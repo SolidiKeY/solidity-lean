@@ -66,7 +66,7 @@ is not an archive of every transient batch wrapper.
 `summary.json` and the three verdict `.txt` lists are readable exports. The
 `gaps/` index retains exact variant gap objects, conservative many-to-many work
 queues and the historical/current status changes. It reviews boundaries for
-65 of 160 partial features; 95 still require exact feature-specific gap review.
+76 of 160 partial features; 84 still require exact feature-specific gap review.
 No manifest status/schema changed. Keyword routing is triage, not attribution
 or proof. An empty runtime queue says nothing about proof-interface completeness.
 
@@ -81,7 +81,18 @@ Max-child RSS and cgroup peak are distinct measurements; file/shared-page
 accounting means they need not agree. The bulk timer's peak is cumulative
 within its container (dependency build plus replay).
 
-Cold/warm measurement is pending. A cold project-artifact cache disables Lake
+The cold command hit its initial 90-minute bound: **exit 124, 5400.005 s**,
+546/685 default targets completed, with `Examples/Tactics/FunctionTypes.lean`
+active at the last five-second sample. Kernel cgroup peak was **8195923968
+bytes (7.633 GiB)**; zero OOM events. This is **blocked**, not a passing build.
+SolkeyTestSuite and the final frozen-sort execution were not reached. Warm
+timing was not run: no successful-cold fingerprint exists. The original cache
+was restored and partial cold artifacts remain in `.lake/baseline-cold/build`.
+See performance.json and build-evidence.tar.gz. Raw timeout rusage accounts
+only for reaped children; its CPU/max-RSS numbers do not represent the whole
+build. The kernel cgroup peak is authoritative; tail RSS values are samples.
+
+A cold project-artifact cache disables Lake
 artifact restoration, retains the original cache, enforces 12 GiB/no swap,
 uses `LEAN_NUM_THREADS=1` and explicit `-j1`, and has an initial 90-minute wall
 bound. A warm run requires a successful cold marker with matching base/model/
@@ -107,3 +118,35 @@ fixture can already be broken through a conclusive companion mode.
 Path-gate diagnostic logs are losslessly gzip-compressed to avoid recursively
 scanning copied missing-path citations. The first new scan repeated 13 old
 targets; no historical diagnostic was removed. This gate remains failing.
+
+Final report refinement adds eleven feature associations from exact fresh
+fixture diagnostics and source review (76 reviewed, 84 unresolved). Examples
+include calldata return/copy boundaries, nested uint24 metadata, fixed-byte
+copy widths, explicit calldata byte/string casts, logical-base literals and
+contract-qualified function-valued state access. Qualified revert calls are
+distinguished from selector projection. No inheritance or do/while gap was
+inferred from misleading fixture names. Each observed association carries
+its exact original gap objects in gaps/gaps.json.
+
+validation.json/reviews.json preserve the baseline checkpoint;
+final-validation.json/final-review.json record the final scope and blocked
+performance gate. The raw baseline archive remains unchanged.
+
+For an independent measurement with no existing private cold directory:
+
+```sh
+bash scripts/run-solidity-baseline.sh cold \
+ /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js \
+ /workspace/solidity-lean/.lake/upstream/cold-results \
+ f4dee4a29c2e208b36db4a4161a4723c735cd775
+# Only after successful cold completion:
+bash scripts/run-solidity-baseline.sh warm \
+ /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js \
+ /workspace/solidity-lean/.lake/upstream/warm-results \
+ f4dee4a29c2e208b36db4a4161a4723c735cd775
+```
+
+This VM retains the incomplete private cold directory. The script refuses to
+overwrite it; preserve it under the writer lock before any independently
+requested fresh measurement. Do not interpret its artifacts as a completed
+warm baseline. No second cold attempt was made here.

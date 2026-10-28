@@ -1,0 +1,54 @@
+{
+  "sourceBase": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "sourceModelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+  "cold": {
+    "status": "blocked-controlled-timeout",
+    "command": [
+      "./run-lean.sh"
+    ],
+    "externalCommand": [
+      "timeout",
+      "-k",
+      "10",
+      "5400",
+      "./run-lean.sh"
+    ],
+    "exitCode": 124,
+    "elapsedSeconds": 5400.004883944,
+    "cgroupMemoryPeakBytes": 8195923968,
+    "memoryCapBytes": 12884901888,
+    "memoryEvents": {
+      "low": "0",
+      "high": "0",
+      "max": "0",
+      "oom": "0",
+      "oom_kill": "0",
+      "oom_group_kill": "0"
+    },
+    "completedDefaultTargets": 546,
+    "reportedDefaultTargets": 685,
+    "activeLeanModuleAtLastSample": "/workspace/solidity-lean/Solidity/Examples/Tactics/FunctionTypes.lean",
+    "lastSampleAt": "2026-10-28T03:38:26.814177+00:00",
+    "defaultBuildComplete": false,
+    "testSuiteAndFrozenSortReached": false,
+    "rusageLimitation": "Timeout killed the nested process group; raw reaped-child rusage omits unreaped Lean descendants and is not the build CPU/RSS peak. Use kernel cgroup peak; tail RSS samples are only samples."
+  },
+  "warm": {
+    "status": "blocked-not-run",
+    "measured": false,
+    "reason": "Cold command did not complete; successful-cold fingerprint marker was never created."
+  },
+  "cacheRecovery": {
+    "originalCacheRestored": true,
+    "temporaryConfigurationRemoved": true,
+    "partialColdArtifactsPreserved": ".lake/baseline-cold/build",
+    "noLeanWorkersRemain": true
+  },
+  "transport": {
+    "interruptionObserved": true,
+    "sameManagedInstanceRecovered": true,
+    "coldContainerRestarted": false,
+    "originalContainerStartedAt": "2026-10-28T02:08:27.254379405Z"
+  },
+  "measurementScope": "Fresh project artifacts, Lake artifact restoration disabled, one CPU, LEAN_NUM_THREADS=1 and explicit -j1; not OS-page-cache/toolchain-install cold."
+}

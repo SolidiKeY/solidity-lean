@@ -260,9 +260,14 @@ The immutable bulk report and 22 isolated follower reports remain separate.
 
 The inventory currently has 212 rows: 13 present, 160 partial, one missing,
 38 not applicable. The new diagnostic index provides reviewed boundaries for
-65 partial rows and explicitly leaves 95 needing feature-specific attribution.
+76 partial rows and explicitly leaves 84 needing feature-specific attribution.
 It does not promote statuses or infer completeness from absent fixtures. The
 manifest/schema is unchanged; generated inventory files remain reproducible.
 
-Cold/warm performance measurement is pending in this branch. This baseline is
-diagnostic evidence, not a universal semantics or lowering-equivalence proof.
+The cold `./run-lean.sh` attempt reached its initial 90-minute wall bound
+(exit 124) at 546/685 default targets, with `FunctionTypes.lean` active.
+Kernel cgroup peak was 8,195,923,968 bytes (7.633 GiB), with zero OOM events.
+The default/TestSuite/frozen-sort combined gate remains blocked; warm timing
+was not run because cold completion was not established. Partial cold
+artifacts and the restored original cache remain on this VM. This baseline
+is diagnostic evidence, not a universal semantics or lowering-equivalence proof.

@@ -8509,6 +8509,17 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/errors/error_in_library_and_interface.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/errors/error_throw_from_module_via_member_access.sol",
         "stage": "lean-import",
         "status": "blocked",
@@ -8522,6 +8533,17 @@
         "status": "blocked",
         "reason": "multi-source frontend import requires compilation-unit provenance",
         "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/errors/via_contract_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
         "missingPipelines": []
       },
       {
@@ -8895,6 +8917,14 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/abicoder/abi_decode_overlapping_dynamic_arrays.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/abicoder/abi_decode_slice.sol",
         "stage": "lean-runtime",
         "status": "blocked",
@@ -8911,7 +8941,367 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_3d_v2.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "Lean process ended before checkpoint",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_dynamic_bytes_v2.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_slicing_v2.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_bytes_bytes32_arrays_v1.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_overlapping_nested_dynamic_arrays_v2.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_string_array_v2.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_array_and_calldata_static_array.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "Lean process ended before checkpoint",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_nested_arrays_v2.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_params_in_external_function.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/nested_with_dynamic_array_v2.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/cleanup/cleanup_v1.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/cleanup/cleanup_v2.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/cleanup/struct2_v2.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/bytes_to_fixed_bytes_cleanup.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/array_of_structs_containing_arrays_calldata_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "noncanonical calldata requires lazy ABI decoder replay",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/bytes_calldata_to_string_calldata.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/calldata_1d_array_into_2d_memory_array_element.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory_2.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "noncanonical calldata requires lazy ABI decoder replay",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/calldata_bytes_array_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/calldata_dyn_2d_bytes_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/calldata_dynamic_array_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/calldata_nested_array_copy_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/calldata_to_storage_different_base.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/empty_bytes_copy.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/memory_to_storage_different_base.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/nested_array_calldata_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "noncanonical calldata requires lazy ABI decoder replay",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/nested_array_element_calldata_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/nested_array_of_structs_calldata_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/copying/string_calldata_to_bytes_calldata.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/external_array_args.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "Lean process ended before checkpoint",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/indexAccess/fixed_bytes_index_access.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/indexAccess/inline_array_index_access_strings.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/indexAccess/memory_arrays_dynamic_index_access_write.sol",
         "stage": "lean-runtime",
         "status": "broken",
         "reason": "frontend import gaps",
@@ -9020,6 +9410,65 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/cleanup/cleanup_bytes_types_shortening_newCodeGen.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/cleanup/cleanup_bytes_types_shortening_OldCodeGen.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/cleanup/dirty_calldata_bytes.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/cleanup/dirty_calldata_dynamic_array.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/cleanup/indexed_log_topic_during_explicit_downcast.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/constants/asm_address_constant_regression.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/constructor/functions_called_by_constructor_through_dispatch.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/conversions/function_type_array_to_storage.sol",
         "stage": "lean-runtime",
         "status": "blocked",
@@ -9058,6 +9507,28 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/errors/require_error_named_parameters_stack_misalignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/errors/require_error_string_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/errors/revert_error_named_parameters_implicit_string_conversions.sol",
         "stage": "lean-runtime",
         "status": "broken",
@@ -9069,11 +9540,306 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/functionCall/calldata_and_memory_arguments.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/functionCall/calldata_argument_internal_struct_as_memory_v2.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/functionTypes/external_functions_with_calldata_args_assigned_to_function_pointers_with_memory_type.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/immutable/immutable_signed.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inheritance/base_access_to_function_type_variables.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inheritance/dataLocation/external_public_calldata.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inheritance/inherited_function_calldata_memory_interface.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inheritance/inherited_function_calldata_memory.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/inheritance/interface_inheritance_conversions.sol",
         "stage": "lean-runtime",
         "status": "blocked",
         "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
         "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/blobhash_index_exceeding_blob_count.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/blobhash.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_assign_dynamic.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_assign_static.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_read.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_assign_from_nowhere.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_assign.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_length_read.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_offset_read_write.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_offset_read.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_struct_assign.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/clz.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/constant_access_referencing.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/constant_access.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_embedded_function_call.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call2.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_memory_access.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_write_to_stack.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/keccak_optimization_bug_string.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_assembly.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy_empty.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy_overlap.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/attached_internal_library_function_returning_calldata.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_string_accepting_storage.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
         "missingPipelines": []
       },
       {
@@ -9270,7 +10036,26 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/variable_cleanup_sstore.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/strings/constant_string_literal.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/strings/empty_string_input.sol",
         "stage": "lean-runtime",
         "status": "broken",
         "reason": "frontend import gaps",
@@ -9300,6 +10085,28 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/structs/copy_struct_with_nested_array_from_calldata_to_memory.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/structs/struct_copy_calldata_to_memory_nested_dynamic_array_v2.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/structs/struct_copy_calldata_to_memory_tuple.sol",
         "stage": "lean-runtime",
         "status": "broken",
@@ -9319,6 +10126,49 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/types/mapping/copy_struct_to_array_stored_in_mapping.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/assembly_access_bytes2_abicoder_v1.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/assembly_access_bytes2_abicoder_v2.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/cleanup_abicoderv1.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/cleanup.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion_abicoderv1.sol",
         "stage": "lean-runtime",
         "status": "blocked",
@@ -9329,10 +10179,66 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/dirty_slot.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/dirty_uint8_read.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/immutable_signed.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/parameter.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/storage_layout_struct.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/storage_signed.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/variables/transient_state_variable_udvt.sol",
         "stage": "lean-runtime",
         "status": "blocked",
         "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/various/codehash_assembly.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
         "requiredPipelines": [],
         "missingPipelines": []
       },
@@ -9416,6 +10322,14 @@
         "missingPipelines": []
       },
       {
+        "path": "test/libsolidity/semanticTests/viaYul/dirty_calldata_struct.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
         "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
         "stage": "lean-runtime",
         "status": "broken",
@@ -9434,6 +10348,14 @@
         "requiredPipelines": [
           "viaIR"
         ],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/viaYul/unary_operations.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "raw ABI replay with physical calldata/memory assembly not adapted",
+        "requiredPipelines": [],
         "missingPipelines": []
       },
       {
@@ -18328,6 +19250,17 @@
         "status": "blocked",
         "reason": "upstream suite has no adapter in this Lean repository",
         "requiredPipelines": [],
+        "missingPipelines": []
+      },
+      {
+        "path": "test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
         "missingPipelines": []
       },
       {
@@ -34806,38 +35739,6 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_dynamic_bytes_v2.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_bytes_bytes32_arrays_v1.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_nested_array_static_reencode_v2.sol",
       "stage": "lean-runtime",
       "status": "blocked",
@@ -34857,28 +35758,6 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_overlapping_nested_dynamic_arrays_v2.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_string_array_v2.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_dynamic_v2.sol",
       "stage": "lean-runtime",
       "status": "broken",
@@ -34891,17 +35770,6 @@
     },
     {
       "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_static_v2.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/nested_with_dynamic_array_v2.sol",
       "stage": "lean-runtime",
       "status": "broken",
       "reason": "frontend import gaps",
@@ -35246,17 +36114,6 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/array/copying/array_of_structs_containing_arrays_calldata_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "blocked",
-      "reason": "noncanonical calldata requires lazy ABI decoder replay",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/array/copying/array_of_structs_containing_arrays_calldata_to_storage.sol",
       "stage": "lean-runtime",
       "status": "blocked",
@@ -35297,44 +36154,11 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/array/copying/bytes_calldata_to_string_calldata.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/array/copying/bytes_storage_to_storage.sol",
       "stage": "lean-runtime",
       "status": "blocked",
       "reason": "dynamic/aggregate/bytes/function ABI vector not adapted",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory_2.sol",
-      "stage": "lean-runtime",
-      "status": "blocked",
-      "reason": "noncanonical calldata requires lazy ABI decoder replay",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -35351,61 +36175,6 @@
       "status": "blocked",
       "reason": "dynamic/aggregate/bytes/function ABI vector not adapted",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/calldata_bytes_array_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/calldata_dyn_2d_bytes_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/calldata_dynamic_array_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/calldata_nested_array_copy_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/calldata_to_storage_different_base.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -35473,28 +36242,6 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/array/copying/memory_to_storage_different_base.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/nested_array_calldata_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "blocked",
-      "reason": "noncanonical calldata requires lazy ABI decoder replay",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/array/copying/nested_array_calldata_to_storage.sol",
       "stage": "lean-runtime",
       "status": "blocked",
@@ -35516,17 +36263,6 @@
       "status": "blocked",
       "reason": "unsupported runtime expectation: i(uint256[][2]): 0x20, 0x40, 0xC0, 3, 0x0A01, 0x0A02, 0x0A03, 4, 0x0B01, 0x0B02, 0x0B03, 0x0B04",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/nested_array_element_calldata_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -35559,17 +36295,6 @@
       "status": "blocked",
       "reason": "unsupported runtime expectation: gas irOptimized: 226644",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/copying/nested_array_of_structs_calldata_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -35645,17 +36370,6 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/array/copying/string_calldata_to_bytes_calldata.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/array/create_memory_array.sol",
       "stage": "lean-runtime",
       "status": "blocked",
@@ -35685,17 +36399,6 @@
       "status": "blocked",
       "reason": "unsupported runtime expectation: gas irOptimized: 88025",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -35747,28 +36450,6 @@
       "status": "blocked",
       "reason": "dynamic/aggregate/bytes/function ABI vector not adapted",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/indexAccess/fixed_bytes_index_access.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/array/indexAccess/memory_arrays_dynamic_index_access_write.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -36043,17 +36724,6 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/constructor/functions_called_by_constructor_through_dispatch.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/constructor/functions_called_by_constructor.sol",
       "stage": "lean-runtime",
       "status": "broken",
@@ -36156,17 +36826,6 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/errors/require_error_named_parameters_stack_misalignment.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/errors/require_error_named_parameters.sol",
       "stage": "lean-runtime",
       "status": "broken",
@@ -36178,40 +36837,7 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/errors/require_error_string_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/errors/via_contract_type.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/freeFunctions/storage_calldata_refs.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/functionCall/calldata_argument_internal_struct_as_memory_v2.sol",
       "stage": "lean-runtime",
       "status": "broken",
       "reason": "frontend import gaps",
@@ -36672,17 +37298,6 @@
       "missingPipelines": []
     },
     {
-      "path": "test/libsolidity/semanticTests/strings/empty_string_input.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
-      "missingPipelines": []
-    },
-    {
       "path": "test/libsolidity/semanticTests/structs/copy_from_mapping.sol",
       "stage": "lean-runtime",
       "status": "blocked",
@@ -36696,17 +37311,6 @@
       "status": "blocked",
       "reason": "unsupported runtime expectation: gas irOptimized: 152962",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/structs/copy_struct_with_nested_array_from_calldata_to_memory.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -36782,17 +37386,6 @@
       "status": "blocked",
       "reason": "unsupported runtime expectation: storageEmpty -> 1",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/structs/struct_copy_calldata_to_memory_nested_dynamic_array_v2.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -36897,17 +37490,6 @@
       "status": "blocked",
       "reason": "dynamic/aggregate/bytes/function ABI vector not adapted",
       "requiredPipelines": [],
-      "missingPipelines": []
-    },
-    {
-      "path": "test/libsolidity/semanticTests/types/mapping/copy_struct_to_array_stored_in_mapping.sol",
-      "stage": "lean-runtime",
-      "status": "broken",
-      "reason": "frontend import gaps",
-      "requiredPipelines": [
-        "legacy",
-        "viaIR"
-      ],
       "missingPipelines": []
     },
     {
@@ -55101,6 +55683,7 @@
         "Solidity/Frontend/SolcJson/Contract.lean"
       ],
       "reviewedBoundaryGroups": [
+        "observed-qualified-errors",
         "abi"
       ],
       "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
@@ -55148,8 +55731,10 @@
       "localEvidence": [
         "Solidity/AST.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-narrow-index"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "addressTypes",
@@ -55168,8 +55753,10 @@
       "localEvidence": [
         "Solidity/AST.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-fixed-byte-copy"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "dynamicBytesType",
@@ -55178,8 +55765,10 @@
       "localEvidence": [
         "Solidity/AST.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-bytes-string"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "stringType",
@@ -55188,8 +55777,10 @@
       "localEvidence": [
         "Solidity/AST.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-bytes-string"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "dynamicArrays",
@@ -55331,8 +55922,10 @@
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-qualified-state-function"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "tupleExpressions",
@@ -55370,8 +55963,10 @@
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-qualified-state-function"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "indexAccess",
@@ -55517,8 +56112,10 @@
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-bytes-string"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "implicitConversions",
@@ -55573,8 +56170,10 @@
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-writable-call"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "callOptions",
@@ -55691,8 +56290,10 @@
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-calldata-return"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "tryStatement",
@@ -55934,8 +56535,10 @@
       "localEvidence": [
         "Solidity/Semantics.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-writable-call"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     },
     {
       "id": "recursiveCalls",
@@ -56566,11 +57169,589 @@
         "Solidity/Frontend/SolcJson/Admission.lean",
         "Solidity/Semantics/Storage/Anon.lean"
       ],
-      "reviewedBoundaryGroups": [],
-      "attribution": "No feature-specific remaining shape established by this diagnostic index; retain partial and consult localEvidence. Do not infer support from absence of a matching fixture."
+      "reviewedBoundaryGroups": [
+        "observed-logical-base"
+      ],
+      "attribution": "Reviewed documentation boundary; corpus routing is not feature completeness evidence."
     }
   ],
   "reviewedBoundaries": [
+    {
+      "id": "observed-qualified-errors",
+      "features": [
+        "errorDeclarations"
+      ],
+      "document": "docs/feature-work/source-admission.md",
+      "documentSha256": "cf79987befa23c9a3fcd20e3f7efeeb47945d0a5baddba6ea22545751756a70d",
+      "remaining": "Qualified revert operands L.E, I.E, A.E and X.E remain refused through member-access error construction in the observed fixtures; bounded selector projection does not establish these calls.",
+      "observedGapExamples": [
+        {
+          "path": "test/libsolidity/semanticTests/errors/error_in_library_and_interface.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "error_in_library_and_interface.sol:15: a custom error named through a member access",
+            "function": "g()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/errors/error_in_library_and_interface.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "error_in_library_and_interface.sol:18: a custom error named through a member access",
+            "function": "h()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/errors/error_in_library_and_interface.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "error_in_library_and_interface.sol:15: a custom error named through a member access",
+            "function": "g()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/errors/error_in_library_and_interface.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "error_in_library_and_interface.sol:18: a custom error named through a member access",
+            "function": "h()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/errors/via_contract_type.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "via_contract_type.sol:11: a custom error named through a member access",
+            "function": "g()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/errors/via_contract_type.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "via_contract_type.sol:12: a custom error named through a member access",
+            "function": "h()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/errors/via_contract_type.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "via_contract_type.sol:11: a custom error named through a member access",
+            "function": "g()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/errors/via_contract_type.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "via_contract_type.sol:12: a custom error named through a member access",
+            "function": "h()"
+          }
+        }
+      ]
+    },
+    {
+      "id": "observed-logical-base",
+      "features": [
+        "logicalStorageBase"
+      ],
+      "document": "docs/feature-work/transient-storage.md",
+      "documentSha256": "b00b6ceedeb2206e69997a8312568f1bc43495a35b465e37c57bf8d32c6bbd90",
+      "remaining": "Observed nonliteral logical storage bases are refused: the current model requires an in-range literal. This does not admit physical layout, assembly or gas semantics.",
+      "observedGapExamples": [
+        {
+          "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "erc7201_layout_specifier_slot_match_comptime.sol:10: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "constructor()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "erc7201_layout_specifier_slot_match_comptime.sol:10: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "builtinMatchesSolidityImplementation()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "erc7201_layout_specifier_slot_match_comptime.sol:10: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "constructor()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "erc7201_layout_specifier_slot_match_comptime.sol:10: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "builtinMatchesSolidityImplementation()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/base_slot_max_value.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "base_slot_max_value.sol:3: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "constructor()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/base_slot_max_value.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "base_slot_max_value.sol:3: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "f(uint)"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/base_slot_max_value.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "base_slot_max_value.sol:3: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "constructor()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/base_slot_max_value.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "base_slot_max_value.sol:3: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "f(uint)"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/last_allowed_storage_slot.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "last_allowed_storage_slot.sol:3: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "constructor()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/last_allowed_storage_slot.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "last_allowed_storage_slot.sol:3: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "f(uint)"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/last_allowed_storage_slot.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "last_allowed_storage_slot.sol:3: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "constructor()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/last_allowed_storage_slot.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "last_allowed_storage_slot.sol:3: solidity.logicalStorageBase: logical storage bases currently require an in-range literal",
+            "function": "f(uint)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "observed-calldata-return",
+      "features": [
+        "returnStatement"
+      ],
+      "document": "docs/calldata-slice-copies.md",
+      "documentSha256": "74d3b470879802b7859605c78137813dea4713ecfca76bcb0639bd2044ce97dd",
+      "remaining": "Returning calldata as memory is refused because Solidity copies while the admitted model path would share the object; nested uint-array returns remain explicit source boundaries.",
+      "observedGapExamples": [
+        {
+          "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_dynamic_array_to_memory_v2.sol:6: calldata returned as memory: solc copies it, the model would share it",
+            "function": "f(uint[][])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_dynamic_array_to_memory_v2.sol:10: calldata returned as memory: solc copies it, the model would share it",
+            "function": "g(uint[][][])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_dynamic_array_to_memory_v2.sol:14: calldata returned as memory: solc copies it, the model would share it",
+            "function": "h(uint[2][][])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_dynamic_array_to_memory_v2.sol:6: calldata returned as memory: solc copies it, the model would share it",
+            "function": "f(uint[][])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_dynamic_array_to_memory_v2.sol:10: calldata returned as memory: solc copies it, the model would share it",
+            "function": "g(uint[][][])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_dynamic_array_to_memory_v2.sol:14: calldata returned as memory: solc copies it, the model would share it",
+            "function": "h(uint[2][][])"
+          }
+        }
+      ]
+    },
+    {
+      "id": "observed-writable-call",
+      "features": [
+        "functionCalls",
+        "internalCalls"
+      ],
+      "document": "docs/calldata-slice-copies.md",
+      "documentSha256": "74d3b470879802b7859605c78137813dea4713ecfca76bcb0639bd2044ce97dd",
+      "remaining": "Calls requiring a fresh memory copy of calldata remain refused, including callees that write and conservative rejection when a returned memory alias could escape; ordinary admitted calls already work.",
+      "observedGapExamples": [
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_2d_bytes_to_memory.sol:9: g: calldata passed to a `memory` parameter it writes: solc copies it, the model would share it",
+            "function": "f(bytes[2])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_2d_bytes_to_memory.sol:9: g: calldata passed to a `memory` parameter it writes: solc copies it, the model would share it",
+            "function": "f(bytes[2])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/functionCall/calldata_argument_internal_struct_as_memory_v2.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_argument_internal_struct_as_memory_v2.sol:18: g: calldata passed to a `memory` parameter it writes: solc copies it, the model would share it",
+            "function": "f(uint32,struct C.S)"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/functionCall/calldata_argument_internal_struct_as_memory_v2.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_argument_internal_struct_as_memory_v2.sol:18: g: calldata passed to a `memory` parameter it writes: solc copies it, the model would share it",
+            "function": "f(uint32,struct C.S)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "observed-narrow-index",
+      "features": [
+        "integerTypes"
+      ],
+      "document": "docs/solc-alignment.md",
+      "documentSha256": "2cf666a4058fc891464173c13bce01c38712160cfaf8a841ae1b3066f319f8a7",
+      "remaining": "The observed nested uint24 array return/index expression set(data)[1] loses its expected 24-bit shape metadata. This is a specific source-lowering boundary, not general lack of integer support.",
+      "observedGapExamples": [
+        {
+          "path": "test/libsolidity/semanticTests/array/indexAccess/memory_arrays_dynamic_index_access_write.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "memory_arrays_dynamic_index_access_write.sol:15: set(data)[1] has narrow positions none where ·[][] 24 bits wide are expected: solc converts no reference type to one of another element type",
+            "function": "f()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/array/indexAccess/memory_arrays_dynamic_index_access_write.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "memory_arrays_dynamic_index_access_write.sol:15: set(data)[1] has narrow positions none where ·[][] 24 bits wide are expected: solc converts no reference type to one of another element type",
+            "function": "f()"
+          }
+        }
+      ]
+    },
+    {
+      "id": "observed-bytes-string",
+      "features": [
+        "stringType",
+        "dynamicBytesType",
+        "explicitConversions"
+      ],
+      "document": "docs/solc-alignment.md",
+      "documentSha256": "2cf666a4058fc891464173c13bce01c38712160cfaf8a841ae1b3066f319f8a7",
+      "remaining": "The observed explicit calldata bytes-to-string and string-to-bytes conversions are refused by narrow-type-position admission; byte content support elsewhere does not establish these source casts.",
+      "observedGapExamples": [
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/bytes_calldata_to_string_calldata.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "bytes_calldata_to_string_calldata.sol:4: string: a narrow integer type stands in the type of a local, a parameter, a return value, a state variable or a struct of the table (`structWidths`), not here",
+            "function": "f(bytes)"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/bytes_calldata_to_string_calldata.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "bytes_calldata_to_string_calldata.sol:4: string: a narrow integer type stands in the type of a local, a parameter, a return value, a state variable or a struct of the table (`structWidths`), not here",
+            "function": "f(bytes)"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/string_calldata_to_bytes_calldata.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "string_calldata_to_bytes_calldata.sol:4: bytes: a narrow integer type stands in the type of a local, a parameter, a return value, a state variable or a struct of the table (`structWidths`), not here",
+            "function": "f(string)"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/string_calldata_to_bytes_calldata.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "string_calldata_to_bytes_calldata.sol:4: bytes: a narrow integer type stands in the type of a local, a parameter, a return value, a state variable or a struct of the table (`structWidths`), not here",
+            "function": "f(string)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "observed-fixed-byte-copy",
+      "features": [
+        "fixedBytesTypes"
+      ],
+      "document": "docs/feature-work/aggregates.md",
+      "documentSha256": "f942ed4fd81568acdb3ba945c6b65c03c67647dde9e301bb2c67ed633a1e1a2d",
+      "remaining": "Observed fixed-byte array copies of differing widths (bytes4[] or bytes8[] to bytes10[]) are refused as noninteger source-type changes; widening needs value shifting.",
+      "observedGapExamples": [
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/calldata_to_storage_different_base.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_to_storage_different_base.sol:7: a storage copy changes a noninteger source type",
+            "function": "f(bytes8[])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/calldata_to_storage_different_base.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "calldata_to_storage_different_base.sol:7: a storage copy changes a noninteger source type",
+            "function": "f(bytes8[])"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/memory_to_storage_different_base.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "memory_to_storage_different_base.sol:7: a storage copy changes a noninteger source type",
+            "function": "f()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/array/copying/memory_to_storage_different_base.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "memory_to_storage_different_base.sol:7: a storage copy changes a noninteger source type",
+            "function": "f()"
+          }
+        }
+      ]
+    },
+    {
+      "id": "observed-qualified-state-function",
+      "features": [
+        "memberAccess",
+        "names"
+      ],
+      "document": "docs/feature-work/finite-dispatch.md",
+      "documentSha256": "537e9204a04720c96a7f0371379199fe01bb7362f7d4e01c8359fca1180b3a18",
+      "remaining": "Contract-qualified access C.x to an internal function-valued state variable is misclassified as a base-qualified function declaration. The fixture has no inheritance; no inheritance gap is inferred.",
+      "observedGapExamples": [
+        {
+          "path": "test/libsolidity/semanticTests/inheritance/base_access_to_function_type_variables.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "base_access_to_function_type_variables.sol:7: a base-qualified function value without an imported function declaration",
+            "function": "set()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/inheritance/base_access_to_function_type_variables.sol",
+          "pipeline": "legacy",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "base_access_to_function_type_variables.sol:15: a base-qualified call without an imported function declaration",
+            "function": "h()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/inheritance/base_access_to_function_type_variables.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "base_access_to_function_type_variables.sol:7: a base-qualified function value without an imported function declaration",
+            "function": "set()"
+          }
+        },
+        {
+          "path": "test/libsolidity/semanticTests/inheritance/base_access_to_function_type_variables.sol",
+          "pipeline": "viaIR",
+          "fixtureStatus": "broken",
+          "variantStatus": "broken",
+          "gap": {
+            "status": "unsupported",
+            "reason": "base_access_to_function_type_variables.sol:15: a base-qualified call without an imported function declaration",
+            "function": "h()"
+          }
+        }
+      ]
+    },
     {
       "id": "slice-aliases",
       "features": [
@@ -56580,7 +57761,8 @@
       ],
       "document": "docs/calldata-slice-copies.md",
       "documentSha256": "74d3b470879802b7859605c78137813dea4713ecfca76bcb0639bd2044ce97dd",
-      "remaining": "Uninitialized/rebound virtual slice descriptors and effectful/conditional calldata alias initializers; general writable whole-calldata copying and reference-element materialization remain explicit boundaries."
+      "remaining": "Uninitialized/rebound virtual slice descriptors and effectful/conditional calldata alias initializers; general writable whole-calldata copying and reference-element materialization remain explicit boundaries.",
+      "observedGapExamples": []
     },
     {
       "id": "pushed-members",
@@ -56590,7 +57772,8 @@
       ],
       "document": "docs/feature-work/aggregates.md",
       "documentSha256": "f942ed4fd81568acdb3ba945c6b65c03c67647dde9e301bb2c67ed633a1e1a2d",
-      "remaining": "Generated pushed-member stores require pure receivers; receiver mutation/calls and callback-capable RHS forms remain unsupported."
+      "remaining": "Generated pushed-member stores require pure receivers; receiver mutation/calls and callback-capable RHS forms remain unsupported.",
+      "observedGapExamples": []
     },
     {
       "id": "source-admission",
@@ -56601,7 +57784,8 @@
       ],
       "document": "docs/feature-work/source-admission.md",
       "documentSha256": "cf79987befa23c9a3fcd20e3f7efeeb47945d0a5baddba6ea22545751756a70d",
-      "remaining": "Legacy ABI-v1 decoder admission and general constant-materialization bounds. Exact rational/literal support already exists; scalar-v1 replay does not establish raw-v1 decoding."
+      "remaining": "Legacy ABI-v1 decoder admission and general constant-materialization bounds. Exact rational/literal support already exists; scalar-v1 replay does not establish raw-v1 decoding.",
+      "observedGapExamples": []
     },
     {
       "id": "source-units",
@@ -56613,7 +57797,8 @@
       ],
       "document": "docs/feature-work/declarations-metadata.md",
       "documentSha256": "d0cb77f7f046f9f520492753e05f30a2c5f7ec9a41e71aace65c69066592e9a5",
-      "remaining": "Multi-source provenance/remappings and broader using-for applicability remain to reproduce. Qualified error selectors already have bounded support."
+      "remaining": "Multi-source provenance/remappings and broader using-for applicability remain to reproduce. Qualified error selectors already have bounded support.",
+      "observedGapExamples": []
     },
     {
       "id": "source-assurance",
@@ -56623,7 +57808,8 @@
       ],
       "document": "docs/feature-work/source-admission.md",
       "documentSha256": "cf79987befa23c9a3fcd20e3f7efeeb47945d0a5baddba6ea22545751756a70d",
-      "remaining": "Executable admission scans are not extraction-completeness or lowering-equivalence proofs; external solc provenance neither authenticates handwritten JSON nor validates bytecode."
+      "remaining": "Executable admission scans are not extraction-completeness or lowering-equivalence proofs; external solc provenance neither authenticates handwritten JSON nor validates bytecode.",
+      "observedGapExamples": []
     },
     {
       "id": "allocation-panic",
@@ -56633,7 +57819,8 @@
       ],
       "document": "docs/feature-work/abi-hashes.md",
       "documentSha256": "a629591494a9770cba18824e90cb3d31c80c6216f9f9954b025bcc2a03be30fe",
-      "remaining": "Enormous-memory replay remains resource-blocked; allocation Panic(0x41) coverage is not established. Retained arithmetic/assertion bytes do not turn resource exhaustion into expected allocation panic."
+      "remaining": "Enormous-memory replay remains resource-blocked; allocation Panic(0x41) coverage is not established. Retained arithmetic/assertion bytes do not turn resource exhaustion into expected allocation panic.",
+      "observedGapExamples": []
     },
     {
       "id": "require-errors",
@@ -56642,7 +57829,8 @@
       ],
       "document": "docs/feature-work/abi-hashes.md",
       "documentSha256": "a629591494a9770cba18824e90cb3d31c80c6216f9f9954b025bcc2a03be30fe",
-      "remaining": "Named error constructors inside require remain a source boundary; positional enum-free aggregate errors and named direct reverts have existing support."
+      "remaining": "Named error constructors inside require remain a source boundary; positional enum-free aggregate errors and named direct reverts have existing support.",
+      "observedGapExamples": []
     },
     {
       "id": "revert-proof-interface",
@@ -56654,7 +57842,8 @@
       ],
       "document": "docs/semantic-gaps.md",
       "documentSha256": "b806483bde7fd80d63ee7afdca7dda55b3dd8f110de18b75fd5f4b71305c2846",
-      "remaining": "Computed catch-data bytes are executable but lack the general exact-data proof link; memory operands without static patterns admit arbitrary bytes and catchDataDiamond is false. Callback catches remain outside ordinary coverage."
+      "remaining": "Computed catch-data bytes are executable but lack the general exact-data proof link; memory operands without static patterns admit arbitrary bytes and catchDataDiamond is false. Callback catches remain outside ordinary coverage.",
+      "observedGapExamples": []
     },
     {
       "id": "events",
@@ -56666,7 +57855,8 @@
       ],
       "document": "docs/feature-work/calls-exceptions.md",
       "documentSha256": "9abc789a4e94046cfd793ad778a2561e3730a4b7b9234ba9abe98211b8c93051",
-      "remaining": "Named event argument lists and qualified event names remain refused. Direct positional operands already execute; observable log traces remain excluded pending profile decision D2."
+      "remaining": "Named event argument lists and qualified event names remain refused. Direct positional operands already execute; observable log traces remain excluded pending profile decision D2.",
+      "observedGapExamples": []
     },
     {
       "id": "entries",
@@ -56678,7 +57868,8 @@
       ],
       "document": "docs/feature-work/declarations-metadata.md",
       "documentSha256": "d0cb77f7f046f9f520492753e05f30a2c5f7ec9a41e71aace65c69066592e9a5",
-      "remaining": "Reference/enum/contract/function getter results; unsupported aggregate getters; general receive/fallback payment registration. Restricted later declaration milestones supersede older Left lists."
+      "remaining": "Reference/enum/contract/function getter results; unsupported aggregate getters; general receive/fallback payment registration. Restricted later declaration milestones supersede older Left lists.",
+      "observedGapExamples": []
     },
     {
       "id": "dispatch",
@@ -56691,7 +57882,8 @@
       ],
       "document": "docs/feature-work/finite-dispatch.md",
       "documentSha256": "537e9204a04720c96a7f0371379199fe01bb7362f7d4e01c8359fca1180b3a18",
-      "remaining": "Reference arguments and signatures outside zero-argument internal bytes-memory return; external multi-return; renamed inherited/overloaded external selector identities; nominal signatures."
+      "remaining": "Reference arguments and signatures outside zero-argument internal bytes-memory return; external multi-return; renamed inherited/overloaded external selector identities; nominal signatures.",
+      "observedGapExamples": []
     },
     {
       "id": "aggregates",
@@ -56707,7 +57899,8 @@
       ],
       "document": "docs/feature-work/aggregates.md",
       "documentSha256": "f942ed4fd81568acdb3ba945c6b65c03c67647dde9e301bb2c67ed633a1e1a2d",
-      "remaining": "Reference-element slices; writable whole-calldata copies; external reference arguments; heterogeneous reference-return tuples; nominal aggregate identities; fixed-byte-width widening in snapshot copies requires shifting. Latest mixed-reference repairs already work."
+      "remaining": "Reference-element slices; writable whole-calldata copies; external reference arguments; heterogeneous reference-return tuples; nominal aggregate identities; fixed-byte-width widening in snapshot copies requires shifting. Latest mixed-reference repairs already work.",
+      "observedGapExamples": []
     },
     {
       "id": "recursive",
@@ -56720,7 +57913,8 @@
       ],
       "document": "docs/feature-work/recursive-types.md",
       "documentSha256": "8a3c0c61a91dd83889e10f83618b9662154977ee5d93cf1ce10049f12f7d18b2",
-      "remaining": "Ordinary importer/state/term/rule migration; ObsEq operation congruence and path commutation; heap-cycle copy policy. Standalone graph API does not establish ordinary source execution."
+      "remaining": "Ordinary importer/state/term/rule migration; ObsEq operation congruence and path commutation; heap-cycle copy policy. Standalone graph API does not establish ordinary source execution.",
+      "observedGapExamples": []
     },
     {
       "id": "world",
@@ -56734,7 +57928,8 @@
       ],
       "document": "docs/feature-work/contract-world.md",
       "documentSha256": "df0037a9cced584eaee2a3e4ecd118338d4532584543d3ff4f4cf436ed850782",
-      "remaining": "General dynamic source creation and world composition; ABI/memory transfer, typed catches, callbacks/transient transfer; general library arguments/aggregate results; certified Reachable source wrappers. Gas remains excluded."
+      "remaining": "General dynamic source creation and world composition; ABI/memory transfer, typed catches, callbacks/transient transfer; general library arguments/aggregate results; certified Reachable source wrappers. Gas remains excluded.",
+      "observedGapExamples": []
     },
     {
       "id": "abi",
@@ -56752,7 +57947,8 @@
       ],
       "document": "docs/feature-work/abi-hashes.md",
       "documentSha256": "a629591494a9770cba18824e90cb3d31c80c6216f9f9954b025bcc2a03be30fe",
-      "remaining": "Named aggregate require constructors; noncanonical/lazy ABI entry layouts; nominal enum aggregate cardinality/legality; recursive graph ABI traversal; general external reference results; recursive round-trip and precompile equivalence proofs. M6 supersedes earlier scalar-only and custom-error gaps."
+      "remaining": "Named aggregate require constructors; noncanonical/lazy ABI entry layouts; nominal enum aggregate cardinality/legality; recursive graph ABI traversal; general external reference results; recursive round-trip and precompile equivalence proofs. M6 supersedes earlier scalar-only and custom-error gaps.",
+      "observedGapExamples": []
     },
     {
       "id": "transient",
@@ -56761,7 +57957,8 @@
       ],
       "document": "docs/feature-work/transient-storage.md",
       "documentSha256": "b00b6ceedeb2206e69997a8312568f1bc43495a35b465e37c57bf8d32c6bbd90",
-      "remaining": "General composed source-world execution and source shapes beyond primitive/function-tag cells. Logical cells, self-call sharing, reset and rollback already exist; assembly/layout/gas/delegatecall remain excluded."
+      "remaining": "General composed source-world execution and source shapes beyond primitive/function-tag cells. Logical cells, self-call sharing, reset and rollback already exist; assembly/layout/gas/delegatecall remain excluded.",
+      "observedGapExamples": []
     },
     {
       "id": "specs",
@@ -56773,8 +57970,9 @@
         "callbackSemantics"
       ],
       "document": "docs/coverage-plan.md",
-      "documentSha256": "d205cd784dde7ee28bad1f5a6233b0ac09125dce7fc200d43450f4b0d9209707",
-      "remaining": "Step 12: quantified diamond loop invariants; finer modifies/aliases; view callees and reference recursion under callbacks; later self-calls; reachable-state diamond specs and old/net closer reads. Runtime corpus does not measure these proof interfaces."
+      "documentSha256": "c1b7f9aac2ec026b912b08e1dfb4b7bca49b9b3263faec6c1a0daecebc3454ac",
+      "remaining": "Step 12: quantified diamond loop invariants; finer modifies/aliases; view callees and reference recursion under callbacks; later self-calls; reachable-state diamond specs and old/net closer reads. Runtime corpus does not measure these proof interfaces.",
+      "observedGapExamples": []
     }
   ],
   "limitations": [
@@ -56785,6 +57983,7 @@
   ],
   "provenance": {
     "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+    "generatorSha256": "ecbdac94ff8c8afa4270009823a022fb9654d464287a8df2e3dc415230ef30d3",
     "reportSha256": "bfd696ad5ae9f7486c2e39d1664be5b8b60fcc4f654e4639cadb490a36fd7f14",
     "summarySha256": "7957775c1ab16bc217849d8b96d061079034fbdd622e9105e6c3bda39b45d914",
     "manifestSha256": "e86f5b65e6384ce4d0354d7935e7dfefe4842ba4043f71500fa7993757c63b9b"

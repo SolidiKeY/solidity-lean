@@ -7,14 +7,16 @@ if [[ !( $# = 4 && $1 != retries ) && !( $# = 5 && $1 = retries ) ]]; then
 fi
 mode=$1; compiler=$(realpath "$2"); output=$(realpath -m "$3"); base=$4; selection=${5:-}
 if [[ -n "$selection" ]]; then selection=$(realpath "$selection"); fi
-repo=$(git rev-parse --show-toplevel); cd "$repo"
+repo=$(realpath "$(git rev-parse --show-toplevel)")
+[[ "$repo" = /workspace/solidity-lean ]] || { echo "Only the attached /workspace/solidity-lean clone is supported" >&2; exit 2; }
+cd "$repo"
 case "$mode" in corpus|cold|warm|retries) ;; *) exit 2;; esac
 mkdir -p /tmp/solidity-lean-feature-groups-20261025
 exec 9>/tmp/solidity-lean-feature-groups-20261025/writer.lock
 flock 9
 git status --short
 [[ -z "$(git ls-files --others --exclude-standard -- Solidity | rg '\.lean$')" ]] || { echo "Untracked Lean sources: inspect before exact-base run" >&2; exit 2; }
-git diff --exit-code "$base" -- Solidity scripts/solidity-upstream.mjs scripts/solc-code.mjs >/dev/null
+git diff --exit-code "$base" -- Solidity Solidity.lean SolidityLean.lean SolkeyTestSuite.lean SolkeyCheck.lean lakefile.toml run-lean.sh scripts/solidity-upstream.mjs scripts/solc-code.mjs scripts/test-solidity.mjs scripts/tool-job.mjs >/dev/null
 [[ ! -e "$output" ]] || { echo 'Refusing to overwrite evidence' >&2; exit 2; }
 mkdir -p "$output/logs" "$repo/.lake/baseline-tools"
 config="$repo/.baseline-lakefile.toml"
@@ -52,7 +54,7 @@ root=Path(sys.argv[1]); mode=sys.argv[2]
 s=(root/'lakefile.toml').read_text().replace('version = "0.1.0"','version = "0.1.0"\nweakLeanArgs = ["-j1"]',1).replace('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1"]')
 if mode in ('cold','warm'):
  s=s.replace('enableArtifactCache = true','enableArtifactCache = false')
- if mode=='cold' and (root/'.lake/baseline-cold/build').exists(): raise SystemExit('Cold directory exists; preserve it and choose another clone')
+ if mode=='cold' and (root/'.lake/baseline-cold/build').exists(): raise SystemExit('Cold directory exists; preserve it and move it aside under the writer lock before a fresh measurement')
  if mode=='warm' and not (root/'.lake/baseline-cold/completed.json').exists(): raise SystemExit('No successful cold artifacts for warm measurement')
 if mode in ('cold','warm'):
  h=hashlib.sha256()

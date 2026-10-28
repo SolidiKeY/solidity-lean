@@ -20,6 +20,8 @@ class Integrity(unittest.TestCase):
  def test_duplicate_paths_rejected(self):
   row={'path':'a','status':'blocked','stage':'lean-runtime'}
   with self.assertRaisesRegex(ValueError,'duplicate'): self.derive([row,row])
+ def test_working_runtime_cannot_omit_required_modes(self):
+  with self.assertRaisesRegex(ValueError,'valid required pipelines'): self.derive([{'path':'a','stage':'lean-runtime','status':'working','variants':[]}])
  def test_working_requires_both_pipelines(self):
   row={'path':'a','status':'working','stage':'lean-runtime','requiredPipelines':['legacy','viaIR'],'variants':[{'pipeline':'legacy','status':'working'}]}
   with self.assertRaisesRegex(ValueError,'required pipelines'): self.derive([row])

@@ -16,8 +16,10 @@ test/libsolidity/semanticTests/constants/constants_at_file_level_referencing.sol
 test/libsolidity/semanticTests/constants/same_constants_different_files.sol
 test/libsolidity/semanticTests/deployedCodeExclusion/module_function_deployed.sol
 test/libsolidity/semanticTests/deployedCodeExclusion/module_function.sol
+test/libsolidity/semanticTests/errors/error_in_library_and_interface.sol
 test/libsolidity/semanticTests/errors/error_throw_from_module_via_member_access.sol
 test/libsolidity/semanticTests/errors/panic_via_import.sol
+test/libsolidity/semanticTests/errors/via_contract_type.sol
 test/libsolidity/semanticTests/errors/via_import.sol
 test/libsolidity/semanticTests/events/event_emit_from_module_via_member_access.sol
 test/libsolidity/semanticTests/expressions/module_from_ternary_expression.sol

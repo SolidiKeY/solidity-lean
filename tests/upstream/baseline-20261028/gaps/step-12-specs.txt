@@ -3,6 +3,7 @@ test/cmdlineTests/no_import_callback/contract_2.sol
 test/cmdlineTests/standard_no_import_callback/B.sol
 test/cmdlineTests/standard_no_import_callback/input.json
 test/cmdlineTests/standard_no_import_callback/output.json
+test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol
 test/libsolidity/semanticTests/externalContracts/base64.sol
 test/libsolidity/semanticTests/externalContracts/prbmath_signed.sol
 test/libsolidity/semanticTests/externalContracts/prbmath_unsigned.sol

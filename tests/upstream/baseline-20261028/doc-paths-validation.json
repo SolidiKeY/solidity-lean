@@ -25,5 +25,14 @@
     }
   ],
   "reason": "The first new scan recursively cited the preserved plaintext diagnostic log, adding 13 citation locations but no new missing targets. Preserve logs losslessly compressed; historical failures remain failures.",
-  "finalMissingCitationListEqualsBefore": true
+  "finalMissingCitationListEqualsBefore": true,
+  "finalPostPerformanceAttempt": {
+    "exitCode": 1,
+    "missingReferences": 20,
+    "newMissingCitations": 0,
+    "compressed": "tests/upstream/baseline-20261028/final-gates/doc-paths.log.gz",
+    "uncompressedSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+    "compressedSha256": "4b7decd4356f0c4cfe26e84d4e0211dd07bfdf654a068f6a256edb7eb903da40",
+    "missingListEqualsBefore": true
+  }
 }

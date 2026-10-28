@@ -14,14 +14,14 @@ import subprocess
 
 ROUTES = {
  'step-01-entrypoints': r'getter|entry.?point|imported.function|fallback|receive|functionDispatch|override|multiple return',
- 'step-02-source-units': r'multi.source|source.?unit|remapping|using.?for|qualified.*error',
- 'step-03-expressions': r'tuple|conditional|slice|range.?access|conversion|literal|shift|UDVT',
+ 'step-02-source-units': r'multi.source|source.?unit|remapping|using.?for|qualified.*error|custom.error.*member.access',
+ 'step-03-expressions': r'tuple|conditional|slice|range.?access|conversion|literal|shift|UDVT|narrow|calldata.*memory|noninteger.source.type|base-qualified|logicalStorageBase',
  'step-04-panic-revert': r'panic|revert|error.data|revertStrings|allocation',
  'step-06-world': r'host|external|contract.?world|creation|new.?contract|library|balance',
  'step-07-recursive': r'recurs|cyclic|type.?graph',
  'step-10-revert-proof-interface': r'catchData|computed.*revert|revert.*proof',
  'step-11-diamond-calls': r'diamond|callback|send|transfer',
- 'step-12-specs': r'loop.?invariant|modifies|callback|static.*restrict|specification',
+ 'step-12-specs': r'loop.?invariant|loop.*condition.*statement|modifies|callback|static.*restrict|specification',
  'step-08-transient': r'transient|tload|tstore',
  'profile-decision-environment-logs': r'block\.|tx\.|blockhash|chainid|basefee|event|emit|log expectation',
  'excluded-machine-semantics': r'assembly|delegatecall|physical|storage.layout|gas expectation|gas.cost',
@@ -30,6 +30,30 @@ ROUTES = {
 
 # Reviewed source boundaries, not automatic interpretations of broad requirements.
 BOUNDARIES = [
+ ('observed-qualified-errors', ['errorDeclarations'],
+  'docs/feature-work/source-admission.md',
+  'Qualified revert operands L.E, I.E, A.E and X.E remain refused through member-access error construction in the observed fixtures; bounded selector projection does not establish these calls.'),
+ ('observed-logical-base', ['logicalStorageBase'],
+  'docs/feature-work/transient-storage.md',
+  'Observed nonliteral logical storage bases are refused: the current model requires an in-range literal. This does not admit physical layout, assembly or gas semantics.'),
+ ('observed-calldata-return', ['returnStatement'],
+  'docs/calldata-slice-copies.md',
+  'Returning calldata as memory is refused because Solidity copies while the admitted model path would share the object; nested uint-array returns remain explicit source boundaries.'),
+ ('observed-writable-call', ['functionCalls','internalCalls'],
+  'docs/calldata-slice-copies.md',
+  'Calls requiring a fresh memory copy of calldata remain refused, including callees that write and conservative rejection when a returned memory alias could escape; ordinary admitted calls already work.'),
+ ('observed-narrow-index', ['integerTypes'],
+  'docs/solc-alignment.md',
+  'The observed nested uint24 array return/index expression set(data)[1] loses its expected 24-bit shape metadata. This is a specific source-lowering boundary, not general lack of integer support.'),
+ ('observed-bytes-string', ['stringType','dynamicBytesType','explicitConversions'],
+  'docs/solc-alignment.md',
+  'The observed explicit calldata bytes-to-string and string-to-bytes conversions are refused by narrow-type-position admission; byte content support elsewhere does not establish these source casts.'),
+ ('observed-fixed-byte-copy', ['fixedBytesTypes'],
+  'docs/feature-work/aggregates.md',
+  'Observed fixed-byte array copies of differing widths (bytes4[] or bytes8[] to bytes10[]) are refused as noninteger source-type changes; widening needs value shifting.'),
+ ('observed-qualified-state-function', ['memberAccess','names'],
+  'docs/feature-work/finite-dispatch.md',
+  'Contract-qualified access C.x to an internal function-valued state variable is misclassified as a base-qualified function declaration. The fixture has no inheritance; no inheritance gap is inferred.'),
  ('slice-aliases', ['calldataLocation','memoryAliasing','rangeAccess'],
   'docs/calldata-slice-copies.md',
   'Uninitialized/rebound virtual slice descriptors and effectful/conditional calldata alias initializers; general writable whole-calldata copying and reference-element materialization remain explicit boundaries.'),
@@ -82,6 +106,25 @@ BOUNDARIES = [
   'Step 12: quantified diamond loop invariants; finer modifies/aliases; view callees and reference recursion under callbacks; later self-calls; reachable-state diamond specs and old/net closer reads. Runtime corpus does not measure these proof interfaces.'),
 ]
 
+# Each example association was checked against the actual upstream source,
+# not inferred from directory names or a broad feature requirement.
+OBSERVED_EXAMPLES = {
+ 'observed-qualified-errors': (['errors/error_in_library_and_interface.sol','errors/via_contract_type.sol'], r'a custom error named through a member access'),
+ 'observed-logical-base': (['builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol','storageLayoutSpecifier/base_slot_max_value.sol','storageLayoutSpecifier/last_allowed_storage_slot.sol'], r'solidity\.logicalStorageBase'),
+ 'observed-calldata-return': (['abicoder/calldataDecoding/array/calldata_dynamic_array_to_memory_v2.sol'], r'calldata returned as memory'),
+ 'observed-writable-call': (['functionCall/calldata_argument_internal_struct_as_memory_v2.sol','array/copying/calldata_2d_bytes_to_memory.sol'], r'calldata passed to a `memory` parameter it writes'),
+ 'observed-narrow-index': (['array/indexAccess/memory_arrays_dynamic_index_access_write.sol'], r'narrow positions'),
+ 'observed-bytes-string': (['array/copying/bytes_calldata_to_string_calldata.sol','array/copying/string_calldata_to_bytes_calldata.sol'], r'narrow integer type stands'),
+ 'observed-fixed-byte-copy': (['array/copying/calldata_to_storage_different_base.sol','array/copying/memory_to_storage_different_base.sol'], r'storage copy changes a noninteger source type'),
+ 'observed-qualified-state-function': (['inheritance/base_access_to_function_type_variables.sol'], r'base-qualified.*without an imported function declaration'),
+}
+
+def observed_examples(boundary, gaps):
+ if boundary not in OBSERVED_EXAMPLES: return []
+ paths, pattern=OBSERVED_EXAMPLES[boundary]
+ return [g for g in gaps if any(g['path'].endswith('/'+p) for p in paths) and re.search(pattern,g['gap'].get('reason',''))]
+
+
 def digest(path):
  return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -91,6 +134,7 @@ def derive(report, manifest, root):
  gaps=[]; routes=defaultdict(list); unrouted=[]
  for row in rows:
   required=row.get('requiredPipelines',[])
+  if row['stage']=='lean-runtime' and row['status']=='working' and (not required or set(required)-{'legacy','viaIR'}): raise ValueError('working runtime fixture lacks valid required pipelines: '+row['path'])
   variants=row.get('variants',[])
   modes=[v.get('pipeline') for v in variants]
   if len(modes)!=len(set(modes)): raise ValueError('duplicate pipeline variant: '+row['path'])
@@ -115,7 +159,7 @@ def derive(report, manifest, root):
  return {'metadata':report['metadata'],'corpusComplete':None,'partialFeatureGapInventoryComplete':False,'counts':{s:sum(r['status']==s for r in rows) for s in ('working','broken','blocked')},
   'stages':{stage:{s:sum(r['status']==s and r['stage']==stage for r in rows) for s in ('working','broken','blocked')} for stage in sorted({r['stage'] for r in rows})},
   'exactVariantGaps':gaps,'routes':{name:routes[name] for name in ROUTES},'unrouted':unrouted,'partialFeatures':partial,
-  'reviewedBoundaries':[{'id':b[0],'features':b[1],'document':b[2],'documentSha256':digest(root/b[2]),'remaining':b[3]} for b in BOUNDARIES],
+  'reviewedBoundaries':[{'id':b[0],'features':b[1],'document':b[2],'documentSha256':digest(root/b[2]),'remaining':b[3],'observedGapExamples':observed_examples(b[0],gaps)} for b in BOUNDARIES],
   'limitations':['Diagnostic evidence, not a universal semantic proof.','Many-to-many keyword queues are triage candidates, not semantic feature attribution.','All unworking fixtures remain indexed, including native harness and excluded/profile-decision cases.','No manifest status, expected observation or source pipeline is changed.']}
 
 def main():
@@ -140,7 +184,7 @@ def main():
  if not summary['complete']: raise ValueError('incomplete baseline: preserve it as blocked; do not issue complete gap lists')
  result=derive(report,manifest,root)
  if result['counts']!=summary['counts'] or result['stages']!=summary['stages']: raise ValueError('summary verdict counts differ')
- result['corpusComplete']=summary['complete']; result['provenance']={'startingCommit':a.base,'reportSha256':digest(a.results/'results.json'),'summarySha256':digest(a.results/'summary.json'),'manifestSha256':digest(root/'docs/solidity-features.json')}
+ result['corpusComplete']=summary['complete']; result['provenance']={'startingCommit':a.base,'generatorSha256':digest(Path(__file__)),'reportSha256':digest(a.results/'results.json'),'summarySha256':digest(a.results/'summary.json'),'manifestSha256':digest(root/'docs/solidity-features.json')}
  historical=root/'tests/upstream/results/results.json'
  if historical.exists():
   old=json.loads(historical.read_text()); before={r['path']:r for r in old['results']}

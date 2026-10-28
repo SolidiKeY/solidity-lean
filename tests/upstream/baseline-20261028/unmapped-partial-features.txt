@@ -22,19 +22,13 @@ immutables
 enumDeclarations
 valueTypeDeclarations
 operatorAliases
-integerTypes
 addressTypes
-fixedBytesTypes
-dynamicBytesType
-stringType
 dynamicArrays
 fixedArrays
 mappings
 enumTypes
 valueTypes
 storageLocation
-names
-memberAccess
 indexAccess
 unaryArithmetic
 increments
@@ -46,9 +40,7 @@ comparisons
 shortCircuit
 assignment
 compoundAssignment
-explicitConversions
 structConstruction
-functionCalls
 callOptions
 metaTypeExpression
 blocks
@@ -57,7 +49,6 @@ variableDeclarations
 expressionStatements
 doWhileStatement
 continueStatement
-returnStatement
 tryStatement
 canonicalRethrow
 assertBuiltin
@@ -72,7 +63,6 @@ stringConcat
 msgValue
 thisAddress
 addressBalance
-internalCalls
 recursiveCalls
 externalSelfCalls
 valueOption
@@ -92,4 +82,3 @@ constructorLifetime
 nonpayableEntry
 creationCode
 runtimeCode
-logicalStorageBase

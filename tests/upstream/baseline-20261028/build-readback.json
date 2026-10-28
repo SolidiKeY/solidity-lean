@@ -1,0 +1,50 @@
+{
+  "allArchivedBytesMatchLiveEvidence": true,
+  "files": [
+    {
+      "path": "tests/upstream/baseline-20261028/cold/container-state.json",
+      "sha256": "1e30675aef6470731dc59cef7d04562100f5e955281d4716d7740add9a5f4147",
+      "bytes": 226
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/cold/exit-code.txt",
+      "sha256": "ca2ebdf97d7469496b1f4b78958f9dc8447efdcb623953fee7b6996b762f6fff",
+      "bytes": 4
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/cold/harness.sh",
+      "sha256": "01a7e70580771ff8d15e5221fc24652ee54088ad6c29e2d23699153aff897a3b",
+      "bytes": 7262
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/cold/lake-wrapper",
+      "sha256": "939ca72aea45a6fe85222bbcef3d335c17401bddbe21e94aaeb90a8efd752280",
+      "bytes": 384
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/cold/lakefile.toml",
+      "sha256": "45438078fbbf27fa58dddc151a307be462fd1d677f1ad0e8bede28271ba00d9c",
+      "bytes": 1465
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/cold/logs/cold.json",
+      "sha256": "3ceaa3ca1cacbe33784d8e42bef6b7fc6743088f449218bdbd6b0da01a4d7b90",
+      "bytes": 449
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/cold/logs/cold.log",
+      "sha256": "9fb3aa3012091d88ec402f5f72c096b154dbe991527a39d8ef0231a2535870da",
+      "bytes": 116727
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/cold/provenance.json",
+      "sha256": "108b50a5c499ad51b8a27954daac2235ba97e6b3c565d43da83232bb9925fe6b",
+      "bytes": 228
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/cold/resource-tail.jsonl",
+      "sha256": "8e004cfc2de3fc563056efd19b2b794d79f1be5f9765ca0e5f5c5e6dab6d588d",
+      "bytes": 146378
+    }
+  ]
+}
