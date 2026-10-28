@@ -1,0 +1,89 @@
+{
+  "exitCode": 1,
+  "failedGate": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "failedGateExitCode": 2,
+  "reason": "Exact-preserved CRLF/UTF8 range input and existing source snapshots with blank EOF triggered whitespace warnings. Inputs are now committed only in the already verified lossless archive, retaining identical bytes; no input normalization or weakening of a check.",
+  "logs": [
+    {
+      "path": "initial-final-gates/check-00.log.gz",
+      "sha256": "0c467016a27ad61cb85aeea79217f418f1d3b91c03e0579c59957a8fb040d90a"
+    },
+    {
+      "path": "initial-final-gates/check-01.log.gz",
+      "sha256": "7be5851f171ddfe6aee9b826e2dbe4da021693b70ba984d0eece114ba56cdb23"
+    },
+    {
+      "path": "initial-final-gates/check-02.log.gz",
+      "sha256": "cdc14731249ba8752a66e4925f9d22f973ade079880e5060296795d41453b7cf"
+    },
+    {
+      "path": "initial-final-gates/check-03.log.gz",
+      "sha256": "f573541cf8090497594a3d08343ca914a102f39166c5614690e109912e03786b"
+    },
+    {
+      "path": "initial-final-gates/check-04.log.gz",
+      "sha256": "9e05110e851840c37e10e054f4ed38542f30a1f84d135cdbb4f7348e4ac3399b"
+    },
+    {
+      "path": "initial-final-gates/check-05.log.gz",
+      "sha256": "875649f128fa52eb957e3c6f135c379943530609f3be1c25713c405414ff0c8e"
+    },
+    {
+      "path": "initial-final-gates/check-06.log.gz",
+      "sha256": "a0d88260b7090eb5bcb905865ae95b3d71e08dc7c0309e317171767676dd9aed"
+    },
+    {
+      "path": "initial-final-gates/check-07.log.gz",
+      "sha256": "1fb2f41abd5fdc79a33f72022ec5bbbfaef6cb49f3692af539051406cb05daf8"
+    },
+    {
+      "path": "initial-final-gates/check-08.log.gz",
+      "sha256": "18b465f8dec41284b01ae1382c6d90696c6af39a085337c2439dbc0614035dfb"
+    },
+    {
+      "path": "initial-final-gates/check-09.log.gz",
+      "sha256": "91da4833219e8e9ae35dcb1a45c1a249f3702e2913a7e32b845311d7603bbcc6"
+    },
+    {
+      "path": "initial-final-gates/check-10.log.gz",
+      "sha256": "ffa7585ce981209d6749e32d4c1039b1f2ef12abf6170756ac75eeabda26f910"
+    },
+    {
+      "path": "initial-final-gates/check-11.log.gz",
+      "sha256": "1acfec31c0af96092ba5676c5863138ebd3be7db2c1c26702a805346d5623861"
+    },
+    {
+      "path": "initial-final-gates/check-12.log.gz",
+      "sha256": "663442056fe272dd1915343e612307b879cb5a8c9875dbd734465c9c4b15f289"
+    },
+    {
+      "path": "initial-final-gates/check-13.log.gz",
+      "sha256": "4dfd2f942a9aa0307b5f8adb2d437ce4b544b6c4d7d13d002bcea1f5e7bcae52"
+    },
+    {
+      "path": "initial-final-gates/check-14.log.gz",
+      "sha256": "b553c4515bb118f3cfda52f01707021c3fec4f689c354a145d6e63ad5c94f194"
+    },
+    {
+      "path": "initial-final-gates/check-15.log.gz",
+      "sha256": "2d00f060935cb99d2b41ee01a22b107704b0e008955fdbb29168a67b2b691f18"
+    },
+    {
+      "path": "initial-final-gates/check-16.log.gz",
+      "sha256": "6a91ae459f838e9615db7889c751633d8c325b929b71e177ca44322de7990dae"
+    },
+    {
+      "path": "initial-final-gates/check-17.log.gz",
+      "sha256": "ae4d2ee9824a3e2b1ae1e62607193d1ab3eb3af013519a9a170f6a2455a2d794"
+    },
+    {
+      "path": "initial-final-gates/check-18.log.gz",
+      "sha256": "ebd8f6ced5173a90b753a3c2fea50029baaec61032b57de3054f3cdbbc177160"
+    }
+  ]
+}

@@ -180,3 +180,20 @@ semantics decisions are made. No theorem/axiom audit is newly applicable.
 The cold stop remains exit 124 at 546/685, peak 8,195,923,968 bytes; warm timing
 remains unrun. All existing inputs, observations, expectations and required
 pipelines are untouched.
+
+## Bounded executable attribution discriminators
+
+The [40-question matrix](probes/README.md) pairs the exact25 evidence-needed
+IDs and15 documentary questions with pinned0.8.38 inputs, both pipelines,
+compiler/provenance/source-reader results and current declaration limits.
+Three feature rows share two observed source-reader refusal shapes: pushed-member
+postfix increment and a UDVT struct field. These are separate probe inputs, not
+new corpus verdicts. Original66629757/13edcbe4 evidence is retained.
+
+Native typed import, production specification parsing, proof listing and replay
+remain blocked: one narrow API refresh stopped at900seconds, exit124, peak
+2,342,395,904bytes, zeroOOM events. The cached lightweight source reader runs;
+its emitted text is not a typed admission or execution claim. All failed first
+wrappers, compiler-invalid candidates, valid companions, full emitted/dropped
+metadata, commands and logs remain in the new hash-checked probe archive.
+The original cold stop and unrun warm measurement are unchanged.

@@ -279,3 +279,9 @@ questions. Ten rows link directly to exact fresh fixture/variant gaps. The
 original 76/84 index remains historical evidence, and the supplement does not
 claim universal semantic attribution or change any manifest status. The cold
 stop and unrun warm measurement above remain unchanged.
+
+The [bounded discriminator matrix](../tests/upstream/baseline-20261028/probes/README.md)
+adds actual pinned-compiler/provenance/source-reader controls for those40 questions.
+It preserves the original corpus and distinguishes source emission from native
+typed admission/proofs/replay, which remain blocked after a single bounded API
+refresh stopped124. No feature status or profile decision changed.

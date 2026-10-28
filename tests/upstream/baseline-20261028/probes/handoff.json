@@ -1,0 +1,58 @@
+{
+  "startingCommit": "13edcbe42e6bf18b3f55e15ab03e6d8942651ca1",
+  "branch": "baseline/current-master-20261028",
+  "sameVm": "ccarenv_b64_Y2NhcmVudl9mNjQxMmFkYWVhYTQ4MTkxYTFiMjVjYWQzNDkzNzJjOQ",
+  "sourceBase": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "preservedAncestorEvidence": [
+    "66629757",
+    "13edcbe4"
+  ],
+  "questions": 40,
+  "classifications": {
+    "inventory-evidence-discrepancy": 26,
+    "named-proof-interface-limit": 6,
+    "observed-source-reader-refusal": 3,
+    "named-lowering-limit-unreproduced": 3,
+    "named-model-assumption-limit": 1,
+    "diagnostic-capability-limit": 1
+  },
+  "actualControls": {
+    "compilerModes": 44,
+    "sourceReaderModes": 30,
+    "completeMetadataModes": 30,
+    "provenanceMutationRefusals": 4,
+    "utf16CrlfPositionsVerified": true,
+    "falsePropertyExecution": "not run",
+    "wrongRuntimeExpectation": "not run; no claim of a passed replay-negative control"
+  },
+  "sourceShapes": [
+    "Valid Ticket-is-uint8 struct member refused as declaration#3 not visible, both modes.",
+    "Pushed-member postfix a.push().x++ refused even for pure receiver, both modes."
+  ],
+  "matrix": "matrix.json",
+  "commandsExitsLogs": "evidence.tar.gz plus validation.json",
+  "exactCaseResults": "matrix.json caseResults (44 compiler-mode records)",
+  "resources": "resources.json",
+  "archiveSha256": "3776164ebd0eae5e919b3500f5cf8a35d41727d016b11df4f8e8e5a3ff803c79",
+  "archiveRegularFiles": 447,
+  "finalCheckSeconds": 17.95598230700125,
+  "maxWait4FinalCheckRssKiB": 182036,
+  "sharedEdits": [
+    "docs/coverage-plan.md",
+    "docs/solidity-upstream-tests.md",
+    "tests/upstream/baseline-20261028/README.md"
+  ],
+  "coreSemanticEdits": [],
+  "newTheoremAxiomChecks": "Not applicable: no semantic theorem/axiom added; generated IO wrappers are diagnostic. Static trust inventory passes zero findings.",
+  "manifestOrGeneratedInventoryChanged": false,
+  "kernelVersusCompiler": "New results are pinned compiler + provenance/source-reader execution, not native typed admission, kernel proof or generated EVM observations. Historical theorem references are not freshly rechecked.",
+  "preciseMissingAssignedValidation": [
+    "Native typed import/production specification parsing/proof listing/replay blocked by stale API artifacts after single900.006s refresh124; peak2342395904bytes, zeroOOM. No second build attempted.",
+    "Three declaration-backed later-lowering gates (compoundAssignment/doWhileStatement/continueStatement) not exercised by the source reader.",
+    "Prepared assertion/unchecked panic vectors and deliberately wrong replay expectation not executed.",
+    "Nonzero-msg.value external-entry discriminator unavailable in current fixed-default-value replay API."
+  ],
+  "preservedPerformance": "Original90-minute cold stop546/685 at8195923968bytes and warm-unrun unchanged.",
+  "remainingScope": "Original profile exclusions, logs/environment policies, D1/D2 and other lanes unchanged; no general closer work.",
+  "reviews": "reviews.json"
+}
