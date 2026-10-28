@@ -188,6 +188,115 @@ theorem source_oracle_input_not_admitted (w : World Direct.contracts)
     Direct.assumptions w { sender := alice, ext := [(key, result)] } = false := by
   simp [Direct.assumptions]
 
+/-- A successful executable result supplies its actual value; the fallback
+is unreachable, and does not select a poststate on failure. -/
+private theorem result_of_success {α : Type} (run : TRes α) (fallback : α)
+    (success : run.toOption.isSome = true) : run = .ok (run.toOption.getD fallback) := by
+  cases run with
+  | error e => cases success
+  | ok value => rfl
+
+/-- A concrete source creation catch now has a funded constructor-rooted
+transition witness, retaining the caller payment and the child's prefunding. -/
+private def triedInitial : World Tried.contracts := World.empty Tried.contracts funds
+private def triedDeployed : World Tried.contracts × Handle Tried.Code.factory :=
+  (Tried.deploy triedInitial factory { sender := alice }).toOption.getD
+    (triedInitial, ⟨factory⟩)
+private theorem tried_deployment_ok :
+    Tried.deploy triedInitial factory { sender := alice } = .ok triedDeployed :=
+  result_of_success _ _ (by decide +kernel)
+private def triedAdmission : Tried.assumptions triedDeployed.1
+    { sender := alice, mode := .ordinary two } = true := by decide +kernel
+private def triedFinal : World Tried.contracts × Bool :=
+  (Tried.run triedDeployed.1 triedDeployed.2 { sender := alice, mode := .ordinary two }
+    child triedAdmission).toOption.getD (triedDeployed.1, true)
+private theorem tried_run_ok :
+    Tried.run triedDeployed.1 triedDeployed.2 { sender := alice, mode := .ordinary two }
+      child triedAdmission = .ok triedFinal :=
+  result_of_success _ _ (by decide +kernel)
+
+/-- Deployment followed by the actual source catch, rather than a chosen
+poststate or an oracle response, establishes this reachable world. -/
+theorem source_catch_reachable :
+    Reachable funds (fun _ => .contractCode) (fun _ _ => True) triedFinal.1 := by
+  have deployed : Reachable funds (fun _ => .contractCode) (fun _ _ => True)
+      triedDeployed.1 :=
+    Reachable.of_certificate .initial trivial
+      (Operation.create_certificate triedInitial Tried.Code.factory factory .nil
+        { sender := alice }) tried_deployment_ok
+  have success : Tried.run triedDeployed.1 triedDeployed.2
+      { sender := alice, mode := .ordinary two } child triedAdmission =
+      .ok (triedFinal.1, triedFinal.2) :=
+    tried_run_ok.trans (congrArg Except.ok (Prod.eta triedFinal).symm)
+  exact Tried.run_reachable (w := triedDeployed.1) (next := triedFinal.1)
+    (result := triedFinal.2) triedDeployed.2 { sender := alice, mode := .ordinary two }
+    child triedAdmission deployed trivial success
+
+/-- The reachable catch world retains exactly the previously observed
+balances and reports the source's false catch return. -/
+theorem source_catch_reachable_observations :
+    ((triedFinal.1.balance alice).1, (triedFinal.1.balance factory).1,
+      (triedFinal.1.balance child).1, (triedFinal.1.balance recipient).1,
+      (triedFinal.1.accounts child).isNone, triedFinal.2) = (8, 2, 4, 0, true, false) := by
+  decide +kernel
+
+/-- Source factory rejection in read-only context is retained by the exact
+operation certificate, even when no value was sent. -/
+theorem source_static_factory_certificate (w : World Direct.contracts)
+    (self : Handle Direct.Code.factory)
+    (admitted : Direct.assumptions w { sender := alice, mode := .readOnly } = true) :
+    (Direct.operation self { sender := alice, mode := .readOnly } child).run w =
+      .error .revert := by
+  rw [← Direct.run_certificate w self _ child admitted]
+  simp only [Direct.run, Context.isStatic, Bool.or_true, ↓reduceIte, forgetResult]
+
+#print axioms Direct.run_certificate
+#print axioms Tried.run_certificate
+#print axioms Linked.run_certificate
+#print axioms Tried.run_reachable
+#print axioms source_catch_reachable
+
+private noncomputable def directOperationSnapshot : TRes (Int × Int × Int × Int) := do
+  let initial := World.empty Direct.contracts funds
+  let w ← (Operation.seq (.create .factory factory .nil { sender := alice })
+    (Direct.operation ⟨factory⟩ { sender := alice, mode := .ordinary three } child)).run initial
+  pure ((w.balance alice).1, (w.balance factory).1,
+    (w.balance child).1, (w.balance recipient).1)
+
+/-- The generated direct operation executes deployment, caller payment and
+constructor settlement, agreeing with the independent source observations. -/
+theorem source_direct_operation : directOperationSnapshot = .ok (7, 2, 4, 1) := by
+  decide +kernel
+
+private noncomputable def linkedOperationSnapshot : TRes (Int × Int × Int × Bool) := do
+  let initial := World.empty Linked.contracts funds Linked.roles
+  let w ← (Operation.seq (.create .caller factory .nil { sender := alice })
+    (.seq (.create .caller otherCaller .nil { sender := alice })
+      (.seq (.deployLibrary .library libraryAddress { sender := alice })
+        (Linked.operation ⟨factory⟩ { sender := alice, mode := .ordinary two } libraryAddress)))).run initial
+  let (w, _) ← w.call (⟨factory⟩ : Handle Linked.Code.caller)
+    (Entry.unit Linked.Source.WorldLibraryUser.checkNine) { sender := alice }
+  let (w, _) ← w.call (⟨otherCaller⟩ : Handle Linked.Code.caller)
+    (Entry.unit Linked.Source.WorldLibraryUser.checkZero) { sender := alice }
+  pure ((w.balance alice).1, (w.balance factory).1, (w.balance libraryAddress).1,
+    (match w.call (⟨factory⟩ : Handle Linked.Code.caller)
+        (Entry.unit Linked.Source.WorldLibraryUser.checkZero) { sender := alice } with
+      | .error .panic => true | _ => false))
+
+/-- The linked operation preserves caller alias identity and charges the
+incoming payment once; the second caller and library balances stay independent. -/
+theorem source_linked_operation : linkedOperationSnapshot = .ok (8, 2, 5, true) := by
+  decide +kernel
+
+/-- A failed caller argument never enters the operation's creation catch. -/
+theorem source_operation_argument_exhaustion (w : World Tried.contracts) :
+    (Operation.tryCreate (.error .exhausted : TRes Unit) Tried.Code.target
+      (fun _ => child) (fun _ => Tried.constructor)
+      (fun _ => { sender := factory })).run w = .error .exhausted := rfl
+
+#print axioms source_direct_operation
+#print axioms source_linked_operation
+
 /-- error: solidity.worldFactory.body: expected exactly one creation return or creation try -/
 #guard_msgs in
 solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9

@@ -1,0 +1,7 @@
+legacy passed 7430ms
+viaIR passed 7326ms
+
+real	0m15.987s
+user	0m15.042s
+sys	0m0.932s
+cgroup memory.peak=332320768

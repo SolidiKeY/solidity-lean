@@ -1173,13 +1173,13 @@ def Feature.info : Feature → FeatureInfo
   | .newContract =>
     { category := "calls", spelling := "new C(args) without salt",
       scope := .abstract, current := .limited,
-      requirement := r#"Typed catalog world allocation, constructor execution, payment and rollback exist, with restricted solc_world_factory source fragments. General source new C with dynamic arguments, ABI/memory transfer, callbacks and composed worlds remains unintegrated."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
+      requirement := r#"Typed catalog world allocation, constructor execution, payment and rollback exist, with restricted solc_world_factory source fragments. General source new C with dynamic arguments, ABI/memory transfer, callbacks and composed worlds remains unintegrated. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/ContractWorldCertificates.lean"] }
   | .creationTry =>
     { category := "calls", spelling := "try new C(args) returns(C c)",
       scope := .abstract, current := .limited,
-      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
+      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/ContractWorldCertificates.lean"] }
   | .callbackSemantics =>
     { category := "calls", spelling := "reentrancy during modeled external calls",
       scope := .abstract, current := .limited,
@@ -1188,8 +1188,8 @@ def Feature.info : Feature → FeatureInfo
   | .externalLibraryCalls =>
     { category := "calls", spelling := "linked library public/external calls",
       scope := .abstract, current := .limited,
-      requirement := r#"Typed linked execution uses caller storage and explicit library identity, with restricted solc_world_library literal field-mutation fragments. General library arguments, aggregate returns and nested external source execution remain unsupported."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1261 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
+      requirement := r#"Typed linked execution uses caller storage and explicit library identity, with restricted solc_world_library literal field-mutation fragments. General library arguments, aggregate returns and nested external source execution remain unsupported. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1261 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/ContractWorldCertificates.lean"] }
   | .abiEncode =>
     { category := "abi", spelling := "abi.encode(...)",
       scope := .model, current := .limited,

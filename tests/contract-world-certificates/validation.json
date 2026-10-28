@@ -1,0 +1,538 @@
+{
+  "recordedOn": "2026-10-28",
+  "environmentId": "ccarenv_b64_Y2NhcmVudl8zOWEyYmExNDc5NDQ4MTkxOGE0OTlhOWE1NWI0MTIyMw",
+  "repository": "SolidiKeY/solidity-lean",
+  "checkout": "/workspace/solidity-lean",
+  "branch": "feature/world-reachable-catch",
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "implementationCommit": "1e37a2256e277ef24b04284ad0de9f822feaca8c",
+  "scope": "Completed source-wrapper operation certification and bare creation-catch increment. General source-world arguments/results and ordinary world-aware importing remain unsupported.",
+  "runtime": {
+    "lean": "Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+    "lake": "Lake 5.0.0-src+797c613",
+    "smoke": {
+      "command": "lake -f .world-bounded.toml build Solidity.KeySort",
+      "status": "passed",
+      "elapsedSeconds": 0.154,
+      "peakMemoryBytes": null
+    }
+  },
+  "resourceBounds": {
+    "vmMemoryBytes": 17179869184,
+    "enforcedMemoryMaxBytes": 12884901888,
+    "enforcedSwapMaxBytes": 0,
+    "LEAN_NUM_THREADS": "1",
+    "explicitLeanArgument": "-j1",
+    "cpus": 1,
+    "writerLock": "/tmp/solidity-lean-feature-groups-20261025/writer.lock",
+    "method": "Managed local Docker daemon, same attached repository/toolchain bind-mounted; no systemd bus available.",
+    "recordedAlternateLakefile": "bounded-lakefile.toml"
+  },
+  "baseline": {
+    "command": "lake -f .world-bounded.toml build Solidity.Examples.Tactics.ContractWorldSource",
+    "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+    "status": "passed",
+    "elapsedSeconds": 297.249,
+    "peakMemoryBytes": 915886080,
+    "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+    "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
+    "controlsSha256": "0365c7bcc18e16c0d867087f684e6ea8065b8dfab80a60e9a03f920c3010dcaa"
+  },
+  "sourceFixtures": [
+    {
+      "contract": "WorldFactory",
+      "method": "make",
+      "expected": "source_factory = ok (7, 2, 4, 1, true)",
+      "before": {
+        "status": "kernel-checked",
+        "pipeline": "legacy",
+        "compiler": "0.8.34"
+      },
+      "after": {
+        "status": "kernel-checked",
+        "pipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "compiler": "0.8.38"
+      }
+    },
+    {
+      "contract": "WorldFactory",
+      "method": "trySuccess",
+      "expected": "source_creation_try_success = ok Snapshot(7, 2, 4, 1, true, true)",
+      "before": {
+        "status": "kernel-checked",
+        "pipeline": "legacy",
+        "compiler": "0.8.34"
+      },
+      "after": {
+        "status": "kernel-checked",
+        "pipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "compiler": "0.8.38"
+      }
+    },
+    {
+      "contract": "WorldFactory",
+      "method": "tryMake",
+      "expected": "source_creation_try = ok Snapshot(8, 2, 4, 0, true, false)",
+      "before": {
+        "status": "kernel-checked",
+        "pipeline": "legacy",
+        "compiler": "0.8.34"
+      },
+      "after": {
+        "status": "kernel-checked",
+        "pipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "compiler": "0.8.38"
+      }
+    },
+    {
+      "contract": "WorldFactory",
+      "method": "failMake",
+      "expected": "source_uncaught_creation_rollback = ok Snapshot(10, 0, 4, 0, true, true)",
+      "before": {
+        "status": "kernel-checked",
+        "pipeline": "legacy",
+        "compiler": "0.8.34"
+      },
+      "after": {
+        "status": "kernel-checked",
+        "pipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "compiler": "0.8.38"
+      }
+    },
+    {
+      "contract": "WorldFactory",
+      "method": "implicitMake",
+      "expected": "source_implicit_constructor = ok true",
+      "before": {
+        "status": "kernel-checked",
+        "pipeline": "legacy",
+        "compiler": "0.8.34"
+      },
+      "after": {
+        "status": "kernel-checked",
+        "pipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "compiler": "0.8.38"
+      }
+    },
+    {
+      "contract": "WorldLibraryUser",
+      "method": "mutate",
+      "expected": "source_linked_library = ok (8, 2, 5, true)",
+      "before": {
+        "status": "kernel-checked",
+        "pipeline": "legacy",
+        "compiler": "0.8.34"
+      },
+      "after": {
+        "status": "kernel-checked",
+        "pipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "compiler": "0.8.38"
+      }
+    }
+  ],
+  "retainedNamedRefusals": [
+    {
+      "method": "WorldFactory.extra",
+      "message": "solidity.worldFactory.body: expected exactly one creation return or creation try"
+    },
+    {
+      "method": "WorldFactory.dynamicArgument",
+      "message": "solidity.worldFactory.arguments: factory parameters are not lowered yet"
+    },
+    {
+      "method": "WorldLibraryUser.extra",
+      "message": "solidity.worldLibrary.body: exactly one direct library call required"
+    },
+    {
+      "method": "WorldFactory.callsExternal",
+      "message": "solidity.worldFactory.constructor: external contract/library calls need world-aware statements"
+    },
+    {
+      "method": "WorldFactory.readsBalance",
+      "message": "solidity.worldFactory.constructor: balance observations need the global world expression interface"
+    }
+  ],
+  "newKernelControls": [
+    "source_catch_reachable",
+    "source_catch_reachable_observations",
+    "source_static_factory_certificate",
+    "source_direct_operation",
+    "source_linked_operation",
+    "source_operation_argument_exhaustion"
+  ],
+  "focusedBuild": {
+    "status": "passed",
+    "command": "lake -f .world-bounded.toml build Solidity.Examples.Tactics.ContractWorldSource",
+    "elapsedSeconds": 87.494,
+    "peakMemoryBytes": 842190848,
+    "log": "world-focused-final.log"
+  },
+  "perFileDiagnostics": {
+    "status": "passed",
+    "elapsedSeconds": 29.824,
+    "peakMemoryBytes": 1561927680,
+    "files": [
+      {
+        "file": "Solidity/Semantics/ContractWorld.lean",
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      },
+      {
+        "file": "Solidity/Semantics/ContractWorldCertificates.lean",
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      },
+      {
+        "file": "Solidity/Frontend/WorldImport.lean",
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      },
+      {
+        "file": "Solidity/Examples/Tactics/ContractWorldSource.lean",
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    ],
+    "note": "Known asyncio shutdown warning after completed success responses; process exit 0."
+  },
+  "sourcePipelines": {
+    "source": "tests/solc/ContractWorld.sol",
+    "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
+    "controlsSha256": "b237d868ce95cbf3dda9e993c88461223e751be9bbdc812243527bcf025349b6",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "scope": "Kernel-checked typed-source observations for both analysis pipelines; no EVM/compiler-equivalence claim.",
+    "pipelines": [
+      {
+        "pipeline": "legacy",
+        "status": "passed",
+        "elapsedMs": 7430,
+        "fixtureSha256": "60623bdbb0537f41cf12f3415e2ba5641874d25458f0e47c664daa9ae1fcfaa7",
+        "wrapperSha256": "442f495784fccffac41cd6021be6f4e11d408827205651a4688e3fa3f7ef8b07",
+        "generationArguments": [
+          "scripts/solc-ast.mjs",
+          "--source",
+          "/workspace/solidity-lean/tests/solc/ContractWorld.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/world-certificate-pipelines/legacy/ContractWorld.ast.json",
+          "--wrapper",
+          "/workspace/solidity-lean/.lake/world-certificate-pipelines/legacy/Controls.lean",
+          "--world-metadata",
+          "--compiler-file",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--compiler-sha256",
+          "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+        ],
+        "leanArguments": [
+          "env",
+          "lean",
+          "--tstack=131072",
+          "-j1",
+          "/workspace/solidity-lean/.lake/world-certificate-pipelines/legacy/Controls.lean"
+        ],
+        "log": "/workspace/.setup/logs/world-pipeline-legacy.log"
+      },
+      {
+        "pipeline": "viaIR",
+        "status": "passed",
+        "elapsedMs": 7326,
+        "fixtureSha256": "f2d2f97eb637fe703941239a34c9152eec85ea612aa27a7354bf77413c0de1e2",
+        "wrapperSha256": "64edd5ed90f4c19947c0d051b43c1bd084cd71c675e9da7a55d8c27766f10988",
+        "generationArguments": [
+          "scripts/solc-ast.mjs",
+          "--source",
+          "/workspace/solidity-lean/tests/solc/ContractWorld.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/world-certificate-pipelines/viaIR/ContractWorld.ast.json",
+          "--wrapper",
+          "/workspace/solidity-lean/.lake/world-certificate-pipelines/viaIR/Controls.lean",
+          "--world-metadata",
+          "--compiler-file",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--compiler-sha256",
+          "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "--via-ir"
+        ],
+        "leanArguments": [
+          "env",
+          "lean",
+          "--tstack=131072",
+          "-j1",
+          "/workspace/solidity-lean/.lake/world-certificate-pipelines/viaIR/Controls.lean"
+        ],
+        "log": "/workspace/.setup/logs/world-pipeline-viaIR.log"
+      }
+    ]
+  },
+  "axiomChecks": {
+    "Solidity.ContractWorld.World.paidRun_certificate": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.Operation.tryCreate_certificate": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.Operation.tryCreate_uncaught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.Reachable.of_certificate": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.Direct.run_certificate": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.Tried.run_certificate": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.Linked.run_certificate": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.Tried.run_reachable": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.source_catch_reachable": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.source_direct_operation": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.source_linked_operation": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.source_factory": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.source_creation_try": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.source_creation_try_success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ContractWorldSource.source_linked_library": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "combinedGate": {
+    "command": "./run-lean.sh (bounded lake wrapper and alternate TOML)",
+    "status": "passed",
+    "exitCode": 0,
+    "defaultTargetJobs": 686,
+    "testSuiteJobs": 259,
+    "sortTaclets": 377,
+    "sortReadBearingAnnotations": 131,
+    "elapsedSeconds": 8734.609,
+    "peakMemoryBytes": 12884901888,
+    "log": "run-lean.log.gz",
+    "uncompressedLogSha256": "57079e497668c3a72ba20fbca80d077a776b52b4d4b59cb7df6b984381b6cbf8",
+    "cacheContext": "Published setup artifacts and earlier focused builds were retained. This is the actual bounded combined validation, not a clean-checkout cold benchmark.",
+    "resourceNote": "Recorded cgroup peak equals the enforced 12 GiB limit; all three gates completed with exit 0.",
+    "reconnect": "Attachment refresh disconnected the original output session. The same surviving container was monitored with docker wait and its complete logs recovered; no build was restarted."
+  },
+  "upstreamReplay": {
+    "status": "blocked",
+    "commandRecord": "upstream-command.sh",
+    "exitCode": 1,
+    "elapsedSeconds": 3.42,
+    "peakMemoryBytes": 318824448,
+    "fixtures": [
+      {
+        "path": "test/libsolidity/semanticTests/functionCall/creation_function_call_with_args.sol",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/external_call_with_storage_mapping_parameter.sol",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/tryCatch/create.sol",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      }
+    ],
+    "expectations": "upstream/fixture-observations.json",
+    "scope": "No per-pipeline Lean runtime or EVM agreement claimed for these three host-blocked fixtures. All original fixture text/expectations retained.",
+    "compressedGlobalCoverage": [
+      {
+        "path": "tests/contract-world-certificates/upstream/dynamic-create/file-coverage.json.gz",
+        "uncompressedSha256": "6bfc1c41fd90ef4df58b43eb84c4e059cc32e14810fc0e119da4d24a35978ad0",
+        "compressedSha256": "8091a334ec125714a92d759e5533a24087e88654341febd4fffb20d2bb31f57f",
+        "uncompressedBytes": 4050018
+      },
+      {
+        "path": "tests/contract-world-certificates/upstream/library-mapping/file-coverage.json.gz",
+        "uncompressedSha256": "0cddbf718e98c31720e0c3dc45b190b4c44253146dc848aba6a6f17c022c2eb7",
+        "compressedSha256": "f15ce166c2fc80ed709edcbab0e91d110868082aa015968dfa3ca7398b0fba18",
+        "uncompressedBytes": 4050018
+      },
+      {
+        "path": "tests/contract-world-certificates/upstream/try-create/file-coverage.json.gz",
+        "uncompressedSha256": "03f3f62e965eeef5f4686a953cea5f6d86a1b9d916b5d765bc464d57755d6298",
+        "compressedSha256": "9fa38c6228fc0063808e9a65e034e834ba11311f2a08b1f8c4ce012ed603e1a0",
+        "uncompressedBytes": 4050018
+      }
+    ],
+    "invocationRepair": "An initial formatting error ran no fixtures. Its log is retained separately and is not passing evidence."
+  },
+  "staticGates": {
+    "trust": {
+      "sources": 715,
+      "implementationRecoverySites": 240,
+      "findings": 0
+    },
+    "orphans": {
+      "reachable": 701,
+      "orphaned": 0,
+      "notAllowed": 0
+    },
+    "layers": {
+      "coreModules": 153,
+      "frontendLeaks": 0
+    },
+    "automatic": {
+      "automatic": 491,
+      "withStepBudget": 61,
+      "manual": 0,
+      "refuted": 11,
+      "pending": 0
+    },
+    "inventory": {
+      "features": 212,
+      "classifiedUpstreamSymbols": 783,
+      "generatedFilesCurrent": true
+    },
+    "nodeContractWorld": {
+      "passed": 1,
+      "failed": 0,
+      "elapsedMilliseconds": 678.027583
+    },
+    "docPaths": {
+      "status": "blocked-existing",
+      "missingReferences": 20,
+      "scope": "All missing references are in unchanged archived group03/group10 reports or the existing Mathlib citation; no new affected path.",
+      "log": "doc-paths.log.gz"
+    }
+  },
+  "reviews": {
+    "finder": "world_finder",
+    "skeptic": "world_skeptic",
+    "mode": "Independent read-only; neither invoked Lean/server/builds or wrote files.",
+    "confirmedSemanticDefects": 0,
+    "addressedRequests": [
+      "Register module in Solidity.lean and module-map",
+      "Add direct and linked generated-operation execution controls",
+      "Pin argument exhaustion outside catch",
+      "State bare-catch/constant-return and ordinary-library-caller limitations"
+    ],
+    "finalEvidenceVerification": "Both independent read-only reviewers verified the full log/exit, all compressed and uncompressed coverage hashes and lengths, original fixture bytes against pinned archive, pipeline/source/control/model hashes, and implementation patch hash; no confirmed inconsistency. Neither used Lean/server/builds or wrote files."
+  },
+  "sharedFilesChanged": [
+    "Solidity.lean",
+    "Solidity/Semantics/ContractWorld.lean",
+    "Solidity/Frontend/WorldImport.lean",
+    "Solidity/Examples/Tactics/ContractWorldSource.lean",
+    "Solidity/Language/Features.lean",
+    "docs/module-map.md",
+    "docs/solidity-features.json",
+    "docs/solidity-feature-inventory.md",
+    "docs/feature-work/contract-world.md"
+  ],
+  "newCoreModule": "Solidity/Semantics/ContractWorldCertificates.lean",
+  "remaining": [
+    "Dynamic source creation arguments and value expressions",
+    "General typed library arguments, aggregate results and qualified library structs",
+    "Typed/data creation catches and operation-valued handler/success bodies",
+    "Nested source external-world execution, ABI/memory transfer and callbacks",
+    "World-aware ordinary solc_import interface",
+    "Computed static bodies and source global-balance expressions"
+  ],
+  "preserved": [
+    "Funded reachable inputs and explicit admission",
+    "Paid-entry preconditions and source environment assumptions",
+    "Argument-before-catch order and caught constructor rollback",
+    "Uncaught exhaustion/divergence and whole-transaction rollback",
+    "Catalog and caller alias identity",
+    "Existing groups 01\u201310, recursive migration, inherited getters and ABI replay",
+    "Core dependency-free policy and environment/log scope"
+  ],
+  "noPushOrMasterMerge": true,
+  "implementationPatch": {
+    "path": "/workspace/world-reachable-catch-1e37a225.patch",
+    "sha256": "314b00a674bf88a2e27e3583cf3438631245adaee345d0e15768cb0d3c7f2a4e"
+  }
+}
