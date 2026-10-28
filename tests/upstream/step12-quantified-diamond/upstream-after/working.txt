@@ -1,0 +1,4 @@
+test/libsolidity/semanticTests/viaYul/loops/break.sol	lean-runtime	functional runtime vectors match in every required source evaluation mode
+test/libsolidity/semanticTests/viaYul/loops/continue.sol	lean-runtime	functional runtime vectors match in every required source evaluation mode
+test/libsolidity/semanticTests/viaYul/loops/return.sol	lean-runtime	functional runtime vectors match in every required source evaluation mode
+test/libsolidity/semanticTests/viaYul/loops/simple.sol	lean-runtime	functional runtime vectors match in every required source evaluation mode

@@ -574,7 +574,7 @@ annotation/schema notation and printers already retain the clauses. The
 were extended consistently. The existing size constants were retained.
 
 `tests/solc/QuantifiedDiamond.sol` is retained as separately pinned solc 0.8.38
-legacy/viaIR ASTs. `Solkey/QuantifiedDiamond.lean` checks both imports and all
+legacy/viaIR ASTs. `Solkey/QuantifiedDiamond.lean` checks both imports and declares all
 eight obligations; `Examples/Tactics/QuantifiedDiamond.lean` proves, in each
 pipeline, the count and for/continue diamonds, the nonempty postcondition
 `∀ uint q; q < 3 → q < r`, and its false companion with witness `q = 2`.
@@ -622,3 +622,42 @@ Final integration found one printer-only regression: removing the obsolete
 clause-empty premise reordered inferred implicit binders in the displayed
 rule type. The existing Loops snapshot now records that binder order; its
 logical statement and all expected program results are unchanged.
+
+### Final step-12 validation
+
+The handoff is a **partial scalar increment**, not completion of every loop
+or specification gap. `tests/upstream/step12-quantified-diamond/validation.json`
+records commands, measured bounds, every source row and upstream observation,
+axiom sets and shared-file edits. No shared `Frontend/` source was edited.
+
+- Both compiler modes: `count` and `forCount` proved; nested/fill remain pending.
+- Both modes retain all four controls as pending source obligations. False-post
+  and infinite-loop behavior is independently certified by the kernel theorems.
+- Upstream break/continue/return/simple: four fixtures, eight required modes,
+  all 28 original observations match, with unchanged fuel 1000.
+- Affected Node tests: 37 pass, zero failures.
+- The first full build hit its 3600-second cap in OpenLoops and remains
+  blocked (peak 8,592,580,608 bytes). A warm-cache retry used the same cap,
+  finishing with only the confirmed binder-order snapshot mismatch (exit 1,
+  2745 seconds, peak 9,316,597,760 bytes). That failed log is also retained.
+  The next attempt stopped without a terminal result after Derived14; its cause
+  is unknown. A fresh process/container/lock inspection confirmed no surviving
+  worker before resuming from cached artifacts. The interrupted log is retained.
+- Full `./run-lean.sh` and a fresh per-file kernel replay pass under 12 GiB,
+  zero swap, `LEAN_NUM_THREADS=1` and explicit `-j1`.
+- Frozen sort annotations match all 131 read-bearing taclets out of 377 parsed.
+- Layer, orphan, trust, automatic and inventory-generation checks pass.
+  The optional rule-text and repository-wide document scanners retain their
+  exact baseline findings (nine constructors, twenty archived/external refs).
+
+Runtime/compiler observations are separate from kernel soundness. All source,
+compiler and snapshot hashes are retained. No timeout, resource stop or pending
+advanced goal is counted as passing. The before proof and blocked-attempt record
+remain intact. Launcher/configuration text in the evidence directory documents
+the session-specific resource wrapper; it adds no core dependency.
+
+Final evidence-only finder and skeptic reviews verified log hashes, terminal
+results, exact partial rows and shared edits. The finder requested portable
+copies of five logs and the baseline document scan; these are retained.
+The document scan is encoded to avoid adding duplicate historical citations
+to its own input. No additional soundness or scope finding remained.

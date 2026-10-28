@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+lean --version
+lake --version
+lake -f lakefile.step12.toml build Solidity.KeySort
+for step12_file in \
+ Solidity/Calculus/LoopInvariantWk.lean \
+ Solidity/Calculus/Blocks.lean \
+ Solidity/Calculus/Rules.lean \
+ Solidity/Calculus/Taclet.lean \
+ Solidity/Calculus/RuleExists.lean \
+ Solidity/Calculus/Proves.lean \
+ Solidity/Calculus/TermSize.lean \
+ Solidity/Calculus/SoundLoops.lean \
+ Solidity/Examples/Tactics/Loops.lean \
+ Solidity/Examples/Tactics/QuantifiedDiamond.lean; do
+ echo "CHECK $step12_file"
+ lake -f lakefile.step12.toml env lean -j1 --tstack=131072 "$step12_file"
+done
