@@ -1,5 +1,10 @@
 # Current-master upstream baseline
 
+The [attribution follow-up](attribution/README.md) assesses each of the original
+84 unresolved feature IDs. It records 59 source/documented boundaries and 25 exact
+missing-evidence questions; ten rows have direct fresh fixture/variant links.
+The original gap index and unresolved list below remain historical evidence.
+
 Source base: `f4dee4a29c2e208b36db4a4161a4723c735cd775`, freshly fetched origin/master.
 Branch: `baseline/current-master-20261028`. All collected cloud groups 01–10 are
 ancestors. Active unmerged work is excluded; no Lean semantic source changed.
@@ -65,8 +70,10 @@ is not an archive of every transient batch wrapper.
 
 `summary.json` and the three verdict `.txt` lists are readable exports. The
 `gaps/` index retains exact variant gap objects, conservative many-to-many work
-queues and the historical/current status changes. It reviews boundaries for
-76 of 160 partial features; 84 still require exact feature-specific gap review.
+queues and the historical/current status changes. At the original checkpoint it reviewed boundaries for
+76 of 160 partial features and left 84 requiring feature-specific review. The
+follow-up assesses all 84; it does not claim semantic completeness for the
+25 rows whose precise evidence questions remain open.
 No manifest status/schema changed. Keyword routing is triage, not attribution
 or proof. An empty runtime queue says nothing about proof-interface completeness.
 
@@ -150,3 +157,26 @@ This VM retains the incomplete private cold directory. The script refuses to
 overwrite it; preserve it under the writer lock before any independently
 requested fresh measurement. Do not interpret its artifacts as a completed
 warm baseline. No second cold attempt was made here.
+
+## Attribution follow-up validation
+
+This resumes the same VM and branch at `66629757`, without a Lean build.
+See [the reviewed input table](attribution/reviewed.tsv),
+[full source/variant evidence](attribution/index.json), and
+[exact validation commands and resource measurements](attribution/validation.json).
+Every original partial ID is accounted for: the inherited 76 associations plus
+84 individually assessed rows. A documented limit is distinct from a new
+runtime counterexample, and missing correspondence evidence is a diagnostic
+question rather than proof that a feature is absent. No manifest status or
+schema changed; generated inventories need no rewrite.
+
+Independent read-only reviews corrected two false gap candidates: storage-pointer
+delete is compiler-invalid, and retained external/self-frame modular-zero guards
+already emit Panic 0x12. The follow-up also excludes dynamic bytesN array-copy
+failures from fixedArrays, enum conversion from typeBounds, runtime ERC7201
+overflow from numericLiterals, and for-loop conditions from doWhileStatement.
+The original keyword queues remain unchanged. No D1/D2 or excluded machine
+semantics decisions are made. No theorem/axiom audit is newly applicable.
+The cold stop remains exit 124 at 546/685, peak 8,195,923,968 bytes; warm timing
+remains unrun. All existing inputs, observations, expectations and required
+pipelines are untouched.

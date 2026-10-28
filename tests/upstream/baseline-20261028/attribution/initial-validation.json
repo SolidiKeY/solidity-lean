@@ -1,0 +1,70 @@
+{
+  "status": "failed-whitespace-check",
+  "command": [
+    "python3",
+    "tests/upstream/baseline-20261028/attribution/validate.py"
+  ],
+  "exitCode": 1,
+  "failedGate": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "failedGateExitCode": 2,
+  "reason": "Generated Markdown had a new blank line at EOF; render corrected. All13 exact command logs retained in initial-gates; no failing result counted as passing.",
+  "logs": [
+    {
+      "path": "initial-gates/gate-00.log.gz",
+      "sha256": "7a76efc6e7a60c2325f040b7009d0c971b13e12bacaaea46df5f6f54b481431c"
+    },
+    {
+      "path": "initial-gates/gate-01.log.gz",
+      "sha256": "7c30920c327869cec21557ce2eb4881f9714ac363976fd2c21886577117fbf86"
+    },
+    {
+      "path": "initial-gates/gate-02.log.gz",
+      "sha256": "3ca0e1067f6b6f631a733383f3cd356c3f0afc1bcdb80f9a47a6e1ff01b8d8d6"
+    },
+    {
+      "path": "initial-gates/gate-03.log.gz",
+      "sha256": "ec65b8055f8f4b870acd21333dfd30366656a38369f210dbc10356c4312f7ccd"
+    },
+    {
+      "path": "initial-gates/gate-04.log.gz",
+      "sha256": "101b70fa490541d15382088cff2d2d29ab4de2f07c7f357e4f64aba22161d0ad"
+    },
+    {
+      "path": "initial-gates/gate-05.log.gz",
+      "sha256": "d3eb2ca1ab4dc58885394008d50aee4fa283c3dba68aacd7a37074074c453b09"
+    },
+    {
+      "path": "initial-gates/gate-06.log.gz",
+      "sha256": "9c3be1390296b736b581ebb4f352ed484a2bbf62edfedcefe9f124c3edf89703"
+    },
+    {
+      "path": "initial-gates/gate-07.log.gz",
+      "sha256": "3465141fdf1ae9cfc5fdbce6baf612c776b344bf715c3bbcf2d9699989b24908"
+    },
+    {
+      "path": "initial-gates/gate-08.log.gz",
+      "sha256": "eb88f23e6f1399c4b8a4a4e7b3ac8daea10cebcb84788d2b7930b42bf7e93fce"
+    },
+    {
+      "path": "initial-gates/gate-09.log.gz",
+      "sha256": "9d2098264ee55691f81701bf0c0e604aa1d47ff15b3e2c66b0cbcc7ce1af846d"
+    },
+    {
+      "path": "initial-gates/gate-10.log.gz",
+      "sha256": "84775617cd67f7d7e697769798f0256a2b069fd357a515739a57b8358170ef77"
+    },
+    {
+      "path": "initial-gates/gate-11.log.gz",
+      "sha256": "22727b1473fdc2e918176c0ddcf42f866509c7cfa35ad707222d61da871c3dc6"
+    },
+    {
+      "path": "initial-gates/gate-12.log.gz",
+      "sha256": "e26ca0637eb1744317df59598882e5f71e7b64cba004d570fe79c66de2d3ae77"
+    }
+  ]
+}

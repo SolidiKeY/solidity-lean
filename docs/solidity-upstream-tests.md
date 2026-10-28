@@ -447,3 +447,11 @@ The default/TestSuite/frozen-sort combined gate remains blocked; warm timing
 was not run because cold completion was not established. Partial cold
 artifacts and the restored original cache remain on this VM. This baseline
 is diagnostic evidence, not a universal semantics or lowering-equivalence proof.
+
+The [feature-attribution follow-up](../tests/upstream/baseline-20261028/attribution/README.md)
+now assesses all 84 IDs left unresolved by that checkpoint: 59 have explicit
+source/documented limits, and 25 retain feature-specific missing-evidence
+questions. Ten rows link directly to exact fresh fixture/variant gaps. The
+original 76/84 index remains historical evidence, and the supplement does not
+claim universal semantic attribution or change any manifest status. The cold
+stop and unrun warm measurement above remain unchanged.
