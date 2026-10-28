@@ -602,3 +602,5 @@ import Solidity.Syntax.Numeric
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Semantics.ExternalTryWitness
 import Solidity.Examples.Tactics.ExternalTryWitness
+import Solidity.Calculus.Sound.ExternalTryWitness
+import Solidity.Examples.Tactics.ExternalTryFormula

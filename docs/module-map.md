@@ -861,3 +861,10 @@ At the root, the notation's own tests:
 | `Semantics/ExternalTryWitness.lean` | Exact external oracle/decoder equations and normal-return witnesses for all four try alternatives; caller-failure controls. |
 | `Counterexamples/DiamondTry.lean` | A reached try admits a caller revert, refuting its universal callback diamond under either payment flag. |
 | `Examples/Tactics/ExternalTryWitness.lean` | Source-shaped explicit-oracle controls, ordered storage observations, caller failures and callback refusal. |
+
+### Deterministic try formula witnesses
+
+| Module | Defines |
+|---|---|
+| `Calculus/Sound/ExternalTryWitness.lean` | State-indexed deterministic diamond transport from explicit normal try and allocated catch-data witnesses; no validity or callback promotion. |
+| `Examples/Tactics/ExternalTryFormula.lean` | Concrete success/catch formulas, allocated raw/reason payloads, explicit frame transport and refusal controls. |
