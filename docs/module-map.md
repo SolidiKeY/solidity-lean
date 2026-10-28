@@ -853,3 +853,11 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+## External try execution evidence
+
+| Module | What it defines |
+|---|---|
+| `Semantics/ExternalTryWitness.lean` | Exact external oracle/decoder equations and normal-return witnesses for all four try alternatives; caller-failure controls. |
+| `Counterexamples/DiamondTry.lean` | A reached try admits a caller revert, refuting its universal callback diamond under either payment flag. |
+| `Examples/Tactics/ExternalTryWitness.lean` | Source-shaped explicit-oracle controls, ordered storage observations, caller failures and callback refusal. |

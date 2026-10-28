@@ -598,3 +598,7 @@ import Solidity.Tools.Upstream
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport
 import Solidity.Syntax.Numeric
+
+import Solidity.Counterexamples.DiamondTry
+import Solidity.Semantics.ExternalTryWitness
+import Solidity.Examples.Tactics.ExternalTryWitness

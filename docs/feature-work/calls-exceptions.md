@@ -132,3 +132,10 @@ The Group10 aggregate custom-error continuation is recorded in
 It reuses the typed aggregate ABI encoder and raw memory-revert path, preserving
 reference locations, delayed reads, source ordering and rollback. Historical
 M5 evidence is unchanged; current and retained evidence remain distinct.
+
+## External try execution witnesses
+
+The [partial step-11 record](diamond-try.md) contains deterministic normal-return
+witnesses, caller-failure controls and the universal callback-diamond obstruction.
+Diamond rules/source automation and the blocked upstream fixture pipelines
+remain open; the record does not increase source support.
