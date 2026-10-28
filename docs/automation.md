@@ -643,8 +643,8 @@ Costs that guide work:
     linear shapes still need more reduction; no general unbounded
     Presburger completeness is claimed. The unpinned equality/ledger
     one-point shape remains separate work. See the
-    [task evidence and limits](feature-work/kint-two-anchors.md); the mandatory
-    full-suite resource gate remains blocked.
+    [task evidence and limits](feature-work/kint-two-anchors.md); the recovered full-suite
+    resource gate and all 26 strict module timings now pass.
   * `gapQuantLedger` (`(∀ uint y. y > 0) → net(0) > 0`): a negative
     quantifier in a leaf that reads the ledger.  Next: the ledger cut ahead
     of `quantReduction?`'s abstraction, the entries as parameters of the

@@ -1,10 +1,10 @@
 # Two-anchor KeY-int test point
 
 The original `gapKIntTwoAnchors` statement is now kernel-certified `.proved`
-through `decideKEnc`, `decideLeaf` and `decideGoal`. The assignment remains **validation-blocked**: the full library passed, but
-the mandatory TestSuite run stopped at the unchanged independent loop module
-`Derived17` under the original memory/headroom guard. Closure of this
-one witness is not `DecisionTheorem` or general Presburger completeness.
+through `decideKEnc`, `decideLeaf` and `decideGoal`. The full/TestSuite gate
+and complete 26-module strict timing audit now pass under the original
+resource limits, after the measured cache recovery recorded below. The earlier
+failed checkpoints remain historical evidence. Closure of this one witness is not `DecisionTheorem` or general Presburger completeness.
 
 ## Scope and proof
 
@@ -130,9 +130,8 @@ JSON contains neither. Its source is byte-identical to the base and has ten
 existing loop obligations. History and `feature-work/integration.md` already
 record its high memory cost. A distinct isolated same-limit experiment also
 stopped, so the blocker is retained. No loop-proof or checking-cost refactor
-was attempted: that belongs to a prohibited previous-batch area. Remaining
-mandatory work is a bounded full/TestSuite pass and complete timing coverage;
-this patch does **not** claim assignment completion. Existing linter warnings
+was attempted at that checkpoint. The bounded full/TestSuite pass and complete
+timing coverage were still open then; the later recovery below closes them. Existing linter warnings
 from unrelated modules remain in the full build log.
 
 Evidence replay uses `prepare-config.py` to recreate the exact threading-only
@@ -182,7 +181,8 @@ outer-VM working headroom 2,112,159,744 bytes. No max/OOM event occurred.
 `continuation-b4b6f3b8/actual-derived17-process.txt` retains the live invocation.
 Both earlier resource stops remain visible. No unchanged retry or subsequent
 full run was attempted. Full/TestSuite and complete strict timing coverage
-remain mandatory open gates; this is **not assignment completion**.
+were mandatory open gates at that checkpoint. The later measured recovery
+below closes them; the failed experiment itself remains a failure.
 
 Unaffected checks were rerun in this executor:
 
@@ -204,3 +204,62 @@ Independent finder and skeptic read-only continuation reviews found no
 confirmed defects. Neither used Lean/server/builds or wrote files; they checked
 the actual invocation, source hashes, limits, renewed checks, replay safety and
 blocked-gate claims. Their records are retained in the evidence bundle.
+
+## Final recovery and full validation
+
+The same VM and branch resumed at `cbab2d76`. Lean 4.24.0/Lake 5.0.0 and actual
+local Docker commands worked; no idle Lean servers or retained containers were
+present; no idle-process cleanup or unrelated-process termination was needed.
+The resource guard terminated only its own failed probe groups. Temporary declaration-level modules copied
+all ten original `Derived17` theorem statements/bodies without editing the
+repository. Proofs 1–8 and 10 passed individually; proof 9,
+`returnLeavesNestedLoops.proved`, alone hit the headroom guard. Its compiled
+walk used 903 of the unchanged 1024 steps. A tighter diagnostic replay also
+stopped and was discarded. Existing chunking resets budgets, so it was rejected.
+No proof, callback/invariant, semantic observation, heartbeat/fuel/node/test
+limit, source/configuration or tactic implementation changed in this recovery.
+
+The concrete resource issue was unnecessary active RAM file cache from earlier
+builds: 4,781,494,272 bytes of active file cache. Under the writer lock,
+`fsync` plus `POSIX_FADV_DONTNEED` on **only this checkout's generated
+`.lake/build` files** retained every disk artifact and reduced outer-VM charged
+memory from 5,571,239,936 to 2,854,502,400 bytes. Active file cache fell to
+2,165,256,192 bytes. No global cache drop, sysctl, limit change or cleanup of
+other tasks occurred. The original 1024-step isolated ninth proof then passed
+in 75.231s (RSS 10,992,001,024 bytes, cgroup peak 11,041,587,200 bytes, minimum
+working headroom 4,649,295,872 bytes). A source/proof refactor was unnecessary.
+
+After the same narrow cleanup, the **actual `./run-lean.sh` passed exit 0**:
+686 library jobs, 259 TestSuite jobs, and the frozen SolKey check (377 taclets,
+131 read-bearing annotations matched). Derived17 had no compiled artifact at
+launch and was freshly built in 126s, with its original source SHA256 and all
+original budgets. The live compiler command includes
+`--tstack=131072 -j1 -DElab.async=false`. Derived18–21 passed in 7.8s, 54s,
+143s and 73s; Suggestions/Refuted/Report passed in 8.6s/15s/13s.
+
+| Final check | Exit, time and resource evidence |
+|---|---|
+| Actual full `./run-lean.sh` | 0; `recovered-full-run.log`, 445.975s; aggregate RSS 11,022,848,000 bytes, cgroup peak 11,317,960,704 bytes, minimum outer-VM working headroom 4,380,983,296 bytes; no max/OOM event or resource stop |
+| Complete strict timing and static/policy gates | 0; `recovered-strict-policy.log`, 5.233s; all **26/26** TestSuite modules have actual successful timings (18 earlier unchanged-source modules plus 8 newly built), none over unchanged 300s, slowest 156s; RSS 209,735,680 bytes, cgroup peak 182,743,040 bytes |
+| Final owner/root diagnostics and headline `lean_verify` | 0; `recovered-final-axioms.log`, 70.314s; complete, no errors; only pre-existing binder unused `Int.add_mul` warning; all three audits standard axioms/no warnings; RSS 5,753,061,376 bytes, cgroup peak 3,252,568,064 bytes |
+| Imported exact certificates and recovered loop axiom audit | 0; `recovered-kernel-audit.log`, 8.845s; original KEnc/Leaf/Goal equalities, negative control and recovered loop proof use only `[propext, Classical.choice, Quot.sound]`; RSS 1,565,302,784 bytes, cgroup peak 603,246,592 bytes |
+
+`declaration-profile/complete-timing-coverage.json` lists every required module
+and checks for missing/over-budget entries; the unchanged strict audit also
+checks both combined and recovered logs. Orphans/layers/trust/inventory gates
+remain at 701 reachable/0 orphaned, 153 core/0 elaborator paths, 715 sources/0
+trust findings and 212 unchanged feature classifications. All six original gap
+statements and target certificates are preserved. The other five original gaps
+remain open; no general completeness or profile decision is claimed.
+
+The actual full build closes the former validation blocker. All failed/stopped
+checks remain preserved, including the three prior resource stops and the
+unsuccessful declaration/tight-replay probes. Passing diagnostics do not erase
+those failures. Kernel exact verdict certificates and meaningful controls are
+unchanged; no fresh native decision-search timing or source/compiler/EVM
+coverage is inferred from the cache recovery. Reproducible cleanup/profile
+helpers and measurements are in `declaration-profile/README.md` under the
+external evidence directory. Final independent finder and skeptic read-only reviews found no remaining
+confirmed defects after process-wording and historical-status fixes; neither
+used Lean/server/builds or wrote files. Reports are retained with the evidence;
+temporary configuration is removed before export.
