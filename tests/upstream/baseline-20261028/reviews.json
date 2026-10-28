@@ -1,0 +1,29 @@
+{
+  "mode": "Independent read-only finder and skeptic; neither used a Lean server or wrote files.",
+  "checkpoint": "approved after corrections",
+  "confirmedFixes": [
+    "Full path-string model hash ordering",
+    "Full snapshot/provenance/zero-counter integrity",
+    "Required-mode and invocation-completion guards",
+    "Conservative fresh-run retry selection and source hashes",
+    "Original observations retained across companion modes",
+    "Exact isolated counts14 working/7 broken/1 blocked vs aggregate changes",
+    "First-uncheckpointed policy applies to unfinished modes",
+    "Default artifact path and original cache preservation",
+    "Successful cold fingerprint required before warm",
+    "Own-container stopped before restoring cache"
+  ],
+  "verified": {
+    "archivedRegularFiles": 2141,
+    "bulkObservedEntriesPreserved": 3940,
+    "conclusiveModeVariantsByteIdentical": 1646,
+    "isolatedReports": 22,
+    "partialFeaturesReviewed": 65,
+    "partialFeaturesStillUnmapped": 95
+  },
+  "pending": [
+    "Cold/warm measurement",
+    "95 feature-specific gap mappings"
+  ],
+  "remainingGateFailure": "20 pre-existing documentation citations; final missing list equals before."
+}

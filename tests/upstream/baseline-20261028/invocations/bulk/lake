@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+if [[ " $* " == *" lean "* ]]; then
+  if [[ " $* " == *" -- "* ]]; then
+    exec "$real" -f /workspace/solidity-lean/.baseline-lakefile.toml "$@" -j1
+  else
+    exec "$real" -f /workspace/solidity-lean/.baseline-lakefile.toml "$@" -- -j1
+  fi
+fi
+exec "$real" -f /workspace/solidity-lean/.baseline-lakefile.toml "$@"

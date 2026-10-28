@@ -246,3 +246,23 @@ Every `scope: model` row is `present`, or `partial` with a `gap` that is a
 named proof limit, not a refused shape; every `abstract` row has its
 environment stated; the upstream corpus has no broken row outside the
 excluded families; and the TestSuite gate stays at 0 pending.
+
+## Current-master baseline (2026-10-28)
+
+The fresh baseline starts at `f4dee4a29c2e208b36db4a4161a4723c735cd775`.
+All ten collected cloud snapshots are ancestors; unmerged work is excluded.
+The combined 9,660-fixture report has **4,135 working, 196 broken, 5,329 blocked**.
+Its 1,662 Lean-runtime fixtures have **657 working, 196 broken, 809 blocked**.
+The 3,478 pinned-solc diagnostic agreements are reference evidence, not Lean
+coverage. Every input, required source mode, completed observation and resource
+block is retained in the [new evidence](../tests/upstream/baseline-20261028/README.md).
+The immutable bulk report and 22 isolated follower reports remain separate.
+
+The inventory currently has 212 rows: 13 present, 160 partial, one missing,
+38 not applicable. The new diagnostic index provides reviewed boundaries for
+65 partial rows and explicitly leaves 95 needing feature-specific attribution.
+It does not promote statuses or infer completeness from absent fixtures. The
+manifest/schema is unchanged; generated inventory files remain reproducible.
+
+Cold/warm performance measurement is pending in this branch. This baseline is
+diagnostic evidence, not a universal semantics or lowering-equivalence proof.

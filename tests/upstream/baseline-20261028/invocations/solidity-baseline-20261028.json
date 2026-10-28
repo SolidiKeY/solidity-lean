@@ -1,0 +1,25 @@
+{
+  "state": {
+    "Dead": false,
+    "Error": "",
+    "ExitCode": 0,
+    "FinishedAt": "2026-10-28T00:56:54.350888022Z",
+    "OOMKilled": false,
+    "Paused": false,
+    "Pid": 0,
+    "Restarting": false,
+    "Running": false,
+    "StartedAt": "2026-10-28T00:56:54.185011477Z",
+    "Status": "exited"
+  },
+  "command": [
+    "/bin/bash",
+    "-c",
+    "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; export PATH=/workspace/solidity-lean/.lake/baseline-tools:$PATH; mkdir -p tests/upstream/baseline-20261028/logs; /usr/bin/time -v -o tests/upstream/baseline-20261028/logs/upstream-build.time timeout -k 10 1800 lake build Solidity.Tools.Upstream >tests/upstream/baseline-20261028/logs/upstream-build.log 2>&1; code=$?; echo build_exit=$code; if [ \"$code\" = 0 ]; then /usr/bin/time -v -o tests/upstream/baseline-20261028/logs/corpus.time node scripts/solidity-upstream.mjs run --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --out tests/upstream/baseline-20261028/results >tests/upstream/baseline-20261028/logs/corpus.log 2>&1; echo corpus_exit=$?; fi"
+  ],
+  "imageId": "sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377",
+  "memoryMaxBytes": 12884901888,
+  "memoryAndSwapMaxBytes": 12884901888,
+  "nanoCpus": 1000000000,
+  "user": "1000:1000"
+}

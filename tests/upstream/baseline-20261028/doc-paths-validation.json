@@ -1,0 +1,29 @@
+{
+  "attempts": [
+    {
+      "source": "tests/upstream/baseline-20261028/gates-before/doc-paths-before.log",
+      "compressed": "tests/upstream/baseline-20261028/gates-before/doc-paths-before.log.gz",
+      "uncompressedSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "compressedSha256": "4b7decd4356f0c4cfe26e84d4e0211dd07bfdf654a068f6a256edb7eb903da40",
+      "missingReferences": 20,
+      "exitCode": 1
+    },
+    {
+      "source": "tests/upstream/baseline-20261028/gates-after/doc-paths.log",
+      "compressed": "tests/upstream/baseline-20261028/gates-after/doc-paths-first.log.gz",
+      "uncompressedSha256": "e47b8e3b6dcdce5fa6692ab49051bcc4c33935f3347c90991770ee14797d532e",
+      "compressedSha256": "3464dfeb9065953c1b33c42642ed51d92cf823ff541c011f9a6d3ce4a5eeb6b1",
+      "missingReferences": 33,
+      "exitCode": 1
+    },
+    {
+      "compressed": "tests/upstream/baseline-20261028/gates-after/doc-paths-final.log.gz",
+      "uncompressedSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "compressedSha256": "4b7decd4356f0c4cfe26e84d4e0211dd07bfdf654a068f6a256edb7eb903da40",
+      "missingReferences": 20,
+      "exitCode": 1
+    }
+  ],
+  "reason": "The first new scan recursively cited the preserved plaintext diagnostic log, adding 13 citation locations but no new missing targets. Preserve logs losslessly compressed; historical failures remain failures.",
+  "finalMissingCitationListEqualsBefore": true
+}

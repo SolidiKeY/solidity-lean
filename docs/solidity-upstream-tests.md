@@ -40,7 +40,7 @@ Two different checks have different meanings:
   as working when their diagnostics match. This runs the SHA-pinned **solc
   reference**; it does not demonstrate Lean frontend or interpreter coverage.
 * `lean-runtime` imports the contract through the repository's modern source
-  admission and typed `solc_import`, then compares supported scalar runtime
+  admission and typed `solc_import`, then compares admitted scalar and typed raw-ABI runtime
   vectors with the typed Lean interpreter. Calls retain state in order,
   constructors/initializers run, failed calls roll back, and return values
   are compared as ABI words. Default/explicit `compileViaYul: also` fixtures
@@ -50,11 +50,12 @@ Two different checks have different meanings:
 
 Runtime results are observations, not universal correctness proofs. They do
 not exercise generated solc EVM/SSA code, the repository's EVM compiler, gas
-costs or the upstream C++ EVM host. Unsupported gas/log/revert-data checks,
-aggregate/dynamic/bytes ABI inputs, noncanonical calldata, external host
-behavior and source imports remain blocked rather than being dropped.
-Only empty-data function failures are currently replayed; the model's generic
-panic cannot certify an expected ABI panic code. Loop fuel is 1,000 per loop;
+costs or the upstream C++ EVM host. Unsupported gas/log checks, ABI shapes, noncanonical or lazy calldata
+layouts, external host behavior and source imports remain explicitly blocked
+rather than being dropped. The current integrated adapter retains and compares
+exact return/revert bytes for admitted vectors, including supported custom
+errors and panic codes. A generic panic or resource exhaustion cannot certify
+an expected ABI panic code. Historical reports retain their older adapter scope. Loop fuel is 1,000 per loop;
 exhaustion or a process timeout is blocked, never a matching expected failure.
 Unsupported compiler configurations and EVM-version constraints are likewise
 explicit. Other upstream families (SMT checker, Yul optimizer, AST/NatSpec
@@ -421,3 +422,23 @@ decoder metadata gaps. New results and validation use separate
 `tests/upstream/group10-aggregate-validation.json`; every earlier report and
 export is preserved. Selected fresh replay never certifies retained unrun
 import/profile/host/configuration/resource cases against a changed model.
+
+## Fresh current-master corpus (2026-10-28)
+
+The fresh baseline starts at `f4dee4a29c2e208b36db4a4161a4723c735cd775`.
+All ten collected cloud snapshots are ancestors; unmerged work is excluded.
+The combined 9,660-fixture report has **4,135 working, 196 broken, 5,329 blocked**.
+Its 1,662 Lean-runtime fixtures have **657 working, 196 broken, 809 blocked**.
+The 3,478 pinned-solc diagnostic agreements are reference evidence, not Lean
+coverage. Every input, required source mode, completed observation and resource
+block is retained in the [new evidence](../tests/upstream/baseline-20261028/README.md).
+The immutable bulk report and 22 isolated follower reports remain separate.
+
+The inventory currently has 212 rows: 13 present, 160 partial, one missing,
+38 not applicable. The new diagnostic index provides reviewed boundaries for
+65 partial rows and explicitly leaves 95 needing feature-specific attribution.
+It does not promote statuses or infer completeness from absent fixtures. The
+manifest/schema is unchanged; generated inventory files remain reproducible.
+
+Cold/warm performance measurement is pending in this branch. This baseline is
+diagnostic evidence, not a universal semantics or lowering-equivalence proof.
