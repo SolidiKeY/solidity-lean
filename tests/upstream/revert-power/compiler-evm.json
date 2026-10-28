@@ -1,0 +1,2311 @@
+{
+  "version": 1,
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "scope": "Compiler/EVM evidence only; original upstream expectations preserved, including debug revertStrings. No Lean agreement claimed for settings refused by the importer.",
+  "observations": [
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "cutoff",
+      "args": [],
+      "calldata": "0x54b02ba4",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "multiply",
+      "args": [],
+      "calldata": "0xf3593cd0",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "declaration",
+      "args": [],
+      "calldata": "0xb1a6afd3",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "nestedCode",
+      "args": [],
+      "calldata": "0x7150a077",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "internalCode",
+      "args": [],
+      "calldata": "0x5d5ae1f1",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "narrowCode",
+      "args": [],
+      "calldata": "0x0b572056",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "fit",
+      "args": [],
+      "calldata": "0xc8e13bb4",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "shortcuts",
+      "args": [],
+      "calldata": "0xea270f42",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "uncheckedCode",
+      "args": [],
+      "calldata": "0x7860f3e3",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "rawData",
+      "args": [],
+      "calldata": "0xcdd1897a",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "shortcutFailures",
+      "args": [],
+      "calldata": "0x39f4da49",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "andCode",
+      "args": [],
+      "calldata": "0x3293daef",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "orCode",
+      "args": [],
+      "calldata": "0x8c5d27df",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "ternaryCode",
+      "args": [],
+      "calldata": "0x4a59a928",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "indexCode",
+      "args": [],
+      "calldata": "0xaee52235",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "priority",
+      "args": [
+        "18"
+      ],
+      "calldata": "0xa5a686840000000000000000000000000000000000000000000000000000000000000012",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "nestedPriorityCode",
+      "args": [
+        "17"
+      ],
+      "calldata": "0x4ae6407b0000000000000000000000000000000000000000000000000000000000000011",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "nestedPriorityCode",
+      "args": [
+        "18"
+      ],
+      "calldata": "0x4ae6407b0000000000000000000000000000000000000000000000000000000000000012",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "priority",
+      "args": [
+        "1"
+      ],
+      "calldata": "0xa5a686840000000000000000000000000000000000000000000000000000000000000001",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "wrongCode",
+      "args": [],
+      "calldata": "0xaf7d5002",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "wrongRaw",
+      "args": [],
+      "calldata": "0xdaa0b19c",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "indexPower",
+      "args": [
+        "2",
+        "256"
+      ],
+      "calldata": "0xcecbd27f00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000100",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "indexBase",
+      "args": [
+        "2",
+        "256"
+      ],
+      "calldata": "0x6322dc4e00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000100",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000032",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000032"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "2",
+        "256"
+      ],
+      "calldata": "0xc04f01fc00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000100",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "57896044618658097711785492504343953926634992332820282019728792003956564819968",
+        "2"
+      ],
+      "calldata": "0xc04f01fc80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "2",
+        "255"
+      ],
+      "calldata": "0xc04f01fc000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000ff",
+      "failure": false,
+      "expected": "0x8000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x8000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "0",
+        "0"
+      ],
+      "calldata": "0xc04f01fc00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "0",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      ],
+      "calldata": "0xc04f01fc0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "1",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      ],
+      "calldata": "0xc04f01fc0000000000000000000000000000000000000000000000000000000000000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "cutoff",
+      "args": [],
+      "calldata": "0x54b02ba4",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "multiply",
+      "args": [],
+      "calldata": "0xf3593cd0",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "declaration",
+      "args": [],
+      "calldata": "0xb1a6afd3",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "nestedCode",
+      "args": [],
+      "calldata": "0x7150a077",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "internalCode",
+      "args": [],
+      "calldata": "0x5d5ae1f1",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "narrowCode",
+      "args": [],
+      "calldata": "0x0b572056",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "fit",
+      "args": [],
+      "calldata": "0xc8e13bb4",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "shortcuts",
+      "args": [],
+      "calldata": "0xea270f42",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "uncheckedCode",
+      "args": [],
+      "calldata": "0x7860f3e3",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "rawData",
+      "args": [],
+      "calldata": "0xcdd1897a",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "shortcutFailures",
+      "args": [],
+      "calldata": "0x39f4da49",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "andCode",
+      "args": [],
+      "calldata": "0x3293daef",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "orCode",
+      "args": [],
+      "calldata": "0x8c5d27df",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "ternaryCode",
+      "args": [],
+      "calldata": "0x4a59a928",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "indexCode",
+      "args": [],
+      "calldata": "0xaee52235",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "priority",
+      "args": [
+        "1"
+      ],
+      "calldata": "0xa5a686840000000000000000000000000000000000000000000000000000000000000001",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "nestedPriorityCode",
+      "args": [
+        "18"
+      ],
+      "calldata": "0x4ae6407b0000000000000000000000000000000000000000000000000000000000000012",
+      "failure": false,
+      "expected": "0x",
+      "actual": "0x"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "nestedPriorityCode",
+      "args": [
+        "17"
+      ],
+      "calldata": "0x4ae6407b0000000000000000000000000000000000000000000000000000000000000011",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "priority",
+      "args": [
+        "18"
+      ],
+      "calldata": "0xa5a686840000000000000000000000000000000000000000000000000000000000000012",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "wrongCode",
+      "args": [],
+      "calldata": "0xaf7d5002",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "wrongRaw",
+      "args": [],
+      "calldata": "0xdaa0b19c",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "indexPower",
+      "args": [
+        "2",
+        "256"
+      ],
+      "calldata": "0xcecbd27f00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000100",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "indexBase",
+      "args": [
+        "2",
+        "256"
+      ],
+      "calldata": "0x6322dc4e00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000100",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000032",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000032"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "2",
+        "256"
+      ],
+      "calldata": "0xc04f01fc00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000100",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "57896044618658097711785492504343953926634992332820282019728792003956564819968",
+        "2"
+      ],
+      "calldata": "0xc04f01fc80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002",
+      "failure": true,
+      "expected": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+      "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "2",
+        "255"
+      ],
+      "calldata": "0xc04f01fc000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000ff",
+      "failure": false,
+      "expected": "0x8000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x8000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "0",
+        "0"
+      ],
+      "calldata": "0xc04f01fc00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "0",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      ],
+      "calldata": "0xc04f01fc0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "tests/solc/SelfPowerData.sol",
+      "sourceSha256": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "power",
+      "args": [
+        "1",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      ],
+      "calldata": "0xc04f01fc0000000000000000000000000000000000000000000000000000000000000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "onlyPanic(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0x2c66b6c8000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000006",
+      "failure": false,
+      "expected": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "onlyPanic(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0x2c66b6c8000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000007",
+      "failure": false,
+      "expected": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011",
+      "actual": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "onlyPanic(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0x2c66b6c8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000006",
+      "failure": true,
+      "expected": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "onlyPanic(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0x2c66b6c8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000007",
+      "failure": true,
+      "expected": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "panicAndError(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0xd7f933fb000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000006",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "panicAndError(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0xd7f933fb000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000007",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "panicAndError(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0xd7f933fb000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000006",
+      "failure": false,
+      "expected": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000",
+      "actual": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "panicAndError(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0xd7f933fb000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000007",
+      "failure": false,
+      "expected": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000",
+      "actual": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "onlyPanic(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0x2c66b6c8000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000006",
+      "failure": false,
+      "expected": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "onlyPanic(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0x2c66b6c8000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000007",
+      "failure": false,
+      "expected": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011",
+      "actual": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "onlyPanic(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0x2c66b6c8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000006",
+      "failure": true,
+      "expected": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "onlyPanic(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0x2c66b6c8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000007",
+      "failure": true,
+      "expected": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "panicAndError(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0xd7f933fb000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000006",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "panicAndError(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0xd7f933fb000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000007",
+      "failure": false,
+      "expected": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "panicAndError(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0xd7f933fb000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000006",
+      "failure": false,
+      "expected": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000",
+      "actual": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "sourceSha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "panicAndError(bool,uint256,uint256)",
+      "args": [],
+      "calldata": "0xd7f933fb000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000007",
+      "failure": false,
+      "expected": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000",
+      "actual": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000076661696c75726500000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "sourceSha256": "9657df120c4abcc5970b4122dc6f271a9086c50b80e65cd18d749cb3ca753109",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "debug": {
+          "revertStrings": "debug"
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "f()",
+      "args": [],
+      "calldata": "0x26121ff0",
+      "failure": true,
+      "expected": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "sourceSha256": "9657df120c4abcc5970b4122dc6f271a9086c50b80e65cd18d749cb3ca753109",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "debug": {
+          "revertStrings": "debug"
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "g(string)",
+      "args": [],
+      "calldata": "0xe6d020960000000000000000000000000000000000000000000000000000000000000000",
+      "failure": true,
+      "expected": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "sourceSha256": "9657df120c4abcc5970b4122dc6f271a9086c50b80e65cd18d749cb3ca753109",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "debug": {
+          "revertStrings": "debug"
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "g(string)",
+      "args": [],
+      "calldata": "0xe6d02096000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "failure": true,
+      "expected": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "sourceSha256": "9657df120c4abcc5970b4122dc6f271a9086c50b80e65cd18d749cb3ca753109",
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "debug": {
+          "revertStrings": "debug"
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "g(string)",
+      "args": [],
+      "calldata": "0xe6d0209600000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "failure": true,
+      "expected": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "sourceSha256": "9657df120c4abcc5970b4122dc6f271a9086c50b80e65cd18d749cb3ca753109",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "debug": {
+          "revertStrings": "debug"
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "f()",
+      "args": [],
+      "calldata": "0x26121ff0",
+      "failure": true,
+      "expected": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "sourceSha256": "9657df120c4abcc5970b4122dc6f271a9086c50b80e65cd18d749cb3ca753109",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "debug": {
+          "revertStrings": "debug"
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "g(string)",
+      "args": [],
+      "calldata": "0xe6d020960000000000000000000000000000000000000000000000000000000000000000",
+      "failure": true,
+      "expected": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "sourceSha256": "9657df120c4abcc5970b4122dc6f271a9086c50b80e65cd18d749cb3ca753109",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "debug": {
+          "revertStrings": "debug"
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "g(string)",
+      "args": [],
+      "calldata": "0xe6d02096000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "failure": true,
+      "expected": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "sourceSha256": "9657df120c4abcc5970b4122dc6f271a9086c50b80e65cd18d749cb3ca753109",
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "cancun",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "debug": {
+          "revertStrings": "debug"
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "signature": "g(string)",
+      "args": [],
+      "calldata": "0xe6d0209600000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "failure": true,
+      "expected": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000",
+      "actual": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

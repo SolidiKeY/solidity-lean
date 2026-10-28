@@ -1,0 +1,30 @@
+CGROUP_MAX=12884901888 SWAP_MAX=0
+missing:   Solidity/Eqns.lean cites `Mathlib/Tactic/Eqns.lean`
+ambiguous: Solidity/Examples/Notation.lean cites `RuleSyntax.lean` (2 files share that name)
+ambiguous: scripts/latex-chains.sh cites `Storage.lean` (3 files share that name)
+ambiguous: tests/upstream/group03-validation.json cites `Decide.lean` (2 files share that name)
+missing:   tests/upstream/group03-validation.json cites `Main.lean`
+ambiguous: tests/upstream/group03-validation.json cites `Problems.lean` (2 files share that name)
+ambiguous: tests/upstream/group03-validation.json cites `ProofTree.lean` (4 files share that name)
+ambiguous: tests/upstream/group03-validation.json cites `Storage.lean` (3 files share that name)
+missing:   tests/upstream/group03-validation.json cites `Widget.lean`
+missing:   tests/upstream/group03-validation.json cites `lakefile.lean`
+missing:   tests/upstream/group03-validation.json cites `test/basic.lean`
+missing:   tests/upstream/group03-validation.json cites `test/subscript.lean`
+missing:   tests/upstream/group03-validation.json cites `test/widget_basic.lean`
+missing:   tests/upstream/group10-validation.json cites `Cslib/Foundations/Logic/InferenceSystem.lean`
+missing:   tests/upstream/group10-validation.json cites `Cslib/Foundations/Logic/LogicalEquivalence.lean`
+missing:   tests/upstream/group10-validation.json cites `Cslib/Foundations/Syntax/Congruence.lean`
+missing:   tests/upstream/group10-validation.json cites `Cslib/Foundations/Syntax/Context.lean`
+missing:   tests/upstream/group10-validation.json cites `Cslib/Logics/Propositional/Defs.lean`
+missing:   tests/upstream/group10-validation.json cites `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean`
+missing:   tests/upstream/group10-validation.json cites `Main.lean`
+missing:   tests/upstream/group10-validation.json cites `Mathlib/Tactic/Eqns.lean`
+missing:   tests/upstream/group10-validation.json cites `Widget.lean`
+missing:   tests/upstream/group10-validation.json cites `lakefile.lean`
+missing:   tests/upstream/group10-validation.json cites `test/basic.lean`
+missing:   tests/upstream/group10-validation.json cites `test/subscript.lean`
+missing:   tests/upstream/group10-validation.json cites `test/widget_basic.lean`
+
+FAIL: 20 reference(s) name a file that does not exist.
+CGROUP_PEAK_BYTES=7122944 ELAPSED_SECONDS=5 EXIT=1

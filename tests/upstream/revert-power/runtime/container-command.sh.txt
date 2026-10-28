@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source /workspace/.setup/activate.sh
+export LEAN_NUM_THREADS=1
+export PATH=/workspace/solidity-lean/.lake/revert-task/bin:$PATH
+export SOLKEY_RULES=/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
+exec "$@"

@@ -1,0 +1,3 @@
+some (Solidity.THalt.panic)
+"try address(address(this)).nested(2, 256) returns (uint se1) { assert(false); } catch Error(string memory) { assert(false); } catch Panic(uint se2) { assert(se2 == 17); } catch { assert(false); }"
+{"command": ["lake", "env", "lean", "-j1", "--tstack=131072", ".lake/revert-task/Probe.lean"], "exit": 0, "elapsed": 8.215701076000187, "peak_group_rss": 860864512}

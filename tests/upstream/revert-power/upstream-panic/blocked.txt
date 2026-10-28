@@ -1,0 +1,1 @@
+test/libsolidity/semanticTests/tryCatch/panic.sol	lean-runtime	transaction/block/self-address or cross-contract host behavior not adapted

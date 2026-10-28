@@ -1,0 +1,26 @@
+⚠ [2/8] Built Solidity.AST (12s)
+warning: Solidity/AST.lean:354:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [3/10] Built Solidity.SpecSyntax (2.8s)
+✔ [4/11] Built Solidity.Syntax.Raw (6.1s)
+✔ [5/11] Built Solidity.Scope (2.6s)
+✔ [6/11] Built Solidity.Syntax.Grammar (15s)
+✔ [7/11] Built Solidity.Syntax.Contract (11s)
+✔ [8/15] Built Solidity.Syntax (896ms)
+✔ [9/15] Built Solidity.Syntax.Scoped (13s)
+✔ [11/17] Built Solidity.Syntax.Join (855ms)
+✔ [13/17] Built Solidity.Syntax.Numeric (1.0s)
+✔ [14/19] Built Solidity.Syntax.Checked (3.8s)
+✔ [15/20] Built Solidity.Syntax.Elab.Context (13s)
+✔ [16/20] Built Solidity.ERC7201 (752ms)
+✔ [18/22] Built Solidity.Syntax.Elab.Values (21s)
+✔ [19/22] Built Solidity.Syntax.Elab.Lower (10s)
+⚠ [20/22] Built Solidity.Syntax.Elab.Arms (82s)
+warning: Solidity/Syntax/Elab/Arms.lean:1354:11: unused variable `n`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [21/22] Built Solidity.Syntax.Elab.Stmt (8.1s)
+✔ [22/22] Built Solidity.Syntax.Elab (1.2s)
+Build completed successfully (22 jobs).
+{"command": ["lake", "-f", "lakefile.revert-task.toml", "build", "Solidity.Syntax.Elab"], "exit": 0, "elapsed": 209.274901483, "peak_group_rss": 1075613696}

@@ -1,0 +1,3 @@
+none
+none
+{"command": ["lake", "env", "lean", "-j1", "--tstack=131072", ".lake/revert-task/Before.lean"], "exit": 0, "elapsed": 2.35001777399998, "peak_group_rss": 801828864}

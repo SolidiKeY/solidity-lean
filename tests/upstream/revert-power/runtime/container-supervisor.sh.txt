@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+started=$SECONDS
+printf 'CGROUP_MAX=%s SWAP_MAX=%s\n' "$(cat /sys/fs/cgroup/memory.max)" "$(cat /sys/fs/cgroup/memory.swap.max)"
+timeout --kill-after=5s 1800 /bin/bash /workspace/solidity-lean/.lake/revert-task/container-command.sh "$@"
+result=$?
+printf 'CGROUP_PEAK_BYTES=%s ELAPSED_SECONDS=%s EXIT=%s\n' "$(cat /sys/fs/cgroup/memory.peak)" "$((SECONDS-started))" "$result"
+exit "$result"

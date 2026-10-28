@@ -844,6 +844,8 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Latex.lean` | Both LaTeX backends pinned: formulas, judgements, line breaking, proved chains, a derivation with the filter, `tests/solc/FixedLength.sol`'s obligation and derivation, the symbol table's coverage, definition links. |
 | `Examples/Tactics/ProgramTrace.lean` | Checked program traces: capture order, read continuations, JSON rows, parameters, kernel submission, budget failure. |
 
+| `Examples/Tactics/SelfPowerData.lean` | Both-pipeline concrete kernel executions for unsigned-power panic bytes in ordinary self-call frames, conditional/index ordering, rollback and negative expectations. |
+
 At the root, the notation's own tests:
 
 | Module | What it shows |

@@ -87,8 +87,11 @@ partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
 operand's effects or explicit overflow guards. -/
 partial def hoistPair (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) := do
   let (P, first) ← hoist first
-  let (Pc, first) ← captureBefore C first [last]
-  let (Q, last) ← if last.hasIncDec || last.hasIdxLen || last.hasCast || hasNarrow C (← ctx) last
+  let powerData := powerDataNeeded C (← read) (← ctx) last
+  -- Expanding a pure later power inserts failing guards too. Evaluate the
+  -- earlier operand before those guards, even when neither operand writes.
+  let (Pc, first) ← if powerData then captureExpr C first else captureBefore C first [last]
+  let (Q, last) ← if last.hasIncDec || last.hasIdxLen || last.hasCast || hasNarrow C (← ctx) last || powerData
     then hoist last else pure ([], last)
   pure (P ++ Pc ++ Q, first, last)
 
@@ -104,8 +107,13 @@ checks its narrow width after the write (`narrowPost`). -/
 partial def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let e ← e.foldConst
   match e with
-  | .binop op a b =>
-    if op.shortCircuits || (op == .pow && (← read).retainFailureData) then
+  | .binop op a b => do
+    let sc ← read
+    -- Only the newly enabled unsigned self-frame route uses the expansion.
+    -- Signed, unchecked and explicit checking modes keep their old captures.
+    let selfPower := sc.selfFrame && !sc.unchecked && sc.overflow.isNone &&
+      (intTyOf C (← ctx) a).all (fun (p, _) => p == .uint)
+    if op.shortCircuits || (op == .pow && (sc.retainFailureData || selfPower)) then
       hoist (.binop op a b)
     else hoistBinop op a b
   | .unop op a => do

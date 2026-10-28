@@ -1,0 +1,19 @@
+CGROUP_MAX=12884901888 SWAP_MAX=0
++ test -f tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
++ sha256sum tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
+02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb  tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
++ bash -x scripts/check-solkey.sh --key /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
++ set -euo pipefail
++++ dirname scripts/check-solkey.sh
+++ cd scripts/..
+++ pwd
++ repo_root=/workspace/solidity-lean
++ cd /workspace/solidity-lean
++ export PATH=/workspace/solidity-lean/scripts/lean-vscode/bin:/workspace/solidity-lean/.lake/revert-task/bin:/workspace/.setup/tools/lean-4.24.0-linux/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback
++ PATH=/workspace/solidity-lean/scripts/lean-vscode/bin:/workspace/solidity-lean/.lake/revert-task/bin:/workspace/.setup/tools/lean-4.24.0-linux/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback
++ rm -f -- ./.lake/build/bin/solkeycheck
++ lake build solkeycheck
++ exec ./.lake/build/bin/solkeycheck --key /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
+solkeycheck: parsed 377 taclets, 131 read-bearing, table covers 131
+solkeycheck: OK — annotations match /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
+CGROUP_PEAK_BYTES=379518976 ELAPSED_SECONDS=0 EXIT=0

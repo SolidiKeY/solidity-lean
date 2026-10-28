@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "$#" -eq 1 ] && [ "$1" = --version ]; then
+  exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake --version
+fi
+for arg in "$@"; do
+  if [ "$arg" = serve ]; then
+    exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake -f /workspace/solidity-lean/lakefile.revert-task.toml "$@" -j1
+  fi
+done
+exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake -f /workspace/solidity-lean/lakefile.revert-task.toml "$@"

@@ -1,0 +1,27 @@
+import Solidity.Frontend.Import
+import Solidity.Semantics.RunFuel
+solc_import "../../tests/solc/SelfPowerData.legacy.ast.json" hash 0x7a70c1359061adec as ConditionalLegacy.SelfPowerData testing
+solc_import "../../tests/solc/SelfPowerData.viaIR.ast.json" hash 0xbb1ca579b2c9db53 as ConditionalIR.SelfPowerData testing
+open Solidity
+namespace Legacy
+def initial : State ConditionalLegacy.SelfPowerData [] := {State.init _ with tx := {selfAddress := ⟨7,rfl⟩}}
+def andCodeP := sol[ConditionalLegacy.SelfPowerData]{andCode();}
+#eval (andCodeP.runF 1000 initial).halt?
+def orCodeP := sol[ConditionalLegacy.SelfPowerData]{orCode();}
+#eval (orCodeP.runF 1000 initial).halt?
+def ternaryCodeP := sol[ConditionalLegacy.SelfPowerData]{ternaryCode();}
+#eval (ternaryCodeP.runF 1000 initial).halt?
+def indexCodeP := sol[ConditionalLegacy.SelfPowerData]{indexCode();}
+#eval (indexCodeP.runF 1000 initial).halt?
+end Legacy
+namespace IR
+def initial : State ConditionalIR.SelfPowerData [] := {State.init _ with tx := {selfAddress := ⟨7,rfl⟩}}
+def andCodeP := sol[ConditionalIR.SelfPowerData]{andCode();}
+#eval (andCodeP.runF 1000 initial).halt?
+def orCodeP := sol[ConditionalIR.SelfPowerData]{orCode();}
+#eval (orCodeP.runF 1000 initial).halt?
+def ternaryCodeP := sol[ConditionalIR.SelfPowerData]{ternaryCode();}
+#eval (ternaryCodeP.runF 1000 initial).halt?
+def indexCodeP := sol[ConditionalIR.SelfPowerData]{indexCode();}
+#eval (indexCodeP.runF 1000 initial).halt?
+end IR
