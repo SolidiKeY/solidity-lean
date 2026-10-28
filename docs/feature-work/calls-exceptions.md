@@ -226,3 +226,30 @@ Exact commands, per-fixture outcomes, hashes, axiom sets, resource measurements,
 shared edits and remaining scope are in the
 [new handoff](../../tests/upstream/revert-power/README.md) and its
 [validation record](../../tests/upstream/revert-power/validation.json).
+
+
+**Targeted library completion (2026-10-28, after `093819c1`).** Cache-only
+rehashing isolated six unfinished jobs: `Decision`, its three direct example
+dependents, the stale `Solidity` root and the library default facet. All 309
+Decision dependency jobs were current. Timing instrumentation identified
+compiled verdict batches costing 186, 149 and 88.5 seconds; profiler messages
+polluted 35 guarded-message checks, so that diagnostic remains a failed run.
+Removing only instrumentation preserved every guard and allowed the unchanged
+`Decision` target to pass (1043 seconds, peak 5,631,021,056 bytes). The remaining
+explicit targets plus the library passed in 207 seconds; a final rehashed
+`--no-build` check confirmed all 686 default jobs current. No evaluation-sharing
+repair, general closer work or Lean source edit was needed. Every command kept
+the 1800-second bound, serial Lean and hard 12 GiB/no-swap cap, with a measured
+16 GiB outer cgroup and 4 GiB margin.
+
+The prior independent TestSuite and frozen-sort passes were retained without
+rerunning them. All five historical whole-script timeouts remain nonpassing;
+there is no claim that one cold whole-script invocation fits the time window.
+Finder and skeptic independently reviewed the exact logs, source/artifact/config
+hashes, timing failures and gate composition without Lean checks or a server;
+neither found a confirmed defect. The full step-4 feature scope remains partial,
+including signed-overflow bytes, allocation `0x41`, and explicit revertStrings
+settings. The [targeted continuation record](../../tests/upstream/revert-power/library-continuation.json)
+and [current handoff](../../tests/upstream/revert-power/README.md) distinguish
+current gate success from historical blocked evidence. This document's preceding
+checkpoint is preserved verbatim alongside those records for its original hash.

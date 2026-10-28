@@ -1,0 +1,342 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-28T13:53:31.652472+00:00",
+  "repository": "SolidiKeY/solidity-lean",
+  "branch": "codex/revert-payload-settings",
+  "evidenceBaseCommit": "093819c1b50d792a43c0596d09730d38a92a47eb",
+  "implementationCommit": "64bfd02e4f6388ac022c5189a33273e18ed834c3",
+  "environmentId": "ccarenv_b64_Y2NhcmVudl8wNTZhOGYxMGU5NDQ4MTkxYmRlZDcwMmU3MzlhMDNkZg",
+  "runtime": {
+    "environmentId": "ccarenv_b64_Y2NhcmVudl8wNTZhOGYxMGU5NDQ4MTkxYmRlZDcwMmU3MzlhMDNkZg",
+    "activation": "/workspace/.setup/activate.sh",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "hardMemoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "threads": 1,
+    "leanFlag": "-j1",
+    "commandTimeBoundSeconds": 1800,
+    "dockerImage": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+    "sameAttachedCheckoutAndToolchain": true
+  },
+  "status": "Default library completed by targeted verified-cache continuation; all default targets rehashed current. Feature step4 remains partial. Historical combined-script attempts remain nonpassing.",
+  "unfinishedJobsAtStart": [
+    "Solidity.Examples.Decision",
+    "Solidity.Examples.DecisionKInt",
+    "Solidity.Examples.DecisionMemory",
+    "Solidity.Examples.DecisionArrays",
+    "Solidity (root module)",
+    "solidity-lean/Solidity:default (library facet)"
+  ],
+  "cacheDiagnosis": {
+    "missingOleansAtStart": [
+      "Solidity.Examples.Decision",
+      "Solidity.Examples.DecisionKInt",
+      "Solidity.Examples.DecisionMemory",
+      "Solidity.Examples.DecisionArrays"
+    ],
+    "staleRootOleanExistedAtStart": true,
+    "decisionImportsCurrentBeforeChecking": true,
+    "dependencyCheckJobCount": 309,
+    "noBuildRefusalDoesNotPassGate": true,
+    "cacheOnlyRanPlaceholdersDoNotPassGate": true
+  },
+  "performance": {
+    "sourcePath": "Solidity/Examples/Decision.lean",
+    "sourceSha256": "2a967b234486863eb1b01adb5708bf8c7b22bff05a6bd3b0bb4656a1cbc20d9d",
+    "sourceEqualsStartingMaster": true,
+    "profileExit": 1,
+    "profileGuardMismatchCount": 35,
+    "profileFailureExplanation": "Only diagnostic timing info polluted #guard_msgs. No guards or expected output changed; original target was then checked without instrumentation. Profile run is failed diagnostic evidence, not a passing build.",
+    "topMeasuredEvents": [
+      {
+        "seconds": 186.0,
+        "sourceLine": 780,
+        "sourceColumn": 0,
+        "kind": "interpretation of _eval",
+        "sourceText": "#eval [gapLedgerWrite, ledgerWriteOk, payBalanceOk, payBalanceBad].map verdict"
+      },
+      {
+        "seconds": 149.0,
+        "sourceLine": 910,
+        "sourceColumn": 15,
+        "kind": "interpretation of _eval",
+        "sourceText": "#guard_msgs in #eval [gapIntDiv, gapIntMod, gapOr, gapXor, gapAnd, gapPow, gapMulW].map verdict"
+      },
+      {
+        "seconds": 88.5,
+        "sourceLine": 810,
+        "sourceColumn": 0,
+        "kind": "interpretation of _eval",
+        "sourceText": "#eval [gapColumn, gapTwoPaths, gapBoolKeyed, gapStructValue, gapPartialGuard, gapPositiveForall].map verdict"
+      },
+      {
+        "seconds": 53.6,
+        "sourceLine": 346,
+        "sourceColumn": 15,
+        "kind": "interpretation of _eval",
+        "sourceText": "#guard_msgs in #eval verdict netSwap"
+      },
+      {
+        "seconds": 50.4,
+        "sourceLine": 966,
+        "sourceColumn": 0,
+        "kind": "type checking",
+        "sourceText": "theorem gapThreeKinds_covered : gapThreeKinds.hashCovered = true := by decide +kernel"
+      },
+      {
+        "seconds": 47.3,
+        "sourceLine": 972,
+        "sourceColumn": 0,
+        "kind": "type checking",
+        "sourceText": "theorem gapMixedPairs_covered : gapMixedPairs.hashCovered = true := by decide +kernel"
+      },
+      {
+        "seconds": 35.7,
+        "sourceLine": 967,
+        "sourceColumn": 0,
+        "kind": "type checking",
+        "sourceText": "theorem gapMixedKinds_covered : gapMixedKinds.hashCovered = true := by decide +kernel"
+      },
+      {
+        "seconds": 18.7,
+        "sourceLine": 940,
+        "sourceColumn": 15,
+        "kind": "interpretation of _eval",
+        "sourceText": "#guard_msgs in #eval verdict intOr"
+      },
+      {
+        "seconds": 16.6,
+        "sourceLine": 1037,
+        "sourceColumn": 15,
+        "kind": "interpretation of _eval",
+        "sourceText": "#guard_msgs in #eval verdict writeKeep"
+      },
+      {
+        "seconds": 9.29,
+        "sourceLine": 295,
+        "sourceColumn": 15,
+        "kind": "interpretation of _eval",
+        "sourceText": "#guard_msgs in #eval [divOk, divBad, modOk, modBad, shrOk, shrInt, shrIntBad].map verdict"
+      },
+      {
+        "seconds": 8.12,
+        "sourceLine": 398,
+        "sourceColumn": 15,
+        "kind": "interpretation of _eval",
+        "sourceText": "#guard_msgs in #eval [rowApf, rowBad, rowOut, rowVar].map verdict"
+      },
+      {
+        "seconds": 7.13,
+        "sourceLine": 956,
+        "sourceColumn": 0,
+        "kind": "elaboration",
+        "sourceText": "/-- info: [\"unknown\", \"unknown\"] -/"
+      }
+    ],
+    "historyInspected": "0cd7a473 certified sortedLe replay and quantCovered shortcut; existing Elab.async=false avoids stack overflow. All retained.",
+    "sharingBoundary": "Compiled verdict batches inside Examples.Decision (ledger/operator/mapping batches) and repeated kernel coverage checks; imports already current. No core representation or general closer change.",
+    "repair": "None. Original target passes within1043seconds and downstream library within207seconds under unchanged1800second per-command limits."
+  },
+  "artifacts": [
+    {
+      "module": "Solidity.Examples.Decision",
+      "sourcePath": "Solidity/Examples/Decision.lean",
+      "sourceSha256": "2a967b234486863eb1b01adb5708bf8c7b22bff05a6bd3b0bb4656a1cbc20d9d",
+      "oleanSha256": "379ee2deb4cb86f2af1adefe67415027920ef9e4d6be80aaa2ac2d46aac86ab6",
+      "traceSha256": "8c9366755ac5984dd94614ca33d6135cf5e002a32d7513ce141a93d7ceb73818"
+    },
+    {
+      "module": "Solidity.Examples.DecisionKInt",
+      "sourcePath": "Solidity/Examples/DecisionKInt.lean",
+      "sourceSha256": "de6fdc450013c30a95808a1d0ce708649d7b8e633085f5f4d05ec61789b2b350",
+      "oleanSha256": "502b89c89fbafaee574358de963366f2188613f5458944370c104210f2dad794",
+      "traceSha256": "4a1553f47332e85e7316d2dc3e1cae37ee8b290fa34cc43bab997353c49c5894"
+    },
+    {
+      "module": "Solidity.Examples.DecisionMemory",
+      "sourcePath": "Solidity/Examples/DecisionMemory.lean",
+      "sourceSha256": "38c85e4d87a21a4940a92ea30e22f2a42aa99710b4beb9d391386127fbcedac5",
+      "oleanSha256": "86b6c244affc47f8bceae003612cecbdfd320c402d77ec36e11a9bd4d39ca676",
+      "traceSha256": "0a19716b9d9e8e359dc4869729eccdfafa6250bde8793b3a1173bff584015a80"
+    },
+    {
+      "module": "Solidity.Examples.DecisionArrays",
+      "sourcePath": "Solidity/Examples/DecisionArrays.lean",
+      "sourceSha256": "bc14e9069f95b98a11c61d3c5c9629d1e757cc8b6db63561a0758ba122e03d2f",
+      "oleanSha256": "02f9fb10fc927439086dc82458112691336e8ac9d52d1c487de9dcb68ae093e7",
+      "traceSha256": "71d3935dcee247a4e3a9561f64b8f6cc4f3946f66fbe7f53f74942cc954cfc1c"
+    },
+    {
+      "module": "Solidity",
+      "sourcePath": "Solidity.lean",
+      "sourceSha256": "ff6e5fe52cedc780fb172e6ac92bfd59026dd9bde8594a26d9bf0231a0a4026e",
+      "oleanSha256": "9cae968b7a52e821f758591ab8c644f9b7c884546c5230f61227f0de1052a9d7",
+      "traceSha256": "89e6108c4bccde6da8a3472e4c5417ed7ac8fb72295f1a22287912cb9139e884"
+    }
+  ],
+  "headroom": {
+    "outerCgroupMemoryMaxBytes": 17179869184,
+    "hardBuildMemoryMaxBytes": 12884901888,
+    "reservedMarginBytes": 4294967296,
+    "outerMemoryCurrentBytesAtFinalCollection": 1831882752,
+    "outerAvailableBytesAtFinalCollection": 15347986432,
+    "hostMemAvailableBytesAtFinalCollection": 18028482560,
+    "duringInitialTargetOuterMemoryCurrentObservedBytes": 2642964480,
+    "duringInitialTargetOuterMaxObservedBytes": 17179869184,
+    "swapMaxBytes": 0,
+    "onlyOneHeavyWorker": true
+  },
+  "checks": [
+    {
+      "command": "lake --rehash --no-build --verbose build",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/default-cache-diagnosis.log",
+      "sha256": "83c75af41349e81c4581e3ee9b277e9593035490cce95f0c44e3cbb7d4679853",
+      "exitCode": 3,
+      "elapsedSeconds": 0,
+      "peakCgroupBytes": 43118592,
+      "status": "expected_stale_cache_refusal"
+    },
+    {
+      "command": "lake --rehash --no-build build Solidity.Examples.Decision:deps",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/decision-deps-current.log",
+      "sha256": "6e999ad418f2ed0925e227aa2b9d9dece2d415ed43b2d363aa423a5323a50327",
+      "exitCode": 0,
+      "elapsedSeconds": 1,
+      "peakCgroupBytes": 40382464,
+      "status": "passed"
+    },
+    {
+      "command": "lake --verbose build Solidity.Examples.Decision (temporary weakLeanArgs adds -Dprofiler=true)",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/decision-target-profile.log",
+      "sha256": "9eb0cc965060741af2e9369a1d334a70b9062982134a51602ec079657861e192",
+      "exitCode": 1,
+      "elapsedSeconds": 994,
+      "peakCgroupBytes": 6459219968,
+      "status": "failed_diagnostic_profiler_messages_polluted_guards"
+    },
+    {
+      "command": "lake build Solidity.Examples.Decision",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/decision-target-original.log",
+      "sha256": "2e82f6afb88e00e75df49597d0f1ee8e459a52c9f94e53d8f2b5a07644fa5497",
+      "exitCode": 0,
+      "elapsedSeconds": 1043,
+      "peakCgroupBytes": 5631021056,
+      "status": "passed"
+    },
+    {
+      "command": "lake --rehash --no-build build Solidity.Examples.Decision",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/decision-now-current.log",
+      "sha256": "e18e89e26bfd6bcf19dd0b2d96b44dc79e7da5a5bd00179ba6c473351f107d9c",
+      "exitCode": 0,
+      "elapsedSeconds": 1,
+      "peakCgroupBytes": 38100992,
+      "status": "passed"
+    },
+    {
+      "command": "lake build Solidity.Examples.DecisionKInt Solidity.Examples.DecisionMemory Solidity.Examples.DecisionArrays Solidity",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/remaining-library-targets.log",
+      "sha256": "b4523297b56b75dcce422ac4fe283d7138857b47bb013be8ed9717e44f1310a0",
+      "exitCode": 0,
+      "elapsedSeconds": 207,
+      "peakCgroupBytes": 1099825152,
+      "status": "passed"
+    },
+    {
+      "command": "lake --rehash --no-build build",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/default-cache-complete.log",
+      "sha256": "eb34315e78fcc06505604c69fdda28b6a5b280ec4c3cca9341482d16d4081d7d",
+      "exitCode": 0,
+      "elapsedSeconds": 1,
+      "peakCgroupBytes": 38117376,
+      "status": "passed"
+    },
+    {
+      "command": "bash -c \"set -ex; node scripts/check-layers.mjs; node scripts/check-orphans.mjs; node scripts/check-automatic.mjs --strict; bash scripts/check-trust.sh; python3 scripts/solidity-feature-audit.py --check\"",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/library-continuation-static.log",
+      "sha256": "2d131c07727e1e03c17da7389e5ee37c01cb3a9a069848f76d9d32ae7b78c0ed",
+      "exitCode": 0,
+      "elapsedSeconds": 8,
+      "peakCgroupBytes": 170602496,
+      "status": "passed"
+    }
+  ],
+  "terminalGateEvidence": {
+    "Decision": "exit0,309jobs,1043seconds",
+    "remainingLibrary": "exit0,676jobs,207seconds,Solidity root built",
+    "defaultTargetsFreshness": "exit0,686jobs,alltargets rehashed up-to-date; --no-build forbids stale compilation",
+    "SolkeyTestSuite": "Prior093819c1 passing259jobs result retained; not rerun",
+    "frozenSorts": "Prior093819c1 explicit frozen-file pass retained; not rerun",
+    "runLeanScript": "Not rerun; five historical whole-script timeouts remain blocked. Gate composition now has library completion plus previously independent TestSuite and frozen-sort success."
+  },
+  "historicalIntegrity": {
+    "validationJsonSha256": "e8916ad26f96045dea8aa931309c7c6ea7252eee3e87143bb162f17aa95dc33c",
+    "independentGatesJsonSha256": "443dc628ac738e31d8c7f8a2e16a27348fd7d7fe415e34e0c93e53578f774298",
+    "previousHandoffSnapshot": "tests/upstream/revert-power/handoff-093819c1.md.txt",
+    "previousHandoffSha256": "ad36561b5a602136652fb50170b31f40c53a6dbac1cb360e3c2e0c1de35f7ff9",
+    "all44PriorLogHashesMatch": true,
+    "independentGateHashesMatch": true,
+    "priorTimedOutAttempts": 5,
+    "priorTimeoutsRemainNonpassing": true,
+    "currentUnchangedFileHashCount": 14,
+    "appendedFeatureDocument": {
+      "path": "docs/feature-work/calls-exceptions.md",
+      "priorCheckpointSnapshot": "tests/upstream/revert-power/calls-exceptions-093819c1.md.txt",
+      "priorSha256": "98e28465c9160fb3ba0342ff84ac6ae65143e503b697548d82aa79ad1950d55c",
+      "currentSha256": "f4934d4d407610ec048d370b22ef81d398a731261eded8b75d0f1289df39d7e0",
+      "priorBytesPreservedAsPrefix": true
+    }
+  },
+  "configSnapshots": [
+    {
+      "path": "tests/upstream/revert-power/runtime/lakefile.library-continuation.toml.txt",
+      "sha256": "28e81365fe41447e485d856c1fe8fecac075dc5ffcf20fedea65a77b00e6c2e0"
+    },
+    {
+      "path": "tests/upstream/revert-power/runtime/lakefile.profile-diagnostic.toml.txt",
+      "sha256": "711fad5d7888c29dc842633c459425c4b910effae0d699cd1ab13bd89f1b8885"
+    }
+  ],
+  "sourceChangesThisContinuation": [],
+  "sharedFilesChangedThisContinuation": [
+    "tests/upstream/revert-power/README.md",
+    "docs/feature-work/calls-exceptions.md"
+  ],
+  "allSharedImplementationFiles": [
+    "Solidity.lean",
+    "Solidity/Language/Features.lean",
+    "Solidity/Syntax/Elab/Arms.lean",
+    "Solidity/Syntax/Elab/Stmt.lean",
+    "Solidity/Syntax/Elab/Values.lean",
+    "docs/feature-work/calls-exceptions.md",
+    "docs/module-map.md",
+    "docs/solc-alignment.md",
+    "docs/solidity-feature-inventory.md",
+    "docs/solidity-features.json"
+  ],
+  "kernelAndEvmEvidence": "Same40 kernel certificates and82 exact-byte EVM observations with original pipelines and axiom sets; all implementation/source hashes unchanged. No rerun or promotion of refused upstream model fixtures.",
+  "remainingFeatureScope": [
+    "Signed-power magnitude-overflow payload precision remains limited; no general signed-power data extension.",
+    "Explicit checked/ignoringOverflow modes retain their existing policies.",
+    "Allocation panic 0x41 is not implemented; THalt.exhausted and gas/fuel policy unchanged.",
+    "Malformed-storage 0x22 remains excluded low-level corruption; no new 0x00 case claimed.",
+    "No explicit default/strip/debug/verbose-debug revertStrings settings admitted; omitted default unchanged.",
+    "Original panic fixture is blocked by unchanged host adapter; debug fixture is blocked by revertStrings=debug. Neither is counted as model agreement.",
+    "Callbacks, external aggregate world returns, environment/log scope, delegatecall and physical layout remain unchanged."
+  ],
+  "missingAssignedLibraryValidation": [],
+  "noProofOrTimeBudgetIncrease": true,
+  "noTestSuiteOrSortRerun": true,
+  "reviews": {
+    "finder": "Completed independent read-only six-job/source-history diagnosis and final evidence audit. Verified all new/historical log/config/artifact hashes, terminal successes, limits and unchanged source; no confirmed defect. No Lean checks/server or edits.",
+    "skeptic": "Completed independent read-only profiler-failure diagnosis and final evidence audit. Confirmed unchanged guards/proof limits, terminal gate composition, retained historical failures and partial feature scope; no confirmed defect. No Lean checks/server or edits."
+  }
+}
