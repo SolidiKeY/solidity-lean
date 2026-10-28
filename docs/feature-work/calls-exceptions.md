@@ -132,3 +132,67 @@ The Group10 aggregate custom-error continuation is recorded in
 It reuses the typed aggregate ABI encoder and raw memory-revert path, preserving
 reference locations, delayed reads, source ordering and rollback. Historical
 M5 evidence is unchanged; current and retained evidence remain distinct.
+
+
+### Step 4 increment: unsigned-power self-call data (2026-10-28)
+
+Starts at current master `f4dee4a29c2e208b36db4a4161a4723c735cd775`, on
+`codex/revert-payload-settings`, in its own managed clone. This increment
+extends existing unsigned-power lowering and byte transport; it adds no
+statement, halt, rule, panic representation, dependency or source profile.
+Group 10's adapter/checkpoints and recursive graph migration are untouched.
+
+**Implemented.** Default checked unsigned `**` in an ordinary self-call frame
+now uses the existing retained-entry expansion: capture both operands in the
+pipeline order, handle zero/one/exponent-zero after evaluation, reject the
+256-bit cutoff with literal `Panic(0x11)`, and otherwise use checked
+multiplications. Local declarations, assignments, nested binary expressions,
+internal callees, selected short-circuit/conditional arms and array indices
+reach that expansion. The new eligibility helper only requests existing
+lowerings; untaken arms remain untaken. An earlier operand or nested array
+base is captured before newly inserted guards, preserving its failure priority.
+
+`tests/solc/SelfPowerData.sol`, its two pinned ASTs, and
+`Solidity/Examples/Tactics/SelfPowerData.lean` cover cutoff and actual
+multiplication overflow, narrow overflow, fitting powers, shortcut operand
+failures, pipeline-specific competing failures, complete 36-byte raw data,
+rollback and successful writes. Wrong code/raw-byte/priority assertions remain
+failing controls. Completed finite kernel runs are transported by
+`Prog.runF_approx`; exhaustion cannot establish their return conclusions.
+These are concrete certificates, not a universal source/compiler or generated
+loop equivalence theorem. Existing mathematical recurrence/cutoff proofs remain
+in the [historical Group 10 M5 controls](abi-hashes.md#m5-repair-the-five-admitted-execution-mismatches-2026-10-27).
+
+**Review.** Independent read-only finder and skeptic reviews, without a Lean
+server, identified and resolved three issues: restrict the new top-level route
+so signed and explicit checking modes retain their reading; capture earlier
+reads before later inserted guards; and cover pure powers skipped by
+conditional/index triggers. The original return-ternary shape already passed;
+the new ternary fixture targets a local initializer instead. Both selections
+and earlier-base bounds failure are tested. A recursion-depth diagnostic while printing a failed finite certificate was
+traced by executing it: the nested via-IR shape was actually failing. The
+missing hoist was repaired without raising any proof or recursion limit.
+Final code reviews found no remaining confirmed defect.
+
+**Remaining scope.** No new panic code or `revertStrings` setting is admitted.
+Signed magnitude-overflow payloads remain limited; explicit `checked` and
+`ignoringOverflow` modes keep their existing policy. Failures outside self-call frames and without retained-entry observation
+keep their prior abstract halt/data reading.
+Allocation `0x41` is not implemented: resource exhaustion stays distinct and
+`THalt.exhausted` policies are unchanged. Malformed-storage `0x22` remains tied
+to excluded low-level corruption; no new `0x00` case is claimed. The source
+provenance boundary still rejects `debug.revertStrings` as an unknown compiler
+setting, and the upstream runner retains `unadapted fixture setting:
+revertStrings=debug`. Explicit default/strip/debug/verbose-debug settings are
+not added by this increment; omitted default settings continue to work.
+Full coverage-plan step 4 remains partial.
+
+**Compiler evidence.** `scripts/check-self-power-data.mjs` pins solc 0.8.38 and
+checks exact bytes and exception status under legacy and via-IR. It also
+preserves every original observation of upstream `tryCatch/panic.sol` and
+`revertStrings/empty_v2.sol`, forwarding the latter's debug setting only to the
+compiler. Those EVM observations do not certify Lean support for that setting.
+AST analysis uses optimizer disabled; reference EVM runs use optimizer enabled,
+both recorded explicitly. Historical Group 10 reports are unchanged. New
+before/after, command, resource, compiler and final validation evidence belongs
+in `tests/upstream/revert-power/`.

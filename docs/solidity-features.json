@@ -3218,7 +3218,10 @@
         }
       ],
       "localEvidence": [
-        "docs/solc-alignment.md"
+        "docs/solc-alignment.md",
+        "docs/feature-work/calls-exceptions.md",
+        "Solidity/Examples/Tactics/SelfPowerData.lean",
+        "tests/solc/SelfPowerData.sol"
       ]
     },
     {
@@ -3235,7 +3238,10 @@
         }
       ],
       "localEvidence": [
-        "docs/solc-alignment.md"
+        "docs/solc-alignment.md",
+        "docs/feature-work/calls-exceptions.md",
+        "Solidity/Examples/Tactics/SelfPowerData.lean",
+        "tests/solc/SelfPowerData.sol"
       ]
     },
     {

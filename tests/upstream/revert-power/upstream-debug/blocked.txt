@@ -1,0 +1,1 @@
+test/libsolidity/semanticTests/revertStrings/empty_v2.sol	lean-runtime	unadapted fixture setting: revertStrings=debug

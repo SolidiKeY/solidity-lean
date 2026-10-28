@@ -1334,12 +1334,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "semantics", spelling := "Panic 0x00/01/11/12/21/22/31/32/41/51",
       scope := .model, current := .limited,
       requirement := r#"Retain applicable Solidity panic codes and payloads; some current paths lose data, and malformed storage encoding 0x22 is tied to excluded low-level corruption."#,
-      upstream := [{ path := "docs/control-structures.rst", line := 612 }], localEvidence := ["docs/solc-alignment.md"] }
+      upstream := [{ path := "docs/control-structures.rst", line := 612 }], localEvidence := ["docs/solc-alignment.md", "docs/feature-work/calls-exceptions.md", "Solidity/Examples/Tactics/SelfPowerData.lean", "tests/solc/SelfPowerData.sol"] }
   | .revertPayloads =>
     { category := "semantics", spelling := "Error(string), custom errors, Panic, raw bytes",
       scope := .model, current := .limited,
       requirement := r#"Distinguish runtime byte precision from what the current proof modalities can observe; do not advertise exact computed-data proofs where unavailable."#,
-      upstream := [{ path := "docs/control-structures.rst", line := 589 }], localEvidence := ["docs/solc-alignment.md"] }
+      upstream := [{ path := "docs/control-structures.rst", line := 589 }], localEvidence := ["docs/solc-alignment.md", "docs/feature-work/calls-exceptions.md", "Solidity/Examples/Tactics/SelfPowerData.lean", "tests/solc/SelfPowerData.sol"] }
   | .rollback =>
     { category := "semantics", spelling := "require/revert/panic/call failure",
       scope := .model, current := .limited,

@@ -117,13 +117,19 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
         else captureExpr C e
       let (Q, k) ← hoist k
       pure (P ++ Pc ++ Q, .index e k)
+    else if powerDataNeeded C (← read) (← ctx) k then
+      -- Reading a nested base can fail before evaluating the index. Keep
+      -- that read before the new power guards, just as for an effectful index.
+      let (Pc, e) ← captureExpr C e
+      let (Q, k) ← hoist k
+      pure (P ++ Pc ++ Q, .index e k)
     else if k.hasIdxLen || k.hasCast || hasNarrow C (← ctx) k then
       let (Q, k) ← hoist k
       pure (P ++ Q, .index e k)
     else pure (P, .index e k)
   | .binop op a b => do
     let sc ← read
-    if op == .pow && sc.retainFailureData && !sc.unchecked && sc.overflow.isNone then
+    if op == .pow && (sc.selfFrame || sc.retainFailureData) && !sc.unchecked && sc.overflow.isNone then
       if (intTyOf C (← ctx) a).all (fun (p, _) => p == .uint) then
         let n := widthIn C (← ctx) a
         -- Capture BOTH operands before the zero/one shortcuts. The legacy
@@ -153,7 +159,8 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
         return (P ++ Q, .name r)
     if op.shortCircuits then
       let (P, a) ← hoist a
-      if b.hasCall || b.hasIncDec || hasNarrow C (← ctx) b then
+      if b.hasCall || b.hasIncDec || hasNarrow C (← ctx) b ||
+          powerDataNeeded C (← read) (← ctx) b then
         -- the right operand's effects, its calls and its checks run only where
         -- solc evaluates it: `bool se = a; if (se) { se = b; }` for `&&`, the
         -- negated test for `||` (solkey's `logicalAndShortCircuitRhs`)
@@ -184,7 +191,8 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       return (P ++ Q, .name x)
     if a.hasCall || b.hasCall || a.hasIncDec || b.hasIncDec ||
         (a matches .ternary ..) || (b matches .ternary ..) ||
-        hasNarrow C (← ctx) a || hasNarrow C (← ctx) b then
+        hasNarrow C (← ctx) a || hasNarrow C (← ctx) b ||
+        powerDataNeeded C (← read) (← ctx) a || powerDataNeeded C (← read) (← ctx) b then
       -- a branch's effects, calls and checks run only in the branch solc
       -- evaluates: `T se; if (c) { se = a; } else { se = b; }`, solkey's
       -- `ternaryToIf` on a capture.  `T` is the type of the branch that is
