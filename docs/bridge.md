@@ -359,18 +359,20 @@ with positive evaluator fuel and zero charged gas; instruction fetching and
 the gas/stack-limit/static-mode checks in the upstream `X` driver are not
 verified by these theorems.
 
-The full instruction correspondence is **not complete**; what remains:
+The full instruction correspondence is **not complete**. Status and remaining boundaries:
 
-| Core instructions | Remaining obligation |
+| Core instructions | Status or remaining obligation |
 |---|---|
-| `keccakMap`, `keccakArr`, `sload`, `sstore` | Numeric slot interpretation, concrete hashing/memory setup, and a storage relation handling address aliases. |
+| `keccakMap`, `keccakArr`, `sload`, `sstore` | Bounded finite-observation macro refinement below, under explicit setup and alias assumptions. Unrestricted layout remains excluded. |
 | `mload`, `mstore`, `mloadAt`, `mstoreAt` | Word-cell to byte-memory relation, address scaling and macro expansion for fixed addresses. |
 | `jump`, `jumpi`, `loop` | Assembler from relative/structured control flow to absolute PC and valid jump destinations. |
 | `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
 | `revert` | Return-data operands and the driver's halting relation. |
 
-Symbolic-slot PUSH/ADD and DUP/SWAP depths outside 1–16 are also outside the
-numeric correspondence. `Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`
+The arithmetic dispatcher above excludes symbolic-slot PUSH/ADD and DUP/SWAP
+depths outside 1–16. The optional finite storage lowering below admits
+symbolic-slot PUSH; symbolic offset ADD and those extra depths remain outside
+its fragment. `Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`
 proves concrete disagreements for same-stack CALL/REVERT/JUMP/JUMPI and fixed
 memory opcodes, non-wrapping symbolic offsets, and impossibility of a globally
 injective encoding of all symbolic slots into finite EVM words. These results
@@ -385,8 +387,9 @@ observed domain: each distinct observed alias must already contain the value
 being written. It covers zero writes and writes outside the observed domain,
 without assuming hash injectivity or collision freedom. Two distinct roots
 (`0` and `2^256`) provide positive zero-alias and negative nonzero-write controls.
-This milestone does **not** discharge the upstream account-map SSTORE or
-Keccak macro obligations in the table above and does not expand source coverage.
+This finite-observation lemma alone does not connect to upstream account-map
+SSTORE or hashing. Those connections are supplied by the bounded adapter below;
+source coverage is not expanded.
 
 On the task VM (2026-10-28), the isolated optional target passed kernel checking
 (exit 0; 17 jobs; 1.61 s; 1,055,711,232 bytes sampled aggregate peak RSS).
@@ -429,12 +432,128 @@ The isolated account target passed (exit 0; 1041 jobs; 2.72 s;
 found no confirmed defects. Driver gas/static-mode checks and source physical
 layout remain outside this optional adapter.
 
+
+### Finite storage macros
+
+The storage row now has an optional, conditional compiler refinement in
+`Bridge/SolidityBridge/ExternalEvm/StorageSlots.lean`, imported with its
+regressions by `Checks.lean`. It does not lift excluded source physical-layout
+or assembly semantics.
+
+- `StorageAddresses.lean` interprets roots modulo `2^256`, recursively hashes
+  mapping/array parents, and wraps offsets. Hashes use actual upstream
+  `MachineState.keccak256` on concrete scratch states built by upstream
+  `mstore`. There is no hash injectivity or collision-freedom premise.
+- `StorageOpcode.lean` proves small actual `EvmYul.EVM.step` steps.
+  `StorageMacros.lean` composes them: array hashing executes
+  `PUSH 0; MSTORE; PUSH 32; PUSH 0; KECCAK256`; mapping hashing writes the key
+  at zero and parent at 32, then hashes 64 bytes. `ArraySetup`/`MapSetup`
+  constrain only the bytes read after those actual writes. Both are inhabited
+  for arbitrary operands from empty memory. No sibling byte-memory or
+  assembler API is required.
+- `Agrees` observes a represented stack and a finite list of symbolic storage
+  cells in a present executing account. `WriteCompatible` is the exact alias
+  condition from `write_iff`: every distinct observed numeric alias already
+  contains the written value. Initial storage and collisions may otherwise be
+  arbitrary. Actual SLOAD and nonzero/zero-erasing SSTORE preserve the relation
+  under explicit membership, account and alias premises.
+- `step_refines` and `bounded_refinement` establish successful actual symbolic
+  instruction execution, partial lowering, upstream macro execution and
+  preservation of `Agrees`. `Ready` records stack/setup/alias premises along a
+  finite instruction list; it does not assume successful executions exist.
+  Joint `Agrees` and `Ready` witnesses establish nonvacuity.
+
+`StorageSlotExamples.lean` kernel-checks scoped source observations and exact
+compiler output: scalar write/read gives 7, clearing gives 0, and
+`balances[7] = 5` gives 5 in both `Prog.runFrames` and actual upstream
+execution of its lowering. Arbitrary mapping/array hash-to-write controls use
+nonempty observation domains. Controls refuse absent accounts, incompatible
+numeric root aliases, underflow, unsupported CALL, and the existing compiled
+source-array read (which needs bounds/control-flow/element arithmetic outside
+this partial lowering). `Obstructions.lean` is unchanged, including its
+impossibility of a globally injective encoding of all symbolic slots.
+
+The relation does not observe PC, gas, refunds/access warmth, other accounts,
+whole byte memory or unbounded physical layout. As in the dispatcher adapter,
+supplied instructions use evaluator fuel 1 and charged gas 0; instruction
+fetch and upstream driver checks are outside the theorem. Upstream
+`ffi.ByteArray.zeroes` and `ffi.keccak256` (called by `ffi.KEC`) remain
+opaque evaluator operations. Agreement with those operations does not certify
+canonical serialization, cryptographic correctness or external FFI execution.
+Symbolic offset ADD and general source-array compilation remain refused.
+No source inventory category is promoted. The fixtures use scoped source and
+the existing intrinsic compiler; no solc pipeline reader or optimizer mode was
+changed by this optional lowering.
+
+Pinned headline and example audits report only
+`[propext, Classical.choice, Quot.sound]`; no new axiom declarations were
+added. Independent read-only finder and skeptic reviews confirmed preparation,
+finite aliases, arbitrary-account storage, joint witnesses and source/compiled
+observations, with no confirmed semantic defect remaining. Earlier requests
+for source hashing/reads, joint witnesses and pinned audits were implemented.
+Neither reviewer used a Lean server or build.
+
+A monolithic concrete-macro proof was **BLOCKED** by the RSS guard (91.65 s;
+10,789,376,000 bytes peak). Small opcode lemmas and composition repaired that
+cost without raising limits. A scalar read example then hit the unchanged
+200,000-heartbeat limit; splitting symbolic execution with `run_append_ok`
+repaired it. The final affected target passed (exit 0; 1133 jobs; 8.97 s;
+1,867,120,640 bytes sampled aggregate peak RSS). All accepted Lean validation
+uses the measured guard described above, `LEAN_NUM_THREADS=1`, and explicit
+`-j1` in temporary untracked Lake configurations.
+
+The first full-package attempt lost its guard during executor reconnection
+(observed defunct guard with wait status 9 and no resource result). It remains
+**BLOCKED**, with no successful terminal exit or invented aggregate peak.
+The remaining workload group was stopped. The retry launches the unchanged guard in a detached session; its inherited
+12 GiB address-space limit was verified on the Lake process before continuing
+from disk caches. Earlier failures and interruptions remain in the exported evidence.
+
+
+The final direct storage regressions and unchanged Obstructions target passed
+(exit 0; 1152 cached jobs; 1.11 s; 406,573,056 bytes peak RSS). The fixed-seed
+rule checker passed 36 rule cases × 1000 samples (seed 42; exit 0; 72.85 s;
+1,113,563,136 bytes peak). Orphan, layer, strict automation, core trust, trust
+script tests and a separate trust scan of all eight task modules passed.
+
+**Full validation remains blocked by an unchanged dependency.** The first
+completed default-package run failed (exit 1; 1228.59 s; 4,158,939,136 bytes
+peak): Arith/Widths proof errors and a TermSize thread-creation abort (134).
+An isolated core TermSize run with MALLOC_ARENA_MAX=2 passed under the same
+limits (27.74 s; 1,360,445,440 bytes). The subsequent full run failed only
+SolidityBridge.Arith.Widths (exit 1; 27.63 s; 1,950,683,136 bytes).
+An isolated Widths target reproduced its five errors (exit 1; 7.97 s;
+1,810,821,120 bytes). Its generated synth.eq_N anchors are stale at lines
+21, 47, 79, 111 and 501. Both independent reviewers verified that Widths is
+unchanged from the recorded base and imports none of the storage-task modules;
+repair belongs to the separate source/arithmetic work. Its failed recovery
+audits containing sorryAx are not accepted certificates. A freshly fetched
+master at 638c9b68b37d8a6a15630eac9885e2d873040eb1 still has the identical
+Widths file. No unrelated proof repair or upstream branch was imported here.
+The maximal independent storage increment is proved; original-assignment
+completion is not claimed while the mandatory full gate is blocked.
+
+The global documentation-path gate also remains failed (exit 1; 20 unresolved
+references in unchanged files). Source blob comparisons establish that debt;
+it is separate from the new owning documentation and is not reported as passed.
+Full logs, exact guard reports, configurations, reviews and checksums accompany
+the task handoff. Reproduce the affected optional targets from `Bridge/`:
+
+```sh
+lake build SolidityBridge.ExternalEvm.StorageSlotExamples \
+  SolidityBridge.ExternalEvm.Obstructions
+```
+
+The task's exact guarded commands and temporary single-thread configurations
+are retained in its evidence.
+
 To build the independent targets alone, from `Bridge/`:
 
 ```sh
 lake build SolidityBridge.ModelTheory.LowenheimSkolem \
   SolidityBridge.CallbackTrace SolidityBridge.CallbackModalTrace \
   SolidityBridge.ExternalEvm.StackOps SolidityBridge.ExternalEvm.Obstructions \
+  SolidityBridge.ExternalEvm.StorageSlotExamples \
   SolidityBridge.CompilerSimulation SolidityBridge.LoopFixpoint \
   SolidityBridge.AdversaryPolicy rulecheck
 lake exe rulecheck --seed 42 --samples 1000
