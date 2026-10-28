@@ -1,5 +1,6 @@
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
+import Solidity.Calculus.QuantLedger
 import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.LedgerBlock
 import Solidity.Calculus.HashMove
@@ -94,7 +95,9 @@ with blocks over them instantiated likewise (`Fml.arrayBlockCovered`,
 `arrayBlockReduction?_isSome`, feature 32)
 (`Fml.arrayCovered`, `arrayReduction?_isSome`), or positive binders of KeY's
 `int` read as ledger entries (`Fml.kintCovered`, `decideKInt`), or binders of
-KeY's `int` read over two words (`Fml.kencCovered`, `decideKEnc`); `decideGoal` likewise
+KeY's `int` read over two words (`Fml.kencCovered`, `decideKEnc`), or quantified
+leaves over the ledger cut (`Fml.quantLedgerCovered`, `decideQuantLedger`);
+`decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete` on covered leaves without a hash,
 `decideGoal_complete_hash` on `Fml.hashCovered`).  `Fml.Covered`
@@ -443,17 +446,54 @@ theorem decideKEnc_refutes {φ : Fml C []} {σ : State C []} (h : decideKEnc φ 
     exact fun hφ => hn ((Fml.holds_kenc φ σ).2 hφ)
   · cases h
 
+/-- A ledger cut before abstraction, with certified proof or countermodel. -/
+def decideQuantLedger (φ : Fml C []) : LeafVerdict C :=
+  match quantLedgerReduction? φ with
+  | none => .unknown
+  | some r => match r.verify with
+    | .inl _ => .proved
+    | .inr cm => .refuted cm.1
+
+theorem decideQuantLedger_sound {φ : Fml C []} (h : decideQuantLedger φ = .proved) : Fml.Valid φ := by
+  unfold decideQuantLedger at h
+  split at h
+  · cases h
+  · split at h
+    · rename_i hv _; exact hv.down
+    · cases h
+
+theorem decideQuantLedger_refutes {φ : Fml C []} {σ : State C []}
+    (h : decideQuantLedger φ = .refuted σ) : ¬ holds σ φ := by
+  unfold decideQuantLedger at h
+  split at h
+  · cases h
+  · split at h
+    · cases h
+    · rename_i cm _; cases h; exact cm.2
+
+theorem decideQuantLedger_complete {φ : Fml C []} (h : φ.quantLedgerCovered = true) :
+    decideQuantLedger φ ≠ .unknown := by
+  obtain ⟨r, hr⟩ := Option.isSome_iff_exists.mp (quantLedgerReduction?_isSome φ h)
+  unfold decideQuantLedger
+  rw [hr]
+  dsimp only
+  split <;> exact fun h => nomatch h
+
 /-- **The decision**: `decideLeafA`, then on a leaf it answers `unknown` on,
 the one with its fresh arrays cut (`decideMem`), then the one with its
 binders of KeY's `int` read as ledger entries (`decideKInt`), then the one
-with them read over two words (`decideKEnc`). -/
+with them read over two words (`decideKEnc`), then quantified ledger leaves
+with the ledger cut before abstraction (`decideQuantLedger`). -/
 def decideLeaf (φ : Fml C []) : LeafVerdict C :=
   match decideLeafA φ with
   | .unknown =>
     match decideMem φ with
     | .unknown =>
       match decideKInt φ with
-      | .unknown => decideKEnc φ
+      | .unknown =>
+        match decideKEnc φ with
+        | .unknown => decideQuantLedger φ
+        | v => v
       | v => v
     | v => v
   | v => v
@@ -464,7 +504,9 @@ theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Val
   split at h
   · split at h
     · split at h
-      · exact decideKEnc_sound h
+      · split at h
+        · exact decideQuantLedger_sound h
+        · exact decideKEnc_sound h
       · exact decideKInt_sound h
     · exact decideMem_sound h
   · exact decideLeafA_sound h
@@ -476,7 +518,9 @@ theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ 
   split at h
   · split at h
     · split at h
-      · exact decideKEnc_refutes h
+      · split at h
+        · exact decideQuantLedger_refutes h
+        · exact decideKEnc_refutes h
       · exact decideKInt_refutes h
     · exact decideMem_refutes h
   · exact decideLeafA_refutes h
@@ -507,9 +551,10 @@ def _root_.Solidity.Fml.kencCovered (φ : Fml C []) : Bool :=
 arrays whose cut is in it (`Fml.memCovered`, M7 step 6), or one with
 binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
 feature 26), or one with them over two words (`Fml.kencCovered`,
-features 30 and 31). -/
+features 30 and 31), or a certified quantified ledger reduction
+(`Fml.quantLedgerCovered`, feature 33). -/
 def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
-  φ.CoveredA || φ.memCovered || φ.kintCovered || φ.kencCovered
+  φ.CoveredA || φ.memCovered || φ.kintCovered || φ.kencCovered || φ.quantLedgerCovered
 
 theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMem φ ≠ .unknown := by
   unfold Fml.memCovered at h
@@ -554,11 +599,15 @@ theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf
     · rename_i hm
       split
       · rename_i hk
-        rcases h with ((h | h) | h) | h
-        · exact absurd hv (decideLeafA_complete h)
-        · exact absurd hm (decideMem_complete h)
-        · exact absurd hk (decideKInt_complete h)
-        · exact decideKEnc_complete h
+        split
+        · rename_i he
+          rcases h with (((h | h) | h) | h) | h
+          · exact absurd hv (decideLeafA_complete h)
+          · exact absurd hm (decideMem_complete h)
+          · exact absurd hk (decideKInt_complete h)
+          · exact absurd he (decideKEnc_complete h)
+          · exact decideQuantLedger_complete h
+        · assumption
       · assumption
     · assumption
   · assumption

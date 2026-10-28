@@ -14,12 +14,13 @@ proved and refuted; a binder compared with a ledger entry (`kintNet`) and
 two binders compared under a negation (`kintNested`) are decided past
 their anchors.  Coverage is the kernel's (`*_covered`), so each is
 answered and exactly (`*_answers`, `*_iff`); the verdicts are recorded
-below, not evaluated in the build.  Two shapes stay
-counterexamples: a binder compared with two unbounded terms
+below, not evaluated in the build.  One anchor shape remains
+a counterexample: a binder compared with two unbounded terms
 (`gapKIntTwoAnchors`, `∀ y. y > z → y > 0` under a negation: real
-Presburger alternation over `ℤ`), and a negative quantifier in a leaf that
-reads the ledger (`gapQuantLedger`, `(∀ uint y. y > 0) → net(0) > 0`: no
-pipeline takes both, whatever the binder's type).
+Presburger alternation over `ℤ`). The original negative-quantifier ledger
+statement `gapQuantLedger`, `(∀ uint y. y > 0) → net(0) > 0`, is retained
+below and now proved by `Examples/DecisionQuantLedger.lean`, through the
+ledger cut before abstraction (`Calculus/QuantLedger.lean`).
 -/
 
 namespace Solidity.Examples.DecisionKInt
@@ -70,9 +71,10 @@ def kintNestedBad : Fml Gaps [] :=
   .imp (bindZ "z" (bindZ "y" (.imp (zcmp .gt rfl zv (.pvZ (.there .here)))
     (zcmp .ge rfl zv (.pvZ (.there .here)))))) ff
 
-/-- Counterexamples still: a binder compared with two unbounded terms (`z`
-and the threshold `0` past the anchor `z`), and a negative quantifier
-(here of `uint`) in a leaf that reads the ledger. -/
+/-- Original gap statements: the two-anchor binder remains open; the
+negative scalar quantifier beside a ledger read is now decided exactly in
+`Examples/DecisionQuantLedger.lean`. Both statements and target certificates
+remain unchanged. -/
 def gapKIntTwoAnchors : Fml Gaps [] :=
   .imp (bindZ "z" (bindZ "y" (.imp (zcmp .gt rfl zv (.pvZ (.there .here))) (zcmp .gt rfl zv (zlit 0))))) ff
 def gapQuantLedger : Fml Gaps [] :=
@@ -121,7 +123,9 @@ evaluation overflowed the language server's stack and did not end within
 half an hour in `lake build`.  Evaluated: `gapKIntNeg`, `kintNetElse`,
 `kintNegWord`, `kintNet`, `kintNested` proved; `kintNegBad`,
 `kintNetElseBad`, `kintNetBad`, `kintNestedBad` refuted;
-`gapKIntTwoAnchors`, `gapQuantLedger` unknown.  The theorems above are the
+`gapKIntTwoAnchors`, `gapQuantLedger` unknown at that checkpoint. The latter
+now has kernel-proved exact Leaf and Goal verdicts in
+`Examples/DecisionQuantLedger.lean` (2026-10-28). The theorems above are the
 pins: coverage by the kernel, so `decideLeaf` answers, and exactly. -/
 
 theorem kintNegBad_answers : decideLeaf kintNegBad ≠ .unknown := decideLeaf_complete kintNegBad_covered
