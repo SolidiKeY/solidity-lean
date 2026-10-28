@@ -1,0 +1,8 @@
+{
+  "container": "solidity-baseline-20261028",
+  "containerExitCode": 0,
+  "innerBuildExitCode": 127,
+  "observedError": "/usr/bin/time: No such file or directory",
+  "classification": "Failed invocation: no Lean/corpus execution; never passing evidence.",
+  "provenance": "Observed terminal output; original attempt log was superseded by successful dependency-build launch. The selected Docker state/command is preserved in invocations."
+}

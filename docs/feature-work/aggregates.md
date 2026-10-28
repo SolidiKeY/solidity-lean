@@ -428,3 +428,19 @@ Shared implementation edits are limited to `Frontend/SolcJson/Body.lean`
 soundness or world/environment/log policy module changed. The feature catalog
 remains `partial`; tuple-target and nominal/recursive/reference-interface
 gaps listed above are not claimed complete.
+## Native diagnostic clarification (2026-10-28)
+
+The [current-master native controls](../../tests/upstream/baseline-20261028/native-cache/README.md)
+narrow the earlier blanket receiver-call/mutation limitation. In
+`PushedMemberMutation.sol`, an internal storage-array receiver increments a
+counter; `receiver().push().x += 7` returns 107 and the subsequent constant
+member store returns 207 in both legacy and viaIR. These unchanged-model
+observations preserve the receiver mutation and distinguish its evaluation
+count. Source receiver calls/mutation are therefore not categorically refused;
+a requirement on a lowered pure place must not be read as that source-wide ban.
+
+Postfix `a.push().x++` remains explicitly refused, including with a pure array
+receiver. Ordinary member increments and isolated positive push controls execute.
+These are separate retained diagnostic inputs, not changed corpus expectations,
+new semantics or generated EVM evidence. The native adapter requires no Testing
+proof-search frontend; its current cache closure was validated without a build.

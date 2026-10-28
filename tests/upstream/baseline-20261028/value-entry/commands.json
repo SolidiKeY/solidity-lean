@@ -1,0 +1,173 @@
+{
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-value-entry-audit.py",
+        "--out",
+        "tests/upstream/baseline-20261028/value-entry/audit.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.161708164996526,
+      "cumulativeChildrenMaxRssKiB": 55548,
+      "log": "gate-00.log.gz",
+      "uncompressedSha256": "bfaf9a8a04c5d1cea04b8847bfd267d25cdf0f36fa93adb7fd5df9d9a25f1a4c"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-native-index.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.111104848998366,
+      "cumulativeChildrenMaxRssKiB": 68996,
+      "log": "gate-01.log.gz",
+      "uncompressedSha256": "724dd85ad2b37ca51c3e0b2195e094a41dbf177c513043e545d3379ee4fc8fda"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-native.test.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.26118009199854,
+      "cumulativeChildrenMaxRssKiB": 94116,
+      "log": "gate-02.log.gz",
+      "uncompressedSha256": "f06081187a6901e0fac7aec8bd25237b6ff1172bcf017eeef5d83c9975ef41e8"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/solidity-baseline-native-verify.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.11009391999687068,
+      "cumulativeChildrenMaxRssKiB": 94116,
+      "log": "gate-03.log.gz",
+      "uncompressedSha256": "9abccd4283e795a361e726d2d27ec4da1e5bbf1d76cc826a377f59cf7391471c"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.76541753699712,
+      "cumulativeChildrenMaxRssKiB": 94116,
+      "log": "gate-04.log.gz",
+      "uncompressedSha256": "5ed8c6ab3911fd4ddb6051924dedcf123ccf22aa47c9790b94700441e416c82d"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.06081978699512547,
+      "cumulativeChildrenMaxRssKiB": 94116,
+      "log": "gate-05.log.gz",
+      "uncompressedSha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.16518711900425842,
+      "cumulativeChildrenMaxRssKiB": 94116,
+      "log": "gate-06.log.gz",
+      "uncompressedSha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.20360066699504387,
+      "cumulativeChildrenMaxRssKiB": 94116,
+      "log": "gate-07.log.gz",
+      "uncompressedSha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.0616007769931457,
+      "cumulativeChildrenMaxRssKiB": 94116,
+      "log": "gate-08.log.gz",
+      "uncompressedSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.296399184997426,
+      "cumulativeChildrenMaxRssKiB": 180864,
+      "log": "gate-09.log.gz",
+      "uncompressedSha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 6.192808124003932,
+      "cumulativeChildrenMaxRssKiB": 180864,
+      "log": "gate-10.log.gz",
+      "uncompressedSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.010908017997280695,
+      "cumulativeChildrenMaxRssKiB": 180864,
+      "log": "gate-11.log.gz",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-value-entry-audit.py",
+        "--out",
+        "tests/upstream/baseline-20261028/value-entry/audit-final.json"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 5.022026926999388,
+      "cumulativeChildrenMaxRssKiB": 55560,
+      "log": "audit-final.log.gz",
+      "uncompressedSha256": "9c7424a8f469135f68c78c5482072b1977bfe133a6d996d557d005dd9f11bbce"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-value-entry-audit.py",
+        "--out",
+        "tests/upstream/baseline-20261028/value-entry/audit-final.json"
+      ],
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "elapsedSeconds": 0.05524874800175894,
+      "cumulativeChildrenMaxRssKiB": 55560,
+      "log": "refuse-overwrite.log.gz",
+      "uncompressedSha256": "2a8c5fa94fc7c26641ebc2b0961ad6857f396b3f90e4b8012e014ad76d18dc2d"
+    }
+  ],
+  "memoryMetric": "RUSAGE_CHILDREN cumulative child maximum RSS; not aggregate cgroup peak",
+  "noLeanNoBuild": true
+}

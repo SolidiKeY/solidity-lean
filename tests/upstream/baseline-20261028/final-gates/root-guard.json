@@ -1,0 +1,15 @@
+{
+  "command": [
+    "bash",
+    "/workspace/solidity-lean/scripts/run-solidity-baseline.sh",
+    "cold",
+    "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+    "/workspace/scratch/baseline-root-guard-o5jfmdz4/must-not-exist",
+    "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+  ],
+  "expectedExitCode": 2,
+  "actualExitCode": 2,
+  "stderr": "Only the attached /workspace/solidity-lean clone is supported\n",
+  "destinationNotCreated": true,
+  "classification": "Passing guard probe; no build attempted and no other checkout accessed."
+}

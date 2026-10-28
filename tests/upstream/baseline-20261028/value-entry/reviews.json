@@ -1,0 +1,23 @@
+{
+  "finder": {
+    "agent": "/root/baseline_finder",
+    "readOnly": true,
+    "noLean": true,
+    "result": "approved",
+    "checked": "24 Lifetime reference hashes;8 source snapshots;15differing/7missing/4oldextra;missing ContractWorld root",
+    "final": "Confirmed Lifetime27dependencies already inside verified native closure;only root prerequisite;fresh-output protection correct."
+  },
+  "skeptic": {
+    "agent": "/root/baseline_skeptic",
+    "readOnly": true,
+    "noLean": true,
+    "result": "approved after two refinements",
+    "checked": "304native snapshots and146historical tracked files unchanged;all command gzip hashes;nonvacuous synthetic controls",
+    "confirmedFindingsFixed": [
+      "Name only Lifetime root as unresolved artifact;27current dependencies are already verified.",
+      "Refuse existing output before collect;validate integrity before exclusive write."
+    ],
+    "final": "No remaining confirmed blocker in diagnostic evidence;runtime validation stays incomplete."
+  },
+  "noSemanticOrRuntimeApproval": true
+}

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "python3",
+    "-",
+    "TEMPORARY_ATTACHED_REPO_LAKE_DIRECTORY"
+  ],
+  "helperSha256": "a97b4f6a8af5df478e94adeba6f34ceaa9b797aef25f91e25ad19a972ce42ff0",
+  "exitCode": 0,
+  "elapsedSeconds": 0.06997596099972725,
+  "extractedInputs": 23,
+  "allOriginalBytesPreserved": true,
+  "stderr": ""
+}

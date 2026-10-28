@@ -249,3 +249,50 @@ Every `scope: model` row is `present`, or `partial` with a `gap` that is a
 named proof limit, not a refused shape; every `abstract` row has its
 environment stated; the upstream corpus has no broken row outside the
 excluded families; and the TestSuite gate stays at 0 pending.
+
+## Current-master baseline (2026-10-28)
+
+The fresh baseline starts at `f4dee4a29c2e208b36db4a4161a4723c735cd775`.
+All ten collected cloud snapshots are ancestors; unmerged work is excluded.
+The combined 9,660-fixture report has **4,135 working, 196 broken, 5,329 blocked**.
+Its 1,662 Lean-runtime fixtures have **657 working, 196 broken, 809 blocked**.
+The 3,478 pinned-solc diagnostic agreements are reference evidence, not Lean
+coverage. Every input, required source mode, completed observation and resource
+block is retained in the [new evidence](../tests/upstream/baseline-20261028/README.md).
+The immutable bulk report and 22 isolated follower reports remain separate.
+
+The inventory currently has 212 rows: 13 present, 160 partial, one missing,
+38 not applicable. The new diagnostic index provides reviewed boundaries for
+76 partial rows and explicitly leaves 84 needing feature-specific attribution.
+It does not promote statuses or infer completeness from absent fixtures. The
+manifest/schema is unchanged; generated inventory files remain reproducible.
+
+The cold `./run-lean.sh` attempt reached its initial 90-minute wall bound
+(exit 124) at 546/685 default targets, with `FunctionTypes.lean` active.
+Kernel cgroup peak was 8,195,923,968 bytes (7.633 GiB), with zero OOM events.
+The default/TestSuite/frozen-sort combined gate remains blocked; warm timing
+was not run because cold completion was not established. Partial cold
+artifacts and the restored original cache remain on this VM. This baseline
+is diagnostic evidence, not a universal semantics or lowering-equivalence proof.
+
+The [feature-attribution follow-up](../tests/upstream/baseline-20261028/attribution/README.md)
+now assesses all 84 IDs left unresolved by that checkpoint: 59 have explicit
+source/documented limits, and 25 retain feature-specific missing-evidence
+questions. Ten rows link directly to exact fresh fixture/variant gaps. The
+original 76/84 index remains historical evidence, and the supplement does not
+claim universal semantic attribution or change any manifest status. The cold
+stop and unrun warm measurement above remain unchanged.
+
+The [bounded discriminator matrix](../tests/upstream/baseline-20261028/probes/README.md)
+adds actual pinned-compiler/provenance/source-reader controls for those40 questions.
+It preserves the original corpus and distinguishes source emission from native
+typed admission/proofs/replay, which remain blocked after a single bounded API
+refresh stopped124. No feature status or profile decision changed.
+
+The [native diagnostic follow-up](../tests/upstream/baseline-20261028/native-cache/README.md)
+now establishes production typed-import/replay observations through the reusable
+narrow adapter, without another build. The old combined preflight conflated it
+with the stale proof-search branch. Named refusals and existing proof/model
+limits remain separate from finite successful controls; the inventory is not
+promoted. The precise remaining native capability is nonzero-payment entry
+validation; the old cold stop and warm-unrun remain unchanged.

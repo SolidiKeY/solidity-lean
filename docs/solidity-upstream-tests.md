@@ -40,7 +40,7 @@ Two different checks have different meanings:
   as working when their diagnostics match. This runs the SHA-pinned **solc
   reference**; it does not demonstrate Lean frontend or interpreter coverage.
 * `lean-runtime` imports the contract through the repository's modern source
-  admission and typed `solc_import`, then compares supported scalar runtime
+  admission and typed `solc_import`, then compares admitted scalar and typed raw-ABI runtime
   vectors with the typed Lean interpreter. Calls retain state in order,
   constructors/initializers run, failed calls roll back, and return values
   are compared as ABI words. Default/explicit `compileViaYul: also` fixtures
@@ -50,11 +50,12 @@ Two different checks have different meanings:
 
 Runtime results are observations, not universal correctness proofs. They do
 not exercise generated solc EVM/SSA code, the repository's EVM compiler, gas
-costs or the upstream C++ EVM host. Unsupported gas/log/revert-data checks,
-aggregate/dynamic/bytes ABI inputs, noncanonical calldata, external host
-behavior and source imports remain blocked rather than being dropped.
-Only empty-data function failures are currently replayed; the model's generic
-panic cannot certify an expected ABI panic code. Loop fuel is 1,000 per loop;
+costs or the upstream C++ EVM host. Unsupported gas/log checks, ABI shapes, noncanonical or lazy calldata
+layouts, external host behavior and source imports remain explicitly blocked
+rather than being dropped. The current integrated adapter retains and compares
+exact return/revert bytes for admitted vectors, including supported custom
+errors and panic codes. A generic panic or resource exhaustion cannot certify
+an expected ABI panic code. Historical reports retain their older adapter scope. Loop fuel is 1,000 per loop;
 exhaustion or a process timeout is blocked, never a matching expected failure.
 Unsupported compiler configurations and EVM-version constraints are likewise
 explicit. Other upstream families (SMT checker, Yul optimizer, AST/NatSpec
@@ -460,3 +461,51 @@ not. Fresh [per-fixture evidence](../tests/upstream/step2-source-units-proof-per
 retains 31 working / 1 excluded-assembly broken / 7 blocked, 86 observations and
 14 required-but-unrun variants. Documentation paths retain the historical
 20 missing references and 6 ambiguities. Feature status and refusals are unchanged.
+## Fresh current-master corpus (2026-10-28)
+
+The fresh baseline starts at `f4dee4a29c2e208b36db4a4161a4723c735cd775`.
+All ten collected cloud snapshots are ancestors; unmerged work is excluded.
+The combined 9,660-fixture report has **4,135 working, 196 broken, 5,329 blocked**.
+Its 1,662 Lean-runtime fixtures have **657 working, 196 broken, 809 blocked**.
+The 3,478 pinned-solc diagnostic agreements are reference evidence, not Lean
+coverage. Every input, required source mode, completed observation and resource
+block is retained in the [new evidence](../tests/upstream/baseline-20261028/README.md).
+The immutable bulk report and 22 isolated follower reports remain separate.
+
+The inventory currently has 212 rows: 13 present, 160 partial, one missing,
+38 not applicable. The new diagnostic index provides reviewed boundaries for
+76 partial rows and explicitly leaves 84 needing feature-specific attribution.
+It does not promote statuses or infer completeness from absent fixtures. The
+manifest/schema is unchanged; generated inventory files remain reproducible.
+
+The cold `./run-lean.sh` attempt reached its initial 90-minute wall bound
+(exit 124) at 546/685 default targets, with `FunctionTypes.lean` active.
+Kernel cgroup peak was 8,195,923,968 bytes (7.633 GiB), with zero OOM events.
+The default/TestSuite/frozen-sort combined gate remains blocked; warm timing
+was not run because cold completion was not established. Partial cold
+artifacts and the restored original cache remain on this VM. This baseline
+is diagnostic evidence, not a universal semantics or lowering-equivalence proof.
+
+The [feature-attribution follow-up](../tests/upstream/baseline-20261028/attribution/README.md)
+now assesses all 84 IDs left unresolved by that checkpoint: 59 have explicit
+source/documented limits, and 25 retain feature-specific missing-evidence
+questions. Ten rows link directly to exact fresh fixture/variant gaps. The
+original 76/84 index remains historical evidence, and the supplement does not
+claim universal semantic attribution or change any manifest status. The cold
+stop and unrun warm measurement above remain unchanged.
+
+The [bounded discriminator matrix](../tests/upstream/baseline-20261028/probes/README.md)
+adds actual pinned-compiler/provenance/source-reader controls for those40 questions.
+It preserves the original corpus and distinguishes source emission from native
+typed admission/proofs/replay, which remain blocked after a single bounded API
+refresh stopped124. No feature status or profile decision changed.
+
+The [native cache diagnosis](../tests/upstream/baseline-20261028/native-cache/README.md)
+separates the reusable 76-module production import/replay adapter from the stale
+257-module Testing proof branch. Source/olean trace hashes, setup imports and a
+no-build preflight passed without any project build or config edit. Both source
+modes now have 40 typed-import reports, 38 replay batches and 122 matching
+observations; 12 batches retain explicit frontend refusals with zero runtime
+observations. Wrong-output, provenance and internal-entry controls are separate.
+Nonzero msg.value entry rejection remains untested in the fixed-default-value
+adapter. Prior baseline counts, inputs, observations and reports are unchanged.

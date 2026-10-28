@@ -1,0 +1,17 @@
+{
+  "command": [
+    "timeout",
+    "-k",
+    "10",
+    "1800",
+    "lake",
+    "build",
+    "Solidity.Tools.Upstream"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 481.526548818,
+  "maxChildRssKiB": 1008432,
+  "userSeconds": 442.819305,
+  "systemSeconds": 37.796071,
+  "cgroupMemoryPeakBytes": 1060544512
+}

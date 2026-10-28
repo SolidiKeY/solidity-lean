@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+  "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+  "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+  "evmVersion": "osaka",
+  "loopFuel": 1000,
+  "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+  "snapshotFiles": 11622,
+  "filter": null,
+  "timeoutMs": 120000,
+  "batchSize": 16,
+  "totalFixtureFiles": 9660,
+  "completedFixtureFiles": 9660,
+  "complete": true,
+  "counts": {
+    "working": 4135,
+    "broken": 196,
+    "blocked": 5329
+  },
+  "stages": {
+    "upstream-harness": {
+      "working": 0,
+      "broken": 0,
+      "blocked": 4417
+    },
+    "lean-runtime": {
+      "working": 657,
+      "broken": 196,
+      "blocked": 809
+    },
+    "lean-import": {
+      "working": 0,
+      "broken": 0,
+      "blocked": 39
+    },
+    "compiler-diagnostics": {
+      "working": 3478,
+      "broken": 0,
+      "blocked": 64
+    }
+  },
+  "retryReports": [
+    {
+      "path": "retries/046a9a435045c79e64a96537213ec1c6c98887de9b59b9ad3849a460040a2ac8.json",
+      "sha256": "046a9a435045c79e64a96537213ec1c6c98887de9b59b9ad3849a460040a2ac8",
+      "fixture": "test/libsolidity/semanticTests/array/fixed_arrays_in_storage.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/1f87c90369bcf645db90886d9171521e6eb195faa2a794a54437976c3f068262.json",
+      "sha256": "1f87c90369bcf645db90886d9171521e6eb195faa2a794a54437976c3f068262",
+      "fixture": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_arrays.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/2328ee00c72dac6cf9ea61766db73bffd53dd1ec4f7c10a8cfe2107af3d0e2f0.json",
+      "sha256": "2328ee00c72dac6cf9ea61766db73bffd53dd1ec4f7c10a8cfe2107af3d0e2f0",
+      "fixture": "test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/2d4c1faf483a43bd10fd534cc964df6316352101555e82a22613db47108d4f9b.json",
+      "sha256": "2d4c1faf483a43bd10fd534cc964df6316352101555e82a22613db47108d4f9b",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/keccak256_empty.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/320e57f60bb585623cb22ba1a52c8b50a945dd6b0a4f85563e688fa3a068e8db.json",
+      "sha256": "320e57f60bb585623cb22ba1a52c8b50a945dd6b0a4f85563e688fa3a068e8db",
+      "fixture": "test/libsolidity/semanticTests/array/fixed_out_of_bounds_array_access.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/32a1c2e27c9f25a659e2566aa9540a474ea78974bc092671e1c25f2daadda828.json",
+      "sha256": "32a1c2e27c9f25a659e2566aa9540a474ea78974bc092671e1c25f2daadda828",
+      "fixture": "test/libsolidity/semanticTests/array/create_memory_byte_array.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/3fd12b2a6b2d7b927b603489d710ccc4fbf31fe2a6cac0c00fcf26c59be0e81c.json",
+      "sha256": "3fd12b2a6b2d7b927b603489d710ccc4fbf31fe2a6cac0c00fcf26c59be0e81c",
+      "fixture": "test/libsolidity/semanticTests/array/create_multiple_dynamic_arrays.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/45818caee99a219d261a581c27a3f8346e8483ff100286471ce801d336aba98a.json",
+      "sha256": "45818caee99a219d261a581c27a3f8346e8483ff100286471ce801d336aba98a",
+      "fixture": "test/libsolidity/semanticTests/literals/escape.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/5b1dc6ecc6b51a9633df3d4c61c5f1fa8411c9fc438402ce84b38238530f1155.json",
+      "sha256": "5b1dc6ecc6b51a9633df3d4c61c5f1fa8411c9fc438402ce84b38238530f1155",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/iterated_keccak256_with_bytes.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/5c245f94e43545d68c6aeff236b8f1845ef3b7d0aa75f5b295ea9ed87f4c3c5c.json",
+      "sha256": "5c245f94e43545d68c6aeff236b8f1845ef3b7d0aa75f5b295ea9ed87f4c3c5c",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/keccak256.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/5cc2400568a75beb4b9a2462d819d58e71050fe989d3a3c090e16309a865da00.json",
+      "sha256": "5cc2400568a75beb4b9a2462d819d58e71050fe989d3a3c090e16309a865da00",
+      "fixture": "test/libsolidity/semanticTests/array/delete/memory_bytes_delete_element.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/6e9cc50a11ada3421b9710435f2efa03daf0edbcd1b34604398f99e7a7861a24.json",
+      "sha256": "6e9cc50a11ada3421b9710435f2efa03daf0edbcd1b34604398f99e7a7861a24",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/6fd66092c7cf1135ffde4b3971c1f83cc2fa429f245f53fe2c56ce87d4056231.json",
+      "sha256": "6fd66092c7cf1135ffde4b3971c1f83cc2fa429f245f53fe2c56ce87d4056231",
+      "fixture": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_dynamic_bytes_v2.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/7dd0dbae1f9311015aabc22d55e436694c35b489af3bf67541fe45b5bec7557c.json",
+      "sha256": "7dd0dbae1f9311015aabc22d55e436694c35b489af3bf67541fe45b5bec7557c",
+      "fixture": "test/libsolidity/semanticTests/array/delete/delete_on_array_of_structs.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/8a73ee23dcb6cae104ebb0083b1b724f463f6535c1ce51aea392cbce9ca79c65.json",
+      "sha256": "8a73ee23dcb6cae104ebb0083b1b724f463f6535c1ce51aea392cbce9ca79c65",
+      "fixture": "test/libsolidity/semanticTests/array/fixed_bytes_length_access.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/8de563ce38fb3f128eea06642eb37bd58a672042b5c409cde38db3b098dd6fb0.json",
+      "sha256": "8de563ce38fb3f128eea06642eb37bd58a672042b5c409cde38db3b098dd6fb0",
+      "fixture": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_length_v2.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/aa4d6934393a6104fc7c8e7da97454c75ed4af0fa9e92061bdd5ef9bf4dc8851.json",
+      "sha256": "aa4d6934393a6104fc7c8e7da97454c75ed4af0fa9e92061bdd5ef9bf4dc8851",
+      "fixture": "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_dynamic_v2.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/b240b0b848f8bc525f04b391873b10464a3418838a4327764564e1fa7cd05c48.json",
+      "sha256": "b240b0b848f8bc525f04b391873b10464a3418838a4327764564e1fa7cd05c48",
+      "fixture": "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/member_array_dynamic2_v2.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/dac02ac2db83b6af7e61a075a71edda899dffa0858385b81fcc51b0050660885.json",
+      "sha256": "dac02ac2db83b6af7e61a075a71edda899dffa0858385b81fcc51b0050660885",
+      "fixture": "test/libsolidity/semanticTests/array/delete/delete_storage_array.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/e3d9cbdc9f8de9ea14c7d540cea2e21624909f95aa30d18a0d75cf254f46d8b9.json",
+      "sha256": "e3d9cbdc9f8de9ea14c7d540cea2e21624909f95aa30d18a0d75cf254f46d8b9",
+      "fixture": "test/libsolidity/semanticTests/array/delete/delete_memory_array.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/f0df108a56e5814cd252127f2102fcca19bb774df00db954e436a83c46fd6893.json",
+      "sha256": "f0df108a56e5814cd252127f2102fcca19bb774df00db954e436a83c46fd6893",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/keccak256_multiple_arguments.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/fbf168c58954130850decb5e0ad399a0100b62c562c20f0555fc4357961fbd4b.json",
+      "sha256": "fbf168c58954130850decb5e0ad399a0100b62c562c20f0555fc4357961fbd4b",
+      "fixture": "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_static_v2.sol",
+      "timeoutMs": 120000,
+      "batchSize": 1
+    }
+  ],
+  "retryMergeSha256": "b200a3af4f53441e306c6a8ab1f8f6970ae44480d236029b91643bc989a20bb3"
+}

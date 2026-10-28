@@ -1,0 +1,416 @@
+{
+  "files": [
+    {
+      "path": "tests/upstream/baseline-20261028/.gitignore",
+      "sha256": "ff1f10a73336369ff9f4ca57fb6fa27096b47d8c8f07f9df055806b9645af945",
+      "bytes": 137
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/README.md",
+      "sha256": "af9e91e6e250f72045a5854e8c81d6151a597fe63878a19db7af44bbd028047f",
+      "bytes": 8602
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/archive-readback.json",
+      "sha256": "c320f08e85cd97520b34fc192aac83f51bd27c7c4f38bba5a553476f55de49ab",
+      "bytes": 423576
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/archive.json",
+      "sha256": "1142c35f5f38001044d8fb6277477a4d683d2aac6f58d91ffe22a940db83fe0a",
+      "bytes": 2255
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/baseline-resource-snapshot.json",
+      "sha256": "c25ea3e4ba0948b0a45278441a0bf894f2b75d0814425dc8b3a078fbabb3e372",
+      "bytes": 206
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/blocked.txt",
+      "sha256": "33d2b0ff4c6b9c5b1093d105e037b6ddf8646dd1ab769f7d9bb3468d101337ed",
+      "bytes": 749592
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/broken.txt",
+      "sha256": "5ec294a0efebdfbd86e756755b4e84e3d5d07d2cb1b819068779cc9d03d1cb0f",
+      "bytes": 22234
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/build-archive.json",
+      "sha256": "64c6be4b7969ff84c546475574ae987c9bfba79b61f11c13df1619c2fc76510d",
+      "bytes": 560
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/build-evidence.tar.gz",
+      "sha256": "a104e630900b984b45e126caa4934515c7999b3df572e1ca850740cb4f0b23d8",
+      "bytes": 24546
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/build-readback.json",
+      "sha256": "60dd2c281702027efc50a536619e364f98329c2fcfd0a5f8c6a52d60e0c95325",
+      "bytes": 1748
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/0.log",
+      "sha256": "cc71f80c90f4edea1698ace9c69f84c2803a973bfcd8098384178e805a2f080f",
+      "bytes": 663
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/1.log",
+      "sha256": "888a0c0ed615e57d32cf72be501b0c355f33b8613c81dfdaa99db33d7959487e",
+      "bytes": 103
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/10.log",
+      "sha256": "46a0a74e4f003a4ef3b259469eda69b6d911cd780bed0d24d9655eed0b819246",
+      "bytes": 39
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/3.log",
+      "sha256": "4ef17fe56b9cddcdec92589d11f683d93ecef2d3cd9dda0361c17b4faeef88ff",
+      "bytes": 2220
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/4.log",
+      "sha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0",
+      "bytes": 41
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/5.log",
+      "sha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858",
+      "bytes": 41
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/6.log",
+      "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+      "bytes": 87
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/7.log",
+      "sha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668",
+      "bytes": 78
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/8.log",
+      "sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+      "bytes": 132
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/9.log",
+      "sha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6",
+      "bytes": 65
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/gates.json",
+      "sha256": "5ff2b904e536b981ec0f9a57fb050c06cb92d65fbe675a39ba19ca172e399b5f",
+      "bytes": 3447
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-gates/root-guard.json",
+      "sha256": "0d8b897af6199270c3dac920085edfbe07534506b386da59615ef4cc1ca062a8",
+      "bytes": 552
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-review.json",
+      "sha256": "aa1d6d3450ee58de30f40386e88625c4b8e74b8f307bfde55fb8b8a35ec58fc5",
+      "bytes": 2209
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/final-validation.json",
+      "sha256": "a65d333ab3df56dbae4a5a0f0fc88ed431c94ea5d14deed1008131ffc34d14d5",
+      "bytes": 2153
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/excluded-machine-semantics.txt",
+      "sha256": "964168d2f659dbaf82c07d132100880533a5ce37fa521d41267375c495fa400d",
+      "bytes": 27088
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/gaps.json",
+      "sha256": "33a03184bb0ec6c4ce0e8947ece7eb5c0041993beae0b05c87cda097f71eb01c",
+      "bytes": 2410518
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/profile-decision-environment-logs.txt",
+      "sha256": "ac1d9d481457a046a3e2decd7b87e59ba332bd3fc333a2ba3f165ce561fae41e",
+      "bytes": 9131
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/resource.txt",
+      "sha256": "567bdce914a53bc55781e15955c9f79dc1399a2c9e12e20252ac692e77bf7fbd",
+      "bytes": 2163
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-01-entrypoints.txt",
+      "sha256": "64e55504a769bc838d7cb8c041b19674ee4cf15206e80bef65f43844a992a334",
+      "bytes": 8512
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-02-source-units.txt",
+      "sha256": "418e2137fffeb52717efd522574ff56587887e8181b694cc566d9a429d513285",
+      "bytes": 4059
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-03-expressions.txt",
+      "sha256": "5e88843fb7779cfbd40cbb4d46c5416b28dcc1a0099e0ec4581bf59a1ec57508",
+      "bytes": 30384
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-04-panic-revert.txt",
+      "sha256": "cf7fb77268deac1f89d82d682e0ef1a6f74ad343f2d9fc1fee8af58f57415a71",
+      "bytes": 8999
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-06-world.txt",
+      "sha256": "b0839502ca81fdee6386ef0a5b9d89745ce53e2d1931080f83f0304100123c93",
+      "bytes": 46627
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-07-recursive.txt",
+      "sha256": "99af39c3ec1f3dd203c8a9738b4161782df1ce1f45a2a211fcf3805aba77e2fe",
+      "bytes": 4218
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-08-transient.txt",
+      "sha256": "bc069bc004f2dec8798f4fa7c4be521228bcc3859ec50ff40a3f8176d42fe4f5",
+      "bytes": 5329
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-10-revert-proof-interface.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-11-diamond-calls.txt",
+      "sha256": "377f7f7aa4f98e8ef7becd31efe56dedaf32db23e364180902dd62bd57d1cc31",
+      "bytes": 3884
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/step-12-specs.txt",
+      "sha256": "f0490c08602ecb56f501a6239b68edfb666d2bc08aa668c44dc3f3a66bc63978",
+      "bytes": 4442
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/unrouted.txt",
+      "sha256": "172a1257488cfed85aa6232b8eb5c92e408a720cedc27d1a8c2f27afe5e3250b",
+      "bytes": 252547
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/0.log",
+      "sha256": "6c6dc0c6593441f133b30761e982acbb0c95d7aa874960c1a96fbe3eb866a286",
+      "bytes": 662
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/1.log",
+      "sha256": "888a0c0ed615e57d32cf72be501b0c355f33b8613c81dfdaa99db33d7959487e",
+      "bytes": 103
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/3.log",
+      "sha256": "d375e22db43fd69ef35ceeaeb4b66312dc2c2a3ab08cede14d22e354f14a7bc5",
+      "bytes": 2219
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/4.log",
+      "sha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0",
+      "bytes": 41
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/5.log",
+      "sha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858",
+      "bytes": 41
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/6.log",
+      "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+      "bytes": 87
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/7.log",
+      "sha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668",
+      "bytes": 78
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/8.log",
+      "sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+      "bytes": 132
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/9.log",
+      "sha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6",
+      "bytes": 65
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-after/gates.json",
+      "sha256": "4446aac45ee3226a8cc2b0e5dcd2f430c1591bdd962331c40f0628cdca2badc7",
+      "bytes": 3081
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-before/0.log",
+      "sha256": "eefbf66899e68f8773221518aa8ddf77fba764929b6c321b144810e3942a5a6f",
+      "bytes": 2221
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-before/1.log",
+      "sha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0",
+      "bytes": 41
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-before/2.log",
+      "sha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858",
+      "bytes": 41
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-before/3.log",
+      "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+      "bytes": 87
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-before/4.log",
+      "sha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668",
+      "bytes": 78
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-before/5.log",
+      "sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+      "bytes": 132
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/gates-before/gates.json",
+      "sha256": "6c4e8f60c928f88637d7047daafb1f579336c79ad3c1cf8ca5b1b70eab806e2e",
+      "bytes": 1070
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/initial-invocation-failure.json",
+      "sha256": "031d6a77576d606ec148d12209ef81982301beb658ffa48fc05b6bf281a591e0",
+      "bytes": 441
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/bulk/lake",
+      "sha256": "25fb34f3fb59c17e8030b97628ba5d1ec4e225435621444f3bcd591dfcd3b829",
+      "bytes": 391
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/bulk/lakefile.toml",
+      "sha256": "3343b5626520cda53b5b4450daa70fe4e13ba743a270fb94da2bfc7e96dad9ec",
+      "bytes": 1441
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/bulk/timed.py",
+      "sha256": "8548b03f4e7951503cf5c1afe11016da3c8b4b8038945fb1f0d63048bb5f2741",
+      "bytes": 630
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/retries/harness.sh",
+      "sha256": "b483a9f9e23cdaae839f209392a3c9eb90ab2aa30ab5a25c68c8693f11fd761c",
+      "bytes": 7165
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/retries/selector.py",
+      "sha256": "67c8a8547da08611d691545b884083ca740c715a6c626aef56c4180a937abb36",
+      "bytes": 8154
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/solidity-baseline-20261028-02.json",
+      "sha256": "bb53321ba3fa4bb4f3a70528e59a7e34efa8265816a00fc3c91c2b00c9e7b253",
+      "bytes": 1180
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/invocations/solidity-baseline-20261028.json",
+      "sha256": "125c955b6bba1b3bb154f100dd2204b415df17e2a6d27008b45ff1a9bd808f66",
+      "bytes": 1403
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/landed-groups.json",
+      "sha256": "5500b4f33b680647828ae76c285cefa862ab9503d61105e110528b18e414e211",
+      "bytes": 3720
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/logs/corpus.json",
+      "sha256": "6bb802baae4898372c3191a20b1374f8461ca42ed4e3d1482c16540bfa978e06",
+      "bytes": 410
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/logs/corpus.log",
+      "sha256": "7e7209cecec933c396dbb876a4185ff655e850f6a8e2fbb58831cb2c25d9c931",
+      "bytes": 12185
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/logs/upstream-build.json",
+      "sha256": "2f82abfe8ac2fea829d3868e21f1ad2e034327c461d78ad9ddfe11c3902d0162",
+      "bytes": 304
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/logs/upstream-build.log",
+      "sha256": "46db81d71c218906108cc07aaf01020277c90d4d1168388c22ec080b06e19791",
+      "bytes": 8830
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/merge.json",
+      "sha256": "7a28cb660b5bb9716b6888d86c498b3f884efdf3ddf90ec09c1b6fe316db8826",
+      "bytes": 2548
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/performance.json",
+      "sha256": "173084904e6f8399e0fea7665427294d432416263984303d7461f0a663244819",
+      "bytes": 1942
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/portable-evidence.tar.gz",
+      "sha256": "5a200e1932c0d12392dd0a27b52b238e622b7f84643b706263d48052078e32ed",
+      "bytes": 20126354
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/prepared-inputs.json",
+      "sha256": "46196bc4ac04e16dac3783de3f44612e18fe7c71331c471a3854f4e8d4ef2d79",
+      "bytes": 906720
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/retry-selection.json",
+      "sha256": "ec0b193002b347f5069f36c063a3fa7dd29d3942946575269964151a067f33fc",
+      "bytes": 26174
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/reviews.json",
+      "sha256": "26945d8da2f193734f7961d5c87dabb95ea6a8a0af5ef3214eeae899b3648341",
+      "bytes": 1201
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/runtime.json",
+      "sha256": "7cd1099c8d637755ba84e7758088062fc3a92bc20ae46ebafbb7b6e032d1161e",
+      "bytes": 951
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/summary.json",
+      "sha256": "7957775c1ab16bc217849d8b96d061079034fbdd622e9105e6c3bda39b45d914",
+      "bytes": 9081
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/unmapped-partial-features.txt",
+      "sha256": "777285e4edc927810958f950e51e1d0e90fb50e2a211da4db587d537a2420fdb",
+      "bytes": 1183
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/validation.json",
+      "sha256": "ce3317e47aa97ac1a512dc00f4dc8272dfd30ddf5f3f7c3e47aed5032bb69f08",
+      "bytes": 1658
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/working.txt",
+      "sha256": "b24e31a9be1a62c95e86ad13e08c219221a84dc9ccba9510877d6ed70108d886",
+      "bytes": 650897
+    }
+  ],
+  "documentationGzipLogHashes": "doc-paths-validation.json",
+  "sourceBase": "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+}

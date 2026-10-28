@@ -1,0 +1,229 @@
+{
+  "recordedAt": "2026-10-28T05:19:37.600457+00:00",
+  "startingCommit": "66629757c15a819af17bb2d97e18c9bea4777351",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-attribution.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 1.5158969539988902,
+      "wait4MaxRssKiB": 73044,
+      "userSeconds": 1.431759,
+      "systemSeconds": 0.07584199999999999,
+      "log": "gate-00.log.gz",
+      "uncompressedLogSha256": "7ad2ce2b43e4c5940eeac29af15fb281db41f749f5e7af62d1362e95d67f1337"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-attribution.test.py"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 1.492720960000952,
+      "wait4MaxRssKiB": 80796,
+      "userSeconds": 1.406199,
+      "systemSeconds": 0.085327,
+      "log": "gate-01.log.gz",
+      "uncompressedLogSha256": "ff55ca94b6b3b5552322ae80bffcd0351d0a1aa47413561312ebcb5aaacdc534"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline.test.py"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.13369983799930196,
+      "wait4MaxRssKiB": 20168,
+      "userSeconds": 0.104751,
+      "systemSeconds": 0.028161,
+      "log": "gate-02.log.gz",
+      "uncompressedLogSha256": "118ff03bd9fb9c84e18c1279010549e42d0468a230d6fef8ef2e55e92c734fe3"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-retries.test.py"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.07638410400068096,
+      "wait4MaxRssKiB": 14848,
+      "userSeconds": 0.07579999999999999,
+      "systemSeconds": 0.0,
+      "log": "gate-03.log.gz",
+      "uncompressedLogSha256": "888a0c0ed615e57d32cf72be501b0c355f33b8613c81dfdaa99db33d7959487e"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 2.734822329999588,
+      "wait4MaxRssKiB": 70944,
+      "userSeconds": 2.681157,
+      "systemSeconds": 1.601632,
+      "log": "gate-04.log.gz",
+      "uncompressedLogSha256": "2f8cddd334c8296bb36faba31ab7dbadac666f28d948140d99bb0fa2a4df2d8c"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.06335514300008072,
+      "wait4MaxRssKiB": 12928,
+      "userSeconds": 0.038423,
+      "systemSeconds": 0.023608999999999998,
+      "log": "gate-05.log.gz",
+      "uncompressedLogSha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.15570085500075947,
+      "wait4MaxRssKiB": 78796,
+      "userSeconds": 0.09907099999999999,
+      "systemSeconds": 0.07507699999999999,
+      "log": "gate-06.log.gz",
+      "uncompressedLogSha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.14838083399990865,
+      "wait4MaxRssKiB": 80988,
+      "userSeconds": 0.119809,
+      "systemSeconds": 0.055153,
+      "log": "gate-07.log.gz",
+      "uncompressedLogSha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.05533170700073242,
+      "wait4MaxRssKiB": 39680,
+      "userSeconds": 0.054508,
+      "systemSeconds": 0.014726999999999999,
+      "log": "gate-08.log.gz",
+      "uncompressedLogSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 4.48157451500083,
+      "wait4MaxRssKiB": 179668,
+      "userSeconds": 4.233193,
+      "systemSeconds": 0.5331739999999999,
+      "log": "gate-09.log.gz",
+      "uncompressedLogSha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "elapsedSeconds": 4.823364453999602,
+      "wait4MaxRssKiB": 7488,
+      "userSeconds": 3.361612,
+      "systemSeconds": 1.606511,
+      "log": "gate-10.log.gz",
+      "uncompressedLogSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "historicalMissingReferences": 20,
+      "originalDiagnosticLogByteIdentical": true
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.008481339000354637,
+      "wait4MaxRssKiB": 7500,
+      "userSeconds": 0.003137,
+      "systemSeconds": 0.0029059999999999997,
+      "log": "gate-11.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.00783104599940998,
+      "wait4MaxRssKiB": 7500,
+      "userSeconds": 0.007245,
+      "systemSeconds": 0.0,
+      "log": "gate-12.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "totalSequentialGateSeconds": 15.71333039000092,
+  "maxWait4JobRssKiB": 179668,
+  "resourceInterpretation": "Lightweight Python/Node/shell read-only checks only. wait4 job maximum RSS is not an aggregate cgroup peak; no Lean build/server/compiler/EVM execution, no memory or proof limits changed.",
+  "assessmentCounts": {
+    "documentedOrSourceBoundaries": 59,
+    "evidenceNeeded": 25,
+    "documentedBoundariesWithAdditionalEvidenceQuestions": 15,
+    "directObservedRows": 10
+  },
+  "immutableInputs": {
+    "originalGapIndexSha256": "33a03184bb0ec6c4ce0e8947ece7eb5c0041993beae0b05c87cda097f71eb01c",
+    "originalUnresolvedListSha256": "777285e4edc927810958f950e51e1d0e90fb50e2a211da4db587d537a2420fdb",
+    "manifestSha256": "e86f5b65e6384ce4d0354d7935e7dfefe4842ba4043f71500fa7993757c63b9b",
+    "portableArchiveSha256": "5a200e1932c0d12392dd0a27b52b238e622b7f84643b706263d48052078e32ed",
+    "upstreamArchiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "reviewTableSha256": "6dbc06482135746e8bdb7bce2244ebf0143dfb6240f22f46f65db3ab423c427a",
+    "generatorSha256": "2e2e0f8524662dfb6d9a4aa42b58722369d7416e4e7c4fb5ec5ee0f9e10e19ee"
+  },
+  "historicalCold": {
+    "exitCode": 124,
+    "completedTargets": 546,
+    "totalTargets": 685,
+    "peakCgroupBytes": 8195923968
+  },
+  "warm": "unrun; not retried",
+  "missingAssignedValidation": "25 feature-specific evidence-needed rows and15 additional documentary-boundary reproduction/assurance questions are explicit in index.json. Diagnostic review of all84 is complete; semantic attribution is not claimed complete.",
+  "theoremAxiomChecks": "N/A: no Lean declarations changed. Static trust inventory gate only; existing proof claims are source citations, not new kernel checking.",
+  "sharedFilesEdited": [
+    "docs/coverage-plan.md",
+    "docs/solidity-upstream-tests.md",
+    "tests/upstream/baseline-20261028/README.md"
+  ]
+}

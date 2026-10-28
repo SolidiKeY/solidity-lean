@@ -1,0 +1,24 @@
+{
+  "finder": {
+    "agent": "/root/baseline_finder",
+    "readOnly": true,
+    "noLeanOrBuildOrWrites": true,
+    "result": "approved",
+    "independentChecks": "309shared files;ABI/payability/16observations;75archive files and digest;2scalar false controls",
+    "confirmedFindingFixed": "Integrate76cached symlinks before rootpreflight in fresh reproduction;done without rootrecompile."
+  },
+  "skeptic": {
+    "agent": "/root/baseline_skeptic",
+    "readOnly": true,
+    "noLeanOrBuildOrWrites": true,
+    "result": "approved",
+    "independentChecks": "309shared and77overlay hashes;16exactobservations plus required controls;75archive files;scope/rollback policy",
+    "confirmedFindingsFixed": [
+      "Independent exact expected-result verifier added before completion.",
+      "Completion scoped as valueEntryDiagnosticComplete, historical nativefalse preserved.",
+      "Failure paths in reproducer check shared snapshots;prior failures remain archived."
+    ]
+  },
+  "finalStaticGates": "Terminal15commands have expected exits;doc path exit1 is unchanged20historical missing references.",
+  "finalTerminalGateReview": "Both finder and skeptic independently checked all15expected exits/log hashes and approved final staged handoff;no remaining confirmed findings."
+}

@@ -1,0 +1,16 @@
+/audit.json
+/hash-jobs.json
+/file-hashes.json
+/hash-verification.json
+/cache-after.json
+/native-invocations.json
+/boundary-records.json
+/containers.json
+/runs/
+/run-inputs/
+/boundaries/
+/boundary-inputs/
+/logs/
+/FileHashes.lean
+/NativePreflight.lean
+/*.snapshot

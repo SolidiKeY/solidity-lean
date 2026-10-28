@@ -1,0 +1,10 @@
+import json,subprocess,time,resource,gzip,hashlib,os
+from pathlib import Path
+out=Path('tests/upstream/baseline-20261028/value-entry/capped');out.mkdir(exist_ok=False);records=[]
+commands=[(['python3','scripts/solidity-baseline-value-entry-audit.py','--out',str(out/'audit.json')],0),(['python3','scripts/solidity-baseline-value-entry-audit.py','--out',str(out/'audit.json')],2),(['python3','scripts/solidity-baseline-native-index.py','--check'],0),(['python3','scripts/solidity-baseline-native.test.py'],0),(['node','scripts/solidity-baseline-native-verify.mjs'],0),(['node','--test','scripts/solidity-upstream.test.mjs'],0),(['python3','scripts/solidity-feature-audit.py','--check'],0),(['node','scripts/check-orphans.mjs'],0),(['node','scripts/check-layers.mjs'],0),(['node','scripts/check-automatic.mjs','--strict'],0),(['bash','scripts/check-trust.sh'],0),(['bash','scripts/check-doc-paths.sh'],1),(['git','diff','--check'],0)]
+for i,(cmd,want) in enumerate(commands):
+ start=time.monotonic();r=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT);name=f'gate-{i:02}.log.gz';(out/name).write_bytes(gzip.compress(r.stdout,mtime=0));records.append(dict(command=cmd,exitCode=r.returncode,expectedExitCode=want,elapsedSeconds=time.monotonic()-start,cumulativeChildrenMaxRssKiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,log=name,uncompressedSha256=hashlib.sha256(r.stdout).hexdigest()));print(i,r.returncode,flush=True)
+ if r.returncode!=want:break
+x=dict(commands=records,environment=dict(LEAN_NUM_THREADS=os.environ.get('LEAN_NUM_THREADS')),cgroupMemoryPeakBytes=int(Path('/sys/fs/cgroup/memory.peak').read_text()),cgroupMemoryMaxBytes=int(Path('/sys/fs/cgroup/memory.max').read_text()),cgroupSwapMaxBytes=int(Path('/sys/fs/cgroup/memory.swap.max').read_text()),memoryEvents=Path('/sys/fs/cgroup/memory.events').read_text(),noLeanNoBuild=True)
+(out/'commands.json').write_text(json.dumps(x,indent=2)+'\n')
+assert len(records)==len(commands) and all(c['exitCode']==c['expectedExitCode'] for c in records)

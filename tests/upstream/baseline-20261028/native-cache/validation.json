@@ -1,0 +1,220 @@
+{
+  "recordedAt": "2026-10-28T09:58:04.782301+00:00",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-native-index.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.1095019899985346,
+      "wait4MaxRssKiB": 68992,
+      "log": "check-00.log.gz",
+      "uncompressedLogSha256": "724dd85ad2b37ca51c3e0b2195e094a41dbf177c513043e545d3379ee4fc8fda"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-native.test.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.846855070998572,
+      "wait4MaxRssKiB": 94160,
+      "log": "check-01.log.gz",
+      "uncompressedLogSha256": "5ba3d8a92593a83d5d96a06e782ca99e7484694cf3275b9db32288ca88ea2b68"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/solidity-baseline-native-verify.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.1122780759978923,
+      "wait4MaxRssKiB": 37632,
+      "log": "check-02.log.gz",
+      "uncompressedLogSha256": "9abccd4283e795a361e726d2d27ec4da1e5bbf1d76cc826a377f59cf7391471c"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "scripts/solidity-baseline-native.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.03451587399831624,
+      "wait4MaxRssKiB": 26368,
+      "log": "check-03.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "scripts/solidity-baseline-native-boundaries.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.04522027700295439,
+      "wait4MaxRssKiB": 27128,
+      "log": "check-04.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "scripts/run-solidity-baseline-native.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.005634960998577299,
+      "wait4MaxRssKiB": 11172,
+      "log": "check-05.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.731632949999039,
+      "wait4MaxRssKiB": 70776,
+      "log": "check-06.log.gz",
+      "uncompressedLogSha256": "96f66f6e008c0036d31afd20b1aadacbf65f5a65249df15352d5d82de78c1d2d"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.05198278199895867,
+      "wait4MaxRssKiB": 12928,
+      "log": "check-07.log.gz",
+      "uncompressedLogSha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.14515419699819176,
+      "wait4MaxRssKiB": 79048,
+      "log": "check-08.log.gz",
+      "uncompressedLogSha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.193032711998967,
+      "wait4MaxRssKiB": 78320,
+      "log": "check-09.log.gz",
+      "uncompressedLogSha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.05705387499983772,
+      "wait4MaxRssKiB": 39800,
+      "log": "check-10.log.gz",
+      "uncompressedLogSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.711141866002436,
+      "wait4MaxRssKiB": 178160,
+      "log": "check-11.log.gz",
+      "uncompressedLogSha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 7.031839941999351,
+      "wait4MaxRssKiB": 11180,
+      "log": "check-12.log.gz",
+      "uncompressedLogSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "historicalMissingReferences": 20,
+      "originalDiagnosticsByteIdentical": true
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.01202614100111532,
+      "wait4MaxRssKiB": 11180,
+      "log": "check-13.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.015413658999023028,
+      "wait4MaxRssKiB": 11180,
+      "log": "check-14.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "elapsedSeconds": 18.50310446000003,
+  "maxWait4JobRssKiB": 178160,
+  "historicalFiles": [
+    {
+      "path": "tests/upstream/baseline-20261028/gaps/gaps.json",
+      "sha256": "33a03184bb0ec6c4ce0e8947ece7eb5c0041993beae0b05c87cda097f71eb01c",
+      "byteIdenticalToStartingCommit": true
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/attribution/index.json",
+      "sha256": "1373bb0acd6c82efb92c7e6acfa29a018d60b4ed66320a98b22eddb2a71f8bee",
+      "byteIdenticalToStartingCommit": true
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/probes/matrix.json",
+      "sha256": "139689102bc2d29d9b70efc3c8f80a8592a4463f5e4b86431eb456616301c739",
+      "byteIdenticalToStartingCommit": true
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/probes/evidence.tar.gz",
+      "sha256": "3776164ebd0eae5e919b3500f5cf8a35d41727d016b11df4f8e8e5a3ff803c79",
+      "byteIdenticalToStartingCommit": true
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/portable-evidence.tar.gz",
+      "sha256": "5a200e1932c0d12392dd0a27b52b238e622b7f84643b706263d48052078e32ed",
+      "byteIdenticalToStartingCommit": true
+    },
+    {
+      "path": "tests/upstream/baseline-20261028/summary.json",
+      "sha256": "7957775c1ab16bc217849d8b96d061079034fbdd622e9105e6c3bda39b45d914",
+      "byteIdenticalToStartingCommit": true
+    }
+  ],
+  "historicalGeneratorNote": "Prior document hashes are snapshot provenance; historical reproduction belongs at its recorded checkpoint. No old derived report regenerated.",
+  "resourceInterpretation": "wait4 maximum is per reaped lightweight job, not aggregate cgroup peak. Actual native checks used12GiB/no-swap cgroups; metrics are archived logs/*.json.",
+  "nativeValidationComplete": false,
+  "remainingNativeCapability": "nonzero-msg.value external-entry discriminator; proof listing is a separate stale Testing closure"
+}
