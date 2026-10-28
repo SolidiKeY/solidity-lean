@@ -2087,3 +2087,73 @@ audit record under the demonstrated Docker cap and unchanged 300-second jobs.
 This task does not enter general closer/step-13 work. Reference/function results
 and broader dispatch remain explicit unsupported shapes; the aggregate timeout
 is separate missing validation. All four catalog entries remain partial/model.
+
+### Validation-driver sharing investigation (2026-10-28)
+
+The [sharing evidence](../../tests/upstream/entry-points-left-sharing-validation.json)
+and executable [probe](../../tests/upstream/GetterEvaluationSharing.lean) continue
+the same branch at `12f773b5`. All original implementation, failed attempts and
+historical hashes are preserved. No feature semantics, production driver,
+manifest status, observations, expected results, proof premises or search budgets
+changed. The production Testing source was restored byte-for-byte after measuring
+two rejected experiments; experiment wrappers, patch and logs remain in the new evidence.
+
+The existing compiled-obligation-table path passed `primitives` but took 141.213
+seconds (133.268 seconds in the row, 112 seconds type checking). It is not a safe
+drop-in driver change: compiled table references can make bounded recursion
+inspection visit unrelated rows. A narrower selected-program compilation kept
+original classification and theorem types, but took 148.270 seconds including
+build (138.072 seconds in the row, 116 seconds type checking). Both showed about
+7.8 seconds of compiler work. Neither establishes a useful sharing repair.
+Earlier declaration-table batching and callee hash-consing choices were inspected
+in history (`75b6e489`, `1a7d5b0e`) and remain intact.
+
+The small probe imports the original hash-pinned modern 0.8.38 legacy-pipeline fixture and uses
+the actual typed `primitives` and `arrays` formulas. Within one command it evaluates
+the identical callback-classification expression twice, then safely compiles that
+exact expression once and reads its retained declaration twice. It checks all four
+Boolean observations agree, kernel-checks retained-definition equality and prints
+the actual transitive axiom set (`propext` only). Final direct execution exits 0
+in 9.042 seconds. Fresh calls cost 116/127 ms for primitives and 111/98 ms for
+arrays; checked retention setup costs 343/305 ms, then reads cost 10/5 and 9/7 ms.
+The setup measurement includes the environment-count check, fresh-name generation
+and checked declaration compilation; fresh calls include their full check, compile
+and evaluation lifecycle. This demonstrates the missing native helper lifetime boundary in Lean's
+`evalExprCore` (`withoutModifyingEnv`, fresh temporary, `addAndCompile` each call),
+not the number of identical expressions encountered in proof search. Two reads
+do not repay retention setup here, and this boundary does not resolve the much
+larger measured kernel-checking cost. No general closer/step-13 work was entered.
+
+All checks were serial under the existing Docker cgroup hard 12 GiB/no-swap cap,
+with explicit `-j1`, `LEAN_NUM_THREADS=1` and measured host-available-memory minima.
+Source/dependency/settings hashes were matched before reusing imported artifacts;
+there is no persisted proof/verdict cache. The maximum measured cgroup peak was
+2128048128 bytes; final direct probe peak was 242532352 bytes, with zero OOM/limit
+events. Per-file lean-verify diagnostics passed after fixing retained failed
+development attempts.
+
+The original 62-test affected invocation remains **blocked**, actual historical
+exit 1 on the unchanged 300-second aggregate PublicGetters job. The independent
+starting-master wrapper also timed out at 300 seconds as recorded above. No
+unchanged full-suite retry followed these rejected experiments; individual probes
+do not replace that gate. The full original roster, false observations, refusal
+controls and legacy/viaIR evidence remain intact. Reference/function results and
+broader dispatch remain separate unsupported shapes; all four catalog rows remain
+partial/model. The exact remaining boundary is repeated temporary native helper
+compilation versus expensive kernel-checked walk/residue certificates; no measured
+driver-local retention repair is justified by these results.
+
+Final read-only finder and skeptic reviews verified restored production hashes,
+fixture identity, observations, axiom outputs and the original blocked full gate.
+They found a measurement-label issue: retention timing includes environment-count
+checks and fresh-name generation. Labels now say **retained setup**, with overhead
+explicit; the corrected source passed sealed diagnostics plus direct execution
+serially in 18.600 seconds, cgroup peak 908361728 bytes, no OOM/limit events. The
+sealed CLI reports fresh/setup/read timings of 166/118, 372, 10/8 ms for primitives
+and 115/95, 340, 12/7 ms for arrays. No remaining production integrity finding was
+reported.
+
+Final static checks: trust has zero findings (after correcting the checker
+invocation), orphan/layer/strict automatic checks pass, generated inventory is
+current, and staged whitespace checks pass. Documentation paths retain exactly
+the baseline 20 findings and remain failed; raw historical reports are unchanged.
