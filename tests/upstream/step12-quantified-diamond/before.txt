@@ -1,0 +1,20 @@
+Starting origin/master: f4dee4a29c2e208b36db4a4161a4723c735cd775
+Original checkout (clean): 11ea6b345b3747b0edb3c703a60211d6138aec5c
+Lean 4.24.0 / Lake 5.0.0-src+797c613
+Before editing, kernel checked in Solidity/Scratch/QuantifiedDiamondBefore.lean:
+
+import Solidity.Calculus.Blocks
+namespace Solidity
+theorem quantifiedDiamondBefore {C : Contract} {Γ Γb : Ctx}
+    (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
+    (brk : Bool) (q : LoopQ C Γ) (qs : List (LoopQ C Γ))
+    (body : Prog C Γ Γb) (xs hv) (hf : body.frame = some (xs, hv)) :
+    loopStep k .diamond (.inv I (some d) brk (q :: qs)) c body = .done false := by
+  simp only [loopStep, hf]
+#print axioms quantifiedDiamondBefore
+end Solidity
+
+Command: LEAN_NUM_THREADS=1 prlimit --as=12884901888 -- lake env lean -j1 --tstack=131072 Solidity/Scratch/QuantifiedDiamondBefore.lean
+Result: exit 0; 'Solidity.quantifiedDiamondBefore' depends on axioms: [propext]
+The generic refusal includes every nonempty clause list and every admitted frame,
+even with a scalar variant. It is a calculus baseline, not an EVM run.

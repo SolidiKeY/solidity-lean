@@ -598,3 +598,7 @@ import Solidity.Tools.Upstream
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport
 import Solidity.Syntax.Numeric
+
+import Solidity.Calculus.LoopInvariantWk
+import Solidity.Examples.Tactics.QuantifiedDiamond
+import Solidity.Solkey.QuantifiedDiamond

@@ -2,7 +2,7 @@ import Solidity.Theory.Bridge.Denote
 import Solidity.Calculus.SoundArms
 import Solidity.Calculus.SoundCalls
 import Solidity.Semantics.NoPanic
-import Solidity.Calculus.TermWk
+import Solidity.Calculus.LoopInvariantWk
 import Solidity.Calculus.Sound.LoopLexErase
 import Solidity.Calculus.Sound.LoopLexDiamond
 
@@ -417,10 +417,10 @@ theorem TLoop.run_variant_or {α : Type} {body : α → TRes α} {c : α → TRe
 /-- **`whileInvariantDiamond` is sound** over the typed state: the variant
 bounds the iterations left. -/
 theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
-    (brk : Bool) (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}
+    (brk : Bool) (qs : List (LoopQ C Γ)) (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}
     (hf : body.frame = some (xs, hv)) (σ : State C Γ) {p : Premise C Γ Γ}
-    (hp : loopStep k .diamond (.inv I (some d) brk []) c body = p) :
-    Premise.Runs .diamond (.loop (.inv I (some d) brk []) c body) p σ := by
+    (hp : loopStep k .diamond (.inv I (some d) brk qs) c body = p) :
+    Premise.Runs .diamond (.loop (.inv I (some d) brk qs) c body) p σ := by
   unfold loopStep at hp
   rw [hf] at hp
   dsimp only at hp
@@ -449,7 +449,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       exact ⟨rfl, nofun⟩
   refine TLoop.run_variant_or (X := fun e => e = .exhausted)
     (H := fun a : Out C σ.H Γ => TGFrame μ σ a.st ∧ FrameKeeps hv σ a.st ∧
-      TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧ holds a.st (Fml.isBool I.lower true))
+      TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧ holds a.st (invFml I qs))
     (D := fun a : Out C σ.H Γ => (d.evalT a.st).map (·.1)) ?_
     ⟨TGFrame.refl σ, FrameKeeps.refl _ σ, TLocAgree.refl _, hI0⟩
   rintro a ⟨hg, hk, hag, hI⟩
@@ -505,11 +505,8 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       obtain ⟨hI₁, hdec⟩ := h'.1
       let τ₀ : State C Γ := o.st.drop body.ext
       change holds (τ₀.push (t := .val .uint) dv) _ at hI₁ hdec
-      have hIτ : holds τ₀ (Fml.isBool I.lower true) := by
-        have h₁ : holds (τ₀.push (t := .val .uint) dv) (Fml.isBool I.up.lower true) := hI₁
-        show I.lower.denote τ₀ = _
-        rw [← Val.lower_denote_up (t := .val .uint) I τ₀ dv]
-        exact h₁
+      have hIτ : holds τ₀ (invFml I qs) :=
+        (invFml_up_holds (t := .val .uint) I qs τ₀ dv).1 hI₁
       have hgτ : TGFrame μ σ τ₀ := hg.trans (hg'.withEnv _)
       have hkτ : FrameKeeps hv σ τ₀ := hk.trans (Prog.frame_keeps hf hb)
       have hagτ : TLocAgree 0 (Prog.writesAt 0 body) σ.env τ₀.env := hag.trans ha'
@@ -626,14 +623,6 @@ theorem Stmt.sound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C
           unfold loopStep at hp
           rw [hf] at hp
           cases qs <;> (dsimp only at hp; cases hp; exact Premise.sound_done σ false nofun)
-        | some d =>
-          cases qs with
-          | nil => exact Premise.sound_whileInvDiamond k I c d brk body hf σ hp
-          | cons =>
-            unfold loopStep at hp
-            rw [hf] at hp
-            dsimp only at hp
-            cases hp
-            exact Premise.sound_done σ false nofun
+        | some d => exact Premise.sound_whileInvDiamond k I c d brk qs body hf σ hp
 
 end Solidity
