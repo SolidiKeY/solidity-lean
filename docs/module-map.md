@@ -93,6 +93,8 @@ commands; it never enters the core import graph.
 | `Bridge/SolidityBridge/ExternalEvm/Dispatch.lean` | The core's instruction steps against `EvmYul.EVM.step` on numeric stacks. |
 | `Bridge/SolidityBridge/ExternalEvm/StackOps.lean` | Legal DUP1–16 and SWAP1–16. |
 | `Bridge/SolidityBridge/ExternalEvm/Obstructions.lean` | Proved disagreements (CALL, REVERT, jumps, fixed memory, symbolic slots) that rule out a one-opcode identity theorem. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/Layout.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutChecks.lean` | Typed forward-label resolution, checked raw-byte layouts and offset/refusal controls; execution refinement remains separate. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/Control.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/Loop.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean` | Actual local jump macros/fetched traces, paired observations, driver refusal controls and constant-loop counted prefixes; general assembly refinement remains open. |
 | `Bridge/SolidityBridge/Adversary.lean` | An independent adversary LTS at a payment boundary; `holdsC_iff_all_policies`, `holdsC_iff_all_callees`. |
 | `Bridge/SolidityBridge/AdversaryPolicy.lean` | A fixed operational callee has exactly the outcomes of its reachable return policy. |
 | `Bridge/SolidityBridge/CallbackTrace.lean` | Completed callback outcomes as observable traces; weak/strong trace equivalence and bisimulation preserve the callback modality. |

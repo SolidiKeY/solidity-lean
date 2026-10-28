@@ -365,7 +365,7 @@ The full instruction correspondence is **not complete**; what remains:
 |---|---|
 | `keccakMap`, `keccakArr`, `sload`, `sstore` | Numeric slot interpretation, concrete hashing/memory setup, and a storage relation handling address aliases. |
 | `mload`, `mstore`, `mloadAt`, `mstoreAt` | Word-cell to byte-memory relation, address scaling and macro expansion for fixed addresses. |
-| `jump`, `jumpi`, `loop` | Assembler from relative/structured control flow to absolute PC and valid jump destinations. |
+| `jump`, `jumpi`, `loop` | Typed raw-byte layout preparation exists below; upstream decoding/valid-destination proofs and structured execution/loop simulation remain open. |
 | `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
 | `revert` | Return-data operands and the driver's halting relation. |
 
@@ -376,6 +376,98 @@ memory opcodes, non-wrapping symbolic offsets, and impossibility of a globally
 injective encoding of all symbolic slots into finite EVM words. These results
 rule out an unrestricted one-opcode identity theorem; they do not rule out
 verified macro lowerings under explicit representation assumptions.
+
+#### Assembly layout and local control macros
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Layout.lean` resolves labels in the
+existing `List Instr`; it introduces no source intermediate language. A label
+is a `Fin (code.length + 1)`, including the continuation. `Relocation` retains
+both `target = origin + 1 + offset` and the exact absolute word address.
+Resolution refuses offsets beyond the continuation, unsupported prefixes, and
+word-address overflow. Numeric PUSH, POP, relative JUMP/JUMPI and nested LOOP
+have executable byte emission; other instructions have no assembly layout here.
+
+Every core boundary receives a `0x5b` byte. Branch macros use fixed PUSH32
+immediates followed by JUMP/JUMPI. Loop emission uses a header, condition,
+ISZERO/conditional exit, body and absolute back edge. Its body begins at
+`base + conditionSpan + 37`; its continuation is at
+`base + conditionSpan + bodySpan + 72`. `assemble` returns a proof-carrying
+`Image` only after checking total length, word-address bounds, boundary bytes,
+and all nested branch-reference bytes. PUSH32 accepts `Fin W`, so its encoder
+cannot silently truncate an out-of-range input.
+
+This is **layout preparation, not completed compiler refinement**. The byte
+checks do not prove upstream PUSH32 decoding, scanner-recognized JUMPDESTs,
+code placement, or execution simulation. For example, placing a `0x5b` image
+after a PUSH32 opcode can put that byte inside its immediate data. A future
+upstream layout relation must exclude that placement and expose actual fetch
+and valid-destination assumptions. General structured sequence/branch/loop simulation
+and divergence correspondence remain open; the existing same-stack JUMP and
+JUMPI obstruction proofs are unchanged. Source assembly remains excluded.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutChecks.lean` checks taken and
+untaken core branches, zero offsets, exact continuation targets, too-large
+offsets, nested-loop edges, unsupported instructions and word-PC boundaries.
+These are layout/core-run controls, not source-versus-upstream agreement.
+Per-file Lean checks used Lean 4.24.0 with `-j1`: layout 1.815 s / 720,998,400
+bytes peak sampled group RSS; controls 1.208 s / 693,436,416 bytes. The managed
+VM policy was an existing 16 GiB cgroup with no actual swap, a hard inherited
+12 GiB per-process address-space limit, sampled 10 GiB workload RSS stop and
+12 GiB whole-VM-current stop. No writable 12 GiB cgroup limit was set.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Control.lean` proves actual
+upstream PUSH32/JUMP and PUSH32/JUMPI macro equations for arbitrary target
+states and numeric stack tails, including conditional underflow. `jump_pc`
+retains the exact resolved natural address; the jump/frame lemmas preserve
+account/environment state and target memory. `fetched_jump_trace` and
+`fetched_jumpi_trace` use actual dispatcher steps with explicit packet-fetch
+assumptions. Positive evaluator fuel and zero charged gas remain explicit.
+The `sequence` helper composes separately supplied source successes and target
+traces; it is not a general sequence simulation or boundary-relation theorem.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean` pairs core runs
+with fetched upstream observations of taken/untaken branches, numeric PUSH32
+including the maximum word, and a terminating loop. It instantiates the general
+fetched-JUMP theorem at an inhabited actual code/state and proves the target
+byte decodes as JUMPDEST. Actual upstream `X` controls reject invalid taken
+JUMP/JUMPI destinations and accept an untaken JUMPI with an invalid destination;
+these use fixed, explicit driver resources, not a new source gas model.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Loop.lean` links the emitted
+constant-true loop bytes to a universal ten-step fetched cycle. The cycle
+preserves the stack and account/environment state, returns to the header,
+and increases `execLength` by ten. `trueLoop_prefixes` proves actual counted
+prefixes for every number of turns. `trueLoop_core` retains the core's semantic
+`.fault` classification for a loop with no terminating turn. This does not
+identify `.fault` with a finite-fuel `X` result, prove driver divergence, or
+establish arbitrary structured-loop assembly correctness.
+
+The focused targets `SolidityBridge.ExternalEvm.Assembly.LayoutChecks`,
+`SolidityBridge.ExternalEvm.Assembly.ControlChecks` and
+`SolidityBridge.ExternalEvm.Assembly.Loop` pass (exit 0), including all paired
+observations and headline axiom audits. Their actual axiom union is
+`propext`, `Classical.choice`, `Quot.sound`. The final pinned warm check took 6.956 s
+at 1,788,063,744 bytes peak sampled group RSS. Loop checking took 17.019 s at
+3,387,580,416 bytes. Direct ten-step elaboration had hit the existing 200,000
+heartbeat limit; separate closed decoder proofs and step equations repaired
+checking without raising any limit. Validation used temporary untracked Lake
+copies with package/library `weakLeanArgs = ["-j1"]`, `LEAN_NUM_THREADS=1`, and
+the workload guard described above; the copies and exact commands are retained
+in the delivered evidence.
+
+The **full default Bridge gate is BLOCKED**, not passed: its guarded cold
+build timed out (exit 75) after 1,200.115 s at 2,400,370,688 bytes peak sampled
+group RSS while building existing dependencies. Azure cache requests returned
+proxy HTTP 403; on-disk source-build progress was preserved. The narrower
+upstream evaluator closure did pass from source (1,053 jobs, 957.962 s,
+1,724,338,176 bytes). Orphan, layer, strict automatic, trust and vendor hash
+gates pass. The prose-path gate still reports 20 historical missing references;
+all diagnostic-producing files match the recorded base byte-for-byte.
+Independent read-only finder/skeptic reviews found no defect in the restricted
+layout, local macro or constant-loop claims, and confirmed that general
+assembly refinement remains open. The original full assignment is incomplete;
+this is a proved independent increment, with the full regression gate and
+remaining general simulation obligations retained explicitly.
 
 To build the independent targets alone, from `Bridge/`:
 

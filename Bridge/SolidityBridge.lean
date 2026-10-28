@@ -25,3 +25,5 @@ import SolidityBridge.CallbackModalTrace
 import SolidityBridge.ExternalEvm.Dispatch
 import SolidityBridge.ExternalEvm.StackOps
 import SolidityBridge.ExternalEvm.Obstructions
+import SolidityBridge.ExternalEvm.Assembly.LayoutChecks
+import SolidityBridge.ExternalEvm.Assembly.ControlChecks
