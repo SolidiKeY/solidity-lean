@@ -2028,3 +2028,62 @@ remain partial. Reference/function return frames, nominal dynamic signatures,
 unsupported handler shapes, raw transaction dispatch and the aggregate source
 test timeout remain explicit handoff limits. Kernel model certificates and
 typed-interpreter observations are not compiler/EVM equivalence proofs.
+
+### Aggregate-gate audit continuation (2026-10-28, dc0ac441)
+
+The [new audit record](../../tests/upstream/entry-points-left-aggregate-audit.json)
+preserves the original `c5bab5e3` evidence and adds a same-VM bounded diagnosis.
+The original affected-suite invocation still exits 1: its unchanged 300-second
+PublicGetters aggregate gate remains **blocked**. The individually replayed 16
+rows do not pass that gate. No expectations, observations, proof premises or
+search budgets changed; no feature code or catalog status changed.
+
+Existing Docker support supplies a real hard cgroup v2 cap: `memory.max` is
+12884901888 and `memory.swap.max` is 0, measured inside the container. No daemon,
+credential or managed configuration changed. The local runtime image uses
+existing binaries, no network, UID 1000 and a read-only host root with this
+workspace writable. Host PID visibility fixes chroot executable discovery.
+Checks use one Lean thread and explicit `-j1`; no Lean server runs alongside.
+The initial container launcher failures are recorded separately and establish
+no successful validation. Earlier per-process/watchdog measurements remain
+historical; the new cap does not retroactively certify those runs.
+
+Only this clone's two saved frontend files were temporarily restored to starting
+master `f4dee4a2`, then restored in `finally`; the implementation commit remains
+intact. The baseline frontend build passed in 41.849 seconds. Its reconstructed
+original aggregate wrapper, with profiling enabled, timed out at 300.002 seconds
+and retained seven proved rows, one internal row and eight notRun rows. Baseline
+`primitives` cost 112.234 seconds and `arrays` 73.625 seconds; historical final
+individual costs were 115.918 and 78.093 seconds. These observations reproduce
+the large proof cost before this lane. They do not establish a same-environment
+full-proof timing equivalence or an aggregate pass. Import/obligation/listing
+cost was 4.380 seconds on baseline and 3.575 seconds after restoration; all 16
+listing objects match apart from timing. No actionable importer/callee-sharing
+regression was identified in this lane. The unchanged final aggregate was not
+blindly rerun. Diagnostic peak cgroup memory was 2260283392 bytes, with no OOM
+or memory-limit events. The diagnostic driver exits 0 when diagnosis completes;
+its recorded baseline timeout remains blocked.
+
+A separate hard-cap run passed KeySort (0.201 seconds), all 42 existing kernel
+certificates with standard axiom sets (26.482 seconds), and admission controls
+(1.811 seconds), peak 880435200 bytes, zero OOM/limit events. Earlier source/API,
+legacy/viaIR, upstream and static results remain precisely as sealed above; no
+new compiler/EVM or full-library claim follows from this documentation audit.
+
+Independent read-only finder and skeptic reviews ran without Lean workers. Both
+found no concrete lane sharing regression. The skeptic found that the diagnostic
+headroom guard's `os._exit` could bypass restoration; the saved reusable driver
+now propagates a stop through child cleanup and `finally` instead. That guard
+did not fire; both exact used and corrected drivers are retained. The finder
+also requested raw cgroup snapshots and a narrower headroom claim; the record
+now includes exact tool-output snapshots and claims no continuously measured
+available-memory minimum. Final read-only reviews found no remaining overclaim.
+
+Required action outside this lane: the owner of shared proof-search/callee
+evaluation must provide an authorized optimization preserving all original rows,
+assertions, premises and budgets, or demonstrate a suitable execution allocation
+in this same environment. Then run the exact original affected command from the
+audit record under the demonstrated Docker cap and unchanged 300-second jobs.
+This task does not enter general closer/step-13 work. Reference/function results
+and broader dispatch remain explicit unsupported shapes; the aggregate timeout
+is separate missing validation. All four catalog entries remain partial/model.
