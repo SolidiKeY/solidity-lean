@@ -503,6 +503,7 @@ import Solidity.Calculus.HashKinds3
 import Solidity.Calculus.HashMove
 import Solidity.Calculus.MemSwap
 import Solidity.Calculus.MemHoist
+import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntTwoAnchors
 import Solidity.Calculus.KIntEncode
