@@ -168,3 +168,49 @@ cgroup peak 332,320,768 bytes. Compiler SHA-256 is
 records source/control/fixture hashes and exact pipeline commands. Raw focused,
 MCP and pipeline logs and environment-specific replay commands are in the same
 new directory; no historical report was overwritten.
+
+## Combined validation and handoff (2026-10-28)
+
+The final `./run-lean.sh` completed with exit 0: **686 default-target jobs,
+259 TestSuite jobs**, then 377 frozen taclets and all 131 read-bearing
+annotations matched. Elapsed time was **145m34.609s**; recorded cgroup peak was
+**12,884,901,888 bytes (12 GiB)**, equal to the enforced limit. Swap allowance
+was zero. Previously checked setup/focused artifacts were retained, so this is
+the measured bounded combined run, not a clean-checkout cold benchmark. An
+attachment refresh disconnected the original output stream; the same surviving
+build container's logs and terminal status were recovered without restarting
+or duplicating Lean work.
+
+The three selected ordinary-import upstream fixtures remain blocked by
+`transaction/block/self-address or cross-contract host behavior not adapted`:
+`tryCatch/create.sol`, `libraries/external_call_with_storage_mapping_parameter.sol`,
+and `functionCall/creation_function_call_with_args.sol`. Both required legacy
+and viaIR replays are explicitly blocked, not passing observations. All original
+source/expectation rows, including gas rows, are retained with hashes in the
+[new handoff](../../tests/contract-world-certificates/README.md). Their runner
+checks took 3.420 s, cgroup peak 318,824,448 bytes, exit 1. An initial malformed
+command ran no fixtures; its failed-invocation log is retained separately.
+
+Final static checks pass: trust (715 sources, 240 inventoried sites, no
+findings), reachability (701 modules, no orphans), layers (153 core modules,
+no frontend leaks), strict automation (491 automatic, 61 with a step budget,
+11 refuted, none pending), and generated inventory consistency (212 features,
+783 classified upstream symbols). The affected metadata/hash Node regression
+passes 1/1. The documentation-path audit still reports 20 missing references,
+all in unchanged archived group03/group10 reports or an existing Mathlib
+citation; it is not recorded as passing. No historical report was rewritten.
+
+The reviewable implementation is `1e37a2256e277ef24b04284ad0de9f822feaca8c` on
+`feature/world-reachable-catch`. Complete commands, per-fixture outcomes,
+standard-axiom checks, compressed raw logs, exact remaining refusals and shared
+file edits are in
+[validation.json](../../tests/contract-world-certificates/validation.json).
+The source certification increment is complete; dynamic source creation
+arguments, general library arguments/results and ordinary world-aware execution
+remain explicitly unsupported. No master push or merge was performed.
+
+The final independent read-only finder and skeptic also verified all retained
+log/exit, archive/fixture, pipeline, source/control/model, compressed coverage
+and implementation-patch hashes. Neither invoked Lean or builds; no confirmed
+inconsistency remained. The temporary root build configuration was removed
+after validation, with its exact contents retained in the handoff.
