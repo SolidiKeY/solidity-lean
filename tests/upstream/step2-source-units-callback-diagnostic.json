@@ -1,0 +1,3375 @@
+{
+  "version": 1,
+  "auditId": "39481496-2ddb-4956-a5b9-43cdfa5a677e",
+  "date": "2026-10-28",
+  "repository": "SolidiKeY/solidity-lean",
+  "branch": "feature/source-units-step2",
+  "priorCommit": "e0dec90810364dcf5261fa0a3c1a3b7112de804f",
+  "preservedCommits": [
+    "da933e15",
+    "97d62742",
+    "e0dec908"
+  ],
+  "environmentId": "ccarenv_b64_Y2NhcmVudl82NTMzMzYwNTAzZjA4MTkxOTgxMjZiMjJkN2E3ZjEyNw",
+  "runtime": "actual attached shell ready; clean e0dec908 checkout; no Lean/server/build worker; documented writer lock held throughout preparation and single diagnostic; enclosing cap16GiB",
+  "staticComparison": {
+    "startingMaster": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+    "branchSnapshot": "e0dec90810364dcf5261fa0a3c1a3b7112de804f",
+    "target": "Solidity/Examples/Tactics/CallbackStrategy.lean",
+    "targetSha256": "105327843da54a9101a436a2266c94243bdefe1dad3ecce808e2ea0212733e1c",
+    "targetSameAsBase": true,
+    "authoritativeSource": "Exact saved Lake setup importArts, not a comment-sensitive source regex",
+    "localImportedModules": 229,
+    "changedClosureModules": [],
+    "setupOptions": {},
+    "setupPlugins": [],
+    "setupDynlibs": [],
+    "dependencies": [
+      {
+        "module": "Solidity.Update",
+        "source": "Solidity/Update.lean",
+        "sourceSha256": "b6770b0a55a024edbf17e0abe396984bac6ca3797e0a3d238a9b62af5adfb830",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4508081860361875464.olean",
+            "sha256": "05fffa1323496b996c8d8151b16441c7a316e31bc8983801c79245aaf01f0f77",
+            "bytes": 163632
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.Values",
+        "source": "Solidity/Typing/Values.lean",
+        "sourceSha256": "8b6c32a3816e4613470608c860b727180d0dde2c0c22038b44b220bb0406099c",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12521795388551370719.olean",
+            "sha256": "e52660dd34434f243653a7842cde4e80d03a6bffb3ee6486bae1a22fc0b7883e",
+            "bytes": 4266928
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.TypedRunInv",
+        "source": "Solidity/Typing/TypedRunInv.lean",
+        "sourceSha256": "d4a3609fef4ac137c040f31f0a2934b3239abf8056081f7868066f8596e89d2a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5422502560525415679.olean",
+            "sha256": "3253caba628927e4ade3c151b0d372a9793376a22d73deedbc943e22d238fe12",
+            "bytes": 889128
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.Tight",
+        "source": "Solidity/Typing/Tight.lean",
+        "sourceSha256": "6b5648af0064ec36f47a13324316c487c61608a2f1d4be7660b0f545e403b4e6",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16504148767684273672.olean",
+            "sha256": "129248f8d2edaad61e2d38e21593b37f1da2f5020e6ecd8e5c98116884ca441d",
+            "bytes": 215176
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.Soundness",
+        "source": "Solidity/Typing/Soundness.lean",
+        "sourceSha256": "a4aafcddf6e0aedb60a371a8ef0c926268f7aa1fcb4e3ee2f4d3d0aae847434d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5526578470728047405.olean",
+            "sha256": "6a849b7b8223bc45a985b830ee0a0c807a6b6b8f9d05f27c506d237a13d38e87",
+            "bytes": 70552
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.Reachability",
+        "source": "Solidity/Typing/Reachability.lean",
+        "sourceSha256": "2004789b49a1b9e054fccd84bfb4bf44e941c9fb279db53597341bc58c224fc2",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12612125002153112051.olean",
+            "sha256": "6414dce52dc701b18c2cefd1958bd025cacabec949b74daf4dc6b4ad006a9772",
+            "bytes": 155104
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.HeredRun",
+        "source": "Solidity/Typing/HeredRun.lean",
+        "sourceSha256": "8bf6f4713b0939a60cf713591f3ac928dfb3a47ce2743ec20838d7a2f120d659",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16941146814759366237.olean",
+            "sha256": "03011a1b03601ff1a0ddd632631ff1f4135777a2e2934af74b83e3dc1f6c10d2",
+            "bytes": 2811000
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.Fits",
+        "source": "Solidity/Typing/Fits.lean",
+        "sourceSha256": "077bb72e812053667f559a0b271c052f0f7f00f2fb1db1a2776929c8c89fba71",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11021003679793505655.olean",
+            "sha256": "c22c7dc751722ded1630646cd1597bd7b84fe98b9c493bb91f1867c253e66c92",
+            "bytes": 327632
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.Constructibility",
+        "source": "Solidity/Typing/Constructibility.lean",
+        "sourceSha256": "ef7f71c95f25f70e395d6da5f14f36fbc48714cf2e3e4fc130a4fa1de03bb9fa",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5713142101764220520.olean",
+            "sha256": "a59ed1699990a5c3e8571eac815e03d66a12ec945f527fc65c1dbe03a0425f8b",
+            "bytes": 2875936
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.CleanTailRun",
+        "source": "Solidity/Typing/CleanTailRun.lean",
+        "sourceSha256": "5ab2dc6eba7e233f79d417fe01e1aa3c0c6ca01281182d8fde56585530c294e7",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11736648967941354621.olean",
+            "sha256": "43dbc7802c381d0ee648034aa3875d77a9913b252a8226d795f855d61c86b85d",
+            "bytes": 8483400
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.CleanTail",
+        "source": "Solidity/Typing/CleanTail.lean",
+        "sourceSha256": "31fddba4c6e1b500a1e2aafc1ac205050ca184f9f80c52dc27dfbf049655650f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2840369344825946855.olean",
+            "sha256": "aaf809cbad9d51e99452f2e872b2f0ed9564f4d6d0b2b29c4b24d518f913f180",
+            "bytes": 866048
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Typing.CanonTest",
+        "source": "Solidity/Typing/CanonTest.lean",
+        "sourceSha256": "e14e8c0b8658e78c74d5d28034e77cf2176ed391a5faafe0ae5c9976216fee94",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15816114698476828847.olean",
+            "sha256": "47cef3fe1291d1f97b86c663ce762ae81ad1d14b726c09ee00bd98a699ea7f04",
+            "bytes": 108160
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Theory.Typed.Obs.Values",
+        "source": "Solidity/Theory/Typed/Obs/Values.lean",
+        "sourceSha256": "47995dc3569459157761825dde462c102424cc44d779ac548d9e6cd4cef6c1c5",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11737566315085697443.olean",
+            "sha256": "c9059ffa04e32c38144e30fae154a57380626fd5d4d6faf4c56c15a75025c0dd",
+            "bytes": 2988992
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Theory.Typed.Obs.Paths",
+        "source": "Solidity/Theory/Typed/Obs/Paths.lean",
+        "sourceSha256": "207bc401bf223ddcc90322522890f064c9aba2786204895e69da81898ac5c5cc",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8714682772691091917.olean",
+            "sha256": "eb0a137ca697c7b5fd71d4a880d05ef02f8120a3009ec2c35075927f1251e972",
+            "bytes": 4821560
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Theory.Typed.Obs.Ops",
+        "source": "Solidity/Theory/Typed/Obs/Ops.lean",
+        "sourceSha256": "73daf760a49da614a224a6e744dec38dd81060cbffbfd7e24f6418474424bdc9",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11404811322371402391.olean",
+            "sha256": "9fe829f51701c7b728432f5aa59f87309580832ba368a84df3acdffdce2f61b6",
+            "bytes": 2018624
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Theory.Typed.Obs",
+        "source": "Solidity/Theory/Typed/Obs.lean",
+        "sourceSha256": "adf3215f70b63900d25c801084a2fbe6a74d5ce545e8791ae792c7eb05425a27",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4437450130364163832.olean",
+            "sha256": "3d5467740b854e1ef3ef862cfed36f43bbf08633ada759cbcf88ac34040ea8e3",
+            "bytes": 22672
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Theory.Typed.MemMirror",
+        "source": "Solidity/Theory/Typed/MemMirror.lean",
+        "sourceSha256": "297bdf800b405d5b81cf655bb9755f96b799d45b2dcb25cd34b146a522f584b4",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8494566324461573187.olean",
+            "sha256": "c4344b3a87a002c10e9fc95049694bd0af1436e2fb578d2dff958ee9e09002bd",
+            "bytes": 772760
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Theory.Typed.Mem",
+        "source": "Solidity/Theory/Typed/Mem.lean",
+        "sourceSha256": "3791770611e07ce4cab587cf9f4e3138a9d49d931d37213904df8f341539808f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17626372260655016015.olean",
+            "sha256": "750c908672a39c4affea6a96960dd83ff347c560ca12ea3cd810d4bb0628954d",
+            "bytes": 2641808
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Theory.Segs",
+        "source": "Solidity/Theory/Segs.lean",
+        "sourceSha256": "57e4a32ca89346c6e840f90866f0cdfd8fc2765cb268e09f693e267a5cb0b673",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9584813423235551355.olean",
+            "sha256": "f7d81cd7c4e8bc12dc8ec588b4c520e6bb998534228ad6eded7b42163c39faf9",
+            "bytes": 42280
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Theory.Bridge.Denote",
+        "source": "Solidity/Theory/Bridge/Denote.lean",
+        "sourceSha256": "dfb71b1ad5c191193e1e7fa687aad5e99b5b59e879b410e2516a647e6163ec76",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3419033105483060584.olean",
+            "sha256": "ac16da4797df1055c5e6082a1df27f8602914c6cc2680a59da28e3a1ece6f59a",
+            "bytes": 3683216
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Splice",
+        "source": "Solidity/Syntax/Splice.lean",
+        "sourceSha256": "7969101dc654bc288f293714ed40806e359c9cadfc51851b6223fbe8d40977ee",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12438531000915393153.olean",
+            "sha256": "ee58e9814ce731c3e28efcee6649221294f8aaa081d584734893310ab2f64837",
+            "bytes": 732912
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Scoped",
+        "source": "Solidity/Syntax/Scoped.lean",
+        "sourceSha256": "b1fa2db12fc79ad445a32658f9231b0e09ce4b34c717bc00e46d0470d9c1e098",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12613385498004722816.olean",
+            "sha256": "83fdf80c17a5c0ea475d935770cd4f364f8e431314bdddb98cf80afeee53c9de",
+            "bytes": 10262032
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Raw",
+        "source": "Solidity/Syntax/Raw.lean",
+        "sourceSha256": "d2fe8be8e0613c8f80b92210f965fdbb7aa067d3bf72548b204909f3f92a28f2",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8948348103998488243.olean",
+            "sha256": "18d4241c057a6b2721b3ba48951f8e7c18711b300a7bc03a6473007a8203d66a",
+            "bytes": 5102328
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Quote",
+        "source": "Solidity/Syntax/Quote.lean",
+        "sourceSha256": "219860f59c96c2580f19ae10c8dcfa27dbb69b2b0f415b1c5bd138f56f2e87e9",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8972671352086309004.olean",
+            "sha256": "ecd171d55d9f2a4d28b1d40fdfdb54b25497f64406fb22c0baba6bf7ec85503f",
+            "bytes": 2602600
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.PushSource",
+        "source": "Solidity/Syntax/PushSource.lean",
+        "sourceSha256": "80e4c3b947bc6ab63eda96005f7f982971204423bf7c0f059e57b07f38f6bdcf",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11426572706591839089.olean",
+            "sha256": "444e27cb8c967810d03f23e7469e169fa23a2e510d5a57fc9e082115a8583d8f",
+            "bytes": 211424
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Numeric",
+        "source": "Solidity/Syntax/Numeric.lean",
+        "sourceSha256": "4ae017159179d6ac5f4aa13c432ccf97635cae8f50c087ed18f452841386bf4a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/18367397148468516830.olean",
+            "sha256": "6ae3f41eb998ab884dfc25da2e26dc909029618bc47a9dccf22fe351a228397f",
+            "bytes": 120968
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Join",
+        "source": "Solidity/Syntax/Join.lean",
+        "sourceSha256": "b0aa29059d179bc364e3bc87c7b0cb833c5dc76beda3585221dd8e54921899a8",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12290372697197903245.olean",
+            "sha256": "09b41fe4dfe84cc3e8167d5b355d12afee7bee0b1abf450742fed40a14dce763",
+            "bytes": 61880
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Inlined",
+        "source": "Solidity/Syntax/Inlined.lean",
+        "sourceSha256": "036fb220fea414b9578e3e63795a5bcd49576859284f026070945a258ae4c37b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9003482571299713154.olean",
+            "sha256": "857b8bd2dd9570ab59c4dc807a193c21a7e32fe61bae29ab4083a0a67a941c88",
+            "bytes": 531936
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Grammar",
+        "source": "Solidity/Syntax/Grammar.lean",
+        "sourceSha256": "996c2b232f6e73f5610f71eb0d7fcc726fa2200c163a8742f300632f7976e5d8",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6750834253774453471.olean",
+            "sha256": "048cf0d14349a80f86cf65e0a82bf4846ea2a4081bfb69a023ae49f0c7f53b80",
+            "bytes": 7183896
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Values",
+        "source": "Solidity/Syntax/Elab/Values.lean",
+        "sourceSha256": "1cb5c3b1d1ae04dbaeedb6af9b05019ab59a545119b1dca98aed00c5c61a00c0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1816086608892695444.olean",
+            "sha256": "51654b8425df954ed172bf8b047a16f0389b06e1d111368f43c0bc662e3c04ce",
+            "bytes": 10807072
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Stmt",
+        "source": "Solidity/Syntax/Elab/Stmt.lean",
+        "sourceSha256": "513ecfae925708c4d7b292e4e72f0c9a5fa924085c399a1e33eeb241cc70cbab",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9591333447602477143.olean",
+            "sha256": "67b82732eb93c143f4c9f139390a8b1dd63dadd5357a44792c717ee53d0ba39a",
+            "bytes": 3167312
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Lower",
+        "source": "Solidity/Syntax/Elab/Lower.lean",
+        "sourceSha256": "c615f6586c4be1be4302130b26564dce32b453ab011c34cce142462306f5e57d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12026472250642908035.olean",
+            "sha256": "9f9c242a34461480cae5d6550d2982f291cfc245ff489a37967a4bf6d073c2e5",
+            "bytes": 7043928
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Context",
+        "source": "Solidity/Syntax/Elab/Context.lean",
+        "sourceSha256": "5c5457536a960829574ac1f09acfdd1123b267b11097d029e04e9332ef4566d0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4458485510398888051.olean",
+            "sha256": "e2afbaa14652b062c55ee003230bc298663125d3712eb9ecf2fe3c72e96457c3",
+            "bytes": 6634768
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Arms",
+        "source": "Solidity/Syntax/Elab/Arms.lean",
+        "sourceSha256": "248a9f3b8acfa42bb7d763bf9734c271f6fb05fc969935cc98c89ccc89c70a73",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11435520984847215083.olean",
+            "sha256": "9c8241cf10376007190c7652db4bf210315039d8c242dbbc1e1c2c8539923e1f",
+            "bytes": 13828752
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Elab",
+        "source": "Solidity/Syntax/Elab.lean",
+        "sourceSha256": "249d1dc7ca5ddb596c4a4ccf196d9448c20fe70880bb3edf1f632fa6115d341c",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1220389940719650155.olean",
+            "sha256": "3bd7fb12eecb576375fdb0db517573864c03eced21f06efd5decc915da127d66",
+            "bytes": 22968
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Contract",
+        "source": "Solidity/Syntax/Contract.lean",
+        "sourceSha256": "9b5ea3c97492fc24b9d3e9957acf07fd489afad9cd62a63784170c9a41d2f8bc",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/10507980342867276957.olean",
+            "sha256": "b7d0656aed21e3a04e1698ee43e83fa36cab375a812836cef3298091d6c8595b",
+            "bytes": 4995536
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax.Checked",
+        "source": "Solidity/Syntax/Checked.lean",
+        "sourceSha256": "27c2e199e4275370d18314eb80f610d4d97f95bf27df26aac042b8875f4ce964",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16950659333712476951.olean",
+            "sha256": "8942acfafa3518861ea58be58196ecb8b64d37820aad4d51241b786fd336d280",
+            "bytes": 2053632
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Syntax",
+        "source": "Solidity/Syntax.lean",
+        "sourceSha256": "81e376192590dacc20ae1b3c1cb27e4cf144289d89be28beb40452d4fe7340e8",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11386092926258521917.olean",
+            "sha256": "36fb18392578b05acf5d91996318219a014043d58542ece9045a3bb21d875cfd",
+            "bytes": 24552
+          }
+        ]
+      },
+      {
+        "module": "Solidity.SpecSyntax",
+        "source": "Solidity/SpecSyntax.lean",
+        "sourceSha256": "0d93503bea09cc6e1174fa5bcf6150705f5db360dfffa0fc33885bad23b3e236",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4605078580987332112.olean",
+            "sha256": "ba549ff2980eaf9e0cc111eb23a0291eeca55dbf8c9fff1ff11dcc17ed752794",
+            "bytes": 2132672
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Signature",
+        "source": "Solidity/Signature.lean",
+        "sourceSha256": "f87769d741153c151bd2d27aa43be9ba0a380f846f614ee5b00ef0e2581b5d1d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12774243861103788997.olean",
+            "sha256": "5ab00b6e16c98f7d102d4c618b9ba85a994f02859c3ec2fc410b0725410214d1",
+            "bytes": 2945904
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Value",
+        "source": "Solidity/Semantics/Value.lean",
+        "sourceSha256": "afa9b289f7720b04ce4db7d28b12c52649d2f12569d9f4d67bc703c1a9a7166e",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3743672513346508189.olean",
+            "sha256": "ca0c8e9afa477f8a2fbdfd3742a7c89d31f912a26ccde901840d15b4ebeb950f",
+            "bytes": 223384
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Termination",
+        "source": "Solidity/Semantics/Termination.lean",
+        "sourceSha256": "45840b8c1408fd05889af0336c0a525200c74f19d05a1b54bd24e312c58763b3",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/10240914599252974441.olean",
+            "sha256": "50d6f3b0c73264a602f5970e63140fac5464a7c203d3022db6855329dc9b6f3f",
+            "bytes": 171080
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.StorageWt",
+        "source": "Solidity/Semantics/StorageWt.lean",
+        "sourceSha256": "d045184c6c27687ae0feff9590128fb644ae0cf319fa48f9fef26c0a211a1093",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8721021171585889654.olean",
+            "sha256": "4b407f09016ebf8423326e73234ce6bfd415b671ac0f59e7dd6ede538f55d72a",
+            "bytes": 225064
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Storage.Values",
+        "source": "Solidity/Semantics/Storage/Values.lean",
+        "sourceSha256": "df568d043be5c7ffbe97ca6d790c7a7118efbe9039513c8379978fd764495259",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/14555745915379256979.olean",
+            "sha256": "e35bb8c54be5d560edff262d4176a3294f2dbd3c4797074a65a627e0c383c6f2",
+            "bytes": 4470584
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Storage.Ops",
+        "source": "Solidity/Semantics/Storage/Ops.lean",
+        "sourceSha256": "85009df8f6d04dc43ca6ee088416e6f557e33a8c0b6a8b7306edc86321d53706",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17972976686011566535.olean",
+            "sha256": "2dd134680b3cabd97e766ff44611d9e2bea450b369e5e1f91321782367a42e8d",
+            "bytes": 5567120
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Storage.Anon",
+        "source": "Solidity/Semantics/Storage/Anon.lean",
+        "sourceSha256": "43d65f0f8f1c00f8802252ed6e031c121e6255f64e0c73bfd748008f74f45e92",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16222091601452267653.olean",
+            "sha256": "937414f81c41d1b514843cb47016e787e028c9b81c105bce14b3e9ace2babe18",
+            "bytes": 604088
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Storage",
+        "source": "Solidity/Semantics/Storage.lean",
+        "sourceSha256": "31e4b8f86b806252e7440a12ddc6e06c1cf1cac21942df248e875b25079d0bc1",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3354405589365092985.olean",
+            "sha256": "ccdf570ba18e3597c6015929c78c6cd4f4bd70ca43bd47c6931520a4323f8041",
+            "bytes": 22824
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.State",
+        "source": "Solidity/Semantics/State.lean",
+        "sourceSha256": "9023e4196a09e4430a7db8141ab664c746ab812252d35c438d34dac0dd3bb4d4",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11016344985893434178.olean",
+            "sha256": "2049aea98a78dd956cc984feac3ef9811e41f6d1d0359379a83191a1a3f66362",
+            "bytes": 385552
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.RunWk",
+        "source": "Solidity/Semantics/RunWk.lean",
+        "sourceSha256": "5b5a7885bfb28918244b17b73ef43b9c27faf86bc28440f8dc4e954d134ff934",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8669878373066178622.olean",
+            "sha256": "aa4ca8d16d5e8ed3f2f59f85fbd5f37c9c7f32e22a0732b190aefa027ebcd78a",
+            "bytes": 5493992
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.RunFrame",
+        "source": "Solidity/Semantics/RunFrame.lean",
+        "sourceSha256": "38dbf7f81b6d50c7b2203a671acd43f53b30521a79a240157ae70ea90a656353",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16100412989518370155.olean",
+            "sha256": "8e9be45f35759f8fa0d548388fbe3f09caeb1b4b4a26e3f61de3cf90b3c871a2",
+            "bytes": 5321536
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Run",
+        "source": "Solidity/Semantics/Run.lean",
+        "sourceSha256": "3e97c693c2bea3ea2578cda59bc9e259a3950ded6c6dd6dea8d1b0c718cab3b9",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16137604376107416606.olean",
+            "sha256": "07a6136a6392628d61f1865e5600bf622316a98870d773d449138295c9002d3f",
+            "bytes": 3335648
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.RevertOnly",
+        "source": "Solidity/Semantics/RevertOnly.lean",
+        "sourceSha256": "9d7a4c70fb1613a1df82d515004c39ac347d8c88e0b66395137aea81d665a73c",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/14317560211593167831.olean",
+            "sha256": "b3e03c5b9cdfe409f3d70779c5bef6243381098bb54ab67122960a05b75ad3f0",
+            "bytes": 50120
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.RevertData",
+        "source": "Solidity/Semantics/RevertData.lean",
+        "sourceSha256": "76737627eefbbff4c90d529286ed61b1c5ea08f51549fc7885262281f268bff1",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4042517334430703249.olean",
+            "sha256": "e16fb0ef785abb9514687759815f44b23f33a2675a7939c39390b356086dd826",
+            "bytes": 49584
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Ops",
+        "source": "Solidity/Semantics/Ops.lean",
+        "sourceSha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/10484641207298742307.olean",
+            "sha256": "d29b1f02e786dc127b1d012b977955967d4d20e4fc2903fadebb1611e3587f16",
+            "bytes": 522616
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.NoPanic",
+        "source": "Solidity/Semantics/NoPanic.lean",
+        "sourceSha256": "a08845384cb4ee03338d7cee214bc2514acec30e16d08bb9225bcaa8e670e5cf",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2798157712287975898.olean",
+            "sha256": "e417ee9c14327bac49dddf7e64bdc1048d9558c919b24c893d3bb0722fff0905",
+            "bytes": 2609240
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.NativeDeferredCallback",
+        "source": "Solidity/Semantics/NativeDeferredCallback.lean",
+        "sourceSha256": "5152f88e997d7c0fe9424741ae1d9146e5227ec10f21ccaa4d354fba4e74d1b9",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5428642270561222045.olean",
+            "sha256": "28c8f4336ecc601dc9329ffa7754cb3c33ddc02d5d311bf29f410332beab0ae5",
+            "bytes": 2043648
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.NativeDeferred",
+        "source": "Solidity/Semantics/NativeDeferred.lean",
+        "sourceSha256": "d1907240b5a8dc311462904f8b09129f31f8bb311f31c83a65d69696f4cc7e81",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12570275301088591516.olean",
+            "sha256": "f89365a77f056243339c50d26005f287e40cd8d47c0991711e48cbc31b00c125",
+            "bytes": 153448
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.LexMetrics",
+        "source": "Solidity/Semantics/LexMetrics.lean",
+        "sourceSha256": "85c4e07d17235339dfa306503042c76d088d9e8946ec554ca04d8f488cebd143",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/771408496423347005.olean",
+            "sha256": "929b7c32360736cff867141c4b65edcde2d1530ee8f4d6856664d279b222072b",
+            "bytes": 367120
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Heap",
+        "source": "Solidity/Semantics/Heap.lean",
+        "sourceSha256": "82bbdc0c5bb712e3cbfaedb258d0fb3cb439d784fb4d79c23c7f9ec1399be24a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2452531759041708165.olean",
+            "sha256": "9a7b34c517691038428c8eec732e2fb390a75164226af9e340545fe7ba617e8a",
+            "bytes": 889472
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Ends",
+        "source": "Solidity/Semantics/Ends.lean",
+        "sourceSha256": "5e820367d4ae198af9df2ccd0054dec6c57f9c4a2f3415541c2cbf23c513b840",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/728307747177204355.olean",
+            "sha256": "0e82c13dd86323888353f62723d65fb0eb59405d66baa093803bb4a7e0b495df",
+            "bytes": 540120
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.DeferredSource",
+        "source": "Solidity/Semantics/DeferredSource.lean",
+        "sourceSha256": "a7b730038dcb44a30bd2a5c8d3aba67f40148d5ebc29a86ba742afbd4b497a89",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/862957492942813669.olean",
+            "sha256": "62cfc8c47a0ab3441523f3005b36aced21fc933d96e7d9cd08b4f70c3b774923",
+            "bytes": 1213904
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.DeferredCorrespondence",
+        "source": "Solidity/Semantics/DeferredCorrespondence.lean",
+        "sourceSha256": "ef1aacb0a4b8216a40891cd3b483dad3fec9250d8542d70ebef40a1ddefcac54",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/18132284479070839752.olean",
+            "sha256": "ba9781d86e2cce8722465aeabd8f030e92cb74dcee8cbe9acd28a20bfaaf8536",
+            "bytes": 933432
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.DeferredCallback",
+        "source": "Solidity/Semantics/DeferredCallback.lean",
+        "sourceSha256": "291ed3eeadd9718a15714d82c9d4f2fe2e2954408377afd03d57438c820d714e",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16505972008874317134.olean",
+            "sha256": "ea442d178c0447f460cf4e2a6c32360f11258dde10b6bb06bee5a943266a3bc8",
+            "bytes": 2507840
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.CallbackWk",
+        "source": "Solidity/Semantics/CallbackWk.lean",
+        "sourceSha256": "d734388e1ab6002f588ef1c5a3bd9e6ab908a9d81967383ad5a0b47dabe930e3",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3132607194382861328.olean",
+            "sha256": "69d83b9be737b49836852b8b57c25aad3358f6ab283c2f807ed38eb64bf73198",
+            "bytes": 20402800
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.CallbackUnwk",
+        "source": "Solidity/Semantics/CallbackUnwk.lean",
+        "sourceSha256": "892e0c41a56ea5857f7e862f2d077b846a4ba7297c024260ca9f12ffd8ce141f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9272667437722890458.olean",
+            "sha256": "e9737ad01f7cf4d6b539884f4b66a475fcb8a3cedb85ee031422c44cc7ba87f5",
+            "bytes": 12002464
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.CallbackFrame",
+        "source": "Solidity/Semantics/CallbackFrame.lean",
+        "sourceSha256": "2d327526d25305fa9467cd98943275b3d8bee3c32da28f60ae883834cc0944f6",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2844989295058666618.olean",
+            "sha256": "fafe8a0a04e66f0bbdadd26aa70f9a12d41588fc3d5bb1fc24d514e704eda3d9",
+            "bytes": 5706704
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.CallbackCapture",
+        "source": "Solidity/Semantics/CallbackCapture.lean",
+        "sourceSha256": "1b2fea24989d7d353d38deb99c727cc31d131e69723f53ecd611945384c45d28",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1179286004271212109.olean",
+            "sha256": "0931d7be9f88aa87396488baa1f793da31f5a913f030adec4fedfff105216fab",
+            "bytes": 1300112
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.Callback",
+        "source": "Solidity/Semantics/Callback.lean",
+        "sourceSha256": "9366dd58437f4489520c8dd14f0ef64ef721f3dfd8382f71ae2d34a41cd5c2ec",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11252153314987487535.olean",
+            "sha256": "41ee4ca4eb747aff6208019b8d78953b1c0f7077a60e487d35786bf90a9d160f",
+            "bytes": 26579336
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics.AllocBytes",
+        "source": "Solidity/Semantics/AllocBytes.lean",
+        "sourceSha256": "29033ca8c2fbb8449ee616ae36fc719fa77c606438b8340f3abe40a25b240257",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16778792671083941062.olean",
+            "sha256": "27902e09cce19be8e6c9557c213abedb96d0eba802eb1553f4cc6086c7e8fb45",
+            "bytes": 825616
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Semantics",
+        "source": "Solidity/Semantics.lean",
+        "sourceSha256": "588c96429a3d91ef043d5ae731a1f98f3a12a8a394a601e287550828db32497d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1443382953507049802.olean",
+            "sha256": "1852de50504948e125f4d376e7531d70747979ca9ed5beb9695668c6ed5a2bc2",
+            "bytes": 681400
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Secp256k1",
+        "source": "Solidity/Secp256k1.lean",
+        "sourceSha256": "44a750d75d6a27fbec52095f26e228b6d31927508854671d71119e78f76433e5",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13224769896814732134.olean",
+            "sha256": "02d1074a63653b35284872363156f0c5cb0292bd228e37bafe7d9e8352c16bc8",
+            "bytes": 315056
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Scope",
+        "source": "Solidity/Scope.lean",
+        "sourceSha256": "d37a9e4393e9b9da12bcd85beb428965becc2d3947838b1d11f510b07170c4ff",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3389900102426606666.olean",
+            "sha256": "b7edbd0db77d21cfaefd3ad328c5434da54b2e6fd17af154e949f1501444f03a",
+            "bytes": 2166056
+          }
+        ]
+      },
+      {
+        "module": "Solidity.RevertBytes",
+        "source": "Solidity/RevertBytes.lean",
+        "sourceSha256": "724b287bc4c3f3e159f06ac2a5cd38100ccff9691b5331c17ef2edeab44d76ee",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4766800655686617295.olean",
+            "sha256": "e85fb170ecbc593805b768d38a770723f108ef7633f1174041c1f6966f34937a",
+            "bytes": 106760
+          }
+        ]
+      },
+      {
+        "module": "Solidity.KeySort",
+        "source": "Solidity/KeySort.lean",
+        "sourceSha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6334813519264954563.olean",
+            "sha256": "591214962934c0ddbb5e6beebbbdc3a08deea195ac16b28a960edb20f3417c97",
+            "bytes": 929504
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Keccak",
+        "source": "Solidity/Keccak.lean",
+        "sourceSha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/168967466823645494.olean",
+            "sha256": "7fdd0607b17f4a9a24abc2533dc529e902f352d47fd94a231eb51f4e6951f9b2",
+            "bytes": 297248
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Hashes",
+        "source": "Solidity/Hashes.lean",
+        "sourceSha256": "1c2c71f30137bb0c0f5767b6f6596e6f54f14ef65f1921c5e7b2cff930bc0919",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13346594836733672456.olean",
+            "sha256": "7cefc4272a2531cd9d16d8dbea868ac86dd6a6b09b0a21eb86b59927ea0d6b9a",
+            "bytes": 794968
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Eqns",
+        "source": "Solidity/Eqns.lean",
+        "sourceSha256": "ea6950a667f4f3d455483672b8fab68bfab911703b2212eeba426e1b8a27f832",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/7265220646445575509.olean",
+            "sha256": "1d71c8aa9dd5e52e147e9892a98950017ae29a24b28b278ed7c175486ba73d56",
+            "bytes": 104112
+          }
+        ]
+      },
+      {
+        "module": "Solidity.ERC7201",
+        "source": "Solidity/ERC7201.lean",
+        "sourceSha256": "5600d38de5f2e8cc3277d3b8a3186d82ecb42631b52f2da5699017a6202d6dff",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6733982175598404536.olean",
+            "sha256": "17fd454dd74ae607e989165a0432f081b35ebd2f86e3fb4d6c44d226e3a82615",
+            "bytes": 84000
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.WkOver",
+        "source": "Solidity/Calculus/WkOver.lean",
+        "sourceSha256": "b17b1d294b95ad1a058ef61c76e6d96789eeb3099ae4012046dd165323d7f408",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9514247117149280973.olean",
+            "sha256": "d62b8a8cad423d8f933fc7c13ecf70cb20cfc372a579f0911dd84936e04a90e7",
+            "bytes": 468672
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.WalkSyntax",
+        "source": "Solidity/Calculus/WalkSyntax.lean",
+        "sourceSha256": "e6ad46612a4b399e1bc83949364bed62c449bf833b257682fa7eff1fca0a7714",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2111236103667878672.olean",
+            "sha256": "a6f67380e5f2dcb7a15a277ba6b96bbcf2a38399498a8e5c2fd747c103693df2",
+            "bytes": 1828168
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.UpdateRules",
+        "source": "Solidity/Calculus/UpdateRules.lean",
+        "sourceSha256": "6df902f7cc8e5cfbf20ad75568ef74ba39fff4985a3eb8da9b1568d19f2bcd7b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12720624668871312956.olean",
+            "sha256": "ac69f899a09a93b441ed01a9567f3e25472dfe78a2d8dd6b54b3002224d435a6",
+            "bytes": 1942392
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.UpdRuleScoped",
+        "source": "Solidity/Calculus/UpdRuleScoped.lean",
+        "sourceSha256": "e7f5557f89916c889e054f1df85b90f6c1b58d8a5a177426d91ef88893b2f5b0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4725730152527611224.olean",
+            "sha256": "f9f6d3def88496d1bab729fe63102b0e853c49470318df63ea61fe986398878a",
+            "bytes": 11098792
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TreeData",
+        "source": "Solidity/Calculus/TreeData.lean",
+        "sourceSha256": "d7d96ac88eaed9b58e10d18e551a9fc28b189245d3466a0b86ce38f1d8759577",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15710649279259438582.olean",
+            "sha256": "27be1cb5cf26fa65d3bd2a4643aadce7db5bb2529e99437d2d741b2db30fb806",
+            "bytes": 866528
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermWk",
+        "source": "Solidity/Calculus/TermWk.lean",
+        "sourceSha256": "74f89643d25bcc23f809ceb088decbfc42d161f91642e9eb9bb01e6e29c1f0a9",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8236727738108751815.olean",
+            "sha256": "f39ed311a255f57c6a65514249ba9475c17922c1d4ef310d55c459edaff68508",
+            "bytes": 535272
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermSize",
+        "source": "Solidity/Calculus/TermSize.lean",
+        "sourceSha256": "4d7736640ff2f31608458299749132eaec16e02d39426c73ef6dff682d2f0409",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4997230197334566795.olean",
+            "sha256": "514cca7b99c6cb4727a1582566b930ea950c2056da5f4619da7f08ebb58e0844",
+            "bytes": 21212632
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermLib.Rules",
+        "source": "Solidity/Calculus/TermLib/Rules.lean",
+        "sourceSha256": "f4a4ae4095724aabed3e5b044da451efbd1251a5bdf6c9e48ed7fd5107720043",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6996233679942872681.olean",
+            "sha256": "99c8404facd97416fa8b9ab6310ec40a2730e154e8938072e226a16e64ad55ee",
+            "bytes": 7931504
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermLib",
+        "source": "Solidity/Calculus/TermLib.lean",
+        "sourceSha256": "2e80d73da56ef0ecca56211510bb889a984a66b0579b660f3ba4503569f95a7b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17062481275279548645.olean",
+            "sha256": "a57170dffcae99353f9f5cf1dd81793498b1ed4bff01dbc41820c75f417a4a07",
+            "bytes": 900520
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermLaws.Storage",
+        "source": "Solidity/Calculus/TermLaws/Storage.lean",
+        "sourceSha256": "b2346ac71e5a0f380ea264c53326d9c25c7cadd4d3d94225c50517f52fede3bb",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13174695956198425191.olean",
+            "sha256": "e25224ef8fe328f6dcda1f6ae285c06e739848ad146e1e735ae0390efcf36dce",
+            "bytes": 9086760
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermLaws.Reads",
+        "source": "Solidity/Calculus/TermLaws/Reads.lean",
+        "sourceSha256": "a198c40df67e60ce3b3e723093e7633423d29c4e5c640a39c9448df1f7dd2694",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9757775907778328782.olean",
+            "sha256": "bff7b405f517e1e7b41966728b226adb49fe7046011559bc28a8a6cb5bf1bff5",
+            "bytes": 33020712
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermLaws.Fresh",
+        "source": "Solidity/Calculus/TermLaws/Fresh.lean",
+        "sourceSha256": "dce8d91c1611d7e9561e338db8bd516030e15743f71c8eb46ab166d827e050c2",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6656605274523178987.olean",
+            "sha256": "d5d251b45ded454bafcb47250b6fb2409f510f0616cddb6c8cce0655533fe2d3",
+            "bytes": 25544288
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermLaws",
+        "source": "Solidity/Calculus/TermLaws.lean",
+        "sourceSha256": "4e9f85934ad7358eb77b438fa443e1ef764d6132ec89f7659e0c63764f74c76f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9205884499553163407.olean",
+            "sha256": "20604c1101e48437d2c30c99deafb4fb8affbd0ca6860a6ab8f77beb9768560d",
+            "bytes": 22808
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermEval",
+        "source": "Solidity/Calculus/TermEval.lean",
+        "sourceSha256": "c254b7420b1157544fbc8d1581673887b90cde8206ee2ea9035f3c6f6e2ea201",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11831693379523998004.olean",
+            "sha256": "2a15ba44ecbcb49d3e49ded8e7f31c7a7b32377fb2e23d2fe02ccef8dc2c85d4",
+            "bytes": 1596952
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermEq",
+        "source": "Solidity/Calculus/TermEq.lean",
+        "sourceSha256": "be3efe8604eeaaae8fb9422d6ad5d7cffe55839fd2ec9b6428bd521498679fb0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4130354848966059078.olean",
+            "sha256": "ff4fc6718433f82d0098ca617320b5897937b2e20cfb07e0b1d60ed765475596",
+            "bytes": 13493152
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TermAgree",
+        "source": "Solidity/Calculus/TermAgree.lean",
+        "sourceSha256": "eb73a9dabd89711c02572659093b4f4a468d52f859c6c0d26c203f36696cc168",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12464470667417528139.olean",
+            "sha256": "60b2a76a0538eca4364e7de7c4b37ddb5b641c3612b94c9e17c6543240bec283",
+            "bytes": 23855088
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TailMode",
+        "source": "Solidity/Calculus/TailMode.lean",
+        "sourceSha256": "edc9e596791bba2153a77b0c60259670b94f821ca529f0c4701a54efe1de9461",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/913092819030038430.olean",
+            "sha256": "d241b4847027ab3fdcb5f78cb65bd1188917b2b52aab46de2981ea95bed6deb6",
+            "bytes": 132768
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.TacticSyntax",
+        "source": "Solidity/Calculus/TacticSyntax.lean",
+        "sourceSha256": "db47b2de230d187301da0fe65b7400531c73b36516918d123fe9dfe96f5c82e0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2914117184110112902.olean",
+            "sha256": "d60269f1f474dccf8404ae79527cad83e99f4cc639eeb053d242d680c7294a34",
+            "bytes": 151240
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Taclet",
+        "source": "Solidity/Calculus/Taclet.lean",
+        "sourceSha256": "4a8f585977ef4127f5c78cfcdd2c14242e8704d7f88946eef6cefdff8845b572",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16044201868404146679.olean",
+            "sha256": "f919ace91a4f1bb65e09a75779cd85a860cb26f04124319c2772175341a222e5",
+            "bytes": 27859112
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SyntaxSize",
+        "source": "Solidity/Calculus/SyntaxSize.lean",
+        "sourceSha256": "012ca70547d657dce56baaa86599c032f7f888d4c86336cbcb62bf760b8d999a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2973497805619757560.olean",
+            "sha256": "6af59cbeb0540fbb2c03021190ce268d4d0b807ce674a0ff0866012a28aac274",
+            "bytes": 1022632
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Symex",
+        "source": "Solidity/Calculus/Symex.lean",
+        "sourceSha256": "1f4e6a8852bdadbb4752e6fc03d7d5367720c58cbe674a5878215a9da3192fdc",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12342754883797012584.olean",
+            "sha256": "5ffaf27c8c31a0f16712abb931f8241e2caa81ee4e11e569c42368024846fa46",
+            "bytes": 1655568
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SurfaceSpec",
+        "source": "Solidity/Calculus/SurfaceSpec.lean",
+        "sourceSha256": "939f567e02e81dd72e4f9323ac2a3482ae9ced2e032cd9ccf9cd8f7ae199fb77",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17811738860574336464.olean",
+            "sha256": "296726398b38c0b162ddc661a6c991acc6fcdb1faf3e10cf192a5e24c6c245f9",
+            "bytes": 3274760
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SurfaceNotation",
+        "source": "Solidity/Calculus/SurfaceNotation.lean",
+        "sourceSha256": "317448a96ea678270c3591e4d5a70ccbc63cd9ed57bff7419ebd4cf66eb8ea0a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11157301257793270388.olean",
+            "sha256": "830d2f2be3ca0067bfba877b1f259ed04d1c77d203f5a3acf03dc24a8ff5e273",
+            "bytes": 9742848
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Surface",
+        "source": "Solidity/Calculus/Surface.lean",
+        "sourceSha256": "a88604e250b9affac4f4f3b0f295f760a2fb338159367ac435abf7591f44342f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8310003398375790179.olean",
+            "sha256": "c1048c3597344edb721146bf9d23ae2dda2568b7b8be8c323dd513533f0809e1",
+            "bytes": 481216
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.StmtSound",
+        "source": "Solidity/Calculus/StmtSound.lean",
+        "sourceSha256": "ff66c6a0f12b79df3d97c2129872af5400ace11f24e897944b50a485839d390a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11964289391543485518.olean",
+            "sha256": "98b77729dc13cbcc49c8b9d7492b34a821793e83b61b89449fc85dcb1c40afe8",
+            "bytes": 245088
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Step",
+        "source": "Solidity/Calculus/Step.lean",
+        "sourceSha256": "13894e747d90e0d5c1fe21bf6bf66f4a616f8a2b36bf5ccacacb6eb59483c37d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15518883812757428876.olean",
+            "sha256": "bd44cc598291bc7bc843a6a1ac89892b0ac31bd014b439f519454787f96c6590",
+            "bytes": 813984
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.StatePartsScoped",
+        "source": "Solidity/Calculus/StatePartsScoped.lean",
+        "sourceSha256": "5295370399777e876977269973a36a01512c9efb918475e2fe6a2966ef8fee0a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5828382820311001396.olean",
+            "sha256": "8a45dc96e3976bf246e177dbfbd44c34cef300e67451011704b347cd6cd43c34",
+            "bytes": 8374944
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.StateFacts",
+        "source": "Solidity/Calculus/StateFacts.lean",
+        "sourceSha256": "538a2f047312bf0e52d95a1f7ff8528a0a4ee0df3b3594af22f97a375de5828a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17960905665913078109.olean",
+            "sha256": "1f5993a224f4653511bfd66be516e420441acaefb37df44e0450355edfb0b943",
+            "bytes": 2003856
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Spec",
+        "source": "Solidity/Calculus/Spec.lean",
+        "sourceSha256": "fe862ca098bec3150836b0959bed518369c17d7be58828c897c18d005bebf852",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17130229458411731542.olean",
+            "sha256": "846beb1168ace4a3200c6e79c8f4b565d79d0fb8c3be2dd7139e7dc352a63517",
+            "bytes": 510944
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundSummary",
+        "source": "Solidity/Calculus/SoundSummary.lean",
+        "sourceSha256": "9c34de9d1d0f1d567eafe6d919a0f816abb9aa4f1b425b25fab27729720ccd1f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8162030940702440974.olean",
+            "sha256": "740b33e8b7b9058018c74bdd0dd86c748a34cb6e13f530e8cd8e8732341d90a1",
+            "bytes": 16303632
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundStore",
+        "source": "Solidity/Calculus/SoundStore.lean",
+        "sourceSha256": "6482b926be149041f32079095b5bad6c3859a633b7f3ea4d6c708a7bc16df9ef",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8676673629765150173.olean",
+            "sha256": "92e00f06897c496e70d7fd4f7d5a0f821ac1a86a2bd7919174a0158f2377e714",
+            "bytes": 5330768
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundStep",
+        "source": "Solidity/Calculus/SoundStep.lean",
+        "sourceSha256": "44af31acf55715beb6cce124f0b80890793763f2654864dec196c07f8a1b4e3e",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1375987092291836575.olean",
+            "sha256": "442207405e3869dec3efe48ea10cb40d6a2cd9f54138d4da832096793cbc1903",
+            "bytes": 539576
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundPush",
+        "source": "Solidity/Calculus/SoundPush.lean",
+        "sourceSha256": "919bd6b4cde5c21497a1db90ac3b86d1da02c3febde04851c84e543cd8e8d1f7",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16403469388231692446.olean",
+            "sha256": "30c3e7b04ca2b0a1ece056de2e65109e0e7dc2cb9a8ff04df1d2e3afb17c00a4",
+            "bytes": 1669224
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundMem",
+        "source": "Solidity/Calculus/SoundMem.lean",
+        "sourceSha256": "266029acadef24064930a76e35cae62327b8c349dddb1ea2afda4800a010eab9",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/10391756065303823886.olean",
+            "sha256": "5ba9e835784a0cadadbf12d8c77c46a9f5974f8cfae778b4a51fcf4c20b0e796",
+            "bytes": 1183096
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundLoops",
+        "source": "Solidity/Calculus/SoundLoops.lean",
+        "sourceSha256": "ce9118e98d850b03a6dea4c3ba0278158e96a8c208a1fc32c0944f10d8221a5a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8470059749413598838.olean",
+            "sha256": "52232029aefc2e9772cc08acb2900404ff33aad816a609a370ba8e95e5e770e0",
+            "bytes": 2091224
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundLocal",
+        "source": "Solidity/Calculus/SoundLocal.lean",
+        "sourceSha256": "da75621dc7ea275af7d5b560b2be392a6d0c20f0b9010774d2a47bc91f08c4f3",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4324418117498674274.olean",
+            "sha256": "b761a5f466a862727ccc2a33bd91273e8688ebb7b3944b6c3769e904eabfd257",
+            "bytes": 5510024
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundKit",
+        "source": "Solidity/Calculus/SoundKit.lean",
+        "sourceSha256": "f960bcdcf7336501295267ede02c840515939a081e695c86dee85808192037d6",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/18342928336605238096.olean",
+            "sha256": "b40f24f961d075d53a83258f2b6ae4cfaf49912de8a198eae839a8331ad95f14",
+            "bytes": 2039600
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundControl",
+        "source": "Solidity/Calculus/SoundControl.lean",
+        "sourceSha256": "d4b290e0a128554316df93f512f3cafd8c684284176b3fd402c803efa5edcfa5",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/427154252058844683.olean",
+            "sha256": "48d7fb4093f6e24eaf3c6b54201d320ec3126afaf0f6c5a82db3222f0151825b",
+            "bytes": 3227936
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundCatch",
+        "source": "Solidity/Calculus/SoundCatch.lean",
+        "sourceSha256": "296421ca87bf07240a72a68065487004439459e63d330a5211c43277fd1e908e",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/422054531772873762.olean",
+            "sha256": "4e7445c9fb103b0313fb8183e54df32a6c0b7cab798ede4bfab8067424fa09ff",
+            "bytes": 827776
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundCapture",
+        "source": "Solidity/Calculus/SoundCapture.lean",
+        "sourceSha256": "cf24cafb908dbcc271e5a068c0caed85a655e9fed9125b42fba5fab3c7ef3637",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15241461254223553389.olean",
+            "sha256": "54b6e36a8b3a966379cf475d018a3184a2b490f5618e85f8e096b7828d00060b",
+            "bytes": 2551704
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundCalls",
+        "source": "Solidity/Calculus/SoundCalls.lean",
+        "sourceSha256": "3a34279f8408488cb77093df61ac1f86c77e45e8c6135b0c0fab34eb0cfcf668",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6638924359432795642.olean",
+            "sha256": "be5583af5e968de5edd4b84f053e8d38467d1ae62544b0e0e24504e1ee665cb3",
+            "bytes": 3539128
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SoundArms",
+        "source": "Solidity/Calculus/SoundArms.lean",
+        "sourceSha256": "edb90ee6c37c3e6b0e6d81eb971b1a6423c82cf76ee715134010d776fad5a3fc",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11511677165799665583.olean",
+            "sha256": "6d401b1942f01407d5b8dc188dd7c25c3ff5a5615ffcdd4133a4cd9b499c62e2",
+            "bytes": 2676400
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Sound.LoopLexErase",
+        "source": "Solidity/Calculus/Sound/LoopLexErase.lean",
+        "sourceSha256": "eeba6602ab33fbd309eda73117ac0a5a4bb3bb5f3c62672f79fede39b7f1510a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12802146403801267546.olean",
+            "sha256": "6c41f703535661613823d3a58a77ba7f41c0877fe234556de6f2694bb73e20b7",
+            "bytes": 31760
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Sound.LoopLexDiamond",
+        "source": "Solidity/Calculus/Sound/LoopLexDiamond.lean",
+        "sourceSha256": "033c4c9375d1eb3a29c6fe023bec081821ce516cc481d719ceb94b709a1768e0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9432465593180693878.olean",
+            "sha256": "92e5b80100f89ec6ed8f78de5ca8176a7577180947cb96c7014f64aed33c5355",
+            "bytes": 687720
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Sound",
+        "source": "Solidity/Calculus/Sound.lean",
+        "sourceSha256": "519cc7e419d16c630473f89c11614f9c10401d07592f25ba20bef8ae5a9e2911",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5843369513746015360.olean",
+            "sha256": "850a8a8b682d5381fa3a57a4578216116309a63a8c5fb39e6c2b756c2a60d4c4",
+            "bytes": 30336
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SolSpec",
+        "source": "Solidity/Calculus/SolSpec.lean",
+        "sourceSha256": "b9df04f44949d7cdaf714280348198eb662b485c475eb0ac5e2fa6caf96f3389",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6136720627358700420.olean",
+            "sha256": "906275ae9b20612bf756e13ad19026e1b4aaf45f48d7683e7c386de8603a679c",
+            "bytes": 21600
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Shift",
+        "source": "Solidity/Calculus/Shift.lean",
+        "sourceSha256": "907888bf49ae2347938ae251b0a3ba38dfe12d0502e54159cf9f52d26ee1991f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9927791963237302338.olean",
+            "sha256": "5433acb4160afa8e3adf7040b2dadafbb2a51d4b42989eb48e62d4cd773e0493",
+            "bytes": 673832
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SequentNotation",
+        "source": "Solidity/Calculus/SequentNotation.lean",
+        "sourceSha256": "93515a4237135a6a9ac589e4609e01617d9b706f5e81849156cfc2993f35820f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5784781589154873043.olean",
+            "sha256": "e0b59ebbe5befcdcce3a1a3425e0cefad82d0acc9c26ba860383f31b58177b24",
+            "bytes": 1014952
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.SeqRewrite",
+        "source": "Solidity/Calculus/SeqRewrite.lean",
+        "sourceSha256": "e5d117f9de069be0611fdd6f931e3d5992ae759d17ccb67becf895e929061093",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/14898774753726321291.olean",
+            "sha256": "bac20f75717541ab5bea88c366994c97464b3c02f661065d64dea0f2f87eb069",
+            "bytes": 3226944
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Rules",
+        "source": "Solidity/Calculus/Rules.lean",
+        "sourceSha256": "05b03d5c6571c593f08f46b654af5122daeebb7cf48510e0b00afd1ab6a4f762",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/7801379613008709068.olean",
+            "sha256": "23abac432558bf8d92e85afbd548d975297282da26e087ea904423be4b4a94b4",
+            "bytes": 5443888
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RuleSyntax.Schemas",
+        "source": "Solidity/Calculus/RuleSyntax/Schemas.lean",
+        "sourceSha256": "516c2deb773b688ed65b5dd6050709bde75aad767fb8ee4f170b20155e56cb8d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/914059567781501708.olean",
+            "sha256": "323e962b2ac1708fafc78730846c0a85c23a38a6ea205ff9e389975a0c10f335",
+            "bytes": 8236048
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RuleSyntax.Print",
+        "source": "Solidity/Calculus/RuleSyntax/Print.lean",
+        "sourceSha256": "a80f2f6f78ad37f8635ef1a5cdfacbd771552d4f38d9e0cef1ee1002b4fae4b3",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8660960595006922725.olean",
+            "sha256": "854df35df45909a2b861bdd74afe08ae65281db695a790be00f87b519c6be86b",
+            "bytes": 1540176
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RuleSyntax.Grammar",
+        "source": "Solidity/Calculus/RuleSyntax/Grammar.lean",
+        "sourceSha256": "f73e209e378f97d3e661cfecb0386fbb91166163de4ecfe0d7ca1bdb674e1d44",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3140463610616580409.olean",
+            "sha256": "5316a01831cb8b4d05af7e12f7392184fcbcc2b01ed532bf9e2b61ccf49037d1",
+            "bytes": 11821624
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RuleSyntax",
+        "source": "Solidity/Calculus/RuleSyntax.lean",
+        "sourceSha256": "18e91abcdf9af69b9d1630c8bcde81b5201f632e5698c306a20cf5e524f09695",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17277187891920410068.olean",
+            "sha256": "7a8a62fbf119dd0864e565254cc9ba1cc69b35932e482d4ac1ac9b178f83e4bf",
+            "bytes": 26888
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RuleShapes",
+        "source": "Solidity/Calculus/RuleShapes.lean",
+        "sourceSha256": "156bbb2f59a5c0e4402ec01accaff31f26085acdbbc59a5aa315fb9928e23bbb",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2887882559397661594.olean",
+            "sha256": "a699579e8f4ccaf44dd1b908a1ba8d686175300f07003d90f40516923fe0d7d6",
+            "bytes": 2236696
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RuleKit",
+        "source": "Solidity/Calculus/RuleKit.lean",
+        "sourceSha256": "753e4ceba0f97a497e4e29bcf0e7c9502aaf03f81fcb3057fb67a5c6d0681047",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3572698483623763420.olean",
+            "sha256": "5e7107b3cd5ca33d78d4f3e6aa836be5c578cbb61bff43dc1f909cd5056e17a7",
+            "bytes": 547560
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RuleExists",
+        "source": "Solidity/Calculus/RuleExists.lean",
+        "sourceSha256": "1ac8849525976d61dfb12e70119fbaaf92e4468196f3350c3611500afd777d03",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12907146939902130273.olean",
+            "sha256": "35bf7ae17c6a3c5c476b80dcba6eb747d5cb04fa8d78f0ca8b9367ce6b4e80a3",
+            "bytes": 51119144
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Rigid",
+        "source": "Solidity/Calculus/Rigid.lean",
+        "sourceSha256": "82cae49cf7b19a6bd7b0591a4963b8ef7aae3891d6a82dd077e45ef66ba7356a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3423992703210214453.olean",
+            "sha256": "f68931e52da4d17269dcc7351ae10fe0ad16637a96bf1cb1cb90edaa75d7e5e0",
+            "bytes": 331536
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RewriteScoped",
+        "source": "Solidity/Calculus/RewriteScoped.lean",
+        "sourceSha256": "bf23e66fc4ac75f1f8f5dcace36f514002377a28fce934551e37b31b7d532dfe",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12564156943051820730.olean",
+            "sha256": "f06d9cdb44e03d92f86e5f1614ae54f6a496bbf461e1b15f5f03d0c6570f877a",
+            "bytes": 22526032
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RewritePast.Scope",
+        "source": "Solidity/Calculus/RewritePast/Scope.lean",
+        "sourceSha256": "041496f1058dfedcfa73b99bd175c7d87750d79a607a952505f5e6efcf7c2fcc",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13462528564087049119.olean",
+            "sha256": "bae55e8e33259238a878234f4a6dc95cfd649357ba034cf7d4cb0aaa8228fa0e",
+            "bytes": 3200728
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RewritePast.Merge",
+        "source": "Solidity/Calculus/RewritePast/Merge.lean",
+        "sourceSha256": "55f712249593eabd295fe2a3a594318b883b9ab9be53586c872074a236d58a23",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13079001976207446356.olean",
+            "sha256": "66267905b4943e40d6a633acb098474484e87c6a010762a6fbfd4f9c0174b61e",
+            "bytes": 5434368
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RewritePast.Apply",
+        "source": "Solidity/Calculus/RewritePast/Apply.lean",
+        "sourceSha256": "548d93019fb1a3c1d7b0eee54e4cc1fc7d4deb423d32b2dd6f73bc43bd3a8534",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2940338384429151624.olean",
+            "sha256": "dc6fb920e121f425c8d7e026c683f842cd7f2afb4487cb2bd07df1af899921e6",
+            "bytes": 12008136
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RewritePast",
+        "source": "Solidity/Calculus/RewritePast.lean",
+        "sourceSha256": "3809f79b14327c5c1a45710dd8d8250441827cd175b88b7a8b9d940b2c4cd5e5",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17681758025072355051.olean",
+            "sha256": "cc7ee8e2715bed3cc8467c6dc76933bb0edf36e73e7cbdb129827d312aa5953b",
+            "bytes": 23136
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.RefInputs",
+        "source": "Solidity/Calculus/RefInputs.lean",
+        "sourceSha256": "b5efc0c790c85a2d7246216a7fc7400785cfa38cb42a0497c108f72af2ab8fcb",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16122189274380140940.olean",
+            "sha256": "78e4f9a8cc19a488505a2e623b82ce1f69f8c249e554672562e6eb9cef013d2a",
+            "bytes": 137048
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.ReadWrite",
+        "source": "Solidity/Calculus/ReadWrite.lean",
+        "sourceSha256": "fadc45d5d8799f08018f77541390df7350c1e870569b5bad254e7bbb060d2969",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/14168991546701774050.olean",
+            "sha256": "0b791d7ccb0a142688464f80c5fb828b5f1914a711c624ded4f09645551db101",
+            "bytes": 183592
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.ReadBounds",
+        "source": "Solidity/Calculus/ReadBounds.lean",
+        "sourceSha256": "f773647a7146f7359480e09ff895546a856325667b49aa00dfaae8593c405af5",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5455558480580017047.olean",
+            "sha256": "4df482f92f921184cd32625f3af248df8a25f7741a648a9c7a1774c591e20d5f",
+            "bytes": 4783032
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Quote",
+        "source": "Solidity/Calculus/Quote.lean",
+        "sourceSha256": "be7daa240fee8ebf94a685a7353bada9016c729fef747cee393908215ff62756",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5165005428767964510.olean",
+            "sha256": "68f9fd80c6218b554e13ed2a33153d6b472ac01f2e22a3fd04dc4252bb441422",
+            "bytes": 4546104
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.ProvesSound",
+        "source": "Solidity/Calculus/ProvesSound.lean",
+        "sourceSha256": "0553ab3c69d9c30b7acc36ca17000b3172210f36f769ad6d3ec753ded52e9625",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/14007592941470856096.olean",
+            "sha256": "cdc1955bdccf386e96568799caa7a7186280d7d6fe7fffa4fdaed006ab7c4440",
+            "bytes": 1086216
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.ProvesDerive",
+        "source": "Solidity/Calculus/ProvesDerive.lean",
+        "sourceSha256": "700559e2d0359d9dd9bc2a519dfb2b300cdc304b3b1e841b127167bf69e24048",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17107005920765745564.olean",
+            "sha256": "5b259acd0e8d59772f2108abacc108a9989d43a3001ffe10017561229c22542f",
+            "bytes": 4222984
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Proves",
+        "source": "Solidity/Calculus/Proves.lean",
+        "sourceSha256": "6bc9d27be9bcb6aea24dba53e877de48590b2d9269a4642fe9072a8fc1b1a426",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5558285634954739864.olean",
+            "sha256": "7630b32aadd97e9f26fe1c60c7a61ca632bd624cf127924670af967736d524c2",
+            "bytes": 3570800
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.ProofTree",
+        "source": "Solidity/Calculus/ProofTree.lean",
+        "sourceSha256": "bb44981bce61032546178f083f1e5226b4416e5ab1db4de84a39c7152e2aa514",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/7509864094478994450.olean",
+            "sha256": "4b0798a421ff51fff8142242d065f79816b60f481b837a6eecdb1615bbcc1e59",
+            "bytes": 1913288
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Problem",
+        "source": "Solidity/Calculus/Problem.lean",
+        "sourceSha256": "0d6c00b28cd8fce8f5b58ac47839d12e7b42d12e849a62787f6b0e799773b516",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5062624900566198496.olean",
+            "sha256": "2e3a25693534cc19c897c5bedbe56f80a7796828475b0097f5f9e6eb9f317e34",
+            "bytes": 1047416
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.PrintTerm",
+        "source": "Solidity/Calculus/PrintTerm.lean",
+        "sourceSha256": "6d10238c8fff14bd004819650ce178c72e5da11231935ac66af77a529043c807",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5586775341739183494.olean",
+            "sha256": "39b8d5ba07349e81d47e020e43c27e09329de09e6074c3fc9f71e3c122ec859f",
+            "bytes": 5775208
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.PrintStmt",
+        "source": "Solidity/Calculus/PrintStmt.lean",
+        "sourceSha256": "be47b3c5fc34b19225d56812c83b1f0a12b20d41d196c3c8dee5228dc8a2620b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1879979882752147848.olean",
+            "sha256": "4ccd2a14b631216347ed81eb0e3d5ee7053403a553e0e6b6fa81159e2e97e168",
+            "bytes": 10647576
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.PremiseSound",
+        "source": "Solidity/Calculus/PremiseSound.lean",
+        "sourceSha256": "4aed9036c674074ecbdd6e3d7f9b646909448181b845ba6f315be1425a6e58b7",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/7053007396763718630.olean",
+            "sha256": "1c91464a91cf790a9318629fe8b36c53e73c2156fdbc5b99901ada0728b88be6",
+            "bytes": 218928
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.NotationResolve",
+        "source": "Solidity/Calculus/NotationResolve.lean",
+        "sourceSha256": "237d675e34c60b55771c985fc999e13ee9f9a5b455b68955ef9c99da1e08ffc3",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/715120386737288600.olean",
+            "sha256": "d01d39996534f7d6c53347979c025e8918048d6c5563b736d3f6ec49c3965bed",
+            "bytes": 749584
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Notation",
+        "source": "Solidity/Calculus/Notation.lean",
+        "sourceSha256": "607ead542430a73fdc295feffaa63a4b7372205497d8956c99d67b15ae055394",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12450792308516610850.olean",
+            "sha256": "a44ecfb4854926ae0471aa980cfc672234d2b86645509501ea5dd47a43befab1",
+            "bytes": 3046728
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.NamedTerm",
+        "source": "Solidity/Calculus/NamedTerm.lean",
+        "sourceSha256": "3d164c53c7a87571a1eaab1d1a1c186891ece2ce1a5c7d613b1c60abd5ce2ae6",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15204635784891095220.olean",
+            "sha256": "03d1203b5f9c1c76843c92eabbc1c283b65ff07a02b30a81dcfd5ef203a3cc50",
+            "bytes": 2990624
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Merge",
+        "source": "Solidity/Calculus/Merge.lean",
+        "sourceSha256": "28351bcd8b238e67943da8e035355b87d1bea5baab7ed8d5e76e2c61935430aa",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12621375804601563165.olean",
+            "sha256": "5eefef67551367eb539d8556c7630a55fdb89871fe9a3572bfc8a34148e2e7ce",
+            "bytes": 1763040
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Spine",
+        "source": "Solidity/Calculus/MemRead/Spine.lean",
+        "sourceSha256": "a369b5470f0471513c16f55acf4862cf838649b68b155c6654f31b7f25711f46",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2856260895051703013.olean",
+            "sha256": "42948c4a30a345c7d0e5732837f8b7f351f31dfc29c626c0eef9c26a93502743",
+            "bytes": 30594704
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Pass",
+        "source": "Solidity/Calculus/MemRead/Pass.lean",
+        "sourceSha256": "9e1063e9d92bffa922150b71b12c1963ed331e321f0540dfd4cc7599d78efe62",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13150400370133304749.olean",
+            "sha256": "905299afc20d05dca5f287da684873b9f1650bc53498b62cc486864afeaa5840",
+            "bytes": 21613056
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Ok",
+        "source": "Solidity/Calculus/MemRead/Ok.lean",
+        "sourceSha256": "343ed5ebb7848cffeab31e9b10aa7d6a7f01697051547906127783b7015ef0e3",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16239471577976661180.olean",
+            "sha256": "64b7707891616dded7cc23a7a2ffd2ed99e948824c6ed55b57b6b6a26ebebdcc",
+            "bytes": 25233696
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Laws",
+        "source": "Solidity/Calculus/MemRead/Laws.lean",
+        "sourceSha256": "54eaa261085e3a6d2d163c80291c329c6ec98cdb32e5dbcd721ad1587ef9664e",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16497720876471659675.olean",
+            "sha256": "bdc0238e2ecc218753eb60f8be8c33e063f4d567adb325490536013365c6456c",
+            "bytes": 23908688
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.MemRead",
+        "source": "Solidity/Calculus/MemRead.lean",
+        "sourceSha256": "b11927c668f84758c21e33619912163d04137ea9e370c296cd4e6471145b5656",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12928334074424585269.olean",
+            "sha256": "2484a12de92701c78b9bd3cd4828f11392e4b481d755c76110310da8fc79a3b8",
+            "bytes": 23600
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.LowerRun",
+        "source": "Solidity/Calculus/LowerRun.lean",
+        "sourceSha256": "5c49c3a0efa22bf2feadf9598430e601d49eaee7409df179b2bd51ba03eaefea",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2538014019545153349.olean",
+            "sha256": "25afc26df23e5b494dee201ca84aafc7cbe7f7aa01c40f036e20e2a3394c9d04",
+            "bytes": 949624
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Lower",
+        "source": "Solidity/Calculus/Lower.lean",
+        "sourceSha256": "7984f90e4d065aa67a3150390bc2dd22301e1c2cedda89f7bf69f2c1d75ed3ef",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/8026280631647761402.olean",
+            "sha256": "9c2e040e77d112c5cc0f3caf6720fcc97f7bf44a304252955db7b7312625e165",
+            "bytes": 893552
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Logic",
+        "source": "Solidity/Calculus/Logic.lean",
+        "sourceSha256": "2ea371b5a0825522f4387a36ed10ae2d651b8de0b12bab6c34e2318ce5dd4b8b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16202579580804133866.olean",
+            "sha256": "fc9a2829a2d3aa44db7ff38148ad51a5d2b6b518c148a5e4a2fba966513a1802",
+            "bytes": 205592
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.LexVariantSound",
+        "source": "Solidity/Calculus/LexVariantSound.lean",
+        "sourceSha256": "a84661eba85ab0fece87df5ef69dfbc5e828324972cbd86dcd7a449941aea445",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12511403824055837712.olean",
+            "sha256": "a421c5e608df6bd10c73c8604c5e6cfe5ec8a9760dee7ce906eeb6aebc425da4",
+            "bytes": 965432
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.LexVariant",
+        "source": "Solidity/Calculus/LexVariant.lean",
+        "sourceSha256": "f853ebeba1f5e360812e86e9cc607d1a22c4f74c25afd236d152fe1f1d2cb40e",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/607217320660962111.olean",
+            "sha256": "730c1ad925fc30c19daaac3680261e461376781c980f421a12fc5510b072da54",
+            "bytes": 262024
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.LexDiamond",
+        "source": "Solidity/Calculus/LexDiamond.lean",
+        "sourceSha256": "b43e502c0feda4c79a70b847ad6d366547be2614947797bfb88e528ce36b79bc",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1031042182303359529.olean",
+            "sha256": "43bd4e41898cf275ebb77ff0acb6132ec58b924fe1b512e1b1adbcf23c637a83",
+            "bytes": 151784
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.LeafSplit",
+        "source": "Solidity/Calculus/LeafSplit.lean",
+        "sourceSha256": "e0fb9ed438bb3b3e885122cfdc40e47c1365dd7d8eb9dea46b77c1ec3a22b4ef",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/10330458763948622670.olean",
+            "sha256": "e9d0dfc421eb3aca7a60b45b6949ddfdd11860dfcd9cc6c7cc1a6263ab8c79e4",
+            "bytes": 542504
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.LeafShare",
+        "source": "Solidity/Calculus/LeafShare.lean",
+        "sourceSha256": "75b21d773ecd95f5cb2bcfaebf710d939ee8f9270f3ee3dd53fb6c48cd0d3405",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1150927131686706843.olean",
+            "sha256": "02e44138813b94e43c3aa7dda56d33bddbd29197fc541d08068336b6cf06769b",
+            "bytes": 5863408
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.LeafDerive",
+        "source": "Solidity/Calculus/LeafDerive.lean",
+        "sourceSha256": "9c3f77974943430e2f4844e292b312d9dd82099c538277113e53878aac91d454",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3886248144834473003.olean",
+            "sha256": "a5e1efe876879ee54db6dac46bf15f1699b65c92d9a067a07efd4e54f01a933b",
+            "bytes": 3564952
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Lands",
+        "source": "Solidity/Calculus/Lands.lean",
+        "sourceSha256": "b623cc6b3d79911c47302977a822ebe64017c06127a209a4e4b3ee1ca75f1c62",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2829943254232514074.olean",
+            "sha256": "782eced94ba16f182725b468d35c904e913f1d63823825b3b7f7ad8ed48e6b3d",
+            "bytes": 15134280
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.KeyTaclets",
+        "source": "Solidity/Calculus/KeyTaclets.lean",
+        "sourceSha256": "45c00a01e81f9bcba148cb2702c11ade936d324888ccff3c18dd7145641221e2",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/14050084890174733285.olean",
+            "sha256": "5adb68cbbf6dd68d059f5541b6908c9227be5ce4fef87989f8a9e847a4dd8a8c",
+            "bytes": 12682648
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Hyp",
+        "source": "Solidity/Calculus/Hyp.lean",
+        "sourceSha256": "9f9cbfe8045669576874d5ba2ce546b7f5ae01b6bedf1c696a8c8b7a1462f55b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4710914310241166149.olean",
+            "sha256": "d5add97973e52671d5cebfc1b48d57ec097b7d94c5169a9fb28e5c659f59241d",
+            "bytes": 261896
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Graft",
+        "source": "Solidity/Calculus/Graft.lean",
+        "sourceSha256": "da9c7bc7b16f5e041f1362a919b277952360fece2d39998ccf70417acf85de1f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2621322381759130636.olean",
+            "sha256": "b7ba6a91a5dcca399b01ed7b3cc002e0d1537701c3e6d25ab8c601aa753a03fc",
+            "bytes": 7208544
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Fml",
+        "source": "Solidity/Calculus/Fml.lean",
+        "sourceSha256": "c9bf3470ae090c69acc437ebdd5e1e3e28fdbeb63126356068e564f1504bb59a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15411305734297817949.olean",
+            "sha256": "930b0a130dfbc254569800977e2037a27fe676768e77e4f86b6d99871b063f2a",
+            "bytes": 2927320
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.FirstOrder",
+        "source": "Solidity/Calculus/FirstOrder.lean",
+        "sourceSha256": "5c8cd291e08f69f3078bd7fab3e18dea5841c03b17d5b25140cdd6745409c234",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15482695230528611568.olean",
+            "sha256": "904bceb65499b89b5a7fc36d2c524b14732bfbee421dc26e26179f3aa77c007f",
+            "bytes": 136976
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.FiniteMembership",
+        "source": "Solidity/Calculus/FiniteMembership.lean",
+        "sourceSha256": "e472ca888946d33909bdf74a0aac10332bf2e710896187b4071b11159c566604",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/373542712080726225.olean",
+            "sha256": "dcea110d72ee3b5d0027733b1d547fc81c570497b59994aaa308368fc716233a",
+            "bytes": 95072
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.FilteredMembership",
+        "source": "Solidity/Calculus/FilteredMembership.lean",
+        "sourceSha256": "ce1a3a266d48d5e2016104ca961e5e12485cd093d6353de90d251a6b7b79095b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2798433202944900254.olean",
+            "sha256": "bfadb62a330543ca394f1e0271e98a33a9209fbfc660b992a21cdebf3ae12d2d",
+            "bytes": 400056
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.EvalEqs",
+        "source": "Solidity/Calculus/EvalEqs.lean",
+        "sourceSha256": "8281afaea89a172f857edccd4320a2ec03f30d0ccd6178bd165cc2afd01a83c7",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13492482611732374548.olean",
+            "sha256": "408ee9938ebc2b1a210d6d2cd25e120dcadd187de44a1340b910b2ecb1aa544e",
+            "bytes": 526616
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.ElimFacts",
+        "source": "Solidity/Calculus/ElimFacts.lean",
+        "sourceSha256": "343f5933f1c0c2cc80a22c36672eaed16b1787f784133d064b5722088c8d5355",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3140637304921882114.olean",
+            "sha256": "d43314bd4e3925e9321953d888eaa7d38316c3f5f836e501ec49d42238469e27",
+            "bytes": 6676752
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Derive",
+        "source": "Solidity/Calculus/Derive.lean",
+        "sourceSha256": "b31be74909e36692252e85982905bf2c8451d4e8a69ca58a0cf9309cd801f485",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/18155125284159127945.olean",
+            "sha256": "e30b0fc5ac7b69ce43d0aef857c50526c5d4cbd3d34afb85f47d107f257ec6c9",
+            "bytes": 2183992
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DelabRules",
+        "source": "Solidity/Calculus/DelabRules.lean",
+        "sourceSha256": "6137a1b4b859ff1252da217ab1d3e9065d65d653f692836144f760670d0d637a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9760356595519364778.olean",
+            "sha256": "2d0450d1e0a32bdc165502c280e29e6e14c8e05ad35954d62da4c752f4af469e",
+            "bytes": 959296
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DelabErase",
+        "source": "Solidity/Calculus/DelabErase.lean",
+        "sourceSha256": "de7ea23a9a28595603627a7a98fddb10b44b118bd87b19f03f6cc5c3b7ab546d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16882502665459178852.olean",
+            "sha256": "94961e7206b4f8da7bae893311ec467bd7015fe64eb5e192b56a0bcf888ba5a4",
+            "bytes": 374008
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Delab",
+        "source": "Solidity/Calculus/Delab.lean",
+        "sourceSha256": "fdfea6c6bb420315c036bd308493d9216454bbb2462f691df486b1b8f96137e5",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6241503245197420111.olean",
+            "sha256": "13a29b85f3dcd1612e5d0a941072cf69541905887f71a9b118517c132c1e8339",
+            "bytes": 825080
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DeclarationFacts",
+        "source": "Solidity/Calculus/DeclarationFacts.lean",
+        "sourceSha256": "e24867e703e5341b834bfe0290a254bae5134fcb0cfb6f466c24103e3766a585",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/18310398080655880698.olean",
+            "sha256": "8469436b5dcf29647f821536889b1e49438c86ade995184b3899f9bd3ba64516",
+            "bytes": 861504
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideTyped",
+        "source": "Solidity/Calculus/DecideTyped.lean",
+        "sourceSha256": "7eb25e6c6bdef4829b47932016a2114f3bc18a34ba8763be9f1afbecfd7087b7",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15633190798914865357.olean",
+            "sha256": "1b647481a316b46fc4e140880cc65bfed87e9adf0238031db220673af732ad46",
+            "bytes": 27816392
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideScoped",
+        "source": "Solidity/Calculus/DecideScoped.lean",
+        "sourceSha256": "9707d789129a2a926691953354c91a9db39683e257f1d5200dea861c623dc073",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6531233939787456853.olean",
+            "sha256": "95395a825b92ef80866f2eef2fbf330687a413ad96fe8d8eb0272b247354d178",
+            "bytes": 2420136
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideLang",
+        "source": "Solidity/Calculus/DecideLang.lean",
+        "sourceSha256": "56375afa5a71a8b4dcc212e72eeedf848f29a1e322cad97f3048893b70028e8d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6545278488245570352.olean",
+            "sha256": "1074166888822d38dfd3fb6917c21e2d06d76d2795745dfb1480f7e78ab6af74",
+            "bytes": 12068904
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideEval.Storages",
+        "source": "Solidity/Calculus/DecideEval/Storages.lean",
+        "sourceSha256": "cb4a3b21de65c9f28f1e4c71f885e3a4901eb691c66806e7becf7d8028070444",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1682483169850672867.olean",
+            "sha256": "52043abe7d4508ed091f22ccb7ad86c78b24e953b37421790cced65497ef76aa",
+            "bytes": 2282912
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideEval.Readers",
+        "source": "Solidity/Calculus/DecideEval/Readers.lean",
+        "sourceSha256": "528adb9f84433ba0e0b06d7627dd2f4a5c8085c5a9f37f2b41a9355731aabad0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11433136406071405572.olean",
+            "sha256": "5356311d7305a0a5660584d372959df92536776781730dac604ef524a7383d37",
+            "bytes": 4040216
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideEval.Memory",
+        "source": "Solidity/Calculus/DecideEval/Memory.lean",
+        "sourceSha256": "5ac5ee8ad225730b22d5639c8badfb0709165300583e041e29798a8e46f5bac0",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17436523936323364933.olean",
+            "sha256": "115363310394739fd8402cb42901e88cca4f42a6cafa2a370334e9049a51a220",
+            "bytes": 2882536
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideEval",
+        "source": "Solidity/Calculus/DecideEval.lean",
+        "sourceSha256": "eed8ef622ec601e148676ed5e04aa7e79d99c62a305109a849743c0f54d85738",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17208568109630425164.olean",
+            "sha256": "405d6f5553b497ceaccc5845e548221c94b5f8b6ee4f66685504210efaf92997",
+            "bytes": 22056
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideComplete",
+        "source": "Solidity/Calculus/DecideComplete.lean",
+        "sourceSha256": "b9974e14b7fea92cd9a86895a606c1b215bd2d19248e56ac2e52d0028bcff94e",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/15883391657870886303.olean",
+            "sha256": "d05f7e3772d0add8a936e91533a95642cfb58d59750711ccad99c013189a34c7",
+            "bytes": 645400
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DecideCleanTail",
+        "source": "Solidity/Calculus/DecideCleanTail.lean",
+        "sourceSha256": "7ea353f68699c9bd0b13fc95cf61398afb9c8e1ce5022533a27e8858f6192400",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4614039505862165574.olean",
+            "sha256": "d0cac9d0007a44000d356fd07f00c945b701f7b5809a8c6056068e96da0aa7ac",
+            "bytes": 6775872
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Decide",
+        "source": "Solidity/Calculus/Decide.lean",
+        "sourceSha256": "eee2e6616999db1060a649ab13430fd7924d9437d73d4132197697b61cc5a4be",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/10559651615574597589.olean",
+            "sha256": "f6312d095af4b650dc6f8ad8e5c4408691ed4a62eacfa7f65ea89f6ec15711d1",
+            "bytes": 22839240
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.DataIn",
+        "source": "Solidity/Calculus/DataIn.lean",
+        "sourceSha256": "1ad0403412306a1eb5c8087a32fa3fa9af3273113309830b3df1c5a17d552664",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17517982653027312589.olean",
+            "sha256": "a7d9ee441e1b914b8b6ddc47fa9adfd71893a0184bd735a79678378523a17b48",
+            "bytes": 2185152
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CorrectCallback",
+        "source": "Solidity/Calculus/CorrectCallback.lean",
+        "sourceSha256": "923dfd401f1d61591c26eda2901cf01de4d6a24c65c73eb80152c2377dbd649a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13573391821829260571.olean",
+            "sha256": "224f0f549ac6280c06ad7e99582111a0c0a5ab88348e94d9c91874f7aa05307b",
+            "bytes": 588720
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Correct",
+        "source": "Solidity/Calculus/Correct.lean",
+        "sourceSha256": "801d1b570c0319cd9f659481630230f5c2cc13c9137ef5b95affb279e2baf051",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6457461782340681594.olean",
+            "sha256": "675f9783f7fc29e5e4c0e4a5c8649e08244f436c6b4f28e5c2e3dd97df2a8d3d",
+            "bytes": 1090432
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CondLift",
+        "source": "Solidity/Calculus/CondLift.lean",
+        "sourceSha256": "a6b306f960cbfd49b32547e7d8f17663b5735d297c6c3d8eb92afee66bf02c7d",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/6730549825531431369.olean",
+            "sha256": "4d02d1d2470d438044a42de0286beeb259b30bc4dd0185152da41aa47349b2f2",
+            "bytes": 3124536
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Completeness",
+        "source": "Solidity/Calculus/Completeness.lean",
+        "sourceSha256": "62bfbba037e71f406b613c8e3d810063c99a1f1987644559124fc8f0c5e6c86a",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5993267052201647988.olean",
+            "sha256": "c1428e59d682a546b118d71634fa17e042851cbef6ae99346b21986248d37e86",
+            "bytes": 1226208
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Closers",
+        "source": "Solidity/Calculus/Closers.lean",
+        "sourceSha256": "fb6a7edafa84c2a8e2965dc9d59797dffdc3544842a929203a35630b09954a61",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/18272046762444313466.olean",
+            "sha256": "f13d3d2ad109547f4adc691d3e919f8350363740aa5eee6d67af71cef947738d",
+            "bytes": 858864
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Closer.Normal",
+        "source": "Solidity/Calculus/Closer/Normal.lean",
+        "sourceSha256": "4ac256566f97a1c16209599ee28f915377bc8da070ca8aafeacc0975bd1a2354",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/5363359174509838957.olean",
+            "sha256": "4393b458b26b32253c211198538c08648518613ed3b502851bc607bd41bf76e1",
+            "bytes": 4514024
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Closer.Leaf",
+        "source": "Solidity/Calculus/Closer/Leaf.lean",
+        "sourceSha256": "7df3cb7a9c159245ac78fced76a6ce0639a4f2f47756592faa913ea84d5159d5",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16976055283444783120.olean",
+            "sha256": "499f5936245dfcecb792ac044434744d8d5f49ad51e13293be5644c11e636575",
+            "bytes": 7457032
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Closer.Facts",
+        "source": "Solidity/Calculus/Closer/Facts.lean",
+        "sourceSha256": "d9d298c637ee21373109cf182c5900cece2e6c41167276b52e11e76b2e0f3e98",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13135031748263269320.olean",
+            "sha256": "568ecf790caabbfb0f7488a9cb4aa355b3105b9c6a25c2737591bf5d54799374",
+            "bytes": 16744296
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Closer.Bytes",
+        "source": "Solidity/Calculus/Closer/Bytes.lean",
+        "sourceSha256": "828774d1c3980ab28dea7fe0f5a2a79739996728dd6b0096aff29cd5b2d28c9f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1773780659682585386.olean",
+            "sha256": "bbd343cab8e6bee1202a5a8a5da617c30523607c4d8a4be5dbbd034cb24e4c5a",
+            "bytes": 10847680
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Closer",
+        "source": "Solidity/Calculus/Closer.lean",
+        "sourceSha256": "58b6a8407058360c1792ae64f78171900877fe3b0005748e0cec0c43bc13cb92",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/10954717011290388599.olean",
+            "sha256": "41ac433a1af075d5ad46f9458e169946cf68c2fe4483d9e21fe58ba5bad30339",
+            "bytes": 22672
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CloseScoped.Steps",
+        "source": "Solidity/Calculus/CloseScoped/Steps.lean",
+        "sourceSha256": "dcd8f37afcce3c5b4ac33a98fa8df1f7b0c1349fc959f29a632a2a520040d411",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/10429659299684852442.olean",
+            "sha256": "f1a1c154283e8670d1d785e6d0376222cd6e7fac0442167d92a674058cf7e579",
+            "bytes": 9903816
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CloseScoped.Leaf",
+        "source": "Solidity/Calculus/CloseScoped/Leaf.lean",
+        "sourceSha256": "bebeff267a5f8cc2462b725d0c3fe34f246d2b37938ede0fe684e9b58c46c8aa",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13517672063237241194.olean",
+            "sha256": "421f835e6c06da4736bfd6872a30d1e6d6163677202d4f267c504de2b67c6cdc",
+            "bytes": 2217056
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CloseScoped",
+        "source": "Solidity/Calculus/CloseScoped.lean",
+        "sourceSha256": "12fd75283fa287d7c91fad7d128876a7cf8431ad32d48afe1428eac67c80a090",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11056163095537104425.olean",
+            "sha256": "ce7f80a893010b7c075f2f727d7d22d526eda6904f50b1c6495d525001e32485",
+            "bytes": 23184
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CloseNonlin",
+        "source": "Solidity/Calculus/CloseNonlin.lean",
+        "sourceSha256": "6b0d15d1d47c673da9d3f5afe38c3607dd62f5a247d6ad4117063d6e3d3cf769",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/9418038305751926933.olean",
+            "sha256": "c21fd12b9cda122f23b91654e021187d11efffd897b12f0e0067d47e94b44e95",
+            "bytes": 1511600
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CloseLemmas",
+        "source": "Solidity/Calculus/CloseLemmas.lean",
+        "sourceSha256": "ffe4b59874fbaaadecefec09b464406f61da658ad6bc8a9974604d6242157407",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2238368213148857265.olean",
+            "sha256": "a1bce75167cdc5aa254c6d01cdec5f7947bf83ebf8998edc66066bb0b53a1078",
+            "bytes": 568368
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CloseFrame",
+        "source": "Solidity/Calculus/CloseFrame.lean",
+        "sourceSha256": "ea5a8da29e7b781552b0debfc3a4628e6de57d5e4523c2f2fa634eb84a64447c",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/1603312230785621225.olean",
+            "sha256": "2936307e392e06a96a592efa99cf503841e436d06942a11cb2c09131d5a7579b",
+            "bytes": 1269736
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CloseAll",
+        "source": "Solidity/Calculus/CloseAll.lean",
+        "sourceSha256": "12eef2c22075e361ee6913434b78c98a7e267b37ba372db0ff8914814a960856",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/4663369975015393617.olean",
+            "sha256": "3d002dad0dffef5c7bcd8eed9c23983bd89b231c7f40fc591c15534b212ae9db",
+            "bytes": 1779480
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Close",
+        "source": "Solidity/Calculus/Close.lean",
+        "sourceSha256": "1631de66930580a41560df53b6e20790cab8181d0545d61905eb000db1550ad5",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/2086279611951459673.olean",
+            "sha256": "283ccd54f383348c09f5ecbe99a5b2e693c196ef0fa7d61101af46faa57e66e7",
+            "bytes": 2160592
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CapturePayments",
+        "source": "Solidity/Calculus/CapturePayments.lean",
+        "sourceSha256": "1e3918d4d736f8e04ddb521ac2df8870b8caf8484c607aac5170b76becf7c145",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17498297526799685999.olean",
+            "sha256": "bd258a935058a674458c6282bd7e128c6f7c08216d825f4d6163c65286f0092f",
+            "bytes": 3059240
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CallbackSound.Rules",
+        "source": "Solidity/Calculus/CallbackSound/Rules.lean",
+        "sourceSha256": "fb015a944606e16bbad9e91582bf6d3c923c6c1c59ed12bce9ddc3e6619c1004",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/325552358748167795.olean",
+            "sha256": "755d0058ad7b2d0d139aad77eda3b698a43418c195f86a6008a10180a22b105b",
+            "bytes": 7171024
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CallbackSound.Calls",
+        "source": "Solidity/Calculus/CallbackSound/Calls.lean",
+        "sourceSha256": "04abaeb71f5efb704156bb2830ba6adcb63d9a3f9d23e67cbf4321ce1402f85f",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11246104099352538637.olean",
+            "sha256": "b3ba3295497a3d7692b6b4bbfff03b39a28e21dff917501e4f0597fc8b3f8e01",
+            "bytes": 6426168
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CallbackSound",
+        "source": "Solidity/Calculus/CallbackSound.lean",
+        "sourceSha256": "676b28823c633de539e0a81546512b974b6df83680fcf49d1fe2b5b40fa2f741",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/16366118704862733018.olean",
+            "sha256": "5f2e0c92209fb4fa90cb6e5e9cf76d933d0a1e061ef729252f654fdbf9b14144",
+            "bytes": 23080
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CallbackRules",
+        "source": "Solidity/Calculus/CallbackRules.lean",
+        "sourceSha256": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13209718698074073500.olean",
+            "sha256": "c46306438b4e67d31ccef1bd5a63bfddfac0274e9e1292babd9ae8205de4c652",
+            "bytes": 222648
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CallbackHolds",
+        "source": "Solidity/Calculus/CallbackHolds.lean",
+        "sourceSha256": "b330820257e664c3222d03e910171e96b147a2743035cf9372dcdcc8cb67b717",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13390976627455208279.olean",
+            "sha256": "ff49dcd38278566799d85e58e8dccf8cbc953cf0ac0ee7d7e2936c5858501dbd",
+            "bytes": 678744
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CallbackDerive",
+        "source": "Solidity/Calculus/CallbackDerive.lean",
+        "sourceSha256": "9cdda3ef59df0ccee40baf6d86319610f7e370cef0a4d9d16c91df06d417ed64",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/7712237422126512623.olean",
+            "sha256": "9fe2d8f28bc3b0200c132e6306ec512219c258796c459e35889337fda9d8f2ab",
+            "bytes": 3147328
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Callback",
+        "source": "Solidity/Calculus/Callback.lean",
+        "sourceSha256": "7751e5206886c688883b6de491b3e98989ddec1e9e6679c9da5fa634cdb151bd",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/11252886314223080899.olean",
+            "sha256": "fb468e35b947f146d5bda79ff100863e0a10b8e3e94cb0dd2af2923bd27c50dd",
+            "bytes": 3469512
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.CallSummary",
+        "source": "Solidity/Calculus/CallSummary.lean",
+        "sourceSha256": "90d665e058d1a0679d87a6a462d786da588e27a7a94269a46926351eeb1f626b",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/14982189544802891077.olean",
+            "sha256": "866fd5308fd4c5246c1dbc8b8d2af4f0aa599c0499f71f5130835e116f2c94d2",
+            "bytes": 2931168
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Budget",
+        "source": "Solidity/Calculus/Budget.lean",
+        "sourceSha256": "5f6a0b941f5555e6a08ad332abdf27f6e9abd4b7721c435501a5858297dfdc9c",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/14098925328902861042.olean",
+            "sha256": "85d4a4ccf99e6d428dea0b17eb9c337cada14b6424e0a54143e05fc4b7939b13",
+            "bytes": 164976
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Blocks",
+        "source": "Solidity/Calculus/Blocks.lean",
+        "sourceSha256": "545452b590243c4e5f30b71a439805f12e11a5688068dbb425f0bef7ef084637",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/17754360147767678337.olean",
+            "sha256": "2b7bcb230d27e38452628c674441974144435ef1e901669adae1997b9e9dc13d",
+            "bytes": 2455680
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.Arms",
+        "source": "Solidity/Calculus/Arms.lean",
+        "sourceSha256": "13cfcdc5b77b6374cd761346dfa87d5b63297122ff9f5605a52c54245aca5a41",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/13340745234744583272.olean",
+            "sha256": "4d4b988be3de20dae23c4fb705d24cabb4879360efaaf0efe1db860517e11adb",
+            "bytes": 3423360
+          }
+        ]
+      },
+      {
+        "module": "Solidity.Calculus.AllLeft",
+        "source": "Solidity/Calculus/AllLeft.lean",
+        "sourceSha256": "37d1bfec5307bb289d04084777f5247562d52f6f39fa89353784e9377cbd9163",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/12681608184157344452.olean",
+            "sha256": "6ab0a9bb51363646fe090dc87cd7fa015c4d80d64e8541fe363a403f1bdab8ab",
+            "bytes": 1990072
+          }
+        ]
+      },
+      {
+        "module": "Solidity.AST",
+        "source": "Solidity/AST.lean",
+        "sourceSha256": "f4247aaa927e3dd13c22d4f34a019e7c534484866a5ff554084cc33cffc90e88",
+        "sameAsStartingMaster": true,
+        "artifacts": [
+          {
+            "path": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache/lake/artifacts/3851929828407552388.olean",
+            "sha256": "48ce5a3b9796574a84c81dd3fd01a5da357212267230d616e228ea0b316545b9",
+            "bytes": 5286720
+          }
+        ]
+      }
+    ],
+    "baselineReuseLimit": "Baseline target source with source-identical current checked dependency artifacts; not a cold standalone baseline build. Source file overlaid at original canonical path inside container only. Original current timeout is retained; branch target is not rerun."
+  },
+  "controlledProbe": {
+    "terminal": {
+      "command": [
+        "env",
+        "-u",
+        "DOCKER_HOST",
+        "-u",
+        "DOCKER_CONTEXT",
+        "-u",
+        "DOCKER_TLS",
+        "-u",
+        "DOCKER_TLS_VERIFY",
+        "-u",
+        "DOCKER_CERT_PATH",
+        "docker",
+        "--host=unix:///var/run/docker.sock",
+        "create",
+        "--name",
+        "source-units-callback-baseline",
+        "--network=none",
+        "--memory=12g",
+        "--memory-swap=12g",
+        "--pids-limit=256",
+        "--user=1000:1000",
+        "--cap-drop=ALL",
+        "--mount",
+        "type=bind,src=/workspace,dst=/workspace",
+        "--mount",
+        "type=bind,src=/workspace/.setup/tools/lean-4.24.0-linux,dst=/opt/source-units-toolchain,readonly",
+        "--mount",
+        "type=bind,src=/workspace/solidity-lean-source-units/.lake/source-units/callback-diagnostic/lean,dst=/workspace/.setup/tools/lean-4.24.0-linux/bin/lean,readonly",
+        "--mount",
+        "type=bind,src=/workspace/solidity-lean-source-units/.lake/source-units/callback-diagnostic/CallbackStrategy.baseline.lean,dst=/workspace/solidity-lean-source-units/Solidity/Examples/Tactics/CallbackStrategy.lean,readonly",
+        "--workdir",
+        "/workspace/solidity-lean-source-units",
+        "-e",
+        "LEAN_NUM_THREADS=1",
+        "-e",
+        "XDG_CACHE_HOME=/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache",
+        "-e",
+        "PATH=/workspace/.setup/tools/lean-4.24.0-linux/bin:/usr/bin:/bin",
+        "debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31",
+        "sh",
+        ".lake/source-units/callback-diagnostic/gates.sh"
+      ],
+      "exitCode": 137,
+      "elapsedSeconds": 180.26586854299967,
+      "resourceStop": null,
+      "hostMinimumAvailableBytes": 17305063424,
+      "parentMinimumHeadroomBytes": 14084960256,
+      "sampledTaskMemoryPeakBytes": 662904832,
+      "lastTaskCounters": {
+        "current": 641277952,
+        "peak": 662904832,
+        "max": "12884901888",
+        "swapMax": "0",
+        "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      "containerState": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 137,
+        "Error": "",
+        "StartedAt": "2026-10-28T17:07:11.010844308Z",
+        "FinishedAt": "2026-10-28T17:10:11.17541965Z"
+      },
+      "limits": {
+        "Memory": 12884901888,
+        "MemorySwap": 12884901888,
+        "PidsLimit": 256,
+        "NetworkMode": "none"
+      },
+      "headroomThresholdBytes": 2147483648,
+      "method": "kernel task cgroup12GiB/swap0; parent16GiB and host available both monitored from before start; Lean serial -j1 timeout180; no shared-host12GiB reserve"
+    },
+    "exactTerminalCounters": "662904832\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "exactTaskPeakBytes": 662904832,
+    "baselineExitCode": 137,
+    "baselineStart": "2026-10-28T17:07:11Z",
+    "baselineEnd": "2026-10-28T17:10:11Z",
+    "savedBranchStartEnd": "START 2026-10-28T13:49:01Z --tstack=131072 -j1 /workspace/solidity-lean-source-units/Solidity/Examples/Tactics/CallbackStrategy.lean -o /workspace/solidity-lean-source-units/.lake/build/lib/lean/Solidity/Examples/Tactics/CallbackStrategy.olean -i /workspace/solidity-lean-source-units/.lake/build/lib/lean/Solidity/Examples/Tactics/CallbackStrategy.ilean -c /workspace/solidity-lean-source-units/.lake/build/ir/Solidity/Examples/Tactics/CallbackStrategy.c --setup /workspace/solidity-lean-source-units/.lake/build/ir/Solidity/Examples/Tactics/CallbackStrategy.setup.json --json\nEND 2026-10-28T13:52:01Z exit=137 --tstack=131072 -j1 /workspace/solidity-lean-source-units/Solidity/Examples/Tactics/CallbackStrategy.lean -o /workspace/solidity-lean-source-units/.lake/build/lib/lean/Solidity/Examples/Tactics/CallbackStrategy.olean -i /workspace/solidity-lean-source-units/.lake/build/lib/lean/Solidity/Examples/Tactics/CallbackStrategy.ilean -c /workspace/solidity-lean-source-units/.lake/build/ir/Solidity/Examples/Tactics/CallbackStrategy.c --setup /workspace/solidity-lean-source-units/.lake/build/ir/Solidity/Examples/Tactics/CallbackStrategy.setup.json --json\n",
+    "originalCompilerTimeoutWrapper": "#!/bin/sh\nexec flock /tmp/source-units-lean.lock sh -c '\necho \"START $(date -u +%FT%TZ) $*\" >> .lake/source-units/isolated-gates/compiler.log\ntimeout --signal=KILL 180 /opt/source-units-toolchain/bin/lean -j1 \"$@\"\nr=$?\necho \"END $(date -u +%FT%TZ) exit=$r $*\" >> .lake/source-units/isolated-gates/compiler.log\nexit \"$r\"\n' sh \"$@\"\n",
+    "baselineWrapper": "#!/bin/sh\nexec flock /tmp/source-units-lean.lock sh -c '\necho \"START $(date -u +%FT%TZ) $*\" >> .lake/source-units/callback-diagnostic/compiler.log\ntimeout --signal=KILL 180 /opt/source-units-toolchain/bin/lean -j1 \"$@\"\nr=$?\necho \"END $(date -u +%FT%TZ) exit=$r $*\" >> .lake/source-units/callback-diagnostic/compiler.log\nexit \"$r\"\n' sh \"$@\"\n",
+    "baselineCommands": "#!/bin/sh\np=.lake/source-units/callback-diagnostic\ncat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max > \"$p/kernel-limits.log\"\ndate -u +%FT%TZ > \"$p/baseline.start\"\nexport LEAN_PATH=/workspace/solidity-lean-source-units/.lake/build/lib/lean\nlean --tstack=131072 -j1 /workspace/solidity-lean-source-units/Solidity/Examples/Tactics/CallbackStrategy.lean -o \"$p/baseline.olean\" -i \"$p/baseline.ilean\" -c \"$p/baseline.c\" --setup \"$p/saved.setup.json\" --json > \"$p/baseline.log\" 2>&1\nr=$?\necho \"$r\" > \"$p/baseline.exit\"\ndate -u +%FT%TZ > \"$p/baseline.end\"\ncat /sys/fs/cgroup/memory.peak /sys/fs/cgroup/memory.events > \"$p/kernel-terminal.log\"\nexit \"$r\"\n",
+    "monitorSource": "import subprocess,json,time,os\nfrom pathlib import Path\np=Path('.lake/source-units/callback-diagnostic')\ndocker=['env','-u','DOCKER_HOST','-u','DOCKER_CONTEXT','-u','DOCKER_TLS','-u','DOCKER_TLS_VERIFY','-u','DOCKER_CERT_PATH','docker','--host=unix:///var/run/docker.sock']\ncmd=docker+['create','--name','source-units-callback-baseline','--network=none','--memory=12g','--memory-swap=12g','--pids-limit=256','--user=1000:1000','--cap-drop=ALL','--mount','type=bind,src=/workspace,dst=/workspace','--mount','type=bind,src=/workspace/.setup/tools/lean-4.24.0-linux,dst=/opt/source-units-toolchain,readonly','--mount','type=bind,src='+str((p/'lean').resolve())+',dst=/workspace/.setup/tools/lean-4.24.0-linux/bin/lean,readonly','--mount','type=bind,src='+str((p/'CallbackStrategy.baseline.lean').resolve())+',dst=/workspace/solidity-lean-source-units/Solidity/Examples/Tactics/CallbackStrategy.lean,readonly','--workdir',str(Path.cwd()),'-e','LEAN_NUM_THREADS=1','-e','XDG_CACHE_HOME='+str(Path('.lake/source-units/docker-gate/cache').resolve()),'-e','PATH=/workspace/.setup/tools/lean-4.24.0-linux/bin:/usr/bin:/bin','debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31','sh',str(p/'gates.sh')]\ncontainer=subprocess.check_output(cmd,text=True).strip();(p/'command.json').write_text(json.dumps(cmd,indent=2)+'\\n')\nstart=time.monotonic(); peak=0; minhost=2**64; minparent=2**64;stop=None;cg=None;last={}\nwith (p/'container.log').open('w') as log,(p/'samples.jsonl').open('w') as samples:\n proc=subprocess.Popen(docker+['start','-a',container],stdout=log,stderr=subprocess.STDOUT)\n while proc.poll() is None:\n  host=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))*1024\n  parentmax=int(Path('/sys/fs/cgroup/memory.max').read_text());parent=int(Path('/sys/fs/cgroup/memory.current').read_text());minhost=min(minhost,host);minparent=min(minparent,parentmax-parent)\n  if cg is None:\n   cg=next((x for x in Path('/sys/fs/cgroup').rglob('memory.peak') if container in str(x)),None)\n  if cg is not None:\n   try:\n    root=cg.parent;peak=max(peak,int(cg.read_text()));last={'current':int((root/'memory.current').read_text()),'peak':peak,'max':(root/'memory.max').read_text().strip(),'swapMax':(root/'memory.swap.max').read_text().strip(),'events':(root/'memory.events').read_text()}\n   except FileNotFoundError:pass\n  sample={'elapsed':time.monotonic()-start,'hostAvailableBytes':host,'parentHeadroomBytes':parentmax-parent,'task':last};samples.write(json.dumps(sample)+'\\n');samples.flush()\n  if min(host,parentmax-parent)<2*1024**3:\n   stop='OS headroom below2GiB; task-only container stop';(p/'stop-sample.json').write_text(json.dumps(sample,indent=2));subprocess.run(docker+['kill',container],check=True);break\n  time.sleep(.25)\n proc.wait()\nstate=json.loads(subprocess.check_output(docker+['inspect',container]))[0]\nrecord={'command':cmd,'exitCode':proc.returncode,'elapsedSeconds':time.monotonic()-start,'resourceStop':stop,'hostMinimumAvailableBytes':minhost,'parentMinimumHeadroomBytes':minparent,'sampledTaskMemoryPeakBytes':peak if cg else None,'lastTaskCounters':last,'containerState':state['State'],'limits':{k:state['HostConfig'][k] for k in ['Memory','MemorySwap','PidsLimit','NetworkMode']},'headroomThresholdBytes':2*1024**3,'method':'kernel task cgroup12GiB/swap0; parent16GiB and host available both monitored from before start; Lean serial -j1 timeout180; no shared-host12GiB reserve'}\n(p/'terminal.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record));raise SystemExit(proc.returncode if not stop else 137)\n",
+    "monitorPrecision": "Prelaunch baseline-memory snapshot is separate. Polling begins immediately after docker start, not before start as the historical runner method string overstates. Exact terminal footer is available for this probe; minima are sampled.",
+    "reuseLimit": "Baseline source at original canonical path with saved setup and source-identical checked current dependency artifacts, all hashes retained. This is not a cold independent baseline build, proof of equal runtime scheduling, or baseline diagnosis of the other three timeout targets.",
+    "limits": "same180s compiler timeout,explicit-j1/LEAN_NUM_THREADS=1,12GiB aggregate cgroup cap,zero swap,2GiB host/enclosing headroom guard; no proof/fuel/search/heartbeat change",
+    "probeCount": 1,
+    "branchTargetRerun": false,
+    "fullBuildOrPassedGatesRerun": false
+  },
+  "conclusion": {
+    "finding": "CallbackStrategy target and all229local imports are byte-identical to recorded starting master and disjoint from source-unit changes. Single reused-artifact baseline probe reproduces180s timeout; recorded branch invocation also timed out at180s. No source-unit-induced regression demonstrated.",
+    "scope": "Existing baseline callback proof-cost blocker under this fixed budget; no narrow step2 semantic/frontend fix justified. Stop blocked without general closer/automation changes or increased limits.",
+    "remainingDefaultGate": [
+      "Solidity.Examples.Tactics.CallbackStrategy:baseline bounded timeout reproduced; separate proof-cost investigation needed",
+      "Solidity.Examples.Tactics.Recursion:prior180s timeout retained; not baseline-diagnosed here",
+      "Solidity.Examples.Tactics.OpenLoops:prior180s timeout retained; not baseline-diagnosed here",
+      "Solidity.Examples.DecisionHashes:prior180s timeout retained; not baseline-diagnosed here"
+    ],
+    "requiredSeparatelyScopedAction": "Investigate/optimize pre-existing callback strategy proof/elaboration cost within unchanged premises, expectations, proof/search/fuel and180s budgets, then address the other three timeout targets independently. This lane does not undertake general closer/step13 changes. No claim that all remaining targets are baseline failures.",
+    "assignedValidationComplete": false,
+    "featureComplete": false
+  },
+  "preservedResults": {
+    "fixtureCounts": {
+      "working": 31,
+      "brokenExcludedAssembly": 1,
+      "blocked": 7
+    },
+    "observations": 86,
+    "preparedCheckpointedJobs": 64,
+    "requiredVariants": 78,
+    "requiredButUnrunVariants": 14,
+    "workingModelJobs": 62,
+    "excludedPreparedUnexecutedCalls": 2,
+    "kernelGuards": 9,
+    "directModuleChecks": 79,
+    "suite": "passed260jobs previously;notrerun",
+    "sort": "passed377/131/131 previously;notrerun",
+    "suiteSortElapsedSeconds": 518.146137277,
+    "suiteSortExactPeakBytes": 12213141504,
+    "modelSha256": "bbe9a0d72dc209e68accc62feac667cb9a9e8b05014fe1cc055ba64cdd00e34b",
+    "evidenceMeaning": "Kernel model proofs and retained compilerAST/model observations,not generated-solcEVM replay or compiler/lowering equivalence",
+    "unsupportedShapes": "Unchanged remainingRefusals in mainvalidation; separate from nonpassing default validation."
+  },
+  "privateEvidence": [
+    {
+      "path": ".lake/source-units/callback-diagnostic/CallbackStrategy.baseline.lean",
+      "sha256": "105327843da54a9101a436a2266c94243bdefe1dad3ecce808e2ea0212733e1c",
+      "bytes": 15406
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/baseline-memory.json",
+      "sha256": "a5df3b57b65c873e70c784cc75bbfe3427233b4edf921623c27333c1c626af83",
+      "bytes": 2751
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/baseline.end",
+      "sha256": "dd039fb273485a6a8330b386de0daa30b4fb17ecefb430803bc972bd31c806d1",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/baseline.exit",
+      "sha256": "e3b9c2844b5a5c2677b3a2279db2ec8487491dd9a23d6b22fac153391b3bb63c",
+      "bytes": 4
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/baseline.log",
+      "sha256": "0089bb674406997eb0e6850cf01c46d23d8689610788516cebf2a31b9276d691",
+      "bytes": 7
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/baseline.start",
+      "sha256": "af71a2f88da8f0eb4f0794d4c390dfa3b234fded5212184d7a19f83a014db207",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/closure.json",
+      "sha256": "3fcbd516fb18002513add9e0a2596fbd4672177b0a0fb0df17069c1d7c553640",
+      "bytes": 124348
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/command.json",
+      "sha256": "88889e502dd0a2aa0a694086d63df0b906f2bd8507749904f08179099960c678",
+      "bytes": 1393
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/compiler.log",
+      "sha256": "ec4ebea6253cac4c2556b5a74b35b55ae1207ca725f6287f94756822f78cc5e6",
+      "bytes": 749
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/container.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/current-target-invocation.log",
+      "sha256": "e71211625563fe15c5027de161339f4995b789505ba784a6a7b53b962b69fae4",
+      "bytes": 1163
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/current-timeout-wrapper",
+      "sha256": "a23dcf9eda3e54a40c3bec8ca819a177171e5a6971f291a522437c4e677a8a32",
+      "bytes": 330
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/gates.sh",
+      "sha256": "e418efc4c2cf1596c2d0399c46d51987bcb1baed3bd492738b2371535c3f29c9",
+      "bytes": 658
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/kernel-limits.log",
+      "sha256": "c67ff9409d4f2a791abe8460355e64866c11f333a18fa86e4f5af5deb5c75d24",
+      "bytes": 14
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/kernel-terminal.log",
+      "sha256": "d8dd4ecb2ecb80c28fdb996441da1214a52d10b62c8704b76ee241da4dbbb351",
+      "bytes": 63
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/lean",
+      "sha256": "067bdfceb35a42dccd64f121f3442c80d61073f19790e6695d872e677c3e82a9",
+      "bytes": 340
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/run.py",
+      "sha256": "075fecfd8fc810726cb244ac94d7a0cc4d9d376388cba9da0b110bc1189b53cf",
+      "bytes": 3629
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/samples.jsonl",
+      "sha256": "423f2e9c513385465df44dfdb0132f2b9a359541cc04a54c1922dab6b2e6c2a8",
+      "bytes": 189945
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/saved.setup.json",
+      "sha256": "bc3d290511b729597799475d28af735309b52d21165ef721c1daebc46e31b66f",
+      "bytes": 35991
+    },
+    {
+      "path": ".lake/source-units/callback-diagnostic/terminal.json",
+      "sha256": "59d8646de38006dd42c6899ad4fc3173279b3155a34af3500f648f40584c22ae",
+      "bytes": 2556
+    }
+  ],
+  "committedLogs": [
+    {
+      "path": "tests/upstream/step2-source-units-callback-baseline.log",
+      "sha256": "0089bb674406997eb0e6850cf01c46d23d8689610788516cebf2a31b9276d691",
+      "bytes": 7
+    },
+    {
+      "path": "tests/upstream/step2-source-units-callback-current-invocation.log",
+      "sha256": "e71211625563fe15c5027de161339f4995b789505ba784a6a7b53b962b69fae4",
+      "bytes": 1163
+    }
+  ],
+  "productionOrLeanChanges": [],
+  "sharedEdits": [
+    "docs/feature-work/source-admission.md",
+    "tests/upstream/step2-source-units-validation.json"
+  ],
+  "reviews": [
+    {
+      "reviewer": "/root/source_unit_finder",
+      "mode": "independent read-only; no Lean/server/build/check execution",
+      "result": "Pass;22evidence references match.229source/artifact closure and target identity verified. Baseline180s timeout,exactpeak662904832/events0,noguard/OOM and minimumheadroom agree. No outstanding finding.",
+      "precisionFixes": [
+        "Polling starts after container launch, separate from prelaunch baseline.",
+        "Warm source-identical artifact reuse is not a cold baseline build or claim about other3targets."
+      ]
+    },
+    {
+      "reviewer": "/root/source_unit_skeptic",
+      "mode": "independent read-only; no Lean/compiler/server/build/test execution",
+      "result": "No outstanding confirmed defect.22references and719samples match; exactfooter/180stimeout agree; closure verified. Other3timeouts undiagnosed, defaultvalidation/feature explicitly incomplete.",
+      "precisionFixes": [
+        "Baseline inference limited to CallbackStrategy with reused checked dependency artifacts.",
+        "No failed gate, unknown measurement or retained refusal promoted to passing evidence."
+      ]
+    }
+  ],
+  "historicalRecords": "Prior runtime-audit and isolated-validation JSON/logs unchanged; earlier currentDocumentationDigests refer to e0dec908 snapshot. This record adds a new diagnostic, not a reclassification of earlier failed gates.",
+  "pushOrMergePerformed": false,
+  "priorExportsReverified": [
+    {
+      "path": ".lake/source-units/handoff/source-units-step2-isolated.patch",
+      "sha256": "4cf8fa9fb89c1b22ba80d641f926dc7e03930de1d15046820763969a9cefb446",
+      "bytes": 1308349
+    },
+    {
+      "path": ".lake/source-units/handoff/source-units-validation-isolated.tar.gz",
+      "sha256": "7867354a2e1bca7cdb76a69be6cf471f465000efcaecc0d7066550ff08c60a85",
+      "bytes": 1447847
+    },
+    {
+      "path": ".lake/source-units/handoff/HANDOFF-isolated-validation.md",
+      "sha256": "7925002dd56ce6430eef545ea691992aa996732199b9c0712cf617ec81a9852c",
+      "bytes": 6495
+    },
+    {
+      "path": ".lake/source-units/handoff/source-units-step2.patch",
+      "sha256": "bfdb6cd111ed5f8d6f88e3d0d16688392836bdf2e8d24015b4ec06a961252d99",
+      "bytes": 985267
+    },
+    {
+      "path": ".lake/source-units/handoff/source-units-validation.tar.gz",
+      "sha256": "52dda10893658fd31c846c664ceeecbe87eb34aa2dd30aa0908efebb3debcb5d",
+      "bytes": 604372
+    },
+    {
+      "path": ".lake/source-units/handoff/source-units-step2-audited.patch",
+      "sha256": "dbe1e2e0952862da32bb65e66e8cea0366936602bb04772065ecfa7b945d93c1",
+      "bytes": 1060770
+    },
+    {
+      "path": ".lake/source-units/handoff/source-units-validation-audited.tar.gz",
+      "sha256": "6f5241512b9a95113d988774b51cecba5a8b70b2cb5830eacb156daabeadae67",
+      "bytes": 631557
+    },
+    {
+      "path": ".lake/source-units/handoff/HANDOFF.md",
+      "sha256": "047050281b07a4c7ee78e852ca4abb7e1aa10ec653e3df92629a1e5e820acae6",
+      "bytes": 3862
+    },
+    {
+      "path": ".lake/source-units/handoff/HANDOFF-runtime-audit.md",
+      "sha256": "d603512e8cc0c38400f11fad73a8110afa6939177f9054d838f34bd853b705d4",
+      "bytes": 5291
+    },
+    {
+      "path": ".lake/source-units/handoff/artifacts.json",
+      "sha256": "4c0e58998f4e8e97216101a7670d09fe401c0f1e402ca5407a1ad438f6a3a6f3",
+      "bytes": 973
+    },
+    {
+      "path": ".lake/source-units/handoff/runtime-audit-artifacts.json",
+      "sha256": "006fc63ac6e86c153ae2394f0bd40ba7974fd32d9bee5afee456979a113d1d68",
+      "bytes": 1863
+    }
+  ],
+  "lightweightChecks": [
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 4.593276786001297,
+      "log": ".lake/source-units/callback-diagnostic/docs.log",
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.008966286999566364,
+      "log": ".lake/source-units/callback-diagnostic/diff.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "documentationAuditComparison": "Byte-identical prior20missing/6ambiguities; no new doc-reference finding.",
+  "unchangedImplementationAndHistoricalResultsRechecked": true,
+  "currentDocumentationDigests": [
+    {
+      "path": "docs/feature-work/source-admission.md",
+      "sha256": "b98c12cbd221ded06f817236052b53f2ab18f5e2314cb9e0340c2efee1a70831",
+      "bytes": 22463
+    },
+    {
+      "path": "tests/upstream/step2-source-units-validation.json",
+      "sha256": "7f8945c259abac1d16a71d06b7c3332329662237f1aef63f5bf106c56d27d396",
+      "bytes": 44273
+    }
+  ]
+}

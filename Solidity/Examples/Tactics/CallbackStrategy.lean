@@ -28,12 +28,26 @@ open scoped Scoped
 
 def vaultInv : Invariant Vault := ⟨dl!{ balance + paidOut == deposited }, rfl⟩
 
-/-- Checks, effects, interactions: the invariant kept with callbacks. -/
+/-- Checks, effects, interactions: the invariant kept with callbacks.
+The guarded search below exercises this same goal; replay the rules here to
+avoid searching for the identical proof twice. -/
 theorem withdrawSafe :
     ValidC vaultInv dl!{ balance + paidOut == deposited →
       [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
         balance + paidOut == deposited } := by
-  sol_prove
+  apply ProvesC.fmlValid
+  apply ProvesC.allIntro
+  apply ProvesC.intro
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.update (.key .storageRootReadSelect) rfl
+  apply ProvesC.update (.key .storageRootWriteStore) rfl
+  apply ProvesC.update (.key .storageRootOpAssign) rfl
+  apply ProvesC.callback .transferWithCallbackBox
+  · apply ProvesC.plain _ rfl
+    sol_leaf
+    sol_close
+  · apply ProvesC.plain _ rfl
+    exact Proves.assumeInv
 
 /-! The walk, as `sol_derive?` writes it: `Examples/Tactics/Callback.lean`'s
 `withdrawSafe`, rule for rule. -/

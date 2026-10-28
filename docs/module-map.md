@@ -569,8 +569,11 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/SolcJson/Body.lean` | What is left out, reading the JSON, types, expressions and statements; declaration-ID metadata and lazy selector receiver helpers. |
 | `Frontend/SolcJson/Contract.lean` | A contract read off the JSON; callable-only source/native finite-dispatch signatures; inherited constructor initialization follows verified legacy/viaIR provenance. |
 | `Frontend/SolcJson/Getters.lean` | Source ABI identities and record-paired, nonempty getter plans, lowered through ordinary function members; primitive/UDVT values, enum mapping keys, reference-result refusal and empty-data array bounds. |
+| `Frontend/SourceUnits.lean` | Original compilation-unit ASTs, per-source provenance and checked compiler import identities; explicit specification/mixed-legacy-ABI refusals. |
 | `Frontend/Source.lean` | Compiler/pragma/settings validation, derived compilation-mode observations, static compiler-code artifacts and an admission result certifying its extracted feature list. |
 | `Frontend/SolcJson/Admission.lean` | Bounded AST scope classification and declaration-header closure over resolved execution roots; structured policy, upstream and implementation diagnostics. |
+| `Examples/Tactics/SourceUnitsImport.lean` | Both pinned compilers and pipelines: module calls, lexical error aliases, exact entry error bytes, receiver/condition effects and nonvacuity controls. |
+| `Examples/Tactics/SourceUnitsMetadata.lean` | Missing, duplicate and foreign source metadata, lexical-specification refusal and real compiler remapping controls. |
 | `Examples/Tactics/SourceLiteralsImport.lean` | Pinned literal, byte, address and constant execution, universal remainder correctness and a false-property counterexample. |
 | `Examples/Tactics/SourceIdentifiersImport.lean` | Raw source names, builtin shadowing, address fields and specifications with dollar names. |
 | `Examples/Tactics/SourceAdmissionImport.lean` | Scope roots, metadata-only references, ABI modes, malformed AST metadata and provenance regressions. |

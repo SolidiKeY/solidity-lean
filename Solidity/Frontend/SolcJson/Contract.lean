@@ -743,6 +743,65 @@ def renderInitializers (kept : List (String × String × Json)) (st : PState)
     | .error (.excluded m _) => throw (.excluded s!"the initializer of `{n}`: {m}" (J.line v))
     | .error (.unsupported m _) => throw (.unsupported s!"the initializer of `{n}`: {m}" (J.line v))
 /-- The contract `name` of the source unit `ast`, its structs renamed by `ren`. -/
+private def compilationNodes (ast : Json) (units : List Json) : List Json :=
+  (if units.isEmpty then [ast] else units).flatMap fun unit => (J.arrD unit "nodes").toList
+
+private def compilationAst (ast : Json) (units : List Json) : Json :=
+  if units.isEmpty then ast else .arr units.toArray
+
+private def primaryContract? (ast : Json) (name : String) : Option Json :=
+  (J.arrD ast "nodes").toList.find? fun node =>
+    J.kind node == "ContractDefinition" && J.str? node "name" == some name
+
+/-- One native short name keeps its original signature. A conflicting
+foreign declaration is refused at its own reference, never allowed to poison
+an already supported local error constructor. -/
+private def addRenderedError (errors : List Json) (candidate : Json) : List Json :=
+  match errors.find? (fun error => J.str? error "name" == J.str? candidate "name") with
+  | none => errors ++ [candidate]
+  | some original =>
+    if (J.id? original).isSome && J.id? original == J.id? candidate then errors
+    else
+      let params (error : Json) := (J.arrD ((J.opt error "parameters").getD .null) "parameters").toList
+      let left := params original
+      let right := params candidate
+      let selector := (declarationSelector original "errorSelector" 4).toOption
+      if left.map J.tyStr == right.map J.tyStr &&
+          (left ++ right).all (fun p => (J.opt p "typeName").any (J.kind · == "ElementaryTypeName")) &&
+          selector.isSome && selector == (declarationSelector candidate "errorSelector" 4).toOption then
+        errors ++ [candidate]
+      else errors
+
+/-- Preserve the original selected/file error scope and add only errors
+reached by compiler references in selected bodies, helpers and constants. -/
+private def selectErrorDeclarations (ast primary : Json) (members : List Json) : List Json := Id.run do
+  let declarations := J.nodes ast
+  let references (root : Json) : List Int := (J.nodes root).flatMap fun node =>
+    ((J.ref? node).toList ++ (J.operatorFunction? node).toList).filter (· ≥ 0)
+  let mut errors := ((members ++ (J.arrD primary "nodes").toList).filter (J.kind · == "ErrorDefinition")).foldl
+    addRenderedError []
+  let mut pending := (members.flatMap references).eraseDups
+  let mut seen : List Int := []
+  for _ in [:declarations.length + pending.length + 1] do
+    let some id := pending.head? | break
+    pending := pending.tail
+    seen := id :: seen
+    if let some declaration := declarations.find? (J.id? · == some id) then
+      if J.kind declaration == "ErrorDefinition" then
+        errors := addRenderedError errors declaration
+      else if ["FunctionDefinition", "ModifierDefinition"].contains (J.kind declaration) ||
+          (J.kind declaration == "VariableDeclaration" && J.opt declaration "constant" == some (.bool true)) then
+        pending := (pending ++ references declaration).eraseDups.filter (!seen.contains ·)
+  return errors
+
+private def readErrorMembers (errors : List Json) (types : Structs) : List String :=
+  errors.filterMap fun error => do
+    let name ← J.str? error "name"
+    let params ← (J.opt error "parameters").bind fun params =>
+      (J.arrD params "parameters").toList.mapM fun param =>
+        ((J.get param "typeName").toOption.bind fun ty => (tyText types ty).toOption)
+    pure s!"error {identText name}({", ".intercalate params});"
+
 def readContract (ast : Json) (name : String) (ren : List (String × String)) (testing : Bool := false)
     (rewriteSpec : String → List (String × String) → List (String × String) → String → Except String String :=
       fun _ params rets text => if params.isEmpty && rets.isEmpty then .ok text
@@ -756,15 +815,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       fun name _ bound text => .ok (!bound.contains name && specReadsName name (specTokens text)))
     (entrypoints : Bool := false) (viaIR : Bool := false)
     (compilerCode : List (Int × (String × String)) := [])
-    (namedErrorSourceOrder : Bool := false) :
+    (namedErrorSourceOrder : Bool := false) (compilationUnits : List Json := []) :
     Except String SolcContract := do
-  let units := match ast.getObjVal? "nodes" with
-    | .ok (.arr a) => a.toList
-    | _ => []
-  let declarations := (J.nodes ast).filter fun node => (J.id? node).isSome
-  let some c := units.find? fun u =>
-      J.kind u == "ContractDefinition" && J.str? u "name" == some name
-    | throw s!"no contract `{name}` in the AST"
+  let primaryAst := ast
+  let units := compilationNodes ast compilationUnits
+  let declarations := (J.nodes (compilationAst ast compilationUnits)).filter fun node => (J.id? node).isSome
+  let some c := primaryContract? ast name | throw s!"no contract `{name}` in the AST"
+  let ast := compilationAst ast compilationUnits
   let lineage ← contractLineage units c
   let phasedInits := viaIR && lineage.length > 1
   let membersOf (node : Json) : List Json :=
@@ -996,12 +1053,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     return selected
   -- the custom errors, the contract's and the file's, as `contract!`
   -- members: a `revert E(…)` folds its selector from the declared types
-  let errorMembers : List String := ((nodes ++ units).filter (J.kind · == "ErrorDefinition")).filterMap
-    fun e => do
-      let n ← J.str? e "name"
-      let ps ← (J.opt e "parameters").bind fun ps => (J.arrD ps "parameters").toList.mapM fun p =>
-        ((J.get p "typeName").toOption.bind fun t => (tyText S t).toOption)
-      pure s!"error {identText n}({", ".intercalate ps});"
+  let renderedErrors := selectErrorDeclarations ast primaryAst nodes
+  let errorMembers := readErrorMembers renderedErrors S
   let mut members : List String := invariants ++ enumMembers ++ structMembers ++
     errorMembers.eraseDups
   -- the variables kept: name, `sol` type, declaration
@@ -1053,7 +1106,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     pure id
     else [])
   let libraryNodes := units.filter fun unit => J.opt unit "contractKind" == some (.str "library")
-  let libraries := libraryNodes.filterMap J.id?
+  let libraries := libraryNodes.filterMap J.id? ++
+    ((J.nodes ast).filter (fun node => ["SourceUnit", "ImportDirective"].contains (J.kind node))).filterMap J.id?
   let freeHelpers := (units.filter (J.kind · == "FunctionDefinition") ++
     libraryNodes.flatMap (fun unit => J.arrD unit "nodes"
       |>.toList.filter (J.kind · == "FunctionDefinition")))
@@ -1286,7 +1340,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let (specConstants, scopeConstBlocked) :=
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
-    { declarations, storageTuples, compilerCode, namedErrorSourceOrder,
+    { declarations, renderedErrors, storageTuples, compilerCode, namedErrorSourceOrder,
       returnStorageIndex := ((J.id? d).bind (lookupBy · storageTuples)).map (·.index),
       selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
       funParams, constants, enumValues, enumBounds, enumNativeNames, enumCarriers, enumDecodeTypes, valueTypes, freeFunctions, libraries,
@@ -1531,7 +1585,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
-  let initSt : PState := { declarations, compilerCode, namedErrorSourceOrder, enumNativeNames, enumCarriers, enumDecodeTypes, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let initSt : PState := { declarations, renderedErrors, compilerCode, namedErrorSourceOrder, enumNativeNames, enumCarriers, enumDecodeTypes, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
   let omittedInitializers := vars.filter fun v =>
     J.opt v "constant" != some (.bool true) &&
       !(J.id? v).any fixedIds.contains && (J.opt v "value").isSome &&

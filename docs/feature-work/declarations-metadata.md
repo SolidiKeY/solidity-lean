@@ -1861,3 +1861,21 @@ application checks after export. All previous commits, reports and exports are
 preserved. No push or merge is performed. Integration should keep the narrow
 Admission/Contract/Testing/API diagnostic changes together with their controls;
 no unpublished work from another lane is assumed.
+
+## Coverage step 2: imported error identities (2026-10-28)
+
+Compilation-unit error references now resolve by original compiler identity
+through static module/contract paths and lexical import aliases, including an
+alias named Panic. The emitted native error keeps its original short name;
+existing byte encoding and the ordinary/external-entry failure-data policies
+are unchanged. An original local signature takes precedence over a conflicting
+foreign signature, so one unsupported imported constructor cannot redirect
+native lookup or poison an existing local error. Compatible elementary
+signatures may share a native name only with equal validated selectors.
+
+The source-unit regressions check both pinned compilers and pipelines,
+qualified/aliased exact payloads, scalar require constructors and an unrelated
+foreign error reached through another method. Conflicting nominal signatures
+still need a separate adapter. See the coverage-step-2 section of
+[source-admission.md](source-admission.md) and its per-fixture evidence.
+No getter dispatch, general ABI codec, or recursive-type migration is changed.

@@ -421,3 +421,42 @@ decoder metadata gaps. New results and validation use separate
 `tests/upstream/group10-aggregate-validation.json`; every earlier report and
 export is preserved. Selected fresh replay never certifies retained unrun
 import/profile/host/configuration/resource cases against a changed model.
+
+## Coverage step 2: source-unit replay (2026-10-28)
+
+The current-master reproduction and compilation-unit increment are recorded in
+[step2-source-units-results.json](../tests/upstream/step2-source-units-results.json)
+and [step2-source-units-validation.json](../tests/upstream/step2-source-units-validation.json).
+The unchanged 39-fixture family moves from 39 provenance blocks to 31 working,
+one broken excluded-assembly case and seven retained host/format blocks.
+All 64 prepared legacy/viaIR jobs retain their checkpoints; no gas, log,
+host, assembly or expected-failure observation is removed to claim agreement.
+The remaining 14 required variants are explicitly unexecuted. The full
+repository Lake build was initially blocked by the no-fork validation cap.
+A later existing-Docker retry solves process creation but stops at the
+documented memory reserve (exit 137 after job 246/688), so the combined build
+still is not passing evidence; see the
+[runtime audit](../tests/upstream/step2-source-units-runtime-audit.json).
+The frontend closure, new kernel controls and focused/static gates have
+separate evidence. These model observations are not compiler/EVM equivalence.
+
+The [isolated-VM continuation](../tests/upstream/step2-source-units-isolated-validation.json)
+corrects the shared-host reserve scope without making prior stops pass. The
+unchanged 12 GiB/zero-swap bound supports a passing 260-job TestSuite and explicit
+pinned sort check after measured task-local cache management. The default
+library remains blocked by four unchanged 180-second timeouts, not a proven
+need for a larger VM. All 31/1/7 fixture statuses, 86 observations and unrun
+required variants remain unchanged; no semantic code was edited.
+
+### Step-2 original gate and proof performance continuation
+
+The [2026-10-28 proof-performance record](../tests/upstream/step2-source-units-proof-performance.json)
+adds a passing original run-lean.sh gate (688 default jobs, 260 suite jobs and
+377/131/131 frozen sorts) under the 12 GiB aggregate cap, zero swap and measured
+isolated-VM headroom. The private 180-second compiler probes remain failed
+diagnostics; that timer was never part of the original acceptance script.
+Only a duplicate-search example proof changed; statements and observations did
+not. Fresh [per-fixture evidence](../tests/upstream/step2-source-units-proof-performance-results.json)
+retains 31 working / 1 excluded-assembly broken / 7 blocked, 86 observations and
+14 required-but-unrun variants. Documentation paths retain the historical
+20 missing references and 6 ambiguities. Feature status and refusals are unchanged.

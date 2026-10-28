@@ -1,0 +1,330 @@
+{
+  "version": 1,
+  "auditId": "dc0ac441-6aee-4c01-b8db-2087d739208b",
+  "repository": "SolidiKeY/solidity-lean",
+  "branch": "feature/source-units-step2",
+  "implementationCommit": "da933e15e1e7ca560376701ea789de1914e2842b",
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "date": "2026-10-28",
+  "runtime": {
+    "environmentId": "ccarenv_b64_Y2NhcmVudl82NTMzMzYwNTAzZjA4MTkxOTgxMjZiMjJkN2E3ZjEyNw",
+    "savedConfigurationId": "2b5c5391-0738-4da9-8acc-99dd89f04e4d~cecfg_6adc9c634c9481a3b462f748c24a047a",
+    "status": "connected; current observations running specRevision 1; actual shell works",
+    "lean": "4.24.0 commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+    "lake": "5.0.0-src+797c613",
+    "originalCheckoutPreserved": true,
+    "noConcurrentBuildOrLeanServer": true,
+    "writerLock": "/tmp/solidity-lean-feature-groups-20261025/writer.lock; outer flock PID12163 held across Docker run; host lslocks and independent finder confirmed",
+    "networkPolicy": "restricted/enforced; inspected /etc/codex/network-policy.json; no credential/configuration/service changes"
+  },
+  "docker": {
+    "id": "1386a44431916b4b51b00dad5da20e9774e6b7092ea18be09c4ea702db61ac4f",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 137,
+      "Error": "",
+      "StartedAt": "2026-10-28T03:10:03.417963117Z",
+      "FinishedAt": "2026-10-28T03:30:09.013620522Z"
+    },
+    "limits": {
+      "Memory": 12884901888,
+      "MemorySwap": 12884901888,
+      "PidsLimit": 256,
+      "NetworkMode": "none",
+      "CapDrop": [
+        "ALL"
+      ]
+    },
+    "image": "debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31",
+    "user": "1000:1000",
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "/workspace",
+        "Target": "/workspace"
+      },
+      {
+        "Type": "bind",
+        "Source": "/workspace/.setup/tools/lean-4.24.0-linux",
+        "Target": "/opt/source-units-toolchain",
+        "ReadOnly": true
+      },
+      {
+        "Type": "bind",
+        "Source": "/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/lean",
+        "Target": "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "ReadOnly": true
+      }
+    ]
+  },
+  "commands": {
+    "localDaemon": "env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH docker --host=unix:///var/run/docker.sock info",
+    "imagePull": "same explicit daemon: docker pull debian:trixie-slim; resolved pinned digest recorded in docker.image",
+    "exactRunScript": "#!/bin/sh\nenv -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH docker --host=unix:///var/run/docker.sock run --name source-units-combined-gate-v2 --network=none --memory=12g --memory-swap=12g --pids-limit=256 --user=1000:1000 --cap-drop=ALL --mount type=bind,src=/workspace,dst=/workspace --mount type=bind,src=/workspace/.setup/tools/lean-4.24.0-linux,dst=/opt/source-units-toolchain,readonly --mount type=bind,src=/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/lean,dst=/workspace/.setup/tools/lean-4.24.0-linux/bin/lean,readonly --workdir /workspace/solidity-lean-source-units -e LEAN_NUM_THREADS=1 -e XDG_CACHE_HOME=/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache -e PATH=/workspace/.setup/tools/lean-4.24.0-linux/bin:/usr/bin:/bin debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31 sh -c 'date -u; cat /sys/fs/cgroup/memory.max; cat /sys/fs/cgroup/memory.swap.max; lake -f lakefile.source-units.toml build Solidity.KeySort && lake -f lakefile.source-units.toml build; result=$?; cat /sys/fs/cgroup/memory.peak; cat /sys/fs/cgroup/memory.events; date -u; exit \"$result\"'\n",
+    "outerCommand": "flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock bash -c <generate exact run.sh from first container mounts; sh run.sh > build-v2.log 2>&1; result=$?; echo \"$result\" > exit-v2; exit \"$result\">",
+    "leanWrapper": "#!/bin/sh\nexec flock /tmp/source-units-lean.lock timeout --signal=KILL 180 /opt/source-units-toolchain/bin/lean -j1 \"$@\"\n",
+    "alternateToml": "name = \"solidity-lean\"\nversion = \"0.1.0\"\ndefaultTargets = [\"Solidity\", \"solkeycheck\", \"solidity-lean\"]\n# Build products go to Lake's cache, keyed by the hash of their inputs and\n# shared by every checkout on this toolchain: a copy, a worktree or a branch\n# switched back to reuses what any of them built (`AGENTS.md`, \"Copies and\n# branches\").\nenableArtifactCache = true\n\n[[lean_lib]]\nname = \"Solidity\"\nweakLeanArgs = [\"--tstack=131072\", \"-j1\"]\n\n# Taclet-text conformance against solkey's `solidityProgramRules.key`.\n[[lean_exe]]\nname = \"solkeycheck\"\nroot = \"SolkeyCheck\"\nweakLeanArgs = [\"-j1\"]\n\n[[lean_exe]]\nname = \"solidity-lean\"\nroot = \"SolidityLean\"\nweakLeanArgs = [\"-j1\"]\n\n# The solkey example corpus, generated by `scripts/solkey-port.mjs`: one\n# module per ported contract, checked by `scripts/check-corpus.sh`. Not a\n# default target; `lake build SolidityCorpus` builds it and its imports only.\n[[lean_lib]]\nname = \"SolidityCorpus\"\nweakLeanArgs = [\"--tstack=131072\", \"-j1\"]\n\n# solkey's `TestSuite.sol`, imported from solc's AST at elaboration time\n# (`solc_import`, `Solidity/Frontend/Import.lean`; the fixture is\n# `tests/solc/TestSuite.ast.json`, `scripts/solc-ast.mjs` writes it). Not a\n# default target; `lake build SolkeyTestSuite` builds it and its imports only.\n[[lean_lib]]\nname = \"SolkeyTestSuite\"\nweakLeanArgs = [\"--tstack=131072\", \"-j1\"]\n\n# LeanTeX text printer, vendored from fm-04; no ProofWidgets dependency.\n[[lean_lib]]\nname = \"LeanTeX\"\nsrcDir = \"vendor/LeanTeX\"\n",
+    "alternateTomlRemovedAfterCheck": true,
+    "executedContinuousMonitor": "import subprocess,time,json\nfrom pathlib import Path\np=Path('.lake/source-units/docker-gate');low=10**20;start=time.monotonic();stop=False\nwhile not (p/'exit-v2').exists():\n a=int(next(l.split()[1] for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:')));low=min(low,a)\n if a<12*1024**2:\n  subprocess.run(['docker','--host=unix:///var/run/docker.sock','kill','source-units-combined-gate-v2']);stop=True;break\n (p/'headroom-continuous.json').write_text(json.dumps({'observedSeconds':time.monotonic()-start,'minimumMemAvailableKiB':low,'reserveKiB':12*1024**2,'resourceStop':stop})+'\\n');time.sleep(.2)\nprint('monitor finished; resourceStop=',stop)\n"
+  },
+  "attempts": [
+    {
+      "kind": "historical no-fork default build",
+      "record": "tests/upstream/step2-source-units-validation.json resources.fullBuild",
+      "status": "blocked; wrapper denies process creation, not theorem/toolchain failure; preserved unchanged"
+    },
+    {
+      "kind": "Docker cache-path attempt",
+      "status": "failed; never passed",
+      "exitCode": 1,
+      "reason": "UID1000 image had no usable home cache path; //.cache permission denied",
+      "peakCgroupMemoryBytes": 133070848,
+      "log": {
+        "path": "tests/upstream/step2-source-units-runtime-audit-cache-failure.log",
+        "sha256": "456caba0e1a535d5ca0ff63c44560eba9da87f46cfada6a9c832df9326737f95",
+        "bytes": 925
+      }
+    },
+    {
+      "kind": "Docker sequential retry",
+      "status": "blocked-resource-stop",
+      "keySort": "passed: Build completed successfully (2 jobs)",
+      "defaultBuild": "not passed: stopped after last completed job246/688 Solidity.Semantics.CallbackWk; active module at stop not captured",
+      "exitCode": 137,
+      "elapsedSeconds": 1205.595657,
+      "startedAt": "2026-10-28T03:10:03.417963117Z",
+      "finishedAt": "2026-10-28T03:30:09.013620522Z",
+      "oomKilled": false,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "resourceStop": true,
+      "stopReason": "host MemAvailable fell below documented 12582912 KiB reserve; monitor killed only named task container",
+      "monitorTerminalOutput": "source-units-combined-gate-v2\nmonitor finished; resourceStop= True\nTool session 10079 exit 0; Docker run session 74760 exit 137.\nThe live JSON was last saved before the threshold crossing; its false resourceStop is a pre-stop snapshot, not the terminal result.\n",
+      "lastPreStopSnapshot": {
+        "observedSeconds": 1145.513963352998,
+        "minimumMemAvailableKiB": 12590648,
+        "reserveKiB": 12582912,
+        "resourceStop": false
+      },
+      "initialMonitorWindow": {
+        "observedSeconds": 50.10976284800199,
+        "minimumMemAvailableKiB": 17083532,
+        "reserveKiB": 12582912,
+        "resourceStop": false
+      },
+      "memoryEvidenceLimits": "The live JSON is a pre-stop snapshot: false resourceStop there does not describe the terminal outcome. Exact crossing value and aggregate peak were not persisted before kill. Container cgroup disappeared on exit; do not invent peak memory. Initial launch interval was not covered by the later-started headroom monitor. Hard cgroup cap applied throughout. No failed/interrupted run is passing evidence.",
+      "lastPreStopMinimumMemAvailableKiB": 12590648,
+      "peakCgroupMemoryBytes": null,
+      "proofLimits": "LEAN_NUM_THREADS=1; explicit -j1 all Lean invocations; flock serial compiler children; unchanged 180s per-file timeout; no heartbeat/fuel/search increase",
+      "log": {
+        "path": "tests/upstream/step2-source-units-runtime-audit.log",
+        "sha256": "9a4dcae7c02ee96813b3a320cf91fe59afcdc869464bf36fc7ce80716f667e11",
+        "bytes": 52764
+      }
+    }
+  ],
+  "remainingValidation": {
+    "gate": "complete default Lake build on exact implementation snapshot",
+    "requiredExternalCapability": "On this same saved VM, demonstrate sufficient effective usable-memory capacity/headroom for the unchanged 12GiB task cgroup and 12GiB available-memory reserve. The observed resource stop establishes that this run cannot complete under present conditions. A conservative full-cap-plus-reserve budget is 24GiB usable memory plus OS/managed-runtime overhead; this is not a measured minimum because the exact crossing and peak were not saved. No new VM or configuration change was attempted. Verified exact-artifact reuse could reduce fresh-checking demand, but no such changed condition or complete build has been established.",
+    "notClaimed": [
+      "default build pass",
+      "run-lean.sh",
+      "SolkeyTestSuite build",
+      "executed frozen sort comparison",
+      "all feature coverage"
+    ],
+    "noRetryAfterResourceStop": true
+  },
+  "unchangedEvidence": {
+    "fixtures": {
+      "working": 31,
+      "brokenExcludedAssembly": 1,
+      "blocked": 7
+    },
+    "preparedJobs": 64,
+    "workingModelJobs": 62,
+    "observedCalls": 86,
+    "requiredVariants": 78,
+    "kernelTheoremGuards": 9,
+    "directModuleChecks": 79,
+    "modelSha256": "bbe9a0d72dc209e68accc62feac667cb9a9e8b05014fe1cc055ba64cdd00e34b",
+    "sourceExpectationsAndPremisesUnchanged": true,
+    "noNewAxiomsOrSorry": true,
+    "distinction": "Kernel model proofs and compiler AST-analysis/model observations; no generated-solc-EVM replay or compiler/lowering equivalence claim"
+  },
+  "featureRefusals": "Unchanged; see existing remainingRefusals record. Excluded assembly remains separate from resource-blocked validation.",
+  "artifacts": [
+    {
+      "path": ".lake/source-units/docker-gate/lean",
+      "sha256": "961794723e4df469e7d85ee62568939e89a33c661d4ad028458a21394a09343d",
+      "bytes": 121
+    },
+    {
+      "path": ".lake/source-units/docker-gate/run.sh",
+      "sha256": "f937f3b72572c87e627be6ab62a68ec409ed782926404c2d78bb5598f5aee923",
+      "bytes": 1191
+    },
+    {
+      "path": ".lake/source-units/docker-gate/terminal-state.json",
+      "sha256": "bd79ede11b26f3afe7cd4e9ddad110fa5ebc853590e53487008ca339f254f846",
+      "bytes": 1162
+    },
+    {
+      "path": ".lake/source-units/docker-gate/headroom.json",
+      "sha256": "df11d88acd2e02d77cd62d59c3badda2a05ff0ec6efebb6463e465c2a91a95cb",
+      "bytes": 122
+    },
+    {
+      "path": ".lake/source-units/docker-gate/headroom-continuous.json",
+      "sha256": "31e490a214ffee149d0f9a083fcbd7505d75deb809514c4a1c5a79efa9d21a2b",
+      "bytes": 122
+    },
+    {
+      "path": ".lake/source-units/docker-gate/monitor-terminal.txt",
+      "sha256": "e5684974275d8d35bd99f8d4b39bf35a245a81583b919c12ac8250aba82e0796",
+      "bytes": 261
+    },
+    {
+      "path": ".lake/source-units/private/lakefile.source-units-docker.toml",
+      "sha256": "6e8ac4aead46c570d6321aa2c85b63389d8fa0020ac0dcfa3623f1ebb89ba80a",
+      "bytes": 1487
+    },
+    {
+      "path": ".lake/source-units/docker-gate/executed-headroom-monitor.py",
+      "sha256": "2899942efc4141a21e2083b213555f91f341ece8cbf734f50284da1e4fee4b3a",
+      "bytes": 681
+    }
+  ],
+  "reviews": [
+    {
+      "reviewer": "/root/source_unit_finder",
+      "mode": "independent read-only; no Lean/server/builds",
+      "result": "No additional runtime/evidence defect. Verified artifact/log hashes, embedded commands, model identity,31/1/7,64jobs,86observations,14unrun variants.",
+      "confirmedFindingsAndResolutions": [
+        "Replaced measured-minimum wording with conservative full-cap-plus-reserve budget; exact crossing/peak remain unknown.",
+        "Populated final reviews with findings/resolutions before commit."
+      ]
+    },
+    {
+      "reviewer": "/root/source_unit_skeptic",
+      "mode": "independent read-only; no Lean/server/builds",
+      "result": "No new runtime/evidence defect. Verified hashes, doc audit baseline, cap/swap, separate KeySort pass and resource-blocked default result.",
+      "confirmedFindingsAndResolutions": [
+        "Original sourceDigests explicitly scoped to implementation da933e15; historical hashes preserved, follow-up digests recorded separately.",
+        "Pre-stop false resourceStop remains a disclosed historical snapshot; terminal monitor/output records true resource stop."
+      ]
+    }
+  ],
+  "sharedFileEditsThisFollowup": [
+    "docs/feature-work/source-admission.md",
+    "docs/solidity-upstream-tests.md",
+    "tests/upstream/step2-source-units-validation.json"
+  ],
+  "productionOrLeanEditsThisFollowup": [],
+  "pushOrMergePerformed": false,
+  "followupChecks": [
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.04247630900135846,
+      "log": ".lake/source-units/docker-gate/inventory.log",
+      "logSha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 3.989437108000857,
+      "log": ".lake/source-units/docker-gate/docs.log",
+      "logSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "comparison": "Output byte-equal to original sealed-gate-5.log: same20missing references and6ambiguities in unchanged files"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.005375140997784911,
+      "log": ".lake/source-units/docker-gate/diff.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "modelDigestRechecked": "bbe9a0d72dc209e68accc62feac667cb9a9e8b05014fe1cc055ba64cdd00e34b",
+  "finalizationAuditId": "5c9b4f34-182e-436a-8f27-47e516c30676",
+  "finalization": "Evidence-only finalization on same saved VM and branch; no heavy check retry, no lowered reserve, unchanged implementation da933e15.",
+  "followupDocumentDigests": [
+    {
+      "path": "docs/feature-work/source-admission.md",
+      "sha256": "9ef9be8b92e8f4f1a7a7f9092a568a0186dd20cf12902016b929e5455f942dd5",
+      "bytes": 16898
+    },
+    {
+      "path": "docs/solidity-upstream-tests.md",
+      "sha256": "c0a31e843287228d8a0223068be13dc58d51c9f7c69dfe6a8d5bdeece5ce9313",
+      "bytes": 26315
+    },
+    {
+      "path": "tests/upstream/step2-source-units-validation.json",
+      "sha256": "3aa1d50a85a0372c11ca586017db2e37d8a13edc04d0e152320398e8b4bca9a7",
+      "bytes": 43687
+    }
+  ],
+  "finalRuntimeVersions": {
+    "command": "source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; lean --version; lake --version",
+    "exitCode": 0,
+    "log": {
+      "path": ".lake/source-units/docker-gate/final-runtime-versions.log",
+      "sha256": "159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4",
+      "bytes": 159
+    }
+  },
+  "toolchainBinaries": [
+    {
+      "path": "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+      "bytes": 9024
+    },
+    {
+      "path": "/workspace/.setup/tools/lean-4.24.0-linux/bin/lake",
+      "sha256": "5f3828d1d1977654cf5602c40ac4ee52b64f7dcf34d64c5877d7b7d2d3616344",
+      "bytes": 12320
+    }
+  ],
+  "finalLightweightChecks": [
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 4.032655922994309,
+      "log": ".lake/source-units/docker-gate/final-docs.log",
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.005084452001028694,
+      "log": ".lake/source-units/docker-gate/final-diff.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

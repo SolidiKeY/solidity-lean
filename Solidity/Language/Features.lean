@@ -534,12 +534,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "declarations", spelling := "source files and top-level declarations",
       scope := .model, current := .limited,
       requirement := r#"Preserve file-level namespaces and all reachable declaration identities across the compilation unit."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 12 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 12 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Frontend/SourceUnits.lean", "Solidity/Examples/Tactics/SourceUnitsImport.lean", "Solidity/Examples/Tactics/SourceUnitsMetadata.lean", "scripts/source-units.test.mjs", "docs/feature-work/source-admission.md"] }
   | .imports =>
     { category := "declarations", spelling := "import path; as; named aliases; wildcard namespace",
       scope := .model, current := .limited,
       requirement := r#"Resolve imports/remappings in solc; preserve qualified references and declaration IDs in the importer."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 34 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 34 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Frontend/SourceUnits.lean", "Solidity/Examples/Tactics/SourceUnitsImport.lean", "Solidity/Examples/Tactics/SourceUnitsMetadata.lean", "scripts/source-units.test.mjs", "docs/feature-work/source-admission.md"] }
   | .contracts =>
     { category := "declarations", spelling := "contract C; abstract contract C",
       scope := .model, current := .limited,
@@ -649,7 +649,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "declarations", spelling := "error E(T a, ...)",
       scope := .model, current := .limited,
       requirement := r#"Preserve signature, selector and argument evaluation/encoding for custom errors, including qualified declarations."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 317 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 317 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Frontend/SourceUnits.lean", "Solidity/Examples/Tactics/SourceUnitsImport.lean", "Solidity/Examples/Tactics/SourceUnitsMetadata.lean", "scripts/source-units.test.mjs", "docs/feature-work/source-admission.md"] }
   | .eventDeclarations =>
     { category := "declarations", spelling := "event E(... indexed ...) anonymous",
       scope := .model, current := .limited,
@@ -659,7 +659,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "declarations", spelling := "using L for T/*; using {f} for T; global",
       scope := .model, current := .limited,
       requirement := r#"Resolve extension calls by solc identity and bind the receiver once; global applicability is lexical/type-specific."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 346 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 346 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Frontend/SourceUnits.lean", "Solidity/Examples/Tactics/SourceUnitsImport.lean", "Solidity/Examples/Tactics/SourceUnitsMetadata.lean", "scripts/source-units.test.mjs", "docs/feature-work/source-admission.md"] }
   | .operatorAliases =>
     { category := "declarations", spelling := "using {f as op} for T global; op in &, ~, |, ^, +, /, %, *, -, ==, >, >=, <, <=, !=",
       scope := .model, current := .limited,

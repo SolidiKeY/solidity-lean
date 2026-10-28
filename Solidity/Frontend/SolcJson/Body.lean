@@ -728,6 +728,7 @@ structure PState where
   discards : Nat := 0
   freeFunctions : List Int := []
   libraries : List Int := []
+  renderedErrors : List Json := []
   pre : Array String := #[]
   fresh : Nat := 0
   pushOk : Bool := false
@@ -1216,6 +1217,74 @@ def staticCompilerBytes? (declarations : List Json)
   let bytes ← lookupBy id code
   pure (if member == "creationCode" then bytes.1 else bytes.2)
 
+/-- A namespace chain has no receiver evaluation to discard. Module and
+contract identities come from the original compiler declaration index. -/
+private def errorNamespace (declarations : List Json) : Nat → Json → Bool
+  | 0, _ => false
+  | fuel + 1, node =>
+    let resolved := (J.ref? node).any fun id => declarations.any fun declaration =>
+      J.id? declaration == some id &&
+        ["SourceUnit", "ImportDirective", "ContractDefinition"].contains (J.kind declaration)
+    resolved && (J.kind node == "Identifier" ||
+      (J.kind node == "MemberAccess" &&
+        (J.opt node "expression").any (errorNamespace declarations fuel)))
+
+private def sourceId? (node : Json) : Option Nat :=
+  (J.str? node "src").bind fun src => (src.splitOn ":").getLast?.bind String.toNat?
+
+/-- Import aliases are lexical to the unit that owns the reference (or the
+statically selected module), never a same-spelled alias in another file. -/
+private def errorAliasScope? (declarations : List Json) (callee : Json) : Option Nat := do
+  if J.kind callee == "Identifier" then return ← sourceId? callee
+  let receiver ← J.opt callee "expression"
+  let id ← J.ref? receiver
+  let owner ← declarations.find? (J.id? · == some id)
+  if J.kind owner == "SourceUnit" then return ← sourceId? owner
+  guard (J.kind owner == "ImportDirective")
+  let target ← (owner.getObjValAs? Int "sourceUnit").toOption
+  let unit ← declarations.find? fun node => J.kind node == "SourceUnit" && J.id? node == some target
+  sourceId? unit
+
+/-- Select a rendered error by compiler identity. Same-named declarations may
+share one native declaration only for identical elementary signatures and
+identical compiler selectors. Nominal/overloaded collisions remain refused. -/
+private def errorReference (declarations renderedErrors : List Json) (callee : Json) :
+    Except Gap (Json × String) := do
+  let some id := J.ref? callee
+    | throw (.unsupported "a custom error without its declaration identity")
+  let [declaration] := declarations.filter (J.id? · == some id)
+    | throw (.unsupported "a custom error whose declaration is missing or ambiguous")
+  let name ← J.str declaration "name"
+  unless J.kind declaration == "ErrorDefinition" do
+    throw (.unsupported "a custom error whose resolved declaration is not an error")
+  let spelling := if J.kind callee == "Identifier" then J.str? callee "name"
+    else if J.kind callee == "MemberAccess" &&
+        (J.opt callee "expression").any (errorNamespace declarations (declarations.length + 1))
+      then J.str? callee "memberName" else none
+  let alias := spelling.isSome && (errorAliasScope? declarations callee).any fun scope =>
+    declarations.any fun directive =>
+      J.kind directive == "ImportDirective" && sourceId? directive == some scope &&
+        (J.arrD directive "symbolAliases").any fun binding =>
+          J.str? binding "local" == spelling &&
+            ((J.opt binding "foreign").bind J.ref?) == some id
+  unless spelling == some name || alias do
+    throw (.unsupported "a custom error whose static name disagrees with its resolved declaration")
+  unless renderedErrors.any (J.id? · == some id) do
+    throw (.unsupported "custom error identity is outside the rendered declaration scope")
+  let candidates := renderedErrors.filter fun other =>
+    J.kind other == "ErrorDefinition" && J.str? other "name" == some name
+  if candidates.length > 1 then
+    let params := (J.arrD (J.opt declaration "parameters" |>.getD .null) "parameters").toList
+    let signature := params.map J.tyStr
+    let selector ← declarationSelector declaration "errorSelector" 4
+    for other in candidates do
+      let ps := (J.arrD (J.opt other "parameters" |>.getD .null) "parameters").toList
+      unless ps.map J.tyStr == signature &&
+          ps.all (fun p => (J.opt p "typeName").any (J.kind · == "ElementaryTypeName")) &&
+          (← declarationSelector other "errorSelector" 4) == selector do
+        throw (.unsupported "custom error identities sharing a name need a nominal signature adapter")
+  return (declaration, name)
+
 /-- A contract-qualified member, never an object or `this` call. -/
 def isBaseMember (contracts : List Int) (f : Json) : Bool :=
   J.kind f == "MemberAccess" && (J.opt f "expression").any fun receiver =>
@@ -1451,6 +1520,13 @@ def checkErrorAggregateParams (ps : List Json) : PM Unit := do
 mutual
 
 partial def expr (j : Json) : PM String := do
+  let declarations := (← get).declarations
+  if ["Identifier", "MemberAccess"].contains (J.kind j) &&
+      ((J.ref? j).bind fun id => declarations.find? (J.id? · == some id)).any
+        (J.kind · == "ErrorDefinition") then
+    let st ← get
+    let (_, name) ← PM.lift (errorReference st.declarations st.renderedErrors j)
+    return identText name
   if let some (id, args) ← PM.lift (operatorAlias? (← get).declarations j) then
     let some name := lookupBy id (← get).names |
       unsupported s!"operator function #{id} is not in the resolved call graph"
@@ -1813,6 +1889,7 @@ partial def call (j : Json) : PM String := do
       let resolved := st.declarations.filter (J.id? · == some id)
       if resolved.any (fun d => J.kind d == "ErrorDefinition") then
         let [decl] := resolved | unsupported "a custom error whose declaration is missing or ambiguous"
+        let _ ← PM.lift (errorReference st.declarations st.renderedErrors f)
         let ps ← PM.lift (J.arr (← PM.lift (J.get decl "parameters")) "parameters")
         let aggregate := ps.any fun p => (J.opt p "typeName").any fun t =>
           J.kind t == "ArrayTypeName" ||
@@ -2139,6 +2216,20 @@ partial def stmt1 (j : Json) : PM (List String) := do
     if J.kind e == "MemberAccess" then
       let owner := unparen ((J.opt e "expression").getD .null)
       let member := (J.str? e "memberName").getD ""
+      -- Discarding a type selected from one module still evaluates the
+      -- condition. Both namespace arms are static and identify that same
+      -- module; reuse ordinary expression-statement lowering for its effects.
+      if (J.tyStr e).startsWith "type(" &&
+          ((J.ref? e).bind fun id => declarations.find? (J.id? · == some id)).any
+            (fun declaration => ["ContractDefinition", "StructDefinition", "EnumDefinition"].contains (J.kind declaration)) &&
+          J.kind owner == "Conditional" && (J.tyStr owner).startsWith "module " then
+        let left := unparen ((J.opt owner "trueExpression").getD .null)
+        let right := unparen ((J.opt owner "falseExpression").getD .null)
+        let condition ← PM.lift (J.get owner "condition")
+        if J.tyStr condition == "bool" && (J.ref? left).isSome && J.ref? left == J.ref? right &&
+            errorNamespace declarations (declarations.length + 1) left &&
+            errorNamespace declarations (declarations.length + 1) right then
+          return ← localStmt (j.setObjVal! "expression" condition)
       if builtinNamed owner "abi" &&
           ["encode", "encodePacked", "encodeWithSelector", "encodeWithSignature", "decode"].contains member then
         return []
@@ -2390,25 +2481,10 @@ partial def stmt1 (j : Json) : PM (List String) := do
   | "RevertStatement" =>
     let call ← PM.lift (J.get j "errorCall")
     let callee ← PM.lift (J.get call "expression")
-    unless J.kind callee == "Identifier" do
-      unsupported "a custom error named through a member access"
-    let some e := J.str? callee "name" | unsupported "a custom error with no name"
+    let st ← get
+    let (decl, e) ← PM.lift (errorReference st.declarations st.renderedErrors callee)
     let args ← PM.lift (J.arr call "arguments")
     let rawNames := (J.arrD call "names").toList
-    let some id := J.ref? callee | unsupported "a custom error without its declaration identity"
-    let [decl] := (← get).declarations.filter (fun d => J.id? d == some id)
-      | unsupported "a custom error whose declaration is missing or ambiguous"
-    unless J.kind decl == "ErrorDefinition" && J.str? decl "name" == some e do
-      unsupported "a custom error whose name disagrees with its resolved declaration"
-    let st ← get
-    let owners := st.declarations.filter fun owner => J.kind owner == "SourceUnit" ||
-      (J.kind owner == "ContractDefinition" && (J.id? owner).any st.baseContracts.contains)
-    let visible := owners.flatMap fun owner => (J.arrD owner "nodes").toList
-    let [rendered] := visible.filter (fun d => J.kind d == "ErrorDefinition" &&
-        J.str? d "name" == some e)
-      | unsupported "custom error identities sharing a name need a nominal signature adapter"
-    unless J.id? rendered == some id do
-      unsupported "custom error identity is outside the rendered declaration scope"
     let ps ← PM.lift (J.arr (← PM.lift (J.get decl "parameters")) "parameters")
     unless ps.length == args.length && ps.all (fun p => J.kind p == "VariableDeclaration") do
       unsupported "custom error argument arity disagrees with declaration"
