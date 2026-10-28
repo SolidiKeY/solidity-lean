@@ -197,3 +197,19 @@ its emitted text is not a typed admission or execution claim. All failed first
 wrappers, compiler-invalid candidates, valid companions, full emitted/dropped
 metadata, commands and logs remain in the new hash-checked probe archive.
 The original cold stop and unrun warm measurement are unchanged.
+
+## Native diagnostic follow-up
+
+The [native cache/evidence index](native-cache/README.md) supersedes the earlier
+blanket native-harness blocker: existing production Import/Upstream artifacts
+were valid, while Testing's broader proof closure was stale. No project build
+or configuration change was needed. Both pipelines now have actual typed-import,
+bounded replay and positive/negative/refusal observations. These are not new
+corpus verdicts, kernel postcondition proofs or generated EVM observations.
+
+Historical document hashes belong to their recorded checkpoints. Later appended
+clarifications do not rewrite those reports; historical generator reproduction
+must use the corresponding checkpoint. The new native index and archive carry
+current diagnostics. Nonzero-payment entry discrimination remains unavailable
+in the unchanged replay input; nativeValidationComplete stays false for that
+precise reason. Testing proof listing/search remains a separate stale prerequisite.

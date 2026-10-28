@@ -285,3 +285,11 @@ adds actual pinned-compiler/provenance/source-reader controls for those40 questi
 It preserves the original corpus and distinguishes source emission from native
 typed admission/proofs/replay, which remain blocked after a single bounded API
 refresh stopped124. No feature status or profile decision changed.
+
+The [native diagnostic follow-up](../tests/upstream/baseline-20261028/native-cache/README.md)
+now establishes production typed-import/replay observations through the reusable
+narrow adapter, without another build. The old combined preflight conflated it
+with the stale proof-search branch. Named refusals and existing proof/model
+limits remain separate from finite successful controls; the inventory is not
+promoted. The precise remaining native capability is nonzero-payment entry
+validation; the old cold stop and warm-unrun remain unchanged.

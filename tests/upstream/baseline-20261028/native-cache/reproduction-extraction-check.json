@@ -1,0 +1,8 @@
+{
+  "exitCode": 0,
+  "sourceCases": 20,
+  "allSourceBytesMatchActualNativeInputs": true,
+  "helperSha256": "edcaf470ffad073f3edbcaccad63bd2b9919c872e07f588740abba9266ba3b5c",
+  "elapsedSeconds": 0.1679173879965674,
+  "noNativeChecksOrBuildsRepeated": true
+}

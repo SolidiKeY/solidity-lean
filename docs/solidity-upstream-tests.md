@@ -461,3 +461,13 @@ adds actual pinned-compiler/provenance/source-reader controls for those40 questi
 It preserves the original corpus and distinguishes source emission from native
 typed admission/proofs/replay, which remain blocked after a single bounded API
 refresh stopped124. No feature status or profile decision changed.
+
+The [native cache diagnosis](../tests/upstream/baseline-20261028/native-cache/README.md)
+separates the reusable 76-module production import/replay adapter from the stale
+257-module Testing proof branch. Source/olean trace hashes, setup imports and a
+no-build preflight passed without any project build or config edit. Both source
+modes now have 40 typed-import reports, 38 replay batches and 122 matching
+observations; 12 batches retain explicit frontend refusals with zero runtime
+observations. Wrong-output, provenance and internal-entry controls are separate.
+Nonzero msg.value entry rejection remains untested in the fixed-default-value
+adapter. Prior baseline counts, inputs, observations and reports are unchanged.
