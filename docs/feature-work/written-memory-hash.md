@@ -1,197 +1,226 @@
-# Written-memory/hash composition (partial)
+# Written-memory/hash composition
 
-The original `gapWrittenMemory` is **not closed**. Its statement, `inTarget`
-certificate and unknown verdict remain unchanged, as do all six original M7
-gaps, waivers, exclusions and `DecisionTheorem`. This branch delivers proved
-independent composition helpers, not a complete decision procedure or a new
-source-support verdict.
+The ORIGINAL `gapWrittenMemory` is now refuted by `decideHash` and
+`decideGoal`, with a kernel-checked dispatched verdict and an actual
+`State.init` countermodel. Its formula and `inTarget` certificate are
+unchanged. This supersedes partial checkpoint `b813cbf98d86`, which is
+preserved in history and in the external checkpoint exports.
 
-## Proved scope
+Coverage is explicit: two fresh `uint[]` memory arrays, `s[0] = 1`, then
+equality of their hashes, under either modality and any of the three
+non-recovery kinds. Binder names are parameters. The producer refuses other
+syntax, including a changed index/value/type, self-equality, recovery, and
+an extra scope. This is an exact syntax-schema refuter, not a general
+negative-array input-certificate extractor or full decision completeness.
+No target, exclusion, waiver, callback/profile policy, or `DecisionTheorem`
+was narrowed or weakened. All six original gap statements/certificates
+remain; only this pin's observation improves with proof-backed evidence.
 
-[HashWritten.lean](../../Solidity/Calculus/HashWritten.lean) adds:
+## Proof and integration
 
-- Normalized byte-input equality as equal lengths and bounded pointwise byte
-  equality. Values are reduced modulo 256; equality of full uint words would
-  incorrectly distinguish 1 and 257.
-- The actual successful heap-write input observation, preserving every other
-  byte. The success witness is mandatory: out-of-bounds `List.set` alone is
-  not a successful Solidity memory write.
-- `hashEq_iff_input` under the existing formula-local finite `HashFree`
-  premise, with set-local identity witnesses. The converse excludes
-  `ecrecover`; forward congruence reuses the existing all-kind theorem.
-- `hashFree_lands` and `hashEq_afterT_iff`, including arbitrary actual memory
-  updates. Both modalities retain their exact failure/exhaustion branch.
-- An intrinsic `HashInputReduction` certificate whose correctness explicitly
-  retains the original premise and the binder-local reading. Its `cut` and
-  `cut?` use the existing hoist 1024 and `mxTop`; the soundness and refutation
-  adapters reuse `decideMem`. A refutation requires the actual original hash
-  premise at the same prestate. No global injectivity assumption is added.
+[HashWrittenInput.lean](../../Solidity/Calculus/HashWrittenInput.lean)
+factors the original proved helpers below `Decision`, preserving their
+names. Normalized byte equality is equal lengths plus bounded pointwise
+byte equality. Actual successful heap writes preserve every untouched
+byte. `hashEq_iff_input` and `hashEq_afterT_iff` use only the formula-local
+finite premise; converse congruence excludes recovery, while forward input
+congruence remains valid for every kind. Failure/exhaustion semantics stay
+unchanged.
+
+The continuation adds `hashFree_update_of_landing`, which constructs the
+update's finite premise from its unique actual landing when the updater has
+no hashes. `refutes_update_input` transfers a realized unequal-input
+counterexample through either modality. `AllocCounterexample` is the
+minimal scoped realization interface: an actual typed object plus a body
+counterexample under that body's own premise at the allocated/pushed state.
+`refutes_alloc` composes it through each fresh binder without borrowing an
+outer premise.
+
+[HashWrittenRealize.lean](../../Solidity/Calculus/HashWrittenRealize.lean)
+constructs actual fresh arrays `[1]` and `[2]`. The write to the first array
+is in bounds and has an actual typed landing. The existing checked family
+supplies the two real distinct hash outputs and the landing's finite
+premise; no global injectivity or collision-freedom hypothesis appears.
+Nested allocation certificates then refute the original closed formula.
+The universal allocation domain remains all typed objects; the one-word
+family objects are existential counterexample witnesses only.
+This concrete realization makes the original pin independent of the general
+`gapMemInnerNeg` reduction. The referenced `0590c505` object is not available
+in this checkout; no other VM's unmerged work was copied or contacted.
+
+`body?` and `extract?` return intrinsic formula equality certificates.
+Their tactic `cases` definitions elaborate to the required recursors;
+existing certified `Tm.beqR` checks every write/hash term and sort. No untyped
+syntax/state/witness or indexed-family match is introduced. `refutation?`
+tries only the three non-recovery kinds. `Decision.tryWritten`, placed last
+in `hashTries`, returns the actual certified countermodel and retains all
+earlier decisions and ordering.
+
+[HashWritten.lean](../../Solidity/Calculus/HashWritten.lean) retains the
+original closed `HashInputReduction` interface and exact composition with
+hoist 1024, `mxTop` and `decideMem`. Its refutation adapter still requires the
+original finite premise at the returned prestate. General negative-array
+input extraction through this cut remains open; the new original-pin verdict
+comes from the explicit realized syntax certificate, not from claiming that
+broader extraction exists.
+
+## Observations and kernel boundary
 
 [DecisionWrittenMemory.lean](../../Solidity/Examples/DecisionWrittenMemory.lean)
-checks a certified positive composition, actual write/input/hash observations
-for every kind and both aliases, modulo-equivalent bytes, unequal tails and
-lengths, actual distinct family hashes, invalid recovery inputs with equal
-outputs, zero-length box/diamond writes, and an unset local. Its full ordered
-18-path matrix is retained before and after this patch.
+retains the full ordered 18-path matrix: memory; three single-kind paths;
+six ordered two-kind paths; six ordered three-kind paths; hash; goal.
 
-## Exact remaining dependency
-
-`decideHash` still does not extract `HashInputReduction` for the original pin.
-The required intrinsic input comparison has equal lengths and a universal
-comparison of normalized array bytes, including bytes after the write. At
-negative polarity it needs exact finite instantiation and reconstruction of
-memory arrays, not merely sampled indices. `MemSwap.mxIdx`/`mxAt?` currently
-require an index to thin to the array's binder; a comparison index bound
-inside that scope is not a supported read-table entry. `HashSwap.sw1?` rejects
-memory updates and `Tm.mx` rejects hash operands, so chaining the two existing
-deciders does not repair this boundary.
-
-The missing memory-array realization/floor proof is the independently owned
-`gapMemInnerNeg` prerequisite described in [M7](../automation.md). After it is
-available, this lane still needs the intrinsic comparison/certificate producer
-and its scope-correct lifting through the original fresh-array binders, then
-sound countermodel transfer with the existing finite premise. The current
-certificate consumer asserts none of that production or coverage. No other
-VM's unmerged work was inspected, copied or contacted.
-
-## Repository and resource evidence
-
-- Checkout: `/workspace/solidity-lean`; origin:
-  `https://github.com/SolidiKeY/solidity-lean.git`.
-- Branch: `codex/next10-written-memory-hash`, based on published master
-  `f4dee4a29c2e208b36db4a4161a4723c735cd775`; fetched ancestry confirmed.
-- Lean 4.24.0, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`;
-  Lake `5.0.0-src+797c613`.
-- Saved setup activation was required; no setup/user file was changed.
-- Writes/checks use the documented writer lock. Heavy checks are serialized;
-  no Lean server runs with a build. `LEAN_NUM_THREADS=1` and an untracked
-  alternate TOML pass explicit `-j1`; no proof, fuel, node or test budget changes.
-- The verified local Docker cgroup has `memory.max=12884901888` and
-  `memory.swap.max=0`, beneath the attached executor's 16 GiB parent limit.
-  Cgroup peak measures the whole group, including its page cache; it is not
-  mislabeled as an individual process's RSS. Caches remain on disk.
-
-The actual startup KeySort gate passed before `RUNTIME_GATE_PASS` was written:
-`lake -f lakefile.next10.toml build Solidity.KeySort`, exit 0, peak 24,862,720
-bytes. An initial Lake `-j1` invocation failed because Lake has no such option;
-the documented weak-Lean-argument TOML repaired it, without budget changes.
-Both logs are retained.
-
-The unchanged baseline `lake -f lakefile.next10.toml build
-Solidity.Examples.Decision` passed all 309 jobs in 3,238 seconds, including the
-original verdict pin and target certificates. Aggregate cgroup peak was
-10,657,259,520 bytes (9.93 GiB); no OOM. `DecisionHashes` took 275 seconds,
-`Decision` 607 seconds. The standalone 72-observation fixture matrix passed
-in 5 seconds, peak 175,456,256 bytes.
-
-## Before/after observations
-
-| Fixture | Before | After |
+| Fixture | Baseline | Continuation |
 |---|---|---|
-| Original written-memory pin | unknown in all 18 tested paths; inTarget true | Identical unknown observations; inTarget true |
-| Written self-hash box | unknown in all 18 paths | Certified composition proved; dispatcher observations unchanged |
-| Input self box | mem and goal proved; other 16 paths unknown | Pinned unchanged |
-| Input diamond | mem and goal refuted, preheap length 0; other 16 unknown | Pinned unchanged |
+| Original written-memory pin | unknown in all 18 paths; inTarget true | first 16 unchanged unknown; hash/goal refuted at preheap length 0; inTarget true |
+| Written self-hash box | unknown in all 18 paths | unchanged; existing certified positive cut still proves it |
+| Input self box | mem/goal proved; other 16 unknown | unchanged |
+| Input diamond | mem/goal refuted at preheap length 0; other 16 unknown | unchanged |
 
-The paths are `decideMem`, the three supported `decideHashK` kinds, six
-ordered two-kind paths, six ordered three-kind paths, `decideHash` and
-`decideGoal`. Full tuples, including ordering and refutation preheap
-observations, are in the retained logs, not replaced by aggregate counts.
+Exactly 70 of 72 original observations are unchanged; only the original
+hash/goal observations improve. The six kind/modality variants retain 108
+ordered observations, with hash/goal refuted for each. Direct-stage refusal
+controls cover self, recovery, index, value, type and extra scope. Existing
+controls retain actual non-idempotent writes/aliases, modulo-equivalent
+bytes, unequal tails/lengths, real family hash separation, invalid recovery
+inputs, zero-length box/diamond failures and an unset local.
 
-## Kernel audits and evidence boundary
+`original_refuted` proves the original statement has a countermodel.
+`original_kernel_verdict` evaluates its actual dispatched refutation in the
+kernel; `original_realized_covered` checks certificate coverage. All new
+headline audits use only `propext`, `Classical.choice`, `Quot.sound`;
+`hashInput_write_index` uses only `propext`. Exact audit outputs are guarded.
+No new axiom or admitted proof is present. This is intrinsic-model/kernel
+and compiled Lean evidence. No new Solidity-source/compiler/EVM conformance
+or language-support result is inferred from it. All hash semantics and
+language inventory support classifications remain unchanged.
 
-The checked `hashInput_write_index` uses only `propext`. The audited update,
-cut, decision-transfer and fixture theorems use only `propext`,
-`Classical.choice`, `Quot.sound`; their exact outputs are `#guard_msgs` pins.
-No new axiom or admitted proof is in the patch. Initial MCP failures and
-subsequent successful repairs are retained; failed iterations are not passes.
+## Runtime, failures and recovery
 
-These are kernel proofs about the existing intrinsic model and compiled
-Lean regression observations. This patch introduces no Solidity source or
-compiler/EVM semantic change. It does not claim a new solc/EVM conformance
-result or source-support coverage from the helper proofs. The existing hash
-implementations and finite computed-family proofs are reused unchanged.
+The retained checkout is `/workspace/solidity-lean`, branch
+`codex/next10-written-memory-hash`, origin
+`https://github.com/SolidiKeY/solidity-lean.git`, based on published master
+`f4dee4a29c2e208b36db4a4161a4723c735cd775`. Startup/reconnect verified the
+retained `b813cbf98d866dafbecfbe5e434df7cb6d40ea46`, ancestry, Bash, Lean
+4.24.0 (`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`) and Lake
+`5.0.0-src+797c613`. Saved setup/user files are preserved; its thread default
+is overridden with `LEAN_NUM_THREADS=1` and explicit Lean `-j1` in a temporary
+Lake configuration. `-DElab.async=false` is the existing scheduling repair;
+no proof/fuel/node/test budget changes.
 
-## Validation and review status
+Writes/checks use the documented writer lock. One heavy check runs at a time
+in the same VM under verified `memory.max=12884901888`,
+`memory.swap.max=0`, beneath the 16 GiB parent. Caches stay on disk. VM
+headroom uses parent limit minus current plus inactive file cache and checks
+host available RAM; the unchanged stop threshold is 1 GiB. Exact cgroup
+peaks include all charged processes/cache in the group. No cold-build-fit
+claim is made from retained-cache confirmations.
 
-Per-file MCP checks for both changed Lean files passed with no errors or
-warnings, including actual axiom audits. The assignment module command-line
-build passed (7 seconds, 227,266,560-byte cgroup peak). All 72 ordered
-before/after observations are byte-identical, SHA256
-`b5d5fe134d852fb2139275ecbb07164b470e9bd903731f42e8ada7609dae6547`.
+The continuation KeySort runtime gate passed before edits: exit 0, two
+jobs, 24,879,104-byte peak. The unchanged original checkpoint baseline and
+its original failed full-run/headroom stop, distinct Derived17 serialization
+repair and passing warm confirmation remain in the preserved checkpoint
+handoff/archive. No old failed or stopped check is relabeled a pass.
 
-The required repository gates passed: 702 reachable modules, no orphans;
-152 core modules with no elaborator reachability; strict automation has 491
-automatic, 61 step-budget proofs, 11 refuted and zero manual/pending;
-trust has 716 sources, 240 inventoried sites and zero findings. Inventory
-regeneration/check passed with unchanged 212 features and 783 upstream
-symbols. Generated files and support classifications have no diff.
+MCP automatic `lake setup-file` initially lost the alternate Lake config.
+Only the affected task container was stopped (exit 137); this was not an OOM
+or a pass. The repaired launcher uses `lake env` and an explicit `LAKE`
+wrapper; process evidence verifies `-j1` and serialized elaboration on the
+child compiler. The executor briefly became unavailable while that repaired
+check ran. The SAME saved VM/branch and running container were recovered,
+without a duplicate check, new VM, clone or replacement branch. The outer
+monitor was lost; a recovery monitor covered the later window. CSV epochs
+record the gap, so uninterrupted headroom coverage is not claimed for this
+attempt. Its recovered actual peak was 6,461,456,384 bytes, no OOM. It exited
+1 after ten partial diagnostic polls; doc-comment attachment and audit line
+wrapping errors were repaired. That attempt is not a pass.
 
-The first `./run-lean.sh` passed the default library (687 jobs), including
-`DecisionMemory`, `DecisionArrays` and both new modules, but the parent-
-headroom guard stopped it during `TestSuite/Derived17.lean`: exit 137 after
-5,933 seconds. Docker reported no OOM kill, and parent OOM counters stayed
-zero. Available headroom, computed as parent limit minus current plus inactive
-file cache, fell to 1,001,287,680 bytes below the 1 GiB threshold. That stopped
-run is retained as a failure. Its inner peak was not emitted because the
-container was stopped; no exact inner peak is claimed for it.
+Future MCP setup calls forbid automatic builds (`--no-build --no-cache`),
+with imports prebuilt separately. The new durable build runner keeps its
+headroom guard inside the bounded container, so loss of an outer tool
+session does not stop monitoring.
 
-The distinct repair was runtime-only serialization: `-DElab.async=false` in
-the temporary weak arguments. `Derived17` has ten large proof declarations
-and no async override. No source, proof/search/node/test budget or verdict was
-changed. Lake's `LeanConfig.lean` documents weak arguments as not affecting
-build-result traces. The isolated retry retained explicit `-j1`, the 12 GiB/
-zero-swap cgroup, the same headroom threshold, and an explicit 300-second wall
-limit. It passed in 133 seconds (135 seconds command wall), with exact cgroup
-peak 10,500,837,376 bytes (9.78 GiB), no OOM, and minimum sampled available
-headroom 1,841,979,392 bytes. The guard did not stop it.
+## Validation and review
 
-The full `./run-lean.sh` then passed from the checked cache with serialized
-elaboration: default library, complete SolkeyTestSuite (259 jobs) and the native
-SolKey checker (377 taclets, 131 read-bearing annotations, all matched).
-Command wall was 368 seconds and exact aggregate cgroup peak 5,992,030,208
-bytes (5.58 GiB), no OOM. The resumed headroom guard did not fire; monitoring
-coverage and samples are retained. This is a passing checked-cache confirmation,
-not a claim that a cold build fits this VM.
+Final changed-file diagnostics so far pass: input helpers, producer,
+Decision, cut adapters, expanded fixture and original Decision source.
+The original source check passed in 592 seconds, sampled peak
+6,266,277,888 bytes and minimum available headroom 4,790,579,200 bytes; exact
+final peak is retained in its log. Hash fixture dependencies passed in
+276 seconds (`DecisionHashes` 275 seconds, matching baseline), exact peak
+7,148,191,744 bytes and minimum headroom 4,092,399,616 bytes. Expanded
+fixture diagnostics passed in 17 seconds with no errors/warnings.
 
-The unchanged timed strict gate passed against the combined actual build logs:
-26 TestSuite modules timed, maximum 173 seconds (`Derived7`), within the
-unchanged 300-second budget. Cached replays are not counted as timed modules.
-No stopped or failed iteration is counted as a passing check.
+The assignment target build passed all 313 jobs in 14 seconds, exact peak
+247,640,064 bytes. `./run-lean.sh` passed in 100.034 seconds with exact group
+peak 1,064,669,184 bytes and minimum available headroom 9,878,556,672 bytes:
+default library 689 jobs; complete SolkeyTestSuite 259 jobs; native checker
+377 taclets, 131 read-bearing annotations, all matched. No OOM or guard stop.
+This is a current-tree confirmation with retained checked caches, not a cold
+build or fresh timing claim for cached modules. The root import file's final
+per-file diagnostic also passed.
 
-Draft finder and skeptic independently reviewed the input/update/cut scope
-without Lean server access. Both confirmed the finite-premise and successful-
-write conditions and required the missing certificate producer to remain
-explicit. Confirmed proof-normalization findings were fixed through per-file
-MCP goals and multi-attempt checks. Final finder and skeptic reviews covered both actual Lean modules, the 72
-ordered observations, concrete write/input/hash and alias controls, all boundary
-controls, audits, registrations and owning documentation. Neither used the Lean
-server, builds or edits. Both found no confirmed defect. Their nonblocking limit
-is retained: the positive certificate consumer control is reflexive and does
-not directly instantiate `hashEq_afterT_iff`; the generic bridge has its own
-kernel proof/audit. This is not an end-to-end reduction of the original pin.
-Reviewed source hashes are recorded in the external review record and remain
-unchanged after review.
+Inventory regeneration/check passed with unchanged 212 features (151 model,
+23 abstract, 30 excluded, 8 upstream) and 783 upstream symbols; generated
+files/support classifications have no diff. Orphans: 704 reachable, zero
+orphans/not-allowed. Layers: 152 core modules, zero elaborator reachability.
+Strict automation: 491 automatic, 61 existing step budgets, zero manual,
+11 refuted, zero pending. Trust: 718 sources, 240 inventoried sites, zero
+findings. These required gates passed both the quick and final bundles.
 
-## Handoff artifacts and shared edits
+The unchanged 300-second timing policy passed against the current full log
+(zero newly timed TestSuite modules: checked cache) and the retained actual
+26-module profile (maximum 173 seconds). Historical successful per-module
+timings are not relabeled fresh runs; the old stopped full attempt remains
+a failure. Isolated OpenLoops and Derived17 confirmations reused checked
+artifacts and passed in about two seconds each; no new proof timings are
+claimed for them. The prepared full-suite serialization script was not
+needed or executed because those dependency graphs were unchanged.
 
-Raw evidence and reproducible bounded runners are under
-`/workspace/next10-written-memory-hash-evidence`. Exports are `/workspace/next10-written-memory-hash.patch`,
-`/workspace/next10-written-memory-hash.sha256`,
-`/workspace/next10-written-memory-hash-handoff.md`, and
-`/workspace/next10-written-memory-hash-evidence.tar.gz`. Commit identity,
-per-command exit/time/peak values, source hashes and raw logs are in the evidence
-manifest. The original pin remains blocked by the negative-array dependency and
-certificate producer; the assignment is not marked complete.
+An ADDITIONAL global `check-doc-paths.sh` audit failed with 20 missing foreign
+file references in unchanged `Solidity/Eqns.lean` and historical group03/group10
+validation JSON. A read-only reproduction against published baseline `f4dee4a`
+finds exactly the same 20 failures, all citing files byte-identical, and zero
+new missing references. The task document's four file links resolve. The
+checker/exclusions and historical artifacts were not modified. The final
+bundle's aggregate exit is therefore 1 solely for that additional baseline
+failure; it is not counted as a passing bundle or hidden by the passing
+required gates. The global audit remains open outside this patch.
 
-The task-specific TOML is exported inside the evidence directory and removed
-from the checkout before commit. For reproduction, copy it back to
-`/workspace/solidity-lean/lakefile.next10.toml`, use the retained bounded runner,
-and remove it again afterwards. On-disk build caches are preserved.
+Read-only finder and skeptic have reviewed the input/update/allocation
+semantics and producer/dispatcher without Lean server, builds or edits.
+Neither found a semantic false accept. Confirmed stale descriptions, the
+missing adapter module docstring and additional refusal controls were fixed.
+Their scope limitation is retained above: exact schema realization closes
+this pin, without general negative-array extraction. Both rechecked the final
+source/evidence and found no semantic defect or evidence overclaim. The
+skeptic's cumulative-import count correction (four imports, not the two
+continuation additions alone) was applied. Final metrics/documentation review
+is recorded in the external review record.
 
-Shared edits are only the two root imports in `Solidity.lean`, two module-map
-rows, one Lean-only correspondence row, and the M7 link to this handoff. The
-feature inventory is regenerated by its audit script, without hand edits or
-support inflation. All implementation/proof controls are additive files unique
-to this task. No push, merge, cherry-pick or other VM/monitor change is authorized
-or performed.
+## Shared edits and artifacts
+
+Shared changes are narrow: the Decision import and last certified hash
+stage; four cumulative root imports (two at the b813 checkpoint and two in
+this continuation); the original proof-backed verdict pin;
+module-map/correspondence/M7 owning links. New implementation stays in
+`HashWrittenInput`/`HashWrittenRealize`; the existing adapter and task fixture
+are updated in this lane. No other gap source, target/waiver tail, setup/user
+configuration, repository script, hash semantics or external VM/monitor was
+modified. The inventory is regenerated with its audit script, without hand
+editing generated files or inflating support.
+
+Evidence is under `/workspace/next10-written-memory-hash-evidence`, including
+full ordered observations, source preservation, recovery/process traces,
+commands/exit codes/timings/peaks and reviews. Original b813 exports are
+preserved separately in `/workspace/next10-written-memory-hash-checkpoint-b813`.
+Final cumulative patch, handoff, archive and SHA256 manifest are refreshed
+at `/workspace/next10-written-memory-hash.{patch,sha256}`,
+`/workspace/next10-written-memory-hash-handoff.md` and
+`/workspace/next10-written-memory-hash-evidence.tar.gz` after final checks.
+The temporary `lakefile.next10.toml` is exported inside the evidence directory
+and removed from the checkout before commit. To reproduce, copy it back,
+activate the saved setup, override `LEAN_NUM_THREADS=1`, and use the retained
+bounded runners; explicit `-j1` belongs to Lean, not Lake build flags. No
+tracked setup/user configuration is changed. No push, merge or cherry-pick
+is performed.

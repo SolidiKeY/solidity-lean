@@ -506,6 +506,8 @@ import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
 import Solidity.Calculus.HashWritten
+import Solidity.Calculus.HashWrittenInput
+import Solidity.Calculus.HashWrittenRealize
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction

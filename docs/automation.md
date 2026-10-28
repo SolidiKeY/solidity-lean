@@ -661,8 +661,9 @@ Costs that guide work:
     memory.  Next: `decideMem`'s cut inside `decideHash`, input equality as
     a negative `∀` over the written arrays (after `gapMemInnerNeg`).
     Independent [written-memory/hash helpers](feature-work/written-memory-hash.md)
-    now prove the byte-input and update/cut composition obligations. They do
-    not produce the negative-array certificate or change this unknown pin.
+    prove byte-input and update/cut composition. The continuation adds an
+    exact syntax-schema realization certificate that refutes this original
+    pin through `decideHash`; general negative-array extraction remains open.
 * Unpinned shapes in the target: fixed arrays and arrays below a mapping
   key in a block (`FloorShape.of` keeps them; they need a `fixed` shape and
   their length in the index set, or a length atom); cut leaves past 511
@@ -817,7 +818,8 @@ Features 30–31 (`kintneg`) and 32 (`apfarrays`) merged; steps 2–5 of the
 original plan moved to M7-next.  Still pinned, in `Fml.inTarget` and
 answered unknown (M7, "What is not proved"): `gapKIntTwoAnchors`,
 `gapQuantLedger`, `gapMemInnerNeg`, `gapMemParam`, `gapMemStruct`,
-`gapWrittenMemory`.
+`gapWrittenMemory`. The written-memory continuation now refutes its original
+pin; the six-gap list above records the dated step-1 checkpoint.
 
 Group 07 direct file-backed profiling found its coverage proofs take about
 one second each; the final verdict evaluation is the slow stage, rather than

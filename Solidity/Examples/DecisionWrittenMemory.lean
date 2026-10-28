@@ -4,11 +4,11 @@ import Solidity.Calculus.HashWritten
 /-!
 # Written-memory/hash composition controls
 
-The original M7 pin remains unknown. The full ordered matrix below is the
-same fixture matrix retained before this patch. `allocAll` has no `dl!`
+The original M7 pin is refuted by the certified written-memory stage. The
+full ordered matrix retains every prior path and records that improvement. `allocAll` has no `dl!`
 notation, as in `Examples/Decision.lean`; all terms use existing printed
 memory/hash symbols. The certificate test proves composition without claiming
-that the current hash dispatcher extracts such a certificate automatically.
+general negative-array extraction beyond the exact written-equality schema.
 -/
 namespace Solidity.Examples.DecisionWrittenMemory
 open Solidity.Decide Solidity.Examples.DecisionHashes
@@ -83,7 +83,7 @@ theorem writtenSelf_certified : Fml.ValidH writtenSelf := by
 
 #guard writtenSelfReduction.cut?.isSome
 #guard (observations Solidity.Examples.Decision.gapWrittenMemory).map (·.2) =
-  List.replicate 18 ("unknown", none)
+  List.replicate 16 ("unknown", none) ++ List.replicate 2 ("refuted", some 0)
 #guard (observations writtenSelf).map (·.2) = List.replicate 18 ("unknown", none)
 #guard (observations inputSelf).map (·.2) =
   [("proved", none)] ++ List.replicate 16 ("unknown", none) ++ [("proved", none)]
@@ -194,6 +194,79 @@ theorem empty_diamond_control : ¬ Fml.holdsS emptyState (.upd .diamond emptyWri
 /-- An unset local remains unset; the atomic input bridge requires Some identities. -/
 theorem unset_control :
     ((State.init Names).push (t := .mem UA) none).getV (.here : Idx [.mem UA] (.mem UA)) = none := rfl
+
+/-- The generalized realization theorem instantiates the ORIGINAL formula;
+its syntax certificate and dispatched kernel verdict are checked below. -/
+theorem original_refuted :
+    ¬ Fml.holdsH (State.init Names) Solidity.Examples.Decision.gapWrittenMemory :=
+  WrittenMemory.Realize.schema_refutes (.user "s") (.user "t") .keccak (by decide) .box
+
+/-- info: 'Solidity.Examples.DecisionWrittenMemory.original_refuted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms original_refuted
+
+/-- The actual dispatched original verdict, evaluated by the kernel. -/
+theorem original_kernel_verdict :
+    (match decideGoal Solidity.Examples.Decision.gapWrittenMemory with
+      | .refuted σ => σ.H.length == 0
+      | _ => false) = true := by decide +kernel
+
+/-- Coverage here means an actual realized certificate, not a target change. -/
+theorem original_realized_covered : Solidity.Examples.Decision.gapWrittenMemory.hashCovered = true :=
+  by decide +kernel
+
+/- Every supported kind and both modalities use the same scope-correct
+realization. Renaming the binders does not affect extraction. -/
+#guard [HashKind.keccak, .sha256, .ripemd160].all fun k =>
+  [Modality.box, .diamond].all fun m =>
+    let φ : Fml Names [] := WrittenMemory.Realize.schema (.user "a") (.user "b") k m
+    observation (decideWrittenHash φ) == ("refuted", some 0)
+#eval [HashKind.keccak, .sha256, .ripemd160].map fun k =>
+  (k, [Modality.box, .diamond].map fun m =>
+    (m, observations (WrittenMemory.Realize.schema (.user "a") (.user "b") k m)))
+
+/- Positive self-equality, recovery, and a different write must be refused
+by this exact schema producer. Existing failure controls remain above. -/
+#guard decideWrittenHash writtenSelf matches .unknown
+#guard decideWrittenHash
+  (WrittenMemory.Realize.schema (.user "s") (.user "t") .ecrecover .box : Fml Names []) matches .unknown
+private def otherWrite : Fml Names [] := strings (.upd .box
+  (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+    (.app2 (.mat .dyn) (.pvI (.there .here)) (num 1)) (.app1 .mval (num 1))))) (.eq hS hT))
+#guard decideWrittenHash otherWrite matches .unknown
+
+private def otherValue : Fml Names [] := strings (.upd .box
+  (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+    (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 2))))) (.eq hS hT))
+#guard decideWrittenHash otherValue matches .unknown
+
+private def otherType : Fml Names [] :=
+  .allocAll (.user "s") (.array (.prim .bool)) (.allocAll (.user "t") UA
+    (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+      (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (.app0 (.lit false))))))
+      (.eq (hnode .keccak (.there .here)) (hnode .keccak .here))))
+#guard decideWrittenHash otherType matches .unknown
+
+private def extraScope : Fml Names [] :=
+  .allocAll (.user "extra") UA (.allocAll (.user "s") UA (.allocAll (.user "t") UA
+    (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+      (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 1)))))
+      (.eq (hnode .keccak (.there .here)) (hnode .keccak .here)))))
+#guard decideWrittenHash extraScope matches .unknown
+#eval [("self", writtenSelf), ("index", otherWrite), ("value", otherValue),
+  ("type", otherType), ("scope", extraScope)].map fun (n, φ) => (n, observation (decideWrittenHash φ))
+
+/-- info: 'Solidity.Examples.DecisionWrittenMemory.original_kernel_verdict' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms original_kernel_verdict
+/-- info: 'Solidity.Examples.DecisionWrittenMemory.original_realized_covered' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms original_realized_covered
+/-- info: 'Solidity.Decide.decideWrittenHash_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideWrittenHash_refutes
+/-- info: 'Solidity.Decide.decideGoal_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideGoal_refutes
 
 /-- info: 'Solidity.Examples.DecisionWrittenMemory.writtenSelf_certified' depends on axioms: [propext,
  Classical.choice,
