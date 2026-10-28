@@ -1,4 +1,5 @@
 import Solidity.Syntax.Elab.Lower
+import Solidity.Syntax.Elab.SliceCopy
 
 /-!
 # The elaborator's arms
@@ -376,8 +377,8 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     let (v, pre) ← ElabM.lift (inlineSliceOpen t view)
     let P ← elabStmtsP pre
     let Γ ← ctx
-    let .mpath (.ref R@(.array (.prim _))) _ ← ElabM.lift (synth C Γ.toNCtx (.name v.base))
-      | throw "a slice copy needs a dynamic array of primitive elements; reference elements are refused"
+    let .mpath (.ref R@(.array E)) _ ← ElabM.lift (synth C Γ.toNCtx (.name v.base))
+      | throw "a slice copy needs a dynamic calldata array"
     let ws := exprShape C Γ (.name v.base)
     if ws.any (fun (k, _) => k.endsWith "#enum" || (k.splitOn "#function").length > 1) then
       throw "a slice copy of enum or function elements needs its nominal source type"
@@ -389,16 +390,17 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     let j := toString (← freshCapture "se")
     let r := toString (← freshCapture "mv")
     -- The bounds have already been checked. For j < L, off + j < fin;
-    -- copying primitive elements retains no reference to the input heap.
-    -- Use the existing typed allocation, indexing and loop elaboration.
+    -- every admitted element copy retains no reference to the input heap.
+    -- Allocate fixed primitive rows inside the loop, never one shared row.
+    let copy ← sliceElementCopy E ws
+      (.index (.name v.base) (sliceAdd v.off (.name j)))
+      (.index (.name r) (.name j))
     let Q ← elabStmtsP [
       .decl (.named "uint") L (some v.len),
       .declMemory T r (some (.newArr T (.name L))),
       .decl (.named "uint") j (some (.num 0)),
-      .whileLoop {} (.binop .lt (.name j) (.name L)) [
-        .assign (.index (.name r) (.name j))
-          (.index (.name v.base) (sliceAdd v.off (.name j))),
-        .assign (.name j) (.binop .add (.name j) (.num 1))]]
+      .whileLoop {} (.binop .lt (.name j) (.name L)) (copy ++ [
+        .assign (.name j) (.binop .add (.name j) (.num 1))])]
     pure (P ++ Q, .name r)
   | .call "#array" args => do
     let T ← ElabM.lift (inlineArrayTy C (← ctx) args)
@@ -1426,7 +1428,11 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   let isRef (l : RawExpr) : Bool := (widthPath? C Γ l).any fun (_, _, t) => t matches .ref _
   let whole ← match s with
     | .declStorage T _ (some e) | .declMemory T _ (some e) => do
-      ElabM.lift (shapeCheck C Γ (← ElabM.lift (elabTyW C T)).2 e); pure true
+      -- Inline projections get their independent shape during hoisting;
+      -- the strict post-hoist check below still checks the generated path.
+      unless e.inlineArrayRoot do
+        ElabM.lift (shapeCheck C Γ (← ElabM.lift (elabTyW C T)).2 e)
+      pure true
     | .declStoragePush T _ b => do
       ElabM.lift (shapeCheck C Γ (← ElabM.lift (elabTyW C T)).2 (.index b (.num 0))); pure true
     | .assignPush l b =>
@@ -1435,9 +1441,10 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
       else pure true
     | .assign l r =>
       if isRef l then do
-        match synth C Γ.toNCtx l with
-        | .ok (.path (.ref _) (.loc _)) => ElabM.lift (storageCopyShape C Γ (placeShape C Γ l) r)
-        | _ => ElabM.lift (shapeCheck C Γ (placeShape C Γ l) r)
+        unless r.inlineArrayRoot do
+          match synth C Γ.toNCtx l with
+          | .ok (.path (.ref _) (.loc _)) => ElabM.lift (storageCopyShape C Γ (placeShape C Γ l) r)
+          | _ => ElabM.lift (shapeCheck C Γ (placeShape C Γ l) r)
         pure true
       else pure false
     | .declPush .. => pure true

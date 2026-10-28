@@ -682,7 +682,7 @@ def RawExpr.roWrites (ro : List String) (e : RawExpr) : Bool :=
     | _ => false
 
 /-- Whether an expression may retain the read-only object named `x`.
-A slice materialization allocates and copies primitive elements; its result
+A slice materialization allocates and deeply copies admitted elements; its result
 retains no alias of its source. Effects inside its descriptor are still
 visited by `roWrites` and the nested-assignment scan in `roStmt`. -/
 def RawExpr.roMentions (x : String) (e : RawExpr) (memoryReturns : List String := []) : Bool :=
@@ -854,9 +854,9 @@ otherwise the base's out-of-range index supplies its bounds panic. Short
 circuiting keeps these effects in the branch that reads the slice.
 `t.length` is `f - o`, and `abi.decode(t, …)` reads the view without a copy.
 A `calldata` local retains a view; a `memory` initializer and other whole
-uses materialize a fresh flat array (`#sliceCopy`, `hoistWith`). This is also
-how a view crosses an internal call boundary. Reference-element copies and
-rebinding a view local remain refused. -/
+uses materialize a fresh independent array (`#sliceCopy`, `hoistWith`). This is also
+how a view crosses an internal call boundary. Fixed primitive rows get fresh
+row copies; other reference elements and rebinding a view local remain refused. -/
 
 /-- A slice's view: its base array, and where it starts and ends in it
 (each a literal, the base's length, or a local assigned once). -/

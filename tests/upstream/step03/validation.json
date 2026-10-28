@@ -1,0 +1,369 @@
+{
+  "generatedAt": "2026-10-28T02:45:40.481468+00:00",
+  "branch": "codex/step03-aggregate-slices",
+  "startCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "repository": "https://github.com/SolidiKeY/solidity-lean",
+  "environmentId": "ccarenv_b64_Y2NhcmVudl82ZDU5MzFkZWE2Y2M4MTkxYWJlNDU1YmM1YTBjNzk4NA",
+  "sourceConfigId": "2b5c5391-0738-4da9-8acc-99dd89f04e4d~cecfg_6adc9c634c9481a3b462f748c24a047a",
+  "specRevision": "1",
+  "toolchain": {
+    "lean": "4.24.0",
+    "leanCommit": "797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+    "lake": "5.0.0-src+797c613",
+    "node": "24.19.0"
+  },
+  "resourcePolicy": {
+    "memoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "leanNumThreads": 1,
+    "leanArgs": [
+      "--tstack=131072",
+      "-j1"
+    ],
+    "image": "debian@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20be455898a9f034ad",
+    "runner": "/workspace/.setup/docker-step03.py",
+    "runnerSha256": "9dd1fe864fafbbba38db2724ecd0a6447a8c2853337dfa95871776f9bb5ec098",
+    "innerRunnerSha256": "6a38460b1b71c1e62f24aff66ee78490e9023e6c8aa6053d05ce9bb21ecc6e31",
+    "privateLakeConfigSha256": "d8012528606ee620bd2da85457ac9988cb135afd71144b2b819bd7e84b712f4e",
+    "notes": "Same managed VM, actual repository, installed toolchain, Node and artifact cache mounted; kernel cgroup memory/swap files verified in every job. No Lean server ran alongside builds."
+  },
+  "proofBoundary": {
+    "kernelCertificates": 30,
+    "axiomAudits": 30,
+    "fuel": 8,
+    "observationBridge": "Solidity.Examples.Tactics.SliceCopies.observe_run_of_fuel, via Prog.runF_approx",
+    "scope": "Concrete emitted-program executions, not universal source/compiler equivalence or a symbolic copy-loop invariant. No new statement/rule, axiom, core dependency or search/heartbeat limit.",
+    "modelFailureClasses": {
+      "invalidRange": "revert",
+      "rowBounds": "revert",
+      "narrowFailure": "revert",
+      "falsePost": "panic"
+    },
+    "evmBoundary": "Separate compiled-bytecode observations, including exact revert/Panic bytes and transaction rollback. No kernel theorem of compiler/EVM equivalence."
+  },
+  "filesSha256": {
+    "Solidity/Syntax/Elab/SliceCopy.lean": "abf1079fe98967c0c56302d478928178d639f695b8604a785e07cf9cb1106676",
+    "Solidity/Syntax/Elab/Lower.lean": "bef38769296f500457a9984abd6f62ad5f7eb2c622d85058e158f9960f0f7054",
+    "Solidity/Syntax/Elab/Arms.lean": "0942b05b3344791b9f98e372d3b635a1b1560db64ff9f6eb18eeccce9dad76c6",
+    "Solidity/Syntax/Elab/Stmt.lean": "6060a1e815ddfc71694121944e6350d27caa94ae0a644504065e0a18c1c0e005",
+    "Solidity/Syntax/Elab/Context.lean": "00e2c6d500ba166b3d614e10bae6974ec6ebf8f1abbd12479e0b3818cc68e50a",
+    "Solidity/Frontend/SolcJson/Body.lean": "de4dea1aaf9c329d6c32ea1321e8582af1fabd96107a15520de91fe1950130dc",
+    "Solidity/Examples/Tactics/SliceReferenceCopies.lean": "9c5f1b3e9bca8845349499fe51c5b770e8365b79c7fecf8f5e1f18bd50d5139e",
+    "tests/solc/SliceReferenceCopies.sol": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8",
+    "tests/solc/SliceReferenceCopies.ast.json": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+    "tests/solc/SliceReferenceCopies.viaIR.ast.json": "69b1c95db55641904c1aa7de193439d50ae21d2deb9d22f21f02d6739d1f487a",
+    "scripts/evm-reference/slice-reference-copies.mjs": "98b0953cf7aac18fe69b3f2079d775b4db3c278fba472b0df51a3050e90ce76d",
+    "docs/solidity-features.json": "b6c807593a171ad95d9fd913044f54a9ac3a55e592b51d4668602e32d4d29e10",
+    "Solidity/Language/Features.lean": "e5a3cf6f3a6c5763e17799f25bc361e4619dfb64682875e559c7946dc5b22be8"
+  },
+  "preservedWorkingFixtureObservations": [
+    "test/libsolidity/semanticTests/array/slices/array_calldata_assignment.sol",
+    "test/libsolidity/semanticTests/array/slices/array_slice_calldata_to_storage.sol"
+  ],
+  "fixtureSummary": {
+    "before": {
+      "working": 2,
+      "broken": 4,
+      "blocked": 0
+    },
+    "after": {
+      "working": 3,
+      "broken": 3,
+      "blocked": 0
+    },
+    "requiredPipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "oldObservationsRetained": 4,
+    "newOriginalFixtureObservations": 6,
+    "allAfterObservations": 10
+  },
+  "customSourceEvmObservations": 32,
+  "nodeTests": 39,
+  "trust": {
+    "inventoriedSites": 240,
+    "findings": 0
+  },
+  "checks": {
+    "focused": {
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Examples.Tactics.SliceReferenceCopies",
+        "Solidity.Tools.Upstream"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 201.28,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 2513592320,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": null,
+      "log": "/workspace/.setup/logs/step03-final-focused.log",
+      "status": "passed"
+    },
+    "evm": {
+      "command": [
+        "node",
+        "scripts/evm-reference/slice-reference-copies.mjs",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 2.405,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 295964672,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": null,
+      "log": "/workspace/.setup/logs/step03-final-evm.log",
+      "status": "passed"
+    },
+    "node": {
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/solidity-upstream.test.mjs",
+        "scripts/solc-ast-hashes.test.mjs",
+        "scripts/evm-reference/replay.test.mjs"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 4.11,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 304320512,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": null,
+      "log": "/workspace/.setup/logs/step03-final-node.log",
+      "status": "passed"
+    },
+    "trust": {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 4.309,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 169660416,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": null,
+      "log": "/workspace/.setup/logs/step03-final-trust.log",
+      "status": "passed"
+    },
+    "static": {
+      "command": [
+        "bash",
+        "-c",
+        "set -e; node scripts/check-orphans.mjs; node scripts/check-layers.mjs; node scripts/check-automatic.mjs --strict; python3 scripts/solidity-feature-audit.py --check; git diff --check"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 0.502,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 82206720,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": null,
+      "log": "/workspace/.setup/logs/step03-final-static.log",
+      "status": "passed"
+    },
+    "upstreamBefore": {
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/array/slices/",
+        "--batch-size",
+        "1",
+        "--out",
+        "/workspace/.setup/step03-upstream-before"
+      ],
+      "exit": 1,
+      "elapsedSeconds": 43.202,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 585981952,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": null,
+      "log": "/workspace/.setup/logs/step03-upstream-before.log",
+      "status": "completed-with-explicit-broken-rows"
+    },
+    "upstreamAfter": {
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/array/slices/",
+        "--batch-size",
+        "1",
+        "--out",
+        "/workspace/.setup/step03-upstream-final"
+      ],
+      "exit": 1,
+      "elapsedSeconds": 57.7,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 590249984,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": null,
+      "log": "/workspace/.setup/logs/step03-upstream-final.log",
+      "status": "completed-with-explicit-broken-rows"
+    },
+    "full": {
+      "command": [
+        "./run-lean.sh"
+      ],
+      "exit": -9,
+      "elapsedSeconds": 7200.13,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 12884901888,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "551",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": "7200 second outer timeout",
+      "log": "/workspace/.setup/logs/step03-full-gate.log",
+      "status": "not-passed"
+    },
+    "fullContinuation": {
+      "command": [
+        "./run-lean.sh"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 184.408,
+      "kernelMemoryMaxBytes": 12884901888,
+      "kernelSwapMaxBytes": 0,
+      "kernelPeakMemoryBytes": 1250676736,
+      "memoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "resourceStop": null,
+      "log": "/workspace/.setup/logs/step03-full-continuation.log",
+      "status": "passed"
+    }
+  },
+  "sharedSourceEdits": {
+    "Solidity/Frontend/SolcJson/Body.lean": "Named source nominal enum/UDVT slice refusal before erasure, including readonly slices.",
+    "Solidity/Syntax/Elab/Arms.lean": "Existing slice copy routed through fixed primitive-row helper; only pre-hoist inline-projection shape checks deferred, strict postchecks retained.",
+    "Solidity/Syntax/Elab/Lower.lean": "Pure inline-root predicate and recursive descriptor type inference; no endpoint evaluation.",
+    "Solidity/Syntax/Elab/Stmt.lean": "Reference argument post-hoist shape check before typed capture; old prechecks retained except pending inline roots.",
+    "Solidity/Syntax/Elab/Context.lean": "Comments only, updated supported copy boundary.",
+    "Solidity.lean": "Registers two additive modules.",
+    "Solidity/Language/Features.lean": "Regenerated partial rangeAccess evidence only."
+  },
+  "remainingRefusals": [
+    "sliceReferenceCopyUnsupported: structs, nested fixed/reference rows and dynamic reference rows.",
+    "Source nominal enum/UDVT IndexRangeAccess is refused, including readonly views; native enum/function materialization markers also refuse.",
+    "Ordinary whole-calldata writable/return copies remain refused; exact outstanding archive diagnostics are preserved in after.json.",
+    "Effectful/dependent nonlocal tuple targets retain named refusals; existing stable duplicate primitive targets remain admitted.",
+    "External reference interfaces, heterogeneous reference-return tuples and recursive ordinary types are not implemented by this lane.",
+    "Address carrier/ABI markers preserved; no new payable, contract-valued or native nominal address-type separation guarantee."
+  ],
+  "historicalReports": "Existing tests/upstream/results and group01-10 reports and pinned archive/expectations are unchanged.",
+  "failedOrSupersededAttempts": [
+    {
+      "log": "/workspace/.setup/logs/step03-certificates-build.log",
+      "status": "incomplete after tool reconnect; not passing"
+    },
+    {
+      "log": "/workspace/.setup/logs/step03-certificates-resume.log",
+      "status": "failed thread creation under virtual-address cap; not passing"
+    },
+    {
+      "log": "/workspace/.setup/logs/step03-certificates-cgroup-import-error.log",
+      "status": "failed import namespace; fixed"
+    },
+    {
+      "log": "/workspace/.setup/logs/step03-inline-precheck-failure.log",
+      "status": "failed early projection shape check; fixed"
+    },
+    {
+      "log": "/workspace/.setup/logs/step03-final-call-precheck-failure.log",
+      "status": "failed early reference argument shape check; fixed"
+    }
+  ],
+  "reviews": {
+    "finder": "Independent read-only slice_finder; no Lean calls. Confirmed per-iteration freshness and metadata; identified rebinding-control weakness, exact-revert check and nested descriptor gap; fixed. Final code review found no lost post-hoist shape premise. Final evidence/status review confirmed all hashes, counts, initial timeout and passing continuation; no remaining concrete defect.",
+    "skeptic": "Independent read-only slice_skeptic; no Lean calls. Confirmed historical nested-ID trimming, distinct alias test, rollback boundary, descriptor recursion and post-hoist/capture checks. Final independent evidence/status review completed: hashes, counts, exact first timeout and passing unchanged-limit continuation metrics match logs; no remaining concrete defect."
+  },
+  "documentationPaths": {
+    "status": "inherited-failure-unchanged",
+    "command": [
+      "bash",
+      "scripts/check-doc-paths.sh"
+    ],
+    "beforeMissing": 20,
+    "afterMissing": 20,
+    "diagnosticsByteIdentical": true,
+    "diagnosticsSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+    "beforeLog": "/workspace/.setup/logs/step03-docpaths-before.log",
+    "afterLog": "/workspace/.setup/logs/step03-docpaths-final.log"
+  }
+}

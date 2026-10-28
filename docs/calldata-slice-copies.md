@@ -7,11 +7,27 @@ its source type and element widths are checked against the base. The compiler
 import preserves this location instead of printing every local as `memory`.
 Ordinary struct and fixed-array calldata aliases keep their existing path.
 
-Whole-value uses of a slice with primitive elements now allocate a fresh
+Whole-value uses of a slice with primitive elements allocate a fresh
 dynamic memory array and copy its elements with the existing typed loop,
 allocation and indexing statements. No slice constructor is added to the core,
 and no recursive shape representation or external Lean dependency is added.
 The length can be determined at runtime; this is not literal-length unrolling.
+
+Slices of fixed primitive rows (`uint8[2][]`, `int8[2][]`, `bool[2][]`,
+`bytes2[2][]`, and address rows) also materialize independently. An outer
+copy iteration allocates a fresh fixed row, fills its primitive leaves with an
+inner loop, then installs that row into the result. No source row reference
+is installed in the result, even if native model inputs share row identities.
+Both loops use the existing intrinsic allocation, index and assignment
+constructs. Inline arrays can contain direct, named or nested slice copies:
+`[xs[1:3]][0]` retains the slice's inferred type and widths. Type inference
+peels descriptors without opening them. Pending projection checks run after
+hoisting, before destination binding or argument capture, so neither a target
+nor a formal parameter can supply a different reference element width. Fixed-byte markers and numeric widths survive hidden captures.
+Address rows preserve the existing address carrier and ABI marker; this does
+not add native nominal address, payable capability or contract-type separation.
+Source compiler admission remains responsible for rejecting incompatible
+address/integer aggregate conversions.
 
 ```solidity
 uint[] calldata v = xs[1:3];
@@ -41,7 +57,7 @@ bytes and address markers are preserved. Source-only markers survive the
 hidden base capture, so unsupported enum/function elements fail closed.
 
 Readonly origin analysis stops alias propagation at explicit materialization:
-primitive elements retain no source references. It still visits effects
+admitted elements retain no source references. It still visits effects
 inside descriptors and endpoints. Ordinary whole-calldata aliases keep their
 previous restrictions. Slice write targets, increments, deletes, pushes and
 rebinding are refused before expression rewriting, including inline targets.
@@ -54,6 +70,14 @@ rejection regressions. `Examples/Tactics/SliceCopiesImport.lean` imports the
 modern pinned `tests/solc/SliceCopies.ast.json` fixture and exercises source
 location admission, copying, internal calls, returns, storage writes, hashes,
 narrow primitives, ordinary non-array aliases and a false assertion.
+
+`Examples/Tactics/SliceReferenceCopies.lean` checks independently compiled
+legacy/via-IR fixed-row source programs, including shared native source rows,
+captured-base rebinding, endpoint effects, lazy untaken failure, calls/returns,
+storage copies, signed/byte/address kinds and precise model failure classes.
+The optional `scripts/evm-reference/slice-reference-copies.mjs` separately
+checks bytecode observations, exact revert data and stateful rollback with the
+repository's existing pinned optional EVM dependencies.
 
 The proof scripts compute finite `Prog.runF` certificates in the kernel and
 lift observations to `Prog.run` with the existing `Prog.runF_approx` theorem.
@@ -74,8 +98,14 @@ remain loop-free.
 
 ## Remaining interfaces
 
-Reference-element materialization is refused: a shallow copy would expose
-writable aliases. Enum/function/UDVT nominal identities, recursive shapes,
+Other reference-element materialization is refused with
+`sliceReferenceCopyUnsupported`: structs, nested reference rows and dynamically
+sized rows need further deep-copy interfaces. A shallow copy would expose
+writable aliases. Source slicing of nominal enum/UDVT elements is refused
+before type erasure, including readonly views; the native enum/function marker
+checks remain. Neither retained nested identifiers nor historical fixtures
+without those identifiers bypass this refusal. Enum/function/UDVT nominal
+identities, recursive shapes,
 external reference arguments, general whole-calldata writable copies and
 uninitialized/rebound calldata view locals and computed calldata-local
 initializers involving views remain separate work. Native
@@ -109,8 +139,8 @@ preprocessing only: no core statement and no new simulation theorem.
 - Struct and fixed-array aliases of calldata parameters keep their typed
   memory-alias representation and read behaviour.
 - Explicit slice descriptors keep their native reading (an interpreter
-  example may give a read-only slice a memory-backed array); materializing a
-  slice allocates an independent primitive array
+  example may give a read-only slice a memory-backed array); materializing an
+  admitted slice allocates an independent array
   (above).
 
 Regressions: `Examples/Tactics/SliceCopies.lean` (transitive aliases, writes

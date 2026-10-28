@@ -794,7 +794,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "expressions", spelling := "a[start:end]; omitted endpoints",
       scope := .model, current := .limited,
       requirement := r#"Model legal calldata views with zero-based derived lengths, endpoint checks and shared immutable content."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 385 }], localEvidence := ["Solidity/Syntax/Grammar.lean", "Solidity/Examples/Tactics/AggregateSlices.lean", "docs/feature-work/aggregates.md"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 385 }], localEvidence := ["Solidity/Syntax/Grammar.lean", "Solidity/Examples/Tactics/AggregateSlices.lean", "docs/feature-work/aggregates.md", "Solidity/Syntax/Elab/SliceCopy.lean", "Solidity/Examples/Tactics/SliceReferenceCopies.lean", "docs/calldata-slice-copies.md"] }
   | .unaryArithmetic =>
     { category := "expressions", spelling := "-x; ~x; !x",
       scope := .model, current := .limited,

@@ -1,7 +1,7 @@
 # Aggregates
 
 Inline arrays, fixed memory snapshots, reference tuples and slice effects.
-Inventory status: partial. Primitive slice materialization, internal
+Inventory status: partial. Primitive and fixed primitive-row slice materialization, internal
 passing/returns and hashing are in
 [calldata-slice-copies.md](../calldata-slice-copies.md); calldata aliases in
 [calldata-slice-copies.md](../calldata-slice-copies.md#calldata-origins-and-aliases).
@@ -53,7 +53,8 @@ to check (one sample: 0.90 s to 1.06 s); no heartbeat limit was raised.
 
 ## Left
 
-- Reference-element slices, general writable whole-calldata copies, external
+- Other reference-element slices (structs and nested/dynamic rows), general
+  writable whole-calldata copies, external
   calls with reference arguments.
 - Heterogeneous reference-return tuples (a function-return interface).
 - Nominal enum/UDVT and function-valued element identities; recursive shapes
@@ -309,3 +310,121 @@ the independent skeptic matched proof counts, axiom audits, failure boundaries
 and remaining exclusions. Neither opened Lean workers. The implementation is
 committed locally as `391a5a74`, following preserved `9c8b45d4` and `3a6a037d`;
 the final follow-up records validation only. No push or merge is performed.
+
+## Coverage-plan step 3: fixed primitive-row slices (2026-10-27)
+
+This independent lane is `codex/step03-aggregate-slices`, based on current
+`origin/master` at `f4dee4a29c2e208b36db4a4161a4723c735cd775`. It preserves
+cloud groups 01–10 and does not migrate recursive types or repair ABI replay.
+The attached managed executor ran Lean 4.24.0 and Lake
+5.0.0-src+797c613. The `Solidity.KeySort` smoke build passed. Before editing,
+a native fixed-row slice was reproduced as refused while the flat primitive
+control was admitted; the checked probe took 1.217 seconds and sampled
+737,533,952 bytes peak RSS. The pinned 0.8.38 compiler independently admitted
+fixed primitive rows in both pipelines and refused dynamically encoded rows.
+
+`Syntax/Elab/SliceCopy.lean` expands fixed primitive-row elements into fresh
+row allocation, an inner copy loop and installation in the result. It uses
+existing intrinsic statements and their existing rules/soundness; there is
+no new statement, rule, runtime representation or core dependency. Outer
+base identity, endpoint captures, relative checks and lazy placement keep
+the existing slice lowering. The new source fixture retains every assertion
+and is generated independently for legacy and via-IR. Its certificates use
+`Prog.runF_approx` through the existing fuel-observation theorem; divergence
+cannot satisfy a success or failure observation. They are emitted-program
+certificates, not a universal Solidity/compiler equivalence theorem.
+
+Nominal enum/UDVT source slices now retain an explicit refusal before erased
+source types can reach the primitive-row path. This conservative source
+boundary includes readonly nominal slices. Both nested identifiers and
+historical identifier-free type strings are checked. Address rows preserve
+the inherited address carrier/ABI marker; payable, contract and native
+nominal address separation are not new guarantees. Struct/nested reference
+rows, general writable whole-calldata copies, external reference interfaces
+and effectful/dependent nonlocal tuple targets remain outside this increment.
+
+Independent read-only finder and skeptic reviews used no Lean workers. Their
+confirmed findings were fixed: the rebinding test now uses a distinct shorter
+array, and the EVM replay requires the exact `revert` exception rather than
+accepting an empty out-of-gas result. They verified per-iteration row freshness,
+`[][]` width/byte/address metadata and the source nominal-name fallback.
+Rollback is an EVM transaction observation (`invalidRange` followed by
+`getMarker() == 0`); the kernel failure certificate alone proves halt class.
+
+Inline arrays containing slice values also retain their independently
+inferred element type. The type reader recursively peels only the descriptor,
+without evaluating endpoints. A projected inline array obtains its shape
+while hoisting; declarations, assignments and reference arguments still pass
+strict shape checks before destination/formal metadata can erase the source.
+Negative initializer, assignment and argument controls reject width changes;
+same-width controls remain admitted. Direct, named and nested source views,
+a taken mutator call and an untaken invalid call are all retained.
+
+The final focused build passes in 201.28 seconds with 2,513,592,320 bytes
+kernel-charged peak memory. All 30 emitted-program certificates and all 30
+axiom audits pass; the sets contain only `propext`, `Classical.choice` and
+`Quot.sound`. The separate EVM replay passes 32 observations (16 per pipeline)
+in 2.405 seconds with 295,964,672 bytes peak; it retains input words, exact
+failure bytes and rollback observations. The 39 affected Node tests pass.
+Trust matches all 240 inventoried sites with zero findings, reachability has
+702 modules and no orphans, layering has 152 core modules and no front-end
+reachability, strict automation has zero pending rows, and generated inventory
+checks pass. These are final-source results, not interrupted-attempt evidence.
+
+All six original slice-directory fixtures were reproduced on the starting
+commit in this task's own detached worktree. No source/expectation, runner,
+archive, pipeline, 120-second fixture timeout or 1,000 loop fuel was changed.
+Both prior working fixtures retain byte-for-byte identical observed vectors.
+The final replay is 57.7 seconds with 590,249,984 bytes peak and no resource
+stop. It exits 1 for three explicitly broken rows; this is not a whole-directory
+passing gate. Every required legacy/via-IR variant remains in the reports.
+
+| Original path under `test/libsolidity/semanticTests/array/slices/` | Before | Final legacy / via-IR |
+|---|---|---|
+| `array_calldata_assignment.sol` | working | working / working |
+| `array_slice_calldata_as_argument_of_external_calls.sol` | broken | broken / broken: ordinary calldata return-as-memory refused |
+| `array_slice_calldata_to_calldata.sol` | broken | broken / broken: ordinary return copies and struct-element materialization refused |
+| `array_slice_calldata_to_memory.sol` | broken: inline slice type inference | working / working: all three original vectors in each pipeline |
+| `array_slice_calldata_to_storage.sol` | working | working / working |
+| `calldata_array_slicing.sol` | broken | broken / broken: existing printed-text parse refusal (`expected '='`) |
+
+The initial full `run-lean.sh` attempt passed all 687 default build jobs but
+hit its unchanged 7,200-second outer timeout during `TestSuite/Derived20.lean`.
+That attempt is blocked, not passing: 7,200.130 seconds, 12,884,901,888 bytes
+kernel-charged peak, 551 memory-limit events and no OOM kill. An unchanged-limit
+cache continuation then passed `run-lean.sh` in 184.408 seconds with
+1,250,676,736 bytes kernel-charged peak and no limit/OOM events. It completed
+the 260-job `SolkeyTestSuite` target and the actual sort comparison: 377 parsed
+taclets, all 131 read-bearing annotations matched. The reports retain both
+attempts separately; no timeout or resource stop is counted as passing.
+Commands, complete original
+before/after observations, all new EVM inputs/results, source/compiler/model
+hashes, axiom audits and resource measurements are in
+[`tests/upstream/step03/validation.json`](../../tests/upstream/step03/validation.json)
+and its linked sibling JSON files. The final model hash is
+`be4ab09309dc97d966038e71ca23811a94cae995684ecc9f873506ba957a0818`.
+Independent read-only evidence reviews reproduced both model hashes and all
+counts without Lean workers and found no remaining code or evidence defect.
+The path checker retains exactly the same 20 missing archived/external
+references as the starting worktree; these historical records are unchanged.
+
+The VM has no direct systemd scope or writable delegated cgroup. Under an
+initial address-space limit, unchanged `Calculus/TermSize.lean` failed creating
+a thread below 2 GiB sampled RSS; that attempt is incomplete, not a pass.
+Final checks instead run in the same managed VM using the actual repository,
+toolchain and cache mounted into a digest-pinned validation container. Its
+observed `memory.max` is 12,884,901,888 bytes and `memory.swap.max` is zero;
+the kernel cap covers every child process and detached replay group. The
+unchanged `TermSize` passes there. No proof, heartbeat, fixture timeout or
+loop-fuel limit was increased. No interrupted or resource-stopped check is
+passing evidence.
+
+Shared implementation edits are limited to `Frontend/SolcJson/Body.lean`
+(nominal refusal), `Syntax/Elab/Lower.lean` (pure inference),
+`Syntax/Elab/Arms.lean` (copy/preflight integration),
+`Syntax/Elab/Stmt.lean` (argument checks), `Syntax/Elab/Context.lean`
+(comments), `Solidity.lean` (module registration), and regenerated
+`Language/Features.lean` evidence. No interpreter, scoped statement, rule,
+soundness or world/environment/log policy module changed. The feature catalog
+remains `partial`; tuple-target and nominal/recursive/reference-interface
+gaps listed above are not claimed complete.

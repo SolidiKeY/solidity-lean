@@ -14,6 +14,7 @@ import Solidity.Syntax.PushSource
 import Solidity.Syntax.Inlined
 import Solidity.Syntax.Join
 import Solidity.Syntax.Elab
+import Solidity.Syntax.Elab.SliceCopy
 import Solidity.Syntax.Quote
 import Solidity.Syntax.Splice
 import Solidity.FreshNames
@@ -574,6 +575,7 @@ import Solidity.Examples.Tactics.AggregatesImport
 import Solidity.Examples.Tactics.AggregateSlices
 import Solidity.Examples.Tactics.SliceCopies
 import Solidity.Examples.Tactics.SliceCopiesImport
+import Solidity.Examples.Tactics.SliceReferenceCopies
 import Solidity.Frontend.Source
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Examples.Tactics.SourceLiteralsImport
