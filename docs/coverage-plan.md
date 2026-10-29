@@ -281,6 +281,10 @@ proof, and their final checks must use the actual implementations.
 
 G08 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g08-checked-lexical-analysis). A checked lexer over source bytes (`Solidity/Frontend/Checked/Lexer.lean`): every lexer rule of the pinned `SolidityLexer.g4` classified with a sample (`lexRules_classified`), maximal munch with modes, solc's scanner rules where they differ from the grammar, and the certificate proved for every accepted source: its pieces re-print it (`lex_reprint`), each token's range re-locates it (`lex_locate`), refusals are located (`lex_error_pos`); the string-escape decoder is proved against an inductive grammar (`strBody_sound`).
 
+G09 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g09-type-and-declaration-syntax). The token yield of S00's syntax under layouts (attribute orders, string fragments) as the grammar derivation; an untrusted fuel-structural parser to `Syn` checked against it (`parse_sound`, `parse_derives`, `parseType_derives`: translation validation); a canonical printer with round trips; recursive and mutual declaration references; every type and declaration constructor covered (`declCtors_covered`). Unambiguity and completeness of the parse are open.
+
+G10 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g10-expressions). Expressions by solc's precedence climbing, the selected tree fixed by `Syn.prec` (levels and associativity of the grammar, refusal where the grammar and solc disagree); level lemmas for every binary constructor (`binary_levels`), every operator parsed (`every_operator`), every expression constructor covered (`exprCtors_covered`), `>>>`/`years` rejected precisely (`expr_out_of_profile`). Translation validated; unambiguity is open.
+
 ### Wave 2 — lowering and complete source semantics (G16–G23)
 
 | Group | Deliverable and completion evidence |

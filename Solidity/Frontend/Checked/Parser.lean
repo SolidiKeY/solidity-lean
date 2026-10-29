@@ -238,6 +238,12 @@ def fnTypeAttrs : Nat → Option Visibility → Option Mutability → List Slot 
       | _, _ => pure (v, m, o.reverse)
     | none => pure (v, m, o.reverse)
 
+/-- A list of absent options (a tuple's empty components). -/
+def allNone : {c : Cat} → Syn c → Bool
+  | _, .nil => true
+  | _, .cons .none r => allNone r
+  | _, _ => false
+
 /-! ## The grammar -/
 
 /-- An optional identifier. -/
@@ -535,7 +541,11 @@ def primary : Nat → P (Syn .expr)
       expectP .lparen
       let t ← typeName n
       expectP .rparen
-      return .metaType t
+      -- solc reads `type(…)`'s argument as an expression: no `address
+      -- payable`, mapping or function type.
+      match t with
+      | .elem .addressPayable | .mapping .. | .fnType .. => P.fail "expected a type expression"
+      | _ => return .metaType t
     | some (.kw .new) => do advance; return .new (← typeName n)
     | some (.punct .lparen) =>
       advance
@@ -546,11 +556,13 @@ def primary : Nat → P (Syn .expr)
       return .tuple first (toSynList rest)
     | some (.punct .lbrack) =>
       advance
+      -- `[]`: solc's parser accepts it (a type error later), the grammar does
+      -- not; refused (`sepBy1` needs an element).
       let es ← sepBy1 (expr n)
       expectP .rbrack
       match es with
       | e :: rest => return .inlineArray e (toSynList rest)
-      | [] => P.fail "empty inline array"
+      | [] => P.fail "expected an expression"
     | _ => P.fail "expected an expression"
 
 /-- A tuple component: absent before `,` or `)`. -/
@@ -608,7 +620,14 @@ def simple : Nat → P (Syn .simple)
     if ← isP .lparen then
       match ← attempt (declTuple n) with
       | some s => return s
-      | none => return .exprStmt (← expr n)
+      | none =>
+        let e ← expr n
+        -- solc's statement parser needs an expression among a leading
+        -- tuple's components (`() = f();` is a ParserError there).
+        match e with
+        | .tuple .none rest | .assign _ (.tuple .none rest) _ =>
+          if allNone rest then P.fail "expected a primary expression" else return .exprStmt e
+        | _ => return .exprStmt e
     else
       match ← attempt (declHead n) with
       | some d =>

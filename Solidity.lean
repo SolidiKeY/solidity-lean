@@ -429,6 +429,7 @@ import Solidity.Frontend.Checked.Parser
 import Solidity.Frontend.Checked.Check
 import Solidity.Frontend.Checked.Render
 import Solidity.Frontend.Checked.TypeExamples
+import Solidity.Frontend.Checked.ExprExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic

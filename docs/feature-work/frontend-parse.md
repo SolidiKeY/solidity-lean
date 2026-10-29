@@ -332,6 +332,125 @@ the near-vacuous profile check stated (3, 4), the stale script name (5),
 `sameTree`'s status (6), the docstring and a mutual-reference witness (7).
 Recorded: printed text re-lexing is tested, not proved (5).
 
+## G10: expressions
+
+### Design
+
+The parser reads expressions as solc's `parseExpression` does: a binary
+expression by precedence climbing over solc's levels, then an assignment
+(right side a whole expression) or a conditional (both branches whole
+expressions); prefix operators take a unary expression; postfix index,
+slice, member, call-options (only when `{` is followed by `identifier :`),
+call and `++`/`--` chain on a primary. Primaries: identifiers, literals
+(string fragments joined, recorded as a `frags` choice), numbers with a unit,
+elementary type names (`elementaryTypeName[false]`: the tree carries the
+proof that the type is not `address payable`), `payable(…)`, `type(T)`,
+`new T`, tuples (`(e)` included, components possibly empty) and inline
+arrays.
+
+`Syn.prec` (`Solidity/Frontend/Checked/Prec.lean`) decides which of the trees
+with one yield is meant: every node satisfies `Syn.precNode`, the binding
+levels of the grammar's `expression` alternatives (`Syn.level`: assignment
+0, conditional 1, `||` 2, `&&` 3, equality 4, order 5, `|` 6, `^` 7, `&` 8,
+shifts 9, `+ -` 10, `* / %` 11, `**` 12, prefix 13, postfix `++ --` 14,
+index/member/call 15, primaries 16) with left associativity except `**`,
+`?:` and assignment. Where the grammar and solc's parser read one token
+sequence differently the input is refused, so the accepted tree agrees with
+both:
+
+* `-x++`: the grammar reads `(-x)++` (UnaryPrefix is listed first), solc
+  `-(x++)`;
+* `x++.f`, `x++ ++`: the grammar accepts, solc's parser does not;
+* `a ? b : c = d`: the grammar reads `(a ? b : c) = d`, solc `a ? b : (c = d)`
+  (it occurs in solc's own accepted tests, `controlFlow/storageReturn/ternary_fine.sol`,
+  which the corpus regression lists);
+* `[]`: solc's parser accepts it (a type error later), the grammar does not;
+* `type(address payable)`, `type(mapping(…))`, `type(function …)`: the
+  grammar's `Type ( typeName )` accepts them, solc reads the argument as an
+  expression and refuses them;
+* a statement beginning with a tuple without an expression component
+  (`() = f();`, `(,) = h();`): the grammar accepts, solc's statement parser
+  refuses (ParserError 6933).
+
+Greedy readings, as in solc: `new T[](n)` and `new a.B` keep `[]`/`.B` in
+the type name (an index or member never has a `new` base).
+
+### Theorems
+
+| Name | Statement |
+|---|---|
+| `parseExpr_derives` | an accepted expression derives its tokens and satisfies `Syn.prec` |
+| `parseExpr_prec_root` (with `Syn.prec_root`) | an accepted expression satisfies `Syn.precNode` at its root (and by `Syn.prec`, at every node) |
+| `addSub_left_assoc`, `mul_left_assoc`, `or_left_assoc` | the right operand of a left-associative operator is never an operator of its level |
+| `exp_right_assoc`, `assign_right_assoc`, `cond_right_assoc` | `**`, assignment and `?:` associate to the right |
+| `mul_over_add`, `bit_levels`, `bitOr_over_order`, `addSub_levels`, `prefix_over_exp` | binding levels |
+| `prefix_suffix_refused`, `cond_false_assign_refused`, `postfix_base` | the disagreements and solc-only refusals as precedence failures |
+| `binary_levels` | for every binary constructor (quantified over its operator), `Syn.precNode` holds exactly when the operands are at the levels of its rule |
+| `every_operator` | each of the 20 binary operators, 12 assignment operators, 6 prefix and 2 postfix operators, spelled out literally, parses into its constructor; `assignSpellings_complete` and `prefixSpellings_complete` check the lists cover S00's `AssignOp` and `PrefixOp` |
+| `exprCtors_covered` | **acceptance coverage**: each of the 32 expression and argument constructors occurs in an accepted expression |
+
+Witnesses (`decide +kernel`): `tree_precedence` (13 trees: `a + b * 2`,
+`a - b - 2`, `a ** b ** 2`, `-a ** 2` as `(-a) ** 2`, chained assignment,
+nested conditionals, `a = b ? 1 : 2`, the logical, bitwise and shift levels,
+`!a.b()`, `a++ + ++b`, `delete a[1]`), `tree_forms` (19 trees: tuples with
+empty components, `(a)`, `()`, inline arrays, slices `a[1:]`/`a[:b]`,
+`a[]`, positional and named calls, call options, `new uint[](3)`,
+`new a.B`, `type(C).max`, `payable(a)`, `address(this).balance`,
+`x.address`, units, string concatenation, compound assignment).
+
+Out of the profile: `expr_out_of_profile` (`>>>`, `>>>=` and `years` parse
+and are rejected with `unsignedRightShift`/`removedUnits` by
+`parseInProfile`, which admits a unit only when S00's `Syn.rejections` is
+empty; `parseInProfile_sound`); `exprCorpus_in_profile`.
+
+Negative controls: `expr_refused` (the two ambiguous forms `-a++` and
+`a ? b : c = d`, the solc-only refusals `a++.f` and `a++ ++`, `type` of an
+`address payable` or a mapping, an unclosed parenthesis, a trailing comma, a missing operand, an empty
+inline array, empty call options, juxtaposed expressions,
+`address payable(a)`), and `expr_parenthesized` (the parenthesized forms
+are accepted).
+
+### G10 Handoff
+
+* **Theorems**: `parseExpr_derives`, `parseExpr_prec_root`, the
+  associativity and level lemmas, `every_operator`, `exprCtors_covered`.
+* **Premises**: none (axioms `propext`).
+* **Status**: translation validation. The level lemmas are statements
+  about `Syn.precNode`, and `Syn.prec` (checked on every accepted parse)
+  applies it at the root (`parseExpr_prec_root`) and, by `Syn.all`'s
+  definition, at every node; a lemma relating `Syn.all` to S00's subterm
+  relation `Syn.Sub` is not proved. Grammatical ambiguities such as
+  `a + b * c` are resolved by `Syn.prec`; that it selects exactly one tree
+  is the unproved unambiguity below.
+* `Syn.precNode` puts no condition on repeated call options
+  (`f{a: 1}{b: 2}`), which solc's parser accepts and its type checker
+  refuses.
+* **Remaining**: unambiguity is not proved: that two trees satisfying
+  `Syn.prec` with one yield are equal (so `Syn.prec` selects exactly one
+  tree). It is checked on every witness and the corpus. Completeness (that
+  the parser finds the `Syn.prec` tree whenever one exists) is not proved.
+* **For S01**: `1._2` (G08) and `x.address` on a non-address are accepted
+  syntax; their refusal is typing.
+
+### G10 Review
+
+Finder (traced against solc's syntax tests): precedence levels and
+associativity match solc's token precedence and the grammar's alternatives;
+no case where the parser's tree fails `Syn.prec` while another reading
+passes. Fixed: `type(address payable)`, `type(mapping…)`, `type(function…)`
+were accepted (1); a statement-start tuple without an expression
+(`() = f();`) was accepted (2); `[]` recorded as a disagreement and an
+unreachable branch merged (3); `a ? b = c : d = e` in solc's accepted tests
+noted (4); docs (5).
+
+Skeptic: "partially met". Fixed: the claim restated as translation
+validation with the subterm step and unambiguity recorded (1, 2, 6); the
+degenerate `cond_right_assoc`, the level lemmas quantified over operators and
+both directions (`binary_levels`, `bit_levels`) (3); out-of-profile
+expressions refused precisely (`expr_out_of_profile`, `parseInProfile`,
+`exprCorpus_in_profile`) (4); literal operator spellings and completeness of
+the operator lists (5); repeated call options noted (7).
+
 ## Reviews
 
 Each checkpoint ends with a read-only finder and a separate skeptic review

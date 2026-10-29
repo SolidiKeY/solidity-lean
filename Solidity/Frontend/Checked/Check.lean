@@ -1,6 +1,7 @@
 import Solidity.Frontend.Checked.Lexer
 import Solidity.Frontend.Checked.Parser
 import Solidity.Frontend.Checked.Prec
+import Solidity.Source.Ctor
 
 /-!
 # Whole-source parsing, checked (G11)
@@ -110,6 +111,34 @@ theorem parse_derives {src : Bytes} {u : Syn .unit} (h : parse src = .ok u) :
     cases h
     obtain ⟨ps, hl, _, hp⟩ := parse_sound hw
     exact ⟨ps, hl, ⟨r.2, hp.1⟩, hp.2⟩
+
+/-! ## The profile
+
+A parsed unit is in the profile when S00's precise rejection finds no
+excluded construct (`Syn.rejections`: assembly other than the canonical
+rethrow, `layout at` with a non-literal base, `>>>`, `years`,
+`pragma experimental solidity`, invalid modifier bodies). -/
+
+/-- **Parse and admit at the syntax level**: refused with the excluded
+features' manifest ids. -/
+def parseInProfile (src : Bytes) : Except Error (Syn .unit) :=
+  match parse src with
+  | .error e => .error e
+  | .ok u =>
+    if u.rejections.isEmpty then .ok u
+    else .error ⟨0, "outside the profile: " ++ ", ".intercalate (u.rejections.map Excl.id)⟩
+
+theorem parseInProfile_sound {src : Bytes} {u : Syn .unit} (h : parseInProfile src = .ok u) :
+    parse src = .ok u ∧ u.rejections = [] := by
+  unfold parseInProfile at h
+  split at h
+  · cases h
+  · next u' hu =>
+    split at h
+    · next he =>
+      cases h
+      exact ⟨hu, List.isEmpty_iff.mp he⟩
+    · cases h
 
 /-! ## One category
 

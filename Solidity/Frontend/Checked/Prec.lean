@@ -21,8 +21,9 @@ member, call options and calls 15, primaries 16.
 
 * a postfix `++`/`--` directly under a prefix operator (`-x++`): the grammar
   reads `(-x)++`, solc `-(x++)`;
-* a postfix `++`/`--` as the base of an index, member or call (`x++.f`) or
-  of another postfix `++`/`--`: the grammar accepts, solc's parser does not;
+* a postfix `++`/`--` as the base of an index, slice, member, call options
+  or call (`x++.f`) or of another postfix `++`/`--`: the grammar accepts,
+  solc's parser does not;
 * an assignment as the false branch of a conditional (`a ? b : c = d`): the
   grammar reads `(a ? b : c) = d`, solc `a ? b : (c = d)`.
 

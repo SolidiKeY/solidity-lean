@@ -1456,6 +1456,12 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Checked/ExprExamples.lean:Solidity.Frontend.Checked.every_operator": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/ExprExamples.lean:Solidity.Frontend.Checked.parseExpr_prec_root": [
+  "propext"
+ ],
  "Solidity/Frontend/Checked/LexExamples.lean:Solidity.Frontend.Checked.lex_error_pos": [
   "propext"
  ],

@@ -604,6 +604,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Frontend/Checked/Check.lean` | G11: whole-source parsing checked against the yield and precedence (`parse`, `parse_sound`, `parse_derives`). |
 | `Frontend/Checked/Render.lean` | G09: canonical token spellings and the source printer `Syn.print`. |
 | `Frontend/Checked/TypeExamples.lean` | G09 controls: type-name trees, attribute layouts, recursive declaration references, printing round trips, type and declaration constructor coverage (`declCtors_covered`), refusals. |
+| `Frontend/Checked/ExprExamples.lean` | G10 controls: precedence and associativity lemmas over `Syn.precNode`, every operator, expression trees, refused ambiguous forms, expression constructor coverage (`exprCtors_covered`). |
 
 ## Precompiles
 
