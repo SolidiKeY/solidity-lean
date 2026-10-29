@@ -22,8 +22,11 @@ only), Q5 (code constants from this compiler's artifact table), G01 Q3
 `Solidity/Frontend/Import.lean:638`) runs at elaboration time:
 
 1. **External analysis** (not Lean). `scripts/solc-ast.mjs` or
-   `scripts/solc-unit.mjs` checks the SHA-256 of a soljson binary against two
-   pins (`scripts/solc-ast.mjs:126-145`), runs `--standard-json` with
+   `scripts/solc-unit.mjs` checks the SHA-256 of a soljson binary against the
+   SolKey checkout's `build.gradle` pin or an explicit `--compiler-sha256`
+   (`scripts/solc-ast.mjs:126-129`) and, for modern provenance only, against
+   the two-pin list (`:145-146`; skipped for `--legacy-fixture`, the path
+   behind the 22 historical headers), runs `--standard-json` with
    `outputSelection` AST only, trims the AST and writes a fixture with a
    header (`solcVersion`, `sourceSha256`, `compilerSha256`, `settings`,
    `acceptedPragmas`). The source text is **not** in the fixture; only its
@@ -93,10 +96,12 @@ source.
 | `Solidity/Frontend/SolcJson/**` | none | the reader's classification and printing | — | nothing (a body that does not print/parse is a row) |
 | `Solidity/Frontend/WorldImport.lean` (`solc_world_factory`, `solc_world_library`) | `unsafe evalConst` (`:264`) | as `solc_import`, plus the fragment recognizers (`WorldLinked.read`, `:310`) | FNV-1a 64 | the generated world definitions, by elaboration of the emitted commands |
 | `Solidity/Frontend/Problems.lean`, `Cli.lean`, `Testing.lean` | `unsafe evalExpr`/`evalConst` (4, 3, 1) | they read already imported constants (`N.report`, `Contract`, `Fml`) | — | the stated obligations `N.f.problem`; proofs `N.f.proved` when they exist |
+| `Solidity/Syntax/Contract.lean` `contract!{ … }` (`:96`, expanded at `:358`) | none: a `macro_rules` expansion | Lean parser and macro expansion of hand-written source | — | the `Contract` literal (its proof fields by `decide`/`rfl`) |
+| `Solidity/Syntax/Splice.lean` `sol{ … }` (`:87`, `sol[InContract.contract]{ … }`) | as `sol[C]{ … }` below | as below | — | as below |
 | `Solidity/Syntax/Splice.lean` `elabAgainstWith` (`sol[C]{ … }`) | `unsafe evalExpr` (`:103`) | compiled elaborator | — | typing of the quoted result |
-| `Solidity/Syntax/Elab/Values.lean` `CallMemo` | `unsafe` ×2, `implemented_by` ×2 | pointer-equality memo; logically `none` | — | the reference implementation is the logical one; the output is re-checked |
-| `Solidity/Syntax/Quote.lean` `QMemo` | `unsafe` ×2, `implemented_by` ×2 | pointer-equality memo | — | output re-checked |
-| `Solidity/Syntax/Elab/Context.lean` `RecThunk.get` | `opaque`, `implemented_by`, `unsafe` | `unsafeCast` at the elaborated contract | — | output re-checked |
+| `Solidity/Syntax/Elab/Values.lean` `CallMemo` | `unsafe` ×2, `override` (`implemented_by`) ×2 | pointer-equality memo; logically `none` | — | the reference implementation is the logical one; the output is re-checked |
+| `Solidity/Syntax/Quote.lean` `QMemo` | `unsafe` ×2, `override` (`implemented_by`) ×2 | pointer-equality memo | — | output re-checked |
+| `Solidity/Syntax/Elab/Context.lean` `RecThunk.get` | `override` (`implemented_by`), `opaque`, `unsafe` | `unsafeCast` at the elaborated contract | — | output re-checked |
 | `Solidity/Tools/Upstream.lean` | `unsafe evalExpr Json` | `solc_import` and the interpreter, reporting observations | FNV-1a 64 via `solc_import` | nothing: reports, not proofs |
 
 No source-admitting path uses `skipKernelTC` (`Calculus/Notation.lean` and
@@ -119,7 +124,7 @@ forbids them).
 
 Counts: fixture headers were counted by reading every JSON file under
 `tests/` with a top-level `header` object and grouping by `solcVersion`
-prefix and `provenanceVersion`. 0.8.38: 67 headers (`tests/solc`,
+prefix and `provenanceVersion`: 94 headers. 0.8.38: 65 headers (`tests/solc`,
 `tests/abi-0.8.38`, `tests/operators-0.8.38`, `tests/upstream`); 0.8.34: 29,
 all in `tests/solc`. None records a non-empty `libraries`. (G00's count of 36
 0.8.34 files includes 7 validation records under `tests/upstream` that are not
@@ -128,7 +133,7 @@ fixtures.)
 ## 2. Certificate interfaces
 
 `Solidity/Roadmap/Frontend.lean` (namespace `Solidity.Roadmap.Frontend`)
-imports `Solidity.Frontend.Source` and `Solidity.Syntax.Raw` only, not
+imports `Solidity.Frontend.SourceUnits` and `Solidity.Syntax.Raw` only, not
 `Solidity.Roadmap.Contracts`; it repeats the fields G01's contract 1 reads.
 All declarations below are definitions or proved shape lemmas; no instance
 exists.
@@ -137,11 +142,11 @@ exists.
 
 | Stage | Lean | Checked judgment |
 |---|---|---|
-| Raw input | `Input` (`units : List SourceUnit`, `main`, `settings`), `Input.Ok`, `Chain.raw`/`raw_sound` | distinct unit names, `main` among them, `Settings.Ok` |
-| Raw identity | `Digests`, `Named`, `Input.Matches` | digests recomputed from the bytes the checker holds |
+| Raw input | `Input` (`units : List SourceUnit`, `main`, `settings`), `Input.Ok`, `Chain.raw`/`raw_sound` | distinct unit names, `main` among them, `Settings.Ok` (profile compiler, empty link map) |
+| Raw identity | `Digests`, `Named`, `Input.Matches` | digests recomputed from the bytes the checker holds; not part of `Chain` (no stage reads a digest) |
 | Parse | `Chain.parse : Checker Input F.Syntax F.Parses` | `Parses` (S00, the pinned grammar) |
 | Resolution | `Chain.resolve : Checker F.Syntax F.Resolved F.Resolves` | `Resolves` (S01) |
-| Metadata | `Chain.metadata : Checker F.Resolved Unit (fun r _ => F.WellFormed r ∧ F.InProfile r)` | well-formedness and profile, including settings and links (`FrontendSpec.SettingsRespected`) |
+| Metadata | `Chain.metadata : Checker F.Resolved Unit (fun r _ => F.WellFormed r ∧ F.InProfile r)` | well-formedness and profile; with the obligation `FrontendSpec.SettingsRespected`, also settings and links (`Chain.checked_settings`) |
 | Whole | `Chain.Cert` (`parsed`, `parse`, `resolve`, `metadata`), `Chain.check` | conjunction of the stages |
 
 `Checker A B J` has `Cert`, `check : A → B → Cert → Bool` and
@@ -153,20 +158,36 @@ list with its extraction proof); each stage's owner chooses one.
 
 | Name | Statement | Premises |
 |---|---|---|
-| `Digests.identity` | two `Named` with equal `recorded` have equal bytes | `CollisionFreeOn [a.bytes, b.bytes]` (per-run, G01 Q3) |
+| `Digests.identity` | two `Named` with equal `recorded` have equal bytes | `CollisionFreeOn [a.bytes, b.bytes]`: the per-run form of the G01 Q3 decision, applied here to input digests (an extension of its wording, which is about the hashes an execution prefix computes; no random-oracle bound is stated for input digests) |
 | `Digests.identity_list` | `xs.map digest = ys.map digest → xs = ys` | no collision between an element of `xs` and one of `ys` |
 | `Input.Matches.identity` | two inputs matching one digest list have the same unit bytes | the same per-run premise |
 | `Digests.only_invariant` | a check `check (digest b)` sound for `P` gives `P b'` for every `b'` with the same digest | none: this is the "identity only" limit |
 | `CoderMode.agrees` | for `p.compilation = .analysed q s`, `p.effectiveCoder = some ((CoderMode.ofPipeline q).coderOf p.requestedCoder)` | none; ties the interface to `Provenance.effectiveCoder` |
-| `Settings.ok_order`, `Settings.ok_coder` | changing `order` (any of 8) or `coder` keeps `Settings.Ok` | `s.Ok` |
+| `CoderMode.agrees_atNode` | the same for `p.atNode node`, the provenance of any source unit of a compilation (`Solidity/Frontend/SourceUnits.lean`) | none |
+| `Settings.ok_order`, `Settings.ok_coder` | `Settings.Ok` does not read `order` or `coder` | `s.Ok` |
+| `FrontendSpec.admits_order` | an admitted input stays admitted, with that order carried, under each of the eight orders | `F.AllSettings`, `i.settings.Ok` |
 | `Settings.ok_compiler` | `s.Ok → s.compiler ≠ .solkey0834` | `s.Ok` |
 | `Chain.checked` | `ch.check i r c = true → i.Ok ∧ F.Admitted i r` | none (axioms: `propext`) |
+| `Chain.checked_settings` | an accepted input's resolution carries its settings, which are `Ok`, and its links name library declarations | `F.SettingsRespected` |
 | `Chain.frontend` | a chain and an untrusted producer, accepted and complete, form a `Checked F` | `accepted`, `complete` |
 
-`Digests.only_invariant` is how "digests prove identity only" is checked:
-since no frontend relation is invariant under digest collisions, a digest
-can never discharge `Parses`, `Resolves`, `WellFormed` or `InProfile`; it can
-only pin which bytes the other certificates are about.
+`Digests.only_invariant` is the formal limit of "digests prove identity
+only": a check reading only a digest certifies only properties shared by every
+input with that digest. It holds for any function; it is a limit, not a
+security claim (for an injective `digest` the limit is empty). The interfaces
+therefore never let a digest discharge `Parses`, `Resolves`, `WellFormed` or
+`InProfile`: `Chain` has no digest field, its stages read the input bytes, and
+`Digests.identity` only pins which bytes a recorded digest names, under the
+per-run premise. No theorem here depends on that premise.
+
+**Obligations, not fields.** `FrontendSpec.SettingsRespected` (a resolution
+carries the input's settings; `InProfile` implies `Input.Ok` and resolved
+links) and `FrontendSpec.AllSettings` (admission is stable under every
+admitted settings value) are `Prop`s about the relations that S00/S01/G15
+must prove. `Chain.checked` does not need them, and `Chain.checked_settings`
+and `FrontendSpec.admits_order` take them as premises. `Checked` alone can
+be inhabited vacuously (`Parses := False`, `produce := fun _ => none`); the
+non-vacuity check is G01's `SourceSpec.NonVacuous` on the same relations.
 
 ### 2.3 Mapping to G01 (`Solidity/Roadmap/Contracts.lean`)
 
@@ -176,39 +197,48 @@ only pin which bytes the other certificates are about.
 | `FrontendSpec.Syntax`, `Resolved`, `Parses`, `Resolves`, `WellFormed`, `InProfile` | the `SourceSpec` fields of the same names |
 | `FrontendSpec.Admitted` | `SourceSpec.Admitted` (same body) |
 | `Checked F` | `CheckedFrontend S` (same fields) |
-| `Chain.frontend` | constructs `CheckedFrontend`; `CheckedFrontend` gives `Admission` given unambiguity (`SourceSpec.Unambiguous`) |
-| `FrontendSpec.settingsOf`, `libraries`, `SettingsRespected` | new: obligations on `Resolves`/`InProfile` so `SourceSpec.meaning` reads the order and coder |
+| `Chain.frontend` | constructs `CheckedFrontend`. `Contracts.lean` states no lemma from `CheckedFrontend` to `Admission`; one holds without `SourceSpec.Unambiguous` (`frontend i := (produce i).map Prod.fst`, since `complete` already allows one admitted resolution per input) and is part of C1 |
+| `FrontendSpec.settingsOf`, `libraries`, `SettingsRespected`, `AllSettings` | new: obligations on `Resolves`/`InProfile`; `SourceSpec.meaning` must factor through `settingsOf` for `order` and `coder` and not read `links` (C1) |
 
 The sibling revision of `Contracts.lean` keeps `Admission` and `SourceSpec`;
 the adapter `FrontendSpec.ofSourceSpec` (and `Chain.frontend` read as a
 `CheckedFrontend`) is a child obligation once G01 is frozen (C1 below).
-`Chain.checked` adds `i.Ok`: raw-input well-formedness is not part of
-`SourceSpec.Admitted`, so `InProfile` must imply it through
-`SettingsRespected` (settings) and `Parses` (unit names).
+`Chain.checked` adds `i.Ok`, but `Checked.checked` (like `CheckedFrontend`)
+returns only `Admitted`: raw-input well-formedness is not part of
+`SourceSpec.Admitted`, so the second conjunct of `SettingsRespected` makes
+`InProfile` imply it.
 
 ## 3. Link settings (G00 disagreement 6)
 
-**Resolution.** Link settings are recorded in admitted settings
-(`Settings.links : List Link`, `Link := {unit, library, address}`), checked at
-two stages, and read only by deployment:
+**Resolution.** Link maps are recorded and checked, and the admitted
+profile takes the empty map:
 
-1. **Raw stage** — `LinksWellFormed`: nonzero 160-bit addresses, one entry per
-   (unit, library), no address shared.
+1. **Record** — `Settings.links : List Link` (`Link := {unit, library,
+   address}`) holds solc's `libraries` setting. `Settings.LinksRecorded`
+   (`LinksWellFormed`): nonzero 160-bit addresses, none an Osaka precompile
+   (`Precompile`: `0x01`–`0x11`, `0x100`; the precompile follow-up decision),
+   one entry per (unit, library), no address shared.
 2. **Metadata stage** — `LinksResolved (F.libraries r) links`: every entry
    names a library declaration of the resolved input (by unit and name, as
-   solc's `libraries` setting spells it). Required by
-   `FrontendSpec.SettingsRespected` from `InProfile`.
-3. **Source semantics** — link-blind: `SettingsRespected`'s third conjunct says
-   `Parses` does not read `links`; a linked library call is a call between two
-   instances of the compiled system (G01's `Event` docstring, G01 Q8), so the
-   meaning never reads an address either.
-4. **Deployment** — the EVM side reads the map: the artifact's unresolved
-   references (`CodeUnit.links` in `Contracts.lean`) are filled with these
-   addresses, and the session installs this compiler's library code at
-   them. With an empty map the session deploys each library of the input
-   and links the addresses it obtains. Either way the library code is the
-   compiled system's, as G01 Q8 requires; no foreign code at a link address
-   is admitted, and no environment premise is added.
+   solc spells it). Required from `InProfile` by `SettingsRespected`.
+3. **Source semantics** — link-blind. A linked library call is a call between
+   two instances of the compiled system (G01's `Event` docstring, G01 Q8), so
+   `meaning` reads no address (C1).
+4. **Admitted profile** — `Settings.Ok` requires `links = []`. The session
+   deploys each library of the input as this compiler's code and fills the
+   artifact's references (`CodeUnit.links` in `Contracts.lean`) with the
+   addresses those deployments return. This needs no premise on the initial
+   world and keeps every library inside the compiled system (G01 Q8).
+
+A non-empty map fixes addresses before deployment. The EVM cannot place code
+at a chosen address (creation addresses follow sender and nonce; salted
+creation is excluded), so admitting one needs a premise on the initial world:
+the code at each address is this compiler's runtime for that library. That
+premise is a new environment assumption, and is question Q1 below. Until then
+a non-empty map is recordable (oracle fixtures) but not admitted.
+`Link` is keyed by unit and library name while `CodeUnit.links` uses
+positions in `Artifact.contracts`; the map between them is the artifact
+table's declaration index (C3).
 
 This keeps provenance and the AST step unchanged: solc's AST analysis does not
 depend on `libraries`. The code change (accepting a `libraries` object in
@@ -219,22 +249,25 @@ lanes; it is not a small local change, so it is child obligation C3.
 
 ## 4. Settings: evaluation order, ABI coder, compiler pins
 
-- **Evaluation order.** `Settings.order : EvalOrder` is an input field
-  ranging over all eight flag combinations (`Settings.ok_order`), so a public
-  theorem quantified over admitted inputs covers each. solc's pipeline fixes
+- **Evaluation order.** `Settings.order : EvalOrder` is an input field.
+  `Settings.Ok` does not constrain it, and under the obligation
+  `FrontendSpec.AllSettings` every admitted input stays admitted with each of
+  the eight orders (`FrontendSpec.admits_order`), so a public theorem
+  quantified over admitted inputs covers all eight. solc's pipeline fixes
   only the importer's default (`defaultOrder`, matching `Import.lean:727-731`);
   six combinations have no solc setting and need none: the AST step does not
   depend on it, and the semantics reads `order` from the resolved input
-  (`settingsOf`). Admission must be order-blind (`SettingsRespected`). F3 is
-  child obligation C4.
+  (`settingsOf`). F3 is child obligation C4.
 - **ABI coder.** The requested coder is per source unit (pragma, read by
   `readPragmas`) and belongs to the syntax; the setting is `CoderMode`:
   `pragma` (solc legacy: each unit's own) or `forceV2` (solc via-IR).
-  `CoderMode.coderOf` is the effective coder, and `CoderMode.agrees` proves it
-  equals `Provenance.effectiveCoder` for every analysed provenance. Both modes
-  are admitted with every order (`Settings.ok_coder`), so a v1 unit under the
-  via-IR schedule (`coder := .pragma`, `order := EvalOrder.viaIR`) is an
-  admitted input although no solc setting produces it. Mixed-mode inheritance (F7)
+  `CoderMode.coderOf` is the effective coder. `CoderMode.agrees` and
+  `CoderMode.agrees_atNode` prove it equals `Provenance.effectiveCoder` for
+  every analysed provenance and every unit of a compilation. G00 Q4 decides
+  the eight orders, not how the coder pairs with them. The interface keeps
+  `coder` independent (both modes under every order: a superset of solc's two
+  pairings). Whether the public theorem covers the pairings no solc setting
+  produces, such as a v1 unit under the via-IR order, is question Q2. Mixed-mode inheritance (F7)
   stays refused until C5.
 - **Compiler.** `Settings.Ok` requires `compiler = .catalog0838`; a 0.8.34
   analysis is never an admitted input (`Settings.ok_compiler`). 0.8.34
@@ -247,9 +280,9 @@ lanes; it is not a small local change, so it is child obligation C3.
 
 | # | Obligation | Owner |
 |---|---|---|
-| C1 | Adapter from G01's frozen `SourceSpec`/`CheckedFrontend` to `FrontendSpec`/`Checked`, after g01-contracts-rev lands | G01, then G05 follow-up |
-| C2 | Parse and resolution relations with certificate formats and checkers (`Chain.parse`, `Chain.resolve`) | S00, S01, G08–G11 |
-| C3 | Accept and record `libraries` in `validateSettings`/`Provenance`; check `LinksResolved` against resolved library ids; artifact linking and library deployment in `EvmSpec.load` | frontend lane owner, G42.04, G44.02, G06 |
+| C1 | Adapter from G01's frozen `SourceSpec`/`CheckedFrontend` to `FrontendSpec`/`Checked`, after g01-contracts-rev lands; `meaning` factors through `settingsOf` (`order`, `coder`) and ignores `links` | G01, then G05 follow-up |
+| C2 | Parse and resolution relations with certificate formats and checkers (`Chain.parse`, `Chain.resolve`); proofs of `SettingsRespected` and `AllSettings` | S00, S01, G08–G11, G15 |
+| C3 | Accept and record `libraries` in `validateSettings`/`Provenance` (refusing non-empty maps for admitted inputs until Q1); check `LinksResolved` against resolved library ids; library deployment and linking through the artifact's declaration index in `EvmSpec.load` | frontend lane owner, G42.04, G44.02, G06 |
 | C4 | Let modern imports take any `EvalOrder` independently of the solc pipeline (F3) | G08–G15 (importer) |
 | C5 | Admit mixed legacy ABI modes across inherited units (F7) | G15, S04.02 |
 | C6 | Re-generate or mark the 29 0.8.34 fixtures: SolKey ones stay compatibility checks; local ones move to 0.8.38 | G53 |
@@ -258,15 +291,71 @@ lanes; it is not a small local change, so it is child obligation C3.
 | C9 | Feature-extraction completeness: `InProfile r ↔` the scan's feature list is within the profile, with combinations (F8) | G15 |
 | C10 | Recompute source SHA-256 in the checker from source bytes in the fixture (F1); today the fixture holds no source text | G08 |
 
-## 6. Gates
+## 6. Open scope questions
+
+These arise from the work; they reopen no recorded decision.
+
+- **Q1 [Link map]** G01 Q8 puts linked libraries in the compiled system, so
+  their code is this compiler's. Should an input whose solc `libraries`
+  setting pre-assigns addresses be admitted?
+  - *Empty map only*: the session deploys and links every library itself; no
+    new premise; a pre-assigned map is recorded but refused (current interface).
+  - *Admit pre-assigned maps*: adds a premise on the initial world that each
+    address holds this compiler's runtime for that library.
+- **Q2 [Coder pair]** G00 Q4 decides the eight `EvalOrder` combinations but not
+  their pairing with the ABI coder mode. Which pairings does the public
+  theorem cover?
+  - *Independent*: both coder modes under every order (16 pairings, a superset
+    of solc's two; current interface).
+  - *Forced with via-IR order only*: `forceV2` exactly when the order is
+    `EvalOrder.viaIR`, pragma coders otherwise (8 pairings).
+
+## 7. Gates
 
 Run at the head of `cloud/roadmap-w1-20261029/g05-frontend`; results are in
 the handoff below.
 
-## 7. Review
+## 8. Review
 
-See the handoff; finder and skeptic reviews (read-only subagents, no Lean
-server) and their confirmed findings are recorded there.
+Two read-only subagents, neither using the Lean server, reviewed commit
+`35f80a6` (the first version): a finder (facts against the repository) and a
+skeptic (soundness and vacuity of the interfaces).
+
+Skeptic, confirmed and fixed:
+
+1. *Unsound obligation.* The first `SettingsRespected` had a conjunct making
+   `Parses` stable under a settings change, plus one carrying
+   `settingsOf r = i.settings`. Together they force `Admitted` to be empty
+   whenever two orders differ. Fixed: settings stability moved to a separate
+   obligation on `Admitted` (`FrontendSpec.AllSettings`, with
+   `FrontendSpec.admits_order`), and the parse conjunct removed.
+2. *All eight orders did not follow.* `Settings.ok_order` only shows that
+   `Settings.Ok` ignores the order. Fixed as in 1; the doc now attributes
+   the eight-order coverage to `AllSettings`.
+3. *`SettingsRespected` unused.* Now a premise of `Chain.checked_settings`,
+   and its second conjunct also gives `Input.Ok` (skeptic 10, finder 5).
+4. *Meaning and non-vacuity.* Recorded: `meaning` must factor through
+   `settingsOf` (C1); `Checked` alone is inhabitable vacuously, and
+   non-vacuity is G01's `SourceSpec.NonVacuous` (§2.2).
+5. *Environment premise smuggled in by pre-assigned links; precompile
+   addresses.* Fixed: `Settings.Ok` requires `links = []`, a non-empty map is
+   question Q1, and `LinksWellFormed` excludes Osaka precompiles (`Precompile`).
+6. *`Link` vs `CodeUnit.links`* (also finder 10). Recorded in §3 and C3.
+7. *Coder agreement for the main unit only.* Added `CoderMode.agrees_atNode`
+   (imports `Solidity.Frontend.SourceUnits`).
+8. *Coder/order pairing undecided.* Now question Q2.
+9. *Digest statements overstated.* §2.2 now says what `only_invariant` does
+   and does not show, that no theorem depends on the per-run premise, and
+   that applying the G01 Q3 premise to input digests extends its wording
+   (also finder 7).
+
+Finder, confirmed and fixed: 0.8.38 fixture headers are 65, not 67 (94
+in all) (1); trust-site kinds use the inventory's `override` (2); the
+metadata-stage and order-blindness claims (3, 4, 5) were corrected with the
+Lean changes above; the `Admission`-from-`CheckedFrontend` claim no longer
+cites `Unambiguous` (6); the solc-ast pin check is described per path (8);
+`contract!{ … }` and `sol{ … }` rows added to the inventory (9). All other
+cited lines, counts and decisions were confirmed.
 
 ## Handoff
 

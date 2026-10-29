@@ -1,4 +1,4 @@
-import Solidity.Frontend.Source
+import Solidity.Frontend.SourceUnits
 import Solidity.Syntax.Raw
 
 /-!
@@ -15,20 +15,25 @@ is an instance: today's frontend (`solc_import`) is elaborator code whose
 output the kernel re-checks for typing only.
 
 **Digests prove identity only.**  A recorded digest names bytes; under the
-per-run premise that the run's preimages do not collide (the decision on
-hash collisions, never global injectivity) equal digests mean equal bytes
-(`Digests.identity`).  A check that reads only a digest certifies only a
+per-run premise that the run's preimages do not collide (the form of the
+hash-collision decision, here applied to input digests; never global
+injectivity) equal digests mean equal bytes (`Digests.identity`).  No
+statement below depends on it: the stage checkers read bytes, not digests.  A check that reads only a digest certifies only a
 property that cannot tell two colliding inputs apart (`Digests.only_invariant`).
 So a parse or a type is never established by a digest.
 
-**Settings are part of the input.**  The eight `EvalOrder` combinations are
-all admitted (`Settings.ok_order`), so a public theorem over admitted inputs
-quantifies over every one; the ABI coder is the per-unit pragma or forced v2
-(`CoderMode`), agreeing with the provenance reader (`CoderMode.agrees`);
-only the 0.8.38 profile compiler is admitted (`Settings.ok_compiler`), so a
-0.8.34 fixture is a SolKey compatibility check only.  Library link settings
-are recorded (`Link`), checked against the resolved library declarations
-(`LinksResolved`), and read by deployment only.
+**Settings are part of the input.**  `Settings.Ok` does not read the
+evaluation order, and the obligation `FrontendSpec.AllSettings` (admission is
+blind to the semantic settings) gives every one of the eight `EvalOrder`
+combinations (`FrontendSpec.admits_order`), so a public theorem over admitted
+inputs quantifies over all of them.  The ABI coder is the per-unit pragma or
+forced v2 (`CoderMode`), agreeing with the provenance reader per unit
+(`CoderMode.agrees_atNode`).  Only the 0.8.38 profile compiler is admitted
+(`Settings.ok_compiler`): a 0.8.34 fixture is a SolKey compatibility check
+only.  Library link maps are recorded (`Link`, `LinksWellFormed`) and checked
+against the resolved library declarations (`LinksResolved`); the admitted
+profile takes the empty map, where the session deploys and links every
+library itself.
 -/
 
 namespace Solidity.Roadmap.Frontend
@@ -115,6 +120,17 @@ theorem CoderMode.agrees (p : Provenance) (q : Pipeline) (s : String)
     p.effectiveCoder = some ((CoderMode.ofPipeline q).coderOf p.requestedCoder) := by
   cases q <;> simp only [Provenance.effectiveCoder, h, CoderMode.ofPipeline, CoderMode.coderOf]
 
+/-- Per source unit: the provenance at a node of any unit of a compilation
+keeps the compilation and takes that unit's requested coder, so the same
+mode gives that unit's effective coder. -/
+theorem CoderMode.agrees_atNode (p : Provenance) (q : Pipeline) (s : String)
+    (h : p.compilation = .analysed q s) (node : Lean.Json) :
+    (p.atNode node).effectiveCoder =
+      some ((CoderMode.ofPipeline q).coderOf (p.atNode node).requestedCoder) := by
+  apply CoderMode.agrees _ q s
+  simp only [Provenance.atNode]
+  split <;> exact h
+
 /-- The evaluation order an imported source gets by default from its solc
 pipeline, as `solc_import` sets it.  The public theorem is not limited to
 these two: `Settings.order` ranges over all eight. -/
@@ -130,10 +146,13 @@ structure Link where
   address : Nat
   deriving DecidableEq, Repr
 
-/-- Links are well formed: nonzero 160-bit addresses, one per library, no
-address shared. -/
+/-- The Osaka precompile addresses: `0x01`–`0x11` and P256VERIFY at `0x100`. -/
+def Precompile (a : Nat) : Prop := (1 ≤ a ∧ a ≤ 0x11) ∨ a = 0x100
+
+/-- Links are well formed: nonzero 160-bit addresses that are not
+precompiles, one per library, no address shared. -/
 def LinksWellFormed (ls : List Link) : Prop :=
-  (∀ l, l ∈ ls → 0 < l.address ∧ l.address < 2 ^ 160) ∧
+  (∀ l, l ∈ ls → 0 < l.address ∧ l.address < 2 ^ 160 ∧ ¬ Precompile l.address) ∧
   (ls.map fun l => (l.unit, l.library)).Pairwise (· ≠ ·) ∧
   (ls.map Link.address).Pairwise (· ≠ ·)
 
@@ -147,16 +166,22 @@ structure Settings where
   coder : CoderMode := .pragma
   links : List Link := []
 
-/-- The settings the public theorem admits: the profile compiler and well
-formed links.  Order and coder are unconstrained. -/
+/-- The settings the public theorem admits: the profile compiler and no
+pre-assigned link addresses (the session deploys and links every library;
+a non-empty map is question Q1 of the G05 document).  Order and coder are
+unconstrained here; that every one is admitted is `AllSettings`. -/
 def Settings.Ok (s : Settings) : Prop :=
-  s.compiler = .catalog0838 ∧ LinksWellFormed s.links
+  s.compiler = .catalog0838 ∧ s.links = []
 
-/-- Every evaluation order is admitted with otherwise admitted settings. -/
+/-- What a recorded solc link map must satisfy even outside the admitted
+profile (an oracle fixture's provenance). -/
+def Settings.LinksRecorded (s : Settings) : Prop := LinksWellFormed s.links
+
+/-- `Settings.Ok` does not read the order. -/
 theorem Settings.ok_order {s : Settings} (h : s.Ok) (o : EvalOrder) :
     ({ s with order := o } : Settings).Ok := h
 
-/-- Both coder modes are admitted with otherwise admitted settings. -/
+/-- `Settings.Ok` does not read the coder mode. -/
 theorem Settings.ok_coder {s : Settings} (h : s.Ok) (m : CoderMode) :
     ({ s with coder := m } : Settings).Ok := h
 
@@ -226,14 +251,30 @@ def FrontendSpec.Admitted (F : FrontendSpec) (i : Input) (r : F.Resolved) : Prop
 def LinksResolved (libs : List (String × String)) (ls : List Link) : Prop :=
   ∀ l, l ∈ ls → (l.unit, l.library) ∈ libs
 
-/-- Obligations on the relations, not fields: the resolution carries the
-input's settings to the meaning; the profile includes the raw and link
-checks; parsing reads no setting but the compiler's language. -/
+/-- Obligations on the relations, not fields (owners S00, S01, G15): a
+resolution carries the input's settings (to `SourceSpec.meaning`); the
+profile includes the raw-input and link checks. -/
 def FrontendSpec.SettingsRespected (F : FrontendSpec) : Prop :=
   (∀ i s r, F.Parses i s → F.Resolves s r → F.settingsOf r = i.settings) ∧
-  (∀ r, F.InProfile r → (F.settingsOf r).Ok ∧ LinksResolved (F.libraries r) (F.settingsOf r).links) ∧
-  (∀ i s o m ls, F.Parses i s →
-    F.Parses { i with settings := { i.settings with order := o, coder := m, links := ls } } s)
+  (∀ i s r, F.Parses i s → F.Resolves s r → F.InProfile r →
+    i.Ok ∧ LinksResolved (F.libraries r) (F.settingsOf r).links)
+
+/-- **Admission is blind to the semantic settings**: an admitted input stays
+admitted under every admitted settings value, with a resolution carrying the
+new settings and the same library declarations.  This, not `Settings.ok_order`,
+is what puts all eight `EvalOrder` combinations under the public theorem. -/
+def FrontendSpec.AllSettings (F : FrontendSpec) : Prop :=
+  ∀ i r, F.Admitted i r → ∀ st : Settings, st.Ok →
+    ∃ r', F.Admitted { i with settings := st } r' ∧ F.settingsOf r' = st ∧
+      F.libraries r' = F.libraries r
+
+/-- Every evaluation order is admitted, given `AllSettings`. -/
+theorem FrontendSpec.admits_order {F : FrontendSpec} (all : F.AllSettings)
+    {i : Input} {r : F.Resolved} (h : F.Admitted i r) (ok : i.settings.Ok) (o : EvalOrder) :
+    ∃ r', F.Admitted { i with settings := { i.settings with order := o } } r' ∧
+      (F.settingsOf r').order = o := by
+  obtain ⟨r', hr', hs, _⟩ := all i r h { i.settings with order := o } (Settings.ok_order ok o)
+  exact ⟨r', hr', by rw [hs]⟩
 
 /-- A checker of one judgment: acceptance implies it. -/
 structure Checker (A B : Type) (J : A → B → Prop) where
@@ -272,6 +313,17 @@ theorem Chain.checked {F : FrontendSpec} (ch : Chain F) (i : Input) (r : F.Resol
   have hwf := ch.metadata.sound r () c.metadata hm
   exact ⟨ch.raw_sound i hr,
     c.parsed, ch.parse.sound i c.parsed c.parse hp, ch.resolve.sound c.parsed r c.resolve hs, hwf⟩
+
+/-- With the settings obligations, an accepted input has admitted settings
+and its links name library declarations. -/
+theorem Chain.checked_settings {F : FrontendSpec} (resp : F.SettingsRespected) (ch : Chain F)
+    (i : Input) (r : F.Resolved) (c : ch.Cert) (h : ch.check i r c = true) :
+    F.settingsOf r = i.settings ∧ i.settings.Ok ∧ LinksResolved (F.libraries r) i.settings.links := by
+  obtain ⟨_, s, hp, hs, _, hi⟩ := ch.checked i r c h
+  have hset := resp.1 i s r hp hs
+  have hprof := resp.2 i s r hp hs hi
+  rw [hset] at hprof
+  exact ⟨hset, hprof.1.2.2, hprof.2⟩
 
 /-- G01's `CheckedFrontend`, over the frontend's fields. -/
 structure Checked (F : FrontendSpec) where
