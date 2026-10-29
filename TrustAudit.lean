@@ -731,7 +731,10 @@ run_cmd do
     ``Solidity.Source.SemanticsExamples.transient_cleared,
     ``Solidity.Source.SemanticsExamples.reentrant_callback,
     ``Solidity.Source.SemanticsExamples.ctor_order_legacy,
-    ``Solidity.Source.SemanticsExamples.ctor_order_viaIR]
+    ``Solidity.Source.SemanticsExamples.ctor_order_viaIR,
+    ``Solidity.Source.SemanticsExamples.outside_revert_rolls_back,
+    ``Solidity.Source.SemanticsExamples.static_callback_refused,
+    ``Solidity.Source.SemanticsExamples.session_runs]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

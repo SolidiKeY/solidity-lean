@@ -332,6 +332,27 @@ theorem no_callback :
     readX (runTxB answerOnly sB (selOf "callOut(address)" ++ wordBytes (toWord ext.val))).2 = some 3 := by decide +kernel
 
 
+/-- The environment calls back into `cb()` once, then answers with a revert. -/
+def reenterThenRevert : Solidity.Roadmap.Strategy := fun evs =>
+  if evs.any (fun e => match e with | .reentered _ => true | _ => false) then .answer (.revert [7])
+  else .reenter thisC ext (word 0) (selOf "cb()") false
+
+def FC : Fr := { this := thisC, sender := user, value := word 0, static := false, contract := "C" }
+
+/-- **A reverted call out undoes its callbacks**: the callback into `cb()`
+succeeds (`x + 1`), but the outside callee then reverts, so the caller sees
+the revert data and `x` is back to `3`, not `4`; the events stay. -/
+theorem outside_revert_rolls_back :
+    let r := runAt (fun n => callAddr (GB reenterThenRevert) FC n ext (word 0) (selOf "ping()") false) sB 30
+    outcomeOf r = some (.revert [7]) ∧ readX r.2 = some 3 ∧ readX r.2 ≠ some 4 ∧
+    r.2.events.length = 4 := by decide +kernel
+
+/-- A static call out: the environment's callback inherits the static
+flag, so `cb()`'s write is refused and the callback reverts. -/
+theorem static_callback_refused :
+    let r := runAt (fun n => callAddr (GB reenterOnce) FC n ext (word 0) (selOf "ping()") true) sB 30
+    readX r.2 = some 3 ∧ (r.2.events.contains (.reentered (.revert []))) = true := by decide +kernel
+
 /-! ## S03.02: constructor order -/
 
 /-- ```
@@ -390,6 +411,32 @@ theorem horizon_stable : outcomeOf (runTxB answerOnly sB (selOf "g()") 20) =
 
 /-- A horizon too small for the transaction completes nothing. -/
 theorem horizon_short : outcomeOf (runTxB answerOnly sB (selOf "g()") 3) = none := by decide +kernel
+
+/-- A session: deploy `C`, then one request `g()`. -/
+def envS : SessionEnv where
+  deployer := user
+  deployNonce := ⟨0, by decide⟩
+  deployValue := word 0
+  deployArgs := []
+  balance := fun _ => word 0
+  hasCode := fun _ _ => true
+  requests := fun _ i => if i = 0 then some (.request ⟨user, addr 0, word 0, word 0, selOf "g()"⟩) else none
+  callee := answerOnly
+
+def PS : SrcProg EB := ⟨PB, .legacy, toyFixed, "C"⟩
+
+/-- **A session completes with its last outcome** (non-vacuity of
+`sessionAt`): the deployment and `g()`'s transaction are the events, and
+`12` is the final observation; a short horizon shows nothing. -/
+theorem session_runs :
+    (sessionFrom PS envS (addr 0) 30).final = some (.success (wordBytes (toWord 12))) ∧
+    (sessionFrom PS envS (addr 0) 30).events.length = 2 ∧ (sessionFrom PS envS (addr 0) 2).final = none := by
+  decide +kernel
+
+/-- `sessionAt` is the session from the creation address (a definition;
+the kernel does not unfold `Evm.beBytes`, so the control runs `sessionFrom`). -/
+theorem sessionAt_eq (env : SessionEnv) (n : Nat) :
+    sessionAt PS env n = sessionFrom PS env (toyFixed.createAddress env.deployer env.deployNonce) n := rfl
 
 /-- The session family of every program is consistent (G01). -/
 theorem session_consistent {E : Env} (P : SrcProg E) (env : SessionEnv) :

@@ -594,6 +594,13 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/Observe.lean` | S04.02: ABI words and bytes of values (`Val.word`, `Val.word_int`), selectors, `Panic`/`Error` revert data (`panicData_code`, `panic_distinct`) and `revertOutcome`. |
 | `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
 | `Source/StateExamples.lean` | S04.01–S04.03 controls: nested memory aliasing, an independent memory copy, storage round trips, distinct panic outcomes, transfers, a reverted call undoing its writes. |
+| `Source/Value.lean` | S02: run-time values `RVal`, `Halt`, decidable `STy` equality, wrapping (`wrapBits_mem`), checked/unchecked integer and fixed-point arithmetic, shifts, powers, comparisons, value conversions. |
+| `Source/Elaborated.lean` | S02 prerequisite: resolved bodies, modifier invocations, initializers and base arguments (`Program`), and `Elaborated` (a resolution carrying its program). |
+| `Source/Machine.lean` | S02: the logical storage layout (`Env.cellTy`), `Locals`, the machine state `St`, frames `Fr`, `Glob`, the monad `EM`, storage/memory reads, writes, copies and deletion. |
+| `Source/Eval.lean` | S02/S03: the interpreter of resolved expressions, lvalues, statements, modifiers, internal and external calls, dispatch and environment moves, at a horizon. |
+| `Source/Semantics.lean` | S03.02/S03.04/S04.04/S05: constructor order per pipeline, deployment, transactions, least-horizon completion (`firstDone_mono`), sessions as G01 prefixes (`sessionAt_consistent`, `sourceLang`). |
+| `Source/Ledger.lean` | S05: the semantic status of every expression and statement constructor against S01's coverage (`semExprCoverage_of_typed`, `semExprGaps_spec`). |
+| `Source/SemanticsExamples.lean` | S02–S05 controls: overflow, division by zero, evaluation order per pipeline, short circuit, two placeholders, constructor order, revert rollback of storage and transient storage, a reentrant callback. |
 
 ## Precompiles
 

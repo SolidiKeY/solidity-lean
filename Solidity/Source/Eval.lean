@@ -249,9 +249,13 @@ def convExplicitRV {Γ : RCtx} (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVa
   match σ, v with
   | .rational q, _ => return .val (← lift (constExplicit q τ))
   | _, .val (.memRef _ a) =>
-    if h : τ.loc? = some .memory then return .val (.memRef h a) else convRV F n τ v
+    match τ with
+    | .fixedBytes k hk => return .val (mkBytes (n := k) (h := hk) (← heapBytes a))
+    | τ => if h : τ.loc? = some .memory then return .val (.memRef h a) else convRV F n τ v
   | _, .val (.storRef _ p) =>
-    if h : τ.loc? = some .storage then return .val (.storRef h p) else convRV F n τ v
+    match τ with
+    | .fixedBytes k hk => return .val (mkBytes (n := k) (h := hk) (← bytesOfRV F n v))
+    | τ => if h : τ.loc? = some .storage then return .val (.storRef h p) else convRV F n τ v
   | _, .val x =>
     if τ.byRef then convRV F n τ v else return .val (← lift (convExplicitVal τ x))
   | _, _ => convRV F n τ v
@@ -426,6 +430,22 @@ def Glob.dispatchFn (G : Glob E) (c : String) (d : Decl) : Decl :=
       ((chain.findSome? fun s => (E.fnIn s d.name ps).find? fun d' => (G.prog.body d').isSome)).getD d
     else d
   | none => d
+
+/-- **Virtual modifiers**: the modifier of `m`'s name in the first scope of
+`c`'s linearization that declares one with a body. -/
+def Glob.dispatchMod (G : Glob E) (c : String) (m : Decl) : Decl :=
+  let chain := (E.linearize c).getD [c]
+  if m.scope.isSome && chain.any (some · == m.scope) then
+    (chain.findSome? fun s => (E.declared (some s) m.name).find? fun d' =>
+      d'.kind == .modifier && (G.prog.body d').isSome).getD m
+  else m
+
+/-- Whether a `receive` or `fallback` function accepts value. -/
+def Decl.specialPayable (d : Decl) : Bool :=
+  match d.kind, d.top, d.node with
+  | .receive, _, _ => true
+  | .fallback, _, .fallback _ _ m _ _ _ _ => m == some .payable
+  | _, _, _ => false
 
 /-- The functions contract `c` exposes, most derived first. -/
 def Env.exposed (E : Env) (c : String) : List Decl :=
@@ -677,16 +697,20 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
     let vs ← evalConvArgs G F n args
     let ps := match d.fnSig E with | some (ps, _) => ps | none => []
     let input := G.selector (sigOf E.layout d.name ps) ++ (← encodeVals F n false vs.toR)
+    if (← instanceAt G a).isNone && !G.hasCode (← st).events a then halt (.revert [])
     let out ← (Prod.fst <$> sub (L0 E) (callAddr G F n a ⟨v.toNat % 2 ^ 256, Nat.mod_lt _ (by decide)⟩ input
       (d.fnMut == some .view || d.fnMut == some .pure)))
     let data ← reraise out
+    if data.length < 32 * rs.length then halt (.revert [])
     return mkRet rs ((← lift (decodeVals E.layout data rs 0)).toR)
   | .transfer a v => do
-    let (ok, _) ← pay G F n a v
-    if ok then return RVal.unit else halt (.revert [])
+    match ← pay G F n a v with
+    | .success _ => return RVal.unit
+    | .revert d => halt (.revert d)
   | .send a v => do
-    let (ok, _) ← pay G F n a v
-    return .val (.bool ok)
+    match ← pay G F n a v with
+    | .success _ => return .val (.bool true)
+    | .revert _ => return .val (.bool false)
   | .abiEncode k args => do
     let vs ← evalArgs G F n args
     let data ← match k, vs with
@@ -865,7 +889,7 @@ termination_by structural n
 /-- **A payment** (`transfer`, `send`): the call with value and no data;
 whether it succeeded. -/
 def pay (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} (a : RExpr E Γ (.address true))
-    (v : RExpr E Γ (.int IntTy.u256)) : EM E Γ (Bool × Unit) :=
+    (v : RExpr E Γ (.int IntTy.u256)) : EM E Γ Outcome :=
   match n with
   | 0 => halt .timeout
   | n + 1 => do
@@ -874,9 +898,7 @@ def pay (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} (a : RExpr E Γ (.address tr
     let w ← match ← getV (← evalE G F n v) with
       | .int i _ => pure i
     let (out, _) ← sub (L0 E) (callAddr G F n x ⟨w.toNat % 2 ^ 256, Nat.mod_lt _ (by decide)⟩ [] false)
-    match out with
-    | .success _ => pure (true, ())
-    | .revert _ => pure (false, ())
+    pure out
 termination_by structural n
 
 /-- **Statement execution** at horizon `n`, in a body with `nps`
@@ -1043,16 +1065,17 @@ def runMods (G : Glob E) (F : Fr) (n : Nat) (b : RBody E) (mods : List (RModInv 
     | _ => halt (.stuck "break outside a loop")
   | m :: rest => do
     let (vs, l1) ← sub l (evalConvArgs G F n m.args)
-    match G.prog.body m.modifier with
+    match G.prog.body (G.dispatchMod F.contract m.modifier) with
     | none => halt (.stuck "modifier without a body")
     | some mb =>
       let ml := vs.onto (L0 E)
       if h : m.ps.reverseAux [] = mb.locals then
         let saved := (← st).fnLocals
         modSt fun s => { s with fnLocals := ⟨_, l1⟩ }
-        let _ ← execItems G F n mb.ps.length (some ⟨b, rest, l1⟩) mb.items (h ▸ ml)
+        let r ← attempt (execItems G F n mb.ps.length (some ⟨b, rest, l1⟩) mb.items (h ▸ ml))
         let ⟨Γf, lf⟩ := (← st).fnLocals
         modSt fun s => { s with fnLocals := saved }
+        if let .error hl := r then halt hl
         if e : Γf = b.locals then pure (e ▸ lf) else halt (.stuck "modifier frame")
       else halt (.stuck "modifier parameters")
 termination_by structural n
@@ -1090,7 +1113,7 @@ def callAddr (G : Glob E) (F : Fr) (n : Nat) (a : Address) (v : Word) (input : B
     match ← instanceAt G a with
     | some c =>
       let m ← mark
-      let ok ← if a = F.this then pure true
+      let ok ← if a = F.this then pure (decide (v.val ≤ ((← st).ex.world.accounts a).balance.val))
         else do
           match (← st).ex.transfer F.this a v with
           | some ex' => modSt fun s => { s with ex := ex' }; pure true
@@ -1098,10 +1121,14 @@ def callAddr (G : Glob E) (F : Fr) (n : Nat) (a : Address) (v : Word) (input : B
       if !ok then return .revert []
       enterInstance G n a F.this v input (static || F.static) c (F.depth + 1) m
     | none =>
+      let m ← mark
       if v.val ≠ 0 then
         if !(← debit F.this v) then return .revert []
       emitEvent (.call a v input (static || F.static))
-      envLoop G n (F.depth + 1)
+      let o ← envLoop G n (F.depth + 1) (static || F.static)
+      match o with
+      | .revert _ => do rollbackTo m; pure o
+      | .success _ => pure o
 termination_by structural n
 
 /-- Running an instance's code in a new frame (fresh memory), its writes
@@ -1124,7 +1151,7 @@ termination_by structural n
 /-- **The environment's moves** while a call of the system is pending:
 answers end it; credits and callbacks (into any instance) are recorded and
 the strategy is asked again. -/
-def envLoop (G : Glob E) (n : Nat) (depth : Nat) : EM E [] Outcome :=
+def envLoop (G : Glob E) (n : Nat) (depth : Nat) (pstatic : Bool) : EM E [] Outcome :=
   match n with
   | 0 => halt .timeout
   | n + 1 => do
@@ -1135,17 +1162,17 @@ def envLoop (G : Glob E) (n : Nat) (depth : Nat) : EM E [] Outcome :=
     | .credit t v => do
       emitEvent (.credit t v)
       if (← instanceAt G t).isSome then credit t v
-      envLoop G n depth
+      envLoop G n depth pstatic
     | .reenter t sender v input static => do
       emitEvent (.reenter t sender v input static)
       let o ← match ← instanceAt G t with
         | some c => do
           let m ← mark
           credit t v
-          enterInstance G n t sender v input static c depth m
+          enterInstance G n t sender v input (static || pstatic) c (depth + 1) m
         | none => pure (.revert [])
       emitEvent (.reentered o)
-      envLoop G n depth
+      envLoop G n depth pstatic
 termination_by structural n
 
 /-- **Dispatch** of call data on the instance's contract: the function
@@ -1165,6 +1192,7 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
       match d.fnSig E with
       | some (ps, rs) =>
         if F.value.val ≠ 0 && d.fnMut != some .payable then halt (.revert [])
+        if input.length < 4 + 32 * ps.length then halt (.revert [])
         let vs ← lift (decodeVals E.layout (input.drop 4) ps 0)
         let (r, _) ← sub (L0 E) (callInternal G F n d vs rs)
         encodeVals F n false (← lift (unRet rs r))
@@ -1174,6 +1202,7 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
         else E.special F.contract .fallback
       match special with
       | some d =>
+        if F.value.val ≠ 0 && !d.specialPayable then halt (.revert [])
         match G.prog.body d with
         | some b =>
           if h : b.locals = [] then

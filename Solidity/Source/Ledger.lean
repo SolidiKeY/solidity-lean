@@ -9,11 +9,14 @@ Every expression and statement constructor of the source syntax
 coverage (`TypingExamples.exprCoverage`, `stmtCoverage`, which classify
 every constructor without a wildcard):
 
-- a constructor S01 types has a semantic case: its derivations elaborate
-  to `RExpr`/`RStmt` (`Typed.toR`, `StmtD.toR`, total), and the interpreter
-  (`evalE`, `execS`, `Solidity/Source/Eval.lean`) matches every
+- a constructor S01 types has an interpreter arm: its derivations
+  elaborate to `RExpr`/`RStmt` (`Typed.toR`, `StmtD.toR`, total), and the
+  interpreter (`evalE`, `execS`, `Solidity/Source/Eval.lean`) matches every
   constructor of `RExpr`, `RLVal`, `RStmt` and `RItems` without a
-  wildcard, so Lean's exhaustiveness check is the per-constructor check;
+  wildcard (Lean's exhaustiveness check).  An arm can still be `stuck` on
+  some inputs (dynamic ABI decoding, calldata references, `fallback` with
+  parameters, nested-array copies): `semExprCoverage_of_typed` is a
+  classification, not a progress theorem;
 - a constructor S01 defers stays a recorded gap with its stage, never an
   exclusion (G00's profile still contains it).
 
@@ -81,8 +84,14 @@ theorem semStmtCoverage_of_typed (k : Ctor) (h : stmtCoverage k = some .typed) :
 def semExprGaps : List Ctor :=
   [.slice, .callOptions, .metaType, .new, .inlineArray, .elemType]
 
+/-- Whether S01 defers a constructor. -/
+def deferred (k : Ctor) : Bool :=
+  match exprCoverage k with
+  | some (.deferred _ _) => true
+  | _ => false
+
 /-- The gaps are exactly the constructors S01 defers. -/
-theorem semExprGaps_spec (k : Ctor) : k ∈ semExprGaps ↔ ∃ s r, exprCoverage k = some (.deferred s r) := by
-  cases k <;> simp [semExprGaps, exprCoverage]
+theorem semExprGaps_spec (k : Ctor) : semExprGaps.contains k = deferred k := by
+  cases k <;> rfl
 
 end Solidity.Source.Ledger

@@ -261,6 +261,14 @@ S00/S01 status (2026-10-29): [source-s00-s01.md](feature-work/source-s00-s01.md)
 
 S04.01–S04.03 status (2026-10-29): [source-s04-state.md](feature-work/source-s04-state.md). The source state over S01's types and a declaration layout: values with intrinsic ranges, enum bounds and reference locations; recursive aggregates with content-keyed mappings; typed memory with copy and aliasing laws; read-only calldata; storage typed by its layout; ABI words, selectors and Panic/Error revert data under G01 Q5; instance accounts, transient storage, transaction configuration, and a journal whose rollback undoes any operations since a call's entry (`rollback_run`, nested calls, transfers). Aggregate storage copies, calldata decoding, the frame stack and its depth limit, static-call enforcement and logs remain for S04.04.
 
+S02 status (2026-10-29, lane V04): [source-s02.md](feature-work/source-s02.md). Resolutions carry their resolved bodies (`Elaborated`; the carried program is the canonical choice, derivation uniqueness not proved, scope question Q1); the typing gaps struct members and construction, external calls, `send`/`transfer`, `abi.encode*` and copies into storage are closed; the independent expression semantics on `RExpr` has an arm for every constructor (no wildcard; some arms are `stuck` on unmodelled inputs), with checked/unchecked arithmetic and its panics, pipeline-dependent effect order, storage paths and memory aliases, copies and failures. Calldata references, dynamic ABI decoding, `abi.decode`, `new`, slices and inline arrays remain.
+
+S03 status (2026-10-29, lane V04): [source-s03.md](feature-work/source-s03.md). Statements and blocks with scoped locals; modifiers with repeated placeholders per pipeline (upstream `function_modifier_multi_invocation(_viair).sol`); constructor order per pipeline; internal (virtual), external, callback and payment frames with journal rollback and the depth limit; least-horizon semantics with divergence (`firstDone_mono`, `firstDone_none_iff`). Horizon independence in general, gas/resource failure points and the stipend rule remain.
+
+S04.04 status (2026-10-29, lane V04): [source-s04-state.md](feature-work/source-s04-state.md#s0404-transactions). Deployment, transactions, the frame stack, static guards, logs, transient reset and the projection to G01 events, with kernel-checked rollback and reentrancy controls. Sender-funds validity is not checked.
+
+S05 status (2026-10-29, lane V04): [source-s05.md](feature-work/source-s05.md). The composition has the type of G01's `Lang Event Outcome` with a proved-consistent session family (horizons only: no failure points, stuck runs read as divergence) (`sessionAt_consistent`, `sourceLang`); the source-constructor ledger is checked against S01's coverage (`Ledger.lean`); nontrivial controls (reentrant callback, revert rolling back storage and transient state, two placeholders, constructor order). `SourceSpec` is not instantiated and progress is an obligation.
+
 ### Wave 1 — source syntax and checked admission (G08–G15)
 
 | Group | Deliverable and completion evidence |
@@ -514,7 +522,7 @@ several groups (noted per row); a lane starts by reading those results.
 | V01 | G02, G04 | V00 | Integrated. |
 | V02 | G03, G05, G06 | V00, V01 | Integrated (with the G06 Osaka re-pin). |
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
-| V04 | S02, S03, S04.04, S05 | V03 | — |
+| V04 | S02, S03, S04.04, S05 | V03 | Partial on `cloud/roadmap-l2-20261029/lane-semantics`: semantics, controls and G01 `Lang` instance done; derivation uniqueness, progress, horizon independence and resource failures open. |
 | V05 | G08, G09, G10, G11 | V04 | — |
 | V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). |
 | V07 | G16, G17, G18, G19 | V06 | — |

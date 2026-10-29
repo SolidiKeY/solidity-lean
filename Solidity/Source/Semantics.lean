@@ -32,8 +32,13 @@ The source semantics composed into G01's interface
 - **Sessions** (S05).  `sessionAt` runs the deployment and then the
   session environment's actions, each transaction at its least completing
   horizon up to `n`; it is G01's `Prefix` at horizon `n`, and the family is
-  consistent (`sessionAt_consistent`), so `sourceLang` instantiates G01's
-  `Lang Event Outcome`.
+  consistent (`sessionAt_consistent`), so `sourceLang` has the type of G01's
+  `Lang Event Outcome`.  Its resources are horizons only: the failure points
+  the user decisions require (any external frame or transaction may fail),
+  the stipend rule and sender-funds validity are not modelled, a `stuck`
+  run shows as an unfinished prefix (like divergence), and the events of a
+  transaction that never completes are not shown.  Horizon independence of
+  a completed result is checked on controls, not proved.
 -/
 
 namespace Solidity.Source
@@ -111,12 +116,13 @@ first) from its constructor's locals, in the pipeline's order. -/
 def construct (G : Glob E) (F : Fr) (n : Nat) (c : String) (lc : Locals E.layout (G.prog.ctorLocals c)) :
     EM E [] Unit := do
   let L := (E.linearize c).getD [c]
-  let acc ← collectArgs G F n L [⟨c, lc⟩]
   match G.pipeline with
   | .legacy =>
     for X in L.reverse do runInits G F n (G.prog.inits X)
+    let acc ← collectArgs G F n L [⟨c, lc⟩]
     for X in L.reverse do runCtorBody G F n acc X
   | .viaIR =>
+    let acc ← collectArgs G F n L [⟨c, lc⟩]
     for X in L.reverse do
       runInits G F n (G.prog.inits X)
       runCtorBody G F n acc X
@@ -129,8 +135,11 @@ ABI-encoded constructor arguments; its outcome. -/
 def deploy (G : Glob E) (n : Nat) (c : String) (addr sender : Address) (value : Word) (args : Bytes) :
     EM E [] Outcome := do
   let m ← mark
-  modSt fun s => { s with ex := s.ex.apply (.account addr fun _ =>
-    { balance := value, nonce := 1, code := G.position c, storage := Storage.empty }) }
+  let old := ((← st).ex.world.accounts addr).balance.val
+  if hb : old + value.val < 2 ^ 256 then
+    modSt fun s => { s with ex := s.ex.apply (.account addr fun _ =>
+      { balance := ⟨old + value.val, hb⟩, nonce := 1, code := none, storage := Storage.empty }) }
+  else halt (.revert [])
   let F : Fr := { this := addr, sender := sender, value := value, static := false, contract := c }
   let ps := ((G.prog.ctor c).map RBody.ps).getD []
   let r ← attempt do
@@ -140,7 +149,9 @@ def deploy (G : Glob E) (n : Nat) (c : String) (addr sender : Address) (value : 
     else halt (.stuck "constructor parameters")
   modSt fun s => { s with heap := Heap.empty }
   match r with
-  | .ok () => pure (.success [])
+  | .ok () => do
+    modSt fun s => { s with ex := s.ex.apply (.account addr fun x => { x with code := G.position c }) }
+    pure (.success [])
   | .error (.revert d) => do rollbackTo m; pure (.revert d)
   | .error h => halt h
 
@@ -312,9 +323,8 @@ theorem sessionGo_mono (P : SrcProg E) (env : SessionEnv) :
 
 /-- **A session at horizon `n`**: the deployment of the main contract at
 its least completing horizon, then up to `n` actions. -/
-def sessionAt (P : SrcProg E) (env : SessionEnv) (n : Nat) : Prefix Event Outcome :=
+def sessionFrom (P : SrcProg E) (env : SessionEnv) (addr : Address) (n : Nat) : Prefix Event Outcome :=
   let G := P.glob env
-  let addr := P.fixed.createAddress env.deployer env.deployNonce
   let dep := fun f => do
     let o ← deploy G f P.main addr env.deployer env.deployValue env.deployArgs
     emitEvent (.deploy env.deployer env.deployValue env.deployArgs o
@@ -324,19 +334,31 @@ def sessionAt (P : SrcProg E) (env : SessionEnv) (n : Nat) : Prefix Event Outcom
   | some (_, (.ok o, s)) => sessionGo P env n n 0 s o
   | _ => ⟨[], none⟩
 
-/-- **The source session semantics is consistent** (G01 `Prefixes.Consistent`). -/
-theorem sessionAt_consistent (P : SrcProg E) (env : SessionEnv) :
-    Prefixes.Consistent (sessionAt P env) := by
+/-- The session at the deployment's creation address (`this` from the
+deployment, G01). -/
+def sessionAt (P : SrcProg E) (env : SessionEnv) (n : Nat) : Prefix Event Outcome :=
+  sessionFrom P env (P.fixed.createAddress env.deployer env.deployNonce) n
+
+/-- Sessions from any address are consistent. -/
+theorem sessionFrom_consistent (P : SrcProg E) (env : SessionEnv) (addr : Address) :
+    Prefixes.Consistent (sessionFrom P env addr) := by
   intro n m hnm
-  simp only [sessionAt]
+  simp only [sessionFrom]
   split
   · rename_i j o s hf
     rw [firstDone_mono _ hnm hf]
     exact sessionGo_mono P env n m n m 0 s o hnm hnm
   · exact ⟨List.nil_prefix, .inl rfl⟩
 
+/-- **The source session semantics is consistent** (G01 `Prefixes.Consistent`). -/
+theorem sessionAt_consistent (P : SrcProg E) (env : SessionEnv) :
+    Prefixes.Consistent (sessionAt P env) :=
+  sessionFrom_consistent P env _
+
 /-- **The source language** (G01 `Lang Event Outcome`): programs at the
-source, the session environment, horizons. -/
+source, the session environment, horizons.  `Admissible`, `Forward` and
+`Guard` are trivial: resource failures, the hash premise and the stipend
+rule are not instantiated (see the module docstring). -/
 def sourceLang (E : Env) : Lang Event Outcome where
   Prog := SrcProg E
   Env := SessionEnv
