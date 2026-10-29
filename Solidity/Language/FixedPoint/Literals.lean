@@ -17,10 +17,12 @@ fixed-point type in four ways (`docs/feature-work/fixed-point-semantics.md`,
 * the mobile type a fractional constant takes when it needs a type of its
   own (`mobileFx?`, solc's `RationalNumberType::fixedPointType`), which
   holds the constant truncated toward zero (`mobileFx?_inRange`) and holds
-  it exactly when its digits suffice (`mobileFx?_exact`);
-* the common type of a fixed-point operand and a constant operand
-  (`litCommon?`), solc's `Type::commonType` restricted, as Q1 requires, to
-  pairs where the constant converts exactly.
+  it exactly if and only if its digits suffice (`mobileFx?_exact`);
+* the common type of a fixed-point operand and a constant operand:
+  `x op c` (`litCommon?`) is solc's `Type::commonType` restricted, as Q1
+  requires, to pairs where the constant converts exactly
+  (`litCommon?_solc`); `c op x` (`litCommonRev?`) is solc's rule, which
+  refuses a fractional `c` (`litCommonRev?_eq_solc`).
 
 Only the rational value of a constant matters, not its spelling
 (`Fx.ofLiteral?_congr`, `Fx.literalTrunc_congr`).
@@ -61,8 +63,9 @@ def ratTrunc (q : Rat) : Int := q.num.tdiv q.den
 def precise (q : Rat) : Option Rat := if fitsPrecision q then some q else none
 
 /-- A power `p ** k` with an integer exponent, as `evaluateBinaryOperator`:
-`0`, `1` and `-1` bases and a zero exponent are exact; otherwise the
-exponent must fit in 32 bits and the precision pre-check must pass. -/
+`0`, `1` and `-1` bases and a zero exponent skip the pre-checks (solc
+returns them early; the later 4096-bit check always passes for them);
+otherwise the exponent must fit in 32 bits and the pre-check must pass. -/
 def ratPow (p : Rat) (k : Int) : Option Rat :=
   if k = 0 ∨ p = 0 ∨ p = 1 ∨ p = -1 then precise (p ^ k)
   else if k.natAbs ≤ 2 ^ 32 - 1 ∧ fitsPrecisionExp p.num.natAbs k.natAbs = true ∧
@@ -247,7 +250,12 @@ theorem explicitConst?_trunc {num : Int} {den : Nat} (hd : den ≠ 0) {a : Fx t}
   have ha : a.1 = (num * t.scale).tdiv den := (explicitConst?_eq_some_iff hd).mp h
   have hp : (0 : Int) < den := Int.natCast_pos.mpr (Nat.pos_of_ne_zero hd)
   have hs : 0 < t.scale := t.scale_pos
-  have ht := tdiv_trunc (num * t.scale) den hp
+  have ht : (0 ≤ num * t.scale → 0 ≤ (num * t.scale).tdiv den * den ∧
+      (num * t.scale).tdiv den * den ≤ num * t.scale ∧
+      num * t.scale < (num * t.scale).tdiv den * den + den) ∧
+    (num * t.scale < 0 → (num * t.scale).tdiv den * den - den < num * t.scale ∧
+      num * t.scale ≤ (num * t.scale).tdiv den * den ∧ (num * t.scale).tdiv den * den ≤ 0) :=
+    tdiv_trunc (num * t.scale) den hp
   rw [ha]
   refine ⟨fun hn => ht.1 (Int.mul_nonneg hn (by omega)),
     fun hn => ht.2 (Int.mul_neg_of_neg_of_pos hn hs)⟩
@@ -324,8 +332,12 @@ theorem ofLiteral?_isSome_iff_solc {num : Int} {den : Nat} (hd : den ≠ 0) :
         have hx : -k ≤ (-t.lo) / t.scale ↔ -k * t.scale ≤ -t.lo := Int.le_ediv_iff_mul_le hs
         rw [Int.neg_mul] at hx
         constructor
-        · intro h; have := hx.mpr (by omega); omega
-        · intro h; have := hx.mp (by omega); omega
+        · intro h
+          have h' : -k ≤ (-t.lo) / t.scale := hx.mpr (by omega)
+          omega
+        · intro h
+          have h' : -(k * t.scale) ≤ -t.lo := hx.mp (by omega)
+          omega
       simp only [FxTy.inRange]
       apply Bool.eq_iff_iff.mpr
       simp only [Bool.and_eq_true, decide_eq_true_eq]
@@ -487,38 +499,158 @@ theorem mobileFx?_inRange {q : Rat} {t : FxTy} (h : mobileFx? q = some t) :
     have hwq : mobWord q = mobMag q := by simp only [mobWord, hn, false_and, if_false]
     omega
 
-/-- The mobile type holds the constant exactly when its digits suffice:
-then the implicit conversion to it succeeds. -/
-theorem mobileFx?_exact {q : Rat} {t : FxTy} (h : mobileFx? q = some t)
-    (hd : (q.den : Int) ∣ q.num * t.scale) : (ofRat? t q).isSome = true := by
-  have hr : t.inRange (literalTrunc t q.num q.den) = true := mobileFx?_inRange h
-  have hp : (q.den : Int) ≠ 0 := Int.ofNat_ne_zero.mpr q.den_nz
-  have he : (⟨literalTrunc t q.num q.den, hr⟩ : Fx t).1 * q.den = q.num * t.scale := by
-    simp only [literalTrunc]
-    exact Int.tdiv_mul_cancel hd
-  rw [(ofRat?_eq_some_iff).mpr he]
-  rfl
+/-- At its mobile type, a constant converts implicitly exactly when its
+digits suffice. -/
+theorem mobileFx?_exact {q : Rat} {t : FxTy} (h : mobileFx? q = some t) :
+    (ofRat? t q).isSome = true ↔ (q.den : Int) ∣ q.num * t.scale := by
+  constructor
+  · intro hs
+    cases ho : ofRat? t q with
+    | none => rw [ho] at hs; exact nomatch hs
+    | some a =>
+      have he : a.1 * q.den = q.num * t.scale := ofRat?_eq_some_iff.mp ho
+      exact ⟨a.1, by rw [← he, Int.mul_comm]⟩
+  · intro hd
+    have hr : t.inRange (literalTrunc t q.num q.den) = true := mobileFx?_inRange h
+    have he : (⟨literalTrunc t q.num q.den, hr⟩ : Fx t).1 * q.den = q.num * t.scale := by
+      simp only [literalTrunc]
+      exact Int.tdiv_mul_cancel hd
+    rw [(ofRat?_eq_some_iff).mpr he]
+    rfl
+
+/-- solc's digit loop stops at or before any digit count `d` at which the
+constant is an integer and fits. -/
+theorem digitsGo_le_of_exact (a den maxV d : Nat) (hd : a * 10 ^ d % den = 0) :
+    ∀ k n, n ≤ d → digitsGo a den maxV k n ≤ d
+  | 0, n, hn => hn
+  | k + 1, n, hn => by
+    unfold digitsGo
+    split
+    · rename_i hc
+      have hne : n ≠ d := fun he => hc.2 (he ▸ hd)
+      exact digitsGo_le_of_exact a den maxV d hd k (n + 1) (by omega)
+    · exact hn
+
+/-- …and the constant is exact where it stops. -/
+theorem digitsGo_exact (a den maxV d : Nat) (hd : a * 10 ^ d % den = 0)
+    (hm : a * 10 ^ d ≤ maxV * den) : ∀ k n, n ≤ d → d ≤ n + k →
+      a * 10 ^ (digitsGo a den maxV k n) % den = 0
+  | 0, n, hn, hk => by
+    have he : n = d := by omega
+    simp only [digitsGo, he]
+    exact hd
+  | k + 1, n, hn, hk => by
+    unfold digitsGo
+    split
+    · rename_i hc
+      have hne : n ≠ d := fun he => hc.2 (he ▸ hd)
+      exact digitsGo_exact a den maxV d hd hm k (n + 1) (by omega) (by omega)
+    · rename_i hc
+      by_cases hz : a * 10 ^ n % den = 0
+      · exact hz
+      · -- the loop stopped on the magnitude, so `d` is `n`
+        have hgt : ¬ a * 10 ^ (n + 1) ≤ maxV * den := fun hl => hc ⟨hl, hz⟩
+        have hnd : ¬ n + 1 ≤ d := by
+          intro hl
+          have hp : 10 ^ (n + 1) ≤ 10 ^ d := Nat.pow_le_pow_right (by decide) hl
+          have hmul : a * 10 ^ (n + 1) ≤ a * 10 ^ d := Nat.mul_le_mul_left a hp
+          omega
+        have he : n = d := by omega
+        rw [he]
+        exact hd
+
+/-- The mobile type of a constant that is exact at some `d ≤ 80` digits
+within the magnitude bound takes digits at which it is exact, so the
+constant converts to it implicitly. -/
+theorem mobileFx?_exact_of_digits {q : Rat} {t : FxTy} (h : mobileFx? q = some t) {d : Nat}
+    (hd80 : d ≤ 80) (hd : q.num.natAbs * 10 ^ d % q.den = 0)
+    (hm : q.num.natAbs * 10 ^ d ≤ maxMag q * q.den) : (ofRat? t q).isSome = true := by
+  have hx : q.num.natAbs * 10 ^ (mobDigits q) % q.den = 0 :=
+    digitsGo_exact _ _ _ d hd hm 80 0 (Nat.zero_le d) (by omega)
+  have ht : t.digits = mobDigits q := (mobileFx?_spec h).2.2.1
+  apply (mobileFx?_exact h).mpr
+  have hn : (q.den : Int) ∣ (q.num.natAbs : Int) * ((10 ^ mobDigits q : Nat) : Int) := by
+    have hdv : q.den ∣ q.num.natAbs * 10 ^ mobDigits q := Nat.dvd_of_mod_eq_zero hx
+    exact Int.natCast_dvd_natCast.mpr hdv
+  have hsc : t.scale = ((10 ^ mobDigits q : Nat) : Int) := by
+    simp only [FxTy.scale, ht, Int.natCast_pow, Int.cast_ofNat_Int]
+  rw [hsc]
+  by_cases hneg : q.num < 0
+  · have ha : q.num = -(q.num.natAbs : Int) := by omega
+    rw [ha, Int.neg_mul]
+    exact Int.dvd_neg.mpr hn
+  · have ha : q.num = (q.num.natAbs : Int) := by omega
+    rw [ha]
+    exact hn
 
 /-! ### The common type with a constant operand -/
 
 /-- The type `x op c` runs at, for `x : t` and a constant `c` (solc's
-`Type::commonType(t, c)`): `t` if `c` converts to it implicitly, else `c`'s
-mobile type if `t` converts to it — and, as Q1 requires, only when `c` is
-exact there (solc would truncate `c`, e.g. `ufixed8x77 x; x + 1/3` at
-`ufixed256x77`). -/
+`Type::commonType(t, c)`): `t` if `c` converts to it implicitly; else, for a
+fractional `c`, `c`'s mobile type if `t` converts to it (an integer
+constant's mobile type is an integer type, to which no fixed-point type
+converts) — and, as Q1 requires, only when `c` is exact there (solc would
+truncate `c`, e.g. `ufixed8x77 x; x + 1/3` at `ufixed256x77`). -/
 def litCommon? (t : FxTy) (q : Rat) : Option FxTy :=
   if (Fx.ofRat? t q).isSome then some t
+  else if q.den = 1 then none
   else match mobileFx? q with
     | some m => if t.implicitOK m && (Fx.ofRat? m q).isSome then some m else none
     | none => none
 
-/-- `c op x` (solc's `Type::commonType(c, t)`): the mobile type first. -/
+/-- `c op x`, as solc's `RationalNumberType::binaryOperatorResult`: a
+fractional `c` is refused ("Fractional literals not supported."); an
+integer `c` runs at `t` when it converts implicitly. -/
 def litCommonRev? (q : Rat) (t : FxTy) : Option FxTy :=
-  match mobileFx? q with
-  | some m =>
-    if t.implicitOK m && (Fx.ofRat? m q).isSome then some m
-    else if (Fx.ofRat? t q).isSome then some t else none
-  | none => if (Fx.ofRat? t q).isSome then some t else none
+  if q.den = 1 ∧ (Fx.ofRat? t q).isSome = true then some t else none
+
+/-- solc's `Type::commonType(t, c)` for a fixed-point `t` and a constant
+`c`, transcribed (`Types.cpp:286–296`, the mobile types from
+`Types.cpp:1207–1213`). -/
+def solcLitCommon (t : FxTy) (q : Rat) : Option FxTy :=
+  if solcLiteralOK t q.num q.den then some t
+  else if q.den = 1 then none
+  else match mobileFx? q with
+    | some m => if t.solcImplicit m then some m else none
+    | none => none
+
+/-- solc's `c op x` for a fixed-point `x : t`, transcribed
+(`Types.cpp:1075–1078` and the common type). -/
+def solcLitCommonRev (q : Rat) (t : FxTy) : Option FxTy :=
+  if q.den = 1 ∧ solcLiteralOK t q.num q.den = true then some t else none
+
+/-- `x op c` is typed only where solc types it, at the same type. -/
+theorem litCommon?_solc {t u : FxTy} {q : Rat} (h : litCommon? t q = some u) :
+    solcLitCommon t q = some u := by
+  have hs : (ofRat? t q).isSome = solcLiteralOK t q.num q.den :=
+    ofLiteral?_isSome_iff_solc q.den_nz
+  unfold litCommon? at h
+  unfold solcLitCommon
+  rw [← hs]
+  by_cases h1 : (Fx.ofRat? t q).isSome = true
+  · simp only [h1, if_true] at h ⊢
+    exact h
+  · simp only [h1, Bool.false_eq_true, if_false] at h ⊢
+    by_cases h0 : q.den = 1
+    · simp only [h0, if_true] at h
+      exact nomatch h
+    · simp only [h0, if_false] at h ⊢
+      split at h
+      · rename_i m _
+        by_cases h2 : (t.implicitOK m && (Fx.ofRat? m q).isSome) = true
+        · simp only [h2, if_true] at h
+          simp only [Bool.and_eq_true, FxTy.implicitOK] at h2
+          simp only [h2.1.1, if_true]
+          exact h
+        · simp only [h2, Bool.false_eq_true, if_false] at h
+          exact nomatch h
+      · exact nomatch h
+
+/-- `c op x` is exactly solc's. -/
+theorem litCommonRev?_eq_solc (q : Rat) (t : FxTy) : litCommonRev? q t = solcLitCommonRev q t := by
+  have hs : (ofRat? t q).isSome = solcLiteralOK t q.num q.den :=
+    ofLiteral?_isSome_iff_solc q.den_nz
+  simp only [litCommonRev?, solcLitCommonRev, hs]
 
 /-- At a common type with a constant, both operands are exact. -/
 theorem litCommon?_exact {t u : FxTy} {q : Rat} (h : litCommon? t q = some u) :
@@ -529,40 +661,30 @@ theorem litCommon?_exact {t u : FxTy} {q : Rat} (h : litCommon? t q = some u) :
     subst h
     exact ⟨FxTy.subsumes_refl t, h1⟩
   · simp only [h1, Bool.false_eq_true, if_false] at h
-    split at h
-    · rename_i m _
-      by_cases h2 : (t.implicitOK m && (Fx.ofRat? m q).isSome) = true
-      · simp only [h2, if_true, Option.some.injEq] at h
-        subst h
-        simp only [Bool.and_eq_true] at h2
-        exact ⟨FxTy.implicitOK_iff.mp h2.1, h2.2⟩
-      · simp only [h2, Bool.false_eq_true, if_false] at h
-        exact nomatch h
-    · exact nomatch h
+    by_cases h0 : q.den = 1
+    · simp only [h0, if_true] at h
+      exact nomatch h
+    · simp only [h0, if_false] at h
+      split at h
+      · rename_i m _
+        by_cases h2 : (t.implicitOK m && (Fx.ofRat? m q).isSome) = true
+        · simp only [h2, if_true, Option.some.injEq] at h
+          subst h
+          simp only [Bool.and_eq_true] at h2
+          exact ⟨FxTy.implicitOK_iff.mp h2.1, h2.2⟩
+        · simp only [h2, Bool.false_eq_true, if_false] at h
+          exact nomatch h
+      · exact nomatch h
 
 theorem litCommonRev?_exact {t u : FxTy} {q : Rat} (h : litCommonRev? q t = some u) :
-    t.subsumes u = true ∧ (Fx.ofRat? u q).isSome = true := by
+    u = t ∧ (Fx.ofRat? u q).isSome = true := by
   unfold litCommonRev? at h
   split at h
-  · rename_i m _
-    by_cases h2 : (t.implicitOK m && (Fx.ofRat? m q).isSome) = true
-    · simp only [h2, if_true, Option.some.injEq] at h
-      subst h
-      simp only [Bool.and_eq_true] at h2
-      exact ⟨FxTy.implicitOK_iff.mp h2.1, h2.2⟩
-    · simp only [h2, Bool.false_eq_true, if_false] at h
-      by_cases h1 : (Fx.ofRat? t q).isSome = true
-      · simp only [h1, if_true, Option.some.injEq] at h
-        subst h
-        exact ⟨FxTy.subsumes_refl t, h1⟩
-      · simp only [h1, Bool.false_eq_true, if_false] at h
-        exact nomatch h
-  · by_cases h1 : (Fx.ofRat? t q).isSome = true
-    · simp only [h1, if_true, Option.some.injEq] at h
-      subst h
-      exact ⟨FxTy.subsumes_refl t, h1⟩
-    · simp only [h1, Bool.false_eq_true, if_false] at h
-      exact nomatch h
+  · rename_i hc
+    simp only [Option.some.injEq] at h
+    subst h
+    exact ⟨rfl, hc.2⟩
+  · exact nomatch h
 
 end Fx
 
@@ -631,10 +753,24 @@ example : (mobileFx? (mkRat (2 ^ 257 - 1) 20)).map (fun t => (t.signed, t.bits, 
 
 /-- `ufixed8x1 x; x + 0.5` runs at `ufixed8x1`; `x + 0.25` is refused (no
 exact type for both); `ufixed8x77 y; y + 1/3` is refused, where solc
-would truncate the constant at `ufixed256x77`. -/
+would truncate the constant at `ufixed256x77`; `ufixed8x0 z; z + 300` is
+refused as in solc (the mobile type of `300` is `uint16`); `0.5 + x` is
+refused as in solc; `2 + x` runs at `ufixed8x1`. -/
 example : (litCommon? ⟨false, 8, 1, by decide⟩ (mkRat 1 2)).map (·.digits) = some 1 ∧
     litCommon? ⟨false, 8, 1, by decide⟩ (mkRat 1 4) = none ∧
-    litCommon? ⟨false, 8, 77, by decide⟩ (mkRat 1 3) = none := by
+    litCommon? ⟨false, 8, 77, by decide⟩ (mkRat 1 3) = none ∧
+    (solcLitCommon ⟨false, 8, 77, by decide⟩ (mkRat 1 3)).map (·.bits) = some 256 ∧
+    litCommon? ⟨false, 8, 0, by decide⟩ 300 = none ∧
+    litCommonRev? (mkRat 1 2) ⟨false, 8, 1, by decide⟩ = none ∧
+    (litCommonRev? 2 ⟨false, 8, 1, by decide⟩).map (·.digits) = some 1 := by
+  decide +kernel
+
+/-- A constant just below `2^256` has no mobile type (`10^0 · c` exceeds
+`2^256 - 1`), so solc refuses `ufixed256x0(c)` for `c = 2^256 - 1/2`; folded
+exactly it is `2^256 - 1`. -/
+example : (mobileFx? (mkRat (2 ^ 257 - 1) 2)).isSome = false ∧
+    (explicitRat? ⟨false, 256, 0, by decide⟩ (mkRat (2 ^ 257 - 1) 2)).map Subtype.val =
+      some (2 ^ 256 - 1) := by
   decide +kernel
 
 end Examples
@@ -664,5 +800,17 @@ info: 'Solidity.Language.FixedPoint.Fx.litCommon?_exact' depends on axioms: [pro
 -/
 #guard_msgs in
 #print axioms Fx.litCommon?_exact
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.litCommon?_solc' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.litCommon?_solc
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.mobileFx?_exact_of_digits' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.mobileFx?_exact_of_digits
 
 end Solidity.Language.FixedPoint

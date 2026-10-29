@@ -477,36 +477,87 @@ dependency-free.
   - `Fx.explicitConst?_trunc`: toward zero, within one unit.
   - `Fx.explicitConst?_of_ofLiteral?`: it agrees with the implicit
     conversion where that exists.
-- **Mobile type.** `mobileFx?` is solc's
+- **Mobile type of a fractional constant.** `mobileFx?` is solc's
   `RationalNumberType::fixedPointType`, read from `Types.cpp:1231–1267` at
-  `v0.8.38` (digest as in §Sources, re-fetched and re-checked here). It
-  takes as many digits as keep the magnitude ≤ `2^256 − 1` (`2^255` if
-  negative), stopping when exact and at 80. It truncates toward zero and
-  uses the fewest bytes of the magnitude, or of `2·(magnitude − 1)` when
-  negative. `mobileFx?_inRange`: the mobile type holds the truncated
-  constant. `mobileFx?_exact`: it holds the constant exactly when its
-  digits suffice. Examples: `0.5 : ufixed8x1`, `-12.8 : fixed8x1`,
-  `-12.9 : fixed16x1`, `1/3 : ufixed256x77`, `2^256 + 0.5` has none.
-- **Common type with a constant operand.** `litCommon?` (`x op c`) and
-  `litCommonRev?` (`c op x`) follow solc's `Type::commonType` in both
-  operand orders, restricted to a type at which the constant is exact
-  (`litCommon?_exact`, `litCommonRev?_exact`).
+  `v0.8.38` (digest as in §Sources, re-fetched and re-checked here). An
+  integer constant's mobile type is an integer type (`integerType`,
+  `Types.cpp:1207–1213`), which belongs to the integer typing.
+  - `mobileFx?` takes as many digits as keep the magnitude ≤ `2^256 − 1`
+    (`2^255` if negative), stopping when exact and at 80. It truncates
+    toward zero and uses the fewest bytes of the magnitude, or of
+    `2·(magnitude − 1)` when negative.
+  - `mobileFx?_inRange`: the mobile type holds the truncated constant.
+  - `mobileFx?_exact`: the constant converts implicitly to it exactly when
+    its digits suffice.
+  - `digitsGo_le_of_exact`, `digitsGo_exact`, `mobileFx?_exact_of_digits`:
+    solc's loop stops at the first exact digit count that fits, so a
+    constant exact at some `d ≤ 80` digits within the bound is exact at its
+    mobile type.
+  - Examples: `0.5 : ufixed8x1`, `-12.8 : fixed8x1`, `-12.9 : fixed16x1`,
+    `1/3 : ufixed256x77`; `2^256 + 0.5` has none.
+- **Common type with a constant operand.**
+  - `litCommon?` (`x op c`) follows solc's `Type::commonType`. For a
+    fractional `c` it tries the mobile type second; for an integer `c` it
+    only converts `c` to `t`. The result is restricted to a type at which
+    the constant is exact: `litCommon?_exact`, and `litCommon?_solc` (it
+    types only what solc types, at solc's type; `solcLitCommon`
+    transcribes `Types.cpp:286–296`).
+  - `litCommonRev?` (`c op x`) refuses a fractional `c`, as solc's
+    `RationalNumberType::binaryOperatorResult` does ("Fractional literals
+    not supported.", `Types.cpp:1075–1078`). `litCommonRev?_eq_solc` shows
+    it is solc's rule exactly (`solcLitCommonRev`).
 
 **Deviations from solc's type checker.**
 
 | Case | solc 0.8.38 (source reading) | Here | Status |
 |---|---|---|---|
 | Out-of-range explicit constant, e.g. `ufixed8x1(100.5)`, `ufixed256x80(1/3)` | Accepted through the mobile type | Compile error | Intended (Q2) |
-| Explicit constant value | Rounded at the mobile type's digits, then converted | Truncated once, at the target's digits | Intended (P1). The value differs only when the target has more digits than the mobile type and ten times the magnitude just exceeds 256 bits. Witness: `ufixed256x1((2**257 - 1) / 20)` is `2^256 − 1` here and `2^256 − 6` through solc's route. Fewer target digits agree, because truncations compose (argument, not proved). |
+| Explicit constant value | Rounded at the mobile type's digits, then converted | Truncated once, at the target's digits | Intended (P1). By the argument below (not proved), the value differs only when the target has more digits than the mobile type and the loop stopped on the magnitude bound (`2^256 − 1`, or `2^255` when negative). Witness: `ufixed256x1((2**257 - 1) / 20)` is `2^256 − 1` here and `2^256 − 6` through solc's route. Fewer target digits agree, because truncations compose. |
+| Explicit constant with no mobile type, e.g. `ufixed256x0(2**256 - 0.5)` | Refused (`isExplicitlyConvertibleTo` needs a mobile type) | `2^256 − 1` (in range after truncation) | Intended (P1: exact folding at the target) |
 | Common type `x op c` where `c` is not exact at the mobile type, e.g. `ufixed8x77 y; y + 1/3` | Common type `ufixed256x77`, `c` truncated | Refused | Intended (Q1: lossy conversions are explicit) |
+| `c op x` with a fractional `c`, e.g. `0.5 * x` | Refused ("Fractional literals not supported.") | Refused, as solc | Follows solc; question QL1 below asks whether full support should admit it |
+| A standalone fractional constant that is inexact at its mobile type, e.g. `abi.encode(1/3)` | Typed `ufixed256x77`, truncated | `mobileFx?` gives solc's type; the model does not decide whether the truncation is admitted | Open: question QL2 below |
+| Constant expressions with bit operators, shifts or over-large literals | Folded (integers) or refused | Not in `CExpr` | Not modelled; integer constants belong to the integer typing |
 
 **Handoff.** S01/G13 can type constant subexpressions with `CExpr.eval`
 and give fixed-point types with `Fx.ofRat?` (implicit), `Fx.explicitRat?`
 (explicit), `mobileFx?` (standalone constants, e.g. `abi.encode(1.5)`) and
 `litCommon?`/`litCommonRev?` (mixed operands). Not done:
-- comparisons between two constants (solc compares at run time through the
-  mobile types; exact rational comparison agrees whenever both mobile
-  types hold their constants exactly);
+- comparisons between two constants. solc compares them at run time
+  through their mobile types and refuses a pair whose mobile types have no
+  common type, e.g. `0.5 < -0.5` (`ufixed8x1` against `fixed8x1`). That
+  rejection and the comparison itself are not modelled;
 - constants of other categories (integer `mobileType`, `bytesM`,
   addresses), which belong to the integer typing;
 - a proof that the two routes agree when the target has fewer digits.
+
+**Scope questions** (raised here, not answered; the rest of the checkpoint
+does not depend on them):
+
+- **QL1 [LitFirst]** — solc refuses `c op x` for a fractional constant `c`
+  and a fixed-point `x` ("Fractional literals not supported."), while it
+  types `x op c`. Should full support admit `c op x` like `x op c`? The
+  model follows solc (`litCommonRev?`).
+- **QL2 [MobileTrunc]** — a fractional constant that needs a type of its
+  own, e.g. `abi.encode(1/3)`, gets solc's mobile type `ufixed256x77`, and
+  its value is truncated there. Q1 makes lossy implicit conversions
+  explicit. Should such a constant be refused, or truncated as in solc?
+
+**Review.** A read-only finder and a separate read-only skeptic reviewed
+`28cbc41`. Both checked the mobile type, the folding, the precision bounds
+and every worked value against the pinned sources, and confirmed them.
+Confirmed findings and their fixes:
+
+| Finding | Source | Fix |
+|---|---|---|
+| `c op x` with a fractional `c` was typed; solc refuses it (`Types.cpp:1075–1078`) | both (blocking) | `litCommonRev?` refuses it; `litCommonRev?_eq_solc`; QL1 |
+| Integer constants used the fixed-point mobile branch (`ufixed8x0 x; x + 300` was typed) | both (blocking) | the mobile branch applies only to fractional constants; example added |
+| `litCommon?_exact` proved safety only, with no link to solc | skeptic | `solcLitCommon`, `litCommon?_solc` |
+| `mobileFx?_exact` was near-tautological and one-directional | both | now an iff, plus `digitsGo_exact`/`mobileFx?_exact_of_digits` (the loop stops when exact) |
+| P1 edge stated only for positive constants; the no-mobile-type case was missing | both | deviation rows rewritten; `2^256 − 1/2` example |
+| `abi.encode(1/3)` truncates silently, unaddressed under Q1 | skeptic | QL2 |
+| Constant comparisons: solc's rejection of mobile pairs without a common type | skeptic | "Not done" note corrected |
+| `CExpr` omissions (bit operators, shifts, literal size) unrecorded | finder | deviation row |
+| `mobileFx?` described as the mobile type of every constant | finder | the bullet names fractional constants only |
+| `ratPow` docstring claimed an unchecked early return | finder | docstring corrected |
+| Untyped `have`s | finder | typed |
