@@ -191,44 +191,92 @@ def Facts.rwWithM {s : Srt} (t : LTm C s) : List (EqF C) → LTm C s
       if t.beqR e.l then h ▸ e.r else Facts.rwWithM t es
     else Facts.rwWithM t es
 
-/-- `t` rewritten by the first fact whose left side it is. The explicit
-list recursor avoids the generated course-of-values recursion in kernel
-certificates; compiled evaluation keeps the original short-circuiting twin. -/
+private noncomputable def Facts.rwBool (t : LTm C (.val .bool)) (es : List (EqF C)) : LTm C (.val .bool) :=
+  (List.rec (motive := fun _ => LTm C (.val .bool) → LTm C (.val .bool)) (fun input => input)
+    (fun e _ rewrite input => match e with
+      | ⟨.bool, l, r⟩ => if input.beqR l then r else rewrite input
+      | ⟨.uint, _, _⟩ => rewrite input
+      | ⟨.int, _, _⟩ => rewrite input
+    ) es) t
+
+private noncomputable def Facts.rwUint (t : LTm C (.val .uint)) (es : List (EqF C)) : LTm C (.val .uint) :=
+  (List.rec (motive := fun _ => LTm C (.val .uint) → LTm C (.val .uint)) (fun input => input)
+    (fun e _ rewrite input => match e with
+      | ⟨.uint, l, r⟩ => if input.beqR l then r else rewrite input
+      | ⟨.bool, _, _⟩ => rewrite input
+      | ⟨.int, _, _⟩ => rewrite input
+    ) es) t
+
+private noncomputable def Facts.rwInt (t : LTm C (.val .int)) (es : List (EqF C)) : LTm C (.val .int) :=
+  (List.rec (motive := fun _ => LTm C (.val .int) → LTm C (.val .int)) (fun input => input)
+    (fun e _ rewrite input => match e with
+      | ⟨.int, l, r⟩ => if input.beqR l then r else rewrite input
+      | ⟨.bool, _, _⟩ => rewrite input
+      | ⟨.uint, _, _⟩ => rewrite input
+    ) es) t
+
+private noncomputable def Facts.rwPrim {p : PrimTy} (t : LTm C (.val p)) (es : List (EqF C)) : LTm C (.val p) :=
+  (PrimTy.casesOn (motive := fun p => LTm C (.val p) → List (EqF C) → LTm C (.val p)) p
+    (fun input es => Facts.rwBool input es)
+    (fun input es => Facts.rwUint input es)
+    (fun input es => Facts.rwInt input es)) t es
+
+private theorem Facts.rwPrim_eq_rwWithM {p : PrimTy} (t : LTm C (.val p)) :
+    (es : List (EqF C)) → Facts.rwPrim t es = Facts.rwWithM t es
+  | [] => by cases p <;> rfl
+  | e :: es => match p, e with
+    | .bool, ⟨.bool, l, r⟩ =>
+      congrArg (fun rest => if t.beqR l then r else rest) (Facts.rwPrim_eq_rwWithM t es)
+    | .uint, ⟨.uint, l, r⟩ =>
+      congrArg (fun rest => if t.beqR l then r else rest) (Facts.rwPrim_eq_rwWithM t es)
+    | .int, ⟨.int, l, r⟩ =>
+      congrArg (fun rest => if t.beqR l then r else rest) (Facts.rwPrim_eq_rwWithM t es)
+    | .bool, ⟨.uint, _, _⟩ | .bool, ⟨.int, _, _⟩ => Facts.rwPrim_eq_rwWithM t es
+    | .uint, ⟨.bool, _, _⟩ | .uint, ⟨.int, _, _⟩ => Facts.rwPrim_eq_rwWithM t es
+    | .int, ⟨.bool, _, _⟩ | .int, ⟨.uint, _, _⟩ => Facts.rwPrim_eq_rwWithM t es
+
+private theorem Facts.rwWithM_nonvalue {s : Srt} (disjoint : ∀ p, s ≠ .val p)
+    (t : LTm C s) : (es : List (EqF C)) → Facts.rwWithM t es = t
+  | [] => rfl
+  | e :: es => (dif_neg (disjoint e.p)).trans (Facts.rwWithM_nonvalue disjoint t es)
+
+/-- The original typed first-match lookup. Finite primitive dispatch avoids
+rechecking outer sort equality and transporting each matching cell's value.
+The compiled implementation remains the original short-circuiting lookup. -/
 @[implemented_by Facts.rwWithM]
 def Facts.rwWith {s : Srt} (t : LTm C s) (es : List (EqF C)) : LTm C s :=
-  (List.rec (motive := fun _ => LTm C s → LTm C s) (fun input => input)
-    (fun e _ rewrite input =>
-      if h : s = .val e.p then
-        if input.beqR e.l then h ▸ e.r else rewrite input
-      else rewrite input) es) t
+  (Srt.casesOn (motive := fun s => LTm C s → LTm C s) s
+    (fun _ input => Facts.rwPrim input es)
+    (fun _ input => input) (fun input => input)
+    (fun _ input => input) (fun _ input => input) (fun _ input => input)
+    (fun input => input) (fun _ input => input) (fun _ input => input)
+    (fun _ _ input => input) (fun input => input)) t
 
 /-- Exact agreement with the original first-match lookup, at every typed sort. -/
 theorem Facts.rwWith_eq_rwWithM {s : Srt} (t : LTm C s) (es : List (EqF C)) :
-    Facts.rwWith t es = Facts.rwWithM t es := by
-  induction es with
-  | nil => rfl
-  | cons e es ih =>
-    change (if h : s = .val e.p then
-        (if t.beqR e.l then h ▸ e.r else Facts.rwWith t es)
-      else Facts.rwWith t es) =
-      (if h : s = .val e.p then
-        (if t.beqR e.l then h ▸ e.r else Facts.rwWithM t es)
-      else Facts.rwWithM t es)
-    split
-    · split
-      · rfl
-      · exact ih
-    · exact ih
+    Facts.rwWith t es = Facts.rwWithM t es :=
+  match s, t with
+  | .val _, t => Facts.rwPrim_eq_rwWithM t es
+  | .path T, t => (Facts.rwWithM_nonvalue (s := .path T) (fun _ h => nomatch h) t es).symm
+  | .st, t => (Facts.rwWithM_nonvalue (s := .st) (fun _ h => nomatch h) t es).symm
+  | .sv T, t => (Facts.rwWithM_nonvalue (s := .sv T) (fun _ h => nomatch h) t es).symm
+  | .ident R, t => (Facts.rwWithM_nonvalue (s := .ident R) (fun _ h => nomatch h) t es).symm
+  | .addr T, t => (Facts.rwWithM_nonvalue (s := .addr T) (fun _ h => nomatch h) t es).symm
+  | .mem, t => (Facts.rwWithM_nonvalue (s := .mem) (fun _ h => nomatch h) t es).symm
+  | .mv T, t => (Facts.rwWithM_nonvalue (s := .mv T) (fun _ h => nomatch h) t es).symm
+  | .sts name, t => (Facts.rwWithM_nonvalue (s := .sts name) (fun _ h => nomatch h) t es).symm
+  | .spath name T, t => (Facts.rwWithM_nonvalue (s := .spath name T) (fun _ h => nomatch h) t es).symm
+  | .kint, t => (Facts.rwWithM_nonvalue (s := .kint) (fun _ h => nomatch h) t es).symm
 
-theorem Facts.rwWith_eval {g : State C []} {ν : AEnv} {s : Srt} (t : LTm C s) :
+private theorem Facts.rwWithM_eval {g : State C []} {ν : AEnv} {s : Srt} (t : LTm C s) :
     (es : List (EqF C)) →
     (∀ e ∈ es, ∃ x, (e.l.eval g ν : Option e.p.Denote) = some x ∧ e.r.eval g ν = some x) →
-    (Facts.rwWith t es).eval g ν = t.eval g ν
+    (Facts.rwWithM t es).eval g ν = t.eval g ν
   | [], _ => rfl
   | e :: es, h => by
     change (if hs : s = .val e.p then
-        (if t.beqR e.l then hs ▸ e.r else Facts.rwWith t es)
-      else Facts.rwWith t es).eval g ν = t.eval g ν
+        (if t.beqR e.l then hs ▸ e.r else Facts.rwWithM t es)
+      else Facts.rwWithM t es).eval g ν = t.eval g ν
     split
     · rename_i hs
       subst hs
@@ -238,8 +286,15 @@ theorem Facts.rwWith_eval {g : State C []} {ν : AEnv} {s : Srt} (t : LTm C s) :
         obtain ⟨x, h1, h2⟩ := h e List.mem_cons_self
         rw [h1]
         exact h2
-      · exact Facts.rwWith_eval t es fun e he => h e (List.mem_cons_of_mem _ he)
-    · exact Facts.rwWith_eval t es fun e he => h e (List.mem_cons_of_mem _ he)
+      · exact Facts.rwWithM_eval t es fun e he => h e (List.mem_cons_of_mem _ he)
+    · exact Facts.rwWithM_eval t es fun e he => h e (List.mem_cons_of_mem _ he)
+
+theorem Facts.rwWith_eval {g : State C []} {ν : AEnv} {s : Srt} (t : LTm C s) :
+    (es : List (EqF C)) →
+    (∀ e ∈ es, ∃ x, (e.l.eval g ν : Option e.p.Denote) = some x ∧ e.r.eval g ν = some x) →
+    (Facts.rwWith t es).eval g ν = t.eval g ν := fun es h =>
+  (congrArg (fun u => u.eval g ν) (Facts.rwWith_eq_rwWithM t es)).trans
+    (Facts.rwWithM_eval t es h)
 
 private theorem Facts.rwWith_nonvalue {s : Srt} (disjoint : ∀ p, s ≠ .val p)
     (t : LTm C s) (es : List (EqF C)) : Facts.rwWith t es = t := by
@@ -253,31 +308,14 @@ private theorem Facts.rwWith_nonvalue {s : Srt} (disjoint : ∀ p, s ≠ .val p)
     rw [dif_neg (disjoint e.p)]
     exact ih
 
-/-- `t` rewritten by the facts. Equality facts have value sort, so other
-sorts keep their input without scanning a list whose entries cannot match. -/
+/-- `t` rewritten by the facts. The lookup itself handles the sort, so this
+wrapper adds no second dependent dispatch. -/
 def Facts.rw (F : Facts C) {s : Srt} (t : LTm C s) : LTm C s :=
-  (Srt.casesOn (motive := fun s => LTm C s → LTm C s) s
-    (fun _ input => Facts.rwWith input F.eqs)
-    (fun _ input => input) (fun input => input)
-    (fun _ input => input) (fun _ input => input) (fun _ input => input)
-    (fun input => input) (fun _ input => input) (fun _ input => input)
-    (fun _ _ input => input) (fun input => input)) t
+  Facts.rwWith t F.eqs
 
-/-- The fast path preserves the complete original typed lookup. -/
+/-- The wrapper preserves the complete original typed lookup. -/
 theorem Facts.rw_eq_rwWith (F : Facts C) {s : Srt} (t : LTm C s) :
-    F.rw t = Facts.rwWith t F.eqs := by
-  cases s with
-  | val p => rfl
-  | path T => exact (Facts.rwWith_nonvalue (s := .path T) (fun _ h => nomatch h) t F.eqs).symm
-  | st => exact (Facts.rwWith_nonvalue (s := .st) (fun _ h => nomatch h) t F.eqs).symm
-  | sv T => exact (Facts.rwWith_nonvalue (s := .sv T) (fun _ h => nomatch h) t F.eqs).symm
-  | ident R => exact (Facts.rwWith_nonvalue (s := .ident R) (fun _ h => nomatch h) t F.eqs).symm
-  | addr T => exact (Facts.rwWith_nonvalue (s := .addr T) (fun _ h => nomatch h) t F.eqs).symm
-  | mem => exact (Facts.rwWith_nonvalue (s := .mem) (fun _ h => nomatch h) t F.eqs).symm
-  | mv T => exact (Facts.rwWith_nonvalue (s := .mv T) (fun _ h => nomatch h) t F.eqs).symm
-  | sts name => exact (Facts.rwWith_nonvalue (s := .sts name) (fun _ h => nomatch h) t F.eqs).symm
-  | spath name T => exact (Facts.rwWith_nonvalue (s := .spath name T) (fun _ h => nomatch h) t F.eqs).symm
-  | kint => exact (Facts.rwWith_nonvalue (s := .kint) (fun _ h => nomatch h) t F.eqs).symm
+    F.rw t = Facts.rwWith t F.eqs := by rfl
 
 theorem Facts.rw_eval {g : State C []} {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {s : Srt}
     (t : LTm C s) : (F.rw t).eval g ν = t.eval g ν :=

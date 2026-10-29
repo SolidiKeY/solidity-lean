@@ -86,4 +86,25 @@ theorem wrapperPath (C : Contract) :
       throw (IO.userError "native wrapper nonvalue lookup changed")
   IO.println "six native wrapper controls passed; kernel wrapper controls checked separately"
 
+private def vp (C : Contract) (p : PrimTy) (k : Nat) : LTm C (.val p) := .var k
+private def ep (C : Contract) (p : PrimTy) (a b : Nat) : EqF C := ⟨p, vp C p a, vp C p b⟩
+
+/-- Every same/different primitive-sort head, with the first matching cell
+winning. This checks the new kernel dispatch, not just its compiled twin. -/
+theorem primitiveSortMatrix (C : Contract) (p q : PrimTy) :
+    Facts.rwWith (vp C p 0) [ep C q 0 2, ep C p 0 1] =
+      (if p == q then vp C p 2 else vp C p 1) := by
+  cases p <;> cases q <;> rfl
+
+#print axioms primitiveSortMatrix
+
+#eval do
+  let C : Contract := { vars := [] }
+  for p in [PrimTy.bool, .uint, .int] do
+    for q in [PrimTy.bool, .uint, .int] do
+      let expected := if p == q then vp C p 2 else vp C p 1
+      unless (Facts.rwWith (vp C p 0) [ep C q 0 2, ep C p 0 1]).beqR expected do
+        throw (IO.userError "native primitive-sort first-match matrix changed")
+  IO.println "nine native primitive-sort matrix controls passed; kernel matrix checked separately"
+
 end Solidity.Tests.FactsLookupSharing

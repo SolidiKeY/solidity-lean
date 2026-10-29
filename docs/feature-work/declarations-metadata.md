@@ -2404,3 +2404,37 @@ fallback controls, twelve lookup/wrapper kernel and native cases, both receiver
 pipelines, and unchanged SourceAdmissionImport. Universal rwWith, rw, nf and
 elimF agreement/soundness axiom audits use only propext, Classical.choice and
 Quot.sound. Full-suite/API/core/upstream/static final gates remain pending.
+
+
+#### Finite primitive lookup continuation (2026-10-29)
+
+The original aggregate passes in 293.905 seconds standalone and 294.862 seconds
+inside the complete affected suite: all 62 tests pass in 653.703 seconds. The
+unchanged API suite passes 22/22 in 338.387 seconds, retaining 21 authoritative
+reports and 43 complete rows. The fresh 42-certificate and control bundle passes
+in 68.307 seconds with standard axioms only, including staged corruption,
+original-budget fallback, lookup and receiver/admission controls. The linked
+performance report records exact commands, resource results and current hashes.
+
+The kernel lookup now selects the primitive type once and scans intrinsically
+typed Bool, Uint or Int cells. It preserves first-match lookup on the original
+input, including mixed primitive types and nonvalue identity. A universal proof
+agrees with the unchanged compiled lookup; all soundness premises remain. The
+wrapper delegates directly, avoiding a duplicate dependent sort dispatch. Nine
+primitive combinations have both kernel and native controls. Independent finder
+and skeptic reviews matched all sixteen aggregate observations except timing,
+all 3880 sealed inputs and 257 imported artifacts, with no integrity finding.
+The aggregate margin remains limited; no budget or observation changed.
+
+Whole-core validation is still pending. Original-policy rebuilds stopped once
+at the 1800-second bound on Hashing, once on conservative OS headroom during
+OpenLoops, and then at 1800 seconds on the general Decision example. These are
+blocked evidence, not passes or OOM claims. Hashing subsequently passes in
+130.550 seconds and OpenLoops in 523.370 seconds at unchanged settings. A
+fresh artifact seal preceded advisory release of this checkout's clean
+generated regular-file cache; bytes, limits and configuration were unchanged.
+The initial stale pre-build seal refusal is separately preserved. No baseline
+documentation findings or component passes substitute for the whole gate.
+The rejected named-value candidate is archived: it misclassified the existing
+clean-tail sharing branch, and production Testing was restored. Feature statuses
+and reference/function-return and broader-dispatch refusals remain unchanged.
