@@ -2,7 +2,7 @@
 """Roadmap G00 reconciliation of the feature manifest and upstream ledger.
 
 Reads docs/solidity-features.json and docs/solidity-upstream-inventory.json
-(never writes them) and prints the G00 ledger as Markdown: every manifest row
+(never writes them; `--write` rewrites only this document's generated block) and prints the G00 ledger as Markdown: every manifest row
 and every upstream symbol classified as in-profile, upstream-rejected or
 unresolved, the feature combinations, and the owning roadmap groups.
 
@@ -22,14 +22,17 @@ Standard library only.
 import argparse
 import collections
 import json
+import re
 import sys
 from pathlib import Path
 
 # Evidence tiers for each `scope: exclude` row. "B" = named as deliberately
 # out of scope in docs/semantic-gaps.md at the root commit c3a3eef, before
-# the agent-authored PR #5 (419f8a4) created the manifest; "B-" = only covered
-# by a generic clause there; "C" = first appears in 419f8a4. None is an
-# attributable user approval, so every row stays unresolved.
+# PR #5 (419f8a4) created the manifest; "B-" = only covered
+# by a generic clause there; "C" = first appears in 419f8a4. Tier "A" would be
+# an explicit user-decision marker (the repository's convention is
+# "**User decision (date)**", docs/kernel-port.md); no exclusion has one, so
+# every row stays unresolved.
 EXCLUSION_EVIDENCE = {
     "inlineAssembly": ("B", "inline assembly other than a canonical whole-byte-buffer rethrow"),
     "gasleft": ("B", "`gasleft()`"),
@@ -51,7 +54,7 @@ EXCLUSION_EVIDENCE = {
     "blockNumber": ("B", "`block.number`"),
     "txOrigin": ("B", "`tx.origin`"),
     "blockBasefee": ("B", "`block.basefee`"),
-    "blockCoinbase": ("B-", "\"block and transaction fields other than those the model reads … ( … )\""),
+    "blockCoinbase": ("B-", "generic block-field clause"),
     "blockDifficulty": ("B-", "generic block-field clause"),
     "blockPrevrandao": ("B-", "generic block-field clause"),
     "blockGaslimit": ("B-", "generic block-field clause"),
@@ -83,9 +86,9 @@ CATEGORY_OWNERS = {
 
 OWNER_OVERRIDES = {
     # lexical
-    "pragmaVersion": ("S00", "G08 G12", "G15", "G54"),
-    "pragmaAbicoder": ("S00 S04.02", "G08 G12", "G21", "G40 G41"),
-    "pragmaOther": ("S00", "G08 G12", "G15", "G54"),
+    "pragmaVersion": ("S00", "G08 G11", "—", "—"),
+    "pragmaAbicoder": ("S00 S04.02", "G08 G11", "G21", "G40 G41"),
+    "pragmaOther": ("S00", "G08 G11", "—", "—"),
     "comments": ("S00", "G08", "—", "—"),
     "identifiers": ("S00 S01", "G08 G12", "G16 G17", "G26"),
     "stringLiterals": ("S00 S02", "G08", "G18.03", "G33"),
@@ -245,8 +248,8 @@ OWNER_OVERRIDES = {
     "revertPayloads": ("S04.02", "G13", "G21", "G38 G41"),
     "rollback": ("S03.04 S04.03", "G13", "G21 G22", "G38 G39 G47"),
     "termination": ("S03.04", "G13", "G19", "G36.03 G37.02 G49.03"),
-    "typeValidation": ("S01", "G13", "G15", "G48"),
-    "featureDetection": ("S05", "G15", "G15", "G48"),
+    "typeValidation": ("S01", "G13", "—", "—"),
+    "featureDetection": ("S05", "G15", "—", "—"),
     "nonpayableEntry": ("S04.04", "G13", "G22.05", "G40 G43"),
     "abiEntryValidation": ("S04.02", "G13", "G21", "G40"),
     "constructorLifetime": ("S04.04", "G14", "G22.03", "G44 G50.01"),
@@ -259,7 +262,26 @@ OWNER_OVERRIDES = {
 # profile for precise rejection"; G15: exact profile classification).
 REJECTION_OWNERS = {
     "exclude": "S00 G15 (precise refusal; observation side: G01/G06)",
-    "upstream": "S00 G08 G11 G15 (precise rejection as invalid/removed)",
+    "upstream": "S00 G08 G11 G15 (match the pinned compiler's acceptance boundary)",
+}
+
+# G00 supplement (the ledger file is not edited): the symbols the canonical
+# rethrow `assembly { revert(add(d, 32), mload(d)) }` needs. The ledger maps
+# them to `inlineAssembly` only, which would leave this in-profile row's
+# syntax unowned.
+RETHROW_SYMBOLS = {
+    "parserRules": ["yulBlock", "yulStatement", "yulExpression", "yulFunctionCall", "yulPath", "yulLiteral"],
+    "lexerRules": ["Assembly", "AssemblyLBrace", "YulEVMBuiltin", "YulIdentifier", "YulDecimalNumber",
+                   "YulLParen", "YulRParen", "YulComma", "YulRBrace", "YulWS"],
+    "yulBuiltins": ["revert", "add", "mload"],
+    "compilerTokens": ["Assembly"],
+}
+
+# Upstream-incomplete rather than invalid: the obligation is solc's exact
+# acceptance boundary, not blanket rejection (Q6 in the document).
+UPSTREAM_NOTES = {
+    "fixedPoint": "upstream-incomplete: pinned solc accepts some uses (`type T is fixed;`, "
+                  "`syntaxTests/userDefinedValueType/all_value_types.sol`); match its exact boundary (Q6)",
 }
 
 GROUPS = ({f"S0{i}" for i in range(6)} | {f"G{i:02d}" for i in range(56)})
@@ -273,14 +295,19 @@ COMBINATIONS = [
     ("byte-oriented `fallback(bytes calldata) returns (bytes memory)`", ["fallbackFunction"], ["rawCalldata", "rawReturndata"], "G15 G20 G40"),
     ("`emit E(args)` under a log-observing property", ["emitStatement", "eventDeclarations"], ["eventLog"], "G15 G23 G31"),
     ("`assembly { revert(add(d,32), mload(d)) }` vs any other assembly", ["canonicalRethrow"], ["inlineAssembly"], "G15 G21 G38"),
-    ("`(bool ok,) = a.call{value:v}(\"\")` vs `a.call(data)`", ["emptyDataValueCall", "valueOption"], ["lowLevelCall", "rawReturndata"], "G15 G22 G43"),
+    ("`(bool ok,) = a.call{value:v}(\"\")` vs `a.call(data)`", ["emptyDataValueCall", "callOptions", "valueOption"], ["lowLevelCall", "rawReturndata"], "G15 G22 G43"),
     ("literal `layout at` base vs physical layout", ["logicalStorageBase"], ["storageLayout"], "G09 G15 G27.05"),
     ("`T transient x` vs physical transient slots", ["transientState"], ["transientLayout"], "G15 G23 G39"),
     ("loops/recursion vs gas/stack exhaustion", ["termination", "recursiveCalls"], ["machineResources"], "G01 G36.03 G37.02 G49.03"),
-    ("`send`/`transfer` vs exact stipend", ["sendTransfer"], ["gasOption", "machineResources"], "G22 G43"),
+    ("`send`/`transfer` vs exact stipend", ["sendTransfer"], ["gasOption", "machineResources"], "G15 G22 G43"),
     ("`type(C).creationCode`/`runtimeCode` vs `address.code`", ["creationCode", "runtimeCode"], ["addressCode", "addressCodehash"], "G15 G44.02"),
-    ("`block.timestamp` vs other `block.*`/`tx.*` members", ["blockTimestamp", "msgSender", "msgValue"],
-     ["blockNumber", "txOrigin", "txGasprice", "blockCoinbase", "blockChainid"], "G15 G23"),
+    ("`block.timestamp` vs other `block.*`/`tx.*` members and hashes", ["blockTimestamp"],
+     ["blockCoinbase", "blockDifficulty", "blockPrevrandao", "blockNumber", "blockGaslimit", "blockChainid",
+      "blockBasefee", "blockBlobbasefee", "blockSlotnum", "txOrigin", "txGasprice", "blockhashBuiltin",
+      "blobhashBuiltin"], "G15 G23"),
+    ("`msg.sender`/`msg.value` vs `msg.data`/`msg.sig`", ["msgSender", "msgValue"], ["rawCalldata"], "G15 G23"),
+    ("`msg.data[4:]` (slice of raw calldata)", ["rangeAccess", "calldataLocation"], ["rawCalldata"], "G15 G21"),
+    ("`catch (bytes memory d)` vs raw low-level return bytes", ["catchClauses", "revertPayloads"], ["rawReturndata"], "G15 G21 G38"),
     ("`view` external call vs low-level `staticcall`", ["staticCallRestriction", "externalTypedCalls"], ["lowLevelStaticcall"], "G15 G42"),
     ("linked library call vs `delegatecall`", ["externalLibraryCalls"], ["delegatecall"], "G15 G42.04"),
 ]
@@ -294,7 +321,15 @@ END = "<!-- END generated by scripts/roadmap-g00-scope.py -->"
 def load(root):
     features = json.loads((root / "docs/solidity-features.json").read_text())
     ledger = json.loads((root / "docs/solidity-upstream-inventory.json").read_text())
-    return features, ledger
+    plan = (root / "docs/coverage-plan.md").read_text()
+    children = set(re.findall(r"^\| ([SG]\d\d\.\d\d) —", plan, re.M))
+    return features, ledger, children
+
+
+def targets_of(kind, name, targets):
+    if name in RETHROW_SYMBOLS.get(kind, ()) and "canonicalRethrow" not in targets:
+        return list(targets) + ["canonicalRethrow"]
+    return targets
 
 
 def g00_status(scope):
@@ -306,8 +341,12 @@ def owners(feature):
     return OWNER_OVERRIDES.get(feature["id"], CATEGORY_OWNERS.get(feature["category"]))
 
 
-def check(features, ledger):
+def check(features, ledger, children):
     errors = []
+    for kind, names in RETHROW_SYMBOLS.items():
+        for name in names:
+            if name not in ledger["symbols"].get(kind, {}):
+                errors.append(f"rethrow supplement: unknown symbol {kind}.{name}")
     ids = {f["id"] for f in features["features"]}
     for key in list(OWNER_OVERRIDES) + list(EXCLUSION_EVIDENCE):
         if key not in ids:
@@ -329,11 +368,13 @@ def check(features, ledger):
     for _, _, _, own in COMBINATIONS:
         groups_used.update(own.split())
     for g in groups_used:
-        if g.split(".")[0] not in GROUPS:
-            errors.append(f"unknown group {g}")
+        if g.split(".")[0] not in GROUPS or ("." in g and g not in children):
+            errors.append(f"unknown group or work package {g}")
     for f in features["features"]:
-        if f["scope"] in ("model", "abstract") and owners(f) is None:
-            errors.append(f"no owner for in-profile {f['id']}")
+        if f["scope"] in ("model", "abstract"):
+            o = owners(f)
+            if o is None or len(o) != 4 or not all(o) or o[0] == "—" or o[1] == "—":
+                errors.append(f"no source/syntax owner for in-profile {f['id']}")
         if f["scope"] == "exclude" and f["id"] not in EXCLUSION_EVIDENCE:
             errors.append(f"no evidence entry for excluded {f['id']}")
     symbol_ids = {x for kind in ledger["symbols"].values() for xs in kind.values() for x in xs}
@@ -348,7 +389,7 @@ def symbol_status(targets, scope):
         return kinds.pop()
     if "in-profile" in kinds:
         return "combination-unresolved" if "unresolved" in kinds else "combination-upstream"
-    return "unresolved" if "unresolved" in kinds else "upstream-rejected"
+    return "nonprofile-mixed"
 
 
 def report(features, ledger):
@@ -376,7 +417,7 @@ def report(features, ledger):
     per_kind = collections.defaultdict(lambda: collections.defaultdict(list))
     for kind, table in ledger["symbols"].items():
         for name, targets in table.items():
-            st = symbol_status(targets, scope)
+            st = symbol_status(targets_of(kind, name, targets), scope)
             sym[st] += 1
             per_kind[kind][st].append(name)
     emit("| upstream symbols | count |")
@@ -404,6 +445,8 @@ def report(features, ledger):
         elif st == "unresolved":
             tier, text = EXCLUSION_EVIDENCE[f["id"]]
             emit(f"| `{f['id']}` | {f['category']} | {f['scope']} | {st} | {tier}: {text} | {REJECTION_OWNERS['exclude']} | | | |")
+        elif f["id"] in UPSTREAM_NOTES:
+            emit(f"| `{f['id']}` | {f['category']} | {f['scope']} | {st} | {UPSTREAM_NOTES[f['id']]} | {REJECTION_OWNERS['upstream']} | | | |")
         else:
             emit(f"| `{f['id']}` | {f['category']} | {f['scope']} | {st} | upstream pin | {REJECTION_OWNERS['upstream']} | | | |")
     emit("")
@@ -411,7 +454,8 @@ def report(features, ledger):
     emit("")
     for kind in ledger["symbols"]:
         parts = []
-        for st in ("in-profile", "combination-unresolved", "combination-upstream", "unresolved", "upstream-rejected"):
+        for st in ("in-profile", "combination-unresolved", "combination-upstream", "unresolved",
+                   "nonprofile-mixed", "upstream-rejected"):
             names = per_kind[kind].get(st)
             if names:
                 parts.append(f"{st} ({len(names)}): " + ", ".join(f"`{n}`" for n in sorted(names)))
@@ -423,10 +467,12 @@ def report(features, ledger):
     emit("|---|---|---|---|")
     for kind, table in ledger["symbols"].items():
         for name, targets in sorted(table.items()):
+            targets = targets_of(kind, name, targets)
             if symbol_status(targets, scope).startswith("combination"):
                 ins = [t for t in targets if g00_status(scope[t]) == "in-profile"]
                 oth = [t for t in targets if g00_status(scope[t]) != "in-profile"]
-                emit(f"| {kind} | `{name}` | {', '.join(ins)} | {', '.join(oth)} |")
+                mark = " (G00 supplement)" if name in RETHROW_SYMBOLS.get(kind, ()) else ""
+                emit(f"| {kind} | `{name}`{mark} | {', '.join(ins)} | {', '.join(oth)} |")
     emit("")
     emit("### Named feature combinations")
     emit("")
@@ -443,8 +489,8 @@ def main():
     ap.add_argument("--write", action="store_true")
     ap.add_argument("--root", default=str(Path(__file__).resolve().parent.parent))
     args = ap.parse_args()
-    features, ledger = load(Path(args.root))
-    errors = check(features, ledger)
+    features, ledger, children = load(Path(args.root))
+    errors = check(features, ledger, children)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
