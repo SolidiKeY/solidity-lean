@@ -170,9 +170,9 @@ def Refines {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop)
   (∀ rt, AT rt → ∃ rs, AS rs ∧ (t rt).Le (s rs))
 
 /-- The source collided before `b`'s observations end: the source prefix at
-`rs` violates the premise (a collision, an overlap, or more than `hashBound`
-distinct preimages), and its events lead `b`'s.  Any source prefix counts,
-resource failures included. -/
+`rs` violates the premise (a collision or an overlap), and its events lead
+`b`'s.  Any source prefix counts, resource failures and long runs
+included. -/
 def Collided {E O RS : Type} (G : RS → Prop) (s : Prefixes RS E O) (rs : RS)
     (b : Prefix E O) : Prop :=
   ¬ G rs ∧ (s rs).events <+: b.events
@@ -534,23 +534,25 @@ fails on every hashing run (`rootSlots ≥ 2^256`) or vanishes
 def Fixed.Sane (F : Fixed) : Prop :=
   1 ≤ F.regionLen ∧ F.regionLen ≤ 2 ^ 128 ∧ F.rootSlots ≤ 2 ^ 128
 
-/-- **The hash premise over a list of preimages** (G01 Q3 and the second
-round): the hash does not collide on them, and the regions of `regionLen`
-slots their hashes start overlap neither each other nor a root slot
-(`Solidity.Hash.RegionsDisjoint` modulo `2^256`). -/
-def HashPremise (F : Fixed) (xs : List Bytes) : Prop :=
+/-- **The hash premise over a run's preimages** (G01 Q3 and the second
+round): the hash does not collide on the preimages `xs`, and the regions of
+`regionLen` slots that the hashes of its slot preimages `ys` start overlap
+neither each other nor a root slot (`Solidity.Hash.RegionsDisjoint` modulo
+`2^256`).  Code hashes are not slot preimages: the compiler chooses those
+bytes and could grind them against the regions. -/
+def HashPremise (F : Fixed) (xs ys : List Bytes) : Prop :=
   Solidity.Hash.CollisionFree F.hash xs ∧
     Solidity.Hash.RegionsDisjoint (2 ^ 256) F.regionLen (fun b => (F.hash b).val)
-      (List.range F.rootSlots) xs
+      (List.range F.rootSlots) ys
 
 /-- A run that hashes nothing meets the premise. -/
-theorem HashPremise.nil (F : Fixed) : HashPremise F [] :=
+theorem HashPremise.nil (F : Fixed) : HashPremise F [] [] :=
   ⟨Solidity.Hash.CollisionFree.nil, Solidity.Hash.RegionsDisjoint.nil⟩
 
 /-- Fewer preimages keep the premise. -/
-theorem HashPremise.of_prefix {F : Fixed} {xs ys : List Bytes} (h : xs <+: ys)
-    (hy : HashPremise F ys) : HashPremise F xs :=
-  ⟨hy.1.of_prefix h, hy.2.of_prefix h⟩
+theorem HashPremise.of_prefix {F : Fixed} {xs xs' ys ys' : List Bytes} (h : xs <+: xs')
+    (h' : ys <+: ys') (hy : HashPremise F xs' ys') : HashPremise F xs ys :=
+  ⟨hy.1.of_prefix h, hy.2.of_prefix h'⟩
 
 /-- Every action's value is affordable: no transaction runs whose value
 exceeds its sender's ledger balance (such a request is invalid and
@@ -753,12 +755,15 @@ structure SourceSpec where
   writes, `delete`, `push`, `pop`). -/
   hashed : lang.Prog → lang.Env → lang.Res → List Bytes
   hashed_consistent : ∀ p e r r', lang.resLE.le r r' → hashed p e r <+: hashed p e r'
-  /-- Adequacy speaks of the runs without resource failures; the premise is
-  that they hash fewer than `hashBound` distinct preimages, meeting the hash
-  premise. -/
-  forward_iff : ∀ p e r, lang.Forward p e r ↔ NoFail (failures r)
-  guard_iff : ∀ p e r, lang.Guard p e r ↔
-    distinctCount (hashed p e r) < hashBound ∧ HashPremise fixed (hashed p e r)
+  /-- The slot preimages among them (the layout's), on which the region
+  premise reads. -/
+  slotHashed : lang.Prog → lang.Env → lang.Res → List Bytes
+  slotHashed_sub : ∀ p e r b, b ∈ slotHashed p e r → b ∈ hashed p e r
+  /-- Adequacy speaks of the runs without resource failures hashing fewer
+  than `hashBound` distinct preimages; the premise is the hash premise. -/
+  forward_iff : ∀ p e r, lang.Forward p e r ↔
+    NoFail (failures r) ∧ distinctCount (hashed p e r) < hashBound
+  guard_iff : ∀ p e r, lang.Guard p e r ↔ HashPremise fixed (hashed p e r) (slotHashed p e r)
 
 /-- The source is idealized: every bound is admissible (unbounded fuel and
 recursion, every failure point), so its prefixes are all of its behaviour
@@ -847,8 +852,8 @@ structure CheckedFrontend (S : SourceSpec) where
 `ofWorld` runs the sessions from a world; `worlds` lists the worlds a prefix
 reaches at its transaction boundaries.  Like the source, it reads the
 session environment exactly, and its `Forward` and `Guard` are pinned: runs
-without resource failure, and fewer than `hashBound` distinct preimages
-meeting the hash premise, where the preimages of a run resumed from a
+without resource failure hashing fewer than `hashBound` distinct preimages,
+and the hash premise on them, where the preimages of a run resumed from a
 world include the keys the world stores. -/
 structure IntrinsicSpec where
   World : Type
@@ -863,9 +868,9 @@ structure IntrinsicSpec where
   allowed_iff : ∀ e, lang.Allowed e ↔ (session e).Allowed
   NoFail : lang.Res → Prop
   hashed : lang.Prog → lang.Env → lang.Res → List Bytes
-  forward_iff : ∀ p e r, lang.Forward p e r ↔ NoFail r
-  guard_iff : ∀ p e r, lang.Guard p e r ↔
-    distinctCount (hashed p e r) < hashBound ∧ HashPremise fixed (hashed p e r)
+  slotHashed : lang.Prog → lang.Env → lang.Res → List Bytes
+  forward_iff : ∀ p e r, lang.Forward p e r ↔ NoFail r ∧ distinctCount (hashed p e r) < hashBound
+  guard_iff : ∀ p e r, lang.Guard p e r ↔ HashPremise fixed (hashed p e r) (slotHashed p e r)
 
 /-- **Contract 2, lowering.**  Total on admitted source (the proofs are
 arguments: no `Option`), for every artifact table, and the source meaning

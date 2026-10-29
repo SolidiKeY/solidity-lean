@@ -58,7 +58,7 @@ implements it.
 
 | Decision | Implemented by |
 |---|---|
-| G01 Q3 / G04 Q1: a per-run hash premise, never global injectivity; G06 F7: over the preimages the source determines | `SourceSpec.hashed` (the preimages a source prefix determines: `keccak256` arguments and slot preimages under the pinned layout), `SourceSpec.guard_iff`; `HashPremise F xs` = `Solidity.Hash.CollisionFree` ∧ `Solidity.Hash.RegionsDisjoint`; `RefinesUnder`, refinement under a premise on the **source** bound, in `PublicCorrectness.refines`, `Cert` and `SpecTransfer`; `PublicCorrectness.hashes_source` (the bytes hash only source-determined preimages). `CollisionFree` is an alias of `Solidity.Hash.CollisionFree`; `CollisionFree.singleton` shows the premise never asks for injectivity. |
+| G01 Q3 / G04 Q1: a per-run hash premise, never global injectivity; G06 F7: over the preimages the source determines | `SourceSpec.hashed` (the preimages a source prefix determines: `keccak256` arguments and slot preimages under the pinned layout), `SourceSpec.guard_iff`; `HashPremise F xs ys` = `Solidity.Hash.CollisionFree` on all preimages ∧ `Solidity.Hash.RegionsDisjoint` on the slot preimages (`SourceSpec.slotHashed`); `RefinesUnder`, refinement under a premise on the **source** bound, in `PublicCorrectness.refines`, `Cert` and `SpecTransfer`; `PublicCorrectness.hashes_source` (the bytes hash only source-determined preimages). `CollisionFree` is an alias of `Solidity.Hash.CollisionFree`; `CollisionFree.singleton` shows the premise never asks for injectivity. |
 | Second round: hashed regions of length at most L overlap neither each other nor a root | `Fixed.regionLen` (L), `Fixed.rootSlots`, `Fixed.Sane` (1 ≤ L ≤ 2^128, at most 2^128 roots; in both `Approved` predicates and `Fixed.Keccak`), `HashPremise`, `HashPremise.nil`, `HashPremise.of_prefix`. |
 | The hash is a fixed parameter instantiated by Keccak, not an environment input; G06 F5 | `Fixed.evm : Evm.Fixed` (G06's hash, precompiles and precompile gas), `Fixed.hash`, shared by `SourceSpec.fixed` and `EvmSpec.fixed` (`PublicCorrectness.fixed`); `Fixed.Keccak` instantiates it with G06's `Evm.keccakWord`. |
 | G01 Q6: export `decode : EvmWorld → Option IntrinsicWorld` | `StateExport` (`lowering`, `decode`, given the run's preimages, `envAbs`); `EvmSpec.World`, `worlds`, `balances`, `resume`; `IntrinsicSpec.worlds`; the fields `decode_reach` and `decode_commutes` of `PublicCorrectness`. |
@@ -237,11 +237,16 @@ order (`hashed_consistent`). It is the source language's `Guard`
 (`SourceSpec.guard_iff`):
 
 ```lean
-def HashPremise (F : Fixed) (xs : List Bytes) : Prop :=
+def HashPremise (F : Fixed) (xs ys : List Bytes) : Prop :=
   Solidity.Hash.CollisionFree F.hash xs ∧
     Solidity.Hash.RegionsDisjoint (2 ^ 256) F.regionLen (fun b => (F.hash b).val)
-      (List.range F.rootSlots) xs
+      (List.range F.rootSlots) ys
 ```
+
+applied to `SourceSpec.hashed` (`xs`) and its slot preimages
+`SourceSpec.slotHashed` (`ys`, `slotHashed_sub`). The region conjunct reads
+only slot preimages: code and initcode hashes are of bytes the compiler
+chooses, which it could grind against the regions.
 
 The first conjunct is G01 Q3: the preimages do not collide. The second is
 the second-round extension: the regions of `regionLen` slots their hashes
@@ -265,18 +270,22 @@ layout's slot preimages (G27, "solc's slot behaviour" of G04 Q2).
 
 Two parameters bound the premise:
 
-- **`hashBound = 2^128`.** The premise includes that the source prefix
-  hashes fewer than `2^128` distinct preimages (`SourceSpec.guard_iff`, with
-  `distinctCount`, the length of `Solidity.Hash.dedup` computed without
-  choice); below that no collision and no overlap is forced by counting.
-  Adequacy (`Forward`, just "no resource failure", `SourceSpec.forward_iff`)
-  is claimed only under the premise, so a source prefix that hashes `2^128`
-  or more preimages (an environment sending that many requests to a
-  contract reading a mapping) is outside it; the bound is
-  compiler-independent. Soundness covers such prefixes up to the point
-  where the bound is crossed, which counts as a violation of the premise
-  (`Collided`).
-- **`Fixed.Sane`**: `1 ≤ regionLen ≤ 2^128` and `rootSlots ≤ 2^128`. Without
+- **`hashBound = 2^128`.** Adequacy speaks only of source prefixes without
+  resource failures hashing fewer than `2^128` distinct preimages
+  (`SourceSpec.forward_iff`, with `distinctCount`, the length of
+  `Solidity.Hash.dedup` computed without choice); below that no collision
+  and no overlap is forced by counting. One request suffices to cross it
+  (`f(2^130)` writing `m[i]` in a loop); such a prefix is outside adequacy,
+  and the bound is compiler-independent. The bound is **not** part of the
+  premise: soundness (`back`) keeps holding for long runs, and its escape
+  `Collided` opens only on an actual violation of `HashPremise` (a
+  collision or an overlap, which past `2^256` preimages counting does
+  force), never on the count alone. Putting the count in the premise would
+  let one long request free every later transaction.
+- **`Fixed.Sane`**: `1 ≤ regionLen ≤ 2^128` and `rootSlots ≤ 2^128`, a
+  sanity bound only: the final statement uses the concrete `S.fixed` of
+  the S05-validated source, whose `regionLen` is the profile's largest
+  region (about `2^66` slots) and `rootSlots` its static layout. Without
   it `rootSlots ≥ 2^256` would fail the premise on every hashing run and
   `regionLen = 0` would drop the region premise. Both `Approved` predicates
   and `Fixed.Keccak` require it. The caps leave room for in-profile storage
@@ -319,9 +328,9 @@ target; at the EVM, only ever a target, both are trivial
    quantified, so no choice of the prover can make the premise fail.
 2. **Backward.** Every admissible target prefix is below an admissible
    source prefix, or the source **collided first** (`Collided`): an
-   admissible source prefix, with or without resource failures, that
-   violates `G` (a collision, an overlap, or `hashBound` distinct preimages
-   reached) and whose events lead the target's. The violation must happen
+   admissible source prefix, with or without resource failures and of any
+   length, that violates `G` (a collision or an overlap) and whose events
+   lead the target's. The violation must happen
    within the shared observations. A source prefix with a failure counts:
    a real collision after an out-of-gas transaction (tx1 out of gas, tx2
    writes `m[k1]`, tx3 reads a colliding `m[k2]`) must offer the escape,
@@ -1077,6 +1086,8 @@ Every field of the contracts has an owner.
 | Committed-history strategies; EIP-684/7610 and EIP-3607 | Narrow `Strategy` or show `Evm.Certificate.forth` realizes it on committed history; settle the two EIPs as idealizations | G06 |
 | `Fixed.evm` against G06 | `HashPremise` agrees with `Evm.Fixed.NoCollision`/`NoOverlap`; `Fixed.hash` with `Evm.Fixed.keccak` (definitional) | G06, G46 |
 | `Lang.resLE`, `Failures` (meaning) | Bounds ordered by horizon only; a failure choice only turns a frame into `revert []` (or drops a request) at some point after its last event, the run agreeing with a no-failure choice before | S03.04, S05 |
+| `hashed` granularity | For every source bound there is one with the same events whose `hashed` includes every hash the run makes before its next event (so an event-granular failure choice cannot hide the hashes of a failing frame from `hashes_source`) | S03.04, S05 |
+| `SourceSpec.slotHashed` | The layout's slot preimages among `hashed` | S04, G27 |
 | `SourceSpec.hashed` | Every hash the source evaluates (`keccak256`, run-time selectors, indexed dynamic event arguments) and the layout's slot preimages of every storage object it touches; the compiled bytes hash only those (`hashes_source`) | S04, G27 |
 | `SessionEnv.hasCode`, `EvmSpec.balances`, `EvmSpec.created` | The EVM's code existence, world balances and `CREATE` bytes, read off the pinned EVM | G06, G47 |
 | Canonical `IntrinsicSpec.World`; concrete `I` in the final statement | Decoded worlds compared by equality; the typed intrinsic layer named for `I` | G22, G24, G49.03 |
@@ -1179,6 +1190,27 @@ theorem is restated against them.
 
 ## Review
 
+### Fifth round: third integration hold
+
+Master `040e59d` merged. Fixed:
+
+1. *Confirmed, blocking: the count in the premise opened the escape on one
+   request.* `f(2^130)` makes the idealized source hash `2^128` distinct
+   preimages within one transaction, so `¬Guard` held right after its
+   events and `Collided` freed it and every later transaction (and
+   `NoCollisionUpTo`, `Matched`). The bound is back in `Forward`
+   (`forward_iff`: no failure and fewer than `hashBound` distinct
+   preimages), `Guard` is `HashPremise` only (`guard_iff`), for both
+   `SourceSpec` and `IntrinsicSpec`; `Collided` still ignores `Forward`, so
+   the fourth round's fix stays.
+2. *The region conjunct read compiler-chosen code hashes.* `HashPremise`
+   takes the slot preimages separately (`SourceSpec.slotHashed`,
+   `IntrinsicSpec.slotHashed`).
+3. *`regionLen` up to `2^128`.* `Fixed.Sane` stays a sanity bound; the doc
+   states that the final statement uses the concrete `S.fixed`, with the
+   profile's largest region.
+4. *`hashed` granularity*: a named child obligation (S03.04, S05).
+
 ### Fourth round: second integration hold
 
 Integration review held the revision back a second time; master `2abccb70`
@@ -1187,9 +1219,9 @@ is merged. Fixed:
 1. *Confirmed: `refines` unmeetable through the backward escape.*
    `Collided` required the source prefix to be in `FS` (no failure, below
    `hashBound`), so a real collision after an out-of-gas transaction had
-   no escape. The bound moved into the premise (`guard_iff`: fewer than
-   `hashBound` distinct preimages and `HashPremise`), `Forward` is only
-   "no resource failure" (`forward_iff`), and `Collided`,
+   no escape. The bound moved into the premise (reverted in the fifth
+   round, which keeps the rest), `Forward` was only "no resource failure",
+   and `Collided`,
    `NoCollisionUpTo`, `Cert.back`/`reflect`, `Cert.comp` and `SpecTransfer`
    no longer mention `FS`. The intrinsic layer's `forward_iff`/`guard_iff`
    follow.

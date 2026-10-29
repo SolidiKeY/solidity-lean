@@ -1157,7 +1157,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - lowering: `Solidity.Frontend.tyOf` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:417`) — reads solc resolved types
   - lowering: `Solidity.intTyOf` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1157`) — operand width inference
   - lowering: `Solidity.widenBytes` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1457`) — fixed-bytes widening
-  - source: `Solidity.Bridge.Arith.Widths.unsigned_widen` (SolidityBridge.Arith.Widths, `Bridge/SolidityBridge/Arith/Widths.lean:571`) — unsigned widening preserved
+  - source: `Solidity.Bridge.Arith.Widths.unsigned_widen` (SolidityBridge.Arith.Widths, `Bridge/SolidityBridge/Arith/Widths.lean:580`) — unsigned widening preserved
   - no existing anchor: admission, backend, evm, theorem
   - missing: No theorem that elaborated widths equal solc's resolved type before enclosing operations. Correctness rests on lowering (R13).
   - missing: Implicit fixed-byte narrowing in encodeCall and aggregate contextual coercions (hex arrays) are refused.
@@ -2367,8 +2367,8 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: CI downloads only solc 0.8.34 (G00 pins); the frozen 0.8.38 pin must reach `Source.Provenance`
   - missing: the 0.8.34 fixture boundary is not recorded per fixture (G05)
 - **D06 Artifact table: `creationCode`/`runtimeCode` read from G01's whole-input `Artifact` table, a source-semantics parameter**
-  - theorem: `Solidity.Roadmap.Artifact` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:663`) — whole-input table of code units
-  - theorem: `Solidity.Roadmap.CodeUnit` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:652`) — initcode, runtime and link sites
+  - theorem: `Solidity.Roadmap.Artifact` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:665`) — whole-input table of code units
+  - theorem: `Solidity.Roadmap.CodeUnit` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:654`) — initcode, runtime and link sites
   - missing: `SourceSpec` does not yet take the `Artifact` table as a parameter (g01-contracts-rev)
   - missing: the G07 non-circularity whitelist must admit exactly this compiler-output parameter
   - missing: no compiled artifact exists for any contract: `type(C).creationCode` has no producer
@@ -2385,7 +2385,7 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: intrinsic recursion is unrolled to `recDepth = 1024` with an `exhausted` bottom (G04 R08)
   - missing: `SourceSpec.Idealized` has no instance; `Prefixes.Consistent` of `Prog.runF` is unproved
 - **D09 Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized**
-  - theorem: `Solidity.Roadmap.EvmSpec` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:892`) — pinned EVM language with resources
+  - theorem: `Solidity.Roadmap.EvmSpec` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:897`) — pinned EVM language with resources
   - theorem: `Solidity.Roadmap.Prefixes.Consistent` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:132`) — consistency of resourced prefix families
   - missing: `EvmSpec` resources still list code size (g01-contracts-rev drops it)
   - missing: `Lang.Res` ends a session at gas exhaustion; the decision requires the session to continue
@@ -2648,7 +2648,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | package | VM | cells | edited modules | lines | flag | lemma split |
 |---|---|---|---|---|---|---|
 | G00 | V00 | 0 | new | 0 | — | — |
-| G01 | V00 | 9 | `Solidity.Roadmap.Contracts`, `Solidity.Roadmap.TypedRun` | 1180 | — | — |
+| G01 | V00 | 9 | `Solidity.Roadmap.Contracts`, `Solidity.Roadmap.TypedRun` | 1185 | — | — |
 | G02 | V01 | 0 | new | 0 | — | — |
 | G03 | V02 | 0 | new | 0 | — | — |
 | G04 | V01 | 0 | new | 0 | — | — |
