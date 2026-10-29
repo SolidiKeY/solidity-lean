@@ -389,7 +389,7 @@ A follow-up audit must re-grade the affected rows once that section lands.
   - Run 1 (96 min): `OpenLoops` was killed with exit 137, out of memory while
     built in parallel.
   - Run 2 (31 min): `lake build` completed (718 jobs), but
-    `SolidityTestSuite`'s `Derived17` was killed with exit 137. It is known to
+    the `SolkeyTestSuite` target's `Derived17` was killed with exit 137. It is known to
     exceed 10 GiB ([integration.md](integration.md)).
   - Run 3 (6 min): `Derived17` built alone (262 jobs, success), and
     `check-solkey` reported 37 mismatches, the base count.
