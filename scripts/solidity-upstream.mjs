@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {libraryTryContext,libraryTryVectorsFixture} from './library-try-adapter.mjs';
 import {creationTryContext} from './creation-try-adapter.mjs';
 import {directSelfTryContext} from './self-try-adapter.mjs';
 /** Pinned upstream corpus, exact compiler diagnostics and typed runtime replay.
@@ -376,8 +377,9 @@ function prepare(entry, directory, compile, work) {
   const candidates = ast?.nodes.filter(n=>n.nodeType === 'ContractDefinition' && n.contractKind === 'contract' && !n.abstract) ?? [];
   const contract = candidates.at(-1);
   if (!contract) return {path,stage,status:'blocked',reason:'no concrete deployment contract'};
+  const libraryContext=libraryTryContext(ast,contract);
   let blocked, vectors;
-  try {vectors=semanticVectors({...fixture,abiCoderV1:ast.nodes.some(n=>n.nodeType==='PragmaDirective' &&
+  try {vectors=semanticVectors({...(libraryContext?libraryTryVectorsFixture(fixture,libraryContext):fixture),abiCoderV1:ast.nodes.some(n=>n.nodeType==='PragmaDirective' &&
     n.literals?.[0]==='abicoder' && n.literals?.[1]==='v1')},out.contracts[fixture.mainSource][contract.name].abi);}
   catch(e) {blocked=e.message;}
   // Context and cross-contract behavior require the upstream EVM host. Refuse
@@ -398,7 +400,7 @@ function prepare(entry, directory, compile, work) {
   if (vectors?.some(v=>v.calldata) && hasAssembly(ast))
     blocked='raw ABI replay with physical calldata/memory assembly not adapted';
   const context = hostBehavior(ast);
-  const hostContext = context ? (directSelfTryContext(ast, contract) ?? creationTryContext(ast, contract)) : null;
+  const hostContext = libraryContext ?? (context ? (directSelfTryContext(ast, contract) ?? creationTryContext(ast, contract)) : null);
   if (context && !hostContext) blocked='transaction/block/self-address or cross-contract host behavior not adapted';
   // Import success alone cannot discharge a vector we cannot execute.
   if (blocked) return {path,stage,status:'blocked',reason:blocked};
@@ -436,7 +438,7 @@ function prepare(entry, directory, compile, work) {
     } catch(e) {return {path,stage,status:'blocked',reason:'static compiler-code materialization failed: '+e.message};}
     const fixturePath=join(work,sha(path+'#'+pipeline).slice(0,24)+'.ast.json');
     save(fixturePath,variant);
-    jobs.push({path,pipeline,requiredPipelines:pipelines,contract:contract.name,fixture:fixturePath,vectors,...(hostContext ? {hostContext,...(hostContext.kind === 'creation-try-source' ? {requiresCreationContext:true} : {requiresSelfContext:true})} : {})});
+    jobs.push({path,pipeline,requiredPipelines:pipelines,contract:contract.name,fixture:fixturePath,vectors,...(hostContext ? {hostContext,...(hostContext.kind === 'linked-library-try-source' ? {requiresLibraryContext:true} : hostContext.kind === 'creation-try-source' ? {requiresCreationContext:true} : {requiresSelfContext:true})} : {})});
   }
   return {jobs};
 }
@@ -524,6 +526,7 @@ async function main(args) {
     compilerCodeAdapterSha256:sha(readFileSync(join(ROOT,'scripts/solc-code.mjs'))),
     selfTryAdapterSha256:sha(readFileSync(join(ROOT,'scripts/self-try-adapter.mjs'))),
     creationTryAdapterSha256:sha(readFileSync(join(ROOT,'scripts/creation-try-adapter.mjs'))),
+    libraryTryAdapterSha256:sha(readFileSync(join(ROOT,'scripts/library-try-adapter.mjs'))),
     modelSha256:modelDigest(),evmVersion:'osaka',loopFuel:1000,
     scope:'Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.',
     snapshotFiles:manifest.files.length,filter:options.filter ?? null,timeoutMs:options.timeoutMs,batchSize:options.batchSize};

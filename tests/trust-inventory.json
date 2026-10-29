@@ -1203,5 +1203,10 @@
     "file": "Solidity/Tools/CreationTryReplay.lean",
     "kind": "unsafe",
     "code": "unsafe evalExpr Json (mkConst ``Json) expression"
+  },
+  {
+    "file": "Solidity/Tools/LibraryTryReplay.lean",
+    "kind": "unsafe",
+    "code": "unsafe evalExpr Json (mkConst ``Json) expression"
   }
 ]

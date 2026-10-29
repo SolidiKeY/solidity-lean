@@ -1,3 +1,4 @@
+import {libraryTryContext,libraryTryVectorsFixture} from '../library-try-adapter.mjs';
 import {SELF_TRY_ADDRESS} from '../self-try-adapter.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -7,7 +8,7 @@ import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {hexToBytes} from '@ethereumjs/util';
-import {COMPILER_SHA, revertBytes} from '../solidity-upstream.mjs';
+import {COMPILER_SHA, revertBytes, parseFixture, semanticVectors} from '../solidity-upstream.mjs';
 import {machine, observation, replayBytecode, HostLimit, INITIAL_GAS, runFixture} from './replay.mjs';
 
 // Reference compiler controls use the same integrity gate as the CLI.
@@ -157,4 +158,35 @@ for(const viaIR of [false,true])test(`creation source receipts preserve failure 
  assert.equal(created.failed,false);assert.ok(created.runtimeCodeBytes>0);
  const wrong=structuredClone(vectors[0]);wrong.expectedBytes[31]=1;
  assert.equal((await replayBytecode(code,[wrong],undefined,context)).status,'broken');
+});
+
+const linkedSource=readFileSync(new URL('../../tests/solc/LibraryTry.sol',import.meta.url),'utf8');
+for(const viaIR of [false,true])test(`original linked try receipts, context, error bytes and refusal controls (viaIR=${viaIR})`,async()=>{
+ const file='linked.sol',settings={viaIR,evmVersion:'osaka',optimizer:{enabled:false,runs:200},metadata:{appendCBOR:false},outputSelection:{'*':{'':['ast'],'*':['abi','evm.bytecode.object','evm.bytecode.linkReferences','evm.deployedBytecode.object','evm.deployedBytecode.linkReferences','evm.methodIdentifiers']}}};
+ const out=JSON.parse(compile(JSON.stringify({language:'Solidity',sources:{[file]:{content:linkedSource}},settings}),0,0));
+ assert.deepEqual((out.errors??[]).filter(e=>e.severity==='error'),[]);
+ const ast=out.sources[file].ast,C=ast.nodes.find(n=>n.name==='C'),context=libraryTryContext(ast,C);
+ assert.ok(context);const code=out.contracts[file].C,linked={file,name:'L',artifact:out.contracts[file].L};
+ const vectors=semanticVectors(libraryTryVectorsFixture(parseFixture(linkedSource),context),code.abi);
+ const actual=await replayBytecode(code,vectors,undefined,context,linked);
+ assert.equal(actual.status,'working',JSON.stringify(actual));assert.equal(actual.observed.length,4);
+ assert.equal(actual.libraryDeployment.address,'0x501f373d5541129778e4195692f7fff4dd01ebc9');
+ assert.equal(actual.deployment.address,'0x8f047056608fdb1be4725341c345326702096cb2');
+ assert.equal(actual.linkManifest.address,actual.libraryDeployment.address);
+ assert.ok(actual.libraryDeployment.runtimeCodeBytes>0);assert.equal(actual.libraryDeployment.failed,false);
+ const error='0x08c379a0'+'20'.padStart(64,'0')+'07'.padStart(64,'0')+Buffer.from('failure').toString('hex').padEnd(64,'0');
+ for(const [i,obs]of actual.observed.entries()){
+  const calls=obs.calls.filter(c=>c.delegatecall);assert.equal(calls.length,1);
+  const c=calls[0];assert.equal(c.to,actual.deployment.address);assert.equal(c.codeAddress,actual.libraryDeployment.address);
+  assert.equal(c.caller,'0x'+'12'.repeat(20));assert.equal(c.value,'0');
+  assert.equal(c.failed,i%2===1);if(c.failed)assert.equal(c.returnData,error);
+  else assert.equal(c.returnData,'0x'+BigInt(i===0?8:9).toString(16).padStart(64,'0'));
+ }
+ const wrongContext=await replayBytecode(code,vectors,undefined,{...context,libraryAddress:'1'},linked);
+ assert.equal(wrongContext.status,'blocked');assert.equal(wrongContext.libraryDeployment.address,actual.libraryDeployment.address);assert.equal(wrongContext.linkManifest,null);
+ const bad=structuredClone(vectors[0]);bad.expectedBytes[31]^=1;
+ const wrong=await replayBytecode(code,[bad],undefined,context,linked);
+ assert.equal(wrong.status,'broken');assert.equal(wrong.libraryDeployment.address,actual.libraryDeployment.address);assert.deepEqual(wrong.linkManifest,actual.linkManifest);
+ const malformed=await replayBytecode(code,[{...vectors[0],calldata:[256]}],undefined,context,linked);
+ assert.equal(malformed.status,'blocked');assert.equal(malformed.libraryDeployment.address,actual.libraryDeployment.address);assert.deepEqual(malformed.linkManifest,actual.linkManifest);
 });

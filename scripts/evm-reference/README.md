@@ -65,3 +65,6 @@ The creation-try source context additionally records actual nested CREATE receip
 (address, actual failed halt/revert bytes or runtime code hash/size). This is
 compiled-bytecode evidence, separate from kernel proofs and native source
 admission. It does not enable a historical profile or alter panic decoding.
+
+
+Linked-try replay admits the exact validated library directive, deploys the real library then links/deploys the caller on the same machine using pinned compiler linkReferences. It records actual code/delegate context and full return/revert bytes, including prerequisite receipts on failed checks. This is separate compiled-bytecode evidence; no historical profile or general library/ABI admission is enabled.

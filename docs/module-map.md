@@ -901,3 +901,15 @@ At the root, the notation's own tests:
 | `Tools/CreationTryReplay.lean` | Bounded native creation source observations with explicit checked runtime context, actual typed world threading and refusal controls. |
 | `Examples/Tactics/CreationTrySource.lean` | Complete original creation source outputs, ordinary transport, argument/rollback/installation/wrong-byte kernel controls and malformed replay controls. |
 | `Examples/Tactics/CreationTrySourceIR.lean` | Separately compiled viaIR original creation source with both ordered output kernel witnesses. |
+
+
+### Linked library try source continuation
+
+| Module | Owning role |
+|---|---|
+| `Semantics/LibraryTryFrame.lean` | Installed library try boundary with total raw extraction, outer decoder, exact caller resume/context/storage/ledger laws and ordinary transport. |
+| `Frontend/LibraryTryImport.lean` | Complete checked library/caller declarations and exact scalar/storage-formal mapping into caller-typed programs. |
+| `Tools/LibraryTryReplay.lean` | Explicit concrete linked runtime context, canonical Boolean input, once-only world execution and caller-storage observations. |
+| `Examples/Tactics/LibraryTrySource.lean` | Original ordered outputs, ordinary-reading equality and actual prefix storage witnesses. |
+| `Examples/Tactics/LibraryTryControls.lean` | Wrong role/identity/frame, decoder/input/static refusals, exact storage alias and atomic rollback controls. |
+| `Examples/Tactics/LibraryTrySourceIR.lean` | Separately compiled via-IR original linked source with all ordered output certificates. |

@@ -622,3 +622,10 @@ import Solidity.Frontend.CreationTryImport
 import Solidity.Tools.CreationTryReplay
 import Solidity.Examples.Tactics.CreationTrySource
 import Solidity.Examples.Tactics.CreationTrySourceIR
+
+import Solidity.Semantics.LibraryTryFrame
+import Solidity.Frontend.LibraryTryImport
+import Solidity.Tools.LibraryTryReplay
+import Solidity.Examples.Tactics.LibraryTrySource
+import Solidity.Examples.Tactics.LibraryTryControls
+import Solidity.Examples.Tactics.LibraryTrySourceIR

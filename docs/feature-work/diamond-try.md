@@ -6,10 +6,10 @@ for this assignment. That resolves the earlier request for a profile decision;
 no stronger global admissibility premise is introduced. The conditional account
 provides exact typed conditions for all external/catch-data outcomes, ordinary
 formula transport, and conditions for the existing creation-try interface. The
-latest continuation adds a narrow creation-try source continuation over the
-existing typed World operations, following the entry return bridge. Eleven
-original fixtures now pass native replay in both pipelines; seventeen pass
-separate compiler/EVM replay. Neither replay establishes universal source
+latest continuation adds source-checked scalar/storage linked-library try
+composition over existing typed World operations, following the creation and
+entry-return bridges. Twelve original fixtures now pass native replay in both
+pipelines; eighteen pass separate compiler/EVM replay. Neither replay establishes universal source
 validity. The remaining native dependencies are enumerated below.
 
 All original unconditional claims and their certified refutations remain.
@@ -1084,3 +1084,172 @@ rather than being relabeled as final passes.
 | inventory-recovered.log | 0 | 1 | 10862592 |
 
 Detailed gate, diagnostics and axiom accounts are in the linked creation-source evidence directory. Finder and skeptic independently reviewed code and owning claims read-only, with no Lean server or check execution. Confirmed denomination, vacuous-vector, runtime-context and stale-overview findings were repaired. The full assignment is still incomplete at the nine remaining native rows and the unchanged callback/profile/decoder boundaries described above.
+
+
+## Linked library try source continuation after ca314a5b
+
+The complete unchanged original `tryCatch/try_catch_library_call.sol` now executes
+through the existing installed `World.libraryCall`, rather than a library oracle
+or library-owned storage. Both original f rows were first checked in both native
+pipelines, with g still explicitly blocked. The same proved composition was then
+extended to g. The complete linked row now passes both native pipelines with all
+four ordered original output tuples and every dynamic string/Error byte. Its
+caller storage observations are 0, 0, 9, 9. Full-family counts and final gate
+results are recorded below only after their actual confirmation.
+
+`LibraryTryImport` checks whole caller and library declarations: actual library
+kind, function/formal/argument/result IDs and names, using-for library/struct,
+caller storage root and struct member, prefix, branch and Error payload binders.
+The library bodies are quoted at caller contract types. The scalar argument is
+read from its actual x=8 prefix. The storage formal is a fresh live alias to
+C.t; existing name renaming preserves its source identity while avoiding the
+model's prohibition on a local named like a state root. The actual view bodies
+read their real arguments/root or emit their source Error("failure"). Neither
+library storage nor library funds replace caller state. No general ABI/lazy
+calldata, linking/world implementation, payment adapter or profile is introduced.
+
+The caller enters once. Its actual prefix is run and committed before the
+installed library operation reloads caller storage, so g's t.x=9 is visible to
+the library and survives a caught callee revert. Resumption refreshes caller
+storage/funds from the selected world, retaining its original heap, locals,
+aliases and transaction context and clearing the already-settled incoming net
+ledger. Actual source success/Error tails and the existing ABI encoder then
+execute once; failures in argument evaluation, return decoding or a caller tail
+do not enter/re-enter the library catch. Existing outer atomic failure rolls
+back the candidate caller prefix for an uncaught failed linked boundary.
+
+The general World Entry.result API may fail. This narrower typed interface
+therefore requires `RawLibrary.total`: every successful body state's raw
+extractor must return actual raw words normally. Generated getters prove this
+by reading the actual typed uint result. Potentially failing uint decoding uses
+the existing Binders decoder outside the catch. A raw descriptor whose extractor
+can fail cannot inhabit this interface. This closes the initial review caveat;
+no World.libraryCall or generic library semantics was changed.
+
+Universal conditional laws cover the actual installed operation, exact caller
+frame/context/ledger, storage-root alias, successful/caught/uncaught outcomes,
+decode errors and tail failures. Generated per-method approximation theorems
+compare bounded caller programs with their ordinary reading, using the identical
+actual library operation. Kernel certificates prove all four ordered outputs
+in one world, full ordinary execution equality, and the caller storage sequence.
+The separately compiled IR source has its own complete ordered certificate.
+Wrong role, installed identity, caller frame, absent library, missing raw result,
+wrong caught bytes, malformed bool/byte input, static mode and atomic rollback
+are kernel controls. Structural tests also refuse wrong root/field/type, using
+or function identities, argument order, unsupported effects/tails and shapes.
+These are conditional/concrete typed executions, not ValidT/holdsC or universal
+Solidity/compiler refinement proofs. Legacy callback counterexamples remain.
+
+Reference replay now consumes only the validated exact library directive,
+deploys actual L, links C at pinned solc's exact FQN/20-byte placeholder ranges,
+and deploys C on the same machine. It rejects overlaps, wrong/out-of-range sites,
+unknown links and leftover nonhex placeholders before constructing bytes/hashes.
+Actual library deployment is checked against the explicit runtime context.
+Deployment/link evidence survives blocked/broken outcomes too. Complete receipts
+record library501f…ebc9, caller8f04…6cb2, actual runtime code and each actual
+DELEGATECALL's caller identity, sender/value, return words or full Error bytes.
+The original optimizer, Osaka, 100M gas and 5M-step settings are unchanged;
+requesting linkReferences is additional compiler output, not a new profile.
+
+An initial combined source check hit the unchanged 12GiB limit. Isolating the
+check found the actual generated alias-name error; a fresh declaration-preserving
+alias fixed it without raising budgets. The failed source/check and OOM footer
+remain retained. Corrected complete ordered checks and separate storage/ordinary
+certificates pass under the original limits. No stopped check is relabeled pass.
+Independent early finder/skeptic reviews also required total raw extraction,
+actual linked-context address checking and retention of failure-path receipts;
+all confirmed findings were repaired with controls. Final reviews/gates follow.
+
+The published prerequisite inspection is in the task evidence: origin/master
+204eb1545cbf57e436196e4cba346075515b7279 still has ContractWorld blob
+9f22396da6266fa083413689a5c2e4141e545a95 and WorldImport blob
+8c5f0e05c9c5a4976612b05112a357e4e4d333ef. The relevant existing library API is
+unchanged. Published mutation-only WorldLinked/certificates do not provide this
+scalar/storage try-and-return composition. No commit/base integration was needed.
+Original base f4dee4a and all prior checkpoints/exports/failures are preserved.
+
+Evidence is retained at
+[/workspace/next10-diamond-try-evidence/library-source](/workspace/next10-diamond-try-evidence/library-source).
+The six physical-assembly/nonprimitive-ABI rows, two historical profile rows,
+and 36-byte versus trailing256-byte Panic review item are not changed here.
+The original assignment is not complete while its remaining source rows/gates
+are unresolved. No push or merge; installed controller alone owns integration.
+
+
+### Linked continuation final validation
+
+The full original native family is **12 working / 8 blocked / 0 broken**. Its
+strict command retains **exit 1**, not a passing family gate. Eighteen original
+fixtures complete both fresh reference pipelines; two retained historical-profile
+reports remain blocked and are not counted as completed replays. All **66**
+completed native/reference and **140** reference/frozen ordered observations match
+signatures, failure flags and every return/revert byte. The linked row additionally
+matches each actual library/caller address, one delegate invocation per call,
+caller self/sender/value, complete library Error/return bytes and native caller
+storage 0,0,9,9. The copied original test source retains its exact frozen SHA256.
+
+Actual transitive axiom audits cover **191 distinct declarations**: all151 retained
+checks plus40 new frame/source/transport/control statements. Only standard Lean
+`propext`, `Classical.choice` and `Quot.sound` occur. No project axiom, sorry or
+proof-budget increase was introduced. Nine changed Lean files have structured
+MCP success, no partial diagnostics and no failed dependencies. All146 affected
+script tests and88 existing exception-vector controls pass.
+
+Full library/SolkeyTestSuite, Corpus, complete frozen TestSuite, source admission,
+orphan/layer checks, strict automatic/trust gates, inventory freshness and
+whitespace checks have actual successful exits. The final confirmation includes
+the small unused-instance cleanup reported by the initial full build. Historical
+documentation paths retain exit1 with the identical20 baseline missing references
+and zero new findings. The earlier source OOM and subsequent alias/type/diagnostic
+failures remain recorded; corrected final gates are separate successful commands.
+No failed/stopped check is relabeled as a pass.
+
+| Final command | Exit | Actual command seconds | Cgroup peak bytes |
+|---|---:|---:|---:|
+| inventory.log | 0 | 1 | 10661888 |
+| full.log | 0 | 2393 | 11788374016 |
+| corpus.log | 0 | 64 | 1114001408 |
+| frozen.log | 0 | 1 | 41226240 |
+| source-admission.log | 0 | 2 | 239771648 |
+| orphans.log | 0 | 1 | 63401984 |
+| layers.log | 0 | 1 | 62324736 |
+| automatic.log | 0 | 1 | 20824064 |
+| trust.log | 0 | 5 | 173752320 |
+| script-tests.log | 0 | 3 | 485539840 |
+| vectors88.log | 0 | 4 | 367812608 |
+| axioms.log | 0 | 5 | 176689152 |
+| axioms-creation.log | 0 | 3 | 177295360 |
+| axioms-return.log | 0 | 4 | 175919104 |
+| axioms-conditional.log | 0 | 2 | 159576064 |
+| axioms-continuation.log | 0 | 4 | 157122560 |
+| axioms-original.log | 0 | 4 | 155123712 |
+| axioms-universal.log | 0 | 3 | 185266176 |
+| native-family.log | 1 | 79 | 488886272 |
+| doc-paths.log | 1 | 3 | 8425472 |
+| whitespace.log | 0 | 1 | 4440064 |
+| confirmation-full.log | 0 | 1 | 380973056 |
+| invocation-control.log | 0 | 1 | 4673536 |
+| axioms-final.log | 0 | 4 | 175607808 |
+
+Final groups verify12GiB memory and zero swap, with disk caches, one Lean thread
+and explicit Lean-j1 through the task-only temporary Lake configuration. Cgroup
+physical peak and sampled aggregate RSS are retained separately. Driver wall
+seconds include writer-lock queue time; actual command seconds are the footer
+values above. MCP/builds were serialized. An earlier MCP internal import compile omitted explicit-j1 and the first root diagnostic timed out; both are retained as nonfinal evidence. The corrected container-only configuration mount and compiled imports support the final clean nine-file diagnostic pass at unchanged limits. See mcp-invocation-repair.md. The same VM/branch and all baseline
+setup/cache files were preserved; no new VM, unpublished import, push or merge.
+
+Per-fixture before/after/full-byte evidence, actual axiom sets, diagnostic
+records, gate exits/timings/resources and repaired review findings are retained in
+[/workspace/next10-diamond-try-evidence/library-source/fixture-account.md](/workspace/next10-diamond-try-evidence/library-source/fixture-account.md),
+[/workspace/next10-diamond-try-evidence/library-source/fixture-parity.json](/workspace/next10-diamond-try-evidence/library-source/fixture-parity.json),
+[/workspace/next10-diamond-try-evidence/library-source/axiom-account.json](/workspace/next10-diamond-try-evidence/library-source/axiom-account.json)
+and the linked task evidence directory. Independent finder/skeptic reviews were
+read-only, with neither Lean server nor checks/writes. Confirmed total-extractor,
+linked-context and receipt-retention findings were fixed with controls.
+
+The original assignment remains incomplete at its six physical-assembly/nonprimitive
+ABI rows and two pre-Byzantium/gas8000 profile rows. The existing trailing256-byte
+Panic versus36-byte decoder counterexample and historical runner proposal still
+require human review; neither was changed or enabled. Legacy callback judgments,
+all six original gap statements/target certificates, target/exclusion/admissibility
+predicates and frozen observations/verdicts retain their meanings.

@@ -445,3 +445,6 @@ import/profile/host/configuration/resource cases against a changed model.
 
 The narrow creation-try continuation and its source/kernel/reference evidence are
 recorded in [the owning feature account](feature-work/diamond-try.md#creation-try-source-continuation-after-e7921de5). It admits the complete original create.sol only through the checked unpaid, stateless shape; unsupported creation, linking and callback judgments are unchanged.
+
+
+The exact linked-library try source continuation is recorded in [the owning account](feature-work/diamond-try.md#linked-library-try-source-continuation-after-ca314a5b). It executes installed caller-typed scalar/storage library entries and real Error tails; general library/world/ABI source support remains partial.

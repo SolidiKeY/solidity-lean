@@ -553,8 +553,8 @@ def Feature.info : Feature → FeatureInfo
   | .libraries =>
     { category := "declarations", spelling := "library L",
       scope := .model, current := .limited,
-      requirement := r#"Inline resolvable pure/internal library calls; externally linked library execution additionally requires an explicit world/storage-context abstraction."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 74 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      requirement := r#"Inline resolvable pure/internal library calls; externally linked library execution additionally requires an explicit world/storage-context abstraction. A narrow source-checked linked-library try composition now executes original scalar and exact caller-storage-reference view entries with real installed identity, actual Error payloads and caller tails; it remains partial and is not general library/ABI/world or callback source validity."#,
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 74 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Semantics/LibraryTryFrame.lean", "Solidity/Frontend/LibraryTryImport.lean", "Solidity/Examples/Tactics/LibraryTrySource.lean", "Solidity/Examples/Tactics/LibraryTryControls.lean", "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"] }
   | .inheritance =>
     { category := "declarations", spelling := "is A(args), B; diamond inheritance",
       scope := .model, current := .limited,
@@ -948,13 +948,13 @@ def Feature.info : Feature → FeatureInfo
   | .tryStatement =>
     { category := "statements", spelling := "try externalCall/new C returns(...) {...} catch...",
       scope := .abstract, current := .limited,
-      requirement := r#"Separate callee failure from caller argument/return-decoding failures; typed contract creation needs the world abstraction."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 500 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      requirement := r#"Separate callee failure from caller argument/return-decoding failures; typed contract creation needs the world abstraction. A narrow source-checked linked-library try composition now executes original scalar and exact caller-storage-reference view entries with real installed identity, actual Error payloads and caller tails; it remains partial and is not general library/ABI/world or callback source validity."#,
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 500 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Semantics/LibraryTryFrame.lean", "Solidity/Frontend/LibraryTryImport.lean", "Solidity/Examples/Tactics/LibraryTrySource.lean", "Solidity/Examples/Tactics/LibraryTryControls.lean", "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"] }
   | .catchClauses =>
     { category := "statements", spelling := "catch Error(string); Panic(uint); (bytes); catch {...}",
       scope := .model, current := .limited,
-      requirement := r#"Dispatch by valid revert bytes, handle malformed payloads and preserve caller/callee rollback boundaries."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 504 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      requirement := r#"Dispatch by valid revert bytes, handle malformed payloads and preserve caller/callee rollback boundaries. A narrow source-checked linked-library try composition now executes original scalar and exact caller-storage-reference view entries with real installed identity, actual Error payloads and caller tails; it remains partial and is not general library/ABI/world or callback source validity."#,
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 504 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Semantics/LibraryTryFrame.lean", "Solidity/Frontend/LibraryTryImport.lean", "Solidity/Examples/Tactics/LibraryTrySource.lean", "Solidity/Examples/Tactics/LibraryTryControls.lean", "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"] }
   | .revertStatement =>
     { category := "statements", spelling := "revert E(args); revert(); revert(reason)",
       scope := .model, current := .limited,

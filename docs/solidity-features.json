@@ -461,7 +461,7 @@
       "syntax": "library L",
       "scope": "model",
       "current": "partial",
-      "requirement": "Inline resolvable pure/internal library calls; externally linked library execution additionally requires an explicit world/storage-context abstraction.",
+      "requirement": "Inline resolvable pure/internal library calls; externally linked library execution additionally requires an explicit world/storage-context abstraction. A narrow source-checked linked-library try composition now executes original scalar and exact caller-storage-reference view entries with real installed identity, actual Error payloads and caller tails; it remains partial and is not general library/ABI/world or callback source validity.",
       "upstream": [
         {
           "path": "docs/grammar/SolidityParser.g4",
@@ -469,7 +469,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Semantics/LibraryTryFrame.lean",
+        "Solidity/Frontend/LibraryTryImport.lean",
+        "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
       ]
     },
     {
@@ -1830,7 +1835,7 @@
       "syntax": "try externalCall/new C returns(...) {...} catch...",
       "scope": "abstract",
       "current": "partial",
-      "requirement": "Separate callee failure from caller argument/return-decoding failures; typed contract creation needs the world abstraction.",
+      "requirement": "Separate callee failure from caller argument/return-decoding failures; typed contract creation needs the world abstraction. A narrow source-checked linked-library try composition now executes original scalar and exact caller-storage-reference view entries with real installed identity, actual Error payloads and caller tails; it remains partial and is not general library/ABI/world or callback source validity.",
       "upstream": [
         {
           "path": "docs/grammar/SolidityParser.g4",
@@ -1838,7 +1843,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Semantics/LibraryTryFrame.lean",
+        "Solidity/Frontend/LibraryTryImport.lean",
+        "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
       ]
     },
     {
@@ -1847,7 +1857,7 @@
       "syntax": "catch Error(string); Panic(uint); (bytes); catch {...}",
       "scope": "model",
       "current": "partial",
-      "requirement": "Dispatch by valid revert bytes, handle malformed payloads and preserve caller/callee rollback boundaries.",
+      "requirement": "Dispatch by valid revert bytes, handle malformed payloads and preserve caller/callee rollback boundaries. A narrow source-checked linked-library try composition now executes original scalar and exact caller-storage-reference view entries with real installed identity, actual Error payloads and caller tails; it remains partial and is not general library/ABI/world or callback source validity.",
       "upstream": [
         {
           "path": "docs/grammar/SolidityParser.g4",
@@ -1855,7 +1865,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Semantics/LibraryTryFrame.lean",
+        "Solidity/Frontend/LibraryTryImport.lean",
+        "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
       ]
     },
     {
