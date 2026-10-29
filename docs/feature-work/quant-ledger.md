@@ -344,3 +344,25 @@ dispatcher and focused diff, finding no other content conflict in the repaired
 file. Read-only skeptic review checked that the rewrite returns the same
 refuted state, retains the unknown-only ledger fallback, and introduces no
 axiom, weakened claim or gate change. These reviews used no Lean server.
+
+### Retained review annotation repair (2026-10-29)
+
+The retained attempt-6 skeptic review rejected the unannotated `have` facts
+in `Calculus/QuantLedger.lean`. All 15 inferred facts now have concrete types,
+including both anonymous facts, the cut certificate, range/index bounds,
+sentence and flattening facts, model agreement, quantified definitions and
+prefix instantiation. All 61 `have` facts in the module are explicitly typed.
+Per-file Lean MCP diagnostics completed with no errors or warnings, including
+the existing guarded axiom reports for body exactness and both verification
+directions (only `propext`, `Classical.choice`, and `Quot.sound`).
+
+Local read-only finder review checked every `have` declaration and found no
+remaining inferred type or content conflict marker. Local read-only skeptic
+review erased the annotations and compared the remaining source with HEAD:
+proof terms and statements are unchanged apart from whitespace. Both reviews
+used no Lean server; launching a separate review agent was unavailable because
+the collaboration service could not load its thread context. The dispatcher
+and `twoAnchorNegative_refuted` repair remain unchanged. No gate, budget,
+observation, invariant or target predicate changed, and no `sorry` or axiom
+was added. Combined validation and runtime execution remain for the coordinator;
+this follow-up ran no build or runtime runner and made no commit.

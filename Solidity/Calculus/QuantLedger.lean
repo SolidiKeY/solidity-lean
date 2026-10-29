@@ -232,7 +232,7 @@ theorem body_of_sentence (h : r.sentenceF.Valid) (g : State C []) (ν' : AEnv) :
     LFml.abstractQ_holds g ν1 L0 n fun e he => (hkey e he).trans (hQ1 e he).symm
   -- the cut's fresh atoms, defined past every atom of the abstracted body
   let B := (abstracted ψ).1
-  have hF := LFml.cut_good_top B
+  have hF : CutFml.Good B B.atomBound [] (B.cut [] B.atomBound) := LFml.cut_good_top B
   obtain ⟨μ, hμ, hd⟩ := hF.defs.extend g ν1
   have hcut : B.cutAll.holds g μ → B.holds g ν1 := fun h =>
     (LFml.holds_agree_below g B hμ).mpr
@@ -253,31 +253,33 @@ theorem body_of_sentence (h : r.sentenceF.Valid) (g : State C []) (ν' : AEnv) :
   let obs := Inputs.observe r.main.encoding.environment r.main.encoding.parameters r.main.encoding.refs g ν2
   let zcodes := codesZ r.L.es r.L.ps r.main.encoding.refs r.main.encoding.ledger g ν2
   let x := assignmentOf r.L zcodes ν2
-  have hW := ledgerLayoutOf_W r.main r.Qs
+  have hW : r.L.es.length + r.L.ps.length ≤ r.L.W := ledgerLayoutOf_W r.main r.Qs
   have hrep : ∀ q ∈ r.L.P, x (r.L.pos q) = q.code ν2 :=
     assignmentOf_rep r.L hW zcodes ν2 fun q hq => by
-      have hi := Parameters.index_lt_of_mem hq
+      have hi : Parameters.index q r.L.ps < r.L.ps.length := Parameters.index_lt_of_mem hq
       have hk : r.L.es.length + Parameters.index q r.L.ps < Inputs.width r.L.es r.L.ps r.main.encoding.refs := by
         simp only [Inputs.width]; omega
       simp only [zcodes, codesZ, if_pos hk]
       exact Inputs.codes_param _ _ _ g ν2 q hq
   have hlow : ∀ i < r.L.W, x i = zcodes i := fun i hi => by simp only [x, assignmentOf, hi, ↓reduceIte]
   have hx0 : ∀ i, r.L.top ≤ i → x i = 0 := fun i hi => assignmentOf_top _ _ _ _ hi
-  have hs := h x
+  have hs : r.sentenceF.holds x := h x
   simp only [sentenceF, QFml.holds_imp] at hs
   have hdom : r.domainF.holds x := by
     refine ⟨?_, ?_, ?_⟩
     · show (QFml.atom _ (List.range (Inputs.types _ _ _).length)).holds x
       rw [holds_atom_domain]
-      have := domain_codes obs
+      have : (domain (Inputs.types r.L.es r.L.ps r.main.encoding.refs)).holds obs.codes :=
+        domain_codes obs
       rw [domain, domainFrom_iff] at this ⊢
       intro k p hk
       have hk0 : k < Inputs.width r.L.es r.L.ps r.main.encoding.refs := by
-        have ht := (List.getElem?_eq_some_iff.1 hk).1
+        have ht : k < (Inputs.types r.L.es r.L.ps r.main.encoding.refs).length :=
+          (List.getElem?_eq_some_iff.1 hk).1
         rw [Inputs.length_types] at ht
         exact ht
       have hk' : k < r.L.W := Nat.lt_of_lt_of_le hk0 (Nat.le_add_right _ _ )
-      have h' := this k p hk
+      have h' : obs.codes (0 + k) < ScalarCode.bound p := this k p hk
       simp only [Nat.zero_add] at h' ⊢
       rw [hlow k hk']
       simp only [zcodes, codesZ, if_pos hk0]
@@ -302,11 +304,12 @@ theorem body_of_sentence (h : r.sentenceF.Valid) (g : State C []) (ν' : AEnv) :
     intro e he
     rw [hrep _ (ledgerLayoutOf_P r.main r.Qs _ (List.mem_flatMap.2 ⟨e, he, List.mem_cons_self⟩)), code_bool,
       hkey2 e he, hkey e he, hQ2 e he, hQ1 e he]
-  have hA := hs hdom hdefs
+  have hA : (QFml.atom r.A (List.range r.L.W)).holds x := hs hdom hdefs
   rw [QFml.holds_atom_range r.A r.L.W r.main.encoding.width] at hA
   have hA' : r.A.holds zcodes := (AFml.holds_agree _ _ _ fun i hi =>
     hlow i (Nat.lt_of_lt_of_le hi r.main.encoding.width)).1 hA
-  have hflat := (r.main.encoding.correct g ν2 zcodes (codesZ_agree _ _ _ _ g ν2)).1 hA'
+  have hflat : r.main.flattening.formula.holds g ν2 :=
+    (r.main.encoding.correct g ν2 zcodes (codesZ_agree _ _ _ _ g ν2)).1 hA'
   exact hL0.1 (hhat.1 (hcut (hfill.1 (hflat hcons))))
 
 /-- **A false assignment gives a refuting state**: the main layout's
@@ -324,7 +327,8 @@ def countermodelOf (x : Nat → Nat) (hx : ¬ r.sentenceF.holds x) : r.Countermo
   let gM := model.1
   let νM := model.2
   let ν := Parameters.setAll r.L.extras (extraValue r.L x) νM
-  have hmodel := r.main.encoding.realize_agree x hdomM
+  have hmodel : Inputs.AgreeZ r.L.es r.L.ps r.main.encoding.refs r.main.encoding.ledger gM νM x :=
+    r.main.encoding.realize_agree x hdomM
   have hobs : Inputs.observe r.L.es r.L.ps r.main.encoding.refs gM ν =
       Inputs.observe r.L.es r.L.ps r.main.encoding.refs gM νM :=
     Inputs.observe_setAll _ _ _ gM νM _ r.L.extras (ledgerLayoutOf_extras r.main r.Qs)
@@ -341,9 +345,9 @@ def countermodelOf (x : Nat → Nat) (hx : ¬ r.sentenceF.holds x) : r.Countermo
   have hW : r.L.es.length + r.L.ps.length ≤ r.L.W := ledgerLayoutOf_W r.main r.Qs
   have hrep : ∀ q ∈ freeQ r.Qs, x (r.L.pos q) = q.code ν := by
     intro q hqf
-    have hq := ledgerLayoutOf_P r.main r.Qs q (freeQ_sub r.Qs q hqf)
+    have hq : q ∈ r.L.P := ledgerLayoutOf_P r.main r.Qs q (freeQ_sub r.Qs q hqf)
     by_cases h1 : q ∈ r.L.ps
-    · have hl := Parameters.index_lt_of_mem h1
+    · have hl : Parameters.index q r.L.ps < r.L.ps.length := Parameters.index_lt_of_mem h1
       have hp : r.L.pos q = r.L.es.length + Parameters.index q r.L.ps := by
         simp only [QLayout.pos, h1, ↓reduceIte]
       have hk : r.L.es.length + Parameters.index q r.L.ps < Inputs.width r.L.es r.L.ps r.main.encoding.refs := by
@@ -352,7 +356,8 @@ def countermodelOf (x : Nat → Nat) (hx : ¬ r.sentenceF.holds x) : r.Countermo
       exact Inputs.codes_param _ _ _ gM ν q h1
     · have h2 : q ∈ r.L.extras := (List.mem_append.1 hq).resolve_left h1
       have hin : x (r.L.pos q) < ScalarCode.bound q.prim := by
-        have := (QFml.holds_conj x _).1 hx'.1.2.1 _ (List.mem_map.2 ⟨q, List.mem_filter.2 ⟨h2,
+        have : (QFml.inRange (r.L.pos q) q.prim).holds x :=
+          (QFml.holds_conj x _).1 hx'.1.2.1 _ (List.mem_map.2 ⟨q, List.mem_filter.2 ⟨h2,
           by simp only [hqf, decide_true]⟩, rfl⟩)
         exact (QFml.holds_inRange _ _ x).1 this
       obtain ⟨v, hv⟩ := Option.isSome_iff_exists.1 ((decode?_isSome q.prim _).2 hin)
@@ -365,7 +370,8 @@ def countermodelOf (x : Nat → Nat) (hx : ¬ r.sentenceF.holds x) : r.Countermo
     (QFml.holds_inRange _ _ x).1 ((QFml.holds_conj x _).1 hx'.1.2.2 _ (List.mem_map.2 ⟨e, he, rfl⟩))
   have hrepQ : ∀ e ∈ r.Qs, Rep r.L.pos e.2.freeParams ν x := fun e he q hq =>
     hrep q (List.mem_flatMap.2 ⟨e, he, List.mem_cons_of_mem _ hq⟩)
-  have hdefs := (r.defs.correct st.1 ν x hrepQ hrefs).1 hx'.2.1
+  have hdefs : ∀ e ∈ r.Qs, (x (r.L.pos ⟨.bool, e.1⟩) = 1 ↔ e.2.holds st.1 ν) :=
+    (r.defs.correct st.1 ν x hrepQ hrefs).1 hx'.2.1
   have hkey : ∀ e ∈ r.Qs, (ν.get .bool e.1 = true ↔ e.2.holds st.1 ν) := fun e he => by
     rw [← code_bool, ← hrep _ (List.mem_flatMap.2 ⟨e, he, List.mem_cons_self⟩)]
     exact hdefs e he
@@ -468,7 +474,8 @@ def countermodelOfBody (st : State C []) (ν : AEnv) (hB : ¬ r.prep.body.holds 
     {σ : State C [] // ¬ holds σ φ} :=
   let st' := r.prep.refute st ν hB
   ⟨st'.1, fun hφ => by
-    have hinst := r.sentence.instantiate st'.1 AEnv.dflt ν ((LFml.liftCond_holds _ _ _ _).mpr
+    have hinst : r.sentence.body.holds st'.1 (Parameters.assign r.sentence.parameters ν AEnv.dflt) :=
+      r.sentence.instantiate st'.1 AEnv.dflt ν ((LFml.liftCond_holds _ _ _ _).mpr
       ((LFml.prenex_holds _ _ _).mpr ((LFml.condSimp_holds _ _ _).mpr ((r.source.elim_holds_iff _).mpr
         ((r.normalization.correct _).mpr hφ)))))
     refine st'.2 ((LFml.holds_agree_free st'.1 _ fun q hq => ?_).1 hinst)
