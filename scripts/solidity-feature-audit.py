@@ -206,14 +206,15 @@ def render_report(data):
 # provenance only; the Lean catalog does not carry them.
 DECISION_OUTCOMES = {
     'G00 Q1': ({'exclude'}, {'approvedExclusion'}),
-    'G00 Q2': ({'abstract'}, {'approved', 'replace', 'followsG01'}),
+    'G00 Q2': ({'abstract'}, {'approved', 'replace', 'provedSpecialCase', 'followsG01'}),
     'G00 Q6': ({'model'}, {'fullSupport'}),
 }
 DECIDED_SCOPES = {'exclude': 'G00 Q1', 'abstract': 'G00 Q2'}
 
 
 def decision_marker(record, date):
-    path, anchor = record.split('#')
+    path, _, anchor = record.partition('#')
+    assert anchor and (ROOT / path).is_file(), ('decision record not found', record)
     text = (ROOT / path).read_text()
     slug = lambda h: re.sub(r'[^a-z0-9 -]', '', h.lower()).replace(' ', '-')
     lines = text.splitlines()

@@ -2791,7 +2791,7 @@
         "question": "G00 Q2",
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
-        "note": "Payment-acceptance boolean not approved: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G04 Q3, G47)."
+        "note": "Payment-acceptance boolean not approved: replace it or propose it again. Candidate per G04 Q3: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G47)."
       }
     },
     {
@@ -2815,7 +2815,7 @@
         "question": "G00 Q2",
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
-        "note": "Payment-acceptance boolean not approved: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G04 Q3, G47)."
+        "note": "Payment-acceptance boolean not approved: replace it or propose it again. Candidate per G04 Q3: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G47)."
       }
     },
     {
@@ -2891,9 +2891,9 @@
       "decision": {
         "date": "2026-10-29",
         "question": "G00 Q2",
-        "outcome": "replace",
+        "outcome": "provedSpecialCase",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
-        "note": "The no-callback reading is not a premise: it must become a proved special case of history-dependent callees with unbounded reentrancy (G01 Q4); not yet proved."
+        "note": "The no-callback reading must become a proved special case of history-dependent callees with unbounded reentrancy (G01 Q4), not a premise; not yet proved."
       }
     },
     {
@@ -3640,7 +3640,7 @@
         "question": "G00 Q2",
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
-        "note": "Not approved: replace with the G01 Q4 environment (history-dependent callees) or propose again."
+        "note": "Not approved: replace it or propose it again. The G01 Q4 environment (history-dependent callees) is the candidate replacement, not part of this decision."
       }
     },
     {

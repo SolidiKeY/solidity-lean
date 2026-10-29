@@ -21,7 +21,8 @@ decision would stay **unresolved**.
 - **Changed files:** this document, `scripts/roadmap-g00-scope.py`,
   `docs/solidity-features.json`, `scripts/solidity-feature-audit.py` and its
   generated `Solidity/Language/Features.lean` and
-  `docs/solidity-feature-inventory.md`, one status line in `coverage-plan.md`.
+  `docs/solidity-feature-inventory.md`, `Solidity/Frontend/SolcJson/Admission.lean`
+  (the fixed-point refusal below), one status line in `coverage-plan.md`.
 - **Manifest.** Every manifest row a decision covers now carries a
   `decision` object (`date`, `question`, `outcome`, `record`, optional
   `note`): the 30 `exclude` rows cite G00 Q1 (`approvedExclusion`), the 23
@@ -37,14 +38,20 @@ decision would stay **unresolved**.
   manifest requires of an in-profile row and which claims no implementation.
   Owners: S00 S01 S02 (source), G08–G15 (admission), G16–G23 (lowering),
   G24–G47 (backend and EVM). The sibling fixed-point-semantics task designs
-  the reference semantics; this row names no file of it. Consequence for the
-  importer: the admission scan (`ScopeScan.certify`,
+  the reference semantics; this row names no file of it. Consequence for
+  admission: the scope scan (`ScopeScan.certify`,
   `Solidity/Frontend/Source.lean`) no longer refuses `fixed`/`ufixed` with the
-  `upstream` diagnostic; such input passes the scope scan and must be
-  refused later by the importer, which has no fixed-point type (for state
-  variables: "elementary state type … is not modelled",
-  `Solidity/Frontend/SolcJson/Contract.lean`). No fixed-point fixture
-  exercises that path; G15 owns the refusal until G08–G23 implement it.
+  `upstream` diagnostic. The importer alone would not refuse every such
+  input (review finding 1: an unused `fixed` state variable or
+  `type T is fixed;` is dropped silently; `event E(fixed x); … emit E(1);`
+  compiles). So the admission validator (`validateNode`,
+  `Solidity/Frontend/SolcJson/Admission.lean`) now refuses every node the
+  scan tags `fixedPoint` — an elementary type name or a common type starting
+  with `fixed`/`ufixed` — with the `missingImplementation` diagnostic
+  `solidity.fixedPoint`. It runs on the same walked nodes as the old scope
+  refusal, so the refused input is unchanged; only the diagnostic kind and
+  name change. No fixed-point fixture exercises it. G15 keeps the refusal
+  until G08–G23 implement fixed point.
 - **Result:** 212 manifest rows = 175 in-profile (all owned) + 7
   upstream-rejected + 30 excluded (all tier A, approved by G00 Q1); 783
   ledger symbols = 483 in-profile + 70 combinations with an excluded part +
@@ -106,9 +113,13 @@ cites a user decision whose record section carries the
 and **unresolved** otherwise. Symbol statuses follow: `combination-excluded`
 replaces the first audit's `combination-unresolved`. A ledger symbol takes
 the status shared by all its target rows; a symbol mapping to in-profile and
-other rows is `combination-unresolved` or `combination-upstream`; one mapping
-to unresolved and upstream rows only (`functionKinds.SetGas`) is
-`nonprofile-mixed`. One G00 supplement does not edit the ledger file: the 20
+other rows is `combination-excluded` (`combination-unresolved` if a part
+were undecided) or `combination-upstream`; one mapping to excluded and
+upstream rows only (`functionKinds.SetGas`) is `nonprofile-mixed`. Both
+scripts require each `exclude` row to cite G00 Q1 and each `abstract` row
+G00 Q2 with a permitted outcome; the G00 script also requires G00 Q1 to be
+cited by exactly the 30 rows of its evidence table (the decision says "All
+30"), so a later exclusion cannot inherit it. One G00 supplement does not edit the ledger file: the 20
 Yul symbols that the in-profile canonical rethrow
 `assembly { revert(add(d, 32), mload(d)) }` needs are mapped to
 `inlineAssembly` only in the ledger, so the script adds `canonicalRethrow` to
@@ -203,16 +214,18 @@ at base `caf52ec` by `git grep`; nothing here re-pins a file.
 
 Ownership gap 1 (compiler-settings surface) is narrowed accordingly: the
 fork, the solc version and the `EvalOrder` range are fixed; their encoding in
-the theorem settings remains G01/G05 work. Gap 4 is now re-pinning work, not
-a choice.
+the theorem settings remains G01/G05 work. Gap 4's fork half is now
+re-pinning work; its reference-EVM versions half (disagreement 5) is still
+open.
 
 ## Exclusion evidence
 
 **Evidence standard.** The repository has an explicit marker for user
 decisions: "**User decision (2026-10-06): … rejected**"
 (`docs/kernel-port.md:295`, present since root `c3a3eef`). Tier **A** is such
-a marker, or the user's own words in a PR or issue, naming the exclusion. No
-exclusion has tier-A evidence. Commit authorship cannot serve instead: every
+a marker, or the user's own words in a PR or issue, naming the exclusion. At
+the first audit no exclusion had tier-A evidence; since 2026-10-29 all 30
+have (Tiers below). Commit authorship cannot serve instead: every
 commit in the history carries the owner's name, including those from agent
 branches such as `codex/…`.
 
@@ -345,7 +358,8 @@ No row's scope or status changed.
 | Outcome | Rows | Meaning |
 |---|---|---|
 | `approved` (9) | `keccakBuiltin`, `sha256Builtin`, `ripemd160Builtin`, `ecrecoverBuiltin`, `msgSender`, `msgValue`, `thisAddress`, `addressBalance`, `blockTimestamp` | Opaque hashes and `ecrecover` as fixed functions (keccak a fixed parameter, not an environment input); `msg`/`block`/`this`/balance values as universally quantified inputs (`this` from deployment, the own balance from the ledger, `msg.value` bounded by the sender's balance) |
-| `replace` (4) | `worldAssumptions`; `sendTransfer`, `emptyDataValueCall` (the payment-acceptance boolean, `Machine.accepts`, G04 R33); `callbackSemantics` (the no-callback reading) | Not approved as premises: replaced by the G01 Q4 environment and G04 Q3 payment outcomes, or proposed again; the no-callback reading must become a proved special case, not yet proved |
+| `replace` (3) | `worldAssumptions`; `sendTransfer`, `emptyDataValueCall` (the payment-acceptance boolean, `Machine.accepts`, G04 R33) | Not approved: "must be replaced or proposed again". The notes name candidates (the G01 Q4 environment; G04 Q3's history-dependent acceptance) without claiming the decision chose them |
+| `provedSpecialCase` (1) | `callbackSemantics` (the no-callback reading) | Not a premise: it "must become a proved special case" of the G01 Q4 environment; not yet proved |
 | `followsG01` (10) | `externalFunctionTypes`, `tryStatement`, `canonicalRethrow`, `externalTypedCalls`, `newContract`, `creationTry`, `externalLibraryCalls`, `abiEntryValidation`, `constructorLifetime`, `staticCallRestriction` | No separate approval: "the remaining abstract rows follow G01 Q4 and Q8". `canonicalRethrow`'s abstraction is syntactic (the recognized idiom), not an environment premise, so for it the outcome only records that no separate approval was given |
 
 ## Open scope questions
@@ -530,7 +544,7 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `sha256Builtin` | builtins | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G46.05 |
 | `stringConcat` | builtins | model | in-profile | in profile | S02 | G10 G13 | G18.03 | G33 G35 |
 | `wrapUnwrap` | builtins | model | in-profile | in profile | S02 | G10 G13 | G16 | G25 |
-| `callbackSemantics` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: replace | S03.03 S04.03 | G13 | G22.02 | G42.03 |
+| `callbackSemantics` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: provedSpecialCase | S03.03 S04.03 | G13 | G22.02 | G42.03 |
 | `creationTry` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S03.03 S04.04 | G11 G13 | G22.03 | G44.03 |
 | `emptyDataValueCall` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: replace | S03.03 S04.03 | G10 G13 | G22 | G43 |
 | `extensionCalls` | calls | model | in-profile | in profile | S03.03 | G10 G14 | G20 | G37 |
@@ -861,20 +875,68 @@ decisions are marked so; the rest are carried forward.
   (`TargetSchedule := "Cancun"`); reference-EVM versions (disagreement 5).
   The vector scripts' fork is the sibling g06-osaka-repin task.
 - `abstract` rows with outcome `replace` (`worldAssumptions`, `sendTransfer`,
-  `emptyDataValueCall`, `callbackSemantics`): G22, G42, G43, G47 replace the
-  premise; G01 Q4's special-case proof of the no-callback reading.
+  `emptyDataValueCall`): G22, G42, G43, G47 replace the premise or propose
+  it again; `callbackSemantics` (`provedSpecialCase`): the G01 Q4
+  special-case proof of the no-callback reading.
 - `fixedPoint`: a reference semantics (sibling fixed-point-semantics task),
   then S00–S02, G08–G15, G16–G23, G24–G47; until then G15 must keep
-  fixed-point input refused (now by the importer, not the scope scan).
+  fixed-point input refused (now by `validateNode`'s `solidity.fixedPoint`
+  diagnostic, not the scope scan).
 - S00/G08: check the seven `upstream` rows against the pinned corpus.
 - Not in this task's files: `docs/solidity-scope.md` still says
-  "`fixedPoint` is still scoped `upstream`" (Manifest follow-up), "the 174
-  in-profile count" and "Fixed-point syntax remains upstream incomplete"; its
-  owner should update them.
+  "`fixedPoint` is still scoped `upstream`" and "the 174 in-profile count"
+  (Manifest follow-up); its owner should update them. ("Fixed-point syntax
+  remains upstream incomplete" there is still true of solc.)
 - Each owner group: the rows assigned in the table, at the current statuses
   (139 model/partial, 2 model/missing, 21 abstract/partial).
 
 ## Review
+
+### Decision revision (2026-10-29)
+
+A read-only finder and a separate skeptic reviewed commit `0fe5752` with git,
+grep and python only, without the Lean server. Both reran both `--check`
+gates and re-derived the row and symbol counts from the manifest and ledger
+(both confirmed: 175/7/30 rows; 483/70/28/148/1/53 symbols). Confirmed
+findings and fixes:
+
+1. **Fixed-point input could pass admission** (both reviews). With
+   `fixedPoint` in profile, the scope scan admitted it; the importer drops
+   an unused `fixed` state variable or `type T is fixed;` silently, and
+   `event E(fixed x); … emit E(1);` compiled. Fixed: `validateNode` refuses
+   every node tagged `fixedPoint` with `solidity.fixedPoint`
+   (`missingImplementation`); the document's claim is corrected.
+2. **Tier A did not check the cited question or outcome per row**, and a
+   copied `decision` would have made a later exclusion tier A. Fixed: both
+   scripts check question and outcome per scope; the G00 script ties G00 Q1
+   to exactly the 30 evidence-table rows and G00 Q6 to `fixedPoint`.
+   Scratch-copy tests (question changed to Q6, decision removed, record
+   without anchor, missing file) all fail `--check` with a message.
+3. **Bad `record` crashed the G00 script** (traceback). Fixed: reported as
+   an error.
+4. **Stale text**: "No exclusion has tier-A evidence", the Method's
+   `combination-unresolved` and "unresolved and upstream rows". Fixed.
+5. **Q2 notes beyond the decision**: `worldAssumptions` named a replacement
+   the decision did not choose; the payment notes dropped "or proposed
+   again"; `callbackSemantics` was labelled `replace` although the decision
+   says "must become a proved special case". Fixed: notes say "replace it or
+   propose it again" with candidates marked as candidates; new outcome
+   `provedSpecialCase` for `callbackSemantics`.
+6. **"Gap 4 is now re-pinning work"** overstated: its reference-EVM half
+   (disagreement 5) stays open. Fixed.
+7. The "Fixed-point syntax remains upstream incomplete" line of
+   `solidity-scope.md` was wrongly listed as stale (it is true of solc).
+   Fixed in Remaining.
+
+Rejected or kept: the backend range `G24–G47` for "G24+" (G48–G55 are
+composition owners of every row, stated once); `fixedPoint`'s position among
+the upstream rows in the manifest order (cosmetic; the inventory groups by
+category, and moving it would reorder the Lean `Feature` constructors); the
+Lean catalog not carrying `decision` (its contract lists the stored fields,
+and no Lean consumer reads decisions); the stale `solidity-scope.md`
+follow-up text (not this task's file; listed in Remaining).
+
+### First audit
 
 Separate read-only finder and skeptic reviews ran after the first draft
 (`6795cf5`), using git, grep and python only, without the Lean server. Both

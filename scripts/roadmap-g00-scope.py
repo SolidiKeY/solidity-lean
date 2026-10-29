@@ -14,7 +14,7 @@ marker of the section it cites (docs/solidity-scope.md, "User decisions
 (2026-10-29)"). `--check` fails if a manifest ID is unowned, an owner
 override names an unknown ID or group, an excluded ID has no evidence entry,
 a cited decision is not in its record, or an `abstract` row has no G00 Q2
-outcome.
+outcome, or a decision cites a question for rows it does not cover.
 
 Usage: python3 scripts/roadmap-g00-scope.py [--check | --write] [--root DIR]
 `--write` replaces the generated block of docs/feature-work/roadmap-g00-scope.md;
@@ -289,6 +289,14 @@ RETHROW_SYMBOLS = {
 UPSTREAM_NOTES = {}
 
 DECISION_MARKER = "**User decision ({date}):**"
+# The question each decided scope must cite and its permitted outcomes. The
+# G00 Q1 decision ("All 30 confirmed") covers exactly the rows of
+# EXCLUSION_EVIDENCE; a later exclusion needs a decision of its own.
+DECISIONS = {
+    "exclude": ("G00 Q1", {"approvedExclusion"}),
+    "abstract": ("G00 Q2", {"approved", "replace", "provedSpecialCase", "followsG01"}),
+}
+DECIDED_ROWS = {"G00 Q1": set(EXCLUSION_EVIDENCE), "G00 Q6": {"fixedPoint"}}
 
 GROUPS = ({f"S0{i}" for i in range(6)} | {f"G{i:02d}" for i in range(56)})
 
@@ -340,7 +348,9 @@ def targets_of(kind, name, targets):
 
 def decision_section(root, record):
     """The lines of the section a decision's `record` (path#anchor) names."""
-    path, anchor = record.split("#")
+    path, _, anchor = record.partition("#")
+    if not anchor or not (root / path).is_file():
+        return None
     lines = (root / path).read_text().splitlines()
     slug = lambda h: re.sub(r"[^a-z0-9 -]", "", h.lower()).replace(" ", "-")
     heads = [i for i, l in enumerate(lines) if l.startswith("#") and slug(l.lstrip("#").strip()) == anchor]
@@ -391,8 +401,17 @@ def check(root, features, ledger, children):
     for f in features["features"]:
         if "decision" in f and decision_tier(root, f) != "A":
             errors.append(f"{f['id']}: decision {f['decision']['question']} not found in {f['decision']['record']}")
-        if f["scope"] == "abstract" and (f.get("decision") or {}).get("question") != "G00 Q2":
-            errors.append(f"{f['id']}: abstract row without a G00 Q2 outcome")
+        d = f.get("decision") or {}
+        if f["scope"] in DECISIONS:
+            q, outcomes = DECISIONS[f["scope"]]
+            if d.get("question") != q or d.get("outcome") not in outcomes:
+                errors.append(f"{f['id']}: {f['scope']} row needs a {q} decision with an outcome in {sorted(outcomes)}")
+        if d.get("question") in DECIDED_ROWS and f["id"] not in DECIDED_ROWS[d["question"]]:
+            errors.append(f"{f['id']}: {d['question']} does not cover this row")
+    for q, rows in DECIDED_ROWS.items():
+        cited = {f["id"] for f in features["features"] if (f.get("decision") or {}).get("question") == q}
+        for key in sorted(rows - cited):
+            errors.append(f"{key}: no {q} decision cited")
     for kind, names in RETHROW_SYMBOLS.items():
         for name in names:
             if name not in ledger["symbols"].get(kind, {}):
