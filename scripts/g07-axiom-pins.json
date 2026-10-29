@@ -1330,6 +1330,41 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.Heap.copy_independent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.panic_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.rollback_run": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.rollback_transfer": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.StateExamples.revert_undoes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.StateExamples.transfers": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.Storage.write_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.Val.word_int": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/TypingExamples.lean:Solidity.Source.FixTy.subsumes_inRange": [
   "Classical.choice",
   "Quot.sound",

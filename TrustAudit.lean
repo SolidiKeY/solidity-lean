@@ -34,6 +34,7 @@ import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.Tactics.Rigid
 import Solidity.Roadmap.Controls
 import Solidity.Source.TypingExamples
+import Solidity.Source.StateExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -672,3 +673,37 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} source-definition theorems use only the standard axioms"
+
+/-! Roadmap S04.01–S04.03: source state, observations and world
+(`Solidity/Source/{State,Observe,World}.lean`,
+`docs/feature-work/source-s04-state.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Heap.copy_get,
+    ``Solidity.Source.Heap.copy_independent,
+    ``Solidity.Source.Heap.write_get,
+    ``Solidity.Source.Heap.write_ty,
+    ``Solidity.Source.Storage.write_read,
+    ``Solidity.Source.Storage.set_restore,
+    ``Solidity.Source.wordBytes_value,
+    ``Solidity.Source.Val.word_int,
+    ``Solidity.Source.readInt_reject,
+    ``Solidity.Source.panicData_code,
+    ``Solidity.Source.panic_distinct,
+    ``Solidity.Source.ExecState.undoN_run,
+    ``Solidity.Source.rollback_run,
+    ``Solidity.Source.rollback_inner,
+    ``Solidity.Source.rollback_outer_after_commit,
+    ``Solidity.Source.rollback_transfer,
+    ``Solidity.Source.transfer_none_iff,
+    ``Solidity.Source.StateExamples.alias_seen,
+    ``Solidity.Source.StateExamples.revert_undoes,
+    ``Solidity.Source.StateExamples.transfers]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-state theorems use only the standard axioms"

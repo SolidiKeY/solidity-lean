@@ -570,6 +570,10 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/Resolved.lean` | S01: the intrinsic resolved form (`RExpr`/`RStmt` over local types, de Bruijn `Idx`, explicit implicit-conversion evidence) and the elaboration of derivations into it (`Typed.toR`, `StmtD.toR`). |
 | `Source/WellFormed.lean` | S01: settings over solc's two pipelines (`Settings.coder`), resolutions, body frames (`Decl.frame?`), and well-formedness of a resolved unit (bases, clashes and overloads, pragmas, declared types, placement, constants, bodies). |
 | `Source/TypingExamples.lean` | S01 controls: a derivation per typed expression constructor (`exprCoverage_typed`, `exprCoverage_total`, `stmtCoverage_total`), the counter well formed, C3 on a diamond, refuted ill-typed, `msg.value`, clashing, same-signature, interface-body and unknown-pragma programs. |
+| `Source/State.lean` | S04.01: source values `Val` over a declaration `Layout` (ranges, enum bounds and reference locations intrinsic), contents `Data` (recursive aggregates, content-keyed mappings), typed `memory` (`Heap`, copy and alias laws), read-only `Calldata`, `Storage` typed by its layout, defaults. |
+| `Source/Observe.lean` | S04.02: ABI words and bytes of values (`Val.word`, `Val.word_int`), selectors, `Panic`/`Error` revert data (`panicData_code`, `panic_distinct`) and `revertOutcome`. |
+| `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
+| `Source/StateExamples.lean` | S04.01–S04.03 controls: nested memory aliasing, an independent memory copy, storage round trips, distinct panic outcomes, transfers, a reverted call undoing its writes. |
 
 ## The solkey corpus
 
