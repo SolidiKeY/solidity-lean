@@ -301,3 +301,7 @@ test('compound array decoder vectors retain dimensions, all calls and raw suffix
     [32,2,64,128,1,7,2,8,9],[32,64,128,1,7,2,8,9],[32,2,5,6,7,8]];
   for(let i=0;i<c.length;i++){assert.equal(c[i].failure,false);assert.deepEqual(c[i].expectedBytes,expected[i].flatMap(word));}
 });
+
+test('retries cannot mix self-try host adapters',()=>{
+  assert.throws(()=>compatible({selfTryAdapterSha256:'a'},{selfTryAdapterSha256:'b'}),/selfTryAdapterSha256/);
+});

@@ -1,3 +1,4 @@
+import {SELF_TRY_ADDRESS} from '../self-try-adapter.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync, writeFileSync, mkdtempSync, rmSync} from 'node:fs';
@@ -6,7 +7,7 @@ import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {hexToBytes} from '@ethereumjs/util';
-import {COMPILER_SHA} from '../solidity-upstream.mjs';
+import {COMPILER_SHA, revertBytes} from '../solidity-upstream.mjs';
 import {machine, observation, replayBytecode, HostLimit, INITIAL_GAS, runFixture} from './replay.mjs';
 
 // Reference compiler controls use the same integrity gate as the CLI.
@@ -101,3 +102,25 @@ for (const body of ['return address(0).balance;', 'return address(0).code.length
     } finally {rmSync(directory,{recursive:true,force:true});}
   });
 }
+
+for (const viaIR of [false,true]) test(`direct self try executes actual callee and checks deployment context (viaIR=${viaIR})`, async()=>{
+  const c=artifact(viaIR,'pragma solidity >=0.0; contract C { function g(bool b) public pure returns(uint){require(b);return 13;} function f(bool b) public view returns(uint){try this.g(b) returns(uint x){return x;}catch{return 9;}} }');
+  const vectors=[{signature:'f(bool)',args:['true'],expected:['13'],failure:false},
+    {signature:'f(bool)',args:['false'],expected:['9'],failure:false}];
+  const r=await replayBytecode(c,vectors,undefined,{kind:'direct-self-try',selfAddress:SELF_TRY_ADDRESS});
+  assert.equal(r.status,'working',JSON.stringify(r));
+  assert.deepEqual(r.observed.map(o=>o.values),[['13'],['9']]);
+  assert.equal(BigInt(r.deployment.address).toString(),SELF_TRY_ADDRESS);
+  const bad=await replayBytecode(c,vectors,undefined,{kind:'direct-self-try',selfAddress:'1'});
+  assert.equal(bad.status,'blocked');assert.match(bad.reason,/actual reference deployment/);
+});
+
+for(const viaIR of [false,true]) test(`raw ABI outputs and uncaught revert bytes remain exact (viaIR=${viaIR})`,async()=>{
+  const c=artifact(viaIR,'pragma solidity >=0.0; contract C { function text() external pure returns(string memory){return "kept";} function reason() external pure {revert("kept");} }');
+  const vectors=[{signature:'text()',calldata:[],failure:false,expectedBytes:revertBytes('0x20, 4, "kept"')},
+    {signature:'reason()',calldata:[],failure:true,expectedBytes:revertBytes('hex"08c379a0", 0x20, 4, "kept"')}];
+  const good=await replayBytecode(c,vectors);assert.equal(good.status,'working',JSON.stringify(good));
+  assert.deepEqual(good.observed.map(o=>o.failed),[false,true]);
+  const wrong=await replayBytecode(c,[{...vectors[1],expectedBytes:[]}]);assert.equal(wrong.status,'broken');
+  const malformed=await replayBytecode(c,[{...vectors[0],calldata:[256]}]);assert.equal(malformed.status,'blocked');
+});

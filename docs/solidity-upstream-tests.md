@@ -68,6 +68,17 @@ all adapted scalar observations, machine exceptions and provenance; they never
 merge into Lean coverage or convert model exhaustion into an expected failure.
 The Group 03 continuation records both methods' per-fixture results.
 
+A narrow direct-self-try adapter now supplies a checked concrete deployment
+address for primitive-ABI `this` try calls and preserves uncaught failure bytes
+in entrypoint testing. It refuses constructors/effectful initializers and other
+host observations. This is bounded runtime evidence, not a stronger global
+source profile. The optional bytecode runner has a distinct reference-only
+memory-Yul admission; that context cannot enter native replay. The
+[try/catch conditional account](feature-work/diamond-try.md#human-approved-conditional-account-and-native-adapter-repair)
+records exact guards, original fixture before/after results, native versus EVM
+limits and retained strict failures. Existing broad baseline descriptions above
+are historical; these narrow adapter results do not imply whole-corpus support.
+
 ## Reproduce
 
 Use Lean 4.24.0 from `lean-toolchain`, Node, Python 3 and `tar`.

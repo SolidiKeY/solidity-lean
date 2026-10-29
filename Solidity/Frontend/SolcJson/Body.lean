@@ -670,6 +670,9 @@ declaration's id), the statements to put before the current one (a pushed
 element's storage local), a counter for their names, and whether the
 current position may hoist a push. -/
 structure PState where
+  /-- Runtime entry adapters preserve an uncaught try's actual data by an
+  explicit catch-data/rethrow program. Ordinary source obligations are unchanged. -/
+  retainUncaughtTryData : Bool := false
   /-- Validated solc declarations, retained by identity for source metadata.
   This is importer input, not a second representation of typed model terms. -/
   declarations : List Json := []
@@ -2316,6 +2319,11 @@ partial def stmt1 (j : Json) : PM (List String) := do
           | "Error", [p] => pure s!"catch Error({p}) {b}"
           | "Panic", [p] => pure s!"catch Panic({p}) {b}"
           | e, _ => unsupported s!"the catch clause `{e}`"
+      let cs ← if (← get).retainUncaughtTryData &&
+          !catches.any (fun cl => J.str? cl "errorName" == some "") then do
+        let x ← freshDiscardName
+        pure (cs ++ [s!"catch (bytes memory {x}) \{ assembly \{ revert(add({x}, 32), mload({x})) } }"])
+      else pure cs
       modify fun st => { st with specLocals := okLocals }
       let b ← block (← PM.lift (J.get ok "block"))
       pure [s!"try {c}{rets} {b} {" ".intercalate cs}"]

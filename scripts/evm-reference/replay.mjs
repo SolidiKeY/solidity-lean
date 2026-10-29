@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {directSelfTryContext} from '../self-try-adapter.mjs';
 /** Optional machine reference, deliberately separate from Lean coverage. */
 import {readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync} from 'node:fs';
 import {dirname, resolve, join} from 'node:path';
@@ -73,7 +74,7 @@ export async function machine(stepLimit = STEP_LIMIT) {
   }};
 }
 
-export async function replayBytecode(artifact, vectors, stepLimit = STEP_LIMIT) {
+export async function replayBytecode(artifact, vectors, stepLimit = STEP_LIMIT, hostContext = null) {
   const vm = await machine(stepLimit);
   const observed = [];
   let address;
@@ -85,19 +86,30 @@ export async function replayBytecode(artifact, vectors, stepLimit = STEP_LIMIT) 
     const ctor = vector.signature === 'constructor';
     if (!address && !ctor) {
       const {result, metrics} = await vm.call({data:hexToBytes('0x'+artifact.evm.bytecode.object)});
-      deployment = creationObservation(result.execResult,'constructor',metrics);
+      deployment = {...creationObservation(result.execResult,'constructor',metrics),
+        address:result.createdAddress?.toString()};
       if (deployment.exception || !result.createdAddress) return {status:'blocked',reason:'default reference deployment failed: '+(deployment.exception ?? 'no address'),deployment,observed};
       address = result.createdAddress;
     }
+    if (!ctor && hostContext && BigInt(address.toString()).toString() !== hostContext.selfAddress)
+      throw new HostLimit('self-try context differs from actual reference deployment');
     const selector = ctor ? '' : artifact.evm.methodIdentifiers[vector.signature];
     if (!ctor && !selector) throw new HostLimit('no canonical method identifier: '+vector.signature);
-    const data = (ctor ? artifact.evm.bytecode.object : selector) + vector.args.map(word).join('');
+    const raw = Array.isArray(vector.calldata);
+    if (raw && !vector.calldata.every(b=>Number.isInteger(b) && b>=0 && b<256))
+      throw new HostLimit('invalid raw calldata byte');
+    const payload = raw ? Buffer.from(vector.calldata).toString('hex') : vector.args.map(word).join('');
+    const data = (ctor ? artifact.evm.bytecode.object : selector) + payload;
     const {result, metrics} = await vm.call({...(ctor ? {} : {to:address}),data:hexToBytes('0x'+data)});
     const actual = ctor ? creationObservation(result.execResult,vector.signature,metrics) :
       observation(result.execResult, vector.signature, metrics);
     observed.push(actual);
-    if (actual.failed !== vector.failure || JSON.stringify(actual.values) !== JSON.stringify(vector.expected) ||
-        (actual.failed && actual.returnData !== '0x'))
+    const expectedBytes = raw ? vector.expectedBytes : vector.failure ? (vector.revertBytes ?? []) : null;
+    if (expectedBytes && !expectedBytes.every(b=>Number.isInteger(b) && b>=0 && b<256))
+      throw new HostLimit('invalid expected ABI byte');
+    if (actual.failed !== vector.failure || (expectedBytes ?
+        actual.returnData !== '0x'+Buffer.from(expectedBytes).toString('hex') :
+        JSON.stringify(actual.values) !== JSON.stringify(vector.expected)))
       return {status:'broken',reason:'machine expectation mismatch',deployment,observed,expected:vector};
     if (ctor) {
       deploymentFailed = actual.failed;
@@ -108,7 +120,7 @@ export async function replayBytecode(artifact, vectors, stepLimit = STEP_LIMIT) 
       return {status:'blocked',reason:e.message,deployment,observed,blockedVector:vector};
     }
   }
-  return {status:'working',reason:'all scalar vectors match on pinned reference EVM',deployment,observed};
+  return {status:'working',reason:'all admitted ABI vectors match on pinned reference EVM',deployment,observed};
 }
 
 function hasHost(node) {
@@ -141,15 +153,17 @@ export async function runFixture(path, directory, compile) {
     const errors = (out.errors ?? []).filter(e=>e.severity === 'error');
     if (errors.length) { result.variants.push({pipeline,status:'blocked',reason:'reference compiler error',errors}); continue; }
     const ast = out.sources[fixture.mainSource].ast;
-    if (hasHost(ast)) throw new HostLimit('host-dependent behavior not adapted');
-    const contract = ast.nodes.filter(n=>n.nodeType === 'ContractDefinition' && n.contractKind === 'contract' && !n.abstract).at(-1)?.name;
+    const definition = ast.nodes.filter(n=>n.nodeType === 'ContractDefinition' && n.contractKind === 'contract' && !n.abstract).at(-1);
+    const hostContext = directSelfTryContext(ast, definition, {referenceOnly:true});
+    if (hasHost(ast) && !hostContext) throw new HostLimit('host-dependent behavior not adapted');
+    const contract = definition?.name;
     if (!contract) throw new HostLimit('no concrete deployment contract');
     const artifact = out.contracts[fixture.mainSource][contract];
     const vectors = semanticVectors(fixture, artifact.abi);
-    const provenance = {pipeline,contract,settings,inputSha256:sha(JSON.stringify(input)),
+    const provenance = {pipeline,contract,settings,...(hostContext ? {hostContext} : {}),inputSha256:sha(JSON.stringify(input)),
       creationSha256:sha(Buffer.from(artifact.evm.bytecode.object,'hex')),
       runtimeSha256:sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex')), vectors};
-    try { result.variants.push({...provenance,...await replayBytecode(artifact,vectors)}); }
+    try { result.variants.push({...provenance,...await replayBytecode(artifact,vectors,STEP_LIMIT,hostContext)}); }
     catch (e) { result.variants.push({...provenance,status:'blocked',reason:e.message}); }
     } catch (e) { result.variants.push({pipeline,status:'blocked',reason:e.message}); }
   }
@@ -183,6 +197,7 @@ async function main(args) {
   const report = {metadata:{commit:PIN,compiler:VERSION,compilerSha256:COMPILER_SHA,
     archiveSha256:manifest.archiveSha256,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
     adapterSha256:sha(readFileSync(new URL('../solidity-upstream.mjs',import.meta.url))),
+    selfTryAdapterSha256:sha(readFileSync(new URL('../self-try-adapter.mjs',import.meta.url))),
     dependencyLockSha256:sha(readFileSync(new URL('package-lock.json',import.meta.url))),
     engine:'@ethereumjs/evm 10.1.3',hardfork:'osaka',
     allowUnlimitedContractSize:true,allowUnlimitedInitCodeSize:true,codeSizeRule:'pinned test/EVMHost.cpp:418-441 (code-deposit gas, no EIP-170 cap)',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,

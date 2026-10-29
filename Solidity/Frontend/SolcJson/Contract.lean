@@ -1287,6 +1287,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
     { declarations, storageTuples, compilerCode, namedErrorSourceOrder,
+      retainUncaughtTryData := entrypoints,
       returnStorageIndex := ((J.id? d).bind (lookupBy · storageTuples)).map (·.index),
       selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
       funParams, constants, enumValues, enumBounds, enumNativeNames, enumCarriers, enumDecodeTypes, valueTypes, freeFunctions, libraries,

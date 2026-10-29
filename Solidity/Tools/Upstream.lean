@@ -260,6 +260,11 @@ def canonical (C : Contract) (d : FunDecl) (f : String) (bytes : List Nat)
 
 end ABI
 
+/-- Typed host-context validation, separate from runtime JSON/decimal parsing.
+No value outside the nonzero 160-bit deployment domain can reach the cast. -/
+def selfTryContextValid (kind : String) (address : Nat) : Bool :=
+  kind == "direct-self-try" && decide (address ≠ 0 ∧ address < 2^160)
+
 /-- Replay complete supported vector sequences. Fuel exhaustion is inconclusive. -/
 def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run do
   let bad := rows.filter fun r => r.status != .elaborated && r.status != .skipped
@@ -272,14 +277,29 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
   let .ok vectors := data.getObjValAs? (Array Json) "vectors"
     | return result "blocked" "missing execution vectors"
   if vectors.isEmpty then return result "blocked" "no execution vectors"
-  let tx : TTx := { msgSender := PrimTy.ofIntD .uint 103164821458651970696730694074090566015747358738 }
+  if (data.getObjValAs? Bool "requiresSelfContext").toOption == some true &&
+      !(data.getObjVal? "hostContext").isOk then
+    return result "blocked" "missing self-try deployment context"
+  let selfContext : Option Nat := if (data.getObjVal? "hostContext").isOk then do
+    let host ← (data.getObjVal? "hostContext").toOption
+    let kind ← (host.getObjValAs? String "kind").toOption
+    let address ← (host.getObjValAs? String "selfAddress").toOption
+    let n ← address.toNat?
+    if selfTryContextValid kind n then some n else none
+  else some 0
+  let some selfAddress := selfContext | return result "blocked" "invalid self-try deployment context"
+  let tx : TTx :=
+    { msgSender := PrimTy.ofIntD .uint 103164821458651970696730694074090566015747358738
+      selfAddress := PrimTy.ofIntD .uint (Int.ofNat selfAddress) }
   let mut state := State.deploy C tx
   let mut deployed := false
   let mut deploymentFailed := false
   let mut observed : Array Json := #[]
+  let contextEvidence : List (String × Json) := if (data.getObjVal? "hostContext").isOk then
+    [("selfAddress", toJson (toString selfAddress))] else []
   for vector in vectors do
     let stopped (status reason : String) (extra : List (String × Json) := []) :=
-      result status reason (("observed", toJson observed) :: extra)
+      result status reason (contextEvidence ++ (("observed", toJson observed) :: extra))
     if deploymentFailed then return stopped "blocked" "calls after failed deployment need the upstream empty-code host"
     let .ok signature := vector.getObjValAs? String "signature"
       | return stopped "blocked" "missing signature"
@@ -379,7 +399,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       ("failed", toJson failed), ("values", toJson values), ("revertBytes", toJson bytes), ("returnBytes", toJson returned)] ++
       if raw then [("calldataBytes", (vector.getObjVal? "calldata").toOption.getD Json.null)] else []))
     let stopped (status reason : String) (extra : List (String × Json) := []) :=
-      result status reason (("observed", toJson observed) :: extra)
+      result status reason (contextEvidence ++ (("observed", toJson observed) :: extra))
     let .ok expectedFailure := vector.getObjValAs? Bool "failure"
       | return stopped "blocked" "missing expected outcome"
     let .ok expectedValues := if raw then .ok [] else vector.getObjValAs? (List String) "expected"
@@ -405,7 +425,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
     if ctor then
       deployed := true
       deploymentFailed := failed
-  return result "working" "all supported runtime vectors match" [("observed", toJson observed)]
+  return result "working" "all supported runtime vectors match" (contextEvidence ++ [("observed", toJson observed)])
 
 syntax (name := upstreamBatch) "#upstream_batch " str " to " str : command
 

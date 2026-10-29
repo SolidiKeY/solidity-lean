@@ -1,13 +1,21 @@
 # External try execution witnesses — partial step 11
 
-**Step 11 is not complete.** This increment adds deterministic external-try
-execution equations, normal-return witnesses, and a state-indexed deterministic
-witness-to-formula interface with allocated catch-data transport. It does not replace
-`tryCallDiamond`, `catchDataDiamond`, or add symex/source-obligation automation.
-The original gaps, target certificates, exclusions, Waivers, DecisionTheorem,
-profile choices and existing verdict/observation pins are unchanged.
-The requested universal-family continuation is now explicitly refuted for the
-quoted control over the original source-domain builders; see the final section.
+**Step 11 remains incomplete at its native source-adapter boundary.** The human
+selected unchanged semantics and explicit conditional success/failure statements
+for this assignment. That resolves the earlier request for a profile decision;
+no stronger global admissibility premise is introduced. The current increment
+provides exact typed conditions for all external/catch-data outcomes, ordinary
+formula transport, and conditions for the existing creation-try interface.
+Four original fixtures now pass native replay in both pipelines; sixteen pass
+separate compiler/EVM replay. Neither replay establishes universal source
+validity. The remaining native dependencies are enumerated below.
+
+All original unconditional claims and their certified refutations remain.
+`tryCallDiamond`/`catchDataDiamond`, callback judgments, the six original gap
+statements and target certificates, exclusions, Waivers, DecisionTheorem,
+profile choices and frozen expectations are unchanged. The historical sections
+retain their original checkpoint results; the final section records the current
+human-approved conditional account and fresh validation.
 
 ## Initial proved scope (`fab16f7c`)
 
@@ -517,6 +525,256 @@ checks or writes. They found no confirmed defect, confirmed the exact default
 source domain, and required the quoted-program versus imported-declaration
 boundary to stay explicit as above. Both independently found no sound positive
 reached-try source path under the unchanged assumptions and callback semantics.
-The remaining blocker is a human semantics/statement decision, not executor
-provisioning. New shared edits are one module import, one module-map row and
+At that checkpoint the remaining blocker was a human semantics/statement
+decision, not executor provisioning. The subsequent human FIRST OPTION resolves
+that choice for this assignment, as recorded below. New shared edits are one module import, one module-map row and
 this owning record; the implementation is one new task-specific module.
+
+
+## Human-approved conditional account and native adapter repair
+
+The human explicitly chose **keep existing semantics; prove explicit conditional
+success and certified failure cases**. This replaces the universal witness-family
+requirement for this assignment only. It does not authorize an altered callback
+judgment or a stronger global admissibility profile. No proposed revert-agent
+judgment is imported or required. The original universal source counterexamples
+remain proved in `Examples/Tactics/ExternalTryUniversal.lean`; the leading-try
+callback obstruction remains in `Counterexamples/DiamondTry.lean`.
+
+### Exact typed statements
+
+[`Semantics/TryConditions.lean`](../../Solidity/Semantics/TryConditions.lean)
+adds `TRun.tryCondition`, indexed by the complete `TRes (Out C σ.H Γ)`, and
+`tryCall_eq_iff`, proving both directions under either self flag. The predicate
+uses actual receiver evaluation, actual self-dispatch/callee result or oracle
+lookup, actual decoding, actual selected-body result, exact environment binding,
+heap extension composition and scope drop. It never invokes the try evaluator
+it characterizes or changes the admissible state space.
+
+| Actual condition | Exact operational consequence |
+|---|---|
+| Receiver is zero | Caller revert, before lookup/catch |
+| Non-self call, lookup absent | Caller revert; empty oracle is not a caught alternative |
+| Oracle success, decoder fails | Exact decoder halt, outside catches |
+| Oracle success, decoded returns | Exact success-body result and return-binding scope drop |
+| Oracle Error/Panic/other category | Exact selected body result; catches restart at caller state |
+| Actual self-callee normal result | Actual returned state/heap passed to success body |
+| Actual self-callee revert/data/panic | Existing Error/Panic decoding and catch selection, with actual code |
+| Other self-callee halt | Exact halt forwarded |
+| Selected success/catch body halts | That halt propagates; no recursive catching of its own body |
+| Receiver/argument capture prefix halts | Exact halt before try; no catch is entered |
+| Capture prefix normal | Exact typed captured state and composed heap extension are used |
+
+`catchCondition`/`catchData_eq_iff` reuse the existing `catchBytes`,
+`CatchKind.decode` and `litBytesT` machinery. This retains actual Error/raw
+payload bytes, allocation and handler outcomes, including malformed data and
+handler failure. Existing payload allocation witnesses/normal transport are
+preserved rather than replaced with a second allocator theorem.
+
+[`Calculus/Sound/TryConditions.lean`](../../Solidity/Calculus/Sound/TryConditions.lean)
+transports each explicit actual-outcome condition to the ordinary deterministic
+formula with arbitrary remaining program, frames and postcondition.
+`diamond_result_iff` and `holds_diamond_outcomes_iff` explicitly retain the
+current diamond's **normal postcondition OR exhaustion** reading. Exhaustion is
+not certified normal completion. No theorem promotes these guards to `ValidT`,
+`ValidC`, `holdsC` or a global source assumption.
+
+[`Semantics/TryCreateConditions.lean`](../../Solidity/Semantics/TryCreateConditions.lean)
+characterizes only the already-existing typed `World.tryCreate` interface:
+argument errors and static callers are outside its catch boundary; actual
+creation success uses the returned world/handle; catchable creation errors run
+the handler at the original world; divergence/exhaustion and handler failures
+propagate. No world implementation, creation source adapter or payment rule is
+added.
+
+[`Examples/Tactics/TryConditions.lean`](../../Solidity/Examples/Tactics/TryConditions.lean)
+proves `guarded_source_success` for any typed state satisfying its explicit
+actual oracle lookup premise. Its original source-shaped diamond has no box
+annotation and consumes the new specialized condition/formula interface. It is
+conditional ordinary `holds`, not unqualified imported-source proof automation.
+The earlier bounded witness/postcondition helper remains available. New kernel
+controls retain success-body, catch-body, payload-body, continuation and frame
+failures; missing context and zero/wide/reference-only deployment contexts are
+refused. Typed validator proofs and runtime JSON/decimal parser tests are
+separate evidence. The complete, truncated and trailing Panic controls certify
+the unchanged exact-36-byte model policy; they do **not** assert that solc
+rejects trailing bytes. Original zero-address, missing-entry, malformed-return,
+payload observations and callback refusals remain unchanged.
+
+### Narrow native integration and original fixture evidence
+
+`scripts/self-try-adapter.mjs` admits only resolved direct `this` try calls to
+primitive-ABI functions for native replay. It records the actual CREATE address
+for the existing replay caller/nonce. The separate bytecode control checks that
+address against actual deployment and refuses a mismatched context. Foreign
+calls, context observations, constructors, effectful initializers, assembly,
+creation and unsupported calls remain refused. Constructor-helper/modifier and
+initializer-helper negative tests cover the independent review's confirmed
+predeployment finding; that finding was repaired before final validation.
+
+`Tools/Upstream.lean` validates the explicit context kind and nonzero 160-bit
+address before installing it, refuses a required-but-missing context, and
+retains it on successful and partial/blocked reports. Jobs without context keep
+their prior input/report behavior. This is a concrete bounded execution input,
+not universal verification of arbitrary callers/worlds.
+
+Only `testing entrypoints` enables the frontend's new default-false
+`retainUncaughtTryData` flag. When no catch-all exists, its hygienic raw-data
+catch rethrows through the existing canonical `revertRaw` path. Explicit
+catch-all bodies and ordinary specification/source obligation import keep their
+prior behavior. This repaired the original `panic.sol` prefix's lost Error
+bytes; the full fixture still stops at the independent mixed-return adapter.
+
+The optional EVM runner executes actual pinned compiler bytecode. Its distinct
+`direct-self-try-reference` context permits non-scalar callee signatures and a
+recursive whitelist of memory/arithmetic/return/revert Yul operations. Unknown
+Yul shapes/instructions, context/world instructions and constructor effects
+remain refused. The native validator rejects this context kind. Complete raw
+calldata, return and revert bytes are compared; wrong bytes, invalid calldata,
+wrong deployment address and forbidden nested Yul instructions are negative
+controls. Gas, instruction and fixture budgets remain unchanged. Optional exact
+reference packages live on workspace disk, outside the core; all twenty locked
+transitive package versions/paths match the tracked lockfile.
+
+The unchanged twenty original archived source files and expectations were
+replayed, including every required legacy/viaIR pipeline. The native before
+report has twenty blocked files (eighteen host/world, two EVM constraints).
+Current native replay has **four working, sixteen blocked, zero broken**;
+its strict command exits **1**, so the mandatory whole-family gate is still
+open. Separate reference replay has **sixteen working, four blocked**. Its
+successes do not clear native coverage. `fixture-account.json/.md` records each
+before/after row, source hashes, report paths and full ordered native/reference
+byte comparisons. Both modes' two observations in each complete native fixture
+match reference bytes; `panic.sol`'s first four observations in each mode also
+match, but that prefix is explicitly not a complete fixture pass.
+
+| Original fixture | Before native | Current native | Reference EVM |
+|---|---|---|---|
+| assert_pre_byzantium.sol | blocked | blocked | blocked |
+| assert.sol | blocked | working | working |
+| create.sol | blocked | blocked | blocked |
+| invalid_error_encoding.sol | blocked | blocked | working |
+| lowLevel.sol | blocked | blocked | working |
+| malformed_error.sol | blocked | blocked | working |
+| malformed_panic_2.sol | blocked | blocked | working |
+| malformed_panic_3.sol | blocked | blocked | working |
+| malformed_panic_4.sol | blocked | blocked | working |
+| malformed_panic.sol | blocked | blocked | working |
+| nested.sol | blocked | blocked | working |
+| panic.sol | blocked | blocked | working |
+| require_pre_byzantium.sol | blocked | blocked | blocked |
+| require.sol | blocked | working | working |
+| return_function.sol | blocked | blocked | working |
+| simple_notuple.sol | blocked | working | working |
+| simple.sol | blocked | working | working |
+| structured.sol | blocked | blocked | working |
+| structuredAndLowLevel.sol | blocked | blocked | working |
+| try_catch_library_call.sol | blocked | blocked | blocked |
+
+Remaining native dependencies are precise:
+
+* `lowLevel`, `nested`, `structured`, `structuredAndLowLevel`, and `panic` reach
+  `Tools.Upstream.ABI.program`'s existing mixed return capture refusal at a
+  reference result (`multiple reference returns need a typed return adapter`).
+  The existing capture path uses primitive tuple targets. General reference
+  tuple/native value-entry support belongs to the excluded prior task lane;
+  no unmerged work is imported.
+* The six malformed/invalid payload fixtures require physical assembly or a
+  reference-valued self-call argument adapter. The intrinsic model does not
+  expose physical EVM memory. In particular `malformed_panic_2/_3` accept
+  trailing Panic data in actual compiled execution, whereas the unchanged
+  model's `decodePanic` requires exactly 36 bytes. Both facts are retained;
+  no decoder or expected result is changed to force parity.
+* `return_function` requires an external function-valued ABI return adapter.
+  Its actual reference execution passes both pipelines; native admission
+  remains refused.
+* `create` requires source/world creation composition; `try_catch_library_call`
+  requires library host/linking integration. Both remain blocked in reference
+  replay as well. They are outside this lane.
+* The two `_pre_byzantium` files require `<byzantium`; the fixed Osaka replay
+  profile remains incompatible. They stay blocked, not silently reprofiled.
+
+No callback-source integration is sound for a reached leading try diamond
+under the current universal callback judgment; its existing certified
+counterexample remains. Unconditional deterministic source validity also stays
+refuted on the original state domain. The approved conditional account is
+separate and does not claim full source-proof automation or step-11 completion.
+
+### Fresh validation and review
+
+The retained executor, original branch/HEAD (`fbc7dd0a` before this increment),
+base ancestry, origin and Lean/Lake versions were rechecked. The initial
+resumption KeySort gate passed before changes: exit 0, one second,
+24,993,792-byte group peak. The first attempt failed only because the documented
+lock directory had disappeared; that failure is retained, the directory was
+restored, and the same VM was used. No replacement VM/clone/branch was created.
+
+All new/changed Lean owning-file diagnostics report structured `success: true`,
+`partial: false`, no errors or failed dependencies. Final root diagnostics are
+also clean. Early failed proof/decoder/parser attempts remain retained and are
+not counted as passes. New theorem signatures and full outputs are audited in
+`conditional/Axioms.lean` and `axioms-expanded.log`: 23 new proofs, of which 13
+use exactly `[propext, Classical.choice, Quot.sound]`, five use `[propext]`, and
+five use no axioms. Together with the preserved/rechecked earlier 20, 28 and six
+proof audits, **77 distinct named proofs** have actual axiom evidence. No new
+axiom or sorry was introduced.
+
+| Command/gate | Exit | Seconds |
+|---|---:|---:|
+| Pre-edit current KeySort | 0 | 1 |
+| Full `./run-lean.sh` after frontend/import changes | 0 | 2340 |
+| Final warm `./run-lean.sh` after decoder controls | 0 | 4 |
+| 23-proof final axiom audit | 0 | 2 |
+| Prior 28 / original 20 / universal six audits | 0 / 0 / 0 | 3 / 4 / 2 |
+| Final root owning diagnostics | 0, structured success | 3 |
+| check-orphans / check-layers / automatic --strict | 0 / 0 / 0 | 0 / 0 / 0 |
+| check-trust | 0 | 4 |
+| Inventory regeneration | 0 | 1 |
+| Script regression tests (84, no skip/fail) | 0 | 3 |
+| Original call/exception EVM vectors (88) | 0 | 4 |
+| Fifteen compatible original EVM fixtures, both modes | 0 each | 48 total |
+| Remaining five EVM fixture commands | 1 / 1 / 1 / 0 / 1 | 15 total |
+| Original native family final strict replay | **1** | 13 |
+
+The remaining-five order is assert_pre_byzantium, require_pre_byzantium, create,
+return_function, try_catch_library_call. The driver loop's exit zero is not a
+passing family gate; the individual blocked exits are retained. Final native
+family driver exit 1 is likewise retained. `final-gates.tsv`, `confirmation.tsv`,
+per-fixture reports, script logs and cgroup outputs are in
+`/workspace/next10-diamond-try-evidence/conditional/`. The full build includes
+695 library and 259 TestSuite jobs and the 377-taclet/131-read-bearing check.
+Trust reports 724 sources, 240 inventoried sites, zero findings. Automatic
+counts remain 491/61 budgeted/11 refuted/zero pending. The inventory was
+regenerated by its script with no inflated support classification.
+
+All writes/checks use the documented writer lock and serialize heavy jobs.
+Every group verifies 12 GiB memory and zero swap, with `LEAN_NUM_THREADS=1`
+and Lean `-j1` through the temporary Lake config, not unsupported lake-build
+flags. The long confirmation group peaked at **12,519,370,752 accounted bytes**
+and **11,453,388 KiB sampled aggregate RSS**, with zero max-limit/OOM events;
+these are different measurements, not interchangeable. The final warm group
+peaked at 762,048,512 accounted bytes and 1,609,412 KiB sampled RSS. The reference
+15-fixture group peaked at 434,409,472 bytes and 379,512 KiB sampled RSS.
+The cap reserves the remainder of the 16 GiB VM for OS/outside-group work;
+resumption also checked available VM RAM. No unrelated worker was killed,
+cache moved to RAM, configuration changed or budget raised. Temporary Lake
+configuration is removed before commit; disk caches and all earlier evidence
+remain.
+
+Independent read-only finder and skeptic reviewed the exact condition/formula/
+creation statements, guarded example, failure controls, native context and
+uncaught-data transport, and reference-only Yul/byte comparison expansion.
+Neither used Lean/server/checks/writes. The finder confirmed the predeployment
+constructor/initializer issue; conservative refusal plus three negative tests
+repaired it. Both final reviews found no further confirmed defect and required
+conditional `holds`, native observations and compiled-bytecode observations to
+remain separate. Their reviewed scope excludes proving a world adapter,
+physical-memory equivalence or universal source automation.
+
+Shared edits: four root imports/module-map registrations; narrow entrypoint
+frontend state/try rendering; native replay context validation; native/reference
+runners and shared structural admission helper/tests; retry adapter provenance;
+this owning record, the upstream adapter documentation and optional EVM README. No frozen fixture,
+coverage target, original gap definition, decision theorem or callback semantics
+was edited. Full original native source automation and its blocked pipelines
+remain open dependencies, not a completed assignment.
