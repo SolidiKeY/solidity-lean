@@ -744,9 +744,18 @@ theorem is restated against them.
     elaborator.
   - `node scripts/check-orphans.mjs`: 0 orphaned.
   - `bash scripts/check-trust.sh`: 0 findings.
-  - The full `./run-lean.sh` result is recorded in the CLOUD-RESULT of this
-    batch.
+  - `./run-lean.sh`: `check-layers` passes; `lake build` "Build completed
+    successfully (704 jobs)", `Solidity.Roadmap.Contracts` built in 2.8 s;
+    `lake build SolkeyTestSuite` "Build completed successfully (262 jobs)".
+    The first cold run lost `TestSuite.Derived15`/`Derived17` to exit 137
+    (memory, parallel jobs) and the warm re-run built them. The script's last
+    step, `check-solkey.sh`, exits 1: "37 mismatch(es)" between the sort
+    annotations and the `../solkey` checkout on this VM. No annotation or
+    SortCheck file is in this diff, so this predates G01; it is reported, not
+    fixed here.
   - Every cited declaration and line was checked with `git grep` at the head.
+- **Elapsed:** about 1 h 15 min (01:00–02:15 UTC, 2026-10-29), most of it
+  the cold build (49 min, then 3 min warm).
 - **Ledger:** the [child obligations](#child-obligations) table.
 - **Remaining:** every contract instance (all groups above) and the eight open
   scope questions.
