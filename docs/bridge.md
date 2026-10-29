@@ -459,7 +459,7 @@ layout remain outside this optional adapter.
 
 The storage row now has an optional, conditional compiler refinement in
 `Bridge/SolidityBridge/ExternalEvm/StorageSlots.lean`, imported with its
-regressions by `Checks.lean`. It does not lift excluded source physical-layout
+regressions by `Bridge/SolidityBridge/Checks.lean`. It does not lift excluded source physical-layout
 or assembly semantics.
 
 - `StorageAddresses.lean` interprets roots modulo `2^256`, recursively hashes
@@ -991,7 +991,7 @@ human approvals, every task commit, full logs, resource reports and reviews.
 
 The merge of `109ba72ac8cf62f4aa4c13ae5590802244400bd0` into
 `c8fd7b7ce6276497229b3aae8a65c27ef7cc78ed` retains all four arithmetic
-regression imports and `ExternalEvm.StorageSlotExamples` in `Checks.lean`.
+regression imports and `ExternalEvm.StorageSlotExamples` in `Bridge/SolidityBridge/Checks.lean`.
 The resolved file is byte-identical to the latter parent. Independent read-only
 finder and skeptic reviews found no lost declarations, audits or import cycle;
 neither used the Lean server. Focused whitespace and conflict-marker checks pass.
