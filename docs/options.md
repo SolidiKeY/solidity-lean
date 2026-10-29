@@ -273,8 +273,10 @@ the oracle), so a send under the diamond is the run's:
 `CallbackTaclet.sendWithCallbackDiamond` (solkey's, read by `ProvesC.sendD`)
 and `ProvesC.sendDetD` (`sendNoCallbackDiamond` for a gas-limited send), sound
 over any modality (`holdsC_sendCb`, `holdsC_sendDet`). A `transfer` stays
-without a diamond, by the earlier decision: the run books it whatever the
-funds, and a refused payment reverts the machine alone (`Evm.compile_correct`),
+without a diamond, by the earlier decision: the run reverts on a refusal
+(`TRun.transfer`, `State.canPay`) that the box rule does not see, and
+`Evm.compile_correct` still states a payment case where the machine alone
+reverts (a stale weakening no proof reaches, [G04 R32](feature-work/roadmap-g04-restrictions.md#27-payments)),
 so `⟨ transfer ⟩` would claim a termination the compiler theorem does not
 back. solkey's `transferNoCallbackDiamond` and `transferWithCallbackDiamond`
 stay unclaimed (`RuleShapes.unclaimedTaclets`).

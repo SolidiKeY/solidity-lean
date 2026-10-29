@@ -212,6 +212,7 @@ Integration notes (2026-10-29):
   `Solidity/Hash/CollisionBound.lean`.
 - **G03 ledger** is not merged yet: its checker needs the second-round
   decisions.
+Decision impact (2026-10-29): [roadmap-decisions-impact.md](feature-work/roadmap-decisions-impact.md) maps every user decision to the definitions, theorems, rules, tests, scripts, documents and Codex lanes it affects, with owners; G04 R32–R36 now carry the decided premises; no obligation closed.
 
 ### Independent source definitions — after G00–G07, before wave 1
 

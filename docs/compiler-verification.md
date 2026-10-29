@@ -127,16 +127,19 @@ theorem compile_correct {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F'
 Both succeed, the machine's stack as it was and its storage, locals and
 balances representing the run's final state; or both halt, the run by a
 revert or a panic (a failed `assert`), the machine by a revert, as solc's
-`Panic(0x01)` is one; or the program pays (`Prog.pays`), the world refuses a
-payment, and the machine alone reverts. The third is the price of a
-`transfer` that books `net` and nothing else (`TRun.transfer`): the
-run does not know whether the contract's account covers the amount or
-whether the recipient accepts it, and the machine does. So the theorem is for
-the box: what the machine does when it succeeds, the run did
+`Panic(0x01)` is one; or the program pays (`Prog.pays`) and the machine
+alone reverts. No proof reaches that third case: the typed run checks the
+contract's funds and the recipient's `sendKey` response (`TRun.transfer`,
+`State.canPay`), and `Sim.funds` and `Sim.oracle` make the machine's `CALL`
+agree with it, so `transfer_sim` gives agreement on both success and refusal
+and `StmtOut.refused` is only propagated from an inner `refused`, never originated. The third case, and the
+refused-payment alternative of the fourth, are a stale weakening of the
+statement ([G04 R32](feature-work/roadmap-g04-restrictions.md#27-payments),
+owned by G43). What the machine does when it succeeds, the run did
 (`compile_box`), and a program that pays no one agrees exactly
 (`compile_exact`).  The fourth case is a loop no number of turns ends:
 the typed run diverges, and the machine has no outcome (`loopRun`'s fault),
-or had stopped at a refused payment before the loop. The typed run has no stuck outcome, so no `not_stuck` is
+or, as stated, a refused payment before the loop. The typed run has no stuck outcome, so no `not_stuck` is
 needed, and `inFragP` says only what the compiler covers.
 
 **The ledger is the money that moved.** KeY's `net` is a ghost of the
@@ -159,7 +162,7 @@ theorem compile_net {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F 
     (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax)
     (hrun : run (compileProg b P) m = .ok m' 0) :
     ∃ o, Solidity.Prog.run σ P = .ok o ∧
-      (∀ a : Nat, a < W → a ≠ m'.self → netAt o.st.net a = (m'.bal₀ a : Int) - m'.bal a) ∧
+      (∀ a : Fin W, a ≠ m'.self → netAt o.st.net a.1 = (m'.bal₀ a : Int) - m'.bal a) ∧
       netAt o.st.net m'.self = 0
 ```
 
@@ -174,19 +177,22 @@ pushes):
 
 ```lean
 theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')
-    (hL : Prog.pushes P < Lmax) (balance : Nat) (hb : balance < W) (bal : Nat → Nat)
-    (self : Nat) (hs : self < W) :
-    (∃ o m', Solidity.Prog.run (freshT C balance hb self hs) P = .ok o ∧
+    (hL : Prog.pushes P < Lmax) (balance : Nat) (hb : balance < W) (bal : Fin W → Nat)
+    (self : Fin W) (hbalance : balance = bal self) :
+    (∃ o m', Solidity.Prog.run (freshT C balance hb self) P = .ok o ∧
         run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ (r : SRef C (.prim .uint)) s (v : PrimTy.uint.Denote),
         PathSlot C false r s →
         o.st.storage.findLive r = some (.prim v) → m'.store s = v.1.toNat) ∨
-    ((Solidity.Prog.run (freshT C balance hb self hs) P = .error .revert ∨
+    ((Solidity.Prog.run (freshT C balance hb self) P = .error .revert ∨
         (Prog.asserts P = true ∧
-          Solidity.Prog.run (freshT C balance hb self hs) P = .error .panic)) ∧
+          Solidity.Prog.run (freshT C balance hb self) P = .error .panic)) ∧
       run (compileProg 0 P) (Machine.init bal self) = .revert) ∨
     (Prog.pays P = true ∧ run (compileProg 0 P) (Machine.init bal self) = .revert ∧
-      ∃ o, Solidity.Prog.run (freshT C balance hb self hs) P = .ok o)
+      ∃ o, Solidity.Prog.run (freshT C balance hb self) P = .ok o) ∨
+    (Solidity.Prog.run (freshT C balance hb self) P = .error .diverge ∧
+      (run (compileProg 0 P) (Machine.init bal self) = .fault ∨ (Prog.pays P = true ∧
+        run (compileProg 0 P) (Machine.init bal self) = .revert)))
 ```
 
 every `uint` path the typed storage holds, the machine holds at its slot.
@@ -217,16 +223,21 @@ says why):
 
 - **slots are terms** — `root o`, `hash k s o` (`keccak256(k ‖ s) + o`),
   `data s o` (`keccak256(s) + o`) — so keccak never collides, solc's assumption
-  made structural; an offset added to a slot does not wrap;
+  made structural; an offset added to a slot does not wrap. This is global
+  injectivity, which the [user decisions](solidity-scope.md#user-decisions-2026-10-29)
+  forbid in the final theorem: there, only a per-run collision premise over
+  the preimages a run hashes is approved (G04 R34, owned by G27.05/G46.05);
 - **relative forward jumps** (`exec` carries the instructions still to skip,
-  so it is structural; the fragment has no loops (`inFrag` refuses a
-  `Stmt.loop`), and the one solc emits for it,
-  `checked_exp_helper`'s, is unrolled: it runs at most 255 times);
+  so it is structural; a source loop is one structured instruction,
+  `LOOP cond body` (`Instr.loop`, `loopRun`), and the loop solc emits inside
+  `**`, `checked_exp_helper`'s, is unrolled: it runs at most 255 times);
 - **locals in memory cells** addressed by their level in the context (`cell`,
   `lvl`; solc keeps them on the stack); `KECCAK256` takes its inputs from the stack;
 - **the world is the accounts' balances** (`bal`, `self`); a recipient's code
   is not run, and whether it accepts a payment is `accepts`, which no
-  instruction changes and the theorem quantifies over; `CALL` takes an
+  instruction changes and the theorem quantifies over (a fixed, history-free
+  oracle; the user decisions require any outcome, depending on history, for
+  untyped recipients, and actual execution for typed ones: G04 R33, G43/G47); `CALL` takes an
   address and a value only, and an address is a word, not cut to 160 bits;
 - no gas, no stack limit.
 
@@ -294,8 +305,8 @@ Out, and why:
 | Construct | Why |
 | --- | --- |
 | memory on the core path | The checked entry selects the memory path instead (above). |
-| loops whose body pushes, pays or shrinks | A loop is one structured instruction, `LOOP cond body` (`Instr.loop`, `loopRun`: its turns, a fault where none ends it; an assembler writes the `JUMPDEST` and the `JUMP` back), simulated turn by turn (`loop_sim`, `TurnRel`, by induction on the turns). Its body may not push (the bound `L + Prog.pushes P ≤ 2^64` counts each push once), pay (a refused payment stops the machine while the typed run goes on, and the run's later turns are not related), or shrink (the fragile aliases a turn forgets must be forgotten before every turn). |
-| storage copies of a value holding a dynamic array (`basketA = basketB;`, `matrix = …`) | solc copies element by element and clears the old tail: a loop over a run-time length; the machine has no loops. Copies of static values (`staticF`) are in. |
+| loops whose body pushes, pays or shrinks | A loop is one structured instruction, `LOOP cond body` (`Instr.loop`, `loopRun`: its turns, a fault where none ends it; an assembler writes the `JUMPDEST` and the `JUMP` back), simulated turn by turn (`loop_sim`, `TurnRel`, by induction on the turns). Its body may not push (the bound `L + Prog.pushes P ≤ 2^64` counts each push once), pay (`StmtOut` keeps the stale `refused` case of the third disjunct, which the turn relation `TurnRel` does not mirror), or shrink (the fragile aliases a turn forgets must be forgotten before every turn). |
+| storage copies of a value holding a dynamic array (`basketA = basketB;`, `matrix = …`) | solc copies element by element and clears the old tail: a loop over a run-time length, which the compiler does not emit. Copies of static values (`staticF`) are in. |
 | `push()` of a struct or an array element | solc does not clear the slot it grows into (a `pop` cleared it), and the interpreter revives the popped value there (`pushSlot`); the representation does not relate slots past the end (relating them would need `delete` and `pop` to clear them, which for a dynamic array is a loop). `push()` of a primitive (solc writes `0`) and `push(e)`/`push(sp)` (every slot written) are in. |
 | a fragile alias used after a `pop` or `delete` | See above: it may name a slot past the end, which the representation does not relate. |
 | `address(this).balance` | Transfers debit the typed balance and the machine account together; `Sim.funds` records their agreement. Direct compilation of the balance read remains outside the fragment. |
