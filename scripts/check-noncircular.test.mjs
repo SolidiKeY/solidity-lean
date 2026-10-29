@@ -46,3 +46,29 @@ test("controls import the contracts only", () => {
   assert.deepEqual(check(mods({ "Solidity.Roadmap.Controls": "import Solidity.Roadmap.Contracts\ndef v : EvmSpec where\n", "Solidity.Roadmap.Contracts": "" })), []);
   assert.ok(check(mods({ "Solidity.Roadmap.Controls": "import Solidity.Evm.Compile\n", "Solidity.Evm.Compile": "" })).some((b) => b.startsWith("CONTROL")));
 });
+
+test("qualified names, multi-module imports and modifiers are caught", () => {
+  for (const src of ["def s : Solidity.Roadmap.SourceSpec where\n", "def s := ({ t with } : Roadmap.SourceSpec)\n"]) {
+    const bad = check(mods({ "Solidity.Other": "import Solidity.Semantics.Run\n" + src, "Solidity.Semantics.Run": "" }));
+    assert.ok(bad.some((b) => b.startsWith("WHITELIST")), src);
+  }
+  assert.ok(check(mods({ "Solidity.Source.A": "def x := Solidity.Roadmap.Lowering\n" })).some((b) => b.startsWith("LATER")));
+  for (const imp of ["import Solidity.Roadmap.Contracts Solidity.Semantics.Run\n", "public import Solidity.Semantics.Run\n", "/- c -/\nimport Solidity.Source.B\n  import Solidity.Semantics.Run\n"]) {
+    const bad = check(mods({ "Solidity.Source.A": imp, "Solidity.Source.B": "", "Solidity.Roadmap.Contracts": "", "Solidity.Semantics.Run": "" }));
+    assert.ok(bad.some((b) => b.startsWith("WHITELIST")), imp);
+  }
+  assert.deepEqual(check(mods({ "Solidity.Source.A": "/-\nimport Solidity.Semantics.Run\n-/\n", "Solidity.Semantics.Run": "" })), []);
+});
+
+test("the EVM end is a whitelist and must reach the pinned EVM", () => {
+  const ok = check(mods({ "Solidity.V": "import Solidity.Roadmap.Evm\ndef v : EvmSpec where\n", "Solidity.Roadmap.Evm": "import Solidity.Keccak\n", "Solidity.Keccak": "" }));
+  assert.deepEqual(ok, []);
+  assert.ok(check(mods({ "Solidity.V": "import Solidity.Roadmap.Evm\nimport Solidity.Semantics.Run\ndef v : Roadmap.EvmSpec where\n", "Solidity.Roadmap.Evm": "", "Solidity.Semantics.Run": "" })).some((b) => b.startsWith("EVM-END")));
+  assert.ok(check(mods({ "Solidity.V": "import Solidity.Roadmap.Contracts\ndef v : EvmSpec where\n", "Solidity.Roadmap.Contracts": "" })).some((b) => b.includes("without the pinned EVM")));
+});
+
+test("the contracts reach only Keccak and define no compiler", () => {
+  assert.ok(check(mods({ "Solidity.Roadmap.Contracts": "import Solidity.Evm.Compile\n", "Solidity.Evm.Compile": "" })).some((b) => b.startsWith("CONTRACTS")));
+  assert.ok(check(mods({ "Solidity.Roadmap.Contracts": "def compile (p : Prog) : Option Artifact := none\n" })).some((b) => b.includes("into Artifact")));
+  assert.deepEqual(check(mods({ "Solidity.Roadmap.Contracts": "def Artifact.initcode (a : Artifact) (k : Nat) : Bytes := []\n" })), []);
+});

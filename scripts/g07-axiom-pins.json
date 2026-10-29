@@ -1,1483 +1,1504 @@
 {
- "literal_ignores_ambient_append": [],
- "long_literal_exact": [],
- "long_literal_not_truncated": [],
- "Solidity.Bridge.Adversary.callSafe_iff_reachablePolicy": [
+ "Bridge/SolidityBridge/AdversaryPolicy.lean:Solidity.Bridge.Adversary.callSafe_iff_reachablePolicy": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Adversary.holdsC_iff_all_callees": [
+ "Bridge/SolidityBridge/CallbackModalTrace.lean:Solidity.Bridge.CallbackTrace.bisim_holdsC": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Adversary.holdsC_iff_weakObservable_traces": [
+ "Bridge/SolidityBridge/CallbackModalTrace.lean:Solidity.Bridge.CallbackTrace.holdsC_iff_traceSafe": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Adversary.weakBisim_callSafe": [
+ "Bridge/SolidityBridge/CallbackTrace.lean:Solidity.Bridge.Adversary.holdsC_iff_weakObservable_traces": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Arith.uint_addW_bitvec": [
+ "Bridge/SolidityBridge/CallbackTrace.lean:Solidity.Bridge.Adversary.weakBisim_callSafe": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Arith.uint_subW_zmod": [
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Bridge.Adversary.holdsC_iff_all_callees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.CallbackTrace.bisim_holdsC": [
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Bridge.Arith.uint_addW_bitvec": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.CallbackTrace.holdsC_iff_traceSafe": [
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Bridge.Arith.uint_subW_zmod": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Loom.generator_get": [
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Bridge.wp_dual": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Loom.leads_sound": [
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Evm.External.simulation": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Loom.loomWp_bind": [
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Evm.External.upstream_step": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Loom.loomWp_iff_afterRunTR": [
+ "Bridge/SolidityBridge/Checks.lean:Solidity.FO.finite_support": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Loom.runWithPost_wp": [
+ "Bridge/SolidityBridge/Checks.lean:Solidity.TLoop.run_correct_of_variant": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Loom.runWithPostGenerator": [
+ "Bridge/SolidityBridge/CompilerSimulation.lean:Solidity.Evm.Compiler.bisimulation": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Loom.runWithPostGenerator_get": [
+ "Bridge/SolidityBridge/CompilerSimulation.lean:Solidity.Evm.Compiler.trace_equivalence": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.Loom.symexGenerator": [
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.BinaryOpcode.agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.LoomExamples.invariant_via_loom": [
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.EnvironmentOpcode.agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.LoomExamples.mixed_returns": [
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.pop_agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.LoomExamples.mixed_via_loom": [
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.push_agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.LoomExamples.panic_rejected": [
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.UnaryOpcode.agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.LoomExamples.revert_accepted": [
+ "Bridge/SolidityBridge/ExternalEvm/Environment.lean:Solidity.Evm.External.referenceMachine_agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.LoomExamples.straight_vc_is_wp_leaf": [
+ "Bridge/SolidityBridge/ExternalEvm/Environment.lean:Solidity.Evm.External.selfbalance_upstream": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.LoomExamples.straight_via_loom": [
+ "Bridge/SolidityBridge/ExternalEvm/Obstructions.lean:Solidity.Evm.External.call_arity_mismatch": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Bridge.wp_dual": [
+ "Bridge/SolidityBridge/ExternalEvm/Obstructions.lean:Solidity.Evm.External.no_injective_slot_encoding": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Corpus.box_of_proved": [
+ "Bridge/SolidityBridge/ExternalEvm/StackOps.lean:Solidity.Evm.External.dup_agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Corpus.diamond_of_proved": [
+ "Bridge/SolidityBridge/ExternalEvm/StackOps.lean:Solidity.Evm.External.swap_agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Corpus.TestSuite.storageRootReadWrite": [
+ "Bridge/SolidityBridge/Loom.lean:Solidity.Bridge.Loom.loomWp_bind": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.AliasEncoding.correct": [
+ "Bridge/SolidityBridge/Loom.lean:Solidity.Bridge.Loom.loomWp_iff_afterRunTR": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ApfFml.apfInst_refute": [
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.invariant_via_loom": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.apfPrep_valid_iff": [
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.mixed_returns": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.arrayBlockReduction?_isSome": [
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.mixed_via_loom": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ArrayBlockReduction.valid_iff": [
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.panic_rejected": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.arrayReduction?_isSome": [
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.revert_accepted": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ArrayReduction.valid_iff": [
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.straight_vc_is_wp_leaf": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.closeLedgerQuantifiers": [
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.straight_via_loom": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideGoal_complete": [
+ "Bridge/SolidityBridge/LoomRules.lean:Solidity.Bridge.Loom.generator_get": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideGoal_complete_hash": [
+ "Bridge/SolidityBridge/LoomRules.lean:Solidity.Bridge.Loom.leads_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideGoal_refutes": [
+ "Bridge/SolidityBridge/LoomRules.lean:Solidity.Bridge.Loom.symexGenerator": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideGoal_sound": [
+ "Bridge/SolidityBridge/LoomRules.lean:Solidity.Premise.toLoom_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideHash2_complete": [
+ "Bridge/SolidityBridge/LoomVCGen.lean:Solidity.Bridge.Loom.runWithPost_wp": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideHash2_refutes": [
+ "Bridge/SolidityBridge/LoomVCGen.lean:Solidity.Bridge.Loom.runWithPostGenerator": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideHash2_sound": [
+ "Bridge/SolidityBridge/LoomVCGen.lean:Solidity.Bridge.Loom.runWithPostGenerator_get": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideHash3_complete": [
+ "Bridge/SolidityBridge/LoopFixpoint.lean:Solidity.TLoop.outcome_lfp_eq": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideHash3_refutes": [
+ "Bridge/SolidityBridge/LoopFixpoint.lean:Solidity.TLoop.run_correct_of_wellFounded_on": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideHash3_sound": [
+ "Bridge/SolidityBridge/ModelTheory.lean:Solidity.FO.finite_storage_support": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideLeaf_complete": [
+ "Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean:Solidity.FO.holds_iff_submodel_realize": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideLeaf_refutes": [
+ "Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean:Solidity.FO.solTheory_compact": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideLeaf_sound": [
+ "Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean:Solidity.FO.solTheory_elementary_submodel": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.decideWrittenHash_refutes": [
+ "Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean:Solidity.FO.solTheory_models_of_card": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.DependentReduction.valid_iff": [
+ "Solidity/Calculus/ArrayBlock.lean:Solidity.Decide.arrayBlockReduction?_isSome": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ExactReduction.countermodelFromReads": [
+ "Solidity/Calculus/ArrayBlock.lean:Solidity.Decide.ArrayBlockReduction.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ExactReduction.elim_holds_iff": [
+ "Solidity/Calculus/ArrayCut.lean:Solidity.Decide.LFml.aCut_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.expandPrep_valid_iff": [
+ "Solidity/Calculus/ArrayCut.lean:Solidity.Decide.LFml.aCut_valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.FlattenedArithmetic.countermodelOf": [
+ "Solidity/Calculus/ArrayFold.lean:Solidity.Decide.LFml.hasFold_holds": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.hoistPrep_valid_iff": [
+ "Solidity/Calculus/ArrayProperty.lean:Solidity.Decide.ApfFml.apfInst_refute": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.InputReduction.not_valid_of_codes": [
+ "Solidity/Calculus/ArrayProperty.lean:Solidity.Decide.apfPrep_valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.InputReduction.valid_iff": [
+ "Solidity/Calculus/ArrayProperty.lean:Solidity.Decide.LFml.apfInst_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.Inputs.observe_realize": [
+ "Solidity/Calculus/ArrayReduction.lean:Solidity.Decide.arrayReduction?_isSome": [
+  "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ledgerBlockReduction?_isSome": [
+ "Solidity/Calculus/ArrayReduction.lean:Solidity.Decide.ArrayReduction.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.LedgerBlockReduction.verify": [
+ "Solidity/Calculus/CallbackSound/Calls.lean:Solidity.ProvesC.fmlValid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.LFml.aCut_refutes": [
+ "Solidity/Calculus/CallbackSound/Calls.lean:Solidity.ProvesC.valid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.LFml.aCut_valid_iff": [
+ "Solidity/Calculus/Correct.lean:Solidity.Spec.sat_iff_holds": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.LFml.apfInst_sound": [
+ "Solidity/Calculus/CorrectCallback.lean:Solidity.Spec.satC_iff_holdsC": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.LFml.gx_holds": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideGoal_complete": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.LFml.hasFold_holds": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideGoal_complete_hash": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.LFml.orLift_holds": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideGoal_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ParameterReduction.Countermodel.refutes": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideGoal_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ParameterReduction.valid_iff": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash2_complete": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.QArith.closedLedgerTruth": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash2_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.QArith.repositionClosedLedger": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash2_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.QDefs.compileQuantLedger": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash3_complete": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.QuantLedgerBody.valid_iff": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash3_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.QuantLedgerBody.verify": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash3_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.QuantLedgerReduction.verify": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideLeaf_complete": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.quantReduction?_isSome": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideLeaf_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.QuantReduction.valid_of_sentence": [
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideLeaf_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.QuantReduction.verify": [
+ "Solidity/Calculus/Decision.lean:Solidity.Fml.swInst_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ReadFlattening.valid_iff": [
+ "Solidity/Calculus/Decision.lean:Solidity.Fml.swPrefix_complete": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.ReadReduction.valid_iff": [
+ "Solidity/Calculus/Decision.lean:Solidity.Fml.swPrefix_exact": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.StaticReduction.verify": [
+ "Solidity/Calculus/Decision.lean:Solidity.Fml.swPrefix_validH": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.StorageEncoding.boolEq": [
+ "Solidity/Calculus/FilteredMembership.lean:Solidity.holds_filteredMember": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.SymbolicRead.constraints_realized_holds": [
+ "Solidity/Calculus/FiniteMembership.lean:Solidity.holds_finiteMember": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.TraceReduction.valid_iff": [
+ "Solidity/Calculus/HashKinds.lean:Solidity.Fml.tk_complete": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.updateGuard_iff": [
+ "Solidity/Calculus/HashKinds.lean:Solidity.Fml.tk_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.AllocCounterexample.refutes_alloc": [
+ "Solidity/Calculus/HashKinds.lean:Solidity.Fml.tk_validH": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.hashEq_afterT_iff": [
+ "Solidity/Calculus/HashKinds3.lean:Solidity.Fml.tk3_complete": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.hashFree_update_of_landing": [
+ "Solidity/Calculus/HashKinds3.lean:Solidity.Fml.tk3_refutes": [
   "Classical.choice",
   "Quot.sound",
-  "propext"
- ],
- "Solidity.Decide.WrittenMemory.hashInput_write_index": [
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.HashInputReduction.cut?": [
+ "Solidity/Calculus/HashKinds3.lean:Solidity.Fml.tk3_validH": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.HashInputReduction.refutes_of_decideMem": [
+ "Solidity/Calculus/HashMove.lean:Solidity.Fml.tk_complete_move": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.HashInputReduction.valid_of_decideMem": [
+ "Solidity/Calculus/HashWritten.lean:Solidity.Decide.WrittenMemory.HashInputReduction.cut?": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.Realize.refutation?": [
+ "Solidity/Calculus/HashWritten.lean:Solidity.Decide.WrittenMemory.HashInputReduction.refutes_of_decideMem": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.Realize.schema_refutes": [
+ "Solidity/Calculus/HashWritten.lean:Solidity.Decide.WrittenMemory.HashInputReduction.valid_of_decideMem": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Decide.WrittenMemory.refutes_update_input": [
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.AllocCounterexample.refutes_alloc": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.DeclarationReadReduction.valid_iff": [
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.hashEq_afterT_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.Compiler.bisimulation": [
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.hashFree_update_of_landing": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.Compiler.trace_equivalence": [
-  "Classical.choice",
-  "Quot.sound",
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.hashInput_write_index": [
   "propext"
  ],
- "Solidity.Evm.External.BinaryOpcode.agrees": [
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.refutes_update_input": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.call_arity_mismatch": [
+ "Solidity/Calculus/HashWrittenRealize.lean:Solidity.Decide.WrittenMemory.Realize.refutation?": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.dup_agrees": [
+ "Solidity/Calculus/HashWrittenRealize.lean:Solidity.Decide.WrittenMemory.Realize.schema_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.EnvironmentOpcode.agrees": [
+ "Solidity/Calculus/KIntBinder.lean:Solidity.Fml.holds_zT": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.no_injective_slot_encoding": [
+ "Solidity/Calculus/KIntBinder.lean:Solidity.Fml.zT_valid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.pop_agrees": [
+ "Solidity/Calculus/KIntEncode.lean:Solidity.Fml.holds_kenc": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.push_agrees": [
+ "Solidity/Calculus/LeafShare.lean:Solidity.holds_upd_share": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.referenceMachine_agrees": [
+ "Solidity/Calculus/LeafSplit.lean:Solidity.Fml.SplitTo.here": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.selfbalance_upstream": [
+ "Solidity/Calculus/LedgerBlock.lean:Solidity.Decide.ledgerBlockReduction?_isSome": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.simulation": [
+ "Solidity/Calculus/LedgerBlock.lean:Solidity.Decide.LedgerBlockReduction.verify": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.swap_agrees": [
+ "Solidity/Calculus/LexVariantSound.lean:Solidity.LoopLex.lexFml_holds": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.UnaryOpcode.agrees": [
+ "Solidity/Calculus/LexVariantSound.lean:Solidity.LoopLex.metrics_eval_saved": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Evm.External.upstream_step": [
+ "Solidity/Calculus/LexVariantSound.lean:Solidity.LoopLex.snapshot_globT_iff_eval": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.AliasConstraints.sourceCounterstate": [
+ "Solidity/Calculus/LexVariantSound.lean:Solidity.LoopLex.snapshot_lands": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.AliasConstraints.subset_consistent": [
-  "Classical.choice",
-  "Quot.sound",
+ "Solidity/Calculus/LinearHypotheses.lean:Solidity.Linear.AFml.hypotheses_hold": [
   "propext"
  ],
- "Solidity.Examples.CallReduction.wrongResult_invalid": [
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.Fml.checkMemoryAt_eq_checkMemoryAtM": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.gapMemParam_countermodel": [
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.MemoryWitness.bind_exact": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.gapMemParam_empty": [
-  "Classical.choice",
-  "Quot.sound",
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.MemoryWitness.Checked.refutes": [],
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.MemoryWitness.heap_get": [
   "propext"
  ],
- "Solidity.Examples.Decision.gapMemParam_verdict": [
-  "Classical.choice",
-  "Quot.sound",
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.MemoryWitness.reference_eq_iff": [
   "propext"
  ],
- "Solidity.Examples.Decision.gapMemWrite_iff": [
+ "Solidity/Calculus/MemSwap.lean:Solidity.Fml.mxTop_holds": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.memAck_iff": [
+ "Solidity/Calculus/OrLift.lean:Solidity.Decide.LFml.gx_holds": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.memoryAlias_differentContents": [
+ "Solidity/Calculus/OrLift.lean:Solidity.Decide.LFml.orLift_holds": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.memoryAlias_equalContents": [
+ "Solidity/Calculus/Preconditions.lean:Solidity.Fml.PreconditionsImpossible.not_possible": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.memoryParameter_emptyDomains": [
+ "Solidity/Calculus/Preconditions.lean:Solidity.Fml.PreconditionsImpossible.valid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.memParamAliasBad_countermodel": [
+ "Solidity/Calculus/PresburgerDecision.lean:Solidity.Linear.QFml.decide_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.memParamSame_checked": [
+ "Solidity/Calculus/PresburgerDecision.lean:Solidity.Linear.QFml.verify": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Decision.memParamSame_valid": [
+ "Solidity/Calculus/QuantExpand.lean:Solidity.Decide.expandPrep_valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionQuantLedger.original_proved": [
+ "Solidity/Calculus/QuantHoist.lean:Solidity.Decide.hoistPrep_valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionQuantLedger.shifted_codes": [
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.closeLedgerQuantifiers": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionQuantLedger.unbounded_codes": [
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QArith.closedLedgerTruth": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.actual_write_hash": [
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QArith.repositionClosedLedger": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.actual_write_input": [
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QDefs.compileQuantLedger": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.alias_written_hashes": [
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QuantLedgerBody.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.distinct_written_hashes": [
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QuantLedgerBody.verify": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.empty_diamond_control": [
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QuantLedgerReduction.verify": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.original_kernel_verdict": [
+ "Solidity/Calculus/QuantTotality.lean:Solidity.Decide.quantReduction?_isSome": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.original_realized_covered": [
+ "Solidity/Calculus/QuantTotality.lean:Solidity.Decide.QuantReduction.valid_of_sentence": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.original_refuted": [
+ "Solidity/Calculus/QuantTotality.lean:Solidity.Decide.QuantReduction.verify": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DecisionWrittenMemory.writtenSelf_certified": [
+ "Solidity/Calculus/Sound.lean:Solidity.Proves.fmlValid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.DependentReduction.follow_invalid": [
+ "Solidity/Calculus/Sound.lean:Solidity.Proves.valid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.InputReduction.setter_exact": [
+ "Solidity/Calculus/Sound/LoopLexDiamond.lean:Solidity.LoopLex.diamondPremise_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.LexMetrics.phase_success": [
+ "Solidity/Calculus/Sound/LoopLexDiamond.lean:Solidity.LoopLex.diamondStep_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.LexMetrics.sourceProgram_success": [
+ "Solidity/Calculus/StmtSound.lean:Solidity.Stmt.sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Preconditions.badPostEntry": [
+ "Solidity/Calculus/TheoryRead.lean:Solidity.Tm.toLT_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Preconditions.impossibleEntry": [
+ "Solidity/Corpus/Imported.lean:Solidity.Corpus.box_of_proved": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Preconditions.possibleEntry": [
+ "Solidity/Corpus/Imported.lean:Solidity.Corpus.diamond_of_proved": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.ProgramReduction.badWrite_invalid": [
+ "Solidity/Corpus/TestSuite.lean:Solidity.Corpus.TestSuite.storageRootReadWrite": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.QueryArithmetic.invalid": [
+ "Solidity/Examples/AliasConstraints.lean:Solidity.Decide.AliasEncoding.correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.QueryArithmetic.mixedCounterstore": [
+ "Solidity/Examples/AliasConstraints.lean:Solidity.Decide.SymbolicRead.constraints_realized_holds": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.SourceCounterexample.badRefuted": [
+ "Solidity/Examples/AliasConstraints.lean:Solidity.Examples.AliasConstraints.sourceCounterstate": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.SourceCounterexample.wideRefuted": [
+ "Solidity/Examples/AliasConstraints.lean:Solidity.Examples.AliasConstraints.subset_consistent": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.CallSummary.CheckedResult.signedTripling": [
+ "Solidity/Examples/BooleanLinear.lean:Solidity.Decide.StorageEncoding.boolEq": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingFive": [
+ "Solidity/Examples/BooleanLinear.lean:Solidity.Linear.CheckedBool.and_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingThree": [
+ "Solidity/Examples/CallReduction.lean:Solidity.Examples.CallReduction.wrongResult_invalid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.FilteredSets.one_correct": [
+ "Solidity/Examples/CallReduction.lean:Solidity.Stmt.runSt_callRets": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.FilteredSets.undefined_key_correct": [
+ "Solidity/Examples/CheckedLinear.lean:Solidity.Linear.CheckedScalar.arith_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.FiniteSets.echo_correct": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemParam_countermodel": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.FiniteSets.one_correct": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemParam_empty": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Lifetime.depositThenPay": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemParam_verdict": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Lifetime.exhaustedNotCommitted": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemWrite_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Lifetime.neverBoth": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memAck_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Lifetime.paymentPossible": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memoryAlias_differentContents": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Lifetime.settlementRemainsPossible": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memoryAlias_equalContents": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Nonvacuity.bad_unprovable": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memoryParameter_emptyDomains": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Nonvacuity.good_provable": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memParamAliasBad_countermodel": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Recursion.addSum": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memParamSame_checked": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Recursion.buildLen": [
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memParamSame_valid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Recursion.evenFour": [
+ "Solidity/Examples/DecisionQuantLedger.lean:Solidity.Examples.DecisionQuantLedger.original_proved": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Recursion.payDownDirect": [
+ "Solidity/Examples/DecisionQuantLedger.lean:Solidity.Examples.DecisionQuantLedger.shifted_codes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.Recursion.payDownNoPanic": [
+ "Solidity/Examples/DecisionQuantLedger.lean:Solidity.Examples.DecisionQuantLedger.unbounded_codes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.aliased_errors": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Decide.decideGoal_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.compiler34_controls": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Decide.decideWrittenHash_refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.false_controls": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.actual_write_hash": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.module_condition_effects": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.actual_write_input": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.normal_legacy": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.alias_written_hashes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.normal_viaIR": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.distinct_written_hashes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.ordinary_error_scope": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.empty_diamond_control": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.qualified_errors": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.original_kernel_verdict": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Tactics.SourceUnitsImport.selected_error_scope": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.original_realized_covered": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Termination.flags_terminate": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.original_refuted": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Examples.Termination.sourceProgram_terminates": [
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.writtenSelf_certified": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.checkMemoryAt_eq_checkMemoryAtM": [
+ "Solidity/Examples/DeclarationReduction.lean:Solidity.DeclarationReadReduction.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.holds_kenc": [
+ "Solidity/Examples/DependentReduction.lean:Solidity.Decide.DependentReduction.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.holds_zT": [
+ "Solidity/Examples/DependentReduction.lean:Solidity.Examples.DependentReduction.follow_invalid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.mxTop_holds": [
+ "Solidity/Examples/ExactReduction.lean:Solidity.Decide.ExactReduction.elim_holds_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.PreconditionsImpossible.not_possible": [
+ "Solidity/Examples/ExactUpdates.lean:Solidity.Decide.updateGuard_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.PreconditionsImpossible.valid": [
+ "Solidity/Examples/InputReduction.lean:Solidity.Decide.InputReduction.not_valid_of_codes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.SplitTo.here": [
+ "Solidity/Examples/InputReduction.lean:Solidity.Decide.InputReduction.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.swInst_refutes": [
-  "Classical.choice",
+ "Solidity/Examples/InputReduction.lean:Solidity.Decide.Inputs.observe_realize": [
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.swPrefix_complete": [
+ "Solidity/Examples/InputReduction.lean:Solidity.Examples.InputReduction.setter_exact": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.swPrefix_exact": [
+ "Solidity/Examples/LexMetrics.lean:Solidity.Examples.LexMetrics.phase_success": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.swPrefix_validH": [
+ "Solidity/Examples/LexMetrics.lean:Solidity.Examples.LexMetrics.sourceProgram_success": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.tk_complete": [
+ "Solidity/Examples/LinearDecision.lean:Solidity.Linear.AFml.countermodel_check": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.tk_complete_move": [
+ "Solidity/Examples/LinearDecision.lean:Solidity.Linear.AFml.countermodelValues_check": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.tk_refutes": [
+ "Solidity/Examples/LinearDecision.lean:Solidity.Linear.AFml.decide_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.tk_validH": [
+ "Solidity/Examples/LinearDecision.lean:Solidity.Linear.AFml.holds_nImp": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.tk3_complete": [
+ "Solidity/Examples/ParameterReduction.lean:Solidity.Decide.ParameterReduction.Countermodel.refutes": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.tk3_refutes": [
+ "Solidity/Examples/ParameterReduction.lean:Solidity.Decide.ParameterReduction.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.tk3_validH": [
+ "Solidity/Examples/Preconditions.lean:Solidity.Examples.Preconditions.badPostEntry": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Fml.zT_valid": [
+ "Solidity/Examples/Preconditions.lean:Solidity.Examples.Preconditions.impossibleEntry": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.FO.finite_storage_support": [
+ "Solidity/Examples/Preconditions.lean:Solidity.Examples.Preconditions.possibleEntry": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.FO.finite_support": [
+ "Solidity/Examples/ProgramReduction.lean:Solidity.Examples.ProgramReduction.badWrite_invalid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.FO.holds_iff_submodel_realize": [
+ "Solidity/Examples/ProgramReduction.lean:Solidity.Upd.afterT_run_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.FO.solTheory_compact": [
+ "Solidity/Examples/QueryArithmetic.lean:Solidity.Examples.QueryArithmetic.invalid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.FO.solTheory_elementary_submodel": [
+ "Solidity/Examples/QueryArithmetic.lean:Solidity.Examples.QueryArithmetic.mixedCounterstore": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.FO.solTheory_models_of_card": [
+ "Solidity/Examples/QueryArithmetic.lean:Solidity.ReadRealization.Query.Arithmetic.valid_iff": [
   "Classical.choice",
   "Quot.sound",
-  "propext"
- ],
- "Solidity.Frontend.staticCompilerLength_agrees": [
   "propext"
  ],
- "Solidity.holds_filteredMember": [
+ "Solidity/Examples/QueryReduction.lean:Solidity.Decide.ExactReduction.countermodelFromReads": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.holds_finiteMember": [
+ "Solidity/Examples/QueryReduction.lean:Solidity.Decide.ReadReduction.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.holds_upd_share": [
+ "Solidity/Examples/ReadFlattening.lean:Solidity.Decide.FlattenedArithmetic.countermodelOf": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.AFml.countermodel_check": [
+ "Solidity/Examples/ReadFlattening.lean:Solidity.Decide.ReadFlattening.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.AFml.countermodelValues_check": [
+ "Solidity/Examples/ReadRealization.lean:Solidity.ReadRealization.Assignment.realizable_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.AFml.decide_iff": [
+ "Solidity/Examples/ReadTrace.lean:Solidity.Decide.TraceReduction.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.AFml.holds_nImp": [
+ "Solidity/Examples/ReadTrace.lean:Solidity.ReadRealization.Query.replay_realizable_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.AFml.hypotheses_hold": [
-  "propext"
- ],
- "Solidity.Linear.CheckedBool.and_correct": [
+ "Solidity/Examples/SourceCounterexample.lean:Solidity.Examples.SourceCounterexample.badRefuted": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.CheckedScalar.arith_correct": [
+ "Solidity/Examples/SourceCounterexample.lean:Solidity.Examples.SourceCounterexample.wideRefuted": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.QFml.decide_iff": [
+ "Solidity/Examples/StaticLinear.lean:Solidity.Decide.StaticReduction.verify": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.QFml.verify": [
+ "Solidity/Examples/Tactics/CallSummary.lean:Solidity.Examples.Tactics.CallSummary.CheckedResult.signedTripling": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.TypedFormula.valid_iff": [
+ "Solidity/Examples/Tactics/CallSummary.lean:Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingFive": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Linear.TypedFormula.verify": [
+ "Solidity/Examples/Tactics/CallSummary.lean:Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingThree": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopLex.diamondPremise_sound": [
+ "Solidity/Examples/Tactics/FilteredSets.lean:Solidity.Examples.Tactics.FilteredSets.one_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopLex.diamondStep_sound": [
+ "Solidity/Examples/Tactics/FilteredSets.lean:Solidity.Examples.Tactics.FilteredSets.undefined_key_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopLex.lexFml_holds": [
+ "Solidity/Examples/Tactics/FiniteSets.lean:Solidity.Examples.Tactics.FiniteSets.echo_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopLex.metrics_eval_saved": [
+ "Solidity/Examples/Tactics/FiniteSets.lean:Solidity.Examples.Tactics.FiniteSets.one_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopLex.snapshot_globT_iff_eval": [
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.depositThenPay": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopLex.snapshot_lands": [
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.exhaustedNotCommitted": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopMetrics.Certificate.valid": [
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.neverBoth": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopMetrics.Certificate.validLex": [
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.paymentPossible": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.LoopMetrics.SourceCertificate.valid": [
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.settlementRemainsPossible": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.callback_soundness": [
+ "Solidity/Examples/Tactics/Nonvacuity.lean:Solidity.Examples.Tactics.Nonvacuity.bad_unprovable": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.compiler_checked": [
+ "Solidity/Examples/Tactics/Nonvacuity.lean:Solidity.Examples.Tactics.Nonvacuity.good_provable": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.compiler_correct": [
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.addSum": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.compiler_net": [
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.buildLen": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.rule_exists": [
-  "propext"
- ],
- "Solidity.Main.rule_is_step": [
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.evenFour": [
+  "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.rule_of_step": [
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.payDownDirect": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
- "Solidity.Main.rule_sound": [
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.payDownNoPanic": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.rule_unique": [
+ "Solidity/Examples/Tactics/Rules.lean:Solidity.Rule.premise_unique": [
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.solkey_eq_calculus": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.aliased_errors": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.solkey_lt_calculus": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.compiler34_controls": [
   "Classical.choice",
   "Quot.sound",
-  "propext"
- ],
- "Solidity.Main.solkey_rule_exists": [
-  "propext"
- ],
- "Solidity.Main.solkey_rule_lt_calculus": [
   "propext"
  ],
- "Solidity.Main.solkey_soundness": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.false_controls": [
   "Classical.choice",
   "Quot.sound",
-  "propext"
- ],
- "Solidity.Main.solkey_step_taclet": [
   "propext"
  ],
- "Solidity.Main.soundness": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.module_condition_effects": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.soundness'": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.normal_legacy": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Main.symex_sound": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.normal_viaIR": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.mappingAssignmentShape": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.ordinary_error_scope": [
+  "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.MemoryWitness.bind_exact": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.qualified_errors": [
   "Classical.choice",
   "Quot.sound",
-  "propext"
- ],
- "Solidity.MemoryWitness.Checked.refutes": [],
- "Solidity.MemoryWitness.heap_get": [
-  "propext"
- ],
- "Solidity.MemoryWitness.reference_eq_iff": [
   "propext"
  ],
- "Solidity.Premise.toLoom_sound": [
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.selected_error_scope": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Proves.fmlValid": [
+ "Solidity/Examples/Termination.lean:Solidity.Examples.Termination.flags_terminate": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Proves.valid": [
+ "Solidity/Examples/Termination.lean:Solidity.Examples.Termination.sourceProgram_terminates": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.ProvesC.fmlValid": [
+ "Solidity/Examples/TypedLinear.lean:Solidity.Linear.TypedFormula.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.ProvesC.valid": [
+ "Solidity/Examples/TypedLinear.lean:Solidity.Linear.TypedFormula.verify": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.ReadRealization.Assignment.realizable_iff": [
-  "Classical.choice",
-  "Quot.sound",
+ "Solidity/Roadmap/Contracts.lean:Solidity.Roadmap.Cert.comp": [
   "propext"
  ],
- "Solidity.ReadRealization.Query.Arithmetic.valid_iff": [
-  "Classical.choice",
-  "Quot.sound",
+ "Solidity/Roadmap/Contracts.lean:Solidity.Roadmap.PublicCorrectness.transfer": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Admission.rejects": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_admission_sloppy": [
   "propext"
  ],
- "Solidity.ReadRealization.Query.replay_realizable_iff": [
-  "Classical.choice",
-  "Quot.sound",
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_nonVacuous_emptySource": [
   "propext"
  ],
- "Solidity.Roadmap.Admission.rejects": [],
- "Solidity.Roadmap.Cert.comp": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler": [
   "propext"
  ],
- "Solidity.Roadmap.Controls.not_admission_sloppy": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler": [
   "propext"
  ],
- "Solidity.Roadmap.Controls.not_nonVacuous_emptySource": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler": [
   "propext"
  ],
- "Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed": [
   "propext"
  ],
- "Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler": [
   "propext"
  ],
- "Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler": [
   "propext"
  ],
- "Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toy_publicCorrectness": [
+  "Quot.sound",
   "propext"
  ],
- "Solidity.Roadmap.Controls.toy_publicCorrectness": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts": [
   "Quot.sound",
   "propext"
  ],
- "Solidity.Roadmap.Controls.toyEvm_approved": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toyEvm_approved": [
   "propext"
  ],
- "Solidity.Roadmap.Controls.toySource_approved": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toySource_approved": [
   "propext"
  ],
- "Solidity.Roadmap.Controls.toySource_nonVacuous": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toySource_nonVacuous": [
   "propext"
  ],
- "Solidity.Roadmap.Evm.Certificate.back_le": [],
- "Solidity.Roadmap.Evm.Precompile.address_injective": [],
- "Solidity.Roadmap.Frontend.Chain.checked": [
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.HashPremise.not_of_rootSlots": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.PublicCorrectness.observedBySource": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.PublicCorrectness.observes": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.PublicCorrectness.rejects": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.SourceSpec.NonVacuous.admits": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse": [],
+ "Solidity/Roadmap/Evm.lean:Solidity.Roadmap.Evm.Certificate.back_le": [],
+ "Solidity/Roadmap/Evm.lean:Solidity.Roadmap.Evm.Precompile.address_injective": [],
+ "Solidity/Roadmap/Frontend.lean:Solidity.Roadmap.Frontend.Chain.checked": [
   "propext"
  ],
- "Solidity.Roadmap.Frontend.Digests.identity_list": [
+ "Solidity/Roadmap/Frontend.lean:Solidity.Roadmap.Frontend.Digests.identity_list": [
   "propext"
  ],
- "Solidity.Roadmap.PublicCorrectness.observes": [],
- "Solidity.Roadmap.PublicCorrectness.rejects": [],
- "Solidity.Roadmap.PublicCorrectness.transfer": [],
- "Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse": [],
- "Solidity.Rule.premise_unique": [
+ "Solidity/Semantics/LexMetrics.lean:Solidity.LoopMetrics.Certificate.valid": [
+  "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Spec.sat_iff_holds": [
+ "Solidity/Semantics/LexMetrics.lean:Solidity.LoopMetrics.Certificate.validLex": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Spec.satC_iff_holdsC": [
+ "Solidity/Semantics/LexMetrics.lean:Solidity.LoopMetrics.SourceCertificate.valid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Stmt.loop_terminates_of_wellFounded": [
+ "Solidity/Semantics/Termination.lean:Solidity.Stmt.loop_terminates_of_wellFounded": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Termination.lean:Solidity.TLoop.finite_of_wellFounded": [
   "propext"
  ],
- "Solidity.Stmt.runSt_callRets": [
+ "Solidity/Semantics/Termination.lean:Solidity.TLoop.run_wellFounded": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Stmt.sound": [
+ "Solidity/Theorems.lean:Solidity.Main.callback_soundness": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Tests.ModifierFrameProofs.loop_ir": [
+ "Solidity/Theorems.lean:Solidity.Main.compiler_checked": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Tests.ModifierFrameProofs.loop_legacy": [
+ "Solidity/Theorems.lean:Solidity.Main.compiler_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Tests.ModifierFrameProofs.multi_ir": [
+ "Solidity/Theorems.lean:Solidity.Main.compiler_net": [
   "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_exists": [
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_is_step": [
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_of_step": [
   "propext"
  ],
- "Solidity.Tests.ModifierFrameProofs.multi_legacy": [
+ "Solidity/Theorems.lean:Solidity.Main.rule_sound": [
   "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_unique": [
   "Quot.sound",
   "propext"
  ],
- "Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_at_start_returns": [
+ "Solidity/Theorems.lean:Solidity.Main.solkey_eq_calculus": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_empty_reverts": [
+ "Solidity/Theorems.lean:Solidity.Main.solkey_lt_calculus": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.solkey_rule_exists": [
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.solkey_rule_lt_calculus": [
   "propext"
  ],
- "Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_notDerivable": [
+ "Solidity/Theorems.lean:Solidity.Main.solkey_soundness": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_notValid": [
+ "Solidity/Theorems.lean:Solidity.Main.solkey_step_taclet": [
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.soundness": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_one_byte_returns": [
+ "Solidity/Theorems.lean:Solidity.Main.soundness'": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.TLoop.finite_of_wellFounded": [
+ "Solidity/Theorems.lean:Solidity.Main.symex_sound": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
- "Solidity.TLoop.outcome_lfp_eq": [
+ "tests/upstream/ByteLiterals.lean:literal_ignores_ambient_append": [],
+ "tests/upstream/ByteLiterals.lean:long_literal_exact": [],
+ "tests/upstream/ByteLiterals.lean:long_literal_not_truncated": [],
+ "tests/upstream/ByteLiterals.lean:utf8_literal_exact": [],
+ "tests/upstream/Declarations.lean:Solidity.Upstream.Declarations.deleteLocal_agrees": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.TLoop.run_correct_of_variant": [
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_at_start_returns": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.TLoop.run_correct_of_wellFounded_on": [
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_empty_reverts": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.TLoop.run_wellFounded": [
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_notDerivable": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Tm.toLT_sound": [
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_notValid": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upd.afterT_run_iff": [
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_one_byte_returns": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.Declarations.deleteLocal_agrees": [
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.effectfulHeads_run": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.Group05.effectfulHeads_run": [
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.failedHead_reverts": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.false_not_certified": [
   "propext"
  ],
- "Solidity.Upstream.Group05.failedHead_reverts": [
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.false_still_refuted": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.hypothesis_projection": [
   "propext"
  ],
- "Solidity.Upstream.Group05.false_not_certified": [
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.memoryAlias_run": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.Group05.false_still_refuted": [
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.pointerPanic_exact": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.Group05.hypothesis_projection": [
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.unassigned_reverts": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.Group05.memoryAlias_run": [
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.wrongByte_panics": [
   "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/MappingDeclarations.lean:Solidity.mappingAssignmentShape": [
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.Group05.pointerPanic_exact": [
+ "tests/upstream/MappingDeclarations.lean:Solidity.Upstream.MappingDeclarations.snapshot_rebind": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.Group05.unassigned_reverts": [
+ "tests/upstream/ModifierFrameProofs.lean:Solidity.Tests.ModifierFrameProofs.loop_ir": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.Group05.wrongByte_panics": [
+ "tests/upstream/ModifierFrameProofs.lean:Solidity.Tests.ModifierFrameProofs.loop_legacy": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.MappingDeclarations.snapshot_rebind": [
+ "tests/upstream/ModifierFrameProofs.lean:Solidity.Tests.ModifierFrameProofs.multi_ir": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.RemainingDeclarations.scalar_projection_keeps_alias": [
+ "tests/upstream/ModifierFrameProofs.lean:Solidity.Tests.ModifierFrameProofs.multi_legacy": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity.Upstream.RemainingDeclarations.scalar_projection_value": [
+ "tests/upstream/RemainingDeclarations.lean:Solidity.Frontend.staticCompilerLength_agrees": [
+  "propext"
+ ],
+ "tests/upstream/RemainingDeclarations.lean:Solidity.Upstream.RemainingDeclarations.scalar_projection_keeps_alias": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "utf8_literal_exact": []
+ "tests/upstream/RemainingDeclarations.lean:Solidity.Upstream.RemainingDeclarations.scalar_projection_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
 }

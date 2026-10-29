@@ -16,21 +16,33 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { blankLean } from "./check-trust.mjs";
 
 export const STANDARD = ["propext", "Classical.choice", "Quot.sound"];
 const INVENTORY = "scripts/g07-axiom-pins.json";
 
-// Pins in one file: [{ name, axioms }]; `name` as printed (fully qualified).
+// Pins in one file: [{ name, target, axioms }]. A pin is a
+// `#guard_msgs (opts)? in #print axioms X` outside comments, with the doc
+// comment that ends right before it; `name` is the printed name, which must
+// end with `X`.
 export function pins(text) {
   const out = [];
-  const re = /\/--([\s\S]*?)-\/\s*#guard_msgs\s+in\s+#print\s+axioms\s+(\S+)/gu;
-  for (const m of text.matchAll(re)) {
-    const doc = m[1].replace(/\s+/gu, " ");
-    const dep = doc.match(/'(\S+)' depends on axioms: \[([^\]]*)\]/u);
-    const none = doc.match(/'(\S+)' does not depend on any axioms/u);
-    if (dep) out.push({ name: dep[1], axioms: dep[2].split(",").map((a) => a.trim()).filter(Boolean).sort() });
-    else if (none) out.push({ name: none[1], axioms: [] });
-    else out.push({ name: m[2], axioms: null });
+  const clean = blankLean(text);
+  const re = /#guard_msgs\s*(?:\([^)]*\)\s*)?in\s+#print\s+axioms\s+(\S+)/gu;
+  for (const m of clean.matchAll(re)) {
+    const before = text.slice(0, m.index).replace(/\s+$/u, "");
+    let doc = null;
+    if (before.endsWith("-/")) {
+      const start = before.lastIndexOf("/--");
+      const body = start < 0 ? null : before.slice(start + 3, -2);
+      if (body !== null && !body.includes("-/")) doc = body.replace(/\s+/gu, " ");
+    }
+    const dep = doc?.match(/'(\S+)' depends on axioms: \[([^\]]*)\]/u);
+    const none = doc?.match(/'(\S+)' does not depend on any axioms/u);
+    const target = m[1];
+    if (dep) out.push({ name: dep[1], target, axioms: dep[2].split(",").map((a) => a.trim()).filter(Boolean).sort() });
+    else if (none) out.push({ name: none[1], target, axioms: [] });
+    else out.push({ name: target, target, axioms: null });
   }
   return out;
 }
@@ -38,11 +50,12 @@ export function pins(text) {
 // Compare the found pins with the recorded inventory.
 export function compare(found, recorded) {
   const errors = [], notes = [];
-  for (const [name, { axioms, file }] of found) {
+  for (const [key, { name, target, axioms, file }] of found) {
     if (axioms === null) { errors.push(`${file}: pin of ${name} prints no axiom line`); continue; }
+    if (target && name !== target && !name.endsWith("." + target)) errors.push(`${file}: pin of ${target} prints ${name}`);
     const extra = axioms.filter((a) => !STANDARD.includes(a));
     if (extra.length) errors.push(`${file}: ${name} depends on non-standard axioms ${extra.join(", ")}`);
-    const old = recorded[name];
+    const old = recorded[key];
     if (!old) notes.push(`new pin ${name} [${axioms.join(", ")}]`);
     else {
       const grown = axioms.filter((a) => !old.includes(a));
@@ -50,7 +63,7 @@ export function compare(found, recorded) {
       else if (axioms.length < old.length) notes.push(`pin ${name} shrank to [${axioms.join(", ")}]`);
     }
   }
-  for (const name of Object.keys(recorded)) if (!found.has(name)) errors.push(`recorded pin ${name} is gone`);
+  for (const key of Object.keys(recorded)) if (!found.has(key)) errors.push(`recorded pin ${key} is gone`);
   return { errors, notes };
 }
 
@@ -66,7 +79,7 @@ export function collect(root) {
   })("");
   const found = new Map();
   for (const file of files) for (const pin of pins(readFileSync(join(root, file), "utf8")))
-    found.set(pin.name, { axioms: pin.axioms, file });
+    found.set(`${file}:${pin.name}`, { ...pin, file });
   return found;
 }
 

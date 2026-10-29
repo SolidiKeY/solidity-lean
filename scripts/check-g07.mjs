@@ -47,36 +47,62 @@ for (const [name, cmd, args] of [
   report(name, r.code === 0, name === "g07 script tests" ? (r.out.match(/# pass \d+/)?.[0] ?? last(r.out)) : last(r.out), fails.slice(0, 20));
 }
 
+// Lines of a baselined gate: backticks dropped, so the baseline file cites
+// no path itself; compared as multisets.
+const strip = (l) => l.replaceAll("`", "");
+const newLines = (lines, known) => {
+  const left = new Map();
+  for (const k of known) left.set(k, (left.get(k) ?? 0) + 1);
+  return lines.filter((l) => {
+    const n = left.get(l) ?? 0;
+    if (n > 0) { left.set(l, n - 1); return false; }
+    return true;
+  });
+};
+
 {
   const r = run("bash", ["scripts/check-doc-paths.sh"]);
-  const missing = r.out.split("\n").filter((l) => l.startsWith("missing:"));
-  const known = new Set(baseline.docPaths.missing);
-  const added = missing.filter((l) => !known.has(l));
-  report("check-doc-paths", added.length === 0,
-    `${missing.length} missing (${known.size} baselined, ${added.length} new)`, added);
+  const summary = r.out.match(/FAIL: (\d+) reference\(s\)|^OK\b.*$/mu);
+  const missing = r.out.split("\n").filter((l) => l.startsWith("missing:")).map(strip);
+  const added = newLines(missing, baseline.docPaths.missing);
+  const sane = (r.code === 0 || r.code === 1) && summary && (summary[1] === undefined || +summary[1] === missing.length);
+  report("check-doc-paths", sane && added.length === 0,
+    sane ? `${missing.length} missing (${baseline.docPaths.missing.length} baselined, ${added.length} new)` : `no summary line (exit ${r.code})`, added);
 }
 
 {
   const r = run("python3", ["-I", "scripts/roadmap-g03-ledger.py", "--check"]);
-  const errors = r.out.split("\n").filter((l) => l && !l.startsWith("roadmap-g03:"));
-  const known = new Set(baseline.g03Ledger.errors);
-  const added = errors.filter((l) => !known.has(l));
-  report("roadmap-g03-ledger --check", added.length === 0,
-    `${errors.length} errors (${known.size} baselined, ${added.length} new)`, added);
+  const summary = r.out.match(/^roadmap-g03: (\d+) error\(s\)|^roadmap-g03: (ok|OK)/mu);
+  const errors = r.out.split("\n").filter((l) => l && !l.startsWith("roadmap-g03:")).map(strip);
+  const added = newLines(errors, baseline.g03Ledger.errors);
+  const sane = (r.code === 0 || r.code === 1) && summary !== null;
+  report("roadmap-g03-ledger --check", sane && added.length === 0,
+    sane ? `${errors.length} errors (${baseline.g03Ledger.errors.length} baselined, ${added.length} new)` : `no summary line (exit ${r.code})`, added);
+}
+
+{
+  // The controls must stay: each named theorem keeps a pin in the inventory.
+  const inv = JSON.parse(readFileSync(resolve(root, "scripts/g07-axiom-pins.json"), "utf8"));
+  const pinned = new Set(Object.keys(inv).map((k) => k.slice(k.indexOf(":") + 1)));
+  const gone = baseline.requiredPins.filter((n) => !pinned.has(n));
+  report("required control pins", gone.length === 0, `${baseline.requiredPins.length - gone.length}/${baseline.requiredPins.length} present`, gone);
 }
 
 const i = process.argv.indexOf("--log");
 if (i > 0) {
+  if (!process.argv[i + 1]) throw new Error("--log needs a file");
   const log = readFileSync(process.argv[i + 1], "utf8").split("\n");
   const oom = baseline.build.knownOom;
-  const errs = log.filter((l) => /\berror\b/i.test(l) && !oom.some((m) => l.includes(m)));
-  report("run-lean errors", errs.length === 0, `${errs.length} error lines outside ${oom.join(", ")}`, errs.slice(0, 20));
-  const mm = log.map((l) => l.match(/(\d+) mismatch\(es\)/)).filter(Boolean).map((m) => +m[1]);
+  const oomLine = (l) => oom.some((m) => l.includes(m)) && /137|Killed|out of memory/iu.test(l);
+  const errs = log.filter((l) => /\berror\b/iu.test(l) && !oomLine(l));
+  report("run-lean errors", errs.length === 0, `${errs.length} error lines outside the baselined out-of-memory kills`, errs.slice(0, 20));
+  const done = log.filter((l) => /Build completed successfully/u.test(l)).length;
+  report("run-lean completion", done >= 1, `${done} "Build completed successfully" lines`);
+  const mm = log.map((l) => l.match(/(\d+) mismatch\(es\)/u)).filter(Boolean).map((m) => +m[1]);
   const n = mm.at(-1);
-  report("check-solkey mismatches", n === undefined || n <= baseline.build.solkeyMismatches,
-    n === undefined ? "no count in log" : `${n} (baseline ${baseline.build.solkeyMismatches})`);
-  const oomHits = log.filter((l) => oom.some((m) => l.includes(m)) && /137|error/i.test(l));
-  console.log(`old  known out-of-memory lines: ${oomHits.length}`);
+  report("check-solkey mismatches", n !== undefined && n <= baseline.build.solkeyMismatches,
+    n === undefined ? "no count in log" : `${n} (baseline ${baseline.build.solkeyMismatches}; compared by count only)`);
+  console.log(`old  known out-of-memory kills: ${log.filter(oomLine).length}`);
 }
 
 console.log(`g07: ${fresh} new failure(s)`);

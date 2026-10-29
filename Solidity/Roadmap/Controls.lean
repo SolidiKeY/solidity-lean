@@ -67,6 +67,20 @@ theorem _root_.Solidity.Roadmap.PublicCorrectness.observes
   have hf : S.lang.Forward (S.meaning r w p art) (envAbs e) rs := (S.forward_iff _ _ _).2 hno
   exact (h.refines i r adm w p art hc e he).2.completes hrs hf ho
 
+/-- **What the bytes observe, the source allows**: a completion of the
+compiled bytes at an allowed environment and an admissible bound meeting the
+per-run premise is a completion of the source meaning at an admissible
+bound, with the same outcome. -/
+theorem _root_.Solidity.Roadmap.PublicCorrectness.observedBySource
+    (h : PublicCorrectness S V compiler envAbs X) {i : S.Input} {r : S.Resolved}
+    (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r) {art : Artifact}
+    (hc : compiler i = some art) {e : V.lang.Env} (he : V.lang.Allowed e) {rt : V.lang.Res}
+    (hrt : V.lang.Admissible rt) (hg : V.RunCollisionFree (V.load art) e rt) {o : Outcome}
+    (ho : (V.lang.sem (V.load art) e rt).final = some o) :
+    ∃ rs, S.lang.Admissible rs ∧ (S.lang.sem (S.meaning r w p art) (envAbs e) rs).final = some o := by
+  obtain ⟨rs, hrs, hfin, _⟩ := (h.refines i r adm w p art hc e he).2.sound hrt hg ho
+  exact ⟨rs, hrs, hfin⟩
+
 /-- **Malformed source is refused**: an input the source does not accept has
 no artifact. -/
 theorem _root_.Solidity.Roadmap.PublicCorrectness.rejects
@@ -330,6 +344,22 @@ theorem malformed_not_admitted : ¬ ∃ r, toySource.Admitted ⟨[], .legacy, .v
   rintro ⟨r, h⟩
   cases (admitted_iff _ _).1 h
 
+/-- Malformed: an unknown tag. -/
+theorem badTag_not_admitted : ¬ ∃ r, toySource.Admitted { text := [3] } r := by
+  rintro ⟨r, h⟩
+  cases (admitted_iff _ _).1 h
+
+/-- Malformed: data after the loop tag. -/
+theorem trailing_not_admitted : ¬ ∃ r, toySource.Admitted { text := [2, 0] } r := by
+  rintro ⟨r, h⟩
+  cases (admitted_iff _ _).1 h
+
+/-- Refused: a pre-assigned library address (decision G05 Q1). -/
+theorem linked_not_admitted :
+    ¬ ∃ r, toySource.Admitted { text := [2], links := [("L", Address.zero)] } r := by
+  rintro ⟨r, h⟩
+  cases (admitted_iff _ _).1 h
+
 /-! ## The intrinsic layer and the lowering -/
 
 /-- The intrinsic layer: the toy language itself, without boundary worlds. -/
@@ -433,9 +463,12 @@ theorem toyEvm_forward (art : Artifact) (e : SessionEnv) (rt : EvmBound) :
     toyEvm.lang.Forward art e rt :=
   Nat.two_pow_pos 128
 
+/-- The compiler that writes the text of `f p` for the admitted program `p`. -/
+def compilerWith (f : Toy → Toy) (i : ToyInput) : Option Artifact :=
+  (accept i).map fun r => artOf (f r.prog).text
+
 /-- The toy compiler: the admitted program's text as the runtime bytes. -/
-def toyCompiler (i : ToyInput) : Option Artifact :=
-  (accept i).map fun r => artOf r.prog.text
+def toyCompiler : ToyInput → Option Artifact := compilerWith id
 
 /-- The state export: nothing to decode, since no world is reached. -/
 def toyExport : StateExport toySource toyIntrinsic toyEvm where
@@ -449,12 +482,17 @@ theorem PrefixFree_artOf (code : Bytes) : (artOf code).PrefixFree := by
   have hk' : k < 1 := hk
   exact absurd (by omega : j = k) hne
 
-/-- **The inhabited control**: the toy compiler meets the public contract
-for the toy source and EVM. -/
-theorem toy_publicCorrectness :
-    PublicCorrectness toySource toyEvm toyCompiler id toyExport where
+/-- A translation of toy programs that refines in both directions: the
+unexhausted source prefix is below the target's, and the target's is below
+the source prefix at some exhaustion choice. -/
+def Faithful (f : Toy → Toy) : Prop :=
+  ∀ t, (t.run false).Le ((f t).run false) ∧ ∃ b, ((f t).run false).Le (t.run b)
+
+/-- A faithful translation meets the public contract. -/
+theorem publicCorrectness_of_faithful (f : Toy → Toy) (hf : Faithful f) :
+    PublicCorrectness toySource toyEvm (compilerWith f) id toyExport where
   coverage := fun i => by
-    show (∃ r, toySource.Admitted i r) ↔ ((accept i).map fun r => artOf r.prog.text).isSome
+    show (∃ r, toySource.Admitted i r) ↔ ((accept i).map fun r => artOf (f r.prog).text).isSome
     constructor
     · rintro ⟨r, h⟩
       rw [(admitted_iff i r).1 h]
@@ -480,9 +518,9 @@ theorem toy_publicCorrectness :
   envAbs_agrees := fun _ => rfl
   creates_table := fun i art hc => by
     cases ha : accept i with
-    | none => simp only [toyCompiler, ha, Option.map_none] at hc; cases hc
+    | none => simp only [compilerWith, ha, Option.map_none] at hc; cases hc
     | some r =>
-      simp only [toyCompiler, ha, Option.map_some, Option.some.injEq] at hc
+      simp only [compilerWith, ha, Option.map_some, Option.some.injEq] at hc
       subst hc
       refine ⟨PrefixFree_artOf _, fun e rt => ?_⟩
       show [] = (createsOf ((decode (mainRuntime _)).run false).events).map _
@@ -490,21 +528,50 @@ theorem toy_publicCorrectness :
       rfl
   refines := fun i r adm _ _ art hc e he => by
     have ha := (admitted_iff i r).1 adm
-    simp only [toyCompiler, ha, Option.map_some, Option.some.injEq] at hc
+    simp only [compilerWith, ha, Option.map_some, Option.some.injEq] at hc
     subst hc
-    refine ⟨he, fun rs _ hf => ⟨⟨rs.horizon, fun _ => 0⟩, trivial, toyEvm_forward _ _ _, fun _ => ?_⟩,
-      fun rt _ _ => ⟨⟨rt.horizon, false⟩, trivial, ?_⟩⟩
-    · show (r.prog.run rs.exhausted).Le ((decode (mainRuntime (artOf r.prog.text))).run false)
-      have hx : rs.exhausted = false := hf
+    obtain ⟨hfw, b, hbw⟩ := hf r.prog
+    refine ⟨he, fun rs _ hfr => ⟨⟨rs.horizon, fun _ => 0⟩, trivial, toyEvm_forward _ _ _, fun _ => ?_⟩,
+      fun rt _ _ => ⟨⟨rt.horizon, b⟩, trivial, ?_⟩⟩
+    · show (r.prog.run rs.exhausted).Le ((decode (mainRuntime (artOf (f r.prog).text))).run false)
+      have hx : rs.exhausted = false := hfr
       rw [hx, mainRuntime_artOf, decode_text]
-      exact Prefix.Le.refl _
-    · show ((decode (mainRuntime (artOf r.prog.text))).run false).Le (r.prog.run false)
+      exact hfw
+    · show ((decode (mainRuntime (artOf (f r.prog).text))).run false).Le (r.prog.run b)
       rw [mainRuntime_artOf, decode_text]
-      exact Prefix.Le.refl _
+      exact hbw
   decode_reach := fun _ _ _ _ _ _ _ _ _ _ _ _ => ⟨⟨0, false⟩, trivial, rfl⟩
   decode_commutes := fun _ _ _ _ _ _ _ _ _ _ _ _ hω => nomatch hω
 
-/-! ## Negative controls -/
+/-- **The inhabited control**: the toy compiler meets the public contract
+for the toy source and EVM. -/
+theorem toy_publicCorrectness :
+    PublicCorrectness toySource toyEvm toyCompiler id toyExport :=
+  publicCorrectness_of_faithful id fun _ => ⟨Prefix.Le.refl _, false, Prefix.Le.refl _⟩
+
+/-- A loop compiled to a revert with empty data. -/
+def loopToRevert : Toy → Toy
+  | .loop => .fail []
+  | t => t
+
+/-- **Accepted by design**: a diverging transaction may compile to one that
+reverts with empty data, since the source lets any transaction fail as if
+out of gas (the exhaustion choice).  The public contract does not
+distinguish divergence from exhaustion at the source's exhausted bounds. -/
+theorem toy_publicCorrectness_loopReverts :
+    PublicCorrectness toySource toyEvm (compilerWith loopToRevert) id toyExport :=
+  publicCorrectness_of_faithful loopToRevert fun t => by
+    cases t with
+    | loop => exact ⟨⟨List.prefix_refl _, .inl rfl⟩, true, Prefix.Le.refl _⟩
+    | succeed d => exact ⟨Prefix.Le.refl _, false, Prefix.Le.refl _⟩
+    | fail d => exact ⟨Prefix.Le.refl _, false, Prefix.Le.refl _⟩
+
+/-! ## Negative controls
+
+Each holds for every intrinsic layer, state export and environment map. -/
+
+section
+variable {I : IntrinsicSpec} {envAbs : toyEvm.lang.Env → toySource.lang.Env}
 
 /-- A compiler whose output always reverts, on the inputs it accepts. -/
 def revertCompiler (i : ToyInput) : Option Artifact :=
@@ -512,9 +579,8 @@ def revertCompiler (i : ToyInput) : Option Artifact :=
 
 /-- **The always-revert control**: no state export makes the reverting
 compiler meet the public contract. -/
-theorem not_publicCorrectness_revertCompiler {I : IntrinsicSpec}
-    (X : StateExport toySource I toyEvm) :
-    ¬ PublicCorrectness toySource toyEvm revertCompiler id X := by
+theorem not_publicCorrectness_revertCompiler (X : StateExport toySource I toyEvm) :
+    ¬ PublicCorrectness toySource toyEvm revertCompiler envAbs X := by
   intro h
   refine h.not_alwaysRevert toySource_nonVacuous
     (fun _ art e rt _ _ => toyEvm_collisionFree art e rt) (fun i art e rt d hc => ?_)
@@ -535,11 +601,11 @@ def alteredCompiler (i : ToyInput) : Option Artifact :=
 /-- **The altered-bytecode control**: appending a byte changes the success
 data of `0 1`, so no state export makes the altered output meet the public
 contract. -/
-theorem not_publicCorrectness_alteredCompiler {I : IntrinsicSpec}
-    (X : StateExport toySource I toyEvm) :
-    ¬ PublicCorrectness toySource toyEvm alteredCompiler id X := by
+theorem not_publicCorrectness_alteredCompiler (X : StateExport toySource I toyEvm) :
+    ¬ PublicCorrectness toySource toyEvm alteredCompiler envAbs X := by
   intro h
-  have adm : toySource.Admitted { text := [0, 1] } ⟨.succeed [1], .legacy, .v2⟩ := (admitted_iff _ _).2 rfl
+  have adm : toySource.Admitted { text := [0, 1] } ⟨.succeed [1], .legacy, .v2⟩ :=
+    (admitted_iff _ _).2 rfl
   obtain ⟨rt, _, _, hfin⟩ := h.observes adm trivial trivial rfl quietEnv_allowed
     (rs := ⟨0, false⟩) trivial rfl (o := .success [1]) rfl
   have hf := (hfin (toyEvm_collisionFree _ _ _)).1
@@ -553,15 +619,31 @@ def erasingCompiler (i : ToyInput) : Option Artifact :=
 
 /-- **The erased-observation control**: the revert data of `1 7` is
 observed, so a compiler that erases it fails the public contract. -/
-theorem not_publicCorrectness_erasingCompiler {I : IntrinsicSpec}
-    (X : StateExport toySource I toyEvm) :
-    ¬ PublicCorrectness toySource toyEvm erasingCompiler id X := by
+theorem not_publicCorrectness_erasingCompiler (X : StateExport toySource I toyEvm) :
+    ¬ PublicCorrectness toySource toyEvm erasingCompiler envAbs X := by
   intro h
-  have adm : toySource.Admitted { text := [1, 7] } ⟨.fail [7], .legacy, .v2⟩ := (admitted_iff _ _).2 rfl
+  have adm : toySource.Admitted { text := [1, 7] } ⟨.fail [7], .legacy, .v2⟩ :=
+    (admitted_iff _ _).2 rfl
   obtain ⟨rt, _, _, hfin⟩ := h.observes adm trivial trivial rfl quietEnv_allowed
     (rs := ⟨0, false⟩) trivial rfl (o := .revert [7]) rfl
   have hf := (hfin (toyEvm_collisionFree _ _ _)).1
   cases hf
+
+/-- Altered bytecode: a loop compiled to a success. -/
+def loopToSucceed : Toy → Toy
+  | .loop => .succeed []
+  | t => t
+
+/-- **The backward (soundness) control**: a success the source never
+produces, here from a loop, fails the public contract. -/
+theorem not_publicCorrectness_loopToSucceed (X : StateExport toySource I toyEvm) :
+    ¬ PublicCorrectness toySource toyEvm (compilerWith loopToSucceed) envAbs X := by
+  intro h
+  have adm : toySource.Admitted { text := [2] } ⟨.loop, .legacy, .v2⟩ := (admitted_iff _ _).2 rfl
+  obtain ⟨rs, _, hfin⟩ := h.observedBySource adm trivial trivial rfl quietEnv_allowed
+    (rt := ⟨0, fun _ => 0⟩) trivial (toyEvm_collisionFree _ _ _) (o := .success []) rfl
+  have hfin' : (Toy.run .loop rs.exhausted).final = some (.success []) := hfin
+  cases hx : rs.exhausted <;> rw [hx] at hfin' <;> cases hfin'
 
 /-- A compiler that also accepts malformed text, compiling it to a loop. -/
 def sloppyCompiler (i : ToyInput) : Option Artifact :=
@@ -569,19 +651,38 @@ def sloppyCompiler (i : ToyInput) : Option Artifact :=
 
 /-- **The malformed-source control**: accepting the empty text fails the
 public contract's coverage. -/
-theorem not_publicCorrectness_sloppyCompiler {I : IntrinsicSpec}
-    (X : StateExport toySource I toyEvm) :
-    ¬ PublicCorrectness toySource toyEvm sloppyCompiler id X := by
+theorem not_publicCorrectness_sloppyCompiler (X : StateExport toySource I toyEvm) :
+    ¬ PublicCorrectness toySource toyEvm sloppyCompiler envAbs X := by
   intro h
   have hn := h.rejects malformed_not_admitted
   cases hn
+
+/-- A compiler that ignores the settings' link map. -/
+def linkBlindCompiler (i : ToyInput) : Option Artifact :=
+  toyCompiler { i with links := [] }
+
+/-- **The link-map control**: an input with a pre-assigned library address
+is refused (decision G05 Q1), so a compiler ignoring it fails. -/
+theorem not_publicCorrectness_linkBlindCompiler (X : StateExport toySource I toyEvm) :
+    ¬ PublicCorrectness toySource toyEvm linkBlindCompiler envAbs X := by
+  intro h
+  have hn := h.rejects linked_not_admitted
+  cases hn
+
+end
+
+/-- The toy frontend: sound and complete. -/
+def toyAdmission : Admission toySource where
+  frontend := accept
+  sound := fun i r h => (admitted_iff i r).2 h
+  complete := fun i r h => (admitted_iff i r).1 h
 
 /-- A frontend that also accepts malformed text, as a loop. -/
 def sloppyFrontend (i : ToyInput) : Option ToyRes :=
   (accept i).orElse fun _ => some ⟨.loop, i.pipeline, i.coder⟩
 
 /-- **The malformed-source control for admission**: no sound admission
-accepts the empty text. -/
+accepts the empty text (and one exists: `toyAdmission`). -/
 theorem not_admission_sloppy (A : Admission toySource) : A.frontend ≠ sloppyFrontend := by
   intro hA
   have hn := A.rejects malformed_not_admitted
@@ -593,6 +694,23 @@ def emptySource : SourceSpec := { toySource with Parses := fun _ _ => False }
 
 theorem not_nonVacuous_emptySource : ¬ emptySource.NonVacuous :=
   SourceSpec.not_nonVacuous_of_no_parse fun _ _ h => h
+
+/-! ## A gap the controls cannot close
+
+With at least one slot per region and `2^256` root slots, no run that hashes
+anything meets the hash premise, so `PublicCorrectness.refines` constrains
+nothing after the first hash.  `Fixed.regionLen` and `Fixed.rootSlots` are not
+bounded by `EvmSpec.Approved`; `docs/feature-work/roadmap-g07-gates.md`
+records this for G01. -/
+
+theorem _root_.Solidity.Roadmap.HashPremise.not_of_rootSlots {F : Fixed} (hl : 1 ≤ F.regionLen)
+    (hr : 2 ^ 256 ≤ F.rootSlots) (x : Bytes) (xs : List Bytes) : ¬ HashPremise F (x :: xs) := by
+  intro ⟨_, _, hroot⟩
+  have hlt : (F.hash x).val < 2 ^ 256 := (F.hash x).isLt
+  have hreg : Region F.regionLen (F.hash x) (F.hash x).val :=
+    ⟨0, hl, by rw [Nat.add_zero, Nat.mod_eq_of_lt hlt]⟩
+  have hle := hroot (F.hash x) (List.mem_map_of_mem (List.mem_cons_self ..)) _ hreg
+  omega
 
 end Solidity.Roadmap.Controls
 
@@ -624,3 +742,15 @@ end Solidity.Roadmap.Controls
 #guard_msgs in #print axioms Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse
 /-- info: 'Solidity.Roadmap.Admission.rejects' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Roadmap.Admission.rejects
+/-- info: 'Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts
+/-- info: 'Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed
+/-- info: 'Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler
+/-- info: 'Solidity.Roadmap.PublicCorrectness.observedBySource' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.observedBySource
+/-- info: 'Solidity.Roadmap.SourceSpec.NonVacuous.admits' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Roadmap.SourceSpec.NonVacuous.admits
+/-- info: 'Solidity.Roadmap.HashPremise.not_of_rootSlots' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Roadmap.HashPremise.not_of_rootSlots

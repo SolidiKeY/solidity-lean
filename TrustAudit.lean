@@ -609,7 +609,13 @@ run_cmd do
     ``Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler,
     ``Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler,
     ``Solidity.Roadmap.Controls.not_admission_sloppy,
-    ``Solidity.Roadmap.Controls.not_nonVacuous_emptySource]
+    ``Solidity.Roadmap.Controls.not_nonVacuous_emptySource,
+    ``Solidity.Roadmap.PublicCorrectness.observedBySource,
+    ``Solidity.Roadmap.SourceSpec.NonVacuous.admits,
+    ``Solidity.Roadmap.HashPremise.not_of_rootSlots,
+    ``Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name
