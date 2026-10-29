@@ -1710,27 +1710,44 @@ theorem zero_to_bytes4 (B : DeclName → DeclName → Bool) :
     STy.implicit B (.rational (Q.ofInt 0)) (.fixedBytes 4 (by decide)) = true ∧
     STy.implicit B (.rational (Q.ofInt 1)) (.fixedBytes 4 (by decide)) = false := ⟨rfl, rfl⟩
 
+/-- The canonical rethrow names its buffer: `revert(add(data, 32), mload(data))`
+rethrows `data`, and with two different buffers it names none. -/
+theorem rethrowVar_canonical :
+    rethrowVar? (.cons (.yulExprStmt (.yulCall "revert" (.cons (.yulCall "add" (.cons
+      (.yulPath "data" []) (.cons (.yulLit (.dec 32)) .nil))) (.cons (.yulCall "mload"
+      (.cons (.yulPath "data" []) .nil)) .nil)))) .nil) = Option.some "data" ∧
+    rethrowVar? (.cons (.yulExprStmt (.yulCall "revert" (.cons (.yulCall "add" (.cons
+      (.yulPath "a" []) (.cons (.yulLit (.dec 32)) .nil))) (.cons (.yulCall "mload"
+      (.cons (.yulPath "b" []) .nil)) .nil)))) .nil) = Option.none := by decide
+
 /-! ### Controls of the literal-typing gaps (solc's `binaryOperatorResult`) -/
 
-/-- `1 << x` and `2 ** x` shift and raise at `uint256`, not at `uint8`. -/
+/-- The left operand of `1 << x` and `0x12 ** x` (a non-constant amount)
+is at `uint256`, not at `uint8`; of `-1 << x`, at `int256`. -/
 theorem shiftTy_literal : STy.shiftTy (.rational (Q.ofInt 1)) = .int IntTy.u256 ∧
-    STy.shiftTy (.hexConst (Q.ofInt 0x12) 1) = .int IntTy.u256 := ⟨rfl, rfl⟩
+    STy.shiftTy (.hexConst (Q.ofInt 0x12) 1) = .int IntTy.u256 ∧
+    STy.shiftTy (.rational (Q.ofInt (-1))) = .int ⟨true, 256, by decide⟩ := ⟨rfl, rfl, rfl⟩
 
-/-- `0x12 == b` with `b : bytes1` has no common type: a constant on the left
-of a `bytesN` is refused. -/
+/-- `0x12 == b` and `0 == b` with `b : bytes1` have no common type: a
+constant on the left of a `bytesN` is refused. -/
 theorem common_literal_bytes_refused (B : DeclName → DeclName → Bool) :
-    STy.common? B (.hexConst (Q.ofInt 0x12) 1) (.fixedBytes 1 (by decide)) = Option.none := rfl
+    STy.common? B (.hexConst (Q.ofInt 0x12) 1) (.fixedBytes 1 (by decide)) = Option.none ∧
+    STy.common? B (.rational (Q.ofInt 0)) (.fixedBytes 1 (by decide)) = Option.none := ⟨rfl, rfl⟩
 
 /-- `x + 0x0100` with `x : uint8` is at `uint16`, the constant's mobile type. -/
 theorem common_mobile_step (B : DeclName → DeclName → Bool) :
-    STy.common? B (.int IntTy.u8) (.rational (Q.ofInt 0x0100)) =
+    STy.common? B (.int IntTy.u8) (.hexConst (Q.ofInt 0x0100) 2) =
       Option.some (.int ⟨false, 16, by decide⟩) := rfl
 
-/-- A 40-digit hexadecimal literal is neither bytes nor a number (solc:
-"looks like an address"). -/
+/-- Hexadecimal literals of 39 to 41 digits are neither bytes nor numbers
+(solc: "looks like an address"); 38 digits are both. -/
 theorem address_like_refused :
     (Syn.lit (.num (.hex (List.replicate 40 1) false)) : Syn .expr).hexLen? = Option.none ∧
-    (Syn.lit (.num (.hex (List.replicate 40 1) false)) : Syn .expr).const = Option.none := by
+    (Syn.lit (.num (.hex (List.replicate 39 1) false)) : Syn .expr).const = Option.none ∧
+    (Syn.lit (.num (.hex (List.replicate 40 1) false)) : Syn .expr).const = Option.none ∧
+    (Syn.lit (.num (.hex (List.replicate 41 1) false)) : Syn .expr).const = Option.none ∧
+    (Syn.lit (.num (.hex (List.replicate 38 1) false)) : Syn .expr).hexLen? = Option.some 19 ∧
+    ((Syn.lit (.num (.hex (List.replicate 38 1) false)) : Syn .expr).const).isSome = true := by
   decide
 
 /-- **`0.length` is ill typed** (solc refuses it): `0` is a constant,

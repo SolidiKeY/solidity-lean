@@ -17,16 +17,16 @@ themselves.  `Elaborated` is a resolution together with a `Program`:
 - every constructor's base-constructor arguments, resolved in that
   constructor's parameters (`RBaseArg`).
 
-**Canonical choice.**  Typing derivations are data and are not unique (`(1)`
-is `const` or `paren (const …)`; `return (x);` is `retVal` or `retTuple`), so the
-elaborated program *is* the choice: an `Elaborated` fixes one derivation per
-body, and `Elaborated.bodies_typed` records that each carried body is the
-elaboration (`ItemsD.toR`) of a derivation of that body's syntax.  The
-semantics (`Solidity/Source/Eval.lean`, `Solidity/Source/Semantics.lean`)
-reads only the carried program (`SrcProg`), so a unit's meaning is a
-function of its elaboration: two elaborations with the same program have
-the same behaviour by construction.  That every *two* derivations of one body elaborate to terms
-with the same behaviour is not proved here (see
+**Choice and uniqueness.**  Typing derivations are data and are not unique
+(`(1)` is `const` or `paren (const …)`), so an `Elaborated` fixes one
+derivation per body, and `Elaborated.bodies_typed` records that each
+carried body is the elaboration (`ItemsD.toR`) of a derivation of that
+body's syntax.  The semantics (`Solidity/Source/Eval.lean`,
+`Solidity/Source/Semantics.lean`) reads only the carried program
+(`SrcProg`).  The choice does not matter: any two derivations of one body
+elaborate to one `RBody` (`RBody.ofDerivation_unique`,
+`Solidity/Source/Unique.lean`).  Initializers, constants, base arguments
+and modifier invocations are not yet tied to derivations here (see
 `docs/feature-work/source-s02.md`, "Uniqueness").
 -/
 

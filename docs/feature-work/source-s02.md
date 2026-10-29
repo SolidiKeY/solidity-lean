@@ -57,7 +57,7 @@ the typing (module `Solidity/Source/Unique.lean`):
 - **`zeroLength_illTyped`.** `0.length` has no derivation (before, it had
   one at every `bytesN`).
 
-**Uniqueness of meaning for the whole language** (Q1, done):
+**Uniqueness of meaning for every expression, statement and body** (Q1):
 
 | Theorem | Statement |
 |---|---|
@@ -94,10 +94,12 @@ derivation. Two statement shapes needed a rule change (below):
   separates it from `retVal`.
 - `_;` in a modifier was `placeholder` or `expr (ident "_")`. `StmtD.expr`
   now refuses `_` in a modifier (`(C.inModifier && e.isUnderscore) = false`).
-- The rethrow's variable was not determined by its premises in a usable
-  way (`isRethrow`'s match does not admit equation lemmas). Its premise now
-  names the first path (`head? = some d`); with `isRethrow`, which makes
-  both paths equal, this accepts the same programs.
+- The rethrow's variable was not determined at all: its premise
+  `(body.paths.map IdPath.last).all (· == d)` held for every `d`, because
+  `Syn.paths` collects no Yul names, so any `bytes memory` local could be
+  the one rethrown (skeptic review). The premise is now
+  `rethrowVar? body = some d`, the buffer the body names
+  (`rethrowVar_canonical`).
 
 This is uniqueness of meaning, not of derivations: `(1)` is both `const`
 and `paren (const …)`, and both elaborate to `const 1`.
@@ -120,11 +122,11 @@ and `paren (const …)`, and both elaborate to `const 1`.
 | `Syn.hexLen?` (literal gaps) | — | also refuses 39–41 digits: solc reports these as address-like, so they are neither numbers nor bytes |
 | `Syn.const` (literal gaps) | — | a 39–41-digit hexadecimal literal is no constant |
 | `STy.common?` | `implicit` either way | solc's `binaryOperatorResult`: two constants, or a constant on the left of a `bytesN`, have no common type; otherwise a constant first takes its mobile type (`x + 0x0100` with `x : uint8` is `uint16`) |
-| `STy.shiftTy` | — | new: a constant's type in `<<`, `>>`, `**` is `uint256` (`int256` when negative), as solc's `binaryOperatorResult` |
-| `Typed.shl`/`shr`/`sar`/`exp` | result at the left operand's type | at `shiftTy` of it |
+| `STy.shiftTy` | — | new: a constant left operand of `<<`, `>>`, `**` with a non-constant amount is at `uint256` (`int256` when negative), as solc's `binaryOperatorResult`; two constants fold |
+| `Typed.shift`, `Typed.exp` | result at the left operand's type | at `shiftTy` of it |
 | `StmtD.expr` | `Typed (C.at L) e τ` | adds `(C.inModifier && e.isUnderscore) = false` |
 | `StmtD.retTuple` | `Typed … e σ → TypedSlots … s σs → argsFit …` | adds `σs ≠ []` |
-| `StmtD.rethrow` | `(body.paths.map IdPath.last).all (· == d) = true` | `(body.paths.map IdPath.last).head? = some d` |
+| `StmtD.rethrow` | `(body.paths.map IdPath.last).all (· == d) = true` (true of every `d`) | `rethrowVar? body = some d` (new function, `Typing.lean`) |
 
 `NumLit.fitsBytes` is kept but no rule reads it any more.
 
@@ -158,7 +160,7 @@ A read-only finder and a separate skeptic reviewed the Q1 change. Fixed:
 - the missing conversion controls;
 - the stale lines in `source-s00-s01.md`.
 
-Recorded, not fixed:
+Recorded at the first review; the first five rows were fixed later (see "Review (Q1 completion)"):
 
 | Finding | Status |
 |---|---|
@@ -171,6 +173,31 @@ Recorded, not fixed:
 | An enum conversion of an out-of-range constant | panics at run time instead of being a compile error |
 | `RExpr.bytesLit` | does not tie `len` to the digit count; only `Typed.litBytes` does |
 | `Typed.const`'s `isAddressLit` premise | now redundant (harmless) |
+
+### Review (Q1 completion)
+
+A read-only finder and a separate skeptic reviewed the uniqueness proof and
+the literal gaps. Fixed:
+
+- **`StmtD.rethrow`** (skeptic): the first change, `head? = some d` over
+  `Syn.paths`, left rethrow untypable, since `Syn.paths` collects no Yul
+  names (and the original premise held of every `d`). Now
+  `rethrowVar? body = some d`, with the control `rethrowVar_canonical`.
+- the controls now test what they claim: `common_mobile_step` at
+  `hexConst 256 2` (`0x0100`), `shiftTy_literal` with the negative case,
+  `common_literal_bytes_refused` with `0 == b`, `address_like_refused` at
+  39, 40 and 41 digits against 38;
+- the table rows (`Typed.shift`/`Typed.exp`, `shiftTy`'s condition) and the
+  overclaiming heading;
+- the stale `Elaborated` module docstring.
+
+Recorded, not fixed:
+
+| Finding | Status |
+|---|---|
+| `Elaborated` ties only `prog.body` to derivations; `consts`, `inits`, `ctor`, `ctorLocals`, `baseArgs` and modifier invocations (`mods`) are unconstrained, and `prog.body d = none` is allowed | item 1b (below) |
+| `_ = 1;` in a modifier | solc parses any statement starting with `_` there as the placeholder (a parse error); the model types it if `_` resolves |
+| The literal-gap controls are about `STy`, not whole derivations | `STy.common?` and `shiftTy` are the only places the rules read these types |
 
 ### Typing gaps closed
 

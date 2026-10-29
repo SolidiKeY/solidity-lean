@@ -473,6 +473,16 @@ def Syn.hexLen? : {c : Cat} → Syn c → Option Nat
   | _, .tuple (.some e) .nil => e.hexLen?
   | _, _ => Option.none
 
+/-- The buffer the canonical rethrow `revert(add(D, 32), mload(D))` names
+(`isRethrow`'s shape with both `D` equal). `Syn.paths` collects no Yul
+names, so this is what determines the rethrown local. -/
+def rethrowVar? (body : Syn (.list .yulStmt)) : Option String :=
+  match body with
+  | .cons (.yulExprStmt (.yulCall "revert" (.cons (.yulCall "add" (.cons (.yulPath d [])
+      (.cons (.yulLit (.dec 32)) .nil))) (.cons (.yulCall "mload" (.cons (.yulPath d' []) .nil))
+      .nil)))) .nil => if d == d' then Option.some d else Option.none
+  | _ => Option.none
+
 /-- The placeholder identifier `_`. -/
 def Syn.isUnderscore : {c : Cat} → Syn c → Bool
   | _, .ident "_" => true
@@ -916,12 +926,12 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       {σs : List STy} : TypedArgs (C.at L) args σs →
       ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) = [d] →
       StmtD C (k := k) L (.revert (.ident er) (.positional args)) L
-  /-- The canonical rethrow, of a `bytes memory` local: `isRethrow` makes both
-  paths name one variable, and the first path names it. -/
+  /-- The canonical rethrow, of the `bytes memory` local it names
+  (`rethrowVar?`). -/
   | rethrow {k : SCtx} {L : List (String × STy)} {fl : List String} {body : Syn (.list .yulStmt)}
       {d : String} {i : Nat} : isRethrow body = true → (C.at L).resolve d = Option.some (.loc i) →
       (L.map Prod.snd)[i]? = Option.some (.bytes .memory) →
-      (body.paths.map IdPath.last).head? = Option.some d →
+      rethrowVar? body = Option.some d →
       StmtD C (k := k) L (.assembly false fl body) L
 
 /-- Typing of a block's items, in order. -/
