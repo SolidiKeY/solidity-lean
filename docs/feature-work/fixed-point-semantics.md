@@ -437,7 +437,7 @@ fixed in the next commit:
 | No general law for unary minus at `ufixed` | finder | `Fx.neg_unsigned` |
 | `Fx.toBits` was new semantics in the laws module | both | moved next to `Fx.ofBits` in the core, with its status |
 | `FxTy.lo_le_zero`/`hi_nonneg` duplicated core proofs | finder | moved to the core; `Fx.mod_inRange` uses them |
-| Untyped `have`s | finder | typed throughout `Laws.lean` |
+| Untyped `have`s | finder | typed throughout `Solidity/Language/FixedPoint/Laws.lean` |
 | Stale review note on `solcImplicit` (§Review) | finder | reworded |
 | Intermediate overflow of `*` was unstated | skeptic | stated as intended, above and in the module docstring |
 
@@ -761,3 +761,82 @@ Not changed: the generic names `field`, `setField` and `place` stay in
 `Solidity.Language.FixedPoint`. That namespace is not opened alongside
 `Semantics`, so the names do not clash with `Semantics/Heap.lean` or
 `Semantics/Storage/Ops.lean`.
+
+### 6.5 Checkpoint 5 — conformance sweep
+
+**Method.** The pinned tarball `tests/upstream/solidity-0.8.38.tar.gz` was
+unpacked outside the repository. Every `.sol` file under
+`test/libsolidity/{syntaxTests,semanticTests,smtCheckerTests}` matching
+`\bu?fixed(\d+x\d+)?\b` was taken: 87 files in all, of which 81 are in
+syntax or semantic tests. A file counts as a real fixed-point use when the
+token occurs in code (outside strings and comments) or a fixed-point type
+appears in its expected diagnostics. That leaves 68 files: 64 with code
+uses and 4 whose messages name a mobile type. The 19 false positives:
+- "fixed bytes" in messages: the 6 `bytes_concat_wrong_type_*` tests,
+  `bytesNN_index_assign/delete` and `288_conditional_with_all_types.sol`;
+- identifiers and strings: `FixedFeeRegistrar`, `mapping_string_key`,
+  `create_random`, `memory_bytes_delete_element_neighbor`;
+- user-defined `uint256` wrappers: `userDefinedValueType/fixedpoint.sol`,
+  `smtCheckerTests/userTypes/fixedpoint.sol`, and the three PRBMath files;
+- `smtCheckerTests/typecast/downcast.sol`.
+
+None of these uses a fixed-point type. solc's verdict is the test's
+expectation: a test whose only error is `UnimplementedFeatureError 1834`
+passes solc's type checker. The decided rules' verdict is computed where a
+function decides it: `Solidity/Language/FixedPoint/Conformance.lean`
+holds one kernel-checked `example` per such test, and all of them pass.
+Otherwise the verdict is argued from the rule named in the table.
+
+**Classification.** "Accept" means the program compiles under the decided
+rules (G00 Q6, full support); "reject" means a compile error.
+
+| Test (under `syntaxTests/` unless marked) | solc 0.8.38 | Decided rules | Basis | Status |
+|---|---|---|---|---|
+| `constants/mod_div_rational.sol` | accept | accept | `CExpr.eval`, `Fx.ofRat?` (Conformance) | agrees |
+| `denominations/fixed_point_division.sol` | reject (the `uint` line); `ufixed(4 ether / 3 hours)` accepted, suggests `ufixed256x62` | same | `Fx.explicitRat?`, `mobileFx?` (Conformance) | agrees |
+| `inlineArrays/inline_array_fixed_types.sol`, `inline_array_rationals.sol` | accept | accept | explicit and implicit constants (Conformance) | agrees |
+| `nameAndTypeResolution/303_…`, `343_integer_and_fixed_interaction.sol`, `smtCheckerTests/operators/fixed_point_add.sol`, `smtCheckerTests/file_level/free_function_4.sol` | accept | accept | `FxTy.intImplicit`, `Fx.ofInteger_inRange` (Conformance) | agrees |
+| `304`, `305`, `307`, `312`, `314`, `324_fixed_points_inside_structs.sol`, `parsing/lexer_numbers_with_underscores_fixed.sol`, `types/rational_number_literal_to_fixed_implicit.sol`, `smtCheckerTests/operators/fixed_point_compound_add.sol` | accept | accept | `Fx.ofRat?` (Conformance) | agrees |
+| `323_mapping_with_fixed_literal.sol` | accept | accept | `Fx.ofRat?`, `Fx.keyWord` | agrees |
+| `328_rational_to_fixed_literal_expression.sol` | accept (all seven lines) | reject: lines `e` and `f`, `ufixed256x80(9.445)` and `ufixed256x80(1.2)`, are out of range at 80 digits; the other five are accepted | `Fx.explicitConst?_eq_none_iff` (Conformance) | intended deviation (Q2: an out-of-range constant is a compile error) |
+| `317_fixed_type_valid_explicit_conversions.sol` | accept | reject: `ufixed256x80(1/3)` and `ufixed248x80(1/3)` are out of range; `ufixed8x1(1/3) = 0.3` is accepted | `Fx.explicitConst?_eq_none_iff` (Conformance) | intended deviation (Q2) |
+| `parsing/declaring_fixed_and_ufixed_variables.sol` | accept | accept | `FxTy.mk?` (Conformance) | agrees |
+| `userDefinedValueType/all_value_types.sol` (`type MyFixed is fixed`) | accept | accept | P8 (identity wrap/unwrap) | agrees |
+| `313_fixed_type_size_capabilities.sol` | reject (`b`, `e`) | reject (`b`, `e`); the other four accepted | `Fx.ofRat?` (Conformance) | agrees |
+| `315_fixed_type_invalid_implicit_conversion_size.sol` | reject | reject | `FxTy.implicitOK_iff` (Conformance) | agrees |
+| `316_…_lost_data.sol`, `344_one_divided_by_three_integer_conversion.sol`, `321_rational_to_bytes_implicit_conversion.sol`, `327_rational_index_access.sol`, `parsing/declaring_fixed_literal_variables.sol` | reject, suggesting `ufixed256x77`, `ufixed8x1`, `ufixed8x1`, `ufixed16x2` | reject; `mobileFx?` gives each suggested type | `Fx.ofRat?`, `mobileFx?` (Conformance) | agrees |
+| `306_invalid_int_implicit_conversion_from_fixed.sol`, `322_fixed_to_bytes_implicit_conversion.sol` | reject | reject | no implicit fixed→integer or fixed→`bytesM` conversion (§1; Q7 is explicit only) | agrees |
+| `329_…_signed.sol`, `330_…_unsigned.sol` (fractional exponent of a constant) | reject | reject | `CExpr.eval` (Conformance) | agrees |
+| `333_…_15.sol`, `334_…_neg.sol` (`**` with a fixed exponent) | reject | reject | P8 (no `**` on `Fx`) | agrees |
+| `338`–`341` (`~ \| ^ &` on fixed) | reject | reject | P8 (no bit operators on `Fx`) | agrees |
+| `operators/signed_rational_modulus.sol` (`.5 % a`) | reject ("Fractional literals not supported.") | reject | `litCommonRev?_eq_solc` (Conformance) | agrees (QL1 asks whether to extend) |
+| `types/too_small_negative_numbers.sol` | reject (not implicit; explicit possible) | reject; explicit gives `0` | `Fx.ofRat?`, `Fx.explicitRat?` (Conformance) | agrees |
+| `types/rational_number_div_limit.sol` | reject (4096 bits), suggests `ufixed8x80` | reject; `mobileFx?` gives `ufixed8x80` | `fitsPrecision`, `mobileFx?` (Conformance) | agrees |
+| `array/length/const_cannot_be_fractional.sol`, `319`, `320` (fixed array lengths) | reject | reject | array lengths are integer constants (G13), unchanged by fixed point | agrees |
+| `298`, `299`, `300`, `302`, `types/weird_sized_types.sol` | identifiers (DeclarationError, or accepted as variable names) | the same | `FxTy.mk?` bounds (Conformance); spelling rule of the scanner (G08) | agrees |
+| `smtCheckerTests/operators/shifts/shr_unused.sol` (`x >>> 6` at `fixed`) | type checker accepts; code generation fails | reject | Q4 (shifts rejected, as solc's code generator does) | agrees with solc's compiler; deviates from its type checker, as Q4 decides |
+| `inlineAssembly/unimplemented_fixed_type_variable.sol`, `unimplemented_ufixed_type_variable.sol` | UnimplementedFeatureError 5016 (no compile) | reject | assembly/Yul exclusion (G00 Q1, P8) | agrees |
+| `inlineAssembly/solidity_keywords.sol` (`let fixed := 1` in Yul) | accept | outside the model (Yul) | assembly/Yul exclusion | not applicable |
+| The nine `elementary_non_address_state_mutability_*.sol` tests (`errors/`, `events/`, `modifiers/`, `parsing/` ×5, `tryCatch/`) | ParserError 9106 | the same | parser (S00/G08), unchanged | agrees |
+| `parsing/fixed_literal_with_double_radix.sol`, `invalid_fixed_conversion_leading_zeroes_check.sol`, `lexer_numbers_with_underscores_fixed_fail.sol`, `308_rational_unary_plus_operation.sol` | ParserError/SyntaxError | the same | lexer and parser, unchanged | agrees |
+| `types/address/type_type_to_address.sol` (`address(fixed)`) | reject | reject | no conversion from a type expression | agrees |
+
+**Result.** Of the 68 real uses:
+- 3 deviate from solc's type checker, each intended. Two are by Q2
+  (`317` and `328`: out-of-range explicit constants). One is by Q4
+  (`shr_unused`, which agrees with solc's compiler but not its type
+  checker).
+- `inlineAssembly/solidity_keywords.sol` is outside the model.
+- All others agree.
+
+No defect was found. Two deviations recorded earlier have no upstream
+test; adding tests for them would be a G15/G51 task:
+- QL2's truncation of standalone constants;
+- the `ufixed8x77 y; y + 1/3` refusal (§6.2).
+
+**Handoff.** G15 can take the table as the fixed-point slice of its
+in-profile classification;
+`Solidity/Language/FixedPoint/Conformance.lean` is the regression check a
+change to the rules must keep passing. G51
+(differential testing) has no solc execution to compare against for any of
+these tests: every accepted one stops in solc's code generation.
