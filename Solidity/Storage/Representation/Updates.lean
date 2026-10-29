@@ -20,6 +20,16 @@ theorem patch_outside (w new : Store) (t : STy) (l x : Loc) (h : ¬ Occ t l x) :
   classical
   exact if_neg h
 
+/-- A scalar footprint patch is exactly one full-word write. -/
+theorem patch_word (w replacement : Store) (l : Loc) :
+    patch w replacement .word l = write w l (replacement l) := by
+  funext x
+  by_cases eq : x = l
+  · subst x
+    rw [patch_inside _ _ _ _ _ Occ.word, write_same]
+  · rw [patch_outside _ _ _ _ _ (by intro hx; cases hx; exact eq rfl)]
+    exact (write_other _ _ _ _ eq).symm
+
 /-- A represented replacement is represented in the patched store. -/
 theorem ValueRep.replace {T : Ty} {v : SVal T} {t : STy} {l : Loc} {w new : Store}
     (h : ValueRep v t l new) : ValueRep v t l (patch w new t l) :=

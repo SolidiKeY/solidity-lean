@@ -676,3 +676,5 @@ import Solidity.Storage.Representation.Members
 import Solidity.Storage.Representation.UpdateControls
 import Solidity.Storage.Representation.Arrays
 import Solidity.Storage.Representation.ArrayControls
+import Solidity.Storage.Representation.Transport
+import Solidity.Storage.Representation.TransportControls

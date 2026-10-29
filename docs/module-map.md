@@ -942,3 +942,5 @@ At the root, the notation's own tests:
 | `Storage/Representation/UpdateControls.lean` | Inhabited member/nested mapping combinations, defaults, alias controls and axiom pins. |
 | `Storage/Representation/Arrays.lean` | Fixed/dynamic whole-array source saves, live/retained bounds and exact header/element frames. |
 | `Storage/Representation/ArrayControls.lean` | Heterogeneous fixed/dynamic, nested save, defaults, stale aliases, live failures and header controls. |
+| `Storage/Representation/Transport.lean` | Finite per-run numeric realization, covered writes/sequences, frames and existing exact source observations. |
+| `Storage/Representation/TransportControls.lean` | Inhabited root/hash/data run, source read/save/header combinations and collision/bound/coverage/failure controls. |

@@ -56,10 +56,11 @@ handoff; whole-assignment validation remains open. Checkpoint 2: scalar/member a
 symbolic other-member frames proved, reviewed and checked; physical finite-run
 transport remains checkpoint 4. Checkpoint 3: array reads/writes, header/element frames, exact live/retained
 bounds and local nested-path composition proved, independently reviewed
-and checked. Checkpoint 4: explicit
-finite touched-set transport through `Loc.word` pending. Backfill A: recursive
-typed path/graph composition pending. Backfill B: supported full-word normalization and nested alias controls
-proved; stronger finite-run controls remain pending. No queue item is waived.
+and checked. Checkpoint 4: explicit finite touched-set transport through `Loc.word`,
+existing source observations and covered writes/sequences proved, reviewed
+and checked. Backfill A: recursive
+typed path/graph composition pending. Backfill B: supported full-word normalization, nested alias controls and
+stronger finite-run transport/frame laws proved, reviewed and checked. No queue item is waived.
 
 Manifest IDs: `structTypes`, `mappings`, `fixedArrays`, `dynamicArrays`,
 `storageLocation`, `storageAliasing`, `deleteMappingTails`, `storageLayout`.
@@ -205,3 +206,70 @@ gates passed; doc-path findings remain the exact-base 46 with zero new ones. Onl
 CP3 local import check: all 10 owned modules have zero forbidden frontend or
 other-new-lane dependencies (`tests/storage-values/check-local-layers.mjs`).
 Base-module membership is checked against the exact assigned commit.
+
+## Checkpoint 4 — finite physical transport and backfill B
+
+`FiniteRun N L R H P touched` bundles exactly the existing `Loc.word_inj`
+conditions: H's output range, L≤N, R≤N, `RegionsDisjoint` on the finite P,
+per-touched-location `Loc.Bounded`, and every preimage in that location's
+`Loc.pres N H` covered by P. It adds no cryptographic premise or global
+injectivity. `Transport` relates only these finite touched terms to numeric
+words. `FiniteRun.restrict`, `Transport.restrict`, `transport_exists`,
+`transport_write`, `transport_sequence`, `transport_extend`,
+`sequence_outside_frame`, `transport_patch`, `transport_patch_frames` prove
+realization, source-symbolic/numeric write commutation, finite coverage
+growth and frames. Coverage growth requires the premise for the extended
+run; it is not inferred from a shorter valid prefix.
+
+`transport_patch` alone is an existential finite realization, not an in-place
+update from an initially related memory. `transport_patch_frames` supplies
+that additional initial-Transport hypothesis and preserves every covered
+cell outside the symbolic target plus every word outside the finite image.
+`patch_word` identifies scalar patching with one word write.
+
+`source_word_observation` and `source_length_observation` reuse existing
+`SVal.obs` and source `find` equations. Their exact boundary is successful
+source reads plus independently proved represented leaf/header and touched
+coverage. They do not decode source presence, retained extent or liveness
+from physical word contents. `source_failed_presence` and
+`source_failed_word_default` separately preserve the existing failed/default
+source observations, without authorizing an unguarded numeric read. Full
+StateExport/decode, compiler bounds checks and liveness composition remain
+parent obligations.
+
+The kernel proves a concrete finite run with roots, two mapping entries and
+a dynamic data region, N=16, L=2, R=1, three preimages and five touched terms.
+H deliberately ignores some arguments, so it is not globally injective. This
+small finite witness tests the generic theorem; it is not a Keccak/EVM vector
+or a change to the approved 256-bit profile. Source mapping reads use
+`mapping_read source_represented`; source mapping save + whole representation
++ numeric write + exact observation commute. A source array header and
+primitive element share one transported store. A finite sequence updates two
+regions, preserves an untouched entry, and frames outside-address 15.
+
+Negative/combination controls expose omitted conditions: uncovered word 8
+may disagree; the committed `Loc.word_data_alias` rejects unbounded offsets;
+a collision under H=0 cannot represent distinct seven/nine observations.
+The source can report failed presence and a zero/default word while numeric
+address 14 contains nine. This explicitly prevents an unearned has/liveness
+claim. Exact axiom pins enforce standard sets (the sequence outside-frame
+uses only propext; alias refusals use propext/Quot.sound).
+
+Backfill B now includes supported full-word normalization, same-type key
+injectivity, nested alias/frame counterexamples, and generic finite
+write-sequence, outside-image, patch-frame and coverage-growth laws. No
+string/bytes key/header or internal packing work was added. Full word types
+need no internal packing under the approved unobservable-physical-layout
+abstraction. Backend/numeric-slot/hash separation work remains read-only.
+
+Both read-only CP4 reviews found no false theorem/premise; finder requested
+source-save/header/failure controls and exact pins, skeptic requested a
+generic outside-image/initial-Transport frame and explicit scope. These are
+implemented. Both independent read-only rechecks accepted the fixes. Layer/local-import/
+orphan/trust gates pass, with 12 owned import closures and no forbidden or
+other-new-lane dependency. Doc-path checks retain the exact-base 46 failures
+and zero new findings. Passing focused
+run: 37 jobs, 3.679156949 s, aggregate RSS 778084352 bytes, cgroup peak
+298176512 bytes. Only inherited AST/Obs.Values warnings replayed; owned files
+are clean. Backfill A recursive typed path/graph composition remains open,
+as do final full/import-closure and the exact-base inherited-gate comparison.
