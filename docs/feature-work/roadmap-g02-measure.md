@@ -357,7 +357,10 @@ No file was changed here; each row names where the fix belongs.
 
 ## 8. Is the ten-hour VM table plausible?
 
-The [initial assignments](../coverage-plan.md#initial-vm-assignments--10-hours-each)
+*Since this measurement, the roadmap sizes VMs as lanes of four to ten
+hours; the costs below apply per lane.*
+
+The [initial assignments](../coverage-plan.md#vm-assignments-revised-2026-10-29)
 give each VM up to 10 hours including validation. These are the measured
 costs that any assignment pays:
 
