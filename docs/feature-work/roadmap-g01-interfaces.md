@@ -224,7 +224,10 @@ transaction run with `gasleft()` below some threshold `X` is not refuted
 (`gasleft` is excluded from the profile, but compiled code may still branch
 on the gas it has): adequacy can always choose a schedule above `X`, and
 soundness accepts the failure choices. This gas-triggered bricking gap is
-the same idealization.
+the same idealization. A brick that persists across transactions needs a
+storage flag, which `decode_reach` and `decode_commutes` refute once the
+intrinsic layer `I` is pinned, so only threshold behaviour inside one
+transaction remains (finding N2 of the final review).
 
 A `transfer` or `send` to an instance of the system forwards the 2300-gas
 stipend. Whether the receiving body fits is decided by a compiler-independent
@@ -280,7 +283,9 @@ source run through a loop the target never executed (`f(2^191)`, or
 `h = keccak(h)`) excuse everything after it. Now the bytes may hash only
 preimages the source determines and address storage only by the source's
 slot preimages (`PublicCorrectness.hashes_source`, per preimage), so the
-compiler cannot choose what the EVM's premise reads; this also makes the
+compiler chooses only which source-determined preimages the EVM's premise
+reads, and when (security level about `2^128/√L`, see the
+[final review](#final-review-of-the-sixth-round)); this also makes the
 compiler use the pinned layout's slot preimages (G27, "solc's slot
 behaviour" of G04 Q2). A correct compiler still has the escape where it is
 needed: a target that really runs the long loop hashes those preimages
@@ -552,9 +557,10 @@ environment and admissible bound:
 
 Both are stated for EVM prefixes meeting the EVM's own premise
 (`V.lang.Guard`). Since the bytes hash only source-determined preimages
-(`hashes_source`), the compiler cannot choose what that premise reads: a
-violation means the run really hashed colliding or overlapping source
-preimages. The intrinsic layer reads the same environment and fixed
+(`hashes_source`), a violation means the run really hashed colliding or
+overlapping source preimages; the compiler still chooses which of them and
+when (finding such a pair costs about `2^128/√L`, finding N1 of the
+[final review](#final-review-of-the-sixth-round)). The intrinsic layer reads the same environment and fixed
 parameters (`PublicCorrectness.ifixed`, `isession`) and its `Forward` and
 `Guard` are pinned like the source's (`IntrinsicSpec.forward_iff`,
 `guard_iff`), so `decode_commutes` cannot be made vacuous by the intrinsic
@@ -1223,7 +1229,8 @@ Master `9b6d1c29` merged. Fixed:
    `NoCollisionUpTo`, `Cert.reflect` and `Matched` are gone; `Cert.back`
    carries the premise back; `EvmSpec.slotHashed` and `EvmSpec.guard_iff`
    are new; `hashes_source` also restricts the EVM's slot preimages to the
-   source's, so the compiler cannot choose what the EVM premise reads. The
+   source's, so the compiler chooses only which source-determined preimages
+   the EVM premise reads (finding N1 of the final review). The
    correct compiler keeps the escape where needed: a target that really
    runs the long loop, or reads a key colliding with one it wrote (after an
    out-of-gas transaction or not), hashed those preimages itself, so the
@@ -1496,3 +1503,38 @@ Lean server.
 
 Not changed: the skeptic's "already acknowledged" items (Q1–Q5, G51's meta
 half, `Prog.runF` monotonicity, now covered by the `Lang.consistent` row).
+
+### Final review of the sixth round
+
+A read-only skeptic of 914bc36b found nothing blocking. The four earlier
+attacks are closed, a correct compiler can meet `refines`, the wrong
+compilers listed in the doc are refuted, and the short failure-free
+sessions are non-vacuous. Its findings are recorded here, to be revisited
+by the child obligations:
+
+- **N1, compiler-chosen preimages.** `hashes_source` gives each preimage
+  some source bound, with no ordering. For example, a backdoored compiler
+  can hash early two overlapping preimages that the source reaches only
+  deep in a silent loop. That makes the EVM's `Guard` false, and backward
+  is then excused. Finding such a pair is a birthday search of about
+  `2^128/√L`. That is the same cost as overlapping user-chosen mapping keys
+  against a correct compiler, so this adds no loss below the premise's
+  level. A per-run link would not help, because a silent loop shows no
+  progress. The doc's earlier claim that the compiler "cannot choose" was
+  corrected above.
+- **N2, gas bricking.** Narrowed in the
+  [resources](#resources-horizons-failures-and-gas) section. The narrowing
+  depends on N5.
+- **N3, constraint on passes.** `Cert.need_ok` and `Cert.back` carry
+  `Guard` in both directions. Each certified pass must therefore keep the
+  hashed set exactly: no dead-hash elimination and no added hashes.
+- **N4, ledger.** `Lang.Affordable` ranges over all programs, while
+  `Ledger` reads only events. Some code moves value without an event and
+  can push a real balance above the ledger: self-destruct to an external
+  beneficiary, or a payment to a precompile. The G03/G06 ledger obligation
+  must restrict `Affordable` to loaded artifacts or add an event.
+- **N5, intrinsic premise.** `IntrinsicSpec.hashed`, `slotHashed` and
+  `NoFail` are free. If `I.Guard` were false, `decode_commutes` forward
+  would be vacuous. The G24 obligation to name the concrete `I` covers this.
+- **N6.** `EvmSpec.hashed` has no prefix-consistency requirement, unlike
+  `SourceSpec.hashed_consistent`. This is minor.
