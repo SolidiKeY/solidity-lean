@@ -13,6 +13,8 @@ history is in git.
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |
 | [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 18 VM lanes of eight to ten hours covering 115 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
 | [feature-work/roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) | Roadmap G01: intrinsic layer interfaces, observations, the six final theorem contracts, pass certificates, reuse map and open scope questions. |
+| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 32 VM lanes of four to ten hours covering 115 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
+| [feature-work/roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) | Roadmap G01: intrinsic layer interfaces, observations, the six final theorem contracts, pass certificates, reuse map and the decisions they implement. |
 | [feature-work/roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md) | Roadmap G05: audit of frontend, provenance and unsafe elaborator paths; checked certificate interfaces for raw input, parse, resolution and metadata; link settings and admitted settings. |
 | [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy (model, abstract, exclude) and the exclusions. |
 | [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md) | Roadmap G00: pins and their disagreements, evidence for each recorded exclusion, manifest/ledger reconciliation, owners and open scope questions. |
