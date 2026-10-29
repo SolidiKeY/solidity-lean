@@ -21,20 +21,29 @@ as [child obligations](#4-child-obligations-for-g06).
   `tests/upstream/revert-power/validation.json:310`,
   `tests/upstream/step08-transient-world/evm-observations.json`). The Osaka
   regeneration of the two pinned outputs is stored beside the other evidence,
-  not over them, so `validation.json`'s `reportSha256` stays true.
+  not over them, so `validation.json`'s `reportSha256` stays true. The same
+  holds for `tests/upstream/revert-power/compiler-evm-initial.json`. After the
+  pin commit, three historical records hold the base SHA-256 of a script they
+  ran: `tests/upstream/revert-power/validation.json:398`
+  (`check-self-power-data.mjs`), `tests/upstream/step08-transient-world/report.json:31`
+  (`check-transient-world-vectors.mjs`) and `tests/upstream/group01/validation.json:66`
+  (`check-modifier-frames.mjs`). Nothing verifies those hashes. They stay records
+  of the base scripts.
 
 ## 1. Setup on the VM
 
 No network block was hit. Every dependency came through the agent proxy:
 
 - solc from `raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/`, as in
-  [solidity-upstream-tests.md](../solidity-upstream-tests.md) (step 1). SHA-256 of
+  [solidity-upstream-tests.md](../solidity-upstream-tests.md#reproduce). SHA-256 of
   `soljson-v0.8.38+commit.1835d247.js` is `6c74ffba…2d390` and of
   `soljson-v0.8.34+commit.80d5c536.js` is `c8649f8d…cfd11d8`. Both equal the pins
   the scripts assert.
 - The external modules at the versions named in `scripts/check-abi-vectors.mjs:4`
-  (EthereumJS `vm`/`common`/`util` 10.1.3, `ethers` 6.17.0), plus `evm` and `tx`
-  10.1.3, which the transaction-based scripts load. Before this task these
+  (EthereumJS `vm`/`common`/`util` 10.1.3, `ethers` 6.17.0), plus `tx` 10.1.3,
+  which the two transaction-based scripts load (`check-transient-vectors.mjs:27`,
+  `check-transient-world-vectors.mjs:20`). `evm` 10.1.3 is pinned too, as the
+  version `vm` runs on. Before this task these
   scripts had no lockfile (G00 [pin disagreement 5](roadmap-g00-scope.md#pin-disagreements)).
   [scripts/evm-vectors/package.json](../../scripts/evm-vectors/package.json) now
   pins them exactly, with a `package-lock.json`:
@@ -95,16 +104,18 @@ reproduce both committed records byte for byte.
 | Transaction gas cap 2^24 | EIP-7825 (Osaka) | `check-transient-vectors.mjs:55` and `check-transient-world-vectors.mjs:46` built signed legacy transactions with `gasLimit:30000000n`. Under Osaka, `createLegacyTx` throws `Transaction gas limit 30000000 exceeds the maximum allowed by EIP-7825 (16777216)` before any execution (3 invocations). The pin commit sets `16777216n`. With that limit the Cancun run passes and reproduces the committed record, so the change does not depend on the fork. No vector depends on gas: none asserts gas, and none runs out of it. |
 | `runCode`/`runCall` message gas | — | The other 10 scripts call `vm.evm.runCode`/`runCall` with `gasLimit:30000000n`. These are message calls, not transactions, so EIP-7825 does not apply. They are left unchanged. |
 | `CLZ` opcode (0x1e) | EIP-7939 (Osaka) | solc 0.8.38 emits no CLZ in any of the 97 compiled objects (counted at instruction positions, PUSH data skipped). |
-| ModExp repricing / bounds, P-256 precompile | EIP-7883, EIP-7823, EIP-7951 (Osaka) | No script calls a precompile. |
-| BLS12-381 precompiles, EIP-7702 code delegation, calldata floor cost | EIP-2537, EIP-7702, EIP-7623 (Prague) | Not exercised: no precompile calls, no type-4 transactions. Neither script that sends transactions asserts gas. |
+| ModExp repricing / bounds, P-256 precompile | EIP-7883, EIP-7823, EIP-7951 (Osaka) | No script calls ModExp or P-256. Three precompiles are called, and none of them changed in Prague or Osaka: `ecrecover` (`tests/abi-0.8.38/Features.sol:47`, via `check-abi-vectors.mjs:90,96,97`), and `sha256` and `ripemd160` (`tests/solc/SliceCopies.sol:47-48`, via `check-slice-copies.mjs:44`). |
+| BLS12-381 precompiles, EIP-7702 code delegation, calldata floor cost, historical block hashes in state | EIP-2537, EIP-7702, EIP-7623, EIP-2935 (Prague) | Not exercised: no BLS precompile calls, no type-4 transactions and no `blockhash`. Neither script that sends transactions asserts gas. |
 | Contract and initcode size caps | EIP-170, EIP-3860 | Not idealized in these scripts (same as at the base). The largest runtime object is 9,484 bytes (cap 24,576). The largest creation object is 11,971 bytes (cap 49,152). No vector comes near either cap. |
 
 **Compiled bytecode.** A `--require` preload intercepted every
 `solidity_compile` call: 43 compiles, 97 `evm.bytecode`/`evm.deployedBytecode`
 objects. It compared them between `evmVersion:'cancun'` and `'osaka'`
 ([bytecode-comparison.json](../../tests/upstream/g06-osaka-repin/bytecode-comparison.json)).
-51 objects are byte-identical. The other 46 differ only inside CBOR metadata
-sections, whose IPFS hash covers the settings, including `evmVersion`. There
+After the trailing CBOR metadata is stripped from deployed objects, 51 objects
+are byte-identical. The other 46 differ only inside embedded CBOR metadata
+sections: those of creation code and of child contracts' code. A metadata
+section's IPFS hash covers the settings, including `evmVersion`. There
 are 0 instruction differences. The preload itself was a scratch tool and is
 not committed; the JSON records the method.
 
@@ -175,15 +186,26 @@ These are Lean-side or other-owner pins that this task may not edit:
    `solc_import`/`solc_world_factory` hashes in those Lean files must change.
    The ASTs record settings, not bytecode, so the only expected change is the
    settings field.
-3. **Documentation that describes these scripts as Cancun.** These lines are
-   owned by other groups' documents and are left for the integrator:
+3. **Text that describes these scripts as Cancun.** These lines are owned by
+   other groups' documents and are left for the integrator:
    `docs/feature-work/abi-hashes.md:95`,
    `docs/feature-work/transient-storage.md:95,389`,
    `docs/feature-work/source-admission.md:111`,
-   `docs/solidity-upstream-tests.md:225`, and G00 pin disagreement 2
-   (`docs/feature-work/roadmap-g00-scope.md:96–102`, owned by
-   g00-manifest-rev).
-4. **Code-size idealization in the vector scripts.** It is not encoded (see
+   `docs/solidity-upstream-tests.md:225`, the AST regeneration command's
+   `--evm-version cancun` (`docs/feature-work/calls-exceptions.md:76`, which
+   changes together with item 2), and the source comment
+   `tests/solc/TransientStorage.sol:4`. G00's pin disagreement 2 and its
+   follow-ups (`docs/feature-work/roadmap-g00-scope.md:96–102,336,784`) are owned
+   by g00-manifest-rev.
+4. **Core machine fork.** `docs/feature-work/roadmap-g00-scope.md:784` asks G06
+   to "pin the EVM fork for the core machine". The core `Solidity/Evm` machine
+   records no fork (same document, lines 102–103). `Solidity/Evm/**` belongs to
+   the open evm-*/memory-* lanes, so this stays a G06 obligation.
+5. **`evm-reference` module versions.** `scripts/evm-reference/package.json:8-9`
+   still pins `@ethereumjs/common`/`util` 10.1.2, while `evm-vectors` pins 10.1.3.
+   That package is already on Osaka and is not part of this task. That half of
+   G00 disagreement 5 remains open.
+6. **Code-size idealization in the vector scripts.** It is not encoded (see
    the table above). Add it only if a vector ever approaches 24,576 / 49,152
    bytes, as `scripts/evm-reference/replay.mjs:54` already does.
 
