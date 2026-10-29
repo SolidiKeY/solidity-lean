@@ -367,7 +367,7 @@ def dependency_ledger(plan, imports, root, errors):
                 errors.append(f"VM table: {i} in {vm_of[i]} and {vm}")
             vm_of[i] = vm
             vm_order[i] = pos
-        vm_pre[vm] = [v.strip() for v in pre.split(",") if v.strip() not in ("—", "")]
+        vm_pre[vm] = re.findall(r"\bV\d\d\b", pre)
     for i in pk:
         if i not in vm_of:
             errors.append(f"VM table: work package {i} has no VM")
@@ -1427,7 +1427,7 @@ class D:
     REQUIRED_DECISION_ROWS = {
         "per-run hash premise and bound": "D11", "decode export": "D14", "artifact table": "D06",
         "frame failure semantics": "D19", "transaction failure semantics": "D20",
-        "memory frames for recursion": "D10", "EvalOrder settings (revised: two pipelines)": "D04",
+        "memory frames for recursion": "D10", "shared-foundation children": "D25", "EvalOrder settings (revised: two pipelines)": "D04",
         "fixed point": "D07",
     }
 
@@ -1468,16 +1468,16 @@ class D:
          "g06-osaka-repin; g06-evm-interface"),
         ("D04", "Public theorem over solc's two pipelines: the legacy and via-IR `EvalOrder` settings "
                 "(revised 2026-10-29: the other six flag combinations are dropped)",
-         ["G00 Q4 — settings", "Pins (G00, G05, G06)"],
-         {"source": "S02 S03.01 S03.02 S03.03", "admission": "G05 G15", "lowering": "G16 G17 G19",
+         ["G00 Q4 — settings", "G00 Q4 (revised) / G05 Q2 — settings", "Pins (G00, G05, G06)"],
+         {"source": "S02 S03.01 S03.02 S03.03 S04.02", "admission": "G05 G15", "lowering": "G16 G17 G19",
           "backend": "G26", "theorem": "G49.02 G49.03"},
          ["the public theorem's settings type must range over exactly the two pipelines and map each to its "
           "`EvalOrder` (`{}` for legacy, `EvalOrder.viaIR`); admission must refuse the other six flag "
           "combinations (manual `evalOrder` overrides)",
           "no source semantics parameterized by the pipeline independently of the elaborator",
           "lowering (`hoist`/`captureExpr`, `wrapMods`) has regressions but no theorem for either order",
-          "the revision is the coordinator's relay of the user's second-round answer; the binding table at "
-          "this base still reads 'all eight' until the 'Second round (2026-10-29)' section lands"],
+          "each pipeline fixes its ABI coder: legacy with the pragma's coder (v1 or v2), via-IR with v2; "
+          "legacy ABI-v1 decoding is today an implementation diagnostic (`pragmaAbicoder`)"],
          "g05-frontend; g01-contracts-rev"),
         ("D05", "Frozen profile solc 0.8.38; 0.8.34 fixtures only as SolKey compatibility checks",
          ["G00 Q4 — settings", "Pins (G00, G05, G06)"],
@@ -1495,13 +1495,22 @@ class D:
           "no compiled artifact exists for any contract: `type(C).creationCode` has no producer"],
          "g01-contracts-rev"),
         ("D07", "Full fixed-point types beyond pinned solc's acceptance boundary",
-         ["G00 Q6 — fixed-point types", "Manifest"],
+         ["G00 Q6 — fixed-point types", "Manifest", "Fixed point — `*` and `/`", "Fixed point — implicit conversions",
+          "Fixed point — explicit conversions out of range", "Fixed point — rounding", "Fixed point — shifts",
+          "Fixed point — unary minus on `ufixed`", "Fixed point — `++`/`--`",
+          "Fixed point — explicit fixed/integer and `bytesM` conversions", "Fixed point"],
          {"source": "S00 S01 S02", "admission": "G08 G09 G13 G15", "lowering": "G16", "backend": "G25",
           "evm": "G46.01", "theorem": "G49.02 G49.03"},
          ["the manifest scopes `fixedPoint` as `upstream` (g00-manifest-rev moves it into the profile)",
           "no reference semantics for fixed-point arithmetic/rounding/conversions beyond solc 0.8.38 "
           "(fixed-point-semantics)",
-          "no lexer, type, lowering or compiler support at all"],
+          "no lexer, type, lowering or compiler support at all",
+          "the reference semantics must encode the second-round answers: exact product/quotient truncated toward "
+          "zero, range-contained implicit conversions only, explicit out-of-range conversions wrap (constants "
+          "are compile errors), `++`/`--` by 1, unary minus on `ufixed` panics `0x11` unless 0, integer/`bytesM` "
+          "conversions by value/bit pattern",
+          "shifts are rejected as solc's checker reaches an internal assertion: G15 must refuse them (narrows "
+          "G00 Q6)"],
          "g00-manifest-rev; fixed-point-semantics"),
         ("D08", "Idealized source resources: unbounded fuel and recursion",
          ["G01 Q1 — source resources"],
@@ -1510,7 +1519,7 @@ class D:
           "`SourceSpec.Idealized` has no instance; `Prefixes.Consistent` of `Prog.runF` is unproved"],
          None),
         ("D09", "Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized",
-         ["G01 Q2 — fixed EVM limits", "Resources in the contracts", "Contracts (G01)"],
+         ["G01 Q2 — fixed EVM limits", "G06 Q2 — Osaka gas caps", "Resources in the contracts", "Contracts (G01)"],
          {"source": "S03.04 S04.04", "backend": "G44.02", "evm": "G06 G46.06 G47", "theorem": "G49.03 G50.02",
           "interface": "G01"},
          ["`EvmSpec` resources still list code size (g01-contracts-rev drops it)",
@@ -1527,7 +1536,7 @@ class D:
          "memory-internal-calls"),
         ("D11", "Per-run hash premise and bound: the preimages hashed by an execution prefix do not collide, "
                 "plus a random-oracle collision bound (about q²/2²⁵⁷)",
-         ["G01 Q3 / G04 Q1 — hash collisions", "Contracts (G01)"],
+         ["G01 Q3 / G04 Q1 — hash collisions", "Hash regions", "Hash bound", "Contracts (G01)"],
          {"source": "S04.02", "backend": "G27.05 G31", "evm": "G46.03 G46.05", "theorem": "G49.02 G50.02",
           "interface": "G01"},
          ["storage slots are symbolic terms that never collide (`Slot`, G04 R34) — global injectivity in the type",
@@ -1536,7 +1545,9 @@ class D:
           "the premise must quantify over the prefix's actual preimages, including mapping keys and "
           "dynamic-array bases",
           "the core has no probability library: the bound must be stated combinatorially, as a count over "
-          "oracle functions in the idealized random-oracle model the decision names, not about keccak itself"],
+          "oracle functions in the idealized random-oracle model the decision names, not about keccak itself",
+          "the premise extends to hashed regions: no region of length at most L based at a hashed slot overlaps "
+          "another or a root region (bound about q²·L/2²⁵⁶); the region predicate and its counting bound are new"],
          "hash-collision-bound; g01-contracts-rev; evm-storage-slots"),
         ("D12", "History-dependent callee strategies with unbounded reentrancy; address 0 has no code",
          ["G01 Q4 — environment"],
@@ -1568,11 +1579,11 @@ class D:
          ["`CALL` takes only address and value in the machine; forwarded gas is absent (G04 R27)"],
          None),
         ("D16", "System boundary: the whole input, every contract and linked library, is compiled",
-         ["G01 Q8 — system boundary", "Pins (G00, G05, G06)"],
+         ["G01 Q8 — system boundary", "G05 Q1 — library addresses", "Frontend (G05)", "Pins (G00, G05, G06)"],
          {"admission": "G05 G12 G15", "lowering": "G22.04", "backend": "G42.04 G44.02", "evm": "G47",
           "theorem": "G49.02 G50.01"},
-         ["`validateSettings` rejects `libraries` (G00 disagreement 6) while the decision puts linked "
-          "libraries in the system",
+         ["`validateSettings` must admit exactly the empty link map; a pre-assigned map is refused and the "
+          "session deploys and links every library itself (G05 Q1, resolving G00 disagreement 6)",
           "no link-settings provenance (G00 ownership gap 2; G05)"],
          "g05-frontend"),
         ("D17", "Storage aliases after `pop`/`delete` in profile, with solc's logical slot behaviour",
@@ -1600,7 +1611,7 @@ class D:
          None),
         ("D20", "Transaction failure semantics: any transaction may revert from gas exhaustion and the session "
                 "continues",
-         ["Follow-up — block gas limit", "Resources in the contracts"],
+         ["Follow-up — gas exhaustion", "G06 Q2 — Osaka gas caps", "Resources in the contracts"],
          {"source": "S04.04", "evm": "G47", "theorem": "G50.02", "interface": "G01"},
          ["`Lang.Res` ends a session at gas exhaustion (contract revision needed)",
           "`Lifetime.System` and `ContractWorld.Step` have no exhaustion transition"],
@@ -1619,8 +1630,38 @@ class D:
           "addresses 1–3",
           "typed calls to a precompile address are environment calls in `ContractWorld`"],
          None),
+        ("D23", "Forced ether: the environment may credit the system's balance between transactions and during "
+                "environment frames; the ledger records the credits",
+         ["G06 Q1 — forced ether"],
+         {"source": "S04.03 S04.04", "lowering": "G22.05", "backend": "G43", "evm": "G46.04 G47",
+          "theorem": "G50.02", "interface": "G01"},
+         ["the core `Sim`/ledger relation fixes balances between steps; credits by beneficiary rewards, foreign "
+          "`SELFDESTRUCT` or withdrawals have no source transition",
+          "the own balance must be allowed to grow in the source (`address(this).balance` reads)"],
+         "g01-contracts-rev"),
+        ("D24", "Stipend payments to our own instances: a compiler-independent source cost rule decides which "
+                "`receive`/fallback bodies fit 2300 gas; the compiler is proved to fit every admitted body",
+         ["G06 Q3 — stipend payments to our own instances"],
+         {"source": "S04.03", "lowering": "G22.05", "backend": "G43 G45.06", "evm": "G46.06 G47",
+          "theorem": "G50.02", "interface": "G01"},
+         ["no source cost rule exists; it must assume cold (EIP-2929) access costs and be independent of the "
+          "compiler",
+          "the compiler must be proved to fit every admitted body within the stipend, and to fail the payment for "
+          "every body the rule rejects",
+          "carve-out from 'Follow-up — nested-frame failures' for these payments only; gas stays unobserved"],
+         None),
+        ("D25", "Shared compiler foundation: frozen slot, state and statement interfaces as children of G24 ahead "
+                "of wave 3",
+         ["G03 Q1 — shared compiler foundation", "Roadmap (G03)"],
+         {"backend": "G24.01 G24.02 G24.03 G24.04"},
+         ["the child rows are not yet in coverage-plan.md's manifest and VM table (integration step 1); the "
+          "checker applies them from `PROPOSED_PACKAGES` until they land",
+          "no frozen interface exists: `Slot`, `Sim`/`StateRepr` and `StmtOut` are concrete today"],
+         None),
     ]
     DECISION_COVER = {
+        "D23": [("backend", "Solidity.Evm.compile_net", "Solidity/Evm/Correct.lean",
+                 "machine success gives net payments; no external credit")],
         "D01": [('admission', "Solidity.Language.Feature.exclusion_complete", "Solidity/Language/Features.lean",
                  "every excluded feature has a structured diagnostic"),
                 ('admission', "Solidity.Language.Unmodelled.excluded", "Solidity/Language/Features.lean",
