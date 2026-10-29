@@ -1,0 +1,237 @@
+{
+  "version": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "sources": {
+    "TransientFactory.sol": "1a86c998bce8a5423c863f78568c5458b00074ca8c450e12fac15c0bdb09819b",
+    "TransientWorldScenario.sol": "78b0a19b679bfd4bf19888fe8c21002faf0c93a3a975370d540c4895fbad0418"
+  },
+  "reset": "successive signed transactions on one VM per pipeline",
+  "reports": [
+    {
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": true
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "name": "makeOnly",
+          "expected": [
+            9
+          ],
+          "failure": null,
+          "actual": "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "exception": null
+        },
+        {
+          "name": "checkFresh",
+          "expected": [
+            9
+          ],
+          "failure": null,
+          "actual": "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "exception": null
+        },
+        {
+          "name": "uncaught",
+          "expected": [],
+          "failure": "revert",
+          "actual": "0x",
+          "exception": "revert"
+        },
+        {
+          "name": "checkFresh",
+          "expected": [
+            9
+          ],
+          "failure": null,
+          "actual": "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "exception": null
+        },
+        {
+          "name": "caught",
+          "expected": [
+            false
+          ],
+          "failure": null,
+          "actual": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "exception": null
+        },
+        {
+          "name": "checkLater",
+          "expected": [
+            11
+          ],
+          "failure": null,
+          "actual": "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "exception": null
+        },
+        {
+          "name": "falseShared",
+          "expected": [],
+          "failure": "panic",
+          "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+          "exception": "revert"
+        },
+        {
+          "name": "failWrite",
+          "expected": [],
+          "failure": "revert",
+          "actual": "0x",
+          "exception": "revert"
+        },
+        {
+          "name": "checkLater",
+          "expected": [
+            11
+          ],
+          "failure": null,
+          "actual": "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "exception": null
+        },
+        {
+          "name": "compose",
+          "expected": [
+            11
+          ],
+          "failure": null,
+          "actual": "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "exception": null
+        },
+        {
+          "name": "checkLater",
+          "expected": [
+            11
+          ],
+          "failure": null,
+          "actual": "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "exception": null
+        }
+      ]
+    },
+    {
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": true
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.deployedBytecode.object"
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "name": "makeOnly",
+          "expected": [
+            9
+          ],
+          "failure": null,
+          "actual": "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "exception": null
+        },
+        {
+          "name": "checkFresh",
+          "expected": [
+            9
+          ],
+          "failure": null,
+          "actual": "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "exception": null
+        },
+        {
+          "name": "uncaught",
+          "expected": [],
+          "failure": "revert",
+          "actual": "0x",
+          "exception": "revert"
+        },
+        {
+          "name": "checkFresh",
+          "expected": [
+            9
+          ],
+          "failure": null,
+          "actual": "0x0000000000000000000000000000000000000000000000000000000000000009",
+          "exception": null
+        },
+        {
+          "name": "caught",
+          "expected": [
+            false
+          ],
+          "failure": null,
+          "actual": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "exception": null
+        },
+        {
+          "name": "checkLater",
+          "expected": [
+            11
+          ],
+          "failure": null,
+          "actual": "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "exception": null
+        },
+        {
+          "name": "falseShared",
+          "expected": [],
+          "failure": "panic",
+          "actual": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+          "exception": "revert"
+        },
+        {
+          "name": "failWrite",
+          "expected": [],
+          "failure": "revert",
+          "actual": "0x",
+          "exception": "revert"
+        },
+        {
+          "name": "checkLater",
+          "expected": [
+            11
+          ],
+          "failure": null,
+          "actual": "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "exception": null
+        },
+        {
+          "name": "compose",
+          "expected": [
+            11
+          ],
+          "failure": null,
+          "actual": "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "exception": null
+        },
+        {
+          "name": "checkLater",
+          "expected": [
+            11
+          ],
+          "failure": null,
+          "actual": "0x000000000000000000000000000000000000000000000000000000000000000b",
+          "exception": null
+        }
+      ]
+    }
+  ]
+}

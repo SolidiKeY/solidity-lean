@@ -1,0 +1,17 @@
+PASS abi-vectors | 31 pinned Solidity 0.8.38 / EVM ABI vectors and 5 compiler rejection cases passed
+PASS recursive-types | 20 pinned solc 0.8.38/EVM recursive-type vectors and 7 compiler rejection cases passed
+PASS self-power-data | 82 exact-byte compiler/EVM observations passed in legacy and viaIR
+PASS modifier-frames | 40 pinned solc/EVM modifier vectors passed (0.8.38+commit.1835d247.Emscripten.clang).
+PASS operator-aliases | 38 solc 0.8.38/EVM execution cases, 8 compiler rejection cases, and both nominal metadata fixtures passed
+PASS slice-copies | {"compiler":"0.8.38+commit.1835d247.Emscripten.clang","pipelines":["legacy","viaIR"],"executions":18,"invalidSourcesPerPipeline":3}
+PASS public-getters-38 | {"sha":"6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390","pipelines":2,"executions":62,"compilerRejections":7}
+PASS call-exception-38 | 88 0.8.38+commit.1835d247.Emscripten.clang legacy/viaIR Osaka call/exception vectors passed
+PASS transient-38 | {"version":"0.8.38+commit.1835d247.Emscripten.clang","pipelines":["legacy","viaIR"],"executions":18,"invalidSources":12,"reset":"successive signed transactions 
+PASS source-admission-38 | {"compiler":"0.8.38+commit.1835d247.Emscripten.clang","evmVersion":"osaka","pipelines":["legacy","viaIR"],"executions":22,"invalidSources":6,"rejectedGates":4,"
+PASS public-getters-34 | {"sha":"c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8","pipelines":2,"executions":62,"compilerRejections":7}
+PASS call-exception-34 | 88 0.8.34+commit.80d5c536.Emscripten.clang legacy/viaIR Osaka call/exception vectors passed
+PASS transient-34 | {"version":"0.8.34+commit.80d5c536.Emscripten.clang","pipelines":["legacy","viaIR"],"executions":18,"invalidSources":12,"reset":"successive signed transactions 
+PASS source-admission-34 | {"compiler":"0.8.34+commit.80d5c536.Emscripten.clang","evmVersion":"osaka","pipelines":["legacy","viaIR"],"executions":22,"invalidSources":6,"rejectedGates":4,"
+PASS transient-world | }
+PASS abi-hex-call | 36 EVM runs and 40 compiler rejections passed
+16/16 checks passed
