@@ -1198,5 +1198,35 @@
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
     "code": "let v \u2190 unsafe evalExpr EvalOrder (mkConst ``EvalOrder) t"
+  },
+  {
+    "file": "Solidity/Calculus/MemoryLoopReplay.lean",
+    "kind": "unsafe",
+    "code": "unsafe def gather {C : Contract} (ref : IO.Ref (Array (Visit C))) (R : RuleSet)"
+  },
+  {
+    "file": "Solidity/Calculus/MemoryLoopReplay.lean",
+    "kind": "unsafe",
+    "code": "unsafe def propose {C : Contract} (R : RuleSet) (n : Nat) (\u03c6 : Fml C []) : Array (Visit C) := unsafeBaseIO do"
+  },
+  {
+    "file": "Solidity/Calculus/MemoryLoopReplay.lean",
+    "kind": "unsafe",
+    "code": "let nativeC \u2190 unsafe evalExpr Contract (Lean.mkConst ``Contract) C"
+  },
+  {
+    "file": "Solidity/Calculus/MemoryLoopReplay.lean",
+    "kind": "unsafe",
+    "code": "let visits \u2190 unsafe evalExpr (Array (Visit nativeC)) type"
+  },
+  {
+    "file": "Solidity/Calculus/MemoryLoopReplay.lean",
+    "kind": "unsafe",
+    "code": "(mkAppN (Lean.mkConst ``propose) #[C,R,toExpr (1024:Nat),\u2190 Symex.evaluable \u03c6]) (safety:=.unsafe)"
+  },
+  {
+    "file": "Solidity/Calculus/MemoryLoopReplay.lean",
+    "kind": "kernel-option",
+    "code": "if (\u2190 getOptions).getBool `debug.skipKernelTC false then throwError memory replay requires kernel checking\""
   }
 ]

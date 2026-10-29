@@ -10,6 +10,10 @@
  * `Derive.leafTacs`' closers (`Calculus/Derive.lean`), under `case leafN =>`
  * bare for a single leaf, or under `all_goals` for every leaf alike.  Anything else in the body (a rewrite, an
  * `intro`, an `omega`), and any `set_option` on the theorem, is manual.
+ * The single `finish_memory_replay` body is the same 1024-step walk,
+ * decomposed into kernel-checked equations (Calculus/MemoryLoopReplay.lean);
+ * no extra closer or changed bound is accepted. Its stage modules are timed
+ * by the same 300-second gate.
  * A refutation (`N.f.refuted : ¬ (⊢ N.f.problem)`) is automatic when it
  * is in `Refuted.lean` and is `sol_refute` alone, which proves it from
  * `¬ ⊨ᶠ N.f.problem` (a certified counterexample).  The counts read here
@@ -63,6 +67,8 @@ const proveLine = /^sol_prove(?: \(steps := (\d+)\))?$/;
 export function classify(lines) {
   const [head, ...rest] = lines;
   if (head === "sol_auto" && rest.length === 0) return { kind: "auto", steps: null };
+  if (head === "finish_memory_replay" && rest.length === 0)
+    return { kind: "budget", steps: 1024 };
   const m = head?.match(proveLine);
   if (!m) return { kind: "manual", why: `starts with \`${head ?? ""}\`` };
   const leaf = (ls) => ls.length === 2 && ["sol_leaf", "sol_leaf_keep"].includes(ls[0]) &&
@@ -140,7 +146,7 @@ function main() {
   const counts = { auto: 0, budget: 0, manual: 0 };
   const findings = [];
   let refuted = 0;
-  const modules = readdirSync(DIR).filter((f) => /^(Derived\d+|Refuted)\.lean$/.test(f)).sort();
+  const modules = readdirSync(DIR).filter((f) => /^(Derived\d+|Derived17MemoryLoop|Refuted)\.lean$/.test(f)).sort();
   for (const f of modules) {
     for (const p of proofs(readFileSync(join(DIR, f), "utf8"))) {
       if (p.kind === "refuted") {

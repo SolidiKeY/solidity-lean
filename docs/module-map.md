@@ -595,6 +595,8 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `TestSuite/Derived14.lean` | The twenty obligations added at solkey `1b4341a303` (`send`, internal calls, `return`, tuples), each by `sol_prove`; ground splits are pruned (`Seq.refuteS`, closed by `Proves.closeFalse`). |
 | `TestSuite/Derived15.lean` | 53 migration derivations for returns, overloads, modifiers, helpers, storage shapes, fresh arrays and push operands; the report counts only kernel-checked declarations. |
 | `TestSuite/Derived16.lean` | Native push compound, DIV/MOD, increment and signed three-push derivations; demanded primitive reads close the signed case within the existing bounds. |
+| `Calculus/MemoryLoopReplay.lean` | Typed symbolic aliases and kernel-checked one-layer equations for the unchanged 1024-step walk; untrusted native proposals, exact callback/result accounting, fail-closed checkpoints and empty-residue-only refusal boundary. |
+| `TestSuite/MemoryLoopReplay/*.lean`, `TestSuite/Derived17MemoryLoop.lean` | Twenty shared replay stages for the original nested-return theorem; incomplete, missing-state, wrong-root and residual-leaf refusal controls. |
 | `TestSuite/Derived17.lean` | Unannotated upstream loop derivations, including storage-dependent bounds, break/continue and nested returns; fixed-budget kernel-checked replay. |
 | `TestSuite/Derived18.lean` | The imported native modular arithmetic obligation, proved with explicit Lean-only assignment rules. |
 | `TestSuite/Derived19.lean` | Obligations new at solkey `473da8944c`: `&`'s operand order, a `continue` under an invariant, modifier continuations, the four dangling-storage claims (a length-only push) and shifts, by `sol_prove`. |

@@ -550,3 +550,36 @@ solkey's four open loop ports are `tests/solc/OpenLoops.sol`
 - `multiArrayFillByPushLoops`: open; `nests.push()` recycles a `Nest` whose
   `d` is a dangling array of unknown length, so the later loops' guards
   read unknown lengths. It needs a closer for exposed slots.
+
+
+### Nested-return proof sharing (compiler10 memory-loop validation)
+
+The unchanged `returnLeavesNestedLoops` obligation consumed 903 visits of its
+original 1024-step walk. Native proposal evaluation took 3.02 s; the monolithic
+kernel evaluation hit the 10 GiB sampled RSS guard (or address-space failure).
+An explicit structural recursion alone did not fix it. `MemoryLoopReplay`
+shares typed symbolic states and proves one layer against an opaque callback.
+Its successor equation is universally equal to the existing `runK`; checked
+child equations instantiate that callback in original postorder. The final
+proof uses the original `Proves.of_residueWithin` with exactly 1024 steps.
+Source programs, formulas, rules, fresh indices, callback branch order, failed
+and speculative callbacks, returned budget and observations are unchanged.
+
+Native gather/propose code supplies candidate metadata only. Every accepted
+state alias, candidate result and node equation is kernel checked; the final
+proof has only `propext`, `Classical.choice`, `Quot.sound`. A malformed candidate
+cannot supply an equation. Missing or incomplete proofs, wrong roots and
+nonempty residual leaves are refused. Runtime exceptions clear the live job
+and restore the previous environment. Snapshots use the exact typed target.
+
+Twenty disk checkpoints bound repeated normalization and retain the default
+per-declaration heartbeat and recursion limits. Total work/heartbeats are
+distributed across declarations; this is not a claim that the monolithic
+aggregate heartbeat count is unchanged. No search, fuel or per-module timing
+budget was raised. No extra closer is used. The full scratch chain took
+1110.96 s, peak process-group RSS 1,950,941,184 bytes; slowest stage 115.31 s,
+below the existing 300 s gate. Production and full-suite terminal measurements
+are recorded in the task handoff and validation logs; failed experiments remain
+archived. The finder and skeptic found no proof-trust defect; their confirmed
+missing refusal controls, trust inventory and classifier-test findings were
+addressed in the production validation.

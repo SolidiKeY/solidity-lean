@@ -161,20 +161,23 @@ Validation for batch `solidity-compiler10-20261028` (2026-10-29), based on
 | Check | Actual result |
 |---|---|
 | Runtime versions and `lake build Solidity.KeySort` | Lean 4.24.0, Lake 5.0.0-src+797c613; each command exited 0. |
-| `lake build Solidity.Evm.MemoryLoopSourceExamples` | Passed, including all new imports and inhabited simulations; 36.98 s, sampled aggregate peak 1,171,623,936 bytes. Final full-build replay also checked the added refusal controls. |
+| `lake build Solidity.Evm.MemoryLoopSourceExamples` | Passed, including all new imports and inhabited simulations; 37.28 s, sampled aggregate peak 1,133,166,592 bytes. Final full-build replay also checked the added refusal controls. |
 | General loop/composition/prefix-budget/exhaustion and public compiler axiom audit | Passed; only `propext`, `Classical.choice`, `Quot.sound`. |
 | Full default `lake build` inside `./run-lean.sh` | Passed, 690 jobs. |
-| Complete `./run-lean.sh` | **BLOCKED** in unchanged `Solidity.TestSuite.Derived17`; no full-script pass claimed. The asynchronous attempt hit `std::bad_alloc` (Lean 134; script 1), while the focused serial repair hit the aggregate RSS guard (75) after 81.94 s at 10,745,778,176 bytes. All 224 source dependencies are byte-identical to the recorded base. The TestSuite loop-proof owner must reduce that target's memory and rerun the suite and full script. |
+| Complete `./run-lean.sh` | Passed (0), 18.56 s, sampled group peak 1,336,823,808 bytes, including `SolkeyTestSuite` and pinned SolKey annotations. Earlier monolithic `Derived17` allocation/RSS failures remain archived as failures; the authorized sharing repair is described in `loops.md`. |
 | Independent `bash scripts/check-solkey.sh` | Passed; 377 taclets parsed, all 131 read-bearing annotations match the existing pin. |
-| Orphans, layers, strict automatic, trust, complete TestSuite audit and trust-script test | Passed: 705 reachable, zero orphans; core has no elaborator reach; 491 automatic, zero manual/pending; trust zero findings; 552 derived + 11 refuted + 1 excluded TestSuite functions, zero pending. |
+| Orphans, layers, strict automatic, trust, complete TestSuite audit and trust-script test | Passed: 728 reachable, zero orphans; core has no elaborator reach; 491 automatic + 61 with recorded step budgets, zero manual/pending; trust 742 sources / 246 sites / zero findings; 552 derived + 11 refuted + 1 excluded TestSuite functions, zero pending. |
 | Documentation paths | Failed (1), with exactly the same 20 findings and byte-identical output at the recorded base; unchanged documentation debt. |
 
-Every Lean/Lake or heavy operation used the measured VM guard: hard inherited
+Passing validation and fresh per-file rechecks used the measured VM guard: hard inherited
 12 GiB address space per process, sampled process-group RSS stop at 10 GiB
 (100 ms), and whole-VM current-memory stop at 12 GiB. The existing hard VM
 cgroup is 16 GiB and actual swap is disabled. No writable 12 GiB cgroup or
 `MemorySwapMax=0` setting is claimed. Runs used `LEAN_NUM_THREADS=1` and explicit
 Lean `-j1` in an untracked, archived Lake configuration; no Lean server ran.
+An abandoned background attempt lost its guard and was stopped; its peak is
+unknown and it is recorded as interrupted, never a pass. The helper and first
+four production stages were subsequently freshly checked under the guard.
 The initial finite-memory baseline took 280.45 s / 1,208,295,424 peak bytes;
 these incremental builds have different target/cache states, not clean-build
 speed ratios.
@@ -194,7 +197,23 @@ confirmed G0 concerns about indexed certificate metadata and new source dispatch
 were fixed with generalized recursors; final reviews found no outstanding
 correctness defect in the stated finite-body/sequential scope. The cumulative
 bundle, handoff, full logs, failed-attempt records and checksums accompany this
-batch. Mandatory whole-script validation remains blocked as recorded above.
+batch. Mandatory whole-script validation now passes after the authorized
+shared `Derived17` proof-memory repair, with all original statements,
+observations and search budgets retained. The new helper and early cached
+stages were freshly rechecked under the guard; the final helper differs from
+the full-script source only by removal of trailing whitespace (token sequence
+unchanged, recorded in the evidence). No interrupted attempt counts as passed.
+
+
+The shared nested-return proof repair production group passed in 965.51 s
+with peak 2,886,291,456 bytes (early stages cached); the remaining nine
+`Derived17` proofs passed unchanged in 48 s. The final axiom audit retains only
+`propext`, `Classical.choice`, `Quot.sound`. Missing-state, wrong-root,
+incomplete-checkpoint and residual-leaf refusals are checked. Finder and
+skeptic reviews confirmed those controls and the exact 1024-step walk. The
+unchanged 300-second automatic gate covers every replay stage; total work is
+distributed across default-budget declarations, not asserted equal to the
+monolithic aggregate heartbeat count.
 
 ## What is proved
 
