@@ -604,18 +604,29 @@ theorem literalTrunc_rescale {t t' : FxTy} (num : Int) {den : Nat} (hd : den ≠
       rw [Int.mul_assoc, ← Int.pow_add, Nat.add_sub_cancel' h]
     rw [hs]
 
-/-- When the target has no more digits than the mobile type, solc's route
-(the constant typed at its mobile type, then converted) gives the exactly
-folded value: P1 changes no such conversion. -/
+/-- When the target has no more digits than the mobile type, the route
+through the mobile type — the constant typed there, then converted by this
+model's run-time conversion (rescale toward zero, then wrap; Q2, Q3) — is
+the wrap of the exactly folded value. -/
+theorem explicit_mobile_route {q : Rat} {m t : FxTy} (hm : mobileFx? q = some m)
+    (hd : t.digits ≤ m.digits) :
+    explicit t (⟨literalTrunc m q.num q.den, mobileFx?_inRange hm⟩ : Fx m) =
+      wrap t (literalTrunc t q.num q.den) := by
+  have hr : rescale m.digits t.digits (literalTrunc m q.num q.den) = literalTrunc t q.num q.den :=
+    literalTrunc_rescale q.num q.den_nz hd
+  simp only [explicit, hr]
+
+/-- …so where the exact fold fits the target (`explicitRat?` succeeds), the
+route gives exactly the folded value: P1 changes no such conversion.  Out of
+range, solc accepts and this model refuses (Q2). -/
 theorem explicitRat?_mobile_route {q : Rat} {m t : FxTy} (hm : mobileFx? q = some m)
     (hd : t.digits ≤ m.digits) {a : Fx t} (ha : explicitRat? t q = some a) :
     explicit t (⟨literalTrunc m q.num q.den, mobileFx?_inRange hm⟩ : Fx m) = a := by
   have hv : a.1 = literalTrunc t q.num q.den := (explicitConst?_eq_some_iff q.den_nz).mp ha
-  have hr : rescale m.digits t.digits (literalTrunc m q.num q.den) = literalTrunc t q.num q.den :=
-    literalTrunc_rescale q.num q.den_nz hd
   have hin : t.inRange (literalTrunc t q.num q.den) = true := by rw [← hv]; exact a.2
+  rw [explicit_mobile_route hm hd]
   apply Subtype.ext
-  simp only [explicit, wrap, hr, wrapInt_of_inRange hin, hv]
+  simp only [wrap, wrapInt_of_inRange hin, hv]
 
 /-! ### The common type with a constant operand -/
 

@@ -8,8 +8,12 @@ second-round decisions asked for (`docs/feature-work/fixed-point-semantics.md`,
 §6.1): checked and unchecked arithmetic agree wherever nothing overflows;
 `*` and `/` are exact when the exact result has at most `N` digits and
 otherwise truncate toward zero by less than one unit in the last place, as
-the digit-dropping conversions do; lossless conversions round-trip; the
-implicit conversion is exactly the range-contained one
+the digit-dropping conversions do; lossless conversions round-trip;
+truncations compose (`tdiv_tdiv`, `Fx.rescale_rescale_down`); rescaling and
+unwrapped explicit conversions keep the order (`Fx.rescale_mono`,
+`Fx.explicit_le`); `+` is associative where it does not overflow
+(`Fx.add_assoc`) and `*` is not (an `example`); the implicit conversion is
+exactly the range-contained one
 (`FxTy.implicitOK_iff`, `FxTy.subsumes_iff`) and keeps the value and the
 order.
 
@@ -635,6 +639,17 @@ theorem common?_preserves {u : FxTy} (h : FxTy.common? t t' = some u) (a : Fx t)
 
 end Fx
 
+/-- `+` is associative wherever the checked sums exist (it is exact). -/
+theorem Fx.add_assoc {t : FxTy} {a b c r s r' s' : Fx t} (h1 : Fx.add .checked a b = .ok r)
+    (h2 : Fx.add .checked r c = .ok s) (h3 : Fx.add .checked b c = .ok r')
+    (h4 : Fx.add .checked a r' = .ok s') : s = s' := by
+  have e1 : r.1 = a.1 + b.1 := Fx.result_checked_val h1
+  have e2 : s.1 = r.1 + c.1 := Fx.result_checked_val h2
+  have e3 : r'.1 = b.1 + c.1 := Fx.result_checked_val h3
+  have e4 : s'.1 = a.1 + r'.1 := Fx.result_checked_val h4
+  apply Subtype.ext
+  omega
+
 /-- `*` is not associative under truncation: at `ufixed16x2`,
 `(0.01 · 0.50) · 2.00 = 0.00` but `0.01 · (0.50 · 2.00) = 0.01`. -/
 example :
@@ -699,5 +714,29 @@ info: 'Solidity.Language.FixedPoint.tdiv_tdiv' depends on axioms: [propext, Clas
 -/
 #guard_msgs in
 #print axioms tdiv_tdiv
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.explicit_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.explicit_le
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.rescale_mono' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.rescale_mono
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.rescale_rescale_down' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.rescale_rescale_down
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.add_assoc' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.add_assoc
 
 end Solidity.Language.FixedPoint
