@@ -540,6 +540,270 @@ theorem uniqE_bin {Γ : Ctx} {e a b : Syn .expr} {k : BinKind} (hb : e.binOp? = 
     | exact (no_const hce ‹_›).elim
     | (cases hb; done)
 
+theorem Uniq.mono {Γ : Ctx} {n m : Nat} (h : Uniq Γ n) (hm : m ≤ n) : Uniq Γ m :=
+  ⟨fun e he => h.e e (by omega), fun e he => h.l e (by omega), fun es he => h.a es (by omega),
+    fun s he => h.s s (by omega)⟩
+
+/-- A name that denotes a builtin types only as `this`. -/
+theorem Typed.ident_builtin {Γ : Ctx} {g : String} {b : Builtin} {τ : STy}
+    (hr : Γ.resolve g = Option.some (.builtin b)) (d : Typed Γ (.ident g) τ) : b = .this := by
+  have hce : (Syn.ident g).const = Option.none := rfl
+  have hbo : (Syn.ident g).binOp? = Option.none := rfl
+  cases d with
+  | loc h _ => rw [hr] at h; cases h
+  | state h _ => rw [hr] at h; cases h
+  | this h _ => rw [hr] at h; cases h; rfl
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **Names.** -/
+theorem uniqE_ident {Γ : Ctx} {x : String} (ih : Uniq Γ (sizeOf (Syn.ident x))) : UniqE Γ (.ident x) := by
+  intro τ τ' d d'
+  have hce : (Syn.ident x).const = Option.none := rfl
+  have hbo : (Syn.ident x).binOp? = Option.none := rfl
+  cases d with
+  | loc hr ht =>
+    cases d' with
+    | loc hr' ht' => rw [hr] at hr'; cases hr'; rw [ht] at ht'; cases ht'; exact ⟨rfl, HEq.rfl⟩
+    | state hr' _ => rw [hr] at hr'; cases hr'
+    | this hr' _ => rw [hr] at hr'; cases hr'
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | state hr hv =>
+    cases d' with
+    | loc hr' _ => rw [hr] at hr'; cases hr'
+    | state hr' hv' => rw [hr] at hr'; cases hr'; rw [hv] at hv'; cases hv'; exact ⟨rfl, HEq.rfl⟩
+    | this hr' _ => rw [hr] at hr'; cases hr'
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | this hr hs =>
+    cases d' with
+    | loc hr' _ => rw [hr] at hr'; cases hr'
+    | state hr' _ => rw [hr] at hr'; cases hr'
+    | this hr' hs' => rw [hs] at hs'; cases hs'; exact ⟨rfl, HEq.rfl⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- A hexadecimal literal of 39 to 41 digits has no bytes length. -/
+theorem Syn.hexLen?_addressLike {ds : List (Fin 16)} {cs : Bool} (h : ds.length = 40) :
+    (Syn.lit (.num (.hex ds cs))).hexLen? = Option.none := by
+  change (if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧ ¬ (39 ≤ ds.length ∧ ds.length ≤ 41) then
+    Option.some (ds.length / 2) else Option.none) = Option.none
+  rw [if_neg (fun hc => hc.2.2.2 ⟨by omega, by omega⟩)]
+
+/-- **Literals** (other than constants, which `Typed.const_unique` covers). -/
+theorem uniqE_lit {Γ : Ctx} {l : Lit} (hce : (Syn.lit l).const = Option.none) : UniqE Γ (.lit l) := by
+  intro τ τ' d d'
+  have hbo : (Syn.lit l).binOp? = Option.none := rfl
+  cases d with
+  | litBytes hl =>
+    cases d' with
+    | litBytes hl' => rw [hl] at hl'; cases hl'; exact ⟨rfl, HEq.rfl⟩
+    | litAddress h40 => rw [Syn.hexLen?_addressLike h40] at hl; cases hl
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | litAddress h40 =>
+    cases d' with
+    | litBytes hl' => rw [Syn.hexLen?_addressLike h40] at hl'; cases hl'
+    | litAddress _ => exact ⟨rfl, HEq.rfl⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | bool b => cases d' with
+    | bool _ => exact ⟨rfl, HEq.rfl⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | str bs => cases d' with
+    | str _ => exact ⟨rfl, HEq.rfl⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | hexStr bs => cases d' with
+    | hexStr _ => exact ⟨rfl, HEq.rfl⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | unicodeStr bs => cases d' with
+    | unicodeStr _ => exact ⟨rfl, HEq.rfl⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **`payable(x)`.** -/
+theorem uniqE_payable {Γ : Ctx} {args : Syn .callArgs} (ih : Uniq Γ (sizeOf (Syn.payableConv args))) :
+    UniqE Γ (.payableConv args) := by
+  intro τ τ' d d'
+  have hce : (Syn.payableConv args).const = Option.none := rfl
+  have hbo : (Syn.payableConv args).binOp? = Option.none := rfl
+  cases d with
+  | @payable x σ dx h =>
+    have hs : sizeOf x < sizeOf (Syn.payableConv (.positional (.cons x .nil))) := by
+      simp only [Syn.payableConv.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+    cases d' with
+    | payable dx' h' =>
+      obtain ⟨h1, e1⟩ := ih.e x hs dx dx'
+      cases h1
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1]
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **Parentheses and tuples.** -/
+theorem uniqE_tuple {Γ : Ctx} {o : Syn (.opt .expr)} {sl : Syn (.list (.opt .expr))}
+    (hce : (Syn.tuple o sl).const = Option.none) (ih : Uniq Γ (sizeOf (Syn.tuple o sl))) :
+    UniqE Γ (.tuple o sl) := by
+  intro τ τ' d d'
+  have hbo : (Syn.tuple o sl).binOp? = Option.none := rfl
+  cases d with
+  | @paren x σ d1 =>
+    have hs : sizeOf x < sizeOf (Syn.tuple (.some x) .nil) := by
+      simp only [Syn.tuple.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+    cases d' with
+    | paren d2 =>
+      obtain ⟨h1, e1⟩ := ih.e x hs d1 d2
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; exact e1⟩
+    | tuple _ ds hne => cases ds; exact absurd rfl hne
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @tuple x sl σ σs d1 ds hne =>
+    have hs : sizeOf x < sizeOf (Syn.tuple (.some x) sl) ∧ sizeOf sl < sizeOf (Syn.tuple (.some x) sl) := by
+      simp only [Syn.tuple.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+    cases d' with
+    | paren _ => cases ds; exact absurd rfl hne
+    | tuple d2 ds' _ =>
+      obtain ⟨h1, e1⟩ := ih.e x hs.1 d1 d2
+      cases h1
+      obtain ⟨h2, e2, -⟩ := ih.s sl hs.2 ds ds'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **Prefix operators.** -/
+theorem uniqE_prefix {Γ : Ctx} {op : PrefixOp} {x : Syn .expr}
+    (hce : (Syn.unaryPrefix op x).const = Option.none) (ih : Uniq Γ (sizeOf (Syn.unaryPrefix op x))) :
+    UniqE Γ (.unaryPrefix op x) := by
+  intro τ τ' d d'
+  have hbo : (Syn.unaryPrefix op x).binOp? = Option.none := rfl
+  have hs : sizeOf x < sizeOf (Syn.unaryPrefix op x) := by
+    simp only [Syn.unaryPrefix.sizeOf_spec]; omega
+  cases d with
+  | neg d1 _ =>
+    cases d' with
+    | neg d2 _ =>
+      obtain ⟨h1, e1⟩ := ih.e x hs d1 d2
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | negFixed d2 => cases (ih.e x hs d1 d2).1
+    | incDec hop _ _ => rcases hop with h | h <;> cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | negFixed d1 =>
+    cases d' with
+    | neg d2 _ => cases (ih.e x hs d1 d2).1
+    | negFixed d2 =>
+      obtain ⟨h1, e1⟩ := ih.e x hs d1 d2
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | incDec hop _ _ => rcases hop with h | h <;> cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | not d1 =>
+    cases d' with
+    | not d2 =>
+      obtain ⟨-, e1⟩ := ih.e x hs d1 d2
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | incDec hop _ _ => rcases hop with h | h <;> cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | bitNot d1 _ =>
+    cases d' with
+    | bitNot d2 _ =>
+      obtain ⟨h1, e1⟩ := ih.e x hs d1 d2
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | incDec hop _ _ => rcases hop with h | h <;> cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | incDec hop l1 _ =>
+    cases d' with
+    | incDec _ l2 _ =>
+      obtain ⟨h1, e1⟩ := ih.l x hs l1 l2
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | delete _ _ => rcases hop with h | h <;> cases h
+    | neg _ _ => rcases hop with h | h <;> cases h
+    | negFixed _ => rcases hop with h | h <;> cases h
+    | not _ => rcases hop with h | h <;> cases h
+    | bitNot _ _ => rcases hop with h | h <;> cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | delete l1 _ =>
+    cases d' with
+    | delete l2 _ =>
+      obtain ⟨h1, e1⟩ := ih.l x hs l1 l2
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | incDec hop _ _ => rcases hop with h | h <;> cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **Postfix `++`/`--`.** -/
+theorem uniqE_suffix {Γ : Ctx} {op : SuffixOp} {x : Syn .expr} (ih : Uniq Γ (sizeOf (Syn.unarySuffix op x))) :
+    UniqE Γ (.unarySuffix op x) := by
+  intro τ τ' d d'
+  have hce : (Syn.unarySuffix op x).const = Option.none := rfl
+  have hbo : (Syn.unarySuffix op x).binOp? = Option.none := rfl
+  have hs : sizeOf x < sizeOf (Syn.unarySuffix op x) := by
+    simp only [Syn.unarySuffix.sizeOf_spec]; omega
+  cases d with
+  | incDecSuffix l1 _ =>
+    cases d' with
+    | incDecSuffix l2 _ =>
+      obtain ⟨h1, e1⟩ := ih.l x hs l1 l2
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
