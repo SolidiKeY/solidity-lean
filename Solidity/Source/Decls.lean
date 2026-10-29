@@ -1,0 +1,230 @@
+import Solidity.Source.Ctor
+
+/-!
+# The typed declaration graph of a source unit (S00)
+
+The declarations of a source unit (`Syn .unit`), each with its kind, name,
+enclosing contract and its own syntax, at the category its kind fixes
+(`DeclKind.cat`): a declaration's node is a contract definition, a contract
+body element or a top-level element, never an arbitrary tree.  The edges of
+the graph are the names a declaration mentions (`Decl.refs`: inheritance
+bases, type and modifier paths, `using` targets, overrides, identifiers);
+S01 resolves them (`Solidity/Source/Resolve.lean`).
+
+`Syn.decls_ctor` proves that every collected declaration's node has the
+constructor its kind names.
+-/
+
+namespace Solidity.Source
+
+/-- The path a mapping key names, if any. -/
+def MapKey.paths : MapKey → List IdPath
+  | .elem _ _ => []
+  | .path p => [p]
+
+/-- The names a tree mentions, root first: paths in types, inheritance,
+modifiers, `using` and overrides, and identifiers. -/
+def Syn.paths : {c : Cat} → Syn c → List IdPath
+  | _, .nil => []
+  | _, .cons a0 a1 => a0.paths ++ a1.paths
+  | _, .none => []
+  | _, .some a0 => a0.paths
+  | _, .unit a0 => a0.paths
+  | _, .pragma _ => []
+  | _, .importPath _ _ => []
+  | _, .importSymbols a0 a1 _ => a0.paths ++ a1.paths
+  | _, .importStar _ _ => []
+  | _, .importAlias _ _ => []
+  | _, .contract _ _ a2 a3 a4 => a2.paths ++ a3.paths ++ a4.paths
+  | _, .interface _ a1 a2 => a1.paths ++ a2.paths
+  | _, .library _ a1 => a1.paths
+  | _, .topPart a0 => a0.paths
+  | _, .inherit a0 a1 => [a0] ++ a1.paths
+  | _, .constructor a0 a1 _ _ a4 => a0.paths ++ a1.paths ++ a4.paths
+  | _, .function _ a1 _ _ a4 _ a6 a7 a8 => a6.getD [] ++ a1.paths ++ a4.paths ++ a7.paths ++ a8.paths
+  | _, .modifier _ a1 _ a3 a4 => a3.getD [] ++ a1.paths ++ a4.paths
+  | _, .fallback a0 _ _ a3 _ a5 a6 => a5.getD [] ++ a0.paths ++ a3.paths ++ a6.paths
+  | _, .fbNoParams => []
+  | _, .fbParams a0 a1 a2 => a0.paths ++ a1.paths ++ a2.paths
+  | _, .receive _ _ a2 _ a4 a5 => a4.getD [] ++ a2.paths ++ a5.paths
+  | _, .struct _ a1 a2 => a1.paths ++ a2.paths
+  | _, .structMember a0 _ => a0.paths
+  | _, .enum _ _ _ => []
+  | _, .udvt _ _ => []
+  | _, .stateVar a0 _ _ a3 _ _ a6 => a3.getD [] ++ a0.paths ++ a6.paths
+  | _, .constant a0 _ a2 => a0.paths ++ a2.paths
+  | _, .event _ a1 _ => a1.paths
+  | _, .eventParam a0 _ _ => a0.paths
+  | _, .error _ a1 => a1.paths
+  | _, .errorParam a0 _ => a0.paths
+  | _, .usingPart a0 => a0.paths
+  | _, .usingPath a0 a1 _ => [a0] ++ a1.paths
+  | _, .usingAliases a0 a1 a2 _ => a0.paths ++ a1.paths ++ a2.paths
+  | _, .usingAlias a0 _ => [a0]
+  | _, .positional a0 => a0.paths
+  | _, .named a0 => a0.paths
+  | _, .namedArg _ a1 => a1.paths
+  | _, .modInv a0 a1 => [a0] ++ a1.paths
+  | _, .param a0 _ _ => a0.paths
+  | _, .elem _ => []
+  | _, .fnType a0 _ _ a3 => a0.paths ++ a3.paths
+  | _, .mapping a0 _ a2 _ => a0.paths ++ a2.paths
+  | _, .userType a0 => [a0]
+  | _, .array a0 a1 => a0.paths ++ a1.paths
+  | _, .varDecl a0 _ _ => a0.paths
+  | _, .index a0 a1 => a0.paths ++ a1.paths
+  | _, .slice a0 a1 a2 => a0.paths ++ a1.paths ++ a2.paths
+  | _, .member a0 _ => a0.paths
+  | _, .callOptions a0 a1 a2 => a0.paths ++ a1.paths ++ a2.paths
+  | _, .call a0 a1 => a0.paths ++ a1.paths
+  | _, .payableConv a0 => a0.paths
+  | _, .metaType a0 => a0.paths
+  | _, .unaryPrefix _ a1 => a1.paths
+  | _, .unarySuffix _ a1 => a1.paths
+  | _, .exp a0 a1 => a0.paths ++ a1.paths
+  | _, .mulDivMod _ a1 a2 => a1.paths ++ a2.paths
+  | _, .addSub _ a1 a2 => a1.paths ++ a2.paths
+  | _, .shift _ a1 a2 => a1.paths ++ a2.paths
+  | _, .bitAnd a0 a1 => a0.paths ++ a1.paths
+  | _, .bitXor a0 a1 => a0.paths ++ a1.paths
+  | _, .bitOr a0 a1 => a0.paths ++ a1.paths
+  | _, .order _ a1 a2 => a1.paths ++ a2.paths
+  | _, .equality _ a1 a2 => a1.paths ++ a2.paths
+  | _, .and a0 a1 => a0.paths ++ a1.paths
+  | _, .or a0 a1 => a0.paths ++ a1.paths
+  | _, .cond a0 a1 a2 => a0.paths ++ a1.paths ++ a2.paths
+  | _, .assign _ a1 a2 => a1.paths ++ a2.paths
+  | _, .new a0 => a0.paths
+  | _, .tuple a0 a1 => a0.paths ++ a1.paths
+  | _, .inlineArray a0 a1 => a0.paths ++ a1.paths
+  | _, .ident a0 => [⟨a0, []⟩]
+  | _, .lit _ => []
+  | _, .litUnit _ _ => []
+  | _, .elemType _ _ => []
+  | _, .declVar a0 a1 => a0.paths ++ a1.paths
+  | _, .declTuple _ a1 a2 a3 => a1.paths ++ a2.paths ++ a3.paths
+  | _, .exprStmt a0 => a0.paths
+  | _, .blockStmt a0 => a0.paths
+  | _, .simpleStmt a0 => a0.paths
+  | _, .ifStmt a0 a1 a2 => a0.paths ++ a1.paths ++ a2.paths
+  | _, .forStmt a0 a1 a2 a3 => a0.paths ++ a1.paths ++ a2.paths ++ a3.paths
+  | _, .whileStmt a0 a1 => a0.paths ++ a1.paths
+  | _, .doWhile a0 a1 => a0.paths ++ a1.paths
+  | _, .continueStmt => []
+  | _, .breakStmt => []
+  | _, .tryStmt a0 a1 a2 a3 a4 => a0.paths ++ a1.paths ++ a2.paths ++ a3.paths ++ a4.paths
+  | _, .catchPlain a0 => a0.paths
+  | _, .catchSig _ a1 a2 a3 => a1.paths ++ a2.paths ++ a3.paths
+  | _, .returnStmt a0 => a0.paths
+  | _, .emit a0 a1 => a0.paths ++ a1.paths
+  | _, .revert a0 a1 => a0.paths ++ a1.paths
+  | _, .assembly _ _ a2 => a2.paths
+  | _, .block a0 => a0.paths
+  | _, .stmtItem a0 => a0.paths
+  | _, .uncheckedItem a0 => a0.paths
+  | _, .yulBlock a0 => a0.paths
+  | _, .yulLet _ _ a2 => a2.paths
+  | _, .yulAssign _ _ a2 => a2.paths
+  | _, .yulExprStmt a0 => a0.paths
+  | _, .yulIf a0 a1 => a0.paths ++ a1.paths
+  | _, .yulFor a0 a1 a2 a3 => a0.paths ++ a1.paths ++ a2.paths ++ a3.paths
+  | _, .yulSwitch a0 a1 a2 => a0.paths ++ a1.paths ++ a2.paths
+  | _, .yulCase _ a1 => a1.paths
+  | _, .yulLeave => []
+  | _, .yulBreak => []
+  | _, .yulContinue => []
+  | _, .yulFun _ _ _ a3 => a3.paths
+  | _, .yulPath _ _ => []
+  | _, .yulCall _ a1 => a1.paths
+  | _, .yulLit _ => []
+
+/-- The kinds of declarations. -/
+inductive DeclKind where
+  | contract | interface | library
+  | function | modifier | constructor | fallback | receive
+  | struct | enum | udvt | stateVar | constant | event | error
+  deriving DecidableEq, Repr
+
+/-- The category of a declaration's node, at file level when `top`. -/
+def DeclKind.cat : DeclKind → Bool → Cat
+  | .contract, _ | .interface, _ | .library, _ => .top
+  | .modifier, _ | .constructor, _ | .fallback, _ | .receive, _ | .stateVar, _ => .part false
+  | .constant, _ => .part true
+  | .function, t | .struct, t | .enum, t | .udvt, t | .event, t | .error, t => .part t
+
+/-- The constructor a declaration of the kind has at its root. -/
+def DeclKind.ctor : DeclKind → Ctor
+  | .contract => .contract | .interface => .interface | .library => .library
+  | .function => .function | .modifier => .modifier | .constructor => .constructor
+  | .fallback => .fallback | .receive => .receive | .struct => .struct | .enum => .enum
+  | .udvt => .udvt | .stateVar => .stateVar | .constant => .constant | .event => .event
+  | .error => .error
+
+/-- A declaration: a node of the declaration graph. -/
+structure Decl where
+  kind : DeclKind
+  /-- The declared name (`""` for a constructor, fallback or receive). -/
+  name : String
+  /-- The enclosing contract, interface or library; `none` at file level. -/
+  scope : Option String
+  top : Bool
+  node : Syn (kind.cat top)
+
+/-- The edges of the declaration graph: the names the declaration
+mentions, resolved by S01. -/
+def Decl.refs (d : Decl) : List IdPath := d.node.paths
+
+/-- The name of a function definition. -/
+def FnName.text : FnName → String
+  | .ident n => n
+  | .fallback => "fallback"
+  | .receive => "receive"
+
+/-- The declarations of a tree, in source order, inside the contract
+`scope` (`none` at file level): walking source-unit and body-element lists,
+not entering bodies (Solidity declares nothing inside a function). -/
+def Syn.collect (scope : Option String) : {c : Cat} → Syn c → List Decl
+  | _, .unit xs => xs.collect Option.none
+  | _, .cons x xs => x.collect scope ++ xs.collect scope
+  | _, .topPart p => p.collect Option.none
+  | _, s@(.contract _ n _ _ body) => ⟨.contract, n, Option.none, true, s⟩ :: body.collect (Option.some n)
+  | _, s@(.interface n _ body) => ⟨.interface, n, Option.none, true, s⟩ :: body.collect (Option.some n)
+  | _, s@(.library n body) => ⟨.library, n, Option.none, true, s⟩ :: body.collect (Option.some n)
+  | _, s@(.constructor _ _ _ _ _) => [⟨.constructor, "", scope, false, s⟩]
+  | .part t, s@(.function n _ _ _ _ _ _ _ _) => [⟨.function, n.text, scope, t, s⟩]
+  | _, s@(.modifier n _ _ _ _) => [⟨.modifier, n, scope, false, s⟩]
+  | _, s@(.fallback _ _ _ _ _ _ _) => [⟨.fallback, "", scope, false, s⟩]
+  | _, s@(.receive _ _ _ _ _ _) => [⟨.receive, "", scope, false, s⟩]
+  | .part t, s@(.struct n _ _) => [⟨.struct, n, scope, t, s⟩]
+  | .part t, s@(.enum n _ _) => [⟨.enum, n, scope, t, s⟩]
+  | .part t, s@(.udvt n _) => [⟨.udvt, n, scope, t, s⟩]
+  | _, s@(.stateVar _ _ _ _ _ n _) => [⟨.stateVar, n, scope, false, s⟩]
+  | _, s@(.constant _ n _) => [⟨.constant, n, scope, true, s⟩]
+  | .part t, s@(.event n _ _) => [⟨.event, n, scope, t, s⟩]
+  | .part t, s@(.error n _) => [⟨.error, n, scope, t, s⟩]
+  | _, _ => []
+
+/-- The declarations of a source unit. -/
+def Syn.decls (u : Syn .unit) : List Decl := u.collect Option.none
+
+theorem Syn.collect_ctor (scope : Option String) {c : Cat} (s : Syn c) :
+    ∀ d ∈ s.collect scope, d.node.ctor = d.kind.ctor := by
+  fun_induction Syn.collect scope s <;> intro d hd <;>
+    try simp only [List.mem_append, List.mem_cons, List.not_mem_nil, or_false] at hd
+  all_goals first
+    | (subst hd; rfl)
+    | (rename_i ih; exact ih d hd)
+    | (rcases hd with hd | hd
+       · subst hd; rfl
+       · rename_i ih; exact ih d hd)
+    | (rename_i ih₁ ih₂
+       rcases hd with hd | hd
+       · exact ih₁ d hd
+       · exact ih₂ d hd)
+
+/-- **The graph is typed**: every declaration's node has the constructor its
+kind names. -/
+theorem Syn.decls_ctor (u : Syn .unit) : ∀ d ∈ u.decls, d.node.ctor = d.kind.ctor :=
+  u.collect_ctor Option.none
+
+end Solidity.Source

@@ -40,6 +40,7 @@ for (const [name, cmd, args] of [
   ["check-orphans", "node", ["scripts/check-orphans.mjs"]],
   ["check-noncircular", "node", ["scripts/check-noncircular.mjs"]],
   ["check-axiom-pins", "node", ["scripts/check-axiom-pins.mjs"]],
+  ["check-source-grammar", "node", ["scripts/check-source-grammar.mjs"]],
   ["g07 script tests", "node", ["--test", "scripts/check-noncircular.test.mjs", "scripts/check-axiom-pins.test.mjs"]],
 ]) {
   const r = run(cmd, args);

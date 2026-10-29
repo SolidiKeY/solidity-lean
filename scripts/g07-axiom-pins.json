@@ -1306,6 +1306,23 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/Examples.lean:Solidity.Source.Ctor.grammar_covers": [],
+ "Solidity/Source/Examples.lean:Solidity.Source.Ctor.mem_all": [
+  "propext"
+ ],
+ "Solidity/Source/Examples.lean:Solidity.Source.Examples.withAssembly_rejected": [
+  "propext"
+ ],
+ "Solidity/Source/Examples.lean:Solidity.Source.Syn.decls_ctor": [
+  "propext"
+ ],
+ "Solidity/Source/Examples.lean:Solidity.Source.Syn.nodes_eq": [
+  "propext"
+ ],
+ "Solidity/Source/Examples.lean:Solidity.Source.Syn.rejections_of_sub": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Theorems.lean:Solidity.Main.callback_soundness": [
   "Classical.choice",
   "Quot.sound",

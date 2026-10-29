@@ -554,6 +554,16 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Roadmap/TypedRun.lean` | `typedRunPrefixes`: the fuelled typed run (`Prog.runF`) read as a G01 prefix family, kept apart from `Roadmap/Contracts.lean` so that a source semantics importing the contracts does not reach the intrinsic run. |
 | `Roadmap/Controls.lean` | Roadmap G07: inhabited and negative controls for the G01 contracts: a toy source, intrinsic layer, EVM and compiler meeting `PublicCorrectness` (`toy_publicCorrectness`), and refutations of an always-reverting, a byte-altering, a data-erasing and a malformed-source-accepting compiler; `PublicCorrectness.observes`, `PublicCorrectness.rejects`, `SourceSpec.not_nonVacuous_of_no_parse`. |
 
+## Independent source definitions
+
+| Module | What it defines |
+|---|---|
+| `Source/Syntax.lean` | S00: the pinned solc 0.8.38 grammar as intrinsic syntax `Syn : Cat → Type`, indexed by category and by statement context (`SCtx`: loop, `unchecked`), excluded syntax (assembly/Yul, `layout at`, `>>>`, `years`) included. |
+| `Source/Ctor.lean` | S00: the constructor index `Ctor` (`Ctor.mem_all`), `Syn.nodes`/`Syn.children`, the syntax-level exclusions `Excl` and precise rejection (`Syn.rejections_of_sub`). |
+| `Source/Upstream.lean` | S00: the explicit mapping from grammar rules/labels and manifest features to constructors (`grammarCtors`, `featureCtors`; `Ctor.grammar_covers`), checked by `scripts/check-source-grammar.mjs`. |
+| `Source/Decls.lean` | S00: the typed declaration graph (`Decl`, `Syn.decls`, `Decl.refs`, `Syn.decls_ctor`). |
+| `Source/Examples.lean` | S00 controls: an in-profile counter and rejected assembly, `layout at`, `>>>` and `years` programs. |
+
 ## The solkey corpus
 
 `SolidityCorpus` (`lake build SolidityCorpus`): each function of solkey's `.sol`
