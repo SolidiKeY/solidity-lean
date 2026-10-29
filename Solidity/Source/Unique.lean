@@ -963,6 +963,77 @@ theorem uniqE_assign {Γ : Ctx} {op : AssignOp} {a b : Syn .expr} (ih : Uniq Γ 
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
+/-- **Members.** -/
+theorem uniqE_member {Γ : Ctx} {a : Syn .expr} {x : String} (ih : Uniq Γ (sizeOf (Syn.member a x))) :
+    UniqE Γ (.member a x) := by
+  intro τ τ' d
+  have hce : (Syn.member a x).const = Option.none := rfl
+  have hbo : (Syn.member a x).binOp? = Option.none := rfl
+  have hs : sizeOf a < sizeOf (Syn.member a x) := by simp only [Syn.member.sizeOf_spec]; omega
+  suffices H : ∀ x0 (d' : Typed Γ (.member a x0) τ'), (x == x0) = true → τ = τ' ∧ HEq d.toR d'.toR from
+    fun d' => H x d' (beq_self_eq_true x)
+  intro x0 d' hx
+  cases d with
+  | length da h =>
+    cases d' with
+    | length da' h' =>
+      obtain ⟨h1, e1⟩ := ih.e a hs da da'
+      cases h1
+      rw [h] at h'; cases h'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | balance _ => exact absurd hx (by decide)
+    | magic hr _ hm _ => cases Typed.ident_builtin hr da; cases hm
+    | member da' _ =>
+      obtain ⟨h1, -⟩ := ih.e a hs da da'
+      cases h1; cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | balance da =>
+    cases d' with
+    | length _ _ => exact absurd hx (by decide)
+    | balance da' =>
+      obtain ⟨h1, e1⟩ := ih.e a hs da da'
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | magic hr _ hm _ => cases Typed.ident_builtin hr da; cases hm
+    | member da' _ => cases (ih.e a hs da da').1
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | magic hr _ hm _ =>
+    cases d' with
+    | length da' _ => cases Typed.ident_builtin hr da'; cases hm
+    | balance da' => cases Typed.ident_builtin hr da'; cases hm
+    | magic hr' _ hm' _ =>
+      cases (eq_of_beq hx)
+      rw [hr] at hr'; cases hr'
+      rw [hm] at hm'; cases hm'
+      exact ⟨rfl, HEq.rfl⟩
+    | member da' _ => cases Typed.ident_builtin hr da'; cases hm
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | member da h =>
+    cases d' with
+    | length da' h' =>
+      obtain ⟨h1, -⟩ := ih.e a hs da da'
+      cases h1; cases h'
+    | balance da' => cases (ih.e a hs da da').1
+    | magic hr _ hm _ => cases Typed.ident_builtin hr da; cases hm
+    | member da' h' =>
+      cases (eq_of_beq hx)
+      obtain ⟨h1, e1⟩ := ih.e a hs da da'
+      cases h1
+      rw [h] at h'; cases h'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
