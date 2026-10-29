@@ -18,6 +18,7 @@ const CORE = [
   /^Solidity\.Calculus\.(Fml|Rules|RuleSyntax|RuleKit|KeyTaclets|Step|Arms|Blocks|Taclet|Proves|Logic|Preconditions|FiniteMembership|FilteredMembership|Hyp|Correct|FirstOrder|Transient|Lifetime|ContractWorld)$/,
   /^Solidity\.Calculus\.(Sound.*|StmtSound|ProvesSound|PremiseSound|UpdRuleScoped|UpdateRules|TermLib\.Rules)$/,
   /^Solidity\.Calculus\.RuleSyntax\./,
+  /^Solidity\.Roadmap\./, // The roadmap's contracts are statements below the elaborator.
   /^Solidity\.Hash\.CollisionBound$/,
   /^Solidity\.Backend\.(Opcode|Jumpdest|Assembler|Control)$/,
   /^Solidity\.Hash\.Adaptive$/,
