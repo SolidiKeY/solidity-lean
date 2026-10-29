@@ -2224,8 +2224,8 @@ check precede every proved result. Every nonproved shared attempt restores state
 and retries the original immediate policy under the same absolute remaining
 heartbeat deadline. A bounded 8192-node syntax inspection chooses the original
 policy up front for small formulas; it adds no admission rule or search budget.
-The ordinary chunked fallback and all recursive/specification paths retain
-their previous policy. Public tactics retain immediate checking by default.
+The ordinary chunked fallback, recursive paths and noncallback specification
+paths retain their previous policy. Public tactics retain immediate checking by default.
 
 Prefix reconstruction shares internal elimination equalities at the original
 immediate atom check. The atom, prefix and whole-context guards remain checked
@@ -2268,3 +2268,38 @@ Fresh 42-certificate, 22-API/admission, upstream, static and full core validatio
 are still pending at this commit. Feature inventory statuses and the previously
 named reference/function-return, wider dispatch and transaction-adapter refusals
 remain unchanged; this performance repair claims no extra feature coverage.
+
+
+#### API budget follow-up on the same repair
+
+Fresh full API validation exposed a real regression in the 8192-node policy:
+21/22 passed, while `RenamedExternal.falseObservation` exhausted the shared
+attempt's original heartbeat budget and reported error rather than the required
+pending result. That failed run is retained as `final-entrypoints-api.log`.
+No error or resource stop was reclassified as passing evidence.
+
+The captured runtime AST measures 10121 expression nodes for that false
+observation, 13545 for its positive companion, and at least 13945 for the large
+getter cases that benefit from sharing. The generic opt-in threshold is now
+12288 nodes, so the failing size category uses the original immediate policy
+from the start. This raises no proof/search limit, grants no extra allowance,
+and does not inspect fixture names or expected results. Boundary controls pin
+12287 to the original policy and 12288 to sharing; every shared-selected
+nonproved attempt still has its original-budget retry.
+
+The unchanged targeted subtest returns pending correctly. The complete original
+22-test API command then passes in 351.779453 s (peak 2066546688 bytes, hard
+12 GiB/no-swap cgroup, zero limit/OOM events). Trust inventory changes record the
+five reviewed native quotation/probe sites and the universally proved runtime
+lookup override; no forbidden-token or kernel-audit policy changed. Trust,
+orphan, layer, automatic and regenerated-inventory checks pass. The existing
+20 missing/ambiguous documentation citations remain a failed baseline gate;
+historical reports were not altered to remove them.
+
+All five assigned upstream fixtures were rerun in new output directories.
+Complete observation results, required pipelines and compiler/budget settings
+are identical to the retained historical results. Primitive value types remain
+working, the reference-valued struct getter remains broken, and contract-key
+and raw receive/fallback adapter cases remain blocked. These refusals and
+feature inventory statuses are unchanged. The complete 62-test command and
+full core check remain to be repeated on this final policy at this commit.

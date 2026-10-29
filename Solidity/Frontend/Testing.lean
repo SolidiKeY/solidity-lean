@@ -200,7 +200,7 @@ private def expressionNodesLeft : Expr → Nat → Nat
 
 /-- Testing shares large typed proofs; small goals use the original immediate
 checker from the start. This changes neither admission nor any proof budget. -/
-def testingShares (formula : Expr) : Bool := expressionNodesLeft formula 8192 == 0
+def testingShares (formula : Expr) : Bool := expressionNodesLeft formula 12288 == 0
 
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are

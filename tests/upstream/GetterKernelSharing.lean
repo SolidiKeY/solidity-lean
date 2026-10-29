@@ -252,13 +252,13 @@ run_elab do
   let rec fullTree : Nat → Expr
     | 0 => mkConst ``Bool.true
     | n + 1 => let child := fullTree n; mkApp child child
-  let below := fullTree 12
-  unless below.sizeWithoutSharing == 8191 do throwError "policy control size changed"
+  let below := mkApp (fullTree 12) (fullTree 11)
+  unless below.sizeWithoutSharing == 12287 do throwError "policy control size changed"
   if Frontend.testingShares below then throwError "small goal unexpectedly shared"
   unless Frontend.testingShares (mkMData {} below) do
     throwError "large goal did not select shared checking"
   if Frontend.testingShares (mkConst ``Bool.true) then throwError "atom unexpectedly shared"
-  logInfo "testing strategy threshold controls passed: 8191 original, 8192 shared"
+  logInfo "testing strategy threshold controls passed: 12287 original, 12288 shared"
 
 
 
