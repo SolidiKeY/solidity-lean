@@ -172,7 +172,7 @@ prefix and that both modalities accept.
 | `Solidity/Semantics/Callback.lean:1120` | `ExecS.trySelfHalt` on an exhausted self-call | as above | R (same) | G22, G42 |
 | `Solidity/Semantics/Storage/Ops.lean:916` | `Storage.full` (push at `2^256` → `exhausted`) | a length cap as a resource stop | V; the transaction-level reading becomes an allowed revert | S04.01, G30 |
 | `Solidity/Semantics/RunFrame.lean:34` | `Modality.onTHalt` (the diamond accepts `exhausted`) | decision 15 of [intrinsic.md](../intrinsic.md) | V for the intrinsic run; the completion transfer of G51 must exclude it | G51 |
-| `Solidity/Calculus/Recursion.lean:164`; `Solidity/Calculus/RecursionCallback.lean:14`; `Solidity/Semantics/Callback.lean:331` | `RecContract.base`: the bottom frame meets every contract; the callback variant and `recUnroll_induct` read the same frames | the 1024-frame unrolling | R (no bottom once the cutoff goes) | G51, S03.04 |
+| `Solidity/Calculus/Recursion.lean:164`; `Solidity/Calculus/RecursionCallback.lean:116,133`; `Solidity/Semantics/Callback.lean:331` | `RecContract.base`: the bottom frame meets every contract; the callback variant and `recUnroll_induct` read the same frames | the 1024-frame unrolling | R (no bottom once the cutoff goes) | G51, S03.04 |
 | `Solidity/Examples/Tactics/Recursion.lean:301` | the countdown diamond, true because of the bottom frame | the cutoff | R (needs a termination argument) | G51, G53 |
 | `tests/upstream/RecursionResource.lean:13` | `bottom_exhausted` | the cutoff exists | R (obsolete once the cutoff is removed) | S03, G52 |
 | `Solidity/Tools/Upstream.lean:296` | `exhausted` reported as blocked, never as an EVM failure | — | R (may match an empty-data revert) | G52, G53 |
@@ -350,7 +350,7 @@ the owners, not scope questions:
 
 ## 5a. Second-round decisions
 
-The second round of user decisions landed on `origin/master` (`ceb0d54`) in
+The second round of user decisions landed on `origin/master` (`7a6a8975`) in
 `docs/solidity-scope.md`, section "Second round (2026-10-29)", after this
 audit's base. The rows below grade it against the same base with the same
 key. It is a shorter pass: each row was re-read, but no separate search was

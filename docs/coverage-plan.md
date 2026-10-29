@@ -197,6 +197,8 @@ G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vector
 
 Fixed-point status (2026-10-29): reference semantics for G00 Q6 in [fixed-point-semantics.md](feature-work/fixed-point-semantics.md) and `Solidity/Language/FixedPoint.lean` (values, operations and laws; not wired into the frontend or compiler); its scope questions Q1–Q8 are answered and encoded; owners (S00–S02, S04.02, G08–G53) are listed in its §4.
 
+Decision impact (2026-10-29): [roadmap-decisions-impact.md](feature-work/roadmap-decisions-impact.md) maps every user decision to the definitions, theorems, rules, tests, scripts, documents and Codex lanes it affects, with owners; G04 R32–R36 now carry the decided premises; no obligation closed.
+
 Integration notes (2026-10-29):
 
 - **G01 revision held back.** Integration review found that its
@@ -210,9 +212,15 @@ Integration notes (2026-10-29):
   and one correspondence between G01's and G06's `Fixed`, precompile
   predicates and `keccakWord`, and the hash premises in
   `Solidity/Hash/CollisionBound.lean`.
-- **G03 ledger** is not merged yet: its checker needs the second-round
-  decisions.
-Decision impact (2026-10-29): [roadmap-decisions-impact.md](feature-work/roadmap-decisions-impact.md) maps every user decision to the definitions, theorems, rules, tests, scripts, documents and Codex lanes it affects, with owners; G04 R32–R36 now carry the decided premises; no obligation closed.
+- **G03 checker follow-ups** (review of the merge): `FROZEN` also silences
+  parallel shared writes; `ACK_MODULES` silences findings by module whatever
+  their kind; refusal anchors count as stage coverage; some definition
+  anchors are tagged `theorem`; proposed G24 children are labelled
+  `roadmap`. The discharge parser now reads only the G04 restriction table.
+- **Decision-impact follow-ups:** `Storage.full`'s verdict should cite G04
+  R24 (solc's `Panic(0x41)` past 2^64 elements); the Lean docstrings of
+  `StmtOut.refused`/`compile_correct` still describe the stale payment
+  disjunct as live.
 
 ### Independent source definitions — after G00–G07, before wave 1
 
@@ -489,8 +497,9 @@ VM that stops after its first checkpoint wastes its setup and cold build.
 | V31 | G54, G55 | V29, V30 |
 
 G02 checks these lane sizes against measured build and proof costs. G03's
-shared-foundation child packages under G24 (decision G03 Q1) are added to the
-manifest and to lane V14 once G03 integrates. The other large lanes (source
+shared-foundation child packages under G24 (decision G03 Q1) are not yet in
+the manifest or lane V14: G03's ledger lists them under "Integration steps"
+and its checker applies them through `PROPOSED_PACKAGES` until they land. The other large lanes (source
 definitions, aggregates, world, EVM bridge) may need splitting by
 measurement. A split keeps each part at four hours or more, and every
 continuation inherits the same scope and completion gate.

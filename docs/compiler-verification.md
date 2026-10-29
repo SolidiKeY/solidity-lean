@@ -226,7 +226,8 @@ says why):
   made structural; an offset added to a slot does not wrap. This is global
   injectivity, which the [user decisions](solidity-scope.md#user-decisions-2026-10-29)
   forbid in the final theorem: there, only a per-run collision premise over
-  the preimages a run hashes is approved (G04 R34, owned by G27.05/G46.05);
+  the preimages a run hashes, extended to hashed regions of length at most
+  L (second round), is approved (G04 R34, owned by G27.05/G46.05);
 - **relative forward jumps** (`exec` carries the instructions still to skip,
   so it is structural; a source loop is one structured instruction,
   `LOOP cond body` (`Instr.loop`, `loopRun`), and the loop solc emits inside

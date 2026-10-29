@@ -137,7 +137,7 @@ def load_restrictions(root):
     text = (root / "docs/feature-work/roadmap-g04-restrictions.md").read_text()
     out = {}
     for m in re.finditer(r"^\| (R\d\d) \|.*\| ([^|]+) \|$", text, re.M):
-        out[m.group(1)] = m.group(2).strip()
+        out.setdefault(m.group(1), m.group(2).strip())  # the restriction table, not later tables
     return out
 
 
@@ -2003,7 +2003,7 @@ class D:
          ["inline calls, value arguments only, fixed source depth; frames in memory per D10"]),
         ("storage aliases across pop/delete and pushes",
          ["storageAliasing", "danglingReferences", "arrayPop", "arrayPushReference", "deleteExpression"], [],
-         {"source": "S04.01", "lowering": "G18.05", "backend": "G27.03 G28 G30 G35.02"}, ["R16", "R18", "R36"],
+         {"source": "S04.01 S02", "lowering": "G18.05", "backend": "G27.03 G28 G30 G35.02"}, ["R16", "R18", "R36"],
          ["fragile aliases forgotten at a shrink; `T storage p = arr.push()` refused"]),
         ("runtime-length storage copies with nested mappings",
          ["storageCopy", "dynamicArrays", "stringType", "mappings", "deleteMappingTails"], [],
