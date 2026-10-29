@@ -1,4 +1,5 @@
 import Solidity.Source.Resolved
+import Solidity.Source.Elaborated
 
 /-!
 # Uniqueness of meaning for constants (Q1)
@@ -1498,6 +1499,201 @@ theorem TypedArgs.unique {Γ : Ctx} {es : Syn (.list .expr)} {τs τs' : List ST
     (d' : TypedArgs Γ es τs') : τs = τs' ∧ HEq d.toR d'.toR :=
   (uniq_all Γ (sizeOf es + 1)).a es (by omega) d d'
 
+/-- Tuple-slot derivations agree. -/
+theorem TypedSlots.unique {Γ : Ctx} {s : Syn (.list (.opt .expr))} {τs τs' : List STy}
+    (d : TypedSlots Γ s τs) (d' : TypedSlots Γ s τs') :
+    τs = τs' ∧ HEq d.toR d'.toR ∧ HEq (TypedArgs.ofSlots d) (TypedArgs.ofSlots d') :=
+  (uniq_all Γ (sizeOf s + 1)).s s (by omega) d d'
+
+theorem OptCond.unique {Γ : Ctx} {c : Syn (.opt .expr)} (d d' : OptCond Γ c) : d.toR = d'.toR := by
+  cases d with
+  | none => cases d'; rfl
+  | some d =>
+    cases d' with
+    | some d' => exact congrArg ROptBool.some (eq_of_heq (Typed.unique d d').2)
+
+theorem OptExpr.unique {Γ : Ctx} {c : Syn (.opt .expr)} (d d' : OptExpr Γ c) : d.toR = d'.toR := by
+  cases d with
+  | none => cases d'; rfl
+  | some d =>
+    cases d' with
+    | some d' =>
+      obtain ⟨e, h⟩ := Typed.unique d d'
+      subst e
+      exact congrArg ROptExpr.some (eq_of_heq h)
+
+theorem filter_single {α : Type} {p : α → Bool} {l : List α} {a b : α} (h : l.filter p = [a])
+    (h' : l.filter p = [b]) : a = b := by
+  rw [h] at h'; cases h'; rfl
+
+theorem underscore_isUnderscore : (Syn.ident "_" : Syn .expr).isUnderscore = true := rfl
+
+/-- `return (a, b);` is not `return t;` of a single return: the tuple has
+two or more components. -/
+theorem argsFit_single {B : DeclName → DeclName → Bool} {σ τ : STy} {σs : List STy} (hne : σs ≠ [])
+    (h : argsFit B (σ :: σs) [τ] = true) : False := by
+  cases σs with
+  | nil => exact hne rfl
+  | cons _ _ => simp only [argsFit, List.length_cons, List.length_nil, Bool.and_eq_true, beq_iff_eq] at h; omega
+
+mutual
+
+/-- **Statement derivations agree**: the locals a statement leaves and its
+resolved form do not depend on the derivation. -/
+theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {s : Syn (.stmt k)}
+    (d : StmtD C L s L₁) (d' : StmtD C L s L₂) : L₁ = L₂ ∧ HEq d.toR d'.toR :=
+  match s, L₁, d, d' with
+  | _, _, .expr d hu, d' => by
+    cases d' with
+    | expr d₂ _ =>
+      obtain ⟨e, h⟩ := Typed.unique d d₂
+      subst e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
+    | placeholder hm =>
+      rw [hm, underscore_isUnderscore] at hu; cases hu
+  | _, _, .placeholder hm, d' => by
+    cases d' with
+    | expr _ hu => rw [hm, underscore_isUnderscore] at hu; cases hu
+    | placeholder _ => exact ⟨rfl, HEq.rfl⟩
+  | _, _, .declVar ht _, d' => by
+    cases d' with
+    | declVar ht' _ => rw [ht] at ht'; cases ht'; exact ⟨rfl, HEq.rfl⟩
+  | _, _, .declInit ht _ d h, d' => by
+    cases d' with
+    | declInit ht' _ d₂ h' =>
+      rw [ht] at ht'; cases ht'
+      obtain ⟨e, hd⟩ := Typed.unique d d₂
+      subst e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hd]⟩
+  | _, _, .block b, d' => by
+    cases d' with
+    | block b' =>
+      obtain ⟨e, h⟩ := ItemsD.unique b b'
+      subst e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
+  | _, _, .ifThen dc _ ds, d' => by
+    cases d' with
+    | ifThen dc' _ ds' =>
+      obtain ⟨_, hc⟩ := Typed.unique dc dc'
+      obtain ⟨e, h⟩ := StmtD.unique ds ds'
+      subst e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hc, eq_of_heq h]⟩
+  | _, _, .ifElse dc _ _ ds dt, d' => by
+    cases d' with
+    | ifElse dc' _ _ ds' dt' =>
+      obtain ⟨_, hc⟩ := Typed.unique dc dc'
+      obtain ⟨e, h⟩ := StmtD.unique ds ds'
+      obtain ⟨e', h'⟩ := StmtD.unique dt dt'
+      subst e e'
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hc, eq_of_heq h, eq_of_heq h']⟩
+  | _, _, .whileLoop dc _ ds, d' => by
+    cases d' with
+    | whileLoop dc' _ ds' =>
+      obtain ⟨_, hc⟩ := Typed.unique dc dc'
+      obtain ⟨e, h⟩ := StmtD.unique ds ds'
+      subst e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hc, eq_of_heq h]⟩
+  | _, _, .doWhile _ ds dc, d' => by
+    cases d' with
+    | doWhile _ ds' dc' =>
+      obtain ⟨_, hc⟩ := Typed.unique dc dc'
+      obtain ⟨e, h⟩ := StmtD.unique ds ds'
+      subst e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hc, eq_of_heq h]⟩
+  | _, _, .forLoop dc dp _ ds, d' => by
+    cases d' with
+    | forLoop dc' dp' _ ds' =>
+      obtain ⟨e, h⟩ := StmtD.unique ds ds'
+      subst e
+      exact ⟨rfl, by
+        simp only [StmtD.toR]; rw [OptCond.unique dc dc', OptExpr.unique dp dp', eq_of_heq h]⟩
+  | _, _, .forInit di dc dp _ ds, d' => by
+    cases d' with
+    | forInit di' dc' dp' _ ds' =>
+      obtain ⟨e, hi⟩ := StmtD.unique di di'
+      subst e
+      obtain ⟨e, h⟩ := StmtD.unique ds ds'
+      subst e
+      exact ⟨rfl, by
+        simp only [StmtD.toR]
+        rw [eq_of_heq hi, OptCond.unique dc dc', OptExpr.unique dp dp', eq_of_heq h]⟩
+  | _, _, .brk, d' => by cases d'; exact ⟨rfl, HEq.rfl⟩
+  | _, _, .cont, d' => by cases d'; exact ⟨rfl, HEq.rfl⟩
+  | _, _, .ret _, d' => by cases d'; exact ⟨rfl, HEq.rfl⟩
+  | _, _, .retVal hR d h, d' => by
+    cases d' with
+    | retVal hR' d₂ _ =>
+      rw [hR] at hR'; cases hR'
+      obtain ⟨e, hd⟩ := Typed.unique d d₂
+      subst e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hd]⟩
+    | retTuple _ _ hne hf => rw [hR] at hf; exact (argsFit_single hne hf).elim
+  | _, _, .retTuple d ds hne hf, d' => by
+    cases d' with
+    | retVal hR _ _ => rw [hR] at hf; exact (argsFit_single hne hf).elim
+    | retTuple d₂ ds' _ _ =>
+      obtain ⟨e, hd⟩ := Typed.unique d d₂
+      obtain ⟨e', _, hs⟩ := TypedSlots.unique ds ds'
+      subst e e'
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hd, eq_of_heq hs]⟩
+  | _, _, .emit da hf, d' => by
+    cases d' with
+    | emit da' hf' =>
+      obtain ⟨e, h⟩ := TypedArgs.unique da da'
+      subst e
+      cases filter_single hf hf'
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
+  | _, _, .revertError da hf, d' => by
+    cases d' with
+    | revertError da' hf' =>
+      obtain ⟨e, h⟩ := TypedArgs.unique da da'
+      subst e
+      cases filter_single hf hf'
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
+  | _, _, .rethrow _ hr _ hp, d' => by
+    cases d' with
+    | rethrow _ hr' _ hp' =>
+      rw [hp] at hp'; cases hp'
+      rw [hr] at hr'; cases hr'
+      exact ⟨rfl, HEq.rfl⟩
+termination_by structural d
+
+/-- Block derivations agree. -/
+theorem ItemsD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {b : Syn (.list (.item k))}
+    (d : ItemsD C L b L₁) (d' : ItemsD C L b L₂) : L₁ = L₂ ∧ HEq d.toR d'.toR :=
+  match b, L₁, d, d' with
+  | _, _, .nil, d' => by cases d'; exact ⟨rfl, HEq.rfl⟩
+  | _, _, .stmt ds dr, d' => by
+    cases d' with
+    | stmt ds' dr' =>
+      obtain ⟨e, h⟩ := StmtD.unique ds ds'
+      subst e
+      obtain ⟨e, h'⟩ := ItemsD.unique dr dr'
+      subst e
+      exact ⟨rfl, by simp only [ItemsD.toR]; rw [eq_of_heq h, eq_of_heq h']⟩
+  | _, _, .unchecked db dr, d' => by
+    cases d' with
+    | unchecked db' dr' =>
+      obtain ⟨e, h⟩ := ItemsD.unique db db'
+      subst e
+      obtain ⟨e, h'⟩ := ItemsD.unique dr dr'
+      subst e
+      exact ⟨rfl, by simp only [ItemsD.toR]; rw [eq_of_heq h, eq_of_heq h']⟩
+termination_by structural d
+
+end
+
+/-- **A body's meaning is the derivation's**: two derivations of one
+function body elaborate to one `RBody`. -/
+theorem RBody.ofDerivation_unique {E : Env} {scope : Option String} (f : Frame)
+    {L₁ L₂ : List (String × STy)} (D : ItemsD (f.ctx E scope) f.locals f.body L₁)
+    (D' : ItemsD (f.ctx E scope) f.locals f.body L₂) (mods : List (RModInv E (tysOf f.locals))) :
+    RBody.ofDerivation f D mods = RBody.ofDerivation f D' mods := by
+  obtain ⟨e, h⟩ := ItemsD.unique D D'
+  subst e
+  simp only [RBody.ofDerivation]
+  rw [eq_of_heq h]
+
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
@@ -1513,6 +1709,29 @@ theorem hex_to_uint16 (B : DeclName → DeclName → Bool) :
 theorem zero_to_bytes4 (B : DeclName → DeclName → Bool) :
     STy.implicit B (.rational (Q.ofInt 0)) (.fixedBytes 4 (by decide)) = true ∧
     STy.implicit B (.rational (Q.ofInt 1)) (.fixedBytes 4 (by decide)) = false := ⟨rfl, rfl⟩
+
+/-! ### Controls of the literal-typing gaps (solc's `binaryOperatorResult`) -/
+
+/-- `1 << x` and `2 ** x` shift and raise at `uint256`, not at `uint8`. -/
+theorem shiftTy_literal : STy.shiftTy (.rational (Q.ofInt 1)) = .int IntTy.u256 ∧
+    STy.shiftTy (.hexConst (Q.ofInt 0x12) 1) = .int IntTy.u256 := ⟨rfl, rfl⟩
+
+/-- `0x12 == b` with `b : bytes1` has no common type: a constant on the left
+of a `bytesN` is refused. -/
+theorem common_literal_bytes_refused (B : DeclName → DeclName → Bool) :
+    STy.common? B (.hexConst (Q.ofInt 0x12) 1) (.fixedBytes 1 (by decide)) = Option.none := rfl
+
+/-- `x + 0x0100` with `x : uint8` is at `uint16`, the constant's mobile type. -/
+theorem common_mobile_step (B : DeclName → DeclName → Bool) :
+    STy.common? B (.int IntTy.u8) (.rational (Q.ofInt 0x0100)) =
+      Option.some (.int ⟨false, 16, by decide⟩) := rfl
+
+/-- A 40-digit hexadecimal literal is neither bytes nor a number (solc:
+"looks like an address"). -/
+theorem address_like_refused :
+    (Syn.lit (.num (.hex (List.replicate 40 1) false)) : Syn .expr).hexLen? = Option.none ∧
+    (Syn.lit (.num (.hex (List.replicate 40 1) false)) : Syn .expr).const = Option.none := by
+  decide
 
 /-- **`0.length` is ill typed** (solc refuses it): `0` is a constant,
 never a `bytesN`, and a constant has no `length`.  Under S01's former
@@ -1541,5 +1760,21 @@ theorem zeroLength_illTyped (Γ : Ctx) (τ : STy) :
 /-- info: 'Solidity.Source.zeroLength_illTyped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms zeroLength_illTyped
+
+/-- info: 'Solidity.Source.Typed.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Typed.unique
+
+/-- info: 'Solidity.Source.StmtD.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms StmtD.unique
+
+/-- info: 'Solidity.Source.ItemsD.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ItemsD.unique
+
+/-- info: 'Solidity.Source.RBody.ofDerivation_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms RBody.ofDerivation_unique
 
 end Solidity.Source

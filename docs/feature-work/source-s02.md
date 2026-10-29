@@ -57,45 +57,50 @@ the typing (module `Solidity/Source/Unique.lean`):
 - **`zeroLength_illTyped`.** `0.length` has no derivation (before, it had
   one at every `bytesN`).
 
-Still open: uniqueness for every expression, `Typed.unique` (any two
-derivations have one type and one elaboration). The literal cases above
-were the reason it failed. The remaining work is a per-constructor case
-analysis over the constructors that share a syntax shape:
+**Uniqueness of meaning for the whole language** (Q1, done):
 
-| Shape | Constructors |
+| Theorem | Statement |
 |---|---|
-| `ident` | `loc`/`state`/`this` (resolution is functional) |
+| `Typed.unique` | two derivations of one expression have one type and one `RExpr` (`HEq`) |
+| `LVal.unique`, `TypedArgs.unique`, `TypedSlots.unique`, `OptCond.unique`, `OptExpr.unique` | the same for lvalues, argument lists, tuple slots and loop parts |
+| `StmtD.unique`, `ItemsD.unique` | two derivations of one statement or block leave the same locals and have one `RStmt`/`RItems` |
+| `RBody.ofDerivation_unique` | two derivations of one function body give one `RBody` |
+| `Typed.const_unique` | the constant-expression corollary |
+
+The expression proof is a strong induction on the syntax's size (`Uniq Γ n`
+holds the hypothesis below size `n`), with one lemma per syntactic shape
+(`uniqE_bin`, `uniqE_ident`, `uniqE_callIdent`, …) so that each stays
+under the default heartbeat limit. The shapes several rules share:
+
+| Shape | Constructors, and what separates them |
+|---|---|
+| literal and constant expressions | `const`/`litBytes`/`paren`/folding operators, by `Typed.constShape` |
+| `ident` | `loc`/`state`/`this`/builtins (resolution is functional) |
 | `tuple` | `paren`/`tuple` |
 | `unaryPrefix` | `neg`/`negFixed` by type |
 | `member` | `length`/`balance`/`magic`/`member` by the operand's type |
-| `call (ident f)` | `convUser`/`callInternal`/`structNew`/`builtinCall` by what `f` resolves to |
+| `call (ident f)` | `convUser`/`callInternal`/`structNew`/builtins by what `f` resolves to |
 | `call (member c f)` | `extCall`/`transfer`/`send`/`abiEncode` |
-| `assign` | `assign`/`assignCopy` (`implicit` and `copiesTo` are disjoint) |
+| `assign` | `assign`/`assignCopy` (`implicit` and `copiesTo` are disjoint); `compound` (`AssignOp.fits` is false for `.assign`) |
 | `index` | by the base's type |
+| binary operators | `order`/`eq` versus `compareConst`, by `constShape` on the operands and `STy.common?_const` |
 
-It also needs these rows:
+The statement proof is a mutual structural recursion on the first
+derivation. Two statement shapes needed a rule change (below):
 
-- `LVal` (`paren`, `indexArray`, `indexMapping`, `indexBytes`, `member`);
-- `compound` versus `assign` (`AssignOp.fits` is false for `.assign`);
-- `cond`;
-- `order`/`eq` versus `compareConst`: a literal case, settled by
-  `constShape` on the operands with `STy.common?_const`, but not stated as a
-  theorem;
-- `TypedArgs`, `TypedSlots`, `OptCond` and `OptExpr`.
+- `return (x);` with one return type was both `retVal (paren …)` and
+  `retTuple … .nil`, which elaborate differently. `StmtD.retTuple` now
+  requires two or more components (`σs ≠ []`), and `argsFit_single`
+  separates it from `retVal`.
+- `_;` in a modifier was `placeholder` or `expr (ident "_")`. `StmtD.expr`
+  now refuses `_` in a modifier (`(C.inModifier && e.isUnderscore) = false`).
+- The rethrow's variable was not determined by its premises in a usable
+  way (`isRethrow`'s match does not admit equation lemmas). Its premise now
+  names the first path (`head? = some d`); with `isRethrow`, which makes
+  both paths equal, this accepts the same programs.
 
-Statements are not unique either, so the full theorem also needs
-`StmtD`/`ItemsD` (skeptic review):
-
-- `return (x);` with one return type is both `retVal (paren …)` and
-  `retTuple … .nil`, and the two elaborate differently. `StmtD.retTuple`
-  needs a non-empty-slots premise, a `Typed` rule change.
-- `_;` in a modifier is `placeholder` or `expr (ident "_")` if `_` resolved
-  to a declaration.
-
-`Typed.const_unique` proves the corollary for constant expressions: any two
-derivations have one type and one elaboration. That is uniqueness of
-meaning, not of derivations: `(1)` is both `const` and `paren (const …)`,
-and both elaborate to `const 1`.
+This is uniqueness of meaning, not of derivations: `(1)` is both `const`
+and `paren (const …)`, and both elaborate to `const 1`.
 
 ### Typed rules changed (for G13's checker)
 
@@ -112,6 +117,14 @@ and both elaborate to `const 1`.
 | `STy.mobile`, `isAmount`, `isIndex`, `isZeroConst`, `inBounds`, `abiArg` | — | `hexConst` like `rational` (`mobile` keeps `hexConst` when no integer type holds it) |
 | `RExpr.bytesLit` | `bytesLit (n) (hn : fitsBytes) : RExpr (fixedBytes len h)` | now `bytesLit (n : NumLit) (len : Nat) : RExpr E Γ (.hexConst n.value len)` |
 | `RVal` | — | gains `hex` |
+| `Syn.hexLen?` (literal gaps) | — | also refuses 39–41 digits: solc reports these as address-like, so they are neither numbers nor bytes |
+| `Syn.const` (literal gaps) | — | a 39–41-digit hexadecimal literal is no constant |
+| `STy.common?` | `implicit` either way | solc's `binaryOperatorResult`: two constants, or a constant on the left of a `bytesN`, have no common type; otherwise a constant first takes its mobile type (`x + 0x0100` with `x : uint8` is `uint16`) |
+| `STy.shiftTy` | — | new: a constant's type in `<<`, `>>`, `**` is `uint256` (`int256` when negative), as solc's `binaryOperatorResult` |
+| `Typed.shl`/`shr`/`sar`/`exp` | result at the left operand's type | at `shiftTy` of it |
+| `StmtD.expr` | `Typed (C.at L) e τ` | adds `(C.inModifier && e.isUnderscore) = false` |
+| `StmtD.retTuple` | `Typed … e σ → TypedSlots … s σs → argsFit …` | adds `σs ≠ []` |
+| `StmtD.rethrow` | `(body.paths.map IdPath.last).all (· == d) = true` | `(body.paths.map IdPath.last).head? = some d` |
 
 `NumLit.fitsBytes` is kept but no rule reads it any more.
 
@@ -132,6 +145,7 @@ Controls (`Unique.lean`, `SemanticsExamples.lean`):
 |---|---|
 | `hex_to_bytes2`, `hex_to_bytes4_refused`, `hex_to_uint16`, `zero_to_bytes4` | which conversions a literal admits |
 | `zeroLength_illTyped` | `0.length` has no derivation |
+| `shiftTy_literal`, `common_literal_bytes_refused`, `common_mobile_step`, `address_like_refused` | the literal gaps: `1 << x` at `uint256`, `0x12 == b` refused, `x + 0x0100` at `uint16`, 40-digit literals refused |
 | `hex_literal_bytes` | evaluating `bytes2(0x1234)` gives `0x12 0x34` |
 
 ### Review (Q1)
@@ -148,11 +162,11 @@ Recorded, not fixed:
 
 | Finding | Status |
 |---|---|
-| Statement-level non-uniqueness (`retVal`/`retTuple`, `_`) | above |
-| `lit << x` and `lit ** x` | typed at the literal's mobile type; solc types them at `uint256`/`int256`, so `1 << x` wraps at `uint8`. This predates Q1 and now extends to hex literals. |
-| Hex literals of 39–41 digits that are not a checksummed address | accepted as numbers or bytes; solc refuses them ("looks like an address") |
-| A literal on the left of a `bytesN` operand (`0x12 == b`, `0 == b`) | accepted; solc's `binaryOperatorResult` refuses it |
-| `STy.common?` | skips solc's mobile-type step, so `x + 0x0100` with `x : uint8` is refused where solc types `uint16` |
+| Statement-level non-uniqueness (`retVal`/`retTuple`, `_`) | fixed: `StmtD.unique` |
+| `lit << x` and `lit ** x` | fixed: `STy.shiftTy` types them at `uint256`/`int256` |
+| Hex literals of 39–41 digits that are not a checksummed address | fixed: refused (`Syn.hexLen?`, `Syn.const`) |
+| A literal on the left of a `bytesN` operand (`0x12 == b`, `0 == b`) | fixed: `STy.common?` refuses it |
+| `STy.common?` mobile-type step | fixed |
 | `abi.encodePacked` of a literal | accepted; solc error 7279 |
 | An enum conversion of an out-of-range constant | panics at run time instead of being a compile error |
 | `RExpr.bytesLit` | does not tie `len` to the digit count; only `Typed.litBytes` does |

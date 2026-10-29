@@ -916,11 +916,12 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       {σs : List STy} : TypedArgs (C.at L) args σs →
       ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) = [d] →
       StmtD C (k := k) L (.revert (.ident er) (.positional args)) L
-  /-- The canonical rethrow, of a `bytes memory` local. -/
+  /-- The canonical rethrow, of a `bytes memory` local: `isRethrow` makes both
+  paths name one variable, and the first path names it. -/
   | rethrow {k : SCtx} {L : List (String × STy)} {fl : List String} {body : Syn (.list .yulStmt)}
       {d : String} {i : Nat} : isRethrow body = true → (C.at L).resolve d = Option.some (.loc i) →
       (L.map Prod.snd)[i]? = Option.some (.bytes .memory) →
-      (body.paths.map IdPath.last).all (· == d) = true →
+      (body.paths.map IdPath.last).head? = Option.some d →
       StmtD C (k := k) L (.assembly false fl body) L
 
 /-- Typing of a block's items, in order. -/

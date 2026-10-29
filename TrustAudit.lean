@@ -738,7 +738,9 @@ run_cmd do
     ``Solidity.Source.SemanticsExamples.session_runs,
     ``Solidity.Source.Typed.constShape,
     ``Solidity.Source.Syn.const_binOp,
-    ``Solidity.Source.zeroLength_illTyped]
+    ``Solidity.Source.zeroLength_illTyped, ``Solidity.Source.Typed.unique,
+    ``Solidity.Source.StmtD.unique, ``Solidity.Source.ItemsD.unique,
+    ``Solidity.Source.RBody.ofDerivation_unique]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name
