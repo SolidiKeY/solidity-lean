@@ -91,6 +91,12 @@ run_cmd do
   check (Json.mkObj [("nodeType", .str "Identifier"), ("name", .str "missing"),
     ("referencedDeclaration", toJson (999999 : Int)),
     ("typeDescriptions", Json.mkObj [("typeString", .str "uint256")])]) .unresolvedReference
+  -- Fixed point is in the profile (G00 Q6) but unimplemented: refused, not dropped.
+  let fixedType := Json.mkObj [("nodeType", .str "ElementaryTypeName"), ("name", .str "fixed128x18")]
+  check fixedType .missingImplementation
+  let fixedScan := Admission.scan ast provenance { entry := fixedType, evaluatedRoots := [fixedType] }
+  unless (fixedScan.diagnostic?.map (·.name)) == some `solidity.fixedPoint do
+    throwError "fixed-point type was not refused as solidity.fixedPoint: {repr fixedScan.diagnostic?}"
   let header ← ofExcept (fixture.getObjVal? "header")
   let badHeader := put header "compilerSha256" (.str (String.mk (List.replicate 64 '0')))
   unless !(Source.read (put fixture "header" badHeader) ast).isOk do
