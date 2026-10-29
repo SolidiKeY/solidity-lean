@@ -672,3 +672,10 @@ server). Findings and their disposition:
   exits 0, and the reason rules match on paths. Open.
 - **Checking cost.** `UnitExamples.lean` (about 4 min) and
   `TypeExamples.lean` (about 110 s) are the heaviest new files. Open.
+- **Finder findings (open).** G05's `UnitParses`
+  (`Frontend/Checked/Certificate.lean`) quantifies over any `Lexed` split,
+  not `lex`'s output, and `Lexed`'s maximal-munch check skips pragma mode
+  and comment pieces, so the relation is weaker than what the checker
+  checks; generic printer helpers (`tk`, `pu`, `parens`, `braces`,
+  `single`, …, `Frontend/Checked/Print.lean`) live in the shared
+  `Solidity.Source` namespace and may clash with later S0x additions.

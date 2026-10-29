@@ -930,3 +930,12 @@ server). Findings and their disposition:
   its "Typed rules changed" table when that lane merges.
 - **Backfill item 5** holds as worded; nothing in S01 consumes
   `mobileConst?`/`abiConst?` yet.
+- **Finder findings (open).** `selectOverload_unique`
+  (`Frontend/Static/Overloads.lean`) never states that the selected
+  candidate accepts the arguments, so it is weaker than its description;
+  Static's `Program` (`Source/Units.lean`) and Checked's `Units`
+  (`Frontend/Checked/Certificate.lean`) are distinct types and G05's
+  `Chain.resolve` cannot take the parse stage's output without a bridge
+  (remappings are missing from `Units`), which is G15's job; the
+  fixed-point conformance table claimed `abi.encode(0.1)` was accepted,
+  now corrected to "decided, not implemented".
