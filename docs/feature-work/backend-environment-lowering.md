@@ -89,11 +89,11 @@ and existing hot source definitions were reused without changes.
 | Item | Status |
 |---|---|
 | 1 environment instruction slices | Proved and controlled; checkpoint gates below |
-| 2 metadata | Pending |
-| 3 intrinsic cryptographic builtin lowering | Pending |
-| 4 composition certificate and mixed observations | Pending beyond checkpoint-1 expression certificate |
-| A erased emits / sequence fallback | Pending interface investigation |
-| B frame/stability and all observation/refusal regressions | Pending |
+| 2 metadata | Locally complete; final full/import gates pending |
+| 3 intrinsic cryptographic builtin lowering | Locally complete at the assigned slice/CALL boundary |
+| 4 composition certificate and mixed observations | Locally complete; final full/import gates pending |
+| A erased emits / sequence fallback | Authorized typed-sequence fallback proved; frontend emit-hoisting remains parent duty |
+| B frame/stability and all observation/refusal regressions | Locally complete with explicit stability/footprint assumptions |
 
 ## Runtime and validation evidence
 
@@ -271,3 +271,75 @@ The corrected exact-name harness passes all 12 programs (`cp3-evm-vectors3.log`)
 Both independent read-only reviewers verified their findings resolved, without
 Lean/server/build. Checkpoint 3 is locally complete; final import/full gates and
 checkpoint 4/backfill remain pending.
+
+## Checkpoint 4 and backfill A/B
+
+`Composition.sliceStep` independently combines the three target instruction
+slices; `runSlice_append` proves actual code concatenation. Support predicates
+prove the data and crypto slice embeddings; byte materialization and hashing
+therefore compose in one actual instruction stream. `ValueCertificate` and
+`ValuesCertificate` read the existing intrinsic `Val C Γ .uint`, never a new
+source IR. `environmentCertificate`, `literalCertificate`, `hashCertificate`,
+`nilCertificate` and `consCertificate` construct certificates from kernel proofs.
+`evalValues` is independently defined from existing `Val.evalT` in source order;
+target results appear in reverse order on the stack, with arbitrary tails.
+`mixed_observation_control` inhabits sender/metadata/Keccak composition over an
+actual typed heap/path. `materialize_then_hash` universally composes byte
+materialization with hashing over arbitrary memory and stack tails.
+
+Backfill A uses the explicitly assigned fallback. The frozen typed `Stmt` has
+no emit constructor or general expression-effect interface; raw `RawStmt.eval`
+(`Syntax/Raw.lean:192–198`) represents erased arguments, and
+`Syntax/Elab/Arms.lean:1244–1247` hoists them with `eagerArgsWith` before dropping
+the residual `.eval []`. Proving that frontend transformation would edit or
+reach reserved source/elaborator work. `source_sequence_success` and
+`source_sequence_failure` instead prove independent composition through existing
+typed `TStep`, `Out` and `TRun.seq`, including exact halts. `source_effect_control`
+inhabits retained assignment/read effects (1 then +2 gives 3), and
+`source_order_control`/`source_order_distinguishes` show panic/revert order changes
+an actual typed run. No log observation is added; the emit-hoisting certificate
+and general effect/allocator integration remain parent obligations.
+
+Backfill B is implemented in `Frames`. `Stable` explicitly requires matching
+frame identities, sender/value/time and ledger, and `Stable.observe`,
+`stable_selection`, `repeated_read` and `repeated_across_stable` prove repeated
+reads only under those assumptions. `balance_frame` and `repeated_balance`
+need only agreement at the truncated read account, explicitly reinserting the
+BALANCE operand. `ledger_other` proves ledger changes outside that footprint
+are irrelevant. `overwriteFunds` is a generic mathematical overwrite, not a
+claim that arbitrary decreases are legal forced credits. The inhabited
+`forced_credit_counterexample` uses an actual increase from 41 to 42; the time
+counterexample changes 13 to 14. Neither is assumed stable across world frames.
+`source_environment_frame` allows arbitrary contract/context/heap/storage/net
+changes under transaction and own-balance equality; `response_table_frame`
+allows an arbitrary replacement of the existing response table. No source-world
+or read-only-call theorem is edited or strengthened implicitly.
+
+`refuse_non_environment` is exhaustive over the six-opcode environment relation;
+`slice_refuses_unsupported` is exhaustive over the composed target slice.
+`excluded_constructor_controls` preserves every excluded BlockField and raw
+msg/tx field in the committed parser, with admitted positive controls.
+`slice_refusal_controls` includes BLOBHASH, GAS, raw returndata/code/log fields,
+and resource observations. Each admitted environment opcode's exact bytes are
+pinned in checkpoint 1; metadata/byte/hash/precompile instructions have the
+checkpoint 2/3 encoded-byte regressions and actual emitted EVM vectors.
+
+Finder requested repeated BALANCE and exhaustive composed refusals; skeptic
+requested explicit BLOBHASH/GAS refusals. Both changes were made. The final
+component still has no CALL/precompile/world/gas composition theorem and claims
+no whole G31 or whole-source-to-bytecode preservation. These exclusions are
+assigned integration boundaries, not newly approved premises.
+
+Checkpoint-4/backfill closure: `cp4-controls3.log` focused build passes (48 jobs),
+exit 0, 3 seconds, aggregate RSS 761708 KiB, cgroup peak 199032832 bytes.
+`cp4-diagnostics.log` is clean on all three new files, exit 0, 5 seconds,
+aggregate RSS 760444 KiB. Task-owned closure gate passes for all 11 modules,
+including no frontend/external/new-lane dependencies and append-only registries.
+Global layer/orphan/trust gates pass: 168 core/zero elaborator reach,
+777 reachable/zero orphaned, 792 sources/zero trust findings. The documentation
+check retains exactly the same 46 base findings, none new. Both independent
+finder and skeptic verified all final-milestone findings resolved read-only,
+without Lean/server/build. No assigned component/backfill proof remains open;
+required final full/import validation is still pending and no goal completion
+is claimed. RUNTIME_GATE_PASS applies only to the previously recorded actual
+versions and passing KeySort output, not to these pending full gates.

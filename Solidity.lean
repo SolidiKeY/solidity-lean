@@ -673,3 +673,6 @@ import Solidity.Backend.Environment.MetadataChecks
 import Solidity.Backend.Environment.Crypto
 import Solidity.Backend.Environment.Namespace
 import Solidity.Backend.Environment.CryptoChecks
+import Solidity.Backend.Environment.Composition
+import Solidity.Backend.Environment.Frames
+import Solidity.Backend.Environment.CompositionChecks

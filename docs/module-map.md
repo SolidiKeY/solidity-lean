@@ -943,3 +943,6 @@ At the root, the notation's own tests:
 | `Backend/Environment/Crypto.lean` | Executable memory Keccak slices, existing intrinsic hash denotation, exact normalized bytes, argument failure/success, and read-only precompile invocation selection. |
 | `Backend/Environment/Namespace.lean` | ERC-7201's actual two-hash instruction slice, wrapping predecessor, exact ABI-word second preimage and low-byte clearing. |
 | `Backend/Environment/CryptoChecks.lean` | Inhabited typed heap/path hash controls, ecrecover positive/fallback, exact opcode bytes, namespace witness and axiom pins. |
+| `Backend/Environment/Composition.lean` | Constructed intrinsic Val certificates, exact target concatenation/stack order, materialization/hash adapters and typed source-sequence fallback. |
+| `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
+| `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
