@@ -520,6 +520,8 @@ import Solidity.Calculus.HashWrittenInput
 import Solidity.Calculus.HashWrittenRealize
 import Solidity.Hash.CollisionBound
 import Solidity.Hash.Adaptive
+import Solidity.Storage.HashedLayout
+import Solidity.Storage.HashedLayoutEvm
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction

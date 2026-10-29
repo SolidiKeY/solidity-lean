@@ -20,6 +20,7 @@ const CORE = [
   /^Solidity\.Calculus\.RuleSyntax\./,
   /^Solidity\.Hash\.CollisionBound$/,
   /^Solidity\.Hash\.Adaptive$/,
+  /^Solidity\.Storage\.HashedLayout$/,
   /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|LoopInvariantWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary|KIntTwoAnchors)$/,
 ];
 const ELABORATOR = [

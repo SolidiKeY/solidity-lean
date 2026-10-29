@@ -280,6 +280,8 @@ proof, and their final checks must use the actual implementations.
 
 G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`, and for adaptive runs (eager sampling, repeated queries, early stopping, regions) in `Solidity/Hash/Adaptive.lean` (random-oracle model; `q` counts every oracle query of the run and of whoever chose its inputs); bounded slot offsets and the connection to executions are open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
 
+G27.05/G46.05 hashed layout status (lane-hashing, 2026-10-29): `Solidity/Storage/HashedLayout.lean` models the storage layout as slot terms read through a hash parameter, proves offsets stay inside their regions for every access path (`STy.locate_bounded`) and that distinct bounded slot terms of one run denote distinct words under the region premise (`Loc.word_inj`, `located_word_inj`); `Solidity/Storage/HashedLayoutEvm.lean` relates the terms to `Evm.Slot` read-only. The relation to `Evm/Layout.lean` and to compiled code, and packing, remain G27.05 ([feature-work/storage-hashed-layout.md](feature-work/storage-hashed-layout.md)).
+
 ### Wave 6 — whole pipeline, verification transfer and release (G48–G55)
 
 | Group | Deliverable and completion evidence |
