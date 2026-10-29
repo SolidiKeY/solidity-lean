@@ -678,3 +678,5 @@ import Solidity.Backend.Failure.ObservationChecks
 import Solidity.Backend.Failure.Checkpoint
 import Solidity.Backend.Failure.Unwind
 import Solidity.Backend.Failure.UnwindChecks
+import Solidity.Backend.Failure.Composition
+import Solidity.Backend.Failure.CompositionChecks

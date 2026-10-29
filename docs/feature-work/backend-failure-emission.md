@@ -41,7 +41,7 @@ composition obligations. Nothing here revisits source failure semantics.
 | 3: intrinsic observations and discriminating controls | Done: proofs, controls, independent reviews and focused gates |
 | 4: local checkpoint/unwind and nested failure | Done: proofs, inhabited nested witness, reviews and focused gates |
 | A: arbitrary payload chunking, tails and address bounds | Proved with checkpoint 2 |
-| B: concatenation, distinction, input preservation, external vectors | Internal exact byte vectors implemented; remaining proofs/tests pending |
+| B: concatenation, distinction, input preservation, external vectors | Done: composition proofs,12 Osaka vectors, independent reviews and focused gates |
 
 `Input` distinguishes empty failure, panic (bounded machine code), Error
 reason bytes, already encoded custom-error bytes and ordinary return bytes.
@@ -295,3 +295,58 @@ shared layers pass; owned closure pass (12 modules,0 findings); orphans pass
 (778 reachable,0 orphaned); trust pass (793 sources,241 inventoried sites,
 0 findings). Docs exit1 is byte-identical to exact base's46 missing references.
 Independent final review record: `cp4-reviews.md`. No whole-group claim follows.
+
+## Backfill B handoff and external vectors
+
+`run_two_writes` proves that both write blocks execute while
+preserving the stack tail. `disjoint_payloads` proves both original immutable
+input lists can be read back exactly, for either ordering of disjoint regions.
+`concatenated_emitters` proves that any second complete emitter, including one
+with overlapping addresses/different class, is unreachable after the first
+terminal. `return_revert_execution_distinct` proves different execution results
+for identical payload bytes and initial memory. No global source/world state
+is assumed or inferred. `CompositionChecks` includes a genuine overlapping
+write negative, two executed regions, ignored overlapping complete emitter,
+and same-bytes/different-terminal control. Headline axioms are guarded.
+
+Focused target `lake -f .failure-emission.lakefile.toml build
+Solidity.Backend.Failure.CompositionChecks`:14 jobs, exit0,1s,
+aggregate RSS284,860 KiB, cgroup peak101,949,440 B (`backfill-build.log`).
+
+The optional external test was possible. `tests/failure-emission/Export.lean`
+exports actual Backend.encode output; vectors.json contains exact byte arrays,
+not an independently reimplemented compiler. The runner independently states
+finite expected Panic/Error/custom/return payloads and expected terminal status.
+All12 cases pass on Osaka: empty revert/return; Panic(1)/Panic(0x12);
+Error(boom)/33-byte reason; Denied(uint256) with word7;65-byte raw failure/return;
+overlapping ignored suffix;1022-word tail completion;1023-word stack overflow.
+The Denied selector is also independently checked with pinned noble Keccak.
+Every case checks output bytes, exception/status, stack contents/height and
+every applicable before marker (nonzero offsets) and every after marker, so a rounded overwrite is discriminated.
+
+Reference versions: EthereumJS EVM10.1.3, Common10.1.2, util10.1.2,
+noble/hashes2.4.0; Nodev24.19.0. Existing lock SHA256:
+`fd223698b68dd5cf9dc1b59589c61da6c0131c3f68af65f7c26a3d5ac0498829`.
+Actual vectors SHA256:
+`1be88148266f4c7e7a438d399b1731f55ac62a02d0fa245c372a75c339323899`.
+The dependency install was task-local, lifecycle scripts disabled; core has
+no new dependency. Replay is offline under the same12 GiB/no-swap cap,
+100,000,000 gas,5,000,000 host steps and120-second timeout, matching existing
+reference budgets. Actual replay:exit0,1s, aggregate RSS58,908 KiB,
+cgroup peak72,687,616 B (`osaka-replay.log`). Exact result/provenance files live
+in tests/failure-emission and the evidence directory. These are bounded
+external emission tests, not source-to-bytecode, full ABI or whole pinned-EVM
+proofs. Full generic byte-memory and world/call bridges remain open.
+
+Final backfill-B per-file diagnostics: Composition exit0 (subsecond,
+RSS135,716 KiB, cgroup peak80,404,480 B); CompositionChecks exit0
+(subsecond,RSS267,112 KiB,peak81,424,384 B). Static gates
+`backfill-static.json`: layers pass; owned imports pass (14 modules,0 findings);
+orphans pass (780 reachable,0 orphaned); trust pass (795 sources,241 sites,
+0 findings). Doc paths exit1 is byte-identical to exact base's46 missing
+references. Both independent final reviews cleared source/proofs/replay and
+verified saved source/vector/provenance hashes. Their wording fixes (module
+versus namespace, and offset-zero marker applicability) were applied.
+Review record: `backfill-reviews.md`. All assigned implementation/backfill
+items are now covered; final full/import-closure validation and committed
+final handoff remain pending, so this is not whole-assignment completion.

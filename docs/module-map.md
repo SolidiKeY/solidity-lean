@@ -944,3 +944,5 @@ At the root, the notation's own tests:
 | `Backend/Failure/Checkpoint.lean` | Independent component-local typed persistent/transient checkpoint relation and compositional restore rules. |
 | `Backend/Failure/Unwind.lean` | Checked emitted payload execution before local unwind; success/failure and nested-failure proofs. |
 | `Backend/Failure/UnwindChecks.lean` | Inhabited distinct snapshots, nested emitted failures, caller-memory restoration and wrong-snapshot negatives. |
+| `Backend/Failure/Composition.lean` | Arbitrary two-write-block byte noninterference, immutable input preservation and checked emitter concatenation/terminal distinction. |
+| `Backend/Failure/CompositionChecks.lean` | Inhabited both-executed writes, overlap negative, overlapping ignored suffix and same-bytes terminal controls. |
