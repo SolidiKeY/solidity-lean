@@ -64,7 +64,7 @@ user-defined value type.
 ## S04.02: values and observations
 
 These definitions follow G01 Q5 (revert outcomes are the full revert bytes,
-panic codes included) and use the fixed Keccak-256 (`Solidity.Roadmap.keccakWord`).
+panic codes included) and use the fixed Keccak-256 (`Solidity.Roadmap.Evm.keccakWord`).
 
 - **ABI words.** `Val.word` is a value type's ABI word: two's complement
   for signed integers and fixed point, `bytesN` left-aligned, and

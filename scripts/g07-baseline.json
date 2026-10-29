@@ -120,6 +120,7 @@
   "Solidity.Roadmap.Admission.rejects",
   "Solidity.Roadmap.HashPremise.not_of_rootSlots",
   "Solidity.Roadmap.PublicCorrectness.transfer",
-  "Solidity.Roadmap.Cert.comp"
+  "Solidity.Roadmap.Cert.comp",
+  "Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler"
  ]
 }

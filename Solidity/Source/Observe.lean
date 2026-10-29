@@ -6,7 +6,7 @@ import Solidity.Source.State
 What a source execution shows at the transaction boundary, independently
 of the compiler, under the approved interpretations (G01 Q5: the full
 revert bytes, `Panic` codes included; opaque hashes are the fixed
-Keccak-256, `Solidity.Roadmap.keccakWord`):
+Keccak-256, `Solidity.Roadmap.Evm.keccakWord`):
 
 - `Val.word`: the ABI word of a value-type value (two's complement for
   signed integers and fixed-point values, left-aligned `bytesN`, addresses
@@ -27,7 +27,7 @@ Environment observations (`msg.sender`, `msg.value`, `block.timestamp`,
 
 namespace Solidity.Source
 
-open Solidity.Roadmap (Address Word Bytes Outcome keccakWord)
+open Solidity.Roadmap (Address Word Bytes Outcome)
 
 /-- A natural number below `2^256` as a word. -/
 def toWord (n : Nat) : Word := ⟨n % 2 ^ 256, Nat.mod_lt _ (by decide)⟩
@@ -127,7 +127,8 @@ theorem readInt_reject : readInt IntTy.u8 (toWord 300) = none := by decide
 /-! ## Selectors and revert data -/
 
 /-- The selector of a signature: the first four bytes of its Keccak-256. -/
-def selector (sig : String) : Bytes := (wordBytes (keccakWord sig.toUTF8.toList)).take 4
+def selector (sig : String) : Bytes :=
+  (wordBytes (toWord (Solidity.Roadmap.Evm.keccakWord sig.toUTF8.toList))).take 4
 
 theorem selector_length (sig : String) : (selector sig).length = 4 := by
   simp only [selector, List.length_take, wordBytes_length]

@@ -617,7 +617,9 @@ run_cmd do
     ``Solidity.Roadmap.HashPremise.not_of_rootSlots,
     ``Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts,
     ``Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed,
-    ``Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler]
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler,
+    ``Solidity.Roadmap.Fixed.Sane.rootSlots_lt]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

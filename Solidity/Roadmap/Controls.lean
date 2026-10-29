@@ -19,7 +19,10 @@ proved for them (`toy_publicCorrectness`), with `SourceSpec.NonVacuous`,
 refutes
 
 - an always-reverting compiler (`not_publicCorrectness_revertCompiler`,
-  through `PublicCorrectness.not_alwaysRevert`);
+  through `PublicCorrectness.not_alwaysRevert`), and one that reverts
+  whenever the source hashes (`not_publicCorrectness_hashRevertCompiler`:
+  the toy's successes hash their data, and `SourceSpec.NonVacuous` demands
+  a hashing success);
 - altered bytecode: correct output with one byte appended
   (`not_publicCorrectness_alteredCompiler`), and output whose revert data is
   erased (`not_publicCorrectness_erasingCompiler`), both through
@@ -32,7 +35,10 @@ refutes
   (`SourceSpec.not_nonVacuous_of_no_parse`), so a malformed or empty source
   semantics cannot meet the final statement's `NonVacuous` conjunct.
 
-The toy languages emit no events, so these controls exercise the
+The toy source hashes the data of a success (`Toy.hashes`), with Keccak-256
+(`Evm.withKeccak`) and sane regions (`Fixed.Sane`), so the forward bounds and
+the hash premise are exercised on a real preimage.  The toy languages emit
+no events, so these controls exercise the
 observation (`Outcome`), coverage and settings fields; event-level controls
 on real programs belong to G49.03.  The module imports the contracts only,
 the whitelist of G01's non-circularity gate (`scripts/check-noncircular.mjs`).
@@ -50,32 +56,33 @@ variable {I : IntrinsicSpec} {S : SourceSpec} {V : EvmSpec}
   {X : StateExport S I V}
 
 /-- **Observations are preserved**: a completion of an admitted source
-meaning, at an allowed environment and an admissible bound without
-exhaustion, is a completion of the compiled bytes with the same outcome and
-events, at an admissible bound below `hashBound`, under the per-run premise. -/
+meaning, at an allowed environment and an admissible bound in the forward
+bounds (no resource failure, fewer than `hashBound` preimages) meeting the
+source's hash premise, is a completion of the compiled bytes with the same
+outcome and events.  Nothing is assumed of the bytes' own hashes. -/
 theorem _root_.Solidity.Roadmap.PublicCorrectness.observes
     (h : PublicCorrectness S V compiler envAbs X) {i : S.Input} {r : S.Resolved}
     (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r) {art : Artifact}
     (hc : compiler i = some art) {e : V.lang.Env} (he : V.lang.Allowed e) {rs : S.lang.Res}
-    (hrs : S.lang.Admissible rs) (hno : S.NoExhaust rs) {o : Outcome}
+    (hrs : S.lang.Admissible rs) (hf : S.lang.Forward (S.meaning r w p art) (envAbs e) rs)
+    (hg : S.lang.Guard (S.meaning r w p art) (envAbs e) rs) {o : Outcome}
     (ho : (S.lang.sem (S.meaning r w p art) (envAbs e) rs).final = some o) :
-    ∃ rt, V.lang.Admissible rt ∧ V.lang.Forward (V.load art) e rt ∧
-      (V.RunCollisionFree (V.load art) e rt →
-        (V.lang.sem (V.load art) e rt).final = some o ∧
-        (V.lang.sem (V.load art) e rt).events =
-          (S.lang.sem (S.meaning r w p art) (envAbs e) rs).events) := by
-  have hf : S.lang.Forward (S.meaning r w p art) (envAbs e) rs := (S.forward_iff _ _ _).2 hno
-  exact (h.refines i r adm w p art hc e he).2.completes hrs hf ho
+    ∃ rt, V.lang.Admissible rt ∧ (V.lang.sem (V.load art) e rt).final = some o ∧
+      (V.lang.sem (V.load art) e rt).events =
+        (S.lang.sem (S.meaning r w p art) (envAbs e) rs).events :=
+  (h.refines i r adm w p art hc e he).2.completes hrs hf hg ho
 
 /-- **What the bytes observe, the source allows**: a completion of the
-compiled bytes at an allowed environment and an admissible bound meeting the
-per-run premise is a completion of the source meaning at an admissible
-bound, with the same outcome. -/
+compiled bytes at an allowed environment and an admissible bound, up to
+whose observations the source does not collide, is a completion of the
+source meaning at an admissible bound, with the same outcome. -/
 theorem _root_.Solidity.Roadmap.PublicCorrectness.observedBySource
     (h : PublicCorrectness S V compiler envAbs X) {i : S.Input} {r : S.Resolved}
     (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r) {art : Artifact}
     (hc : compiler i = some art) {e : V.lang.Env} (he : V.lang.Allowed e) {rt : V.lang.Res}
-    (hrt : V.lang.Admissible rt) (hg : V.RunCollisionFree (V.load art) e rt) {o : Outcome}
+    (hrt : V.lang.Admissible rt)
+    (hg : NoCollisionUpTo S.lang.Admissible (S.lang.Guard (S.meaning r w p art) (envAbs e))
+      (S.lang.sem (S.meaning r w p art) (envAbs e)) (V.lang.sem (V.load art) e rt)) {o : Outcome}
     (ho : (V.lang.sem (V.load art) e rt).final = some o) :
     ∃ rs, S.lang.Admissible rs ∧ (S.lang.sem (S.meaning r w p art) (envAbs e) rs).final = some o := by
   obtain ⟨rs, hrs, hfin, _⟩ := (h.refines i r adm w p art hc e he).2.sound hrt hg ho
@@ -124,8 +131,8 @@ inductive Toy where
   | loop
   deriving DecidableEq, Repr
 
-/-- A source bound: a horizon and whether the transaction's frame is
-exhausted (fails as if out of gas). -/
+/-- A source bound: a horizon and whether the transaction's frame fails as
+if out of gas (its resource failure). -/
 structure Bound where
   horizon : Nat
   exhausted : Bool
@@ -149,6 +156,12 @@ def Toy.run : Toy → Bool → Prefix Event Outcome
 
 theorem Toy.run_events (t : Toy) (b : Bool) : (t.run b).events = [] := by
   cases b <;> cases t <;> rfl
+
+/-- The preimages a toy program hashes: a success hashes its data (as a
+`keccak256` of the return value would), the others nothing. -/
+def Toy.hashes : Toy → List Bytes
+  | .succeed d => [d]
+  | _ => []
 
 /-- The source text of a toy program: a tag byte, then the data. -/
 def Toy.text : Toy → Bytes
@@ -176,15 +189,17 @@ theorem decode_text (t : Toy) : decode t.text = t := by
 
 /-! ## The fixed parameters and an allowed environment -/
 
-/-- Fixed parameters: Keccak-256, a ledger that ignores events, no
-precompile output and every creation at address 0. -/
+/-- Fixed parameters: G06's Keccak-256 instance (`Evm.withKeccak`), a ledger
+that ignores events, and one-slot regions with one root slot. -/
 def toyFixed : Fixed where
-  hash := keccakWord
+  evm := Evm.withKeccak
   ledger := fun bal _ a => bal a
-  precompile := fun _ _ => .success []
-  createAddress := fun _ _ => Address.zero
   regionLen := 1
   rootSlots := 1
+
+theorem toyFixed_sane : toyFixed.Sane := ⟨Nat.le_refl _, by decide, by decide⟩
+
+theorem toyFixed_keccak : toyFixed.Keccak := ⟨fun _ => rfl, toyFixed_sane⟩
 
 /-- A session environment: no code anywhere, no requests, every call
 succeeds at once. -/
@@ -195,32 +210,46 @@ def quietEnv : SessionEnv where
   deployArgs := []
   balance := fun _ => 0
   hasCode := fun _ _ => false
-  requests := fun _ => none
+  requests := fun _ _ => none
   callee := fun _ => .answer (.success [])
 
-theorem quietEnv_allowed : quietEnv.Allowed toyFixed :=
-  ⟨⟨Nat.zero_le _, fun _ _ h => nomatch h⟩, fun _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+theorem quietEnv_allowed : quietEnv.Allowed :=
+  ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+
+/-- The toy hash premise on one preimage: no collision, and no slot
+preimages. -/
+theorem toy_premise (t : Toy) : HashPremise toyFixed t.hashes [] := by
+  cases t with
+  | succeed d => exact ⟨Solidity.Hash.CollisionFree.singleton d, Solidity.Hash.RegionsDisjoint.nil⟩
+  | fail d => exact HashPremise.nil _
+  | loop => exact HashPremise.nil _
+
+theorem toy_count (t : Toy) : distinctCount t.hashes < hashBound := by
+  cases t <;> simp only [Toy.hashes, distinctCount, hashBound, List.elem_nil, Bool.false_eq_true,
+    if_false] <;> decide
 
 /-! ## The toy source -/
 
 /-- The source language: programs are toy programs, environments are session
-environments, every bound is admissible, adequacy speaks of unexhausted
-bounds. -/
+environments, every bound is admissible; the forward bounds are the
+unexhausted ones hashing fewer than `hashBound` preimages, the premise is the
+hash premise on the program's preimages. -/
 def toyLang : Lang Event Outcome where
   Prog := Toy
   Env := SessionEnv
   Res := Bound
   resLE := inferInstanceAs (LE Bound)
-  Allowed := fun e => e.Allowed toyFixed
+  Allowed := SessionEnv.Allowed
   Admissible := fun _ => True
   sem := fun p _ r => p.run r.exhausted
   consistent := fun p _ r r' h => by
     show (p.run r.exhausted).Le (p.run r'.exhausted)
     rw [h.2]
     exact Prefix.Le.refl _
-  Forward := fun _ _ r => r.exhausted = false
+  Forward := fun p _ r => r.exhausted = false ∧ distinctCount (Toy.hashes p) < hashBound
+  Guard := fun p _ _ => HashPremise toyFixed (Toy.hashes p) []
 
-/-- A toy compilation input: source bytes and settings. -/
+/-- A toy compilation input: source bytes (one unit) and settings. -/
 structure ToyInput where
   text : Bytes
   pipeline : Pipeline := .legacy
@@ -259,12 +288,12 @@ def toySource : SourceSpec where
   pipeline := ToyInput.pipeline
   setPipeline := fun i q => { i with pipeline := q }
   pipeline_set := fun _ _ => rfl
-  pragmaCoder := ToyInput.pragmaCoder
-  coder := ToyInput.coder
-  coder_legacy := fun i h => by simp only [ToyInput.coder, h]
-  coder_viaIR := fun i h => by simp only [ToyInput.coder, h]
+  pragmaCoder := fun i _ => i.pragmaCoder
+  coder := fun i _ => i.coder
+  coder_legacy := fun i _ h => by simp only [ToyInput.coder, h]
+  coder_viaIR := fun i _ h => by simp only [ToyInput.coder, h]
   pipelineOf := ToyRes.pipeline
-  coderOf := ToyRes.coder
+  coderOf := fun r _ => r.coder
   linkMap := ToyInput.links
   stipendFits := fun _ _ => true
   fixed := toyFixed
@@ -273,12 +302,17 @@ def toySource : SourceSpec where
   session_of := fun _ => rfl
   of_session := fun _ => rfl
   allowed_iff := fun _ => Iff.rfl
-  Exhaust := Bool
-  never := false
-  exhaust := Bound.exhausted
-  withExhaust := fun r x => { r with exhausted := x }
-  exhaust_with := fun _ _ => rfl
+  Failures := Bool
+  failures := Bound.exhausted
+  withFailures := fun r x => { r with exhausted := x }
+  failures_with := fun _ _ => rfl
+  NoFail := fun x => x = false
+  hashed := fun p _ _ => Toy.hashes p
+  hashed_consistent := fun _ _ _ _ _ => List.prefix_refl _
+  slotHashed := fun _ _ _ => []
+  slotHashed_sub := fun _ _ _ _ h => nomatch h
   forward_iff := fun _ _ _ => Iff.rfl
+  guard_iff := fun _ _ _ => Iff.rfl
 
 theorem admitted_iff (i : ToyInput) (r : ToyRes) : toySource.Admitted i r ↔ accept i = some r := by
   constructor
@@ -301,36 +335,52 @@ theorem admitted_iff (i : ToyInput) (r : ToyRes) : toySource.Admitted i r ↔ ac
         exact ⟨(t, i.pipeline, i.coder), ⟨hl, by rw [hp]; rfl⟩, rfl, trivial, trivial⟩
     · cases h
 
-/-- **The toy source is non-vacuous**: `0 1` succeeds with `[1]`, `1 7`
-reverts with `[7]`, `2` diverges. -/
+/-- The forward bound and premise of an unexhausted toy run. -/
+theorem toy_forward (t : Toy) (e : SessionEnv) (h : Nat) :
+    toySource.lang.Forward t e ⟨h, false⟩ ∧ toySource.lang.Guard t e ⟨h, false⟩ :=
+  ⟨⟨rfl, toy_count t⟩, toy_premise t⟩
+
+/-- **The toy source is non-vacuous**: `0 1` succeeds with `[1]`, hashing
+`[1]`; `1 7` reverts with `[7]`; `2` diverges. -/
 theorem toySource_nonVacuous : toySource.NonVacuous := by
   refine ⟨⟨{ text := [0, 1] }, ⟨.succeed [1], .legacy, .v2⟩, trivial, trivial, quietEnv, ⟨0, false⟩, [1],
-      (admitted_iff _ _).2 rfl, quietEnv_allowed, trivial, rfl, by simp, fun _ => rfl⟩,
+      (admitted_iff _ _).2 rfl, quietEnv_allowed, trivial, List.cons_ne_nil _ _,
+      fun _ => ⟨(toy_forward _ _ _).1, (toy_forward _ _ _).2, rfl⟩⟩,
+    ⟨{ text := [0, 1] }, ⟨.succeed [1], .legacy, .v2⟩, trivial, trivial, quietEnv, ⟨0, false⟩, [1],
+      (admitted_iff _ _).2 rfl, quietEnv_allowed, trivial,
+      fun _ => ⟨List.cons_ne_nil _ _, (toy_forward _ _ _).1, (toy_forward _ _ _).2, rfl⟩⟩,
     ⟨{ text := [1, 7] }, ⟨.fail [7], .legacy, .v2⟩, trivial, trivial, quietEnv, ⟨0, false⟩, [7],
-      (admitted_iff _ _).2 rfl, quietEnv_allowed, trivial, rfl, fun _ => rfl⟩,
+      (admitted_iff _ _).2 rfl, quietEnv_allowed, trivial,
+      fun _ => ⟨(toy_forward _ _ _).1, (toy_forward _ _ _).2, rfl⟩⟩,
     ⟨{ text := [2] }, ⟨.loop, .legacy, .v2⟩, trivial, trivial, quietEnv,
-      (admitted_iff _ _).2 rfl, quietEnv_allowed, fun _ rs ⟨_, hno⟩ => ?_⟩⟩
+      (admitted_iff _ _).2 rfl, quietEnv_allowed, fun _ _ _ => rfl, fun _ rs ⟨_, hno⟩ => ?_⟩⟩
   show (Toy.run .loop rs.exhausted).final = none
   have hx : rs.exhausted = false := hno
   rw [hx]
   rfl
 
+/-- No toy run's events contain anything. -/
+theorem toy_no_event {p : Toy} {r : Bound} {x : Event} (hm : x ∈ (Toy.run p r.exhausted).events) : False := by
+  rw [Toy.run_events] at hm
+  cases hm
+
 /-- The toy source meets the approved readings. -/
 theorem toySource_approved : toySource.Approved := by
-  refine ⟨fun _ => trivial, fun p _ r _ _ _ _ hm _ => ?_, fun p _ r _ _ _ _ _ hm => ?_, ?_, ?_⟩
-  · have hm' : _ ∈ (Toy.run p r.exhausted).events := hm
+  refine ⟨fun _ => trivial, fun p _ r _ _ _ _ hm _ => toy_no_event hm,
+    fun p _ r _ _ _ _ _ hm => (toy_no_event hm).elim, fun p _ r h _ _ _ _ _ _ hm => ?_, ?_, ?_,
+    toyFixed_sane⟩
+  · have hm' : h ++ _ <+: (Toy.run p r.exhausted).events := hm
     rw [Toy.run_events] at hm'
-    cases hm'
-  · have hm' : _ ∈ (Toy.run p r.exhausted).events := hm
-    rw [Toy.run_events] at hm'
-    cases hm'
+    have := hm'.length_le
+    simp only [List.length_append, List.length_singleton, List.length_nil] at this
+    omega
   · intro i r adm
     have h := (admitted_iff i r).1 adm
     simp only [accept] at h
     split at h
     · cases hp : parse i.text with
       | none => rw [hp] at h; cases h
-      | some t => rw [hp] at h; cases h; exact ⟨rfl, rfl⟩
+      | some t => rw [hp] at h; cases h; exact ⟨rfl, fun _ => rfl⟩
     · cases h
   · intro i r adm
     have h := (admitted_iff i r).1 adm
@@ -340,23 +390,23 @@ theorem toySource_approved : toySource.Approved := by
     · cases h
 
 /-- A malformed text is refused: the empty input. -/
-theorem malformed_not_admitted : ¬ ∃ r, toySource.Admitted ⟨[], .legacy, .v2, []⟩ r := by
+theorem malformed_not_admitted : ¬ ∃ r, toySource.Admitted (⟨[], .legacy, .v2, []⟩ : ToyInput) r := by
   rintro ⟨r, h⟩
   cases (admitted_iff _ _).1 h
 
 /-- Malformed: an unknown tag. -/
-theorem badTag_not_admitted : ¬ ∃ r, toySource.Admitted { text := [3] } r := by
+theorem badTag_not_admitted : ¬ ∃ r, toySource.Admitted ({ text := [3] } : ToyInput) r := by
   rintro ⟨r, h⟩
   cases (admitted_iff _ _).1 h
 
 /-- Malformed: data after the loop tag. -/
-theorem trailing_not_admitted : ¬ ∃ r, toySource.Admitted { text := [2, 0] } r := by
+theorem trailing_not_admitted : ¬ ∃ r, toySource.Admitted ({ text := [2, 0] } : ToyInput) r := by
   rintro ⟨r, h⟩
   cases (admitted_iff _ _).1 h
 
 /-- Refused: a pre-assigned library address (decision G05 Q1). -/
 theorem linked_not_admitted :
-    ¬ ∃ r, toySource.Admitted { text := [2], links := [("L", Address.zero)] } r := by
+    ¬ ∃ r, toySource.Admitted ({ text := [2], links := [("L", Address.zero)] } : ToyInput) r := by
   rintro ⟨r, h⟩
   cases (admitted_iff _ _).1 h
 
@@ -368,7 +418,17 @@ def toyIntrinsic : IntrinsicSpec where
   lang := toyLang
   ofWorld := id
   worlds := fun _ _ _ => []
-  guard_trivial := fun _ _ _ => trivial
+  fixed := toyFixed
+  session := id
+  ofSession := id
+  session_of := fun _ => rfl
+  of_session := fun _ => rfl
+  allowed_iff := fun _ => Iff.rfl
+  NoFail := fun r => r.exhausted = false
+  hashed := fun p _ _ => Toy.hashes p
+  slotHashed := fun _ _ _ => []
+  forward_iff := fun _ _ _ => Iff.rfl
+  guard_iff := fun _ _ _ => Iff.rfl
 
 /-- The identity pass. -/
 def idPass : Pass toyLang toyLang where
@@ -376,13 +436,15 @@ def idPass : Pass toyLang toyLang where
   run := fun p _ => p
   envAbs := id
 
-/-- Its certificate: every bound maps to itself. -/
+/-- Its certificate: every bound maps to itself; a target collision is the
+source's. -/
 def idCert : Cert idPass where
   envSound := fun _ he => he
   envOnto := fun e he => ⟨e, he, rfl⟩
   need := fun _ _ _ r => r
-  need_ok := fun _ _ _ _ _ _ hf => ⟨trivial, hf, fun _ => Prefix.Le.refl _⟩
-  back := fun _ _ _ r _ _ _ => ⟨r, trivial, Prefix.Le.refl _⟩
+  need_ok := fun _ _ _ _ _ _ hf hg => ⟨trivial, hf, hg, Prefix.Le.refl _⟩
+  back := fun _ _ _ r _ _ => ⟨r, trivial, .inl (Prefix.Le.refl _)⟩
+  reflect := fun _ _ _ r _ _ hng => ⟨r, trivial, hng, List.prefix_refl _⟩
 
 /-- The lowering: the resolved program, unchanged. -/
 def toyLowering : Lowering toySource toyIntrinsic where
@@ -403,27 +465,25 @@ def artOf (code : Bytes) : Artifact := ⟨[{ initcode := [], runtime := code }],
 
 theorem mainRuntime_artOf (code : Bytes) : mainRuntime (artOf code) = code := rfl
 
-/-- The hash premise of a run that hashes nothing. -/
-def evmGuard : Prop := HashPremise toyFixed []
-
 /-- The toy EVM language: it runs the selected unit's decoded bytes,
-whatever the gas schedule, and hashes nothing. -/
+whatever the gas schedule; as a target, it has no premise or forward
+restriction of its own. -/
 def toyEvmLang : Lang Event Outcome where
   Prog := Artifact
   Env := SessionEnv
   Res := EvmBound
   resLE := inferInstanceAs (LE EvmBound)
-  Allowed := fun e => e.Allowed toyFixed
+  Allowed := SessionEnv.Allowed
   Admissible := fun _ => True
   sem := fun art _ _ => (decode (mainRuntime art)).run false
   consistent := fun _ _ _ _ _ => Prefix.Le.refl _
-  Guard := fun _ _ _ => evmGuard
-  Forward := fun _ _ _ => ([] : List Bytes).length < hashBound
 
-/-- The toy EVM. -/
+/-- The toy EVM: the Osaka pin, and no `KECCAK256` (its successes return
+their data without hashing it). -/
 def toyEvm : EvmSpec where
   lang := toyEvmLang
   load := id
+  pin := Evm.pinned
   fixed := toyFixed
   session := id
   ofSession := id
@@ -434,34 +494,26 @@ def toyEvm : EvmSpec where
   withGas := fun r g => { r with gas := g }
   gas_with := fun _ _ => rfl
   hashed := fun _ _ _ => []
-  hashed_consistent := fun _ _ _ _ _ => List.prefix_refl _
-  guard := fun _ _ _ => Iff.rfl
-  forward_iff := fun _ _ _ => Iff.rfl
   created := fun _ _ _ => []
   World := Unit
   worlds := fun _ _ _ => []
   balances := fun _ _ => 0
   resume := fun _ => artOf []
 
+theorem toyEvm_no_event {art : Artifact} {x : Event}
+    (hm : x ∈ ((decode (mainRuntime art)).run false).events) : False := by
+  rw [Toy.run_events] at hm
+  cases hm
+
 theorem toyEvm_approved : toyEvm.Approved := by
-  refine ⟨rfl, fun _ => trivial, ?_, ?_⟩
-  · intro art _ _ _ _ _ _ hm _
-    have hm' : _ ∈ ((decode (mainRuntime art)).run false).events := hm
-    rw [Toy.run_events] at hm'
-    cases hm'
-  · intro art _ _ _ _ _ _ _ hm
-    have hm' : _ ∈ ((decode (mainRuntime art)).run false).events := hm
-    rw [Toy.run_events] at hm'
-    cases hm'
-
-/-- Every toy run meets the hash premise: it hashes nothing. -/
-theorem toyEvm_collisionFree (art : Artifact) (e : SessionEnv) (rt : EvmBound) :
-    toyEvm.RunCollisionFree art e rt :=
-  HashPremise.nil toyFixed
-
-theorem toyEvm_forward (art : Artifact) (e : SessionEnv) (rt : EvmBound) :
-    toyEvm.lang.Forward art e rt :=
-  Nat.two_pow_pos 128
+  refine ⟨rfl, toyFixed_sane, fun _ => trivial, fun _ _ _ => ⟨trivial, trivial⟩,
+    fun art _ _ _ _ _ _ hm _ => toyEvm_no_event hm, fun art _ _ _ _ _ _ _ hm => (toyEvm_no_event hm).elim,
+    fun art _ _ h _ _ _ _ _ _ hm => ?_⟩
+  have hm' : h ++ _ <+: ((decode (mainRuntime art)).run false).events := hm
+  rw [Toy.run_events] at hm'
+  have := hm'.length_le
+  simp only [List.length_append, List.length_singleton, List.length_nil] at this
+  omega
 
 /-- The compiler that writes the text of `f p` for the admitted program `p`. -/
 def compilerWith (f : Toy → Toy) (i : ToyInput) : Option Artifact :=
@@ -516,6 +568,8 @@ theorem publicCorrectness_of_faithful (f : Toy → Toy) (hf : Faithful f) :
   fixed := rfl
   session := fun _ => rfl
   envAbs_agrees := fun _ => rfl
+  ifixed := rfl
+  isession := fun _ => rfl
   creates_table := fun i art hc => by
     cases ha : accept i with
     | none => simp only [compilerWith, ha, Option.map_none] at hc; cases hc
@@ -526,22 +580,23 @@ theorem publicCorrectness_of_faithful (f : Toy → Toy) (hf : Faithful f) :
       show [] = (createsOf ((decode (mainRuntime _)).run false).events).map _
       rw [Toy.run_events]
       rfl
+  hashes_source := fun _ _ _ _ _ _ _ _ _ _ _ _ hb => nomatch hb
   refines := fun i r adm _ _ art hc e he => by
     have ha := (admitted_iff i r).1 adm
     simp only [compilerWith, ha, Option.map_some, Option.some.injEq] at hc
     subst hc
     obtain ⟨hfw, b, hbw⟩ := hf r.prog
-    refine ⟨he, fun rs _ hfr => ⟨⟨rs.horizon, fun _ => 0⟩, trivial, toyEvm_forward _ _ _, fun _ => ?_⟩,
-      fun rt _ _ => ⟨⟨rt.horizon, b⟩, trivial, ?_⟩⟩
+    refine ⟨he, fun rs _ hfr _ => ⟨⟨rs.horizon, fun _ => 0⟩, trivial, ?_⟩,
+      fun rt _ => ⟨⟨rt.horizon, b⟩, trivial, .inl ?_⟩⟩
     · show (r.prog.run rs.exhausted).Le ((decode (mainRuntime (artOf (f r.prog).text))).run false)
-      have hx : rs.exhausted = false := hfr
+      have hx : rs.exhausted = false := hfr.1
       rw [hx, mainRuntime_artOf, decode_text]
       exact hfw
     · show ((decode (mainRuntime (artOf (f r.prog).text))).run false).Le (r.prog.run b)
       rw [mainRuntime_artOf, decode_text]
       exact hbw
   decode_reach := fun _ _ _ _ _ _ _ _ _ _ _ _ => ⟨⟨0, false⟩, trivial, rfl⟩
-  decode_commutes := fun _ _ _ _ _ _ _ _ _ _ _ _ hω => nomatch hω
+  decode_commutes := fun _ _ _ _ _ _ _ _ _ _ _ _ _ hω => nomatch hω
 
 /-- **The inhabited control**: the toy compiler meets the public contract
 for the toy source and EVM. -/
@@ -556,8 +611,8 @@ def loopToRevert : Toy → Toy
 
 /-- **Accepted by design**: a diverging transaction may compile to one that
 reverts with empty data, since the source lets any transaction fail as if
-out of gas (the exhaustion choice).  The public contract does not
-distinguish divergence from exhaustion at the source's exhausted bounds. -/
+out of gas (a resource failure).  The public contract does not distinguish
+divergence from a resource failure at the source's failing bounds. -/
 theorem toy_publicCorrectness_loopReverts :
     PublicCorrectness toySource toyEvm (compilerWith loopToRevert) id toyExport :=
   publicCorrectness_of_faithful loopToRevert fun t => by
@@ -573,26 +628,48 @@ Each holds for every intrinsic layer, state export and environment map. -/
 section
 variable {I : IntrinsicSpec} {envAbs : toyEvm.lang.Env → toySource.lang.Env}
 
+/-- The output of `compilerWith f` runs `f` of the admitted program. -/
+theorem compilerWith_run {f : Toy → Toy} {i : ToyInput} {art : Artifact}
+    (hc : compilerWith f i = some art) : ∃ r, accept i = some r ∧ art = artOf (f r.prog).text := by
+  cases ha : accept i with
+  | none => simp only [compilerWith, ha, Option.map_none] at hc; cases hc
+  | some r =>
+    simp only [compilerWith, ha, Option.map_some, Option.some.injEq] at hc
+    exact ⟨r, rfl, hc.symm⟩
+
 /-- A compiler whose output always reverts, on the inputs it accepts. -/
-def revertCompiler (i : ToyInput) : Option Artifact :=
-  (accept i).map fun _ => artOf (Toy.fail []).text
+def revertCompiler : ToyInput → Option Artifact := compilerWith fun _ => .fail []
 
 /-- **The always-revert control**: no state export makes the reverting
 compiler meet the public contract. -/
 theorem not_publicCorrectness_revertCompiler (X : StateExport toySource I toyEvm) :
     ¬ PublicCorrectness toySource toyEvm revertCompiler envAbs X := by
   intro h
-  refine h.not_alwaysRevert toySource_nonVacuous
-    (fun _ art e rt _ _ => toyEvm_collisionFree art e rt) (fun i art e rt d hc => ?_)
-  cases ha : accept i with
-  | none => simp only [revertCompiler, ha, Option.map_none] at hc; cases hc
-  | some r =>
-    simp only [revertCompiler, ha, Option.map_some, Option.some.injEq] at hc
-    subst hc
-    show ((decode (mainRuntime (artOf (Toy.fail []).text))).run false).final ≠ _
-    rw [mainRuntime_artOf, decode_text]
-    intro hf
-    cases hf
+  refine h.not_alwaysRevert toySource_nonVacuous (fun i art e rt d hc _ _ => ?_)
+  obtain ⟨r, _, rfl⟩ := compilerWith_run hc
+  show ((decode (mainRuntime (artOf (Toy.fail []).text))).run false).final ≠ _
+  rw [mainRuntime_artOf, decode_text]
+  intro hf
+  cases hf
+
+/-- A compiler that reverts exactly where the source hashes: a success
+(which hashes its data) becomes a revert. -/
+def hashRevert : Toy → Toy
+  | .succeed _ => .fail []
+  | t => t
+
+/-- **The revert-on-hashing control**: the non-vacuity witness that hashes
+and succeeds forces a success of the bytes, so a compiler reverting on every
+hashing run fails the public contract, whatever the EVM hashes and without
+any fact about Keccak's values (`PublicCorrectness.succeeds_hashing`). -/
+theorem not_publicCorrectness_hashRevertCompiler (X : StateExport toySource I toyEvm) :
+    ¬ PublicCorrectness toySource toyEvm (compilerWith hashRevert) envAbs X := by
+  intro h
+  refine h.not_alwaysRevert toySource_nonVacuous (fun i art e rt d hc _ _ => ?_)
+  obtain ⟨r, _, rfl⟩ := compilerWith_run hc
+  show ((decode (mainRuntime (artOf (hashRevert r.prog).text))).run false).final ≠ _
+  rw [mainRuntime_artOf, decode_text]
+  cases r.prog <;> intro hf <;> cases hf
 
 /-- Altered bytecode: the correct output with one byte appended. -/
 def alteredCompiler (i : ToyInput) : Option Artifact :=
@@ -604,12 +681,11 @@ contract. -/
 theorem not_publicCorrectness_alteredCompiler (X : StateExport toySource I toyEvm) :
     ¬ PublicCorrectness toySource toyEvm alteredCompiler envAbs X := by
   intro h
-  have adm : toySource.Admitted { text := [0, 1] } ⟨.succeed [1], .legacy, .v2⟩ :=
+  have adm : toySource.Admitted ({ text := [0, 1] } : ToyInput) ⟨.succeed [1], .legacy, .v2⟩ :=
     (admitted_iff _ _).2 rfl
-  obtain ⟨rt, _, _, hfin⟩ := h.observes adm trivial trivial rfl quietEnv_allowed
-    (rs := ⟨0, false⟩) trivial rfl (o := .success [1]) rfl
-  have hf := (hfin (toyEvm_collisionFree _ _ _)).1
-  cases hf
+  obtain ⟨rt, _, hfin, _⟩ := h.observes adm trivial trivial rfl quietEnv_allowed
+    (rs := ⟨0, false⟩) trivial (toy_forward _ _ _).1 (toy_forward _ _ _).2 (o := .success [1]) rfl
+  cases hfin
 
 /-- Altered bytecode: revert data erased. -/
 def erasingCompiler (i : ToyInput) : Option Artifact :=
@@ -622,12 +698,11 @@ observed, so a compiler that erases it fails the public contract. -/
 theorem not_publicCorrectness_erasingCompiler (X : StateExport toySource I toyEvm) :
     ¬ PublicCorrectness toySource toyEvm erasingCompiler envAbs X := by
   intro h
-  have adm : toySource.Admitted { text := [1, 7] } ⟨.fail [7], .legacy, .v2⟩ :=
+  have adm : toySource.Admitted ({ text := [1, 7] } : ToyInput) ⟨.fail [7], .legacy, .v2⟩ :=
     (admitted_iff _ _).2 rfl
-  obtain ⟨rt, _, _, hfin⟩ := h.observes adm trivial trivial rfl quietEnv_allowed
-    (rs := ⟨0, false⟩) trivial rfl (o := .revert [7]) rfl
-  have hf := (hfin (toyEvm_collisionFree _ _ _)).1
-  cases hf
+  obtain ⟨rt, _, hfin, _⟩ := h.observes adm trivial trivial rfl quietEnv_allowed
+    (rs := ⟨0, false⟩) trivial (toy_forward _ _ _).1 (toy_forward _ _ _).2 (o := .revert [7]) rfl
+  cases hfin
 
 /-- Altered bytecode: a loop compiled to a success. -/
 def loopToSucceed : Toy → Toy
@@ -635,13 +710,15 @@ def loopToSucceed : Toy → Toy
   | t => t
 
 /-- **The backward (soundness) control**: a success the source never
-produces, here from a loop, fails the public contract. -/
+produces, here from a loop (which hashes nothing, so never collides), fails
+the public contract. -/
 theorem not_publicCorrectness_loopToSucceed (X : StateExport toySource I toyEvm) :
     ¬ PublicCorrectness toySource toyEvm (compilerWith loopToSucceed) envAbs X := by
   intro h
-  have adm : toySource.Admitted { text := [2] } ⟨.loop, .legacy, .v2⟩ := (admitted_iff _ _).2 rfl
+  have adm : toySource.Admitted ({ text := [2] } : ToyInput) ⟨.loop, .legacy, .v2⟩ :=
+    (admitted_iff _ _).2 rfl
   obtain ⟨rs, _, hfin⟩ := h.observedBySource adm trivial trivial rfl quietEnv_allowed
-    (rt := ⟨0, fun _ => 0⟩) trivial (toyEvm_collisionFree _ _ _) (o := .success []) rfl
+    (rt := ⟨0, fun _ => 0⟩) trivial (fun _ _ _ => HashPremise.nil _) (o := .success []) rfl
   have hfin' : (Toy.run .loop rs.exhausted).final = some (.success []) := hfin
   cases hx : rs.exhausted <;> rw [hx] at hfin' <;> cases hfin'
 
@@ -695,22 +772,28 @@ def emptySource : SourceSpec := { toySource with Parses := fun _ _ => False }
 theorem not_nonVacuous_emptySource : ¬ emptySource.NonVacuous :=
   SourceSpec.not_nonVacuous_of_no_parse fun _ _ h => h
 
-/-! ## A gap the controls cannot close
+/-! ## The region parameters
 
-With at least one slot per region and `2^256` root slots, no run that hashes
-anything meets the hash premise, so `PublicCorrectness.refines` constrains
-nothing after the first hash.  `Fixed.regionLen` and `Fixed.rootSlots` are not
-bounded by `EvmSpec.Approved`; `docs/feature-work/roadmap-g07-gates.md`
-records this for G01. -/
+With at least one slot per region and `2^256` root slots, no run with a
+slot preimage meets the hash premise, which would leave `refines` with no
+constraint after it; `Fixed.Sane` (a conjunct of both `SourceSpec.Approved`
+and `EvmSpec.Approved`) rules such parameters out (`Fixed.Sane.rootSlots_lt`).
+This was G07's first contract gap, closed by the final G01 revision. -/
 
 theorem _root_.Solidity.Roadmap.HashPremise.not_of_rootSlots {F : Fixed} (hl : 1 ≤ F.regionLen)
-    (hr : 2 ^ 256 ≤ F.rootSlots) (x : Bytes) (xs : List Bytes) : ¬ HashPremise F (x :: xs) := by
+    (hr : 2 ^ 256 ≤ F.rootSlots) (xs : List Bytes) (y : Bytes) (ys : List Bytes) :
+    ¬ HashPremise F xs (y :: ys) := by
   intro ⟨_, _, hroot⟩
-  have hlt : (F.hash x).val < 2 ^ 256 := (F.hash x).isLt
-  have hreg : Region F.regionLen (F.hash x) (F.hash x).val :=
-    ⟨0, hl, by rw [Nat.add_zero, Nat.mod_eq_of_lt hlt]⟩
-  have hle := hroot (F.hash x) (List.mem_map_of_mem (List.mem_cons_self ..)) _ hreg
+  have hlt : (F.hash y).val < 2 ^ 256 := (F.hash y).isLt
+  have hmem : (F.hash y).val ∈ List.range F.rootSlots := List.mem_range.2 (by omega)
+  refine hroot y (List.mem_cons_self ..) _ hmem (.inl ⟨Nat.le_refl _, ?_⟩)
+  show (F.hash y).val < (F.hash y).val + F.regionLen
   omega
+
+/-- Sane parameters have fewer root slots than words. -/
+theorem _root_.Solidity.Roadmap.Fixed.Sane.rootSlots_lt {F : Fixed} (h : F.Sane) :
+    F.rootSlots < 2 ^ 256 :=
+  Nat.lt_of_le_of_lt h.2.2 (Nat.pow_lt_pow_right (by decide) (by decide))
 
 end Solidity.Roadmap.Controls
 
@@ -718,9 +801,9 @@ end Solidity.Roadmap.Controls
 #guard_msgs in #print axioms Solidity.Roadmap.Controls.toy_publicCorrectness
 /-- info: 'Solidity.Roadmap.Controls.toySource_nonVacuous' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Roadmap.Controls.toySource_nonVacuous
-/-- info: 'Solidity.Roadmap.Controls.toySource_approved' depends on axioms: [propext] -/
+/-- info: 'Solidity.Roadmap.Controls.toySource_approved' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Roadmap.Controls.toySource_approved
-/-- info: 'Solidity.Roadmap.Controls.toyEvm_approved' depends on axioms: [propext] -/
+/-- info: 'Solidity.Roadmap.Controls.toyEvm_approved' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Roadmap.Controls.toyEvm_approved
 /-- info: 'Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler
@@ -754,3 +837,5 @@ end Solidity.Roadmap.Controls
 #guard_msgs in #print axioms Solidity.Roadmap.SourceSpec.NonVacuous.admits
 /-- info: 'Solidity.Roadmap.HashPremise.not_of_rootSlots' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Roadmap.HashPremise.not_of_rootSlots
+/-- info: 'Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler
