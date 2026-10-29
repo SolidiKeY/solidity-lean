@@ -42,14 +42,14 @@ Notation for the shared premises:
 | T3 | `Solidity.Evm.compile_box` | `Solidity/Evm/Correct.lean:1137` | Machine success implies source success with `Sim`. | CoreIn, machine `run … = .ok m' 0`. |
 | T4 | `Solidity.Evm.compile_net` | `Solidity/Evm/Correct.lean:1157` | Machine success implies source success, and `net(a) = bal₀ a − bal a` for `a ≠ self`, `net(self) = 0`. | As T3. |
 | T5 | `Solidity.Evm.Sim.init` | `Solidity/Evm/Correct.lean:1181` | Fresh typed state `freshT` and `Machine.init` satisfy `Sim C 1 0 (Frag.init [])`. | `balance < W`, `balance = bal self`. |
-| T6 | `Solidity.Evm.compile_storage` | `Solidity/Evm/Correct.lean:1197` | From a fresh contract, 4-way with success reading as: every live `uint` storage path value equals the machine slot. | `inFragP (Frag.init []) P = some F'`, `Prog.pushes P < Lmax`, `balance < W`, `balance = bal self`. |
+| T6 | `Solidity.Evm.compile_storage` | `Solidity/Evm/Correct.lean:1197` | From a fresh contract, 4-way with success reading as: every live `uint` storage path value equals the machine slot. | `inFragP (Frag.init []) P = some F'`, `Prog.pushes P < Lmax`, `balance < W`, `balance = bal self`. The start state is fixed: `freshT`/`Machine.init` (`Correct.lean:1173`, `Machine.lean:346`), so caller, value and timestamp are `0` and every payment is accepted. |
 | T7 | `Solidity.Evm.Memory.ValFrag.correct` | `Solidity/Evm/MemoryCompile.lean:140` | Memory-path expression code: value agreement or both revert. | `ValFrag` certificate, `StateRepr`. |
 | T8 | `Solidity.Evm.Memory.StmtFrag.correct` | `Solidity/Evm/MemoryCompile.lean:1221` | One memory-path statement: `GrowingResult` (success with extended base map and exact allocator growth, or both revert). | `StmtFrag` certificate, MemIn with `frameNeedStmt`. |
 | T9 | `Solidity.Evm.Memory.ProgFrag.correct` | `Solidity/Evm/MemoryCompile.lean:1230` | As T8 for programs. | `ProgFrag` certificate, MemIn. |
 | T10 | `Solidity.Evm.Memory.compile_correct` | `Solidity/Evm/MemoryCompile.lean:1245` | `compileProg b F P = some result` gives `GrowingResult` (success or revert only). | MemIn with `result.cert.cost σ`. |
 | T11 | `Solidity.Evm.Compiler.Compilation.memory_input` | `Solidity/Evm/Compiler.lean:53` | Opens the memory input without reducing the compiler result. | `isMemory = true`. |
 | T12 | `Solidity.Evm.Compiler.Compilation.correct` | `Solidity/Evm/Compiler.lean:86` | Unified entry: for either path, `Input → Agrees` (4-way with the path's `Rep`). | `Input`: CoreIn (core path) or MemIn (memory path). |
-| T13 | `Solidity.Main.compiler_correct` | `Solidity/Theorems.lean:269` | Notation restatement of T1, without the stack clause. | CoreIn. |
+| T13 | `Solidity.Main.compiler_correct` | `Solidity/Theorems.lean:269` | Notation restatement of T1. It drops the stack clause and also drops `Sim` from disjunct (iii), keeping only `∃ o`. | CoreIn. |
 | T14 | `Solidity.Main.compiler_net` | `Solidity/Theorems.lean:285` | Restatement of T4. | As T4. |
 | T15 | `Solidity.Main.compiler_checked` | `Solidity/Theorems.lean:297` | Restatement of T12 (the "public" checked entry). | As T12. |
 | T16 | `Solidity.Evm.compile_trace_sound` | `Bridge/SolidityBridge/Evm.lean:144` | A successful CSLib trace of compiled code has a source success with `Sim`. | CoreIn. |
@@ -67,9 +67,9 @@ These are **fixed-program instances, not general theorems**:
 regression families listed in [compiler-verification.md](../compiler-verification.md#memory-operations).
 `Solidity/Tools/DiffTest.lean` is random testing, not a theorem.
 
-**Axioms.** T1, T12, T13–T15, T8–T10 and T19 are pinned to
+**Axioms.** T1, T12, T13–T15, T8–T10, `Compiler.bisimulation` and `Compiler.trace_equivalence` are pinned to
 `[propext, Classical.choice, Quot.sound]` by existing `#guard_msgs` or
-`TrustAudit.lean`. Not re-run here.
+`TrustAudit.lean`. `Compiler.simulation` (T19) and `ValFrag.correct` (T7) have no pin. Not re-run here.
 
 **What no theorem states at the base.** There is no compilability or coverage
 theorem: `Compiler.compile` returns `Option`, and `none` carries no statement.
@@ -111,9 +111,9 @@ them.
 | R09 | Internal calls are compiled inline (`Stmt.call` carries its body). Value arguments only (`argsIn`, `:146–149`). Return shape `.none`/`.val` only (`CallRetIn`, `:153–159`). `callReceiver(Push)` out (`:316–317`). | Storage/memory reference arguments, tuple/reference returns, receiver-style library calls, runtime call frames. | `function g(uint[] storage a) internal {…} g(arr);`; `function h() internal returns (uint, uint)` | N | G37.01, G37.03, G20. ⟳ memory-internal-calls, function-ref-args |
 | R10 | `valIn` refuses `readMem`, `mlen`, `modular`, `hash` (`:127`). | Memory reads on the core path, `addmod`/`mulmod`, `keccak256`/`sha256`/`ripemd160` values. | `x = addmod(a, b, m);`; `h = uint(keccak256(abi.encode(a)));` | N | G25 (modular), G31 + G46.05 (hashes), G23 |
 | R11 | `simpleIn` refuses the `selfBalance` environment read (`:104–106`). | `address(this).balance`. | ✓ `total = address(this).balance;` (`selfBalance_out`) | N | G31, G46.04 |
-| R12 | Operator tables `binInFrag`/`unInFrag` (`Solidity/Evm/Layout.lean:410,422`): bitwise and shift operators, `**` and the wrapping (`unchecked`) operators only at `uint`. | Signed bitwise/shift operators, signed `**`, `unchecked` signed arithmetic. | `int c = a & b;`, `int d = a >> 1;`, `unchecked { int e = a + b; }` | N | G25 |
+| R12 | Operator table `binInFrag` (`Solidity/Evm/Layout.lean:410`): `&`, `\|`, `^` and `>>` only at `uint`, though the source accepts them at `int` (`BinOp.accepts`, `Solidity/AST.lean:1144`). Signed `**`, `<<` and `~` are already refused by the source (`AST.lean:1141,1145,1158`), so they are not a compiler gap. `unchecked` signed arithmetic is lowered through `uint` wrapping and casts (`Solidity/Syntax/Elab/Values.lean:1708–1721`) and is admitted. | Signed bitwise operators and arithmetic `>>`. | `int c = a & b;`, `int d = a >> 1;` | N | G25 (compiler); S02/G16 for the source-refused signed `<<`/`~`, if in profile |
 | R13 | `PrimTy` is only `bool`/`uint`/`int` (`Solidity/AST.lean:30–45`). Narrow widths, `address`, enums and `bytesN` reach the compiler as `uint` after elaboration. `bytesN` is right-aligned, unlike solc ([semantic-gaps.md](../semantic-gaps.md#bytes-and-strings)). | Nothing at the compiler interface. Width and representation correctness rests on lowering. | `uint8 x = 200; x += 100;` is correct only via the elaborated guard. | O (representation), checked by lowering | G16, G25, G27.01 |
-| R14 | Mapping keys `uint` only (`locIn`, `:116`; `ReprAt.map` relates only `K = .uint`, `Solidity/Evm/Repr.lean:85`). | `bool`/`int`/`string`/`bytes` keys (the last are hashed). | `mapping(bool => uint) m; m[true] = 1;`; `mapping(string => uint)` | N | G27.02 |
+| R14 | Mapping keys `uint` only (`locIn`, `:116`; `ReprAt.map` relates only `K = .uint`, `Solidity/Evm/Repr.lean:85`). | `bool`/`int` keys. `string`/`bytes` keys reach the compiler as a `uint` key indexed by a hash and are refused through R10 (`valIn`), not by this check. | `mapping(bool => uint) m; m[true] = 1;`; `mapping(int => uint)` | N | G27.02 (and R10's owners for hashed keys) |
 | R15 | Layout size side conditions: `leavesFit` (`:101`), field `offset < W` (`:115`), fixed `n < W` (`:118–119`). | Storage types with more than `2^256` slots. | None found. solc refuses storage types that are too large; that claim is unverified here, so G13/G18.01 must prove admission implies these. | O | G27.05, G18.01 |
 | R16 | Unset storage aliases are `dead` (`declStorageIn`, `:220`) and unreadable until rebound. | Reads of an uninitialized storage pointer. | None expected: solc rejects such reads at compile time (claim not verified here). | O | G28 (confirm via G13 admission) |
 
@@ -122,15 +122,15 @@ them.
 | ID | Restriction (where) | Excludes | In-profile example | Kind | Discharging group(s) |
 |---|---|---|---|---|---|
 | R17 | Storage-to-storage `=` only for `static` types (`assignIn`, `Compile.lean:211–216`; `static`, `Layout.lean:440`). | Copies of a value that holds a dynamic array, `bytes` or `string`. These need a runtime-length loop. | ✓ `basketA = basketB;` (`rejected`); `names = otherNames;` (`string[]`) | N | G29.01–G29.03 |
-| R18 | `push` shapes (`pushIn`, `:167–174`): `push()` only of a primitive, and `push(sp)` only of a static element. | `push()` of a struct or array, which revives the popped slot (`pushSlot`); pushes of dynamic or memory values. | ✓ `persons.push();` (`rejected`); `rows.push(memRow);` | N | G30, G35.02, G27.03 |
-| R19 | `copyMem`, `fixedCopy`, `fixedCopyMem` sources out of the core path (`:216`, `:174`). | Memory-to-storage and fixed-array copies. | `stored = memRecord;`; `fixedArr = otherFixed;` with memory/fixed sources | N | G35.02, G35.04. ⟳ memory-storage-copy |
+| R18 | `push` shapes (`pushIn`, `:167–174`): `push()` only of a primitive, and `push(sp)` only of a static element. Also refused: `assignLocalPush`, `pushOpAssign`, `pushIncDec` (`:313,315`), and binding an alias to `arr.push()` (`rebind`, `:276–278`; `declStorageIn`, `:223`). | `push()` of a struct or array, which revives the popped slot (`pushSlot`); pushes of dynamic or memory values; `x = arr.push()`-style results, `arr.push() += 1`, `arr.push()++`, `T storage p = arr.push();`. | ✓ `persons.push();` (`rejected`); `rows.push(memRow);`; `Person storage p = persons.push();` | N | G30, G28, G35.02, G27.03 |
+| R19 | `copyMem`, `fixedCopy`, `fixedCopyMem` sources out of the core path (`:216`, `:174`). | Memory-to-storage and fixed-array copies. | `stored = memRecord;`; `dynArr = fixedArr;` (a fixed-to-dynamic copy is `fixedCopy`, `Solidity/Syntax/Scoped.lean:101`; a same-type static fixed copy is admitted as `Src.copy`) | N | G35.02, G35.04. ⟳ memory-storage-copy |
 | R20 | Memory path copies: only primitive-member storage-root struct → memory (`StmtFrag.copyStruct`/`rebindCopyStruct`, `MemoryCompile.lean:203,211`; M31 in [assurance.md](../assurance.md)). | Storage arrays → memory, memory → storage, deep memory → memory, calldata → memory, runtime-length objects. | `uint[] memory c = storedArr;`; `Record memory r = stored.nested;` | N | G35.01–G35.06, G18.05. ⟳ memory-storage-copy, abi-lazy-calldata |
 
 ### 2.4 Loops and control flow
 
 | ID | Restriction (where) | Excludes | In-profile example | Kind | Discharging group(s) |
 |---|---|---|---|---|---|
-| R21 | A core loop body must not push, pay or shrink, and must leave the fragment flags unchanged (`Compile.lean:307–312`). `Prog.pushes` counts a loop as `0` (`:243`). | Loops that grow, pay, pop/delete, or rebind aliases. | ✓ `while (age < 3) { values.push(1); age = age + 1; }` (`loop_push_rejected`); `for (…) { a.transfer(1); }`; `for (…) arr.pop();` | N | G36.02, G36.03 (after G43), G19. ⟳ memory-loops |
+| R21 | A core loop body must not push, pay or shrink, and must leave the fragment flags unchanged (`(G.restrict Γ).fl = F.fl`, `Compile.lean:307–312`). `Prog.pushes` counts a loop as `0` (`:243`). | Loops that grow, pay, pop/delete, or rebind an alias so that its flag changes. | ✓ `while (age < 3) { values.push(1); age = age + 1; }` (`loop_push_rejected`); `for (…) { a.transfer(1); }`; `for (…) arr.pop();` | N | G36.02, G36.03 (after G43), G19. ⟳ memory-loops |
 | R22 | No loops on the memory path (`StmtFrag` has no loop constructor, `MemoryCompile.lean:162–360`). | Any loop in a memory program. | `for (uint i; i < xs.length; i++) xs[i] = i;` with `xs` in memory | N | G36.02, G24. ⟳ memory-loops |
 | R23 | Structured `LOOP` and relative forward jumps. `checked_exp_helper` is unrolled 255 times (`Machine.lean:34–43`; `expLoop`, `Layout.lean:480`). | Absolute-jump bytecode. | — (target property) | O now, N for the final target | G45.03. ⟳ evm-control-flow |
 
@@ -138,8 +138,8 @@ them.
 
 | ID | Restriction (where) | Excludes | In-profile example | Kind | Discharging group(s) |
 |---|---|---|---|---|---|
-| R24 | `L + Prog.pushes P ≤ Lmax` (`2^64`), with `Sim.bound` and every array length `≤ L` (`Sim.lean:213`; `Machine.lean:93`). The typed run caps lengths at `2^256` (`Storage.full`, `Solidity/Semantics/Storage/Ops.lean:916`) and has no `Panic(0x41)` at `2^64` ([solc-alignment.md](../solc-alignment.md#remaining-deltas-documented-intentionally-out-of-scope)). | States with an array near `2^64`; with R21, pushes inside loops. | A storage array of length `2^64` followed by `push`: the run succeeds where solc panics. | N (initial-state premise that hides a source/solc mismatch) | S04.01 / S02 (source length bound and `0x41`), G30, G38 |
-| R25 | Memory capacity is a premise (`AllocationInput`, `MemoryGrowResult.lean:36`: `cost = 0 ∨ (0 < b ∧ ∃ cursor, … ∧ cursor + cost < W)`). The generated code has no capacity check. | Allocations whose reached cost exceeds the word space. solc panics instead. | `uint[] memory x = new uint[](2**255);`: the typed run allocates, no input satisfies the premise, and the theorem says nothing. | N | G33, G38 (`0x41`). ⟳ evm-byte-memory |
+| R24 | `L + Prog.pushes P ≤ Lmax` (`2^64`), with `Sim.bound` (`L ≤ Lmax`, `Sim.lean:213`; `Lmax` at `Machine.lean:93`) and every array length `< L` (`ReprAt.array`, `Repr.lean:79`). The typed run caps lengths at `2^256` (`Storage.full`, `Solidity/Semantics/Storage/Ops.lean:916`) and has no `Panic(0x41)` at `2^64` ([solc-alignment.md](../solc-alignment.md#remaining-deltas-documented-intentionally-out-of-scope)). | States with an array near `2^64`; with R21, pushes inside loops. | A storage array of length `2^64` followed by `push`: the run succeeds where solc panics. | N (initial-state premise that hides a source/solc mismatch) | S04.01 / S02 (source length bound and `0x41`), G30, G38 |
+| R25 | Memory capacity is a premise (`AllocationInput`, `MemoryGrowResult.lean:36`: `cost = 0 ∨ (0 < b ∧ ∃ cursor, … ∧ cursor + cost < W)`). The generated code has no capacity check. | Allocations whose reached cost exceeds the word space. solc panics instead. | `uint[] memory x = new uint[](2**255);`: the cost `n + 1` (`MemoryCompile.lean:711`) fits a small cursor, so the theorem applies and gives agreement with an unbounded `Nat → Word` memory, where solc panics. The premise is unsatisfiable, and the theorem silent, only for a reached cost of at least `W`. | N (source/solc mismatch and capacity premise) | G33, G38 (`0x41`). ⟳ evm-byte-memory |
 | R26 | Frame: `b + frameNeedProg P ≤ frame` (peak context, `MemoryCompile.lean:51`), `0 < b` when allocating, and locals held in memory cells by level (`Compile.lean:44–55`). | Nothing at the source, as long as a frame exists. | — | O | G32, G37.01, G45.02 |
 | R27 | Idealized machine: no gas, no stack limit, memory `Nat → Word`, addresses as 256-bit words not truncated to 160 bits, and `CALL` takes only address and value (`Machine.lean:56–66,323–344`). | Resource-indexed behaviour and the 160-bit address domain. | Recursion or loops that exhaust gas on chain. | P (resource abstraction) | G01/G06 (definition), G46.04, G46.06, G47 |
 
@@ -149,14 +149,14 @@ them.
 |---|---|---|---|---|---|
 | R28 | Primitive-element arrays and primitive- or reference-member structs only. No reference-element arrays, no construction or defaults of reference-member structs, no fixed memory arrays ([compiler-verification.md](../compiler-verification.md#memory-operations), "Out of the memory path"). | Nested memory aggregates. | `uint[][] memory m = new uint[][](2);`; `Wrapper memory w = Wrapper(inner);`; `uint[3] memory f;` | N | G18.03, G33, G34. ⟳ memory-reference-arrays, memory-reference-structs |
 | R29 | The only storage statement is a primitive `storageWrite` (`:347`). No `assert`, call, payment, `push`/`pop`/`delete` of storage, or compound storage update in a memory program. | Mixed storage/memory programs. | `uint[] memory xs = new uint[](1); total += xs[0];` | N | G24, G28, G37, G38, G43. ⟳ memory-internal-calls |
-| R30 | `HeapRepr` relates only primitive-element arrays (`MemoryHeap.lean:16–23`). `PointerRepr` requires every memory local to be initialized (`MemorySource.lean:20`). | Initial states holding other heap objects or unset pointers. | — (input premise) | O | G32 |
+| R30 | `StateRepr` input separation premises (`MemorySource.lean:26–34`): `HeapRepr` (primitive-element arrays, above the frame and pairwise separated; `MemoryHeap.lean:16–23`), `StructHeapRepr`, `StructArraySeparated`, `RefFieldsRepr`, and `PointerRepr` (every memory local initialized; `MemorySource.lean:20`). | Initial states with heap objects outside these shapes (e.g. reference-element arrays), overlapping objects or unset pointers. | — (input premise) | O | G32 |
 | R31 | Word-addressed memory, one word per member, headerless structs (`StructRepr`, [compiler-verification.md](../compiler-verification.md#memory-operations), "The representation"). | Byte-addressed EVM memory. | — | O now, N for the final target | G32, G46.02. ⟳ evm-byte-memory |
 
 ### 2.7 Payments
 
 | ID | Restriction (where) | Excludes | In-profile example | Kind | Discharging group(s) |
 |---|---|---|---|---|---|
-| R32 | **Payment asymmetry.** Disjunct (iii) of T1/T6/T12/T13 (`Prog.pays P = true ∧ machine revert ∧ source ok`), and the `pays ∧ revert` alternative in (iv). The Bridge results T17–T19 require `pays = false`. **Finding:** at the base, the only leaf for payments, `transfer_sim` (`Solidity/Evm/Stmt.lean:892`), returns `.inl` or `.inr` only. Exact agreement on refusal comes from `Sim.funds`/`Sim.oracle` (`Sim.lean:223–228`; fields `funds` and `oracle`). `StmtOut.refused` (`Stmt.lean:107`) is only propagated (`Correct.lean:79,95,111,168,504,583,922,933,937`), never constructed. The disjunct therefore appears unreachable. That is not proved here. | As stated, the theorem lets a compiler revert every paying program. | Any `owner.transfer(1);`: the theorem allows the machine to revert where the source succeeds. | S + N | G43 (discharge the asymmetry). G36.03 then relies on it. ⟳ diamond-payments |
+| R32 | **Payment asymmetry.** Disjunct (iii) of T1/T6/T12/T13 (`Prog.pays P = true ∧ machine revert ∧ source ok`), and the `pays ∧ revert` alternative in (iv). The Bridge results T17–T19 require `pays = false`. **Finding:** at the base, the only leaf for payments, `transfer_sim` (`Solidity/Evm/Stmt.lean:892`), returns `.inl` or `.inr` only. Exact agreement on refusal comes from `Sim.funds`/`Sim.oracle` (`Sim.lean:223–228`; fields `funds` and `oracle`). `StmtOut.refused` (`Stmt.lean:107`) is only propagated (`Correct.lean:79,95,111,168,504,583,922,933,937`), never constructed. `StmtOut.mono` (`Stmt.lean:123`) also only re-raises it. The `pays ∧ revert` branch of `diverge` is built only at `Correct.lean:939`, from a refused first statement. `TurnRel` has no refused case. Both branches are therefore unreachable by construction, and the needed facts are `Sim` fields already in CoreIn. Dropping `refused` from `StmtOut` looks like a statement-only strengthening; that is not proved here. Affected statements: T1, T6, T12, T13, T15. | As stated, the theorem lets a compiler revert every paying program. | Any `owner.transfer(1);`: the theorem allows the machine to revert where the source succeeds. | S + N | G43 (discharge the asymmetry). G36.03 then relies on it. ⟳ diamond-payments |
 | R33 | Recipient code is not run. Acceptance is the oracle `Machine.accepts` (`Machine.lean:336`), tied to the source `tx.ext` `sendKey` table by `Sim.oracle`. The world is balances only. | Reentrant or state-changing recipients, stipend gas. | A `transfer` to a contract whose `receive()` writes storage. | P | G22.02, G42.03, G43, G47 |
 
 ### 2.8 Hashes and storage representation
@@ -177,7 +177,7 @@ them.
 | ID | Restriction (where) | Excludes | In-profile example | Kind | Discharging group(s) |
 |---|---|---|---|---|---|
 | R37 | Revert data is erased. `Out.revert` carries no bytes, and a failed `assert` (source `panic`) matches a plain machine revert. Every other source failure is `.revert` ([solc-alignment.md](../solc-alignment.md#remaining-deltas-documented-intentionally-out-of-scope), "Error classification"). | Panic codes, `Error(string)`, custom-error payloads. | `require(x > 0, "neg");` reason bytes; `revert E(1);` | N (observation loss) | G38, G21, G41. ⟳ revert-outcome-specs |
-| R38 | Divergence is matched classically. Source `diverge` corresponds to machine `.fault` through `loopRun`'s `Classical.choose` (`Machine.lean:435`). `.fault` also covers stack underflow and malformed code (`Instr.step`, `:476ff`). There is no finite-prefix, resource-indexed statement. | A faithful finite-prefix/divergence correspondence. | `while (true) {}`: the theorem gives a machine "fault", not a gas-bounded prefix family. | N | G01 (definition), G36.03, G47, G49.03 |
+| R38 | Divergence is matched classically. Source `diverge` corresponds to machine `.fault` through `loopRun`'s classical `if h : ∃ …` case split (`Machine.lean:435–436`). `.fault` also covers stack underflow and malformed code (`Instr.step`, `:476ff`). There is no finite-prefix, resource-indexed statement. | A faithful finite-prefix/divergence correspondence. | `while (true) {}`: the theorem gives a machine "fault", not a gas-bounded prefix family. | N | G01 (definition), G36.03, G47, G49.03 |
 | R39 | Source `exhausted` (a push at `2^256`, the recursion bottom, `assumeFalse`) never appears in the theorem. It is excluded through R08/R24 and `assumeFalse ⇒ none` (`Compile.lean:298`). | Programs that reach the source resource bound. | Recursion deeper than 1024 frames (see R08). | O while R08/R24 hold | S03.04, G01/G06 resource abstraction |
 | R40 | The Bridge LTS (T19) relates successful boundaries only (module docstring, `CompilerSimulation.lean:4–10`). | Halting and diverging traces in the CSLib bisimulation. | Any reverting program. | N for a final trace theorem | G49.03, G50.02 |
 | R41 | Observation at success is `Sim`: storage representation, locals, balances, ledger and four environment words (`EnvSim`, `SimLemmas.lean:610`). There are no return values or returndata. | Function results as observations. | `function f() external returns (uint)`, whose result has no theorem | N | G41, G49.02 |
@@ -200,7 +200,11 @@ G03 should record them explicitly.
 4. **The source has no `2^64` length bound or `Panic(0x41)` (R24).** S04.01
    and S02 own state and value semantics, and G30/G38 own the compiled check. No
    row names this solc divergence, which is the reason for the `Lmax` premise.
-5. **Stale public documentation** (see [§4](#4-other-findings-at-the-base)). Only
+5. **Source-only environment.** `EnvKey` has five keys
+   (`Solidity/Syntax/Raw.lean:37–42`), so `block.number`, `tx.origin`, `chainid`
+   and similar are absent at the source. This is outside the compiler ledger;
+   the owners are G00 (scope), S04.02 and G23.
+6. **Stale public documentation** (see [§4](#4-other-findings-at-the-base)). Only
    G55 ("public claims") covers it.
 
 No restriction was found with no plausible owner at all.
@@ -218,19 +222,24 @@ edits no Lean and the documents are owned elsewhere.
     `hbalance : balance = bal self`.
   - It describes the payment disjunct as reachable ("the world refuses a
     payment, and the machine alone reverts").
-- `Solidity/Evm/Compile.lean:24–25` (module docstring) still says the fragment
-  has "no `send`/`try`/loop". Loops are admitted at `:307`.
+- `Solidity/Evm/Compile.lean:25–26` (module docstring) still says the fragment
+  has "no `send`/`try`/loop". Loops are admitted at `:307`. The `Stmt.pushes` (`:228`)
+  docstring ("since the fragment has no loop") is equally stale, and so is
+  [compiler-verification.md](../compiler-verification.md#the-machine) line 222
+  ("the fragment has no loops").
 - These still say that a refused payment "reverts the machine alone":
   - [solc-alignment.md](../solc-alignment.md#where-the-interpreter-follows-solc-not-key), `transfer` row;
   - `Solidity/Calculus/Rules.lean:1061`;
-  - `Solidity/Examples/Tactics/Payment.lean:16`.
+  - the docstrings of `transfer_sim` (`Stmt.lean:889–891`), `compile_correct`
+    (`Correct.lean:1077–1081`) and `compile_storage` (`Correct.lean:~1185`).
 
   This contradicts [solc-alignment.md](../solc-alignment.md#transfer) ("agree on
   both success and refusal") and `transfer_sim`.
 - [assurance.md](../assurance.md) gives the memory capacity as
-  `cursor + size + 1 < 2^256`. The definition (`AllocationInput`,
-  `MemoryGrowResult.lean:36`) states `cursor.val + cost < W` over the
-  accumulated cost.
+  `cursor + size + 1 < 2^256`. That is the per-allocation premise of the
+  single-allocation lemmas (`MemoryAlloc.lean:59,78,163,285`). The public input
+  (`AllocationInput`, `MemoryGrowResult.lean:36`) states `cursor.val + cost < W`
+  over the accumulated cost.
 - `Stmt.pays` counts `callRec` as paying (`Compile.lean:260`). That is harmless
   while `callRec` is out of the fragment, but it must be revisited by G37.02.
 
@@ -287,13 +296,51 @@ These do not block this audit. They need a user decision; evidence is given.
   unreachability is an observation, not a theorem.
 - **Remaining child obligations:**
   - every R-row's discharging group;
-  - the five implicit ownerships in §3 for G03;
+  - the six implicit ownerships in §3 for G03;
   - the stale-document fixes in §4;
   - Q1–Q3 for the user/G00;
   - lane re-checks in §5.
-- **Elapsed:** about 1.5 h of agent time on a 4-core VM; no Lean process run.
+- **Elapsed:** about 45 minutes wall-clock (01:01–01:45 UTC, 2026-10-29) on a 4-core VM; no Lean process run, so peak RSS is not applicable.
 
 ## Review
 
-Separate read-only finder and skeptic reviews (subagents, no Lean server) of
-this document. Results and fixes are recorded below.
+Separate read-only finder and skeptic reviews (subagents, no Lean server,
+read-only git/sed) were run on commit `f31d89d`. Both spot-checked about 40–60
+citations against the code; apart from the slips below, all matched. Confirmed
+findings, each re-checked against the code and fixed in this revision:
+
+**Finder**
+
+1. R12 overstated the compiler gap. Signed `**`, `<<` and `~` are source-refused,
+   and `unchecked` signed arithmetic is admitted through `uint` wrapping.
+   Narrowed, with the source owners added.
+2. R25's example was not vacuous: the cost is `n + 1` and fits the premise.
+   Restated as a source/solc mismatch.
+3. Push forms were missing from R18 (`assignLocalPush`, `pushOpAssign`,
+   `pushIncDec`, alias-to-`push()`). Added.
+4. R30 omitted the `StateRepr` separation fields. Added.
+5. T6's fixed environment (`freshT`/`Machine.init`) was not recorded. Added.
+6. R24 stated the bound as `≤ L`; it is `k < L`. Corrected.
+7. R32 missed the `Stmt.lean:123` propagation site. Added.
+8. The axiom-pin claim for T19 was too broad. Corrected.
+9. Citation slips: `Compile.lean:24–25` is now `:25–26`.
+10. The source environment keys were not covered. Added as §3 item 5.
+
+**Skeptic**
+
+1. R32 confirmed. The dead `diverge` `pays ∧ revert` branch and the stale Lean
+   docstrings are now recorded.
+2. §4: `Payment.lean:16` was wrongly listed as stale and is removed. The
+   assurance.md capacity is the per-allocation premise; reworded. Two more
+   stale "no loops" texts were added.
+3. R12: the `unchecked` example was refuted. Removed.
+4. R14: `string` keys fail through R10, not the key check. Reworded.
+5. R19: a same-type fixed copy is admitted. The example is replaced by a
+   fixed-to-dynamic copy.
+6. R18 was incomplete (same as finder 3).
+7. R21 overclaimed rebinding. Narrowed to flag-changing rebinds.
+8. T13 also drops `Sim` from disjunct (iii); R32's list now includes T15; R38
+   names the classical case split, not `Classical.choose`.
+
+Rejected or unconfirmed: none. The finder's remaining slip (R23's line range)
+was not changed: the cited range includes the jumps bullet.
