@@ -96,8 +96,8 @@ EVM integration stays in `Bridge/`; the core stays dependency-free.
 
 ## VM execution contract
 
-The schedule is **32 lanes** (see [VM assignments](#vm-assignments-revised-2026-10-29)),
-each on an isolated **16 GiB VM** for **four to ten hours including
+The schedule is **18 lanes** (see [VM assignments](#vm-assignments-revised-2026-10-29)),
+each on an isolated **16 GiB VM** for **eight to ten hours including
 validation**, with one branch/worktree and a reviewable patch per
 checkpoint. The 115 proof work packages below are checkpoints within
 those assignments, **not 115 separate VM launches**. An assignment performs
@@ -447,27 +447,32 @@ G36.03: its payment relation must be proved independently of loop composition.
 
 ## VM assignments (revised 2026-10-29)
 
-This is a scheduling proposal calibrated by the first two cloud batches, not
-a measured claim that 32 runs suffice. Each row is a **lane**: one 16 GiB VM
+This is a scheduling proposal calibrated by the first three cloud batches. Each row is a **lane**: one 16 GiB VM
 working through an ordered queue of checkpoints on one branch. A parent ID
 includes all its child checkpoints. The rows cover all work packages exactly
 once. Prerequisites are integrated revisions, not other lanes' unproved
 interfaces.
 
-### What the first batches showed
+### What the batches showed
 
-Two cloud batches on 2026-10-29 ran 13 wave-0 audit, specification and
-measurement assignments (`roadmap-w0-20261029`, `roadmap-w1-20261029`). Each
-took **15–60 minutes** of agent work. The only long step was one cold build
-of about 50 minutes on a 4-core, 15 GB VM. Costs ran from about $5 to $28 per
-VM. An audit or a specification is therefore not a VM's worth of work, and a
-VM that stops after its first checkpoint wastes its setup and cold build.
+- **Wave-0 batches** (`roadmap-w0-20261029`, `roadmap-w1-20261029`): 13 audit,
+  specification and measurement assignments each took **15–60 minutes** of
+  agent work; the only long step was one ~50-minute cold build.
+- **First lanes** (`roadmap-l1-20261029`): five lanes sized for four to ten
+  hours finished their whole queues in **about 1.5–3 hours** (fixed point
+  1 h 25 min, assembler 1 h 30 min, hashing 1 h 45 min, source 2 h 25 min,
+  precompiles about 3 h including a stalled turn), each with per-checkpoint
+  finder/skeptic reviews. Cost was about $8–41 per lane.
+
+So a checkpoint list that looks like ten hours is about three, and lanes
+must hold roughly three times more work than estimated.
 
 ### Sizing rules
 
-- **Fill several hours.** A lane holds enough checkpoints for at least four
-  hours and at most ten hours of work, including validation. Every lane
-  contains at least one implementation checkpoint with kernel-checked proofs.
+- **Fill eight to ten hours.** A lane holds enough checkpoints for eight to
+  ten hours of work, including validation — in practice three or four of the
+  old roadmap groups, a whole dependency chain rather than one link of it.
+  Every lane contains implementation checkpoints with kernel-checked proofs.
 - **No lone audits.** An audit, specification or measurement never gets its
   own VM. It becomes the first checkpoint of the lane that consumes its
   result.
@@ -475,8 +480,8 @@ VM that stops after its first checkpoint wastes its setup and cold build.
   reviews applied, pushed to the lane branch), the VM starts the next
   checkpoint in its queue on the same branch, reusing the build cache. It
   stops only when:
-  - the queue is empty;
-  - the next checkpoint needs an unmerged prerequisite from another lane;
+  - the queue and the backfill queue are empty;
+  - every remaining item needs an unmerged prerequisite from another lane;
   - about ten hours are spent;
   - or a resource limit stops it.
 - **Backfill before stopping.** A blocked or empty lane takes the next ready
@@ -486,51 +491,48 @@ VM that stops after its first checkpoint wastes its setup and cold build.
 - **Handoff per checkpoint.** Each checkpoint records its own handoff
   (revision, theorems, premises, checks, remaining obligations) in its
   feature document, so the coordinator can integrate a lane in parts.
+- **Fewer, longer lanes.** Prefer one lane that runs a dependency chain end
+  to end over several lanes that wait on each other; parallel lanes are for
+  independent chains.
 
 ### Lanes
 
+Wave 0 is complete apart from merges. The remaining work is grouped into 14
+lanes (V04–V17) instead of the former 28; each is a dependency chain of
+three or four groups. Earlier preparatory lanes already delivered parts of
+several groups (noted per row); a lane starts by reading those results.
+
 | Lane | Checkpoints, in order | Starts after | Status (2026-10-29) |
 |---|---|---|---|
-| V00 | G00, G01 | — | Integrated; G00 manifest follow-up and G01 contract revision in flight (`roadmap-w1`). |
-| V01 | G02, G04 | V00 | G04 integrated; G02 measurement in flight. |
-| V02 | G03, G05, G06 | V00, V01 | In flight (`roadmap-w1`); the G06 Osaka re-pin child is integrated. |
-| V03 | G07, S00, S01, S04.01–S04.03 | V02 integrated, G01 revision frozen | Next. G07 heads the lane because it alone is short. |
+| V00 | G00, G01 | — | Integrated; the G01 contract revision is in a fifth review round. |
+| V01 | G02, G04 | V00 | Integrated. |
+| V02 | G03, G05, G06 | V00, V01 | Integrated (with the G06 Osaka re-pin). |
+| V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
 | V04 | S02, S03, S04.04, S05 | V03 | — |
-| V05 | G08, G09 | V04 |
-| V06 | G10, G11 | V05 |
-| V07 | G12, G13 | V04 |
-| V08 | G14, G15 | V06, V07 |
-| V09 | G16, G17 | V08 |
-| V10 | G18 | V08 |
-| V11 | G19, G20 | V08 |
-| V12 | G21 | V08 |
-| V13 | G22, G23 | V09, V10, V11, V12 |
-| V14 | G24, G25, G26 | V13 |
-| V15 | G27, G28 | V14 |
-| V16 | G29, G30 | V15 |
-| V17 | G31 | V14 |
-| V18 | G32, G33, G34 | V16, V17 |
-| V19 | G35 | V18 |
-| V20 | G37, G36.01, G36.02 | V18 |
-| V21 | G38, G39 | V18 |
-| V22 | G40, G41 | V19, V20, V21 |
-| V23 | G42 | V22 |
-| V24 | G43, G36.03 | V23 |
-| V25 | G44 | V23 |
-| V26 | G45 | V19, V20, V21 |
-| V27 | G46, G47 | V24, V25, V26 |
-| V28 | G48, G49 | V27 |
-| V29 | G50, G51 | V28 |
-| V30 | G52, G53 | V27 |
-| V31 | G54, G55 | V29, V30 |
+| V05 | G08, G09, G10, G11 | V04 | — |
+| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). |
+| V07 | G16, G17, G18, G19 | V06 | — |
+| V08 | G20, G21, G22, G23 | V07 | — |
+| V09 | G24, G25, G26, G31 | V08 | G24's foundation children come from G03; G31's precompile and stipend parts are prepared (`Solidity/Precompiles/`, `Solidity/Stipend/Rule.lean`). |
+| V10 | G27, G28, G29, G30 | V09 | G27.01–G27.03 separation and the hashed layout are prepared (`Solidity/Storage/Hashed*.lean`); the representation halves and G27.04/G27.05 remain. |
+| V11 | G32, G33, G34, G35 | V10 | — |
+| V12 | G37, G36.01, G36.02, G38, G39 | V11 | — |
+| V13 | G40, G41, G42 | V12 | — |
+| V14 | G43, G36.03, G44, G45 | V13 | G45.05, G45.04 and the G45.03 expansion are prepared (`Solidity/Backend/`). |
+| V15 | G46, G47 | V14 | Needs the Mathlib cache hosts for its Bridge adapters (backfill). |
+| V16 | G48, G49, G50, G51 | V15 | — |
+| V17 | G52, G53, G54, G55 | V16 | — |
 
-G02 checks these lane sizes against measured build and proof costs. G03's
+The remaining dependencies (G03's ledger) make the lanes one chain: each
+starts when the previous one is merged. Lanes run in parallel only through
+backfill and prepare-against-interface work, never through a final check. G02's measurements apply per lane: one cold build
+of about an hour, then warm rebuilds of minutes; a lane whose edits touch a
+low module such as `AST.lean` pays about an hour per full rebuild. G03's
 shared-foundation child packages under G24 (decision G03 Q1) are not yet in
-the manifest or lane V14: G03's ledger lists them under "Integration steps"
-and its checker applies them through `PROPOSED_PACKAGES` until they land. The other large lanes (source
-definitions, aggregates, world, EVM bridge) may need splitting by
-measurement. A split keeps each part at four hours or more, and every
-continuation inherits the same scope and completion gate.
+the manifest: G03's ledger lists them under "Integration steps" and its
+checker applies them through `PROPOSED_PACKAGES` until they land. A lane
+that still finishes early takes backfill items or the next ready lane's
+first group, and the coordinator merges the lane in parts.
 
 ### Backfill queue
 
