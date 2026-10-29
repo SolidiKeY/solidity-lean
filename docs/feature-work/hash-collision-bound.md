@@ -216,8 +216,11 @@ Proved here, in the same style as the preimage bound:
 Read as a probability, the bound is
 `q(q-1)(2L-1)/2²⁵⁷ + q·|roots|·L/2²⁵⁶ ≤ (q²·L + q·R·L)/2²⁵⁶`, which is the
 decided figure. `L` can reach `Lmax` (2⁶⁴, `Solidity/Evm/Machine.lean`), so
-for large arrays the bound is much weaker than q²/2²⁵⁷ but stays below
-q²/2¹⁹² for q hashes.
+for large arrays the bound is much weaker than q²/2²⁵⁷: with `L ≤ 2⁶⁴` it is
+at most (q² + q·R)/2¹⁹². `R = roots.length` counts root *words*: a root
+struct or static array is covered only if each of its words is listed in
+`roots`. One `L` serves every region; a shorter region lies inside the
+length-`L` one, so taking the largest region length is sound.
 
 Left to the users of the premise (G27.05):
 
@@ -227,9 +230,9 @@ Left to the users of the premise (G27.05):
   over them then gives equal preimages from distinct slot terms. G27.05 must
   show that every reached offset is below the region length it assumes (for
   arrays, by `Lmax`).
-- **Words below `N`.** `near_of_overlap` reads hashes and roots as words below
-  `N` and needs `L ≤ N`. The roots' hypothesis `r < 2^256` is part of the
-  stated bound.
+- **Words below `N`.** `near_of_overlap` reads hashes as words below `N`,
+  and both it and `covers_of_hit` need `L ≤ N`. The hypothesis that roots are
+  below `2^256` belongs to the counting lemmas.
 - **Adaptive and repeated preimages.** As for the preimage bound: the
   `RegionsDisjoint` counterpart of `EagerAdaptiveBound` and of the repeat
   reduction is also open. `RegionsDisjoint` depends only on membership, as
@@ -278,12 +281,13 @@ the Lean server. Confirmed findings, all fixed in the following commit:
 | `adaptive_lazy_collision_prob_le` was called the adaptive birthday bound; it has no adaptive content, and its model gives repeated queries fresh answers (skeptic 2). | The doc, the module docstring and the coverage-plan status line now say so. |
 | The doc cited the lazy bound for adaptively chosen keys (skeptic 4). | "Justification" now says the bound reaches real runs only through the open obligations. |
 | The module docstring stated the tuple model as fact and said adaptive queries were "not covered", which contradicted the lazy theorem (skeptic 1, finder 2). | Docstring rewritten. |
-| Offsets: root overlap and offset aliasing (`data s 0` versus `data s 2^256`) were missing, and the doc wrongly said distinct slots give distinct preimages (skeptic 3). | Added to "Open: offsets and region overlap"; step 3 corrected. |
+| Offsets: root overlap and offset aliasing (`data s 0` versus `data s 2^256`) were missing, and the doc wrongly said distinct slots give distinct preimages (skeptic 3). | Added to the offsets section (now "Offsets and the region premise"); step 3 corrected. |
 | The doc stated as fact that the G01 contracts use the `CollisionFree` shape and that G46.05 "exposes" preimages (finder 4). | Reworded as an assignment and a plan. |
 | Two descriptions of the `2 ^ (256 + 1)` spelling disagreed (finder 5). | Aligned. |
 | The module was not in `CORE` (finder 7). | Added. |
 | Several `have`s had no explicit type (finder 8). | All typed. |
 | `EagerAdaptiveBound` fixed `β : Type` (finder 3). | Universe-polymorphic. |
+| A second skeptic review of the region commit `4eb6d3a` found the arithmetic and `Near`/`Covers` correct, plus four doc issues: the "below q²/2¹⁹²" figure dropped the root term, `R` counting root words was unstated, a stale section name, and a misattributed `r < N` hypothesis. | All four reworded. |
 | The offsets question (skeptic 3) needed a user decision. | Decided in the second round (relayed by the coordinator); `RegionsDisjoint` and its bound added after the review, see "Offsets and the region premise". |
 
 Not changed: `grind` in `two_mul_collisions_le` (one ring identity; `grind`
