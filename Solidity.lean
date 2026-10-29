@@ -427,6 +427,9 @@ import Solidity.Source.Eval
 import Solidity.Source.Semantics
 import Solidity.Source.Ledger
 import Solidity.Source.SemanticsExamples
+import Solidity.Source.Infer
+import Solidity.Source.Elaborate
+import Solidity.Source.ElaborateExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic

@@ -1,0 +1,105 @@
+import Solidity.Source.Elaborate
+import Solidity.Source.SemanticsExamples
+
+/-!
+# Controls of the elaborator (S02 item 1b)
+
+Units written as syntax, elaborated by `elaborate` (no hand-written
+resolved terms), deployed and called through the semantics
+(`Solidity/Source/Semantics.lean`).  The runs are checked by `#guard`, which
+evaluates compiled code; the elaborator's output is a derivation, so each
+run is of the program the typing rules give the unit.
+
+```solidity
+contract A {
+  uint256 a;
+  constructor(uint256 v) { a = v; }
+}
+contract C is A(7) {
+  uint256 x = 3;
+  modifier pos(uint256 k) { require(k > 0); _; }
+  function g(uint256 k) public pos(k) returns (uint256) { x = x + k; return x + a; }
+}
+```
+-/
+
+namespace Solidity.Source.ElaborateExamples
+
+open Solidity.Source Solidity.Source.Examples Solidity.Source.SemanticsExamples
+open Solidity.Roadmap (Address Word Bytes Event Outcome Move Request SessionEnv Pipeline)
+
+def num (k : Nat) : Syn .expr := .lit (.num (.dec k 0 0))
+def stmt (e : Syn .expr) : Syn (.item .body) := .stmtItem (.simpleStmt (.exprStmt e))
+def pK : Syn (.list .param) := .cons (.param u256 none (some "k")) .nil
+def pV : Syn (.list .param) := .cons (.param u256 none (some "v")) .nil
+def pRet : Syn (.list .param) := .cons (.param u256 none none) .nil
+
+def ctorA : Syn (.part false) :=
+  .constructor pV .nil false none (.block (.cons (stmt (.assign .assign (.ident "a") (.ident "v"))) .nil))
+
+def modPos : Syn (.part false) :=
+  .modifier "pos" (.some pK) false none (.some (.block
+    (.cons (stmt (.call (.ident "require") (.positional (.cons (.order .gt (.ident "k") (num 0)) .nil))))
+    (.cons (stmt (.ident "_")) .nil))))
+
+def fnG : Syn (.part false) :=
+  .function (.ident "g") pK (some .pub) none (.cons (.modInv ⟨"pos", []⟩ (.some (.positional (.cons (.ident "k") .nil)))) .nil)
+    false none pRet (.some (.block
+      (.cons (stmt (.assign .assign (.ident "x") (.addSub .add (.ident "x") (.ident "k"))))
+      (.cons (.stmtItem (.returnStmt (.some (.addSub .add (.ident "x") (.ident "a"))))) .nil))))
+
+def unitAC : Syn .unit :=
+  .unit (.cons (.contract false "A" .none .nil
+      (.cons (.stateVar u256 none none none false "a" .none) (.cons ctorA .nil)))
+    (.cons (.contract false "C" .none (.cons (.inherit ⟨"A", []⟩ (.some (.positional (.cons (num 7) .nil)))) .nil)
+      (.cons (.stateVar u256 none none none false "x" (.some (num 3))) (.cons modPos (.cons fnG .nil))))
+    .nil))
+
+def resAC : Resolution := resolveUnit { pipeline := .legacy } unitAC
+
+def elabAC : Option Elaborated := elaborate resAC
+
+-- The unit elaborates: every body, initializer and base argument has a
+-- derivation.
+#guard elabAC.isSome
+
+-- The program's parts, read back: `C` has one initializer (`x = 3`) and
+-- gives `A` one argument; `g`'s body carries one modifier invocation.
+#guard (elabAC.map fun el => ((el.prog.inits "C").length, (el.prog.baseArgs "C").length,
+  (el.prog.ctorLocals "A").length)) == some (1, 1, 1)
+
+def thisC : Address := addr 1
+def user : Address := addr 7
+
+/-- Deploy `C` at `thisC`, then call `g(k)`: the outcome and `x`. -/
+def deployCall (el : Elaborated) (k : Nat) (h : k < 2 ^ 256 := by decide) : Option Outcome :=
+  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
+    fun _ => .answer (.success []), word 0⟩
+  let r := runAt (fun n => do
+    let d ← deploy G n "C" thisC user (word 0) []
+    match d with
+    | .success _ => runTx G n ⟨user, thisC, word 0, word 0, selOf "g(uint256)" ++ wordBytes ⟨k, h⟩⟩
+    | o => pure o) (s0 : St el.res.env) 40
+  match r.1 with
+  | .ok o => some o
+  | _ => none
+
+-- **`g(2)` returns `x + a = (3 + 2) + 7`**: the initializer, the base
+-- argument through `A`'s constructor, the modifier and the body all ran.
+#guard (elabAC.bind fun el => deployCall el 2) == some (.success (wordBytes (toWord 12)))
+
+-- `g(0)` reverts in the modifier's `require`.
+#guard (elabAC.bind fun el => deployCall el 0) == some (.revert [])
+
+/-- A unit with an ill-typed body does not elaborate: `x = true` with
+`uint256 x`. -/
+def unitBad : Syn .unit :=
+  .unit (.cons (.contract false "C" .none .nil
+      (.cons (.stateVar u256 none none none false "x" .none)
+        (.cons (.function (.ident "f") .nil (some .pub) none .nil false none .nil (.some (.block
+          (.cons (stmt (.assign .assign (.ident "x") (.lit (.bool true)))) .nil)))) .nil)))
+    .nil)
+
+#guard (elaborate (resolveUnit { pipeline := .legacy } unitBad)).isNone
+
+end Solidity.Source.ElaborateExamples

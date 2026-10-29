@@ -18,6 +18,9 @@ composition and the ledger are in [source-s05.md](source-s05.md).
 | `Solidity/Source/Value.lean` | `RVal`, `Halt`, decidable equality of `STy`, wrapping (`wrapBits_mem`), checked and unchecked arithmetic, shifts, powers, comparisons, conversions of values |
 | `Solidity/Source/Machine.lean` | Layouts (`Env.layout`, `Env.cellTy`), `Locals`, the state `St`, frames `Fr`, `Glob`, the monad `EM`, storage and memory operations, copies and deletion |
 | `Solidity/Source/Eval.lean` | The interpreter (expressions here; statements and calls in S03) |
+| `Solidity/Source/Unique.lean` | Uniqueness of meaning (Q1) and the literal-typing controls |
+| `Solidity/Source/Infer.lean` | Type inference computing derivations (item 1b) |
+| `Solidity/Source/Elaborate.lean`, `ElaborateExamples.lean` | The elaborator `Resolution → Option Elaborated` and its controls (item 1b) |
 
 ## Checkpoint 1: prerequisites
 
@@ -219,6 +222,58 @@ arrays, slices, named arguments, calldata references, and tuple
 destructuring (`declTuple`). The ledger in [source-s05.md](source-s05.md)
 records these as gaps.
 
+## Item 1b: the elaborator
+
+`elaborate : Resolution → Option Elaborated` (`Elaborate.lean`) builds the
+program the semantics runs from a unit's syntax, with no hand-written
+resolved terms:
+
+- **Inference** (`Infer.lean`): `Typed.infer`, `LVal.infer`,
+  `TypedArgs.infer`, `StmtD.infer`, `ItemsD.infer` return a derivation, so
+  they are sound by construction. They follow the rules' premises in order;
+  where several rules share a shape, the choice does not matter by
+  `Typed.unique`/`StmtD.unique`. Recursion is structural on a fuel equal to
+  the syntax's node count (`Syn.nodes`), which the recursion never exhausts
+  first. Completeness (a derivation exists ⇒ inference finds one) is not
+  proved.
+- **Coherence** (`Elaborated.lean`): `Elaborated` now ties every part of
+  the program to a derivation, not only bodies:
+
+  | Field | Statement |
+  |---|---|
+  | `bodies_typed` | each body is `ItemsD.toR` of a derivation in its frame (as before) |
+  | `mods_typed` | each modifier invocation's arguments are `RArgs.convert` of a `TypedArgs` derivation in a context with the body's locals (`RConvArgs.Derived`) |
+  | `ctor_typed` | a contract's constructor is the body of its constructor declaration |
+  | `consts_typed`, `inits_typed` | a constant's value and a contract's initializers are `.conv` of a derivation of the variable's initializer, implicitly converted to its type (`RInit.Derived`) |
+  | `baseArgs_typed` | base-constructor arguments are converted derivations in the constructor's locals |
+
+  The elaborator builds each piece as a subtype carrying that proof, so the
+  fields hold by construction.
+- **Where the syntax goes**: a constructor's invocations that name a
+  contract (`constructor() B(x)`) are base arguments, the others modifiers;
+  `is B(args)` arguments are typed in the contract's scope with the
+  constructor's locals present but unnamed (`anonLocals`), so they fit the
+  constructor's frame without being visible.
+
+Controls (`ElaborateExamples.lean`, `#guard`, evaluated by compiled code):
+a unit with `contract C is A(7)`, an initializer `uint256 x = 3`, a modifier
+`pos(k)` with `require(k > 0); _;` and `g(k)` returning `x + a` elaborates;
+deployed and called, `g(2)` returns `12` and `g(0)` reverts; a unit
+assigning `true` to a `uint256` does not elaborate.
+
+Limitations:
+
+- `RConvArgs.Derived` says the arguments come from *some* argument list's
+  derivation, not that it is the invocation's syntax; the elaborator uses
+  the syntax, but the field does not record it.
+- A modifier needs a body to be invoked (`Decl.frame?`); named arguments
+  (`f({a: 1})`) do not elaborate.
+- `progOf` elaborates a body each time the semantics looks it up (lazy, not
+  cached); kernel evaluation of elaborated programs is therefore slow, and
+  the controls use `#guard`.
+- `elaborate` refuses a unit if any body, initializer or base argument
+  fails; it does not check `WellFormed` (bases, clashes, pragmas).
+
 ## Checkpoint 2: expressions
 
 ### Values
@@ -333,7 +388,7 @@ independence, discussed in [source-s03.md](source-s03.md#horizons).
 
 These items are also listed under `limitations:`.
 
-- **Uniqueness of derivations.** Not proved; see "Uniqueness" and Q1.
+- **Uniqueness of derivations.** Not true (`(1)`); uniqueness of meaning is proved, see "Uniqueness".
 - **Calldata.** `cdRef` values are never produced. External arguments
   are decoded into values, and dynamic ABI types are not decoded
   (`decodeWord` is `stuck` on them).

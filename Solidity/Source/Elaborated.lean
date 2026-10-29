@@ -25,9 +25,10 @@ body's syntax.  The semantics (`Solidity/Source/Eval.lean`,
 `Solidity/Source/Semantics.lean`) reads only the carried program
 (`SrcProg`).  The choice does not matter: any two derivations of one body
 elaborate to one `RBody` (`RBody.ofDerivation_unique`,
-`Solidity/Source/Unique.lean`).  Initializers, constants, base arguments
-and modifier invocations are not yet tied to derivations here (see
-`docs/feature-work/source-s02.md`, "Uniqueness").
+`Solidity/Source/Unique.lean`).  Initializers and constants
+(`RInit.Derived`), modifier invocations and base arguments
+(`RConvArgs.Derived`) are tied to derivations too; `elaborate`
+(`Solidity/Source/Elaborate.lean`) builds an `Elaborated` from a resolution.
 -/
 
 namespace Solidity.Source
@@ -86,8 +87,29 @@ structure Program (E : Env) where
 def Env.contracts (E : Env) : List String :=
   (E.decls.filter fun d => d.kind == .contract && d.scope == none).map (·.name)
 
+/-- Converted arguments elaborated from a derivation of an argument list, in
+a context whose environment is `E` and whose locals have types `Γ`. -/
+def RConvArgs.Derived (E : Env) (Γ : RCtx) (ps : List STy) (args : RConvArgs E Γ ps) : Prop :=
+  ∃ (C : Ctx) (es : Syn (.list .expr)) (σs : List STy) (D : TypedArgs C es σs)
+    (h : argsFit C.env.isBase σs ps = true), C.env = E ∧ C.tys = Γ ∧ HEq args (RArgs.convert ps D.toR h)
+
+/-- An initializer elaborated from a derivation of the variable's
+initializer, converted implicitly to its type. -/
+def RInit.Derived (E : Env) (i : RInit E) : Prop :=
+  ∃ (e : Syn .expr) (σ : STy) (D : Typed (Ctx.forInit E i.var.scope) e σ)
+    (h : σ.implicit E.isBase i.τ = true), i.var.init? = some e ∧ i.e = .conv D.toR (.inl h)
+
+/-- A body elaborated from a derivation of a declaration's body in its
+frame, its modifier invocations from derivations of their arguments. -/
+def RBody.Derived (E : Env) (d : Decl) (b : RBody E) : Prop :=
+  (∃ f L', d.frame? E = some f ∧ ∃ D : ItemsD (f.ctx E d.scope) f.locals f.body L',
+    b.ps = f.ps ∧ b.rs = f.rs ∧ b.inModifier = f.inModifier ∧ b.locals = tysOf f.locals ∧
+    b.out = tysOf L' ∧ HEq b.items D.toR) ∧
+  ∀ m ∈ b.mods, RConvArgs.Derived E b.locals m.ps m.args
+
 /-- **An elaborated unit**: a resolution and its resolved program, each
-carried body the elaboration of a typing derivation of its syntax. -/
+carried body, initializer, constant, modifier invocation and base argument
+the elaboration of a typing derivation of its syntax. -/
 structure Elaborated where
   res : Resolution
   prog : Program res.env
@@ -96,6 +118,18 @@ structure Elaborated where
       b.ps = f.ps ∧ b.rs = f.rs ∧ b.inModifier = f.inModifier ∧ b.locals = tysOf f.locals ∧
       b.out = tysOf L' ∧ HEq b.items D.toR
   contracts_eq : prog.contracts = res.env.contracts
+  /-- Each body's modifier invocations come from typed arguments. -/
+  mods_typed : ∀ d b, prog.body d = some b → ∀ m ∈ b.mods, RConvArgs.Derived res.env b.locals m.ps m.args
+  /-- A contract's constructor is the body of its constructor declaration. -/
+  ctor_typed : ∀ c b, prog.ctor c = some b → ∃ d ∈ res.env.decls,
+    d.kind = .constructor ∧ d.scope = some c ∧ prog.body d = some b
+  /-- A constant's value is its initializer's elaboration. -/
+  consts_typed : ∀ d i, prog.consts d = some i → i.var = d ∧ RInit.Derived res.env i
+  /-- A contract's initializers are its own variables', elaborated. -/
+  inits_typed : ∀ c, ∀ i ∈ prog.inits c, i.var.scope = some c ∧ RInit.Derived res.env i
+  /-- Base-constructor arguments come from typed arguments in the
+  constructor's locals. -/
+  baseArgs_typed : ∀ c, ∀ a ∈ prog.baseArgs c, RConvArgs.Derived res.env (prog.ctorLocals c) a.ps a.args
 
 /-- A body elaborated from a derivation, in its frame. -/
 def RBody.ofDerivation {E : Env} {scope : Option String} (f : Frame) {L' : List (String × STy)}
