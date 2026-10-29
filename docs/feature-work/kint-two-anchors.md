@@ -263,3 +263,22 @@ external evidence directory. Final independent finder and skeptic read-only revi
 confirmed defects after process-wording and historical-status fixes; neither
 used Lean/server/builds or wrote files. Reports are retained with the evidence;
 temporary configuration is removed before export.
+
+## Fresh-master conflict integration (2026-10-29)
+
+The combined resolution retains the two-anchor certificates and fresh master's
+quantified-ledger results. Local read-only finder and skeptic passes confirmed
+that the merged `DecisionKInt.lean` executable content matches the incoming
+version and retains every fresh-master executable line in order. They also
+found and corrected stale gap counts and the module-map memory-parameter status:
+the two integer/ledger witnesses are proved, the memory parameter witness is
+refuted, and three original witnesses remain open. No formula, target
+certificate, proof, invariant or budget was changed by the resolution.
+
+Independent finder and skeptic agents could not start because the collaboration
+service failed to load the thread context; these local passes do not replace
+independent review. Per-file Lean MCP diagnostics remained partial with no
+reported errors after repeated waits; this is not a completed validation.
+No full build was started. `git diff --check` and conflict-marker checks pass.
+The worktree's external Git index is read-only in the repair sandbox, so the
+coordinator must stage the resolved files before completing the journaled merge.
