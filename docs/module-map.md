@@ -932,3 +932,8 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+| G31 preparation module | Purpose |
+|---|---|
+| `Backend/Environment/Observations.lean` | Actual environment opcode selection, local stack semantics, address truncation and intrinsic expression/world observation certificates. |
+| `Backend/Environment/ObservationsChecks.lean` | Inhabited environment witnesses, distinguishing negative controls and headline axiom pins. |
