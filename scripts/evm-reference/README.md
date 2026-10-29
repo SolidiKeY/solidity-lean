@@ -64,3 +64,13 @@ the existing `replay.mjs` host policy or the core payment/callback semantics.
 Run `node --test --test-concurrency=1 scripts/evm-reference/{replay,payment-replay}.test.mjs`
 with `SOLC_REFERENCE` pointing to the pinned compiler. Keep caches and `TMPDIR`
 on disk and run under the documented writer lock and aggregate resource cap.
+
+
+The upstream source runner uses the payment adapter only after complete-shape
+validation in Lean. Whole payment-fixture success requires fresh provenance-
+matched reference evidence for both pipelines, every functional observation and
+any gas rows; an unmetered typed source match alone stays pending. The SDK is
+therefore needed to finish those payment rows, while the Lean core remains
+independent of it. Install from this package's lockfile with npm ci --ignore-scripts.
+The source witnesses reproduce with scripts/payment-source-fixtures.mjs --check
+and SOLC_REFERENCE pointing to the pinned0.8.38 compiler.

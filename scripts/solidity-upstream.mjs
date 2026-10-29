@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {preparePaymentSource,certifyPaymentEvidence} from './payment-source.mjs';
 /** Pinned upstream corpus, exact compiler diagnostics and typed runtime replay.
  * See docs/solidity-upstream-tests.md. No npm or Lake dependency is added.
  */
@@ -350,6 +351,12 @@ function prepare(entry, directory, compile, work) {
   let fixture;
   try {fixture = parseFixture(text);}
   catch(e) {return {path,stage,status:'blocked',reason:e.message};}
+  if (semantic) {
+    try {
+      const payment=preparePaymentSource(path,fixture,compile,work,{runtimePipelines,withPreamble,semanticVectors,evmCompatible,COMPILER_SHA,VERSION,fixtureSha256:sha(bytes)});
+      if(payment)return payment;
+    } catch(e) {return {path,stage,status:'blocked',reason:'payment source preparation: '+e.message};}
+  }
   const allowed = syntax ? ['EVMVersion','compileViaYul','stopAfter','optimize-yul','experimental'] :
     ['EVMVersion','compileViaYul','compileViaSSACFG','ABIEncoderV1Only'];
   for (const key of Object.keys(fixture.settings)) {
@@ -537,8 +544,12 @@ async function main(args) {
   const metadata={version:1,commit:PIN,compiler:VERSION,compilerSha256:COMPILER_SHA,
     archiveSha256:manifest.archiveSha256,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
     compilerCodeAdapterSha256:sha(readFileSync(join(ROOT,'scripts/solc-code.mjs'))),
+    paymentSourceAdapterSha256:sha(readFileSync(join(ROOT,'scripts/payment-source.mjs'))),
+    paymentReferenceSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/payment-replay.mjs'))),
+    paymentReferenceEngineSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/replay.mjs'))),
+    paymentReferenceLockSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/package-lock.json'))),
     modelSha256:modelDigest(),evmVersion:'osaka',loopFuel:1000,
-    scope:'Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.',
+    scope:'Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. No Lean gas or compiler-equivalence claim. Payment gas obligations require a separate provenance-matched bytecode report; other generated EVM/SSA, logs and native C++ harness are not tested.',
     snapshotFiles:manifest.files.length,filter:options.filter ?? null,timeoutMs:options.timeoutMs,batchSize:options.batchSize};
   const results=new Map();
   const variants=new Map();
@@ -548,15 +559,14 @@ async function main(args) {
     if (JSON.stringify(previous.metadata) !== JSON.stringify(metadata)) throw new Error('resume provenance differs; use a new output directory');
     for (const row of previous.results) {
       results.set(row.path,row);
-      if (row.variants) variants.set(row.path,row.variants);
+      if (row.variants && !row.pendingPaymentGas) variants.set(row.path,row.variants);
     }
   }
   // Finish the one-time build before interpreting a failure as a corpus result.
-  runTool('lake',['build','Solidity.Tools.Upstream'],Math.max(options.timeoutMs,300000));
   const jobs=[];
   for (const [i,entry] of files.entries()) {
     const previous=results.get(entry.path);
-    if (previous && (!previous.requiredPipelines || previous.requiredPipelines.every(pipeline=>
+    if (previous && !previous.pendingPaymentGas && (!previous.requiredPipelines || previous.requiredPipelines.every(pipeline=>
       previous.variants?.some(row=>row.pipeline===pipeline)))) continue;
     let row;
     try {row=prepare(entry,directory,compile,work);}
@@ -567,11 +577,13 @@ async function main(args) {
     if (i%100===0) {writeReports(output,metadata,results,files.length,manifest.files);console.log(`Prepared ${i+1}/${files.length}; ${jobs.length} Lean replay jobs`);}
   }
   writeReports(output,metadata,results,files.length,manifest.files);
+  runTool('lake',['build',jobs.some(j=>j.paymentSource)?'Solidity.Tools.PaymentReplay':'Solidity.Tools.Upstream'],Math.max(options.timeoutMs,300000));
   for (let first=0;first<jobs.length;first+=options.batchSize) {
     const batch=jobs.slice(first,first+options.batchSize);
     const input=join(work,'batch.json'), checkpoint=join(work,'checkpoint.json'), wrapper=join(work,'Batch.lean');
     save(input,batch);save(checkpoint,[]);
-    writeFileSync(wrapper,`import Solidity.Tools.Upstream\n#upstream_batch ${JSON.stringify(input)} to ${JSON.stringify(checkpoint)}\n`);
+    const payment=batch.some(job=>job.paymentSource);
+    writeFileSync(wrapper,`import Solidity.Tools.${payment?'PaymentReplay':'Upstream'}\n#${payment?'payment':'upstream'}_batch ${JSON.stringify(input)} to ${JSON.stringify(checkpoint)}\n`);
     let failure;
     try {runTool('lake',['--quiet','--no-build','lean',wrapper,'--','--tstack=131072'],options.timeoutMs);}
     catch(e) {failure=e;}
@@ -582,10 +594,23 @@ async function main(args) {
       rows.push(found ?? {path:job.path,pipeline:job.pipeline,status:'blocked',
         reason:'Lean process ended before checkpoint',tool:failure?.tool,diagnostic:failure?.message?.slice(-3000)});
       variants.set(job.path,rows);
-      results.set(job.path,combineVariants(job.path,job.requiredPipelines,rows));
+      let combined=combineVariants(job.path,job.requiredPipelines,rows);
+      if(job.paymentSource&&combined.status==='working')
+        combined={...combined,typedSourceStatus:'working',pendingPaymentGas:true,status:'blocked',reason:'typed payment source passed; independent payment bytecode/gas observations pending'};
+      results.set(job.path,combined);
     }
     const summary=writeReports(output,metadata,results,files.length,manifest.files);
     console.log(`Lean ${Math.min(first+batch.length,jobs.length)}/${jobs.length}; ${JSON.stringify(summary.counts)}`);
+  }
+  for(const job of jobs.filter((j,i,a)=>j.paymentSource&&a.findIndex(x=>x.path===j.path)===i)) {
+    const reportPath=join(work,'payment-gas-'+sha(job.path).slice(0,16)+'.json');let report;
+    try {runTool('node',['scripts/evm-reference/payment-replay.mjs','--compiler',options.compiler,'--filter',job.path,'--out',reportPath],options.timeoutMs);}
+    catch(e) { /* A report may retain a real mismatch; absent evidence stays blocked. */ }
+    if(existsSync(reportPath))report=json(reportPath);
+    const provenance={commit:PIN,compilerSha256:COMPILER_SHA,archiveSha256:manifest.archiveSha256,
+      runnerSha256:metadata.paymentReferenceSha256,adapterSha256:metadata.runnerSha256,
+      baseEngineSha256:metadata.paymentReferenceEngineSha256,dependencyLockSha256:metadata.paymentReferenceLockSha256};
+    results.set(job.path,certifyPaymentEvidence(results.get(job.path),job,report,provenance));
   }
   const summary=writeReports(output,metadata,results,files.length,manifest.files);
   console.log(JSON.stringify(summary,null,2));

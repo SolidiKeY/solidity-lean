@@ -7,9 +7,11 @@ requirement. The original unconditional statements and their refutations remain
 unchanged evidence. The semantic-choice blocker is resolved, not awaiting another
 profile decision. The new exact family and source-reference repair are below.
 Original observations, callback judgment, target predicates and budgets remain.
-Two original source fixtures still require genuine source-world/payload/gas
-execution support; they are not declared complete. Earlier milestone validation
-and blocker lists below record their historical checkpoint, not new results.
+The two remaining original source rows now execute through a narrow typed
+world-source bridge, with kernel witnesses and paired independent bytecode/gas
+validation. All three named source rows pass both required pipelines. Earlier
+validation and blocker lists below are historical checkpoints; the final source
+bridge milestone records the current bounded scope and actual checks.
 
 Baseline: `f4dee4a29c2e208b36db4a4161a4723c735cd775`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, branch
@@ -360,7 +362,7 @@ Lake configuration is restored byte-for-byte; temporary configuration/shim
 copies are retained externally before removal. No push or merge occurred.
 
 
-## Human-approved conditional family (2026-10-29)
+## Checkpoint d426b23f: human-approved conditional family (historical)
 
 `Calculus/PaymentConditions.lean` separates funding from recipient policy.
 `recipient_iff` proves exactly no oracle entry or an explicit `.ok data`;
@@ -524,3 +526,165 @@ shim in the evidence directory; tracked user configuration is unchanged.
 Final doc-path invocation initially hit Docker Git ownership refusal; command-
 scoped safe.directory repaired invocation, without changing Git/user configuration.
 The check still reports the same20 baseline missing references.
+
+
+## Typed payment source bridge: 2026-10-29 continuation
+
+This milestone closes the two source rows left at d426b23f under the explicit
+human-approved conditional payment assignment. Final validation results are
+recorded below; historical checkpoint failures remain in their original logs.
+No unconditional transfer-success claim is restored.
+
+The retained branch started clean at d426b23f74d059dbc507e1a9f988bf5877922013.
+Published origin/master was inspected at cc155f36. The only imported prerequisite
+is the exact published ContractWorldCertificates module and the 11-line
+Operation.guard/tryCreate addition to ContractWorld (published1e37a225). The
+existing create/call/enter/finish/settlement definitions are unchanged. This is a
+deliberate narrow prerequisite import, not a merge/reset or change of evidence
+base; cumulative patches still start at f4dee4a2. No unpublished branch is used.
+
+`PaymentWorld` composes actual typed calls above unchanged single-contract TRun.
+`createSend` consumes the returned Handle from World.create and invokes receive
+through that same handle even for zero amount. Its success witness exposes the
+real creation and stipend operations; send true iff actual recipient completion,
+and receiveRun_ok exposes the real funding, imported body and settlement.
+Completed recipient failure returns false with the pre-receive world, preserving
+preceding caller funding/creation. Exhaustion/divergence are not ordinary false.
+Transfer transports the actual nested THalt and every byte. Funding failure
+precedes receive execution. The atomic failure law preserves the entire original
+world, not merely its observed balances.
+
+`PaymentPlan` accepts complete source bodies and retains owner/target, receive,
+creation, local/root and ordinary method/call identities. It rejects extra
+statements/declarations, inheritance, modifiers, unresolved/mismatched receivers,
+internal/private exposed methods and full-gas calls. `PaymentImport` imports the
+original AST declarations, resolves receive/getter by exact sourceId, and quotes
+the actual programs with kernel checking. It uses the existing external-entry
+failure-data reading only for the receive boundary; legacy TRun.transfer still
+has its certified empty-data behavior. No reference bytes are supplied to a
+source execution.
+
+For Main.s the whole source body is local new Receiver followed by send0.
+Main's real payable constructor receives20. For C the sole new-A initializer is
+executed while C is not installed, using A's source-implicit empty constructor;
+then an intrinsic typed assignment stores the actual returned address in C.a
+before World.create installs C. This staging is justified by the complete
+recognized shape: A has no fields or user constructor and C has no other
+initializer or constructor effects. Later transfers read C.a through a quoted
+typed program, require equality with the typed handle, and dispatch A.receive.
+The real C.receive and g() bodies are also imported and executed. All code-kind,
+static/library, funding, settlement and rollback checks remain explicit.
+
+The kernel proofs cover original constructor20/newReceiver/zero-receive/sendtrue
+and the full debug sequence: receive10; g()10; actual100-byte Error(no_receive);
+unfunded100ether empty failure; g()still10; both code accounts still installed.
+Separate initialization, successful funding and getter witnesses avoid comparing
+whole world functions in the elaborator. Earlier monolithic/reflexivity attempts
+hit recursion/200000-heartbeat bounds; diagnostic counters and failing files are
+retained. The final proofs use finite kernel observations and unchanged limits;
+whole-world rollback is a separate universal equality theorem. Wrong bytes,
+handle and code-kind controls retain their exact source/model distinction.
+
+The frame and its proofs are deterministic and unmetered. Stipend send/transfer
+have their own source kind; full-gas calls are not coerced into it. This is not a
+2300-gas adequacy theorem or a change to legacy callback defaults. The generic
+world API can execute other bodies, but this source reader cannot admit them.
+All original callback rules, funding/recipient/invariant/resumption premises and
+the original PiggyBank proof remain unchanged. The six original gap statements,
+inTarget certificates, DecisionTheorem, exclusions and Waivers are untouched.
+
+Whole-fixture completion requires both required typed source pipelines and a
+fresh independent bytecode report matching source/compiler/snapshot/runner/
+adapter/engine/lock provenance. It compares every ordered signature, failure,
+value and revert byte, plus every original gas row/profile. Gas is never claimed
+as a Lean observation. Intermediate reports stay blocked until reference evidence
+is complete; pending rows really resume. Thus an unmetered functional match alone
+cannot certify a gas-sensitive recipient outcome. The replayer currently refuses
+repeated creation without a fresh-address allocator and calls following failed
+explicit deployment, rather than inventing collision behavior or redeploying.
+No universal source/compiler equivalence, general world-source language, general
+callback source theorem or full decision completeness is claimed.
+
+The actual source controls exercise wrong expected bytes, wrong receiver/native
+kind/internal visibility, repeated creation, calls after failed deployment,
+zero-value refusing receive with retained creation, wrong gas and provenance,
+absent reference evidence, and saved pending-result recovery. Source balances are
+audited as decimal strings. The two committed AST witnesses reproduce from the
+unchanged pinned snapshot/compiler with payment-source-fixtures.mjs --check.
+The optional bytecode engine retains its instruction/gas limits and failed-create
+payload gas refusal; no old source expectation is changed.
+
+Reviewed source-import evaluation sites are inventoried narrowly: four evalConst
+reads of imported contracts/reports, one evalExpr of JSON observations. Every
+quoted program and every theorem is still checked by the kernel. These are not
+new axioms or an unchecked proof path. Feature evidence was updated only for
+sendTransfer; partial status remains and inventory was generated by its audit.
+
+Shared edits: narrow published world prerequisite, root/module registration,
+upstream payment routing/provenance/build/report join, trust audit/inventory,
+owning docs and audit-generated feature evidence. New payment-specific modules,
+AST witnesses and scripts are isolated additions. No push/merge, other VM,
+monitor, profile decision or rejected ABI/lazy-calldata assignment was touched.
+
+Finder and skeptic reviewed the kernel/source/reference areas read-only without
+Lean/server/checks. Confirmed defects fixed before final validation: unverified gas
+completion, missing source/reference outcome pairing, repeated address reuse,
+implicit redeployment after failure, pending-row resume skip, missing visibility
+checks, uncaught preparation exceptions, cold dependency build and helper-hash
+provenance. Their final frozen-code pass found no further confirmed defect.
+
+### Actual final validation
+
+- Full `./run-lean.sh`: exit0,2189.997s;699 library/default jobs and259
+  TestSuite jobs. Aggregate sampled RAM peak12884570112 bytes; retained group
+  peak12884901888 bytes (the12GiB cap). memory.events max1624 versus inherited377,
+  oom0/oom_kill0. This is measured reclaim/pressure, not spare margin. A live
+  heavy-build OS snapshot retained8598601728 bytes MemAvailable; physical RAM
+  is18882674688 bytes, a reported drift from nominal16GiB. Disk had24GiB free.
+- Its first terminal SolKey check was skipped because SOLKEY_RULES was absent;
+  that actual skipped output is retained. After supplying the existing pinned
+  path, a full cached confirmation exited0 in0.951s and actually matched377
+  taclets/131 read annotations. No pin/configuration or budget was changed.
+- Strict automatic gate exit0:26 timed TestSuite modules within300s;491
+  automatic,61 step-budgeted,11 refuted,0 pending. Orphans/layers/inventory all0.
+- Script regressions59/59 passed,43.717s. Source AST reproduction --check exit0.
+  Trust inventory728 sources/245 reviewed sites/0 findings; TrustAudit545
+  headline theorems use only propext/Classical.choice/Quot.sound. Corpus gate0:
+  73 proved/34 unsupported/101 unported, preserving the old PiggyBank improvement
+  and every other original pin.
+- `fixtures-final.json`: original send source0(43.650s), bytecode0(5.584s);
+  uncalled source0(2.231s), bytecode0(2.791s); debug transfer source0(6.409s),
+  bytecode0(2.929s). Wall times may include waiting for the single writer lock.
+  All ordered rows and required modes are retained in final-source-*/results.json
+  and final-bytecode-*.json. Send also verifies all6 gas/code-gas rows across
+  irOptimized/legacy/legacyOptimized. The uncalled fixture still executes only
+  f(), not its uncalled fallback member references.
+- Final per-file MCP in mcp-final.log: all10 files eventually success=true,
+  partial=false,0 errors. One initial timeout was polled to completion. Three
+  core lean_verify calls report only standard axioms. That combined command
+  exited1 when lean_verify re-elaborated the relative-fixture source file in a
+  scratch location and incorrectly collected its recovery sorryAx. The actual
+  file diagnostics, kernel build and545-headline audit were already clean.
+  Inspection of lean-lsp-mcp0.29.0 tools/analysis.py confirms it copies the file
+  to scratch and filters only appended diagnostics, missing earlier relative-
+  path errors. No source or proof was changed to conceal this failure.
+  mcp-imported-axioms.log then audits the actual compiled source constants via
+  the import-only root: original send/transfer, wrong handle/kind/bytes and
+  original PiggyBank all return only standard axioms, with the explicit
+  ALL_IMPORTED_AXIOM_AUDITS_PASS assertion. Repository source scanning remains
+  covered separately by check-trust. Shutdown-loop messages are retained.
+- Global doc-path check remains exit1 with the same20 baseline historical/
+  external missing references. Its actual debt is not waived or rewritten.
+
+Before/after from d426b23f: send blocked→working; debug transfer blocked→working;
+uncalled working→working. Both repaired rows now run actual typed world source
+compositions; their kernel witnesses and independent bytecode/gas observations
+are distinct evidence. There is no remaining named source-row implementation
+blocker or pending human semantics decision for this conditional assignment.
+The broader language/profile/decision-completeness gaps above remain outside
+this completion claim.
+
+Evidence directory: /workspace/diamond-payments-source-evidence. Earlier
+checkpoints, failed attempts, command output, timings and original exports are
+preserved. The cumulative patch/handoff/checksum are exported only after the
+final actual diagnostics and review complete. No push or merge.

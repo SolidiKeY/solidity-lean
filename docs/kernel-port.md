@@ -57,12 +57,17 @@ The language and calculus gaps, callbacks included, are listed in
   `Examples/Tactics/PaymentCorpus.lean` proves the original PiggyBank box
   callback obligation, including zero-value entry booking, by typed bounded
   auxiliary proofs. This is kernel evidence; only its handwritten `.key` pin improves;
-  source/compiler/EVM blockers remain unchanged. See
+  the two world-dependent payment fixtures now use a narrow typed bridge;
+  all three original fixtures have typed source and independent bytecode/gas
+  validation. Broader compiler
+  correspondence remains open. See
   [the payment handoff](feature-work/diamond-payments.md).
   The human-approved payment assignment now uses exact conditional success and
   certified failure instead of requiring the unconditional success rule.
   `Calculus/PaymentConditions.lean` covers that family under unchanged semantics;
-  source-world/payload/gas dependencies are separate and remain open.
+  the named original source-world/payload rows are now handled by the narrow
+  payment frame; gas is independently checked, while general source/compiler
+  correspondence remains open.
 - **A struct recursive through a mapping** (`TestSuite.sol`'s `Tree`) is
   refused: its default value is infinite and the model's are finite
   (`Solkey/TestSuite.lean`'s excluded row).

@@ -1198,5 +1198,30 @@
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
     "code": "let v \u2190 unsafe evalExpr EvalOrder (mkConst ``EvalOrder) t"
+  },
+  {
+    "file": "Solidity/Frontend/PaymentImport.lean",
+    "kind": "unsafe",
+    "code": "let targetC \u2190 liftTermElabM <| unsafe evalConst Contract targetName"
+  },
+  {
+    "file": "Solidity/Frontend/PaymentImport.lean",
+    "kind": "unsafe",
+    "code": "let targetRows \u2190 liftTermElabM <| unsafe evalConst (List ImportRow) (targetName ++ `report)"
+  },
+  {
+    "file": "Solidity/Frontend/PaymentImport.lean",
+    "kind": "unsafe",
+    "code": "let ownC \u2190 liftTermElabM <| unsafe evalConst Contract ownerName"
+  },
+  {
+    "file": "Solidity/Frontend/PaymentImport.lean",
+    "kind": "unsafe",
+    "code": "let ownRows \u2190 liftTermElabM <| unsafe evalConst (List ImportRow) (ownerName ++ `report)"
+  },
+  {
+    "file": "Solidity/Tools/PaymentReplay.lean",
+    "kind": "unsafe",
+    "code": "unsafe evalExpr Json (mkConst ``Json) e"
   }
 ]

@@ -861,3 +861,10 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+| `Semantics/ContractWorldCertificates.lean` | Published paid-run/source-wrapper operation certificates, reused unchanged from origin/master cc155f36. |
+| `Semantics/PaymentWorld.lean` | Typed stipend source frames over actual world calls; send completed-failure handling, transfer exact halt transport, no-op/funding and atomic rollback laws. |
+| `Frontend/PaymentPlan.lean` | Complete declaration-resolved creation/send and initializer/receive/transfer/getter source shapes; unknown effects and full-gas calls refused. |
+| `Frontend/PaymentImport.lean` | Imports actual receive/getter code, builds typed initializer handle assignment and paid creation/payment compositions with source identities. |
+| `Tools/PaymentReplay.lean` | Ordered deterministic source-world observations with actual nested bytes and committed-world audits; gas remains an independent obligation. |
+| `Examples/Tactics/PaymentSource.lean` | Kernel-checked original send and debug transfer source snapshots, initialized handle/funding/getter witnesses and wrong handle/kind/bytes controls. |

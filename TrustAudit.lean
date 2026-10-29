@@ -1,3 +1,4 @@
+import Solidity.Examples.Tactics.PaymentSource
 import Solidity.Theorems
 import Solidity.Semantics.Termination
 import Solidity.Semantics.LexMetrics
@@ -562,7 +563,23 @@ run_cmd do
     ``Solidity.Examples.Tactics.FilteredSets.echo_correct,
     ``Solidity.Examples.Tactics.FilteredSets.empty_correct,
     ``Solidity.Examples.Tactics.FilteredSets.undefined_key_correct,
-    ``Solidity.Examples.Tactics.FilteredSets.theory_guard_correct]
+    ``Solidity.Examples.Tactics.FilteredSets.theory_guard_correct,
+    ``Solidity.ContractWorld.World.receiveRun_ok,
+    ``Solidity.ContractWorld.World.stipend_transfer_failure,
+    ``Solidity.ContractWorld.World.receiveRun_unfunded,
+    ``Solidity.ContractWorld.World.call_unit_noop,
+    ``Solidity.ContractWorld.World.createSend_ok,
+    ``Solidity.ContractWorld.World.stipend_send_true,
+    ``Solidity.ContractWorld.sendResult_true_iff,
+    ``Solidity.ContractWorld.sendResult_failure,
+    ``Solidity.ContractWorld.sendResult_uncaught,
+    ``Solidity.ContractWorld.payment_atomic_failure,
+    ``Solidity.ContractWorld.World.paidRun_certificate,
+    ``Solidity.Examples.Tactics.PaymentSource.original_send,
+    ``Solidity.Examples.Tactics.PaymentSource.original_transfer,
+    ``Solidity.Examples.Tactics.PaymentSource.wrong_handle,
+    ``Solidity.Examples.Tactics.PaymentSource.wrong_kind,
+    ``Solidity.Examples.Tactics.PaymentSource.wrong_bytes]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

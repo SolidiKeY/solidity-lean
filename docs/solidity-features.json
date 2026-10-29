@@ -2593,7 +2593,13 @@
         "Solidity/Calculus/PaymentConditions.lean",
         "Solidity/Examples/Tactics/PaymentConditions.lean",
         "scripts/payment-reference.test.mjs",
-        "docs/feature-work/diamond-payments.md"
+        "docs/feature-work/diamond-payments.md",
+        "Solidity/Semantics/PaymentWorld.lean",
+        "Solidity/Frontend/PaymentPlan.lean",
+        "Solidity/Frontend/PaymentImport.lean",
+        "Solidity/Tools/PaymentReplay.lean",
+        "Solidity/Examples/Tactics/PaymentSource.lean",
+        "scripts/payment-source.test.mjs"
       ]
     },
     {

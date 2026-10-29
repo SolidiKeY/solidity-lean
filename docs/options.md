@@ -289,7 +289,11 @@ The human-approved payment account keeps these semantics. Exact funding/recipien
 refusal-state and deterministic/callback send conditions are in
 `Calculus/PaymentConditions.lean`: callback failure remains mandatory even after
 acceptance. This does not replace the unconditional transfer refutation or claim
-source-world/gas correspondence.
+general source-world/gas correspondence. The narrow original payment source
+fixtures now use `Frontend/PaymentImport.lean` over existing world frames, with
+actual receive bodies and independent bytecode/gas agreement. This deterministic
+unmetered source layer does not change the callback judgment or establish
+2300-gas adequacy in Lean.
 
 **Calls with callbacks.** An internal call whose body calls back is inlined
 as `Stmt.step` inlines it (`ProvesC.callNone`, `ProvesC.callRets`: the
