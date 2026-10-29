@@ -94,7 +94,8 @@ evidence directory.
    focused target and independent review follow-ups pass.
 A. Constructor-prefix return/revert composition: implemented; focused target,
    inhabited controls and independent review follow-ups pass.
-B. Determinism, commutation, encoding/provenance and external vectors: pending.
+B. Determinism, commutation, encoding/provenance and external vectors: implemented;
+   kernel checks, 16 external vectors and independent review follow-ups pass.
 
 All final focused/import/full/TestSuite/static/trust/document gates and inherited
 failure comparisons remain pending. No completion claim is made for the lane.
@@ -241,3 +242,51 @@ was used by either reviewer. Focused constructor target passes (9 jobs); its
 headline axiom pins use only standard subsets of `propext`, `Classical.choice`,
 `Quot.sound`. Parent source inheritance/initializer order, world rollback,
 account installation and payment composition remain open exactly as scoped.
+
+## Backfill B: laws, provenance and external creation vectors
+
+`Laws.link_permutation` proves arbitrary permutations of pairwise-disjoint typed
+library sites yield identical bytes. Its proof folds over length-certified byte
+states and uses the existing assembler overwrite. `Exec.deterministic` already
+proves unique slice outcomes. `Artifact.payload_deterministic` fixes runtime/args;
+`Artifact.sections_unique` additionally requires equal runtime lengths before
+recovering both sections from equal payloads. Link metadata is deliberately not
+recoverable from raw bytes. `wrapper_decode` reuses the existing exact decoder law.
+`Provenance` stores a bounded generated section interval and a bounded interval
+of actual supplied source-file contents. `global_bounds` and `bytes_exact` certify
+its global byte range. Source-map fidelity/semantic provenance is not inferred
+from supplied labels or ranges and remains a producer integration obligation.
+
+Inhabited controls include a three-site link permutation, a conflicting-overlap
+order counterexample, distinct metadata records with identical byte payloads,
+section recovery, valid provenance extraction and an uninhabitable out-of-bounds
+location. Focused laws/provenance target passes (13 jobs); axiom pins contain only
+standard subsets of `propext`, `Classical.choice`, `Quot.sound`.
+
+`tests/creation-artifacts/Export.lean` exports actual artifact functions into
+`vectors.jsonl`. Its SHA256 is
+`d8453e2544375fd911a2077491e8dc40b2bc9c4fb506d77c4d37926c69d5b9fc`.
+`node scripts/check-creation-artifacts-vectors.mjs` passed 16/16 actual Osaka CREATE
+transactions under EthereumJS 10.1.3, checking installed account code or exact
+revert bytes. It covers empty/word/PUSH boundaries, linking, immutables, combined
+patches, constructor return/revert and malformed source/return ranges. Dependencies
+are isolated task fixtures, not Lean/core dependencies. The offset-transition
+external tests use executable JUMPDEST prefixes; the kernel placement witnesses
+use zero prefixes as suffix-entry layout data and do not execute them. These are
+finite independent external tests, not whole pinned-EVM or source preservation
+proofs. The initial export failed on a Lean-version string-constructor name;
+`String.mk` fixed it without a budget change, with failed output retained.
+
+Independent finder and skeptic reviewed the laws, records, exporter, all generated
+rows and the exact 16/16 output without Lean servers or builds. Their follow-ups
+confirm no remaining concrete finding; the distinct-record uniqueness control
+and explicit executable-prefix/suffix-entry distinction address their notes.
+
+## Final gate status
+
+All component source queues 1–4 and backfill A–B have implementation, kernel
+proofs, inhabited positive/negative/combination controls and two independent
+read-only reviews. This is not whole-assignment completion: final full/import
+closure, TestSuite, strict/static/document gates, exact-base failure comparison
+and committed handoff/export remain required below. No parent roadmap group is
+claimed complete, and no source/world/pinned-EVM composition premise is hidden.

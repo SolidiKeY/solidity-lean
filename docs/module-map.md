@@ -954,3 +954,7 @@ At the root, the notation's own tests:
 
 | `Backend/Creation/Constructor.lean` | Independently checked byte-prefix steps composed with exact runtime-return or exact-byte revert wrappers, over arbitrary prefix memory. |
 | `Backend/Creation/ConstructorChecks.lean` | Actual copying constructor-prefix witnesses, return/revert separation and nonempty argument controls. |
+
+| `Backend/Creation/Laws.lean` | Arbitrary disjoint link permutations, payload determinism, section uniqueness and wrapper decode law. |
+| `Backend/Creation/Provenance.lean` | Intrinsic generated/source range records, section bounds and exact provenance byte extraction. |
+| `Backend/Creation/LawChecks.lean` | Three-link permutation, overlapping-order negative, metadata/layout and inhabited provenance controls. |

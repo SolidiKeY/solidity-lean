@@ -27,7 +27,7 @@ theorem Immediate.read (v : Immediate) :
 def runtimeOffset (n : Immediate) : Nat := 2 * n.width.val + 8
 
 theorem runtimeOffset_fits (n : Immediate) : runtimeOffset n < 256 := by
-  have h := n.width.isLt
+  have h : n.width.val < 33 := n.width.isLt
   simp only [runtimeOffset]
   omega
 
