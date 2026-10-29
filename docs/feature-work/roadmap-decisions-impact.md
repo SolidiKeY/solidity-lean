@@ -348,6 +348,27 @@ the owners, not scope questions:
 - how `ValidH` (per goal) relates to the per-run premise in specification
   transfer: G51.02.
 
+## 5a. Second-round decisions: not yet audited
+
+The coordinator reported a second round of user decisions, to be recorded in
+`docs/solidity-scope.md` under "Second round (2026-10-29)". That section was
+not on `origin/master` when this audit finished (checked at 13:15 UTC), so
+none of these decisions is audited here. Several revise rows above:
+
+- settings: solc's two pipelines only. This revises G00 Q4 and so §2.7 and
+  the eight-combination wording of §1.
+- Osaka gas caps idealized (§2.4, §2.6).
+- forced ether credited by the environment (§2.3, own balance).
+- a stipend cost rule for payments to our own instances. This interacts
+  with §2.2 and the R-verdicts on the stipend texts.
+- the hash-region premise (§2.5, G04 R34).
+- foundation child packages under G24.
+- empty link map only. This revises G01 Q8 and the §2.10 `validateSettings`
+  row.
+- the fixed-point choices (§2.9).
+
+A follow-up audit must re-grade the affected rows once that section lands.
+
 ## 6. Handoff
 
 - **Base:** `caf52ecd4dde5d37cbc0098d47de1a01aa218285`.
