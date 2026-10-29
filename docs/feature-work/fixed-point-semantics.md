@@ -146,7 +146,7 @@ otherwise the operation is refused, as solc's `Type::commonType` refuses
 **Theorems** (premises in parentheses; all checked by the Lean server with
 `propext`, `Classical.choice`, `Quot.sound` at most — `#print axioms` on
 `Fx.ofWord_toWord`, `Fx.solc_lossy`, `Fx.mod_eq`, `Fx.ofInteger_inRange`,
-`Fx.implicit_lt`; `Fx.solc_lossy` uses none):
+`Fx.implicit_lt`, `Fx.explicit_of_subsumes`, `Fx.ofIntegerExplicit_of_implicit`, `Fx.add_eq`; `Fx.solc_lossy` uses none):
 
 - `Fx.wrapInt_inRange`, `Fx.wrapInt_of_inRange` (`t.inRange v`),
   `Fx.wrapInt_emod` — wrapping lands in range, keeps an in-range integer, and
