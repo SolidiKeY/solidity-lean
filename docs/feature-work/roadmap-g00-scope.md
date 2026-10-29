@@ -22,6 +22,10 @@ questions that need the user are in [Open scope questions](#open-scope-questions
   decision. The profile is therefore *recorded* but not *frozen*: freezing
   waits on [Q1–Q6](#open-scope-questions), including the fork and settings
   pins.
+- **Answered 2026-10-29:** the user confirmed all 30 exclusions and answered
+  Q1–Q6 ([User decisions](../solidity-scope.md#user-decisions-2026-10-29)).
+  The counts and the generated ledger below are as of base `127c2ee`, before
+  those answers; the remaining pin work is listed there.
 
 ## Method and reproduction
 

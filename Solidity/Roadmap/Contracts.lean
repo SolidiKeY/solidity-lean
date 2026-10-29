@@ -307,21 +307,22 @@ def SourceSpec.Unambiguous (S : SourceSpec) : Prop :=
   (∀ i s s', S.Parses i s → S.Parses i s' → s = s') ∧
   (∀ s r r', S.Resolves s r → S.Resolves s r' → r = r')
 
-/-- **Non-vacuity of a source definition** (G07, S05): admitted inputs whose
-meanings, at allowed environments, complete with a success carrying data,
-complete with a revert, and diverge.  A `SourceSpec` without these makes
-every contract vacuous (an empty input type, `InProfile := False`, a `sem`
-ignoring the program). -/
-def SourceSpec.NonVacuous (S : SourceSpec) : Prop :=
-  (∃ r w p e rs d, S.lang.Allowed e ∧ S.lang.Admissible rs ∧ d ≠ [] ∧
-    (S.lang.sem (S.meaning r w p) e rs).final = some (.success d)) ∧
-  (∃ r w p e rs d, S.lang.Allowed e ∧ S.lang.Admissible rs ∧
-    (S.lang.sem (S.meaning r w p) e rs).final = some (.revert d)) ∧
-  (∃ r w p e, S.lang.Allowed e ∧ (S.lang.sem (S.meaning r w p) e).Diverges S.lang.Admissible)
-
 /-- The admitted source inputs, with their resolution. -/
 def SourceSpec.Admitted (S : SourceSpec) (i : S.Input) (r : S.Resolved) : Prop :=
   ∃ s, S.Parses i s ∧ S.Resolves s r ∧ S.WellFormed r ∧ S.InProfile r
+
+/-- **Non-vacuity of a source definition** (G07, S05): inputs the source
+admits whose meanings, at allowed environments, complete with a success
+carrying data, complete with a revert, and diverge.  Each witness starts from
+an admitted input, so a `SourceSpec` with an empty input type, `Parses :=
+False` or `InProfile := False` has none. -/
+def SourceSpec.NonVacuous (S : SourceSpec) : Prop :=
+  (∃ i r w p e rs d, S.Admitted i r ∧ S.lang.Allowed e ∧ S.lang.Admissible rs ∧ d ≠ [] ∧
+    (S.lang.sem (S.meaning r w p) e rs).final = some (.success d)) ∧
+  (∃ i r w p e rs d, S.Admitted i r ∧ S.lang.Allowed e ∧ S.lang.Admissible rs ∧
+    (S.lang.sem (S.meaning r w p) e rs).final = some (.revert d)) ∧
+  (∃ i r w p e, S.Admitted i r ∧ S.lang.Allowed e ∧
+    (S.lang.sem (S.meaning r w p) e).Diverges S.lang.Admissible)
 
 /-- **Contract 1, source admission and parsing.**  The frontend accepts
 exactly the well-formed in-profile inputs, with their resolution.  A

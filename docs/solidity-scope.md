@@ -4,7 +4,8 @@ This audit classifies the Solidity language at **0.8.38**, the latest stable
 release returned by GitHub on 2026-10-25. It pins
 [`argotorg/solidity` at `1835d247de183f23e7b0e2bc4a50732af525b77c`](https://github.com/argotorg/solidity/tree/1835d247de183f23e7b0e2bc4a50732af525b77c).
 The historical `ethereum/solidity` repository redirects to this repository.
-This is a versioned language inventory and a proposed scope contract, with
+This is a versioned language inventory and a scope contract, settled by the
+[user decisions](#user-decisions-2026-10-29), with
 an inspection assessment of existing implementation support. It does not
 assert that every target feature already imports, executes, or proves correctly.
 
@@ -63,12 +64,14 @@ it is not a mechanical renaming of legacy importer statuses.
 roadmap groups G00, G01 and G04 ([G00](feature-work/roadmap-g00-scope.md#open-scope-questions),
 [G01](feature-work/roadmap-g01-interfaces.md#open-scope-questions),
 [G04](feature-work/roadmap-g04-restrictions.md#6-open-scope-questions)).
-These answers fix the profile; they close no proof obligation.
+These answers settle the questions; they close no proof obligation. The
+follow-up list below records what they still require of the pins, the
+manifest and the G01 statements.
 
 | Question | Decision |
 |---|---|
-| G00 Q1 — the 30 recorded exclusions | All 30 confirmed as approved exclusions (assembly/Yul, gas, `delegatecall`, low-level calls, selfdestruct, salted creation, raw code, physical layout, logs, extra block/transaction fields). |
-| G00 Q2 — premises of the 23 `abstract` rows | Approved: opaque hashes and `ecrecover`, and `msg`/`block`/`this`/balance values as universally quantified inputs. Not approved: `worldAssumptions` and the payment-acceptance boolean, which must be replaced or proposed again. The no-callback reading becomes a proved case (G01 Q4). |
+| G00 Q1 — the 30 recorded exclusions | All 30 confirmed as approved exclusions (for example assembly/Yul, gas, `delegatecall`, low-level calls, selfdestruct, salted creation, raw code, physical layout, logs, extra block/transaction fields). |
+| G00 Q2 — premises of the 23 `abstract` rows | Approved: opaque hashes and `ecrecover`, and `msg`/`block`/`this`/balance values as universally quantified inputs. Not approved: `worldAssumptions` and the payment-acceptance boolean, which must be replaced or proposed again. The no-callback reading must become a proved special case (not yet proved; G01 Q4). The remaining abstract rows follow G01 Q4 and Q8. |
 | G00 Q3 — EVM fork | Osaka, for the pinned semantics and the compiled bytecode. |
 | G00 Q4 — settings | The public theorem quantifies over all eight `EvalOrder` flag combinations. The frozen profile is solc 0.8.38; 0.8.34 fixtures are SolKey compatibility checks only. |
 | G00 Q5 — `creationCode`/`runtimeCode` | The bytes this compiler produces, read from G01's whole-input `Artifact` table, which the source semantics takes as a parameter. |
@@ -76,13 +79,41 @@ These answers fix the profile; they close no proof obligation.
 | G01 Q1 — source resources | Idealized source: unbounded fuel and recursion. |
 | G01 Q2 — fixed EVM limits | Gas, call-depth and stack exhaustion end a finite prefix; internal calls keep their frames in memory, so recursion depth is bounded only by gas. The code-size limits (EIP-170, EIP-3860) are a recorded idealization: the theorem assumes any code size deploys. |
 | G01 Q3 / G04 Q1 — hash collisions | A per-run premise that the preimages hashed by the execution prefix do not collide, plus a random-oracle lemma bounding the probability of a collision (about q²/2²⁵⁷ for q hashes). Global injectivity stays forbidden. |
-| G01 Q4 — environment | History-dependent callee strategies with unbounded reentrancy; address 0 having no code stays an assumption. |
+| G01 Q4 — environment | History-dependent callee strategies with unbounded reentrancy; the no-callback reading (`transferSemantics`) is a special case, not a premise; address 0 having no code stays an assumption. Sender funds and precompile addresses are not yet decided. |
 | G01 Q5 — observation | The full `Event` list with exact ABI and revert bytes, `Panic` codes included. |
 | G01 Q6 — state transfer | The public theorem exports `decode : EvmWorld → Option IntrinsicWorld`. |
 | G01 Q7 — gas and the environment | Over-approximation: callee answers range over all outcomes regardless of forwarded gas; one resource bound per session. |
 | G01 Q8 — system boundary | The whole input, every contract and linked library, is the compiled system. |
 | G04 Q2 — storage aliases after `pop`/`delete` | In profile, with solc's slot behaviour (G28). |
 | G04 Q3 — payment acceptance | Any outcome: an untyped recipient may accept or refuse each payment, depending on history; typed recipients run their own code (G47). |
+
+Follow-up the decisions require (none is done yet):
+
+- **Contracts (G01).** Revise `Solidity/Roadmap/Contracts.lean` before G01
+  counts as frozen: a per-run hash premise and the `decode` export in
+  `PublicCorrectness`, the `Artifact` table as a source-semantics parameter
+  (with the G07 non-circularity whitelist explaining why a compiler-output
+  parameter is not circular), code size dropped from the `EvmSpec`
+  resources, and the "open question" wording removed.
+- **Pins (G00, G05, G06).** Re-pin the vector scripts and the bridge from
+  Cancun to Osaka, modulo EIP-170/EIP-3860 as recorded above; resolve G00's
+  disagreements 5 (reference-EVM versions) and 6 (`validateSettings` rejects
+  `libraries`, while G01 Q8 puts linked libraries in the system). Six of the
+  eight `EvalOrder` combinations have no solc setting; the public theorem's
+  settings must express them.
+- **Manifest.** `fixedPoint` is still scoped `upstream`. Full support needs
+  a manifest change, owners and a reference semantics beyond solc 0.8.38;
+  the 174 in-profile count changes with it.
+- **Consistency to settle with the user.** The EVM's 1024 call depth does
+  not grow with gas, so unbounded reentrancy needs either a recorded
+  idealization or a bounded source; the block gas limit is not addressed;
+  our own code running out of forwarded gas inside a callback continues the
+  session on the EVM, which "ends the prefix" does not describe.
+- **Readings.** Opaque hashes are a fixed parameter instantiated by keccak,
+  not an environment input; `this` comes from deployment and the own
+  balance follows the ledger. "solc's slot behaviour" for dangling aliases
+  fixes the logical alias semantics, not solc's physical packing, which
+  stays unobservable.
 
 ## What belongs in the model
 
@@ -124,7 +155,8 @@ fold constant inputs without exposing physical storage. `type(C).name`, interfac
 and function addresses are source-level metadata. Internal functions and
 statically resolved library functions can be lowered without machine code.
 Static `type(C).creationCode` and `type(C).runtimeCode` constants are admitted
-only with matching compiler/source/settings artifact inputs; they do not
+only with matching compiler/source/settings artifact inputs (to be replaced by
+this compiler's artifact table, [G00 Q5](#user-decisions-2026-10-29)); they do not
 provide deployed-account code observations or arbitrary bytecode execution
 ([artifact boundary](feature-work/source-admission.md)).
 The typed contract-world API and restricted factory/library source commands
@@ -150,8 +182,9 @@ functions must retain their actual trust boundaries.
 
 Payment-only empty-data calls and `send`/`transfer` have existing abstractions.
 Their use does not admit arbitrary byte-oriented calls or establish exact
-gas/stipend behavior. A no-callback interpretation is a selected premise,
-not an EVM theorem. Resource fuel, bounded call expansion and mathematical
+gas/stipend behavior. A no-callback interpretation is today a selected premise,
+not an EVM theorem; [G00 Q2](#user-decisions-2026-10-29) requires it to become
+a proved special case. Resource fuel, bounded call expansion and mathematical
 divergence are distinct from real EVM gas and stack exhaustion.
 
 ## What is deliberately outside this profile
@@ -239,7 +272,7 @@ Conversely modifier `_ ;` is recognized by the C++ parser despite its absence
 from the ANTLR statement alternatives. Concrete modifier bodies must contain
 at least one placeholder, and placeholders cannot appear inside `unchecked`;
 conditional placeholders can still skip execution dynamically. Fixed-point syntax remains upstream
-incomplete. The removed Generic Solidity prototype is not part of this audit's
+incomplete; [G00 Q6](#user-decisions-2026-10-29) asks for full support. The removed Generic Solidity prototype is not part of this audit's
 mainstream language. Compiler CLI/JSON protocols, optimizer passes, SMTChecker,
 debuggers, code generation, linking tools and metadata packaging are compiler
 products, not additional executable Solidity syntax; their selected settings

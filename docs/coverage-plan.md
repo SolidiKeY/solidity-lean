@@ -179,8 +179,10 @@ assuming each other's unproved conclusions.
 | G07 | Establish proof/trust regression gates, axiom inventories and inhabited source-to-machine controls; record existing failures separately. Check that malformed source, altered bytecode and always-revert output cannot satisfy the planned contracts. |
 
 G00 status (2026-10-29): pins, exclusion evidence, reconciliation and owners in [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md); its questions Q1–Q6 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which confirms all 30 exclusions.
-G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
-G04 status: base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
+
+G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which lists the contract revisions they require before G01 counts as frozen.
+
+G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
 
 ### Independent source definitions — after G00–G07, before wave 1
 

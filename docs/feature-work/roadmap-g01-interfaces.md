@@ -365,10 +365,12 @@ transactions (G50). The final public statement is the conjunction of:
   controls, since the type alone does not make a parameter executable;
 - `SourceSpec.Idealized`, unless the user approves a source-side resource
   ([Q1](#q1-source-resources));
-- `SourceSpec.NonVacuous` (line 315): admitted inputs whose meanings, at
-  allowed environments, complete with a success with data, complete with a
-  revert, and diverge. Without it an empty input type, `InProfile := False`
-  or a `sem` that ignores the program would make every contract vacuous.
+- `SourceSpec.NonVacuous`: admitted inputs (`S.Admitted i r`) whose
+  meanings, at allowed environments, complete with a success with data,
+  complete with a revert, and diverge. Without it an empty input type,
+  `Parses := False` or `InProfile := False` would make every contract vacuous.
+  (Integration review: the witnesses originally ranged over any resolution,
+  not an admitted input; fixed on integration.)
 
 The obligations of the roadmap read off this contract as follows:
 
