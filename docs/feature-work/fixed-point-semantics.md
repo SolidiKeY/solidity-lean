@@ -271,9 +271,23 @@ with it. This task did not edit the manifest.
 
 ## Gates
 
-Recorded in the handoff (`CLOUD-RESULT`) of this task: Lean diagnostics,
-`check-layers`, `check-orphans`, `check-trust`, `check-doc-paths`, and the
-full `./run-lean.sh`.
+Run on 2026-10-29 (4 cores, 15 GB):
+
+- Lean server diagnostics on `Solidity/Language/FixedPoint.lean`: no
+  messages; no `sorry`, axiom, `native_decide`, `implemented_by` or
+  `maxHeartbeats` in it.
+- `node scripts/check-layers.mjs`: 155 core modules, 0 reach the elaborator;
+  `node scripts/check-orphans.mjs`: 734 reachable, 0 orphaned;
+  `bash scripts/check-trust.sh`: 0 findings;
+  `bash scripts/check-doc-paths.sh`: 46 missing references, as at the base.
+- `./run-lean.sh`: the first run (61 min 38 s wall clock) built the default
+  target (719 jobs) and lost `Solidity.TestSuite.Derived17` to the out-of-memory
+  killer (Lean exit 137; about 15.6 GB in use machine-wide, Lean server
+  included) while the TestSuite modules built in parallel. The re-run at
+  `c51a819` (4 min 16 s) built both targets ("Build completed successfully",
+  719 and 262 jobs; `Derived17` alone in 226 s, peak about 13.4 GB in use),
+  then `check-solkey.sh` reported 37 mismatches — the base's count — and
+  exited 1 for them.
 
 ## Review
 
