@@ -277,11 +277,6 @@ end Ctx
 
 /-! ## Operand rules -/
 
-/-- The type two operands meet at: one converts implicitly to the other. -/
-def STy.common? (isBase : DeclName → DeclName → Bool) (a b : STy) : Option STy :=
-  if a.implicit isBase b then Option.some b
-  else if b.implicit isBase a then Option.some a else Option.none
-
 /-- The smallest integer type holding an integral constant
 (`RationalNumberType::mobileType`): `uintM` for a non-negative one, `intM`
 for a negative one. -/
@@ -306,6 +301,38 @@ def STy.mobile : STy → STy
     | Option.some t => .int t
     | Option.none => .hexConst q n
   | .stringLit _ => .string .memory
+  | τ => τ
+
+/-- A constant's type: its rational, or a hexadecimal literal's. -/
+def STy.isConstTy : STy → Bool
+  | .rational _ | .hexConst _ _ => true
+  | _ => false
+
+/-- Whether a type is `bytesN`. -/
+def STy.isFixedBytes : STy → Bool
+  | .fixedBytes _ _ => true
+  | _ => false
+
+/-- **The type two operands meet at** (solc's `Type::commonType` with its
+mobile-type step): the left operand's mobile type if the right converts to
+it, else the right's mobile type if the left converts to it.  Two constants
+never meet (they fold), and a constant on the left of a `bytesN` operand
+does not either (solc's `RationalNumberType::binaryOperatorResult`). -/
+def STy.common? (isBase : DeclName → DeclName → Bool) (a b : STy) : Option STy :=
+  if a.isConstTy && (b.isConstTy || b.isFixedBytes) then Option.none
+  else if b.implicit isBase a.mobile then Option.some a.mobile
+  else if a.implicit isBase b.mobile then Option.some b.mobile else Option.none
+
+/-- The type of a shift's or power's left operand: a constant at `uint256`
+(`int256` when negative), as solc types `lit << x` and `lit ** x` with a
+non-constant amount; any other type as it is. -/
+def STy.shiftTy : STy → STy
+  | .rational q =>
+    if q.FitsInt IntTy.u256 then .int IntTy.u256
+    else if q.FitsInt ⟨true, 256, by decide⟩ then .int ⟨true, 256, by decide⟩ else .rational q
+  | .hexConst q n =>
+    if q.FitsInt IntTy.u256 then .int IntTy.u256
+    else if q.FitsInt ⟨true, 256, by decide⟩ then .int ⟨true, 256, by decide⟩ else .hexConst q n
   | τ => τ
 
 /-- Numbers: integers and fixed-point values (`+ - * / %`, order). -/
@@ -439,12 +466,17 @@ def Syn.isAddressLit : {c : Cat} → Syn c → Bool
 an address, not bytes.  solc types such a literal as a constant that also
 converts to `bytes{len}` (`STy.hexConst`). -/
 def Syn.hexLen? : {c : Cat} → Syn c → Option Nat
-  | _, .lit (.num (.hex ds cs)) =>
-    if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧ ¬ (cs = true ∧ ds.length = 40) then
+  | _, .lit (.num (.hex ds _)) =>
+    if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧ ¬ (39 ≤ ds.length ∧ ds.length ≤ 41) then
       Option.some (ds.length / 2)
     else Option.none
   | _, .tuple (.some e) .nil => e.hexLen?
   | _, _ => Option.none
+
+/-- The placeholder identifier `_`. -/
+def Syn.isUnderscore : {c : Cat} → Syn c → Bool
+  | _, .ident "_" => true
+  | _, _ => false
 
 /-- A declaration statement (solc refuses one as the body of `if` or a
 loop: "Variable declarations can only be used inside blocks"). -/
@@ -632,16 +664,17 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
       τ.isBits = true → Typed Γ e τ
   /-- `a << b`, `a >> b`: an integer or `bytesN` by an unsigned amount, at
-  `a`'s type (a constant `a` with a non-constant amount: its mobile type).
+  `a`'s type (a constant `a` with a non-constant amount: `uint256`, or
+  `int256` when negative, `STy.shiftTy`).
   Two constant operands are folded (`const`), never typed here. -/
   | shift {e a b : Syn .expr} {τa τb : STy} : e.binOp? = Option.some (.shift, a, b) →
-      Typed Γ a τa → Typed Γ b τb → τa.mobile.isBits = true → τb.isAmount = true →
-      (a.const.isSome && b.const.isSome) = false → Typed Γ e τa.mobile
-  /-- `a ** b`: an integer to an unsigned power, at `a`'s (mobile) type; two
+      Typed Γ a τa → Typed Γ b τb → τa.shiftTy.isBits = true → τb.isAmount = true →
+      (a.const.isSome && b.const.isSome) = false → Typed Γ e τa.shiftTy
+  /-- `a ** b`: an integer to an unsigned power, at `a`'s type (`STy.shiftTy`); two
   constants are folded. -/
   | exp {e a b : Syn .expr} {τa τb : STy} : e.binOp? = Option.some (.exp, a, b) →
-      Typed Γ a τa → Typed Γ b τb → τa.mobile.isInt = true → τb.isAmount = true →
-      (a.const.isSome && b.const.isSome) = false → Typed Γ e τa.mobile
+      Typed Γ a τa → Typed Γ b τb → τa.shiftTy.isInt = true → τb.isAmount = true →
+      (a.const.isSome && b.const.isSome) = false → Typed Γ e τa.shiftTy
   | order {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.order, a, b) →
       Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
       τ.isOrdered = true → Typed Γ e .bool
@@ -821,8 +854,11 @@ contract, return types, `msg.value` and modifier flags, which no statement
 changes): `s` is well typed with locals `L` and leaves locals `L'` (a
 declaration adds one; a block's locals end with it). -/
 inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k) → List (String × STy) → Type where
+  /-- An expression statement; in a modifier, `_;` is the placeholder, not an
+  expression. -/
   | expr {k : SCtx} {L : List (String × STy)} {e : Syn .expr} {τ : STy} :
-      Typed (C.at L) e τ → StmtD C (k := k) L (.simpleStmt (.exprStmt e)) L
+      Typed (C.at L) e τ → (C.inModifier && e.isUnderscore) = false →
+      StmtD C (k := k) L (.simpleStmt (.exprStmt e)) L
   /-- `_;` in a modifier body. -/
   | placeholder {k : SCtx} {L : List (String × STy)} : C.inModifier = true →
       StmtD C (k := k) L (.simpleStmt (.exprStmt (.ident "_"))) L
@@ -867,7 +903,7 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       Typed (C.at L) e σ → σ.implicit C.isBase τ = true → StmtD C (k := k) L (.returnStmt (.some e)) L
   /-- `return (a, b, …);`: each component converts to its return type. -/
   | retTuple {k : SCtx} {L : List (String × STy)} {e : Syn .expr} {s : Syn (.list (.opt .expr))}
-      {σ : STy} {σs : List STy} : Typed (C.at L) e σ → TypedSlots (C.at L) s σs →
+      {σ : STy} {σs : List STy} : Typed (C.at L) e σ → TypedSlots (C.at L) s σs → σs ≠ [] →
       argsFit C.isBase (σ :: σs) C.rets = true →
       StmtD C (k := k) L (.returnStmt (.some (.tuple (.some e) s))) L
   /-- `emit E(args);`: exactly one event accepts the arguments. -/

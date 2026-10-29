@@ -72,24 +72,6 @@ def Syn.binOpName : Syn .expr → BinOp
 /-- A conversion where two operand types meet: implicit, or none. -/
 def Conv (B : DeclName → DeclName → Bool) (σ τ : STy) : Prop := σ.implicit B τ = true ∨ σ = τ
 
-theorem common?_left {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
-    Conv B a c := by
-  simp only [STy.common?] at h
-  split at h
-  · cases h; exact .inl (by assumption)
-  · split at h
-    · cases h; exact .inr rfl
-    · cases h
-
-theorem common?_right {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
-    Conv B b c := by
-  simp only [STy.common?] at h
-  split at h
-  · cases h; exact .inr rfl
-  · split at h
-    · cases h; exact .inl (by assumption)
-    · cases h
-
 /-- A constant's mobile integer type holds it. -/
 theorem Q.mobileInt?_fits {q : Q} {t : IntTy} (h : q.mobileInt? = some t) : q.FitsInt t := by
   simp only [Q.mobileInt?] at h
@@ -122,6 +104,47 @@ theorem mobile_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ 
     | some t =>
       exact .inl (decide_eq_true (Q.mobileInt?_fits hm))
   | stringLit bs => exact .inl rfl
+  | _ => exact .inr rfl
+
+theorem common?_left {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
+    Conv B a c := by
+  simp only [STy.common?] at h
+  split at h
+  · cases h
+  · split at h
+    · cases h; exact mobile_conv
+    · split at h
+      · cases h; exact .inl (by assumption)
+      · cases h
+
+theorem common?_right {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
+    Conv B b c := by
+  simp only [STy.common?] at h
+  split at h
+  · cases h
+  · split at h
+    · cases h; exact .inl (by assumption)
+    · split at h
+      · cases h; exact mobile_conv
+      · cases h
+
+/-- A shift's or power's left operand converts to its operand type. -/
+theorem shiftTy_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ τ.shiftTy := by
+  cases τ with
+  | rational q =>
+    simp only [Conv, STy.shiftTy]
+    split
+    · exact .inl (decide_eq_true (by assumption))
+    · split
+      · exact .inl (decide_eq_true (by assumption))
+      · exact .inr rfl
+  | hexConst q n =>
+    simp only [Conv, STy.shiftTy]
+    split
+    · exact .inl (decide_eq_true (by assumption))
+    · split
+      · exact .inl (decide_eq_true (by assumption))
+      · exact .inr rfl
   | _ => exact .inr rfl
 
 /-- A member found by name has its type at its position. -/
@@ -283,8 +306,8 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .delete l _ => .delete l.toR
   | .arith (e := e) _ da db h _ _ => .binary e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
   | .bit (e := e) _ da db h _ => .binary e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
-  | .shift (e := e) _ da db _ h _ => .shiftLike e.binOpName (.conv da.toR mobile_conv) db.toR h
-  | .exp _ da db _ h _ => .shiftLike .exp (.conv da.toR mobile_conv) db.toR h
+  | .shift (e := e) _ da db _ h _ => .shiftLike e.binOpName (.conv da.toR shiftTy_conv) db.toR h
+  | .exp _ da db _ h _ => .shiftLike .exp (.conv da.toR shiftTy_conv) db.toR h
   | .order (e := e) _ da db h _ => .compare e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
   | .eq (e := e) _ da db h _ => .compare e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
   | .compareConst (e := e) (qa := qa) (qb := qb) _ _ _ _ => .compareConst e.binOpName qa qb
@@ -429,7 +452,7 @@ mutual
 /-- **Elaboration of statements.** -/
 def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt k)} :
     StmtD C L s L' → RStmt C.env C.rets C.inModifier k (tysOf L) (tysOf L')
-  | .expr d => .expr d.toR
+  | .expr d _ => .expr d.toR
   | .placeholder h => .placeholder h
   | .declVar (τ := τ) _ _ => .declVar τ
   | .declInit _ _ d h => .declInit d.toR h
@@ -444,7 +467,7 @@ def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt
   | .cont => .cont
   | .ret h => .ret h
   | .retVal hR d h => .retVal hR d.toR h
-  | .retTuple d ds h => .retTuple (RArgs.convert C.rets (.cons d.toR (TypedArgs.ofSlots ds)) h)
+  | .retTuple d ds _ h => .retTuple (RArgs.convert C.rets (.cons d.toR (TypedArgs.ofSlots ds)) h)
   | .emit (d := d) da hf =>
     let p := paramsOf C.env C.isBase _ d (mem_of_filter_eq hf)
     .emit d p.2.1 (RArgs.convert p.1 da.toR p.2.2)

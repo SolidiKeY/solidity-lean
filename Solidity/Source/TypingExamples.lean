@@ -99,7 +99,7 @@ def w_msgSender : Typed Γ (.member (.ident "msg") "sender") (.address false) :=
 /-- `require(b, "no");` -/
 def w_require : StmtD (k := .body) Γ Γ.locals (.simpleStmt (.exprStmt (.call (.ident "require")
     (.positional (.cons (.ident "b") (.cons (.lit (.str [110, 111])) .nil)))))) Γ.locals :=
-  .expr (.builtinCall rfl rfl (.cons ty_b (.cons (.str _) .nil)) rfl)
+  .expr (.builtinCall rfl rfl (.cons ty_b (.cons (.str _) .nil)) rfl) rfl
 
 /-- `gasleft()` has no typing rule: an excluded builtin. -/
 theorem gasleft_untyped (τ : STy) (h : HasType Γ (.call (.ident "gasleft") (.positional .nil)) τ) : False := by
@@ -309,19 +309,7 @@ theorem Typed.lit_num {Γ : Ctx} {n : NumLit} {σ : STy} (h : Typed Γ (.lit (.n
     σ = .rational n.value ∨ (∃ len, σ = .hexConst n.value len) ∨ σ = .address false := by
   cases h with
   | const hq =>
-    have hv : ∀ {q : Q}, (Syn.lit (.num n) : Syn .expr).const = some q → q = n.value := by
-      intro q h
-      cases n with
-      | dec m f x => cases h; rfl
-      | hex ds cs =>
-        cases cs
-        · cases h; rfl
-        · by_cases h40 : ds.length = 40
-          · change (if ds.length = 40 then Option.none else Option.some _) = _ at h
-            rw [if_pos h40] at h; cases h
-          · change (if ds.length = 40 then Option.none else Option.some _) = _ at h
-            rw [if_neg h40] at h; cases h; rfl
-    rw [hv hq]
+    rw [Syn.const_lit_eq hq]
     exact Or.inl rfl
   | litBytes _ => exact Or.inr (Or.inl ⟨_, rfl⟩)
   | litAddress _ => exact Or.inr (Or.inr rfl)
@@ -432,7 +420,7 @@ theorem counter_decls_eq : counter.decls =
 def incBody : ItemsD (k := .body)
     ({ env := counter.env, scope := some "Counter", locals := [], rets := [], msgValue := false } : Ctx)
     [] (.cons incStmt .nil) [] :=
-  .stmt (.expr (.incDecSuffix (.state rfl rfl rfl) rfl)) .nil
+  .stmt (.expr (.incDecSuffix (.state rfl rfl rfl) rfl) rfl) .nil
 
 /-- **The counter is well formed** (and inside the profile's syntax). -/
 theorem counter_wellFormed : WellFormed counterRes ∧ InProfileSyntax counterRes := by

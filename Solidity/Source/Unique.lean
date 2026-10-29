@@ -30,15 +30,10 @@ def Syn.hexLit? : {c : Cat} → Syn c → Option NumLit
   | _, .tuple (.some e) .nil => e.hexLit?
   | _, _ => Option.none
 
-/-- A constant's type: its rational, or a hexadecimal literal's. -/
-def STy.isConstTy : STy → Bool
-  | .rational _ | .hexConst _ _ => true
-  | _ => false
-
 /-- **Two constant types never meet**: no implicit conversion between them. -/
 theorem STy.common?_const {B : DeclName → DeclName → Bool} {a b : STy} (ha : a.isConstTy = true)
     (hb : b.isConstTy = true) : STy.common? B a b = Option.none := by
-  cases a <;> cases b <;> first | rfl | (simp only [STy.isConstTy, Bool.false_eq_true] at ha hb)
+  simp only [STy.common?, ha, hb, Bool.true_or, Bool.and_self, if_true]
 
 /-- A bind that succeeds had a value. -/
 theorem Option.isSome_of_bind_eq_some {α β : Type} {o : Option α} {f : α → Option β} {b : β}
@@ -123,15 +118,13 @@ theorem Syn.const_hexLit {n : NumLit} {len : Nat} (h : (Syn.lit (.num n)).hexLen
   cases n with
   | dec m f x => rfl
   | hex ds cs =>
-    cases cs
-    · rfl
-    · by_cases h40 : ds.length = 40
-      · change (if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧ ¬ (true = true ∧ ds.length = 40) then
-          Option.some (ds.length / 2) else Option.none) = Option.some len at h
-        rw [if_neg (fun hc => hc.2.2.2 ⟨rfl, h40⟩)] at h
-        cases h
-      · show (if ds.length = 40 then Option.none else Option.some _) = _
-        rw [if_neg h40]
+    change (if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧ ¬ (39 ≤ ds.length ∧ ds.length ≤ 41) then
+      Option.some (ds.length / 2) else Option.none) = Option.some len at h
+    split at h
+    · rename_i hc
+      show (if 39 ≤ ds.length ∧ ds.length ≤ 41 then Option.none else Option.some _) = _
+      rw [if_neg hc.2.2.2]
+    · cases h
 
 /-- The shape of a constant expression's derivation: its rational, or a
 hexadecimal literal's type; elaborated to that constant. -/
@@ -167,8 +160,8 @@ theorem Typed.constShape {Γ : Ctx} {e : Syn .expr} {τ : STy} {q : Q} (d : Type
     simp only [Typed.toR]
     exact h'
   case litAddress ds h40 =>
-    change (if ds.length = 40 then Option.none else Option.some _) = Option.some q at hq
-    rw [if_pos h40] at hq; cases hq
+    change (if 39 ≤ ds.length ∧ ds.length ≤ 41 then Option.none else Option.some _) = Option.some q at hq
+    rw [if_pos ⟨by omega, by omega⟩] at hq; cases hq
   case tuple e s τ1 τs d1 sl hne =>
     cases sl
     · exact absurd rfl hne
