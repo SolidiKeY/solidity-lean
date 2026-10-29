@@ -188,3 +188,86 @@ also reviewed and will receive the task-specific closure check in final gates.
 `cp2-doc-paths.log` retains exactly the same 46 inherited path findings as the
 exact base, zero new findings. Both independent reviews are closed. Checkpoint
 2 is locally complete; full/import closure remains pending.
+
+## Checkpoint 3: intrinsic cryptographic builtins
+
+`Crypto` reuses `Storage.HashedKeccak.keccak256_bytes`/`ofBytes_lt` read-only
+for `keccak_bound`. `source_digest` proves the existing intrinsic `keccakBytes`
+agrees with the real computed digest on the exact normalized bytes. It adds no
+hash axiom or injectivity premise. `digest_fixed` agrees with G06's concrete
+`Roadmap.Evm.keccakWord`. `wireBytes_values` preserves the actual intrinsic
+`b.toNat % 256` convention, including values above 255 and negative integers.
+
+`keccakCode` emits PUSH32 length, PUSH32 offset, KECCAK256. `cryptoStep` states
+its target memory/stack meaning independently of selection. `keccak_correct`
+proves exact preimage/result and arbitrary stack-tail preservation.
+`HashInput` requires exact represented bytes and a nonwrapping interval.
+`intrinsic_keccak` connects the existing `Val.hash`/`MPath.mvalT`/`Heap.hash`
+denotation to execution for arbitrary typed state, heap, ledger and external
+response table. `lowerHash_success`, `lowerHash_failure` and
+`intrinsic_hash_failure` preserve the one path evaluation and its precise halt.
+No source semantics depends on compilation. The surrounding memory compiler
+must establish source-object layout/allocation and the HashInput boundary.
+
+`Namespace.namespace_source` proves the existing `ERC7201.root` on any represented
+byte string. It emits two actual KECCAK256 instructions, SUB with wrapping,
+MSTORE of exactly `Semantics.wordBytes` of the predecessor, and SHR/SHL by 8
+to clear the low byte. `namespace_preimage`, `root_value`, `namespace_result`
+and `namespace_suffix_correct` expose the intermediate bytes and result.
+`NamespaceInput` requires the input and caller-owned 32-byte scratch intervals
+to fit. Scratch can overlap the consumed input because its write follows the
+first hash. Other live source regions must be framed by the caller. No physical
+storage namespace disjointness or collision claim is made.
+
+For SHA256/RIPEMD160/ECRECOVER, `precompileResult` reuses the existing committed
+`Precompiles.Basic` computations. `precompileAddress`, `precompilePrefix`,
+`precompile_operands`, `precompile_preimage` and `precompileCode` select real
+STATICCALL code with exact input bytes and operands. GAS is forwarding machinery,
+not an admitted source observation. The suffix POP/PUSH32 output/MLOAD extracts
+the word. Output memory must fit, be caller-owned and be zero initialized for
+ECRECOVER's empty result. The CALL/precompile execution/result-copy/gas/failure
+composition remains explicitly open, as assigned; no symbolic instruction is
+counted as executable lowering. Invalid intrinsic ECRECOVER lengths return zero
+(`ecrecover_wrong_length`), so `builtinCode` preserves that case with PUSH0 after
+argument evaluation instead of invoking the precompile's zero-padding semantics.
+The valid 128-byte case has its own inhabited intrinsic heap/path control.
+
+`CryptoChecks` includes a typed four-byte heap/path, a preserved nonempty stack,
+normalized bytes, unset-argument failure, wrong operand/preimage order, namespace
+execution, exact Keccak and precompile suffix bytes, and ecrecover128/fallback
+controls. Headline axioms are pinned to propext/Classical.choice/Quot.sound only.
+
+The first namespace proof hit kernel deep recursion while expanding a large
+formula; it stayed failed. The final proof uses separate bounded-word/digest
+lemmas, without raising maxRecDepth, maxHeartbeats or resource budgets.
+`cp3-controls5.log` passes: 45 jobs, exit 0, 2 seconds, sampled aggregate RSS
+781660 KiB, cgroup peak 229056512 bytes. Finder found missing positive 128-byte
+ECRECOVER branch coverage; `recovery_positive` and `precompile_suffix_bytes`
+were added, and finder verified resolution read-only without Lean/server/build.
+
+`tests/backend-environment/Emit.lean` exports the actual Backend.encode outputs;
+`vectors.mjs` runs them in pinned EthereumJS EVM 10.1.3, Osaka. The 12 programs
+cover all five environment reads, arbitrary-address BALANCE with high bits,
+numeric/ABI selectors, Keccak, ERC-7201, SHA256/RIPEMD160, invalid and valid
+nonzero ECRECOVER, malformed-length fallback, and UTF-8 name materialization.
+All pass (`cp3-evm-vectors2.log`, exit 0, 1 second, sampled RSS 728380 KiB).
+These are external tests, not general pinned-EVM proofs or whole-pipeline proofs.
+The runtime image installs only standard checking tools; Lean/Node toolchains
+and the preserved original Git metadata are mounted read-only for checks.
+
+Skeptic found that the external harness could silently accept omitted/duplicate
+vector names. It now asserts exact equality with the expected program-name set;
+this is fixed before checkpoint closure. `lowerHash` is explicitly an evaluated-
+argument, state-indexed adapter, not a state-independent whole compiler. The
+surrounding compiler must integrate hoisted argument effects, allocation and
+runtime parameter placement. Those parent obligations are not claimed here.
+
+Checkpoint-3 closure: all three per-file JSON diagnostics are clean
+(`cp3-diagnostics.log`, exit 0, 6 seconds, sampled aggregate RSS 768168 KiB).
+Layer/orphan/trust gates pass: 168 core modules/zero elaborator reach,
+774 reachable/zero orphaned, 789 sources/zero trust findings. Documentation-path
+check has exactly the same 46 inherited failures as the base, zero new findings.
+The corrected exact-name harness passes all 12 programs (`cp3-evm-vectors3.log`).
+Both independent read-only reviewers verified their findings resolved, without
+Lean/server/build. Checkpoint 3 is locally complete; final import/full gates and
+checkpoint 4/backfill remain pending.

@@ -670,3 +670,6 @@ import Solidity.Backend.Environment.ObservationsChecks
 import Solidity.Backend.Environment.Metadata
 import Solidity.Backend.Environment.ByteConstants
 import Solidity.Backend.Environment.MetadataChecks
+import Solidity.Backend.Environment.Crypto
+import Solidity.Backend.Environment.Namespace
+import Solidity.Backend.Environment.CryptoChecks
