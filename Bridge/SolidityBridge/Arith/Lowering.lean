@@ -62,13 +62,13 @@ theorem castCapture_factor (C : Contract) (f : String) (e : RawExpr) (p : PrimTy
 theorem intTyOf_head (C : Contract) (Γ : ECtx) (x : String) (p : PrimTy) (n : Nat) :
     intTyOf C ((x, .val p n) :: Γ) (.name x) = some (p, n) := by
   change (match Semantics.lookupBy x ((x, .val p n) :: Γ) with
-    | some (.val p n) => some (p, n)
+    | some (.val p n _) => some (p, n)
     | some _ => some (.uint, 256)
     | none => match C.rootType x with
       | some (.prim p) => some (p, (Semantics.lookupBy x C.widths).getD 256)
       | _ => some (.uint, 256)) = _
-  rewrite [Semantics.lookupBy, if_pos rfl]
-  rfl
+  rw [Semantics.lookupBy, if_pos rfl]
+
 
 /-- Actual unsigned wrapping rewrite, including full width and ordinary nonliteral operands. -/
 theorem narrowWrap_uint (C : Contract) (unc : Bool) (Γ : ECtx) (op : WrapOp)
@@ -125,7 +125,7 @@ theorem narrowWrap_uint_bnot (C : Contract) (unc : Bool) (Γ : ECtx)
       .ok (.binop .subW (.num (2 ^ n - 1)) a) := by
   rw [narrowWrapNode, ht]
   have hp : (PrimTy.uint == PrimTy.int) = false := rfl
-  simp only [hp, Bool.and_false, Bool.false_eq_true, if_false,
+  simp only [hp, Bool.and_false, Bool.false_and, Bool.false_eq_true, if_false,
     if_neg (not_le.mpr hn), pure, Except.pure, bind, Except.bind]
 
 theorem narrowWrap_uint_shl (C : Contract) (unc : Bool) (Γ : ECtx)

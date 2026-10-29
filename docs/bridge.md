@@ -550,7 +550,7 @@ The task's exact guarded commands and temporary single-thread configurations
 are retained in its evidence.
 
 
-### Resumed Widths prerequisite (2026-10-29)
+### Resumed Widths prerequisite (checkpoint d44a19bf; superseded below)
 
 The continuation authorizes narrow shared proof maintenance in
 `Bridge/SolidityBridge/Arith/Widths.lean`. The initial resumed fetch was
@@ -658,6 +658,146 @@ changed. The next proposed investigation is source-level profiling of Derived17
 by its loop/closer owner under these bounds; this storage task does not take over the
 excluded loop work. The semantic Widths decision is independently necessary.
 The original-assignment completion decision remains **blocked**, not complete.
+
+### Human-approved signed-SHR maintenance (2026-10-29)
+
+The human explicitly approved the exact exception
+`p = .int → op ≠ .shr` for the four internal generic Widths synth/check
+helpers, and required a separate signed-SHR proof. This resolves the earlier
+Widths decision; it authorizes no other weakening. The four helpers now have
+that premise. All 34 other original Widths theorem statements, all 21
+NarrowChecked statements and all 19 Lowering statements remain unchanged.
+NarrowChecked's callers discharge the new premise trivially. Stable structural
+unfolding also repairs its negative-literal anchor. Existing width/cast results
+are kernel checked again (isolated Widths: exit 0; 9.77 s; 1,738,887,168-byte
+peak group RSS; NarrowChecked: exit 0; 8.15 s; 1,730,707,456 bytes).
+
+`Bridge/SolidityBridge/Arith/WidthsSignedShift.lean` separately proves the actual
+source checker branches. Both check the count as uint. A literal count uses
+`min n 256`; a nonliteral count is compared with uint 256 before conversion
+to int. The theorems retain explicit successful checker/literal setup premises.
+A concrete empty contract inhabits checked inputs at counts 0, 255, 256 and
+257, as well as the nonliteral cast-count branch. The old unrestricted-helper
+counterexamples in `Bridge/SolidityBridge/Arith/WidthsObstructions.lean` remain
+unchanged. The separate branch laws and controls passed at the default recursion
+limit (exit 0; 3.82 s; 1,675,149,312 bytes); their pinned axiom audits contain
+only `[propext, Quot.sound]`. These are source-checker syntax laws, not a new
+universal source-arithmetic or physical-layout refinement claim.
+
+#### Retained-failure-data guard decision
+
+Full Bridge reached a further false contract in
+`Bridge/SolidityBridge/Arith/Lowering.lean`: `narrowCheck_guard` describes its
+RHS using `scope.selfFrame` alone. Current source lowering uses
+`scope.selfFrame || scope.retainFailureData` in both the explicit-overflow and
+default guard branches. The new
+`Bridge/SolidityBridge/Arith/LoweringObstructions.lean` proves the actual
+source equation and negates the exact old unrestricted schema. Its concrete
+empty contract, uint8 local, `selfFrame=false`, `retainFailureData=true`,
+default overflow mode and empty memo satisfy every old premise. Actual lowering
+emits a panic-data guard; the old RHS emits an ordinary require. A typed
+statement observation distinguishes the results. The actual equation, setup,
+concrete counterexample and exact-schema negation passed (exit 0; 3.02 s;
+1,689,808,896-byte peak group RSS), with only `[propext, Quot.sound]`.
+
+The exact proposed correction is to use the OR of the two flags in both RHS
+positions. A separate human decision has been requested; the signed-SHR
+approval does not authorize it. The old Lowering contract has not been changed.
+The independent local-type and Boolean simplification proof repairs retain
+those statements. Original-assignment completion and a green full Bridge gate
+are not claimed while this contract is pending.
+
+#### Primary cgroup validation
+
+After resuming this same saved VM, its local Docker daemon could enforce the
+original primary policy. The task's directory-only carrier mounts the existing
+published runtime read-only and the existing workspace read/write; it downloads
+no image/toolchain/source environment. Workspace device/inode and actual
+Lean 4.24.0 / Lake 5.0.0 output match the outer executor. The runtime mounts for
+the Derived17 check are `/usr`, `/bin`, `/lib` and `/lib64`; core validation
+additionally mounts `/opt` for the published Node runtime.
+
+Actual kernel files verify the workload's hard 12 GiB memory limit and zero
+swap allowance. A read-only ancestor inspection verifies the same VM's hard
+16 GiB ancestor. Executor and Docker workload cgroups are siblings beneath that
+ancestor, not a direct parent/child pair. This is the approved primary cgroup
+policy, with no per-process address-space limit; it is not a passing fallback
+AS/RSS-guard run. The earlier fallback stops remain failed.
+
+The exact original Derived17 Lake target passed unchanged: exit 0; 201.34 s;
+10,977,157,120-byte sampled aggregate RSS; 10,909,995,008-byte peak charged
+cgroup memory; no max/OOM/OOM-kill events. No fixture, proof, sharding, tactic
+step, heartbeat, search or test budget changed. The first eight unchanged
+proofs had separately passed at 2,225,348,608-byte peak RSS; the isolated
+1024-step nested-return proof exceeded the fallback's 10 GiB RSS stop. Splitting at existing theorem boundaries did not remove that measured
+individual-proof peak; this does not rule out other proof factoring. No core
+loop/closer work was taken over.
+
+The original `./run-lean.sh` core/TestSuite/sort command runs under the same
+primary bounds with explicit Lean `-j1` and `LEAN_NUM_THREADS=1`. An initial
+carrier invocation failed before validation because Node was absent from PATH;
+that failed log is retained. The corrected run reached 526 build jobs without
+proof errors but hit its 1800-second timeout (exit 75; 7,889,965,056-byte sampled
+RSS; 8,189,521,920-byte charged cgroup peak). It is not a pass. The next attempt
+restores the published CLI asynchronous-elaboration default, retains all numeric
+proof/search/test budgets and the same timeout/hard resource bounds, and reuses
+the completed disk caches. Its terminal result must be recorded separately.
+
+All logs, primary/fallback policy scopes, exact configuration snapshots, human
+approval, failed commands and read-only review outcomes accompany the cumulative
+handoff. No source support inventory is promoted by this optional finite-model
+compiler refinement or by internal proof maintenance. The original global
+storage-encoding obstruction and the physical-layout/assembly exclusions remain.
+
+The published-default-schedule full-script attempt also timed out (exit 75;
+1800.07 s; 5,947,494,400-byte sampled RSS; 5,283,250,176-byte charged peak),
+after 577 jobs and without proof errors. A bounded library prerequisite then
+timed out in OpenLoops (exit 75; 600.01 s; 6,750,101,504-byte sampled RSS;
+5,792,980,992-byte charged peak). Both remain failed. Isolating the exact
+OpenLoops module within the existing 1800-second maximum passed unchanged
+(exit 0; 750.89 s; 9,120,841,728-byte sampled RSS; 8,168,312,832-byte charged
+peak; no OOM events). No allocator-cadence change was needed for that isolated pass. Subsequent cold
+library validation timed out again (600.01 s; sampled RSS 3,967,377,408 bytes;
+charged peak 3,049,177,088 bytes), after 608 jobs without proof errors. The next
+library attempt restores only the documented default collection cadence of
+10000 from 100, under the same limits and proof budgets; its outcome remains
+pending. Separate library/executable/TestSuite prerequisites and the original
+full-script confirmation still require their own terminal outcomes.
+
+The preserved primary runner V1 had an exceptional-path reporting defect:
+a missing executable produced a CLI success with a null underlying exit code.
+This was reproduced as an explicitly labeled negative control, not a passing
+command. Historical successful checks retain valid underlying child exit 0
+and completed-build output; their results do not rely on that error path.
+V2 fails closed on launcher/monitor exceptions and passed both the missing-command
+(exit 75) and normal-success (exit 0) controls. V1 and its exact historical
+reports remain preserved; subsequent checks use V2. The installed fallback
+`bounded.py` was not modified.
+
+The latest independent affected-target check passed the current Widths,
+separate signed-shift, counterexample, narrow, finite-storage and unchanged
+global-obstruction targets. The fixed-seed executable again passed 36 cases
+× 1000 samples, seed 42. Broad local-type simplification initially hit the
+existing 200000-heartbeat limit; the proof now matches the current three-field
+`LocalTy.val` equation directly and rewrites the known head lookup. This removed
+that error without raising the limit. The isolated Lowering module now fails
+only at the unchanged, separately unapproved guard contract.
+
+The latest fresh affected-target check passed (exit 0; 26.14 s; sampled RSS
+1,740,263,424 bytes; charged peak 374,431,744 bytes), including every new
+independent source-checker/counterexample module, narrow laws, finite-storage
+controls and unchanged global obstruction. The fixed-seed executable passed
+(exit 0; 2.52 s; sampled RSS 462,655,488 bytes; charged peak 245,403,648 bytes).
+The current isolated Lowering gate reports only the original false guard
+contract (exit 1; 6.65 s); failed recovery audits are not certificates.
+
+Independent read-only finder and skeptic reviews found no new soundness or
+scope defect, confirmed the exact four approved premise changes and unchanged
+other headers, and verified the concrete retained-data obstruction. Neither
+used Lean tools, a Lean server or a build. Their requested qualifications about
+proof factoring, primary-policy scope and historical runner reports are retained
+here. This local proof checkpoint is not original-assignment completion: the
+full core script and full Bridge gate are still pending/red as described above.
 
 To build the independent targets alone, from `Bridge/`:
 

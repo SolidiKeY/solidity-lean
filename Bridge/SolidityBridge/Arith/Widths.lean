@@ -41,14 +41,21 @@ theorem synth_binary {C : Contract} {Γ : NCtx} (p : PrimTy) (e b : RawExpr)
     (v w : Val C Γ.ctx p) (op : BinOp) (ha : op.accepts p = true)
     (hc : e.constRat? = none) (hl : e.isLit = false)
     (hs : Solidity.synth C Γ e = .ok (.val p v))
-    (hv : Solidity.check C Γ p e = .ok v) (hw : Solidity.check C Γ p b = .ok w) :
+    (hv : Solidity.check C Γ p e = .ok v) (hw : Solidity.check C Γ p b = .ok w)
+    (hshift : p = .int → op ≠ .shr) :
     Solidity.synth C Γ (.binop op e b) =
       .ok (.val (op.ret p) (.binop op ha rfl v w)) := by
-  rw [synth.eq_6]
+  have hp : (p == .int && op == .pow) = false := by
+    cases p <;> cases op <;> first | rfl | cases ha
+  have hr : (p == .int && op == .shr) = false := by
+    cases p <;> cases op <;> first | rfl | exact (hshift rfl rfl).elim
+  have hlft : (p == .int && op == .shl) = false := by
+    cases p <;> cases op <;> first | rfl | cases ha
+  unfold synth
   simp only [RawExpr.constRat?, hc, bind, Option.bind, pure, Except.pure, Except.bind,
-    hl, Bool.false_eq_true, if_false]
+    hl, Bool.false_and, Bool.false_eq_true, if_false]
   rw [hs]
-  simp only [TExpr.toVal?]
+  simp only [TExpr.toVal?, hp, hr, hlft, Bool.false_eq_true, if_false]
   split
   · rw [hv, hw]
   · rename_i hf
@@ -59,13 +66,14 @@ theorem check_binary {C : Contract} {Γ : NCtx} (p : PrimTy) (e b : RawExpr)
     (v w : Val C Γ.ctx p) (op : BinOp) (ha : op.accepts p = true)
     (hc : e.constRat? = none) (hl : e.isLit = false)
     (hs : Solidity.synth C Γ e = .ok (.val p v))
-    (hv : Solidity.check C Γ p e = .ok v) (hw : Solidity.check C Γ p b = .ok w) :
+    (hv : Solidity.check C Γ p e = .ok v) (hw : Solidity.check C Γ p b = .ok w)
+    (hshift : p = .int → op ≠ .shr) :
     Solidity.check C Γ (op.ret p) (.binop op e b) = .ok (.binop op ha rfl v w) := by
-  rw [Solidity.check.eq_3]
+  unfold Solidity.check
   simp only [RawExpr.constRat?, hc, hl, Bool.false_and, Bool.false_eq_true, bind,
     Option.bind, Except.bind, pure, Except.pure, if_false]
   unfold checkVia
-  rw [synth_binary p e b v w op ha hc hl hs hv hw]
+  rw [synth_binary p e b v w op ha hc hl hs hv hw hshift]
   simp only [bind, Except.bind, TExpr.toVal?, dite_true, pure, Except.pure]
 
 theorem synth_bin_literal {C : Contract} {Γ : NCtx} (p : PrimTy) (e : RawExpr)
@@ -73,14 +81,21 @@ theorem synth_bin_literal {C : Contract} {Γ : NCtx} (p : PrimTy) (e : RawExpr)
     (ha : op.accepts p = true) (hk : p.inRange (k : Int) = true)
     (hc : e.constRat? = none) (hl : e.isLit = false)
     (hs : Solidity.synth C Γ e = .ok (.val p v))
-    (hv : Solidity.check C Γ p e = .ok v) :
+    (hv : Solidity.check C Γ p e = .ok v)
+    (hshift : p = .int → op ≠ .shr) :
     Solidity.synth C Γ (.binop op e (.num k)) =
       .ok (.val (op.ret p) (.binop op ha rfl v (.simple (.lit k hk)))) := by
-  rw [synth.eq_6]
+  have hp : (p == .int && op == .pow) = false := by
+    cases p <;> cases op <;> first | rfl | cases ha
+  have hr : (p == .int && op == .shr) = false := by
+    cases p <;> cases op <;> first | rfl | exact (hshift rfl rfl).elim
+  have hlft : (p == .int && op == .shl) = false := by
+    cases p <;> cases op <;> first | rfl | cases ha
+  unfold synth
   simp only [RawExpr.constRat?, hc, bind, Option.bind, pure, Except.pure, Except.bind,
-    hl, Bool.false_eq_true, if_false]
+    hl, Bool.false_and, Bool.false_eq_true, if_false]
   rw [hs]
-  simp only [TExpr.toVal?]
+  simp only [TExpr.toVal?, hp, hr, hlft, Bool.false_eq_true, if_false]
   split
   · rw [hv, Solidity.check.eq_1, litAt_of_range p (k : Int) hk]
     rfl
@@ -93,14 +108,15 @@ theorem check_bin_literal {C : Contract} {Γ : NCtx} (p : PrimTy) (e : RawExpr)
     (ha : op.accepts p = true) (hk : p.inRange (k : Int) = true)
     (hc : e.constRat? = none) (hl : e.isLit = false)
     (hs : Solidity.synth C Γ e = .ok (.val p v))
-    (hv : Solidity.check C Γ p e = .ok v) :
+    (hv : Solidity.check C Γ p e = .ok v)
+    (hshift : p = .int → op ≠ .shr) :
     Solidity.check C Γ (op.ret p) (.binop op e (.num k)) =
       .ok (.binop op ha rfl v (.simple (.lit k hk))) := by
-  rw [Solidity.check.eq_3]
+  unfold Solidity.check
   simp only [RawExpr.constRat?, hc, hl, Bool.false_and, Bool.false_eq_true, bind,
     Option.bind, Except.bind, pure, Except.pure, if_false]
   unfold checkVia
-  rw [synth_bin_literal p e v op k ha hk hc hl hs hv]
+  rw [synth_bin_literal p e v op k ha hk hc hl hs hv hshift]
   simp only [bind, Except.bind, TExpr.toVal?, dite_true, pure, Except.pure]
 
 theorem synth_unary {C : Contract} {Γ : NCtx} (p : PrimTy) (e : RawExpr)
@@ -132,7 +148,7 @@ theorem check_mod_literal {C : Contract} (k : Nat)
       .ok (Val.binop .mod rfl rfl (.simple (.local (.here : Idx [.val .uint] (.val .uint))))
         (.simple (.lit k h))) :=
   check_bin_literal (Γ := wordContext) .uint (.name "x") (.simple (.local .here)) .mod k rfl h rfl rfl
-    synth_word check_word
+    synth_word check_word (by intro h; cases h)
 
 
 theorem check_low {C : Contract} (n : Nat) (hn : n < 256)
@@ -251,15 +267,15 @@ theorem check_signed {C : Contract} (n : Nat) (hn : n < 256)
   let v2 : Val C wordContext.ctx .uint := .binop .mod rfl rfl v1 (.simple (.lit (2 ^ n : Nat) hm))
   let v3 : Val C wordContext.ctx .uint := .binop .subW rfl rfl v2 (.simple (.lit (2 ^ (n - 1) : Nat) hh))
   have hs1 : Solidity.synth C wordContext e1 = .ok (.val .uint v1) :=
-    synth_bin_literal .uint e0 v0 .addW (2 ^ (n - 1)) rfl hh rfl rfl synth_word check_word
+    synth_bin_literal .uint e0 v0 .addW (2 ^ (n - 1)) rfl hh rfl rfl synth_word check_word (by intro h; cases h)
   have hv1 : Solidity.check C wordContext .uint e1 = .ok v1 :=
-    check_bin_literal .uint e0 v0 .addW (2 ^ (n - 1)) rfl hh rfl rfl synth_word check_word
+    check_bin_literal .uint e0 v0 .addW (2 ^ (n - 1)) rfl hh rfl rfl synth_word check_word (by intro h; cases h)
   have hs2 : Solidity.synth C wordContext e2 = .ok (.val .uint v2) :=
-    synth_bin_literal .uint e1 v1 .mod (2 ^ n) rfl hm rfl rfl hs1 hv1
+    synth_bin_literal .uint e1 v1 .mod (2 ^ n) rfl hm rfl rfl hs1 hv1 (by intro h; cases h)
   have hv2 : Solidity.check C wordContext .uint e2 = .ok v2 :=
-    check_bin_literal .uint e1 v1 .mod (2 ^ n) rfl hm rfl rfl hs1 hv1
+    check_bin_literal .uint e1 v1 .mod (2 ^ n) rfl hm rfl rfl hs1 hv1 (by intro h; cases h)
   have hs3 : Solidity.synth C wordContext e3 = .ok (.val .uint v3) :=
-    synth_bin_literal .uint e2 v2 .subW (2 ^ (n - 1)) rfl hh rfl rfl hs2 hv2
+    synth_bin_literal .uint e2 v2 .subW (2 ^ (n - 1)) rfl hh rfl rfl hs2 hv2 (by intro h; cases h)
   rw [signedAt, if_neg (not_le.mpr hn)]
   exact check_unary .uint e3 v3 .toInt rfl rfl hs3
 
@@ -408,7 +424,7 @@ theorem check_low_from {C : Contract} {Γ : NCtx} (e : RawExpr) (v : Val C Γ.ct
     (hv : Solidity.check C Γ .uint e = .ok v) :
     Solidity.check C Γ .uint (lowBits n e) = .ok (lowFrom v n hm) := by
   rw [lowBits, if_neg (not_le.mpr hn)]
-  exact check_bin_literal .uint e v .mod (2 ^ n) rfl hm hc hl hs hv
+  exact check_bin_literal .uint e v .mod (2 ^ n) rfl hm hc hl hs hv (by intro h; cases h)
 
 theorem check_signed_from {C : Contract} {Γ : NCtx} (e : RawExpr) (v : Val C Γ.ctx .uint)
     (n : Nat) (hn : n < 256)
@@ -425,17 +441,17 @@ theorem check_signed_from {C : Contract} {Γ : NCtx} (e : RawExpr) (v : Val C Γ
   let v2 : Val C Γ.ctx .uint := .binop .mod rfl rfl v1 (.simple (.lit (2 ^ n : Nat) hm))
   let v3 : Val C Γ.ctx .uint := .binop .subW rfl rfl v2 (.simple (.lit (2 ^ (n - 1) : Nat) hh))
   have hs1 : Solidity.synth C Γ e1 = .ok (.val .uint v1) :=
-    synth_bin_literal .uint e v .addW (2 ^ (n - 1)) rfl hh hc hl hs hv
+    synth_bin_literal .uint e v .addW (2 ^ (n - 1)) rfl hh hc hl hs hv (by intro h; cases h)
   have hv1 : Solidity.check C Γ .uint e1 = .ok v1 :=
-    check_bin_literal .uint e v .addW (2 ^ (n - 1)) rfl hh hc hl hs hv
+    check_bin_literal .uint e v .addW (2 ^ (n - 1)) rfl hh hc hl hs hv (by intro h; cases h)
   have hc1 : e1.constRat? = none := by simp only [e1, RawExpr.constRat?, hc, bind, Option.bind]
   have hs2 : Solidity.synth C Γ e2 = .ok (.val .uint v2) :=
-    synth_bin_literal .uint e1 v1 .mod (2 ^ n) rfl hm hc1 rfl hs1 hv1
+    synth_bin_literal .uint e1 v1 .mod (2 ^ n) rfl hm hc1 rfl hs1 hv1 (by intro h; cases h)
   have hv2 : Solidity.check C Γ .uint e2 = .ok v2 :=
-    check_bin_literal .uint e1 v1 .mod (2 ^ n) rfl hm hc1 rfl hs1 hv1
+    check_bin_literal .uint e1 v1 .mod (2 ^ n) rfl hm hc1 rfl hs1 hv1 (by intro h; cases h)
   have hc2 : e2.constRat? = none := by simp only [e2, RawExpr.constRat?, hc1, bind, Option.bind]
   have hs3 : Solidity.synth C Γ e3 = .ok (.val .uint v3) :=
-    synth_bin_literal .uint e2 v2 .subW (2 ^ (n - 1)) rfl hh hc2 rfl hs2 hv2
+    synth_bin_literal .uint e2 v2 .subW (2 ^ (n - 1)) rfl hh hc2 rfl hs2 hv2 (by intro h; cases h)
   rw [signedAt, if_neg (not_le.mpr hn)]
   exact check_unary .uint e3 v3 .toInt rfl rfl hs3
 
@@ -603,3 +619,15 @@ end Solidity.Bridge.Arith.Widths
 #guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.synth_head
 /-- info: 'Solidity.Bridge.Arith.Widths.synth_unary' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.synth_unary
+
+/-- info: 'Solidity.Bridge.Arith.Widths.synth_binary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.synth_binary
+
+/-- info: 'Solidity.Bridge.Arith.Widths.check_binary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.check_binary
+
+/-- info: 'Solidity.Bridge.Arith.Widths.synth_bin_literal' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.synth_bin_literal
+
+/-- info: 'Solidity.Bridge.Arith.Widths.check_bin_literal' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.check_bin_literal
