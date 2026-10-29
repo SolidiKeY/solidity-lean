@@ -1456,6 +1456,25 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Checked/LexExamples.lean:Solidity.Frontend.Checked.lex_error_pos": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/LexExamples.lean:Solidity.Frontend.Checked.lex_locate": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/LexExamples.lean:Solidity.Frontend.Checked.lex_sound": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/LexExamples.lean:Solidity.Frontend.Checked.lexRules_classified": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/TypeExamples.lean:Solidity.Frontend.Checked.declCtors_covered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/TypeExamples.lean:Solidity.Frontend.Checked.parseType_derives": [
+  "propext"
+ ],
  "Solidity/Hash/Adaptive.lean:Solidity.Hash.eagerAdaptiveBound": [
   "Classical.choice",
   "Quot.sound",

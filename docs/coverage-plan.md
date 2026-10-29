@@ -279,6 +279,8 @@ its integrated whole-parser check runs after their implementations merge. The
 same rule applies to later composition groups: an interface is not a completed
 proof, and their final checks must use the actual implementations.
 
+G08 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g08-checked-lexical-analysis). A checked lexer over source bytes (`Solidity/Frontend/Checked/Lexer.lean`): every lexer rule of the pinned `SolidityLexer.g4` classified with a sample (`lexRules_classified`), maximal munch with modes, solc's scanner rules where they differ from the grammar, and the certificate proved for every accepted source: its pieces re-print it (`lex_reprint`), each token's range re-locates it (`lex_locate`), refusals are located (`lex_error_pos`); the string-escape decoder is proved against an inductive grammar (`strBody_sound`).
+
 ### Wave 2 — lowering and complete source semantics (G16–G23)
 
 | Group | Deliverable and completion evidence |
@@ -515,7 +517,7 @@ several groups (noted per row); a lane starts by reading those results.
 | V02 | G03, G05, G06 | V00, V01 | Integrated (with the G06 Osaka re-pin). |
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
 | V04 | S02, S03, S04.04, S05 | V03 | — |
-| V05 | G08, G09, G10, G11 | V04 | — |
+| V05 | G08, G09, G10, G11 | V04 | Lane `roadmap-l2-20261029/lane-parse`: G08 done. |
 | V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). |
 | V07 | G16, G17, G18, G19 | V06 | — |
 | V08 | G20, G21, G22, G23 | V07 | — |

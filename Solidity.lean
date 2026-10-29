@@ -419,6 +419,16 @@ import Solidity.Source.State
 import Solidity.Source.Observe
 import Solidity.Source.World
 import Solidity.Source.StateExamples
+import Solidity.Frontend.Checked.Token
+import Solidity.Frontend.Checked.Tables
+import Solidity.Frontend.Checked.Lexer
+import Solidity.Frontend.Checked.LexExamples
+import Solidity.Frontend.Checked.Print
+import Solidity.Frontend.Checked.Prec
+import Solidity.Frontend.Checked.Parser
+import Solidity.Frontend.Checked.Check
+import Solidity.Frontend.Checked.Render
+import Solidity.Frontend.Checked.TypeExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic
