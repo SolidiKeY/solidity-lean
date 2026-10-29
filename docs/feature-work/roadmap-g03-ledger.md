@@ -2367,8 +2367,8 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: CI downloads only solc 0.8.34 (G00 pins); the frozen 0.8.38 pin must reach `Source.Provenance`
   - missing: the 0.8.34 fixture boundary is not recorded per fixture (G05)
 - **D06 Artifact table: `creationCode`/`runtimeCode` read from G01's whole-input `Artifact` table, a source-semantics parameter**
-  - theorem: `Solidity.Roadmap.Artifact` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:665`) — whole-input table of code units
-  - theorem: `Solidity.Roadmap.CodeUnit` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:654`) — initcode, runtime and link sites
+  - theorem: `Solidity.Roadmap.Artifact` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:621`) — whole-input table of code units
+  - theorem: `Solidity.Roadmap.CodeUnit` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:610`) — initcode, runtime and link sites
   - missing: `SourceSpec` does not yet take the `Artifact` table as a parameter (g01-contracts-rev)
   - missing: the G07 non-circularity whitelist must admit exactly this compiler-output parameter
   - missing: no compiled artifact exists for any contract: `type(C).creationCode` has no producer
@@ -2385,7 +2385,7 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: intrinsic recursion is unrolled to `recDepth = 1024` with an `exhausted` bottom (G04 R08)
   - missing: `SourceSpec.Idealized` has no instance; `Prefixes.Consistent` of `Prog.runF` is unproved
 - **D09 Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized**
-  - theorem: `Solidity.Roadmap.EvmSpec` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:897`) — pinned EVM language with resources
+  - theorem: `Solidity.Roadmap.EvmSpec` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:853`) — pinned EVM language with resources
   - theorem: `Solidity.Roadmap.Prefixes.Consistent` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:132`) — consistency of resourced prefix families
   - missing: `EvmSpec` resources still list code size (g01-contracts-rev drops it)
   - missing: `Lang.Res` ends a session at gas exhaustion; the decision requires the session to continue
@@ -2410,8 +2410,8 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: the Bridge adversary covers a payment boundary only
   - missing: no transaction-level quantification over strategies in a contract
 - **D13 Observation: the full `Event` list with exact ABI and revert bytes, `Panic` codes included**
-  - theorem: `Solidity.Roadmap.Event` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:422`) — shared observable events
-  - theorem: `Solidity.Roadmap.Outcome` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:411`) — outcomes with bytes
+  - theorem: `Solidity.Roadmap.Event` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:378`) — shared observable events
+  - theorem: `Solidity.Roadmap.Outcome` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:367`) — outcomes with bytes
   - source: `Solidity.Prog.withPanics` (Solidity.Syntax.Checked, `Solidity/Syntax/Checked.lean:587`) — solc panic codes in callees
   - missing: revert data is erased in the compiler theorem (G04 R37); `THalt` loses panic codes
   - missing: the call, creation and callee-answer events of the `Event` list have no producer: typed calls and creation are not compiled (G42.02, G44.03)
@@ -2648,7 +2648,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | package | VM | cells | edited modules | lines | flag | lemma split |
 |---|---|---|---|---|---|---|
 | G00 | V00 | 0 | new | 0 | — | — |
-| G01 | V00 | 9 | `Solidity.Roadmap.Contracts`, `Solidity.Roadmap.TypedRun` | 1185 | — | — |
+| G01 | V00 | 9 | `Solidity.Roadmap.Contracts`, `Solidity.Roadmap.TypedRun` | 1141 | — | — |
 | G02 | V01 | 0 | new | 0 | — | — |
 | G03 | V02 | 0 | new | 0 | — | — |
 | G04 | V01 | 0 | new | 0 | — | — |

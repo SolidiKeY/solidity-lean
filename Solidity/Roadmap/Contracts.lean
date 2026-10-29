@@ -146,11 +146,11 @@ def Prefixes.Diverges {R E O : Type} (A : R → Prop) (p : Prefixes R E O) : Pro
 final observations `O`.  `Res` is a horizon together with the layer's
 resource choices; `Admissible` is the approved resource profile of the layer.
 `Forward` marks the bounds resource adequacy speaks of (at the source: no
-resource failure, fewer than `hashBound` hashes), and `Guard` is the per-run
-hash premise on a bound (at the source: the preimages the run determines do
-not collide and their regions do not overlap).  A pass carries both to its
-target; at the EVM, which is only a target, both are trivial.  Every
-execution is a consistent family. -/
+resource failure, fewer than `hashBound` hashes; at the EVM, which is only a
+target: every bound), and `Guard` is the per-run hash premise on the
+preimages this layer's own run hashed (they do not collide and their
+regions do not overlap).  A pass carries both to its target and the premise
+back.  Every execution is a consistent family. -/
 structure Lang (E O : Type) where
   Prog : Type
   Env : Type
@@ -169,29 +169,17 @@ def Refines {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop)
   (∀ rs, AS rs → ∃ rt, AT rt ∧ (s rs).Le (t rt)) ∧
   (∀ rt, AT rt → ∃ rs, AS rs ∧ (t rt).Le (s rs))
 
-/-- The source collided before `b`'s observations end: the source prefix at
-`rs` violates the premise (a collision or an overlap), and its events lead
-`b`'s.  Any source prefix counts, resource failures and long runs
-included. -/
-def Collided {E O RS : Type} (G : RS → Prop) (s : Prefixes RS E O) (rs : RS)
-    (b : Prefix E O) : Prop :=
-  ¬ G rs ∧ (s rs).events <+: b.events
-
-/-- Two-sided refinement under a per-run premise `G` on the **source** bound.
-Forward: every admissible source bound in `FS` satisfying `G` names an
-admissible target bound above it.  Backward: every admissible target prefix
-is below an admissible source prefix, or the source collided before its
-observations end. -/
-def RefinesUnder {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop) (FS G : RS → Prop)
-    (s : Prefixes RS E O) (t : Prefixes RT E O) : Prop :=
-  (∀ rs, AS rs → FS rs → G rs → ∃ rt, AT rt ∧ (s rs).Le (t rt)) ∧
-  (∀ rt, AT rt → ∃ rs, AS rs ∧ ((t rt).Le (s rs) ∨ Collided G s rs (t rt)))
-
-/-- The source premise up to a target prefix's observations: every
-admissible source prefix whose events lead the target's satisfies `G`. -/
-def NoCollisionUpTo {E O RS : Type} (AS G : RS → Prop) (s : Prefixes RS E O)
-    (b : Prefix E O) : Prop :=
-  ∀ rs, AS rs → (s rs).events <+: b.events → G rs
+/-- Two-sided refinement under per-run premises, each read on its own side's
+run.  Forward: every admissible source bound in `FS` meeting the source's
+premise `GS` names an admissible target bound above it.  Backward: every
+admissible target prefix meeting the target's premise `GT` (on the preimages
+the target run itself hashed) is below an admissible source prefix.  A
+violation of the premise therefore excuses only a target run that really
+hashed the colliding or overlapping preimages. -/
+def RefinesUnder {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop) (FS GS : RS → Prop)
+    (GT : RT → Prop) (s : Prefixes RS E O) (t : Prefixes RT E O) : Prop :=
+  (∀ rs, AS rs → FS rs → GS rs → ∃ rt, AT rt ∧ (s rs).Le (t rt)) ∧
+  (∀ rt, AT rt → GT rt → ∃ rs, AS rs ∧ (t rt).Le (s rs))
 
 theorem Refines.trans {E O R₁ R₂ R₃ : Type} {A₁ : R₁ → Prop} {A₂ : R₂ → Prop} {A₃ : R₃ → Prop}
     {p₁ : Prefixes R₁ E O} {p₂ : Prefixes R₂ E O} {p₃ : Prefixes R₃ E O}
@@ -204,108 +192,97 @@ theorem Refines.trans {E O R₁ R₂ R₃ : Type} {A₁ : R₁ → Prop} {A₂ :
     obtain ⟨r₁, a₁, l₂₁⟩ := h₁₂.2 r₂ a₂
     exact ⟨r₁, a₁, l₃₂.trans l₂₁⟩
 
-/-- Unguarded refinement is refinement under any premise. -/
+/-- Unguarded refinement is refinement under any premises. -/
 theorem Refines.under {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t) (FS G : RS → Prop) :
-    RefinesUnder AS AT FS G s t :=
-  ⟨fun rs hrs _ _ => h.1 rs hrs, fun rt hrt => (h.2 rt hrt).imp fun _ ⟨a, l⟩ => ⟨a, .inl l⟩⟩
+    {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t) (FS GS : RS → Prop)
+    (GT : RT → Prop) : RefinesUnder AS AT FS GS GT s t :=
+  ⟨fun rs hrs _ _ => h.1 rs hrs, fun rt hrt _ => h.2 rt hrt⟩
 
-/-- If every admissible source bound is in `FS` and satisfies `G`, guarded
-refinement is refinement. -/
+/-- If every admissible source bound is in `FS` and meets `GS`, and every
+admissible target bound meets `GT`, guarded refinement is refinement. -/
 theorem RefinesUnder.refines {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {FS G : RS → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
-    (h : RefinesUnder AS AT FS G s t) (hG : ∀ rs, AS rs → FS rs ∧ G rs) : Refines AS AT s t := by
-  refine ⟨fun rs hrs => h.1 rs hrs (hG rs hrs).1 (hG rs hrs).2, fun rt hrt => ?_⟩
-  obtain ⟨rs, hrs, hl⟩ := h.2 rt hrt
-  rcases hl with l | ⟨hng, _⟩
-  · exact ⟨rs, hrs, l⟩
-  · exact absurd (hG rs hrs).2 hng
+    {FS GS : RS → Prop} {GT : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
+    (h : RefinesUnder AS AT FS GS GT s t) (hS : ∀ rs, AS rs → FS rs ∧ GS rs)
+    (hT : ∀ rt, AT rt → GT rt) : Refines AS AT s t :=
+  ⟨fun rs hrs => h.1 rs hrs (hS rs hrs).1 (hS rs hrs).2, fun rt hrt => h.2 rt hrt (hT rt hrt)⟩
 
 /-- **Non-vacuity of refinement.**  A source completion at an admissible bound
-in `FS` satisfying `G` is a target completion with the same observation and
+in `FS` meeting `GS` is a target completion with the same observation and
 events: a target that never completes with `o` (always reverting, always out
 of gas, `o` erased) refines no source that completes with `o` there. -/
 theorem RefinesUnder.completes {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {FS G : RS → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
-    (h : RefinesUnder AS AT FS G s t) {rs : RS} (hrs : AS rs) (hf : FS rs) (hg : G rs)
+    {FS GS : RS → Prop} {GT : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
+    (h : RefinesUnder AS AT FS GS GT s t) {rs : RS} (hrs : AS rs) (hf : FS rs) (hg : GS rs)
     {o : O} (ho : (s rs).final = some o) :
     ∃ rt, AT rt ∧ (t rt).final = some o ∧ (t rt).events = (s rs).events := by
   obtain ⟨rt, hrt, hle⟩ := h.1 rs hrs hf hg
   have heq : t rt = s rs := hle.final_eq ho
   exact ⟨rt, hrt, by rw [heq, ho], by rw [heq]⟩
 
-/-- **Soundness of refinement.**  Whatever an admissible target prefix
-completes with, an admissible source prefix completes with too, unless the
-source collided before the target's observations end. -/
+/-- **Soundness of refinement.**  Whatever an admissible target prefix meeting
+its premise completes with, an admissible source prefix completes with too. -/
 theorem RefinesUnder.sound {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {FS G : RS → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
-    (h : RefinesUnder AS AT FS G s t) {rt : RT} (hrt : AT rt)
-    (hn : NoCollisionUpTo AS G s (t rt)) {o : O} (ho : (t rt).final = some o) :
+    {FS GS : RS → Prop} {GT : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
+    (h : RefinesUnder AS AT FS GS GT s t) {rt : RT} (hrt : AT rt) (hg : GT rt)
+    {o : O} (ho : (t rt).final = some o) :
     ∃ rs, AS rs ∧ (s rs).final = some o ∧ (s rs).events = (t rt).events := by
-  obtain ⟨rs, hrs, hl⟩ := h.2 rt hrt
-  rcases hl with l | ⟨hng, hp⟩
-  · have heq : s rs = t rt := l.final_eq ho
-    exact ⟨rs, hrs, by rw [heq, ho], by rw [heq]⟩
-  · exact absurd (hn rs hrs hp) hng
+  obtain ⟨rs, hrs, l⟩ := h.2 rt hrt hg
+  have heq : s rs = t rt := l.final_eq ho
+  exact ⟨rs, hrs, by rw [heq, ho], by rw [heq]⟩
 
-/-- **Divergence transfers** to target prefixes up to whose observations the
-source does not collide. -/
+/-- **Divergence transfers** to target prefixes meeting their premise. -/
 theorem RefinesUnder.diverges {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {FS G : RS → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
-    (h : RefinesUnder AS AT FS G s t) (hs : s.Diverges AS) :
-    t.Diverges fun rt => AT rt ∧ NoCollisionUpTo AS G s (t rt) := by
-  intro rt ⟨hrt, hn⟩
+    {FS GS : RS → Prop} {GT : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
+    (h : RefinesUnder AS AT FS GS GT s t) (hs : s.Diverges AS) :
+    t.Diverges fun rt => AT rt ∧ GT rt := by
+  intro rt ⟨hrt, hg⟩
   cases ho : (t rt).final with
   | none => rfl
   | some o =>
-    obtain ⟨rs, hrs, hfin, _⟩ := h.sound hrt hn ho
+    obtain ⟨rs, hrs, hfin, _⟩ := h.sound hrt hg ho
     rw [hs rs hrs] at hfin
     cases hfin
 
 /-- **Safety transfers.**  A prefix property closed downward (what a box
 reads: no admissible prefix violates it) holds of every admissible target
-prefix up to whose observations the source does not collide, if it holds of
-the source. -/
+prefix meeting its premise, if it holds of the source. -/
 theorem RefinesUnder.safety {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {FS G : RS → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
-    (h : RefinesUnder AS AT FS G s t)
+    {FS GS : RS → Prop} {GT : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O}
+    (h : RefinesUnder AS AT FS GS GT s t)
     (Φ : Prefix E O → Prop) (down : ∀ a b, a.Le b → Φ b → Φ a)
-    (hs : ∀ rs, AS rs → Φ (s rs)) :
-    ∀ rt, AT rt → NoCollisionUpTo AS G s (t rt) → Φ (t rt) := by
-  intro rt hrt hn
-  obtain ⟨rs, hrs, hl⟩ := h.2 rt hrt
-  rcases hl with l | ⟨hng, hp⟩
-  · exact down _ _ l (hs rs hrs)
-  · exact absurd (hn rs hrs hp) hng
+    (hs : ∀ rs, AS rs → Φ (s rs)) : ∀ rt, AT rt → GT rt → Φ (t rt) := by
+  intro rt hrt hg
+  obtain ⟨rs, hrs, l⟩ := h.2 rt hrt hg
+  exact down _ _ l (hs rs hrs)
 
 /-- `RefinesUnder.completes` without a premise. -/
 theorem Refines.completes {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
     {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t)
     {rs : RS} (hrs : AS rs) {o : O} (ho : (s rs).final = some o) :
     ∃ rt, AT rt ∧ (t rt).final = some o ∧ (t rt).events = (s rs).events :=
-  (h.under (fun _ => True) fun _ => True).completes hrs trivial trivial ho
+  (h.under (fun _ => True) (fun _ => True) fun _ => True).completes hrs trivial trivial ho
 
 /-- `RefinesUnder.sound` without a premise. -/
 theorem Refines.sound {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
     {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t)
     {rt : RT} (hrt : AT rt) {o : O} (ho : (t rt).final = some o) :
     ∃ rs, AS rs ∧ (s rs).final = some o ∧ (s rs).events = (t rt).events :=
-  (h.under (fun _ => True) fun _ => True).sound hrt (fun _ _ _ => trivial) ho
+  (h.under (fun _ => True) (fun _ => True) fun _ => True).sound hrt trivial ho
 
 /-- `RefinesUnder.diverges` without a premise. -/
 theorem Refines.diverges {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
     {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t)
     (hs : s.Diverges AS) : t.Diverges AT :=
-  fun rt hrt => (h.under (fun _ => True) fun _ => True).diverges hs rt
-    ⟨hrt, fun _ _ _ => trivial⟩
+  fun rt hrt => (h.under (fun _ => True) (fun _ => True) fun _ => True).diverges hs rt
+    ⟨hrt, trivial⟩
 
 /-- `RefinesUnder.safety` without a premise. -/
 theorem Refines.safety {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
     {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t)
     (Φ : Prefix E O → Prop) (down : ∀ a b, a.Le b → Φ b → Φ a)
     (hs : ∀ rs, AS rs → Φ (s rs)) : ∀ rt, AT rt → Φ (t rt) :=
-  fun rt hrt => (h.under (fun _ => True) fun _ => True).safety Φ down hs rt hrt
-    fun _ _ _ => trivial
+  fun rt hrt => (h.under (fun _ => True) (fun _ => True) fun _ => True).safety Φ down hs rt hrt
+    trivial
 
 /-- A compiler pass from `L₁` to `L₂`.  `Dom` is the pass's input domain;
 the composition lemma requires every output of the pass before to lie in it,
@@ -317,14 +294,15 @@ structure Pass {E O : Type} (L₁ L₂ : Lang E O) where
 
 /-- **A pass certificate**: the target environments map to source ones and
 reach all of them; resources are given constructively (`need`); a source
-bound in the forward bounds satisfying the premise is below the target
-prefix at `need`, which is again in the forward bounds and satisfies the
-target's premise (the pass carries the preimages down); every admissible
-target prefix is below an admissible source prefix or the source collided
-first (`back`); and a target collision reflects a source one (`reflect`).
-`need` is an explicit bound function; that the final one is computable (not
-obtained by choice) is a check of the final theorems' axioms and
-definitions (G49.03, G54), not something this type enforces. -/
+bound in the forward bounds meeting the premise is below the target prefix
+at `need`, which is again in the forward bounds and meets the target's
+premise (the pass carries the preimages down); and every admissible target
+prefix meeting its premise is below an admissible source prefix meeting its
+own (the pass carries them back up).  Each language's premise reads the
+preimages its own run hashed.  `need` is an explicit bound function; that
+the final one is computable (not obtained by choice) is a check of the final
+theorems' axioms and definitions (G49.03, G54), not something this type
+enforces. -/
 structure Cert {E O : Type} {L₁ L₂ : Lang E O} (π : Pass L₁ L₂) where
   envSound : ∀ e, L₂.Allowed e → L₁.Allowed (π.envAbs e)
   envOnto : ∀ e, L₁.Allowed e → ∃ e', L₂.Allowed e' ∧ π.envAbs e' = e
@@ -334,22 +312,19 @@ structure Cert {E O : Type} {L₁ L₂ : Lang E O} (π : Pass L₁ L₂) where
     L₂.Admissible (need p h e r) ∧ L₂.Forward (π.run p h) e (need p h e r) ∧
       L₂.Guard (π.run p h) e (need p h e r) ∧
       (L₁.sem p (π.envAbs e) r).Le (L₂.sem (π.run p h) e (need p h e r))
-  back : ∀ p (h : π.Dom p) e r, L₂.Allowed e → L₂.Admissible r →
-    ∃ r', L₁.Admissible r' ∧ ((L₂.sem (π.run p h) e r).Le (L₁.sem p (π.envAbs e) r') ∨
-      Collided (L₁.Guard p (π.envAbs e)) (L₁.sem p (π.envAbs e)) r' (L₂.sem (π.run p h) e r))
-  reflect : ∀ p (h : π.Dom p) e r, L₂.Allowed e → L₂.Admissible r →
-    ¬ L₂.Guard (π.run p h) e r →
-    ∃ r', L₁.Admissible r' ∧
-      Collided (L₁.Guard p (π.envAbs e)) (L₁.sem p (π.envAbs e)) r' (L₂.sem (π.run p h) e r)
+  back : ∀ p (h : π.Dom p) e r, L₂.Allowed e → L₂.Admissible r → L₂.Guard (π.run p h) e r →
+    ∃ r', L₁.Admissible r' ∧ L₁.Guard p (π.envAbs e) r' ∧
+      (L₂.sem (π.run p h) e r).Le (L₁.sem p (π.envAbs e) r')
 
 /-- What a certificate gives for one program and environment. -/
 theorem Cert.refines {E O : Type} {L₁ L₂ : Lang E O} {π : Pass L₁ L₂} (c : Cert π)
     (p : L₁.Prog) (h : π.Dom p) (e : L₂.Env) (he : L₂.Allowed e) :
     RefinesUnder L₁.Admissible L₂.Admissible (L₁.Forward p (π.envAbs e))
-      (L₁.Guard p (π.envAbs e)) (L₁.sem p (π.envAbs e)) (L₂.sem (π.run p h) e) :=
+      (L₁.Guard p (π.envAbs e)) (L₂.Guard (π.run p h) e)
+      (L₁.sem p (π.envAbs e)) (L₂.sem (π.run p h) e) :=
   ⟨fun r hr hf hg => ⟨c.need p h e r, (c.need_ok p h e r he hr hf hg).1,
       (c.need_ok p h e r he hr hf hg).2.2.2⟩,
-    fun r hr => c.back p h e r he hr⟩
+    fun r hr hg => (c.back p h e r he hr hg).imp fun _ ⟨a, _, l⟩ => ⟨a, l⟩⟩
 
 /-- Two passes in turn, the second defined on every output of the first. -/
 def Pass.comp {E O : Type} {L₁ L₂ L₃ : Lang E O} (π₁ : Pass L₁ L₂) (π₂ : Pass L₂ L₃)
@@ -373,29 +348,10 @@ def Cert.comp {E O : Type} {L₁ L₂ L₃ : Lang E O} {π₁ : Pass L₁ L₂} 
     have h₁ := c₁.need_ok p h (π₂.envAbs e) r (c₂.envSound e he) hr hf hg
     have h₂ := c₂.need_ok (π₁.run p h) (closed p h) e _ he h₁.1 h₁.2.1 h₁.2.2.1
     exact ⟨h₂.1, h₂.2.1, h₂.2.2.1, h₁.2.2.2.trans h₂.2.2.2⟩
-  back p h e r he hr := by
-    obtain ⟨r₂, hr₂, l₂⟩ := c₂.back (π₁.run p h) (closed p h) e r he hr
-    rcases l₂ with l₃₂ | ⟨hg₂, hp₂⟩
-    · obtain ⟨r₁, hr₁, l₁⟩ := c₁.back p h (π₂.envAbs e) r₂ (c₂.envSound e he) hr₂
-      refine ⟨r₁, hr₁, ?_⟩
-      rcases l₁ with l₂₁ | ⟨hg₁, hp₁⟩
-      · exact .inl (l₃₂.trans l₂₁)
-      · rcases l₃₂.2 with hn | heq
-        · rcases List.prefix_or_prefix_of_prefix hp₁ l₃₂.1 with h₁₃ | h₃₁
-          · exact .inr ⟨hg₁, h₁₃⟩
-          · exact .inl ⟨h₃₁, .inl hn⟩
-        · have hp : (L₁.sem p (π₁.envAbs (π₂.envAbs e)) r₁).events <+:
-              (L₃.sem (π₂.run (π₁.run p h) (closed p h)) e r).events := by
-            rw [← heq]; exact hp₁
-          exact .inr ⟨hg₁, hp⟩
-    · obtain ⟨r₁, hr₁, hg₁, hp₁⟩ :=
-        c₁.reflect p h (π₂.envAbs e) r₂ (c₂.envSound e he) hr₂ hg₂
-      exact ⟨r₁, hr₁, .inr ⟨hg₁, hp₁.trans hp₂⟩⟩
-  reflect p h e r he hr hg := by
-    obtain ⟨r₂, hr₂, hg₂, hp₂⟩ := c₂.reflect (π₁.run p h) (closed p h) e r he hr hg
-    obtain ⟨r₁, hr₁, hg₁, hp₁⟩ :=
-      c₁.reflect p h (π₂.envAbs e) r₂ (c₂.envSound e he) hr₂ hg₂
-    exact ⟨r₁, hr₁, hg₁, hp₁.trans hp₂⟩
+  back p h e r he hr hg := by
+    obtain ⟨r₂, hr₂, hg₂, l₃₂⟩ := c₂.back (π₁.run p h) (closed p h) e r he hr hg
+    obtain ⟨r₁, hr₁, hg₁, l₂₁⟩ := c₁.back p h (π₂.envAbs e) r₂ (c₂.envSound e he) hr₂ hg₂
+    exact ⟨r₁, hr₁, hg₁, l₃₂.trans l₂₁⟩
 
 /-! ## Shared observations at the transaction boundary
 
@@ -909,8 +865,12 @@ structure EvmSpec where
   gas : lang.Res → List Event → Nat
   withGas : lang.Res → (List Event → Nat) → lang.Res
   gas_with : ∀ r g, gas (withGas r g) = g
-  /-- The `KECCAK256` preimages a prefix hashes, in order. -/
+  /-- The `KECCAK256` preimages a prefix hashes, in order, and those whose
+  hash it uses as a storage address. -/
   hashed : lang.Prog → lang.Env → lang.Res → List Bytes
+  slotHashed : lang.Prog → lang.Env → lang.Res → List Bytes
+  /-- The EVM's premise reads its own run's preimages. -/
+  guard_iff : ∀ p e r, lang.Guard p e r ↔ HashPremise fixed (hashed p e r) (slotHashed p e r)
   /-- The creation bytes (with constructor arguments) of each `CREATE` the
   system executes in a prefix, in order. -/
   created : lang.Prog → lang.Env → lang.Res → List Bytes
@@ -922,12 +882,12 @@ structure EvmSpec where
   resume : World → lang.Prog
 
 /-- The EVM's approved readings: the Osaka pin with its idealizations
-(`Evm.pinned`), sane region parameters, every horizon and gas schedule admissible, no premise or
-forward restriction of its own (it is only a target), precompiles fixed
+(`Evm.pinned`), sane region parameters, every horizon and gas schedule
+admissible, no forward restriction (it is only a target), precompiles fixed
 functions, `this` from the deployment, and values affordable. -/
 def EvmSpec.Approved (V : EvmSpec) : Prop :=
   V.pin = Evm.pinned ∧ V.fixed.Sane ∧ (∀ r, V.lang.Admissible r) ∧
-    (∀ p e r, V.lang.Forward p e r ∧ V.lang.Guard p e r) ∧ V.lang.PrecompilesFixed ∧
+    (∀ p e r, V.lang.Forward p e r) ∧ V.lang.PrecompilesFixed ∧
     V.lang.ThisFromDeployment V.fixed V.session ∧ V.lang.Affordable V.fixed V.session
 
 /-- The fixed parameters are the real ones: Keccak-256 (G06's `keccakWord`)
@@ -953,15 +913,6 @@ structure Execution (Asm : Lang Event Outcome) (V : EvmSpec) where
   dom : ∀ a, pass.Dom a
   agrees : ∀ a, pass.run a (dom a) = V.load (assemble a)
   cert : Cert pass
-
-/-- An EVM prefix is matched by a source prefix in the forward bounds that
-meets the premise: the state export speaks of these.  The premise is the
-source's, so the compiler cannot make it fail (by hashing a known collision
-pair, or the same preimage `2^128` times). -/
-def Matched (S : SourceSpec) (p : S.lang.Prog) (e : S.lang.Env) (b : Prefix Event Outcome) :
-    Prop :=
-  ∃ rs, S.lang.Admissible rs ∧ S.lang.Forward p e rs ∧ S.lang.Guard p e rs ∧
-    b.Le (S.lang.sem p e rs)
 
 /-- The state export of the public theorem (G01 Q6): the lowering whose
 worlds are decoded, the decoding of EVM worlds given the preimages hashed so
@@ -1000,33 +951,40 @@ structure PublicCorrectness {I : IntrinsicSpec} (S : SourceSpec) (V : EvmSpec)
   creates_table : ∀ i art, compiler i = some art → art.PrefixFree ∧
     ∀ e rt, V.created (V.load art) e rt =
       (createsOf (V.lang.sem (V.load art) e rt).events).map fun ca => art.initcode ca.1 ++ ca.2
-  /-- The bytes hash only preimages the source determines (each at some
-  source bound: a failing transaction may hash before it fails). -/
+  /-- The bytes hash only preimages the source determines, and address
+  storage only by the source's slot preimages (each at some source bound: a
+  failing transaction may hash before it fails).  So the compiler cannot
+  choose the preimages the EVM's premise reads. -/
   hashes_source : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e rt, V.lang.Allowed e → V.lang.Admissible rt →
-      ∀ b, b ∈ V.hashed (V.load art) e rt →
-        ∃ rs, S.lang.Admissible rs ∧ b ∈ S.hashed (S.meaning r w p art) (envAbs e) rs
+      (∀ b, b ∈ V.hashed (V.load art) e rt →
+        ∃ rs, S.lang.Admissible rs ∧ b ∈ S.hashed (S.meaning r w p art) (envAbs e) rs) ∧
+      ∀ b, b ∈ V.slotHashed (V.load art) e rt →
+        ∃ rs, S.lang.Admissible rs ∧ b ∈ S.slotHashed (S.meaning r w p art) (envAbs e) rs
   refines : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e, V.lang.Allowed e → S.lang.Allowed (envAbs e) ∧
       RefinesUnder S.lang.Admissible V.lang.Admissible
         (S.lang.Forward (S.meaning r w p art) (envAbs e))
-        (S.lang.Guard (S.meaning r w p art) (envAbs e))
+        (S.lang.Guard (S.meaning r w p art) (envAbs e)) (V.lang.Guard (V.load art) e)
         (S.lang.sem (S.meaning r w p art) (envAbs e)) (V.lang.sem (V.load art) e)
   decode_reach : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e, V.lang.Allowed e → ∀ rt, V.lang.Admissible rt →
-      Matched S (S.meaning r w p art) (envAbs e) (V.lang.sem (V.load art) e rt) →
+      V.lang.Guard (V.load art) e rt →
       ∃ ri, I.lang.Admissible ri ∧
         (V.worlds (V.load art) e rt).map (X.decode (V.hashed (V.load art) e rt)) =
           (I.worlds (I.ofWorld (X.lowering.lower r w p art)) (X.envAbs e) ri).map some
-  decode_commutes : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
+  decode_commutes : ∀ i r, S.Admitted i r → ∀ (_ : S.WellFormed r) (_ : S.InProfile r) art,
     compiler i = some art → ∀ e rt, V.lang.Allowed e → V.lang.Admissible rt →
-      Matched S (S.meaning r w p art) (envAbs e) (V.lang.sem (V.load art) e rt) →
+      V.lang.Guard (V.load art) e rt →
       ∀ ω, ω ∈ V.worlds (V.load art) e rt →
       ∀ ω', X.decode (V.hashed (V.load art) e rt) ω = some ω' →
       ∀ e', V.lang.Allowed e' → (V.session e').balance = V.balances ω →
         I.lang.Allowed (X.envAbs e') ∧
         RefinesUnder I.lang.Admissible V.lang.Admissible
           (I.lang.Forward (I.ofWorld ω') (X.envAbs e')) (I.lang.Guard (I.ofWorld ω') (X.envAbs e'))
+          (fun rt' => HashPremise V.fixed
+            (V.hashed (V.load art) e rt ++ V.hashed (V.resume ω) e' rt')
+            (V.slotHashed (V.load art) e rt ++ V.slotHashed (V.resume ω) e' rt'))
           (I.lang.sem (I.ofWorld ω') (X.envAbs e')) (V.lang.sem (V.resume ω) e')
 
 /-- **Contract 6, specification transfer.**  A source specification, read on
@@ -1041,9 +999,7 @@ def SpecTransfer (S : SourceSpec) (V : EvmSpec) (compiler : S.Input → Option A
     ∀ e, V.lang.Allowed e →
       (∀ Φ : Prefix Event Outcome → Prop, (∀ a b, a.Le b → Φ b → Φ a) →
         (∀ rs, S.lang.Admissible rs → Φ (S.lang.sem (S.meaning r w p art) (envAbs e) rs)) →
-        ∀ rt, V.lang.Admissible rt →
-          NoCollisionUpTo S.lang.Admissible (S.lang.Guard (S.meaning r w p art) (envAbs e))
-            (S.lang.sem (S.meaning r w p art) (envAbs e)) (V.lang.sem (V.load art) e rt) →
+        ∀ rt, V.lang.Admissible rt → V.lang.Guard (V.load art) e rt →
           Φ (V.lang.sem (V.load art) e rt)) ∧
       (∀ o, (∃ rs, S.lang.Admissible rs ∧ S.lang.Forward (S.meaning r w p art) (envAbs e) rs ∧
           S.lang.Guard (S.meaning r w p art) (envAbs e) rs ∧
