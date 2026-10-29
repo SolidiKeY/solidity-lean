@@ -380,7 +380,22 @@ A follow-up audit must re-grade the affected rows once that section lands.
   - every cited line re-read at the base;
   - every F verdict against the decision text, and the V verdicts of the `⊨ᶠ` examples against their refuting theorems (`withdrawUnsafe_withCallback`, `selfCall_noCallback`);
   - `scripts/check-doc-paths.sh` (no new missing reference).
-- **Lean:** none changed, no Lean server used, no build.
+- **Lean:** none changed, and no Lean server was used.
+- **Script gates:** `check-layers` (155 core modules, 0 reach the
+  elaborator), `check-orphans` (0 orphaned) and `check-trust` (0 findings)
+  pass. `check-doc-paths` reports 46 missing references, the same set as the
+  base.
+- **Full gate:** `./run-lean.sh`, run three times on the 4-core, 15 GB VM.
+  - Run 1 (96 min): `OpenLoops` was killed with exit 137, out of memory while
+    built in parallel.
+  - Run 2 (31 min): `lake build` completed (718 jobs), but
+    `SolidityTestSuite`'s `Derived17` was killed with exit 137. It is known to
+    exceed 10 GiB ([integration.md](integration.md)).
+  - Run 3 (6 min): `Derived17` built alone (262 jobs, success), and
+    `check-solkey` reported 37 mismatches, the base count.
+  - Neither kill comes from this branch, which changes no Lean. Peak memory
+    was not measured: the sampler recorded nothing.
+- **Elapsed:** 12:17–14:40 UTC, about 2 h 25 min, most of it the build.
 - **Child obligations:**
   - every R and F row above, by its owner;
   - the docstring table of §4;
