@@ -2925,4 +2925,45 @@ chose the foundation children.
 
 ## Handoff
 
-<!-- filled at the end -->
+- **Base** `caf52ecd4dde5d37cbc0098d47de1a01aa218285`; branch
+  `cloud/roadmap-w1-20261029/g03-ledger`.
+- **Done:**
+  - this document;
+  - `scripts/roadmap-g03-ledger.py`;
+  - the generated `roadmap-g03-ledger.json`;
+  - one G03 status paragraph in `coverage-plan.md`;
+  - one row in `docs/README.md`.
+
+  No Lean module was added or changed (so there are no module-map or
+  `Solidity.lean` lines), and no manifest, generated feature file or feature
+  status changed.
+- **Theorems and definitions:** none new. The ledger cites existing
+  declarations only (684 anchors, each checked to be declared in its file).
+  The obligations it assigns are the G01 contracts `Admission`/`CheckedFrontend`,
+  `Lowering`, `Compilation`, `Execution`, `PublicCorrectness` and `SpecTransfer`
+  (`Solidity/Roadmap/Contracts.lean`). Their premises are as G01 states them,
+  plus the decision rows D01–D22 (for example, the per-run hash premise D11
+  and the `decode` export D14 are not yet in `PublicCorrectness`).
+- **Checked:**
+  - `python3 -I scripts/roadmap-g03-ledger.py --check`: 0 errors. Ten
+    data mutations (an unknown owner, a missing owner, a combination without
+    owner, a dropped G00 combination, a parent as owner, a bad anchor, an
+    unrefined parent, an empty stage, a dropped decision row) each fail it.
+  - `roadmap-g00-scope.py --check` and `solidity-feature-audit.py --check`:
+    pass.
+  - `check-layers.mjs`: 155 core modules, 0 reach the elaborator.
+  - `check-orphans.mjs`: 0 orphaned.
+  - `check-trust.sh`: 0 findings.
+  - `check-doc-paths.sh`: 46 missing, all at the base; none new.
+  - `./run-lean.sh`, cold, on this unchanged Lean tree: `lake build`
+    "Build completed successfully (718 jobs)". `SolkeyTestSuite` lost
+    `TestSuite.Derived17` to exit 137 (memory under parallel jobs, as in
+    G01's run; the memory-loops lane owns that file). The warm re-run built
+    it: "Build completed successfully (262 jobs)". Its last step,
+    `check-solkey.sh`, reports "37 mismatch(es)", the base count.
+- **Elapsed and memory:** about 1 h 35 min wall time (12:14–13:50 UTC). The
+  cold build took 69 min 30 s (user 182 min), the warm re-run 3 min 38 s.
+  The lowest available memory was 1.74 GB of 15.7 GB, so peak use was about
+  14 GB system-wide, sampled every 15 s, during the cold run.
+- **Remaining:** the integration steps and remaining child obligations
+  above. Every ledger row stays open.
