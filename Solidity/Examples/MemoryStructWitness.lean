@@ -59,7 +59,7 @@ theorem distinct_observations : distinctObs = [6, 1, 3, 7, 8, 11, 12, 9, 0, 10, 
 /-- A Person cannot be manufactured at an empty heap: its Account is absent. -/
 theorem no_empty_person : ¬ Nonempty (MObj [] Per) := by
   intro ⟨o⟩
-  have hr := (o.1 : HRef [] Acc).get?
+  have hr : ([] : HTy)[(o.1 : HRef [] Acc).id]? = some Acc := (o.1 : HRef [] Acc).get?
   simp only [List.getElem?_nil, reduceCtorEq] at hr
 
 /-- A child-first prefix supplies the exact two children of a Person. -/

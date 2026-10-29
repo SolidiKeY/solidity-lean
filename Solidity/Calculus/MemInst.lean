@@ -402,8 +402,14 @@ theorem mxRangeInstance_holds (σ : State C Γ) {q : PrimTy}
     holds (σ.allocPush o) (mxRangeInstance .here v (.app0 (.lit u))) ↔
       (u.1 < ((MObj.elems .dyn o).length : Int) →
         (MObj.elems .dyn o)[u.1.toNat]? = some v) := by
-  have hl := mxLenNew_eval σ o
-  have hr := mxReadNew_eval σ o .dyn (.app0 (.lit u)) rfl rfl
+  have hl : (MxOrig.len (Γ := .mem (.array (.prim q)) :: Γ) .here).tm.eval
+      (σ.allocPush o) = some (lenU (MObj.elems .dyn o).length (by
+        rw [MObj.elems_dyn]; exact o.2)) := mxLenNew_eval σ o
+  have hr : (MxOrig.elem .here .dyn
+      ((Tm.app0 (.lit u) : Tm C Γ (.val .uint)).wk (.drop .refl)) rfl).tm.eval
+      (σ.allocPush o) = ((Tm.app0 (.lit u) : Tm C Γ (.val .uint)).eval σ).bind
+        (fun k => (MObj.elems .dyn o)[k.1.toNat]?) :=
+    mxReadNew_eval σ o .dyn (.app0 (.lit u)) rfl rfl
   have hld : (MxOrig.len (C := C) (Γ := .mem (.array (.prim q)) :: Γ) .here).tm.denote
       (σ.allocPush o) = some (lenU (MObj.elems .dyn o).length (by
         rw [MObj.elems_dyn]; exact o.2)) := by
@@ -444,11 +450,12 @@ theorem mxRangeBlock_holds (σ : State C Γ) {q : PrimTy}
       rw [MObj.elems_dyn]
       exact o.2
     have hb : k < 2 ^ 256 := by omega
-    have hv := h (uintOfNat k)
+    have hv : (uintOfNat k).1 < ((MObj.elems .dyn o).length : Int) →
+        (MObj.elems .dyn o)[(uintOfNat k).1.toNat]? = some v := h (uintOfNat k)
     rw [uintOfNat_val hb] at hv
     exact hv (by omega)
   · intro h u hu
-    have h0 := mxUint_nonneg u
+    have h0 : 0 ≤ u.1 := mxUint_nonneg u
     exact h u.1.toNat (by omega)
 
 /-- A single bound value has the same range/read interpretation as its
@@ -509,8 +516,10 @@ theorem MxInstPrep.range_reconstruct (σ : State C Γ) {q : PrimTy}
   apply mxFloorRebuild_block .dyn (by trivial) o B hn (fun w => w = some v)
   intro k hk hlen
   obtain ⟨pt, hpt, u, hu, hku⟩ := hc k hk hlen
-  have hp := (p.range_holds σ o x v).1 h pt hpt u hu
-  have h0 := mxUint_nonneg u
+  have hp : u.1 < ((MObj.elems .dyn o).length : Int) →
+      (MObj.elems .dyn o)[u.1.toNat]? = some v :=
+    (p.range_holds σ o x v).1 h pt hpt u hu
+  have h0 : 0 ≤ u.1 := mxUint_nonneg u
   rw [hku] at hp
   exact hp (by omega)
 

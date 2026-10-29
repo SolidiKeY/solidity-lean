@@ -63,27 +63,27 @@ theorem mxFloorIndex_bounds (B : List Int) {n k : Nat} (hn : (n : Int) ∈ B) :
 /-- A retained lower guard operand transfers in both directions. -/
 theorem mxFloorIndex_ge_iff (B : List Int) {n k : Nat} (hn : (n : Int) ∈ B) :
     n ≤ mxFloorIndex B k ↔ n ≤ k := by
-  have hb := mxFloorIndex_bounds B (n := n) (k := k) hn
+  have hb : mxFloorIndex B k < n ↔ k < n := mxFloorIndex_bounds B (n := n) (k := k) hn
   omega
 
 /-- Strict lower guards need the successor, not just the operand. -/
 theorem mxFloorIndex_gt_iff (B : List Int) {n k : Nat} (hn : ((n + 1 : Nat) : Int) ∈ B) :
     n < mxFloorIndex B k ↔ n < k := by
-  have hb := mxFloorIndex_ge_iff B (k := k) hn
+  have hb : n + 1 ≤ mxFloorIndex B k ↔ n + 1 ≤ k := mxFloorIndex_ge_iff B (k := k) hn
   omega
 
 /-- A non-strict upper guard likewise retains the successor. -/
 theorem mxFloorIndex_le_iff (B : List Int) {n k : Nat} (hn : ((n + 1 : Nat) : Int) ∈ B) :
     mxFloorIndex B k ≤ n ↔ k ≤ n := by
-  have hb := mxFloorIndex_bounds B (k := k) hn
+  have hb : mxFloorIndex B k < n + 1 ↔ k < n + 1 := mxFloorIndex_bounds B (k := k) hn
   omega
 
 /-- Equality guards retain both sides of their singleton region. -/
 theorem mxFloorIndex_eq_iff (B : List Int) {n k : Nat}
     (hn : (n : Int) ∈ B) (hs : ((n + 1 : Nat) : Int) ∈ B) :
     mxFloorIndex B k = n ↔ k = n := by
-  have hlo := mxFloorIndex_ge_iff B (k := k) hn
-  have hhi := mxFloorIndex_le_iff B (k := k) hs
+  have hlo : n ≤ mxFloorIndex B k ↔ n ≤ k := mxFloorIndex_ge_iff B (k := k) hn
+  have hhi : mxFloorIndex B k ≤ n ↔ k ≤ n := mxFloorIndex_le_iff B (k := k) hs
   omega
 
 /-- A floor is the least index or one of the retained nonnegative points.
@@ -142,7 +142,8 @@ theorem mxFloorRebuild_slot {H : HTy} {R : RefTy} {q : PrimTy}
       (mxFloorIndex_bounds B hn).2 hk
     simp only [hk, dite_true, List.getElem?_eq_getElem hf]
   · have hf : (MObj.elems a o).length ≤ mxFloorIndex B k := by
-      have hb := mxFloorIndex_bounds B (k := k) hn
+      have hb : mxFloorIndex B k < (MObj.elems a o).length ↔
+          k < (MObj.elems a o).length := mxFloorIndex_bounds B (k := k) hn
       omega
     rw [dif_neg hk, List.getElem?_eq_none hf]
 
@@ -239,7 +240,12 @@ theorem mxFloorRebuild_negative_iff {H : HTy} {R : RefTy} {q : PrimTy}
       Q (MObj.elems a o).length (reads.map fun k => (MObj.elems a o)[k]?)) := by
   constructor
   · intro h o hi
-    have hb := mxFloorRebuild_block_reads a hok o (points o) (hn o)
+    have hb : (∀ k : Nat,
+        k < (MObj.elems a (mxFloorRebuild a hok o (points o))).length →
+        P (MObj.elems a o).length
+          ((MObj.elems a (mxFloorRebuild a hok o (points o)))[k]?)) ∧
+        reads.map (fun k => (MObj.elems a (mxFloorRebuild a hok o (points o)))[k]?) =
+          reads.map (fun k => (MObj.elems a o)[k]?) := mxFloorRebuild_block_reads a hok o (points o) (hn o)
       (P (MObj.elems a o).length) hi reads (hr o)
     have hall : ∀ k : Nat,
         k < (MObj.elems a (mxFloorRebuild a hok o (points o))).length →
@@ -247,7 +253,9 @@ theorem mxFloorRebuild_negative_iff {H : HTy} {R : RefTy} {q : PrimTy}
           ((MObj.elems a (mxFloorRebuild a hok o (points o)))[k]?) := by
       rw [mxFloorRebuild_len]
       simpa only [mxFloorRebuild_len] using hb.1
-    have hq := h (mxFloorRebuild a hok o (points o)) hall
+    have hq : Q (MObj.elems a (mxFloorRebuild a hok o (points o))).length
+        (reads.map fun k => (MObj.elems a (mxFloorRebuild a hok o (points o)))[k]?) :=
+      h (mxFloorRebuild a hok o (points o)) hall
     rw [mxFloorRebuild_len, hb.2] at hq
     exact hq
   · intro h o hi

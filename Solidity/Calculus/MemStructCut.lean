@@ -65,7 +65,8 @@ theorem fieldEq_refutes {s f : Name} {p : PrimTy} (σ : State C Γ)
   intro hall
   let o : MObj (σ.adopt g).1.H (.struct s) :=
     MFields.set (structDef s) g.val hf (different p v)
-  have heq := hall o
+  have heq : holds ((σ.adopt g).1.allocPush o)
+      (.eq (fieldRead hf) (.app0 (.lit v))) := hall o
   have heval : (fieldRead (C := C) hf).eval ((σ.adopt g).1.allocPush o) =
       some (different p v) := by
     rw [fieldRead_eval, MFields.get_set_same]

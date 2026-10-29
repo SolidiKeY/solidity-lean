@@ -924,12 +924,14 @@ modified, and no genuine semantic decision is required.
 
 ### Explicit proof-fact types (2026-10-29)
 
-The retained source-convention finding is repaired: all seven newly added
-untyped `have` facts now have concrete types (`hp`, both `hg` facts and
+The initial source-convention repair gave seven newly added
+untyped `have` facts concrete types (`hp`, both `hg` facts and
 `hr` in `MemNegPrep`, `h0` and `hk` in `MemObserve`, and `hu` in
-`MemoryNegativeDecision`). Inspection of the complete original assignment
-diff and the subsequent G0 repair found no further added untyped facts.
-Pre-existing untyped facts in `MemInst` are untouched. This repair adds only
+`MemoryNegativeDecision`). The earlier claim that this covered the complete
+assignment diff was incorrect: it inspected too narrow a source range.
+`MemInst` was newly delivered relative to the requested base, so its facts
+were not exempt historical debt. The follow-up below repairs the remaining
+omissions across the complete delivery. This initial repair added only
 type annotations; all proof terms, generalized recursors, exactness
 certificates, scope checks, observations and budgets are preserved.
 
@@ -945,3 +947,35 @@ review launches failed before starting with the retained thread-store
 `no rollout found` error. Independent review and full combined validation
 remain with the coordinator. Whitespace checks pass; no actual conflict
 markers remain in the affected files. No staging or commit was performed.
+
+### Complete-delivery annotation follow-up (2026-10-29)
+
+The retained finder rejection identified fifteen further missing fact types:
+eight in `MemFloor`, six in `MemInst`, and one in `MemoryFloor`.
+All now have concrete types. The already-integrated batch also receives
+three requested annotations: `hf` in `DecisionKInt`, `heq` in `MemStructCut`,
+and `hr` in `MemoryStructWitness`. These cross-result follow-ups are recorded
+here; their original receipts are unchanged.
+
+The source audit uses the complete assignment range
+`f4dee4a29c2e208b36db4a4161a4723c735cd775..71bd4626e115`, rather than the
+last source commit's parent. The current versions of its changed Lean files
+and the complete integration diff from pre-delivery master `b6bc41d4`
+contain no remaining newly added untyped `have` facts. The seven earlier
+annotations and the G0 conversions are preserved. This follow-up changes
+only fact type annotations and this handoff; theorem statements, proof terms,
+semantics, observations, target predicates, invariants and budgets are unchanged.
+
+Per-file MCP error diagnostics (`interactive=false`) complete successfully
+for `MemFloor`, `MemInst`, `MemStructCut`, `MemoryFloor` and
+`MemoryStructWitness`. `DecisionKInt` is still awaiting import elaboration;
+five partial timeout results report no errors or failed dependencies and are
+not passing checks. Diagnostic results are recorded in
+`/tmp/memory-negative-block-complete-types-diagnostics.json`. The coordinator
+must complete the pending diagnostic and combined gates. Whitespace and
+conflict-marker checks pass.
+
+The coordinator owns independent finder/skeptic reviews and the full combined
+gates. No competing full build, index write, commit, push, source VM, skill
+or monitor modification is part of this follow-up. No semantic decision is
+required.

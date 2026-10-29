@@ -110,7 +110,7 @@ theorem original_block_fails :
     ¬ (∀ k : Nat, k < (uintElems words).length →
       (uintElems words)[k]? = some (uintOfNat 7)) := by
   intro h
-  have he := h 1 (by decide +kernel)
+  have he : (uintElems words)[1]? = some (uintOfNat 7) := h 1 (by decide +kernel)
   have hn : (uintElems words)[1]? ≠ some (uintOfNat 7) := by decide +kernel
   exact hn he
 
