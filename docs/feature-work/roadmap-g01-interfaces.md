@@ -58,7 +58,7 @@ implements it.
 
 | Decision | Implemented by |
 |---|---|
-| G01 Q3 / G04 Q1: a per-run hash premise, never global injectivity; G06 F7: over the preimages the source determines | `SourceSpec.hashed` (the preimages a source prefix determines: `keccak256` arguments and slot preimages under the pinned layout), `SourceSpec.guard_iff`; `HashPremise F xs ys` = `Solidity.Hash.CollisionFree` on all preimages ∧ `Solidity.Hash.RegionsDisjoint` on the slot preimages (`SourceSpec.slotHashed`); `RefinesUnder`, refinement under a premise on the **source** bound, in `PublicCorrectness.refines`, `Cert` and `SpecTransfer`; `PublicCorrectness.hashes_source` (the bytes hash only source-determined preimages). `CollisionFree` is an alias of `Solidity.Hash.CollisionFree`; `CollisionFree.singleton` shows the premise never asks for injectivity. |
+| G01 Q3 / G04 Q1: a per-run hash premise, never global injectivity; G06 F7: over the preimages the source determines | `SourceSpec.hashed` (the preimages a source prefix determines: `keccak256` arguments and slot preimages under the pinned layout), `SourceSpec.guard_iff`; `HashPremise F xs ys` = `Solidity.Hash.CollisionFree` on all preimages ∧ `Solidity.Hash.RegionsDisjoint` on the slot preimages (`SourceSpec.slotHashed`); `RefinesUnder`, refinement with the forward direction under the source's premise and the backward direction under the target run's own (`EvmSpec.hashed`, `slotHashed`, `guard_iff`), in `PublicCorrectness.refines`, `Cert` and `SpecTransfer`; `PublicCorrectness.hashes_source` (the bytes hash only source-determined preimages and address storage only by the source's slot preimages). `CollisionFree` is an alias of `Solidity.Hash.CollisionFree`; `CollisionFree.singleton` shows the premise never asks for injectivity. |
 | Second round: hashed regions of length at most L overlap neither each other nor a root | `Fixed.regionLen` (L), `Fixed.rootSlots`, `Fixed.Sane` (1 ≤ L ≤ 2^128, at most 2^128 roots; in both `Approved` predicates and `Fixed.Keccak`), `HashPremise`, `HashPremise.nil`, `HashPremise.of_prefix`. |
 | The hash is a fixed parameter instantiated by Keccak, not an environment input; G06 F5 | `Fixed.evm : Evm.Fixed` (G06's hash, precompiles and precompile gas), `Fixed.hash`, shared by `SourceSpec.fixed` and `EvmSpec.fixed` (`PublicCorrectness.fixed`); `Fixed.Keccak` instantiates it with G06's `Evm.keccakWord`. |
 | G01 Q6: export `decode : EvmWorld → Option IntrinsicWorld` | `StateExport` (`lowering`, `decode`, given the run's preimages, `envAbs`); `EvmSpec.World`, `worlds`, `balances`, `resume`; `IntrinsicSpec.worlds`; the fields `decode_reach` and `decode_commutes` of `PublicCorrectness`. |
@@ -83,19 +83,18 @@ signatures changed as follows, which a citing sibling must follow:
 
 - `Lang` has new fields `Forward` and `Guard`, both defaulting to `True`.
 - `Cert.need_ok` assumes the source bound in the source's `Forward` and
-  `Guard` and yields a target bound in the target's; `Cert.back` may answer
-  with a source collision (`Collided`); `Cert.reflect` is new;
+  `Guard` and yields a target bound in the target's; `Cert.back` assumes
+  the target's `Guard` and yields a source bound meeting the source's;
   `Cert.refines` gives `RefinesUnder`; `Cert.comp` takes no extra premise.
 - `Refines.completes`, `Refines.sound`, `Refines.diverges` and
-  `Refines.safety` are kept; `RefinesUnder AS AT FS G` (source forward
-  bounds `FS`, source premise `G`; the escape `Collided G` needs only `G`)
-  is the guarded form, with
-  `RefinesUnder.*` its lemmas (`sound`, `diverges` and `safety` take
-  `NoCollisionUpTo`), and `Refines.under` and `RefinesUnder.refines`
-  convert.
+  `Refines.safety` are kept; `RefinesUnder AS AT FS GS GT` (source forward
+  bounds `FS`, source premise `GS`, target premise `GT`) is the guarded
+  form, with `RefinesUnder.*` its lemmas (`sound`, `diverges` and `safety`
+  take `GT`), and `Refines.under` and `RefinesUnder.refines` convert.
 - `IntrinsicSpec` has `worlds`, `fixed`, the session-environment fields,
-  `NoFail`, `hashed`, `forward_iff` and `guard_iff`; `PublicCorrectness` has
-  `ifixed` and `isession`; `Matched` guards the state export.
+  `NoFail`, `hashed`, `slotHashed`, `forward_iff` and `guard_iff`;
+  `EvmSpec` has `slotHashed` and `guard_iff`; `PublicCorrectness` has
+  `ifixed` and `isession`.
 - `SourceSpec` and `EvmSpec` have new fields; `SourceSpec.meaning` and
   `Lowering.lower` take an `Artifact`.
 - `Event` addresses and values are `Address`/`Word`; `Event.tx` gained its
@@ -220,7 +219,12 @@ admissible ones, so the soundness half covers them; the adequacy half may
 use more gas than the caps. Consequently a compiler that is correct only
 with very large gas (say above 2^100) and reverts or takes a catch path
 below it satisfies the contracts; a quantitative bound on `need` is not part
-of them.
+of them. In particular a contract that bricks itself permanently after a
+transaction run with `gasleft()` below some threshold `X` is not refuted
+(`gasleft` is excluded from the profile, but compiled code may still branch
+on the gas it has): adequacy can always choose a schedule above `X`, and
+soundness accepts the failure choices. This gas-triggered bricking gap is
+the same idealization.
 
 A `transfer` or `send` to an instance of the system forwards the 2300-gas
 stipend. Whether the receiving body fits is decided by a compiler-independent
@@ -233,8 +237,10 @@ fail for every other (G43, G47).
 The premise reads the preimages the **source** run determines (G06 F7):
 `SourceSpec.hashed p e r`, the `keccak256` arguments and the slot preimages
 of the source prefix's storage accesses under the pinned storage layout, in
-order (`hashed_consistent`). It is the source language's `Guard`
-(`SourceSpec.guard_iff`):
+order (`hashed_consistent`). Every layer's `Guard` is the same premise on
+the preimages **its own** run hashed: the source's on `SourceSpec.hashed`
+(`SourceSpec.guard_iff`), the intrinsic layer's on `IntrinsicSpec.hashed`,
+the EVM's on `EvmSpec.hashed` and `slotHashed` (`EvmSpec.guard_iff`):
 
 ```lean
 def HashPremise (F : Fixed) (xs ys : List Bytes) : Prop :=
@@ -243,10 +249,13 @@ def HashPremise (F : Fixed) (xs ys : List Bytes) : Prop :=
       (List.range F.rootSlots) ys
 ```
 
-applied to `SourceSpec.hashed` (`xs`) and its slot preimages
-`SourceSpec.slotHashed` (`ys`, `slotHashed_sub`). The region conjunct reads
-only slot preimages: code and initcode hashes are of bytes the compiler
-chooses, which it could grind against the regions.
+applied to a run's preimages (`xs`) and its slot preimages (`ys`:
+`SourceSpec.slotHashed` with `slotHashed_sub`; on the EVM the preimages
+whose hash addresses storage). The region conjunct reads only slot
+preimages: code and initcode hashes are of bytes the compiler chooses,
+which it could grind against the regions. The region rule is conservative:
+two single-slot values whose hashes lie within `L` slots of each other count
+as overlapping, though neither region is used beyond its first slot.
 
 The first conjunct is G01 Q3: the preimages do not collide. The second is
 the second-round extension: the regions of `regionLen` slots their hashes
@@ -259,14 +268,24 @@ G06's `Evm.Fixed.NoCollision` and `Evm.Fixed.NoOverlap` state the same
 premises with a root count; that they agree with `HashPremise` on
 `Fixed.evm` is an integration lemma (G06/G46).
 
-Why the source and not the EVM: a premise over the bytes' own hashes is
-the compiler's to falsify. Bytes that hash a known Keccak collision pair
-would falsify every later guard, and bytes that hash more than `2^256`
-preimages falsify it by counting, so the guarded statements would hold
-vacuously. The source's preimages are fixed before any compiler exists.
-The bytes may hash only preimages the source determines
-(`PublicCorrectness.hashes_source`), which makes the compiler use the pinned
-layout's slot preimages (G27, "solc's slot behaviour" of G04 Q2).
+**Which run's premise.** Forward (adequacy) is guarded by the *source*
+run's premise: the source bound is universally quantified, so no choice of
+the prover can make it fail. Backward (soundness) is guarded by the
+*target* run's own premise: a violation excuses only a target run that
+really hashed the colliding or overlapping preimages. Two earlier designs
+failed here. A premise on the bytes' own hashes, with no restriction on what
+they hash, let the compiler falsify it (a known Keccak collision pair,
+`2^256` repeated hashes). A backward escape borrowed from the source let a
+source run through a loop the target never executed (`f(2^191)`, or
+`h = keccak(h)`) excuse everything after it. Now the bytes may hash only
+preimages the source determines and address storage only by the source's
+slot preimages (`PublicCorrectness.hashes_source`, per preimage), so the
+compiler cannot choose what the EVM's premise reads; this also makes the
+compiler use the pinned layout's slot preimages (G27, "solc's slot
+behaviour" of G04 Q2). A correct compiler still has the escape where it is
+needed: a target that really runs the long loop hashes those preimages
+itself, and a real collision (`m[k1]` written, colliding `m[k2]` read, after
+an out-of-gas transaction or not) is among the target's own hashes.
 
 Two parameters bound the premise:
 
@@ -277,11 +296,10 @@ Two parameters bound the premise:
   and no overlap is forced by counting. One request suffices to cross it
   (`f(2^130)` writing `m[i]` in a loop); such a prefix is outside adequacy,
   and the bound is compiler-independent. The bound is **not** part of the
-  premise: soundness (`back`) keeps holding for long runs, and its escape
-  `Collided` opens only on an actual violation of `HashPremise` (a
-  collision or an overlap, which past `2^256` preimages counting does
-  force), never on the count alone. Putting the count in the premise would
-  let one long request free every later transaction.
+  premise. Counting does force a violation of `HashPremise` once a run
+  hashes more than about `2^256/L` distinct slot preimages (about `2^190`
+  for `L ≈ 2^66`); since soundness reads the target's own premise, that
+  excuses only a target that itself hashed that many.
 - **`Fixed.Sane`**: `1 ≤ regionLen ≤ 2^128` and `rootSlots ≤ 2^128`, a
   sanity bound only: the final statement uses the concrete `S.fixed` of
   the S05-validated source, whose `regionLen` is the profile's largest
@@ -309,10 +327,10 @@ statement must add them as conjuncts.
 bound type `Res` with an order `resLE`, `Allowed : Env → Prop`, `Admissible :
 Res → Prop`, `sem : Prog → Env → Prefixes Res E O`, the proof `consistent`,
 and two predicates on bounds that default to `True`: `Forward`, the bounds
-adequacy speaks of, and `Guard`, the per-run premise. At the source they
-are fixed by `forward_iff` and `guard_iff`; a pass carries them to its
-target; at the EVM, only ever a target, both are trivial
-(`EvmSpec.Approved`).
+adequacy speaks of, and `Guard`, the per-run premise on the preimages this
+layer's run hashed. At the source and the intrinsic layer both are fixed by
+`forward_iff` and `guard_iff`, at the EVM `Guard` by `guard_iff` and
+`Forward` is trivial (`EvmSpec.Approved`).
 
 `Refines AS AT s t` is two-sided:
 
@@ -321,33 +339,24 @@ target; at the EVM, only ever a target, both are trivial
 2. **Backward (soundness).** Every admissible target prefix is below some
    admissible source prefix.
 
-`RefinesUnder AS AT FS G s t` puts the premise on the **source** bound:
+`RefinesUnder AS AT FS GS GT s t` reads each premise on its own side:
 
-1. **Forward.** Every admissible source bound in `FS` satisfying `G` names
-   an admissible target bound above it. The source bound is universally
-   quantified, so no choice of the prover can make the premise fail.
-2. **Backward.** Every admissible target prefix is below an admissible
-   source prefix, or the source **collided first** (`Collided`): an
-   admissible source prefix, with or without resource failures and of any
-   length, that violates `G` (a collision or an overlap) and whose events
-   lead the target's. The violation must happen
-   within the shared observations. A source prefix with a failure counts:
-   a real collision after an out-of-gas transaction (tx1 out of gas, tx2
-   writes `m[k1]`, tx3 reads a colliding `m[k2]`) must offer the escape,
-   or no correct compiler could meet `refines`.
+1. **Forward.** Every admissible source bound in `FS` meeting the source's
+   premise `GS` names an admissible target bound above it.
+2. **Backward.** Every admissible target prefix meeting the target's own
+   premise `GT` is below an admissible source prefix.
 
-`NoCollisionUpTo` says the source does not collide up to a target prefix's
-observations; the lemmas that read the backward direction take it.
 `Refines.under` and `RefinesUnder.refines` convert. Proved consequences:
 
 - **Completion transfers** (`RefinesUnder.completes`, `Refines.completes`).
   A source completion at an admissible bound in `FS` satisfying `G` is a
   target completion with the same observation and events.
-- **Nothing is invented** (`RefinesUnder.sound`, `Refines.sound`), up to a
-  source collision.
+- **Nothing is invented** (`RefinesUnder.sound`, `Refines.sound`) by a
+  target prefix meeting its premise.
 - **Divergence transfers** (`RefinesUnder.diverges`, `Refines.diverges`).
 - **Safety transfers** (`RefinesUnder.safety`, `Refines.safety`): any
-  downward-closed prefix property, up to a source collision.
+  downward-closed prefix property, to target prefixes meeting their
+  premise.
 - `Refines.trans` composes.
 
 Adequacy is the explicit bound function `Cert.need` of each pass
@@ -536,16 +545,16 @@ environment and admissible bound:
   reached EVM world `ω` decoding to `ω'`, the sessions continued from `ω`
   (`EvmSpec.resume`) refine and are refined by the intrinsic sessions from
   `ω'` (`IntrinsicSpec.ofWorld`), at every allowed environment whose opening
-  balances are `ω`'s (`EvmSpec.balances`), under the intrinsic run's own
-  premise, which covers the keys the world `ω'` stores (a later key may
-  collide with an earlier one).
+  balances are `ω`'s (`EvmSpec.balances`): forward under the intrinsic
+  run's own premise, which covers the keys the world `ω'` stores, backward
+  under the EVM premise over the prefix's preimages followed by the
+  continuation's (a later key may collide with an earlier one).
 
-Both are stated for EVM prefixes that are `Matched`: below a source prefix
-in the forward bounds that meets the premise. The premise is the source's,
-so the compiler cannot falsify it: neither by hashing a known collision pair
-nor by hashing one preimage `2^128` times. (Committed state holds only slot
-preimages of the source; a hash computed in a frame that later fails
-changes no state.) The intrinsic layer reads the same environment and fixed
+Both are stated for EVM prefixes meeting the EVM's own premise
+(`V.lang.Guard`). Since the bytes hash only source-determined preimages
+(`hashes_source`), the compiler cannot choose what that premise reads: a
+violation means the run really hashed colliding or overlapping source
+preimages. The intrinsic layer reads the same environment and fixed
 parameters (`PublicCorrectness.ifixed`, `isession`) and its `Forward` and
 `Guard` are pinned like the source's (`IntrinsicSpec.forward_iff`,
 `guard_iff`), so `decode_commutes` cannot be made vacuous by the intrinsic
@@ -618,11 +627,11 @@ language, `ofWorld` and `worlds`. `Lowering S I` has:
 
 **Observation and relation.** The shared `Event` and `Outcome`. The
 certificate gives refinement in both directions at every allowed environment
-(`Cert.refines`), under the source's premise. The intrinsic language's
-`Forward` and `Guard` carry the source's down: the certificate must
-establish them at `need`, and must reflect an intrinsic collision to a
-source one (`Cert.reflect`), so neither can be chosen to make the contract
-vacuous. Typing preservation is in the
+(`Cert.refines`), forward under the source's premise and backward under
+the intrinsic run's own. The intrinsic language's `Forward` and `Guard` are
+pinned (`IntrinsicSpec.forward_iff`, `guard_iff`), and the certificate must
+establish them at `need` and carry the premise back (`Cert.back`), so
+neither can be chosen to make the contract vacuous. Typing preservation is in the
 target type itself, since `lower` produces intrinsic `Prog C Γ Γ'`.
 
 **Premises.** Only the approved environment set `I.lang.Allowed` and its
@@ -716,8 +725,8 @@ these fields:
 8. `refines`: for every admitted input, artifact the compiler returns and
    allowed EVM environment `e`, `envAbs e` is allowed and the source meaning
    **at that artifact table** refines the artifact's EVM sessions at `e`,
-   under the per-run hash premise on the source (`RefinesUnder` with the
-   source's `Forward` and `Guard`).
+   forward under the source's `Forward` and `Guard`, backward under the
+   EVM run's own `Guard` (`RefinesUnder`).
 9. `decode_reach` and `decode_commutes`: the state export (above).
 
 The final public statement is the conjunction of:
@@ -776,8 +785,8 @@ allowed EVM environment, two kinds of source specification hold of the
 bytes:
 
 - **Safety (box-like).** A downward-closed prefix property that holds at
-  every admissible source prefix holds at every admissible EVM prefix up to
-  whose observations the source does not collide (`NoCollisionUpTo`).
+  every admissible source prefix holds at every admissible EVM prefix
+  meeting the EVM run's own premise.
 - **Completion (diamond-like).** A source completion at an admissible bound
   without failures, below `hashBound` and under the premise gives an
   admissible EVM bound at which the bytes complete with the same outcome.
@@ -877,10 +886,9 @@ domain and `envAbs`. A **certificate** `Cert π` is data. Its fields are:
   admissible, in the target's `Forward`, satisfies the target's `Guard`
   (the pass carries the preimages down), and the source prefix is below the
   target prefix there;
-- `back`: every admissible target prefix is below an admissible source
-  prefix, or the source collided first (`Collided`);
-- `reflect`: a target prefix in the target's `Forward` that violates the
-  target's `Guard` has a source collision within its observations.
+- `back`: every admissible target prefix meeting the target's `Guard` is
+  below an admissible source prefix meeting the source's (the pass carries
+  the preimages back up).
 
 `Cert.refines` turns a certificate into `RefinesUnder` for one program and
 environment.
@@ -898,12 +906,8 @@ def Cert.comp (c₁ : Cert π₁) (c₂ : Cert π₂) (closed : ∀ p h, π₂.D
 The lemma is proved in `Contracts.lean` and depends on `propext` only,
 pinned by `#guard_msgs`. The composed bound is `need₂ ∘ need₁`, with the
 forward bounds and premises carried through the middle language. The
-backward direction chains the two `back` fields: a middle collision is
-reflected to the source (`c₁.reflect`), and a source collision within the
-middle prefix lies either within the target's observations or after them,
-in which case the target prefix, unfinished, is below the source prefix
-(`List.prefix_or_prefix_of_prefix`). `reflect` chains the two `reflect`
-fields.
+backward direction chains the two `back` fields, the middle prefix meeting
+its premise.
 
 Mixed programs (G24) are handled by passes whose domain is all intrinsic
 programs. A per-feature compiler is an inner component, and its fragment
@@ -1181,8 +1185,15 @@ theorem is restated against them.
   and `--check` 0 errors; `./run-lean.sh`: "Build completed successfully
   (739 jobs)", SolkeyTestSuite "(262 jobs)", `check-solkey.sh`
   "37 mismatch(es)" (baseline).
-- **Elapsed:** about 4 h in all (12:55–17:00 UTC); before the second hold
-  about 2 h 25 min (12:55–15:20 UTC); the first part
+- **Checked after the fourth hold** (master `9b6d1c29` merged): diagnostics
+  clean with the pins; `check-layers` 168 core modules, 0 reach the
+  elaborator; `check-orphans` 0 orphaned; `check-trust` 0 findings;
+  `check-doc-paths` 46 missing, unchanged; `roadmap-g03-ledger.py --write`
+  and `--check` 0 errors; `./run-lean.sh`: "Build completed successfully
+  (751 jobs)", SolkeyTestSuite "(262 jobs)", `check-solkey.sh`
+  "37 mismatch(es)" (baseline).
+- **Elapsed:** about 4 h 50 min in all (12:55–17:45 UTC); before the second
+  hold about 2 h 25 min (12:55–15:20 UTC); the first part
   below took about 1 h 15 min (12:55–14:10 UTC, 2026-10-29), of which the
   cold build took 59 min (151 min user CPU) and the final builds 11 and
   4 min. Peak memory was not measured (`/usr/bin/time` is absent).
@@ -1196,6 +1207,32 @@ theorem is restated against them.
   that predate G01. Elapsed about 1 h 15 min.
 
 ## Review
+
+### Sixth round: fourth integration hold (design change)
+
+Master `9b6d1c29` merged. Fixed:
+
+1. *Confirmed, blocking: B1 at a higher threshold.* The region conjunct
+   fails by counting past about `2^256/L` distinct slot preimages, so a
+   source run through `f(2^191)` (or `h = keccak(h)`) violated the premise
+   right after the history before the request, and `Collided` freed the
+   rest of the session, though the target never ran that loop. Design
+   change: each layer's `Guard` reads its own run's preimages; backward
+   soundness is guarded by the **target's** premise
+   (`RefinesUnder AS AT FS GS GT`), forward by the source's; `Collided`,
+   `NoCollisionUpTo`, `Cert.reflect` and `Matched` are gone; `Cert.back`
+   carries the premise back; `EvmSpec.slotHashed` and `EvmSpec.guard_iff`
+   are new; `hashes_source` also restricts the EVM's slot preimages to the
+   source's, so the compiler cannot choose what the EVM premise reads. The
+   correct compiler keeps the escape where needed: a target that really
+   runs the long loop, or reads a key colliding with one it wrote (after an
+   out-of-gas transaction or not), hashed those preimages itself, so the
+   second and fourth rejections stay closed.
+2. *Doc*: the counting threshold is about `2^256/L`, not the count of
+   `hashBound`; the conservative region rule (two single-slot values within
+   `L` count as overlapping) is stated.
+3. *Recorded*: the gas-triggered bricking gap (see the
+   [resources](#resources-horizons-failures-and-gas)).
 
 ### Fifth round: third integration hold
 
