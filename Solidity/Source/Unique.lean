@@ -1316,6 +1316,188 @@ theorem uniqE_callOpts {Γ : Ctx} {f : Syn .expr} {o : Syn .namedArg} {os : Syn 
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
+/-- **Lvalues.** -/
+theorem uniqL_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqL Γ e := by
+  intro τ τ' l l'
+  cases l with
+  | loc hr ht =>
+    cases l' with
+    | loc hr' ht' => rw [hr] at hr'; cases hr'; rw [ht] at ht'; cases ht'; exact ⟨rfl, HEq.rfl⟩
+    | state hr' _ _ => rw [hr] at hr'; cases hr'
+  | state hr hv _ =>
+    cases l' with
+    | loc hr' _ => rw [hr] at hr'; cases hr'
+    | state hr' hv' _ => rw [hr] at hr'; cases hr'; rw [hv] at hv'; cases hv'; exact ⟨rfl, HEq.rfl⟩
+  | @paren x σ l1 =>
+    cases l' with
+    | paren l2 =>
+      have hs : sizeOf x < sizeOf (Syn.tuple (.some x) .nil) := by
+        simp only [Syn.tuple.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.l x hs l1 l2
+      cases h1
+      exact ⟨rfl, by simp only [LVal.toR]; exact e1⟩
+  | @indexArray a i dl τe σ n da hl di h hb =>
+    have hs : sizeOf a < sizeOf (Syn.index a (.some i)) ∧ sizeOf i < sizeOf (Syn.index a (.some i)) := by
+      simp only [Syn.index.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+    cases l' with
+    | indexArray da' _ di' _ _ =>
+      obtain ⟨h1, e1⟩ := ih.e a hs.1 da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e i hs.2 di di'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [LVal.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | indexMapping da' _ _ => cases (ih.e a hs.1 da da').1
+    | indexBytes da' _ _ _ => cases (ih.e a hs.1 da da').1
+  | @indexMapping a i τk τv σ da di h =>
+    have hs : sizeOf a < sizeOf (Syn.index a (.some i)) ∧ sizeOf i < sizeOf (Syn.index a (.some i)) := by
+      simp only [Syn.index.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+    cases l' with
+    | indexArray da' _ _ _ _ => cases (ih.e a hs.1 da da').1
+    | indexMapping da' di' _ =>
+      obtain ⟨h1, e1⟩ := ih.e a hs.1 da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e i hs.2 di di'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [LVal.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | indexBytes da' _ _ _ => cases (ih.e a hs.1 da da').1
+  | @indexBytes a i dl σ da hl di h =>
+    have hs : sizeOf a < sizeOf (Syn.index a (.some i)) ∧ sizeOf i < sizeOf (Syn.index a (.some i)) := by
+      simp only [Syn.index.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+    cases l' with
+    | indexArray da' _ _ _ _ => cases (ih.e a hs.1 da da').1
+    | indexMapping da' _ _ => cases (ih.e a hs.1 da da').1
+    | indexBytes da' _ di' _ =>
+      obtain ⟨h1, e1⟩ := ih.e a hs.1 da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e i hs.2 di di'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [LVal.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+  | @member a x dl dn i τ da hl h =>
+    cases l' with
+    | member da' _ h' =>
+      have hs : sizeOf a < sizeOf (Syn.member a x) := by simp only [Syn.member.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e a hs da da'
+      cases h1
+      rw [h] at h'; cases h'
+      exact ⟨rfl, by simp only [LVal.toR]; rw [eq_of_heq e1]⟩
+
+/-- **Argument lists.** -/
+theorem uniqA_of {Γ : Ctx} {es : Syn (.list .expr)} (ih : Uniq Γ (sizeOf es)) : UniqA Γ es := by
+  intro τs τs' d d'
+  cases d with
+  | nil => cases d'; exact ⟨rfl, HEq.rfl⟩
+  | @cons e es τ τs d1 ds =>
+    cases d' with
+    | cons d2 ds' =>
+      have hs : sizeOf e < sizeOf (Syn.cons e es) ∧ sizeOf es < sizeOf (Syn.cons e es) := by
+        simp only [Syn.cons.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e e hs.1 d1 d2
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.a es hs.2 ds ds'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [TypedArgs.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+
+/-- **Tuple slots.** -/
+theorem uniqS_of {Γ : Ctx} {sl : Syn (.list (.opt .expr))} (ih : Uniq Γ (sizeOf sl)) : UniqS Γ sl := by
+  intro τs τs' d d'
+  cases d with
+  | nil => cases d'; exact ⟨rfl, HEq.rfl, HEq.rfl⟩
+  | @cons e es τ τs d1 ds =>
+    cases d' with
+    | cons d2 ds' =>
+      have hs : sizeOf e < sizeOf (Syn.cons (.some e) es) ∧ sizeOf es < sizeOf (Syn.cons (.some e) es) := by
+        simp only [Syn.cons.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e e hs.1 d1 d2
+      cases h1
+      obtain ⟨h2, e2, e3⟩ := ih.s es hs.2 ds ds'
+      cases h2
+      refine ⟨rfl, ?_, ?_⟩
+      · simp only [TypedSlots.toR]
+        rw [eq_of_heq e1, eq_of_heq e2]
+      · simp only [TypedArgs.ofSlots]
+        rw [eq_of_heq e1, eq_of_heq e3]
+
+/-- An expression no rule types. -/
+theorem uniqE_empty {Γ : Ctx} {e : Syn .expr} (h : ∀ τ, Typed Γ e τ → False) : UniqE Γ e :=
+  fun d _ => (h _ d).elim
+
+/-- **Every expression's derivations agree**, given the hypothesis below its size. -/
+theorem uniqE_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqE Γ e := by
+  cases hce : e.const with
+  | some q => exact fun d d' => Typed.const_unique d d' hce
+  | none =>
+  cases hb : e.binOp? with
+  | some p =>
+    obtain ⟨k, a, b⟩ := p
+    exact uniqE_bin hb hce ih
+  | none =>
+  cases e with
+  | cond c a b => exact uniqE_cond ih
+  | ident x => exact uniqE_ident ih
+  | lit l => exact uniqE_lit hce
+  | tuple o sl => exact uniqE_tuple hce ih
+  | unaryPrefix op x => exact uniqE_prefix hce ih
+  | unarySuffix op x => exact uniqE_suffix ih
+  | payableConv A => exact uniqE_payable ih
+  | index a o => exact uniqE_index ih
+  | assign op a b => exact uniqE_assign ih
+  | member a x => exact uniqE_member ih
+  | call f A =>
+    cases f with
+    | ident n => exact uniqE_callIdent ih
+    | member c n => exact uniqE_callMember ih
+    | elemType el h => exact uniqE_callElem ih
+    | callOptions f o os => exact uniqE_callOpts ih
+    | _ =>
+      apply uniqE_empty
+      intro τ d
+      cases d <;> first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hb; assumption)
+  | _ =>
+    first
+    | (cases hb; done)
+    | (rename_i op _ _; cases op <;> cases hb; done)
+    | (apply uniqE_empty
+       intro τ d
+       cases d <;> first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hb; assumption))
+
+/-- **Uniqueness below every size.** -/
+theorem uniq_all (Γ : Ctx) : ∀ n, Uniq Γ n
+  | 0 => ⟨fun _ h => absurd h (Nat.not_lt_zero _), fun _ h => absurd h (Nat.not_lt_zero _),
+      fun _ h => absurd h (Nat.not_lt_zero _), fun _ h => absurd h (Nat.not_lt_zero _)⟩
+  | n + 1 =>
+    have ih := uniq_all Γ n
+    ⟨fun _ h => uniqE_of (ih.mono (by omega)), fun _ h => uniqL_of (ih.mono (by omega)),
+      fun _ h => uniqA_of (ih.mono (by omega)), fun _ h => uniqS_of (ih.mono (by omega))⟩
+
+/-- **Typing derivations agree** (Q1): any two derivations of one
+expression have one type and elaborate to one resolved term, so a unit's
+meaning does not depend on the derivation an elaboration carries. -/
+theorem Typed.unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} (d : Typed Γ e τ) (d' : Typed Γ e τ') :
+    τ = τ' ∧ HEq d.toR d'.toR :=
+  (uniq_all Γ (sizeOf e + 1)).e e (by omega) d d'
+
+/-- Lvalue derivations agree. -/
+theorem LVal.unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} (l : LVal Γ e τ) (l' : LVal Γ e τ') :
+    τ = τ' ∧ HEq l.toR l'.toR :=
+  (uniq_all Γ (sizeOf e + 1)).l e (by omega) l l'
+
+/-- Argument-list derivations agree. -/
+theorem TypedArgs.unique {Γ : Ctx} {es : Syn (.list .expr)} {τs τs' : List STy} (d : TypedArgs Γ es τs)
+    (d' : TypedArgs Γ es τs') : τs = τs' ∧ HEq d.toR d'.toR :=
+  (uniq_all Γ (sizeOf es + 1)).a es (by omega) d d'
+
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
