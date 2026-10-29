@@ -399,6 +399,11 @@ import Solidity.Evm.MemoryRefWrite
 import Solidity.Evm.MemoryRefDelete
 import Solidity.Evm.MemoryPathExamples
 import Solidity.Evm.MemoryStructDefault
+import Solidity.Evm.MemoryStructDefaultSource
+import Solidity.Evm.MemoryStructReferenceDefaultExamples
+import Solidity.Evm.MemoryStructReferenceDefaultModes
+import Solidity.Evm.MemoryStructReferenceDefaultLiterals
+import Solidity.Evm.MemoryStructReferenceDefaultBoundaries
 import Solidity.Evm.MemoryStructDefaultExamples
 import Solidity.Evm.MemoryStructCopy
 import Solidity.Evm.MemoryStructCopyCode

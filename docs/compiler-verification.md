@@ -19,7 +19,8 @@ copies, aliases into elements), internal calls and `transfer`.
 
 `Evm.Compiler.compile` is the checked entry for the core fragment below and
 the memory fragment for primitive arrays, primitive struct fields, and
-primitive-member struct construction and copies from storage roots. It returns code together with a fragment
+finite nonrecursive struct default/literal construction with supported reference
+members, and primitive-member copies from storage roots. It returns code together with a fragment
 certificate; `Compiler.Compilation.correct` (`Main.compiler_checked`) proves
 their common source/machine agreement. The selected path determines its
 explicit input and output state relation; `inFragP` and `compile_correct`
@@ -40,9 +41,11 @@ checked operators, short-circuit and conditional expressions over memory
 operands, primitive storage writes, `require`/`revert`, blocks and
 statement-level `if`. Allocation: `new T[](n)` with a simple length (the
 elaborator captures effects first), a declaration without initializer (the
-same as `new T[](0)`), default and literal construction of primitive-member
-structs (the elaborator lowers literals to a default declaration and field
-writes), and allocating rebinding. Older aliases keep their objects. `delete`
+same as `new T[](0)`), default and literal construction of finite nonrecursive
+structs with primitive members, nested structs and primitive dynamic arrays
+(the elaborator lowers literals to default declarations and field writes), and
+allocating rebinding. A primitive `new T[](n)` may also initialize a reference
+field after allocating the child and then resolving its receiver. Older aliases keep their objects. `delete`
 of an element, a field, a whole array local (a fresh empty array) or a whole
 struct local (a fresh default object). Numeric `+=` `-=` `*=` `/=` `%=` and
 standalone or captured `++`/`−−` on elements, fields and locals (the result
@@ -51,7 +54,8 @@ word stays on the stack during the checked bump, so `i = xs[i]++` and
 (`Evm/MemoryPaths.lean`) for reads, aliases and primitive writes;
 reference-field assignment redirects a member to an existing child
 (`Evm/MemoryRefWrite.lean`); deleting a reference member allocates a fresh
-empty array or primitive-member struct (`Evm/MemoryRefDelete.lean`); copies
+empty array or a supported finite default struct
+(`Evm/MemoryRefDelete.lean`, `Evm/MemoryStructDefaultSource.lean`); copies
 of a primitive-member struct from a storage root (`Record memory fresh =
 stored;`, `Evm/MemoryStructCopyCode.lean`).
 
@@ -257,6 +261,22 @@ no speed-driven intrinsic representation decision was reversed. Full commands,
 terminal logs, hashes, measured cgroups and review outcomes are exported with
 the checkpoint handoff.
 
+**Finite default layouts.** `Evm/MemoryStructDefaultLayout.lean` defines the
+recursive cost: primitive children cost zero, empty primitive dynamic arrays
+cost one header cell, and a struct costs its children plus
+`max 1 memberCount`. Children are allocated in field order before their parent;
+relative pointer stores initialize the parent with the actual child addresses.
+`Evm/MemoryStructReferenceAlloc.lean` proves preservation of older objects, reference
+words, separation and the zeroed free region. `Evm/MemoryStructDefaultPlan.lean`
+connects every reached child allocation to the actual typed `Heap.allocDefault`
+and its capacity premise. `Evm/MemoryStructDefaultCode.lean` keeps executable data
+indexed by the original reference type and proves erasure, soundness and cost
+equivalence to those certificates. Its structural traversal uses the existing
+type rank, proved sufficient for the finite specification; no evaluator/search
+budget is increased. Local/member deletion allocates fresh children as well as
+a fresh parent, retaining objects reached through old aliases. Literal lowering
+may leave replaced default children allocated; those costs remain included.
+
 **Out of the construction fallback**: construction of structs
 with reference members, other uncertified reference-member default layouts, copies other
 than the primitive-member storage-root clause (including memory back to
@@ -267,7 +287,16 @@ calls, payments, and compound storage writes in a mixed memory program.
 compiler's code, with an inhabited public input):
 `Evm/MemoryCompileExamples.lean`, `Evm/MemoryExprExamples.lean`,
 `Evm/MemoryAllocExamples.lean`, `Evm/MemoryAllocSourceExamples.lean`,
-`Evm/MemoryStructDefaultExamples.lean`, `Evm/MemoryPathExamples.lean`. The
+`Evm/MemoryStructDefaultExamples.lean`, `Evm/MemoryPathExamples.lean`, and the
+`Evm/MemoryStructReferenceDefaultExamples.lean`,
+`Evm/MemoryStructReferenceDefaultModes.lean`,
+`Evm/MemoryStructReferenceDefaultLiterals.lean`, and
+`Evm/MemoryStructReferenceDefaultBoundaries.lean` modules. The latter check nested defaults, legacy/viaIR literals and allocating
+rebinding, retained aliases, finite child/local deletion, empty model children,
+wrong zero pointer words, insufficient capacity, exact failure and unreached
+allocations, with source and target observations and inhabited correctness
+inputs. Invalid empty struct encodings remain model-only; source admission is
+unchanged. The
 large computed compiler results there are marked irreducible for
 elaboration; kernel checks still unfold them, and the pointer compiler
 recurses structurally so acceptance reduces in the kernel (no native
@@ -579,3 +608,90 @@ the session rollout. Per-file Lean MCP diagnostics remained partial after
 three 30-second polls, with no diagnostics or failed dependencies returned;
 this is pending validation, not a passing Lean audit. `git diff --check` passed.
 The coordinator must complete the combined audit under its resource scope.
+
+### Finite reference-struct validation (2026-10-28–29)
+
+The memory-reference-structs task uses the published Lean 4.24.0 toolchain.
+The runtime KeySort smoke passed (exit 0, 0.303 s, 48,545,792 bytes sampled
+group RSS). The original typed nested declaration was refused by the public
+compiler while its source run allocated four objects. The extension accepts
+that same shape. No new axioms are introduced: printed headline correctness
+axioms are `propext`, `Classical.choice`, and `Quot.sound`.
+
+Concrete target computation initially exhausted the inherited address-space
+limit (about 10.44 GB sampled RSS); extracting opaque proof lemmas alone did
+not resolve it. Separating typed executable layout data from proof records
+preserved the same observations and passed the examples in 7.45 s with
+1,157,050,368 bytes sampled RSS, without raising proof budgets. All failed
+attempts are retained as failures in the delivered logs.
+
+The resource guard is `/workspace/.cloudvm-solidity-compiler10/bounded.py`: a
+12 GiB inherited per-process address-space limit, 10 GiB sampled process-group
+RSS stop and 12 GiB whole-VM memory-current stop, on an existing 16 GiB hard
+VM cgroup with actual swap disabled. This is a measured guard, not a writable
+12 GiB cgroup guarantee. Builds use `LEAN_NUM_THREADS=1` and `-j1` through a
+temporary untracked Lake configuration, with `-DElab.async=false`. The initial
+full-build attempt failed creating threads in unchanged `LinearDecision` and
+`TermSize` modules: `-j1` alone still allowed asynchronous elaboration. Disabling
+async elaboration passed both modules under the same guard in 38.55 s at
+1,098,969,088 bytes sampled RSS; no proof/search budget changed.
+An initial complete-default attempt stopped at the 12 GiB whole-VM guard
+after 600 jobs (exit 75, 4,415.11 s, 7,695,233,024 bytes peak build-group RSS);
+this is BLOCKED, not an OS OOM or a pass. Its last observed module was the
+unchanged `Examples/Tactics/OpenLoops.lean`, whose repository import closure
+contains no task-modified module. Read-only best-effort `POSIX_FADV_DONTNEED`
+advice for build/toolchain files reduced measured VM usage from
+4,897,751,040 to 2,623,434,752 bytes while keeping caches on disk. The same
+OpenLoops target then passed in 512 s under unchanged limits. Targeted success
+does not replace the full build; its subsequent terminal result is recorded
+separately in the handoff.
+Full commands, exit codes, timings,
+peaks and hashes are delivered in
+`/workspace/solidity-compiler10-memory-reference-structs/`.
+
+Independent final read-only finder and skeptic reviews found no confirmed
+semantic defect; neither used a Lean server or ran builds. Earlier requests
+for inhabited viaIR observations, literal rebinding, empty children and
+unreached-capacity controls were implemented. This compiler refinement does
+not promote universal source coverage or change feature inventory status.
+
+#### Final terminal results and remaining blocker
+
+The implementation and its inhabited kernel simulations are complete for the
+finite STRUCT composition over existing primitive-array/struct children.
+Original-assignment completion remains **BLOCKED** because the mandatory
+`./run-lean.sh` TestSuite stage was not completed under the fixed resource limits in the attempted configurations. No
+statement, premise, expected observation, search/step budget or resource limit
+was weakened to make that gate green.
+
+| Check | Actual result |
+| --- | --- |
+| `lake -f lakefile.struct-default.toml build Solidity.Evm.MemoryStructReferenceDefaultBoundaries` | Exit 0; 121 jobs; 235.05 s; 1,373,937,664 bytes sampled build-group RSS. Includes all four new control modules. |
+| Complete default `lake build` | Exit 0; 709 jobs, using checked disk caches (1.62 s; 1,591,160,832 bytes sampled group RSS). The previous bounded-search failure in unchanged `Examples/Tactics/AllLeftLater.lean` passed with default async elaboration, still `-j1`, in 7.66 s. |
+| `./run-lean.sh` | Exit 75 at the 12 GiB whole-VM guard during TestSuite validation; not passed. Its supervisor-group peak is not the nested Lake build's peak. |
+| Unchanged `TestSuite/Derived17.lean` controls | Async check: `std::bad_alloc`, Lean exit 134 / Lake exit 1. Serial smaller-arena/immediate-purge check: exit 75 at whole-VM guard, 88.99 s, 10,289,602,560 bytes sampled group RSS. Combined async/allocator check: `std::bad_alloc`, exit 1, 73.35 s, 8,472,776,704 bytes sampled group RSS. |
+| SolKey conformance | Exit 0, independently checked after the blocked TestSuite stage. |
+| Orphan, layer, strict automatic and trust gates | Each exit 0. |
+| Relevant script suites | Utility/aggregate/runner/trust suites: 29 passed. Focused existing constructor/fresh-array tests: 2 passed, 144.26 s; original expectations retained, including their negative controls. |
+| Relevant pinned source fixture | `memory_structs_nested.sol`: exit 0, one working fixture, zero broken/blocked, all required fixture pipelines. The compiler controls separately check inhabited legacy/viaIR observations. No generated-EVM, native gas or optimizer-equivalence claim is made. |
+| Broad extra source suite | The additional `struct\|memory\|fresh arrays` selection hit its original 1,800 s guard: BLOCKED, not passed. Focused tests do not erase that record. |
+| Extra upstream fixture | `memory_structs_nested_load.sol` remained blocked by the runner's unsupported `gas irOptimized: 110769` expectation. Its fixed-array/storage-copy shape is outside this compiler extension. |
+| Global documentation paths | Exit 1: 46 pre-existing missing references. The canonical check on detached base `fd35566ee3138dd93d456191cc3447c021b1a87b` produced byte-identical output; no new missing reference is attributed to this task. No exclusions or old evidence files were edited. |
+
+The allocator-only controls used installed mimalloc's verified
+`MIMALLOC_ARENA_RESERVE=64MiB` and `MIMALLOC_PURGE_DELAY=0`, with the original
+12 GiB per-process address-space limit and unchanged RSS/VM guards. Broader
+read-only cache advice reduced measured VM usage from 3,393,245,184 to
+270,503,936 bytes, keeping all files on disk; this still did not complete
+`Derived17`. A first numeric-unit probe was corrected using explicit `MiB`
+after inspecting actual verbose option output. All probe/failure logs remain
+in the evidence archive.
+
+The next concrete step is a separate performance repair of the existing
+`Derived17` loop proofs under these same limits (for example, investigate
+existing chunked replay while retaining statements and step/heartbeat budgets),
+then rerun `./run-lean.sh`. That prover/TestSuite work is outside the assigned
+memory-STRUCT construction area and was not taken over. The committed task
+increment retains its complete child-first allocation proof, reached cost,
+old aliases, separation, zero tail, public compiler observations and named
+refusals. The handoff records this blocker rather than claiming full completion.
