@@ -285,6 +285,14 @@ its integrated whole-parser check runs after their implementations merge. The
 same rule applies to later composition groups: an interface is not a completed
 proof, and their final checks must use the actual implementations.
 
+G08 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g08-checked-lexical-analysis). A checked lexer over source bytes (`Solidity/Frontend/Checked/Lexer.lean`): every lexer rule of the pinned `SolidityLexer.g4` classified with a sample (`lexRules_classified`), maximal munch with modes, solc's scanner rules where they differ from the grammar, and the certificate proved for every accepted source: its pieces re-print it (`lex_reprint`), each token's range re-locates it (`lex_locate`), refusals are located (`lex_error_pos`); the string-escape decoder is proved against an inductive grammar (`strBody_sound`).
+
+G09 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g09-type-and-declaration-syntax). The token yield of S00's syntax under layouts (attribute orders, string fragments) as the grammar derivation; an untrusted fuel-structural parser to `Syn` checked against it (`parse_sound`, `parse_derives`, `parseType_derives`: translation validation); a canonical printer with round trips; recursive and mutual declaration references; every type and declaration constructor covered (`declCtors_covered`). Unambiguity and completeness of the parse are open.
+
+G10 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g10-expressions). Expressions by solc's precedence climbing, the selected tree fixed by `Syn.prec` (levels and associativity of the grammar, refusal where the grammar and solc disagree); level lemmas for every binary constructor (`binary_levels`), every operator parsed (`every_operator`), every expression constructor covered (`exprCtors_covered`), `>>>`/`years` rejected precisely (`expr_out_of_profile`). Translation validated; unambiguity is open.
+
+G11 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g11-statements-definitions-and-whole-units). Whole-source parsing to `Syn .unit` from G08–G10 (`parse_sound`, translation validation; completeness and uniqueness open), syntax-level admission (`parseInProfile`), every one of S00's 112 constructors produced by an accepted program (`allCtors_covered`; in-profile ones by admitted programs, `profileCtors_covered`), G05's parse-stage checker (`parseChecker`, `checkUnits_sound`, `produce_accepted`), and the corpus regression over solc 0.8.38's 3542 syntax tests and the repository's `.sol` files (`scripts/parse-corpus.mjs`, baseline `tests/parse-corpus/baseline.json`: 3126 of 3208 expected-accepted tests accepted, 289 of 334 expected-refused refused, every disagreement with its reason; print/parse round trip without failure).
+
 ### Wave 2 — lowering and complete source semantics (G16–G23)
 
 | Group | Deliverable and completion evidence |
@@ -521,7 +529,7 @@ several groups (noted per row); a lane starts by reading those results.
 | V02 | G03, G05, G06 | V00, V01 | Integrated (with the G06 Osaka re-pin). |
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
 | V04 | S02, S03, S04.04, S05 | V03 | — |
-| V05 | G08, G09, G10, G11 | V04 | — |
+| V05 | G08, G09, G10, G11 | V04 | Lane `roadmap-l2-20261029/lane-parse`: G08–G11 done (translation-validated parse; completeness and uniqueness open), round-trip backfill done. |
 | V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). lane-static: G12, G13, G14 done; backfill item 5 (fixed-point mobile constants) done. |
 | V07 | G16, G17, G18, G19 | V06 | — |
 | V08 | G20, G21, G22, G23 | V07 | — |

@@ -51,6 +51,10 @@ import Solidity.Frontend.Static.Certificates
 import Solidity.Frontend.Static.InferExamples
 import Solidity.Frontend.Static.InheritanceExamples
 import Solidity.Source.StateExamples
+import Solidity.Frontend.Checked.LexExamples
+import Solidity.Frontend.Checked.TypeExamples
+import Solidity.Frontend.Checked.ExprExamples
+import Solidity.Frontend.Checked.UnitExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -1179,3 +1183,82 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} standalone-constant review theorems use only the standard axioms"
+
+
+-- G08 (`docs/feature-work/frontend-parse.md`): the checked lexer's headline
+-- theorems use only the standard axioms.
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Checked.lex_sound,
+    ``Solidity.Frontend.Checked.lex_reprint,
+    ``Solidity.Frontend.Checked.lex_locate,
+    ``Solidity.Frontend.Checked.lex_error_pos,
+    ``Solidity.Frontend.Checked.lexRules_classified,
+    ``Solidity.Frontend.Checked.lexRules_cover,
+    ``Solidity.Frontend.Checked.classify_reserved]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checked-lexer theorems use only the standard axioms"
+
+-- G09 (`docs/feature-work/frontend-parse.md`): checked parsing of types and
+-- declarations.
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Checked.parse_sound,
+    ``Solidity.Frontend.Checked.parse_derives,
+    ``Solidity.Frontend.Checked.parseType_derives,
+    ``Solidity.Frontend.Checked.declCtors_covered,
+    ``Solidity.Frontend.Checked.recursive_struct,
+    ``Solidity.Frontend.Checked.print_roundtrip,
+    ``Solidity.Frontend.Checked.strBody_sound]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checked-parse (G09) theorems use only the standard axioms"
+
+-- G10 (`docs/feature-work/frontend-parse.md`): checked expressions.
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Checked.parseExpr_derives,
+    ``Solidity.Frontend.Checked.parseExpr_prec_root,
+    ``Solidity.Frontend.Checked.binary_levels,
+    ``Solidity.Frontend.Checked.every_operator,
+    ``Solidity.Frontend.Checked.exprCtors_covered,
+    ``Solidity.Frontend.Checked.expr_out_of_profile,
+    ``Solidity.Frontend.Checked.parseInProfile_sound]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checked-expression (G10) theorems use only the standard axioms"
+
+-- G11 (`docs/feature-work/frontend-parse.md`): whole-unit parsing, the G05
+-- parse stage and constructor coverage.
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Checked.checkUnits_sound,
+    ``Solidity.Frontend.Checked.produce_accepted,
+    ``Solidity.Frontend.Checked.allCtors_covered,
+    ``Solidity.Frontend.Checked.profileCtors_covered,
+    ``Solidity.Frontend.Checked.demo_parses,
+    ``Solidity.Frontend.Checked.unit_out_of_profile]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checked-unit (G11) theorems use only the standard axioms"
