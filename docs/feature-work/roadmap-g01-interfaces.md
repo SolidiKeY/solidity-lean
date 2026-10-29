@@ -1138,7 +1138,15 @@ theorem is restated against them.
     (memory) on the first run and built it on the warm re-run ("Build
     completed successfully (262 jobs)"); `check-solkey.sh` reports
     "37 mismatch(es)", the count at the base.
-- **Elapsed:** about 1 h 15 min (12:55–14:10 UTC, 2026-10-29), of which the
+- **Checked after the integration rounds** (head after the merge with
+  `77f8878f`): `lean_diagnostic_messages` clean on both modules with the
+  pins holding; `check-layers` 160 core modules, 0 reach the elaborator;
+  `check-orphans` 0 orphaned; `check-trust` 0 findings; `check-doc-paths`
+  46 missing, unchanged; `./run-lean.sh`: "Build completed successfully
+  (723 jobs)", SolkeyTestSuite "(262 jobs)", `check-solkey.sh`
+  "37 mismatch(es)" (baseline).
+- **Elapsed:** about 2 h 25 min in all (12:55–15:20 UTC); the first part
+  below took about 1 h 15 min (12:55–14:10 UTC, 2026-10-29), of which the
   cold build took 59 min (151 min user CPU) and the final builds 11 and
   4 min. Peak memory was not measured (`/usr/bin/time` is absent).
 
