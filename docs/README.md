@@ -25,6 +25,7 @@ history is in git.
 | [feature-work/cloud-integration-01-09.md](feature-work/cloud-integration-01-09.md) | Combined cloud tasks 01–09: snapshot scope, conflict resolutions, regression checks and remaining blockers. |
 | [feature-work/roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) | Roadmap G04: current compiler theorems, every fragment/input restriction and its discharging group. |
 | [feature-work/roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md) | Roadmap G06 child: hand-written EVM vector scripts re-pinned from Cancun to Osaka; both-fork measurements, bytecode comparison, lane re-runs and Lean-side pin obligations. |
+| [feature-work/fixed-point-semantics.md](feature-work/fixed-point-semantics.md) | Fixed-point types: the pinned specification, the reference model `Language/FixedPoint.lean`, silent-spec proposals, scope questions and roadmap owners. |
 - [Cloud task 10 integration](feature-work/cloud-integration-10.md) — committed ABI/error repairs, merge decisions and combined validation.
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
