@@ -1155,7 +1155,16 @@ theorem is restated against them.
   46 missing, unchanged; `./run-lean.sh`: "Build completed successfully
   (723 jobs)", SolkeyTestSuite "(262 jobs)", `check-solkey.sh`
   "37 mismatch(es)" (baseline).
-- **Elapsed:** about 2 h 25 min in all (12:55–15:20 UTC); the first part
+- **Checked after the second hold** (master `2abccb70` merged): diagnostics
+  clean with the pins; `check-layers` 160 core modules, 0 reach the
+  elaborator; `check-orphans` 0 orphaned; `check-trust` 0 findings;
+  `check-doc-paths` 46 missing, unchanged; `roadmap-g03-ledger.py --check`
+  0 errors; `./run-lean.sh`: "Build completed successfully (728 jobs)",
+  SolkeyTestSuite lost `TestSuite.Derived17` to exit 137 (memory) on the
+  first run and built "(262 jobs)" on the warm re-run, `check-solkey.sh`
+  "37 mismatch(es)" (baseline).
+- **Elapsed:** about 3 h 25 min in all (12:55–16:20 UTC); before the second
+  hold about 2 h 25 min (12:55–15:20 UTC); the first part
   below took about 1 h 15 min (12:55–14:10 UTC, 2026-10-29), of which the
   cold build took 59 min (151 min user CPU) and the final builds 11 and
   4 min. Peak memory was not measured (`/usr/bin/time` is absent).
