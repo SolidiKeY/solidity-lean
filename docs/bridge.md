@@ -166,6 +166,7 @@ These examples are also on the examples site (`docs/site.md`).
 |---|---|---|
 | Arithmetic against other implementations | `Bridge/SolidityBridge/Arith.lean`: checked add/subtract/multiply return the mathematical result exactly in range at both primitive numeric types; unsigned wrapping add/multiply agree with `BitVec`; unsigned wrapping add/subtract/multiply agree with `ZMod`. | The actual `BinOp.evalT` and `PrimTy.ofInt?`, not detached arithmetic formulas. Narrow source types are elaborator lowerings and are not covered by a blanket all-width theorem. |
 | Independent EVM model | `Bridge/SolidityBridge/ExternalEvm.lean`: exact word encodings, numeric stack-step agreement, a CSLib `Simulation` on the projected arithmetic stack LTS, and `upstream_step` against EVMYulLean's actual `execBinOp` transformer. | `ADD`, `SUB`, `MUL`, `DIV`, `MOD`, `AND`, `OR`, `XOR`, arbitrary operand words and numeric stack tails. Upstream stack underflow is checked; its other state is framed. Bytecode dispatch, gas, symbolic slots, jumps, account state and `CALL` remain outside the correspondence. |
+| Bounded EVM byte memory | `Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean` and `Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean`: persistent word-cell/32-byte correspondence through actual core instructions and upstream macros. | All four load/store forms on preallocated numeric cells; aligned in-bounds windows, nonwrapping extent and the explicit unproved `PaddingCorrect` contract. No raw-memory Solidity admission or gas/bytecode claim. |
 | Compiler traces | `Bridge/SolidityBridge/Evm.lean`: successful instruction traces reflect source runs; payment-free successful source runs produce traces; successful termination is equivalent. | The existing compiler's `inFragP`, representation and array-bound hypotheses remain explicit. Calls are included when admitted by that fragment. This reuses core compiler correctness. |
 | Weakest preconditions | `Bridge/SolidityBridge/WeakestPre.lean`: predicate transformer as a Mathlib order homomorphism, weakest sufficient precondition, nonempty intersection preservation and guarded duality. | Reads the actual modality and frame execution. Panic is rejected by both modalities; exhaustion is accepted by both. Box of top is panic freedom. Thus arbitrary empty-infimum preservation and unconditional box/diamond duality would be false. |
 | Independent loop rules | `Bridge/SolidityBridge/Loop.lean`: invariants from Mathlib's `PFun.fixInduction`; definedness from `WellFounded` or a natural variant; total correctness combining both. | Proved through the bridge's first-return-map correspondence, without invoking the core's loop invariant/variant rules. Terminal errors are outcomes; the chosen postcondition must reject them if successful termination is required. |
@@ -386,10 +387,236 @@ The full instruction correspondence is **not complete**. Status and remaining bo
 | Core instructions | Status or remaining obligation |
 |---|---|
 | `keccakMap`, `keccakArr`, `sload`, `sstore` | Bounded finite-observation macro refinement below, under explicit setup and alias assumptions. Unrestricted layout remains excluded. |
-| `mload`, `mstore`, `mloadAt`, `mstoreAt` | Word-cell to byte-memory relation, address scaling and macro expansion for fixed addresses. |
+| `mload`, `mstore`, `mloadAt`, `mstoreAt` | [Bounded preallocated refinement](#bounded-memory-refinement-compiler10-2026-10-29) is proved under the explicit padding contract. Discharging that external contract, memory growth, instruction fetching and gas/bytecode equivalence remain outside the result. |
 | `jump`, `jumpi`, `loop` | Assembler from relative/structured control flow to absolute PC and valid jump destinations. |
 | `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
 | `revert` | Return-data operands and the driver's halting relation. |
+
+#### Bounded memory refinement (compiler10, 2026-10-29)
+
+`Bridge/SolidityBridge/ExternalEvm/Memory.lean` supplies actual
+`EvmYul.EVM.step` MLOAD/MSTORE equations, fixed-cell PUSH32 macros, and
+stack-cell PUSH32(32)/MUL macros. The runner supplies opcodes with positive
+fuel and zero charged gas. Returned states retain the actual PC,
+execution-length, gas preparation and active-memory updates; this is not an
+instruction-fetching or gas-checking driver theorem. Existing same-stack
+counterexamples in `Obstructions` are unchanged.
+
+`Bridge/SolidityBridge/ExternalEvm/MemoryBytes.lean` proves a pure 32-byte
+big-endian `encoding`, its exact length and decoder roundtrip. `serialize_eq`
+connects the actual upstream `UInt256.toByteArray` to this encoding under the
+explicit named hypothesis `PaddingCorrect bound`, with `32 ≤ bound`.
+The hypothesis specifies only the opaque zero allocator, not serialization,
+reads, writes, simulation or their desired conclusions. No new axiom is
+installed and **no inhabitant of this external contract is claimed**.
+
+The trust boundary is concrete. Upstream `ffi.ByteArray.zeroes` has no stated
+source body or correctness specification and names the native `memset_zero`
+implementation. Inspection of the actual Lean declaration reports no axioms;
+its elaborator-generated opaque value is `fun n => default`, not a checked
+zero-padding implementation. Native allocator correctness is therefore an
+external representation assumption, not established by an axiom audit or by
+sampled execution. These theorems do not verify or replace that primitive.
+
+`write_inbounds` normalizes the actual `ByteArray.write` definition.
+`write_size`, `write_get_same`, `write_get_frame`, `read_inbounds`, `readback`
+and `write_readback` derive size, exact written bytes, padded-read reduction,
+readback and the frame on every existing byte outside `[a,a+32)`. They require
+a full 32-byte source and `a+32 ≤ dest.size`; only the length-zero allocator
+contract is needed for these in-bounds byte operations. They do not assume
+readback or frame conclusions. No write-growth or partially allocated read is
+covered. Source arrays are immutable mathematical byte arrays, so the laws do
+not assume a mutable buffer aliasing implementation.
+
+`Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean` defines the persistent
+`Represents cells m s` relation independently of upstream reads: physical size
+is `32*cells`, `activeWords.toNat = cells`, and every cell below capacity is a
+numeric core word with all 32 physical bytes equal to its pure encoding.
+`Bounded cells` requires `32*cells < 2^256` and `< 2^64`. Thus cell scaling and
+`activeWords*32` do not wrap, and the accessed windows fit before the upstream
+`USize` conversions. Serialization padding lengths are at most 32 (also valid
+on a 32-bit platform). Symbolic words, cells outside capacity and memory
+expansion remain outside this relation.
+
+`load_state_frame` proves the actual upstream load leaves the full memory-machine
+state unchanged within capacity. `store_lookup_same` and `store_lookup_other`
+state actual upstream readback and distinct-cell read framing directly for
+arbitrary represented memory and every numeric word. These are derived from
+the persistent relation, not assumed read equations.
+
+`lookup_represents` derives actual upstream read agreement from these bytes;
+it does not assume `ReadAgrees`. `load_preserves` and `store_preserves` prove
+the persistent postrelation for the actual upstream memory transformers.
+`load_refines`, `store_refines`, `loadAt_refines` and `storeAt_refines` relate
+the actual core steps to the actual upstream macros, with equal numeric
+stacks **and the whole persistent postrelation**. Every access requires its
+word-cell index below capacity. Distinct aligned cells have disjoint windows;
+the store proof uses the written-byte law at its cell and the physical-byte
+frame at every other cell. Loads read before expanding active memory; the
+preallocated active capacity makes that update stable.
+
+`control_represents` proves an inhabited two-cell input independently of the
+FFI hypothesis. Fixed/dynamic controls cover either valid boundary and all
+numeric stored values. `roundtrip_control` proves actual upstream store/load
+readback and the other-cell zero frame; `fixed_roundtrip` composes actual core
+store/load steps and actual macros, deriving the load from the store's proved
+postrelation and an exact final one-word stack. These evaluator claims remain
+conditional on the explicit allocator contract. The contract itself is not
+claimed inhabited. Under the same allocator contract, the new actual unaligned-store counterexample shows a
+store of one at byte 1 changes byte 32 of the next cell. Existing underflow,
+address-wrap, active-extent-wrap and same-stack obstructions remain; the
+access premise excludes the first out-of-capacity index; this is not an executable
+refusal. `capacity_load_counterexample` separately proves that an actual load
+at that index expands activeWords to 3 with physical size still 64, losing
+the original two-cell relation, independently of the FFI contract.
+
+The separate native regression `scripts/check-external-memory.sh` compiles only
+the verbatim `memset_zero` function from already-pinned EVMYulLean commit
+`047f63070309f436b66c61e276ab3b6d1169265a`, plus the ABI wrapper generated by
+the unchanged vendored FFI declaration and pinned Lean compiler.
+`Bridge/tests/memory-zeroes.provenance.json` records the full upstream source
+hash and verbatim function-body hash; the script verifies the copied fixture's
+checksum. It loads the memory symbol into Lean's interpreter and runs
+`Bridge/tests/MemoryObserve.lean`: 28 actual core/upstream fixed/dynamic
+store-load pairs, at cells 0 and 1, with values 0, 1, 255, 256, `2^248`, `2^255`
+and `2^256-1`. It checks numeric stacks, physical encoding, size, active extent,
+other-cell read frame, 33 zero-allocator samples and six boundary/error
+observations. No hashing libraries are linked. These are runtime observations,
+not kernel proof of the allocator contract, a Solidity source-admission test,
+or gas/bytecode equivalence. No reference Lean definition is replaced. The final native run passed in
+5 seconds at 275,124,224 bytes peak aggregate cgroup memory, with no OOM.
+The active-wrap observation starts from the nonzero unaligned-write state,
+so its expected zero is discriminating.
+
+All 20 new guarded headline axiom audits report only `propext`,
+`Classical.choice` and `Quot.sound`; the original eleven remain. Focused byte
+checking passed in 4 seconds at 297,611,264 bytes peak aggregate cgroup memory;
+focused refinement checking passed in 12 seconds at 318,484,480 bytes. A
+projection-normalization repair resolved the initial store proof's default
+heartbeat stop without changing budgets or claims. Independent read-only finder/skeptic reviews found no remaining proof defect.
+Their confirmed capacity-wording issue and nondiscriminating native active-wrap
+control were corrected; neither reviewer used a Lean server. New/existing
+ExternalEvm targets and the 36-case × 1,000-sample rule checker passed.
+Orphan/layer/strict automatic/trust gates and the trust regression passed.
+TestSuite's complete 564-row check passed with the repository's existing pinned
+snapshot (552 derived, 11 refuted, one excluded, zero pending; two skip).
+The incomplete setup snapshot first failed for a missing sibling pin file;
+no pin or source was changed to repair it. Before the master refresh, documentation paths failed
+with the same 20 missing references as the initial baseline, not new memory-reference failures.
+After refreshing only the task branch from published master `127c2ee5`, the
+cold `timeout --signal=TERM --kill-after=15s 7200 bash ./run-lean.sh` reached
+its aggregate 7,200-second limit after 699/703 default jobs. That attempt is
+**BLOCKED**, not passed. There was no theorem error or OOM. The same serialized
+group's optional umbrella failed in `Arith/Widths.lean` at lines 21, 47, 79,
+111 and 501 (438 seconds); all new/existing ExternalEvm targets, native memory
+observations and the rule checker passed. The group took 7,659 seconds, peaked
+at its hard 12 GiB cap, and recorded 51 cgroup limit events but zero OOM events.
+
+The concrete repair for the cold aggregate timeout was to build the remaining
+`Solidity.Examples.DecisionMemory` and `Solidity.Examples.DecisionKInt` targets
+separately using the retained cache (84 seconds), then rerun the **unchanged**
+7,200-second full command. It passed in 1,104 seconds: 703 default jobs, all
+262 TestSuite jobs and the actual SolKey annotation check, with no skip.
+The 28 explicit axiom audits present at that milestone passed in 5 seconds;
+three direct read/frame laws were then added and individually kernel-checked.
+The successful staged group took 1,193 seconds at 11,587,039,232 bytes peak
+aggregate cgroup memory, with no limit or OOM events. No statement, expected
+observation, proof/search budget or timeout was changed to obtain these passes. The final
+optional-memory check then passed the affected targets (12 seconds), all 31
+explicit axiom audits (5 seconds), native observations (4 seconds), complete
+TestSuite/static gates and diff check. Its only failing check was the historical
+documentation-path gate. That group took 29 seconds at 353,624,064 bytes peak
+aggregate memory, with no limit or OOM events. Final independent finder/skeptic
+reviews found no remaining proof obligation within this explicitly conditional,
+preallocated fragment; the conflicting present-tense documentation-debt count
+was corrected.
+
+A subsequent whole-scope review identified a weakness in the controls: the
+original zero-filled neighbor could not detect accidental zeroing, and the
+explicit composed witness covered only fixed store/fixed load.
+`Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean` now provides a pure,
+allocator-independent two-cell initializer for arbitrary words and proves all
+four fixed/dynamic store/load compositions against the actual core runner and
+upstream evaluator runner. Dynamic source reads include an actual index PUSH;
+no stack is injected between the store and load. The theorem retains the
+persistent byte relation, exact value and arbitrary stack tail, and the other
+cell's specified original value. The allocator hypothesis remains explicit and
+unproved; neither the populated initializer nor native execution proves it.
+Eight additional native cases use distinct nonzero initial cells, zero and
+maximum-word writes, and the sentinel tail `[7, 9]`, checking the neighbor's
+bytes as well as its read. All original controls and expected values remain.
+The new module checked in 5 seconds at 360,980,480 bytes peak; the native group
+passed in 10 seconds at 488,419,328 bytes, with 12 GiB/no-swap limits and no
+limit or OOM events. Five new guarded audits report only `propext`,
+`Classical.choice` and `Quot.sound`, bringing the explicit audit total to 36.
+
+The populated-composition final group passed affected targets, all 36 explicit
+axiom audits, native controls, complete TestSuite/static checks, orphan/layer,
+strict automatic and trust gates. It took 19 seconds at 279,638,016 bytes peak,
+with no memory-limit or OOM events. Its documentation-path check remains red
+with exactly the previous finding set (46 missing, 16 ambiguous). Independent
+read-only finder and skeptic reviews confirmed the two control gaps above are
+repaired and found no further independent obligation within this bounded
+conditional memory fragment. Neither used a Lean server. At that checkpoint, published master
+`cc155f36` had no relevant Bridge, source-syntax or core-run changes relative
+to the validation base; the shared Widths prerequisite was still unpublished.
+
+At the earlier published base `127c2ee5`, the documentation checker failed
+with 46 missing and 16 ambiguous references. A read-only reconstruction of
+that exact base yielded the identical finding set, with no task-introduced
+findings. The earlier 20-missing result belongs to the pre-refresh base and
+remains recorded in its logs.
+
+The earlier checkpoint `200153d3` and every subsequent export are retained.
+Their failed Widths gates and cold aggregate timeouts remain failed historical
+attempts, not passes. The coordinator's published prerequisite
+`040e59d30a6726fa4f9fee831695eeaa4027ede1` was verified as an ancestor of fetched
+master and merged into this same task branch at `57d53308`. No unpublished
+sibling work was imported and this task made no arithmetic repair.
+
+On that merged source, the full optional Bridge command passed in 1,042 seconds
+(2,021 jobs), including the original pinned `SolidityBridge.Checks`. All
+new/existing affected ExternalEvm targets passed, as did the original native
+controls plus eight populated compositions, all 36 memory axiom audits, and
+the 36-case × 1,000-sample rule checker at seed 42. Orphan/layer, strict
+automatic, complete TestSuite/static, trust and trust-regression gates passed.
+The first unchanged 7,200-second full core command passed all 738 default targets
+and TestSuite through Derived19, including Derived17 (154 seconds), then hit
+its aggregate timeout. This is **BLOCKED**, not a pass. The group took 8,271
+seconds at its 12 GiB hard cap, with 1,773 limit events and zero OOM events.
+Its original container continued across a managed-runtime reconnect; the
+terminal resource report was recovered verbatim from retained Docker stdout.
+
+The concrete repair was to stage the two remaining cold targets, Derived20 and
+Derived21, under the same 7,200-second timeout and 12 GiB/no-swap limit. Both
+passed (223 seconds combined). The identical full `./run-lean.sh` command then
+passed in 43 seconds: all 738 default jobs, all 262 TestSuite jobs and the
+actual pinned SolKey annotation check, with no skip. A separate annotation
+check and all 36 audits also passed. That staged group took 271 seconds at
+5,986,820,096 bytes peak, with no limit or OOM events. No source statement,
+expected observation, proof/search budget or timeout was changed. Derived17
+required no repair on this task branch. These passing gates do not establish
+the unproved `PaddingCorrect` contract or an unconditional FFI theorem.
+
+The final documentation-path gate remains **FAIL**: 46 missing and 24 ambiguous
+references. A separate detached read-only checkout of exactly `040e59d3`
+produces the identical 70 findings, with no memory-task regressions or resolved
+historical references. The 16-ambiguity count above belongs to the older base.
+Final complete TestSuite/static, orphan/layer, strict automatic, trust and diff
+checks passed. That final static group took 13 seconds at 173,125,632 bytes
+peak, with no limit or OOM events; its documentation checks remain red.
+Independent read-only finder and skeptic reviews found no remaining obligation
+within this explicitly conditional bounded fragment. Their confirmed
+current-base ambiguity-count finding was corrected; neither used a Lean
+server. The original assignment's bounded refinement is complete under its
+stated external contract, while no unconditional FFI, raw-source admission,
+gas or bytecode claim is made.
+
+This optional refinement admits no raw-memory/assembly Solidity source shape,
+changes no source compiler, inventory target or exclusion, and claims no gas
+or bytecode equivalence. Consequently no legacy/viaIR/optimizer source-admission
+fixture is added or promoted. Numeric storage hashing and jump/PC assembly
+remain outside this memory task.
 
 The arithmetic dispatcher above excludes symbolic-slot PUSH/ADD and DUP/SWAP
 depths outside 1–16. The optional finite storage lowering below admits
@@ -828,6 +1055,8 @@ lake build SolidityBridge.ModelTheory.LowenheimSkolem \
   SolidityBridge.CallbackTrace SolidityBridge.CallbackModalTrace \
   SolidityBridge.ExternalEvm.StackOps SolidityBridge.ExternalEvm.Obstructions \
   SolidityBridge.ExternalEvm.StorageSlotExamples \
+  SolidityBridge.ExternalEvm.Memory SolidityBridge.ExternalEvm.MemoryBytes \
+  SolidityBridge.ExternalEvm.MemoryRefinement SolidityBridge.ExternalEvm.MemoryComposition \
   SolidityBridge.CompilerSimulation SolidityBridge.LoopFixpoint \
   SolidityBridge.AdversaryPolicy rulecheck
 lake exe rulecheck --seed 42 --samples 1000
