@@ -187,6 +187,8 @@ G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](fe
 
 G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.
 
+G06 status (2026-10-29): machine inventory (23 disagreements with pinned Osaka), the pinned semantics and observation interfaces, the core/Bridge certificate boundary and bridge lemmas B01–B28 with owners in [roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) and `Solidity/Roadmap/Evm.lean` (statements only); no obligation closed; its questions Q1–Q3 are answered (second round, 2026-10-29) and encoded.
+
 ### Independent source definitions — after G00–G07, before wave 1
 
 These six source-definition workstreams implement the source side of G01's interfaces. They
