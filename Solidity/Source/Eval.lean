@@ -560,6 +560,17 @@ def getterPath {Γ : RCtx} (F : Fr) (n : Nat) (data : Bytes) : STy → SPath →
     if w < size then getterPath F n data τ (p.go (.index w)) (i + 1) else lift (panic .index)
   | τ, p, _ => pure (p, τ)
 
+/-- The exposed function whose selector call data starts with. -/
+def Glob.pickFn (G : Glob E) (F : Fr) (input : Bytes) : Option Decl :=
+  (E.exposed F.contract).find? fun d => match d.fnSig E with
+    | some (ps, _) => G.selector (sigOf E.layout d.name ps) == input.take 4
+    | none => false
+
+/-- The public variable whose getter's selector call data starts with. -/
+def Glob.pickGetter (G : Glob E) (F : Fr) (input : Bytes) : Option (Decl × List STy × STy) :=
+  (E.getters F.contract).find? fun (d, ps, _) =>
+    !input.isEmpty && G.selector (sigOf E.layout d.name ps) == input.take 4
+
 /-- The position of an instance's contract and its name. -/
 def Glob.contractAt (G : Glob E) (k : Nat) : Option String := G.prog.contracts[k]?
 
@@ -1310,11 +1321,7 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
   match n with
   | 0 => halt .timeout
   | n + 1 => do
-    let fns := E.exposed F.contract
-    let pick := fns.find? fun d => match d.fnSig E with
-      | some (ps, _) => G.selector (sigOf E.layout d.name ps) == input.take 4
-      | none => false
-    match pick, input.isEmpty with
+    match G.pickFn F input, input.isEmpty with
     | some d, false =>
       match d.fnSig E with
       | some (ps, rs) =>
@@ -1325,9 +1332,7 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
         encodeVals F n false (← lift (unRet rs r))
       | none => halt (.stuck "signature")
     | _, _ =>
-    let getter := (E.getters F.contract).find? fun (d, ps, _) =>
-      !input.isEmpty && G.selector (sigOf E.layout d.name ps) == input.take 4
-    match getter with
+    match G.pickGetter F input with
     | some (d, ps, r) =>
       if F.value.val ≠ 0 then halt (.revert [])
       if input.length < 4 + 32 * ps.length then halt (.revert [])
