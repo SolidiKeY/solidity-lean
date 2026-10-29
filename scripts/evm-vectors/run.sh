@@ -6,7 +6,8 @@
 # NODE_MODULES defaults to scripts/evm-vectors/node_modules, installed with
 #   npm ci --ignore-scripts --prefix scripts/evm-vectors
 # Each check writes OUT_DIR/<name>.log. check-self-power-data.mjs also writes
-# OUT_DIR/compiler-evm.json, and the transient-world log is its JSON report.
+# OUT_DIR/compiler-evm.json; some logs (transient-world, abi-vectors,
+# modifier-frames) are multi-line JSON reports.
 # Exit 0 = every check passed.
 set -u
 self=$(realpath "$0")

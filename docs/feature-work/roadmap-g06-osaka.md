@@ -13,7 +13,7 @@ as [child obligations](#4-child-obligations-for-g06).
 - **Commits.** The measurement commit adds this document, the evidence
   directory [tests/upstream/g06-osaka-repin/](../../tests/upstream/g06-osaka-repin/)
   and the locked runner [scripts/evm-vectors/](../../scripts/evm-vectors/run.sh).
-  The **last commit on the branch** switches the pins and nothing else, so the
+  The pin commit `0f92a28a` switches the pins and nothing else, so the
   integrator can take or drop it on its own. Without it the scripts stay on
   Cancun and the runner still works.
 - **Not changed:** historical evidence records stay Cancun
@@ -206,7 +206,7 @@ These are Lean-side or other-owner pins that this task may not edit:
    `--evm-version cancun` (`docs/feature-work/calls-exceptions.md:76`, which
    changes together with item 2), and the source comment
    `tests/solc/TransientStorage.sol:4`. G00's pin disagreement 2 and its
-   follow-ups (`docs/feature-work/roadmap-g00-scope.md:96–102,336,784`) are owned
+   follow-ups (`docs/feature-work/roadmap-g00-scope.md:95–104,336,784`) are owned
    by g00-manifest-rev.
 4. **Core machine fork.** `docs/feature-work/roadmap-g00-scope.md:784` asks G06
    to "pin the EVM fork for the core machine". The core `Solidity/Evm` machine
@@ -218,7 +218,11 @@ These are Lean-side or other-owner pins that this task may not edit:
    G00 disagreement 5 remains open.
 6. **Code-size idealization in the vector scripts.** It is not encoded (see
    the table above). Add it only if a vector ever approaches 24,576 / 49,152
-   bytes, as `scripts/evm-reference/replay.mjs:54` already does.
+   bytes, as `scripts/evm-reference/replay.mjs:54` already does. Since the
+   user decided to idealize EIP-7825 and the block gas limit as well
+   (second-round decisions, 2026-10-29), the scripts' 2^24 transaction limit
+   is a property of EthereumJS, not of the decided semantics; no vector needs
+   more.
 
 ## 5. Gates
 
