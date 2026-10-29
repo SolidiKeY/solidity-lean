@@ -937,3 +937,6 @@ At the root, the notation's own tests:
 |---|---|
 | `Backend/Environment/Observations.lean` | Actual environment opcode selection, local stack semantics, address truncation and intrinsic expression/world observation certificates. |
 | `Backend/Environment/ObservationsChecks.lean` | Inhabited environment witnesses, distinguishing negative controls and headline axiom pins. |
+| `Backend/Environment/Metadata.lean` | Typed metadata PUSH encoding, source declaration selection, selector numeric/ABI alignment, truncation and function/address projections. |
+| `Backend/Environment/ByteConstants.lean` | Byte-valued resolved metadata materialization through PUSH/MSTORE8, exact byte order and memory-frame laws. |
+| `Backend/Environment/MetadataChecks.lean` | Metadata byte regressions, UTF-8 witness, missing metadata refusals and axiom pins. |

@@ -667,3 +667,6 @@ import Solidity.Tools.SolCases
 import Solidity.Examples.SolCases
 import Solidity.Backend.Environment.Observations
 import Solidity.Backend.Environment.ObservationsChecks
+import Solidity.Backend.Environment.Metadata
+import Solidity.Backend.Environment.ByteConstants
+import Solidity.Backend.Environment.MetadataChecks

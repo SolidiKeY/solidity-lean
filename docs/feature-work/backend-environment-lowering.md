@@ -134,3 +134,57 @@ at the frozen base (`base-doc-paths2.log`) and this checkpoint
 (`cp1-doc-paths.log`); no new finding. This inherited failure is not marked
 passed. Both independent reviewers confirmed all findings resolved. Checkpoint
 1 is complete locally; final full/import-closure validation remains open.
+
+## Checkpoint 2: metadata constants
+
+`Metadata` reuses `Backend.Assembler.toBytesBE` and its roundtrip theorem.
+`constant_correct` proves actual PUSH immediate decoding, exact word value,
+zero extension and stack-tail preservation for every width 0–32. `truncate_correct`
+states the explicit low-byte modulus; `zero_extension` proves widening keeps
+values. `selector_correct` preserves the source's low numeric four-byte value;
+`selector_alignment` and `selector_abi_bytes` give the separate ABI-left-aligned
+value and exact big-endian immediate. `address_correct`, `function_correct` and
+`function_projections` preserve bounded receivers and the existing
+`address*2^32+selector` representation.
+
+`metadataSelector` reads `SourceFunction.callable`'s existing canonical
+`SourceCallable.abi`/`getter` selector. `declaration_correct` lifts any resolved
+selector to code; `selector_intrinsic` connects it to existing `Val.evalT` literal
+denotation. Missing ABI metadata, constructors and other non-ABI roles are
+refused. No canonical signature is reconstructed from a generated model name.
+
+The bounded `metadataBytes` adapter covers the existing four-byte interface/error
+selectors and 32-byte event digests supplied by the importer. Their resolution
+and interface XOR computation stay in `Frontend/SolcJson/Body.lean:1060–1095`;
+this module does not replace or certify that frontend. `typeName` is also
+accounted for: the core `Contract` does not retain its name, so the existing
+importer resolves the String first. `nameCode` then materializes the standard
+UTF-8 encoder's structural byte-array contents (`toUTF8.data.toList`) through
+actual PUSH1/PUSH32/MSTORE8. `materialize_correct`, `writeBytes_at`,
+`read_written` and `writeBytes_frame` prove exact bytes/order, stack preservation,
+and unchanged memory outside a precisely bounded, nonwrapping interval.
+Full string-object layout and allocator integration remain parent obligations.
+This is a component-local target slice, not a duplicate source or memory IR.
+
+Both independent reviewers found missing byte-name coverage and requested explicit
+declaration/function adapters. Those were implemented and both reviewers verified
+resolution without Lean/server/build use. The concrete UTF-8 witness includes
+`Aλ`, both neighboring memory bytes and a nonempty stack. Exact byte regressions
+cover PUSH4 numeric/ABI selector alignment, PUSH20 address, PUSH24 packing,
+PUSH0/truncation, four-/32-byte metadata and PUSH/MSTORE8. Wrong selector alignment
+has an inhabited counterexample. `MetadataChecks` pins headline axiom sets to
+only propext/Classical.choice/Quot.sound (or the appropriate subset).
+
+`cp2-controls4.log`: focused build passes (36 jobs), exit 0, 2 seconds, sampled
+aggregate RSS 784232 KiB, cgroup peak 239304704 bytes. Earlier failed iterations
+are retained; none is counted green. No proof/resource budget was raised.
+
+Checkpoint-2 closure: `cp2-diagnostics.log` is clean on all three new Lean
+files, exit 0, 4 seconds, sampled aggregate RSS 770068 KiB. Layer/orphan/trust
+gates pass: 168 core modules with zero elaborator reach, 771 reachable modules
+with zero orphans, 786 source files and zero trust findings. The global layer
+checker enumerates core names explicitly; the new modules' import closure is
+also reviewed and will receive the task-specific closure check in final gates.
+`cp2-doc-paths.log` retains exactly the same 46 inherited path findings as the
+exact base, zero new findings. Both independent reviews are closed. Checkpoint
+2 is locally complete; full/import closure remains pending.
