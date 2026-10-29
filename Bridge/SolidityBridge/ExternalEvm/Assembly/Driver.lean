@@ -268,21 +268,34 @@ private theorem fetch_of_decode {s : EVM.State} {packet : Packet}
   rw [decoded]
   rfl
 
+/-- Counted actual charged dispatcher prefix. This exposes the intermediate
+state of the existing X path; it does not change X or introduce source fuel. -/
+def driverSteps : Nat → Nat → Array UInt256 → EVM.State → Except ExecutionException EVM.State
+  | 0, _, _, s => .ok s
+  | _ + 1, 0, _, _ => .error .OutOfFuel
+  | _ + 1, 1, _, _ => .error .OutOfFuel
+  | n + 1, fuel + 2, valid, s => do
+    let packet ← (EVM.decode s.executionEnv.code s.pc).option (.error .InvalidInstruction) Except.ok
+    let (charged, cost) ← driverGate valid s packet.1
+    let next ← EVM.step (fuel + 1) cost (some packet) charged
+    driverSteps n (fuel + 1) valid next
+
 /-- Any certified fetched prefix lifts to the actual charged, finite-fuel X
 continuation under its explicit original driver checks. No result of X is
 assumed, and gas/execLength are the only fields omitted from the relation. -/
-theorem fetchedSteps_driver (n fuel : Nat) (valid : Array UInt256)
+theorem fetchedSteps_driver_exact (n fuel : Nat) (valid : Array UInt256)
     (s t actual : EVM.State)
     (trace : fetchedSteps n s = .ok t)
     (same : observeState actual = observeState s)
     (ready : DriverReady n fuel valid actual) :
-    ∃ final, observeState final = observeState t ∧
+    ∃ final, driverSteps n fuel valid actual = .ok final ∧
+      observeState final = observeState t ∧
       EVM.X fuel valid actual = EVM.X (fuel - n) valid final := by
   induction n generalizing fuel s actual with
   | zero =>
     have ht : s = t := Except.ok.inj trace
     subst t
-    exact ⟨actual, same, by rw [Nat.sub_zero]⟩
+    exact ⟨actual, rfl, same, by rw [Nat.sub_zero]⟩
   | succ n ih =>
     cases fuel with
     | zero => exact False.elim ready
@@ -320,12 +333,23 @@ theorem fetchedSteps_driver (n fuel : Nat) (valid : Array UInt256)
                 rw [ha] at congr
                 have nextSame : observeState actualNext = observeState next := Except.ok.inj congr
                 rw [ha] at ready
-                obtain ⟨final, finalSame, rest⟩ := ih (fuel + 1) next actualNext trace nextSame ready
-                refine ⟨final, finalSame, ?_⟩
+                obtain ⟨final, counted, finalSame, rest⟩ := ih (fuel + 1) next actualNext trace nextSame ready
+                refine ⟨final, ?_, finalSame, ?_⟩
+                · simp only [driverSteps, hd, Option.option, bind, Except.bind, hg, ha]
+                  exact counted
                 rw [X_continue fuel valid actual charged actualNext packet cost hd hg ha pure.nonhalting, rest]
                 congr 1
                 omega
 
+
+/-- Compatibility projection of the exact counted driver refinement. -/
+theorem fetchedSteps_driver (n fuel : Nat) (valid : Array UInt256)
+    (s t actual : EVM.State) (trace : fetchedSteps n s = .ok t)
+    (same : observeState actual = observeState s) (ready : DriverReady n fuel valid actual) :
+    ∃ final, observeState final = observeState t ∧
+      EVM.X fuel valid actual = EVM.X (fuel - n) valid final := by
+  obtain ⟨final, _, observed, continued⟩ := fetchedSteps_driver_exact n fuel valid s t actual trace same ready
+  exact ⟨final, observed, continued⟩
 
 /-- Relating an actual charged endpoint back to the source boundary uses
 only fields preserved by the driver theorem. -/

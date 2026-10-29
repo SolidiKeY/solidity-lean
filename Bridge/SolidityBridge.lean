@@ -31,3 +31,6 @@ import SolidityBridge.ExternalEvm.Assembly.CompositionChecks
 import SolidityBridge.ExternalEvm.Assembly.StackLoopChecks
 import SolidityBridge.ExternalEvm.Assembly.Placement
 import SolidityBridge.ExternalEvm.Assembly.LinkedChecks
+import SolidityBridge.ExternalEvm.Assembly.ResourceChecks
+import SolidityBridge.ExternalEvm.Assembly.SafeDivergenceChecks
+import SolidityBridge.ExternalEvm.Assembly.PopChecks

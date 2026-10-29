@@ -633,6 +633,141 @@ by a pass. Measurements use the existing 16 GiB
 VM/no swap, hard 12 GiB per-process address-space limit and sampled 10 GiB group
 RSS/12 GiB VM-current stops, not a writable 12 GiB cgroup guarantee.
 
+### Scanner-consuming success and nested divergence
+
+The continuation after `e9aaa5d34ee257b3564bc24503f1d2957626d28c` closes
+integration gaps found by independent whole-scope review; the unchanged Widths
+failure does not block these independent proofs.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Termination.lean` checks an
+`ExitLayout`: the actual linked end-label JUMPDEST, a nonwrapping next PC and
+an actual STOP at that PC. `TerminalGates` and its checker retain the two
+original terminal resource gates. `SuccessBoundary` relates the final numeric
+stack, world/environment and memory to the source result/frame, records the
+exact STOP PC and clearing of returnData. `LinkedProgram.success_simulation`
+now composes general source success, charged-prefix refinement and terminal
+halting into actual `X.success`, rather than ending at continuation equality.
+It still requires finite readiness and terminal gates; no X result is a premise.
+
+The existing prefix theorem is preserved. Its new exact helper exposes
+`driverSteps`, the counted actual charged prefix endpoint. This adapter is
+related to `X` only for the certified pure fragment under positive readiness;
+no off-fragment equivalence is asserted. The shared success helper uses that
+endpoint equality to attach executable terminal witnesses without inspecting
+classical source-loop witnesses. `Bridge/SolidityBridge/ExternalEvm/Assembly/PureFetched.lean`
+proves frame preservation by induction.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/TerminationChecks.lean` kernel-inhabits
+the actual 21-step/three-turn loop prefix, readiness, terminal gates and the
+shared success proof on `[1,2,0,9]`, returning `[9]` with `X 24`. A separate
+inhabited application exercises the compiler-facing count existential; the
+control does not claim to identify its classical witness. Prefix readiness
+at fuel 22 remains insufficient to execute the terminal JD and STOP.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/SafeTrace.lean` annotates each actual
+fetched microstep with its decoded pure packet and scanner justification for
+its jump target. `SafeTrace.jump_checks` derives the original upstream
+`X.notIn` check at every reached branch. The stronger compiled invariant also
+validates untaken conditional targets; the existing upstream counterexample
+accepting an untaken invalid destination remains unchanged.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/SafeComposition.lean`,
+`Bridge/SolidityBridge/ExternalEvm/Assembly/SafeLocal.lean` and
+`Bridge/SolidityBridge/ExternalEvm/Assembly/SafeStructured.lean` carry that
+annotation through the existing source sequence, relative-branch and loop
+inductions. `ScannedCode.safe_refinement` consumes the same stored atomic
+relocations and nested loop entry/exit memberships used by its erasure;
+scanner safety is no longer merely a parallel metadata fact.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/ResourceReady.lean` removes real-array
+destination validity from readiness premises. Its resource adapter invokes
+the unchanged driver gate with the current operand as a singleton array;
+`resourceGate_eq` proves equality to the real-array gate from compiled
+`JumpSafe`. All original gas, stack, static and other checks remain intact.
+`ResourceReady` contains no real destination array and no X outcome.
+`SafeTrace.driver_ready` derives the original full readiness using the safe
+trace and retained-state congruence. `LinkedProgram.resource_success_simulation`
+therefore obtains actual X success from scanner-certified source execution,
+resource-only readiness and the exact terminal gates. This is an adapter for
+upstream checks, not a source gas semantics or universal gas-sufficiency claim.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/SafeFetched.lean` separately checks
+finite microstep safety for executable controls.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/ResourceChecks.lean` kernel-inhabits
+the resource-only shared success path on the same multi-turn input, and both
+taken/untaken relocated source branches. Missing destinations, zero gas and
+insufficient fuel remain negative controls. Direct X observations accompany
+the general proof path rather than replacing it.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/NestedDivergence.lean` adds proof
+relations indexed by the existing instructions and machines, not a new source
+IR. A witness ultimately contains a genuinely forever-running loop; successful
+prefixes, divergent conditions/bodies and finite completed outer turns may
+precede it. `BlockDiverges.source_fault` derives the unchanged core fault
+classification. `BlockDiverges.compiled` enters an infinite inner loop without
+assuming that an outer turn completes.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/SafeDivergence.lean` strengthens this
+to arbitrarily long nonhalting, scanner-safe fetched traces, including sequence
+prefixes with pending skips and later nested divergence after finite outer
+turns. No finite-fuel/gas X divergence or equivalence with ordinary faults is
+claimed.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/NestedDivergenceChecks.lean` stages
+automatic recursive certification for an outer body containing an infinite
+inner loop. `Bridge/SolidityBridge/ExternalEvm/Assembly/SafeDivergenceChecks.lean`
+kernel-inhabits the recursively scanned certificate, actual scanner walk and
+linked program, then applies the general safe-divergence theorem. The source
+fault proof and 15-step target observation (inner header PC 37, empty stack)
+exercise entry before any completed outer turn. A distinct later-entry case
+uses `[loop [] [jumpi 1, loop [push 1] []]]` on `[1,1,1,0]`: a kernel source
+witness completes one outer turn before inner divergence, while executable
+link acceptance and 19 fetched steps reach PC 72 with an empty stack. That
+later case is a source witness plus executable target regression, not a second
+kernel-instantiated safe-divergence certificate. Independent review found the
+general checked `afterTurns` induction and existing inhabited certificate
+adequate; no per-constructor universal coverage claim is made.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutFacts.lean` supplies image-data
+uniqueness and acceptance of already proved images by the raw layout validator;
+it does not assert syntactic or semantic checker completeness.
+
+The new complete control closure passed in 13.604 s at 2,346,885,120 bytes
+sampled group RSS. The automatic scanner-safe nested control passed in 19.576 s
+at 2,737,020,928 bytes. A closed endpoint proof initially hit the unchanged
+10 GiB group-RSS guard (exit 75, 51.083 s / 10,765,037,568 bytes; further failed
+attempts/probes are retained). Declaration isolation located repeated
+normalization of whole 21-step EVM states in boundary conversion. Checked
+endpoint equations, inductive frame preservation and elaboration-abstract
+endpoint definitions repaired it: the same complete success control passed in
+18.936 s at 2,358,882,304 bytes. No observation, fuel, proof/search limit or
+resource ceiling was changed. Longer scanner walks similarly use factored
+literal PCs and kernel-checked closed parser facts instead of raising recursion
+depth. All failed resource terminals remain BLOCKED evidence.
+
+The final closure, including pinned axiom assertions, passed in 31.409 s at
+2,732,032,000 bytes sampled group RSS (exit 0).
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/PopChecks.lean` closes the final
+review's supported-POP validation omission: an automatic atomic certificate
+and general kernel simulation pair `[push 1, pop, push 9]` with `[9]`, fetched
+PC 70 and actual `X 9` STOP PC 71. A kernel safe-POP instance exercises the
+scanner-consuming atomic path. Empty-stack source POP faults, exactly two
+fetched steps produce StackUnderflow, and resource readiness refuses it.
+The fixture passed in 5.643 s at 1,912,508,416 bytes sampled group RSS.
+
+The actual new axiom union remains `propext`, `Classical.choice`, `Quot.sound`
+(`Image.unique` uses only `propext`, `Quot.sound`). General success and safe
+nested-divergence headlines and their inhabited controls pin actual axioms.
+Independent read-only finder and skeptic reviews found no remaining semantic
+integration gap within this accepted numeric fragment, and retained the opaque
+D_J, acceptance-completeness, resource/terminal and unsuccessful-source limits.
+
+The task patch checks cleanly against published master in a temporary index;
+the relevant dependency closure is unchanged there. The later fetch at
+`2abccb7044a4c6eb33a816cee7e862927e499cff` still has the original Widths file.
+The failed umbrella gate is preserved and is not repeated without a changed
+prerequisite. Its shared approved repair remains owned by storage-slots. This
+is the remaining required combined-validation dependency, not a reason to
+leave the independent assembler obligations unfinished. No source-assembly
+admission, feature inventory, intrinsic core representation or upstream pin
+changed.
+
 To build the independent targets alone, from `Bridge/`:
 
 ```sh
