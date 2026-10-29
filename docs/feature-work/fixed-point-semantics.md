@@ -8,8 +8,8 @@ there is no compiler behaviour to align with. This document fixes what "full
 support" means: the language rules collected from the pinned specification
 (§1), the reference values and operations in
 `Solidity/Language/FixedPoint.lean` (§2), the choices where the
-specification is silent (§3), and the roadmap owners of the remaining work
-(§4). Nothing is wired into the AST, the elaborator, the compiler or the
+specification is silent, with the user's answers (§3), and the roadmap
+owners of the remaining work (§4). Nothing is wired into the AST, the elaborator, the compiler or the
 feature manifest.
 
 - **Base revision:** `caf52ecd4dde5d37cbc0098d47de1a01aa218285`
@@ -137,10 +137,10 @@ otherwise the operation is refused, as solc's `Type::commonType` refuses
 | `Fx.inc`, `Fx.dec` | `a ± 10^N` (the value `1`) | as `add` |
 | `Fx.lt`, `Fx.le` (and `== != > >=` likewise) | integer order of the scaled integers | — |
 | `Fx.implicit` | along `FxTy.subsumes`: `a · 10^(N'−N)` | total |
-| `Fx.explicit m` | `Fx.rescale` (truncate toward zero when digits drop), then ranged by `m` | per Q2 |
-| `Fx.ofIntegerExplicit m`, `Fx.ofBits` | integer → fixed by value; `bytesM` → fixed by bit pattern (Q7) | per Q2 / total |
+| `Fx.explicit` | `Fx.rescale` (truncate toward zero when digits drop), then wrap (Q2) | total |
+| `Fx.ofIntegerExplicit`, `Fx.ofBits` | integer → fixed by value, wrapped; `bytesM` → fixed by bit pattern (Q7) | total |
 | `Fx.toIntTrunc` | fixed → integer by value (Q7): `tdiv a 10^N`, then the integer conversion | — |
-| `Fx.ofLiteral?`, `Fx.literalTrunc` | implicit literal (exact or refused); explicit literal folded exactly at the target's N (P1) | — |
+| `Fx.ofLiteral?`, `Fx.explicitConst?`, `Fx.literalTrunc` | implicit literal (exact or refused); explicit constant folded exactly at the target's N (P1), refused when out of range (Q2) | `none` = compile error |
 | `Fx.toWord`, `Fx.ofWord?` | ABI word (two's complement mod `2^256`); decoding range-checks (P5) | `none` = decoding revert |
 
 **Theorems** (premises in parentheses; all checked by the Lean server with
@@ -165,7 +165,7 @@ otherwise the operation is refused, as solc's `Type::commonType` refuses
 - `Fx.lt_iff`; `Fx.implicit_sameValue`, `Fx.implicit_lt`
   (`t.subsumes t'`) — the implicit conversion keeps the number and the order;
   `Fx.inRange_mul_of_subsumes`; `Fx.explicit_of_subsumes` — the explicit
-  conversion is the implicit one where that exists, in either mode.
+  conversion is the implicit one where that exists.
 - `Fx.ofInteger_inRange` (`t.intImplicit lo hi`, `lo ≤ k ≤ hi`) — solc's
   implicit integer→fixed test is exact: such a conversion never fails;
   `Fx.ofIntegerExplicit_of_implicit`.
@@ -181,12 +181,12 @@ otherwise the operation is refused, as solc's `Type::commonType` refuses
 Proposals that follow from solc's documented integer rules, a recorded
 decision or a confirmed exclusion, and need no user decision:
 
-- **P1 — literals fold exactly.** An explicit conversion of a literal rounds
+- **P1 — constants fold exactly.** An explicit conversion of a literal rounds
   the exact rational at the *target's* N (`Fx.literalTrunc`), not through
   solc's mobile type (which first rounds at its own N; for
   `ufixed256x80(1/3)` that type has 77 digits). This follows "fold rational
   constants exactly" ([solidity-scope.md](../solidity-scope.md#what-belongs-in-the-model)).
-  An out-of-range explicit literal is Q2.
+  An out-of-range explicit constant is a compile error (Q2).
 - **P2 — division by zero** panics `0x12` in checked and unchecked code, as
   solc's integer `/` and `%` do (`control-structures.rst:640–641`,
   `value-types.rst:122,142`), and G01 Q5 observes the code exactly. This
@@ -213,69 +213,27 @@ decision or a confirmed exclusion, and need no user decision:
   which solc reports as unimplemented rather than refuses, falls under the
   confirmed assembly/Yul exclusion (G00 Q1).
 
-Decisions the user must make (also in the handoff block):
+### User decisions (2026-10-29)
 
-- **Q1 [Implicit]** solc's implicit fixed→fixed test accepts lossy
-  conversions (F1). Options: *exact subset* — accept only solc's pairs whose
-  range is contained (`FxTy.implicitOK`), refusing e.g. `fixed8x3 →
-  ufixed8x3` (Recommended: solc's documented rule is that an implicit
-  conversion loses no information, `conversion.rst:14`, and the program can
-  still say `ufixed8x3(x)` explicitly, so no computation becomes
-  inexpressible); *solc's set, checked* — accept all of solc's pairs and
-  panic `0x11` on a value that does not fit; *solc's set, wrapping* —
-  accept all and wrap. Note that the recommended option **narrows** solc's
-  type-checker acceptance (and, through P7, the mixed operations it
-  admits); G00 Q6 asks for support beyond solc's *compiled* boundary, which
-  for these programs is empty, so the choice is the user's.
-- **Q2 [Explicit]** An explicit conversion whose value does not fit.
-  Options: *wrap at run time, reject out-of-range constants at compile
-  time* (Recommended: solc's integer rules — explicit conversions of values
-  cut higher-order bits and never fail, `conversion.rst:61`, while an
-  explicit conversion of an out-of-range literal to an integer type is a
-  type error, `Types.cpp:1054–1055`; for fixed, solc accepts e.g.
-  `ufixed8x1(100.5)` through the mobile type); *wrap everywhere*, constants
-  included; *panic `0x11` at run time*, rejecting constants.
-- **Q3 [Rounding]** `*`, `/` and digit-dropping conversions. Options:
-  *toward zero* (Recommended: solc's literal rounding, integer `/`, and
-  rational `%` all truncate toward zero); *toward −∞*; *half-to-even*.
-- **Q4 [Shifts]** `<<`, `>>`, `>>>` with fixed operands (F2). Options:
-  *reject* (Recommended: the documented operator list omits them, integers
-  reject `>>>`, and solc's typing would make the shift amount a fixed-point
-  value, which has no defined meaning); *shift the scaled integer by an
-  integer amount* as for `intM`, rejecting `>>>`.
-- **Q5 [UfixedNeg]** unary `-` at `ufixed` (F3). Options: *accept as solc's
-  type checker does* (encoded: `0x11` unless the operand is `0`, wraps in
-  `unchecked`; Recommended: G00 Q6 asks for support beyond solc's boundary,
-  and this keeps every program solc's type checker accepts); *reject* as for
-  `uintM`.
-- **Q6 [IncDec]** `++`/`--` (spec silent). Options: *add the value 1*
-  (encoded, `Fx.inc`; agrees with `x += 1` wherever the literal `1`
-  converts; at types without `1`, such as `fixed8x3`, `++x` type-checks and
-  always panics `0x11`); *add one unit in the last place* (`10^−N`). No
-  recommendation: the evidence (solc admits `++` at every fixed type) fits
-  both.
-- **Q7 [Reinterpret]** explicit conversions between fixed and integer types,
-  and `bytesM`→fixed. Options: *integers by value, `bytesM` by bit pattern*
-  (encoded: `Fx.ofIntegerExplicit`, `Fx.toIntTrunc`, `Fx.ofBits`; by value
-  the explicit conversion agrees with the implicit one wherever both exist,
-  `Fx.ofIntegerExplicit_of_implicit`; with Q2 = wrap, `fixed256x18(int256 x)`
-  then wraps for most `x`); *by bit pattern* — the same-width,
-  same-signedness shape solc admits is the shape of its bit-preserving
-  conversions such as `uint160`↔`bytes20`, with the value reading only where
-  the implicit conversion exists (hybrid); *by value throughout*
-  (`bytesM` read as its unsigned integer). No recommendation: the evidence
-  points both ways.
-- **Q8 [Intermediate]** `*` and `/`: the result of the exact product or
-  quotient, truncated (encoded; P3 then wraps that result in `unchecked`),
-  or the EVM-native `((a·b) mod 2^256) / 10^N`. Options: *exact*
-  (Recommended: the ABI spec defines the value `v / 10^N`, and only the
-  exact reading makes checked `*` fail exactly when the true result does not
-  fit; cost: a 512-bit multiply-divide in G25); *word-native*, with overflow
-  of the intermediate a `0x11` panic in checked code.
+The questions Q1–Q8 below were put to the user, who answered all of them
+on 2026-10-29 (relayed by the batch coordinator; the coordinator records
+them in [solidity-scope.md](../solidity-scope.md) as a "Second round"
+section). The model encodes every answer; no question is open.
 
-The Lean model keeps both variants where Q2 is open (`Mode` on
-`Fx.explicit`/`Fx.ofIntegerExplicit`) and encodes the stated option for the
-others; changing an answer changes one definition.
+| Question | Decision | Encoded by |
+|---|---|---|
+| Q1 [Implicit] — solc's implicit fixed→fixed test accepts lossy conversions (F1) | Only the exact, range-contained subset of solc's pairs. This narrows solc's type-checker acceptance (and, through P7, the mixed operations it admits); `ufixed8x3(x)` stays expressible explicitly. | `FxTy.implicitOK`, `FxTy.common?`, `Fx.implicit` |
+| Q2 [Explicit] — an explicit conversion whose value does not fit | Wrap modulo `2^M` at run time, as explicit integer conversions cut higher-order bits (`conversion.rst:61`); an out-of-range constant is a compile error, as for integer types (`Types.cpp:1054–1055`), although solc's fixed-point type checker admits e.g. `ufixed8x1(100.5)`. | `Fx.explicit`, `Fx.ofIntegerExplicit` (both total, wrapping), `Fx.explicitConst?` (`none` = compile error) |
+| Q3 [Rounding] — `*`, `/` and digit-dropping conversions | Toward zero, as solc's literal rounding, integer `/` and rational `%`. | `Int.tdiv`/`Int.tmod` in `Fx.mul`, `Fx.div`, `Fx.mod`, `Fx.rescale`, `Fx.literalTrunc`, `Fx.toIntTrunc` |
+| Q4 [Shifts] — `<<`, `>>`, `>>>` with fixed operands (F2) | "Do what solc does": no such program compiles, so shifts are **rejected**. Why: solc's type checker admits a shift whose left operand is fixed (F2), but code generation then fails the assertion `solUnimplementedAssert(_type.category() != Type::Category::FixedPoint, …)` in `typedShiftLeftFunction`/`typedShiftRightFunction` (`YulUtilFunctions.cpp:554,577`), reported as `UnimplementedFeatureError` — the upstream test `shr_unused.sol` expects exactly that for `x >>> 6` at `fixed`. A fixed shift *amount* under an integer or literal left operand is already a type error (`isValidShiftAndAmountType`, `Types.cpp:573–583`). | no shift operation is defined on `Fx` |
+| Q5 [UfixedNeg] — unary `-` at `ufixed` (F3) | Accepted, as solc's type checker does: `0x11` unless the operand is `0`, wrapping in `unchecked`. | `Fx.neg` |
+| Q6 [IncDec] — `++`/`--` | Add or subtract the value `1`. At a type without `1` (e.g. `fixed8x3`) `++x` type-checks and always panics `0x11`. | `Fx.inc`, `Fx.dec` |
+| Q7 [Reinterpret] — explicit fixed↔integer and `bytesM`→fixed | Integers convert by value; `bytesM` converts by bit pattern. With Q2, `fixed256x18(int256 x)` wraps for most `x`. | `Fx.ofIntegerExplicit`, `Fx.toIntTrunc`, `Fx.ofBits` |
+| Q8 [Intermediate] — `*` and `/` | The exact product or quotient, then truncated (and, unchecked, wrapped: P3); the backend needs a 512-bit multiply-divide (G25). | `Fx.mul`, `Fx.div` |
+
+`Mode` remains only where the language has both behaviours: arithmetic in
+checked code and in `unchecked { }`. Explicit conversions take no mode.
+
 
 ## 4. Owners
 
@@ -297,7 +255,6 @@ with it. This task did not edit the manifest.
 
 ## 5. Remaining child obligations
 
-- Answer Q1–Q8; then adjust the encoded variants.
 - G00: record the fetched specification/compiler files (§Sources) in the
   upstream snapshot, or pin them otherwise; re-confirm F1–F3 by running the
   pinned solc.
@@ -346,6 +303,12 @@ their fixes:
 | Q5/Q6 lacked a recommendation rationale | skeptic | Q5 recommended with evidence; Q6 explicitly none, with the `fixed8x3` case |
 | Bare `simp` in `Fx.pow_bits_le` | skeptic | `simp only [Int.natCast_pow, Int.cast_ofNat_Int]` |
 | Owners missed G10, G18, G26 | skeptic | added |
+
+After the reviews the user answered Q1–Q8 (§3); the model now encodes the
+answers: explicit conversions wrap and take no `Mode`
+(`Fx.explicit`, `Fx.ofIntegerExplicit`), constants out of range are refused
+(`Fx.explicitConst?`), and the Q4 rationale cites the code-generation
+assertion that stops every fixed shift.
 
 Not changed: the finder's suggestion to drop `FxTy.solcImplicit` from
 `FxTy.implicitOK` (the implication is unproved; §5), and P1's
