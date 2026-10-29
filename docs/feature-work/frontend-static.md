@@ -903,3 +903,30 @@ standalone constant is `Fx.mobileConst?`'s value
 **For G15**: a fractional `abi.encode` argument compiles here but not with
 solc 0.8.38 (6090), so the solc-JSON route cannot certify such a program;
 G15's classification should mark it as outside solc's accepted set.
+
+## Integration review (2026-10-30)
+
+Coordinator skeptic review of the merge into master (read-only, no Lean
+server). Findings and their disposition:
+
+- **Status overclaimed.** `docs/coverage-plan.md` now marks V06 partial:
+  - G12 holds for file-level scopes; typing across units, `N.x` namespace
+    resolution and overloads in typing are open, and import cycles are a
+    recorded deviation from solc.
+  - G13's `hasType_iff`, `stmtOK_iff`/`itemsOK_iff` and `wellFormed_iff`
+    decide S01's own relations, but the row's discharge of compiler-provided
+    type metadata is not done ("removable, not yet removed"); UDVT operators
+    do not compose (`a+b+c`); `arrayLenB` is sound only.
+  - G14's `InheritanceOK` (`Source/Inheritance.lean`) is stated over the
+    same helpers the checker uses, so `inheritance_iff` is reflection, not a
+    proof against independent source definitions; `linearize_sound` proves
+    C3 consistency only.
+- **Admission gaps in the unsound direction.** G14 accepts programs solc
+  refuses: fallback/receive overrides, getters and modifier overriding are
+  not checked. It also refuses some programs solc accepts (no 6480 pruning;
+  `interface_and_base_override_fine.sol`).
+- **Literal typing changed upstream.** lane-semantics changed S01's literal
+  typing to solc's (decision Q1, 2026-10-29); the G13 checker must follow
+  its "Typed rules changed" table when that lane merges.
+- **Backfill item 5** holds as worded; nothing in S01 consumes
+  `mobileConst?`/`abiConst?` yet.

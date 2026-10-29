@@ -529,8 +529,8 @@ several groups (noted per row); a lane starts by reading those results.
 | V02 | G03, G05, G06 | V00, V01 | Integrated (with the G06 Osaka re-pin). |
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
 | V04 | S02, S03, S04.04, S05 | V03 | — |
-| V05 | G08, G09, G10, G11 | V04 | Lane `roadmap-l2-20261029/lane-parse`: G08–G11 done (translation-validated parse; completeness and uniqueness open), round-trip backfill done. |
-| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). lane-static: G12, G13, G14 done; backfill item 5 (fixed-point mobile constants) done. |
+| V05 | G08, G09, G10, G11 | V04 | Partial (lane `roadmap-l2-20261029/lane-parse`, integrated 2026-10-30): checked lexer and parser, translation-validated against the lane's own transcriptions (`classify`, `Syn.yield`, `Syn.prec`); parse completeness and uniqueness open, so G05's `Checked.complete` and G01's `SourceSpec.Unambiguous` are not met; `-x++`, `~x++` and `a ? b : c = d`, which solc compiles, are refused (G10). Round-trip backfill done. |
+| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). Partial (lane `roadmap-l2-20261029/lane-static`, integrated 2026-10-30): G12 for file-level scopes (typing across units and `N.x` namespaces open); G13 decides S01's `Typed`/`WellFormed`, but the type-metadata trust is not yet removed and UDVT operators do not compose; G14's `InheritanceOK` is stated over the checker's own helpers and accepts programs solc refuses (fallback/receive overrides, getters, modifier overriding); G15 not started. Backfill item 5 (fixed-point mobile constants) done. |
 | V07 | G16, G17, G18, G19 | V06 | — |
 | V08 | G20, G21, G22, G23 | V07 | — |
 | V09 | G24, G25, G26, G31 | V08 | G24's foundation children come from G03; G31's precompile and stipend parts are prepared (`Solidity/Precompiles/`, `Solidity/Stipend/Rule.lean`). |

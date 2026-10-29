@@ -643,3 +643,32 @@ blockers (10). Recorded: completeness and uniqueness (1).
 Each checkpoint ended with a read-only finder and a separate skeptic review
 (no Lean server); the confirmed findings and their fixes are recorded in the
 checkpoint's Review section above.
+
+## Integration review (2026-10-30)
+
+Coordinator skeptic review of the merge into master (read-only, no Lean
+server). Findings and their disposition:
+
+- **Status overclaimed.** G10's row asks for parse correspondence for all
+  in-profile expression forms; only soundness and constructor coverage are
+  proved. G11 does not prove `Parses` functional (G01
+  `SourceSpec.Unambiguous`) and does not provide G05's `complete`, so no
+  `Checked` frontend chain can be built. `docs/coverage-plan.md` now marks
+  V05 partial.
+- **Specifications are this lane's transcriptions.** `classify`, `Syn.yield`
+  and `Syn.prec` were written here and reviewed by hand against the pinned
+  grammar; "sound" means sound against them, not against an independent
+  grammar derivation.
+- **Refusals of programs solc compiles.** `-x++`, `~x++` and
+  `a ? b : c = d` (`Prec.lean`), including
+  `tests/operators-0.8.38/OperatorBoundaries.sol` and solc's
+  `controlFlow/storageReturn/ternary_fine.sol` and
+  `controlFlow/localStorageVariables/ternary_declaration_fine.sol`. Open:
+  follow solc or record them as out of profile before G15 routes admission
+  through this parser.
+- **Corpus regression not enforced.** `scripts/parse-corpus.mjs` and
+  `scripts/check-checked-frontend.mjs` are not in CI; `report --write`
+  records a baseline without the unclassified check, a missing baseline
+  exits 0, and the reason rules match on paths. Open.
+- **Checking cost.** `UnitExamples.lean` (about 4 min) and
+  `TypeExamples.lean` (about 110 s) are the heaviest new files. Open.
