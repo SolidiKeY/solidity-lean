@@ -35,7 +35,7 @@ for (const input of inputs) for (const viaIR of [false,true]) {
  const fixture=input.own?undefined:parseFixture(input.text);
  const sources=input.own?{'SelfPowerData.sol':{content:input.text}}:
   Object.fromEntries([...fixture.sources].map(([k,v])=>[k,{content:withPreamble(v)}]));
- const settings={viaIR,evmVersion:'cancun',optimizer:{enabled:true,runs:200},
+ const settings={viaIR,evmVersion:'osaka',optimizer:{enabled:true,runs:200},
   ...(fixture?.settings.revertStrings?{debug:{revertStrings:fixture.settings.revertStrings}}:{}),
   outputSelection:{'*':{'*':['abi','evm.deployedBytecode.object']}}};
  const out=JSON.parse(compile(JSON.stringify({language:'Solidity',sources,settings}),0,0));
@@ -47,7 +47,7 @@ for (const input of inputs) for (const viaIR of [false,true]) {
  const caller=createAddressFromString('0x0000000000000000000000000000000000002000');
  async function check(signature,args,expected,failure=false,calldata) {
   const data=calldata??iface.encodeFunctionData(signature,args);
-  const vm=await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Cancun})});
+  const vm=await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Osaka})});
   await vm.stateManager.putCode(to,code);
   const {execResult:r}=await vm.evm.runCall({to,caller,data:hexToBytes(data),gasLimit:30000000n});
   const actual=bytesToHex(r.returnValue).toLowerCase();

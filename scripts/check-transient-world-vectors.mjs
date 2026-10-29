@@ -24,13 +24,13 @@ const sources = Object.fromEntries(['TransientFactory.sol', 'TransientWorldScena
   [name, {content:readFileSync(new URL('../tests/solc/' + name, import.meta.url), 'utf8')}]));
 const reports = [];
 for (const viaIR of [false, true]) {
-  const settings = {viaIR, evmVersion:'cancun', optimizer:{enabled:true},
+  const settings = {viaIR, evmVersion:'osaka', optimizer:{enabled:true},
     outputSelection:{'*':{'*':['abi', 'evm.deployedBytecode.object']}}};
   const out = JSON.parse(compile(JSON.stringify({language:'Solidity', sources, settings}), 0, 0));
   assert.deepEqual((out.errors ?? []).filter(e => e.severity === 'error'), []);
   const c = out.contracts['TransientWorldScenario.sol'].TransientWorldScenario;
   const iface = new Interface(c.abi);
-  const common = new Common({chain:Mainnet, hardfork:Hardfork.Cancun});
+  const common = new Common({chain:Mainnet, hardfork:Hardfork.Osaka});
   const vm = await createVM({common});
   const to = createAddressFromString('0x0000000000000000000000000000000000001234');
   // Public fixture key; funds exist only inside this in-memory reference VM.
@@ -43,7 +43,8 @@ for (const viaIR of [false, true]) {
   let nonce = 0n;
   const observations = [];
   async function transaction(name, expected = [], failure = null) {
-    const tx = createLegacyTx({nonce:nonce++, gasPrice:1000000000n, gasLimit:30000000n,
+    // Osaka EIP-7825 caps a transaction at 2^24 gas.
+    const tx = createLegacyTx({nonce:nonce++, gasPrice:1000000000n, gasLimit:16777216n,
       to, value:0n, data:hexToBytes(iface.encodeFunctionData(name))}, {common}).sign(key);
     const {execResult:r} = await runTx(vm, {tx, skipBlockGasLimitValidation:true});
     const bytes = bytesToHex(r.returnValue);

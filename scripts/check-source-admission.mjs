@@ -27,7 +27,7 @@ const {hexToBytes, createAddressFromString, createAccount} = req('@ethereumjs/ut
 const {Interface} = req('ethers');
 function output(source, viaIR = false, bytecode = true) {
   return JSON.parse(compile(JSON.stringify({language:'Solidity', sources:{'S.sol':{content:source}},
-    settings:{viaIR, evmVersion:'cancun', optimizer:{enabled:false,runs:200},
+    settings:{viaIR, evmVersion:'osaka', optimizer:{enabled:false,runs:200},
       outputSelection:{'*':{'*':bytecode ? ['abi','evm.deployedBytecode.object'] : [], '':['ast']}}}}),0,0));
 }
 const errors = out => (out.errors ?? []).filter(error => error.severity === 'error');
@@ -44,7 +44,7 @@ for (const viaIR of [false, true]) {
     assert.deepEqual(errors(out), [], 'source must compile to bytecode');
     const compiled = out.contracts['S.sol'][contract];
     const iface = new Interface(compiled.abi);
-    const vm = await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Cancun})});
+    const vm = await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Osaka})});
     await vm.stateManager.putAccount(address, createAccount({balance:0n}));
     for (const name of names) {
       const result = await vm.evm.runCode({to:address,
@@ -75,6 +75,6 @@ const acceptedGates = ['pragma abicoder v1;',
   'pragma experimental SMTChecker;'];
 for (const gate of acceptedGates)
   assert.deepEqual(errors(output(gate + ' contract C {}', false, false)), [], gate);
-console.log(JSON.stringify({compiler:pins.get(compilerSha), evmVersion:'cancun',
+console.log(JSON.stringify({compiler:pins.get(compilerSha), evmVersion:'osaka',
   pipelines:['legacy','viaIR'], executions:executed, invalidSources:6,
   rejectedGates:invalidGates.length, acceptedGates:acceptedGates.length}));

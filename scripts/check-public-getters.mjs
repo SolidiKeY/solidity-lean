@@ -34,7 +34,7 @@ contract ExplicitBytesPrefix {
 }`;
 const errors = out => (out.errors ?? []).filter(error => error.severity === 'error');
 const output = (text, viaIR) => JSON.parse(compile(JSON.stringify({language:'Solidity',
-  sources:{'Getters.sol':{content:text}}, settings:{viaIR, evmVersion:'cancun',
+  sources:{'Getters.sol':{content:text}}, settings:{viaIR, evmVersion:'osaka',
     optimizer:{enabled:false,runs:200}, outputSelection:{'*':{'*':['abi','evm.bytecode.object','evm.methodIdentifiers']}}}}),0,0));
 let executions = 0;
 for (const viaIR of [false, true])
@@ -54,7 +54,7 @@ for (const viaIR of [false,true]) {
   assert.deepEqual(getter('allowances').inputs.map(row => [row.name,row.type]), [['who','address'],['kind','uint16']]);
   assert.deepEqual(getter('sequences').inputs.map(row => row.type), ['uint256','uint256']);
   const caller = createAddressFromString('0x0000000000000000000000000000000000001234');
-  const vm = await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Cancun})});
+  const vm = await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Osaka})});
   await vm.stateManager.putAccount(caller, createAccount({balance:1000000000000000000n}));
   async function deploy(contract, success = true) {
     const result = await vm.evm.runCall({caller, data:hexToBytes('0x'+code[contract].evm.bytecode.object), gasLimit:30000000n});
