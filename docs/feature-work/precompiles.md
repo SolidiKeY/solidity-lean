@@ -160,8 +160,7 @@ Axiom pins (`#guard_msgs`): `run_eq_none_iff` and `gas_mono` use
 
 ### Handoff (checkpoints 1–2)
 
-- **Revision:** see the branch head of the commit "Precompiles: the Osaka
-  `Fixed` instance".
+- **Revision:** `2b0bd1b` (checkpoints 1–2); review fixes in `dff640c`.
 - **Theorems:** as listed above; no `sorry`, no new axiom, no
   `native_decide`, `implemented_by` or `maxHeartbeats` change.
 - **Premises:** none. The public theorem still quantifies over
@@ -225,6 +224,14 @@ This is G06's B16 (instances) and B01 (Osaka repin) for the precompiles. It
 needs a Bridge build and, for the crypto outputs, a vendor patch replacing
 the Python and FFI calls with the core definitions (D13's route for
 Keccak).
+
+### Handoff (checkpoint 3)
+
+- **Status:** blocked. No Bridge adapter is committed, because no Lean check of one is possible here.
+- **Done:** the agreement table above, by reading.
+- **Needed:** network access to a Mathlib cache host (or a multi-hour Mathlib build), then
+  `Bridge/SolidityBridge/Precompiles.lean` proving the gas rows and `IDENTITY` by definition,
+  and recording the `MODEXP` and 0x0b–0x11/0x100 disagreements as B01's repin obligations.
 
 ## Review
 
