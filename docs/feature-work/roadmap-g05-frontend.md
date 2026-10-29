@@ -317,8 +317,23 @@ round (see the note under the base revision above). They are encoded as follows:
 
 ## 7. Gates
 
-Run at the head of `cloud/roadmap-w1-20261029/g05-frontend`; results are in
-the handoff below.
+Run on this branch (final Lean content as of the second-round commit):
+
+| Command | Result |
+|---|---|
+| `lean_diagnostic_messages` on `Solidity/Roadmap/Frontend.lean` | clean (no errors, warnings or infos besides the pinned `#guard_msgs`) |
+| `node scripts/check-layers.mjs` | pass: `155 core modules, 0 reach the elaborator` |
+| `node scripts/check-orphans.mjs` | pass: `734 reachable, 0 orphaned, 0 not allowed` |
+| `bash scripts/check-trust.sh` | pass: `trust: 749 sources, 241 inventoried implementation/recovery sites, 0 findings` (no new site) |
+| `bash scripts/check-doc-paths.sh` | 46 missing references, the base count; none from this group's files |
+| `./run-lean.sh`, first run (first commit, 63 min 49 s) | `lake build`: `Build completed successfully (719 jobs)`; `lake build SolkeyTestSuite` failed on `Solidity.TestSuite.Derived17` with `Lean exited with code 137` (killed for memory while built in parallel; not a file this group touches) |
+| `./run-lean.sh`, rerun at the final Lean content (incremental, 3 min 42 s) | `Build completed successfully (719 jobs)`; `Build completed successfully (262 jobs)` (Derived17 built in 195 s); `check-solkey.sh`: `37 mismatch(es)`, unchanged from the base, so the script exits 1 on baseline drift only |
+
+Peak memory: sampled (`free -m`, used memory every 5 s) during the rerun
+only: 12,893 MiB system-wide. The first run was not sampled.
+Lean axioms: `Chain.checked` and `Digests.identity_list` depend on `propext`
+only (pinned by `#guard_msgs`); no `sorry`, axiom, `native_decide`,
+`implemented_by` or `maxHeartbeats` change.
 
 ## 8. Review
 
@@ -366,4 +381,15 @@ cited lines, counts and decisions were confirmed.
 
 ## Handoff
 
-Pending.
+- **Base:** `caf52ecd4dde5d37cbc0098d47de1a01aa218285`; work took about 1 h
+  50 min (12:14–14:05 UTC, 2026-10-29), mostly the first full build.
+- **Done:** audit of every source-admitting path (§1); statements-only
+  certificate interfaces with proved shape lemmas (§2); G00 disagreement 6
+  resolved without frontend code changes (§3); settings representation per
+  the second-round answers (§4); child obligations C1–C10 (§5); both reviews
+  with fixes (§8).
+- **Not done:** no instance of any interface; no frontend code changed (C3,
+  C4, C7, C8 and C10 touch `Solidity/Frontend/**`, which in-flight lanes edit);
+  the adapter to G01's revised `Contracts.lean` waits for that revision (C1).
+  The second-round answers are encoded as relayed by the batch coordinator.
+  Their record in `docs/solidity-scope.md` was not yet on master when checked.
