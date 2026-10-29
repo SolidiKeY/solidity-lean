@@ -549,7 +549,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | Module | What it defines |
 |---|---|
 | `Roadmap/Contracts.lean` | Roadmap G01: the six final source-to-bytecode contracts, observations, resourced prefix families and compositional pass certificates as statements only (`Cert.comp`, `PublicCorrectness`); no final theorem is claimed ([roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md)). |
-| `Roadmap/Frontend.lean` | Roadmap G05: checked frontend certificate interfaces as statements only: raw input, parse, resolution and metadata checkers (`Chain.checked`), digests as identity (`Digests.identity`, `Digests.only_invariant`), admitted settings with every `EvalOrder`, coder mode and link map ([roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md)). |
+| `Roadmap/Frontend.lean` | Roadmap G05: checked frontend certificate interfaces as statements only: raw input, parse, resolution and metadata checkers (`Chain.checked`), digests as identity (`Digests.identity`, `Digests.only_invariant`), admitted settings: solc's two pipelines (three order/coder pairs) and the empty link map ([roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md)). |
 
 ## The solkey corpus
 

@@ -10,9 +10,17 @@ Deliverables: this document and the statements-only module
 the code is about the base revision; `Solidity/Frontend/**` is edited by
 in-flight lanes. The user decisions followed are the table in
 [solidity-scope.md](../solidity-scope.md#user-decisions-2026-10-29): G00 Q3 (Osaka),
-Q4 (all eight `EvalOrder` combinations, solc 0.8.38 profile, 0.8.34 SolKey
-only), Q5 (code constants from this compiler's artifact table), G01 Q3
+Q4 (solc 0.8.38 profile, 0.8.34 SolKey only; its settings part is revised by
+the second round below), Q5 (code constants from this compiler's artifact table), G01 Q3
 (per-run hash premise) and Q8 (linked libraries are part of the compiled system).
+
+**Second-round answers** to this document's questions Q1 and Q2 (§6) were
+relayed by the batch coordinator on 2026-10-29 and are to be recorded in
+`docs/solidity-scope.md`, section "Second round (2026-10-29)"; that section is
+not yet on master at this branch's base. Q1: empty link map only. Q2 (revising
+G00 Q4): solc's two pipelines only, that is the legacy order with each unit's
+pragma coder (v1 or v2) and the via-IR order with coder v2; the other six
+`EvalOrder` combinations are outside the profile.
 
 ## 1. Audit: what admits source and what each path trusts
 
@@ -164,8 +172,10 @@ list with its extraction proof); each stage's owner chooses one.
 | `Digests.only_invariant` | a check `check (digest b)` sound for `P` gives `P b'` for every `b'` with the same digest | none: this is the "identity only" limit |
 | `CoderMode.agrees` | for `p.compilation = .analysed q s`, `p.effectiveCoder = some ((CoderMode.ofPipeline q).coderOf p.requestedCoder)` | none; ties the interface to `Provenance.effectiveCoder` |
 | `CoderMode.agrees_atNode` | the same for `p.atNode node`, the provenance of any source unit of a compilation (`Solidity/Frontend/SourceUnits.lean`) | none |
-| `Settings.ok_order`, `Settings.ok_coder` | `Settings.Ok` does not read `order` or `coder` | `s.Ok` |
-| `FrontendSpec.admits_order` | an admitted input stays admitted, with that order carried, under each of the eight orders | `F.AllSettings`, `i.settings.Ok` |
+| `Settings.ok_ofPipeline` | `Settings.ofPipeline q` is admitted for both pipelines | none |
+| `Settings.ok_order` | `s.order = {} ∨ s.order = EvalOrder.viaIR` | `s.Ok` |
+| `Settings.ok_pairs` | for a unit requesting `c`: legacy order with coder `c`, or via-IR order with v2 (the three admitted pairs) | `s.Ok` |
+| `FrontendSpec.admits_pipeline` | an admitted input stays admitted under both pipelines' settings, which its resolution carries | `F.AllSettings` |
 | `Settings.ok_compiler` | `s.Ok → s.compiler ≠ .solkey0834` | `s.Ok` |
 | `Chain.checked` | `ch.check i r c = true → i.Ok ∧ F.Admitted i r` | none (axioms: `propext`) |
 | `Chain.checked_settings` | an accepted input's resolution carries its settings, which are `Ok`, and its links name library declarations | `F.SettingsRespected` |
@@ -185,7 +195,7 @@ carries the input's settings; `InProfile` implies `Input.Ok` and resolved
 links) and `FrontendSpec.AllSettings` (admission is stable under every
 admitted settings value) are `Prop`s about the relations that S00/S01/G15
 must prove. `Chain.checked` does not need them, and `Chain.checked_settings`
-and `FrontendSpec.admits_order` take them as premises. `Checked` alone can
+and `FrontendSpec.admits_pipeline` take them as premises. `Checked` alone can
 be inhabited vacuously (`Parses := False`, `produce := fun _ => none`); the
 non-vacuity check is G01's `SourceSpec.NonVacuous` on the same relations.
 
@@ -232,10 +242,10 @@ profile takes the empty map:
 
 A non-empty map fixes addresses before deployment. The EVM cannot place code
 at a chosen address (creation addresses follow sender and nonce; salted
-creation is excluded), so admitting one needs a premise on the initial world:
-the code at each address is this compiler's runtime for that library. That
-premise is a new environment assumption, and is question Q1 below. Until then
-a non-empty map is recordable (oracle fixtures) but not admitted.
+creation is excluded), so admitting one would need a premise on the initial
+world: the code at each address is this compiler's runtime for that library.
+The second-round answer to Q1 refuses such maps: a non-empty map is
+recordable (oracle fixtures) but never admitted.
 `Link` is keyed by unit and library name while `CodeUnit.links` uses
 positions in `Artifact.contracts`; the map between them is the artifact
 table's declaration index (C3).
@@ -249,26 +259,26 @@ lanes; it is not a small local change, so it is child obligation C3.
 
 ## 4. Settings: evaluation order, ABI coder, compiler pins
 
-- **Evaluation order.** `Settings.order : EvalOrder` is an input field.
-  `Settings.Ok` does not constrain it, and under the obligation
-  `FrontendSpec.AllSettings` every admitted input stays admitted with each of
-  the eight orders (`FrontendSpec.admits_order`), so a public theorem
-  quantified over admitted inputs covers all eight. solc's pipeline fixes
-  only the importer's default (`defaultOrder`, matching `Import.lean:727-731`);
-  six combinations have no solc setting and need none: the AST step does not
-  depend on it, and the semantics reads `order` from the resolved input
-  (`settingsOf`). F3 is child obligation C4.
+- **Evaluation order and coder.** `Settings.order : EvalOrder` and
+  `Settings.coder : CoderMode` are input fields, and `Settings.Ok` requires
+  them to be one solc pipeline's (`Settings.Pipelined`: `defaultOrder q` and
+  `CoderMode.ofPipeline q`, matching `Import.lean:727-731`). That gives exactly
+  three (order, coder) pairs (`Settings.ok_pairs`): legacy with v1, legacy
+  with v2 (each unit's pragma) and via-IR with v2. The other six `EvalOrder`
+  combinations are outside the profile (`Settings.ok_order`). Under the
+  obligation `FrontendSpec.AllSettings`, every admitted input is admitted
+  under both pipelines (`FrontendSpec.admits_pipeline`), so a public theorem
+  over admitted inputs covers all three pairs. The semantics reads `order` and
+  `coder` from the resolved input (`settingsOf`). Since modern imports already
+  take only these two orders, F3 is no longer a gap; C4 shrinks to keeping
+  `evalOrder` overrides on historical fixtures out of admitted inputs.
 - **ABI coder.** The requested coder is per source unit (pragma, read by
   `readPragmas`) and belongs to the syntax; the setting is `CoderMode`:
   `pragma` (solc legacy: each unit's own) or `forceV2` (solc via-IR).
   `CoderMode.coderOf` is the effective coder. `CoderMode.agrees` and
   `CoderMode.agrees_atNode` prove it equals `Provenance.effectiveCoder` for
-  every analysed provenance and every unit of a compilation. G00 Q4 decides
-  the eight orders, not how the coder pairs with them. The interface keeps
-  `coder` independent (both modes under every order: a superset of solc's two
-  pairings). Whether the public theorem covers the pairings no solc setting
-  produces, such as a v1 unit under the via-IR order, is question Q2. Mixed-mode inheritance (F7)
-  stays refused until C5.
+  every analysed provenance and every unit of a compilation. Mixed-mode
+  inheritance (F7) stays refused until C5.
 - **Compiler.** `Settings.Ok` requires `compiler = .catalog0838`; a 0.8.34
   analysis is never an admitted input (`Settings.ok_compiler`). 0.8.34
   fixtures stay valid for SolKey compatibility (`docs/solkey-migration.md`),
@@ -282,8 +292,8 @@ lanes; it is not a small local change, so it is child obligation C3.
 |---|---|---|
 | C1 | Adapter from G01's frozen `SourceSpec`/`CheckedFrontend` to `FrontendSpec`/`Checked`, after g01-contracts-rev lands; `meaning` factors through `settingsOf` (`order`, `coder`) and ignores `links` | G01, then G05 follow-up |
 | C2 | Parse and resolution relations with certificate formats and checkers (`Chain.parse`, `Chain.resolve`); proofs of `SettingsRespected` and `AllSettings` | S00, S01, G08–G11, G15 |
-| C3 | Accept and record `libraries` in `validateSettings`/`Provenance` (refusing non-empty maps for admitted inputs until Q1); check `LinksResolved` against resolved library ids; library deployment and linking through the artifact's declaration index in `EvmSpec.load` | frontend lane owner, G42.04, G44.02, G06 |
-| C4 | Let modern imports take any `EvalOrder` independently of the solc pipeline (F3) | G08–G15 (importer) |
+| C3 | Accept and record `libraries` in `validateSettings`/`Provenance` (refusing non-empty maps for admitted inputs, per Q1); check `LinksResolved` against resolved library ids; library deployment and linking through the artifact's declaration index in `EvmSpec.load` | frontend lane owner, G42.04, G44.02, G06 |
+| C4 | Keep the historical-fixture `evalOrder` override (`Import.lean:670`) out of admitted inputs: only the two pipeline orders are in profile (F3, Q2) | G08–G15 (importer) |
 | C5 | Admit mixed legacy ABI modes across inherited units (F7) | G15, S04.02 |
 | C6 | Re-generate or mark the 29 0.8.34 fixtures: SolKey ones stay compatibility checks; local ones move to 0.8.38 | G53 |
 | C7 | Refuse or flag non-Osaka `evmVersion` in admitted provenance (F6) | G06 |
@@ -291,24 +301,19 @@ lanes; it is not a small local change, so it is child obligation C3.
 | C9 | Feature-extraction completeness: `InProfile r ↔` the scan's feature list is within the profile, with combinations (F8) | G15 |
 | C10 | Recompute source SHA-256 in the checker from source bytes in the fixture (F1); today the fixture holds no source text | G08 |
 
-## 6. Open scope questions
+## 6. Scope questions (answered)
 
-These arise from the work; they reopen no recorded decision.
+The first version asked two questions; the user answered both in the second
+round (see the note under the base revision above). They are encoded as follows:
 
-- **Q1 [Link map]** G01 Q8 puts linked libraries in the compiled system, so
-  their code is this compiler's. Should an input whose solc `libraries`
-  setting pre-assigns addresses be admitted?
-  - *Empty map only*: the session deploys and links every library itself; no
-    new premise; a pre-assigned map is recorded but refused (current interface).
-  - *Admit pre-assigned maps*: adds a premise on the initial world that each
-    address holds this compiler's runtime for that library.
-- **Q2 [Coder pair]** G00 Q4 decides the eight `EvalOrder` combinations but not
-  their pairing with the ABI coder mode. Which pairings does the public
-  theorem cover?
-  - *Independent*: both coder modes under every order (16 pairings, a superset
-    of solc's two; current interface).
-  - *Forced with via-IR order only*: `forceV2` exactly when the order is
-    `EvalOrder.viaIR`, pragma coders otherwise (8 pairings).
+- **Q1 [Link map]** — Should an input whose solc `libraries` setting
+  pre-assigns addresses be admitted? *Answer: empty map only*; the session
+  deploys and links every library itself, and a pre-assigned map is refused.
+  Encoded: `Settings.Ok` requires `links = []` (§3).
+- **Q2 [Coder pair]** — Which (order, coder) pairings does the public theorem
+  cover? *Answer: solc's two pipelines only* (revising G00 Q4's eight
+  orders). Encoded: `Settings.Pipelined`, `Settings.ok_pairs`,
+  `Settings.ok_order`, `FrontendSpec.admits_pipeline` (§4).
 
 ## 7. Gates
 
@@ -328,22 +333,24 @@ Skeptic, confirmed and fixed:
    `settingsOf r = i.settings`. Together they force `Admitted` to be empty
    whenever two orders differ. Fixed: settings stability moved to a separate
    obligation on `Admitted` (`FrontendSpec.AllSettings`, with
-   `FrontendSpec.admits_order`), and the parse conjunct removed.
-2. *All eight orders did not follow.* `Settings.ok_order` only shows that
-   `Settings.Ok` ignores the order. Fixed as in 1; the doc now attributes
-   the eight-order coverage to `AllSettings`.
+   then `FrontendSpec.admits_order`, now `admits_pipeline`), and the parse
+   conjunct removed.
+2. *All eight orders did not follow.* The first `Settings.ok_order` only
+   showed that `Settings.Ok` ignores the order. Fixed as in 1; after the
+   second-round answer the profile has two orders, and coverage of both
+   pipelines comes from `AllSettings`.
 3. *`SettingsRespected` unused.* Now a premise of `Chain.checked_settings`,
    and its second conjunct also gives `Input.Ok` (skeptic 10, finder 5).
 4. *Meaning and non-vacuity.* Recorded: `meaning` must factor through
    `settingsOf` (C1); `Checked` alone is inhabitable vacuously, and
    non-vacuity is G01's `SourceSpec.NonVacuous` (§2.2).
 5. *Environment premise smuggled in by pre-assigned links; precompile
-   addresses.* Fixed: `Settings.Ok` requires `links = []`, a non-empty map is
-   question Q1, and `LinksWellFormed` excludes Osaka precompiles (`Precompile`).
+   addresses.* Fixed: `Settings.Ok` requires `links = []` (confirmed by the
+   Q1 answer), and `LinksWellFormed` excludes Osaka precompiles (`Precompile`).
 6. *`Link` vs `CodeUnit.links`* (also finder 10). Recorded in §3 and C3.
 7. *Coder agreement for the main unit only.* Added `CoderMode.agrees_atNode`
    (imports `Solidity.Frontend.SourceUnits`).
-8. *Coder/order pairing undecided.* Now question Q2.
+8. *Coder/order pairing undecided.* Asked as Q2; answered and encoded (§6).
 9. *Digest statements overstated.* §2.2 now says what `only_invariant` does
    and does not show, that no theorem depends on the per-run premise, and
    that applying the G01 Q3 premise to input digests extends its wording

@@ -22,18 +22,20 @@ statement below depends on it: the stage checkers read bytes, not digests.  A ch
 property that cannot tell two colliding inputs apart (`Digests.only_invariant`).
 So a parse or a type is never established by a digest.
 
-**Settings are part of the input.**  `Settings.Ok` does not read the
-evaluation order, and the obligation `FrontendSpec.AllSettings` (admission is
-blind to the semantic settings) gives every one of the eight `EvalOrder`
-combinations (`FrontendSpec.admits_order`), so a public theorem over admitted
-inputs quantifies over all of them.  The ABI coder is the per-unit pragma or
-forced v2 (`CoderMode`), agreeing with the provenance reader per unit
+**Settings are part of the input.**  The profile has solc's two pipelines
+only (the user's second-round answer, revising G00 Q4): the legacy order with
+each unit's pragma coder (v1 or v2), and the via-IR order with coder v2
+(`Settings.Pipelined`, `Settings.ok_pairs`); the other six `EvalOrder`
+combinations are outside it (`Settings.ok_order`).  The obligation
+`FrontendSpec.AllSettings` (admission is blind to the semantic settings)
+gives both pipelines for every admitted input (`FrontendSpec.admits_pipeline`).
+The ABI coder mode agrees with the provenance reader per unit
 (`CoderMode.agrees_atNode`).  Only the 0.8.38 profile compiler is admitted
 (`Settings.ok_compiler`): a 0.8.34 fixture is a SolKey compatibility check
 only.  Library link maps are recorded (`Link`, `LinksWellFormed`) and checked
 against the resolved library declarations (`LinksResolved`); the admitted
-profile takes the empty map, where the session deploys and links every
-library itself.
+profile takes only the empty map, where the session deploys and links every
+library itself; a pre-assigned map is refused (second-round answer).
 -/
 
 namespace Solidity.Roadmap.Frontend
@@ -132,8 +134,7 @@ theorem CoderMode.agrees_atNode (p : Provenance) (q : Pipeline) (s : String)
   split <;> exact h
 
 /-- The evaluation order an imported source gets by default from its solc
-pipeline, as `solc_import` sets it.  The public theorem is not limited to
-these two: `Settings.order` ranges over all eight. -/
+pipeline, as `solc_import` sets it: the profile's only two orders. -/
 def defaultOrder : Pipeline → EvalOrder
   | .legacy => {}
   | .viaIR => EvalOrder.viaIR
@@ -166,24 +167,44 @@ structure Settings where
   coder : CoderMode := .pragma
   links : List Link := []
 
-/-- The settings the public theorem admits: the profile compiler and no
-pre-assigned link addresses (the session deploys and links every library;
-a non-empty map is question Q1 of the G05 document).  Order and coder are
-unconstrained here; that every one is admitted is `AllSettings`. -/
+/-- The order and coder mode are one of solc's pipelines'. -/
+def Settings.Pipelined (s : Settings) : Prop :=
+  ∃ q, s.order = defaultOrder q ∧ s.coder = CoderMode.ofPipeline q
+
+/-- The settings the public theorem admits: the profile compiler, no
+pre-assigned link addresses (the session deploys and links every library)
+and a solc pipeline's order and coder. -/
 def Settings.Ok (s : Settings) : Prop :=
-  s.compiler = .catalog0838 ∧ s.links = []
+  s.compiler = .catalog0838 ∧ s.links = [] ∧ s.Pipelined
+
+/-- The admitted settings of a pipeline. -/
+def Settings.ofPipeline (q : Pipeline) : Settings :=
+  { compiler := .catalog0838, order := defaultOrder q, coder := CoderMode.ofPipeline q }
+
+theorem Settings.ok_ofPipeline (q : Pipeline) : (Settings.ofPipeline q).Ok :=
+  ⟨rfl, rfl, q, rfl, rfl⟩
 
 /-- What a recorded solc link map must satisfy even outside the admitted
 profile (an oracle fixture's provenance). -/
 def Settings.LinksRecorded (s : Settings) : Prop := LinksWellFormed s.links
 
-/-- `Settings.Ok` does not read the order. -/
-theorem Settings.ok_order {s : Settings} (h : s.Ok) (o : EvalOrder) :
-    ({ s with order := o } : Settings).Ok := h
+/-- Only the legacy and via-IR orders are admitted. -/
+theorem Settings.ok_order {s : Settings} (h : s.Ok) :
+    s.order = {} ∨ s.order = EvalOrder.viaIR := by
+  obtain ⟨_, _, q, ho, _⟩ := h
+  cases q
+  · exact .inl ho
+  · exact .inr ho
 
-/-- `Settings.Ok` does not read the coder mode. -/
-theorem Settings.ok_coder {s : Settings} (h : s.Ok) (m : CoderMode) :
-    ({ s with coder := m } : Settings).Ok := h
+/-- **The three admitted (order, coder) pairs**: for a unit requesting
+`requested`, the legacy order with that coder, or the via-IR order with v2. -/
+theorem Settings.ok_pairs {s : Settings} (h : s.Ok) (requested : AbiCoder) :
+    (s.order = {} ∧ s.coder.coderOf requested = requested) ∨
+    (s.order = EvalOrder.viaIR ∧ s.coder.coderOf requested = .v2) := by
+  obtain ⟨_, _, q, ho, hc⟩ := h
+  cases q
+  · exact .inl ⟨ho, by rw [hc]; rfl⟩
+  · exact .inr ⟨ho, by rw [hc]; rfl⟩
 
 /-- A 0.8.34 analysis is never an admitted input: SolKey compatibility only. -/
 theorem Settings.ok_compiler {s : Settings} (h : s.Ok) : s.compiler ≠ .solkey0834 := by
@@ -261,20 +282,21 @@ def FrontendSpec.SettingsRespected (F : FrontendSpec) : Prop :=
 
 /-- **Admission is blind to the semantic settings**: an admitted input stays
 admitted under every admitted settings value, with a resolution carrying the
-new settings and the same library declarations.  This, not `Settings.ok_order`,
-is what puts all eight `EvalOrder` combinations under the public theorem. -/
+new settings and the same library declarations.  This is what puts both
+pipelines under the public theorem for every admitted input. -/
 def FrontendSpec.AllSettings (F : FrontendSpec) : Prop :=
   ∀ i r, F.Admitted i r → ∀ st : Settings, st.Ok →
     ∃ r', F.Admitted { i with settings := st } r' ∧ F.settingsOf r' = st ∧
       F.libraries r' = F.libraries r
 
-/-- Every evaluation order is admitted, given `AllSettings`. -/
-theorem FrontendSpec.admits_order {F : FrontendSpec} (all : F.AllSettings)
-    {i : Input} {r : F.Resolved} (h : F.Admitted i r) (ok : i.settings.Ok) (o : EvalOrder) :
-    ∃ r', F.Admitted { i with settings := { i.settings with order := o } } r' ∧
-      (F.settingsOf r').order = o := by
-  obtain ⟨r', hr', hs, _⟩ := all i r h { i.settings with order := o } (Settings.ok_order ok o)
-  exact ⟨r', hr', by rw [hs]⟩
+/-- Both pipelines are admitted for every admitted input, given `AllSettings`. -/
+theorem FrontendSpec.admits_pipeline {F : FrontendSpec} (all : F.AllSettings)
+    {i : Input} {r : F.Resolved} (h : F.Admitted i r) (q : Pipeline) :
+    ∃ r', F.Admitted { i with settings := Settings.ofPipeline q } r' ∧
+      (F.settingsOf r').order = defaultOrder q ∧
+      (F.settingsOf r').coder = CoderMode.ofPipeline q := by
+  obtain ⟨r', hr', hs, _⟩ := all i r h (Settings.ofPipeline q) (Settings.ok_ofPipeline q)
+  exact ⟨r', hr', by rw [hs]; rfl, by rw [hs]; rfl⟩
 
 /-- A checker of one judgment: acceptance implies it. -/
 structure Checker (A B : Type) (J : A → B → Prop) where
