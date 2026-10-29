@@ -10,6 +10,7 @@ import {createRequire} from 'node:module';
 import {execFileSync, spawnSync} from 'node:child_process';
 import {runTool} from './test-solidity.mjs';
 import {compilerCode} from './solc-code.mjs';
+import {compilationUnitFixture,COMPILERS} from './solc-unit.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SNAPSHOT = join(ROOT, 'tests/upstream');
@@ -369,7 +370,6 @@ function prepare(entry, directory, compile, work) {
   }
   const errors = (out.errors ?? []).filter(e=>e.severity === 'error');
   if (errors.length) return {path,stage,status:'blocked',reason:'semantic fixture needs an unadapted compiler configuration',diagnostics:errors.map(e=>e.formattedMessage)};
-  if (fixture.sources.size !== 1) return {path,stage:'lean-import',status:'blocked',reason:'multi-source frontend import requires compilation-unit provenance'};
   const ast = out.sources?.[fixture.mainSource]?.ast;
   const candidates = ast?.nodes.filter(n=>n.nodeType === 'ContractDefinition' && n.contractKind === 'contract' && !n.abstract) ?? [];
   const contract = candidates.at(-1);
@@ -393,9 +393,9 @@ function prepare(entry, directory, compile, work) {
   };
   const hasAssembly = node => node && typeof node === 'object' &&
     (node.nodeType === 'InlineAssembly' || Object.values(node).some(v=>Array.isArray(v)?v.some(hasAssembly):hasAssembly(v)));
-  if (vectors?.some(v=>v.calldata) && hasAssembly(ast))
+  if (vectors?.some(v=>v.calldata) && Object.values(out.sources).some(unit=>hasAssembly(unit.ast)))
     blocked='raw ABI replay with physical calldata/memory assembly not adapted';
-  const context = hostBehavior(ast);
+  const context = Object.values(out.sources).some(unit=>hostBehavior(unit.ast));
   if (context) blocked='transaction/block/self-address or cross-contract host behavior not adapted';
   // Import success alone cannot discharge a vector we cannot execute.
   if (blocked) return {path,stage,status:'blocked',reason:blocked};
@@ -412,22 +412,32 @@ function prepare(entry, directory, compile, work) {
     return result;
   };
   const recordedSettings = {...settings,outputSelection:{'*':{'':['ast']}}};
-  const data = {header:{solcVersion:VERSION,sourceSha256:sha(Buffer.from(source)),solkeyCommit:'',source:path,
+  const data = fixture.sources.size === 1 ? {header:{solcVersion:VERSION,sourceSha256:sha(Buffer.from(source)),solkeyCommit:'',source:path,
     provenanceVersion:1,compilerFile:'soljson-v0.8.38+commit.1835d247.js',compilerSha256:COMPILER_SHA,
     validationStage:'analysis',settings:recordedSettings,
-    acceptedPragmas:ast.nodes.filter(n=>n.nodeType === 'PragmaDirective').map(n=>n.literals)}, ast:normalise(ast)};
+    acceptedPragmas:ast.nodes.filter(n=>n.nodeType === 'PragmaDirective').map(n=>n.literals)}, ast:normalise(ast)} : null;
   const jobs=[];
   for (const pipeline of pipelines) {
-    const variant=structuredClone(data);
-    variant.header.settings.viaIR=pipeline === 'viaIR';
-    if (variant.header.settings.viaIR !== settings.viaIR) {
+    const variant=data ? structuredClone(data) : {};
+    if (data) variant.header.settings.viaIR=pipeline === 'viaIR';
+    if (data && variant.header.settings.viaIR !== settings.viaIR) {
       const other=compile({language:'Solidity',sources,settings:{...settings,viaIR:variant.header.settings.viaIR}});
       const errors=(other.errors ?? []).filter(e=>e.severity==='error');
       if (errors.length) return {path,stage,status:'blocked',reason:'alternate source mode needs unadapted compiler settings',diagnostics:errors.map(e=>e.formattedMessage)};
       variant.ast=normalise(other.sources[fixture.mainSource].ast);
     }
+    if (fixture.sources.size > 1) {
+      const analysed=compile({language:'Solidity',sources,
+        settings:{...settings,viaIR:pipeline==='viaIR'}});
+      const unit=compilationUnitFixture({output:analysed,sources,mainSource:fixture.mainSource,
+        settings:{...recordedSettings,viaIR:pipeline==='viaIR'},
+        pin:COMPILERS.find(p=>p.sha256===COMPILER_SHA)});
+      // Keep all original source ASTs. Never dress them in a schema-1 header.
+      for (const key of Object.keys(variant)) delete variant[key];
+      Object.assign(variant,unit);
+    }
     try {
-      const code=compilerCode(compile,sources,{...settings,viaIR:pipeline==='viaIR'},
+      const code=fixture.sources.size > 1 ? null : compilerCode(compile,sources,{...settings,viaIR:pipeline==='viaIR'},
         variant.ast,{compilerSha256:COMPILER_SHA,sourceSha256:variant.header.sourceSha256});
       if (code) variant.compilerCode=code;
     } catch(e) {return {path,stage,status:'blocked',reason:'static compiler-code materialization failed: '+e.message};}
@@ -519,6 +529,7 @@ async function main(args) {
   const metadata={version:1,commit:PIN,compiler:VERSION,compilerSha256:COMPILER_SHA,
     archiveSha256:manifest.archiveSha256,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
     compilerCodeAdapterSha256:sha(readFileSync(join(ROOT,'scripts/solc-code.mjs'))),
+    compilationUnitAdapterSha256:sha(readFileSync(join(ROOT,'scripts/solc-unit.mjs'))),
     modelSha256:modelDigest(),evmVersion:'osaka',loopFuel:1000,
     scope:'Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.',
     snapshotFiles:manifest.files.length,filter:options.filter ?? null,timeoutMs:options.timeoutMs,batchSize:options.batchSize};

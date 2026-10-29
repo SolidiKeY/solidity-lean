@@ -1,0 +1,234 @@
+⚠ [2/11] Replayed Solidity.AST
+warning: Solidity/AST.lean:354:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [7/12] Built Solidity.Language.Features (20s)
+✔ [9/12] Built Solidity.Frontend.Source (4.5s)
+✔ [10/16] Built Solidity.Frontend.SolcJson.Body (18s)
+✔ [11/16] Built Solidity.Frontend.SolcJson.Admission (3.6s)
+✔ [13/16] Built Solidity.Frontend.SolcJson.Getters (1.8s)
+✔ [14/19] Built Solidity.Frontend.SolcJson.Contract (32s)
+✔ [15/33] Built Solidity.Frontend.SolcJson (950ms)
+⚠ [18/33] Replayed Solidity.Syntax.Quote
+warning: Solidity/Syntax/Quote.lean:424:39: unused variable `ps`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [28/33] Replayed Solidity.Syntax.Elab.Arms
+warning: Solidity/Syntax/Elab/Arms.lean:1362:11: unused variable `n`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [29/33] Built Solidity.Syntax.Elab.Stmt (8.3s)
+✔ [30/33] Built Solidity.Syntax.Elab (1.0s)
+✔ [31/33] Built Solidity.Syntax.Splice (7.4s)
+✔ [33/78] Built Solidity.Frontend.Import (9.4s)
+⚠ [52/78] Replayed Solidity.Theory.Typed.Obs.Values
+warning: Solidity/Theory/Typed/Obs/Values.lean:495:46: This simp argument is unused:
+  and_false
+
+Hint: Omit it from the simp argument list.
+  simp only [TVal.delR, e, Nat.not_lt_zero, a̵n̵d̵_̵f̵a̵l̵s̵e̵,̵ ̵if_false, c.read_obsOpt]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Values.lean:563:48: This simp argument is unused:
+  and_false
+
+Hint: Omit it from the simp argument list.
+  simp only [TVal.stripR, e, Nat.not_lt_zero, a̵n̵d̵_̵f̵a̵l̵s̵e̵,̵ ̵if_false]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Values.lean:717:73: This simp argument is unused:
+  and_false
+
+Hint: Omit it from the simp argument list.
+  simp only [SVal.obsOpt_len_nil, SVal.lenOf, Nat.not_lt_zero, a̵n̵d̵_̵f̵a̵l̵s̵e̵,̵ ̵if_false, c.read_obsOpt]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [53/78] Replayed Solidity.Theory.Typed.Obs.Ops
+warning: Solidity/Theory/Typed/Obs/Ops.lean:170:44: This simp argument is unused:
+  Int.natCast_nonneg
+
+Hint: Omit it from the simp argument list.
+  simp only [if_true, uintOfNat_val hn, I̵n̵t̵.̵n̵a̵t̵C̵a̵s̵t̵_̵n̵o̵n̵n̵e̵g̵,̵ ̵Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:244:45: This simp argument is unused:
+  Int.natCast_nonneg
+
+Hint: Omit it from the simp argument list.
+  simp only [if_true, uintOfNat_val hkb, I̵n̵t̵.̵n̵a̵t̵C̵a̵s̵t̵_̵n̵o̵n̵n̵e̵g̵,̵ ̵Int.toNat_natCast, List.getElem?_set_self hk,
+  ̲  ̲ ̲ ̲ ̲ ̲ ̲ ̲Option.bind_some]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:355:35: This simp argument is unused:
+  Int.natCast_nonneg
+
+Hint: Omit it from the simp argument list.
+  simp only [uintOfNat_val hn, I̵n̵t̵.̵n̵a̵t̵C̵a̵s̵t̵_̵n̵o̵n̵n̵e̵g̵,̵ ̵if_true, Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:355:55: This simp argument is unused:
+  if_true
+
+Hint: Omit it from the simp argument list.
+  simp only [uintOfNat_val hn, Int.natCast_nonneg, i̵f̵_̵t̵r̵u̵e̵,̵ ̵Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:363:35: This simp argument is unused:
+  Int.natCast_nonneg
+
+Hint: Omit it from the simp argument list.
+  simp only [uintOfNat_val hn, I̵n̵t̵.̵n̵a̵t̵C̵a̵s̵t̵_̵n̵o̵n̵n̵e̵g̵,̵ ̵if_true, Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:363:55: This simp argument is unused:
+  if_true
+
+Hint: Omit it from the simp argument list.
+  simp only [uintOfNat_val hn, Int.natCast_nonneg, i̵f̵_̵t̵r̵u̵e̵,̵ ̵Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:373:37: This simp argument is unused:
+  Int.natCast_nonneg
+
+Hint: Omit it from the simp argument list.
+  simp only [uintOfNat_val hn, I̵n̵t̵.̵n̵a̵t̵C̵a̵s̵t̵_̵n̵o̵n̵n̵e̵g̵,̵ ̵if_true, Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:373:57: This simp argument is unused:
+  if_true
+
+Hint: Omit it from the simp argument list.
+  simp only [uintOfNat_val hn, Int.natCast_nonneg, i̵f̵_̵t̵r̵u̵e̵,̵ ̵Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:433:70: This simp argument is unused:
+  Int.natCast_nonneg
+
+Hint: Omit it from the simp argument list.
+  simp only [uintOfNat_val (show n - 1 < 2 ^ 256 by omega), I̵n̵t̵.̵n̵a̵t̵C̵a̵s̵t̵_̵n̵o̵n̵n̵e̵g̵,̵ ̵if_true, Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Theory/Typed/Obs/Ops.lean:433:90: This simp argument is unused:
+  if_true
+
+Hint: Omit it from the simp argument list.
+  simp only [uintOfNat_val (show n - 1 < 2 ^ 256 by omega), Int.natCast_nonneg, ̵i̵f̵_̵t̵r̵u̵e̵,̵
+                Int.toNat_natCast]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+✔ [70/78] Built Solidity.Tools.Show (1.3s)
+✔ [71/78] Built Solidity.Semantics.Deploy (1.1s)
+✔ [74/78] Built Solidity.Tools.Common (1.7s)
+⚠ [75/78] Replayed Solidity.Semantics.RevertMemory
+warning: Solidity/Semantics/RevertMemory.lean:76:61: This simp argument is unused:
+  Bool.true_eq
+
+Hint: Omit it from the simp argument list.
+  simp only [TRun.catchBytes, if_neg hnz, hc, Bool.and_self, B̵o̵o̵l̵.̵t̵r̵u̵e̵_̵e̵q̵,̵ ̵↓reduceIte, hcall]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+✔ [76/78] Built Solidity.Tools.Run (3.8s)
+✔ [77/78] Built Solidity.Tools.Upstream (4.4s)
+ℹ [78/78] Built Solidity.Examples.Tactics.SelfPowerData (46s)
+info: Solidity/Examples/Tactics/SelfPowerData.lean:104:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.cutoff_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:105:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.multiply_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:106:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.declaration_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:107:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.nestedCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:108:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.internalCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:109:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.narrowCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:110:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.fit_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:111:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.shortcuts_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:112:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.uncheckedCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:113:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.rawData_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:114:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.priority_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:115:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.wrongCode_panics' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:116:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.wrongRaw_panics' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:117:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.shortcutFailures_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:118:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.priorityWrong_panics' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:119:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.nestedPriority_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:124:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.andCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:129:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.orCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:134:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.ternaryCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:139:0: 'Solidity.Examples.Tactics.SelfPowerData.Legacy.indexCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:227:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.cutoff_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:228:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.multiply_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:229:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.declaration_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:230:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.nestedCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:231:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.internalCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:232:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.narrowCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:233:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.fit_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:234:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.shortcuts_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:235:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.uncheckedCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:236:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.rawData_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:237:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.priority_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:238:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.wrongCode_panics' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:239:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.wrongRaw_panics' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:240:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.shortcutFailures_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:241:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.priorityWrong_panics' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:242:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.nestedPriority_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:247:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.andCode_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:252:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.orCode_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:257:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.ternaryCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/SelfPowerData.lean:262:0: 'Solidity.Examples.Tactics.SelfPowerData.IR.indexCode_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+Build completed successfully (78 jobs).
+{"command": ["lake", "-f", "lakefile.revert-task.toml", "build", "Solidity.Examples.Tactics.SelfPowerData", "Solidity.Tools.Upstream"], "exit": 0, "elapsed": 168.00496696899995, "peak_group_rss": 1703165952}

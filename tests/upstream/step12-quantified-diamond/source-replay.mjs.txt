@@ -1,0 +1,31 @@
+import {readFileSync,writeFileSync,mkdtempSync,existsSync,rmSync} from 'node:fs';
+import {join,resolve} from 'node:path';
+import {tmpdir} from 'node:os';
+import {runTool} from '/workspace/solidity-lean/scripts/test-solidity.mjs';
+const destination=resolve('tests/upstream/step12-quantified-diamond');
+let blocked=false;
+for (const [pipeline,file,space] of [
+ ['legacy','QuantifiedDiamond.ast.json','ReplayLegacy.QuantifiedDiamond'],
+ ['viaIR','QuantifiedDiamond.viaIR.ast.json','ReplayIR.QuantifiedDiamond']]) {
+ const fixture=resolve('tests/solc/'+file), bytes=readFileSync(fixture), data=JSON.parse(bytes);
+ let h=0xcbf29ce484222325n;
+ for (const b of bytes) h=BigInt.asUintN(64,(h^BigInt(b))*0x100000001b3n);
+ const scratch=mkdtempSync(join(tmpdir(),'step12-replay-'));
+ const output=join(scratch,'results.json'), wrapper=join(scratch,'Replay.lean');
+ writeFileSync(wrapper,`import Solidity.Frontend.Testing\nsolc_import ${JSON.stringify(fixture)} hash 0x${h.toString(16)} as ${space} testing\nsolc_scoped_problems ${space} decl\n#solkey_test ${space} to ${JSON.stringify(output)}\n`);
+ let diagnostics='', failure=null;
+ try {diagnostics=runTool('lake',['--quiet','--no-build','lean',wrapper,'--','--tstack=131072','-j1'],300000);}
+ catch(e) {failure={message:e.message,tool:e.tool??null};blocked=true;}
+ const results=existsSync(output)?JSON.parse(readFileSync(output)):[];
+ const names=['count','forCount','nested','undefinedVariant','fill','falsePost','constantVariant','nonterminating'];
+ if (results.length!==8 || names.some(n=>!results.some(r=>r.function===n))) blocked=true;
+ for (const r of results) if (r.status==='error'||r.status==='notRun') blocked=true;
+ for (const n of ['count','forCount']) if (!results.some(r=>r.function===n&&r.status==='proved')) blocked=true;
+ for (const n of ['nested','fill']) if (!results.some(r=>r.function===n&&r.status==='proved')) blocked=true;
+ writeFileSync(join(destination,`runner-${pipeline}.json`),JSON.stringify({pipeline,header:data.header,results,failure},null,2)+'\n');
+ writeFileSync(join(destination,`runner-${pipeline}.txt`),diagnostics);
+ console.log(pipeline,results.map(r=>`${r.function}=${r.status}`).join(', '));
+ rmSync(scratch,{recursive:true,force:true});
+}
+console.log('sourceReplayStatus='+(blocked?'blocked-or-partial':'passed'));
+process.exitCode=blocked?2:0;

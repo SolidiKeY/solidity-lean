@@ -18,9 +18,10 @@ const CORE = [
   /^Solidity\.Calculus\.(Fml|Rules|RuleSyntax|RuleKit|KeyTaclets|Step|Arms|Blocks|Taclet|Proves|Logic|Preconditions|FiniteMembership|FilteredMembership|Hyp|Correct|FirstOrder|Transient|Lifetime|ContractWorld)$/,
   /^Solidity\.Calculus\.(Sound.*|StmtSound|ProvesSound|PremiseSound|UpdRuleScoped|UpdateRules|TermLib\.Rules)$/,
   /^Solidity\.Calculus\.RuleSyntax\./,
-  /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary)$/,
+  /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|LoopInvariantWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary|KIntTwoAnchors)$/,
 ];
 const ELABORATOR = [
+  /^Solidity\.Tools\.SolCases$/, // External-source printer stays outside the core.
   /^Solidity\.Syntax\.(Elab|Quote|Splice)(\.|$)/,
   /^Solidity\.Calculus\.(Print[^.]*|Surface[^.]*|TacticSyntax|Quote|NamedTerm)(\.|$)/,
 ];

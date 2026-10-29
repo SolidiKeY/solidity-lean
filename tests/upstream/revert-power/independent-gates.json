@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-28T09:32:07.786623+00:00",
+  "evidenceBaseCommit": "e26679e37319743795f334edb51b8733ad4ae024",
+  "implementationCommit": "64bfd02e4f6388ac022c5189a33273e18ed834c3",
+  "branch": "codex/revert-payload-settings",
+  "environmentId": "ccarenv_b64_Y2NhcmVudl8wNTZhOGYxMGU5NDQ4MTkxYmRlZDcwMmU3MzlhMDNkZg",
+  "overallStatus": "blocked: terminal default library completion remains missing; step 4 scope remains partial",
+  "runtime": {
+    "environmentId": "ccarenv_b64_Y2NhcmVudl8wNTZhOGYxMGU5NDQ4MTkxYmRlZDcwMmU3MzlhMDNkZg",
+    "activation": "/workspace/.setup/activate.sh",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "hardMemoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "threads": 1,
+    "leanFlag": "-j1",
+    "commandTimeBoundSeconds": 1800,
+    "dockerImage": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+    "sameAttachedCheckoutAndToolchain": true
+  },
+  "elapsedClockGranularitySeconds": 1,
+  "zeroElapsedMeaning": "Runner SECONDS reported 0 for cached frozen-sort command: less than one-second clock granularity, not an unmeasured pass. Docker launch overhead is excluded.",
+  "checks": [
+    {
+      "command": "lake build SolkeyTestSuite",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/independent-testsuite.log",
+      "sha256": "5f201b47c236eabba33c9eb2c3a0cea530b20c476f2619f12cf9ec099f84f160",
+      "exitCode": 0,
+      "elapsedSeconds": 1470,
+      "peakCgroupBytes": 11986788352,
+      "status": "passed"
+    },
+    {
+      "command": "bash -x scripts/check-solkey.sh --key /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/independent-frozen-sorts.log",
+      "sha256": "8751d592c456c0a622f6c8eb8c3520b3439bc747c685fd6dd2ea0db0a2943415",
+      "exitCode": 0,
+      "elapsedSeconds": 0,
+      "peakCgroupBytes": 379518976,
+      "status": "passed"
+    },
+    {
+      "command": "bash -c \"set -ex; node scripts/check-layers.mjs; node scripts/check-orphans.mjs; node scripts/check-automatic.mjs --strict; bash scripts/check-trust.sh; python3 scripts/solidity-feature-audit.py --check; bash scripts/check-testsuite.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples\"",
+      "runner": ".lake/revert-task/cgroup-run.sh",
+      "log": "tests/upstream/revert-power/logs/independent-static.log",
+      "sha256": "da1ea52c6155c8e5b5e6747122dd5399fb4a88619fa542423e2f672c4d8588ad",
+      "exitCode": 0,
+      "elapsedSeconds": 6,
+      "peakCgroupBytes": 168869888,
+      "status": "passed"
+    }
+  ],
+  "closureEvidence": {
+    "path": "tests/upstream/revert-power/independent-closures.json",
+    "sha256": "4380b6f97d73c8a572a948e496199abfe54cdfd56be02a609cf3d6894df6233d",
+    "inspection": "Transitive local imports parsed recursively before gates; independently recomputed by finder; cache presence is not freshness or proof. Lake terminal gates establish the results.",
+    "testSuiteLocalModules": 257,
+    "testSuiteCachedOleansBefore": 238,
+    "sortLocalModules": 5,
+    "sortCachedOleansBefore": 5,
+    "blockedDecisionInEitherClosure": false
+  },
+  "frozenRules": {
+    "path": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+    "sha256": "02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb"
+  },
+  "serialConfigSnapshot": {
+    "path": "tests/upstream/revert-power/runtime/lakefile.independent.toml.txt",
+    "sha256": "28e81365fe41447e485d856c1fe8fecac075dc5ffcf20fedea65a77b00e6c2e0",
+    "changes": "Restored prior serial weakLeanArgs snapshot; added -j1 to temporary solkeycheck executable weakLeanArgs for explicit serial checking. No proof/time budget changed. Temporary file removed after checks; tracked lakefile untouched."
+  },
+  "defaultLibraryGate": {
+    "status": "blocked",
+    "command": "bash ./run-lean.sh",
+    "exitCode": 124,
+    "elapsedSeconds": 1800,
+    "lastCompletedJob": 680,
+    "totalLibraryJobs": 686,
+    "lastCompletedModule": "Solidity.Examples.DecisionHashes",
+    "activeModuleAtDeadline": "Solidity.Examples.Decision",
+    "activeModuleUnchangedFromStartingMaster": true,
+    "testSuiteBuild": "not reached",
+    "sortCheck": "not reached",
+    "additionalFullRetries": 0,
+    "diagnosis": "No reported code/test error; unchanged Examples/Decision.lean remained active at timeout. No build/container/Lean server survived; writer lock released. Single authorized continuation completed, no further full retry.",
+    "interpretation": "Historical combined-attempt fields only: TestSuite and sorts were not reached in that command, then passed independently as recorded here. Default library completion is still blocked."
+  },
+  "missingAssignedValidation": [
+    "Terminal default library build success: last attempt exited124 after1800seconds at680/686, with unchanged Solidity.Examples.Decision active. No default/full retry or general proof repair attempted."
+  ],
+  "independentResults": {
+    "SolkeyTestSuite": "passed259jobs; actual Lean target and Report/Suggestions built, not static parity",
+    "frozenSorts": "passed377taclets,131read-bearing,131covered against explicit frozen file; no missing-checkout skip"
+  },
+  "historicalIntegrity": {
+    "record": "tests/upstream/revert-power/validation.json",
+    "sha256": "e8916ad26f96045dea8aa931309c7c6ea7252eee3e87143bb162f17aa95dc33c",
+    "preservedPriorLogHashes": 44,
+    "preservedImplementationHashes": 15,
+    "priorTimedOutAttempts": 5,
+    "allRemainNonpassing": true
+  },
+  "remainingFeatureScope": [
+    "Signed-power magnitude-overflow payload precision remains limited; no general signed-power data extension.",
+    "Explicit checked/ignoringOverflow modes retain their existing policies.",
+    "Allocation panic 0x41 is not implemented; THalt.exhausted and gas/fuel policy unchanged.",
+    "Malformed-storage 0x22 remains excluded low-level corruption; no new 0x00 case claimed.",
+    "No explicit default/strip/debug/verbose-debug revertStrings settings admitted; omitted default unchanged.",
+    "Original panic fixture is blocked by unchanged host adapter; debug fixture is blocked by revertStrings=debug. Neither is counted as model agreement.",
+    "Callbacks, external aggregate world returns, environment/log scope, delegatecall and physical layout remain unchanged."
+  ],
+  "scopeChange": false,
+  "sharedFilesChangedThisContinuation": [
+    "tests/upstream/revert-power/README.md"
+  ],
+  "allSharedImplementationFiles": [
+    "Solidity.lean",
+    "Solidity/Language/Features.lean",
+    "Solidity/Syntax/Elab/Arms.lean",
+    "Solidity/Syntax/Elab/Stmt.lean",
+    "Solidity/Syntax/Elab/Values.lean",
+    "docs/feature-work/calls-exceptions.md",
+    "docs/module-map.md",
+    "docs/solc-alignment.md",
+    "docs/solidity-feature-inventory.md",
+    "docs/solidity-features.json"
+  ],
+  "noLeanSourceEdits": true,
+  "reviews": {
+    "finder": "Completed read-only closure and final evidence reviews. Independently recomputed both transitive import graphs, verified every new and historical hash, exact terminal gate results and hard-cap bounds. No confirmed defect; no Lean checks/server or edits.",
+    "skeptic": "Completed read-only final evidence review. Verified new/historical hashes, unchanged implementation/proof limits, explicit frozen-file comparison and default-gate block. Fixed stale README wording about missing TestSuite build; no soundness or false-completion defect. No Lean checks/server or edits."
+  }
+}

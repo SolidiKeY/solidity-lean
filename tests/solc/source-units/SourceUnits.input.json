@@ -1,0 +1,33 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "lib/Math.sol": {
+      "content": "pragma solidity ^0.8.0;\nuint constant K = 7;\nfunction bump(uint x) pure returns (uint) { return x + 1; }\n"
+    },
+    "lib/Errors.sol": {
+      "content": "pragma solidity ^0.8.0;\nuint constant K = 9;\nerror Bad(uint n);\ncontract ErrorOwner { error Bad(uint n); }\n"
+    },
+    "app/Main.sol": {
+      "content": "pragma solidity ^0.8.0;\nimport * as M from \"@lib/Math.sol\";\nimport * as E from \"@lib/Errors.sol\";\nimport {bump as inc} from \"@lib/Math.sol\";\nimport {Bad as Panic} from \"@lib/Errors.sol\";\nusing {inc} for uint;\ncontract SourceUnits {\nfunction ordinary() public pure { assert(M.bump(3) == 4); }\nfunction usingAlias() public pure { assert(uint(3).inc() == 4); }\nfunction constants() public pure { assert(M.K == 7 && E.K == 9); }\nfunction receiverOnce() public pure { uint x = 3; uint y = (x++).inc(); assert(y == 4 && x == 4); }\nfunction qualified() public pure { revert E.Bad(7); }\nfunction nested() public pure { revert E.ErrorOwner.Bad(7); }\nfunction falseControl() public pure { assert(M.bump(3) == 5); }\nfunction moduleEffect() public pure { uint count; ((++count == 1) ? E : E).ErrorOwner; assert(count == 1); }\nfunction failCondition() internal pure returns (bool) { assert(false); return true; }\nfunction moduleConditionFailure() public pure { (failCondition() ? E : E).ErrorOwner; }\nfunction aliasedError() public pure { revert Panic(7); }\nfunction aliasedRequire() public pure { require(false, Panic(7)); }\n}\n"
+    }
+  },
+  "settings": {
+    "viaIR": false,
+    "evmVersion": "osaka",
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "libraries": {},
+    "remappings": [
+      "@lib/=lib/"
+    ],
+    "outputSelection": {
+      "*": {
+        "": [
+          "ast"
+        ]
+      }
+    }
+  }
+}

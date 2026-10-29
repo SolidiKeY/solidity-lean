@@ -14,6 +14,7 @@ import Solidity.Syntax.PushSource
 import Solidity.Syntax.Inlined
 import Solidity.Syntax.Join
 import Solidity.Syntax.Elab
+import Solidity.Syntax.Elab.SliceCopy
 import Solidity.Syntax.Quote
 import Solidity.Syntax.Splice
 import Solidity.FreshNames
@@ -501,8 +502,11 @@ import Solidity.Calculus.HashKinds
 import Solidity.Calculus.HashKinds3
 import Solidity.Calculus.HashMove
 import Solidity.Calculus.MemSwap
+import Solidity.Calculus.MemStructWitness
 import Solidity.Calculus.MemHoist
+import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
+import Solidity.Calculus.KIntTwoAnchors
 import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic
@@ -513,6 +517,7 @@ import Solidity.Examples.Decision
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionMemory
+import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.DecisionArrays
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
@@ -523,6 +528,7 @@ import Solidity.Examples.Verify
 import Solidity.Examples.ProofTree
 import Solidity.Theorems
 import Solidity.Frontend.SolcJson
+import Solidity.Frontend.SourceUnits
 import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
 import Solidity.Frontend.Testing
@@ -574,10 +580,13 @@ import Solidity.Examples.Tactics.AggregatesImport
 import Solidity.Examples.Tactics.AggregateSlices
 import Solidity.Examples.Tactics.SliceCopies
 import Solidity.Examples.Tactics.SliceCopiesImport
+import Solidity.Examples.Tactics.SliceReferenceCopies
 import Solidity.Frontend.Source
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Examples.Tactics.SourceLiteralsImport
 import Solidity.Examples.Tactics.SourceIdentifiersImport
+import Solidity.Examples.Tactics.SourceUnitsMetadata
+import Solidity.Examples.Tactics.SourceUnitsImport
 import Solidity.Examples.Tactics.SourceAdmissionImport
 import Solidity.Examples.RecursiveStorage
 import Solidity.Examples.RecursiveCopy
@@ -587,14 +596,24 @@ import Solidity.Examples.Tactics.CallExceptions
 import Solidity.Examples.Tactics.TransientStorage
 import Solidity.Examples.Tactics.TransientSourceImport
 import Solidity.Semantics.ContractWorld
+import Solidity.Semantics.ContractWorldCertificates
 import Solidity.Semantics.TransientWorld
 import Solidity.Calculus.ContractWorld
 import Solidity.Frontend.WorldImport
 import Solidity.Examples.Tactics.ContractWorld
 import Solidity.Examples.Tactics.ContractWorldSource
 import Solidity.Examples.Tactics.TransientWorld
+import Solidity.Examples.Tactics.TransientWorldSource
 import Solidity.Tools.Upstream
 
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport
 import Solidity.Syntax.Numeric
+import Solidity.Examples.Tactics.SelfPowerData
+
+import Solidity.Calculus.LoopInvariantWk
+import Solidity.Examples.Tactics.QuantifiedDiamond
+import Solidity.Solkey.QuantifiedDiamond
+
+import Solidity.Tools.SolCases
+import Solidity.Examples.SolCases

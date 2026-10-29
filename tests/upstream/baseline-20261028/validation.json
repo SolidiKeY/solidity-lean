@@ -1,0 +1,61 @@
+{
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "recordedAt": "2026-10-28T02:07:24.247979+00:00",
+  "bulkCounts": {
+    "working": 4121,
+    "broken": 190,
+    "blocked": 5349
+  },
+  "combinedCounts": {
+    "working": 4135,
+    "broken": 196,
+    "blocked": 5329
+  },
+  "combinedStages": {
+    "upstream-harness": {
+      "working": 0,
+      "broken": 0,
+      "blocked": 4417
+    },
+    "lean-runtime": {
+      "working": 657,
+      "broken": 196,
+      "blocked": 809
+    },
+    "lean-import": {
+      "working": 0,
+      "broken": 0,
+      "blocked": 39
+    },
+    "compiler-diagnostics": {
+      "working": 3478,
+      "broken": 0,
+      "blocked": 64
+    }
+  },
+  "isolatedCounts": {
+    "working": 14,
+    "broken": 7,
+    "blocked": 1
+  },
+  "originalObservationEntriesPreserved": 3940,
+  "all22MergeGuardsPassed": true,
+  "newTheoremAxiomChecks": {
+    "applicable": false,
+    "reason": "No Lean declaration changed; existing trust inventory passes with zero findings."
+  },
+  "semanticLeanDiff": [],
+  "historicalReportsAndSnapshotDiff": [],
+  "sharedFilesChanged": [
+    "docs/coverage-plan.md",
+    "docs/solidity-upstream-tests.md"
+  ],
+  "sharedFrontendEdits": [],
+  "performanceMeasurement": "pending; not passing evidence",
+  "manifestStatusOrSchemaChanges": false,
+  "generatedInventoryRegeneratedByteIdentical": true,
+  "functionalGateRecords": "gates-after/gates.json",
+  "documentationGateRecords": "doc-paths-validation.json",
+  "sourceModelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+  "scope": "Diagnostic baseline only; no universal semantic, compiler or EVM equivalence proof."
+}

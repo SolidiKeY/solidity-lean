@@ -1,0 +1,136 @@
+{
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "groups": [
+    {
+      "group": 1,
+      "collectedCommit": "54239de9f802c850d829a0795faf96289ec860a8",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "54239de9f802c850d829a0795faf96289ec860a8",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 2,
+      "collectedCommit": "67d0549ee5b57d77efea3ac4b169095f2eba23d0",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "67d0549ee5b57d77efea3ac4b169095f2eba23d0",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 3,
+      "collectedCommit": "a2a9da820f062be1be687456df88a3f2292de8ca",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "a2a9da820f062be1be687456df88a3f2292de8ca",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 4,
+      "collectedCommit": "601b2d5943e25f9e32c81abc9b0df9d91d8293eb",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "601b2d5943e25f9e32c81abc9b0df9d91d8293eb",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 5,
+      "collectedCommit": "f5ad68d70664689b0772ddc17091d0fdab7c3dec",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "f5ad68d70664689b0772ddc17091d0fdab7c3dec",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 6,
+      "collectedCommit": "f106995b5358519477b9d71faa0aa71605434f9c",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "f106995b5358519477b9d71faa0aa71605434f9c",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 7,
+      "collectedCommit": "0ee1cfedc529d588943e80b1c03130f2f2107290",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "0ee1cfedc529d588943e80b1c03130f2f2107290",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 8,
+      "collectedCommit": "35d026b12dec4a641e24615ff07d838f3d1cff80",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "35d026b12dec4a641e24615ff07d838f3d1cff80",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 9,
+      "collectedCommit": "67d21501a41286abacd1995738a4d5a97eb9f520",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "67d21501a41286abacd1995738a4d5a97eb9f520",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    },
+    {
+      "group": 10,
+      "collectedCommit": "2c3eeed45d0ad83b5a999ecb465271ba2bdb337e",
+      "ancestorOfStartingMaster": true,
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "2c3eeed45d0ad83b5a999ecb465271ba2bdb337e",
+        "f4dee4a29c2e208b36db4a4161a4723c735cd775"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "excluded": "Active unmerged branches and uncommitted ordinary recursive migration are not counted."
+}

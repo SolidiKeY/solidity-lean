@@ -1,0 +1,35 @@
+solc-ast: /workspace/solidity-lean/.lake/world-certificate-pipelines/viaIR/ContractWorld.ast.json (49279 bytes, hash 0x94d73041fd367574, solc 0.8.38+commit.1835d247.Emscripten.clang)
+
+'Solidity.Examples.Tactics.ContractWorldSource.Direct.run_certificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.Tried.run_certificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.Linked.run_certificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.Tried.run_reachable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.source_catch_reachable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.source_direct_operation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.source_linked_operation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.source_factory' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.source_creation_try' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.source_creation_try_success' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.ContractWorldSource.source_linked_library' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

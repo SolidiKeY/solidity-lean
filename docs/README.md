@@ -11,7 +11,7 @@ history is in git.
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Typed loop measures, finite membership, entry audits, certified source witnesses and editor integration. |
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |
-| [coverage-plan.md](coverage-plan.md) | The plan for covering the features: steps, one VM each, their order and gates. |
+| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 32 initial 10-hour VM assignments covering 115 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
 | [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy (model, abstract, exclude) and the exclusions. |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated from `solidity-features.json`: each feature's requirement, scope, status and evidence. Do not edit. |
 | [semantic-gaps.md](semantic-gaps.md) | What of Solidity's semantics is still open, and the chain facts an obligation assumes: the work list. |
@@ -19,6 +19,7 @@ history is in git.
 | [solidity-upstream-tests.md](solidity-upstream-tests.md) | The pinned solc test snapshot, its runner and the working/broken/blocked lists. |
 | [solc-validation.md](solc-validation.md) | What is checked against solc, and the checks still to build. |
 | [feature-work/integration.md](feature-work/integration.md) | Index of the per-feature documents in `feature-work/` (source admission, declarations, operators, aggregates, recursive types, ABI and hashes, transient storage, contract world, calls and exceptions, finite dispatch) and their shared decisions. |
+| [feature-work/cloud-integration-20261028.md](feature-work/cloud-integration-20261028.md) | Eight finished feature-cloud workstreams, merge decisions, historical replay controls and combined validation. |
 | [feature-work/cloud-integration-01-09.md](feature-work/cloud-integration-01-09.md) | Combined cloud tasks 01–09: snapshot scope, conflict resolutions, regression checks and remaining blockers. |
 - [Cloud task 10 integration](feature-work/cloud-integration-10.md) — committed ABI/error repairs, merge decisions and combined validation.
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
@@ -59,6 +60,7 @@ history is in git.
 | [contributing.md](contributing.md) | Verification commands, Lean setup, tactic development, worktrees and memory limits. |
 | [cli.md](cli.md) | The native `solidity-lean` CLI. |
 | [solidity-testing.md](solidity-testing.md) | Testing `.sol` files: CLI, JavaScript and Lean APIs. |
+| [feature-work/generated-differential.md](feature-work/generated-differential.md) | Bounded typed generated cases against real solc/EVM, provenance, shrinking and remaining D/E work. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
 | [bridge.md](bridge.md) | The optional Bridge package: Mathlib/CSLib, EVMYulLean, Loom and Velvet adapters. |
 | [refactoring-progress.md](refactoring-progress.md) | Completed getter/provenance refactors, bounded validation and the remaining dispatch-signature candidate. |

@@ -1,0 +1,23 @@
+{
+  "sourceCommit": "c4a5a2f1e90887fa86df4df39b48a791a679b09d",
+  "purpose": "Historical reader-only matrix; not current merged-source evidence",
+  "archiveSha256": "b470117bdee4f60eddb7f01ae6a1cb0878d7e27f504547254cb91e162feca13f",
+  "files": {
+    "Solidity/Frontend/Import.lean": "c8c775bb4fa2a91054ee00fe57558044c9385b8e7057df0fae82626300f030d8",
+    "Solidity/Frontend/SolcJson/Contract.lean": "22b8bc09e094b0cd88b3bf59e5d4bebca9a343f6a2536b662e3fd933be822145",
+    "Solidity/Frontend/Source.lean": "7205ddfacd94b01b44e4a3b01b1e7075ee8e99b1bff5e53274e99c34510e1313",
+    "Solidity/Calculus/MemRead/Pass.lean": "9e1063e9d92bffa922150b71b12c1963ed331e321f0540dfd4cc7599d78efe62",
+    "Solidity/Examples/Tactics/Hashing.lean": "3a5c2024e38223b85d17863f0e97f284c2667e617b181e6ae532bac202110903",
+    "Solidity/Evm/Compile.lean": "e452bff7f9c882940ccbabea2a51566e333c30d3617486b8338d04d32f99e4a9",
+    "Solidity/Examples/Tactics/ArrayShapeCopy.lean": "b145d9c8c6773386c3f95186dd49d30a89266daf6bf1dffd0c8498c799c0c025",
+    "Solidity/Syntax/Elab/Lower.lean": "c615f6586c4be1be4302130b26564dce32b453ab011c34cce142462306f5e57d",
+    "Solidity/Frontend/SolcJson/Body.lean": "38a0bbee442defad87ab3a3e1e0777731456d71e382c507ce2e71903370ab0e4",
+    "Solidity/Semantics/RevertMemory.lean": "f9f8570ed679b830d5eaab6ab16d8dd3a9383307ea4a7579aeae4aa448a16e93",
+    "docs/loops.md": "fc26e1dd5ebb53a674d1d545e5d9ab38c6cce4e7621e7dff08f60c2df8d2cff0",
+    "docs/solc-alignment.md": "2cf666a4058fc891464173c13bce01c38712160cfaf8a841ae1b3066f319f8a7",
+    "Solidity/Calculus/CleanTailBoundary.lean": "b118c7b799c2e280ce8ebb079d6cf9e359743287811eaa21388faf8dcec39f2e",
+    "Solidity/Tools/Upstream.lean": "26e68e8b83886a2fa83e72fec3519e8852a48b2d7555ca6ba9d21cb447120d6b",
+    "Solidity/Frontend/Problems.lean": "f5693156a3d001b3082252622bd8becb8f1fe592dfaa2a47716617bb0c93cd7e",
+    "scripts/solidity-baseline-probe-index.py": "50fc305e289cb4dde5a2f582c66ca9ebdad7b28d4e8c78bb1101f602eec1d624"
+  }
+}

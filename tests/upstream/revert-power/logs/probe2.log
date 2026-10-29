@@ -1,0 +1,3 @@
+some (Solidity.THalt.panic)
+"elaborated"
+{"command": ["lake", "env", "lean", "-j1", "--tstack=131072", ".lake/revert-task/Probe.lean"], "exit": 0, "elapsed": 12.347768119000193, "peak_group_rss": 856801280}

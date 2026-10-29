@@ -390,6 +390,12 @@ theorem atomic_failure {α : Type} (w : World contracts) (e : THalt) :
 /-- Actual world operations, including an atomic sequence. Bodies still have
 the explicit interface obligations of Entry and Library. -/
 inductive Operation (contracts : K → Contract) where
+  /-- A source context guard; it cannot choose or modify a world. -/
+  | guard (condition : Bool)
+  /-- A bare creation catch. Arguments precede the catch; only a completed
+  creation failure is handled, by retaining the precreation world. -/
+  | tryCreate {α : Type} (args : TRes α) (k : K) (target : α → Address)
+      (ctor : α → Prog (contracts k) [] []) (context : α → Context)
   | create (k : K) (self : Address) (body : Prog (contracts k) [] []) (ctx : Context)
   | deployLibrary (k : K) (self : Address) (ctx : Context)
   | call (k : K) (reference : Handle k) (entry : Entry (contracts k) Unit) (ctx : Context)
@@ -399,6 +405,11 @@ inductive Operation (contracts : K → Contract) where
 /-- Each operation runs the checked world frames; sequences expose no
 intermediate world if their second operation fails. -/
 def Operation.run : Operation contracts → World contracts → TRes (World contracts)
+  | .guard condition, w => if condition then .ok w else .error .revert
+  | .tryCreate args k target ctor context, w => do
+    let (next, _) ← w.tryCreate args k target ctor context
+      (fun next _ => .ok (next, ())) (fun before _ => .ok (before, ()))
+    pure next
   | .create k self body ctx, w => do
     let (next, _) ← w.create k self body ctx
     pure next

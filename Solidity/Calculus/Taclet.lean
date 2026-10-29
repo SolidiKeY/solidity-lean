@@ -583,7 +583,7 @@ theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
 
 theorem Taclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
-    {brk : Bool} {qs : List (LoopQ C Γ)} (hf : body.frame = some (xs, hv)) (hq : qs = []) :
+    {brk : Bool} {qs : List (LoopQ C Γ)} (hf : body.frame = some (xs, hv)) :
     Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec) brk qs) cond body) =
       Premise.inv (invFml inv qs) none xs hv
         ((Upd.nil.decl (Var.fresh "ie" k) (Rhs.val (p := .uint) dec.lower)).decl (Var.fresh "se" k)
@@ -598,7 +598,6 @@ theorem Taclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ�
                   (Tms.Term.litB true)).and
                 (Fml.eq (Tms.Term.binop .lt .uint dec.up.up.lower (Tms.Term.pv (p := .uint) Idx.here.there))
                   (Tms.Term.litB true)))))) := by
-  subst hq
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
   rfl
@@ -612,17 +611,13 @@ theorem LeanTaclet.whileClose.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁} {inv
 
 theorem LeanTaclet.whileNoVariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {inv cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)} {brk : Bool} {qs : List (LoopQ C Γ)}
-    (hf : body.frame.isSome = true) (hd : (dec.isNone || !qs.isEmpty) = true) :
+    (hf : body.frame.isSome = true) (hd : dec.isNone = true) :
     Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv dec brk qs) cond body) = Premise.done false := by
   obtain ⟨⟨xs, hv⟩, hfr⟩ := Option.isSome_iff_exists.mp hf
   dsimp only [Stmt.step]
   cases dec with
   | none => cases qs <;> simp only [loopStep, hfr]
-  | some =>
-    cases qs with
-    | nil => simp only [Option.isNone_some, List.isEmpty_nil, Bool.not_true, Bool.or_self,
-        Bool.false_eq_true] at hd
-    | cons => simp only [loopStep, hfr]
+  | some => cases hd
 
 theorem LeanTaclet.functionCallArgCapture.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps}
     {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {p : PrimTy}

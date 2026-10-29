@@ -1,0 +1,26 @@
+{
+  "finder": {
+    "agent": "/root/baseline_finder",
+    "result": "approved phase-corrected matrix and first-five controls; no remaining confirmed issue; no Lean/writes"
+  },
+  "skeptic": {
+    "agent": "/root/baseline_skeptic",
+    "result": "approved phase/refusal causality and hash-checked archive extraction; all447 archivefiles and23 inputs independently checked; no Lean/writes"
+  },
+  "fixedFindings": [
+    "BadClause is reader-emitted here; current production spec parser was not exercised.",
+    "Default not-imported specification callbacks are reduced-adapter limits.",
+    "Per-row execute/route/reset/transport wording corrected to source-reader emission or historical theorem controls.",
+    "Pushed-member increment refusal does not establish receiver mutation.",
+    "Raw HexArray and original payable cast candidate were compiler-invalid; separately named valid companions retained.",
+    "UDVT struct refusal occurs during field-type reading, not a newly broken construction rule.",
+    "Prepared panic/wrong-output vectors were not replayed."
+  ],
+  "reviewedHashes": {
+    "tests/upstream/baseline-20261028/probes/matrix.json": "139689102bc2d29d9b70efc3c8f80a8592a4463f5e4b86431eb456616301c739",
+    "tests/upstream/baseline-20261028/probes/README.md": "187e216fed7cf26c963045a592ac41ba5864295318a222b18d76ab970260c1b6",
+    "tests/upstream/baseline-20261028/probes/evidence.tar.gz": "3776164ebd0eae5e919b3500f5cf8a35d41727d016b11df4f8e8e5a3ff803c79",
+    "scripts/solidity-baseline-probe-index.py": "50fc305e289cb4dde5a2f582c66ca9ebdad7b28d4e8c78bb1101f602eec1d624",
+    "scripts/run-solidity-baseline-probes.sh": "3d3874cda3ba8ffbb579cda19952f55fee2ff2dde327e15585040d9d3e124c9a"
+  }
+}

@@ -1,0 +1,239 @@
+{
+  "stages": {
+    "priority": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "600",
+        "node",
+        "scripts/solidity-baseline-probe.mjs",
+        "SourceIdentifiers",
+        "CommentRanges",
+        "VersionReject",
+        "WrongIdentifier",
+        "ConstantsEnums",
+        "SourceTypes",
+        "WrongNominal",
+        "WrongBounds",
+        "ScalarMatrix"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 29.305333016000077,
+      "maxChildRssKiB": 663888,
+      "userSeconds": 20.053378,
+      "systemSeconds": 8.415255,
+      "cgroupMemoryPeakBytes": 237797376,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "rechecked": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "600",
+        "node",
+        "scripts/solidity-baseline-probe.mjs",
+        "SourceIdentifiers",
+        "CommentRanges",
+        "VersionReject",
+        "WrongIdentifier",
+        "ConstantsEnums",
+        "SourceTypes",
+        "WrongNominal",
+        "WrongBounds",
+        "ScalarMatrixValid",
+        "SourceLiterals",
+        "WrongAddress",
+        "InvalidDelete",
+        "PushedMember",
+        "TryContinue",
+        "NominalStruct",
+        "HexArray",
+        "ExactRethrow",
+        "WrongRethrow",
+        "ComputedRevert",
+        "SpecBindings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 99.71197228799792,
+      "maxChildRssKiB": 673072,
+      "userSeconds": 69.518078,
+      "systemSeconds": 27.095677,
+      "cgroupMemoryPeakBytes": 232120320,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "metadata": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "300",
+        "node",
+        "scripts/solidity-baseline-reader-metadata.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 59.42640959200071,
+      "maxChildRssKiB": 673716,
+      "userSeconds": 49.966759,
+      "systemSeconds": 18.803452,
+      "cgroupMemoryPeakBytes": 227434496,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "reader-preflight": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lake",
+        "-f",
+        ".diagnostic-lakefile.toml",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/baseline-20261028/probes/ReaderPreflight.lean",
+        "--",
+        "--tstack=131072",
+        "-j1"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.500480589998915,
+      "maxChildRssKiB": 616328,
+      "userSeconds": 0.7270329999999999,
+      "systemSeconds": 0.6511239999999999,
+      "cgroupMemoryPeakBytes": 182509568,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "harness-build": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "900",
+        "lake",
+        "-f",
+        ".diagnostic-lakefile.toml",
+        "build",
+        "Solidity.Tools.Upstream",
+        "Solidity.Frontend.Testing"
+      ],
+      "exitCode": 124,
+      "elapsedSeconds": 900.0063766230014,
+      "maxChildRssKiB": 2037180,
+      "userSeconds": 826.328085,
+      "systemSeconds": 70.516,
+      "cgroupMemoryPeakBytes": 2342395904,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "additional": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "node",
+        "scripts/solidity-baseline-probe.mjs",
+        "BadClause",
+        "HexArrayExplicit"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 12.666843039001833,
+      "maxChildRssKiB": 670424,
+      "userSeconds": 8.091753,
+      "systemSeconds": 4.132912,
+      "cgroupMemoryPeakBytes": 227434496,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "preflight": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lake",
+        "-f",
+        ".diagnostic-lakefile.toml",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/baseline-20261028/probes/Preflight.lean",
+        "--",
+        "--tstack=131072",
+        "-j1"
+      ],
+      "exitCode": 3,
+      "elapsedSeconds": 0.2807634050004708,
+      "maxChildRssKiB": 57104,
+      "userSeconds": 0.14704499999999998,
+      "systemSeconds": 0.051226999999999995,
+      "cgroupMemoryPeakBytes": 42373120,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    }
+  },
+  "originalCold": "unchanged: exit124 at546/685 peak8195923968bytes",
+  "warm": "unrun",
+  "hardBoundBytes": 12884901888,
+  "leanNumThreads": 1,
+  "leanArguments": [
+    "-j1",
+    "--tstack=131072"
+  ],
+  "noRaisedFuelSearchOrHeartbeatLimits": true
+}

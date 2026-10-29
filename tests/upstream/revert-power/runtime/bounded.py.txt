@@ -1,0 +1,23 @@
+import os, sys, subprocess, time, signal, resource, json
+start=time.monotonic()
+def limit():
+    resource.setrlimit(resource.RLIMIT_AS,(12*1024**3,12*1024**3))
+p=subprocess.Popen(sys.argv[1:],start_new_session=True,preexec_fn=limit)
+peak=0
+while p.poll() is None:
+    rss=0
+    for name in os.listdir('/proc'):
+        if not name.isdecimal(): continue
+        try:
+            stat=open('/proc/'+name+'/stat').read().rsplit(')',1)[1].split()
+            if int(stat[2])==p.pid: rss+=int(stat[21])*os.sysconf('SC_PAGE_SIZE')
+        except (OSError,ValueError,IndexError): pass
+    peak=max(peak,rss)
+    if rss>12*1024**3 or time.monotonic()-start>1800:
+        os.killpg(p.pid,signal.SIGKILL)
+        print('RESOURCE_STOP',flush=True)
+        p.wait()
+        break
+    time.sleep(.05)
+print(json.dumps(dict(command=sys.argv[1:],exit=p.returncode,elapsed=time.monotonic()-start,peak_group_rss=peak)))
+sys.exit(p.returncode if p.returncode>=0 else 128-p.returncode)

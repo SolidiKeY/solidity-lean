@@ -1,0 +1,216 @@
+{
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-value-verify.py",
+        ".lake/upstream/value-entry-runtime-20261028",
+        "--out",
+        "tests/upstream/baseline-20261028/value-runtime/checks/verification.json"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 1.127106690997607,
+      "cumulativeChildrenMaxRssKiB": 34980,
+      "log": "checks/gate-00.log.gz",
+      "uncompressedSha256": "f95843075e944a0c1fc83b8b79d3a0641fc6fccb1e48e056aba35233ad580150"
+    },
+    {
+      "command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; [compile(Path(p).read_text(),p,'exec') for p in ['scripts/solidity-baseline-lifetime-root.py','scripts/solidity-baseline-value-runtime.py','scripts/solidity-baseline-value-verify.py']]; print('syntax pass')"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.047667370999988634,
+      "cumulativeChildrenMaxRssKiB": 34980,
+      "log": "checks/gate-01.log.gz",
+      "uncompressedSha256": "abc93c1dfbcffff0c615ef767f1c759be63236df0e5228cc48909ab470943231"
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "scripts/run-solidity-baseline-value.sh"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.0055525220013805665,
+      "cumulativeChildrenMaxRssKiB": 34980,
+      "log": "checks/gate-02.log.gz",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-native-index.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 1.5609925190001377,
+      "cumulativeChildrenMaxRssKiB": 70256,
+      "log": "checks/gate-03.log.gz",
+      "uncompressedSha256": "724dd85ad2b37ca51c3e0b2195e094a41dbf177c513043e545d3379ee4fc8fda"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-native.test.py"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 2.8259077990005608,
+      "cumulativeChildrenMaxRssKiB": 95688,
+      "log": "checks/gate-04.log.gz",
+      "uncompressedSha256": "3828bf216a91d17dfce41829453b5a2524d90dbad5ee1c1f7bb61b55edbc6e60"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/solidity-baseline-native-verify.mjs"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.13535548299842048,
+      "cumulativeChildrenMaxRssKiB": 95688,
+      "log": "checks/gate-05.log.gz",
+      "uncompressedSha256": "9abccd4283e795a361e726d2d27ec4da1e5bbf1d76cc826a377f59cf7391471c"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 10.051422643999103,
+      "cumulativeChildrenMaxRssKiB": 95688,
+      "log": "checks/gate-06.log.gz",
+      "uncompressedSha256": "ba1c6d48da209a46978fd1eb9f834050f98012e7633880215a5df41e021210c9"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.10690574000182096,
+      "cumulativeChildrenMaxRssKiB": 95688,
+      "log": "checks/gate-07.log.gz",
+      "uncompressedSha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.23580586499883793,
+      "cumulativeChildrenMaxRssKiB": 95688,
+      "log": "checks/gate-08.log.gz",
+      "uncompressedSha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.37159459100075765,
+      "cumulativeChildrenMaxRssKiB": 95688,
+      "log": "checks/gate-09.log.gz",
+      "uncompressedSha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.49325968100311,
+      "cumulativeChildrenMaxRssKiB": 95688,
+      "log": "checks/gate-10.log.gz",
+      "uncompressedSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 7.279899704000854,
+      "cumulativeChildrenMaxRssKiB": 184276,
+      "log": "checks/gate-11.log.gz",
+      "uncompressedSha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "elapsedSeconds": 7.806517435994465,
+      "cumulativeChildrenMaxRssKiB": 184276,
+      "log": "checks/gate-12.log.gz",
+      "uncompressedSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.0183149240037892,
+      "cumulativeChildrenMaxRssKiB": 184276,
+      "log": "checks/gate-13.log.gz",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "29b73d0e",
+        "--",
+        "Solidity",
+        "Solidity.lean",
+        "lakefile.toml",
+        "docs/solidity-features.json",
+        "docs/solidity-feature-inventory.md",
+        "tests/upstream/baseline-20261028/gaps",
+        "tests/upstream/baseline-20261028/attribution",
+        "tests/upstream/baseline-20261028/probes",
+        "tests/upstream/baseline-20261028/native-cache",
+        "tests/upstream/baseline-20261028/value-entry",
+        "tests/upstream/results",
+        "tests/upstream/solidity-0.8.38.tar.gz"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedSeconds": 0.012868755002273247,
+      "cumulativeChildrenMaxRssKiB": 184276,
+      "log": "checks/gate-14.log.gz",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "archiveRegularFilesVerified": 75,
+  "docPathOutputUnchanged": true,
+  "noLeanOrBuildInFinalGates": true,
+  "cgroupPeakBytes": 382468096,
+  "memoryMaxBytes": 12884901888,
+  "swapMaxBytes": 0,
+  "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+}

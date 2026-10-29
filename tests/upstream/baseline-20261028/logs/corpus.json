@@ -1,0 +1,17 @@
+{
+  "command": [
+    "node",
+    "scripts/solidity-upstream.mjs",
+    "run",
+    "--compiler",
+    "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+    "--out",
+    "tests/upstream/baseline-20261028/results"
+  ],
+  "exitCode": 1,
+  "elapsedSeconds": 2285.716826895,
+  "maxChildRssKiB": 12466064,
+  "userSeconds": 1717.70422,
+  "systemSeconds": 77.48409,
+  "cgroupMemoryPeakBytes": 12884901888
+}

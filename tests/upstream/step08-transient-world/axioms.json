@@ -1,0 +1,208 @@
+[
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.source_transactions",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.false_persistent_cells",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.caught_rollback",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.uncaught_rollback",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.static_creation",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.source_false_control",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.ancestor_rollback",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.entry_reset",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.later_rollback",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.source_catch",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.Legacy.source_uncaught",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.source_transactions",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.false_persistent_cells",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.caught_rollback",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.uncaught_rollback",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.static_creation",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.source_false_control",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.ancestor_rollback",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.entry_reset",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.later_rollback",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.source_catch",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.TransientWorldSource.ViaIR.source_uncaught",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.ContractWorld.World.transact_ok",
+    "axioms": [
+      "propext"
+    ]
+  },
+  {
+    "theorem": "Solidity.ContractWorld.World.transact_commit",
+    "axioms": [
+      "propext"
+    ]
+  },
+  {
+    "theorem": "Solidity.ContractWorld.World.transact_failure",
+    "axioms": [
+      "propext"
+    ]
+  },
+  {
+    "theorem": "Solidity.ContractWorld.World.resetTransient_storage?",
+    "axioms": [
+      "propext"
+    ]
+  },
+  {
+    "theorem": "Solidity.ContractWorld.World.resetTransient_persistent",
+    "axioms": [
+      "propext"
+    ]
+  }
+]

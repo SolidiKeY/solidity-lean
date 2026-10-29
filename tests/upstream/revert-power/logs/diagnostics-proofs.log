@@ -1,0 +1,45 @@
+/workspace/solidity-lean/.venv/lib/python3.12/site-packages/pydantic_settings/sources/utils.py:51: IncompleteFieldDefinitionWarning: Field 'lifespan' has an incomplete definition: its annotation contains an unresolved forward reference, so settings sources may fail to correctly resolve its value. Call `model_rebuild()` on the model where the field is defined, once all the referenced types are defined.
+  warnings.warn(  # noqa: B028  (called from many sources at differing depths, so no stacklevel is correct)
+[10/28/26 01:17:19] INFO     Disabled tool                         server.py:163
+                             'lean_get_widget_source' via                       
+                             LEAN_MCP_DISABLED_TOOLS                            
+                    INFO     Disabled tool 'lean_get_widgets' via  server.py:163
+                             LEAN_MCP_DISABLED_TOOLS                            
+                    INFO     Disabled tool 'lean_hammer_premise'   server.py:163
+                             via LEAN_MCP_DISABLED_TOOLS                        
+                    INFO     Disabled tool 'lean_leanfinder' via   server.py:163
+                             LEAN_MCP_DISABLED_TOOLS                            
+                    INFO     Disabled tool 'lean_leansearch' via   server.py:163
+                             LEAN_MCP_DISABLED_TOOLS                            
+                    INFO     Disabled tool 'lean_loogle' via       server.py:163
+                             LEAN_MCP_DISABLED_TOOLS                            
+                    INFO     Disabled tool 'lean_state_search' via server.py:163
+                             LEAN_MCP_DISABLED_TOOLS                            
+                    INFO     Overrode server instructions via      server.py:168
+                             LEAN_MCP_INSTRUCTIONS                              
+                    INFO     Processing request of type            server.py:733
+                             CallToolRequest                                    
+                    INFO     Shared async LSP client          client_utils.py:95
+                             connected at                                       
+                             /workspace/solidity-lean                           
+[10/28/26 01:17:51] INFO     Processing request of type            server.py:733
+                             ListToolsRequest                                   
+Solidity/Examples/Tactics/SelfPowerData.lean {"meta":null,"content":[{"type":"text","text":"{\n  \"partial\": false,\n  \"still_elaborating_lines\": null,\n  \"success\": true,\n  \"timed_out\": false,\n  \"items\": [],\n  \"failed_dependencies\": []\n}","annotations":null,"meta":null}],"structuredContent":{"result":{"partial":false,"still_elaborating_lines":null,"success":true,"timed_out":false,"items":[],"failed_dependencies":[]}},"isError":false}
+                    INFO     Session ending — cleaning up          server.py:445
+                             per-session resources                              
+Exception ignored in: <function BaseSubprocessTransport.__del__ at 0x7fb9e13c1bc0>
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_subprocess.py", line 126, in __del__
+    self.close()
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_subprocess.py", line 104, in close
+    proto.pipe.close()
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/unix_events.py", line 767, in close
+    self.write_eof()
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/unix_events.py", line 753, in write_eof
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 799, in call_soon
+    self._check_closed()
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 545, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+{"command": [".venv/bin/python", ".lake/revert-task/diagnose.py", "Solidity/Examples/Tactics/SelfPowerData.lean"], "exit": 0, "elapsed": 33.41209201399988, "peak_group_rss": 50507776}

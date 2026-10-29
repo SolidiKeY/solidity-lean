@@ -70,6 +70,14 @@ def inlineLiteralFits (T : RawTy) (e : RawExpr) : Bool :=
       | _, _ => false
   | _ => false
 
+/-- An inline allocation (possibly projected) whose independent element
+shape is installed only by hoisting. The caller must check its generated
+path afterwards, before a destination declaration can erase that shape. -/
+def RawExpr.inlineArrayRoot : RawExpr → Bool
+  | .call "#array" _ => true
+  | .index base _ | .field base _ => base.inlineArrayRoot
+  | _ => false
+
 mutual
 /-- An inline element's source type, before hoisting erases casts and aliases.
 The result is raw syntax only; allocation below rechecks it into indexed
@@ -92,6 +100,11 @@ partial def inlineExprTy (Γ : ECtx) (e₀ : RawExpr) : Except String RawTy := d
   if (exprShape C Γ e).contains ("#string", 1) then return .named "string"
   if let some (tb, k, T) := widthPath? C Γ e then return rawTyW tb T k
   match e with
+  -- A materialized view has its base's array type. Inspect only that type;
+  -- endpoint effects and the copy remain at the element's evaluation point.
+  | .call "#sliceCopy" [view] => inlineExprTy Γ view
+  | .call "#sliceRaw" [base, _, _]
+  | .call "#sliceDesc" [base, _, _] => inlineExprTy Γ base
   | .call "#array" es => return .fixed (← inlineArrayTy Γ es) es.length
   | .newArr T _ =>
     if let .named s := T then

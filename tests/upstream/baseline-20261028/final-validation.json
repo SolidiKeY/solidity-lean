@@ -1,0 +1,56 @@
+{
+  "recordedAt": "2026-10-28T03:49:28.007809+00:00",
+  "baselineCheckpointCommit": "2207c1bba286538fd63e4a0ff4960ed4a593a8ab",
+  "sourceBase": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "combinedCounts": {
+    "working": 4135,
+    "broken": 196,
+    "blocked": 5329
+  },
+  "leanRuntimeCounts": {
+    "working": 657,
+    "broken": 196,
+    "blocked": 809
+  },
+  "isolatedCounts": {
+    "working": 14,
+    "broken": 7,
+    "blocked": 1
+  },
+  "observationsPreserved": 3940,
+  "conclusiveModeVariantsByteIdentical": 1646,
+  "reviewedPartialFeatureBoundaries": 76,
+  "partialFeatureAttributionsRemaining": 84,
+  "exactVariantGapObjects": 661,
+  "allHistoricalInputsReportsManifestAndLeanSourcesUnchanged": true,
+  "newTheoremAxiomChecks": "Not applicable: no Lean declarations changed; source trust inventory passes with zero findings.",
+  "kernelVersusCompilerEvidence": "Typed execution observations are diagnostic; 3478 pinned-solc diagnostic agreements are reference-compiler evidence. No EVM replay or universal source-lowering/semantic proof is claimed.",
+  "lightweightFinalGates": "final-gates/gates.json",
+  "performance": "performance.json",
+  "coldGate": "blocked exit124 after90min;546/685 default targets; not a passing core build",
+  "warmGate": "not run: incomplete cold",
+  "sharedFilesChanged": [
+    "docs/coverage-plan.md",
+    "docs/solidity-upstream-tests.md"
+  ],
+  "sharedFrontendEdits": [],
+  "manifestStatusAndSchemaChanges": false,
+  "generatedInventoryRegeneratedByteIdentical": true,
+  "noPushMergeRepinOrExternalMessages": true,
+  "documentationPathGate": {
+    "exitCode": 1,
+    "missingBefore": 20,
+    "missingAfter": 20,
+    "newMissingCitations": 0
+  },
+  "independentReview": "final-review.json",
+  "attachedRootGuardProbe": "final-gates/root-guard.json",
+  "measuredHeavyCommandsSeconds": {
+    "upstreamDependencyBuild": 481.526548818,
+    "bulkCorpus": 2285.716826895,
+    "isolatedFollowers": 159.11534438399985,
+    "coldAttempt": 5400.004883944
+  },
+  "sumMeasuredHeavyCommandSeconds": 8326.363604041,
+  "sumLimitation": "Sum of these sequential measured command windows only, not end-to-end task wall time."
+}

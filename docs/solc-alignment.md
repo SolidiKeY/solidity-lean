@@ -605,6 +605,12 @@ existing soundness proofs apply; the catch-transport lemmas
 (`Semantics/RevertMemory.lean`) keep the exact byte list and the caller's
 state, heap rollback included.
 
+Checked unsigned powers in default self-call frames also retain `Panic(0x11)`
+through the existing multiplication lowering, including selected conditional
+arms and array indices. Earlier operand/base failures retain pipeline order.
+Concrete kernel and compiler controls, and the remaining signed/settings/
+allocation limits, are recorded in the linked step 4 increment.
+
 See [feature-work/calls-exceptions.md](feature-work/calls-exceptions.md);
 its EVM reference checks are evidence about the pinned compilers, not a
 frontend-equivalence proof.

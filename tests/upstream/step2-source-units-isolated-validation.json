@@ -1,0 +1,796 @@
+{
+  "version": 1,
+  "date": "2026-10-28",
+  "repository": "SolidiKeY/solidity-lean",
+  "branch": "feature/source-units-step2",
+  "implementationCommit": "da933e15e1e7ca560376701ea789de1914e2842b",
+  "priorEvidenceCommit": "97d627426d67a0d9e60db91a45de1220d5847cd8",
+  "environmentId": "ccarenv_b64_Y2NhcmVudl82NTMzMzYwNTAzZjA4MTkxOTgxMjZiMjJkN2E3ZjEyNw",
+  "scopeDiagnosis": {
+    "coveragePlan": "docs/coverage-plan.md Memory:12GiB process-group cap on16GiB cloud VM with measured OS headroom",
+    "priorError": "The shared-checkout12GiB available-memory reserve was overapplied to this isolated VM. The prior exit137 remains a failed run; it did not establish that a larger VM was required.",
+    "continuation": "User explicitly authorized applying isolated-VM scope. Hard12GiB cgroup and zero swap unchanged;2GiB guard monitors both host MemAvailable and raw enclosing16GiB-cgroup free charge margin. No platform, daemon, security, credential or persistent service configuration changed.",
+    "ownership": "Own clean worktree /workspace/solidity-lean-source-units,UID1000; original checkout preserved. No other Lean worker/server; documented writer.lock held across writes/checks. /tmp lock directory recreated after VM resume before writes.",
+    "priorArtifactHashes": "All97d62742 handoff/export hashes verified before work. No prior artifact overwritten."
+  },
+  "policy": {
+    "taskMemoryMaxBytes": 12884901888,
+    "taskSwapMaxBytes": 0,
+    "enclosingMemoryMaxBytes": 17179869184,
+    "headroomGuardBytes": 2147483648,
+    "leanThreads": 1,
+    "explicitLeanArg": "-j1",
+    "compilerSeconds": 180,
+    "serialMethod": "flock serializes Lean child compilers; gates sequential; outer writer lock",
+    "monitorPrecision": "Baseline snapshot precedes launch; polling begins immediately after docker start-a. The runner historical method string says before-start too broadly; this clarification controls. Peaks from failed gates are maximum observed kernel memory.peak readings, not exact exit counters. Successful suite/sort has exact terminal footer."
+  },
+  "attempts": [
+    {
+      "gate": "default library/executables",
+      "terminal": {
+        "command": [
+          "env",
+          "-u",
+          "DOCKER_HOST",
+          "-u",
+          "DOCKER_CONTEXT",
+          "-u",
+          "DOCKER_TLS",
+          "-u",
+          "DOCKER_TLS_VERIFY",
+          "-u",
+          "DOCKER_CERT_PATH",
+          "docker",
+          "--host=unix:///var/run/docker.sock",
+          "create",
+          "--name",
+          "source-units-isolated-gates",
+          "--network=none",
+          "--memory=12g",
+          "--memory-swap=12g",
+          "--pids-limit=256",
+          "--user=1000:1000",
+          "--cap-drop=ALL",
+          "--mount",
+          "type=bind,src=/workspace,dst=/workspace",
+          "--mount",
+          "type=bind,src=/workspace/.setup/tools/lean-4.24.0-linux,dst=/opt/source-units-toolchain,readonly",
+          "--mount",
+          "type=bind,src=/workspace/solidity-lean-source-units/.lake/source-units/isolated-gates/lean,dst=/workspace/.setup/tools/lean-4.24.0-linux/bin/lean,readonly",
+          "--workdir",
+          "/workspace/solidity-lean-source-units",
+          "-e",
+          "LEAN_NUM_THREADS=1",
+          "-e",
+          "XDG_CACHE_HOME=/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache",
+          "-e",
+          "PATH=/workspace/.setup/tools/lean-4.24.0-linux/bin:/usr/bin:/bin",
+          "debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31",
+          "sh",
+          ".lake/source-units/isolated-gates/gates.sh"
+        ],
+        "exitCode": 1,
+        "elapsedSeconds": 5936.634315242,
+        "resourceStop": null,
+        "hostMinimumAvailableBytes": 11253088256,
+        "parentMinimumHeadroomBytes": 7228592128,
+        "sampledTaskMemoryPeakBytes": 9569771520,
+        "lastTaskCounters": {
+          "current": 3872268288,
+          "peak": 9569771520,
+          "max": "12884901888",
+          "swapMax": "0",
+          "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+        },
+        "containerState": {
+          "Status": "exited",
+          "Running": false,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 0,
+          "ExitCode": 1,
+          "Error": "",
+          "StartedAt": "2026-10-28T13:10:47.265057728Z",
+          "FinishedAt": "2026-10-28T14:49:43.593983994Z"
+        },
+        "limits": {
+          "Memory": 12884901888,
+          "MemorySwap": 12884901888,
+          "PidsLimit": 256,
+          "NetworkMode": "none"
+        },
+        "headroomThresholdBytes": 2147483648,
+        "method": "kernel task cgroup12GiB/swap0; parent16GiB and host available both monitored from before start; Lean serial -j1 timeout180; no shared-host12GiB reserve"
+      },
+      "result": "blocked by four per-file timeouts; not passed",
+      "timeouts": [
+        {
+          "module": "Solidity.Examples.Tactics.CallbackStrategy",
+          "elapsedSeconds": 180,
+          "childExitCode": 137
+        },
+        {
+          "module": "Solidity.Examples.Tactics.Recursion",
+          "elapsedSeconds": 180,
+          "childExitCode": 137
+        },
+        {
+          "module": "Solidity.Examples.Tactics.OpenLoops",
+          "elapsedSeconds": 180,
+          "childExitCode": 137
+        },
+        {
+          "module": "Solidity.Examples.DecisionHashes",
+          "elapsedSeconds": 180,
+          "childExitCode": 137
+        }
+      ],
+      "terminalCounterFooterAvailable": false,
+      "taskPeakMeaning": "Maximum recorded kernel memory.peak9569771520bytes; observed events zero, DockerOOMKilled=false; no headroom stop. No target demonstrated exceeding12GiB cap.",
+      "sourceUnitsGuard": "Lake built Solidity.Examples.Tactics.SourceUnitsImport in6.5s; historical nine theorem guards/79directchecks preserved."
+    },
+    {
+      "gate": "initial independent suite/sort",
+      "terminal": {
+        "command": [
+          "env",
+          "-u",
+          "DOCKER_HOST",
+          "-u",
+          "DOCKER_CONTEXT",
+          "-u",
+          "DOCKER_TLS",
+          "-u",
+          "DOCKER_TLS_VERIFY",
+          "-u",
+          "DOCKER_CERT_PATH",
+          "docker",
+          "--host=unix:///var/run/docker.sock",
+          "create",
+          "--name",
+          "source-units-isolated-suite-sort",
+          "--network=none",
+          "--memory=12g",
+          "--memory-swap=12g",
+          "--pids-limit=256",
+          "--user=1000:1000",
+          "--cap-drop=ALL",
+          "--mount",
+          "type=bind,src=/workspace,dst=/workspace",
+          "--mount",
+          "type=bind,src=/workspace/.setup/tools/lean-4.24.0-linux,dst=/opt/source-units-toolchain,readonly",
+          "--mount",
+          "type=bind,src=/workspace/solidity-lean-source-units/.lake/source-units/isolated-suite-sort/lean,dst=/workspace/.setup/tools/lean-4.24.0-linux/bin/lean,readonly",
+          "--workdir",
+          "/workspace/solidity-lean-source-units",
+          "-e",
+          "LEAN_NUM_THREADS=1",
+          "-e",
+          "XDG_CACHE_HOME=/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache",
+          "-e",
+          "PATH=/workspace/.setup/tools/lean-4.24.0-linux/bin:/usr/bin:/bin",
+          "debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31",
+          "sh",
+          ".lake/source-units/isolated-suite-sort/gates.sh"
+        ],
+        "exitCode": 137,
+        "elapsedSeconds": 862.1371335369995,
+        "resourceStop": "OS headroom below2GiB; task-only container stop",
+        "hostMinimumAvailableBytes": 7344533504,
+        "parentMinimumHeadroomBytes": 2138071040,
+        "sampledTaskMemoryPeakBytes": 10685378560,
+        "lastTaskCounters": {
+          "current": 10685378560,
+          "peak": 10685378560,
+          "max": "12884901888",
+          "swapMax": "0",
+          "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+        },
+        "containerState": {
+          "Status": "exited",
+          "Running": false,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 0,
+          "ExitCode": 137,
+          "Error": "",
+          "StartedAt": "2026-10-28T14:50:09.353367177Z",
+          "FinishedAt": "2026-10-28T15:04:31.404152802Z"
+        },
+        "limits": {
+          "Memory": 12884901888,
+          "MemorySwap": 12884901888,
+          "PidsLimit": 256,
+          "NetworkMode": "none"
+        },
+        "headroomThresholdBytes": 2147483648,
+        "method": "kernel task cgroup12GiB/swap0; parent16GiB and host available both monitored from before start; Lean serial -j1 timeout180; no shared-host12GiB reserve"
+      },
+      "result": "resource-stopped while Derived17 active; suite not passed and sort not run",
+      "stopSample": {
+        "elapsed": 861.9490616120002,
+        "hostAvailableBytes": 7344533504,
+        "parentHeadroomBytes": 2138071040,
+        "task": {
+          "current": 10685378560,
+          "peak": 10685378560,
+          "max": "12884901888",
+          "swapMax": "0",
+          "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+        }
+      },
+      "cause": "Raw enclosing-cgroup free margin below2GiB, with task below12GiB and host available~6.84GiB. Idle parent retained~4.17GB file cache after preceding build. No OOM observed."
+    },
+    {
+      "gate": "resumed independent suite/sort",
+      "terminal": {
+        "command": [
+          "env",
+          "-u",
+          "DOCKER_HOST",
+          "-u",
+          "DOCKER_CONTEXT",
+          "-u",
+          "DOCKER_TLS",
+          "-u",
+          "DOCKER_TLS_VERIFY",
+          "-u",
+          "DOCKER_CERT_PATH",
+          "docker",
+          "--host=unix:///var/run/docker.sock",
+          "create",
+          "--name",
+          "source-units-isolated-suite-resume",
+          "--network=none",
+          "--memory=12g",
+          "--memory-swap=12g",
+          "--pids-limit=256",
+          "--user=1000:1000",
+          "--cap-drop=ALL",
+          "--mount",
+          "type=bind,src=/workspace,dst=/workspace",
+          "--mount",
+          "type=bind,src=/workspace/.setup/tools/lean-4.24.0-linux,dst=/opt/source-units-toolchain,readonly",
+          "--mount",
+          "type=bind,src=/workspace/solidity-lean-source-units/.lake/source-units/isolated-suite-resume/lean,dst=/workspace/.setup/tools/lean-4.24.0-linux/bin/lean,readonly",
+          "--workdir",
+          "/workspace/solidity-lean-source-units",
+          "-e",
+          "LEAN_NUM_THREADS=1",
+          "-e",
+          "XDG_CACHE_HOME=/workspace/solidity-lean-source-units/.lake/source-units/docker-gate/cache",
+          "-e",
+          "PATH=/workspace/.setup/tools/lean-4.24.0-linux/bin:/usr/bin:/bin",
+          "debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31",
+          "sh",
+          ".lake/source-units/isolated-suite-resume/gates.sh"
+        ],
+        "exitCode": 0,
+        "elapsedSeconds": 518.146137277,
+        "resourceStop": null,
+        "hostMinimumAvailableBytes": 6734766080,
+        "parentMinimumHeadroomBytes": 4108681216,
+        "sampledTaskMemoryPeakBytes": 12213141504,
+        "lastTaskCounters": {
+          "current": 1160642560,
+          "peak": 12213141504,
+          "max": "12884901888",
+          "swapMax": "0",
+          "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+        },
+        "containerState": {
+          "Status": "exited",
+          "Running": false,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 0,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-10-28T15:06:26.896057729Z",
+          "FinishedAt": "2026-10-28T15:15:04.845526242Z"
+        },
+        "limits": {
+          "Memory": 12884901888,
+          "MemorySwap": 12884901888,
+          "PidsLimit": 256,
+          "NetworkMode": "none"
+        },
+        "headroomThresholdBytes": 2147483648,
+        "method": "kernel task cgroup12GiB/swap0; parent16GiB and host available both monitored from before start; Lean serial -j1 timeout180; no shared-host12GiB reserve"
+      },
+      "result": "suite and pinned sort both passed",
+      "suiteExitCode": 0,
+      "sortExitCode": 0,
+      "suiteSummary": "Build completed successfully (260 jobs).",
+      "sortSummary": "solkeycheck: parsed 377 taclets, 131 read-bearing, table covers 131\nsolkeycheck: OK \u2014 annotations match /workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+      "exactTerminalKernelCounters": "12213141504\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "exactTaskPeakBytes": 12213141504,
+      "sortPin": {
+        "commit": "473da8944ca7329e6b76819863591407db26e7ec",
+        "file": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "sha256": "02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb",
+        "matchesSetupSnapshot": true
+      },
+      "changedCondition": "Own clean generated-file cache eviction reduced parent baseline before resuming only unfinished suite/sort, not library timeouts."
+    }
+  ],
+  "cacheHint": {
+    "record": {
+      "method": "POSIX_FADV_DONTNEED on own generated build/artifact-cache regular files only; no deletions, no kernel/system configuration writes",
+      "before": {
+        "memoryCurrent": 4419555328,
+        "memoryStat": "anon 44244992\nfile 4172783616\nkernel 201809920\nkernel_stack 589824\npagetables 1523712\nsec_pagetables 0\npercpu 46256\nsock 0\nvmalloc 0\nshmem 8192\nfile_mapped 249856\nfile_dirty 45056\nfile_writeback 0\nswapcached 0\nanon_thp 0\nfile_thp 1130364928\nshmem_thp 0\ninactive_anon 44056576\nactive_anon 45056\ninactive_file 987828224\nactive_file 3184959488\nunevictable 0\nslab_reclaimable 199025592\nslab_unreclaimable 586272\nslab 199611864\nworkingset_refault_anon 0\nworkingset_refault_file 0\nworkingset_activate_anon 0\nworkingset_activate_file 0\nworkingset_restore_anon 0\nworkingset_restore_file 0\nworkingset_nodereclaim 0\npgdemote_kswapd 0\npgdemote_direct 0\npgdemote_khugepaged 0\npgdemote_proactive 0\npgscan 0\npgsteal 0\npswpin 0\npswpout 0\npgscan_kswapd 0\npgscan_direct 0\npgscan_khugepaged 0\npgscan_proactive 0\npgsteal_kswapd 0\npgsteal_direct 0\npgsteal_khugepaged 0\npgsteal_proactive 0\npgfault 94423089\npgmajfault 243\npgrefill 0\npgactivate 772402\npgdeactivate 0\npglazyfree 4\npglazyfreed 0\nswpin_zero 0\nswpout_zero 0\nthp_fault_alloc 93815\nthp_collapse_alloc 356\nthp_swpout 0\nthp_swpout_fallback 0\n",
+        "hostMeminfo": "MemTotal:       18440112 kB\nMemFree:        13632208 kB\nMemAvailable:   17551052 kB\nBuffers:           21068 kB\nCached:          4087164 kB\nSwapCached:            0 kB\nActive:          3111980 kB\nInactive:        1011120 kB\nActive(anon):         44 kB\nInactive(anon):    44760 kB\nActive(file):    3111936 kB\nInactive(file):   966360 kB\nUnevictable:       29924 kB\nMlocked:               0 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nDirty:                68 kB\nWriteback:             0 kB\nAnonPages:         44856 kB\nMapped:            82492 kB\nShmem:                20 kB\nKReclaimable:     192560 kB\nSlab:             243936 kB\nSReclaimable:     192560 kB\nSUnreclaim:        51376 kB\nKernelStack:        2240 kB\nPageTables:         2452 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     9220056 kB\nCommitted_AS:     359228 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:        4508 kB\nVmallocChunk:          0 kB\nPercpu:             1368 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:   1103872 kB\nFilePmdMapped:         0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      126976 kB\nDirectMap2M:    12025856 kB\nDirectMap1G:    30408704 kB\n"
+      },
+      "files": 7606,
+      "logicalFileBytes": 5180856306,
+      "errors": [],
+      "after": {
+        "memoryCurrent": 643207168,
+        "memoryStat": "anon 44879872\nfile 486813696\nkernel 110575616\nkernel_stack 589824\npagetables 1519616\nsec_pagetables 0\npercpu 46144\nsock 0\nvmalloc 0\nshmem 8192\nfile_mapped 249856\nfile_dirty 196608\nfile_writeback 0\nswapcached 0\nanon_thp 0\nfile_thp 0\nshmem_thp 0\ninactive_anon 44728320\nactive_anon 45056\ninactive_file 348192768\nactive_file 138625024\nunevictable 0\nslab_reclaimable 107814024\nslab_unreclaimable 572296\nslab 108386320\nworkingset_refault_anon 0\nworkingset_refault_file 0\nworkingset_activate_anon 0\nworkingset_activate_file 0\nworkingset_restore_anon 0\nworkingset_restore_file 0\nworkingset_nodereclaim 0\npgdemote_kswapd 0\npgdemote_direct 0\npgdemote_khugepaged 0\npgdemote_proactive 0\npgscan 0\npgsteal 0\npswpin 0\npswpout 0\npgscan_kswapd 0\npgscan_direct 0\npgscan_khugepaged 0\npgscan_proactive 0\npgsteal_kswapd 0\npgsteal_direct 0\npgsteal_khugepaged 0\npgsteal_proactive 0\npgfault 94423254\npgmajfault 243\npgrefill 0\npgactivate 772409\npgdeactivate 0\npglazyfree 4\npglazyfreed 0\nswpin_zero 0\nswpout_zero 0\nthp_fault_alloc 93815\nthp_collapse_alloc 356\nthp_swpout 0\nthp_swpout_fallback 0\n",
+        "hostMeminfo": "MemTotal:       18440112 kB\nMemFree:        17318108 kB\nMemAvailable:   17588108 kB\nBuffers:           21068 kB\nCached:           487752 kB\nSwapCached:            0 kB\nActive:           137128 kB\nInactive:         387376 kB\nActive(anon):         44 kB\nInactive(anon):    45476 kB\nActive(file):     137084 kB\nInactive(file):   341900 kB\nUnevictable:       29924 kB\nMlocked:               0 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nDirty:                68 kB\nWriteback:             0 kB\nAnonPages:         45612 kB\nMapped:            82512 kB\nShmem:                20 kB\nKReclaimable:     113812 kB\nSlab:             158784 kB\nSReclaimable:     113812 kB\nSUnreclaim:        44972 kB\nKernelStack:        2288 kB\nPageTables:         2260 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     9220056 kB\nCommitted_AS:     359228 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:        4508 kB\nVmallocChunk:          0 kB\nPercpu:             1368 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      126976 kB\nDirectMap2M:    12025856 kB\nDirectMap1G:    30408704 kB\n"
+      }
+    },
+    "executedCode": "import os,json,time,hashlib\nfrom pathlib import Path\np=Path('.lake/source-units/isolated-suite-sort')\ndef snapshot():return {'memoryCurrent':int(Path('/sys/fs/cgroup/memory.current').read_text()),'memoryStat':Path('/sys/fs/cgroup/memory.stat').read_text(),'hostMeminfo':Path('/proc/meminfo').read_text()}\nd={'method':'POSIX_FADV_DONTNEED on own generated build/artifact-cache regular files only; no deletions, no kernel/system configuration writes','before':snapshot()};count=0;errors=[];bytes_=0\nfor root in [Path('.lake/build'),Path('.lake/source-units/docker-gate/cache')]:\n for f in root.rglob('*'):\n  if not f.is_file() or f.is_symlink():continue\n  try:\n   fd=os.open(f,os.O_RDONLY);os.posix_fadvise(fd,0,0,os.POSIX_FADV_DONTNEED);os.close(fd);count+=1;bytes_+=f.stat().st_size\n  except OSError as e:errors.append({'path':str(f),'error':str(e)})\nd.update(files=count,logicalFileBytes=bytes_,errors=errors,after=snapshot());(p/'own-cache-eviction.json').write_text(json.dumps(d,indent=2)+'\\n');print(json.dumps({'beforeBytes':d['before']['memoryCurrent'],'afterBytes':d['after']['memoryCurrent'],'files':count,'errors':len(errors)}))\n",
+    "pathWhitelist": [
+      ".lake/build",
+      ".lake/source-units/docker-gate/cache"
+    ],
+    "noDeletionOrContentChange": true,
+    "baselineBeforeBytes": 4419555328,
+    "baselineAfterBytes": 643207168,
+    "resumeBaseline": {
+      "parentMemoryCurrent": 641855488,
+      "parentMemoryMax": 17179869184,
+      "changedCondition": "Own clean generated-file cache evicted via POSIX_FADV_DONTNEED, preserving artifacts. Previous run baseline4.4GB reduced below2GiB; samecap12GiB/swap0/guard2GiB/j1/timeout180. Reuse only successful Lake traces; no cold rebuild or prior library timeout retry."
+    }
+  },
+  "unchangedEvidence": {
+    "fixtures": {
+      "working": 31,
+      "brokenExcludedAssembly": 1,
+      "blocked": 7
+    },
+    "requiredPipelineVariants": 78,
+    "preparedCheckpointedJobs": 64,
+    "workingModelJobs": 62,
+    "observedCalls": 86,
+    "requiredButUnrunVariants": 14,
+    "excludedPreparedUnexecutedCalls": 2,
+    "kernelTheoremGuards": 9,
+    "priorDirectModuleChecks": 79,
+    "modelSha256": "bbe9a0d72dc209e68accc62feac667cb9a9e8b05014fe1cc055ba64cdd00e34b",
+    "expectedResultsPremisesAndLimitsUnchanged": true,
+    "noSemanticCodeChanges": true,
+    "proofVersusExternal": "Kernel model proofs and retained compiler AST-analysis/model observations; no generated-solcEVM replay or equivalence claim."
+  },
+  "remainingValidation": {
+    "gate": "complete default Lake build under unchanged proof/search/fuel/time limits",
+    "blockers": [
+      "CallbackStrategy180s timeout",
+      "Recursion180s timeout",
+      "OpenLoops180s timeout",
+      "DecisionHashes180s timeout"
+    ],
+    "memoryConclusion": "Current evidence does not justify a larger VM requirement: the isolated library stayed under its cap; resumed suite/sort passed with exactpeak11.37GiB. No cap or timeout increase was attempted.",
+    "notClaimed": [
+      "default library pass",
+      "run-lean.sh pass",
+      "all feature coverage"
+    ],
+    "noRetryOfFourLibraryTimeouts": true
+  },
+  "remainingFeatureRefusals": "Unchanged named refusals in step2-source-units-validation.json remainingRefusals; excluded assembly/host/log/delegatecall/gas/layout policy retained. These are separate from validation timeouts.",
+  "logs": [
+    {
+      "path": "tests/upstream/step2-source-units-isolated-library.log",
+      "sha256": "93e4ddd80b872d8cc1f565e4bb1c2a8808022a51545bca829ec8d34902b0d12c",
+      "bytes": 119292
+    },
+    {
+      "path": "tests/upstream/step2-source-units-isolated-suite-guard-stop.log",
+      "sha256": "ee523be3ab6192ca8c28f1b431c748f77841946ed6f8016bcd94220843931c3f",
+      "bytes": 35681
+    },
+    {
+      "path": "tests/upstream/step2-source-units-isolated-suite.log",
+      "sha256": "2f8bd7d1b87eb38e74df5e8ba8148f2d0ce600334d7d300c8d7e4e6af872c3d9",
+      "bytes": 43831
+    },
+    {
+      "path": "tests/upstream/step2-source-units-isolated-sort.log",
+      "sha256": "fe45fead7a05db8e6a5c96d9ed022c60fe9423a75b706f68e3255ff6bb77a679",
+      "bytes": 233
+    }
+  ],
+  "privateEvidence": [
+    {
+      "path": ".lake/source-units/isolated-gates/baseline.json",
+      "sha256": "dd97fbb2fe48e5db738e74d3fb8a1dc979671f8a42205eca41aa7d11ae96b9eb",
+      "bytes": 1826
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/command.json",
+      "sha256": "cfb1325fe5bfb6d9a67c0d28fd8ba8a542799ff7e71a0bb25e7ab7a5eea8b070",
+      "bytes": 1141
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/compiler.log",
+      "sha256": "c42e66f0e4a1641c4fb522e34edf85d2cc0aa744db762abde33e9e390507415f",
+      "bytes": 462364
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/container.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/gates.sh",
+      "sha256": "68f6801961fdd48b38e5702375ebe761ce6bf085ca1be6da66ea84c5bb39ccbd",
+      "bytes": 742
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/kernel-limits.log",
+      "sha256": "c67ff9409d4f2a791abe8460355e64866c11f333a18fa86e4f5af5deb5c75d24",
+      "bytes": 14
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/lean",
+      "sha256": "a23dcf9eda3e54a40c3bec8ca819a177171e5a6971f291a522437c4e677a8a32",
+      "bytes": 330
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/library.end",
+      "sha256": "a3b24155ffa8a74fc6cd842781c11016fb1d10e1b6181e0934b2b7d6b088689c",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/library.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/library.log",
+      "sha256": "93e4ddd80b872d8cc1f565e4bb1c2a8808022a51545bca829ec8d34902b0d12c",
+      "bytes": 119292
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/library.start",
+      "sha256": "a9483467baaec16fc83b18b0be318738b45421a5eee7778fb5387dbf23533750",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/run.py",
+      "sha256": "858fc08d3686c1aef2e3c7eefdd5cac9e0a55a44babaf2d0f390952fdc0a2be0",
+      "bytes": 3440
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/samples.jsonl",
+      "sha256": "de724f2e869d36d76335b3260166b1ba9d440f51b75d38b23cf20e9d61e7047f",
+      "bytes": 6228279
+    },
+    {
+      "path": ".lake/source-units/isolated-gates/terminal.json",
+      "sha256": "acf96a885738c5f48823be2cee1cdd42bed5d0c5cdb7c08d799b0a7e95538ce0",
+      "bytes": 2295
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/command.json",
+      "sha256": "77105ff28d825c77341745c6398b2f9355d7b2870911b2b51b8e9d08a0496934",
+      "bytes": 1156
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/compiler.log",
+      "sha256": "a7e775f14721260f23ea16bdb53b5d5ed1fe462bc29173c1124bce78877b8216",
+      "bytes": 19827
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/container.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/evict-owned-cache.executed.py",
+      "sha256": "f0ea6f44c5083a199e5babe0ccf0bd8a6403d7bffbea9dd0a0b925d99251892d",
+      "bytes": 1138
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/gates.sh",
+      "sha256": "4367beafbe7f1247518b8c0b86378f52e1388695624a4170f7d705d21c6f3fb5",
+      "bytes": 676
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/kernel-limits.log",
+      "sha256": "c67ff9409d4f2a791abe8460355e64866c11f333a18fa86e4f5af5deb5c75d24",
+      "bytes": 14
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/lean",
+      "sha256": "3681fd3ce54940995b02053d276e8e46644a1358f29c34a035ffcb8cbeaef0ee",
+      "bytes": 340
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/own-cache-eviction.json",
+      "sha256": "65c47e702eb8c6b4336799ccbe37d6bbdce31720317f62490fc103aa532e3ab8",
+      "bytes": 5673
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/run.py",
+      "sha256": "39607f64dd660e6c55becb0b0eff7b542079fcd80ab3b45f967f09f01bff7142",
+      "bytes": 3450
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/samples.jsonl",
+      "sha256": "bb3d0e8f7155856837e70440caf5b93189edef4ea5c30ed5dd191133273fe721",
+      "bytes": 911617
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/sort-pin.json",
+      "sha256": "b92477a865821b74ca7f4b634948d68cc80fcb99e1f2e659984bc4c101ed208b",
+      "bytes": 286
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/stop-sample.json",
+      "sha256": "ef7f1cebefd8ea0bd5c4ee3afacc18929eae7857d0e9e6a1de1b3e98b8d212f8",
+      "bytes": 299
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/suite.log",
+      "sha256": "ee523be3ab6192ca8c28f1b431c748f77841946ed6f8016bcd94220843931c3f",
+      "bytes": 35681
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/suite.start",
+      "sha256": "aba63deb10d38ca8ac44b09518018e8672c34fafcae101feccc9e31346c4f9de",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-sort/terminal.json",
+      "sha256": "8aeee9ad09984da66efe3a3d3b5c8f7a8188d0fc478419e414c6f50cb878db38",
+      "bytes": 2364
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/baseline.json",
+      "sha256": "216f71ef8c254739a003064119b1f31dc5add5b3c75c3f70f26a45ba4129b016",
+      "bytes": 357
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/command.json",
+      "sha256": "2226d78bd058793827f50cff16260dcad8f97f56e55979e809b850007116d5dc",
+      "bytes": 1162
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/compiler.log",
+      "sha256": "0dca11fe30f4668b6b07c2f33886cedb876ce3b3f2a85b5dd4ab2655b3ca25ac",
+      "bytes": 9029
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/container.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/gates.sh",
+      "sha256": "7266e462c4b325f69bb0bd19370bab5ef7ad19e1110b1086cd7d226252d29e59",
+      "bytes": 678
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/kernel-limits.log",
+      "sha256": "c67ff9409d4f2a791abe8460355e64866c11f333a18fa86e4f5af5deb5c75d24",
+      "bytes": 14
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/kernel-terminal.log",
+      "sha256": "f826d3ea0ea3765ad079232ac99b37e038f48a76c5c2ddb02b5dc03bac7ff52d",
+      "bytes": 65
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/lean",
+      "sha256": "c7d66c0a3c2583fd7ab572f8ee1f78411875439922d5c115496288d898599357",
+      "bytes": 344
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/run.py",
+      "sha256": "da56b4db49944aff896b8df1963d15bff8188072e5557bedf3ae698f10d872e9",
+      "bytes": 3454
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/samples.jsonl",
+      "sha256": "78c99647fb4497186089a63c1e32c2727b456a7cbcd79c156ed9b9bac761ceee",
+      "bytes": 551151
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/sort.end",
+      "sha256": "9391ea1fcea3c30b8ea1f17c84060d7755cb779f7933f82381a367dac340e9f2",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/sort.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/sort.log",
+      "sha256": "fe45fead7a05db8e6a5c96d9ed022c60fe9423a75b706f68e3255ff6bb77a679",
+      "bytes": 233
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/sort.start",
+      "sha256": "9391ea1fcea3c30b8ea1f17c84060d7755cb779f7933f82381a367dac340e9f2",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/suite.end",
+      "sha256": "9391ea1fcea3c30b8ea1f17c84060d7755cb779f7933f82381a367dac340e9f2",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/suite.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/suite.log",
+      "sha256": "2f8bd7d1b87eb38e74df5e8ba8148f2d0ce600334d7d300c8d7e4e6af872c3d9",
+      "bytes": 43831
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/suite.start",
+      "sha256": "3ae33a5f398ef43a388a358e9b7c036e91006da7f54f7bd105cf5d1ea759db99",
+      "bytes": 21
+    },
+    {
+      "path": ".lake/source-units/isolated-suite-resume/terminal.json",
+      "sha256": "9928f2820c8c4922252ab18ca6f8362280c19b256bf151fdfc877b2706c00e84",
+      "bytes": 2316
+    },
+    {
+      "path": ".lake/source-units/private/lakefile.source-units-isolated.toml",
+      "sha256": "6e8ac4aead46c570d6321aa2c85b63389d8fa0020ac0dcfa3623f1ebb89ba80a",
+      "bytes": 1487
+    }
+  ],
+  "reviews": [
+    {
+      "reviewer": "/root/source_unit_finder",
+      "mode": "independent read-only; no Lean/server/build/check execution",
+      "result": "Final review passed. All53 retained evidence references match;260suitejobs,sort377/131/131,exactterminalpeak12213141504/events0; unchanged31/1/7,64jobs,86observations,14unrun. No outstanding finding.",
+      "confirmedFixes": [
+        "Polling-start wording corrected to immediately after docker start, with prior baseline snapshot.",
+        "Failed-run peak/events labeled observed; successful suite/sort exact terminal footer retained.",
+        "Exact executed cache-hint code and own-root whitelist preserved."
+      ]
+    },
+    {
+      "reviewer": "/root/source_unit_skeptic",
+      "mode": "independent read-only; no Lean/server/build/test execution",
+      "result": "No outstanding confirmed defect.53references and all3sample files independently matched; suite/sort0,default4timeouts retained,scope correction supported. Total elapsed7316.917586056s verified. Old audit JSON byte-equal97; model/results unchanged.",
+      "confirmedFixes": [
+        "Historical stops remain failed and old hashes intact.",
+        "Measured cache-baseline change supports suite-only continuation with identical cap/swap/guard/time limits.",
+        "No larger-VM requirement inferred from overapplied shared reserve."
+      ]
+    }
+  ],
+  "productionFilesChanged": [],
+  "sharedEdits": [
+    "docs/feature-work/source-admission.md",
+    "docs/solidity-upstream-tests.md",
+    "tests/upstream/step2-source-units-validation.json"
+  ],
+  "historicalDigestScope": "Initial sourceDigests refer to da933e15. Runtime-audit followupDocumentDigests refer to97d62742. Both historical records and their original exports remain unchanged.",
+  "pushOrMergePerformed": false,
+  "lightweightChecks": [
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.05794671500007098,
+      "log": ".lake/source-units/isolated-gates/final-inventory.log",
+      "sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 4.585835535000115,
+      "log": ".lake/source-units/isolated-gates/final-docs.log",
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "comparison": "Byte-identical to prior sealed doc audit:20missing references and6ambiguities in unchanged sources."
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.009345530000246072,
+      "log": ".lake/source-units/isolated-gates/final-diff.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "modelDigestRechecked": "bbe9a0d72dc209e68accc62feac667cb9a9e8b05014fe1cc055ba64cdd00e34b",
+  "setupSolkeyManifestSha256": "c8d6166c3d728174eded3c3279fe499470f143943877a1307745f7a6b2da1b37",
+  "repositorySolkeyManifestPin": {
+    "commit": "473da8944ca7329e6b76819863591407db26e7ec",
+    "manifestSha256": "c8d6166c3d728174eded3c3279fe499470f143943877a1307745f7a6b2da1b37"
+  },
+  "historicalArtifactsReverified": [
+    {
+      "path": ".lake/source-units/handoff/source-units-step2-audited.patch",
+      "sha256": "dbe1e2e0952862da32bb65e66e8cea0366936602bb04772065ecfa7b945d93c1",
+      "bytes": 1060770
+    },
+    {
+      "path": ".lake/source-units/handoff/source-units-validation-audited.tar.gz",
+      "sha256": "6f5241512b9a95113d988774b51cecba5a8b70b2cb5830eacb156daabeadae67",
+      "bytes": 631557
+    },
+    {
+      "path": ".lake/source-units/handoff/HANDOFF-runtime-audit.md",
+      "sha256": "d603512e8cc0c38400f11fad73a8110afa6939177f9054d838f34bd853b705d4",
+      "bytes": 5291
+    },
+    {
+      "path": ".lake/source-units/handoff/source-units-step2.patch",
+      "sha256": "bfdb6cd111ed5f8d6f88e3d0d16688392836bdf2e8d24015b4ec06a961252d99",
+      "bytes": 985267
+    },
+    {
+      "path": ".lake/source-units/handoff/source-units-validation.tar.gz",
+      "sha256": "52dda10893658fd31c846c664ceeecbe87eb34aa2dd30aa0908efebb3debcb5d",
+      "bytes": 604372
+    },
+    {
+      "path": ".lake/source-units/handoff/HANDOFF.md",
+      "sha256": "047050281b07a4c7ee78e852ca4abb7e1aa10ec653e3df92629a1e5e820acae6",
+      "bytes": 3862
+    },
+    {
+      "path": ".lake/source-units/handoff/artifacts.json",
+      "sha256": "4c0e58998f4e8e97216101a7670d09fe401c0f1e402ca5407a1ad438f6a3a6f3",
+      "bytes": 973
+    }
+  ],
+  "runtimeVersions": {
+    "command": [
+      "bash",
+      "-c",
+      "source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; lean --version; lake --version"
+    ],
+    "exitCode": 0,
+    "output": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)\nLake version 5.0.0-src+797c613 (Lean version 4.24.0)\n",
+    "log": ".lake/source-units/isolated-gates/final-versions.log",
+    "sha256": "159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4"
+  },
+  "totalAttemptElapsedSeconds": 7316.917586056,
+  "currentDocumentationDigests": [
+    {
+      "path": "docs/feature-work/source-admission.md",
+      "sha256": "0e05619b410467dc06628862d7990385d5e1783d9d04857557011db53ce24ae6",
+      "bytes": 19969
+    },
+    {
+      "path": "docs/solidity-upstream-tests.md",
+      "sha256": "ef1ee762aa68b5c0b65651ad89f5268ff9f32ab567262a37f3face46679f39ce",
+      "bytes": 26861
+    },
+    {
+      "path": "tests/upstream/step2-source-units-validation.json",
+      "sha256": "915c5f377350ed3e1a6c9a256ac46dd44226015fd02a04006a6e9c1fa3e9fa08",
+      "bytes": 43991
+    }
+  ]
+}

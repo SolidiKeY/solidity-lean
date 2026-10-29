@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd /home/guilherme/projects/solidity-lean
+export PATH="/tmp/solidity-cloud-results-20261028/bin:$PATH"
+export LEAN_NUM_THREADS=1
+export LAKE_CACHE_DIR="$PWD/.lake/refactor-cache/cloud-integration-20261028"
+export SOLC_REFERENCE=/tmp/solidity-cloud-results-20261028/soljson-v0.8.38+commit.1835d247.js
+export SOURCE_UNITS_SOLJSON="$SOLC_REFERENCE"
+export SOLKEY_ROOT=/home/guilherme/projects/solkey
+phase() {
+ local name=$1; shift
+ printf 'START %s %s\n' "$name" "$(date -Is)"
+ python3 /tmp/cloud-integration-time-command.py "$@" > ".lake/cloud-integration-20261028/$name.log" 2>&1
+ printf 'PASS %s %s\n' "$name" "$(date -Is)"
+}
+# Refresh generated executable destinations before accepting cache restoration.
+rm -f .lake/build/bin/solidity-lean .lake/build/bin/solcases
+phase native-tools lake build solidity-lean solcases
+phase node-regressions node --test --test-concurrency=1 --test-reporter=tap scripts/source-units.test.mjs scripts/solidity-upstream.test.mjs scripts/solc-ast-hashes.test.mjs scripts/contract-world.test.mjs scripts/transient-storage.test.mjs scripts/aggregates.test.mjs scripts/declarations-metadata.test.mjs scripts/source-provenance.test.mjs scripts/source-shadowing.test.mjs scripts/dispatch-signatures.test.mjs
+phase reference-unit node --test --test-concurrency=1 --test-reporter=tap scripts/evm-reference/replay.test.mjs scripts/evm-reference/generated.test.mjs
+phase slice-evm node scripts/evm-reference/slice-reference-copies.mjs "$SOLC_REFERENCE"
+phase panic-evm node scripts/check-self-power-data.mjs "$SOLC_REFERENCE" /tmp/solidity-cloud-reference/node_modules .lake/cloud-integration-20261028/panic-evm.json
+phase transient-evm node scripts/check-transient-world-vectors.mjs "$SOLC_REFERENCE" /tmp/solidity-cloud-reference/node_modules
+phase generated-evm node scripts/evm-reference/generated.mjs --compiler "$SOLC_REFERENCE" --seed 0 --out .lake/cloud-integration-20261028/generated-seed-0.json
+phase slice-admission lake lean tests/upstream/step03/Admission.lean -- --tstack=131072
+printf 'POST_BUILD_GATES_PASS %s\n' "$(date -Is)"

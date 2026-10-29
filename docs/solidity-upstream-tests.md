@@ -40,7 +40,7 @@ Two different checks have different meanings:
   as working when their diagnostics match. This runs the SHA-pinned **solc
   reference**; it does not demonstrate Lean frontend or interpreter coverage.
 * `lean-runtime` imports the contract through the repository's modern source
-  admission and typed `solc_import`, then compares supported scalar runtime
+  admission and typed `solc_import`, then compares admitted scalar and typed raw-ABI runtime
   vectors with the typed Lean interpreter. Calls retain state in order,
   constructors/initializers run, failed calls roll back, and return values
   are compared as ABI words. Default/explicit `compileViaYul: also` fixtures
@@ -50,11 +50,12 @@ Two different checks have different meanings:
 
 Runtime results are observations, not universal correctness proofs. They do
 not exercise generated solc EVM/SSA code, the repository's EVM compiler, gas
-costs or the upstream C++ EVM host. Unsupported gas/log/revert-data checks,
-aggregate/dynamic/bytes ABI inputs, noncanonical calldata, external host
-behavior and source imports remain blocked rather than being dropped.
-Only empty-data function failures are currently replayed; the model's generic
-panic cannot certify an expected ABI panic code. Loop fuel is 1,000 per loop;
+costs or the upstream C++ EVM host. Unsupported gas/log checks, ABI shapes, noncanonical or lazy calldata
+layouts, external host behavior and source imports remain explicitly blocked
+rather than being dropped. The current integrated adapter retains and compares
+exact return/revert bytes for admitted vectors, including supported custom
+errors and panic codes. A generic panic or resource exhaustion cannot certify
+an expected ABI panic code. Historical reports retain their older adapter scope. Loop fuel is 1,000 per loop;
 exhaustion or a process timeout is blocked, never a matching expected failure.
 Unsupported compiler configurations and EVM-version constraints are likewise
 explicit. Other upstream families (SMT checker, Yul optimizer, AST/NatSpec
@@ -421,3 +422,90 @@ decoder metadata gaps. New results and validation use separate
 `tests/upstream/group10-aggregate-validation.json`; every earlier report and
 export is preserved. Selected fresh replay never certifies retained unrun
 import/profile/host/configuration/resource cases against a changed model.
+
+## Coverage step 2: source-unit replay (2026-10-28)
+
+The current-master reproduction and compilation-unit increment are recorded in
+[step2-source-units-results.json](../tests/upstream/step2-source-units-results.json)
+and [step2-source-units-validation.json](../tests/upstream/step2-source-units-validation.json).
+The unchanged 39-fixture family moves from 39 provenance blocks to 31 working,
+one broken excluded-assembly case and seven retained host/format blocks.
+All 64 prepared legacy/viaIR jobs retain their checkpoints; no gas, log,
+host, assembly or expected-failure observation is removed to claim agreement.
+The remaining 14 required variants are explicitly unexecuted. The full
+repository Lake build was initially blocked by the no-fork validation cap.
+A later existing-Docker retry solves process creation but stops at the
+documented memory reserve (exit 137 after job 246/688), so the combined build
+still is not passing evidence; see the
+[runtime audit](../tests/upstream/step2-source-units-runtime-audit.json).
+The frontend closure, new kernel controls and focused/static gates have
+separate evidence. These model observations are not compiler/EVM equivalence.
+
+The [isolated-VM continuation](../tests/upstream/step2-source-units-isolated-validation.json)
+corrects the shared-host reserve scope without making prior stops pass. The
+unchanged 12 GiB/zero-swap bound supports a passing 260-job TestSuite and explicit
+pinned sort check after measured task-local cache management. The default
+library remains blocked by four unchanged 180-second timeouts, not a proven
+need for a larger VM. All 31/1/7 fixture statuses, 86 observations and unrun
+required variants remain unchanged; no semantic code was edited.
+
+### Step-2 original gate and proof performance continuation
+
+The [2026-10-28 proof-performance record](../tests/upstream/step2-source-units-proof-performance.json)
+adds a passing original run-lean.sh gate (688 default jobs, 260 suite jobs and
+377/131/131 frozen sorts) under the 12 GiB aggregate cap, zero swap and measured
+isolated-VM headroom. The private 180-second compiler probes remain failed
+diagnostics; that timer was never part of the original acceptance script.
+Only a duplicate-search example proof changed; statements and observations did
+not. Fresh [per-fixture evidence](../tests/upstream/step2-source-units-proof-performance-results.json)
+retains 31 working / 1 excluded-assembly broken / 7 blocked, 86 observations and
+14 required-but-unrun variants. Documentation paths retain the historical
+20 missing references and 6 ambiguities. Feature status and refusals are unchanged.
+## Fresh current-master corpus (2026-10-28)
+
+The fresh baseline starts at `f4dee4a29c2e208b36db4a4161a4723c735cd775`.
+All ten collected cloud snapshots are ancestors; unmerged work is excluded.
+The combined 9,660-fixture report has **4,135 working, 196 broken, 5,329 blocked**.
+Its 1,662 Lean-runtime fixtures have **657 working, 196 broken, 809 blocked**.
+The 3,478 pinned-solc diagnostic agreements are reference evidence, not Lean
+coverage. Every input, required source mode, completed observation and resource
+block is retained in the [new evidence](../tests/upstream/baseline-20261028/README.md).
+The immutable bulk report and 22 isolated follower reports remain separate.
+
+The inventory currently has 212 rows: 13 present, 160 partial, one missing,
+38 not applicable. The new diagnostic index provides reviewed boundaries for
+76 partial rows and explicitly leaves 84 needing feature-specific attribution.
+It does not promote statuses or infer completeness from absent fixtures. The
+manifest/schema is unchanged; generated inventory files remain reproducible.
+
+The cold `./run-lean.sh` attempt reached its initial 90-minute wall bound
+(exit 124) at 546/685 default targets, with `FunctionTypes.lean` active.
+Kernel cgroup peak was 8,195,923,968 bytes (7.633 GiB), with zero OOM events.
+The default/TestSuite/frozen-sort combined gate remains blocked; warm timing
+was not run because cold completion was not established. Partial cold
+artifacts and the restored original cache remain on this VM. This baseline
+is diagnostic evidence, not a universal semantics or lowering-equivalence proof.
+
+The [feature-attribution follow-up](../tests/upstream/baseline-20261028/attribution/README.md)
+now assesses all 84 IDs left unresolved by that checkpoint: 59 have explicit
+source/documented limits, and 25 retain feature-specific missing-evidence
+questions. Ten rows link directly to exact fresh fixture/variant gaps. The
+original 76/84 index remains historical evidence, and the supplement does not
+claim universal semantic attribution or change any manifest status. The cold
+stop and unrun warm measurement above remain unchanged.
+
+The [bounded discriminator matrix](../tests/upstream/baseline-20261028/probes/README.md)
+adds actual pinned-compiler/provenance/source-reader controls for those40 questions.
+It preserves the original corpus and distinguishes source emission from native
+typed admission/proofs/replay, which remain blocked after a single bounded API
+refresh stopped124. No feature status or profile decision changed.
+
+The [native cache diagnosis](../tests/upstream/baseline-20261028/native-cache/README.md)
+separates the reusable 76-module production import/replay adapter from the stale
+257-module Testing proof branch. Source/olean trace hashes, setup imports and a
+no-build preflight passed without any project build or config edit. Both source
+modes now have 40 typed-import reports, 38 replay batches and 122 matching
+observations; 12 batches retain explicit frontend refusals with zero runtime
+observations. Wrong-output, provenance and internal-entry controls are separate.
+Nonzero msg.value entry rejection remains untested in the fixed-default-value
+adapter. Prior baseline counts, inputs, observations and reports are unchanged.

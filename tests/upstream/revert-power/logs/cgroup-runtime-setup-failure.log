@@ -1,0 +1,2 @@
+CGROUP_MAX=12884901888 SWAP_MAX=0
+/bin/bash: -c: option requires an argument

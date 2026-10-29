@@ -1,0 +1,709 @@
+[
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/SourceIdentifiers.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/SourceIdentifiers/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 0,
+    "tool": {
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "elapsedMs": 1148.045932,
+    "log": "runs/SourceIdentifiers/legacy/compile.log",
+    "logSha256": "f3e8d89c66c64bd6e5e33aa9baf710ce7490b3bc93935607f12a264918b45772",
+    "ok": true
+  },
+  {
+    "stage": "source-reader",
+    "command": [
+      "lake",
+      "--quiet",
+      "--no-build",
+      "lean",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/SourceIdentifiers/legacy/Reader.lean",
+      "--",
+      "--tstack=131072",
+      "-j1"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1707.32969,
+    "log": "runs/SourceIdentifiers/legacy/source-reader.log",
+    "logSha256": "86374a0e09162875e22a6c617061e924bff5751bcca2bba4c2a6ba37e89d5dbe",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/SourceIdentifiers.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/SourceIdentifiers/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 0,
+    "tool": {
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "elapsedMs": 920.3917379999998,
+    "log": "runs/SourceIdentifiers/viaIR/compile.log",
+    "logSha256": "a60ed0b269f05468b51ed13fb19d7100883744c0a90561e635ba731b32557270",
+    "ok": true
+  },
+  {
+    "stage": "source-reader",
+    "command": [
+      "lake",
+      "--quiet",
+      "--no-build",
+      "lean",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/SourceIdentifiers/viaIR/Reader.lean",
+      "--",
+      "--tstack=131072",
+      "-j1"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1660.3055469999995,
+    "log": "runs/SourceIdentifiers/viaIR/source-reader.log",
+    "logSha256": "1239e0a354bd73b874d8f46ffd72e1b0e2d3440481ec9051e0509b6d9238f6fe",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/CommentRanges.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/CommentRanges/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 0,
+    "tool": {
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "elapsedMs": 815.5943520000001,
+    "log": "runs/CommentRanges/legacy/compile.log",
+    "logSha256": "b9ddb875264820d544c6fe888b8f930720470abc502688259932b2c4852f523e",
+    "ok": true
+  },
+  {
+    "stage": "source-reader",
+    "command": [
+      "lake",
+      "--quiet",
+      "--no-build",
+      "lean",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/CommentRanges/legacy/Reader.lean",
+      "--",
+      "--tstack=131072",
+      "-j1"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1676.488926,
+    "log": "runs/CommentRanges/legacy/source-reader.log",
+    "logSha256": "665d54116197cb9f9abe2e0b5b5d9375b045d1377ff87f15b98256d346be42af",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/CommentRanges.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/CommentRanges/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 0,
+    "tool": {
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "elapsedMs": 646.8170010000003,
+    "log": "runs/CommentRanges/viaIR/compile.log",
+    "logSha256": "c74c1f94afbc30aacb65408cb859ab8462eb9b2319519cd8d9b966333686cdf5",
+    "ok": true
+  },
+  {
+    "stage": "source-reader",
+    "command": [
+      "lake",
+      "--quiet",
+      "--no-build",
+      "lean",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/CommentRanges/viaIR/Reader.lean",
+      "--",
+      "--tstack=131072",
+      "-j1"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1446.3183229999995,
+    "log": "runs/CommentRanges/viaIR/source-reader.log",
+    "logSha256": "33a23f75872faef84adb3bb32c6c54eada9840c1505e434e85aadc9fa4b06135",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/VersionReject.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/VersionReject/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 821.9761729999991,
+    "log": "runs/VersionReject/legacy/compile.log",
+    "logSha256": "976b14b08431a7fdf94f389d3401b14ad6425c9a92163785ccd67664376744c4",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/VersionReject.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/VersionReject/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 739.203884999999,
+    "log": "runs/VersionReject/viaIR/compile.log",
+    "logSha256": "976b14b08431a7fdf94f389d3401b14ad6425c9a92163785ccd67664376744c4",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/WrongIdentifier.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/WrongIdentifier/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 716.24964,
+    "log": "runs/WrongIdentifier/legacy/compile.log",
+    "logSha256": "c7e2f9c97ebe976db78bc19ef50a3309044a13c82d5dc16be6d5622ce7b4b3f0",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/WrongIdentifier.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/WrongIdentifier/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 613.7318469999991,
+    "log": "runs/WrongIdentifier/viaIR/compile.log",
+    "logSha256": "c7e2f9c97ebe976db78bc19ef50a3309044a13c82d5dc16be6d5622ce7b4b3f0",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/ConstantsEnums.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/ConstantsEnums/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 0,
+    "tool": {
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "elapsedMs": 1124.050378,
+    "log": "runs/ConstantsEnums/legacy/compile.log",
+    "logSha256": "1fa4ca991d7e6854792739783d0c32eeba731ba5e323f00f627fd04842696f24",
+    "ok": true
+  },
+  {
+    "stage": "source-reader",
+    "command": [
+      "lake",
+      "--quiet",
+      "--no-build",
+      "lean",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/ConstantsEnums/legacy/Reader.lean",
+      "--",
+      "--tstack=131072",
+      "-j1"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1800.0119560000003,
+    "log": "runs/ConstantsEnums/legacy/source-reader.log",
+    "logSha256": "04c9c0bb066f583e8ba02e836b97bd0aae768a548b717435460b0f7935ae936c",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/ConstantsEnums.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/ConstantsEnums/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 0,
+    "tool": {
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "elapsedMs": 773.9748170000003,
+    "log": "runs/ConstantsEnums/viaIR/compile.log",
+    "logSha256": "c8189332a201e7d479875f5d6bdc0a76b309dc591ae8a34e2f717f60208def40",
+    "ok": true
+  },
+  {
+    "stage": "source-reader",
+    "command": [
+      "lake",
+      "--quiet",
+      "--no-build",
+      "lean",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/ConstantsEnums/viaIR/Reader.lean",
+      "--",
+      "--tstack=131072",
+      "-j1"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1826.062586,
+    "log": "runs/ConstantsEnums/viaIR/source-reader.log",
+    "logSha256": "9017021f51c1147707bc8b806db4b855e1ed0c50afd301c771d46e252be766b0",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/SourceTypes.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/SourceTypes/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 0,
+    "tool": {
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "elapsedMs": 1164.6951479999989,
+    "log": "runs/SourceTypes/legacy/compile.log",
+    "logSha256": "80bad74581e0a21fe2a445d6488485388c8e279c4a4ab222490d6b32d5118d75",
+    "ok": true
+  },
+  {
+    "stage": "source-reader",
+    "command": [
+      "lake",
+      "--quiet",
+      "--no-build",
+      "lean",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/SourceTypes/legacy/Reader.lean",
+      "--",
+      "--tstack=131072",
+      "-j1"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1623.304036999998,
+    "log": "runs/SourceTypes/legacy/source-reader.log",
+    "logSha256": "fc077641ba6e63c3b68fd313e4c948a1a6112903923cb45083740086846578f3",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/SourceTypes.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/SourceTypes/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 0,
+    "tool": {
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "elapsedMs": 1097.5080990000024,
+    "log": "runs/SourceTypes/viaIR/compile.log",
+    "logSha256": "5df912581362de4e302e7d3d5d443f11bf65ec67fc49265758c96220bd935d47",
+    "ok": true
+  },
+  {
+    "stage": "source-reader",
+    "command": [
+      "lake",
+      "--quiet",
+      "--no-build",
+      "lean",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/SourceTypes/viaIR/Reader.lean",
+      "--",
+      "--tstack=131072",
+      "-j1"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1749.2156250000007,
+    "log": "runs/SourceTypes/viaIR/source-reader.log",
+    "logSha256": "825646912c4cec2185781f820f37ae1dc2f170bee30b02f07db859af42158297",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/WrongNominal.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/WrongNominal/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 711.5459899999987,
+    "log": "runs/WrongNominal/legacy/compile.log",
+    "logSha256": "dee4b5a69970d5cc21541ba01ceddbe0a72e72da6c95e31194eb89fe9955c54a",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/WrongNominal.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/WrongNominal/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 889.3728990000018,
+    "log": "runs/WrongNominal/viaIR/compile.log",
+    "logSha256": "dee4b5a69970d5cc21541ba01ceddbe0a72e72da6c95e31194eb89fe9955c54a",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/WrongBounds.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/WrongBounds/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 753.9349399999992,
+    "log": "runs/WrongBounds/legacy/compile.log",
+    "logSha256": "e729253f7c7b37442a86b403faaff2700c3cf5ac13ee405a5b67d3e2929c1f1f",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/WrongBounds.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/WrongBounds/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 780.2875050000002,
+    "log": "runs/WrongBounds/viaIR/compile.log",
+    "logSha256": "e729253f7c7b37442a86b403faaff2700c3cf5ac13ee405a5b67d3e2929c1f1f",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/ScalarMatrix.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/ScalarMatrix/legacy/source.ast.json",
+      "--no-wrapper"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 813.9118669999989,
+    "log": "runs/ScalarMatrix/legacy/compile.log",
+    "logSha256": "854d7b714c12273cd276559be4f616716a290552cd596aacbff9b29145497eee",
+    "ok": false
+  },
+  {
+    "stage": "compile",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/solc-ast.mjs",
+      "--compiler-file",
+      "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "--compiler-sha256",
+      "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "--source",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/inputs/ScalarMatrix.sol",
+      "--out",
+      "/workspace/solidity-lean/tests/upstream/baseline-20261028/probes/runs/ScalarMatrix/viaIR/source.ast.json",
+      "--no-wrapper",
+      "--via-ir"
+    ],
+    "exitCode": 1,
+    "tool": {
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    },
+    "elapsedMs": 1033.6424220000008,
+    "log": "runs/ScalarMatrix/viaIR/compile.log",
+    "logSha256": "854d7b714c12273cd276559be4f616716a290552cd596aacbff9b29145497eee",
+    "ok": false
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "cases": [
+    "BadClause",
+    "CommentRanges",
+    "ComputedRevert",
+    "ConstantsEnums",
+    "ExactRethrow",
+    "HexArray",
+    "HexArrayExplicit",
+    "InvalidDelete",
+    "NominalStruct",
+    "PushedMember",
+    "ScalarMatrixValid",
+    "SourceIdentifiers",
+    "SourceLiterals",
+    "SourceTypes",
+    "SpecBindings",
+    "TryContinue",
+    "VersionReject",
+    "WrongAddress",
+    "WrongBounds",
+    "WrongIdentifier",
+    "WrongNominal",
+    "WrongRethrow"
+  ],
+  "pipelines": [
+    "legacy",
+    "viaIR"
+  ],
+  "compilerRejections": [
+    "VersionReject",
+    "WrongIdentifier",
+    "WrongNominal",
+    "WrongBounds",
+    "WrongAddress",
+    "InvalidDelete",
+    "HexArray"
+  ],
+  "mode": "reader-only; not native typed admission or proof/replay"
+}

@@ -46,3 +46,24 @@ Reports retain archive, compiler, runner, imported adapter, dependency-lock,
 compiler-input, source and creation/runtime-bytecode hashes. Keep reports outside
 historical `tests/upstream/results`. Refer to the Group 03 continuation in
 `docs/feature-work/numeric-operators.md` for per-fixture Lean and reference results.
+
+## Generated typed differential cases
+
+After `source /workspace/.setup/activate.sh` (or selecting Lean 4.24.0):
+
+```sh
+lake build solcases Solidity.Examples.SolCases
+lake exe solcases 0
+SOLC_REFERENCE=/absolute/path/to/soljson-v0.8.38+commit.1835d247.js \
+  node --test scripts/evm-reference/generated.test.mjs
+node scripts/evm-reference/generated.mjs --compiler /absolute/path/to/soljson-v0.8.38+commit.1835d247.js --seed 0 --out .lake/generated/seed-0.json
+```
+
+The exact pinned compiler hash/version is checked before execution. The optional
+`--index N` selects one reproducible case. All four legacy/viaIR × optimizer
+off/on variants always run. A failed case shrinks within its template and
+boundary pool using regenerated Lean expectations; any mismatch cause is
+retained, without claiming cause-preserving minimization. Reports preserve
+sources, bytecode, layout, full adapted observations and hashes. Unknown syntax,
+layout, exceptions or logs are blocked. No JavaScript arithmetic model supplies
+expected results. See [scope and evidence](../../docs/feature-work/generated-differential.md).

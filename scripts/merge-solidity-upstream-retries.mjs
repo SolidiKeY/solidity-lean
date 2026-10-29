@@ -10,7 +10,7 @@ const read=path=>JSON.parse(readFileSync(path,'utf8'));
 const save=(path,value)=>writeFileSync(path,JSON.stringify(value,null,2)+'\n');
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const identity=['version','commit','compiler','compilerSha256','archiveSha256','runnerSha256',
-  'modelSha256','evmVersion','loopFuel','scope','snapshotFiles'];
+  'modelSha256','compilationUnitAdapterSha256','evmVersion','loopFuel','scope','snapshotFiles'];
 
 export function mergeRetry(original,retry) {
   if (original.path!==retry.path || original.stage!=='lean-runtime' || retry.stage!=='lean-runtime' ||

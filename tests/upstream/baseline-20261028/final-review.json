@@ -1,0 +1,52 @@
+{
+  "mode": "Independent read-only finder and skeptic; no Lean server or writes by reviewers.",
+  "result": "approved after confirmed fixes",
+  "baselineCheckpoint": "2207c1bba286538fd63e4a0ff4960ed4a593a8ab",
+  "verified": {
+    "fixtureFiles": 9660,
+    "snapshotLedgerFiles": 11622,
+    "bulkObservationEntriesPreserved": 3940,
+    "conclusiveModeVariantsByteIdentical": 1646,
+    "isolatedReports": 22,
+    "isolatedReportCounts": {
+      "working": 14,
+      "broken": 7,
+      "blocked": 1
+    },
+    "reviewedPartialFeatures": 76,
+    "unmappedPartialFeatures": 84,
+    "exactVariantGaps": 661,
+    "originalArchiveRegularFilesReadBack": 2141,
+    "buildArchiveRegularFilesReadBack": 9,
+    "coldExitCode": 124,
+    "coldElapsedSeconds": 5400.004883944,
+    "coldPeakBytes": 8195923968,
+    "coldOomEvents": 0,
+    "originalCacheRestored": true,
+    "warmRun": false,
+    "documentationMissingBefore": 20,
+    "documentationMissingAfter": 20,
+    "newMissingCitations": 0
+  },
+  "confirmedFixes": [
+    "Isolated outcomes distinguished from aggregate status transitions",
+    "Unfinished modes distinguished from overall already-broken fixture status",
+    "Actual selector source retained with matching original hash",
+    "Exact full-path model hashing and complete-mode/provenance checks",
+    "Existing observation prefixes and conclusive variants preserved",
+    "Fixed-byte examples precisely bytes4/8 to bytes10",
+    "Conservative returned-memory-alias refusal not falsely described as callee writes",
+    "No inheritance/doWhile attribution from misleading fixture names",
+    "Working runtime rows cannot omit required modes",
+    "Attached checkout assertion before lock/writes with refusal probe",
+    "Blocked cold/rusage limits stated accurately; no warm timing invented",
+    "Diagnostic path logs preserved losslessly compressed"
+  ],
+  "remaining": [
+    "Cold full default/TestSuite/frozen-sort combined gate blocked at90minutes",
+    "Warm timing not measured",
+    "84 feature-specific partial-gap attributions remain",
+    "20 pre-existing documentation missing references remain"
+  ],
+  "scope": "Diagnostic evidence, not universal semantic/source-lowering/compiler/EVM proof."
+}

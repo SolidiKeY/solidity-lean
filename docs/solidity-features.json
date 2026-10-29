@@ -401,7 +401,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Frontend/SourceUnits.lean",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "scripts/source-units.test.mjs",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -418,7 +423,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Frontend/SourceUnits.lean",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "scripts/source-units.test.mjs",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -803,7 +813,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Frontend/SourceUnits.lean",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "scripts/source-units.test.mjs",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -837,7 +852,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Frontend/SourceUnits.lean",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "scripts/source-units.test.mjs",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -1307,7 +1327,10 @@
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean",
         "Solidity/Examples/Tactics/AggregateSlices.lean",
-        "docs/feature-work/aggregates.md"
+        "docs/feature-work/aggregates.md",
+        "Solidity/Syntax/Elab/SliceCopy.lean",
+        "Solidity/Examples/Tactics/SliceReferenceCopies.lean",
+        "docs/calldata-slice-copies.md"
       ]
     },
     {
@@ -1736,7 +1759,11 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Calculus/LoopInvariantWk.lean",
+        "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "tests/solc/QuantifiedDiamond.sol",
+        "docs/loops.md"
       ]
     },
     {
@@ -1753,7 +1780,11 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Calculus/LoopInvariantWk.lean",
+        "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "tests/solc/QuantifiedDiamond.sol",
+        "docs/loops.md"
       ]
     },
     {
@@ -2610,7 +2641,7 @@
       "syntax": "new C(args) without salt",
       "scope": "abstract",
       "current": "partial",
-      "requirement": "Typed catalog world allocation, constructor execution, payment and rollback exist, with restricted solc_world_factory source fragments. General source new C with dynamic arguments, ABI/memory transfer, callbacks and composed worlds remains unintegrated.",
+      "requirement": "Typed catalog world allocation, constructor execution, payment and rollback exist, with restricted solc_world_factory source fragments. General source new C with dynamic arguments, ABI/memory transfer, callbacks and composed worlds remains unintegrated. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial.",
       "upstream": [
         {
           "path": "libsolidity/ast/Types.h",
@@ -2620,7 +2651,8 @@
       "localEvidence": [
         "Solidity/Semantics/ContractWorld.lean",
         "Solidity/Frontend/WorldImport.lean",
-        "Solidity/Examples/Tactics/ContractWorldSource.lean"
+        "Solidity/Examples/Tactics/ContractWorldSource.lean",
+        "Solidity/Semantics/ContractWorldCertificates.lean"
       ]
     },
     {
@@ -2629,7 +2661,7 @@
       "syntax": "try new C(args) returns(C c)",
       "scope": "abstract",
       "current": "partial",
-      "requirement": "Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported.",
+      "requirement": "Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial.",
       "upstream": [
         {
           "path": "libsolidity/ast/Types.h",
@@ -2639,7 +2671,8 @@
       "localEvidence": [
         "Solidity/Semantics/ContractWorld.lean",
         "Solidity/Frontend/WorldImport.lean",
-        "Solidity/Examples/Tactics/ContractWorldSource.lean"
+        "Solidity/Examples/Tactics/ContractWorldSource.lean",
+        "Solidity/Semantics/ContractWorldCertificates.lean"
       ]
     },
     {
@@ -2665,7 +2698,7 @@
       "syntax": "linked library public/external calls",
       "scope": "abstract",
       "current": "partial",
-      "requirement": "Typed linked execution uses caller storage and explicit library identity, with restricted solc_world_library literal field-mutation fragments. General library arguments, aggregate returns and nested external source execution remain unsupported.",
+      "requirement": "Typed linked execution uses caller storage and explicit library identity, with restricted solc_world_library literal field-mutation fragments. General library arguments, aggregate returns and nested external source execution remain unsupported. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial.",
       "upstream": [
         {
           "path": "libsolidity/ast/Types.h",
@@ -2675,7 +2708,8 @@
       "localEvidence": [
         "Solidity/Semantics/ContractWorld.lean",
         "Solidity/Frontend/WorldImport.lean",
-        "Solidity/Examples/Tactics/ContractWorldSource.lean"
+        "Solidity/Examples/Tactics/ContractWorldSource.lean",
+        "Solidity/Semantics/ContractWorldCertificates.lean"
       ]
     },
     {
@@ -3075,7 +3109,7 @@
       "syntax": "T transient x",
       "scope": "model",
       "current": "partial",
-      "requirement": "Typed primitive and established signature-marked function-tag source declarations use disjoint regions of the joint logical root product; nested self-calls share cells, failure rolls back the product, and lifetime/replay transaction boundaries reset cells. Physical layout, raw tload/tstore, raw function addresses and general source world/delegate execution remain unsupported.",
+      "requirement": "Typed primitive and established signature-marked function-tag source declarations use disjoint regions of the joint logical root product; nested self-calls share cells and failure rolls back the product. Closed source factory targets may contain certified transient roots; typed compositions of imported frames use an explicit outer World.transact boundary with per-owner reset and full rollback. General source-world statement lowering, transient factory owners, physical layout, raw tload/tstore and raw function addresses remain unsupported.",
       "upstream": [
         {
           "path": "libsolidity/parsing/Parser.cpp",
@@ -3091,7 +3125,10 @@
         "Solidity/Semantics/Lifetime.lean",
         "Solidity/Examples/Tactics/TransientStorage.lean",
         "Solidity/Semantics/TransientWorld.lean",
-        "Solidity/Examples/Tactics/TransientWorld.lean"
+        "Solidity/Examples/Tactics/TransientWorld.lean",
+        "Solidity/Frontend/WorldImport.lean",
+        "Solidity/Examples/Tactics/TransientWorldSource.lean",
+        "scripts/check-transient-world-vectors.mjs"
       ]
     },
     {
@@ -3218,7 +3255,10 @@
         }
       ],
       "localEvidence": [
-        "docs/solc-alignment.md"
+        "docs/solc-alignment.md",
+        "docs/feature-work/calls-exceptions.md",
+        "Solidity/Examples/Tactics/SelfPowerData.lean",
+        "tests/solc/SelfPowerData.sol"
       ]
     },
     {
@@ -3235,7 +3275,10 @@
         }
       ],
       "localEvidence": [
-        "docs/solc-alignment.md"
+        "docs/solc-alignment.md",
+        "docs/feature-work/calls-exceptions.md",
+        "Solidity/Examples/Tactics/SelfPowerData.lean",
+        "tests/solc/SelfPowerData.sol"
       ]
     },
     {
