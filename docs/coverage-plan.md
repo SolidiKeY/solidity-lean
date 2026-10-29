@@ -222,6 +222,8 @@ checkpoints below, not individual VM launches.
 | S04 | Implement independent aggregate/storage/memory/calldata/world/environment/ABI observations and transaction semantics under approved abstractions. Give inhabited models of the relations. |
 | S05 | Compose S00–S04, check the full source-constructor ledger against G00, prove source well-formedness/progress interfaces and independent nontrivial behavior controls. Missing semantic cases block frontend/backend preservation work. |
 
+S00/S01 status (2026-10-29): [source-s00-s01.md](feature-work/source-s00-s01.md). S00: the pinned solc 0.8.38 grammar as intrinsic syntax over `Solidity/Source/` (112 constructors indexed by category and loop/`unchecked` context), its complete constructor index, precise rejection of the six syntax-level exclusions, the checked mapping from all 119 grammar rules and labels and the manifest's syntax features, and the declaration graph. S01: constants, conversions (fixed point per the second round), C3 resolution with builtin profile status, expression and statement typing with a derivation for 23 of 29 expression constructors (6 deferred with stages), settings over the two pipelines and well-formedness; typing is a relation, a checker is open.
+
 ### Wave 1 — source syntax and checked admission (G08–G15)
 
 | Group | Deliverable and completion evidence |

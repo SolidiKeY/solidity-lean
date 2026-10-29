@@ -402,6 +402,12 @@ import Solidity.Source.Ctor
 import Solidity.Source.Upstream
 import Solidity.Source.Decls
 import Solidity.Source.Examples
+import Solidity.Source.Const
+import Solidity.Source.Types
+import Solidity.Source.Resolve
+import Solidity.Source.Typing
+import Solidity.Source.WellFormed
+import Solidity.Source.TypingExamples
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples

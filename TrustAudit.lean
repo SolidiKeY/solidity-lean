@@ -33,6 +33,7 @@ import Solidity.Examples.Tactics.ComputedRevert
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.Tactics.Rigid
 import Solidity.Roadmap.Controls
+import Solidity.Source.TypingExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -624,3 +625,37 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} roadmap control theorems use only the standard axioms"
+
+/-! Roadmap S00/S01: the source syntax, its rejection and mapping, and static
+typing (`Solidity/Source/`, `docs/feature-work/source-s00-s01.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Ctor.mem_all,
+    ``Solidity.Source.Syn.nodes_eq,
+    ``Solidity.Source.Syn.rejections_of_sub,
+    ``Solidity.Source.Syn.rejections_witnessed,
+    ``Solidity.Source.Syn.excl_ctor,
+    ``Solidity.Source.Excl.mapped,
+    ``Solidity.Source.Ctor.grammar_covers,
+    ``Solidity.Source.Syn.decls_ctor,
+    ``Solidity.Source.Examples.no_break_outside_loop,
+    ``Solidity.Source.Examples.no_nested_unchecked,
+    ``Solidity.Source.implicit_int_range,
+    ``Solidity.Source.FixTy.subsumes_inRange,
+    ``Solidity.Source.Q.toFixedExplicit?_of_toFixed?,
+    ``Solidity.Source.resolve_iff,
+    ``Solidity.Source.Resolves.unique,
+    ``Solidity.Source.StmtOK.locals_suffix,
+    ``Solidity.Source.TypingExamples.exprCoverage_typed,
+    ``Solidity.Source.TypingExamples.counter_wellFormed,
+    ``Solidity.Source.TypingExamples.tooBig_illTyped,
+    ``Solidity.Source.TypingExamples.clashing_illFormed,
+    ``Solidity.Source.TypingExamples.gasleft_untyped]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-definition theorems use only the standard axioms"

@@ -1330,6 +1330,49 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.FixTy.subsumes_inRange": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.implicit_int_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.Q.toFixedExplicit?_of_toFixed?": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.resolve_iff": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.Resolves.unique": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.StmtOK.locals_suffix": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.clashing_illFormed": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.counter_wellFormed": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.diamond_linearize": [],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.exprCoverage_typed": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.gasleft_untyped": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.tooBig_illTyped": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.w_emit": [
+  "propext"
+ ],
  "Solidity/Theorems.lean:Solidity.Main.callback_soundness": [
   "Classical.choice",
   "Quot.sound",

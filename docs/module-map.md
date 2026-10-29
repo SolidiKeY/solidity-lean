@@ -563,6 +563,12 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/Upstream.lean` | S00: the explicit mapping from grammar rules/labels and manifest features to constructors (`grammarCtors`, `featureCtors`; `Ctor.grammar_covers`), checked by `scripts/check-source-grammar.mjs`. |
 | `Source/Decls.lean` | S00: the typed declaration graph (`Decl`, `Syn.decls`, `Decl.refs`, `Syn.decls_ctor`). |
 | `Source/Examples.lean` | S00 controls: an in-profile counter and rejected assembly, `layout at`, `>>>` and `years` programs. |
+| `Source/Const.lean` | S01: compile-time constants: exact rationals `Q`, literal values and units, `Syn.const` (folding `+ - * / % **`, shifts and two's-complement bitwise operations), the implicit and explicit conversions of constants to integer and fixed-point types. |
+| `Source/Types.lean` | S01: static types `STy`, elaboration of elementary types, implicit and explicit conversions (fixed point per the second-round decisions) with `implicit_int_range` and `FixTy.subsumes_inRange`. |
+| `Source/Resolve.lean` | S01: name resolution: C3 linearization, scoped lookup, builtins classified against the profile (`Builtin.status`, member and call-option status), the `Resolves` judgment with `resolve_iff` and `Resolves.unique`. |
+| `Source/Typing.lean` | S01: type-name elaboration (`Syn.tys`), typing contexts, expression typing `HasType` and statement typing `StmtOK`/`ItemsOK`. |
+| `Source/WellFormed.lean` | S01: settings over solc's two pipelines (`Settings.coder`), resolutions, and well-formedness of a resolved unit. |
+| `Source/TypingExamples.lean` | S01 controls: a derivation per typed expression constructor (`exprCoverage_typed`), the counter well formed, C3 on a diamond, refuted ill-typed and clashing programs. |
 
 ## The solkey corpus
 
