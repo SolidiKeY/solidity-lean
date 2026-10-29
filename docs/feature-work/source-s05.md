@@ -156,7 +156,9 @@ bodies are split across declarations to stay within the default heartbeats
 (`evalE_apart_*` by constructor index, `evalBuiltin_apart_*` by builtin,
 `dispatch_apart_*` by what the call data selects); two interpreter pieces
 were named for this with the same meaning (`Glob.pickFn`,
-`Glob.pickGetter`, `extReturn`).
+`Glob.pickGetter`, `extReturn`), and `fieldsOf` and `decodeArg` were rewritten as single-level exhaustive matches.
+
+The prefix of an unfinished transaction holds its `.call`, `.answer` and `.reenter` events but no `.tx` event (`runTx` emits it when it ends). That `sessionAtEvents` agrees with `sessionAt` when every transaction completes holds by the definition, not by a theorem.
 
 ## Well-formedness and progress interfaces
 
