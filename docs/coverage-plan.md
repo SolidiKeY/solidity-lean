@@ -189,6 +189,8 @@ G02 status (2026-10-29): cold/warm/cache-restore measurements on the 16 GiB VM i
 
 G03 status (2026-10-29): constructor-to-theorem, combination, decision-row and module/lemma dependency ledger in [roadmap-g03-ledger.md](feature-work/roadmap-g03-ledger.md), checked by `scripts/roadmap-g03-ledger.py --check`; no obligation closed, no feature status changed.
 
+G01 revision (2026-10-29): `Solidity/Roadmap/Contracts.lean` and [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md#decisions-applied) now implement every G01 follow-up of the decisions (per-run hash premise, `decode` export, artifact-table parameter, resources, session environment, the two pipelines and the other second-round decisions); G01's interfaces are frozen at this revision, statements only.
+
 G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
 
 G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.

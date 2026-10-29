@@ -551,6 +551,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Roadmap/Contracts.lean` | Roadmap G01: the six final source-to-bytecode contracts, observations, resourced prefix families and compositional pass certificates as statements only (`Cert.comp`, `PublicCorrectness`); no final theorem is claimed ([roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md)). |
 | `Roadmap/Frontend.lean` | Roadmap G05: checked frontend certificate interfaces as statements only: raw input, parse, resolution and metadata checkers (`Chain.checked`), digests as identity (`Digests.identity`, `Digests.only_invariant`), admitted settings: solc's two pipelines (three order/coder pairs) and the empty link map ([roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md)). |
 | `Roadmap/Evm.lean` | Roadmap G06: the pinned Osaka EVM interface as statements only: the pin and its idealizations (`pinned`), the Osaka precompile table, the shared fixed functions with the per-run hash premise and `CREATE` addresses (`Fixed`), resources as gas schedules, fuel and source failure points (`GasRes`, `FailurePoints`), frame observation (`Halt.observe`) and the core/Bridge `Certificate` ([roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md)). |
+| `Roadmap/TypedRun.lean` | `typedRunPrefixes`: the fuelled typed run (`Prog.runF`) read as a G01 prefix family, kept apart from `Roadmap/Contracts.lean` so that a source semantics importing the contracts does not reach the intrinsic run. |
 
 ## The solkey corpus
 
