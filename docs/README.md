@@ -11,8 +11,9 @@ history is in git.
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Typed loop measures, finite membership, entry audits, certified source witnesses and editor integration. |
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |
-| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 32 initial 10-hour VM assignments covering 115 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
+| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 32 VM lanes of four to ten hours covering 115 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
 | [feature-work/roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) | Roadmap G01: intrinsic layer interfaces, observations, the six final theorem contracts, pass certificates, reuse map and the decisions they implement. |
+| [feature-work/roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md) | Roadmap G05: audit of frontend, provenance and unsafe elaborator paths; checked certificate interfaces for raw input, parse, resolution and metadata; link settings and admitted settings. |
 | [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy (model, abstract, exclude) and the exclusions. |
 | [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md) | Roadmap G00: pins and their disagreements, evidence for each recorded exclusion, manifest/ledger reconciliation, owners and open scope questions. |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated from `solidity-features.json`: each feature's requirement, scope, status and evidence. Do not edit. |
@@ -23,8 +24,13 @@ history is in git.
 | [feature-work/integration.md](feature-work/integration.md) | Index of the per-feature documents in `feature-work/` (source admission, declarations, operators, aggregates, recursive types, ABI and hashes, transient storage, contract world, calls and exceptions, finite dispatch) and their shared decisions. |
 | [feature-work/cloud-integration-20261028.md](feature-work/cloud-integration-20261028.md) | Eight finished feature-cloud workstreams, merge decisions, historical replay controls and combined validation. |
 | [feature-work/cloud-integration-01-09.md](feature-work/cloud-integration-01-09.md) | Combined cloud tasks 01–09: snapshot scope, conflict resolutions, regression checks and remaining blockers. |
+| [feature-work/roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) | Roadmap G06: every EVM-like machine and its disagreements with pinned Osaka, the pinned semantics and observation interfaces, the core/Bridge certificate boundary and the bridge lemmas with owners. |
+| [feature-work/roadmap-g02-measure.md](feature-work/roadmap-g02-measure.md) | Roadmap G02: measured cold/warm/cache-restore build baseline, slowest and largest modules, OOM, cache recipe, stale artifacts and the ten-hour VM assessment. |
 | [feature-work/roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) | Roadmap G04: current compiler theorems, every fragment/input restriction and its discharging group. |
-- [Cloud task 10 integration](feature-work/cloud-integration-10.md) — committed ABI/error repairs, merge decisions and combined validation.
+| [feature-work/roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md) | Roadmap G06 child: hand-written EVM vector scripts re-pinned from Cancun to Osaka; both-fork measurements, bytecode comparison, lane re-runs and Lean-side pin obligations. |
+| [feature-work/fixed-point-semantics.md](feature-work/fixed-point-semantics.md) | Fixed-point types: the pinned specification, the reference model `Language/FixedPoint.lean`, silent-spec proposals, scope questions and roadmap owners. |
+| [feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md) | The approved per-run hash premise `CollisionFree` and the kernel-checked random-oracle birthday bound (q²/2²⁵⁷ for keccak), adaptive-query scope and how G27.05/G46.05 use them. |
+| [feature-work/cloud-integration-10.md](feature-work/cloud-integration-10.md) | Cloud task 10 integration: committed ABI/error repairs, merge decisions and combined validation. |
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
 

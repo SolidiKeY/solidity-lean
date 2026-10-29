@@ -1,0 +1,96 @@
+{
+  "method": "Every solc_compile call of every check was intercepted (cancun settings at base, osaka settings at the pin). Each returned evm.bytecode / evm.deployedBytecode object was compared byte for byte, then with every CBOR metadata section (a2 64 ipfs 58 22 1220 <32 bytes> 64 solc 43 <3 bytes> 0033) removed. CLZ (0x1e) is counted at instruction positions, skipping PUSH data, after removing metadata. Deployed objects had their trailing metadata stripped by the interceptor before comparison.",
+  "compiles": 43,
+  "objects": 97,
+  "totals": {
+    "objects": 97,
+    "identical": 51,
+    "metadataOnly": 46,
+    "codeDiffers": 0,
+    "clzOpcodesOsaka": 0
+  },
+  "perCheck": {
+    "abi-hex-call": {
+      "objects": 4,
+      "identical": 4,
+      "clzOpcodesOsaka": 0
+    },
+    "abi-vectors": {
+      "objects": 1,
+      "identical": 1,
+      "clzOpcodesOsaka": 0
+    },
+    "call-exception-34": {
+      "objects": 2,
+      "identical": 2,
+      "clzOpcodesOsaka": 0
+    },
+    "call-exception-38": {
+      "objects": 2,
+      "identical": 2,
+      "clzOpcodesOsaka": 0
+    },
+    "modifier-frames": {
+      "objects": 2,
+      "identical": 2,
+      "clzOpcodesOsaka": 0
+    },
+    "operator-aliases": {
+      "objects": 4,
+      "metadataOnly": 2,
+      "clzOpcodesOsaka": 0,
+      "identical": 2
+    },
+    "public-getters-34": {
+      "objects": 20,
+      "metadataOnly": 20,
+      "clzOpcodesOsaka": 0
+    },
+    "public-getters-38": {
+      "objects": 20,
+      "metadataOnly": 20,
+      "clzOpcodesOsaka": 0
+    },
+    "recursive-types": {
+      "objects": 4,
+      "identical": 4,
+      "clzOpcodesOsaka": 0
+    },
+    "self-power-data": {
+      "objects": 6,
+      "identical": 6,
+      "clzOpcodesOsaka": 0
+    },
+    "slice-copies": {
+      "objects": 2,
+      "identical": 2,
+      "clzOpcodesOsaka": 0
+    },
+    "source-admission-34": {
+      "objects": 4,
+      "identical": 4,
+      "clzOpcodesOsaka": 0
+    },
+    "source-admission-38": {
+      "objects": 4,
+      "identical": 4,
+      "clzOpcodesOsaka": 0
+    },
+    "transient-34": {
+      "objects": 8,
+      "identical": 8,
+      "clzOpcodesOsaka": 0
+    },
+    "transient-38": {
+      "objects": 8,
+      "identical": 8,
+      "clzOpcodesOsaka": 0
+    },
+    "transient-world": {
+      "objects": 6,
+      "metadataOnly": 4,
+      "clzOpcodesOsaka": 0,
+      "identical": 2
+    }
+  }
+}

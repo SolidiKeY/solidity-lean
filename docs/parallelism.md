@@ -30,6 +30,7 @@ elaborator.
 - what those import: `Calculus.{TermEval,TermEq,TermWk,LoopInvariantWk,Lower,LowerRun,Shift,
   WkOver,Lands,StateFacts,ReadWrite,DataIn,SeqRewrite,SyntaxSize,Graft,
   CallSummary,KIntTwoAnchors}`.
+- the hash bound: `Hash.CollisionBound`.
 
 `Tools.SolCases` is an external-source printer and is explicitly included in
 the forbidden frontend set checked from the core.
