@@ -194,6 +194,13 @@ had that restriction: `SVal.defaultOf` keeps a fixed-size array's `n` elements
 
 ## Memory allocation, aliasing, declarations
 
+The M7 given-heap witness fallback (`Calculus/MemoryWitness.lean`) is Lean-only
+finite semantic checking, not a new taclet. Its binder enumeration preserves
+existing identities and unset; it performs no allocation rewrite. Alias write
+controls use the same identity/index distinction as `memoryRules.key`'s
+`readOnWrite`, via the existing typed heap read/write laws.
+
+
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `memoryReferenceDeclFreshAlloc` | same | same | `T memory mv; ⇝ { mv := freshId(addM(memory)) ‖ memory := addM(memory) }`, the pair KeY writes: `ITerm.alloc` and `MTerm.addM` agree on the minted root because both read the same pre-state |
@@ -664,6 +671,19 @@ old one, computed from the type (`TVal.overlay`, one component at a time:
 `TVal.ovR`): no lazy leaf, so the `selectOnSaveEmpty*` rows are the reads of
 that overlay.  `docs/solkey-feedback.md` carries the request that solkey drop
 the fold.
+
+### Two-threshold integer quantifiers (Lean-only)
+
+`Calculus/KIntTwoAnchors.lean` is exact arithmetic preparation, not a new
+SolKey program taclet. It keeps the existing KeY-int `gt`/`ge` symbols:
+`∀ y : Int. y > z → y > k` becomes `z >= k`. Side conditions: both
+comparisons read the same innermost integer, `z` is an outer KeY-int local,
+`k` is a literal, and both Boolean observations are exactly `true`.
+The thresholds are total and independent of `y`; `y = k` is the
+counterexample point when `z < k`. A typed shape certificate and
+`Fml.holds_kintTwoAnchor` prove equivalence at every state and polarity.
+No term/formula syntax or printer is added. Other shapes, including
+symbolic multiplication, are not admitted by this preparation.
 
 ### The update vocabulary (`Solidity/Update.lean`)
 

@@ -7,6 +7,7 @@ import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.MemStructCut
+import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
 
@@ -385,13 +386,17 @@ theorem decideStruct_complete {φ : Fml C []}
   | none => simp only [ha, Option.isSome_none, Bool.false_eq_true] at h
   | some a => cases a <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true]
 
-/-- Cut fresh arrays first; otherwise try the certified fresh-struct field schema. -/
+/-- Cut fresh arrays or decide their certified fresh-struct schema; otherwise
+try a certified given-heap countermodel. A single witness never proves validity. -/
 def decideMem (φ : Fml C []) : LeafVerdict C :=
   if φ.hasAllocAll then
     match (φ.hoist 1024).mxTop with
     | some ψ => decideLeafA ψ
     | none => decideStruct φ
-  else .unknown
+  else
+    match MemoryWitness.countermodel? φ with
+    | some w => .refuted w.1
+    | none => .unknown
 
 theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid φ := by
   unfold decideMem at h
@@ -400,7 +405,7 @@ theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid
     · rename_i ψ hψ
       exact fun σ => (Fml.hoist_holds 1024 φ σ).1 ((Fml.mxTop_valid hψ).2 (decideLeafA_sound h) σ)
     · exact decideStruct_sound h
-  · cases h
+  · split at h <;> cases h
 
 theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = .refuted σ) :
     ¬ holds σ φ := by
@@ -410,7 +415,11 @@ theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = 
     · rename_i ψ hψ
       exact fun hφ => decideLeafA_refutes h ((Fml.mxTop_holds hψ σ).1 ((Fml.hoist_holds 1024 φ σ).2 hφ))
     · exact decideStruct_refutes h
-  · cases h
+  · split at h
+    · rename_i w _
+      cases h
+      exact w.2
+    · cases h
 
 /-! ### Binders of KeY's `int` (M7, feature 26)
 

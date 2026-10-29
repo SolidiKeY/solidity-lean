@@ -11,7 +11,7 @@ history is in git.
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Typed loop measures, finite membership, entry audits, certified source witnesses and editor integration. |
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |
-| [coverage-plan.md](coverage-plan.md) | The plan for covering the features: steps, one VM each, their order and gates. |
+| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 32 initial 10-hour VM assignments covering 115 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
 | [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy (model, abstract, exclude) and the exclusions. |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated from `solidity-features.json`: each feature's requirement, scope, status and evidence. Do not edit. |
 | [semantic-gaps.md](semantic-gaps.md) | What of Solidity's semantics is still open, and the chain facts an obligation assumes: the work list. |
