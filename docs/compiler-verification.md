@@ -1,5 +1,13 @@
 # Compiler verification
 
+This document describes the **current fragment compiler and its proved
+boundaries**. The target is a complete compiler for all Solidity in the approved
+profile, with kernel-checked source-to-executable-EVM correctness. The
+[full compiler roadmap](coverage-plan.md) owns the VM groups and final proof
+obligations. The fragment restrictions below are implementation/proof work to
+remove, not additional user exclusions; this page does not claim that endpoint
+has been reached.
+
 `Solidity/Evm/` compiles a fragment of the scoped syntax (`Stmt C Γ Γ'`,
 `Solidity/Syntax/Scoped.lean`) to an EVM-style stack machine and proves that
 the compiled code does what the typed run (`Stmt.run`,

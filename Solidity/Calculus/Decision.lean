@@ -7,6 +7,7 @@ import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.MemNegPrep
+import Solidity.Calculus.MemStructCut
 import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
@@ -350,13 +351,50 @@ def _root_.Solidity.Fml.hasAllocAll {Γ : Ctx} : Fml C Γ → Bool
   | .all _ _ φ => φ.hasAllocAll
   | _ => false
 
-/-- Exact negative-block preparation and fresh-array cutting, or a concrete
-given-heap countermodel. Truth at one witness state is never promoted to validity. -/
+/-- Decide the certified fresh-struct field schema. Refutations carry the
+realized child heap, rather than reusing the arithmetic pipeline's state. -/
+def decideStruct (φ : Fml C []) : LeafVerdict C :=
+  match MemoryWitness.structAnswer φ with
+  | some (.proved _) => .proved
+  | some (.refuted state _) => .refuted (state (State.init C))
+  | none => .unknown
+
+/-- Every accepted positive struct answer is valid in every typed state. -/
+theorem decideStruct_sound {φ : Fml C []} (h : decideStruct φ = .proved) : Fml.Valid φ := by
+  unfold decideStruct at h
+  split at h
+  · rename_i valid _
+    exact valid
+  · cases h
+  · cases h
+
+/-- The returned state includes the constructed children and refutes the leaf. -/
+theorem decideStruct_refutes {φ : Fml C []} {σ : State C []}
+    (h : decideStruct φ = .refuted σ) : ¬ holds σ φ := by
+  unfold decideStruct at h
+  split at h
+  · cases h
+  · rename_i state refutes _
+    cases h
+    exact refutes (State.init C)
+  · cases h
+
+/-- Recognition produces a proved or a refuted verdict, never unknown. -/
+theorem decideStruct_complete {φ : Fml C []}
+    (h : (MemoryWitness.structAnswer φ).isSome = true) : decideStruct φ ≠ .unknown := by
+  unfold decideStruct
+  cases ha : MemoryWitness.structAnswer φ with
+  | none => simp only [ha, Option.isSome_none, Bool.false_eq_true] at h
+  | some a => cases a <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true]
+
+/-- Exact negative-block preparation and fresh-array cutting, with a certified
+fresh-struct fallback or a concrete given-heap countermodel. Truth at one
+witness state is never promoted to validity. -/
 def decideMem (φ : Fml C []) : LeafVerdict C :=
   if φ.hasAllocAll then
     match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => decideLeafA ψ
-    | none => .unknown
+    | none => decideStruct φ
   else
     match MemoryWitness.countermodel? φ with
     | some w => .refuted w.1
@@ -370,7 +408,7 @@ theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid
       exact fun σ => ((mxNegativePrepare φ).exact σ).1
         ((Fml.hoist_holds 1024 (mxNegativePrepare φ).body σ).1
           ((Fml.mxTop_valid hψ).2 (decideLeafA_sound h) σ))
-    · cases h
+    · exact decideStruct_sound h
   · split at h <;> cases h
 
 theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = .refuted σ) :
@@ -382,7 +420,7 @@ theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = 
       exact fun hφ => decideLeafA_refutes h ((Fml.mxTop_holds hψ σ).1
         ((Fml.hoist_holds 1024 (mxNegativePrepare φ).body σ).2
           (((mxNegativePrepare φ).exact σ).2 hφ)))
-    · cases h
+    · exact decideStruct_refutes h
   · split at h
     · rename_i w _
       cases h
@@ -499,13 +537,13 @@ theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf �
     ¬ Fml.Valid φ :=
   fun hv => decideLeaf_refutes h (hv σ)
 
-/-- **The fragment with fresh arrays**: the leaf binds one; after the same
-exact preparation and hoisting as `decideMem`, its cut is defined and in
-`Fml.CoveredA`. -/
+/-- **The fragment with fresh memory objects**: after the same exact
+preparation and hoisting as `decideMem`, its array cut is in `Fml.CoveredA`,
+or the cut is unavailable and the fresh-struct schema is certified. -/
 def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
   φ.hasAllocAll && match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => ψ.CoveredA
-    | none => false
+    | none => (MemoryWitness.structAnswer φ).isSome
 
 /-- **The fragment with binders of KeY's `int`**: the leaf binds one where
 `Fml.zT` reads it, is in `Fml.zOK`, and its rewriting is in `Fml.CoveredA`. -/
@@ -518,9 +556,9 @@ remaining positive binders read as ledger entries, in `Fml.kintCovered`. -/
 def _root_.Solidity.Fml.kencCovered (φ : Fml C []) : Bool :=
   φ.kencB.2 && (φ.kencB.1.CoveredA || φ.kencB.1.kintCovered)
 
-/-- **The fragment proved complete**: `Fml.CoveredA`, or a leaf with fresh
-arrays whose cut is in it (`Fml.memCovered`, M7 step 6), or one with
-binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
+/-- **The fragment proved complete**: `Fml.CoveredA`, or a leaf with a covered
+fresh-array cut or a certified fresh-struct schema (`Fml.memCovered`, M7 step 6),
+or one with binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
 feature 26), or one with them over two words (`Fml.kencCovered`,
 features 30 and 31). -/
 def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
@@ -534,7 +572,7 @@ theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMe
   rw [if_pos ha]
   split at h
   · exact decideLeafA_complete h
-  · cases h
+  · exact decideStruct_complete h
 
 theorem decideKInt_complete {φ : Fml C []} (h : φ.kintCovered = true) :
     decideKInt φ ≠ .unknown := by

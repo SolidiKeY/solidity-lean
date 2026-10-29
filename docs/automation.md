@@ -638,6 +638,22 @@ fallback does not establish general memory-binder completeness or change
 The [task handoff](feature-work/next10-memory-parameter-witness.md) records exact
 scope, proof/native evidence, resource measurements, review and gate status.
 
+The combined integration keeps exact negative-array preparation, the
+fresh-struct decision branch and the given-heap countermodel branch together.
+Read-only finder and skeptic reviews confirmed that both sides retain their
+imports and declarations, soundness/refutation transport and coverage branches.
+They found and corrected a stale combined verdict and array-only coverage
+docstrings. The combined memory pin expects `["refuted", "refuted", "refuted"]`
+for the negative array block, hidden parameter and fresh struct. The original
+formulas, target certificates and decision budgets are unchanged.
+
+For this fresh-master resolution, per-file MCP error diagnostics completed
+successfully for `Calculus/Decision.lean`. Diagnostics for
+`Examples/DecisionMemory.lean` and the import root `Solidity.lean` remained
+partial, with no reported errors; they are not passing validation results.
+Conflict-marker and `git diff --check` checks pass. No full build was run;
+the individual lanes' historical build and axiom evidence is separate.
+
 ### What is not proved
 
 * `DecisionTheorem` itself.
@@ -657,8 +673,8 @@ scope, proof/native evidence, resource measurements, review and gate status.
   does better in general (a sorted mapping read at three far keys).
 * **The original gap witnesses**: all six statements and their kernel
   `*_inTarget` certificates are retained. `gapKIntTwoAnchors` is now proved;
-  `gapMemInnerNeg` and `gapMemParam` are refuted. The other three still
-  answer *unknown*. The original statements are retained below:
+  `gapMemInnerNeg`, `gapMemParam` and `gapMemStruct` are refuted. The other
+  two still answer *unknown*. The original statements are retained below:
   * `gapKIntTwoAnchors` (`Examples/DecisionKInt.lean`,
     `(∀ int z. ∀ int y. y > z → y > 0) → 0 == 1`): **closed by an exact
     test point**. `∀ y : Int. y > z → y > k`, for an outer KeY-int local
@@ -702,6 +718,16 @@ scope, proof/native evidence, resource measurements, review and gate status.
     and target certificate are unchanged. See the witness subsection above.
   * `gapMemStruct`: a fresh struct with reference members needs objects for
     them, so the cut is exact only at heaps that have them.
+    The original equation is now refuted by `decideStruct`: a finite typed
+    realization constructs its children before returning the countermodel
+    state. `word_cut` retains the realizability premise at each heap;
+    `word_cut_global` proves scalar exactness using constructed children.
+    The formula and its target certificate are unchanged. The added decision
+    schema handles one outer map-free struct binder with a direct primitive
+    field/literal equation (literal on the right) or a reflexive equation.
+    Nested reference observations, alias formulas and general struct bodies
+    remain open; witness sharing controls do not claim decision coverage for
+    them. See the [implementation and evidence record](feature-work/next10-memory-struct-witness.md).
   * `gapWrittenMemory` (`Examples/Decision.lean`,
     `∀ s t. [ s[0] = 1; ] keccak256(s) == keccak256(t)`): a hash of written
     memory.  Next: `decideMem`'s cut inside `decideHash`, input equality as
@@ -867,7 +893,8 @@ witnesses were in `Fml.inTarget` and answered unknown (M7, "What is not proved")
 [two-anchor follow-up](feature-work/kint-two-anchors.md) certifies
 `gapKIntTwoAnchors` as proved; exact fresh-array preparation certifies
 `gapMemInnerNeg` as refuted, and the given-heap witness certifies `gapMemParam`
-as refuted. The other three original witnesses remain unknown. All six
+as refuted; the fresh-struct schema certifies `gapMemStruct` as refuted.
+The other two original witnesses remain unknown. All six
 original definitions and target certificates are unchanged.
 
 Group 07 direct file-backed profiling found its coverage proofs take about
@@ -898,7 +925,7 @@ pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
    counterexample.  It needs `Fml.inTarget ∧ ¬ Fml.Residue → Fml.Covered`,
    with no `sorry` and no new axioms (only propext, Classical.choice,
    Quot.sound).  `Fml.Residue` is a decidable predicate that names
-   exactly the gaps still open (the three remaining unknown pins above, plus the unpinned shapes
+   exactly the gaps still open (the two remaining unknown pins above, plus the unpinned shapes
    the proof finds it needs), each with a one-line reason.
 2. **The goal is unchanged.** `DecisionTheorem` stays stated as it is;
    later milestones may only shrink `Fml.Residue`.
