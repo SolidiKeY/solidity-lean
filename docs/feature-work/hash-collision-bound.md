@@ -296,8 +296,7 @@ corollaries instantiate the general `k`-bit theorem.
 
 ## Remaining child obligations
 
-- G27.05's proof that reached offsets stay below `L` (above); the lane's
-  hashed layout model (work queue item 2) is to supply it for its slot terms.
+- bounded offsets are proved for `STy.locate` terms (`STy.locate_bounded`); their tie to compiled code (G27.05) is open.
 - The G46.05 preimage list per prefix and the G01 `PublicCorrectness`
   premise (owners: G46.05 and the G01 revision).
 

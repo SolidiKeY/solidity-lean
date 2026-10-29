@@ -19,6 +19,7 @@ const CORE = [
   /^Solidity\.Calculus\.(Sound.*|StmtSound|ProvesSound|PremiseSound|UpdRuleScoped|UpdateRules|TermLib\.Rules)$/,
   /^Solidity\.Calculus\.RuleSyntax\./,
   /^Solidity\.Hash\.CollisionBound$/,
+  /^Solidity\.Backend\.(Opcode|Jumpdest|Assembler|Control)$/,
   /^Solidity\.Hash\.Adaptive$/,
   /^Solidity\.Storage\.HashedLayout$/,
   /^Solidity\.Storage\.HashedKeccak$/,
