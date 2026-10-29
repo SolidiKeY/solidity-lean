@@ -296,7 +296,8 @@ DECISIONS = {
     "exclude": ("G00 Q1", {"approvedExclusion"}),
     "abstract": ("G00 Q2", {"approved", "replace", "provedSpecialCase", "followsG01"}),
 }
-DECIDED_ROWS = {"G00 Q1": set(EXCLUSION_EVIDENCE), "G00 Q6": {"fixedPoint"}}
+DECIDED_ROWS = {"G00 Q1": set(EXCLUSION_EVIDENCE), "G00 Q6": {"fixedPoint"},
+                "G00 Q4 (revised)": {"evaluationOrder", "pragmaAbicoder"}}
 
 GROUPS = ({f"S0{i}" for i in range(6)} | {f"G{i:02d}" for i in range(56)})
 

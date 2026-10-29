@@ -14,7 +14,8 @@ decision would stay **unresolved**.
 
 - **Base revision:** `caf52ecd4dde5d37cbc0098d47de1a01aa218285` ("Record
   resource and environment decisions"); branch
-  `cloud/roadmap-w1-20261029/g00-manifest-rev`. The generated
+  `cloud/roadmap-w1-20261029/g00-manifest-rev`, with master `e4ae128`
+  (second-round decisions, Osaka vector re-pin) merged in. The generated
   [Ledger](#ledger) and the counts here are at this revision plus the changes
   below. Line numbers elsewhere in this document are the first audit's (base
   `127c2ee`) unless stated.
@@ -27,7 +28,9 @@ decision would stay **unresolved**.
   `decision` object (`date`, `question`, `outcome`, `record`, optional
   `note`): the 30 `exclude` rows cite G00 Q1 (`approvedExclusion`), the 23
   `abstract` rows cite G00 Q2 (see [Abstraction outcomes](#abstraction-outcomes-g00-q2)),
-  and `fixedPoint` cites G00 Q6 (`fullSupport`). `solidity-feature-audit.py`
+  `fixedPoint` cites G00 Q6 (`fullSupport`), and `evaluationOrder` and
+  `pragmaAbicoder` cite the revised G00 Q4 (`twoPipelines`,
+  [second round](../solidity-scope.md#second-round-2026-10-29)). `solidity-feature-audit.py`
   checks that the cited section holds the "**User decision (date):**"
   marker and the question's table row, that every `exclude` row cites G00 Q1
   and every `abstract` row G00 Q2, and prints the decision in the readable
@@ -198,25 +201,28 @@ the base revision only.
 ### Pin decisions (2026-10-29)
 
 What the [user decisions](../solidity-scope.md#user-decisions-2026-10-29)
-settle for each disagreement above. "Decided" fixes the target; the code and
-scripts still pin the old values until the named owner changes them. Checked
-at base `caf52ec` by `git grep`; nothing here re-pins a file.
+and their [second round](../solidity-scope.md#second-round-2026-10-29) (which
+revised G00 Q4) settle for each disagreement above. "Decided" fixes the
+target; the code and scripts still pin the old values until the named owner
+changes them. Checked by `git grep` at this branch's head after merging
+master `e4ae128`; nothing here re-pins a file.
 
 | # | Disagreement | Decision | State | Open for |
 |---|---|---|---|---|
 | 1 | Two solc versions | G00 Q4: the frozen profile is solc **0.8.38**; 0.8.34 fixtures are SolKey compatibility checks only | Decided. `parseCompiler` still accepts both and CI still downloads only 0.8.34; provenance does not yet mark 0.8.34 fixtures as compatibility-only | G05 (provenance boundary), G53 (SolKey re-pin) |
-| 2 | Two EVM forks | G00 Q3: **Osaka** for the pinned semantics and the compiled bytecode, modulo the recorded EIP-170/EIP-3860 idealization (G01 Q2) | Decided. The hand-written vector scripts and fixture records still say Cancun, the bridge still `TargetSchedule := "Cancun"`, the core `Solidity/Evm` machine records no fork | G06 (core fork, bridge); the sibling g06-osaka-repin task (vector scripts) |
+| 2 | Two EVM forks | G00 Q3: **Osaka** for the pinned semantics and the compiled bytecode, modulo the recorded EIP-170/EIP-3860 idealization (G01 Q2) | Decided. The hand-written vector scripts are re-pinned to Osaka on master (`0f92a28`, [roadmap-g06-osaka.md](roadmap-g06-osaka.md)); the bridge still has `TargetSchedule := "Cancun"` and the core `Solidity/Evm` machine records no fork | G06 (core fork, bridge) |
 | 3 | Amsterdam | G00 Q1: `blockSlotnum` stays excluded, so no Amsterdam target is needed | Resolved | — |
 | 4 | Optimizer settings vary by tool | None: they configure the external solc oracle, not this compiler | Open (tooling only, no profile effect) | G06/G52 (reference tooling) |
 | 5 | Reference EVM versions | None (named open in the follow-up list) | Open | G06 |
-| 6 | Link settings not recorded | G01 Q8 puts every linked library in the compiled system, so `validateSettings` rejecting `libraries` now conflicts with the profile | Open, sharpened | G05 (link-settings provenance), G42.04/G44.02 |
-| 7 | Evaluation-order settings | G00 Q4: the public theorem quantifies over all eight `EvalOrder` combinations | Decided. Six combinations have no solc setting; how the theorem's settings express them is not written | G01 (theorem statement), G05 (settings provenance) |
+| 6 | Link settings not recorded | G05 Q1 (second round): only an empty link map is admitted; the session deploys and links every library itself, a pre-assigned map is refused. With G01 Q8 this resolves the disagreement | Decided. `validateSettings` already rejects a non-empty `libraries` map; the session-side deployment and linking is G05/G44.02 work | G05, G42.04/G44.02 |
+| 7 | Evaluation-order settings | G00 Q4 revised (second round): solc's two pipelines only — the legacy order with the pragma's coder (v1 or v2), and the via-IR order with coder v2; the other six `EvalOrder` combinations are not in the profile. (The first answer, all eight combinations, is superseded.) | Decided. The `evaluationOrder` and `pragmaAbicoder` rows cite it (`twoPipelines`); `EvalOrder` still expresses all eight, so the theorem's settings must restrict to the two | G01 (theorem statement), G05 (settings provenance) |
 
 Ownership gap 1 (compiler-settings surface) is narrowed accordingly: the
-fork, the solc version and the `EvalOrder` range are fixed; their encoding in
-the theorem settings remains G01/G05 work. Gap 4's fork half is now
-re-pinning work; its reference-EVM versions half (disagreement 5) is still
-open.
+fork, the solc version and the two pipelines are fixed; their encoding in
+the theorem settings remains G01/G05 work. Gap 2 (link-settings provenance)
+is decided by G05 Q1. Gap 4's fork half is done for the vector scripts at
+master and remains for the bridge; its reference-EVM versions half
+(disagreement 5) is still open.
 
 ## Exclusion evidence
 
@@ -622,7 +628,7 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `hexLiterals` | lexical | model | in-profile | in profile | S00 S02 | G08 | G18.03 | G33 |
 | `identifiers` | lexical | model | in-profile | in profile | S00 S01 | G08 G12 | G16 G17 | G26 |
 | `numericLiterals` | lexical | model | in-profile | in profile | S00 | G08 | G16 | G25 |
-| `pragmaAbicoder` | lexical | model | in-profile | in profile | S00 S04.02 | G08 G11 | G21 | G40 G41 |
+| `pragmaAbicoder` | lexical | model | in-profile | in profile; G00 Q4 (revised): twoPipelines | S00 S04.02 | G08 G11 | G21 | G40 G41 |
 | `pragmaOther` | lexical | model | in-profile | in profile | S00 | G08 G11 | — | — |
 | `pragmaVersion` | lexical | model | in-profile | in profile | S00 | G08 G11 | — | — |
 | `stringLiterals` | lexical | model | in-profile | in profile | S00 S02 | G08 | G18.03 | G33 |
@@ -640,7 +646,7 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `checkedArithmetic` | semantics | model | in-profile | in profile | S02 | G13 | G16 | G25 |
 | `constructorLifetime` | semantics | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S04.04 | G14 | G22.03 | G44 G50.01 |
 | `defaultInitialization` | semantics | model | in-profile | in profile | S02 S04.01 | G13 | G18 | G30 G33 |
-| `evaluationOrder` | semantics | model | in-profile | in profile | S02 S03 | G13 | G16 G17 | G26 |
+| `evaluationOrder` | semantics | model | in-profile | in profile; G00 Q4 (revised): twoPipelines | S02 S03 | G13 | G16 G17 | G26 |
 | `exactConstants` | semantics | model | in-profile | in profile | S01 | G13 | G16 | G25 |
 | `featureDetection` | semantics | model | in-profile | in profile | S05 | G15 | — | — |
 | `nonpayableEntry` | semantics | model | in-profile | in profile | S04.04 | G13 | G22.05 | G40 G43 |
@@ -861,25 +867,26 @@ until the pin work below lands. First-audit obligations superseded by the
 decisions are marked so; the rest are carried forward.
 - ~~Q1–Q6 to the user~~ — answered 2026-10-29. G15/S00 keep the 30
   exclusions refused; G55 can now close against tier-A rows only.
-- G01: the settings (all eight `EvalOrder` combinations, solc 0.8.38, Osaka)
+- G01: the settings (solc's two pipelines, solc 0.8.38, Osaka)
   and static code constants (Q5: the `Artifact` table) in the theorem
   contracts.
 - G03: extend this ledger through admission → lowering → backend → EVM →
   theorem, including the `combination-*` symbols, the G00 rethrow supplement
   and the 17 named combinations.
-- G05: link-settings provenance (disagreement 6, now in conflict with G01
-  Q8); marking 0.8.34 fixtures as SolKey compatibility checks only
-  (disagreement 1); settings provenance for the six `EvalOrder` combinations
-  without a solc setting (disagreement 7).
+- G05: the empty-link-map rule and session-side linking (disagreement 6,
+  G05 Q1); marking 0.8.34 fixtures as SolKey compatibility checks only
+  (disagreement 1); settings provenance for the two pipelines
+  (disagreement 7).
 - G06: the Osaka fork for the core machine and the bridge
   (`TargetSchedule := "Cancun"`); reference-EVM versions (disagreement 5).
-  The vector scripts' fork is the sibling g06-osaka-repin task.
+  The vector scripts are on Osaka at master.
 - `abstract` rows with outcome `replace` (`worldAssumptions`, `sendTransfer`,
   `emptyDataValueCall`): G22, G42, G43, G47 replace the premise or propose
   it again; `callbackSemantics` (`provedSpecialCase`): the G01 Q4
   special-case proof of the no-callback reading.
-- `fixedPoint`: a reference semantics (sibling fixed-point-semantics task),
-  then S00–S02, G08–G15, G16–G23, G24–G47; until then G15 must keep
+- `fixedPoint`: a reference semantics encoding the second-round
+  fixed-point answers (sibling fixed-point-semantics task; shifts stay
+  rejected, narrowing G00 Q6), then S00–S02, G08–G15, G16–G23, G24–G47; until then G15 must keep
   fixed-point input refused (now by `validateNode`'s `solidity.fixedPoint`
   diagnostic, not the scope scan).
 - S00/G08: check the seven `upstream` rows against the pinned corpus.
@@ -927,6 +934,13 @@ findings and fixes:
 7. The "Fixed-point syntax remains upstream incomplete" line of
    `solidity-scope.md` was wrongly listed as stale (it is true of solc).
    Fixed in Remaining.
+
+After the reviews the coordinator reported the revised G00 Q4; it was read
+on master (`7a6a897`, "Second round (2026-10-29)") and merged before the
+manifest and the pin table were updated (rows 2, 6, 7; the `twoPipelines`
+annotations; the fixed-point shift narrowing in the `fixedPoint`
+requirement). These follow-up edits were checked by both `--check` gates
+and the scratch-copy tests, not by a further review.
 
 Rejected or kept: the backend range `G24–G47` for "G24+" (G48–G55 are
 composition owners of every row, stated once); `fixedPoint`'s position among
@@ -995,6 +1009,41 @@ the script are kept as the fallback for rows added later without an
 override.
 
 ## Handoff
+
+### Decision revision (2026-10-29)
+
+- Base `caf52ecd4dde5d37cbc0098d47de1a01aa218285`, master `e4ae128` merged;
+  branch `cloud/roadmap-w1-20261029/g00-manifest-rev`.
+- Done: tier A from the decision marker (30/30); `decision` objects on the
+  30 exclusions, the 23 abstract rows (approved 9, replace 3,
+  provedSpecialCase 1, followsG01 10), `fixedPoint` (G00 Q6) and
+  `evaluationOrder`/`pragmaAbicoder` (G00 Q4 revised); `fixedPoint` moved
+  to model/missing with owners; admission refusal `solidity.fixedPoint` in
+  `validateNode`; pin decisions table.
+- Lean: no theorem or definition was added. Changed: the generated
+  `Solidity.Language.Feature.info` row for `fixedPoint` (scope `.model`,
+  current `.missing`), so `rejectedByUpstream` loses it and
+  `targetFeatures`/`missingFeatures` gain it; `Unmodelled.excluded` and
+  `Feature.exclusion_complete` are unchanged (premise-free over the
+  catalog). `validateNode` (private) gained the fixed-point refusal.
+- Checked: both `--check` gates; Lean diagnostics clean on
+  `Solidity/Language/Features.lean` and
+  `Solidity/Frontend/SolcJson/Admission.lean`; `check-layers`,
+  `check-orphans`, `check-trust` pass; `check-doc-paths.sh` 46 missing
+  (baseline). `./run-lean.sh` at `de72958` (before the master merge and the
+  Q4-revision strings): `lake build` completed (718 jobs); `lake build
+  SolkeyTestSuite` failed only in `Solidity.TestSuite.Derived17` ("Lean
+  exited with code 137", out of memory; its repair belongs to the
+  memory-loops lane), so `run-lean.sh` stopped before its last step;
+  `check-solkey.sh` run separately: 37 mismatches (baseline). Elapsed 63 min
+  wall time, peak system memory 15.1 GiB (sampled every 20 s, including the
+  Lean server).
+- Not proved or not done: no fixed-point fixture exercises the new refusal;
+  the follow-up edits after the master merge were not re-reviewed or
+  rebuilt (they change one generated requirement string); the stale
+  `solidity-scope.md` lines are left to that file's owner.
+
+### First audit
 
 - Base `127c2ee59de16971e45b08a2def54f4e5fae8e2a`; branch
   `cloud/roadmap-w0-20261029/g00-scope-freeze`.

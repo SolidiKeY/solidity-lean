@@ -208,6 +208,7 @@ DECISION_OUTCOMES = {
     'G00 Q1': ({'exclude'}, {'approvedExclusion'}),
     'G00 Q2': ({'abstract'}, {'approved', 'replace', 'provedSpecialCase', 'followsG01'}),
     'G00 Q6': ({'model'}, {'fullSupport'}),
+    'G00 Q4 (revised)': ({'model'}, {'twoPipelines'}),
 }
 DECIDED_SCOPES = {'exclude': 'G00 Q1', 'abstract': 'G00 Q2'}
 

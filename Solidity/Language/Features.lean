@@ -1488,7 +1488,7 @@ def Feature.info : Feature → FeatureInfo
   | .fixedPoint =>
     { category := "types", spelling := "fixed/ufixed; fixedMxN/ufixedMxN",
       scope := .model, current := .missing,
-      requirement := r#"Full fixed-point support beyond the acceptance boundary of pinned solc 0.8.38, which accepts some declarations such as `type T is fixed;` and reports UnimplementedFeatureError for most other uses: fixed/ufixed and fixedMxN/ufixedMxN declarations, literals, conversions and arithmetic need a reference semantics defined in this repository, since solc gives none. Nothing is implemented."#,
+      requirement := r#"Full fixed-point support beyond the acceptance boundary of pinned solc 0.8.38, which accepts some declarations such as `type T is fixed;` and reports UnimplementedFeatureError for most other uses: fixed/ufixed and fixedMxN/ufixedMxN declarations, literals, conversions and arithmetic need a reference semantics defined in this repository, since solc gives none. Nothing is implemented. Shifts on fixed-point operands stay rejected, as by solc (second-round decision, narrowing G00 Q6); the reference semantics follows the second-round fixed-point answers."#,
       upstream := [{ path := "libsolidity/analysis/TypeChecker.cpp", line := 814 }], localEvidence := [] }
   | .removedAliases =>
     { category := "upstream", spelling := "now; sha3; suicide; throw; msg.gas; block.blockhash; callcode; legacy f.gas()/value()",

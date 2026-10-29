@@ -363,7 +363,14 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q4 (revised)",
+        "outcome": "twoPipelines",
+        "record": "docs/solidity-scope.md#second-round-2026-10-29",
+        "note": "The legacy pipeline takes the pragma coder (v1 or v2); the via-IR pipeline takes coder v2."
+      }
     },
     {
       "id": "pragmaOther",
@@ -3391,7 +3398,14 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q4 (revised)",
+        "outcome": "twoPipelines",
+        "record": "docs/solidity-scope.md#second-round-2026-10-29",
+        "note": "Settings are solc's two pipelines only: the legacy order with the pragma coder, and the via-IR order with coder v2; the other six EvalOrder flag combinations are not in the profile."
+      }
     },
     {
       "id": "exactConstants",
@@ -4107,7 +4121,7 @@
       "syntax": "fixed/ufixed; fixedMxN/ufixedMxN",
       "scope": "model",
       "current": "missing",
-      "requirement": "Full fixed-point support beyond the acceptance boundary of pinned solc 0.8.38, which accepts some declarations such as `type T is fixed;` and reports UnimplementedFeatureError for most other uses: fixed/ufixed and fixedMxN/ufixedMxN declarations, literals, conversions and arithmetic need a reference semantics defined in this repository, since solc gives none. Nothing is implemented.",
+      "requirement": "Full fixed-point support beyond the acceptance boundary of pinned solc 0.8.38, which accepts some declarations such as `type T is fixed;` and reports UnimplementedFeatureError for most other uses: fixed/ufixed and fixedMxN/ufixedMxN declarations, literals, conversions and arithmetic need a reference semantics defined in this repository, since solc gives none. Nothing is implemented. Shifts on fixed-point operands stay rejected, as by solc (second-round decision, narrowing G00 Q6); the reference semantics follows the second-round fixed-point answers.",
       "upstream": [
         {
           "path": "libsolidity/analysis/TypeChecker.cpp",
