@@ -51,7 +51,7 @@ namespace Solidity.Roadmap
 
 /-! ## Words, addresses and the per-run hash premise -/
 
-/-- An EVM word: a natural number below `2^256` (`Fin Evm.W`). -/
+/-- An EVM word: a natural number below `2^256` (`Fin Solidity.Evm.W`). -/
 abbrev Word := Fin (2 ^ 256)
 
 /-- An account address: 160 bits. -/
@@ -79,10 +79,16 @@ preimage, so the premise never asks for injectivity. -/
 theorem CollisionFree.singleton {α β : Type} (f : α → β) (a : α) : CollisionFree f [a] :=
   Solidity.Hash.CollisionFree.singleton a
 
-/-- How many preimages a source run adequacy speaks of may hash: far below
-the `2^256` at which a collision or an overlap of regions is forced by
+/-- How many distinct preimages a source run adequacy speaks of may hash: far
+below the `2^256` at which a collision or an overlap of regions is forced by
 counting. -/
 def hashBound : Nat := 2 ^ 128
+
+/-- The number of distinct preimages in a list (the `q` of the collision
+bound; `(Solidity.Hash.dedup xs).length`, computed without choice). -/
+def distinctCount : List Bytes → Nat
+  | [] => 0
+  | x :: xs => if xs.elem x then distinctCount xs else distinctCount xs + 1
 
 /-! ## Finite prefixes and their order -/
 
@@ -523,10 +529,11 @@ def Fixed.createAddress (F : Fixed) (sender : Address) (nonce : Fin (2 ^ 64)) : 
   ⟨F.evm.createAddress sender.val nonce.val, F.evm.createAddress_lt _ _⟩
 
 /-- The region parameters are sane: regions of at least one and at most
-`2^64` slots, at most `2^64` root slots.  Without it the region premise fails
-on every hashing run (`rootSlots ≥ 2^256`) or vanishes (`regionLen = 0`). -/
+`2^128` slots, at most `2^128` root slots.  Without it the region premise
+fails on every hashing run (`rootSlots ≥ 2^256`) or vanishes
+(`regionLen = 0`). -/
 def Fixed.Sane (F : Fixed) : Prop :=
-  1 ≤ F.regionLen ∧ F.regionLen ≤ 2 ^ 64 ∧ F.rootSlots ≤ 2 ^ 64
+  1 ≤ F.regionLen ∧ F.regionLen ≤ 2 ^ 128 ∧ F.rootSlots ≤ 2 ^ 128
 
 /-- **The hash premise over a list of preimages** (G01 Q3 and the second
 round): the hash does not collide on them, and the regions of `regionLen`
@@ -558,18 +565,27 @@ def Lang.Affordable (L : Lang Event Outcome) (F : Fixed) (session : L.Env → Se
 def SessionEnv.ZeroHasNoCode (e : SessionEnv) : Prop :=
   ∀ h, e.hasCode h Address.zero = false
 
+/-- A precompile has no code (`extcodesize` reads 0 there). -/
+def SessionEnv.PrecompilesHaveNoCode (e : SessionEnv) : Prop :=
+  ∀ h a, Address.Precompile a → e.hasCode h a = false
+
+/-- The session issues one action: the first request, and nothing after. -/
+def SessionEnv.OneRequest (e : SessionEnv) : Prop :=
+  ∀ h i, 1 ≤ i → e.requests h i = none
+
 /-- A call to an account without code runs nothing: it succeeds at once with
 no data. -/
 def SessionEnv.CodelessSucceeds (e : SessionEnv) : Prop :=
   ∀ h a v i s, e.hasCode h a = false →
     e.callee (h ++ [.call a v i s]) = .answer (.success [])
 
-/-- The allowed session environments: address 0 without code, codeless
-accounts running nothing, and otherwise any requests and any strategy
+/-- The allowed session environments: address 0 and the precompiles without
+code, codeless accounts running nothing, and otherwise any requests and any
+strategy
 (unbounded reentrancy, any answer to any call or payment to an account with
 code).  Unaffordable requests are allowed and dropped (`Lang.Affordable`). -/
 def SessionEnv.Allowed (e : SessionEnv) : Prop :=
-  e.ZeroHasNoCode ∧ e.CodelessSucceeds
+  e.ZeroHasNoCode ∧ e.PrecompilesHaveNoCode ∧ e.CodelessSucceeds
 
 /-- The no-callback reading (`transferSemantics:noCallback`): the strategy
 never calls back. -/
@@ -593,8 +609,8 @@ contain the no-callback ones, so a statement over every allowed environment
 holds of them; it is never a premise. -/
 theorem SessionEnv.Allowed.withoutCallbacks {e : SessionEnv} (he : e.Allowed) :
     e.withoutCallbacks.Allowed :=
-  ⟨he.1, fun h a v i s hc => by
-    simp only [SessionEnv.withoutCallbacks, he.2 h a v i s hc]⟩
+  ⟨he.1, he.2.1, fun h a v i s hc => by
+    simp only [SessionEnv.withoutCallbacks, he.2.2 h a v i s hc]⟩
 
 /-- Every deployment the language reports produces the address `Fixed`
 computes from the session's deployer and nonce: `this` comes from the
@@ -653,11 +669,12 @@ structure Artifact where
 def Artifact.initcode (art : Artifact) (k : Nat) : Bytes :=
   ((art.contracts[k]?).map CodeUnit.initcode).getD []
 
-/-- No unit's creation bytes are a prefix of another's, so the creation bytes
-of a `CREATE` name the unit they come from. -/
+/-- No nonempty unit's creation bytes are a prefix of another's, so the
+creation bytes of a `CREATE` name the unit they come from (interfaces and
+abstract contracts have empty creation bytes and are never created). -/
 def Artifact.PrefixFree (art : Artifact) : Prop :=
   ∀ j k, j < art.contracts.length → k < art.contracts.length → j ≠ k →
-    ¬ art.initcode j <+: art.initcode k
+    art.initcode j ≠ [] → ¬ art.initcode j <+: art.initcode k
 
 /-- The creations of a history: the position of the created contract and the
 constructor arguments. -/
@@ -730,14 +747,18 @@ structure SourceSpec where
   withFailures : lang.Res → Failures → lang.Res
   failures_with : ∀ r x, failures (withFailures r x) = x
   NoFail : Failures → Prop
-  /-- The preimages a source prefix determines (G06's F7): its `keccak256`
-  arguments and the slot preimages of its storage accesses under the pinned
-  storage layout, in order. -/
+  /-- The preimages a source prefix determines (G06's F7), in order: every
+  hash the source semantics evaluates (`keccak256`, selectors computed at
+  run time, indexed dynamic event arguments) and the slot preimages, under
+  the pinned storage layout, of every storage object it touches (reads,
+  writes, `delete`, `push`, `pop`). -/
   hashed : lang.Prog → lang.Env → lang.Res → List Bytes
   hashed_consistent : ∀ p e r r', lang.resLE.le r r' → hashed p e r <+: hashed p e r'
   /-- Adequacy speaks of the runs without resource failures hashing fewer
-  than `hashBound` preimages; the premise is the hash premise on them. -/
-  forward_iff : ∀ p e r, lang.Forward p e r ↔ NoFail (failures r) ∧ (hashed p e r).length < hashBound
+  than `hashBound` distinct preimages; the premise is the hash premise on
+  them. -/
+  forward_iff : ∀ p e r, lang.Forward p e r ↔
+    NoFail (failures r) ∧ distinctCount (hashed p e r) < hashBound
   guard_iff : ∀ p e r, lang.Guard p e r ↔ HashPremise fixed (hashed p e r)
 
 /-- The source is idealized: every bound is admissible (unbounded fuel and
@@ -748,7 +769,7 @@ def SourceSpec.Idealized (S : SourceSpec) : Prop := ∀ r, S.lang.Admissible r
 /-- A bound without resource failures: the run as if gas were unbounded
 (only the call-depth limit and the stipend rule fail frames, as on the
 EVM). -/
-def SourceSpec.NoExhaust (S : SourceSpec) (r : S.lang.Res) : Prop := S.NoFail (S.failures r)
+def SourceSpec.NoFailure (S : SourceSpec) (r : S.lang.Res) : Prop := S.NoFail (S.failures r)
 
 /-- The source's judgments are functions where the contract needs them: an
 input has one parse, a parse one resolution. -/
@@ -783,8 +804,9 @@ def SourceSpec.Approved (S : SourceSpec) : Prop :=
 /-- **Non-vacuity of a source definition** (G07, S05): inputs the source
 admits whose meanings, at allowed environments, in the forward bounds and
 under the premise (say, hashing nothing), complete with a success carrying
-data and complete with a revert, and one that diverges without resource
-failures, whatever the artifact table.  Each witness starts from an
+data and complete with a revert, and one whose single request (or
+deployment) diverges without resource failures, whatever the artifact
+table.  Each witness starts from an
 admitted input, so a `SourceSpec` with an empty input type, `Parses :=
 False` or `InProfile := False` has none. -/
 def SourceSpec.NonVacuous (S : SourceSpec) : Prop :=
@@ -794,9 +816,9 @@ def SourceSpec.NonVacuous (S : SourceSpec) : Prop :=
   (∃ i r w p e rs d, S.Admitted i r ∧ S.lang.Allowed e ∧ S.lang.Admissible rs ∧
     ∀ art, S.lang.Forward (S.meaning r w p art) e rs ∧ S.lang.Guard (S.meaning r w p art) e rs ∧
       (S.lang.sem (S.meaning r w p art) e rs).final = some (.revert d)) ∧
-  (∃ i r w p e, S.Admitted i r ∧ S.lang.Allowed e ∧
+  (∃ i r w p e, S.Admitted i r ∧ S.lang.Allowed e ∧ (S.session e).OneRequest ∧
     ∀ art, (S.lang.sem (S.meaning r w p art) e).Diverges
-      fun rs => S.lang.Admissible rs ∧ S.NoExhaust rs)
+      fun rs => S.lang.Admissible rs ∧ S.NoFailure rs)
 
 /-- **Contract 1, source admission and parsing.**  The frontend accepts
 exactly the well-formed in-profile inputs, with their resolution.  A
@@ -819,13 +841,27 @@ structure CheckedFrontend (S : SourceSpec) where
 /-- The intrinsic layer: typed contract worlds (`Contract`, `Prog C Γ Γ'`,
 `State C Γ` and a world of typed instances), with their own semantics.
 `ofWorld` runs the sessions from a world; `worlds` lists the worlds a prefix
-reaches at its transaction boundaries.  Its `Forward` and `Guard` carry the
-source's down: a lowering certificate must establish them at `need`. -/
+reaches at its transaction boundaries.  Like the source, it reads the
+session environment exactly, and its `Forward` and `Guard` are pinned: runs
+without resource failure hashing fewer than `hashBound` distinct preimages,
+and the hash premise on them, where the preimages of a run resumed from a
+world include the keys the world stores. -/
 structure IntrinsicSpec where
   World : Type
   lang : Lang Event Outcome
   ofWorld : World → lang.Prog
   worlds : lang.Prog → lang.Env → lang.Res → List World
+  fixed : Fixed
+  session : lang.Env → SessionEnv
+  ofSession : SessionEnv → lang.Env
+  session_of : ∀ s, session (ofSession s) = s
+  of_session : ∀ e, ofSession (session e) = e
+  allowed_iff : ∀ e, lang.Allowed e ↔ (session e).Allowed
+  NoFail : lang.Res → Prop
+  hashed : lang.Prog → lang.Env → lang.Res → List Bytes
+  forward_iff : ∀ p e r, lang.Forward p e r ↔
+    NoFail r ∧ distinctCount (hashed p e r) < hashBound
+  guard_iff : ∀ p e r, lang.Guard p e r ↔ HashPremise fixed (hashed p e r)
 
 /-- **Contract 2, lowering.**  Total on admitted source (the proofs are
 arguments: no `Option`), for every artifact table, and the source meaning
@@ -877,11 +913,11 @@ structure EvmSpec where
   resume : World → lang.Prog
 
 /-- The EVM's approved readings: the Osaka pin with its idealizations
-(`Evm.pinned`), every horizon and gas schedule admissible, no premise or
+(`Evm.pinned`), sane region parameters, every horizon and gas schedule admissible, no premise or
 forward restriction of its own (it is only a target), precompiles fixed
 functions, `this` from the deployment, and values affordable. -/
 def EvmSpec.Approved (V : EvmSpec) : Prop :=
-  V.pin = Evm.pinned ∧ (∀ r, V.lang.Admissible r) ∧
+  V.pin = Evm.pinned ∧ V.fixed.Sane ∧ (∀ r, V.lang.Admissible r) ∧
     (∀ p e r, V.lang.Forward p e r ∧ V.lang.Guard p e r) ∧ V.lang.PrecompilesFixed ∧
     V.lang.ThisFromDeployment V.fixed V.session ∧ V.lang.Affordable V.fixed V.session
 
@@ -908,6 +944,15 @@ structure Execution (Asm : Lang Event Outcome) (V : EvmSpec) where
   dom : ∀ a, pass.Dom a
   agrees : ∀ a, pass.run a (dom a) = V.load (assemble a)
   cert : Cert pass
+
+/-- An EVM prefix is matched by a source prefix in the forward bounds that
+meets the premise: the state export speaks of these.  The premise is the
+source's, so the compiler cannot make it fail (by hashing a known collision
+pair, or the same preimage `2^128` times). -/
+def Matched (S : SourceSpec) (p : S.lang.Prog) (e : S.lang.Env) (b : Prefix Event Outcome) :
+    Prop :=
+  ∃ rs, S.lang.Admissible rs ∧ S.lang.Forward p e rs ∧ S.lang.Guard p e rs ∧
+    b.Le (S.lang.sem p e rs)
 
 /-- The state export of the public theorem (G01 Q6): the lowering whose
 worlds are decoded, the decoding of EVM worlds given the preimages hashed so
@@ -938,16 +983,20 @@ structure PublicCorrectness {I : IntrinsicSpec} (S : SourceSpec) (V : EvmSpec)
   fixed : S.fixed = V.fixed
   session : ∀ e, S.session (envAbs e) = V.session e
   envAbs_agrees : ∀ e, X.lowering.pass.envAbs (X.envAbs e) = envAbs e
+  /-- The intrinsic layer reads the same environment and fixed parameters. -/
+  ifixed : I.fixed = V.fixed
+  isession : ∀ e, I.session (X.envAbs e) = V.session e
   /-- `type(C).creationCode` is what `new C` deploys: every `CREATE` runs the
   table's creation bytes for the contract its event names. -/
   creates_table : ∀ i art, compiler i = some art → art.PrefixFree ∧
     ∀ e rt, V.created (V.load art) e rt =
       (createsOf (V.lang.sem (V.load art) e rt).events).map fun ca => art.initcode ca.1 ++ ca.2
-  /-- The bytes hash only preimages the source determines. -/
+  /-- The bytes hash only preimages the source determines (each at some
+  source bound: a failing transaction may hash before it fails). -/
   hashes_source : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e rt, V.lang.Allowed e → V.lang.Admissible rt →
-      ∃ rs, S.lang.Admissible rs ∧ ∀ b, b ∈ V.hashed (V.load art) e rt →
-        b ∈ S.hashed (S.meaning r w p art) (envAbs e) rs
+      ∀ b, b ∈ V.hashed (V.load art) e rt →
+        ∃ rs, S.lang.Admissible rs ∧ b ∈ S.hashed (S.meaning r w p art) (envAbs e) rs
   refines : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e, V.lang.Allowed e → S.lang.Allowed (envAbs e) ∧
       RefinesUnder S.lang.Admissible V.lang.Admissible
@@ -956,14 +1005,13 @@ structure PublicCorrectness {I : IntrinsicSpec} (S : SourceSpec) (V : EvmSpec)
         (S.lang.sem (S.meaning r w p art) (envAbs e)) (V.lang.sem (V.load art) e)
   decode_reach : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e, V.lang.Allowed e → ∀ rt, V.lang.Admissible rt →
-      (V.hashed (V.load art) e rt).length < hashBound →
-      HashPremise V.fixed (V.hashed (V.load art) e rt) →
+      Matched S (S.meaning r w p art) (envAbs e) (V.lang.sem (V.load art) e rt) →
       ∃ ri, I.lang.Admissible ri ∧
         (V.worlds (V.load art) e rt).map (X.decode (V.hashed (V.load art) e rt)) =
           (I.worlds (I.ofWorld (X.lowering.lower r w p art)) (X.envAbs e) ri).map some
-  decode_commutes : ∀ i r, S.Admitted i r → ∀ (_ : S.WellFormed r) (_ : S.InProfile r) art,
+  decode_commutes : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e rt, V.lang.Allowed e → V.lang.Admissible rt →
-      HashPremise V.fixed (V.hashed (V.load art) e rt) →
+      Matched S (S.meaning r w p art) (envAbs e) (V.lang.sem (V.load art) e rt) →
       ∀ ω, ω ∈ V.worlds (V.load art) e rt →
       ∀ ω', X.decode (V.hashed (V.load art) e rt) ω = some ω' →
       ∀ e', V.lang.Allowed e' → (V.session e').balance = V.balances ω →
@@ -1043,14 +1091,14 @@ theorem PublicCorrectness.succeeds (h : PublicCorrectness S V compiler envAbs X)
     exact ⟨i, art, e', rt, d, hc, he', hrt, hd, ht⟩
 
 /-- **An always-reverting compiler fails**: compiled bytes that never complete
-with a success satisfy the public contract for no non-vacuous source,
-whatever they hash. -/
+with a success at an allowed environment and admissible bound satisfy the
+public contract for no non-vacuous source, whatever they hash. -/
 theorem PublicCorrectness.not_alwaysRevert (h : PublicCorrectness S V compiler envAbs X)
     (hv : S.NonVacuous)
-    (hrev : ∀ i art e rt d, compiler i = some art →
+    (hrev : ∀ i art e rt d, compiler i = some art → V.lang.Allowed e → V.lang.Admissible rt →
       (V.lang.sem (V.load art) e rt).final ≠ some (.success d)) : False := by
-  obtain ⟨i, art, e, rt, d, hc, _, _, _, ht⟩ := h.succeeds hv
-  exact hrev i art e rt d hc ht
+  obtain ⟨i, art, e, rt, d, hc, he, hrt, _, ht⟩ := h.succeeds hv
+  exact hrev i art e rt d hc he hrt ht
 
 /-- The source environment is allowed exactly when the EVM's is: both read
 the same session environment. -/
