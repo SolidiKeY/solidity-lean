@@ -1,0 +1,13 @@
+lean-build-probe (batch probe-20261029)
+base: 127c2ee59de16971e45b08a2def54f4e5fae8e2a
+
+`lake build Solidity.Keccak`: NOT RUN. Bash denied it (repo .claude/settings.json
+forbids `lake build`); coordinator redirected to the lean-lsp MCP probe below.
+
+Probe: mcp__lean-lsp__lean_diagnostic_messages on Solidity/Keccak.lean, severity=error
+- result: success=true, partial=false, timed_out=false, items=[], failed_dependencies=[]
+- wall time: ~5 s (2026-10-29T00:50:47Z -> 00:50:52Z, measured around the call
+  from two Bash clock reads, so includes tool-call overhead; server may have been warm)
+- cache fetched: none observed (not measurable through the MCP call)
+- peak RSS: not measurable (no /usr/bin/time; MCP server process)
+- log tail: n/a (no log; the MCP call returns JSON only)
