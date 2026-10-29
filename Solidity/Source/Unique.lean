@@ -804,6 +804,165 @@ theorem uniqE_suffix {Γ : Ctx} {op : SuffixOp} {x : Syn .expr} (ih : Uniq Γ (s
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
+/-- A copy into storage is never an implicit conversion. -/
+theorem STy.implicit_of_copiesTo {B : DeclName → DeclName → Bool} {σ τ : STy} (h : σ.copiesTo τ = true) :
+    σ.implicit B τ = false := by
+  cases σ <;> cases τ
+  all_goals first
+    | (cases h; done)
+    | rfl
+    | skip
+  case bytes.bytes l1 l2 | string.string l1 l2 =>
+    cases l1 <;> cases l2 <;> first | rfl | (cases h; done)
+  case stringLit.bytes l2 | stringLit.string l2 =>
+    cases l2 <;> first | rfl | (cases h; done)
+  case array.array l1 e1 n1 l2 e2 n2 =>
+    cases l1 <;> cases l2 <;> first
+      | (cases h; done)
+      | (change (_ && false) = false; exact Bool.and_false _)
+  case struct.struct l1 d1 l2 d2 =>
+    cases l1 <;> cases l2 <;> first
+      | (cases h; done)
+      | (change (_ && false) = false; exact Bool.and_false _)
+
+/-- **Indexing.** -/
+theorem uniqE_index {Γ : Ctx} {a : Syn .expr} {o : Syn (.opt .expr)} (ih : Uniq Γ (sizeOf (Syn.index a o))) :
+    UniqE Γ (.index a o) := by
+  intro τ τ' d d'
+  have hce : (Syn.index a o).const = Option.none := rfl
+  have hbo : (Syn.index a o).binOp? = Option.none := rfl
+  cases d with
+  | @indexArray a i l τe σ n da di h hb =>
+    have hs : sizeOf a < sizeOf (Syn.index a (.some i)) ∧ sizeOf i < sizeOf (Syn.index a (.some i)) := by
+      simp only [Syn.index.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+    cases d' with
+    | indexArray da' di' _ _ =>
+      obtain ⟨h1, e1⟩ := ih.e a hs.1 da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e i hs.2 di di'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | indexMapping da' _ _ => cases (ih.e a hs.1 da da').1
+    | indexBytes da' hk _ _ _ =>
+      obtain ⟨h1, -⟩ := ih.e a hs.1 da da'
+      cases h1; cases hk
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @indexMapping a i τk τv σ da di h =>
+    have hs : sizeOf a < sizeOf (Syn.index a (.some i)) ∧ sizeOf i < sizeOf (Syn.index a (.some i)) := by
+      simp only [Syn.index.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+    cases d' with
+    | indexArray da' _ _ _ => cases (ih.e a hs.1 da da').1
+    | indexMapping da' di' _ =>
+      obtain ⟨h1, e1⟩ := ih.e a hs.1 da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e i hs.2 di di'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | indexBytes da' hk _ _ _ =>
+      obtain ⟨h1, -⟩ := ih.e a hs.1 da da'
+      cases h1; cases hk
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @indexBytes a i τa σ da hk di h hb =>
+    have hs : sizeOf a < sizeOf (Syn.index a (.some i)) ∧ sizeOf i < sizeOf (Syn.index a (.some i)) := by
+      simp only [Syn.index.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+    cases d' with
+    | indexArray da' _ _ _ =>
+      obtain ⟨h1, -⟩ := ih.e a hs.1 da da'
+      cases h1; cases hk
+    | indexMapping da' _ _ =>
+      obtain ⟨h1, -⟩ := ih.e a hs.1 da da'
+      cases h1; cases hk
+    | indexBytes da' _ di' _ _ =>
+      obtain ⟨h1, e1⟩ := ih.e a hs.1 da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e i hs.2 di di'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **Assignments.** -/
+theorem uniqE_assign {Γ : Ctx} {op : AssignOp} {a b : Syn .expr} (ih : Uniq Γ (sizeOf (Syn.assign op a b))) :
+    UniqE Γ (.assign op a b) := by
+  intro τ τ' d d'
+  have hce : (Syn.assign op a b).const = Option.none := rfl
+  have hbo : (Syn.assign op a b).binOp? = Option.none := rfl
+  have hs : sizeOf a < sizeOf (Syn.assign op a b) ∧ sizeOf b < sizeOf (Syn.assign op a b) := by
+    simp only [Syn.assign.sizeOf_spec]; omega
+  cases d with
+  | assign l1 db h _ =>
+    cases d' with
+    | assign l2 db' _ _ =>
+      obtain ⟨h1, e1⟩ := ih.l a hs.1 l1 l2
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e b hs.2 db db'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | compound _ _ h' => cases h'
+    | assignCopy l2 db' h' =>
+      obtain ⟨h1, -⟩ := ih.l a hs.1 l1 l2
+      cases h1
+      obtain ⟨h2, -⟩ := ih.e b hs.2 db db'
+      cases h2
+      rw [STy.implicit_of_copiesTo h'] at h; cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | compound l1 db h =>
+    cases d' with
+    | assign _ _ _ _ => cases h
+    | compound l2 db' _ =>
+      obtain ⟨h1, e1⟩ := ih.l a hs.1 l1 l2
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e b hs.2 db db'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | assignCopy _ _ _ => cases h
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | assignCopy l1 db h =>
+    cases d' with
+    | assign l2 db' h' _ =>
+      obtain ⟨h1, -⟩ := ih.l a hs.1 l1 l2
+      cases h1
+      obtain ⟨h2, -⟩ := ih.e b hs.2 db db'
+      cases h2
+      rw [STy.implicit_of_copiesTo h] at h'; cases h'
+    | compound _ _ h' => cases h'
+    | assignCopy l2 db' _ =>
+      obtain ⟨h1, e1⟩ := ih.l a hs.1 l1 l2
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e b hs.2 db db'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
