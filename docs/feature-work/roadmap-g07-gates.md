@@ -300,4 +300,43 @@ skeptic; `HashPremise.not_of_rootSlots` makes gap 1 a lemma). Others:
 
 ## Handoff
 
-To be filled at the end of the checkpoint.
+- **Base:** `ceb0d54`, with six roadmap-w1 branches merged (`544b6d7`);
+  G07 is commits `5bbf24e` and `119ee49`.
+- **Done:**
+  - controls: the inhabited control (`toy_publicCorrectness`), its
+    accepted divergence-as-revert variant, and seven negative controls
+    covering always-revert, altered bytes, erased data, a loop compiled to a
+    success, malformed text, an ignored link map, and sloppy admission, with
+    four malformed-input refusals;
+  - lemmas: five generic contract lemmas and the hash-layout gap lemma;
+  - gates: the non-circularity gate, the axiom-pin inventory, and the
+    baselined regression runner with existing failures recorded separately;
+  - TrustAudit: an appended block of 23 theorems.
+- **New theorems:** `PublicCorrectness.observes`,
+  `PublicCorrectness.observedBySource`, `PublicCorrectness.rejects`,
+  `SourceSpec.NonVacuous.admits`, `SourceSpec.not_nonVacuous_of_no_parse`,
+  `Admission.rejects`, `HashPremise.not_of_rootSlots`, and the controls of §1.
+- **Checked:**
+  - `lean_diagnostic_messages` on `Solidity/Roadmap/Controls.lean`: no
+    messages; every `#guard_msgs` axiom pin holds (`[propext]`,
+    `[propext, Quot.sound]` or none). No `sorry`, axiom, `native_decide`,
+    `implemented_by` or `maxHeartbeats` change.
+  - `node scripts/check-g07.mjs --log <build log>`: 0 new failures. It runs:
+    - `check-trust` (0 findings), `check-layers` (160 core modules, 0 reach
+      the elaborator) and `check-orphans` (0 orphaned);
+    - `check-noncircular` (0 violations) and `check-axiom-pins` (0 errors);
+    - the script tests (11 pass);
+    - `check-doc-paths`: 46 missing, all baselined;
+    - the G03 ledger: 38 errors, all baselined;
+    - the build log: both builds completed, SolKey 37 mismatches (the
+      baseline).
+  - `./run-lean.sh` (warm, after `cccc108`): `lake build` "Build completed
+    successfully (727 jobs)"; `lake build SolkeyTestSuite` "Build completed
+    successfully (262 jobs)", `TestSuite.Derived17` included this time;
+    `check-solkey.sh` "37 mismatch(es)", the baseline, so the script exits
+    1 as at the base. 8 min 18 s. The cold build before it (40 min 46 s)
+    failed only at the root `Solidity.lean`, which was edited mid-build.
+  - `TrustAudit.lean`: its appended blocks are checked in the lane's final
+    gate (S01 handoff).
+- **Remaining:** see [Remaining obligations](#remaining-obligations); the
+  four contract gaps of §1 go to G01's owners.

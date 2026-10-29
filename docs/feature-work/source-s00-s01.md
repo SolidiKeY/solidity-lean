@@ -335,7 +335,37 @@ A read-only finder and a separate skeptic reviewed the first push
 
 ### Handoff (S00)
 
-To be filled.
+- **Base:** the G07 checkpoint (`119ee49`); S00 is commits `2aec5be` and
+  `cccc108`.
+- **Done:**
+  - `Solidity/Source/{Syntax,Ctor,Upstream,Decls,Examples}.lean` and the
+    vendored grammar;
+  - `scripts/check-source-grammar.mjs` and `scripts/source-ctors.py`, both
+    run by `check-g07.mjs`.
+- **New theorems:**
+  - the index and rejection: `Ctor.mem_all`, `Syn.nodes_eq`,
+    `Syn.rejections_of_sub`, `Syn.rejections_witnessed`, `Syn.excl_ctor`,
+    `Excl.mem_all`;
+  - the mapping and graph: `Excl.mapped`, `Ctor.grammar_covers`,
+    `Syn.decls_ctor`;
+  - the intrinsic contexts: `no_break_outside_loop`,
+    `no_continue_outside_loop`, `no_nested_unchecked`;
+  - the controls listed above.
+- **Checked:**
+  - `lean_diagnostic_messages` clean on all five modules, with the
+    `#guard_msgs` pins.
+  - `node scripts/check-g07.mjs`: 0 new failures, with source-grammar
+    reporting 119 rules and labels, 112 constructors and 0 errors, and
+    source-ctors reporting 0 stale blocks.
+  - `./run-lean.sh` as in G07's handoff (727 and 262 jobs, SolKey 37).
+- **Timings:** `Solidity.Source.Decls` 22 s and `Solidity.Source.Examples`
+  1.5 s. The other modules finished under the build log's report threshold
+  (Lake prints no time for them).
+- **Remaining:**
+  - the `Parses` relation (G08–G11);
+  - completeness of `Syn.collect`;
+  - the S01-owned SyntaxChecker rules in the table;
+  - the manifest's `fallback(bytes)` conflict (G00).
 
 ## S01: static typing, resolution and constants
 
