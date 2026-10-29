@@ -932,3 +932,5 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+| `Storage/Representation/Model.lean` | Intrinsic value-independent layout shapes and represented scalar, struct, mapping, fixed/dynamic-array values including retained shadows. |
+| `Storage/Representation/Controls.lean` | Inhabited representation witnesses, source reads, negative scalar control and exact axiom pins. |

@@ -83,3 +83,4 @@ history is in git.
 | [parallelism.md](parallelism.md) | The core apart from the elaborator, the layering check, the split convention. |
 | [latex.md](latex.md) | LaTeX notation and the checked trace export. |
 | [site.md](site.md) | The examples site on GitHub Pages. |
+| [feature-work/storage-value-representation.md](feature-work/storage-value-representation.md) | G27 typed storage representation, bounded validation, reviews and remaining composition obligations. |

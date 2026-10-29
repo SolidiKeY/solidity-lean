@@ -665,3 +665,6 @@ import Solidity.Solkey.QuantifiedDiamond
 
 import Solidity.Tools.SolCases
 import Solidity.Examples.SolCases
+
+import Solidity.Storage.Representation.Model
+import Solidity.Storage.Representation.Controls
