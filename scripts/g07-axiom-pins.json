@@ -1310,10 +1310,17 @@
  "Solidity/Source/Examples.lean:Solidity.Source.Ctor.mem_all": [
   "propext"
  ],
- "Solidity/Source/Examples.lean:Solidity.Source.Examples.withAssembly_rejected": [
+ "Solidity/Source/Examples.lean:Solidity.Source.Examples.no_break_outside_loop": [
+  "propext"
+ ],
+ "Solidity/Source/Examples.lean:Solidity.Source.Examples.withAssembly_rejected": [],
+ "Solidity/Source/Examples.lean:Solidity.Source.Excl.mapped": [
   "propext"
  ],
  "Solidity/Source/Examples.lean:Solidity.Source.Syn.decls_ctor": [
+  "propext"
+ ],
+ "Solidity/Source/Examples.lean:Solidity.Source.Syn.excl_ctor": [
   "propext"
  ],
  "Solidity/Source/Examples.lean:Solidity.Source.Syn.nodes_eq": [

@@ -164,7 +164,7 @@ def grammarData : List (String × String) := [
 
 /-- Manifest features that are syntax, with their constructors. -/
 def featureCtors : List (String × List Ctor) := [
-  ("addressTypes", [.elem]), ("arithmetic", [.exp, .mulDivMod, .addSub, .unaryPrefix]),
+  ("addressLiterals", [.lit]), ("addressTypes", [.elem, .userType, .payableConv]), ("arithmetic", [.exp, .mulDivMod, .addSub, .unaryPrefix]),
   ("assignment", [.assign]), ("bitwise", [.bitAnd, .bitXor, .bitOr, .unaryPrefix]),
   ("blocks", [.block, .blockStmt]), ("boolType", [.elem]), ("booleanLiterals", [.lit]),
   ("breakStatement", [.breakStmt]), ("callOptions", [.callOptions]),
@@ -188,20 +188,23 @@ def featureCtors : List (String × List Ctor) := [
   ("imports", [.importPath, .importSymbols, .importStar, .importAlias]),
   ("increments", [.unaryPrefix, .unarySuffix]), ("indexAccess", [.index]),
   ("inheritance", [.inherit]), ("inlineArrays", [.inlineArray]),
-  ("inlineAssembly", [.assembly]), ("integerTypes", [.elem]), ("interfaces", [.interface]),
-  ("internalFunctionTypes", [.fnType]), ("libraries", [.library]),
-  ("mappings", [.mapping]), ("memberAccess", [.member]), ("memoryLayout", [.assembly]),
+  ("inlineAssembly", [.assembly, .yulBlock, .yulLet, .yulAssign, .yulExprStmt, .yulIf,
+    .yulFor, .yulSwitch, .yulCase, .yulLeave, .yulBreak, .yulContinue, .yulFun, .yulPath, .yulCall,
+    .yulLit]), ("integerTypes", [.elem]), ("interfaces", [.interface]),
+  ("internalFunctionTypes", [.fnType]), ("libraries", [.library]), ("logicalStorageBase", [.contract]),
+  ("mappings", [.mapping]), ("memberAccess", [.member]),
   ("memoryLocation", [.param, .varDecl]), ("metaTypeExpression", [.metaType]),
-  ("modifiers", [.modifier, .modInv]), ("namedArguments", [.named, .namedArg]),
+  ("modifiers", [.modifier, .modInv]), ("modifierPlaceholder", [.modifier, .exprStmt, .ident]),
+  ("invalidModifierBody", [.modifier, .uncheckedItem]), ("namedArguments", [.named, .namedArg]),
   ("names", [.ident, .member]), ("newMemory", [.new]), ("numericLiterals", [.lit]),
   ("operatorAliases", [.usingAliases, .usingAlias]),
-  ("overrideDeclarations", [.function, .modifier, .stateVar]), ("parentheses", [.tuple]),
+  ("overrideDeclarations", [.function, .modifier, .stateVar, .fallback, .receive]), ("parentheses", [.tuple]),
   ("pragmaAbicoder", [.pragma]), ("pragmaOther", [.pragma]), ("pragmaVersion", [.pragma]),
   ("rangeAccess", [.slice]), ("receiveFunction", [.receive]),
   ("removedGenericSolidity", [.pragma]), ("removedUnits", [.litUnit]),
-  ("returnStatement", [.returnStmt]), ("revertStatement", [.revert]), ("shifts", [.shift]),
+  ("returnStatement", [.returnStmt]), ("revertStatement", [.revert, .call, .ident]), ("shifts", [.shift]),
   ("shortCircuit", [.and, .or]), ("sourceUnits", [.unit, .topPart]),
-  ("stateMutability", [.function, .fnType]), ("stateVariables", [.stateVar]),
+  ("stateMutability", [.function, .fnType, .fallback, .receive, .constructor]), ("stateVariables", [.stateVar]),
   ("storageLayout", [.contract]), ("storageLocation", [.param, .varDecl]),
   ("stringLiterals", [.lit]), ("stringType", [.elem]), ("structConstruction", [.call]),
   ("structDeclarations", [.struct, .structMember]), ("structTypes", [.userType]),
@@ -210,12 +213,30 @@ def featureCtors : List (String × List Ctor) := [
   ("unaryArithmetic", [.unaryPrefix]), ("uncheckedBlock", [.uncheckedItem]),
   ("unicodeLiterals", [.lit]), ("unsignedRightShift", [.shift, .assign]),
   ("usingFor", [.usingPart, .usingPath, .usingAliases]), ("valueTypeDeclarations", [.udvt]),
-  ("valueTypes", [.udvt]), ("variableDeclarations", [.declVar, .declTuple, .varDecl]),
-  ("visibility", [.function, .stateVar, .fnType]), ("whileStatement", [.whileStmt])]
+  ("valueTypes", [.udvt, .userType]), ("variableDeclarations", [.declVar, .declTuple, .varDecl]),
+  ("visibility", [.function, .stateVar, .fnType, .fallback, .receive, .constructor]), ("whileStatement", [.whileStmt])]
 
 /-- Manifest syntax features below the abstract syntax: lexical classes and
 spellings (G08). -/
 def featureLexical : List String := ["comments", "invalidLexemes", "reservedKeywords"]
+
+/-- The excluded and upstream-rejected features that are not decided on
+syntax, with the stage that decides them: names and members (S01's
+resolution, `Builtin.status`, `addressMemberStatus`, `callOptionStatus`),
+observations and resources (the G01 contracts' observation and resource
+choices, S04.02).  The lexical exclusions are `featureLexical` (G08).  `memoryLayout` and `transientLayout` are
+reachable only through assembly, which `inlineAssembly` rejects. -/
+def featureElsewhere : List (String × String) := [
+  ("addressCode", "S01"), ("addressCodehash", "S01"), ("blobhashBuiltin", "S01"),
+  ("blockBasefee", "S01"), ("blockBlobbasefee", "S01"), ("blockChainid", "S01"),
+  ("blockCoinbase", "S01"), ("blockDifficulty", "S01"), ("blockGaslimit", "S01"),
+  ("blockNumber", "S01"), ("blockPrevrandao", "S01"), ("blockSlotnum", "S01"),
+  ("blockhashBuiltin", "S01"), ("create2Salt", "S01"), ("delegatecall", "S01"),
+  ("gasOption", "S01"), ("gasleft", "S01"), ("lowLevelCall", "S01"),
+  ("lowLevelStaticcall", "S01"), ("rawCalldata", "S01"), ("rawReturndata", "S01"),
+  ("selfdestruct", "S01"), ("txGasprice", "S01"), ("txOrigin", "S01"),
+  ("removedAliases", "S01"), ("eventLog", "S04.02"), ("machineResources", "G01"),
+  ("memoryLayout", "S00"), ("transientLayout", "S00")]
 
 /-- Whether a constructor represents some grammar rule. -/
 def Ctor.inGrammar (k : Ctor) : Bool := grammarCtors.any fun r => r.2.contains k
@@ -226,10 +247,10 @@ pinned grammar. -/
 theorem Ctor.grammar_covers : ∀ k ∈ Ctor.all, k.structural = true ∨ k.inGrammar = true := by
   decide +kernel
 
-/-- Every exclusion is a manifest syntax feature represented by the
-constructors that trigger it. -/
-theorem Excl.mapped : ∀ f ∈ [Excl.inlineAssembly, .storageLayout, .unsignedRightShift,
-    .removedUnits, .removedGenericSolidity], (featureCtors.lookup f.id).isSome = true := by
+/-- **Every exclusion is mapped**: the constructors at which it is decided
+(`Excl.ctors`, which `Syn.excl_ctor` proves exhaustive) are in its feature's
+row. -/
+theorem Excl.mapped : ∀ f ∈ Excl.all, ∀ k ∈ f.ctors, k ∈ (featureCtors.lookup f.id).getD [] := by
   decide +kernel
 
 end Solidity.Source

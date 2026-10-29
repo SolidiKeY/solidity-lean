@@ -30,14 +30,16 @@ detail (G08–G11).
 `layout at`, the `>>>` operators and the `years` unit are syntax here, so a
 program using them is represented and rejected precisely (`Syn.rejections`,
 `Solidity/Source/Ctor.lean`).  The Yul body follows the grammar's rules
-without its single- versus multi-variable restrictions; it is rejected
-whole.
+without its single- versus multi-variable restrictions, the non-empty
+paths of an assignment, the function-call-only expression statement and the
+"a case or a default" of `switch`; assembly is rejected whole except the
+canonical rethrow (`Syn.excl`), which these approximations do not reach.
 
 **Lexical content.**  Identifiers are strings, number literals their exact
-value (underscores and spelling are lexical, G08), string literals their
-concatenated fragments.  `int`/`uint` are `int256`/`uint256`.  Fixed-point
-type names keep the raw `M`/`N` of the lexer token; their bounds are a typing
-judgment (S01).
+value (underscores and spelling are lexical, G08), string literals the bytes
+of their concatenated fragments.  `int`/`uint` are `int256`/`uint256`.
+Fixed-point type names carry solc's bounds (`FixDims`).  Paths, pragma words
+and identifiers are not checked non-empty: that is lexical (G08).
 
 The constructor index and the mapping to the grammar's rules and labelled
 alternatives are in `Solidity/Source/Ctor.lean`.
@@ -49,6 +51,17 @@ namespace Solidity.Source
 structure IdPath where
   head : String
   tail : List String := []
+  deriving DecidableEq, Repr
+
+/-- The `M`, `N` of a `fixedMxN`/`ufixedMxN` token inside solc's bounds
+(`8 ≤ M ≤ 256`, `8 ∣ M`, `N ≤ 80`): solc's scanner reads any other spelling
+as an identifier (`liblangutil/Token.cpp`, `fromIdentifierOrKeyword`).  The
+ANTLR lexer's own token (`[1-9][0-9]*` digits, and two or more for
+`ufixed`) differs; solc decides. -/
+structure FixDims where
+  bits : Nat
+  digits : Nat
+  valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256 ∧ digits ≤ 80
   deriving DecidableEq, Repr
 
 /-- An elementary type name (`elementaryTypeName`).  Integer widths and
@@ -64,9 +77,9 @@ inductive Elem where
   | int (signed : Bool) (bits : Nat) (h : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
   /-- `bytesN` (`FixedBytes`). -/
   | fixedBytes (n : Nat) (h : 1 ≤ n ∧ n ≤ 32)
-  /-- `fixed`/`ufixed`, or `fixedMxN`/`ufixedMxN` with the token's `M`, `N`
-  (`Fixed`/`Ufixed`). -/
-  | fixed (signed : Bool) (dims : Option (Nat × Nat))
+  /-- `fixed`/`ufixed` (`none`, an alias of `M = 128`, `N = 18`), or
+  `fixedMxN`/`ufixedMxN` (`Fixed`/`Ufixed`). -/
+  | fixed (signed : Bool) (dims : Option FixDims)
   deriving DecidableEq, Repr
 
 /-- `visibility`. -/
@@ -101,7 +114,8 @@ inductive DataLoc where
   deriving DecidableEq, Repr
 
 /-- The name position of `functionDefinition`: an identifier, or the
-keywords `fallback`/`receive` (which solc rejects with a hint). -/
+keywords `fallback`/`receive` (solc's parser accepts these with warning 3445,
+declaring an ordinary function so named). -/
 inductive FnName where
   | ident (name : String)
   | fallback
@@ -120,9 +134,10 @@ inductive Denom where
   deriving DecidableEq, Repr
 
 /-- A number literal (`DecimalNumber`/`HexNumber`).  A decimal denotes
-`mantissa / 10^fracDigits * 10^exp`; a hexadecimal keeps its digits (their
-count types an address literal) and whether it is a valid checksummed
-address spelling. -/
+`mantissa / 10^fracDigits * 10^exp` (one value has several spellings; the
+spelling is lexical, G08); a hexadecimal keeps its digits (their count types
+an address literal) and whether its letter case is a valid EIP-55 checksum,
+which the lexer computes from the spelling (G08). -/
 inductive NumLit where
   | dec (mantissa fracDigits : Nat) (exp : Int)
   | hex (digits : List (Fin 16)) (checksummed : Bool)
@@ -130,9 +145,11 @@ inductive NumLit where
 
 /-- `literal`: string, hex string, unicode string, boolean or number. -/
 inductive Lit where
-  | str (s : String)
+  /-- A string literal's bytes after escapes: `\xNN` may make them invalid
+  UTF-8, so they are bytes, not a `String`. -/
+  | str (bytes : List UInt8)
   | hexStr (bytes : List UInt8)
-  | unicodeStr (s : String)
+  | unicodeStr (bytes : List UInt8)
   | bool (b : Bool)
   | num (n : NumLit)
   deriving DecidableEq, Repr
@@ -187,7 +204,7 @@ inductive MapKey where
 inductive YulLit where
   | dec (n : Nat)
   | hex (n : Nat)
-  | str (s : String)
+  | str (bytes : List UInt8)
   | hexStr (bytes : List UInt8)
   | bool (b : Bool)
   deriving DecidableEq, Repr
@@ -243,8 +260,9 @@ inductive Syn : Cat → Type where
   | some {c : Cat} : Syn c → Syn (.opt c)
   -- `sourceUnit` and its elements.
   | unit : Syn (.list .top) → Syn .unit
-  /-- `pragma …;`: the pragma's token text. -/
-  | pragma (text : String) : Syn .top
+  /-- `pragma …;`: the pragma's words, comments and whitespace removed
+  (`pragma solidity ^0.8.0;` is `["solidity", "^0.8.0"]`). -/
+  | pragma (words : List String) : Syn .top
   /-- `import "p" (as a)?;` -/
   | importPath (path : String) (alias : Option String) : Syn .top
   /-- `import {a as b, …} from "p";` -/
