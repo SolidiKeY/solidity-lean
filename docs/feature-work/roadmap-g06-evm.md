@@ -632,7 +632,8 @@ Run at the head of this branch:
 | `node scripts/check-orphans.mjs` | `734 reachable, 0 orphaned, 0 not allowed`. |
 | `bash scripts/check-trust.sh` | `0 findings`. |
 | `bash scripts/check-doc-paths.sh` | 46 missing references, the base count; none from this change. |
-| `./run-lean.sh` (background, log grepped) | @@BUILD@@ |
+| `./run-lean.sh` (background, log grepped), first run | `lake build`: `Build completed successfully (719 jobs)`. `lake build SolkeyTestSuite` failed: `Solidity.TestSuite.Derived17` was killed (`Lean exited with code 137`, out of memory, while running in parallel with the other `Derived*` modules). That shared file belongs to the memory-loops lane and was not touched. |
+| `./run-lean.sh`, second run (incremental, after the review and answer commits) | `Build completed successfully (719 jobs)`, then `Build completed successfully (262 jobs)` (Derived17 built). `check-solkey.sh`: `solkeycheck: 37 mismatch(es)`, unchanged from the base's 37, so baseline only. The script exits 1 on that existing drift. |
 
 ## Handoff
 
@@ -678,7 +679,7 @@ Run at the head of this branch:
   - the discriminating certificate control (G07);
   - the random-oracle bound for `Fixed.NoOverlap` (sibling hash-collision-bound);
   - B28 (stipend rule and compiler fit, G43).
-- **Resources:** @@TIME@@
+- **Resources:** the first full run took 74 min wall time (`real 74m24s`, `user 199m38s`); the incremental rerun took 4 min 23 s. The summed RSS of all processes, sampled every 20 s, peaked at 18.4 GB. That figure counts shared pages more than once (the VM has 15 GB), so it overstates the peak; no per-process peak was recorded (`/usr/bin/time` is absent).
 
 ## Review
 
