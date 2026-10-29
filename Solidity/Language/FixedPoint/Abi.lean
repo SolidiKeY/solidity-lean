@@ -4,24 +4,32 @@ import Solidity.Language.FixedPoint.Laws
 # Fixed-point ABI encoding
 
 The ABI specification encodes `fixed<M>x<N>` / `ufixed<M>x<N>` as the
-value `v / 10^N` through its scaled integer `v`, a 32-byte two's-complement
-word as for `int256` / `uint256` (`abi-spec.rst:218–221` at `v0.8.38`), and
-names a type in a selector by its canonical name, the aliases `fixed` /
-`ufixed` as `fixed128x18` / `ufixed128x18` (`abi-spec.rst:71–72`).
-`docs/feature-work/fixed-point-semantics.md`, §6.3, records the reading.
+value `v / 10^N` through its scaled integer `v`, a 32-byte big-endian
+two's-complement word as for `int256` / `uint256` (`abi-spec.rst:213–221`
+at `v0.8.38`), and names a type in a selector by its canonical name, the
+aliases `fixed` / `ufixed` as `fixed128x18` / `ufixed128x18`
+(`abi-spec.rst:71–72`).  solc 0.8.38 generates no ABI code for these types
+(its cleanup and validation functions are unimplemented for them), so the
+coder behaviour below is a proposal by analogy with `intM` / `uintM` (P5),
+not compiler behaviour; `docs/feature-work/fixed-point-semantics.md`, §6.3,
+records the reading.
 
 * `Fx.encode` — the word; `Fx.abiEncode` — its 32 big-endian bytes.
-* `Fx.decodeV2` — ABI coder v2 decoding: a word that is not the sign- or
-  zero-extension of an `M`-bit integer (dirty upper bits) reverts (`none`),
-  as solc's v2 validator does for `intM` / `uintM` (P5).
-  `Fx.decodeV2_encode` (round trip), `Fx.encode_of_decodeV2` (only canonical
-  words decode), `Fx.decodeV2_eq_none_iff` (every other word is rejected),
-  `Fx.decodeV2_isSome_iff` (the upper-bit condition, explicitly).
+* `Fx.decodeV2` — ABI coder v2 decoding: a word whose upper bits are not
+  the sign- or zero-extension of an `M`-bit integer reverts (`none`), as
+  solc's v2 validator does for `intM` / `uintM` (`decodeV2_isSome_iff`).
+  Decoding is exactly the inverse of `encode`: `Fx.decodeV2_encode`,
+  `Fx.encode_of_decodeV2`, `Fx.decodeV2_eq_none_iff`.
 * `Fx.decodeV1` — ABI coder v1 (the legacy pipeline's pragma may select
-  it; G00 Q4): no validation, the low `M` bits cleaned as `intM` is;
+  it; G00 Q4): no validation, the low `M` bits cleaned as v1 cleans `intM`;
   `Fx.decodeV1_of_decodeV2` (the coders agree on clean words).
-* `Fx.encodePacked` — `abi.encodePacked`: the `M/8`-byte two's complement,
-  unpadded (`abi-spec.rst:755`), with its round trip.
+* `Fx.encodePacked` — `abi.encodePacked` of a top-level argument: the
+  `M/8`-byte two's complement, unpadded (`abi-spec.rst:755`); there is no
+  packed decoder in Solidity, and `Fx.ofPackedBytes` only witnesses that
+  the encoding loses nothing.
+* The type names include `N = 0` (`fixedMx0`, P4), which the ABI
+  specification excludes (`0 < N`, `abi-spec.rst:66–67`): a deliberate
+  extension, since solc's scanner admits the types.
 -/
 
 namespace Solidity.Language.FixedPoint
@@ -103,7 +111,8 @@ theorem pow_256 : (256 : Nat) ^ 32 = 2 ^ 256 := by
 
 /-- `2^M = 256^(M/8)`. -/
 theorem pow_bits_bytes (t : FxTy) : (2 : Nat) ^ t.bits = 256 ^ (t.bits / 8) := by
-  have h := t.valid
+  have h : (decide (8 ≤ t.bits) && decide (t.bits ≤ 256) && t.bits % 8 == 0 &&
+      decide (t.digits ≤ 80)) = true := t.valid
   simp only [Bool.and_eq_true, decide_eq_true_eq, beq_iff_eq] at h
   have hb : t.bits = 8 * (t.bits / 8) := by omega
   rw [show (256 : Nat) = 2 ^ 8 by decide, ← Nat.pow_mul, ← hb]
@@ -154,7 +163,9 @@ theorem encode_of_decodeV2 {w : Fin (2 ^ 256)} {a : Fx t} (h : decodeV2 t w = so
     encode a = w := by
   have hw0 : (0 : Int) ≤ w.val := Int.natCast_nonneg _
   have hc : ((2 ^ 256 : Nat) : Int) = (2 : Int) ^ 256 := Int.natCast_pow 2 256
-  have hw1 : (w.val : Int) < 2 ^ 256 := by have := w.isLt; omega
+  have hw1 : (w.val : Int) < 2 ^ 256 := by
+    have hl : w.val < 2 ^ 256 := w.isLt
+    omega
   have hv : a.1 = (if t.signed ∧ 2 ^ 255 ≤ (w.val : Int) then (w.val : Int) - 2 ^ 256
       else (w.val : Int)) := ofInt?_val h
   have hm : a.1 % 2 ^ 256 = (w.val : Int) := by
@@ -245,7 +256,9 @@ def abiEncode (a : Fx t) : List UInt8 := beBytes 32 (encode a).val
 
 theorem abiEncode_length (a : Fx t) : (abiEncode a).length = 32 := beBytes_length 32 _
 
-/-- A 32-byte head decoded at the type with coder v2. -/
+/-- An isolated 32-byte head decoded at the type with coder v2 (solc's
+decoder reads a head at an offset and ignores trailing data; offsets are
+G40's). -/
 def abiDecodeV2 (t : FxTy) (bs : List UInt8) : Option (Fx t) :=
   if bs.length = 32 then decodeV2 t ⟨beNat bs % 2 ^ 256, Nat.mod_lt _ (Nat.two_pow_pos 256)⟩
   else none
@@ -289,11 +302,13 @@ def encodePacked (a : Fx t) : List UInt8 := beBytes (t.bits / 8) (toBits a).toNa
 theorem encodePacked_length (a : Fx t) : (encodePacked a).length = t.bits / 8 :=
   beBytes_length _ _
 
-/-- Packed bytes read back at the type (their bit pattern, Q7). -/
-def decodePacked (t : FxTy) (bs : List UInt8) : Option (Fx t) :=
+/-- Packed bytes read back at the type, as their bit pattern: not an ABI
+operation (Solidity has no packed decoder), only the inverse that shows
+`encodePacked` loses nothing. -/
+def ofPackedBytes (t : FxTy) (bs : List UInt8) : Option (Fx t) :=
   if bs.length = t.bits / 8 then some (ofBits t (beNat bs : Int)) else none
 
-theorem decodePacked_encodePacked (a : Fx t) : decodePacked t (encodePacked a) = some a := by
+theorem ofPackedBytes_encodePacked (a : Fx t) : ofPackedBytes t (encodePacked a) = some a := by
   have hl : (encodePacked a).length = t.bits / 8 := encodePacked_length a
   have hp : (0 : Int) < 2 ^ t.bits := Int.pow_pos (by decide)
   have h0 : 0 ≤ toBits a := Int.emod_nonneg _ (by omega)
@@ -306,12 +321,12 @@ theorem decodePacked_encodePacked (a : Fx t) : decodePacked t (encodePacked a) =
       omega
     rw [Nat.mod_eq_of_lt hlt]
     exact Int.toNat_of_nonneg h0
-  simp only [decodePacked, hl, if_true, hn, ofBits_toBits]
+  simp only [ofPackedBytes, hl, if_true, hn, ofBits_toBits]
 
-/-! ### Selector names -/
+/-! ### Canonical type names -/
 
-/-- Canonical names in selectors: the aliases are spelled out, and `N = 0`
-keeps its `x0` (P4). -/
+/-- Canonical type names (as selectors spell them): the aliases are spelled
+out, and `N = 0` keeps its `x0` (P4). -/
 example : FxTy.fixed.name = "fixed128x18" ∧ FxTy.ufixed.name = "ufixed128x18" ∧
     fixed8x1.name = "fixed8x1" ∧ (⟨false, 256, 0, by decide⟩ : FxTy).name = "ufixed256x0" := by
   decide +kernel
@@ -349,9 +364,9 @@ info: 'Solidity.Language.FixedPoint.Fx.abiEncode_of_abiDecodeV2' depends on axio
 #print axioms Fx.abiEncode_of_abiDecodeV2
 
 /--
-info: 'Solidity.Language.FixedPoint.Fx.decodePacked_encodePacked' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: 'Solidity.Language.FixedPoint.Fx.ofPackedBytes_encodePacked' depends on axioms: [propext, Classical.choice, Quot.sound]
 -/
 #guard_msgs in
-#print axioms Fx.decodePacked_encodePacked
+#print axioms Fx.ofPackedBytes_encodePacked
 
 end Solidity.Language.FixedPoint

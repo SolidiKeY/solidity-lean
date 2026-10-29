@@ -565,60 +565,152 @@ Confirmed findings and their fixes:
 ### 6.3 Checkpoint 3 — ABI
 
 New module `Solidity/Language/FixedPoint/Abi.lean`. It reads the ABI
-specification (`abi-spec.rst:66–72, 218–221, 755` at `v0.8.38`, §Sources):
+specification (`abi-spec.rst:66–72, 213–221, 755` at `v0.8.38`, §Sources):
 the value `v / 10^N` is encoded through its scaled integer `v` as a 32-byte
-two's-complement word, as `int256`/`uint256` are.
+big-endian two's-complement word, as `int256`/`uint256` are. solc 0.8.38
+generates no ABI code for fixed-point types: `cleanupFunction`
+(`YulUtilFunctions.cpp:3994–3995`) and the legacy cleanup are
+unimplemented for them, so no validator can be generated. The coder
+behaviour below is therefore proposal P5, by analogy with `intM`/`uintM`.
+It is not compiler behaviour, and no differential test against solc is
+possible.
 
 - **Words.** `Fx.encode : Fx t → Fin (2^256)` (`Fx.encode_val`: the word is
   `Fx.toWord`).
 - **Coder v2 decoding (P5).** `Fx.decodeV2` reads the word as `int256`
-  where signed, then range-checks it, so a word whose upper bits are not
-  the sign or zero extension of an `M`-bit integer reverts (`none`), as
-  solc's v2 validator does for `intM`/`uintM`.
-  - `Fx.decodeV2_encode`: round trip.
-  - `Fx.encode_of_decodeV2`: only a value's canonical word decodes to it.
-  - `Fx.decodeV2_eq_none_iff`: every word that is no value's encoding is
-    rejected.
-  - `Fx.decodeV2_isSome_iff`: the upper-bit condition, explicitly. An
-    unsigned word must be `< 2^M`; a signed one must be `< 2^(M−1)` or
-    `≥ 2^256 − 2^(M−1)`.
+  where signed, then range-checks it.
+  - `Fx.decodeV2_isSome_iff` is the dirty-upper-bit condition. An unsigned
+    word must be `< 2^M`; a signed one must be `< 2^(M−1)` or
+    `≥ 2^256 − 2^(M−1)`, i.e. the sign extension of its low `M` bits. This
+    is what solc's `validator_revert_t_intM` checks for `intM`
+    (`eq(value, cleanup(value))`, then `revert(0, 0)`).
+  - Decoding is exactly the inverse of encoding: `Fx.decodeV2_encode`
+    (round trip), `Fx.encode_of_decodeV2` (only a value's own word decodes
+    to it) and `Fx.decodeV2_eq_none_iff` (every other word is rejected).
 - **Coder v1 (G00 Q4: the legacy pipeline may select v1 by pragma).**
-  `Fx.decodeV1` does no validation; it cleans the low `M` bits as v1 cleans
-  `intM` (`Fx.decodeV1_eq_ofBits`). `Fx.decodeV1_of_decodeV2`: the coders
-  agree on every word v2 accepts. `Fx.decodeV1_encode`.
+  `Fx.decodeV1` does no validation and cleans the low `M` bits, as v1
+  cleans `intM` (`Fx.decodeV1_eq_ofBits`). Cleaning on load and cleaning
+  before each use cannot be told apart. `Fx.decodeV1_of_decodeV2`: the
+  coders agree on every word v2 accepts. `Fx.decodeV1_encode`.
 - **Bytes.**
   - `beBytes`/`beNat` (big-endian): `beNat_beBytes`, `beBytes_beNat`,
     `beNat_lt`.
   - `Fx.abiEncode` (32 bytes, `Fx.abiEncode_length`) and
-    `Fx.abiDecodeV2`: `Fx.abiDecodeV2_abiEncode` (round trip) and
-    `Fx.abiEncode_of_abiDecodeV2` (only the canonical bytes decode, so
-    every other 32-byte head is rejected).
-  - `Fx.encodePacked`/`Fx.decodePacked`: `abi.encodePacked`, the
-    `M/8`-byte two's complement, unpadded, with
-    `Fx.decodePacked_encodePacked`.
-- **Selector names (P4).** `FxTy.name`: `fixed` and `ufixed` are spelled
-  `fixed128x18` and `ufixed128x18`, and `N = 0` keeps its `x0` (example).
+    `Fx.abiDecodeV2` on an isolated 32-byte head:
+    `Fx.abiDecodeV2_abiEncode` and `Fx.abiEncode_of_abiDecodeV2` (only the
+    canonical bytes decode).
+  - `Fx.encodePacked`: `abi.encodePacked` of a top-level argument, the
+    `M/8`-byte two's complement, unpadded. Solidity has no packed decoder;
+    `Fx.ofPackedBytes` and `Fx.ofPackedBytes_encodePacked` only show that
+    the packed bytes lose nothing.
+- **Canonical type names (P4).** `FxTy.name`: `fixed` and `ufixed` are
+  spelled `fixed128x18` and `ufixed128x18`. `N = 0` keeps its `x0`, which
+  the ABI specification excludes (`0 < N`). That is a deliberate extension,
+  since the scanner admits these types (F4). Signature strings and their
+  Keccak selectors are G40's.
 - **Worked values.** `-1.0 : fixed8x1` is the word `2^256 − 10`. The word
   `0xff` at `fixed8x1` is rejected by v2 and cleaned to `-0.1` by v1.
   `256` at `ufixed8x2` is rejected.
 
 `#print axioms` pins: `Fx.decodeV2_eq_none_iff` and
 `Fx.abiEncode_of_abiDecodeV2` use `[propext, Quot.sound]`;
-`Fx.decodeV2_isSome_iff` and `Fx.decodePacked_encodePacked` use
+`Fx.decodeV2_isSome_iff` and `Fx.ofPackedBytes_encodePacked` use
 `[propext, Classical.choice, Quot.sound]`.
 
 **Handoff.** G40/G41 can lower fixed-point parameters and return values as
-`intM`/`uintM` words and cite `Fx.decodeV2_eq_none_iff` for the
-validation. The words are `Fin (2^256)`; `Semantics.Word` in
-`Solidity/Semantics.lean` is the repository's word type, and the
-correspondence is the bridge's (G40). The byte functions are local to this
-module. `wordBytes` in `Solidity/RevertBytes.lean` computes the same bytes
-for a 32-byte word, but this module does not import it (that would pull
-in Keccak), and the equality is not proved.
+`intM`/`uintM` words and cite `Fx.decodeV2_isSome_iff` for the validation.
+Known cost: the words are `Fin (2^256)`, while `Fx.toWord` is an `Int` and
+the repository's `Semantics.Word` (`Solidity/Semantics.lean`) is a
+range-checked `Int`. The conversions are not written. Importing
+`Semantics.lean` here would tie the import-free reference model to the
+whole semantics. The byte functions are local; `bytesNat` and `wordBytes`
+in `Solidity/RevertBytes.lean` compute the same bytes, but the equality is
+not proved and that module pulls in Keccak.
 
 Not done:
-- dynamic aggregates of fixed values (arrays, structs), which reuse the
-  word encoding through the general ABI (G40);
-- calldata decoding offsets;
-- the revert data of a v2 validation failure, which is empty, as for
-  `intM` (G01 Q5).
+- dynamic aggregates of fixed values, whose elements are padded words in
+  the standard encoding and also in packed mode (arrays pad elements to 32
+  bytes) (G40);
+- calldata heads at offsets, and the non-strict decoder's acceptance of
+  trailing data;
+- event topics: an indexed fixed parameter's topic is its word
+  (`Fx.encode`);
+- user-defined value types over fixed types, which use the underlying
+  name and word;
+- the empty revert data of a v2 validation failure (G01 Q5).
+
+**Review.** A read-only finder and a separate read-only skeptic reviewed
+`663c0da`. Neither found a correctness defect. The finder confirmed the
+byte order, the v2 condition against `validator_revert_*`, the v1 cleaning
+and every worked value. Confirmed findings and their fixes:
+
+| Finding | Source | Fix |
+|---|---|---|
+| The doc and docstring read as solc behaviour; solc generates no fixed-point ABI code | both | stated as P5 by analogy, above and in the module docstring |
+| The handoff cited `Fx.decodeV2_eq_none_iff` for the bit validation | skeptic | it cites `Fx.decodeV2_isSome_iff`; `_eq_none_iff` is described as the inverse property |
+| `decodePacked` presented as an ABI operation | both | renamed `Fx.ofPackedBytes`, documented as an injectivity witness |
+| Packed arrays, event topics, UDVTs, head offsets and trailing data were unmentioned | both | "Not done" |
+| `N = 0` departs from the ABI spec without saying so here | finder | stated in §6.3 and the module docstring |
+| The "selector" bullet only showed names | skeptic | now "canonical type names"; selectors are G40's |
+| Three word types; `Fin (2^256)` matches neither neighbour | skeptic | stated as a known cost in the handoff |
+| Citation `abi-spec.rst:218–221` incomplete | finder | `213–221` |
+| Untyped `have`s | finder | typed |
+| Duplicate byte helpers (`RevertBytes.lean`) | finder | recorded in the handoff; not merged (see there) |
+
+### 6.4 Checkpoint 4 — storage packing
+
+New module `Solidity/Language/FixedPoint/Storage.lean`. Per the scope's
+"Readings", the physical layout is not observable; solc's slot behaviour
+fixes the logical alias semantics, not the packing. The layout is
+therefore a free choice, and the one chosen is solc's for `intM` (P6).
+A fixed value takes `M/8` bytes (`FxTy.storageBytes`), right-aligned at a
+byte offset of its slot, and holds its `M`-bit two's-complement pattern,
+not sign-extended (`Types.h:552–554`: `storageBytes`, `leftAligned =
+false`).
+
+- **Byte ranges of a word.** `field w off len` reads bytes and
+  `setField w off len v` writes them.
+  - `field_setField`: read after write.
+  - `field_setField_below` and `field_setField_above`: a write leaves every
+    disjoint range alone.
+  - `setField_field`: writing back what is there changes nothing.
+  - `setField_setField`: the last write wins.
+  - `setField_lt`: a write inside the slot keeps a 256-bit word.
+  - Helpers: `parts_eq`, `parts_mod`, `parts_div`, `parts_hi`.
+- **Fixed values in a slot.** `Fx.load t w off` and
+  `Fx.store w off h a` (`h : off + M/8 ≤ 32`) work on a `Slot`, a
+  `Fin (2^256)`.
+  - `Fx.load_store`: read after write.
+  - `Fx.load_store_disjoint`: a value of any fixed type in a disjoint byte
+    range is undisturbed.
+  - `Fx.field_store_disjoint`: so is any disjoint byte range, the frame for
+    packed neighbours of other types.
+  - `Fx.store_load`, `Fx.store_store`.
+  - `Fx.load_zero`: an untouched slot reads as the default, `0`.
+- **Packing a sequence (solc's rule).** `place` puts each value type at
+  the next free offset, or at offset 0 of the next slot when it does not
+  fit. `place_fits`: every item of at most 32 bytes lies inside its slot.
+  `place_pairwise`: no two items overlap (`Apart`). Example:
+  `fixed8x1 a; ufixed16x2 b; fixed c; ufixed256x0 d;` places `a`, `b`, `c`
+  at slot 0, offsets 0, 1, 3, and `d` at slot 1.
+- **Mapping keys (P6).** `Fx.keyWord` is the padded ABI word that is
+  hashed. `Fx.keyWord_injective`: distinct keys give distinct words.
+
+`#print axioms` pins: `Fx.load_store` and `Fx.load_store_disjoint` use
+`[propext, Classical.choice, Quot.sound]`; `place_pairwise` uses
+`[propext, Quot.sound]`.
+
+**Handoff.** G28 (storage packing) can instantiate its per-variable
+offsets with `place` and prove reads and writes of fixed state variables
+with `Fx.load_store` and `Fx.field_store_disjoint`. S04.02 can read a
+fixed-valued storage observation as `Fx.load`. The keccak of `Fx.keyWord`
+belongs to the storage-hashing lane.
+
+Not done:
+- the solc rule that structs and arrays start, and are followed by, a new
+  slot;
+- packed fixed elements of storage arrays (`M/8` bytes each, the same rule
+  inside the array's area);
+- connecting `Slot` to the repository's typed storage
+  (`Semantics/Storage.lean`), which keeps logical values, not packed
+  words.
