@@ -52,6 +52,7 @@ CONTRACTS = ("Admission", "CheckedFrontend", "Lowering", "Compilation", "Executi
 # --------------------------------------------------------------------------
 
 def load_g00(root):
+    sys.dont_write_bytecode = True  # importing G00's script must not leave scripts/__pycache__
     spec = importlib.util.spec_from_file_location("roadmap_g00", root / "scripts/roadmap-g00-scope.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
