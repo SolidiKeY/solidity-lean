@@ -185,10 +185,13 @@ decision or a confirmed exclusion, and need no user decision:
 
 - **P1 — constants fold exactly.** An explicit conversion of a literal rounds
   the exact rational at the *target's* N (`Fx.literalTrunc`), not through
-  solc's mobile type (which first rounds at its own N; for
-  `ufixed256x80(1/3)` that type has 77 digits). This follows "fold rational
-  constants exactly" ([solidity-scope.md](../solidity-scope.md#what-belongs-in-the-model)).
-  An out-of-range explicit constant is a compile error (Q2).
+  solc's mobile type, which first rounds at its own N. This follows "fold
+  rational constants exactly" ([solidity-scope.md](../solidity-scope.md#what-belongs-in-the-model)).
+  An out-of-range explicit constant is a compile error (Q2). (Corrected in
+  §6.2: the earlier example `ufixed256x80(1/3)` is out of range at 80 digits,
+  so it is a compile error, not a rounding difference. The two routes differ
+  in value only at the edge shown by the second `explicitRat?` example in
+  `Solidity/Language/FixedPoint/Literals.lean`.)
 - **P2 — division by zero** panics `0x12` in checked and unchecked code, as
   solc's integer `/` and `%` do (`control-structures.rst:640–641`,
   `value-types.rst:122,142`), and G01 Q5 observes the code exactly. This
@@ -437,3 +440,73 @@ fixed in the next commit:
 | Untyped `have`s | finder | typed throughout `Laws.lean` |
 | Stale review note on `solcImplicit` (§Review) | finder | reworded |
 | Intermediate overflow of `*` was unstated | skeptic | stated as intended, above and in the module docstring |
+
+### 6.2 Checkpoint 2 — literals and constants
+
+New module `Solidity/Language/FixedPoint/Literals.lean`. The constants are
+Lean core's normalized `Rat`, which lives in `Init`, so the core stays
+dependency-free.
+
+- **Exact folding.** `CExpr` covers literals, unary `-`, `+ - * / %` and
+  `**`; `CExpr.eval` folds them as solc's
+  `ConstantEvaluator::evaluateBinaryOperator` does. `/` and `%` by zero, a
+  non-integer exponent, a result over solc's 4096-bit precision bound
+  (`fitsPrecision`) and a power that fails solc's pre-check
+  (`fitsPrecisionExp`, 32-bit exponent) are compile errors (`none`). `%` is
+  `p − trunc(p/r)·r`, with the sign of the dividend. Bit operators and
+  shifts are left out: solc refuses them on fractional constants, and the
+  shift decision rejects them on fixed operands. Examples: `0.1 + 0.2` is
+  exactly `0.3`; `(1/3)·3` is exactly `1`; `2 ** -2 = 0.25`;
+  `-7.5 % 2 = -1.5`; `2 ** 2049` is refused.
+- **Only the value matters.** `Fx.ofLiteral?_congr`,
+  `Fx.literalTrunc_congr`, `Fx.ofRat?_mkRat`, `Fx.explicitRat?_mkRat`.
+- **Implicit conversion of a constant.**
+  - `Fx.ofRat?` / `Fx.ofLiteral?`; `Fx.ofLiteral?_eq_some_iff` says it is
+    exact.
+  - `Fx.ofLiteral?_isSome_iff_solc`: it accepts exactly what solc's
+    `RationalNumberType::isImplicitlyConvertibleTo` accepts (no negative
+    value into `ufixed`; integers by `minIntegerValue`/`maxIntegerValue`;
+    fractions by an exact scaled integer that fits). Unlike the
+    fixed→fixed test (F1), solc's literal test is already lossless, so
+    there is no deviation here.
+- **Explicit conversion of a constant (Q2, Q3, P1).**
+  - `Fx.explicitRat?` / `Fx.explicitConst?`.
+  - `Fx.explicitConst?_eq_some_iff`: it is the truncated scaled integer.
+  - `Fx.explicitConst?_eq_none_iff`: a compile error exactly when that
+    integer is out of range.
+  - `Fx.explicitConst?_trunc`: toward zero, within one unit.
+  - `Fx.explicitConst?_of_ofLiteral?`: it agrees with the implicit
+    conversion where that exists.
+- **Mobile type.** `mobileFx?` is solc's
+  `RationalNumberType::fixedPointType`, read from `Types.cpp:1231–1267` at
+  `v0.8.38` (digest as in §Sources, re-fetched and re-checked here). It
+  takes as many digits as keep the magnitude ≤ `2^256 − 1` (`2^255` if
+  negative), stopping when exact and at 80. It truncates toward zero and
+  uses the fewest bytes of the magnitude, or of `2·(magnitude − 1)` when
+  negative. `mobileFx?_inRange`: the mobile type holds the truncated
+  constant. `mobileFx?_exact`: it holds the constant exactly when its
+  digits suffice. Examples: `0.5 : ufixed8x1`, `-12.8 : fixed8x1`,
+  `-12.9 : fixed16x1`, `1/3 : ufixed256x77`, `2^256 + 0.5` has none.
+- **Common type with a constant operand.** `litCommon?` (`x op c`) and
+  `litCommonRev?` (`c op x`) follow solc's `Type::commonType` in both
+  operand orders, restricted to a type at which the constant is exact
+  (`litCommon?_exact`, `litCommonRev?_exact`).
+
+**Deviations from solc's type checker.**
+
+| Case | solc 0.8.38 (source reading) | Here | Status |
+|---|---|---|---|
+| Out-of-range explicit constant, e.g. `ufixed8x1(100.5)`, `ufixed256x80(1/3)` | Accepted through the mobile type | Compile error | Intended (Q2) |
+| Explicit constant value | Rounded at the mobile type's digits, then converted | Truncated once, at the target's digits | Intended (P1). The value differs only when the target has more digits than the mobile type and ten times the magnitude just exceeds 256 bits. Witness: `ufixed256x1((2**257 - 1) / 20)` is `2^256 − 1` here and `2^256 − 6` through solc's route. Fewer target digits agree, because truncations compose (argument, not proved). |
+| Common type `x op c` where `c` is not exact at the mobile type, e.g. `ufixed8x77 y; y + 1/3` | Common type `ufixed256x77`, `c` truncated | Refused | Intended (Q1: lossy conversions are explicit) |
+
+**Handoff.** S01/G13 can type constant subexpressions with `CExpr.eval`
+and give fixed-point types with `Fx.ofRat?` (implicit), `Fx.explicitRat?`
+(explicit), `mobileFx?` (standalone constants, e.g. `abi.encode(1.5)`) and
+`litCommon?`/`litCommonRev?` (mixed operands). Not done:
+- comparisons between two constants (solc compares at run time through the
+  mobile types; exact rational comparison agrees whenever both mobile
+  types hold their constants exactly);
+- constants of other categories (integer `mobileType`, `bytesM`,
+  addresses), which belong to the integer typing;
+- a proof that the two routes agree when the target has fewer digits.
