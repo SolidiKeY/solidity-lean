@@ -20,19 +20,22 @@ item 3).  It does not import `Solidity.Roadmap.Contracts`: `Pinned` is
 parameterized by the artifact type and the prefix type with its order, and
 the document maps it to G01's `EvmSpec`.
 
-**Resources are what gas decides.**  A pinned execution's resource is a
-`Schedule` (every gas number chosen outside the compiled system, and the
-depth at which the environment enters it) and evaluator fuel.  More fuel
+**Resources are what gas decides.**  A pinned EVM execution's resource is a
+`Schedule` (the transaction gas limits, whose effect depends on the compiled
+code) and evaluator fuel (`GasRes`); the source's is `FailurePoints`, where
+each request and each external frame of the system may fail.  More fuel
 extends a prefix; a different schedule is a different execution, so the
 order compares fuel at an equal schedule.  Gas exhaustion is therefore not
 the end of a prefix: a frame or a transaction that runs out fails, its
 caller sees the failure and continues (the 2026-10-29 decisions).
 
-**Fixed functions are parameters.**  Keccak-256 and the precompiles are
-fields of `Fixed`, shared by the source semantics and the pinned EVM; the
-public theorem quantifies over every `Fixed`, so its instance by the real
-functions is a bridge lemma, not a trust assumption.  The only premise on
-them is the per-run `Fixed.NoCollision`.
+**Fixed functions are parameters.**  Keccak-256 and the precompiles' results
+are fields of `Fixed`, shared by the source semantics and the pinned EVM;
+the public theorem quantifies over them, so their instance by the real
+functions is a bridge lemma, not a trust assumption.  Precompile gas is an
+EVM definition: the public theorem fixes `precompileGas` to Osaka's rather
+than quantifying it.  The only premise on them is the per-run
+`Fixed.NoCollision`.
 -/
 
 namespace Solidity.Roadmap.Evm
@@ -148,10 +151,11 @@ theorem Precompile.address_pos_lt (p : Precompile) : 0 < p.address ∧ p.address
 /-! ## Fixed functions -/
 
 /-- The functions the source semantics and the pinned EVM share, fixed for a
-whole run and quantified by the public theorem.  A precompile's result is
-`none` for an exceptional halt (an invalid input); its gas is what it
-charges, which matters where the source fixes the forwarded gas (the
-`stipend` of a payment). -/
+whole run.  A precompile's result is `none` for an exceptional halt (an
+invalid input); its gas is what it charges, which matters where the source
+fixes the forwarded gas (the `stipend` of a payment).  The public theorem
+quantifies over `keccak` and `precompile` and fixes `precompileGas` to
+Osaka's gas schedule. -/
 structure Fixed where
   keccak : Bytes → Nat
   keccak_lt : ∀ b, keccak b < 2 ^ 256
@@ -230,52 +234,64 @@ def withKeccak : Fixed where
 
 /-! ## Resources -/
 
-/-- Every gas number chosen outside the compiled system, and the depths at
-which the environment enters it: the gas limit of the `i`-th transaction
-request, the gas the environment forwards to the `k`-th frame of the system
-it enters (a callback or a call from outside), and that frame's depth.  The
-gas the system's own calls forward is the compiler's choice, not here. -/
+/-- The gas numbers a pinned execution's environment cannot fix in advance:
+the gas limit of the `i`-th transaction request.  Which transactions run out
+of gas depends on the compiled code, so the limit is a resource, not an
+environment input.  The gas an environment frame forwards when it enters the
+system, and the depth it enters at, are its code's (the environment's); the
+gas the system's own calls forward is the compiler's. -/
 structure Schedule where
   txGas : Nat → Nat
-  entryGas : Nat → Nat
-  entryDepth : Nat → Nat
 
-/-- A pinned execution's resource: a schedule and the adapter's evaluator
-fuel. -/
-structure Res where
+/-- A pinned EVM execution's resource: a schedule and the adapter's
+evaluator fuel. -/
+structure GasRes where
   schedule : Schedule
   fuel : Nat
 
 /-- More fuel at the same schedule.  A different schedule is a different
 execution, not a longer prefix of the same one. -/
-instance : LE Res := ⟨fun a b => a.schedule = b.schedule ∧ a.fuel ≤ b.fuel⟩
+instance : LE GasRes := ⟨fun a b => a.schedule = b.schedule ∧ a.fuel ≤ b.fuel⟩
 
-theorem Res.le_refl (a : Res) : a ≤ a := ⟨rfl, Nat.le_refl _⟩
+theorem GasRes.le_refl (a : GasRes) : a ≤ a := ⟨rfl, Nat.le_refl _⟩
 
-theorem Res.le_trans {a b c : Res} (h₁ : a ≤ b) (h₂ : b ≤ c) : a ≤ c :=
+theorem GasRes.le_trans {a b c : GasRes} (h₁ : a ≤ b) (h₂ : b ≤ c) : a ≤ c :=
   ⟨h₁.1.trans h₂.1, Nat.le_trans h₁.2 h₂.2⟩
 
-/-- **The admissible resources** of a pin: a transaction's gas within the
-cap where the pin has one, and an entered frame no deeper than the depth
-limit.  Every fuel is admissible, so unbounded behaviour is the family's. -/
-def Res.Admissible (p : Pin) (r : Res) : Prop :=
-  (∀ c, p.txGasCap = some c → ∀ i, r.schedule.txGas i ≤ c) ∧
-  ∀ k, r.schedule.entryDepth k ≤ p.callDepth
+/-- **The admissible resources** of a pin: each transaction's gas within the
+cap where the pin has one.  Every fuel is admissible, so unbounded behaviour
+is the family's.  A limit below a request's intrinsic gas makes the request
+invalid: it is dropped (`TxFate.dropped`). -/
+def GasRes.Admissible (p : Pin) (r : GasRes) : Prop :=
+  ∀ c, p.txGasCap = some c → ∀ i, r.schedule.txGas i ≤ c
 
 /-- Fuel does not change admissibility. -/
-theorem Res.Admissible.of_le {p : Pin} {a b : Res} (h : a ≤ b) (ha : Res.Admissible p a) :
-    Res.Admissible p b := by
-  unfold Res.Admissible at ha ⊢
+theorem GasRes.Admissible.of_le {p : Pin} {a b : GasRes} (h : a ≤ b)
+    (ha : GasRes.Admissible p a) : GasRes.Admissible p b := by
+  unfold GasRes.Admissible at ha ⊢
   rw [← h.1]
   exact ha
 
-/-- The source side of a schedule: where a frame or a transaction fails from
-resources, as the number of its events before the failure, or never.  The
-source semantics also fails every call made at the depth limit
-(`Pin.callFails`); no source resource can avoid that. -/
+/-- The source side of one request's gas: dropped as invalid (its sender
+cannot cover value and upfront fees, or its limit is below intrinsic gas),
+or run with the sender's balance after the upfront fees, failing from gas
+after `failAfter` of its events or never.  The request runs only if its
+value is within that balance (decision "sender funds"). -/
+inductive TxFate where
+  | dropped
+  | runs (senderBalance : Nat) (failAfter : Option Nat)
+  deriving DecidableEq, Repr
+
+/-- **The source's resource failures**: each request's fate, and for the
+`k`-th external frame of the compiled system in the order frames start
+(entered by the environment, a call between instances, `this.f()`, a
+creation's initcode, a library frame), whether it fails from resources after
+that many of its events.  The source semantics also fails every call or
+creation made at the depth limit (`Pin.callFails`), counting all external
+frames; no failure point can avoid that. -/
 structure FailurePoints where
-  tx : Nat → Option Nat
-  entry : Nat → Option Nat
+  tx : Nat → TxFate
+  frame : Nat → Option Nat
 
 /-! ## Observation -/
 
@@ -309,53 +325,70 @@ theorem Halt.observe_success {h : Halt} {d : Bytes} : h.observe = (true, d) ↔ 
 with its order (`Contracts.lean`'s `Prefix Event Outcome` and `Prefix.Le`),
 `Art` the artifact type (`Artifact`).  `sem a e r` deploys `a` in the
 environment `e` (the world, every environment account's code, the request
-and block sequence) and runs the session at resource `r`.  An invalid
-request (its sender cannot cover value and upfront gas) never executes. -/
+and block sequence) and runs the session at resource `r`.  The external EVM
+takes `GasRes` with `GasRes.Admissible pin`; the core semantics of the G06
+document may take another resource type. -/
 structure Pinned (Art P : Type) [LE P] where
   pin : Pin
   fixed : Fixed
   Env : Type
+  Res : Type
+  resLE : LE Res
   Allowed : Env → Prop
+  Admissible : Res → Prop
   sem : Art → Env → Res → P
-  consistent : ∀ a e r r', r ≤ r' → sem a e r ≤ sem a e r'
-
-/-- `Pinned.Admissible` is its pin's. -/
-def Pinned.Admissible {Art P : Type} [LE P] (V : Pinned Art P) : Res → Prop :=
-  Res.Admissible V.pin
+  consistent : ∀ a e r r', resLE.le r r' → sem a e r ≤ sem a e r'
 
 /-- Two prefixes are the same observation. -/
 def SameObs {P : Type} [LE P] (x y : P) : Prop := x ≤ y ∧ y ≤ x
 
 /-- **The core/Bridge certificate.**  An external EVM `ext` (an adapter over
-EVMYulLean in `Bridge/`) certifies the core's pinned semantics `core` when
-the pins and the fixed functions agree and each admissible execution of one
-is observed exactly as some admissible execution of the other, per artifact,
-in both directions.  The environments correspond per execution, not by a
-fixed map: which transactions run out of gas depends on the code.  The
-core states this; only the adapter proves it. -/
-structure Certificate {Art P : Type} [LE P] (core ext : Pinned Art P) : Prop where
+EVMYulLean in `Bridge/`) certifies the core's pinned semantics `core` on the
+artifacts whose reachable code the core specifies (`Specified`; a compiler
+lemma shows its output is specified).  Environments correspond by one map
+`envMap`, fixed before the artifact, so an input the core reads wrongly
+cannot be repaired by choosing another environment; resources correspond
+per execution (`∃ r'`).  `forth` is finitary: each admissible core prefix is
+realized by an external environment whose image agrees with the core's on
+that prefix (environment code realizes every finite strategy, not every
+strategy).  The core states this; only the adapter proves it. -/
+structure Certificate {Art P : Type} [LE P] (core ext : Pinned Art P) where
   pin : core.pin = ext.pin
   fixed : core.fixed = ext.fixed
-  back : ∀ a e r, ext.Allowed e → ext.Admissible r →
-    ∃ e' r', core.Allowed e' ∧ core.Admissible r' ∧ SameObs (ext.sem a e r) (core.sem a e' r')
-  forth : ∀ a e' r', core.Allowed e' → core.Admissible r' →
-    ∃ e r, ext.Allowed e ∧ ext.Admissible r ∧ SameObs (core.sem a e' r') (ext.sem a e r)
+  Specified : Art → Prop
+  envMap : ext.Env → core.Env
+  envSound : ∀ e, ext.Allowed e → core.Allowed (envMap e)
+  back : ∀ a, Specified a → ∀ e r, ext.Allowed e → ext.Admissible r →
+    ∃ r', core.Admissible r' ∧ SameObs (ext.sem a e r) (core.sem a (envMap e) r')
+  forth : ∀ a, Specified a → ∀ e' r', core.Allowed e' → core.Admissible r' →
+    ∃ e r, ext.Allowed e ∧ ext.Admissible r ∧
+      SameObs (core.sem a (envMap e) r') (core.sem a e' r') ∧
+      SameObs (core.sem a e' r') (ext.sem a e r)
 
-/-- A certificate is symmetric: the boundary transfers in both directions. -/
-theorem Certificate.symm {Art P : Type} [LE P] {core ext : Pinned Art P}
-    (c : Certificate core ext) : Certificate ext core :=
-  ⟨c.pin.symm, c.fixed.symm, c.forth, c.back⟩
+/-- Every pinned EVM certifies itself on every artifact, with the identity
+environment map; `SameObs` needs a reflexive order. -/
+def Certificate.refl {Art P : Type} [LE P] (refl : ∀ x : P, x ≤ x) (V : Pinned Art P) :
+    Certificate V V where
+  pin := rfl
+  fixed := rfl
+  Specified _ := True
+  envMap := id
+  envSound _ h := h
+  back _ _ _ r _ hr := ⟨r, hr, refl _, refl _⟩
+  forth _ _ e r he hr := ⟨e, r, he, hr, ⟨refl _, refl _⟩, refl _, refl _⟩
 
-/-- Every pinned EVM certifies itself, so the boundary is not vacuous on
-its own; `SameObs` needs a reflexive order. -/
-theorem Certificate.refl {Art P : Type} [LE P] (refl : ∀ x : P, x ≤ x) (V : Pinned Art P) :
-    Certificate V V :=
-  ⟨rfl, rfl, fun _ e r he hr => ⟨e, r, he, hr, refl _, refl _⟩,
-    fun _ e r he hr => ⟨e, r, he, hr, refl _, refl _⟩⟩
+/-- A certificate's `back` read on one specified artifact: an external
+completion is a core completion at the mapped environment. -/
+theorem Certificate.back_le {Art P : Type} [LE P] {core ext : Pinned Art P}
+    (c : Certificate core ext) {a : Art} (ha : c.Specified a) {e : ext.Env} {r : ext.Res}
+    (he : ext.Allowed e) (hr : ext.Admissible r) :
+    ∃ r', core.Admissible r' ∧ ext.sem a e r ≤ core.sem a (c.envMap e) r' :=
+  let ⟨r', h, h₁, _⟩ := c.back a ha e r he hr
+  ⟨r', h, h₁⟩
 
 end Solidity.Roadmap.Evm
 
 /-- info: 'Solidity.Roadmap.Evm.Precompile.address_injective' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Roadmap.Evm.Precompile.address_injective
-/-- info: 'Solidity.Roadmap.Evm.Certificate.symm' does not depend on any axioms -/
-#guard_msgs in #print axioms Solidity.Roadmap.Evm.Certificate.symm
+/-- info: 'Solidity.Roadmap.Evm.Certificate.back_le' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Roadmap.Evm.Certificate.back_le
