@@ -304,6 +304,13 @@ private def validateNode (provenance : Provenance) (j : Json) : Except Diagnosti
         (bytesTy? name).isSome || ["address payable", "bytes", "string"].contains name ||
         name.startsWith "fixed" || name.startsWith "ufixed" do
       throw (diagnostic j .invalidAst `solidity.typeValidation s!"unrecognized elementary type {name}")
+  -- In profile since G00 Q6 but unimplemented: refuse every node the scan tags
+  -- `fixedPoint`, so that an unused declaration is not dropped silently.
+  let commonType := ((J.opt j "commonType").bind (J.str? · "typeString")).getD ""
+  let fixedName := if J.kind j == "ElementaryTypeName" then (J.str? j "name").getD "" else ""
+  if [fixedName, commonType].any fun t => t.startsWith "fixed" || t.startsWith "ufixed" then
+    throw (diagnostic j .missingImplementation `solidity.fixedPoint
+      "fixed-point types are in the profile but not implemented" (some .fixedPoint))
   if J.kind j == "FunctionCall" &&
       !["functionCall", "typeConversion", "structConstructorCall"].contains ((J.str? j "kind").getD "") then
     throw (diagnostic j .invalidAst `solidity.callKind "unknown function call kind")

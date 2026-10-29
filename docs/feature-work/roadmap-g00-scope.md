@@ -4,9 +4,70 @@ This is the G00 deliverable of the [full compiler roadmap](../coverage-plan.md#w
 It records the pinned identities, the evidence behind every recorded exclusion,
 a mechanical reconciliation of the [feature manifest](../solidity-features.json)
 and the [upstream ledger](../solidity-upstream-inventory.json), and an owning
-roadmap group for every in-profile obligation. It decides no scope: an
-exclusion without an attributable user decision stays **unresolved**, and the
-questions that need the user are in [Open scope questions](#open-scope-questions).
+roadmap group for every in-profile obligation. G00 itself decides no scope:
+the decisions are the user's, recorded in
+[User decisions (2026-10-29)](../solidity-scope.md#user-decisions-2026-10-29);
+this document and the manifest cite them. An exclusion without such a
+decision would stay **unresolved**.
+
+### Current result (decision revision)
+
+- **Base revision:** `caf52ecd4dde5d37cbc0098d47de1a01aa218285` ("Record
+  resource and environment decisions"); branch
+  `cloud/roadmap-w1-20261029/g00-manifest-rev`, with master `e4ae128`
+  (second-round decisions, Osaka vector re-pin) merged in. The generated
+  [Ledger](#ledger) and the counts here are at this revision plus the changes
+  below. Line numbers elsewhere in this document are the first audit's (base
+  `127c2ee`) unless stated.
+- **Changed files:** this document, `scripts/roadmap-g00-scope.py`,
+  `docs/solidity-features.json`, `scripts/solidity-feature-audit.py` and its
+  generated `Solidity/Language/Features.lean` and
+  `docs/solidity-feature-inventory.md`, `Solidity/Frontend/SolcJson/Admission.lean`
+  (the fixed-point refusal below), one status line in `coverage-plan.md`.
+- **Manifest.** Every manifest row a decision covers now carries a
+  `decision` object (`date`, `question`, `outcome`, `record`, optional
+  `note`): the 30 `exclude` rows cite G00 Q1 (`approvedExclusion`), the 23
+  `abstract` rows cite G00 Q2 (see [Abstraction outcomes](#abstraction-outcomes-g00-q2)),
+  `fixedPoint` cites G00 Q6 (`fullSupport`), and `evaluationOrder` and
+  `pragmaAbicoder` cite the revised G00 Q4 (`twoPipelines`,
+  [second round](../solidity-scope.md#second-round-2026-10-29)). `solidity-feature-audit.py`
+  checks that the cited section holds the "**User decision (date):**"
+  marker and the question's table row, that every `exclude` row cites G00 Q1
+  and every `abstract` row G00 Q2, and prints the decision in the readable
+  inventory. The Lean catalog does not carry decisions (they are provenance,
+  not classification); its only change is the `fixedPoint` row.
+- **`fixedPoint`.** Moved from `upstream` to `model` (category `types`) by
+  G00 Q6; `current` goes from `notApplicable` to `missing`, which the
+  manifest requires of an in-profile row and which claims no implementation.
+  Owners: S00 S01 S02 (source), G08–G15 (admission), G16–G23 (lowering),
+  G24–G47 (backend and EVM). The sibling fixed-point-semantics task designs
+  the reference semantics; this row names no file of it. Consequence for
+  admission: the scope scan (`ScopeScan.certify`,
+  `Solidity/Frontend/Source.lean`) no longer refuses `fixed`/`ufixed` with the
+  `upstream` diagnostic. The importer alone would not refuse every such
+  input (review finding 1: an unused `fixed` state variable or
+  `type T is fixed;` is dropped silently; `event E(fixed x); … emit E(1);`
+  compiles). So the admission validator (`validateNode`,
+  `Solidity/Frontend/SolcJson/Admission.lean`) now refuses every node the
+  scan tags `fixedPoint` — an elementary type name or a common type starting
+  with `fixed`/`ufixed` — with the `missingImplementation` diagnostic
+  `solidity.fixedPoint`. It runs on the same walked nodes as the old scope
+  refusal, so the refused input is unchanged; only the diagnostic kind and
+  name change. No fixed-point fixture exercises it. G15 keeps the refusal
+  until G08–G23 implement fixed point.
+- **Result:** 212 manifest rows = 175 in-profile (all owned) + 7
+  upstream-rejected + 30 excluded (all tier A, approved by G00 Q1); 783
+  ledger symbols = 483 in-profile + 70 combinations with an excluded part +
+  28 combinations with an upstream-rejected part + 148 excluded + 1 mixed
+  non-profile + 53 upstream-rejected. No statuses changed except
+  `fixedPoint`'s; no implementation status was promoted.
+- **Not frozen yet:** the profile is decided; the pins still owe the work in
+  [Pin decisions](#pin-decisions-2026-10-29).
+
+### First audit (history)
+
+The bullets below are the first G00 audit, before the user's answers, kept as
+history.
 
 - **Base revision:** `127c2ee59de16971e45b08a2def54f4e5fae8e2a` ("Refresh
   integration"). Every count, line number and status below is pinned to it.
@@ -24,8 +85,8 @@ questions that need the user are in [Open scope questions](#open-scope-questions
   pins.
 - **Answered 2026-10-29:** the user confirmed all 30 exclusions and answered
   Q1–Q6 ([User decisions](../solidity-scope.md#user-decisions-2026-10-29)).
-  The counts and the generated ledger below are as of base `127c2ee`, before
-  those answers; the remaining pin work is listed there.
+  The counts of this first audit are as of base `127c2ee`, before those
+  answers.
 
 ## Method and reproduction
 
@@ -34,11 +95,14 @@ questions that need the user are in [Open scope questions](#open-scope-questions
 python3 -I scripts/roadmap-g00-scope.py --write
 # Consistency: every in-profile row has source and syntax owners, every owner is
 # a roadmap group or a work package of coverage-plan.md, every excluded row has
-# an evidence entry, combination IDs have the stated scope, and the generated
-# block is current.
+# an evidence entry, every cited decision is in its record, every abstract row
+# has a G00 Q2 outcome, combination IDs have the stated scope, and the
+# generated block is current.
 python3 -I scripts/roadmap-g00-scope.py --check
-# The manifest's own generated-file and classification check (unchanged).
+# The manifest's own check: generated files, classification, decision fields.
 python3 scripts/solidity-feature-audit.py --check
+# After a manifest edit: regenerate the Lean catalog and readable inventory.
+python3 scripts/solidity-feature-audit.py
 ```
 
 The script uses only the standard library and never writes the manifests;
@@ -46,12 +110,19 @@ The script uses only the standard library and never writes the manifests;
 manifest row by its recorded `scope`: `model` and `abstract` are
 **in-profile**; `upstream` is **upstream-rejected** — evidence from the pinned
 compiler, not a user exclusion, which still owes a match of solc's exact
-acceptance boundary (for `fixedPoint` that is not blanket rejection, Q6);
-`exclude` is **unresolved** until the user confirms it. A ledger symbol takes
+acceptance boundary; `exclude` is **excluded** when the row's `decision`
+cites a user decision whose record section carries the
+"**User decision (date):**" marker and the question's table row (tier A),
+and **unresolved** otherwise. Symbol statuses follow: `combination-excluded`
+replaces the first audit's `combination-unresolved`. A ledger symbol takes
 the status shared by all its target rows; a symbol mapping to in-profile and
-other rows is `combination-unresolved` or `combination-upstream`; one mapping
-to unresolved and upstream rows only (`functionKinds.SetGas`) is
-`nonprofile-mixed`. One G00 supplement does not edit the ledger file: the 20
+other rows is `combination-excluded` (`combination-unresolved` if a part
+were undecided) or `combination-upstream`; one mapping to excluded and
+upstream rows only (`functionKinds.SetGas`) is `nonprofile-mixed`. Both
+scripts require each `exclude` row to cite G00 Q1 and each `abstract` row
+G00 Q2 with a permitted outcome; the G00 script also requires G00 Q1 to be
+cited by exactly the 30 rows of its evidence table (the decision says "All
+30"), so a later exclusion cannot inherit it. One G00 supplement does not edit the ledger file: the 20
 Yul symbols that the in-profile canonical rethrow
 `assembly { revert(add(d, 32), mload(d)) }` needs are mapped to
 `inlineAssembly` only in the ledger, so the script adds `canonicalRethrow` to
@@ -127,13 +198,40 @@ Facts in rows 1, 2 and 6 sit in code that in-flight lanes edit
 (`Solidity/Frontend/`, `Solidity/Evm/`, ABI/call paths); they are claims about
 the base revision only.
 
+### Pin decisions (2026-10-29)
+
+What the [user decisions](../solidity-scope.md#user-decisions-2026-10-29)
+and their [second round](../solidity-scope.md#second-round-2026-10-29) (which
+revised G00 Q4) settle for each disagreement above. "Decided" fixes the
+target; the code and scripts still pin the old values until the named owner
+changes them. Checked by `git grep` at this branch's head after merging
+master `e4ae128`; nothing here re-pins a file.
+
+| # | Disagreement | Decision | State | Open for |
+|---|---|---|---|---|
+| 1 | Two solc versions | G00 Q4: the frozen profile is solc **0.8.38**; 0.8.34 fixtures are SolKey compatibility checks only | Decided. `parseCompiler` still accepts both and CI still downloads only 0.8.34; provenance does not yet mark 0.8.34 fixtures as compatibility-only | G05 (provenance boundary), G53 (SolKey re-pin) |
+| 2 | Two EVM forks | G00 Q3: **Osaka** for the pinned semantics and the compiled bytecode, modulo the recorded EIP-170/EIP-3860 idealization (G01 Q2) | Decided. The hand-written vector scripts are re-pinned to Osaka on master (`0f92a28`, [roadmap-g06-osaka.md](roadmap-g06-osaka.md)); the bridge still has `TargetSchedule := "Cancun"` and the core `Solidity/Evm` machine records no fork | G06 (core fork, bridge) |
+| 3 | Amsterdam | G00 Q1: `blockSlotnum` stays excluded, so no Amsterdam target is needed | Resolved | — |
+| 4 | Optimizer settings vary by tool | None: they configure the external solc oracle, not this compiler | Open (tooling only, no profile effect) | G06/G52 (reference tooling) |
+| 5 | Reference EVM versions | None (named open in the follow-up list) | Open | G06 |
+| 6 | Link settings not recorded | G05 Q1 (second round): only an empty link map is admitted; the session deploys and links every library itself, a pre-assigned map is refused. With G01 Q8 this resolves the disagreement | Decided. `validateSettings` already rejects a non-empty `libraries` map; the session-side deployment and linking is G05/G44.02 work | G05, G42.04/G44.02 |
+| 7 | Evaluation-order settings | G00 Q4 revised (second round): solc's two pipelines only — the legacy order with the pragma's coder (v1 or v2), and the via-IR order with coder v2; the other six `EvalOrder` combinations are not in the profile. (The first answer, all eight combinations, is superseded.) | Decided. The `evaluationOrder` and `pragmaAbicoder` rows cite it (`twoPipelines`); `EvalOrder` still expresses all eight, so the theorem's settings must restrict to the two | G01 (theorem statement), G05 (settings provenance) |
+
+Ownership gap 1 (compiler-settings surface) is narrowed accordingly: the
+fork, the solc version and the two pipelines are fixed; their encoding in
+the theorem settings remains G01/G05 work. Gap 2 (link-settings provenance)
+is decided by G05 Q1. Gap 4's fork half is done for the vector scripts at
+master and remains for the bridge; its reference-EVM versions half
+(disagreement 5) is still open.
+
 ## Exclusion evidence
 
 **Evidence standard.** The repository has an explicit marker for user
 decisions: "**User decision (2026-10-06): … rejected**"
 (`docs/kernel-port.md:295`, present since root `c3a3eef`). Tier **A** is such
-a marker, or the user's own words in a PR or issue, naming the exclusion. No
-exclusion has tier-A evidence. Commit authorship cannot serve instead: every
+a marker, or the user's own words in a PR or issue, naming the exclusion. At
+the first audit no exclusion had tier-A evidence; since 2026-10-29 all 30
+have (Tiers below). Commit authorship cannot serve instead: every
 commit in the history carries the owner's name, including those from agent
 branches such as `codex/…`.
 
@@ -178,8 +276,12 @@ and low-level `call(data)`, block and transaction fields other than
 storage layout, and logs. This is recorded design intent without a decision
 marker. The section was later removed in the documentation pruning.
 
-**Tiers** (the `evidence` column of the manifest table):
-- **A** (0): explicit user decision.
+**Tiers** (the `evidence` column of the manifest table; the first audit's
+tiers are kept after "before:"):
+- **A** (30 since 2026-10-29; 0 at the first audit): explicit user decision —
+  every exclusion, by G00 Q1 in
+  [User decisions (2026-10-29)](../solidity-scope.md#user-decisions-2026-10-29).
+  The tiers below are the history before that decision.
 - **B** (12): named in the root-commit text — `inlineAssembly`, `gasleft`,
   `rawCalldata`, `rawReturndata`, `lowLevelCall`, `selfdestruct`,
   `create2Salt`, `addressCode`, `eventLog`, `blockNumber`, `txOrigin`,
@@ -200,10 +302,10 @@ marker. The section was later removed in the documentation pruning.
 B and B- rows also have the unanswered D1–D3. Tiers only order the evidence;
 none is approval.
 
-**Classification: 0 confirmed-with-evidence, 30 unresolved.** Each is an open
-scope question (Q1). Until it is answered the recorded profile is preserved
-(the roadmap's rule): admission keeps refusing these rows with their
-structured diagnostics, and no further exclusion is added. The Lean catalog
+**Classification: 30 confirmed (tier A), 0 unresolved** since the G00 Q1
+decision. (First audit: 0 confirmed, 30 unresolved, each an open scope
+question.) Admission keeps refusing these rows with their structured
+diagnostics; no exclusion was added. The Lean catalog
 proves the diagnostics match the recorded rows — `Solidity.Language.Unmodelled.excluded`
 (`Solidity/Language/Features.lean:1910`) and
 `Solidity.Language.Feature.exclusion_complete` (`:1936`), over
@@ -252,6 +354,19 @@ exclusions:
   excluded low-level storage corruption: it follows `storageLayout`/
   `inlineAssembly` in Q1).
 - The `libraries`-must-be-empty provenance setting (disagreement 6).
+
+## Abstraction outcomes (G00 Q2)
+
+The decision's outcome for each of the 23 `abstract` rows, recorded in the
+manifest's `decision.outcome` (with a `note`) and checked by both scripts.
+No row's scope or status changed.
+
+| Outcome | Rows | Meaning |
+|---|---|---|
+| `approved` (9) | `keccakBuiltin`, `sha256Builtin`, `ripemd160Builtin`, `ecrecoverBuiltin`, `msgSender`, `msgValue`, `thisAddress`, `addressBalance`, `blockTimestamp` | Opaque hashes and `ecrecover` as fixed functions (keccak a fixed parameter, not an environment input); `msg`/`block`/`this`/balance values as universally quantified inputs (`this` from deployment, the own balance from the ledger, `msg.value` bounded by the sender's balance) |
+| `replace` (3) | `worldAssumptions`; `sendTransfer`, `emptyDataValueCall` (the payment-acceptance boolean, `Machine.accepts`, G04 R33) | Not approved: "must be replaced or proposed again". The notes name candidates (the G01 Q4 environment; G04 Q3's history-dependent acceptance) without claiming the decision chose them |
+| `provedSpecialCase` (1) | `callbackSemantics` (the no-callback reading) | Not a premise: it "must become a proved special case" of the G01 Q4 environment; not yet proved |
+| `followsG01` (10) | `externalFunctionTypes`, `tryStatement`, `canonicalRethrow`, `externalTypedCalls`, `newContract`, `creationTry`, `externalLibraryCalls`, `abiEntryValidation`, `constructorLifetime`, `staticCallRestriction` | No separate approval: "the remaining abstract rows follow G01 Q4 and Q8". `canonicalRethrow`'s abstraction is syntactic (the recognized idiom), not an environment premise, so for it the outcome only records that no separate approval was given |
 
 ## Open scope questions
 
@@ -319,7 +434,7 @@ each owner proves against; G04 maps existing compiler restrictions to these
 owners; G06/G46/G47 own the EVM side of every backend column; G02/G07 own
 measurement and regression gates, not feature obligations.
 
-**Rejection owners.** Unresolved exclusions: S00 (syntax outside the profile
+**Rejection owners.** Exclusions (approved by G00 Q1): S00 (syntax outside the profile
 for precise rejection) and G15 (exact classification), with the observation
 boundary in G01/G06. Upstream rows: S00, G08, G11, G15, matching the pinned
 compiler's acceptance boundary.
@@ -344,7 +459,7 @@ compiler's acceptance boundary.
    below) have no feature-level owner. G15 owns them through extraction; the
    scope document already notes the ledger cannot serve as the extractor.
 
-Each of the 174 in-profile rows has a source and a syntax owner and a
+Each of the 175 in-profile rows (174 at the first audit, plus `fixedPoint`) has a source and a syntax owner and a
 lowering and backend entry (`--check` enforces this). `—` marks no
 row-specific obligation in that stage: `comments`, `pragmaVersion`,
 `pragmaOther` (acceptance and provenance only), and `typeValidation`,
@@ -360,22 +475,22 @@ Manifest pin: `argotorg/solidity` `v0.8.38` `1835d247de183f23e7b0e2bc4a50732af52
 
 | G00 status | manifest scope | rows |
 |---|---|---|
+| excluded | exclude | 30 |
 | in-profile | abstract | 23 |
-| in-profile | model | 151 |
-| unresolved | exclude | 30 |
-| upstream-rejected | upstream | 8 |
+| in-profile | model | 152 |
+| upstream-rejected | upstream | 7 |
 | **total** | | **212** |
 
-Current statuses at the base (informative; G00 does not change them): abstract/partial 21, abstract/present 2, exclude/notApplicable 30, model/missing 1, model/partial 139, model/present 11, upstream/notApplicable 8.
+Current implementation statuses (informative; G00 changes only `fixedPoint`, from upstream/notApplicable to model/missing, by the G00 Q6 decision): abstract/partial 21, abstract/present 2, exclude/notApplicable 30, model/missing 2, model/partial 139, model/present 11, upstream/notApplicable 7.
 
 | upstream symbols | count |
 |---|---|
-| combination-unresolved | 70 |
-| combination-upstream | 52 |
-| in-profile | 455 |
+| combination-excluded | 70 |
+| combination-upstream | 28 |
+| excluded | 148 |
+| in-profile | 483 |
 | nonprofile-mixed | 1 |
-| unresolved | 148 |
-| upstream-rejected | 57 |
+| upstream-rejected | 53 |
 | **total** | **783** |
 
 Manifest rows with no ledger symbol (semantic requirements, enumerated by hand): 26 — `callbackSemantics`, `checkedArithmetic`, `constructorLifetime`, `danglingReferences`, `defaultInitialization`, `deleteMappingTails`, `evaluationOrder`, `extensionCalls`, `implicitConversions`, `machineResources`, `memoryAliasing`, `memoryLayout`, `nonpayableEntry`, `panicCodes`, `recursiveTypes`, `removedGenericSolidity`, `revertPayloads`, `rollback`, `staticCallRestriction`, `storageAliasing`, `storageCopy`, `termination`, `transientLayout`, `typeValidation`, `uncheckedArithmetic`, `worldAssumptions`.
@@ -386,6 +501,36 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 
 | ID | category | scope | G00 status | evidence | source | syntax | lowering | backend |
 |---|---|---|---|---|---|---|---|---|
+| `blobhashBuiltin` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: C: a builtin, not a field; not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockBasefee` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: `block.basefee` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockBlobbasefee` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockChainid` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockCoinbase` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockDifficulty` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockGaslimit` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockNumber` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: `block.number` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockPrevrandao` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockSlotnum` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: generic block-field clause (Amsterdam-gated; no pinned EVM target accepts it) | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `blockhashBuiltin` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: C: a builtin, not a field; not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `txGasprice` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: generic block/transaction-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `txOrigin` | environment | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: `tx.origin` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `addressCode` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: `address.code`, `extcodesize` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `addressCodehash` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `create2Salt` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: `create2` salts | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `delegatecall` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `eventLog` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: the log is dropped; argument effects are kept | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `gasOption` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: gas stipends beyond `transfer`/`send` (the `{gas:}` option is not named) | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `gasleft` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: `gasleft()` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `inlineAssembly` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: inline assembly other than a canonical whole-byte-buffer rethrow | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `lowLevelCall` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: low-level `call(data)` with arbitrary bytes | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `lowLevelStaticcall` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `machineResources` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: compiler-verification.md: "no gas, no stack limit" (a model property, not a profile decision) | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `memoryLayout` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `rawCalldata` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: raw calldata (`msg.data`, `msg.sig`) | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `rawReturndata` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: raw returndata | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `selfdestruct` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B: `selfdestruct` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `storageLayout` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: B-: storage layout (slot numbers, packing); `layout at` not named | S00 G15 (precise refusal; observation side: G01/G06) | | | |
+| `transientLayout` | excluded | exclude | excluded | A: G00 Q1 (2026-10-29); before: C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
 | `abiDecode` | abi | model | in-profile | in profile | S04.02 | G10 G13 | G21 | G40 G41 |
 | `abiEncode` | abi | model | in-profile | in profile | S04.02 | G10 G13 | G21 | G40 G41 |
 | `abiEncodeCall` | abi | model | in-profile | in profile | S04.02 | G10 G13 | G21 | G40 G41 |
@@ -395,28 +540,28 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `addmodBuiltin` | builtins | model | in-profile | in profile | S02 | G10 G13 | G16 | G25 |
 | `assertBuiltin` | builtins | model | in-profile | in profile | S02 S04.02 | G10 G13 | G21 | G38 |
 | `bytesConcat` | builtins | model | in-profile | in profile | S02 | G10 G13 | G18.03 | G33 G35 |
-| `ecrecoverBuiltin` | builtins | abstract | in-profile | in profile (abstraction) | S04.02 | G10 G13 | G23 | G31 G46.05 |
+| `ecrecoverBuiltin` | builtins | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G46.05 |
 | `erc7201Builtin` | builtins | model | in-profile | in profile | S02 S04.02 | G10 G13 | G23 | G31 G46.05 |
-| `keccakBuiltin` | builtins | abstract | in-profile | in profile (abstraction) | S04.02 | G10 G13 | G23 | G31 G46.05 |
+| `keccakBuiltin` | builtins | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G46.05 |
 | `mulmodBuiltin` | builtins | model | in-profile | in profile | S02 | G10 G13 | G16 | G25 |
 | `requireBuiltin` | builtins | model | in-profile | in profile | S02 S04.02 | G10 G13 | G21 | G38 |
 | `revertBuiltin` | builtins | model | in-profile | in profile | S02 S04.02 | G10 G13 | G21 | G38 |
-| `ripemd160Builtin` | builtins | abstract | in-profile | in profile (abstraction) | S04.02 | G10 G13 | G23 | G31 G46.05 |
-| `sha256Builtin` | builtins | abstract | in-profile | in profile (abstraction) | S04.02 | G10 G13 | G23 | G31 G46.05 |
+| `ripemd160Builtin` | builtins | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G46.05 |
+| `sha256Builtin` | builtins | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G46.05 |
 | `stringConcat` | builtins | model | in-profile | in profile | S02 | G10 G13 | G18.03 | G33 G35 |
 | `wrapUnwrap` | builtins | model | in-profile | in profile | S02 | G10 G13 | G16 | G25 |
-| `callbackSemantics` | calls | abstract | in-profile | in profile (abstraction) | S03.03 S04.03 | G13 | G22.02 | G42.03 |
-| `creationTry` | calls | abstract | in-profile | in profile (abstraction) | S03.03 S04.04 | G11 G13 | G22.03 | G44.03 |
-| `emptyDataValueCall` | calls | abstract | in-profile | in profile (abstraction) | S03.03 S04.03 | G10 G13 | G22 | G43 |
+| `callbackSemantics` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: provedSpecialCase | S03.03 S04.03 | G13 | G22.02 | G42.03 |
+| `creationTry` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S03.03 S04.04 | G11 G13 | G22.03 | G44.03 |
+| `emptyDataValueCall` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: replace | S03.03 S04.03 | G10 G13 | G22 | G43 |
 | `extensionCalls` | calls | model | in-profile | in profile | S03.03 | G10 G14 | G20 | G37 |
-| `externalLibraryCalls` | calls | abstract | in-profile | in profile (abstraction) | S03.03 S04.03 | G10 G14 | G22.04 | G42.04 |
+| `externalLibraryCalls` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S03.03 S04.03 | G10 G14 | G22.04 | G42.04 |
 | `externalSelfCalls` | calls | model | in-profile | in profile | S03.03 | G10 G14 | G22.01 | G42.01 |
-| `externalTypedCalls` | calls | abstract | in-profile | in profile (abstraction) | S03.03 S04.03 | G10 G14 | G22.01 | G42.02 |
+| `externalTypedCalls` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S03.03 S04.03 | G10 G14 | G22.01 | G42.02 |
 | `functionValues` | calls | model | in-profile | in profile | S03.03 | G10 G13 | G20 | G37.03 G42.05 |
 | `internalCalls` | calls | model | in-profile | in profile | S03.03 | G10 G14 | G20 | G37 |
-| `newContract` | calls | abstract | in-profile | in profile (abstraction) | S03.03 S04.04 | G10 G13 | G22.03 | G44.03 |
+| `newContract` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S03.03 S04.04 | G10 G13 | G22.03 | G44.03 |
 | `recursiveCalls` | calls | model | in-profile | in profile | S03.03 S03.04 | G10 G14 | G20 | G37.02 |
-| `sendTransfer` | calls | abstract | in-profile | in profile (abstraction) | S03.03 S04.03 | G10 G13 | G22 | G43 |
+| `sendTransfer` | calls | abstract | in-profile | in profile (abstraction); G00 Q2: replace | S03.03 S04.03 | G10 G13 | G22 | G43 |
 | `valueOption` | calls | model | in-profile | in profile | S03.03 S04.03 | G10 G13 | G22 | G43 |
 | `constants` | declarations | model | in-profile | in profile | S01 | G09 G13 | G16 | G25 |
 | `constructors` | declarations | model | in-profile | in profile | S03.02 S04.04 | G11 G14 | G19 G22.03 | G44.01 |
@@ -445,11 +590,11 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `usingFor` | declarations | model | in-profile | in profile | S01 | G11 G14 | G20 | G37 |
 | `valueTypeDeclarations` | declarations | model | in-profile | in profile | S00 S01 | G09 G13 | G16 | G25 |
 | `visibility` | declarations | model | in-profile | in profile | S01 | G11 G14 | G20 | G40 |
-| `addressBalance` | environment | abstract | in-profile | in profile (abstraction) | S04.02 S04.03 | G10 G13 | G23 | G31 G43 |
-| `blockTimestamp` | environment | abstract | in-profile | in profile (abstraction) | S04.02 | G10 G13 | G23 | G31 G46.04 |
-| `msgSender` | environment | abstract | in-profile | in profile (abstraction) | S04.02 | G10 G13 | G23 | G31 G46.04 |
-| `msgValue` | environment | abstract | in-profile | in profile (abstraction) | S04.02 | G10 G13 | G23 | G31 G43 |
-| `thisAddress` | environment | abstract | in-profile | in profile (abstraction) | S04.02 | G10 G13 | G23 | G31 G46.04 |
+| `addressBalance` | environment | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 S04.03 | G10 G13 | G23 | G31 G43 |
+| `blockTimestamp` | environment | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G46.04 |
+| `msgSender` | environment | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G46.04 |
+| `msgValue` | environment | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G43 |
+| `thisAddress` | environment | abstract | in-profile | in profile (abstraction); G00 Q2: approved | S04.02 | G10 G13 | G23 | G31 G46.04 |
 | `arithmetic` | expressions | model | in-profile | in profile | S02 | G10 G13 | G16 | G25 |
 | `assignment` | expressions | model | in-profile | in profile | S02 | G10 G13 | G17 | G26 G28 G34 |
 | `bitwise` | expressions | model | in-profile | in profile | S02 | G10 G13 | G16 | G25 |
@@ -483,7 +628,7 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `hexLiterals` | lexical | model | in-profile | in profile | S00 S02 | G08 | G18.03 | G33 |
 | `identifiers` | lexical | model | in-profile | in profile | S00 S01 | G08 G12 | G16 G17 | G26 |
 | `numericLiterals` | lexical | model | in-profile | in profile | S00 | G08 | G16 | G25 |
-| `pragmaAbicoder` | lexical | model | in-profile | in profile | S00 S04.02 | G08 G11 | G21 | G40 G41 |
+| `pragmaAbicoder` | lexical | model | in-profile | in profile; G00 Q4 (revised): twoPipelines | S00 S04.02 | G08 G11 | G21 | G40 G41 |
 | `pragmaOther` | lexical | model | in-profile | in profile | S00 | G08 G11 | — | — |
 | `pragmaVersion` | lexical | model | in-profile | in profile | S00 | G08 G11 | — | — |
 | `stringLiterals` | lexical | model | in-profile | in profile | S00 S02 | G08 | G18.03 | G33 |
@@ -497,11 +642,11 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `runtimeCode` | metadata | model | in-profile | in profile | S04.02 | G13 | G23 | G44.02 |
 | `typeBounds` | metadata | model | in-profile | in profile | S01 | G13 | G16 | G25 |
 | `typeName` | metadata | model | in-profile | in profile | S01 | G13 | G23 | G31 |
-| `abiEntryValidation` | semantics | abstract | in-profile | in profile (abstraction) | S04.02 | G13 | G21 | G40 |
+| `abiEntryValidation` | semantics | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S04.02 | G13 | G21 | G40 |
 | `checkedArithmetic` | semantics | model | in-profile | in profile | S02 | G13 | G16 | G25 |
-| `constructorLifetime` | semantics | abstract | in-profile | in profile (abstraction) | S04.04 | G14 | G22.03 | G44 G50.01 |
+| `constructorLifetime` | semantics | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S04.04 | G14 | G22.03 | G44 G50.01 |
 | `defaultInitialization` | semantics | model | in-profile | in profile | S02 S04.01 | G13 | G18 | G30 G33 |
-| `evaluationOrder` | semantics | model | in-profile | in profile | S02 S03 | G13 | G16 G17 | G26 |
+| `evaluationOrder` | semantics | model | in-profile | in profile; G00 Q4 (revised): twoPipelines | S02 S03 | G13 | G16 G17 | G26 |
 | `exactConstants` | semantics | model | in-profile | in profile | S01 | G13 | G16 | G25 |
 | `featureDetection` | semantics | model | in-profile | in profile | S05 | G15 | — | — |
 | `nonpayableEntry` | semantics | model | in-profile | in profile | S04.04 | G13 | G22.05 | G40 G43 |
@@ -509,14 +654,14 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `referenceCopyRules` | semantics | model | in-profile | in profile | S04.01 | G13 | G18.05 | G29 G35 |
 | `revertPayloads` | semantics | model | in-profile | in profile | S04.02 | G13 | G21 | G38 G41 |
 | `rollback` | semantics | model | in-profile | in profile | S03.04 S04.03 | G13 | G21 G22 | G38 G39 G47 |
-| `staticCallRestriction` | semantics | abstract | in-profile | in profile (abstraction) | S03.03 S04.03 | G13 | G22 | G42.02 G42.05 |
+| `staticCallRestriction` | semantics | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S03.03 S04.03 | G13 | G22 | G42.02 G42.05 |
 | `termination` | semantics | model | in-profile | in profile | S03.04 | G13 | G19 | G36.03 G37.02 G49.03 |
 | `typeValidation` | semantics | model | in-profile | in profile | S01 | G13 | — | — |
 | `uncheckedArithmetic` | semantics | model | in-profile | in profile | S02 | G13 | G16 | G25 |
-| `worldAssumptions` | semantics | abstract | in-profile | in profile (abstraction) | S04.03 | G13 | G22 | G47 |
+| `worldAssumptions` | semantics | abstract | in-profile | in profile (abstraction); G00 Q2: replace | S04.03 | G13 | G22 | G47 |
 | `blocks` | statements | model | in-profile | in profile | S03.01 | G11 | G19 | G36.01 |
 | `breakStatement` | statements | model | in-profile | in profile | S03.01 | G11 | G19 | G36.01 |
-| `canonicalRethrow` | statements | abstract | in-profile | in profile (abstraction) | S03.01 S04.02 | G11 G15 | G21 | G38 |
+| `canonicalRethrow` | statements | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S03.01 S04.02 | G11 G15 | G21 | G38 |
 | `catchClauses` | statements | model | in-profile | in profile | S03.03 S04.02 | G11 | G21 | G38 G41 |
 | `continueStatement` | statements | model | in-profile | in profile | S03.01 | G11 | G19 | G36.01 |
 | `doWhileStatement` | statements | model | in-profile | in profile | S03.01 | G11 | G19 | G36 |
@@ -526,7 +671,7 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `ifStatement` | statements | model | in-profile | in profile | S03.01 | G11 | G19 | G36.01 |
 | `returnStatement` | statements | model | in-profile | in profile | S03.01 | G11 | G19 | G36.01 G37 |
 | `revertStatement` | statements | model | in-profile | in profile | S03.01 S04.02 | G11 | G21 | G38 |
-| `tryStatement` | statements | abstract | in-profile | in profile (abstraction) | S03.03 S04.03 | G11 | G21 G22 | G38 G42 |
+| `tryStatement` | statements | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S03.03 S04.03 | G11 | G21 G22 | G38 G42 |
 | `uncheckedBlock` | statements | model | in-profile | in profile | S02 S03.01 | G11 | G16 | G25 |
 | `variableDeclarations` | statements | model | in-profile | in profile | S03.01 | G11 G13 | G17 G19 | G26 |
 | `whileStatement` | statements | model | in-profile | in profile | S03.01 | G11 | G19 | G36 |
@@ -547,9 +692,10 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `dynamicArrays` | types | model | in-profile | in profile | S00 S01 S04.01 | G09 G13 | G18 | G27.03 G32 |
 | `dynamicBytesType` | types | model | in-profile | in profile | S00 S01 S04.01 | G09 G13 | G18 | G27.03 G32 |
 | `enumTypes` | types | model | in-profile | in profile | S00 S01 | G09 G13 | G16 | G25 |
-| `externalFunctionTypes` | types | abstract | in-profile | in profile (abstraction) | S00 S01 S04.03 | G09 G13 | G20 G22.04 | G42.05 |
+| `externalFunctionTypes` | types | abstract | in-profile | in profile (abstraction); G00 Q2: followsG01 | S00 S01 S04.03 | G09 G13 | G20 G22.04 | G42.05 |
 | `fixedArrays` | types | model | in-profile | in profile | S00 S01 S04.01 | G09 G13 | G18 | G27.03 G32 |
 | `fixedBytesTypes` | types | model | in-profile | in profile | S00 S01 | G09 G13 | G16 | G25 |
+| `fixedPoint` | types | model | in-profile | in profile; G00 Q6: fullSupport | S00 S01 S02 | G08–G15 | G16–G23 | G24–G47 |
 | `integerTypes` | types | model | in-profile | in profile | S00 S01 | G09 G13 | G16 | G25 |
 | `internalFunctionTypes` | types | model | in-profile | in profile | S00 S01 | G09 G13 | G20 | G37.03 |
 | `mappings` | types | model | in-profile | in profile | S00 S01 S04.01 | G09 G13 | G18.02 | G27.02 |
@@ -560,37 +706,6 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | `structTypes` | types | model | in-profile | in profile | S00 S01 S04.01 | G09 G13 | G18 | G27.01 G32 |
 | `tupleTypes` | types | model | in-profile | in profile | S00 S01 | G09 G13 | G17 | G26 |
 | `valueTypes` | types | model | in-profile | in profile | S00 S01 | G09 G13 | G16 | G25 |
-| `blobhashBuiltin` | environment | exclude | unresolved | C: a builtin, not a field; not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockBasefee` | environment | exclude | unresolved | B: `block.basefee` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockBlobbasefee` | environment | exclude | unresolved | B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockChainid` | environment | exclude | unresolved | B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockCoinbase` | environment | exclude | unresolved | B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockDifficulty` | environment | exclude | unresolved | B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockGaslimit` | environment | exclude | unresolved | B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockNumber` | environment | exclude | unresolved | B: `block.number` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockPrevrandao` | environment | exclude | unresolved | B-: generic block-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockSlotnum` | environment | exclude | unresolved | B-: generic block-field clause (Amsterdam-gated; no pinned EVM target accepts it) | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `blockhashBuiltin` | environment | exclude | unresolved | C: a builtin, not a field; not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `txGasprice` | environment | exclude | unresolved | B-: generic block/transaction-field clause | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `txOrigin` | environment | exclude | unresolved | B: `tx.origin` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `addressCode` | excluded | exclude | unresolved | B: `address.code`, `extcodesize` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `addressCodehash` | excluded | exclude | unresolved | C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `create2Salt` | excluded | exclude | unresolved | B: `create2` salts | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `delegatecall` | excluded | exclude | unresolved | C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `eventLog` | excluded | exclude | unresolved | B: the log is dropped; argument effects are kept | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `gasOption` | excluded | exclude | unresolved | B-: gas stipends beyond `transfer`/`send` (the `{gas:}` option is not named) | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `gasleft` | excluded | exclude | unresolved | B: `gasleft()` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `inlineAssembly` | excluded | exclude | unresolved | B: inline assembly other than a canonical whole-byte-buffer rethrow | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `lowLevelCall` | excluded | exclude | unresolved | B: low-level `call(data)` with arbitrary bytes | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `lowLevelStaticcall` | excluded | exclude | unresolved | C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `machineResources` | excluded | exclude | unresolved | B-: compiler-verification.md: "no gas, no stack limit" (a model property, not a profile decision) | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `memoryLayout` | excluded | exclude | unresolved | C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `rawCalldata` | excluded | exclude | unresolved | B: raw calldata (`msg.data`, `msg.sig`) | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `rawReturndata` | excluded | exclude | unresolved | B: raw returndata | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `selfdestruct` | excluded | exclude | unresolved | B: `selfdestruct` | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `storageLayout` | excluded | exclude | unresolved | B-: storage layout (slot numbers, packing); `layout at` not named | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `transientLayout` | excluded | exclude | unresolved | C: not named before 419f8a4 | S00 G15 (precise refusal; observation side: G01/G06) | | | |
-| `fixedPoint` | upstream | upstream | upstream-rejected | upstream-incomplete: pinned solc accepts some uses (`type T is fixed;`, `syntaxTests/userDefinedValueType/all_value_types.sol`); match its exact boundary (Q6) | S00 G08 G11 G15 (match the pinned compiler's acceptance boundary) | | | |
 | `invalidLexemes` | upstream | upstream | upstream-rejected | upstream pin | S00 G08 G11 G15 (match the pinned compiler's acceptance boundary) | | | |
 | `invalidModifierBody` | upstream | upstream | upstream-rejected | upstream pin | S00 G08 G11 G15 (match the pinned compiler's acceptance boundary) | | | |
 | `removedAliases` | upstream | upstream | upstream-rejected | upstream pin | S00 G08 G11 G15 (match the pinned compiler's acceptance boundary) | | | |
@@ -601,22 +716,22 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 
 ### Upstream symbols by kind
 
-- **parserRules** — in-profile (68): `block`, `booleanLiteral`, `breakStatement`, `callArgumentList`, `catchClause`, `constantVariableDeclaration`, `constructorDefinition`, `continueStatement`, `contractBodyElement`, `dataLocation`, `doWhileStatement`, `emitStatement`, `enumDefinition`, `errorDefinition`, `errorParameter`, `expression`, `expressionStatement`, `forStatement`, `functionDefinition`, `functionTypeName`, `hexStringLiteral`, `identifier`, `identifierPath`, `ifStatement`, `importAliases`, `importDirective`, `inheritanceSpecifier`, `inheritanceSpecifierList`, `inlineArrayExpression`, `interfaceDefinition`, `libraryDefinition`, `literal`, `mappingKeyType`, `mappingType`, `modifierInvocation`, `namedArgument`, `numberLiteral`, `overrideSpecifier`, `parameterDeclaration`, `parameterList`, `path`, `pragmaDirective`, `receiveFunctionDefinition`, `returnStatement`, `revertStatement`, `simpleStatement`, `sourceUnit`, `stateMutability`, `stateVariableDeclaration`, `statement`, `stringLiteral`, `structDefinition`, `structMember`, `symbolAliases`, `tryStatement`, `tupleExpression`, `uncheckedBlock`, `unicodeStringLiteral`, `userDefinableOperator`, `userDefinedValueTypeDefinition`, `usingAliases`, `usingDirective`, `variableDeclaration`, `variableDeclarationList`, `variableDeclarationStatement`, `variableDeclarationTuple`, `visibility`, `whileStatement`; combination-unresolved (12): `assemblyFlags`, `assemblyStatement`, `contractDefinition`, `eventDefinition`, `eventParameter`, `fallbackFunctionDefinition`, `yulBlock`, `yulExpression`, `yulFunctionCall`, `yulLiteral`, `yulPath`, `yulStatement`; combination-upstream (5): `assignOp`, `elementaryTypeName`, `literalWithSubDenomination`, `modifierDefinition`, `typeName`; unresolved (8): `yulAssignment`, `yulBoolean`, `yulForStatement`, `yulFunctionDefinition`, `yulIfStatement`, `yulSwitchCase`, `yulSwitchStatement`, `yulVariableDeclaration`
-- **expressionAlternatives** — in-profile (23): `AddSubOperation`, `AndOperation`, `Assignment`, `BitAndOperation`, `BitOrOperation`, `BitXorOperation`, `Conditional`, `EqualityComparison`, `ExpOperation`, `FunctionCall`, `IndexAccess`, `IndexRangeAccess`, `InlineArray`, `MemberAccess`, `MetaType`, `MulDivModOperation`, `OrOperation`, `OrderComparison`, `PayableConversion`, `PrimaryExpression`, `Tuple`, `UnaryPrefixOperation`, `UnarySuffixOperation`; combination-unresolved (2): `FunctionCallOptions`, `NewExpr`; combination-upstream (1): `ShiftOperation`
-- **lexerRules** — in-profile (108): `Add`, `And`, `As`, `AssignSar`, `AssignShl`, `BitAnd`, `BitNot`, `BitOr`, `BitXor`, `Break`, `COMMENT`, `Calldata`, `Catch`, `Colon`, `Conditional`, `Constant`, `Constructor`, `Continue`, `Dec`, `DecimalDigits`, `DecimalNumber`, `Delete`, `Div`, `Do`, `DoubleArrow`, `DoubleQuote`, `DoubleQuotedPrintable`, `DoubleQuotedStringCharacter`, `DoubleQuotedUnicodeStringCharacter`, `Else`, `Emit`, `EmptyStringLiteral`, `Enum`, `Equal`, `Error`, `EscapeSequence`, `EvenHexDigits`, `Exp`, `False`, `For`, `From`, `Function`, `Global`, `GreaterThan`, `GreaterThanOrEqual`, `Hex`, `HexCharacter`, `HexDigits`, `HexNumber`, `HexString`, `Identifier`, `IdentifierPart`, `IdentifierStart`, `If`, `Immutable`, `Import`, `Inc`, `Interface`, `Internal`, `Is`, `LINE_COMMENT`, `LessThan`, `LessThanOrEqual`, `Library`, `Mapping`, `Memory`, `Mod`, `Modifier`, `Mul`, `New`, `NonEmptyStringLiteral`, `Not`, `NotEqual`, `Or`, `Override`, `Period`, `Pragma`, `PragmaCOMMENT`, `PragmaLINE_COMMENT`, `PragmaSemicolon`, `PragmaToken`, `PragmaWS`, `Private`, `Public`, `Pure`, `Receive`, `Return`, `Revert`, `Sar`, `Shl`, `SingleQuote`, `SingleQuotedPrintable`, `SingleQuotedStringCharacter`, `SingleQuotedUnicodeStringCharacter`, `Storage`, `Struct`, `Sub`, `Transient`, `True`, `Try`, `Type`, `Unchecked`, `Unicode`, `UnicodeStringLiteral`, `Using`, `View`, `WS`, `While`; combination-unresolved (27): `Abstract`, `Anonymous`, `Assembly`, `AssemblyLBrace`, `At`, `Comma`, `Contract`, `Event`, `External`, `Fallback`, `Indexed`, `LBrace`, `LParen`, `Layout`, `RBrace`, `RParen`, `Returns`, `Semicolon`, `Virtual`, `YulComma`, `YulDecimalNumber`, `YulEVMBuiltin`, `YulIdentifier`, `YulLParen`, `YulRBrace`, `YulRParen`, `YulWS`; combination-upstream (22): `Address`, `Assign`, `AssignAdd`, `AssignBitAnd`, `AssignBitOr`, `AssignBitXor`, `AssignDiv`, `AssignMod`, `AssignMul`, `AssignSub`, `Bool`, `Bytes`, `Fixed`, `FixedBytes`, `LBrack`, `Payable`, `RBrack`, `SignedIntegerType`, `String`, `SubDenomination`, `Ufixed`, `UnsignedIntegerType`; unresolved (32): `AssemblyBlockCOMMENT`, `AssemblyBlockComma`, `AssemblyBlockLINE_COMMENT`, `AssemblyBlockLParen`, `AssemblyBlockRParen`, `AssemblyBlockWS`, `AssemblyDialect`, `AssemblyFlagString`, `YulArrow`, `YulAssign`, `YulBreak`, `YulCOMMENT`, `YulCase`, `YulContinue`, `YulDefault`, `YulFalse`, `YulFor`, `YulFunction`, `YulHex`, `YulHexNumber`, `YulHexStringLiteral`, `YulIdentifierPart`, `YulIdentifierStart`, `YulIf`, `YulLBrace`, `YulLINE_COMMENT`, `YulLeave`, `YulLet`, `YulPeriod`, `YulStringLiteral`, `YulSwitch`, `YulTrue`; upstream-rejected (6): `AssignShr`, `DecimalNumberFollowedByIdentifier`, `OctalNumber`, `ReservedKeywords`, `RightArrow`, `Shr`
-- **astClasses** — in-profile (62): `ASTNode`, `ArrayTypeName`, `Assignment`, `BinaryOperation`, `Block`, `Break`, `BreakableStatement`, `CallableDeclaration`, `Conditional`, `Continue`, `ContractDefinition`, `Declaration`, `Documented`, `ElementaryTypeNameExpression`, `EmitStatement`, `EnumDefinition`, `EnumValue`, `ErrorDefinition`, `EventDefinition`, `Expression`, `ExpressionStatement`, `ForStatement`, `FunctionCall`, `FunctionDefinition`, `FunctionTypeName`, `Identifier`, `IdentifierPath`, `IfStatement`, `ImplementationOptional`, `ImportDirective`, `IndexAccess`, `IndexRangeAccess`, `InheritanceSpecifier`, `MagicVariableDeclaration`, `Mapping`, `MemberAccess`, `ModifierInvocation`, `NewExpression`, `OverrideSpecifier`, `ParameterList`, `PragmaDirective`, `PrimaryExpression`, `Return`, `RevertStatement`, `Scopable`, `ScopeOpener`, `SourceUnit`, `Statement`, `StructDefinition`, `StructurallyDocumented`, `StructuredDocumentation`, `TryCatchClause`, `TryStatement`, `TupleExpression`, `UnaryOperation`, `UserDefinedTypeName`, `UserDefinedValueTypeDefinition`, `UsingForDirective`, `VariableDeclaration`, `VariableDeclarationStatement`, `VariableScope`, `WhileStatement`; combination-unresolved (3): `FunctionCallOptions`, `InlineAssembly`, `StorageLayoutSpecifier`; combination-upstream (5): `ElementaryTypeName`, `Literal`, `ModifierDefinition`, `PlaceholderStatement`, `TypeName`; upstream-rejected (1): `Throw`
-- **functionKinds** — in-profile (31): `ABIDecode`, `ABIEncode`, `ABIEncodeCall`, `ABIEncodePacked`, `ABIEncodeWithSelector`, `ABIEncodeWithSignature`, `AddMod`, `ArrayPop`, `ArrayPush`, `Assert`, `BytesConcat`, `Declaration`, `DelegateCall`, `ECRecover`, `ERC7201`, `Error`, `External`, `Internal`, `KECCAK256`, `MetaType`, `MulMod`, `ObjectCreation`, `RIPEMD160`, `Require`, `Revert`, `SHA256`, `Send`, `StringConcat`, `Transfer`, `Unwrap`, `Wrap`; combination-unresolved (3): `BareCall`, `Creation`, `Event`; combination-upstream (1): `SetValue`; unresolved (6): `BareDelegateCall`, `BareStaticCall`, `BlobHash`, `BlockHash`, `GasLeft`, `Selfdestruct`; nonprofile-mixed (1): `SetGas`; upstream-rejected (1): `BareCallCode`
-- **globalNames** — in-profile (14): `abi`, `addmod`, `assert`, `ecrecover`, `erc7201`, `keccak256`, `mulmod`, `require`, `revert`, `ripemd160`, `sha256`, `super`, `this`, `type`; combination-unresolved (2): `block`, `msg`; unresolved (5): `blobhash`, `blockhash`, `gasleft`, `selfdestruct`, `tx`; upstream-rejected (3): `now`, `sha3`, `suicide`
-- **yulBuiltins** — combination-unresolved (3): `add`, `mload`, `revert`; unresolved (78): `addmod`, `address`, `and`, `balance`, `basefee`, `blobbasefee`, `blobhash`, `blockhash`, `byte`, `call`, `callcode`, `calldatacopy`, `calldataload`, `calldatasize`, `caller`, `callvalue`, `chainid`, `clz`, `coinbase`, `create`, `create2`, `delegatecall`, `difficulty`, `div`, `eq`, `exp`, `extcodecopy`, `extcodehash`, `extcodesize`, `gas`, `gaslimit`, `gasprice`, `gt`, `invalid`, `iszero`, `keccak256`, `log0`, `log1`, `log2`, `log3`, `log4`, `lt`, `mcopy`, `mod`, `msize`, `mstore`, `mstore8`, `mul`, `mulmod`, `not`, `number`, `or`, `origin`, `pop`, `prevrandao`, `return`, `returndatacopy`, `returndatasize`, `sar`, `sdiv`, `selfbalance`, `selfdestruct`, `sgt`, `shl`, `shr`, `signextend`, `sload`, `slotnum`, `slt`, `smod`, `sstore`, `staticcall`, `stop`, `sub`, `timestamp`, `tload`, `tstore`, `xor`
-- **compilerTokens** — in-profile (95): `Add`, `And`, `As`, `AssignSar`, `AssignShl`, `BitAnd`, `BitNot`, `BitOr`, `BitXor`, `Break`, `BytesM`, `CallData`, `Catch`, `Colon`, `CommentLiteral`, `Conditional`, `Constant`, `Constructor`, `Continue`, `Dec`, `Delete`, `Div`, `Do`, `DoubleArrow`, `EOS`, `Else`, `Emit`, `Enum`, `Equal`, `Exp`, `FalseLiteral`, `For`, `Function`, `GreaterThan`, `GreaterThanOrEqual`, `Hex`, `HexStringLiteral`, `Identifier`, `If`, `Immutable`, `Import`, `Inc`, `Int`, `IntM`, `Interface`, `Internal`, `Is`, `LessThan`, `LessThanOrEqual`, `Library`, `Mapping`, `Memory`, `Mod`, `Modifier`, `Mul`, `New`, `Not`, `NotEqual`, `Number`, `Or`, `Override`, `Period`, `Pragma`, `Private`, `Public`, `Pure`, `Receive`, `Return`, `SAR`, `SHL`, `Storage`, `StringLiteral`, `Struct`, `Sub`, `SubDay`, `SubEther`, `SubGwei`, `SubHour`, `SubMinute`, `SubSecond`, `SubWeek`, `SubWei`, `TrueLiteral`, `Try`, `Type`, `TypesEnd`, `UInt`, `UIntM`, `Unchecked`, `Unicode`, `UnicodeStringLiteral`, `Using`, `View`, `While`, `Whitespace`; combination-unresolved (16): `Abstract`, `Anonymous`, `Assembly`, `Comma`, `Contract`, `Event`, `External`, `Fallback`, `Indexed`, `LBrace`, `LParen`, `RBrace`, `RParen`, `Returns`, `Semicolon`, `Virtual`; combination-upstream (17): `Address`, `Assign`, `AssignAdd`, `AssignBitAnd`, `AssignBitOr`, `AssignBitXor`, `AssignDiv`, `AssignMod`, `AssignMul`, `AssignSub`, `Bool`, `Bytes`, `Fixed`, `LBrack`, `Payable`, `RBrack`, `String`; unresolved (2): `AssemblyAssign`, `Leave`; upstream-rejected (40): `After`, `Alias`, `Apply`, `AssignShr`, `Auto`, `Byte`, `Case`, `CopyOf`, `Default`, `Define`, `Final`, `FixedMxN`, `Illegal`, `Implements`, `In`, `Inline`, `Let`, `Macro`, `Match`, `Mutable`, `NullLiteral`, `Of`, `Partial`, `Promise`, `Reference`, `Relocatable`, `RightArrow`, `SHR`, `Sealed`, `Sizeof`, `Static`, `SubYear`, `Supports`, `Switch`, `Throw`, `TypeOf`, `Typedef`, `UFixed`, `UFixedMxN`, `Var`
-- **typeCategories** — in-profile (20): `Address`, `Array`, `ArraySlice`, `Bool`, `Contract`, `Enum`, `FixedBytes`, `Function`, `InaccessibleDynamic`, `Integer`, `Magic`, `Mapping`, `Modifier`, `Module`, `RationalNumber`, `StringLiteral`, `Struct`, `Tuple`, `TypeType`, `UserDefinedValueType`; upstream-rejected (1): `FixedPoint`
-- **magicMembers** — in-profile (15): `ABI.decode`, `ABI.encode`, `ABI.encodeCall`, `ABI.encodePacked`, `ABI.encodeWithSelector`, `ABI.encodeWithSignature`, `Block.timestamp`, `Message.sender`, `Message.value`, `MetaType.creationCode`, `MetaType.interfaceId`, `MetaType.max`, `MetaType.min`, `MetaType.name`, `MetaType.runtimeCode`; unresolved (13): `Block.basefee`, `Block.blobbasefee`, `Block.chainid`, `Block.coinbase`, `Block.difficulty`, `Block.gaslimit`, `Block.number`, `Block.prevrandao`, `Block.slotnum`, `Message.data`, `Message.sig`, `Transaction.gasprice`, `Transaction.origin`; upstream-rejected (2): `Block.blockhash`, `Message.gas`
-- **AddressTypeMembers** — in-profile (3): `balance`, `send`, `transfer`; combination-unresolved (1): `call`; unresolved (4): `code`, `codehash`, `delegatecall`, `staticcall`; upstream-rejected (1): `callcode`
+- **parserRules** — in-profile (70): `block`, `booleanLiteral`, `breakStatement`, `callArgumentList`, `catchClause`, `constantVariableDeclaration`, `constructorDefinition`, `continueStatement`, `contractBodyElement`, `dataLocation`, `doWhileStatement`, `elementaryTypeName`, `emitStatement`, `enumDefinition`, `errorDefinition`, `errorParameter`, `expression`, `expressionStatement`, `forStatement`, `functionDefinition`, `functionTypeName`, `hexStringLiteral`, `identifier`, `identifierPath`, `ifStatement`, `importAliases`, `importDirective`, `inheritanceSpecifier`, `inheritanceSpecifierList`, `inlineArrayExpression`, `interfaceDefinition`, `libraryDefinition`, `literal`, `mappingKeyType`, `mappingType`, `modifierInvocation`, `namedArgument`, `numberLiteral`, `overrideSpecifier`, `parameterDeclaration`, `parameterList`, `path`, `pragmaDirective`, `receiveFunctionDefinition`, `returnStatement`, `revertStatement`, `simpleStatement`, `sourceUnit`, `stateMutability`, `stateVariableDeclaration`, `statement`, `stringLiteral`, `structDefinition`, `structMember`, `symbolAliases`, `tryStatement`, `tupleExpression`, `typeName`, `uncheckedBlock`, `unicodeStringLiteral`, `userDefinableOperator`, `userDefinedValueTypeDefinition`, `usingAliases`, `usingDirective`, `variableDeclaration`, `variableDeclarationList`, `variableDeclarationStatement`, `variableDeclarationTuple`, `visibility`, `whileStatement`; combination-excluded (12): `assemblyFlags`, `assemblyStatement`, `contractDefinition`, `eventDefinition`, `eventParameter`, `fallbackFunctionDefinition`, `yulBlock`, `yulExpression`, `yulFunctionCall`, `yulLiteral`, `yulPath`, `yulStatement`; combination-upstream (3): `assignOp`, `literalWithSubDenomination`, `modifierDefinition`; excluded (8): `yulAssignment`, `yulBoolean`, `yulForStatement`, `yulFunctionDefinition`, `yulIfStatement`, `yulSwitchCase`, `yulSwitchStatement`, `yulVariableDeclaration`
+- **expressionAlternatives** — in-profile (23): `AddSubOperation`, `AndOperation`, `Assignment`, `BitAndOperation`, `BitOrOperation`, `BitXorOperation`, `Conditional`, `EqualityComparison`, `ExpOperation`, `FunctionCall`, `IndexAccess`, `IndexRangeAccess`, `InlineArray`, `MemberAccess`, `MetaType`, `MulDivModOperation`, `OrOperation`, `OrderComparison`, `PayableConversion`, `PrimaryExpression`, `Tuple`, `UnaryPrefixOperation`, `UnarySuffixOperation`; combination-excluded (2): `FunctionCallOptions`, `NewExpr`; combination-upstream (1): `ShiftOperation`
+- **lexerRules** — in-profile (120): `Add`, `Address`, `And`, `As`, `AssignSar`, `AssignShl`, `BitAnd`, `BitNot`, `BitOr`, `BitXor`, `Bool`, `Break`, `Bytes`, `COMMENT`, `Calldata`, `Catch`, `Colon`, `Conditional`, `Constant`, `Constructor`, `Continue`, `Dec`, `DecimalDigits`, `DecimalNumber`, `Delete`, `Div`, `Do`, `DoubleArrow`, `DoubleQuote`, `DoubleQuotedPrintable`, `DoubleQuotedStringCharacter`, `DoubleQuotedUnicodeStringCharacter`, `Else`, `Emit`, `EmptyStringLiteral`, `Enum`, `Equal`, `Error`, `EscapeSequence`, `EvenHexDigits`, `Exp`, `False`, `Fixed`, `FixedBytes`, `For`, `From`, `Function`, `Global`, `GreaterThan`, `GreaterThanOrEqual`, `Hex`, `HexCharacter`, `HexDigits`, `HexNumber`, `HexString`, `Identifier`, `IdentifierPart`, `IdentifierStart`, `If`, `Immutable`, `Import`, `Inc`, `Interface`, `Internal`, `Is`, `LBrack`, `LINE_COMMENT`, `LessThan`, `LessThanOrEqual`, `Library`, `Mapping`, `Memory`, `Mod`, `Modifier`, `Mul`, `New`, `NonEmptyStringLiteral`, `Not`, `NotEqual`, `Or`, `Override`, `Payable`, `Period`, `Pragma`, `PragmaCOMMENT`, `PragmaLINE_COMMENT`, `PragmaSemicolon`, `PragmaToken`, `PragmaWS`, `Private`, `Public`, `Pure`, `RBrack`, `Receive`, `Return`, `Revert`, `Sar`, `Shl`, `SignedIntegerType`, `SingleQuote`, `SingleQuotedPrintable`, `SingleQuotedStringCharacter`, `SingleQuotedUnicodeStringCharacter`, `Storage`, `String`, `Struct`, `Sub`, `Transient`, `True`, `Try`, `Type`, `Ufixed`, `Unchecked`, `Unicode`, `UnicodeStringLiteral`, `UnsignedIntegerType`, `Using`, `View`, `WS`, `While`; combination-excluded (27): `Abstract`, `Anonymous`, `Assembly`, `AssemblyLBrace`, `At`, `Comma`, `Contract`, `Event`, `External`, `Fallback`, `Indexed`, `LBrace`, `LParen`, `Layout`, `RBrace`, `RParen`, `Returns`, `Semicolon`, `Virtual`, `YulComma`, `YulDecimalNumber`, `YulEVMBuiltin`, `YulIdentifier`, `YulLParen`, `YulRBrace`, `YulRParen`, `YulWS`; combination-upstream (10): `Assign`, `AssignAdd`, `AssignBitAnd`, `AssignBitOr`, `AssignBitXor`, `AssignDiv`, `AssignMod`, `AssignMul`, `AssignSub`, `SubDenomination`; excluded (32): `AssemblyBlockCOMMENT`, `AssemblyBlockComma`, `AssemblyBlockLINE_COMMENT`, `AssemblyBlockLParen`, `AssemblyBlockRParen`, `AssemblyBlockWS`, `AssemblyDialect`, `AssemblyFlagString`, `YulArrow`, `YulAssign`, `YulBreak`, `YulCOMMENT`, `YulCase`, `YulContinue`, `YulDefault`, `YulFalse`, `YulFor`, `YulFunction`, `YulHex`, `YulHexNumber`, `YulHexStringLiteral`, `YulIdentifierPart`, `YulIdentifierStart`, `YulIf`, `YulLBrace`, `YulLINE_COMMENT`, `YulLeave`, `YulLet`, `YulPeriod`, `YulStringLiteral`, `YulSwitch`, `YulTrue`; upstream-rejected (6): `AssignShr`, `DecimalNumberFollowedByIdentifier`, `OctalNumber`, `ReservedKeywords`, `RightArrow`, `Shr`
+- **astClasses** — in-profile (64): `ASTNode`, `ArrayTypeName`, `Assignment`, `BinaryOperation`, `Block`, `Break`, `BreakableStatement`, `CallableDeclaration`, `Conditional`, `Continue`, `ContractDefinition`, `Declaration`, `Documented`, `ElementaryTypeName`, `ElementaryTypeNameExpression`, `EmitStatement`, `EnumDefinition`, `EnumValue`, `ErrorDefinition`, `EventDefinition`, `Expression`, `ExpressionStatement`, `ForStatement`, `FunctionCall`, `FunctionDefinition`, `FunctionTypeName`, `Identifier`, `IdentifierPath`, `IfStatement`, `ImplementationOptional`, `ImportDirective`, `IndexAccess`, `IndexRangeAccess`, `InheritanceSpecifier`, `MagicVariableDeclaration`, `Mapping`, `MemberAccess`, `ModifierInvocation`, `NewExpression`, `OverrideSpecifier`, `ParameterList`, `PragmaDirective`, `PrimaryExpression`, `Return`, `RevertStatement`, `Scopable`, `ScopeOpener`, `SourceUnit`, `Statement`, `StructDefinition`, `StructurallyDocumented`, `StructuredDocumentation`, `TryCatchClause`, `TryStatement`, `TupleExpression`, `TypeName`, `UnaryOperation`, `UserDefinedTypeName`, `UserDefinedValueTypeDefinition`, `UsingForDirective`, `VariableDeclaration`, `VariableDeclarationStatement`, `VariableScope`, `WhileStatement`; combination-excluded (3): `FunctionCallOptions`, `InlineAssembly`, `StorageLayoutSpecifier`; combination-upstream (3): `Literal`, `ModifierDefinition`, `PlaceholderStatement`; upstream-rejected (1): `Throw`
+- **functionKinds** — in-profile (31): `ABIDecode`, `ABIEncode`, `ABIEncodeCall`, `ABIEncodePacked`, `ABIEncodeWithSelector`, `ABIEncodeWithSignature`, `AddMod`, `ArrayPop`, `ArrayPush`, `Assert`, `BytesConcat`, `Declaration`, `DelegateCall`, `ECRecover`, `ERC7201`, `Error`, `External`, `Internal`, `KECCAK256`, `MetaType`, `MulMod`, `ObjectCreation`, `RIPEMD160`, `Require`, `Revert`, `SHA256`, `Send`, `StringConcat`, `Transfer`, `Unwrap`, `Wrap`; combination-excluded (3): `BareCall`, `Creation`, `Event`; combination-upstream (1): `SetValue`; excluded (6): `BareDelegateCall`, `BareStaticCall`, `BlobHash`, `BlockHash`, `GasLeft`, `Selfdestruct`; nonprofile-mixed (1): `SetGas`; upstream-rejected (1): `BareCallCode`
+- **globalNames** — in-profile (14): `abi`, `addmod`, `assert`, `ecrecover`, `erc7201`, `keccak256`, `mulmod`, `require`, `revert`, `ripemd160`, `sha256`, `super`, `this`, `type`; combination-excluded (2): `block`, `msg`; excluded (5): `blobhash`, `blockhash`, `gasleft`, `selfdestruct`, `tx`; upstream-rejected (3): `now`, `sha3`, `suicide`
+- **yulBuiltins** — combination-excluded (3): `add`, `mload`, `revert`; excluded (78): `addmod`, `address`, `and`, `balance`, `basefee`, `blobbasefee`, `blobhash`, `blockhash`, `byte`, `call`, `callcode`, `calldatacopy`, `calldataload`, `calldatasize`, `caller`, `callvalue`, `chainid`, `clz`, `coinbase`, `create`, `create2`, `delegatecall`, `difficulty`, `div`, `eq`, `exp`, `extcodecopy`, `extcodehash`, `extcodesize`, `gas`, `gaslimit`, `gasprice`, `gt`, `invalid`, `iszero`, `keccak256`, `log0`, `log1`, `log2`, `log3`, `log4`, `lt`, `mcopy`, `mod`, `msize`, `mstore`, `mstore8`, `mul`, `mulmod`, `not`, `number`, `or`, `origin`, `pop`, `prevrandao`, `return`, `returndatacopy`, `returndatasize`, `sar`, `sdiv`, `selfbalance`, `selfdestruct`, `sgt`, `shl`, `shr`, `signextend`, `sload`, `slotnum`, `slt`, `smod`, `sstore`, `staticcall`, `stop`, `sub`, `timestamp`, `tload`, `tstore`, `xor`
+- **compilerTokens** — in-profile (106): `Add`, `Address`, `And`, `As`, `AssignSar`, `AssignShl`, `BitAnd`, `BitNot`, `BitOr`, `BitXor`, `Bool`, `Break`, `Bytes`, `BytesM`, `CallData`, `Catch`, `Colon`, `CommentLiteral`, `Conditional`, `Constant`, `Constructor`, `Continue`, `Dec`, `Delete`, `Div`, `Do`, `DoubleArrow`, `EOS`, `Else`, `Emit`, `Enum`, `Equal`, `Exp`, `FalseLiteral`, `Fixed`, `FixedMxN`, `For`, `Function`, `GreaterThan`, `GreaterThanOrEqual`, `Hex`, `HexStringLiteral`, `Identifier`, `If`, `Immutable`, `Import`, `Inc`, `Int`, `IntM`, `Interface`, `Internal`, `Is`, `LBrack`, `LessThan`, `LessThanOrEqual`, `Library`, `Mapping`, `Memory`, `Mod`, `Modifier`, `Mul`, `New`, `Not`, `NotEqual`, `Number`, `Or`, `Override`, `Payable`, `Period`, `Pragma`, `Private`, `Public`, `Pure`, `RBrack`, `Receive`, `Return`, `SAR`, `SHL`, `Storage`, `String`, `StringLiteral`, `Struct`, `Sub`, `SubDay`, `SubEther`, `SubGwei`, `SubHour`, `SubMinute`, `SubSecond`, `SubWeek`, `SubWei`, `TrueLiteral`, `Try`, `Type`, `TypesEnd`, `UFixed`, `UFixedMxN`, `UInt`, `UIntM`, `Unchecked`, `Unicode`, `UnicodeStringLiteral`, `Using`, `View`, `While`, `Whitespace`; combination-excluded (16): `Abstract`, `Anonymous`, `Assembly`, `Comma`, `Contract`, `Event`, `External`, `Fallback`, `Indexed`, `LBrace`, `LParen`, `RBrace`, `RParen`, `Returns`, `Semicolon`, `Virtual`; combination-upstream (9): `Assign`, `AssignAdd`, `AssignBitAnd`, `AssignBitOr`, `AssignBitXor`, `AssignDiv`, `AssignMod`, `AssignMul`, `AssignSub`; excluded (2): `AssemblyAssign`, `Leave`; upstream-rejected (37): `After`, `Alias`, `Apply`, `AssignShr`, `Auto`, `Byte`, `Case`, `CopyOf`, `Default`, `Define`, `Final`, `Illegal`, `Implements`, `In`, `Inline`, `Let`, `Macro`, `Match`, `Mutable`, `NullLiteral`, `Of`, `Partial`, `Promise`, `Reference`, `Relocatable`, `RightArrow`, `SHR`, `Sealed`, `Sizeof`, `Static`, `SubYear`, `Supports`, `Switch`, `Throw`, `TypeOf`, `Typedef`, `Var`
+- **typeCategories** — in-profile (21): `Address`, `Array`, `ArraySlice`, `Bool`, `Contract`, `Enum`, `FixedBytes`, `FixedPoint`, `Function`, `InaccessibleDynamic`, `Integer`, `Magic`, `Mapping`, `Modifier`, `Module`, `RationalNumber`, `StringLiteral`, `Struct`, `Tuple`, `TypeType`, `UserDefinedValueType`
+- **magicMembers** — in-profile (15): `ABI.decode`, `ABI.encode`, `ABI.encodeCall`, `ABI.encodePacked`, `ABI.encodeWithSelector`, `ABI.encodeWithSignature`, `Block.timestamp`, `Message.sender`, `Message.value`, `MetaType.creationCode`, `MetaType.interfaceId`, `MetaType.max`, `MetaType.min`, `MetaType.name`, `MetaType.runtimeCode`; excluded (13): `Block.basefee`, `Block.blobbasefee`, `Block.chainid`, `Block.coinbase`, `Block.difficulty`, `Block.gaslimit`, `Block.number`, `Block.prevrandao`, `Block.slotnum`, `Message.data`, `Message.sig`, `Transaction.gasprice`, `Transaction.origin`; upstream-rejected (2): `Block.blockhash`, `Message.gas`
+- **AddressTypeMembers** — in-profile (3): `balance`, `send`, `transfer`; combination-excluded (1): `call`; excluded (4): `code`, `codehash`, `delegatecall`, `staticcall`; upstream-rejected (1): `callcode`
 - **FixedBytesTypeMembers** — in-profile (1): `length`
 - **ArrayTypeMembers** — in-profile (3): `length`, `pop`, `push`
 - **FunctionTypeMembers** — in-profile (2): `address`, `selector`; upstream-rejected (2): `gas`, `value`
 - **TypeTypeMembers** — in-profile (3): `concat`, `unwrap`, `wrap`
-- **nativeMemberOwners** — in-profile (7): `ArrayType`, `ContractType`, `FixedBytesType`, `MagicType`, `ModuleType`, `StructType`, `TypeType`; combination-unresolved (1): `AddressType`; combination-upstream (1): `FunctionType`
+- **nativeMemberOwners** — in-profile (7): `ArrayType`, `ContractType`, `FixedBytesType`, `MagicType`, `ModuleType`, `StructType`, `TypeType`; combination-excluded (1): `AddressType`; combination-upstream (1): `FunctionType`
 
 ### Ledger combinations (symbols mapped to in-profile and non-profile rows)
 
@@ -626,13 +741,11 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | parserRules | `assemblyStatement` | canonicalRethrow | inlineAssembly |
 | parserRules | `assignOp` | assignment, compoundAssignment | unsignedRightShift |
 | parserRules | `contractDefinition` | contracts, inheritance, logicalStorageBase | storageLayout |
-| parserRules | `elementaryTypeName` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | parserRules | `eventDefinition` | eventDeclarations | eventLog |
 | parserRules | `eventParameter` | eventDeclarations | eventLog |
 | parserRules | `fallbackFunctionDefinition` | fallbackFunction | rawCalldata, rawReturndata |
 | parserRules | `literalWithSubDenomination` | etherUnits, timeUnits | removedUnits |
 | parserRules | `modifierDefinition` | modifierPlaceholder, modifiers | invalidModifierBody |
-| parserRules | `typeName` | addressTypes, dynamicArrays, dynamicBytesType, enumTypes, externalFunctionTypes, fixedArrays, fixedBytesTypes, integerTypes, internalFunctionTypes, mappings, stringType, structTypes, valueTypes | fixedPoint |
 | parserRules | `yulBlock` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | parserRules | `yulExpression` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | parserRules | `yulFunctionCall` (G00 supplement) | canonicalRethrow | inlineAssembly |
@@ -643,7 +756,6 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | expressionAlternatives | `NewExpr` | newContract, newMemory | create2Salt |
 | expressionAlternatives | `ShiftOperation` | shifts | unsignedRightShift |
 | lexerRules | `Abstract` | contracts, inheritance | storageLayout |
-| lexerRules | `Address` | addressTypes, arithmetic, assignment, boolType, conditional, dynamicBytesType, fixedBytesTypes, functionCalls, integerTypes, shortCircuit, stringType | fixedPoint |
 | lexerRules | `Anonymous` | eventDeclarations | eventLog |
 | lexerRules | `Assembly` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | lexerRules | `AssemblyLBrace` (G00 supplement) | canonicalRethrow | inlineAssembly |
@@ -657,31 +769,20 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | lexerRules | `AssignMul` | assignment, compoundAssignment | unsignedRightShift |
 | lexerRules | `AssignSub` | assignment, compoundAssignment | unsignedRightShift |
 | lexerRules | `At` | contracts, identifiers, inheritance, logicalStorageBase, names | storageLayout |
-| lexerRules | `Bool` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
-| lexerRules | `Bytes` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | lexerRules | `Comma` | arithmetic, assignment, calldataLocation, conditional, constructors, enumDeclarations, errorDeclarations, eventDeclarations, functionCalls, functions, imports, inheritance, inlineArrays, memoryLocation, namedArguments, operatorAliases, overrideDeclarations, shortCircuit, storageLocation, tupleExpressions, tupleTypes, usingFor, variableDeclarations | eventLog |
 | lexerRules | `Contract` | contracts, inheritance | storageLayout |
 | lexerRules | `Event` | eventDeclarations | eventLog |
 | lexerRules | `External` | fallbackFunction, receiveFunction, visibility | rawCalldata, rawReturndata |
 | lexerRules | `Fallback` | fallbackFunction, freeFunctions, functions | rawCalldata, rawReturndata |
-| lexerRules | `Fixed` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
-| lexerRules | `FixedBytes` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | lexerRules | `Indexed` | eventDeclarations | eventLog |
 | lexerRules | `LBrace` | arithmetic, assignment, blocks, conditional, contracts, enumDeclarations, functionCalls, imports, inheritance, interfaces, libraries, namedArguments, operatorAliases, shortCircuit, structDeclarations, usingFor | storageLayout |
-| lexerRules | `LBrack` | addressTypes, arithmetic, assignment, conditional, dynamicArrays, dynamicBytesType, enumTypes, externalFunctionTypes, fixedArrays, fixedBytesTypes, functionCalls, inlineArrays, integerTypes, internalFunctionTypes, mappings, shortCircuit, stringType, structTypes, valueTypes | fixedPoint |
 | lexerRules | `LParen` | arithmetic, assignment, catchClauses, conditional, constructors, creationTry, doWhileStatement, errorDeclarations, eventDeclarations, externalFunctionTypes, fallbackFunction, forStatement, freeFunctions, functionCalls, functions, ifStatement, internalFunctionTypes, mappings, modifierPlaceholder, modifiers, namedArguments, overrideDeclarations, receiveFunction, shortCircuit, tryStatement, tupleExpressions, variableDeclarations, whileStatement | eventLog, rawCalldata, rawReturndata |
 | lexerRules | `Layout` | contracts, identifiers, inheritance, logicalStorageBase, names | storageLayout |
-| lexerRules | `Payable` | addressTypes, arithmetic, assignment, boolType, conditional, constructors, dynamicBytesType, fixedBytesTypes, functionCalls, integerTypes, receiveFunction, shortCircuit, stateMutability, stringType | fixedPoint |
 | lexerRules | `RBrace` | arithmetic, assignment, blocks, conditional, contracts, enumDeclarations, functionCalls, imports, inheritance, interfaces, libraries, namedArguments, operatorAliases, shortCircuit, structDeclarations, usingFor | storageLayout |
-| lexerRules | `RBrack` | addressTypes, arithmetic, assignment, conditional, dynamicArrays, dynamicBytesType, enumTypes, externalFunctionTypes, fixedArrays, fixedBytesTypes, functionCalls, inlineArrays, integerTypes, internalFunctionTypes, mappings, shortCircuit, stringType, structTypes, valueTypes | fixedPoint |
 | lexerRules | `RParen` | arithmetic, assignment, catchClauses, conditional, constructors, creationTry, doWhileStatement, errorDeclarations, eventDeclarations, externalFunctionTypes, fallbackFunction, forStatement, freeFunctions, functionCalls, functions, ifStatement, internalFunctionTypes, mappings, modifierPlaceholder, modifiers, namedArguments, overrideDeclarations, receiveFunction, shortCircuit, tryStatement, tupleExpressions, variableDeclarations, whileStatement | eventLog, rawCalldata, rawReturndata |
 | lexerRules | `Returns` | creationTry, externalFunctionTypes, fallbackFunction, freeFunctions, functions, internalFunctionTypes, tryStatement | rawCalldata, rawReturndata |
 | lexerRules | `Semicolon` | breakStatement, constants, continueStatement, doWhileStatement, emitStatement, errorDeclarations, eventDeclarations, expressionStatements, fallbackFunction, forStatement, freeFunctions, functions, immutables, imports, modifierPlaceholder, modifiers, operatorAliases, receiveFunction, returnStatement, revertStatement, stateVariables, structDeclarations, transientState, tupleExpressions, usingFor, valueTypeDeclarations, variableDeclarations | eventLog, rawCalldata, rawReturndata |
-| lexerRules | `SignedIntegerType` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
-| lexerRules | `String` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | lexerRules | `SubDenomination` | etherUnits, timeUnits | removedUnits |
-| lexerRules | `Ufixed` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
-| lexerRules | `UnsignedIntegerType` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | lexerRules | `Virtual` | fallbackFunction, freeFunctions, functions, modifierPlaceholder, modifiers, receiveFunction | rawCalldata, rawReturndata |
 | lexerRules | `YulComma` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | lexerRules | `YulDecimalNumber` (G00 supplement) | canonicalRethrow | inlineAssembly |
@@ -691,14 +792,12 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | lexerRules | `YulRBrace` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | lexerRules | `YulRParen` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | lexerRules | `YulWS` (G00 supplement) | canonicalRethrow | inlineAssembly |
-| astClasses | `ElementaryTypeName` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | astClasses | `FunctionCallOptions` | callOptions, valueOption | create2Salt, gasOption |
 | astClasses | `InlineAssembly` | canonicalRethrow | inlineAssembly |
 | astClasses | `Literal` | addressLiterals, booleanLiterals, etherUnits, hexLiterals, numericLiterals, stringLiterals, timeUnits, unicodeLiterals | removedUnits |
 | astClasses | `ModifierDefinition` | modifiers | invalidModifierBody |
 | astClasses | `PlaceholderStatement` | modifierPlaceholder | invalidModifierBody |
 | astClasses | `StorageLayoutSpecifier` | logicalStorageBase | storageLayout |
-| astClasses | `TypeName` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | functionKinds | `BareCall` | emptyDataValueCall | lowLevelCall |
 | functionKinds | `Creation` | creationTry, newContract | create2Salt |
 | functionKinds | `Event` | emitStatement | eventLog |
@@ -709,7 +808,6 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | yulBuiltins | `mload` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | yulBuiltins | `revert` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | compilerTokens | `Abstract` | contracts, inheritance | storageLayout |
-| compilerTokens | `Address` | addressTypes, arithmetic, assignment, boolType, conditional, dynamicBytesType, fixedBytesTypes, functionCalls, integerTypes, shortCircuit, stringType | fixedPoint |
 | compilerTokens | `Anonymous` | eventDeclarations | eventLog |
 | compilerTokens | `Assembly` (G00 supplement) | canonicalRethrow | inlineAssembly |
 | compilerTokens | `Assign` | assignment, compoundAssignment, constants, immutables, stateVariables, transientState, tupleExpressions, variableDeclarations | unsignedRightShift |
@@ -721,25 +819,18 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 | compilerTokens | `AssignMod` | assignment, compoundAssignment | unsignedRightShift |
 | compilerTokens | `AssignMul` | assignment, compoundAssignment | unsignedRightShift |
 | compilerTokens | `AssignSub` | assignment, compoundAssignment | unsignedRightShift |
-| compilerTokens | `Bool` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
-| compilerTokens | `Bytes` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | compilerTokens | `Comma` | arithmetic, assignment, calldataLocation, conditional, constructors, enumDeclarations, errorDeclarations, eventDeclarations, functionCalls, functions, imports, inheritance, inlineArrays, memoryLocation, namedArguments, operatorAliases, overrideDeclarations, shortCircuit, storageLocation, tupleExpressions, tupleTypes, usingFor, variableDeclarations | eventLog |
 | compilerTokens | `Contract` | contracts, inheritance | storageLayout |
 | compilerTokens | `Event` | eventDeclarations | eventLog |
 | compilerTokens | `External` | fallbackFunction, receiveFunction, visibility | rawCalldata, rawReturndata |
 | compilerTokens | `Fallback` | fallbackFunction, freeFunctions, functions | rawCalldata, rawReturndata |
-| compilerTokens | `Fixed` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | compilerTokens | `Indexed` | eventDeclarations | eventLog |
 | compilerTokens | `LBrace` | arithmetic, assignment, blocks, conditional, contracts, enumDeclarations, functionCalls, imports, inheritance, interfaces, libraries, namedArguments, operatorAliases, shortCircuit, structDeclarations, usingFor | storageLayout |
-| compilerTokens | `LBrack` | addressTypes, arithmetic, assignment, conditional, dynamicArrays, dynamicBytesType, enumTypes, externalFunctionTypes, fixedArrays, fixedBytesTypes, functionCalls, inlineArrays, integerTypes, internalFunctionTypes, mappings, shortCircuit, stringType, structTypes, valueTypes | fixedPoint |
 | compilerTokens | `LParen` | arithmetic, assignment, catchClauses, conditional, constructors, creationTry, doWhileStatement, errorDeclarations, eventDeclarations, externalFunctionTypes, fallbackFunction, forStatement, freeFunctions, functionCalls, functions, ifStatement, internalFunctionTypes, mappings, modifierPlaceholder, modifiers, namedArguments, overrideDeclarations, receiveFunction, shortCircuit, tryStatement, tupleExpressions, variableDeclarations, whileStatement | eventLog, rawCalldata, rawReturndata |
-| compilerTokens | `Payable` | addressTypes, arithmetic, assignment, boolType, conditional, constructors, dynamicBytesType, fixedBytesTypes, functionCalls, integerTypes, receiveFunction, shortCircuit, stateMutability, stringType | fixedPoint |
 | compilerTokens | `RBrace` | arithmetic, assignment, blocks, conditional, contracts, enumDeclarations, functionCalls, imports, inheritance, interfaces, libraries, namedArguments, operatorAliases, shortCircuit, structDeclarations, usingFor | storageLayout |
-| compilerTokens | `RBrack` | addressTypes, arithmetic, assignment, conditional, dynamicArrays, dynamicBytesType, enumTypes, externalFunctionTypes, fixedArrays, fixedBytesTypes, functionCalls, inlineArrays, integerTypes, internalFunctionTypes, mappings, shortCircuit, stringType, structTypes, valueTypes | fixedPoint |
 | compilerTokens | `RParen` | arithmetic, assignment, catchClauses, conditional, constructors, creationTry, doWhileStatement, errorDeclarations, eventDeclarations, externalFunctionTypes, fallbackFunction, forStatement, freeFunctions, functionCalls, functions, ifStatement, internalFunctionTypes, mappings, modifierPlaceholder, modifiers, namedArguments, overrideDeclarations, receiveFunction, shortCircuit, tryStatement, tupleExpressions, variableDeclarations, whileStatement | eventLog, rawCalldata, rawReturndata |
 | compilerTokens | `Returns` | creationTry, externalFunctionTypes, fallbackFunction, freeFunctions, functions, internalFunctionTypes, tryStatement | rawCalldata, rawReturndata |
 | compilerTokens | `Semicolon` | breakStatement, constants, continueStatement, doWhileStatement, emitStatement, errorDeclarations, eventDeclarations, expressionStatements, fallbackFunction, forStatement, freeFunctions, functions, immutables, imports, modifierPlaceholder, modifiers, operatorAliases, receiveFunction, returnStatement, revertStatement, stateVariables, structDeclarations, transientState, tupleExpressions, usingFor, valueTypeDeclarations, variableDeclarations | eventLog, rawCalldata, rawReturndata |
-| compilerTokens | `String` | addressTypes, boolType, dynamicBytesType, fixedBytesTypes, integerTypes, stringType | fixedPoint |
 | compilerTokens | `Virtual` | fallbackFunction, freeFunctions, functions, modifierPlaceholder, modifiers, receiveFunction | rawCalldata, rawReturndata |
 | AddressTypeMembers | `call` | emptyDataValueCall | lowLevelCall |
 | nativeMemberOwners | `AddressType` | addressBalance, sendTransfer | addressCode, addressCodehash, lowLevelCall, delegatecall, lowLevelStaticcall |
@@ -747,7 +838,7 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 
 ### Named feature combinations
 
-| construct | in-profile IDs | unresolved IDs | owners |
+| construct | in-profile IDs | excluded IDs | owners |
 |---|---|---|---|
 | `f{value:v,gas:g}(…)` | callOptions, valueOption | gasOption | G15 G22 G43 |
 | `new C{salt:s,value:v}(…)` | callOptions, newContract, valueOption | create2Salt | G15 G22.03 G44.03 |
@@ -770,25 +861,96 @@ Owner columns: source definition / syntax and static checking / lowering / backe
 
 ## Remaining child obligations
 
-The G00 audit (pins, evidence, reconciliation, owners) is complete; the
-profile and the fork/settings pins are **not frozen** until Q1–Q6 are
-answered. Handed on:
-- Q1–Q6 to the user. Until they are answered, G15/S00 keep all 30 exclusions
-  refused and unresolved, and G55 cannot close with an unresolved row.
-- G01: settings and the fork in the theorem contracts; static code constants
-  (Q5).
+The profile is **decided**: every exclusion is tier A, every abstraction has
+its G00 Q2 outcome, and `fixedPoint` is in profile. G00 is **not frozen**
+until the pin work below lands. First-audit obligations superseded by the
+decisions are marked so; the rest are carried forward.
+- ~~Q1–Q6 to the user~~ — answered 2026-10-29. G15/S00 keep the 30
+  exclusions refused; G55 can now close against tier-A rows only.
+- G01: the settings (solc's two pipelines, solc 0.8.38, Osaka)
+  and static code constants (Q5: the `Artifact` table) in the theorem
+  contracts.
 - G03: extend this ledger through admission → lowering → backend → EVM →
   theorem, including the `combination-*` symbols, the G00 rethrow supplement
   and the 17 named combinations.
-- G05: link-settings provenance; the 0.8.34 fixture boundary.
-- G06 (after Q3): pin the EVM fork for the core machine; reconcile the Cancun
-  vector scripts and the bridge.
-- S00/G08: check the eight `upstream` rows against the pinned corpus. G00
-  checked only `fixedPoint`.
+- G05: the empty-link-map rule and session-side linking (disagreement 6,
+  G05 Q1); marking 0.8.34 fixtures as SolKey compatibility checks only
+  (disagreement 1); settings provenance for the two pipelines
+  (disagreement 7).
+- G06: the Osaka fork for the core machine and the bridge
+  (`TargetSchedule := "Cancun"`); reference-EVM versions (disagreement 5).
+  The vector scripts are on Osaka at master.
+- `abstract` rows with outcome `replace` (`worldAssumptions`, `sendTransfer`,
+  `emptyDataValueCall`): G22, G42, G43, G47 replace the premise or propose
+  it again; `callbackSemantics` (`provedSpecialCase`): the G01 Q4
+  special-case proof of the no-callback reading.
+- `fixedPoint`: a reference semantics encoding the second-round
+  fixed-point answers (sibling fixed-point-semantics task; shifts stay
+  rejected, narrowing G00 Q6), then S00–S02, G08–G15, G16–G23, G24–G47; until then G15 must keep
+  fixed-point input refused (now by `validateNode`'s `solidity.fixedPoint`
+  diagnostic, not the scope scan).
+- S00/G08: check the seven `upstream` rows against the pinned corpus.
+- Not in this task's files: `docs/solidity-scope.md` still says
+  "`fixedPoint` is still scoped `upstream`" and "the 174 in-profile count"
+  (Manifest follow-up); its owner should update them. ("Fixed-point syntax
+  remains upstream incomplete" there is still true of solc.)
 - Each owner group: the rows assigned in the table, at the current statuses
-  (139 model/partial, 1 model/missing, 21 abstract/partial).
+  (139 model/partial, 2 model/missing, 21 abstract/partial).
 
 ## Review
+
+### Decision revision (2026-10-29)
+
+A read-only finder and a separate skeptic reviewed commit `0fe5752` with git,
+grep and python only, without the Lean server. Both reran both `--check`
+gates and re-derived the row and symbol counts from the manifest and ledger
+(both confirmed: 175/7/30 rows; 483/70/28/148/1/53 symbols). Confirmed
+findings and fixes:
+
+1. **Fixed-point input could pass admission** (both reviews). With
+   `fixedPoint` in profile, the scope scan admitted it; the importer drops
+   an unused `fixed` state variable or `type T is fixed;` silently, and
+   `event E(fixed x); … emit E(1);` compiled. Fixed: `validateNode` refuses
+   every node tagged `fixedPoint` with `solidity.fixedPoint`
+   (`missingImplementation`); the document's claim is corrected.
+2. **Tier A did not check the cited question or outcome per row**, and a
+   copied `decision` would have made a later exclusion tier A. Fixed: both
+   scripts check question and outcome per scope; the G00 script ties G00 Q1
+   to exactly the 30 evidence-table rows and G00 Q6 to `fixedPoint`.
+   Scratch-copy tests (question changed to Q6, decision removed, record
+   without anchor, missing file) all fail `--check` with a message.
+3. **Bad `record` crashed the G00 script** (traceback). Fixed: reported as
+   an error.
+4. **Stale text**: "No exclusion has tier-A evidence", the Method's
+   `combination-unresolved` and "unresolved and upstream rows". Fixed.
+5. **Q2 notes beyond the decision**: `worldAssumptions` named a replacement
+   the decision did not choose; the payment notes dropped "or proposed
+   again"; `callbackSemantics` was labelled `replace` although the decision
+   says "must become a proved special case". Fixed: notes say "replace it or
+   propose it again" with candidates marked as candidates; new outcome
+   `provedSpecialCase` for `callbackSemantics`.
+6. **"Gap 4 is now re-pinning work"** overstated: its reference-EVM half
+   (disagreement 5) stays open. Fixed.
+7. The "Fixed-point syntax remains upstream incomplete" line of
+   `solidity-scope.md` was wrongly listed as stale (it is true of solc).
+   Fixed in Remaining.
+
+After the reviews the coordinator reported the revised G00 Q4; it was read
+on master (`7a6a897`, "Second round (2026-10-29)") and merged before the
+manifest and the pin table were updated (rows 2, 6, 7; the `twoPipelines`
+annotations; the fixed-point shift narrowing in the `fixedPoint`
+requirement). These follow-up edits were checked by both `--check` gates
+and the scratch-copy tests, not by a further review.
+
+Rejected or kept: the backend range `G24–G47` for "G24+" (G48–G55 are
+composition owners of every row, stated once); `fixedPoint`'s position among
+the upstream rows in the manifest order (cosmetic; the inventory groups by
+category, and moving it would reorder the Lean `Feature` constructors); the
+Lean catalog not carrying `decision` (its contract lists the stored fields,
+and no Lean consumer reads decisions); the stale `solidity-scope.md`
+follow-up text (not this task's file; listed in Remaining).
+
+### First audit
 
 Separate read-only finder and skeptic reviews ran after the first draft
 (`6795cf5`), using git, grep and python only, without the Lean server. Both
@@ -847,6 +1009,41 @@ the script are kept as the fallback for rows added later without an
 override.
 
 ## Handoff
+
+### Decision revision (2026-10-29)
+
+- Base `caf52ecd4dde5d37cbc0098d47de1a01aa218285`, master `e4ae128` merged;
+  branch `cloud/roadmap-w1-20261029/g00-manifest-rev`.
+- Done: tier A from the decision marker (30/30); `decision` objects on the
+  30 exclusions, the 23 abstract rows (approved 9, replace 3,
+  provedSpecialCase 1, followsG01 10), `fixedPoint` (G00 Q6) and
+  `evaluationOrder`/`pragmaAbicoder` (G00 Q4 revised); `fixedPoint` moved
+  to model/missing with owners; admission refusal `solidity.fixedPoint` in
+  `validateNode`; pin decisions table.
+- Lean: no theorem or definition was added. Changed: the generated
+  `Solidity.Language.Feature.info` row for `fixedPoint` (scope `.model`,
+  current `.missing`), so `rejectedByUpstream` loses it and
+  `targetFeatures`/`missingFeatures` gain it; `Unmodelled.excluded` and
+  `Feature.exclusion_complete` are unchanged (premise-free over the
+  catalog). `validateNode` (private) gained the fixed-point refusal.
+- Checked: both `--check` gates; Lean diagnostics clean on
+  `Solidity/Language/Features.lean` and
+  `Solidity/Frontend/SolcJson/Admission.lean`; `check-layers`,
+  `check-orphans`, `check-trust` pass; `check-doc-paths.sh` 46 missing
+  (baseline). `./run-lean.sh` at `de72958` (before the master merge and the
+  Q4-revision strings): `lake build` completed (718 jobs); `lake build
+  SolkeyTestSuite` failed only in `Solidity.TestSuite.Derived17` ("Lean
+  exited with code 137", out of memory; its repair belongs to the
+  memory-loops lane), so `run-lean.sh` stopped before its last step;
+  `check-solkey.sh` run separately: 37 mismatches (baseline). Elapsed 63 min
+  wall time, peak system memory 15.1 GiB (sampled every 20 s, including the
+  Lean server).
+- Not proved or not done: no fixed-point fixture exercises the new refusal;
+  the follow-up edits after the master merge were not re-reviewed or
+  rebuilt (they change one generated requirement string); the stale
+  `solidity-scope.md` lines are left to that file's owner.
+
+### First audit
 
 - Base `127c2ee59de16971e45b08a2def54f4e5fae8e2a`; branch
   `cloud/roadmap-w0-20261029/g00-scope-freeze`.
