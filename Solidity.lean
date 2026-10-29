@@ -665,3 +665,14 @@ import Solidity.Solkey.QuantifiedDiamond
 
 import Solidity.Tools.SolCases
 import Solidity.Examples.SolCases
+
+import Solidity.Backend.Scalar.Slice
+import Solidity.Backend.Scalar.Typed
+import Solidity.Backend.Scalar.Widths
+import Solidity.Backend.Scalar.Comparisons
+import Solidity.Backend.Scalar.Wrapping
+import Solidity.Backend.Scalar.Casts
+import Solidity.Backend.Scalar.Guards
+import Solidity.Backend.Scalar.Modular
+import Solidity.Backend.Scalar.Bitwise
+import Solidity.Backend.Scalar.Values

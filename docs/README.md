@@ -83,3 +83,7 @@ history is in git.
 | [parallelism.md](parallelism.md) | The core apart from the elaborator, the layering check, the split convention. |
 | [latex.md](latex.md) | LaTeX notation and the checked trace export. |
 | [site.md](site.md) | The examples site on GitHub Pages. |
+
+| Document | Holds |
+|---|---|
+| [feature-work/backend-scalar-lowering.md](feature-work/backend-scalar-lowering.md) | G25 preparation: numeric instruction-slice semantics, typed selection certificates, queue status and remaining composition/validation obligations. |

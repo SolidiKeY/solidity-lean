@@ -932,3 +932,18 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+## G25 scalar lowering preparation
+
+| Module | What it defines |
+|---|---|
+| `Backend/Scalar/Slice.lean` | Independent numeric semantics for real Backend instructions, PUSH32, sequencing and untouched tails. |
+| `Backend/Scalar/Typed.lean` | Intrinsic value relation, literal selection and Boolean operation certificates. |
+| `Backend/Scalar/Widths.lean` | All byte-multiple widths, signed/unsigned cleanup and unsigned cast chains. |
+| `Backend/Scalar/Comparisons.lean` | Source-exact signed and unsigned ordering certificates. |
+| `Backend/Scalar/Wrapping.lean` | Intrinsic unsigned wrapping add/sub/mul and width-cleanup composition. |
+| `Backend/Scalar/Casts.lean` | Source-exact word-preserving uint/int casts. |
+| `Backend/Scalar/Guards.lean` | Retained-operand zero tests and existing panic-byte failure selection at the component boundary. |
+| `Backend/Scalar/Modular.lean` | Source-exact addmod/mulmod with unbounded intermediate arithmetic and zero-modulus failure. |
+| `Backend/Scalar/Bitwise.lean` | Intrinsic unsigned bitwise AND/OR/XOR certificates. |
+| `Backend/Scalar/Values.lean` | State-uniform closed intrinsic Val certificates and actual encoded-byte controls. |
