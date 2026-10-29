@@ -151,7 +151,7 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 
 | Area | Still due |
 |---|---|
-| Memory compiler | Other storage paths and copies (memory-to-storage, runtime-length arrays, reference-bearing structs), reference-bearing construction and defaults, fixed and reference-element arrays and paths, loops on the memory path, remaining mixed operations. The core path compiles loops (`Instr.loop`, `loop_sim`). |
+| Memory compiler | Other storage paths and copies (memory-to-storage, runtime-length arrays, reference-bearing structs), reference-bearing construction and defaults, fixed and reference-element arrays and paths, nested memory loops and loops under enclosing blocks/branches, remaining mixed operations. Finite-body memory loops now have typed prefix-capacity certificates and public simulation (`docs/compiler-verification.md`, Checked memory loops). The core path compiles loops (`Instr.loop`, `loop_sim`). |
 | Loop automation | Two `SolcLoopsOpen` functions (`docs/semantic-gaps.md`, `docs/loops.md`). Support sound invariant use where missing; keep a missing invariant distinct from a false specification. |
 | Quantifier instantiation | Broaden ground terms and larger loops only with bounded, checked instances. |
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |

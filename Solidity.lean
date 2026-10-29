@@ -392,6 +392,7 @@ import Solidity.Evm.MemoryCapture
 import Solidity.Evm.MemoryCompile
 import Solidity.Evm.Compiler
 import Solidity.Evm.MemoryCompileExamples
+import Solidity.Evm.MemoryLoopSourceExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
 import Solidity.Evm.Interpreter

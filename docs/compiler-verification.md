@@ -30,7 +30,8 @@ cell each), through typed pointer locals: element and field reads and
 writes, lengths, array reads composed in indices and RHS values (`a[a[0]]`),
 checked operators, short-circuit and conditional expressions over memory
 operands, primitive storage writes, `require`/`revert`, blocks and
-statement-level `if`. Allocation: `new T[](n)` with a simple length (the
+statement-level `if`. Sequential programs may also contain checked loops whose
+conditions and bodies belong to this finite memory fragment (below). Allocation: `new T[](n)` with a simple length (the
 elaborator captures effects first), a declaration without initializer (the
 same as `new T[](0)`), default and literal construction of primitive-member
 structs (the elaborator lowers literals to a default declaration and field
@@ -82,7 +83,8 @@ allocating.
 **Out of the memory path**: reference-element arrays, construction of structs
 with reference members, other reference-member default layouts, copies other
 than the primitive-member storage-root clause (including memory back to
-storage and runtime-length objects, which need iteration), loops, `assert`,
+storage and runtime-length objects, which need iteration), nested loops and
+loops beneath enclosing blocks/branches, `assert`,
 calls, payments, and compound storage writes in a mixed memory program.
 
 **Regressions** (each runs the actual source program and the public
@@ -94,6 +96,105 @@ large computed compiler results there are marked irreducible for
 elaboration; kernel checks still unfold them, and the pointer compiler
 recurses structurally so acceptance reduces in the kernel (no native
 reduction is trusted).
+
+### Checked memory loops
+
+`Evm/MemoryLoop.lean` proves an unbounded simulation of `Stmt.loop` using
+`Instr.loop`. The condition has a `ValFrag` certificate and the body has the
+existing finite `ProgFrag` certificate. Its output flags must restrict to the
+entry flags, so every next turn uses the same checked fragment. The body may
+use the already proved array/struct operations, scopes, branches and allocating
+clauses. `Evm/MemoryLoopCompile.lean` composes these loops with finite statements
+before and after them; `Compiler.compile` automatically selects `memoryLoops`
+when the earlier core and finite-memory paths refuse the complete program.
+
+`LoopPrefix` records actual successful source turns and their cumulative
+allocation cost. `LoopRoom` requires capacity for each reached true-condition
+turn, including allocations before a later revert in that body. Program
+`Demand` adds the exact successful prefix cost to each reachable suffix demand.
+Zero iterations need no body allocation; unreachable suffixes generate no
+demands. Nonallocating programs have an explicitly inhabited zero-capacity
+premise (`room_nonallocating`). `prefixBudget` can recognize a finite prefix
+before a nonallocating suffix without evaluating a potentially divergent loop;
+its bound is proved, not trusted.
+
+The public loop input is `StateRepr`, the certificate's full frame need, and
+this source-prefix capacity predicate. `memoryLoops_input` opens it without
+unfolding a computed compiler result. `isMemory` continues to identify the
+legacy finite-memory path; the separate `isMemoryLoops` discriminator identifies
+the loop path. Success retains a typed `Cost` witness, `BaseExtends`, exact
+`GrowsAllocator`, stack equality and `StateRepr`. The frame includes every
+body temporary, even though a loop's final local context is unchanged.
+
+A finite prefix that exits or reverts corresponds on both evaluators. If no
+finite prefix exits, every finite machine prefix continues, so the source
+returns `diverge` and the machine returns `fault`. There is no added iteration
+fuel, termination assumption or runtime capacity check. Continuously allocating
+divergence generally cannot inhabit finite-word capacity. Exhaustion-producing
+statements (`push` and `assumeFalse`) remain statically refused; a certified
+loop cannot turn exhaustion into success or revert (`not_exhausted`).
+
+This extension covers loops over the previously supported **finite body**
+fragment, with surrounding sequential composition. It does not recursively admit
+nested loops or loops inside enclosing blocks/conditionals. Those shapes remain
+refused, alongside the existing copy, reference-layout, call and payment
+boundaries. This is word-memory compiler refinement, not bytecode, gas, raw
+layout or universal source coverage.
+
+The additive regressions are `Evm/MemoryLoopExamples.lean`,
+`Evm/MemoryLoopAllocExamples.lean` and `Evm/MemoryLoopSourceExamples.lean`.
+They retain the old compiler refusal as a kernel equality and separately check
+inhabited public simulation, actual source/machine observations, zero turns,
+array aliases and independent objects, primitive struct updates, reached
+allocation, allocation before revert, frame under-reservation, last-word
+capacity refusal, divergence and exact source exhaustion with compiler refusal.
+Ordinary source examples run in legacy and viaIR evaluation orders.
+`tests/solc/MemoryCompilerLoops.sol` additionally compiles with published solc
+0.8.34 in all four legacy/viaIR × optimizer-off/on modes; backend acceptance is
+separate from the Lean source/machine observations and does not prove solc/EVM
+equivalence. No feature inventory status is promoted.
+
+
+Validation for batch `solidity-compiler10-20261028` (2026-10-29), based on
+`f4dee4a29c2e208b36db4a4161a4723c735cd775`:
+
+| Check | Actual result |
+|---|---|
+| Runtime versions and `lake build Solidity.KeySort` | Lean 4.24.0, Lake 5.0.0-src+797c613; each command exited 0. |
+| `lake build Solidity.Evm.MemoryLoopSourceExamples` | Passed, including all new imports and inhabited simulations; 36.98 s, sampled aggregate peak 1,171,623,936 bytes. Final full-build replay also checked the added refusal controls. |
+| General loop/composition/prefix-budget/exhaustion and public compiler axiom audit | Passed; only `propext`, `Classical.choice`, `Quot.sound`. |
+| Full default `lake build` inside `./run-lean.sh` | Passed, 690 jobs. |
+| Complete `./run-lean.sh` | **BLOCKED** in unchanged `Solidity.TestSuite.Derived17`; no full-script pass claimed. The asynchronous attempt hit `std::bad_alloc` (Lean 134; script 1), while the focused serial repair hit the aggregate RSS guard (75) after 81.94 s at 10,745,778,176 bytes. All 224 source dependencies are byte-identical to the recorded base. The TestSuite loop-proof owner must reduce that target's memory and rerun the suite and full script. |
+| Independent `bash scripts/check-solkey.sh` | Passed; 377 taclets parsed, all 131 read-bearing annotations match the existing pin. |
+| Orphans, layers, strict automatic, trust, complete TestSuite audit and trust-script test | Passed: 705 reachable, zero orphans; core has no elaborator reach; 491 automatic, zero manual/pending; trust zero findings; 552 derived + 11 refuted + 1 excluded TestSuite functions, zero pending. |
+| Documentation paths | Failed (1), with exactly the same 20 findings and byte-identical output at the recorded base; unchanged documentation debt. |
+
+Every Lean/Lake or heavy operation used the measured VM guard: hard inherited
+12 GiB address space per process, sampled process-group RSS stop at 10 GiB
+(100 ms), and whole-VM current-memory stop at 12 GiB. The existing hard VM
+cgroup is 16 GiB and actual swap is disabled. No writable 12 GiB cgroup or
+`MemorySwapMax=0` setting is claimed. Runs used `LEAN_NUM_THREADS=1` and explicit
+Lean `-j1` in an untracked, archived Lake configuration; no Lean server ran.
+The initial finite-memory baseline took 280.45 s / 1,208,295,424 peak bytes;
+these incremental builds have different target/cache states, not clean-build
+speed ratios.
+
+Scheduling/resource investigations are retained as failures: a full serial
+attempt stopped at whole-VM memory (75, 3,474.15 s, peak group 7,861,137,408
+bytes). Releasing clean Lake file-cache pages with `POSIX_FADV_DONTNEED`
+reduced VM memory from 4,898,828,288 to 233,721,856 bytes while retaining all
+cache files. Forced serial elaboration also made unchanged `AllLeftLater`
+exceed its existing bounded search; default asynchronous elaboration with a
+smaller thread stack passed it in 8.1 s. The archived temporary configs and
+per-command logs distinguish these scheduling repairs from proof-budget
+changes; no proof/search budget or expected observation was changed.
+
+Independent read-only finder and skeptic reviews used no Lean server. Their
+confirmed G0 concerns about indexed certificate metadata and new source dispatch
+were fixed with generalized recursors; final reviews found no outstanding
+correctness defect in the stated finite-body/sequential scope. The cumulative
+bundle, handoff, full logs, failed-attempt records and checksums accompany this
+batch. Mandatory whole-script validation remains blocked as recorded above.
 
 ## What is proved
 
