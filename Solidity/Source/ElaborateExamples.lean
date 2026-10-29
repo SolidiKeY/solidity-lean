@@ -64,9 +64,12 @@ def elabAC : Option Elaborated := elaborate resAC
 #guard elabAC.isSome
 
 -- The program's parts, read back: `C` has one initializer (`x = 3`) and
--- gives `A` one argument; `g`'s body carries one modifier invocation.
+-- gives `A` one argument; `A`'s constructor has one local; `g`'s body
+-- carries one modifier invocation, `pos`.
 #guard (elabAC.map fun el => ((el.prog.inits "C").length, (el.prog.baseArgs "C").length,
   (el.prog.ctorLocals "A").length)) == some (1, 1, 1)
+#guard (elabAC.bind fun el => (el.res.env.decls.find? (·.name == "g")).bind fun d =>
+  (el.prog.body d).map fun b => b.mods.map (·.modifier.name)) == some ["pos"]
 
 def thisC : Address := addr 1
 def user : Address := addr 7
@@ -84,11 +87,11 @@ def deployCall (el : Elaborated) (k : Nat) (h : k < 2 ^ 256 := by decide) : Opti
   | .ok o => some o
   | _ => none
 
--- **`g(2)` returns `x + a = (3 + 2) + 7`**: the initializer, the base
--- argument through `A`'s constructor, the modifier and the body all ran.
+-- **`g(2)` returns `x + a = (3 + 2) + 7`**: the initializer and the base
+-- argument through `A`'s constructor ran (without either, `9` or `5`).
 #guard (elabAC.bind fun el => deployCall el 2) == some (.success (wordBytes (toWord 12)))
 
--- `g(0)` reverts in the modifier's `require`.
+-- `g(0)` reverts in the modifier's `require` (without the modifier, `7`).
 #guard (elabAC.bind fun el => deployCall el 0) == some (.revert [])
 
 /-- A unit with an ill-typed body does not elaborate: `x = true` with

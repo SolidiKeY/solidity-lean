@@ -26,8 +26,9 @@ body's syntax.  The semantics (`Solidity/Source/Eval.lean`,
 (`SrcProg`).  The choice does not matter: any two derivations of one body
 elaborate to one `RBody` (`RBody.ofDerivation_unique`,
 `Solidity/Source/Unique.lean`).  Initializers and constants
-(`RInit.Derived`), modifier invocations and base arguments
-(`RConvArgs.Derived`) are tied to derivations too; `elaborate`
+(`RInit.Derived`), modifier invocations (`RModInv.Derived`) and base
+arguments (`RBaseArg.Derived`) are tied to their syntax and derivations
+too (soundness: what is carried was written; not completeness); `elaborate`
 (`Solidity/Source/Elaborate.lean`) builds an `Elaborated` from a resolution.
 -/
 
@@ -87,11 +88,95 @@ structure Program (E : Env) where
 def Env.contracts (E : Env) : List String :=
   (E.decls.filter fun d => d.kind == .contract && d.scope == none).map (·.name)
 
-/-- Converted arguments elaborated from a derivation of an argument list, in
-a context whose environment is `E` and whose locals have types `Γ`. -/
-def RConvArgs.Derived (E : Env) (Γ : RCtx) (ps : List STy) (args : RConvArgs E Γ ps) : Prop :=
-  ∃ (C : Ctx) (es : Syn (.list .expr)) (σs : List STy) (D : TypedArgs C es σs)
-    (h : argsFit C.env.isBase σs ps = true), C.env = E ∧ C.tys = Γ ∧ HEq args (RArgs.convert ps D.toR h)
+/-! ### Where invocations are written -/
+
+/-- The modifier invocations of a body. -/
+def Decl.modInvs (d : Decl) : Syn (.list .modInv) :=
+  match d.kind, d.top, d.node with
+  | .function, _, .function _ _ _ _ ms _ _ _ _ => ms
+  | .constructor, _, .constructor _ ms _ _ _ => ms
+  | .fallback, _, .fallback _ _ _ ms _ _ _ => ms
+  | .receive, _, .receive _ _ ms _ _ _ => ms
+  | _, _, _ => .nil
+
+/-- The invocations of a list: each name and its arguments. -/
+def Syn.invList : Syn (.list .modInv) → List (IdPath × Syn (.opt .callArgs))
+  | .nil => []
+  | .cons (.modInv p a) rest => (p, a) :: rest.invList
+
+/-- The entries of an inheritance list: each base and its arguments. -/
+def Syn.inheritList : Syn (.list .inherit) → List (IdPath × Syn (.opt .callArgs))
+  | .nil => []
+  | .cons (.inherit p a) rest => (p, a) :: rest.inheritList
+
+/-- An invocation's positional arguments (none written: none). -/
+def invArgs : Syn (.opt .callArgs) → Option (Syn (.list .expr))
+  | .none => Option.some .nil
+  | .some (.positional es) => Option.some es
+  | _ => Option.none
+
+/-- The declaration of contract `c`'s constructor. -/
+def Env.ctorDecl (E : Env) (c : String) : Option Decl :=
+  E.decls.find? fun d => d.kind == .constructor && d.scope == Option.some c
+
+/-- The frame of contract `c`'s constructor. -/
+def Env.ctorFrame (E : Env) (c : String) : Option Frame :=
+  (E.ctorDecl c).bind (·.frame? E)
+
+/-- The locals of contract `c`'s constructor (`[]` without one). -/
+def Env.ctorFrameLocals (E : Env) (c : String) : List (String × STy) :=
+  match E.ctorFrame c with
+  | Option.some f => f.locals
+  | Option.none => []
+
+/-- The parameters of contract `c`'s constructor. -/
+def Env.ctorParams (E : Env) (c : String) : List STy :=
+  match E.ctorFrame c with
+  | Option.some f => f.ps
+  | Option.none => []
+
+/-- The modifier a path names, with its parameter types (from its header,
+so a `virtual` modifier without a body is named too). -/
+def Env.modifierAt (E : Env) (scope : Option String) (p : IdPath) : Option (Decl × List STy) :=
+  match E.lookupPath scope p with
+  | [m] =>
+    match m.kind, m.top, m.node with
+    | .modifier, _, .modifier _ (.some ps) _ _ _ => (ps.tys E m.scope .memory).map fun τs => (m, τs)
+    | .modifier, _, .modifier _ .none _ _ _ => Option.some (m, [])
+    | _, _, _ => Option.none
+  | _ => Option.none
+
+/-- The contract a path names. -/
+def Env.contractAt (E : Env) (scope : Option String) (p : IdPath) : Option String :=
+  match E.lookupPath scope p with
+  | [b] => if b.kind == .contract then Option.some b.name else Option.none
+  | _ => Option.none
+
+/-- The inheritance list of contract `c`. -/
+def Env.inheritOf (E : Env) (c : String) : Syn (.list .inherit) :=
+  match E.decls.find? fun d => d.kind == .contract && d.name == c && d.scope == Option.none with
+  | Option.some d =>
+    match d.kind, d.top, d.node with
+    | .contract, _, .contract _ _ _ is _ => is
+    | _, _, _ => .nil
+  | Option.none => .nil
+
+/-- Locals unnamed: in the context of `is B(args)` the constructor's locals
+occupy the frame but no name resolves to them. -/
+def anonLocals (L : List (String × STy)) : List (String × STy) := L.map fun p => ("", p.2)
+
+/-- The context of contract `c`'s inheritance-list arguments. -/
+def Env.inheritCtx (E : Env) (c : String) : Ctx :=
+  { env := E, scope := Option.some c, locals := anonLocals (E.ctorFrameLocals c) }
+
+/-! ### Coherence of the parts -/
+
+/-- Converted arguments that are the elaboration of a derivation of the
+argument list `es` in context `C`, converted to the parameters `ps`. -/
+def RConvArgs.DerivedIn (C : Ctx) (es : Syn (.list .expr)) {Γ : RCtx} (ps : List STy)
+    (args : RConvArgs C.env Γ ps) : Prop :=
+  ∃ (σs : List STy) (D : TypedArgs C es σs) (h : argsFit C.env.isBase σs ps = true),
+    HEq args (RArgs.convert ps D.toR h)
 
 /-- An initializer elaborated from a derivation of the variable's
 initializer, converted implicitly to its type. -/
@@ -99,13 +184,33 @@ def RInit.Derived (E : Env) (i : RInit E) : Prop :=
   ∃ (e : Syn .expr) (σ : STy) (D : Typed (Ctx.forInit E i.var.scope) e σ)
     (h : σ.implicit E.isBase i.τ = true), i.var.init? = some e ∧ i.e = .conv D.toR (.inl h)
 
+/-- A modifier invocation of declaration `d` (frame `f`): written in `d`'s
+invocations, naming the modifier it carries with that modifier's
+parameters, its arguments elaborated from a derivation of the written ones
+in `d`'s parameters. -/
+def RModInv.Derived (E : Env) (d : Decl) (f : Frame) {Γ : RCtx} (m : RModInv E Γ) : Prop :=
+  ∃ p a es, (p, a) ∈ d.modInvs.invList ∧ E.modifierAt d.scope p = some (m.modifier, m.ps) ∧
+    invArgs a = some es ∧ RConvArgs.DerivedIn ((f.ctx E d.scope).at f.locals) es m.ps m.args
+
 /-- A body elaborated from a derivation of a declaration's body in its
-frame, its modifier invocations from derivations of their arguments. -/
+frame, each modifier invocation from one written in its header. -/
 def RBody.Derived (E : Env) (d : Decl) (b : RBody E) : Prop :=
-  (∃ f L', d.frame? E = some f ∧ ∃ D : ItemsD (f.ctx E d.scope) f.locals f.body L',
+  ∃ f L', d.frame? E = some f ∧ (∃ D : ItemsD (f.ctx E d.scope) f.locals f.body L',
     b.ps = f.ps ∧ b.rs = f.rs ∧ b.inModifier = f.inModifier ∧ b.locals = tysOf f.locals ∧
     b.out = tysOf L' ∧ HEq b.items D.toR) ∧
-  ∀ m ∈ b.mods, RConvArgs.Derived E b.locals m.ps m.args
+  ∀ m ∈ b.mods, RModInv.Derived E d f m
+
+/-- A base-constructor argument of contract `c`: written in `c`'s
+inheritance list (typed with the constructor's locals unnamed) or among its
+constructor's invocations (typed in its parameters), naming a contract, at
+that contract's constructor parameters. -/
+def RBaseArg.Derived (E : Env) (c : String) {Γ : RCtx} (a : RBaseArg E Γ) : Prop :=
+  a.ps = E.ctorParams a.base ∧
+  ((∃ p es, (p, Syn.some (.positional es)) ∈ (E.inheritOf c).inheritList ∧
+      E.contractAt Option.none p = some a.base ∧ RConvArgs.DerivedIn (E.inheritCtx c) es a.ps a.args) ∨
+   (∃ d f p args es, E.ctorDecl c = some d ∧ d.frame? E = some f ∧ (p, args) ∈ d.modInvs.invList ∧
+      E.contractAt d.scope p = some a.base ∧ invArgs args = some es ∧
+      RConvArgs.DerivedIn ((f.ctx E d.scope).at f.locals) es a.ps a.args))
 
 /-- **An elaborated unit**: a resolution and its resolved program, each
 carried body, initializer, constant, modifier invocation and base argument
@@ -118,8 +223,9 @@ structure Elaborated where
       b.ps = f.ps ∧ b.rs = f.rs ∧ b.inModifier = f.inModifier ∧ b.locals = tysOf f.locals ∧
       b.out = tysOf L' ∧ HEq b.items D.toR
   contracts_eq : prog.contracts = res.env.contracts
-  /-- Each body's modifier invocations come from typed arguments. -/
-  mods_typed : ∀ d b, prog.body d = some b → ∀ m ∈ b.mods, RConvArgs.Derived res.env b.locals m.ps m.args
+  /-- Each body's modifier invocations are written ones, typed. -/
+  mods_typed : ∀ d b, prog.body d = some b → ∃ f, d.frame? res.env = some f ∧
+    ∀ m ∈ b.mods, RModInv.Derived res.env d f m
   /-- A contract's constructor is the body of its constructor declaration. -/
   ctor_typed : ∀ c b, prog.ctor c = some b → ∃ d ∈ res.env.decls,
     d.kind = .constructor ∧ d.scope = some c ∧ prog.body d = some b
@@ -127,9 +233,8 @@ structure Elaborated where
   consts_typed : ∀ d i, prog.consts d = some i → i.var = d ∧ RInit.Derived res.env i
   /-- A contract's initializers are its own variables', elaborated. -/
   inits_typed : ∀ c, ∀ i ∈ prog.inits c, i.var.scope = some c ∧ RInit.Derived res.env i
-  /-- Base-constructor arguments come from typed arguments in the
-  constructor's locals. -/
-  baseArgs_typed : ∀ c, ∀ a ∈ prog.baseArgs c, RConvArgs.Derived res.env (prog.ctorLocals c) a.ps a.args
+  /-- Base-constructor arguments are written ones, typed. -/
+  baseArgs_typed : ∀ c, ∀ a ∈ prog.baseArgs c, RBaseArg.Derived res.env c a
 
 /-- A body elaborated from a derivation, in its frame. -/
 def RBody.ofDerivation {E : Env} {scope : Option String} (f : Frame) {L' : List (String × STy)}

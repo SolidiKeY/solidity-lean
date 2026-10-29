@@ -237,15 +237,17 @@ resolved terms:
   first. Completeness (a derivation exists ⇒ inference finds one) is not
   proved.
 - **Coherence** (`Elaborated.lean`): `Elaborated` now ties every part of
-  the program to a derivation, not only bodies:
+  the program to its syntax and a derivation, not only bodies. This is
+  soundness (what is carried was written and typed), not completeness (a
+  carried list may omit a written invocation):
 
   | Field | Statement |
   |---|---|
   | `bodies_typed` | each body is `ItemsD.toR` of a derivation in its frame (as before) |
-  | `mods_typed` | each modifier invocation's arguments are `RArgs.convert` of a `TypedArgs` derivation in a context with the body's locals (`RConvArgs.Derived`) |
+  | `mods_typed` | each modifier invocation is one written in the declaration's header (`Decl.modInvs`), names the modifier it carries with that modifier's parameters (`Env.modifierAt`), and its arguments are `RArgs.convert` of a derivation of the written arguments in the declaration's parameters (`RModInv.Derived`, `RConvArgs.DerivedIn`) |
   | `ctor_typed` | a contract's constructor is the body of its constructor declaration |
   | `consts_typed`, `inits_typed` | a constant's value and a contract's initializers are `.conv` of a derivation of the variable's initializer, implicitly converted to its type (`RInit.Derived`) |
-  | `baseArgs_typed` | base-constructor arguments are converted derivations in the constructor's locals |
+  | `baseArgs_typed` | each base-constructor argument is written in the contract's inheritance list or its constructor's invocations, names that contract, is at its constructor's parameters (`Env.ctorParams`), and is a converted derivation of the written arguments (`RBaseArg.Derived`) |
 
   The elaborator builds each piece as a subtype carrying that proof, so the
   fields hold by construction.
@@ -263,16 +265,48 @@ assigning `true` to a `uint256` does not elaborate.
 
 Limitations:
 
-- `RConvArgs.Derived` says the arguments come from *some* argument list's
-  derivation, not that it is the invocation's syntax; the elaborator uses
-  the syntax, but the field does not record it.
-- A modifier needs a body to be invoked (`Decl.frame?`); named arguments
-  (`f({a: 1})`) do not elaborate.
+- The coherence fields are soundness only: they do not say that every
+  written invocation, initializer or base argument is carried, nor that a
+  base appears once (`is A(7)` together with `constructor() A(1)` is not
+  refused; solc refuses it), nor that a named base is a base of the contract.
+- That the inference fuel (`Syn.nodes`) never runs out first is argued
+  (each call is on a strict subterm), not proved.
+- Named arguments (`f({a: 1})`) do not elaborate.
+- A string literal initializer of a `string` state variable or constant
+  (`string public name = "T";`) does not elaborate: `RInit` converts by
+  `STy.implicit`, which takes a string literal only to `memory`; S01's
+  `WellFormed.inits` has the same restriction (the semantics' `storeRV`
+  could store it).
+- An `immutable` assigned in a constructor does not type (`LVal.state`
+  requires `Decl.mutable`), so such a contract does not elaborate.
+- Modifier arguments are typed in the declaration's locals, named returns
+  included (`Frame.locals`).
 - `progOf` elaborates a body each time the semantics looks it up (lazy, not
   cached); kernel evaluation of elaborated programs is therefore slow, and
   the controls use `#guard`.
 - `elaborate` refuses a unit if any body, initializer or base argument
   fails; it does not check `WellFormed` (bases, clashes, pragmas).
+
+### Review (item 1b)
+
+A read-only finder and a separate skeptic reviewed the elaborator. Fixed:
+
+- **Coherence too weak** (skeptic): `RConvArgs.Derived` allowed any
+  context and syntax. Now `RModInv.Derived` and `RBaseArg.Derived` tie each
+  invocation to the written one (`Syn.invList`, `Syn.inheritList`), to the
+  modifier or contract it names and its parameters, and the arguments to a
+  derivation of the written arguments in the right context
+  (`RConvArgs.DerivedIn`).
+- **`s.length` on a struct member `length`** (finder): inference now
+  tries `lengthTy` first and falls back to struct members.
+- **Abstract modifiers** (finder): `Env.modifierAt` reads the parameter
+  types from the header, so a `virtual` modifier without a body is named.
+- The controls: the comment of the parts check, a check of `g`'s
+  modifier list, and what `g(2)` and `g(0)` each pin down.
+
+Recorded, not fixed: soundness-only coherence, string literal
+initializers, immutables, the unproved fuel bound (all under
+Limitations above).
 
 ## Checkpoint 2: expressions
 

@@ -260,11 +260,10 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
       | .ident g => tryMagic Γ g x
       | _ => Option.none : Option (Inferred Γ (.member a x)))).orElse fun _ => do
     let ⟨τ, da⟩ ← Typed.inferN n Γ a
-    if hx : x = "length" then
-      match hl : τ.lengthTy with
-      | Option.some ρ => pure ⟨ρ, by subst hx; exact .length da hl⟩
-      | Option.none => Option.none
-    else
+    match hl : τ.lengthTy with
+    | Option.some ρ =>
+      if hx : x = "length" then pure ⟨ρ, by subst hx; exact .length da hl⟩ else Option.none
+    | Option.none =>
       match τ, da with
       | .address _, da =>
         if hb : x = "balance" then pure ⟨_, by subst hb; exact .balance da⟩ else Option.none

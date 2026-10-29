@@ -16,7 +16,7 @@ a base argument does not elaborate.
 Where the syntax goes:
 
 - a function, modifier, `receive` or `fallback` body: `Program.body`, its
-  modifier invocations resolved in its parameters;
+  modifier invocations typed in its locals (parameters and named returns);
 - a constructor: `Program.body` and `Program.ctor`; its invocations that
   name a contract (`constructor() B(x)`) are base arguments, not modifiers;
 - `is B(args)`: base arguments, typed in the contract's scope with the
@@ -28,82 +28,51 @@ Where the syntax goes:
 
 namespace Solidity.Source
 
-/-- The modifier invocations of a body. -/
-def Decl.modInvs (d : Decl) : Syn (.list .modInv) :=
-  match d.kind, d.top, d.node with
-  | .function, _, .function _ _ _ _ ms _ _ _ _ => ms
-  | .constructor, _, .constructor _ ms _ _ _ => ms
-  | .fallback, _, .fallback _ _ _ ms _ _ _ => ms
-  | .receive, _, .receive _ _ ms _ _ _ => ms
-  | _, _, _ => .nil
-
-/-- An invocation's positional arguments (none written: none). -/
-def invArgs : Syn (.opt .callArgs) → Option (Syn (.list .expr))
-  | .none => Option.some .nil
-  | .some (.positional es) => Option.some es
-  | _ => Option.none
-
 /-- Converted arguments from a derivation, at parameters `ps`, in context
 `C`. -/
 def elabArgs (C : Ctx) (es : Syn (.list .expr)) (ps : List STy) :
-    Option {a : RConvArgs C.env C.tys ps // RConvArgs.Derived C.env C.tys ps a} :=
+    Option {a : RConvArgs C.env C.tys ps // RConvArgs.DerivedIn C es ps a} :=
   match TypedArgs.infer C es with
   | Option.some ⟨σs, D⟩ =>
     if h : argsFit C.env.isBase σs ps = true then
-      Option.some ⟨RArgs.convert ps D.toR h, C, es, σs, D, h, rfl, rfl, HEq.rfl⟩
+      Option.some ⟨RArgs.convert ps D.toR h, σs, D, h, HEq.rfl⟩
     else Option.none
   | Option.none => Option.none
 
-/-- The declaration of contract `c`'s constructor. -/
-def Env.ctorDecl (E : Env) (c : String) : Option Decl :=
-  E.decls.find? fun d => d.kind == .constructor && d.scope == Option.some c
+/-- Arguments derived in a context, moved to an equal list of local types. -/
+def castArgs {C : Ctx} {es : Syn (.list .expr)} {Γ Γ' : RCtx} {ps : List STy} (h : Γ = Γ')
+    (a : RConvArgs C.env Γ ps) (ha : RConvArgs.DerivedIn C es ps a) :
+    {a' : RConvArgs C.env Γ' ps // RConvArgs.DerivedIn C es ps a'} :=
+  ⟨cast (congrArg (RConvArgs C.env · ps) h) a, by
+    obtain ⟨σs, D, hf, he⟩ := ha
+    exact ⟨σs, D, hf, (cast_heq _ a).trans he⟩⟩
 
-/-- The frame of contract `c`'s constructor. -/
-def Env.ctorFrame (E : Env) (c : String) : Option Frame :=
-  (E.ctorDecl c).bind (·.frame? E)
-
-/-- The locals of contract `c`'s constructor (`[]` without one). -/
-def Env.ctorFrameLocals (E : Env) (c : String) : List (String × STy) :=
-  match E.ctorFrame c with
-  | Option.some f => f.locals
-  | Option.none => []
-
-/-- The parameters of contract `c`'s constructor. -/
-def Env.ctorParams (E : Env) (c : String) : List STy :=
-  match E.ctorFrame c with
-  | Option.some f => f.ps
-  | Option.none => []
-
-/-- The modifier a path names, with its parameters. -/
-def Env.modifierAt (E : Env) (scope : Option String) (p : IdPath) : Option (Decl × List STy) :=
-  match E.lookupPath scope p with
-  | [m] => if m.kind == .modifier then (m.frame? E).map fun f => (m, f.ps) else Option.none
-  | _ => Option.none
-
-/-- The contract a path names. -/
-def Env.contractAt (E : Env) (scope : Option String) (p : IdPath) : Option String :=
-  match E.lookupPath scope p with
-  | [b] => if b.kind == .contract then Option.some b.name else Option.none
-  | _ => Option.none
-
-/-- A body's modifier invocations, each typed in its locals: a constructor's
-invocations of a contract are skipped (base arguments). -/
+/-- The modifier invocations among `invs`, each typed in `f`'s locals: a
+constructor's invocations of a contract are skipped (base arguments). -/
 def elabMods (E : Env) (d : Decl) (f : Frame) :
-    Syn (.list .modInv) → Option {ms : List (RModInv E (tysOf f.locals)) //
-      ∀ m ∈ ms, RConvArgs.Derived E (tysOf f.locals) m.ps m.args}
-  | .nil => Option.some ⟨[], fun _ h => nomatch h⟩
-  | .cons (.modInv p args) rest => do
+    (invs : List (IdPath × Syn (.opt .callArgs))) → Option {ms : List (RModInv E (tysOf f.locals)) //
+      ∀ m ∈ ms, ∃ p a es, (p, a) ∈ invs ∧ E.modifierAt d.scope p = some (m.modifier, m.ps) ∧
+        invArgs a = some es ∧ RConvArgs.DerivedIn ((f.ctx E d.scope).at f.locals) es m.ps m.args}
+  | [] => Option.some ⟨[], fun _ h => nomatch h⟩
+  | (p, args) :: rest => do
     let ⟨ms, hms⟩ ← elabMods E d f rest
-    match E.modifierAt d.scope p with
+    match hm : E.modifierAt d.scope p with
     | Option.some (m, ps) =>
-      let es ← invArgs args
-      let ⟨a, ha⟩ ← elabArgs ((f.ctx E d.scope).at f.locals) es ps
-      pure ⟨⟨m, ps, a⟩ :: ms, fun x hx => by
-        cases hx with
-        | head => exact ha
-        | tail _ hx => exact hms x hx⟩
+      match hes : invArgs args with
+      | Option.some es =>
+        let ⟨a, ha⟩ ← elabArgs ((f.ctx E d.scope).at f.locals) es ps
+        pure ⟨⟨m, ps, a⟩ :: ms, fun x hx => by
+          cases hx with
+          | head => exact ⟨p, args, es, List.mem_cons_self, hm, hes, ha⟩
+          | tail _ hx =>
+            obtain ⟨p', a', es', hmem, h1, h2, h3⟩ := hms x hx
+            exact ⟨p', a', es', List.mem_cons_of_mem _ hmem, h1, h2, h3⟩⟩
+      | Option.none => Option.none
     | Option.none =>
-      if d.kind == .constructor && (E.contractAt d.scope p).isSome then pure ⟨ms, hms⟩
+      if d.kind == .constructor && (E.contractAt d.scope p).isSome then
+        pure ⟨ms, fun x hx => by
+          obtain ⟨p', a', es', hmem, h1, h2, h3⟩ := hms x hx
+          exact ⟨p', a', es', List.mem_cons_of_mem _ hmem, h1, h2, h3⟩⟩
       else Option.none
 
 /-- **A body, elaborated**, with its modifier invocations. -/
@@ -114,10 +83,10 @@ def elabBody (E : Env) (d : Decl) : Option {b : RBody E // RBody.Derived E d b} 
     match ItemsD.infer (f.ctx E d.scope) f.locals f.body with
     | Option.none => Option.none
     | Option.some ⟨L', D⟩ =>
-      match elabMods E d f d.modInvs with
+      match elabMods E d f d.modInvs.invList with
       | Option.none => Option.none
       | Option.some ⟨ms, hms⟩ =>
-        Option.some ⟨RBody.ofDerivation f D ms, ⟨f, L', hf, D, rfl, rfl, rfl, rfl, rfl, HEq.rfl⟩, hms⟩
+        Option.some ⟨RBody.ofDerivation f D ms, f, L', hf, ⟨D, rfl, rfl, rfl, rfl, rfl, HEq.rfl⟩, hms⟩
 
 /-- **An initializer, elaborated** and converted to the variable's type. -/
 def elabInit (E : Env) (d : Decl) : Option {i : RInit E // i.var = d ∧ RInit.Derived E i} :=
@@ -131,85 +100,87 @@ def elabInit (E : Env) (d : Decl) : Option {i : RInit E // i.var = d ∧ RInit.D
     | Option.none => Option.none
   | _, _ => Option.none
 
-/-- The constructor's locals, unnamed: the context of `is B(args)`. -/
-def anonLocals (L : List (String × STy)) : List (String × STy) := L.map fun p => ("", p.2)
-
 theorem tysOf_anonLocals (L : List (String × STy)) : tysOf (anonLocals L) = tysOf L := by
   simp only [tysOf, anonLocals, List.map_map]
   rfl
 
-/-- Converted arguments, moved to an equal list of local types. -/
-def castDerived {E : Env} {Γ Γ' : RCtx} {ps : List STy} (h : Γ = Γ')
-    (a : {a : RConvArgs E Γ ps // RConvArgs.Derived E Γ ps a}) :
-    {a : RConvArgs E Γ' ps // RConvArgs.Derived E Γ' ps a} :=
-  h ▸ a
-
-/-- The base arguments of an inheritance list, typed with the constructor's
-locals unnamed. -/
+/-- The base arguments of inheritance-list entries `xs` of contract `c`. -/
 def elabInherit (E : Env) (c : String) :
-    Syn (.list .inherit) → Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) //
-      ∀ a ∈ as, RConvArgs.Derived E (tysOf (E.ctorFrameLocals c)) a.ps a.args}
-  | .nil => Option.some ⟨[], fun _ h => nomatch h⟩
-  | .cons (.inherit p args) rest => do
+    (xs : List (IdPath × Syn (.opt .callArgs))) → Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) //
+      ∀ a ∈ as, a.ps = E.ctorParams a.base ∧ ∃ p es, (p, Syn.some (.positional es)) ∈ xs ∧
+        E.contractAt Option.none p = some a.base ∧ RConvArgs.DerivedIn (E.inheritCtx c) es a.ps a.args}
+  | [] => Option.some ⟨[], fun _ h => nomatch h⟩
+  | (p, args) :: rest => do
     let ⟨as, has⟩ ← elabInherit E c rest
+    let lift : ∀ (y : IdPath × Syn (.opt .callArgs)), ∀ a ∈ as, a.ps = E.ctorParams a.base ∧
+        ∃ p' es, (p', Syn.some (.positional es)) ∈ y :: rest ∧
+        E.contractAt Option.none p' = some a.base ∧ RConvArgs.DerivedIn (E.inheritCtx c) es a.ps a.args :=
+      fun _ x hx => by
+        obtain ⟨h0, p', es, hmem, h1, h2⟩ := has x hx
+        exact ⟨h0, p', es, List.mem_cons_of_mem _ hmem, h1, h2⟩
     match args with
-    | .none => pure ⟨as, has⟩
+    | .none => pure ⟨as, lift _⟩
     | .some (.positional es) =>
-      let b ← E.contractAt Option.none p
-      let C : Ctx := { env := E, scope := Option.some c, locals := anonLocals (E.ctorFrameLocals c) }
-      let ⟨a, ha⟩ := castDerived (tysOf_anonLocals _) (← elabArgs C es (E.ctorParams b))
-      pure ⟨⟨b, _, a⟩ :: as, fun x hx => by
-        cases hx with
-        | head => exact ha
-        | tail _ hx => exact has x hx⟩
+      match hb : E.contractAt Option.none p with
+      | Option.some b =>
+        let ⟨a0, ha0⟩ ← elabArgs (E.inheritCtx c) es (E.ctorParams b)
+        let ⟨a, ha⟩ := castArgs (tysOf_anonLocals _) a0 ha0
+        pure ⟨⟨b, _, a⟩ :: as, fun x hx => by
+          cases hx with
+          | head => exact ⟨rfl, p, es, List.mem_cons_self, hb, ha⟩
+          | tail _ hx => exact lift _ x hx⟩
+      | Option.none => Option.none
     | .some (.named _) => Option.none
 
-/-- A constructor's invocations of base contracts, typed in its locals. -/
+/-- A constructor's invocations of base contracts, typed in its parameters. -/
 def elabCtorBases (E : Env) (c : String) (d : Decl) (f : Frame) (hL : f.locals = E.ctorFrameLocals c) :
-    Syn (.list .modInv) → Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) //
-      ∀ a ∈ as, RConvArgs.Derived E (tysOf (E.ctorFrameLocals c)) a.ps a.args}
-  | .nil => Option.some ⟨[], fun _ h => nomatch h⟩
-  | .cons (.modInv p args) rest => do
+    (xs : List (IdPath × Syn (.opt .callArgs))) → Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) //
+      ∀ a ∈ as, a.ps = E.ctorParams a.base ∧ ∃ p args es, (p, args) ∈ xs ∧
+        E.contractAt d.scope p = some a.base ∧ invArgs args = some es ∧
+        RConvArgs.DerivedIn ((f.ctx E d.scope).at f.locals) es a.ps a.args}
+  | [] => Option.some ⟨[], fun _ h => nomatch h⟩
+  | (p, args) :: rest => do
     let ⟨as, has⟩ ← elabCtorBases E c d f hL rest
-    match E.contractAt d.scope p with
+    let lift : ∀ a ∈ as, a.ps = E.ctorParams a.base ∧ ∃ p' args' es, (p', args') ∈ (p, args) :: rest ∧
+        E.contractAt d.scope p' = some a.base ∧ invArgs args' = some es ∧
+        RConvArgs.DerivedIn ((f.ctx E d.scope).at f.locals) es a.ps a.args := fun x hx => by
+      obtain ⟨h0, p', a', es, hmem, h1, h2, h3⟩ := has x hx
+      exact ⟨h0, p', a', es, List.mem_cons_of_mem _ hmem, h1, h2, h3⟩
+    match hb : E.contractAt d.scope p with
     | Option.some b =>
-      let es ← invArgs args
-      let ⟨a, ha⟩ := castDerived (congrArg tysOf hL)
-        (← elabArgs ((f.ctx E d.scope).at f.locals) es (E.ctorParams b))
-      pure ⟨⟨b, _, a⟩ :: as, fun x hx => by
-        cases hx with
-        | head => exact ha
-        | tail _ hx => exact has x hx⟩
-    | Option.none => pure ⟨as, has⟩
-
-/-- The inheritance list of contract `c`. -/
-def Env.inheritOf (E : Env) (c : String) : Syn (.list .inherit) :=
-  match E.decls.find? fun d => d.kind == .contract && d.name == c && d.scope == Option.none with
-  | Option.some d =>
-    match d.kind, d.top, d.node with
-    | .contract, _, .contract _ _ _ is _ => is
-    | _, _, _ => .nil
-  | Option.none => .nil
+      match hes : invArgs args with
+      | Option.some es =>
+        let ⟨a0, ha0⟩ ← elabArgs ((f.ctx E d.scope).at f.locals) es (E.ctorParams b)
+        let ⟨a, ha⟩ := castArgs (congrArg tysOf hL) a0 ha0
+        pure ⟨⟨b, _, a⟩ :: as, fun x hx => by
+          cases hx with
+          | head => exact ⟨rfl, p, args, es, List.mem_cons_self, hb, hes, ha⟩
+          | tail _ hx => exact lift x hx⟩
+      | Option.none => Option.none
+    | Option.none => pure ⟨as, lift⟩
 
 /-- **The base-constructor arguments contract `c` gives**: its
 constructor's invocations, then its inheritance list. -/
 def elabBaseArgs (E : Env) (c : String) :
-    Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) //
-      ∀ a ∈ as, RConvArgs.Derived E (tysOf (E.ctorFrameLocals c)) a.ps a.args} := do
-  let ⟨fromInherit, hi⟩ ← elabInherit E c (E.inheritOf c)
+    Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) // ∀ a ∈ as, RBaseArg.Derived E c a} := do
+  let ⟨fromInherit, hi⟩ ← elabInherit E c (E.inheritOf c).inheritList
+  let hi' : ∀ a ∈ fromInherit, RBaseArg.Derived E c a := fun x hx => by
+    obtain ⟨h0, p, es, h1, h2, h3⟩ := hi x hx
+    exact ⟨h0, Or.inl ⟨p, es, h1, h2, h3⟩⟩
   match hd : E.ctorDecl c with
-  | Option.none => pure ⟨fromInherit, hi⟩
+  | Option.none => pure ⟨fromInherit, hi'⟩
   | Option.some d =>
     match hf : d.frame? E with
-    | Option.none => pure ⟨fromInherit, hi⟩
+    | Option.none => pure ⟨fromInherit, hi'⟩
     | Option.some f =>
       have hL : f.locals = E.ctorFrameLocals c := by
         simp only [Env.ctorFrameLocals, Env.ctorFrame, hd, Option.bind_some, hf]
-      let ⟨fromCtor, hc⟩ ← elabCtorBases E c d f hL d.modInvs
+      let ⟨fromCtor, hc⟩ ← elabCtorBases E c d f hL d.modInvs.invList
       pure ⟨fromCtor ++ fromInherit, fun x hx => by
         rcases List.mem_append.mp hx with hx | hx
-        · exact hc x hx
-        · exact hi x hx⟩
+        · obtain ⟨h0, p, args, es, h1, h2, h3, h4⟩ := hc x hx
+          exact ⟨h0, Or.inr ⟨d, f, p, args, es, hd, hf, h1, h2, h3, h4⟩⟩
+        · exact hi' x hx⟩
 
 /-- The state variables of contract `c` that are not constants, in order. -/
 def Env.stateVarsOf (E : Env) (c : String) : List Decl :=
@@ -247,9 +218,13 @@ def elaborate (r : Resolution) : Option Elaborated :=
     Option.some
       { res := r
         prog := progOf r.env
-        bodies_typed := fun _ _ _ hb => (mem_of_map_val hb).1
+        bodies_typed := fun _ _ _ hb => by
+          obtain ⟨f, L', hf, hD, _⟩ := mem_of_map_val hb
+          exact ⟨f, L', hf, hD⟩
         contracts_eq := rfl
-        mods_typed := fun _ _ hb => (mem_of_map_val hb).2
+        mods_typed := fun _ _ hb => by
+          obtain ⟨f, _, hf, _, hm⟩ := mem_of_map_val hb
+          exact ⟨f, hf, hm⟩
         ctor_typed := fun c b hb => by
           simp only [progOf, Option.bind_eq_some_iff] at hb
           obtain ⟨d, hd, hb⟩ := hb
