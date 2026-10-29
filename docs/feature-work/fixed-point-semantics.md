@@ -947,3 +947,33 @@ open:
 | `+` associativity neither stated nor proved | skeptic | `Fx.add_assoc` |
 | solc "Rounded" at the mobile digits; it truncates | both | corrected |
 | Pins for the new laws missing; the `Laws.lean` docstring not updated; `literalTrunc_rescale` named without `Fx.` | both | added, updated, renamed in the doc |
+
+### 6.7 Lane gates (2026-10-29)
+
+Run on the lane head before this section (4 cores, 15 GB):
+
+- Lean server diagnostics on every touched Lean file
+  (`Solidity/Language/FixedPoint.lean` and `FixedPoint/{Laws,Literals,Abi,Storage,Conformance}.lean`):
+  no messages. None of them contains `sorry`, `native_decide`,
+  `implemented_by`, `maxHeartbeats` or an axiom. Every headline theorem
+  has a `#print axioms` pin (`#guard_msgs`), each at most
+  `[propext, Classical.choice, Quot.sound]`.
+- `node scripts/check-layers.mjs`: 155 core modules, 0 reach the
+  elaborator. `node scripts/check-orphans.mjs`: 739 reachable, 0 orphaned.
+  `bash scripts/check-trust.sh`: 0 findings.
+  `bash scripts/check-doc-paths.sh`: 46 missing references, the base's
+  count.
+- `./run-lean.sh` took three runs:
+  1. The first (40 min 16 s, cold) failed only because `Solidity.lean`
+     gained the `Conformance` import while the build was running.
+  2. The second (5 min 31 s) built the default target ("Build completed
+     successfully (724 jobs)") and lost `Solidity.TestSuite.Derived17` to
+     the out-of-memory killer (exit 137), the known baseline.
+  3. The third (2 min 42 s) built both targets (724 and 262 jobs,
+     `Derived17` in 146 s). `check-solkey.sh` then reported
+     "solkeycheck: 37 mismatch(es)", the baseline drift, and exited 1 for
+     it.
+- Elaboration in the build: `Literals.lean` 2.7 s, `Abi.lean` 1.4 s,
+  `Conformance.lean` 1.1 s, `Storage.lean` 1.0 s. `Laws.lean` and
+  `FixedPoint.lean` came from the cache (under 3 s each when they were
+  built). No file is heavy.
