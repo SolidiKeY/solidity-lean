@@ -166,6 +166,7 @@ These examples are also on the examples site (`docs/site.md`).
 |---|---|---|
 | Arithmetic against other implementations | `Bridge/SolidityBridge/Arith.lean`: checked add/subtract/multiply return the mathematical result exactly in range at both primitive numeric types; unsigned wrapping add/multiply agree with `BitVec`; unsigned wrapping add/subtract/multiply agree with `ZMod`. | The actual `BinOp.evalT` and `PrimTy.ofInt?`, not detached arithmetic formulas. Narrow source types are elaborator lowerings and are not covered by a blanket all-width theorem. |
 | Independent EVM model | `Bridge/SolidityBridge/ExternalEvm.lean`: exact word encodings, numeric stack-step agreement, a CSLib `Simulation` on the projected arithmetic stack LTS, and `upstream_step` against EVMYulLean's actual `execBinOp` transformer. | `ADD`, `SUB`, `MUL`, `DIV`, `MOD`, `AND`, `OR`, `XOR`, arbitrary operand words and numeric stack tails. Upstream stack underflow is checked; its other state is framed. Bytecode dispatch, gas, symbolic slots, jumps, account state and `CALL` remain outside the correspondence. |
+| Bounded EVM byte memory | `Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean` and `Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean`: persistent word-cell/32-byte correspondence through actual core instructions and upstream macros. | All four load/store forms on preallocated numeric cells; aligned in-bounds windows, nonwrapping extent and the explicit unproved `PaddingCorrect` contract. No raw-memory Solidity admission or gas/bytecode claim. |
 | Compiler traces | `Bridge/SolidityBridge/Evm.lean`: successful instruction traces reflect source runs; payment-free successful source runs produce traces; successful termination is equivalent. | The existing compiler's `inFragP`, representation and array-bound hypotheses remain explicit. Calls are included when admitted by that fragment. This reuses core compiler correctness. |
 | Weakest preconditions | `Bridge/SolidityBridge/WeakestPre.lean`: predicate transformer as a Mathlib order homomorphism, weakest sufficient precondition, nonempty intersection preservation and guarded duality. | Reads the actual modality and frame execution. Panic is rejected by both modalities; exhaustion is accepted by both. Box of top is panic freedom. Thus arbitrary empty-infimum preservation and unconditional box/diamond duality would be false. |
 | Independent loop rules | `Bridge/SolidityBridge/Loop.lean`: invariants from Mathlib's `PFun.fixInduction`; definedness from `WellFounded` or a natural variant; total correctness combining both. | Proved through the bridge's first-return-map correspondence, without invoking the core's loop invariant/variant rules. Terminal errors are outcomes; the chosen postcondition must reject them if successful termination is required. |
@@ -556,26 +557,60 @@ with no memory-limit or OOM events. Its documentation-path check remains red
 with exactly the previous finding set (46 missing, 16 ambiguous). Independent
 read-only finder and skeptic reviews confirmed the two control gaps above are
 repaired and found no further independent obligation within this bounded
-conditional memory fragment. Neither used a Lean server. Published master
-`cc155f36` has no relevant Bridge, source-syntax or core-run changes relative
-to the validation base; the shared Widths prerequisite remains unpublished.
+conditional memory fragment. Neither used a Lean server. At that checkpoint, published master
+`cc155f36` had no relevant Bridge, source-syntax or core-run changes relative
+to the validation base; the shared Widths prerequisite was still unpublished.
 
-The refreshed published base has additional historical documentation debt:
-the checker fails with 46 missing and 16 ambiguous references. A read-only
-reconstruction against exactly `127c2ee5` yields the identical finding set;
-this task introduces and resolves none. The earlier 20-missing result belongs
-to the pre-refresh base and remains recorded in its logs.
+At the earlier published base `127c2ee5`, the documentation checker failed
+with 46 missing and 16 ambiguous references. A read-only reconstruction of
+that exact base yielded the identical finding set, with no task-introduced
+findings. The earlier 20-missing result belongs to the pre-refresh base and
+remains recorded in its logs.
 
-Full optional acceptance remains **BLOCKED** on the designated storage-slots
-owner's Widths repair. Fresh `origin/master` at `cc155f36` still has the same
-Widths source and synthesis definitions implicated by these errors. No
-unpublished work was imported and this task does not duplicate that repair.
+The earlier checkpoint `200153d3` and every subsequent export are retained.
+Their failed Widths gates and cold aggregate timeouts remain failed historical
+attempts, not passes. The coordinator's published prerequisite
+`040e59d30a6726fa4f9fee831695eeaa4027ede1` was verified as an ancestor of fetched
+master and merged into this same task branch at `57d53308`. No unpublished
+sibling work was imported and this task made no arithmetic repair.
 
-The earlier checkpoint commit `200153d3` and its exports are retained. Its
-full optional gate failed in unchanged `Arith/Widths.lean` source-synthesis
-proofs; the designated storage-slots task owns that narrow prerequisite
-repair. At fresh master `cc155f36` it was still not merged. This is a separate
-integration dependency, not a passing full gate.
+On that merged source, the full optional Bridge command passed in 1,042 seconds
+(2,021 jobs), including the original pinned `SolidityBridge.Checks`. All
+new/existing affected ExternalEvm targets passed, as did the original native
+controls plus eight populated compositions, all 36 memory axiom audits, and
+the 36-case × 1,000-sample rule checker at seed 42. Orphan/layer, strict
+automatic, complete TestSuite/static, trust and trust-regression gates passed.
+The first unchanged 7,200-second full core command passed all 738 default targets
+and TestSuite through Derived19, including Derived17 (154 seconds), then hit
+its aggregate timeout. This is **BLOCKED**, not a pass. The group took 8,271
+seconds at its 12 GiB hard cap, with 1,773 limit events and zero OOM events.
+Its original container continued across a managed-runtime reconnect; the
+terminal resource report was recovered verbatim from retained Docker stdout.
+
+The concrete repair was to stage the two remaining cold targets, Derived20 and
+Derived21, under the same 7,200-second timeout and 12 GiB/no-swap limit. Both
+passed (223 seconds combined). The identical full `./run-lean.sh` command then
+passed in 43 seconds: all 738 default jobs, all 262 TestSuite jobs and the
+actual pinned SolKey annotation check, with no skip. A separate annotation
+check and all 36 audits also passed. That staged group took 271 seconds at
+5,986,820,096 bytes peak, with no limit or OOM events. No source statement,
+expected observation, proof/search budget or timeout was changed. Derived17
+required no repair on this task branch. These passing gates do not establish
+the unproved `PaddingCorrect` contract or an unconditional FFI theorem.
+
+The final documentation-path gate remains **FAIL**: 46 missing and 24 ambiguous
+references. A separate detached read-only checkout of exactly `040e59d3`
+produces the identical 70 findings, with no memory-task regressions or resolved
+historical references. The 16-ambiguity count above belongs to the older base.
+Final complete TestSuite/static, orphan/layer, strict automatic, trust and diff
+checks passed. That final static group took 13 seconds at 173,125,632 bytes
+peak, with no limit or OOM events; its documentation checks remain red.
+Independent read-only finder and skeptic reviews found no remaining obligation
+within this explicitly conditional bounded fragment. Their confirmed
+current-base ambiguity-count finding was corrected; neither used a Lean
+server. The original assignment's bounded refinement is complete under its
+stated external contract, while no unconditional FFI, raw-source admission,
+gas or bytecode claim is made.
 
 This optional refinement admits no raw-memory/assembly Solidity source shape,
 changes no source compiler, inventory target or exclusion, and claims no gas
@@ -597,7 +632,8 @@ To build the independent targets alone, from `Bridge/`:
 lake build SolidityBridge.ModelTheory.LowenheimSkolem \
   SolidityBridge.CallbackTrace SolidityBridge.CallbackModalTrace \
   SolidityBridge.ExternalEvm.StackOps SolidityBridge.ExternalEvm.Obstructions \
-  SolidityBridge.ExternalEvm.Memory SolidityBridge.ExternalEvm.MemoryRefinement \
+  SolidityBridge.ExternalEvm.Memory SolidityBridge.ExternalEvm.MemoryBytes \
+  SolidityBridge.ExternalEvm.MemoryRefinement SolidityBridge.ExternalEvm.MemoryComposition \
   SolidityBridge.CompilerSimulation SolidityBridge.LoopFixpoint \
   SolidityBridge.AdversaryPolicy rulecheck
 lake exe rulecheck --seed 42 --samples 1000
