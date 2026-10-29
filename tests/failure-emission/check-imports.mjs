@@ -12,6 +12,7 @@ for(const m of modules){
  for(const d of reach(graph,m))if(forbidden(d))findings.push(`${m}: forbidden closure ${d}`);
 }
 for(const d of reach(graph,'Solidity.Backend.Failure.Slice'))if(owned(d))findings.push(`independent Slice reaches emitter-lane definition ${d}`);
+for(const d of reach(graph,'Solidity.Backend.Failure.Checkpoint'))if(owned(d)&&d!=='Solidity.Backend.Failure.Slice')findings.push(`independent Checkpoint reaches emitter ${d}`);
 for(const d of reach(graph,'Solidity.Backend.Failure.Gap'))if(owned(d))findings.push(`base-only gap reaches new implementation ${d}`);
 console.log(`${modules.length} failure modules, ${findings.length} import/independence findings`);
 for(const f of findings)console.error(f);

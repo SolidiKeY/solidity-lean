@@ -941,3 +941,6 @@ At the root, the notation's own tests:
 | `Backend/Failure/SliceChecks.lean` | Literal instruction, underflow/truncation, memory/frame/chunk, concatenation and1022/1023 stack controls. |
 | `Backend/Failure/Observe.lean` | Existing THalt/TRes source observation relation, deterministic payload correspondence and checked emission. |
 | `Backend/Failure/ObservationChecks.lean` | Inhabited source assert/require/custom/return, complete-body selector negatives and wrong-observation refutations. |
+| `Backend/Failure/Checkpoint.lean` | Independent component-local typed persistent/transient checkpoint relation and compositional restore rules. |
+| `Backend/Failure/Unwind.lean` | Checked emitted payload execution before local unwind; success/failure and nested-failure proofs. |
+| `Backend/Failure/UnwindChecks.lean` | Inhabited distinct snapshots, nested emitted failures, caller-memory restoration and wrong-snapshot negatives. |

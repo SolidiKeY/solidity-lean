@@ -675,3 +675,6 @@ import Solidity.Backend.Failure.Correct
 import Solidity.Backend.Failure.SliceChecks
 import Solidity.Backend.Failure.Observe
 import Solidity.Backend.Failure.ObservationChecks
+import Solidity.Backend.Failure.Checkpoint
+import Solidity.Backend.Failure.Unwind
+import Solidity.Backend.Failure.UnwindChecks

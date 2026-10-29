@@ -39,7 +39,7 @@ composition obligations. Nothing here revisits source failure semantics.
 | 1: typed input and opcode emission | Done: focused gates and independent reviews passed |
 | 2: independent byte memory, stack tails, terminal slices | Done: kernel proofs, controls and independent reviews |
 | 3: intrinsic observations and discriminating controls | Done: proofs, controls, independent reviews and focused gates |
-| 4: local checkpoint/unwind and nested failure | Pending |
+| 4: local checkpoint/unwind and nested failure | Done: proofs, inhabited nested witness, reviews and focused gates |
 | A: arbitrary payload chunking, tails and address bounds | Proved with checkpoint 2 |
 | B: concatenation, distinction, input preservation, external vectors | Internal exact byte vectors implemented; remaining proofs/tests pending |
 
@@ -245,3 +245,53 @@ frontend); task-local imports pass (9 owned modules, 0 findings); orphans pass
 0 findings). Docs exit 1, output still byte-identical to exact base's 46
 missing references, never classified passed. Both independent follow-ups
 cleared all concrete source/control findings; `cp3-reviews.md` records them.
+
+## Checkpoint 4 handoff
+
+`Checkpoint` imports only independent Slice. `Local.Journal P T` and
+`Local.Checkpoint P T` retain separately typed persistent/transient snapshots
+and an explicit caller machine. They are local snapshot records, not source
+state/term IR. Instantiating P/T with the source/world owners' actual store
+projections, their mutation journal and real frame boundaries remains open.
+`CheckpointRel` independently states success commit and revert restore;
+`finish_rel`, functionality, snapshot projections, idempotence, outer rollback
+dominance and success-after-inner-rollback are proved without emitter imports.
+
+`Unwind.execute` first runs the actual checked instruction slice and captures
+its Outcome, then applies those rules. `execute_emitter` and
+`execute_checkpoint` compose both results. `execute_failure` restores the
+named P and T snapshots and the caller's entire machine, while retaining the
+exact copied payload; `execute_return` retains live stores and emitted memory.
+`nested_failure` composes two actual failed emissions through an explicit
+intervening local continuation. It does not implement or assume source catch,
+call or whole-world rollback semantics. Those remain G37/G42/G47 obligations.
+
+`UnwindChecks` instantiates different store types Fin17/Fin19, outer values
+(1,2), middle (7,11), deep (13,17), resumed (15,18), and four distinct memory
+markers. It proves the inner and outer executions and their nested composition,
+including inner payload de-ad and different outer payload be-ef-00-ff. The
+caller memory at address31 is restored to48 while the copied failure payload
+still contains de-ad. Separate relation negatives reject a wrong persistent
+and a wrong transient snapshot. Success commits the live state and success
+after an inner rollback retains the intermediate snapshot.
+
+The local relation and outer-rollback axioms are empty; actual execution and
+nested witnesses use only Lean's standard propext, Classical.choice and
+Quot.sound, with exact guarded pins. A record layout parse error in the
+initial witness was repaired with an explicit constructor; the memory marker
+control then passed. No statement, budget or exclusion was weakened.
+Focused target `lake -f .failure-emission.lakefile.toml build
+Solidity.Backend.Failure.UnwindChecks`:15 jobs, exit0, elapsed0 seconds
+(subsecond module check), aggregate RSS293,036 KiB, cgroup peak103,899,136 B
+(`cp4-build.log`). Both read-only reviews found no semantic defect; both final
+follow-ups cleared guarded pins and the corrected concrete witness.
+
+Final CP4 per-file diagnostics: Checkpoint exit0 (subsecond, RSS232,708 KiB,
+peak80,351,232 B); Unwind exit0 (subsecond, RSS242,872 KiB, peak79,593,472 B);
+UnwindChecks exit0 (1s, RSS271,924 KiB, peak83,922,944 B). Logs are
+`cp4-Checkpoint-diagnostics.log`, `cp4-Unwind-diagnostics.log`,
+`cp4-UnwindChecks-diagnostics.log`. Static gates (`cp4-static.json`):
+shared layers pass; owned closure pass (12 modules,0 findings); orphans pass
+(778 reachable,0 orphaned); trust pass (793 sources,241 inventoried sites,
+0 findings). Docs exit1 is byte-identical to exact base's46 missing references.
+Independent final review record: `cp4-reviews.md`. No whole-group claim follows.
