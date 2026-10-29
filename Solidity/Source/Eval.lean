@@ -463,6 +463,49 @@ def Env.exposed (E : Env) (c : String) : List Decl :=
 def Env.special (E : Env) (c : String) (k : DeclKind) : Option Decl :=
   ((E.linearize c).getD [c]).findSome? fun s => E.decls.find? fun d => d.scope == some s && d.kind == k
 
+/-! ### Public getters -/
+
+/-- A value type: what a getter returns as one word. -/
+def STy.isValueTy : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
+  | _ => false
+
+/-- A public state variable's getter: one parameter per mapping key or array
+index, outermost first, and the type it returns; `none` unless the keys and
+the result are value types (struct, `bytes` and `string` getters are not
+modelled). -/
+def getterSig : STy → Option (List STy × STy)
+  | .mapping k v => if k.isValueTy then (getterSig v).map fun (ps, r) => (k :: ps, r) else none
+  | .array _ τ _ => (getterSig τ).map fun (ps, r) => (.int IntTy.u256 :: ps, r)
+  | τ => if τ.isValueTy then some ([], τ) else none
+
+/-- Whether a declaration is a `public` state variable or constant. -/
+def Decl.isPublicVar (d : Decl) : Bool :=
+  match d.kind, d.top, d.node with
+  | .stateVar, _, .stateVar _ (some .pub) _ _ _ _ _ => true
+  | _, _, _ => false
+
+/-- The public state variables of contract `c` and its bases, with their
+getters. -/
+def Env.getters (E : Env) (c : String) : List (Decl × List STy × STy) :=
+  ((E.linearize c).getD [c]).flatMap fun s =>
+    (E.decls.filter fun d => d.scope == some s && d.isPublicVar).filterMap fun d =>
+      (d.varTy E).bind getterSig |>.map fun (ps, r) => (d, ps, r)
+
+/-- The storage path a getter reads: each key or index, from the call
+data's words, one step down (an index past the end panics). -/
+def getterPath {Γ : RCtx} (F : Fr) (n : Nat) (data : Bytes) : STy → SPath → Nat → EM E Γ (SPath × STy)
+  | .mapping k v, p, i => do
+    let key ← lift (decodeWord E.layout (wordAt data i) k)
+    getterPath F n data v (p.go (← keyStep F n (τ := k) (.val key))) (i + 1)
+  | .array _ τ len, p, i => do
+    let w := wordAt data i
+    let size ← match len with
+      | some m => pure m
+      | none => readLen F p
+    if w < size then getterPath F n data τ (p.go (.index w)) (i + 1) else lift (panic .index)
+  | τ, p, _ => pure (p, τ)
+
 /-- The position of an instance's contract and its name. -/
 def Glob.contractAt (G : Glob E) (k : Nat) : Option String := G.prog.contracts[k]?
 
@@ -993,6 +1036,7 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
   | .emit (ps := ps) ev _ args => do
     let (vs, l1) ← sub l (evalConvArgs G F n args)
     let data ← encodeVals F n false vs.toR
+    if F.static then halt (.revert [])
     modSt fun s => { s with logs := (F.this, G.selector (sigOf E.layout ev.name ps) ++ data) :: s.logs }
     pure (.normal l1)
   | .revertError (ps := ps) er _ args => do
@@ -1203,6 +1247,22 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
         encodeVals F n false (← lift (unRet rs r))
       | none => halt (.stuck "signature")
     | _, _ =>
+    let getter := (E.getters F.contract).find? fun (d, ps, _) =>
+      !input.isEmpty && G.selector (sigOf E.layout d.name ps) == input.take 4
+    match getter with
+    | some (d, ps, r) =>
+      if F.value.val ≠ 0 then halt (.revert [])
+      if input.length < 4 + 32 * ps.length then halt (.revert [])
+      match d.varTy E, G.prog.consts d with
+      | _, some ri => do
+        let (v, _) ← sub (L0 E) (evalE G F n ri.e)
+        if h : ri.τ = r then encodeVals F n false (.cons (h ▸ v) .nil) else halt (.stuck "getter type")
+      | some τ, none => do
+        let (p, ρ) ← getterPath F n (input.drop 4) τ d.path 0
+        let v ← readAt F p ρ
+        encodeVals F n false (.cons (.val v) .nil)
+      | none, none => halt (.stuck "getter type")
+    | none =>
       let special := if input.isEmpty then (E.special F.contract .receive).orElse fun _ => E.special F.contract .fallback
         else E.special F.contract .fallback
       match special with

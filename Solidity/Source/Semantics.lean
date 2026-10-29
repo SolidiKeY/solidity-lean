@@ -130,6 +130,16 @@ def construct (G : Glob E) (F : Fr) (n : Nat) (c : String) (lc : Locals E.layout
 /-- The position of a contract in the compilation input. -/
 def Glob.position (G : Glob E) (c : String) : Option Nat := G.prog.contracts.idxOf? c
 
+/-- Whether contract `c`'s constructor is `payable` (without one, the
+default constructor is not: solc reverts a deployment with value). -/
+def Env.ctorPayable (E : Env) (c : String) : Bool :=
+  match E.ctorDecl c with
+  | some d =>
+    match d.kind, d.top, d.node with
+    | .constructor, _, .constructor _ _ pay _ _ => pay
+    | _, _, _ => false
+  | none => false
+
 /-- **Deployment** of contract `c` at `addr` by `sender` with `value` and
 ABI-encoded constructor arguments; its outcome. -/
 def deploy (G : Glob E) (n : Nat) (c : String) (addr sender : Address) (value : Word) (args : Bytes) :
@@ -143,6 +153,7 @@ def deploy (G : Glob E) (n : Nat) (c : String) (addr sender : Address) (value : 
   let F : Fr := { this := addr, sender := sender, value := value, static := false, contract := c }
   let ps := ((G.prog.ctor c).map RBody.ps).getD []
   let r ← attempt do
+    if value.val ≠ 0 && !E.ctorPayable c then halt (.revert [])
     let vs ← lift (decodeVals E.layout args ps 0)
     let l := vs.onto (L0 E)
     if h : ps.reverseAux [] = G.prog.ctorLocals c then construct G F n c (h ▸ l)

@@ -105,4 +105,81 @@ def unitBad : Syn .unit :=
 
 #guard (elaborate (resolveUnit { pipeline := .legacy } unitBad)).isNone
 
+/-! ## Public getters, `emit` in a static frame, value to a constructor
+
+```solidity
+contract D {
+  uint256 public x = 3;
+  mapping(uint256 => uint256) public m;
+  event E(uint256);
+  function set(uint256 k) public { m[k] = x + k; }
+  function e() public { emit E(1); }
+}
+```
+-/
+
+def mapUU : Syn .typeName :=
+  .mapping (.elem (.int false 256 (by decide)) (by decide)) none u256 none
+
+def unitD : Syn .unit :=
+  .unit (.cons (.contract false "D" .none .nil
+      (.cons (.stateVar u256 (some .pub) none none false "x" (.some (num 3)))
+      (.cons (.stateVar mapUU (some .pub) none none false "m" .none)
+      (.cons (.event "E" (.cons (.eventParam u256 false none) .nil) false)
+      (.cons (.function (.ident "set") pK (some .pub) none .nil false none .nil (.some (.block
+          (.cons (stmt (.assign .assign (.index (.ident "m") (.some (.ident "k")))
+            (.addSub .add (.ident "x") (.ident "k")))) .nil))))
+      (.cons (.function (.ident "e") .nil (some .pub) none .nil false none .nil (.some (.block
+          (.cons (.stmtItem (.emit (.ident "E") (.positional (.cons (num 1) .nil)))) .nil))))
+      .nil))))))
+    .nil)
+
+def elabD : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitD)
+
+#guard elabD.isSome
+
+def arg (k : Nat) (h : k < 2 ^ 256 := by decide) : Bytes := wordBytes ⟨k, h⟩
+
+/-- Deploy `D` with `value`, then run each call data as a transaction: the
+deployment's outcome and each transaction's. -/
+def runD (el : Elaborated) (value : Nat) (inputs : List Bytes) (h : value < 2 ^ 256 := by decide) :
+    List (Option Outcome) :=
+  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
+    fun _ => .answer (.success []), word 0⟩
+  let go : Nat → EM el.res.env [] (List Outcome) := fun n => do
+    let d ← deploy G n "D" thisC user ⟨value, h⟩ []
+    let mut outs := [d]
+    for i in inputs do
+      outs := outs ++ [← runTx G n ⟨user, thisC, word 0, word 0, i⟩]
+    pure outs
+  match (runAt go (s0 : St el.res.env) 40).1 with
+  | .ok os => os.map some
+  | _ => []
+
+-- **Getters**: after `set(2)`, `x()` is `3`, `m(2)` is `3 + 2`, `m(3)` is `0`.
+#guard (elabD.map fun el => runD el 0 [selOf "set(uint256)" ++ arg 2, selOf "x()",
+    selOf "m(uint256)" ++ arg 2, selOf "m(uint256)" ++ arg 3]) ==
+  some [some (.success []), some (.success []), some (.success (arg 3)), some (.success (arg 5)),
+    some (.success (arg 0))]
+
+-- **Value to a non-payable constructor** (here the default one) reverts the
+-- deployment; no value deploys.
+#guard (elabD.map fun el => (runD el 1 []).head?) == some (some (some (.revert [])))
+#guard (elabD.map fun el => (runD el 0 []).head?) == some (some (some (.success [])))
+
+/-- `e()` entered in a static frame or not, after deploying `D`. -/
+def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=
+  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
+    fun _ => .answer (.success []), word 0⟩
+  match (runAt (fun n => do
+    let _ ← deploy G n "D" thisC user (word 0) []
+    let m ← mark
+    enterInstance G n thisC user (word 0) (selOf "e()") static "D" 1 m) (s0 : St el.res.env) 40).1 with
+  | .ok o => some o
+  | _ => none
+
+-- **`emit` in a static frame reverts** (as `LOG` does); outside one it succeeds.
+#guard (elabD.bind fun el => emitIn el true) == some (.revert [])
+#guard (elabD.bind fun el => emitIn el false) == some (.success [])
+
 end Solidity.Source.ElaborateExamples

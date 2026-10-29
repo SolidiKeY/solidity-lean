@@ -119,6 +119,16 @@ environment and the horizon, so it is deterministic by construction.
 The interpreter's matches on `RStmt` and `RItems` have no wildcard; the
 ledger is in [source-s05.md](source-s05.md).
 
+## Item 3: gaps closed after S05
+
+| Gap | Now | Control (`ElaborateExamples.lean`) |
+|---|---|---|
+| Public getters | `dispatch` answers the getter of a `public` state variable or constant (`Env.getters`, `getterSig`): one parameter per mapping key or array index, a value-type result read from storage (`getterPath`, an index past the end panics with `0x32`) or a constant's value; struct, `bytes` and `string` getters and non-value keys are not modelled | after `set(2)`: `x()` is 3, `m(2)` is 5, `m(3)` is 0 |
+| `emit` in a static frame | reverts with no data, as `LOG` does | `e()` entered static reverts, non-static succeeds |
+| Value to a non-payable constructor | the deployment reverts (`Env.ctorPayable`; a contract without a constructor has solc's non-payable default) | `D` deployed with value 1 reverts, with 0 succeeds |
+
+The controls run elaborated units (item 1b) and are checked by `#guard`.
+
 ## What S03 does not do
 
 These items are also listed under `limitations:`.
