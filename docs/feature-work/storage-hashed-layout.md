@@ -329,3 +329,33 @@ findings, fixed in the following commit:
 | The module docstring omitted struct members and static elements from `Occ` (finder 3c). | Added. |
 | Two untyped and two partly typed `have`s (finder 4a, 4b). | Typed. |
 | Six headline theorems unpinned, while the doc implied all were (finder 4c, skeptic 6). | All pinned. |
+
+### Handoff — checkpoint 4 and lane gates
+
+Work queue item 4 is done for its separation half (above); the
+representation half is listed under the checkpoint's limitations.
+
+Per-file gates: `lean_diagnostic_messages` clean on
+`Solidity/Storage/HashedSeparation.lean` after the review fixes; 11
+`#guard_msgs` pins; no `sorry`, new axiom, `native_decide`, `decide` tactic,
+`grind`, `implemented_by` or `maxHeartbeats`. `check-layers`: 160 core
+modules, 0 reach the elaborator; `check-orphans`: 739 reachable, 0 orphaned;
+`check-trust`: 0 findings; `check-doc-paths`: 46, the base count.
+
+Lane-end `./run-lean.sh` (started at commit `108b89f`; 70 min 52 s wall,
+194 min user on 4 cores; peak memory not measured, `/usr/bin/time` absent):
+
+- `node scripts/check-layers.mjs`: passed.
+- `lake build`: `Build completed successfully (724 jobs)`. The lane's
+  modules built in 1.5–3.5 s each (`Hash.Adaptive` 3.5 s,
+  `Storage.HashedSeparation` 1.7 s, `Storage.HashedKeccak` 1.5 s,
+  `Storage.HashedLayoutEvm` 1.5 s). `HashedSeparation.lean` was compiled in
+  its `108b89f` form; the checkpoint-4 review fixes (`73681b0`, an added
+  lemma, pins and typed `have`s, no import change) were checked with the
+  language server only.
+- `lake build SolkeyTestSuite`: failed only on `Solidity.TestSuite.Derived17`
+  (`Lean exited with code 137`, out of memory), the known baseline owned by a
+  Codex lane; this lane touches no file it imports. `run-lean.sh` stops
+  there.
+- `scripts/check-solkey.sh`, run on its own: `37 mismatch(es)`, the base
+  count.
