@@ -792,8 +792,10 @@ uses and 4 whose messages name a mobile type. The 19 false positives:
 
 None of these uses a fixed-point type. The regex cannot find tests about
 fractional constants whose diagnostics never name a fixed type. A second
-pass over the diagnostics "Fractional", "fractional" and `rational_const`
-added 11 such files (rows marked † below). Every other fractional-literal
+pass over the expectations matching `Fractional|fractional|rational_const`
+added 13 such files, and the finder added one more,
+`layout_fractional_number.sol`, whose message says "must evaluate to an
+integer". That makes 14 rows marked † below. Every other fractional-literal
 test is about integer typing (array indices, enum conversions, `addmod`
 arguments), which fixed point does not change. solc's verdict is the test's
 expectation: a test whose only error is `UnimplementedFeatureError 1834`
@@ -824,7 +826,8 @@ rules (G00 Q6, full support); "reject" means a compile error.
 | `344_one_divided_by_three_integer_conversion.sol`, `321_rational_to_bytes_implicit_conversion.sol`, `327_rational_index_access.sol` (fractional constant at `uint256`/`bytes32`) | reject, suggesting `ufixed256x77`, `ufixed8x1`, `ufixed8x1` | reject; `mobileFx?` gives each suggested type | rejection by the integer/bytes typing, argued; the suggestion by `mobileFx?` (Conformance) | agrees |
 | † `types/encoding_fractional.sol`, `encoding_fractional_abiencoderv2.sol`, `encoding_packed_fractional.sol`, `encoding_packed_fractional_abiencoderv2.sol` (`abi.encode(0.1, 1)`, packed) | reject (TypeError 6090; packed also 7279 for the integer literal) | reject, as solc, until QL2 is answered | QL2 (§6.2) | agrees for now; QL2 may turn it into an intended deviation |
 | `306_invalid_int_implicit_conversion_from_fixed.sol`, `322_fixed_to_bytes_implicit_conversion.sol` | reject | reject | no implicit fixed→integer or fixed→`bytesM` conversion (§1; Q7 is explicit only) | agrees |
-| `329_…_signed.sol`, `330_…_unsigned.sol` (fractional exponent of a constant) | reject | reject | `CExpr.eval` (Conformance) | agrees |
+| `329_…_signed.sol`, `330_…_unsigned.sol`, † `331_rational_as_exponent_half.sol`, † `332_rational_as_exponent_value_neg_quarter.sol` (fractional exponent of a constant) | reject | reject | `CExpr.eval` (Conformance) | agrees |
+| † `372_shift_constant_right_fractional.sol` (`0x42 >> (1 / 2)`) | reject | reject | shifts are not folded on fractional constants (`CExpr`), and Q4 rejects fixed shifts; argued | agrees |
 | `333_…_15.sol`, `334_…_neg.sol` (`**` with a fixed exponent) | reject | reject | P8 (no `**` on `Fx`) | agrees |
 | `338`–`341` (`~ \| ^ &` on fixed) | reject | reject | P8 (no bit operators on `Fx`) | agrees |
 | `operators/signed_rational_modulus.sol` (`.5 % a`; `a` and `c = a % b` accepted by both) | reject ("Fractional literals not supported.") | reject | `litCommonRev?_eq_solc` (Conformance) | agrees (QL1 asks whether to extend) |
@@ -840,8 +843,8 @@ rules (G00 Q6, full support); "reject" means a compile error.
 | `parsing/fixed_literal_with_double_radix.sol`, `invalid_fixed_conversion_leading_zeroes_check.sol`, `lexer_numbers_with_underscores_fixed_fail.sol`, `308_rational_unary_plus_operation.sol` | ParserError/SyntaxError | the same | lexer and parser, unchanged | agrees |
 | `types/address/type_type_to_address.sol` (`address(fixed)`) | reject | reject | no conversion from a type expression | agrees |
 
-**Result.** Counted in files: 68 found by the regex and 11 by the second
-pass (†), 79 in all.
+**Result.** Counted in files: 68 found by the regex and 14 by the second
+pass (†), 82 in all.
 - 3 files deviate from solc's type checker, in 5 lines, each intended:
   `317` lines `a` and `b`, and `328` lines `e` and `f`, by Q2 (out-of-range
   explicit constants); `shr_unused` by Q4.
@@ -878,7 +881,7 @@ findings and their fixes:
 | Finding | Source | Fix |
 |---|---|---|
 | `abi.encode(0.1)`/`encodePacked(0.1)` tests (TypeError 6090) were missed by the regex, and QL2's premise (that solc truncates `abi.encode(1/3)`) was wrong | finder | second pass (†); rows added; QL2 and the §6.2 rows and handoff corrected |
-| Other fractional-literal tests were swept inconsistently | finder | added (†) with the scope stated |
+| Other fractional-literal tests were swept inconsistently | finder | added (†) with the scope stated; the author's own second pass added `331`, `332` and `372` |
 | "68 uses" counted files; deviations were not given per line | skeptic | counts in files and lines |
 | Basis cells overstated what is computed (inline array element type, `b[0] += 1`, `343`'s result type, `div_limit`'s shift, `328`'s function) | skeptic | `litCommon?` examples added; argued rows marked |
 | `shr_unused` "agrees with solc's compiler" was meaningless (solc's compiler rejects every fixed program) | skeptic | now "intended deviation (Q4)" |

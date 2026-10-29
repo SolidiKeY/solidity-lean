@@ -179,9 +179,11 @@ example : sig (mobileFx? (mkRat 16 5)) = some (false, 8, 1) ∧
     implicitOK (ty true 40 40 (by decide)) 3.14 = false := by
   decide +kernel
 
-/-- `329`, `330`: a fractional exponent is refused. -/
+/-- `329`, `330`, `331`, `332`: a fractional exponent is refused. -/
 example : CExpr.eval (.pow (.lit 2) (.lit (-2.2))) = none ∧
-    CExpr.eval (.pow (.lit 3) (.lit 2.5)) = none := by
+    CExpr.eval (.pow (.lit 3) (.lit 2.5)) = none ∧
+    CExpr.eval (.pow (.lit 2) (.div (.lit 1) (.lit 2))) = none ∧
+    CExpr.eval (.pow (.lit 42) (.div (.lit (-1)) (.lit 4))) = none := by
   decide +kernel
 
 /-- `operators/signed_rational_modulus.sol`: `a = 0.42578125 % -0.4271…`
