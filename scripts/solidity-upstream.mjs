@@ -320,6 +320,23 @@ function compiler(path) {
   return input => JSON.parse(compile(JSON.stringify(input),0,0));
 }
 
+/** A discarded native payment member evaluates this total receiver but does
+ * not invoke it. No payment, callback, account inspection or result is observed.
+ * Effectful or unknown receivers deliberately remain outside this exception. */
+export function discardedSelfPaymentReference(node) {
+  const member=node?.expression;
+  if (node?.nodeType!=='ExpressionStatement' || member?.nodeType!=='MemberAccess' ||
+      !['send','transfer'].includes(member.memberName) ||
+      !new RegExp('^t_function_'+member.memberName+'_').test(member.typeDescriptions?.typeIdentifier ?? '') ||
+      Number.isInteger(member.referencedDeclaration) && member.referencedDeclaration>=0) return false;
+  const receiver=member.expression;
+  if (receiver?.nodeType!=='FunctionCall' || receiver.kind!=='typeConversion' ||
+      receiver.expression?.nodeType!=='ElementaryTypeNameExpression' ||
+      receiver.expression.typeName?.name!=='address' || receiver.arguments?.length!==1) return false;
+  const self=receiver.arguments[0];
+  return self?.nodeType==='Identifier' && self.name==='this';
+}
+
 function prepare(entry, directory, compile, work) {
   const path = entry.path;
   const syntax = path.startsWith('test/libsolidity/syntaxTests/');
@@ -382,6 +399,7 @@ function prepare(entry, directory, compile, work) {
   // rather than choose arbitrary values for its transaction/block environment.
   const hostBehavior = node => {
     if (!node || typeof node !== 'object') return false;
+    if (discardedSelfPaymentReference(node)) return false;
     if (node.nodeType === 'Identifier' && node.name === 'this') return true;
     if (node.nodeType === 'MemberAccess' && node.expression?.nodeType === 'Identifier' &&
         ['msg','block','tx'].includes(node.expression.name)) return true;

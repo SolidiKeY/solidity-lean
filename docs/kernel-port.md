@@ -59,6 +59,10 @@ The language and calculus gaps, callbacks included, are listed in
   auxiliary proofs. This is kernel evidence; only its handwritten `.key` pin improves;
   source/compiler/EVM blockers remain unchanged. See
   [the payment handoff](feature-work/diamond-payments.md).
+  The human-approved payment assignment now uses exact conditional success and
+  certified failure instead of requiring the unconditional success rule.
+  `Calculus/PaymentConditions.lean` covers that family under unchanged semantics;
+  source-world/payload/gas dependencies are separate and remain open.
 - **A struct recursive through a mapping** (`TestSuite.sol`'s `Tree`) is
   refused: its default value is infinite and the model's are finite
   (`Solkey/TestSuite.lean`'s excluded row).

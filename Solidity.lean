@@ -154,6 +154,7 @@ import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.CallbackSound.Payments
 import Solidity.Calculus.PaymentWitness
+import Solidity.Calculus.PaymentConditions
 import Solidity.Calculus.PaymentClose
 import Solidity.Calculus.CallbackSound
 import Solidity.Calculus.CapturePayments
@@ -245,6 +246,7 @@ import Solidity.Examples.Tactics.CrossDomain
 import Solidity.Examples.Tactics.Net
 import Solidity.Examples.Tactics.Payment
 import Solidity.Examples.Tactics.PaymentWitness
+import Solidity.Examples.Tactics.PaymentConditions
 import Solidity.Examples.Tactics.PaymentRules
 import Solidity.Examples.Tactics.PaymentCorpus
 import Solidity.Examples.Tactics.Theory

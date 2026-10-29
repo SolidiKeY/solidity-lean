@@ -2590,6 +2590,9 @@
         "Solidity/Calculus/CallbackSound/Payments.lean",
         "Solidity/Examples/Tactics/PaymentRules.lean",
         "Solidity/Examples/Tactics/PaymentCorpus.lean",
+        "Solidity/Calculus/PaymentConditions.lean",
+        "Solidity/Examples/Tactics/PaymentConditions.lean",
+        "scripts/payment-reference.test.mjs",
         "docs/feature-work/diamond-payments.md"
       ]
     },
@@ -2668,6 +2671,9 @@
         "Solidity/Calculus/CallbackSound/Payments.lean",
         "Solidity/Examples/Tactics/PaymentRules.lean",
         "Solidity/Examples/Tactics/PaymentCorpus.lean",
+        "Solidity/Calculus/PaymentConditions.lean",
+        "Solidity/Examples/Tactics/PaymentConditions.lean",
+        "scripts/payment-reference.test.mjs",
         "docs/feature-work/diamond-payments.md"
       ]
     },

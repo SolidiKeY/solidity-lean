@@ -1,12 +1,15 @@
 # Diamond payments: guarded rules and the original PiggyBank callback proof
 
-Current scope: sound conditional deterministic/callback transfer diamond rules,
-positive and failure countercontrols, and the full original PiggyBank callback
-kernel obligation. Its single `.key` corpus row is connected through the existing
-handwritten-proof mapping, with build-checked evidence. This does not establish
-source-runner, compiler/EVM or whole-contract callback support. The unconditional
-transfer diamond and blocked source fixtures remain open; both features stay
-partial. New final validation is recorded in the resumed milestone below.
+Current scope after the explicit human decision on 2026-10-29: keep existing
+semantics and prove exact conditional success and certified failure conditions.
+For this assignment only, that replaces the unconditional transfer-success
+requirement. The original unconditional statements and their refutations remain
+unchanged evidence. The semantic-choice blocker is resolved, not awaiting another
+profile decision. The new exact family and source-reference repair are below.
+Original observations, callback judgment, target predicates and budgets remain.
+Two original source fixtures still require genuine source-world/payload/gas
+execution support; they are not declared complete. Earlier milestone validation
+and blocker lists below record their historical checkpoint, not new results.
 
 Baseline: `f4dee4a29c2e208b36db4a4161a4723c735cd775`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, branch
@@ -271,7 +274,7 @@ and generated `SolidityCorpus.lean`, `tests/solkey/expected.tsv`,
 `docs/corpus-parity.md`. No snapshot or upstream-source re-pin occurs.
 
 
-## Resumed final validation and remaining blockers
+## Resumed final validation and remaining blockers (historical 1b9bf3a9)
 
 `./run-lean.sh` passed in 5,168.874 seconds: 691 default jobs, 259 TestSuite
 jobs, all 377 parsed taclets and 131 read-bearing annotations. This is a cached
@@ -355,3 +358,169 @@ Machine-readable continuation results are in `resume-gates.json`,
 attempts and the earlier checkpoint artifacts are retained. The original user
 Lake configuration is restored byte-for-byte; temporary configuration/shim
 copies are retained externally before removal. No push or merge occurred.
+
+
+## Human-approved conditional family (2026-10-29)
+
+`Calculus/PaymentConditions.lean` separates funding from recipient policy.
+`recipient_iff` proves exactly no oracle entry or an explicit `.ok data`;
+`canPay_iff` combines that with sufficient live funds, even for self-payment.
+Missing-entry acceptance establishes neither deployed code nor receive dispatch.
+`transfer_success_iff` and `transfer_callback_conditions_iff` expose exact
+necessary and sufficient deterministic/callback conditions. The callback case
+retains the booked exit invariant and every storage/ledger/live-balance resumption.
+`transfer_failure_iff` certifies insufficient funds or recipient rejection;
+`transfer_failure_bytes` and `transfer_does_not_bubble` certify bare-revert behavior.
+
+`send_accepted_run` and `send_refused_run` specify exact states and result locals.
+`send_flag_iff` characterizes the deterministic Boolean. `send_deterministic_iff`
+characterizes universal diamond validity when the statement does not fork; it is
+not an individual accepted-callback classification. `send_refused_outcome_iff`
+gives the unique refused callback outcome. `send_callback_iff` proves the missing
+necessity direction: the unbooked false-result continuation is mandatory for
+every response; acceptance additionally requires the exit invariant and every
+successful invariant-preserving resumption. Full-gas calls cannot satisfy the
+nonforking premise merely by selecting the noCallback stipend option. Concrete
+controls cover error/panic/zero-value/funding/payload/full-gas cases. The original
+unconditional claims/refutations and all earlier payment witnesses are retained.
+
+The original `uncalled_address_transfer_send.sol` now passes its complete `f()`
+observation in both legacy and via-IR with pinned solc. It executes only f(),
+so this is not evidence of fallback or payment invocation. The reader evaluates
+discarded native member receivers into fresh typed locals, retaining their
+writes, calls and reverts. The dependency scanner starts at actual invocations,
+uses existing callee arms/options/native kind IDs, and retains refusal for actual
+unsupported self-payment dispatch. The host exception applies only to an
+uninvoked native reference with a total self receiver. Source proof controls
+retain receiver writes/reverts; actual direct/parenthesized/conditional self-call
+negative controls retain the old dispatch refusal. No global profile or core
+operational/callback definition changes.
+
+The remaining `send_zero_ether.sol` observations are constructor value20,
+actual Receiver creation, receive invocation, s()=true, and SIX exact gas/code-gas
+observations for irOptimized/legacy/legacyOptimized. Default oracle acceptance
+proves neither dispatch nor gas. Existing WorldImport handles direct creation-
+return factories, not creation-then-send; the upstream runtime has no value/world
+sequence adapter. The new separate optional payment EVM replay retains these observations and
+implements the pinned test host intrinsic/refund/code-deposit accounting, with
+metadata disabled in its gas profiles. Actual results are recorded below.
+This independent bytecode execution does not fill the typed source-world gap.
+No observation is dropped.
+
+The original debug transfer sequence is empty-calldata receive with value10,
+g()=10, f()=Error(no_receive), then insufficient-funds h() with empty failure.
+It first creates A in C's state initializer. Actual receiver code/error bytes
+need typed source-world payment execution. Existing single-contract transfer
+maps every refused response to bare revert, even if it contains a reason. The
+new generic theorem certifies that this route cannot produce the frozen nonempty
+f() observation. No posthoc bytes or separate revert-agent proposal are adopted.
+Remaining dependencies are source-world creation/initializer/receive dispatch,
+payload-preserving source-world payment frames above the unchanged run. Independent bytecode observations are recorded
+separately below. These are not the resolved semantic-
+choice blocker. The latest human instruction authorizes fixture repair; the remaining issue
+is the absent typed source-world sequence interface, not lack of authorization.
+The current reader explicitly refuses these shapes rather than erasing effects.
+Until those dependencies exist, both full fixtures and the overall assignment
+remain incomplete. Independent payment proofs and the complete uncalled-reference
+fixture are carried forward with the actual validation below.
+
+Shared edits: two additive modules/root registrations, narrow Body/Contract
+payment-reference lowering/dependency fixes, upstream host check, payment-reference
+source/script tests, owning docs and audit-generated inventory evidence. Statuses
+remain partial. No target/exclusion/waiver or original expected observation changes.
+
+
+### Human-choice milestone validation, 2026-10-29
+
+Same retained VM, `codex/next10-diamond-payments`, parent
+`1b9bf3a9bc342ba8807b681a14c3ec8168610a9e`; earlier `2edd52bf` and all
+unconditional claims/refutations are preserved. No new clone/container/branch,
+push or merge. Lean4.24.0/Lake5.0.0, explicit Lean `-j1` through temporary Lake
+configuration, `LEAN_NUM_THREADS=1`, one writer/check under the documented lock.
+Original user Lake configuration restored after MCP. Docker memory.max
+12884901888, swap.max0, network none; caches/TMPDIR on disk. Observed physical
+RAM18882674688 bytes differs from nominal16GiB; initial MemAvailable17158901760.
+Full build aggregate peak12884901888, memory.events max377, oom0/oom_kill0:
+the cap was reached with reclaim, not a measured spare margin. No limit increase.
+
+Actual logs are retained in
+`/workspace/diamond-payments-human-choice-evidence/` (outside the repository):
+
+- `full-run.log`: `./run-lean.sh`, exit0, 2349.445s, 693 build jobs and259
+  TestSuite jobs;377 taclets/131 read annotations matched. Baseline and current
+  KeySort runtime output is retained; current `runtime-gate.log` exit0.
+- `resume-gates.json`: orphans0(0.268s), layers0(0.271s), automatic strict0
+  (0.172s;26 timed modules below unchanged300s;491 automatic/61 bounded/
+  11 refuted/0 pending), trust0(4.031s), inventory0(0.157s), source/script tests0
+  (32/32;15.257s), TrustAudit0(99.206s;529 standard-axiom headlines), corpus0
+  (79.939s;73 proved/34 unsupported/101 unported), diff0. Wall times can include
+  waiting for the writer lock. Global doc-paths remains exit1: the same20 baseline
+  missing historical/external references; policy is unchanged.
+- `mcp-final.log`: every new/edited Lean file, generated Features and root have
+  success=true, partial=false and no errors. Actual `lean_verify` for exact
+  callback transfer/send and original PiggyBank reports only propext,
+  Classical.choice, Quot.sound; PiggyBank's existing local-instance scan warning
+  is retained. Per-file printed audits include all new main exactness/control
+  heads, with at most those standard axioms; expected nonempty-error bytes is
+  axiom-free. No sorry or new axiom.
+- `evm-tests-final.log`:21/21 optional reference regressions,2.507s; wrong output,
+  wrong revert bytes, wrong gas, rollback, actual2300-gas receiver execution,
+  unsupported failed-creation payload gas, broken-before-unexecuted-gas precedence,
+  and unchanged instruction-exhaustion handling. The initial parser test failure
+  was a missing constructor ABI in the test setup; retained and repaired.
+
+All original fixtures were rerun without changing source, expected observations
+or callback/profile semantics. Before: all three Lean source adapters blocked.
+After (`after-human-choice/{0,1,2}/results.json`):
+
+| Original fixture | Lean source result | Separate bytecode reference |
+|---|---|---|
+| functionCall/send_zero_ether.sol | blocked: world/host sequence absent | all modes working; constructor20wei, s()true and all6 gas/code-gas observations exact |
+| expressions/uncalled_address_transfer_send.sol | working in legacy/viaIR: f(), success, empty values/return/revert bytes | same full observation working in both modes |
+| revertStrings/transfer.sol | blocked: revertStrings debug/world payment adapter absent | both modes working: receive10wei; g()10; f()100-byte Error(no_receive); h()empty failure |
+
+`evm-{send,uncalled,transfer}-final.json` retain every ordered original row,
+required pipelines and any extra optimized gas profiles, exact actual bytes,
+source/compiler/input/runtime hashes, adapter/engine/lock hashes, actual frame
+step counts, created runtime hashes and gas/refund/deposit accounting. The send
+trace records creation then a distinct2300-gas, zero-value, nonzero-step receive
+frame. These are actual compiled-bytecode observations under pinned solc0.8.38
+(SHA6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390)
+and snapshot1835d247; they are not Lean source proofs or a compiler theorem.
+The unchanged generic EVM backend retains its host refusals. The new optional
+payment replay blocks failed CREATE/CREATE2 with nonempty output because its
+host deposit rule is not adapted; no generic gas completeness claim.
+
+Finder and skeptic independently reviewed core conditions, source lowering,
+fixture scope, and optional replay without Lean/server/checks/writes. Confirmed
+findings fixed: callee-head-only dispatch, failed-creation gas refusal, broken
+verdict precedence, adapter provenance, portable disk TMPDIR and stale current
+authorization/backend wording. No further semantic false-support finding after
+repair. Retained original source/target/inTarget certificates, six gaps,
+DecisionTheorem, exclusions and Waivers are unchanged. Inventory was regenerated
+by the audit script from evidence-only manifest additions; partial status stays.
+
+**Remaining implementation dependency, not a semantic-choice question:** the
+existing WorldImport accepts whole direct creation-return factories, and
+ContractWorld.call executes a typed callee entry. Neither lowers a creation or
+state-initializer followed by a payment inside an arbitrary source body, nor
+connects receive selection and a nested recipient halt to that caller's transfer.
+The single-contract transfer provably returns empty halt bytes, so it cannot
+be relabeled as the frozen debug payload observation. Required next integration
+is an intrinsic world-aware statement/frame interface retaining catalog handles,
+initializer storage, caller funds/rollback, receive selection and actual nested
+halt bytes above the unchanged single-contract run. Removing host/debug refusals
+or feeding reference bytes into Lean would not implement it. Independent gas
+observations are now validated; the two Lean world-source adapters and therefore
+the full assignment remain open. No human semantics decision remains pending.
+
+
+Final read-only finder/skeptic review after fixes: no further substantive finding;
+no reviewers used Lean/server/checks or wrote files. Final cached full confirmation
+`full-final.log` exit0,1.027s. Post-review21 reference tests passed; inventory,
+strict and trust rerun passed (trust722 sources,240 inventoried sites,0 findings).
+Temporary Lake configuration removed from checkout after preserving it with the
+shim in the evidence directory; tracked user configuration is unchanged.
+Final doc-path invocation initially hit Docker Git ownership refusal; command-
+scoped safe.directory repaired invocation, without changing Git/user configuration.
+The check still reports the same20 baseline missing references.

@@ -2139,6 +2139,12 @@ partial def stmt1 (j : Json) : PM (List String) := do
     if J.kind e == "MemberAccess" then
       let owner := unparen ((J.opt e "expression").getD .null)
       let member := (J.str? e "memberName").getD ""
+      -- Naming a payment member does not call it. Keep receiver evaluation,
+      -- including calls, mutations and checks, in a fresh typed scalar local.
+      if nativeMember e && ["send", "transfer"].contains member &&
+          (J.tyStr e).startsWith "function" then
+        let name ← freshDiscardName
+        return [s!"{modelExprType (← get) owner} {name} = {← expr owner}"]
       if builtinNamed owner "abi" &&
           ["encode", "encodePacked", "encodeWithSelector", "encodeWithSignature", "decode"].contains member then
         return []

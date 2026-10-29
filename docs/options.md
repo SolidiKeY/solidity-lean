@@ -285,6 +285,12 @@ funding and recipient acceptance cannot be inferred from uint nonnegativity.
 The semantic exactness results remain in `PaymentWitness`; see the
 [payment handoff](feature-work/diamond-payments.md).
 
+The human-approved payment account keeps these semantics. Exact funding/recipient,
+refusal-state and deterministic/callback send conditions are in
+`Calculus/PaymentConditions.lean`: callback failure remains mandatory even after
+acceptance. This does not replace the unconditional transfer refutation or claim
+source-world/gas correspondence.
+
 **Calls with callbacks.** An internal call whose body calls back is inlined
 as `Stmt.step` inlines it (`ProvesC.callNone`, `ProvesC.callRets`: the
 parameters declared, the return variables at their defaults, the body under

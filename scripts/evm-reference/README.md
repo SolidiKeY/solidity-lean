@@ -46,3 +46,21 @@ Reports retain archive, compiler, runner, imported adapter, dependency-lock,
 compiler-input, source and creation/runtime-bytecode hashes. Keep reports outside
 historical `tests/upstream/results`. Refer to the Group 03 continuation in
 `docs/feature-work/numeric-operators.md` for per-fixture Lean and reference results.
+
+
+Payment-specific replay is additive: `payment-replay.mjs --compiler FILE --filter
+EXACT_PINNED_PATH --out FILE` uses the same pinned compiler/snapshot and unchanged
+100-million gas / five-million instruction ceilings. It retains constructor or
+empty-calldata funding, actual CREATE and receive frames, ordered return/revert
+bytes, and every original gas row across required and named optimized profiles.
+Gas follows the pinned EVMHost and ExecutionFramework accounting; failed creation
+with nonempty output is blocked because its deposit accounting differs from this
+engine. Unknown settings/observations and host limits stay blocked. It records
+executed frame steps, runtime hashes, compiler inputs and dependency provenance.
+
+This tool supplies independent compiled-bytecode observations, never Lean source
+coverage, a callback theorem or a compiler correctness proof. It does not modify
+the existing `replay.mjs` host policy or the core payment/callback semantics.
+Run `node --test --test-concurrency=1 scripts/evm-reference/{replay,payment-replay}.test.mjs`
+with `SOLC_REFERENCE` pointing to the pinned compiler. Keep caches and `TMPDIR`
+on disk and run under the documented writer lock and aggregate resource cap.
