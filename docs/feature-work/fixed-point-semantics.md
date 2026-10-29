@@ -659,14 +659,20 @@ and every worked value. Confirmed findings and their fixes:
 
 ### 6.4 Checkpoint 4 — storage packing
 
-New module `Solidity/Language/FixedPoint/Storage.lean`. Per the scope's
-"Readings", the physical layout is not observable; solc's slot behaviour
-fixes the logical alias semantics, not the packing. The layout is
-therefore a free choice, and the one chosen is solc's for `intM` (P6).
-A fixed value takes `M/8` bytes (`FxTy.storageBytes`), right-aligned at a
-byte offset of its slot, and holds its `M`-bit two's-complement pattern,
-not sign-extended (`Types.h:552–554`: `storageBytes`, `leftAligned =
-false`).
+New module `Solidity/Language/FixedPoint/Storage.lean`.
+
+**Where the layout is a choice.** For the source semantics the physical
+layout is not observable: per the scope's "Readings", solc's slot behaviour
+fixes the logical alias semantics, not the packing. At the backend, the
+layout becomes observable through the `storageLayout` output,
+`eth_getStorageAt`, upgrades under `delegatecall` and gas, so a backend
+proof (G28) fixes it as part of its specification. Inline-assembly
+`.slot`/`.offset` access is closed (P8). solc emits no storage code for
+fixed-point types, so the layout chosen here is `intM`'s rule carried over
+(P6). A fixed value takes `M/8` bytes (`FxTy.storageBytes`), lower-order
+aligned at a byte offset of its slot, and holds its `M`-bit
+two's-complement pattern, not sign-extended (`Types.h:552–553`:
+`storageBytes`, `leftAligned = false`).
 
 - **Byte ranges of a word.** `field w off len` reads bytes and
   `setField w off len v` writes them.
@@ -676,41 +682,82 @@ false`).
   - `setField_field`: writing back what is there changes nothing.
   - `setField_setField`: the last write wins.
   - `setField_lt`: a write inside the slot keeps a 256-bit word.
-  - Helpers: `parts_eq`, `parts_mod`, `parts_div`, `parts_hi`.
-- **Fixed values in a slot.** `Fx.load t w off` and
+  - Helpers: `pow_off_len`, `parts_eq`, `parts_mod`, `parts_div`,
+    `parts_hi`, `setField_parts`, `setField_low`, `setField_div`,
+    `setField_hi`, `field_eq_mod`, `low_lt`, `val_lt`.
+- **Fixed values in one slot.** `Fx.load t w off` and
   `Fx.store w off h a` (`h : off + M/8 ≤ 32`) work on a `Slot`, a
   `Fin (2^256)`.
   - `Fx.load_store`: read after write.
-  - `Fx.load_store_disjoint`: a value of any fixed type in a disjoint byte
-    range is undisturbed.
-  - `Fx.field_store_disjoint`: so is any disjoint byte range, the frame for
-    packed neighbours of other types.
+  - `Fx.load_store_disjoint`: another fixed value in a disjoint range is
+    undisturbed.
+  - `Fx.field_store_disjoint`: so is any disjoint byte range, whatever it
+    holds.
   - `Fx.store_load`, `Fx.store_store`.
   - `Fx.load_zero`: an untouched slot reads as the default, `0`.
 - **Packing a sequence (solc's rule).** `place` puts each value type at
   the next free offset, or at offset 0 of the next slot when it does not
-  fit. `place_fits`: every item of at most 32 bytes lies inside its slot.
-  `place_pairwise`: no two items overlap (`Apart`). Example:
-  `fixed8x1 a; ufixed16x2 b; fixed c; ufixed256x0 d;` places `a`, `b`, `c`
-  at slot 0, offsets 0, 1, 3, and `d` at slot 1.
-- **Mapping keys (P6).** `Fx.keyWord` is the padded ABI word that is
-  hashed. `Fx.keyWord_injective`: distinct keys give distinct words.
+  fit.
+  - `place_fits`: every item of at most 32 bytes lies inside its slot.
+  - `place_pairwise`: no two items overlap (`Apart`).
+  - Supporting facts: `place_after`, `place_sizes`, `place_length`,
+    `Apart.symm`, `place_apart` (any two distinct indices).
+  - Example: `fixed8x1 a; ufixed16x2 b; fixed c; ufixed256x0 d;` places
+    `a`, `b`, `c` at slot 0, offsets 0, 1, 3, and `d` at slot 1.
+- **The slots of a contract.** `Store` is `Nat → Slot`. `Fx.loadAt` and
+  `Fx.storeAt` address a slot and an offset. `layout tys` is the placement
+  of typed state variables (`layout_length`, `layout_size`, and
+  `layout_fits`, which supplies the `store` premise).
+  - `Fx.loadAt_storeAt`: read after write.
+  - `Fx.loadAt_storeAt_apart`: a write leaves every value apart from it
+    unchanged, in its own slot or any other.
+  - `Fx.layout_frame`: writing variable `i` of a layout leaves every other
+    variable `j` unchanged.
+  - `Fx.layout_load_store`: read after write, per variable.
+- **Mapping keys (P6).** `Fx.keyWord` is the padded ABI word whose hash
+  addresses the entry. `Fx.keyWord_injective`: distinct keys are distinct
+  words. The hash belongs to the storage-hashing lane.
 
-`#print axioms` pins: `Fx.load_store` and `Fx.load_store_disjoint` use
-`[propext, Classical.choice, Quot.sound]`; `place_pairwise` uses
-`[propext, Quot.sound]`.
+`#print axioms` pins:
+- `Fx.load_store`, `Fx.load_store_disjoint`, `Fx.layout_frame` and
+  `Fx.field_store_disjoint` use `[propext, Classical.choice, Quot.sound]`;
+- `place_pairwise` and `Fx.keyWord_injective` use `[propext, Quot.sound]`.
 
-**Handoff.** G28 (storage packing) can instantiate its per-variable
-offsets with `place` and prove reads and writes of fixed state variables
-with `Fx.load_store` and `Fx.field_store_disjoint`. S04.02 can read a
-fixed-valued storage observation as `Fx.load`. The keccak of `Fx.keyWord`
-belongs to the storage-hashing lane.
+**Handoff.** G28 can take `layout` as the offsets of fixed state
+variables. Its frame obligation for them is `Fx.layout_frame`, and its
+read-after-write obligation is `Fx.layout_load_store`. For mixed layouts
+with other value types it can use `place` together with
+`Fx.field_store_disjoint`. S04.02 can read a fixed-valued storage
+observation as `Fx.loadAt`.
 
 Not done:
 - the solc rule that structs and arrays start, and are followed by, a new
   slot;
-- packed fixed elements of storage arrays (`M/8` bytes each, the same rule
-  inside the array's area);
-- connecting `Slot` to the repository's typed storage
-  (`Semantics/Storage.lean`), which keeps logical values, not packed
-  words.
+- packed fixed elements of storage arrays (`floor(32 / (M/8))` per slot);
+- a typed `place` over every value type: `layout` is typed for fixed types
+  only, and `place` takes sizes;
+- connecting `Store` to the repository's typed storage
+  (`Semantics/Storage.lean`), which keeps logical values, not packed words.
+
+**Review.** A read-only finder and a separate read-only skeptic reviewed
+`678bd3d`. The finder confirmed the layout rules against
+`layout_in_storage.rst` and `Types.h` at `v0.8.38`: low-order alignment,
+no sign extension, next-slot overflow, the example, and key padding.
+Confirmed findings and their fixes:
+
+| Finding | Source | Fix |
+|---|---|---|
+| No storage map or layout-level frame theorem; `place_pairwise` was not connected to `load`/`store` | both (main gap) | `Store`, `Fx.loadAt`/`Fx.storeAt`, `layout`, `Fx.loadAt_storeAt_apart`, `Fx.layout_frame`, `Fx.layout_load_store` |
+| `place` untyped; nothing produced the `store` premise | skeptic | `layout` over `List FxTy`, `layout_size`, `layout_fits` |
+| "Free choice of layout" was applied beyond the source semantics; "solc's" layout overstated (solc emits no fixed storage code) | skeptic | restricted above and in the module docstring; `intM`'s rule carried over |
+| "packed value of any type" overclaimed `Fx.load_store_disjoint` | both | docstrings name fixed types; `Fx.field_store_disjoint` listed |
+| "hash distinct words" read as a hash claim | both | reworded |
+| Size-0 items | both | docstring: harmless, and no value type has them (`FxTy.storageBytes_pos`) |
+| Pins were partial | skeptic | three more pins |
+| `Types.h:552–554` should be `552–553`; "low-order bytes first" ambiguous | finder | corrected |
+| `storageBytes_bits` sat in the `Fx` namespace | finder | moved to `FxTy` |
+
+Not changed: the generic names `field`, `setField` and `place` stay in
+`Solidity.Language.FixedPoint`. That namespace is not opened alongside
+`Semantics`, so the names do not clash with `Semantics/Heap.lean` or
+`Semantics/Storage/Ops.lean`.

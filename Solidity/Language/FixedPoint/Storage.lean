@@ -4,28 +4,35 @@ import Solidity.Language.FixedPoint.Abi
 # Fixed-point values in storage
 
 A storage slot is a 256-bit word.  A fixed-point value occupies `M/8`
-bytes of a slot at a byte offset, right-aligned (low-order bytes first),
-holding its `M`-bit two's-complement pattern, as solc packs `intM`
-(`storageBytes = M/8`, `leftAligned = false`, `Types.h:552–554` at
-`v0.8.38`).  The physical layout is not observable (the scope's "Readings":
-solc's slot behaviour fixes the logical alias semantics, not the physical
-packing), so this layout is a choice; the one chosen is solc's
-(`docs/feature-work/fixed-point-semantics.md`, P6 and §6.4).
+bytes of a slot at a byte offset, lower-order aligned, holding its `M`-bit
+two's-complement pattern (not sign-extended), as solc packs `intM`
+(`storageBytes = M/8`, `leftAligned = false`, `Types.h:552–553` at
+`v0.8.38`).  solc emits no storage code for fixed-point types, so this is
+`intM`'s rule carried over (P6).  For the source semantics the physical
+layout is not observable (the scope's "Readings": solc's slot behaviour fixes
+the logical alias semantics, not the physical packing), so the layout is a
+choice there; a backend proof (G28) fixes it as part of its specification
+(`docs/feature-work/fixed-point-semantics.md`, §6.4).
 
 * `field` / `setField` — a byte range of a word, read and written;
   `field_setField` (read after write), `field_setField_below`,
   `field_setField_above` (writes leave disjoint ranges alone),
   `setField_field` (writing back what is there), `setField_setField`
   (the last write wins), `setField_lt` (the word stays a word).
-* `Fx.load` / `Fx.store` — a fixed-point value at an offset:
-  `Fx.load_store` (read after write), `Fx.load_store_disjoint`
-  (non-interference with any other packed value of any type),
-  `Fx.store_load`, `Fx.store_store`.
+* `Fx.load` / `Fx.store` — a fixed-point value at an offset of one slot:
+  `Fx.load_store` (read after write), `Fx.load_store_disjoint` (another
+  fixed value in a disjoint range), `Fx.field_store_disjoint` (any disjoint
+  byte range, whatever it holds), `Fx.store_load`, `Fx.store_store`,
+  `Fx.load_zero`.
 * `place` — solc's packing of a sequence of value types into slots:
   `place_fits` (each item lies inside its slot), `place_pairwise` (no two
   items overlap).
-* `Fx.keyWord` — a mapping key hashes as its padded ABI word, injectively
-  (`Fx.keyWord_injective`).
+* `Store`, `Fx.loadAt` / `Fx.storeAt`, `layout` — the slots of a contract
+  and the layout of its fixed-point state variables: `Fx.layout_frame`
+  (writing one variable leaves every other variable's value unchanged),
+  `Fx.layout_load_store` (read after write).
+* `Fx.keyWord` — a mapping key's padded ABI word, the preimage that is
+  hashed; distinct keys are distinct words (`Fx.keyWord_injective`).
 -/
 
 namespace Solidity.Language.FixedPoint
@@ -178,13 +185,7 @@ theorem setField_lt {w off len : Nat} (v : Nat) (hw : w < 2 ^ 256) (h : off + le
 /-- A storage slot. -/
 abbrev Slot := Fin (2 ^ 256)
 
-namespace Fx
-
-variable {t t' : FxTy}
-
-theorem toBits_nonneg (a : Fx t) : 0 ≤ toBits a := by
-  have hp : (0 : Int) < 2 ^ t.bits := Int.pow_pos (by decide)
-  exact Int.emod_nonneg _ (by omega)
+namespace FxTy
 
 theorem storageBytes_bits (t : FxTy) : 8 * t.storageBytes = t.bits := by
   have h : (decide (8 ≤ t.bits) && decide (t.bits ≤ 256) && t.bits % 8 == 0 &&
@@ -192,6 +193,26 @@ theorem storageBytes_bits (t : FxTy) : 8 * t.storageBytes = t.bits := by
   simp only [Bool.and_eq_true, decide_eq_true_eq, beq_iff_eq] at h
   simp only [FxTy.storageBytes]
   omega
+
+theorem storageBytes_le (t : FxTy) : t.storageBytes ≤ 32 := by
+  have hb : 8 * t.storageBytes = t.bits := t.storageBytes_bits
+  have hl : t.bits ≤ 256 := t.bits_le
+  omega
+
+theorem storageBytes_pos (t : FxTy) : 0 < t.storageBytes := by
+  have hb : 8 * t.storageBytes = t.bits := t.storageBytes_bits
+  have hl : 8 ≤ t.bits := t.bits_ge
+  omega
+
+end FxTy
+
+namespace Fx
+
+variable {t t' : FxTy}
+
+theorem toBits_nonneg (a : Fx t) : 0 ≤ toBits a := by
+  have hp : (0 : Int) < 2 ^ t.bits := Int.pow_pos (by decide)
+  exact Int.emod_nonneg _ (by omega)
 
 /-- The value of type `t` at byte `off` of a slot: its `M/8` bytes read as
 the bit pattern (sign-extended where signed). -/
@@ -211,10 +232,11 @@ theorem load_store (w : Slot) (off : Nat) (h : off + t.storageBytes ≤ 32) (a :
   have hcb : ((2 ^ t.bits : Nat) : Int) = (2 : Int) ^ t.bits := Int.natCast_pow 2 _
   have he : ((toBits a).toNat : Int) = toBits a := Int.toNat_of_nonneg h0
   have hlt : (toBits a).toNat < 2 ^ (8 * t.storageBytes) := by
-    rw [storageBytes_bits]; omega
+    rw [FxTy.storageBytes_bits]; omega
   simp only [load, store, field_setField, Nat.mod_eq_of_lt hlt, he, ofBits_toBits]
 
-/-- A packed value of any type in a disjoint byte range is not disturbed. -/
+/-- A packed value of any fixed type in a disjoint byte range is not
+disturbed (`field_store_disjoint`: nor is any byte range). -/
 theorem load_store_disjoint (w : Slot) {off off' : Nat} (h : off + t.storageBytes ≤ 32)
     (a : Fx t) (hd : off' + t'.storageBytes ≤ off ∨ off + t.storageBytes ≤ off') :
     load t' (store w off h a) off' = load t' w off' := by
@@ -237,7 +259,7 @@ theorem field_store_disjoint (w : Slot) {off off' len : Nat} (h : off + t.storag
 theorem store_load (w : Slot) (off : Nat) (h : off + t.storageBytes ≤ 32) :
     store w off h (load t w off) = w := by
   have hlt : field w.val off t.storageBytes < 2 ^ t.bits := by
-    rw [← storageBytes_bits]; exact Nat.mod_lt _ (Nat.two_pow_pos _)
+    rw [← FxTy.storageBytes_bits]; exact Nat.mod_lt _ (Nat.two_pow_pos _)
   have hcb : ((2 ^ t.bits : Nat) : Int) = (2 : Int) ^ t.bits := Int.natCast_pow 2 _
   have hb : toBits (load t w off) = (field w.val off t.storageBytes : Int) := by
     simp only [load]
@@ -260,7 +282,8 @@ theorem load_zero (off : Nat) : load t ⟨0, Nat.two_pow_pos 256⟩ off = zero t
 /-- A mapping key: the padded ABI word that is hashed (P6). -/
 def keyWord (a : Fx t) : Fin (2 ^ 256) := encode a
 
-/-- Distinct keys hash distinct words. -/
+/-- Distinct keys are distinct words (what is hashed; the hash itself is
+the storage-hashing lane's). -/
 theorem keyWord_injective {a b : Fx t} (h : keyWord a = keyWord b) : a = b := by
   have ha : decodeV2 t (encode a) = some a := decodeV2_encode a
   have hb : decodeV2 t (encode b) = some b := decodeV2_encode b
@@ -272,7 +295,8 @@ end Fx
 
 /-! ### Packing a sequence of value types -/
 
-/-- solc's packing: each item (its size in bytes, `1 … 32`) goes at the next
+/-- solc's packing: each item (its size in bytes; every value type has
+`1 … 32`, and a size-0 item would be harmless but meaningless) goes at the next
 free offset of the current slot, or at offset `0` of the next slot when it
 does not fit.  The result lists `(slot, offset, size)`. -/
 def place : List Nat → Nat → Nat → List (Nat × Nat × Nat)
@@ -342,6 +366,132 @@ theorem place_pairwise : ∀ (ss : List Nat) (slot off : Nat),
       · exact Or.inl (by simp only; omega)
       · exact Or.inr (Or.inl (by simp only; omega))
 
+/-! ### The slots of a contract -/
+
+/-- Storage as slots. -/
+abbrev Store := Nat → Slot
+
+/-- `Apart` is symmetric. -/
+theorem Apart.symm {p q : Nat × Nat × Nat} (h : Apart p q) : Apart q p := by
+  rcases h with h | h | h
+  · exact Or.inl (fun he => h he.symm)
+  · exact Or.inr (Or.inr h)
+  · exact Or.inr (Or.inl h)
+
+theorem place_sizes : ∀ (ss : List Nat) (slot off : Nat),
+    (place ss slot off).map (fun p => p.2.2) = ss
+  | [], _, _ => rfl
+  | s :: ss, slot, off => by
+    unfold place
+    split
+    · simp only [List.map_cons, place_sizes ss slot (off + s)]
+    · simp only [List.map_cons, place_sizes ss (slot + 1) s]
+
+theorem place_length (ss : List Nat) (slot off : Nat) : (place ss slot off).length = ss.length := by
+  have h : ((place ss slot off).map (fun p => p.2.2)).length = ss.length := by
+    rw [place_sizes]
+  simp only [List.length_map] at h
+  exact h
+
+/-- Two distinct items of a placement are apart. -/
+theorem place_apart (ss : List Nat) (slot off : Nat) {i j : Nat}
+    (hi : i < (place ss slot off).length) (hj : j < (place ss slot off).length) (hne : i ≠ j) :
+    Apart (place ss slot off)[i] (place ss slot off)[j] := by
+  have hp : ∀ (i j : Nat) (hi : i < (place ss slot off).length)
+      (hj : j < (place ss slot off).length), i < j →
+      Apart (place ss slot off)[i] (place ss slot off)[j] :=
+    List.pairwise_iff_getElem.mp (place_pairwise ss slot off)
+  rcases Nat.lt_or_gt_of_ne hne with h | h
+  · exact hp i j hi hj h
+  · exact (hp j i hj hi h).symm
+
+/-- The layout of a sequence of fixed-point state variables. -/
+def layout (tys : List FxTy) : List (Nat × Nat × Nat) := place (tys.map FxTy.storageBytes) 0 0
+
+theorem layout_length (tys : List FxTy) : (layout tys).length = tys.length := by
+  simp only [layout, place_length, List.length_map]
+
+theorem layout_size (tys : List FxTy) {i : Nat} (hi : i < (layout tys).length) :
+    (layout tys)[i].2.2 = (tys[i]'(by rw [← layout_length]; exact hi)).storageBytes := by
+  have h : ((layout tys).map (fun p => p.2.2))[i]'(by simp only [List.length_map]; exact hi) =
+      (tys.map FxTy.storageBytes)[i]'(by
+        simp only [List.length_map]; rw [← layout_length]; exact hi) := by
+    simp only [layout, place_sizes]
+  simp only [List.getElem_map] at h
+  exact h
+
+theorem layout_fits (tys : List FxTy) {i : Nat} (hi : i < (layout tys).length) :
+    (layout tys)[i].2.1 + (tys[i]'(by rw [← layout_length]; exact hi)).storageBytes ≤ 32 := by
+  have hm : (layout tys)[i] ∈ layout tys := List.getElem_mem hi
+  have hall : ∀ s ∈ tys.map FxTy.storageBytes, s ≤ 32 := by
+    intro s hs
+    simp only [List.mem_map] at hs
+    obtain ⟨t, _, rfl⟩ := hs
+    exact t.storageBytes_le
+  have hf : (layout tys)[i].2.1 + (layout tys)[i].2.2 ≤ 32 :=
+    place_fits _ 0 0 hall _ hm
+  rw [layout_size] at hf
+  exact hf
+
+namespace Fx
+
+variable {t t' : FxTy}
+
+/-- The value of type `t` at `(slot, off)`. -/
+def loadAt (t : FxTy) (σ : Store) (slot off : Nat) : Fx t := load t (σ slot) off
+
+/-- Storage with the value written at `(slot, off)`. -/
+def storeAt (σ : Store) (slot off : Nat) (h : off + t.storageBytes ≤ 32) (a : Fx t) : Store :=
+  fun s => if s = slot then store (σ slot) off h a else σ s
+
+theorem loadAt_storeAt (σ : Store) (slot off : Nat) (h : off + t.storageBytes ≤ 32) (a : Fx t) :
+    loadAt t (storeAt σ slot off h a) slot off = a := by
+  simp only [loadAt, storeAt, if_true, load_store]
+
+/-- A write leaves every value apart from it unchanged, in its own slot or
+any other. -/
+theorem loadAt_storeAt_apart (σ : Store) {slot off slot' off' : Nat}
+    (h : off + t.storageBytes ≤ 32) (a : Fx t)
+    (hA : Apart (slot, off, t.storageBytes) (slot', off', t'.storageBytes)) :
+    loadAt t' (storeAt σ slot off h a) slot' off' = loadAt t' σ slot' off' := by
+  simp only [loadAt, storeAt]
+  by_cases hs : slot' = slot
+  · subst hs
+    simp only [if_true]
+    rcases hA with hA | hA | hA
+    · exact absurd rfl hA
+    · exact load_store_disjoint _ h a (Or.inr hA)
+    · exact load_store_disjoint _ h a (Or.inl hA)
+  · simp only [hs, if_false]
+
+/-- Writing variable `i` of a layout leaves every other variable `j`
+unchanged. -/
+theorem layout_frame (tys : List FxTy) (σ : Store) {i j : Nat}
+    (hi : i < (layout tys).length) (hj : j < (layout tys).length) (hne : i ≠ j)
+    (a : Fx (tys[i]'(by rw [← layout_length]; exact hi))) :
+    loadAt (tys[j]'(by rw [← layout_length]; exact hj))
+        (storeAt σ (layout tys)[i].1 (layout tys)[i].2.1 (layout_fits tys hi) a)
+        (layout tys)[j].1 (layout tys)[j].2.1 =
+      loadAt (tys[j]'(by rw [← layout_length]; exact hj)) σ (layout tys)[j].1
+        (layout tys)[j].2.1 := by
+  apply loadAt_storeAt_apart
+  have hA : Apart (layout tys)[i] (layout tys)[j] := place_apart _ 0 0 hi hj hne
+  have hsi : (layout tys)[i].2.2 = (tys[i]'(by rw [← layout_length]; exact hi)).storageBytes :=
+    layout_size tys hi
+  have hsj : (layout tys)[j].2.2 = (tys[j]'(by rw [← layout_length]; exact hj)).storageBytes :=
+    layout_size tys hj
+  rw [← hsi, ← hsj]
+  exact hA
+
+/-- Writing variable `i` of a layout and reading it back gives the value. -/
+theorem layout_load_store (tys : List FxTy) (σ : Store) {i : Nat}
+    (hi : i < (layout tys).length) (a : Fx (tys[i]'(by rw [← layout_length]; exact hi))) :
+    loadAt _ (storeAt σ (layout tys)[i].1 (layout tys)[i].2.1 (layout_fits tys hi) a)
+      (layout tys)[i].1 (layout tys)[i].2.1 = a :=
+  loadAt_storeAt σ _ _ _ a
+
+end Fx
+
 /-! ### Worked values -/
 
 section Examples
@@ -383,5 +533,23 @@ info: 'Solidity.Language.FixedPoint.place_pairwise' depends on axioms: [propext,
 -/
 #guard_msgs in
 #print axioms place_pairwise
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.layout_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.layout_frame
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.field_store_disjoint' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.field_store_disjoint
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.keyWord_injective' depends on axioms: [propext, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.keyWord_injective
 
 end Solidity.Language.FixedPoint
