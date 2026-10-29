@@ -1004,6 +1004,24 @@ theorem is restated against them.
   `PublicCorrectness.allPipelines`, `compiles`, `succeeds`,
   `not_alwaysRevert`, `allowed_iff`, `envAbs_eq`.
 
+- **Checked:**
+  - `lean_diagnostic_messages` on `Contracts.lean` and `TypedRun.lean`: no
+    messages; the `#guard_msgs` pins hold (`Cert.comp`: `propext`;
+    `PublicCorrectness.transfer`: no axioms). No `sorry`, axiom,
+    `native_decide`, `implemented_by` or `maxHeartbeats` change.
+  - `node scripts/check-layers.mjs`: 157 core modules, 0 reach the
+    elaborator; `node scripts/check-orphans.mjs`: 0 orphaned;
+    `bash scripts/check-trust.sh`: 0 findings;
+    `bash scripts/check-doc-paths.sh`: 46 missing references, as at the base.
+  - `./run-lean.sh`: `lake build` "Build completed successfully (719 jobs)";
+    `lake build SolkeyTestSuite` lost `TestSuite.Derived17` to exit 137
+    (memory) on the first run and built it on the warm re-run ("Build
+    completed successfully (262 jobs)"); `check-solkey.sh` reports
+    "37 mismatch(es)", the count at the base.
+- **Elapsed:** about 1 h 15 min (12:55–14:10 UTC, 2026-10-29), of which the
+  cold build took 59 min (151 min user CPU) and the final builds 11 and
+  4 min. Peak memory was not measured (`/usr/bin/time` is absent).
+
 ### First version
 
 - **Base revision:** `127c2ee59de16971e45b08a2def54f4e5fae8e2a`.
