@@ -609,3 +609,10 @@ import Solidity.Semantics.TryConditions
 import Solidity.Semantics.TryCreateConditions
 import Solidity.Calculus.Sound.TryConditions
 import Solidity.Examples.Tactics.TryConditions
+import Solidity.Semantics.EntryReturn
+import Solidity.Tools.EntryReturn
+import Solidity.Examples.Tactics.EntryReturn
+import Solidity.Examples.Tactics.EntryReturnFlow
+import Solidity.Examples.Tactics.EntryReturnFlowIR
+import Solidity.Examples.Tactics.EntryReturnMetadata
+import Solidity.Examples.Tactics.EntryReturnFunction

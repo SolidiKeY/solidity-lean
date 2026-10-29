@@ -50,3 +50,36 @@ for(const AST of [undefined,{}, {nodeType:'YulBlock'}, {nodeType:'UnknownYul',st
   const c=control();c.target.body={nodeType:'InlineAssembly',AST};
   assert.equal(directSelfTryContext(c.ast,c.contract,{referenceOnly:true}),null);
  });
+
+const functionResult = () => ({typeDescriptions:{typeString:'function () external'},
+  typeName:{nodeType:'FunctionTypeName',visibility:'external',
+    parameterTypes:{parameters:[]},returnParameterTypes:{parameters:[]}}});
+test('native self try observes a zero-argument external-void function result only as data',()=>{
+ const c=control();c.target.returnParameters.parameters=[scalar('uint256'),functionResult(),scalar('uint256')];
+ assert.deepEqual(directSelfTryContext(c.ast,c.contract),{kind:'direct-self-try',selfAddress:SELF_TRY_ADDRESS});
+});
+for(const [name,mutate] of [
+ ['function input',c=>c.target.parameters.parameters=[functionResult()]],
+ ['internal function result',c=>c.target.returnParameters.parameters[0].typeName.visibility='internal'],
+ ['function result with parameters',c=>c.target.returnParameters.parameters[0].typeName.parameterTypes.parameters=[scalar('uint256')]],
+ ['function result with returns',c=>c.target.returnParameters.parameters[0].typeName.returnParameterTypes.parameters=[scalar('uint256')]],
+ ['missing function signature',c=>delete c.target.returnParameters.parameters[0].typeName.parameterTypes],
+ ['function value invocation',c=>c.target.body={nodeType:'FunctionCall',expression:{nodeType:'Identifier',name:'h',typeDescriptions:{typeString:'function () external',typeIdentifier:'t_function_external_nonpayable'}}}]
+]) test(`return-only admission refuses ${name}`,()=>{
+ const c=control();c.target.returnParameters.parameters=[functionResult()];mutate(c);
+ assert.equal(directSelfTryContext(c.ast,c.contract),null);
+});
+
+test('function return does not indirectly admit an outer function-valued input',()=>{
+ const c=control();c.target.returnParameters.parameters=[functionResult()];
+ c.contract.nodes.push({nodeType:'FunctionDefinition',parameters:{parameters:[functionResult()]},body:{}});
+ assert.equal(directSelfTryContext(c.ast,c.contract),null);
+});
+
+test('outer function return with scalar self callee refuses helper function inputs',()=>{
+ const c=control();
+ c.contract.nodes.push({nodeType:'FunctionDefinition',parameters:{parameters:[]},
+   returnParameters:{parameters:[scalar('uint256'),functionResult()]},body:{}});
+ c.contract.nodes.push({nodeType:'ModifierDefinition',parameters:{parameters:[functionResult()]},body:{}});
+ assert.equal(directSelfTryContext(c.ast,c.contract),null);
+});

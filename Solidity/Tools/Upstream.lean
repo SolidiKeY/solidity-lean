@@ -2,6 +2,7 @@ import Solidity.Frontend.Import
 import Solidity.Tools.Run
 import Solidity.Semantics.RunFuel
 import Solidity.Semantics.RevertMemory
+import Solidity.Tools.EntryReturn
 
 /-!
 # Replay upstream typed ABI semantic vectors
@@ -85,17 +86,30 @@ indexed guards generate concrete bytes before execution; no outcome is used
 to choose a panic code. Call arguments here are ABI-decoded locals or checked
 scalar literals; arbitrary effectful top-level argument expressions are outside
 this adapter. Ordinary calculus entry points remain unchanged. -/
-def entryProgParts (C : Contract) (pre body post : List RawStmt) : Except String (Blk C []) := do
+def entryProgParts (C : Contract) (pre body post : List RawStmt)
+    (encoded : Option (String × EntryReturn.Plan) := none) : Except String (Blk C []) := do
   let all := pre ++ body ++ post
   let k := RawStmt.maxIdxs all + 1
   let ss ← freshenBlocks (C.vars.map (·.1)) [] all
   unless ss.length == all.length do throw "entry statement boundaries changed during freshening"
   let action : ElabM (SProg C) := do
-    let P ← elabStmtsP C (ss.take pre.length)
-    let Q ← withReader (fun sc => { sc with retainFailureData := true })
-      (elabStmtsP C ((ss.drop pre.length).take body.length))
-    let R ← elabStmtsP C (ss.drop (pre.length + body.length))
-    pure (P ++ Q ++ R)
+    let funs ← match encoded with
+      | none => pure C.funs
+      | some (f, plan) => EntryReturn.scope C f plan
+    withReader (fun sc => { sc with funs }) do
+      let P ← elabStmtsP C (ss.take pre.length)
+      let Q ← withReader (fun sc => { sc with retainFailureData := true }) do
+        let source := (ss.drop pre.length).take body.length
+        match encoded, source with
+        | some _, [.declMemory T x (some e)] =>
+          -- The synthetic name lives only in this elaboration scope. Hoisting
+          -- resolves it there and supplies the actual typed memory result;
+          -- the ordinary declaration then checks that result's exact shape.
+          let (P, value) ← hoist C e
+          pure (P ++ (← elabStmtsP C [.declMemory T x (some value)]))
+        | _, _ => elabStmtsP C source
+      let R ← elabStmtsP C (ss.drop (pre.length + body.length))
+      pure (P ++ Q ++ R)
   let P ← action.runFrom' { funs := C.funs } ([], k)
   SProg.chain [] [] P
 
@@ -202,6 +216,19 @@ def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
       pure (RawStmt.declMemory raw (argName i) (some (decode i)))
   let args := (List.range d.params.length).map fun i => RawExpr.name (argName i)
   let call := RawExpr.call f args
+  -- Serialize the actual source return frame inside a single-memory-result
+  -- call. The observer takes these bytes directly: no outer ABI envelope.
+  if !probe && !ctor && d.rets.length > 1 && d.rets.any (fun (_, T) => T matches .ref _) then
+    return ← entryProgParts C
+      ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
+      [.declMemory (.named "bytes") outputName
+        (some (.call EntryReturn.wrapperName args))] [] (some (f, .memory))
+  if !probe && !ctor && d.rets.length > 1 &&
+      d.rets.any (fun (n, _) => (fnRow? d.widths n).isSome) then
+    return ← entryProgParts C
+      ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
+      [.declMemory (.named "bytes") outputName
+        (some (.call EntryReturn.wrapperName args))] [] (some (f, .functionTuple))
   let captures ← if probe then pure [] else if ctor then pure (if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then [] else [RawStmt.call (.name "constructor") args])
     else if d.rets.length == 1 then do
       let [(x,T)] := d.rets | throw "single return shape mismatch"

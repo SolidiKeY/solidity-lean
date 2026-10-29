@@ -79,6 +79,15 @@ records exact guards, original fixture before/after results, native versus EVM
 limits and retained strict failures. Existing broad baseline descriptions above
 are historical; these narrow adapter results do not imply whole-corpus support.
 
+The native entry observer also has a bounded return-frame serializer for a
+primitive tuple ending in bytes/string memory, and a separate return-only tuple
+containing one nullary external-void function value. It reuses existing typed
+CallRet capture, exact source declaration/prefix scope and actual ABI encoding.
+Function/reference inputs, general function dispatch, physical Yul memory and
+world composition remain refused. The [current return bridge account](feature-work/diamond-try.md#native-entry-return-bridge-after-checkpoint-99d0049a)
+records kernel controls, conditional correspondence, all ordered replay bytes
+and the native family’s retained strict failure (10 working, 10 blocked).
+
 ## Reproduce
 
 Use Lean 4.24.0 from `lean-toolchain`, Node, Python 3 and `tar`.

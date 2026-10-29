@@ -3,10 +3,11 @@
 **Step 11 remains incomplete at its native source-adapter boundary.** The human
 selected unchanged semantics and explicit conditional success/failure statements
 for this assignment. That resolves the earlier request for a profile decision;
-no stronger global admissibility premise is introduced. The current increment
+no stronger global admissibility premise is introduced. The conditional account
 provides exact typed conditions for all external/catch-data outcomes, ordinary
-formula transport, and conditions for the existing creation-try interface.
-Four original fixtures now pass native replay in both pipelines; sixteen pass
+formula transport, and conditions for the existing creation-try interface. The
+latest continuation adds a native entry return bridge over existing typed calls.
+Ten original fixtures now pass native replay in both pipelines; sixteen pass
 separate compiler/EVM replay. Neither replay establishes universal source
 validity. The remaining native dependencies are enumerated below.
 
@@ -162,7 +163,7 @@ Evidence directory: `/workspace/next10-diamond-try-evidence/`.
 - `full.log`, `validation.tsv`, `full-cgroup-snapshot.log`: initial full gate,
   timings, aggregate memory accounting and limits.
 - `fixtures.tsv`, `source-build.log`, `trust-fixed.log`: component and trust gates.
-- `axioms-and-observations.log`, `Axioms.lean`: actual audits and observations.
+- `axioms-and-observations.log`, [Axioms audit](/workspace/next10-diamond-try-evidence/Axioms.lean): actual audits and observations.
 - `upstream-before/`, `upstream-after/`, `fixture-comparison.json`: every retained
   classification row, source snapshot hashes and strict blocked results.
 - `final-gates.tsv`, `full-final.log`: final checks after the last import change.
@@ -320,7 +321,7 @@ a kernel-checked normal-completion certificate. Postconditions use kernel
 checking separately. A source quotation's retained-local context mismatch was
 also repaired explicitly; it was not papered over by dropping a frame.
 
-`Axioms.lean` audits all 28 new public helper/control theorems. Actual output in
+[Axioms audit](/workspace/next10-diamond-try-evidence/continuation/Axioms.lean) audits all 28 new public helper/control theorems. Actual output in
 `axioms-observations.log`: 27 depend exactly on `[propext, Classical.choice,
 Quot.sound]`; `malformed_reason` has no axioms. There are no new axioms or
 `sorry`. Ordered payload observations are `(2,38)` and `(2,66)`. These remain
@@ -488,7 +489,7 @@ errors or failed dependencies for the new owning file. Early failed attempts,
 line-wrapping repair remain retained. The two earlier implementation commits
 and their evidence are preserved unchanged.
 
-`Axioms.lean` / `axioms.log` audit all six new public theorems: each depends
+[Axioms audit](/workspace/next10-diamond-try-evidence/universal/Axioms.lean) / `axioms.log` audit all six new public theorems: each depends
 exactly on `[propext, Classical.choice, Quot.sound]`. `previous-axioms.log`
 rechecks the previous 28 proofs and complete payload observations. The original
 20-proof audit remains retained separately. No new axiom or `sorry`.
@@ -713,7 +714,7 @@ All new/changed Lean owning-file diagnostics report structured `success: true`,
 `partial: false`, no errors or failed dependencies. Final root diagnostics are
 also clean. Early failed proof/decoder/parser attempts remain retained and are
 not counted as passes. New theorem signatures and full outputs are audited in
-`conditional/Axioms.lean` and `axioms-expanded.log`: 23 new proofs, of which 13
+[conditional axiom audit](/workspace/next10-diamond-try-evidence/conditional/Axioms.lean) and `axioms-expanded.log`: 23 new proofs, of which 13
 use exactly `[propext, Classical.choice, Quot.sound]`, five use `[propext]`, and
 five use no axioms. Together with the preserved/rechecked earlier 20, 28 and six
 proof audits, **77 distinct named proofs** have actual axiom evidence. No new
@@ -778,3 +779,155 @@ this owning record, the upstream adapter documentation and optional EVM README. 
 coverage target, original gap definition, decision theorem or callback semantics
 was edited. Full original native source automation and its blocked pipelines
 remain open dependencies, not a completed assignment.
+
+
+## Native entry return bridge after checkpoint 99d0049a
+
+This continuation kept the original branch and baseline. Published origin/master
+was inspected read-only at cc155f36dc163e221b1f8279c56fb2006113ee7d. Its existing
+scalar-memory return and World/WorldImport APIs were reused where applicable;
+no base integration, unpublished import, callback change or global world rewrite
+was needed. The pre-edit KeySort gate actually passed in one second with
+24,825,856-byte cgroup peak, before the runtime pass marker was written.
+All detailed commands, failed attempts, diagnostics and reports live in
+[/workspace/next10-diamond-try-evidence/return-bridge](/workspace/next10-diamond-try-evidence/return-bridge).
+
+The first original row was structured.sol, selected from the retained conditional
+fixture account. Its native entry mixed two uint results with a string memory
+result. The first bridge attempt retained the exact error: synthetic call had
+“narrow positions none” where byte width 8 and the source bytes marker were
+required. Hoisting the actual synthetic call in its exact local function scope
+before the ordinary memory declaration supplied its actual typed result. The
+ordinary shape check remains active; no refusal was removed. The original row
+then passed all ordered observations in both legacy and viaIR.
+
+`Solidity/Tools/EntryReturn.lean` serializes the actual original return frame
+through the existing one-memory-result CallRet. It resolves the original
+FunDecl and original nonrecursive prefix scope, runs existing calleeBody once
+(including early returns, loops and modifier continuation), then ABI-encodes
+its actual named return locals in declaration order. The observer reads those
+encoded bytes directly, without a second ABI envelope. Original C, source
+entry identities, self-try callee lookup, actual caught bytes, rollback and
+handler scope are retained. This changes native ABI entry observation only;
+ordinary source obligation generation and legacy ValidT/holdsC are unchanged.
+
+Two bounded extraction plans share that serializer. The memory plan accepts
+primitive arguments/results followed by one final bytes/string memory result,
+requiring the original bytes marker and width 8. It refuses storage results,
+multiple references, ordinary uint arrays that share intrinsic bytesR, function
+markers, recursion and reserved-name collisions. The output-only function plan
+accepts one nullary external-void function value among primitive results,
+retaining its exact original fnRow signature. It refuses function/reference
+arguments, other function signatures and invocation. The host guard also checks
+all function/modifier inputs are scalar whenever this new return-only fragment
+is present, including an outer function returning a function value around a
+scalar-returning try. General function-reference arguments and lazy calldata
+remain outside this work; no decoder/dispatch for that pending task is added.
+
+`Solidity/Semantics/EntryReturn.lean` proves conditional exact call reduction,
+source/encoder composition, heap-extension transport, caller restoration,
+reference/alias identity, primitive binder order and exact argument/body failure
+propagation. The hypotheses are actual typed argument, entry, source and encoder
+execution results; no EVM observation is injected. A separate approximation
+lemma transports a proved nondivergent bounded result to ordinary runR.
+The frontend admission implications preserve exact source metadata and lookup.
+These are conditional typed correspondence statements, not a general proof that
+arbitrary raw wrapper construction refines Solidity/compiler execution.
+
+Five EntryReturn example modules provide kernel-checked concrete executions:
+success and actual Error reason with the same once-only counter; malformed bool
+and zero-self refusal; wrong reference/tuple/storage/byte-marker controls;
+loop early return with a live mutated alias and exactly one modifier continuation
+(counter 11), including viaIR; empty defaults, signed int8 and bytes2 order and
+padding; actual returned external function address 0x1234 and selector 0x946644cd,
+eight trailing ABI zero bytes, tuple order and counter 1 in both modes. Normal
+certificates also yield ordinary execution equalities. String-marker parser
+controls remain runtime frontend tests, distinguished from kernel implications.
+Large IR quotations use the existing safe kernel-checked declaration mechanism;
+no recursion/heartbeat/fuel/test allowance was raised.
+
+The complete native original family is now **10 working / 10 blocked / 0 broken**,
+strict exit 1. Newly working versus 99d0049a are lowLevel, structured,
+structuredAndLowLevel, nested, panic and return_function. All ten working rows
+pass every original ordered observation in both required pipelines (27 calls
+per pipeline); this includes all eight panic observations, not a partial prefix.
+The separate pinned compiler/EVM replay remains **16 working / 4 blocked**.
+The fresh reports preserve the current shared helper hash; the full-byte parity
+account and per-fixture before/after table are in the return-bridge evidence.
+Neither compiler/EVM replay nor concrete native execution proves universal
+source validity. All earlier universal callback counterexamples remain negative.
+
+The remaining native blockers have specific boundaries:
+
+- Six malformed/invalid-encoding sources use physical Yul mstore/revert byte
+  slices. Existing intrinsic heap objects are not physical EVM byte-addressed
+  memory. invalid_error_encoding additionally calls g(bytes memory), while the
+  current ExtArg is a primitive Simple, not an Args memory binder. A source
+  adapter cannot manufacture a witness for that missing call argument primitive.
+  malformed_panic_2/_3 return a 256-byte Panic payload in d(), which pinned EVM
+  catches as code 67; current decodePanic requires exactly 36 bytes. The retained
+  kernel trailing-payload refusal certifies this concrete mismatch. Changing
+  the decoder or injecting expected bytes is not authorized.
+- create.sol requires contract-world creation/source composition; the existing
+  standalone World.tryCreate and import APIs do not supply that composition for
+  the native single-contract State. try_catch_library_call requires linked
+  library and storage-receiver world execution. These excluded lanes are not
+  replaced by a synthetic oracle or the entry serializer.
+- Two pre-Byzantium sources explicitly require <byzantium and a literal gas8000
+  self call. Current Osaka reports remain blocked. Both legacy and viaIR compile
+  under the same pinned compiler for historical targets, as the retained profile
+  probes show. A concrete separate-runner proposal is retained in
+  [profile-proposal.md](/workspace/next10-diamond-try-evidence/return-bridge/profile-proposal.md);
+  historical EVM execution is not claimed, and the current profile is unchanged.
+
+Final full library/TestSuite, Corpus, frozen TestSuite, source-admission,
+orphan/layer/strict-automatic/trust/inventory and actual axiom checks passed.
+The post-function full run took 116 seconds; Corpus 12 seconds; source admission
+2 seconds. Strict automation reports 491 automatic, 61 budgeted, 11 refuted and
+zero pending; trust reports 731 sources, 240 inventoried sites and zero findings.
+The new audit contains 46 named proofs; with the preserved 77 earlier proofs,
+123 distinct names have actual axiom output, limited to the repository's
+propext/Classical.choice/Quot.sound foundations. Native family and doc-path gates
+retain their actual failing exits. Initial pin-path/CLI/compiler-setting and
+proof/shape/quotation failures are preserved separately from corrected passes.
+
+Heavy checks were serialized under the writer lock, LEAN_NUM_THREADS=1 and
+Lean -j1 via the temporary Lake configuration. Every build/check group had
+verified memory.max=12884901888 and memory.swap.max=0, disk caches and no OOM.
+The final full-gate group peaked at 2,527,895,552 cgroup bytes and conservatively
+sampled 4,912,096 KiB summed RSS. The earlier fresh per-file group peaked at
+3,525,042,176 bytes. The 16 GiB VM retained OS headroom and 23 GiB disk space.
+Temporary invocation settings do not modify tracked/user configuration.
+
+Independent read-only finder and skeptic reviews covered typed capture,
+serialization, source scope, admission, both-mode kernel controls and byte
+replays, without Lean/server/checks/writes. Confirmed findings were fixed:
+original-prefix visibility instead of all-C scope; bytesR source-marker/width
+checks; combined byte-and-counter certificates; safe IR quotation without a
+budget raise; and outer-function-return input-guard coverage. Both reviewers
+found no further ABI/execution defect and retained the general raw/compiler
+refinement limitation. Final evidence/doc review is recorded alongside logs.
+Shared edits are limited to the native Upstream entry adapter, its structural
+self-try helper/tests, root registrations/module map and owning adapter docs;
+core syntax/operational judgments and frozen sources/verdicts are unchanged.
+Step 11 is still incomplete where the original required native fixtures remain
+blocked; this return bridge closes the compatible independent source layer.
+
+
+Current confirmation evidence is `confirm.tsv`: all nine owning-file structured
+MCP results are clean; `confirm-script-tests.log` records **93/93** current-helper
+tests passing. The earlier missing-default-compiler-path test exit 1 remains in
+`latest-script-tests.log`; it is not a current passing result. The checked
+[fixture account](/workspace/next10-diamond-try-evidence/return-bridge/fixture-account.md)
+and [full-byte parity manifest](/workspace/next10-diamond-try-evidence/return-bridge/fixture-parity.json)
+verify 54 complete native/reference observations and 128 frozen/reference
+observations in order, with current helper/compiler hashes and all twenty source
+hashes. Four reference exclusions are explicitly historical, not fresh passes.
+The [actual axiom account](/workspace/next10-diamond-try-evidence/return-bridge/axiom-account.json)
+contains all 123 audited names. Corrected doc-path checks actually exit 1 for
+both current checkout and pinned baseline, with the same twenty missing-reference
+lines; two task-own external evidence citations were repaired. The earlier
+baseline invocation exit 127 was a wrapper/mount error and supplies no baseline
+evidence. Final current confirmation peaked at 3,474,202,624 cgroup bytes,
+3,841,672 KiB sampled aggregate RSS, no OOM/swap, in 186 seconds. A script driver's
+exit 0 does not replace the individual retained nonzero gate exits in its table.

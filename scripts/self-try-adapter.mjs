@@ -4,6 +4,15 @@
  */
 export const SELF_TRY_ADDRESS = '457415396813334496268612927368880745799219276745';
 const scalar = p => /^(?:bool|u?int(?:[0-9]+)?)$/.test(p.typeDescriptions?.typeString ?? '');
+// Return-only function values use the existing packed address/selector model.
+// This admits no function inputs, invocation, or general function signature.
+const nullaryExternalVoidResult = p => {
+  const t=p.typeName;
+  return t?.nodeType === 'FunctionTypeName' && t.visibility === 'external' &&
+    Array.isArray(t.parameterTypes?.parameters) && t.parameterTypes.parameters.length === 0 &&
+    Array.isArray(t.returnParameterTypes?.parameters) && t.returnParameterTypes.parameters.length === 0;
+};
+const resultValue = p => scalar(p) || nullaryExternalVoidResult(p);
 // Reference-only memory assembly: execute compiler bytecode, never model Yul.
 // Unknown shapes/instructions and context/world observations remain refused.
 const yulKinds = new Set(['YulBlock','YulVariableDeclaration','YulAssignment','YulExpressionStatement',
@@ -28,6 +37,7 @@ export function directSelfTryContext(ast, contract, {referenceOnly = false} = {}
   const functions = new Map((contract.nodes ?? []).filter(n => n.nodeType === 'FunctionDefinition' && n.body)
     .map(n => [n.id,n]));
   let tries = 0;
+  let functionReturnSeen = false;
   const hasCall = n => n && typeof n === 'object' && (n.nodeType === 'FunctionCall' ||
     Object.values(n).some(v => Array.isArray(v) ? v.some(hasCall) : hasCall(v)));
   function visit(node) {
@@ -35,6 +45,9 @@ export function directSelfTryContext(ast, contract, {referenceOnly = false} = {}
     // Runtime code does not exist during deployment. Refuse constructor and
     // initializer dependency closures instead of inlining a predeployment try.
     if (node.nodeType === 'FunctionDefinition' && node.kind === 'constructor') return false;
+    if (!referenceOnly && node.nodeType === 'FunctionDefinition' &&
+        (node.returnParameters?.parameters ?? []).some(nullaryExternalVoidResult))
+      functionReturnSeen = true;
     if (node.nodeType === 'VariableDeclaration' && node.stateVariable && hasCall(node.value)) return false;
     if (node.nodeType === 'TryStatement') {
       const call = node.externalCall, member = call?.expression;
@@ -42,8 +55,10 @@ export function directSelfTryContext(ast, contract, {referenceOnly = false} = {}
       if (call?.nodeType !== 'FunctionCall' || member?.nodeType !== 'MemberAccess' ||
           member.expression?.nodeType !== 'Identifier' || member.expression.name !== 'this' ||
           !callee || !['public','external'].includes(callee.visibility) ||
-          (!referenceOnly && (!callee.parameters.parameters.every(scalar) || !callee.returnParameters.parameters.every(scalar)))) return false;
+          (!referenceOnly && (!callee.parameters.parameters.every(scalar) || !callee.returnParameters.parameters.every(resultValue)))) return false;
       tries++;
+      if (!referenceOnly && callee.returnParameters.parameters.some(nullaryExternalVoidResult))
+        functionReturnSeen = true;
       // The only permitted host nodes are this exact receiver/call. Inspect
       // arguments and every clause, including nested tries, normally.
       return (call.arguments ?? []).every(visit) && (node.clauses ?? []).every(visit);
@@ -58,5 +73,16 @@ export function directSelfTryContext(ast, contract, {referenceOnly = false} = {}
         /\bexternal\b/.test(node.expression?.typeDescriptions?.typeString ?? ''))) return false;
     return Object.values(node).every(v => Array.isArray(v) ? v.every(visit) : visit(v));
   }
-  return visit(ast) && tries > 0 ? {kind:referenceOnly?'direct-self-try-reference':'direct-self-try',selfAddress:SELF_TRY_ADDRESS} : null;
+  const scalarEntryInputs = node => {
+    if (!node || typeof node !== 'object') return true;
+    if (['FunctionDefinition','ModifierDefinition'].includes(node.nodeType) &&
+        (!Array.isArray(node.parameters?.parameters) || !node.parameters.parameters.every(scalar))) return false;
+    return Object.values(node).every(v=>Array.isArray(v)?v.every(scalarEntryInputs):scalarEntryInputs(v));
+  };
+  const valid=visit(ast);
+  // The new return-only fragment must not open an indirect route through an
+  // outer entry/helper's function-reference inputs. Old scalar-only cases and
+  // reference-only EVM admission retain their previous policy.
+  return valid && tries > 0 && (!functionReturnSeen || scalarEntryInputs(ast)) ?
+    {kind:referenceOnly?'direct-self-try-reference':'direct-self-try',selfAddress:SELF_TRY_ADDRESS} : null;
 }

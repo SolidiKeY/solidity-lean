@@ -878,3 +878,16 @@ At the root, the notation's own tests:
 | `Semantics/TryCreateConditions.lean` | Exact creation-try conditions over the unchanged typed world interface. |
 | `Calculus/Sound/TryConditions.lean` | Guarded ordinary formula transport for all results/frames and exact normal-or-exhausted diamond account. |
 | `Examples/Tactics/TryConditions.lean` | Arbitrary-state explicitly guarded source success, certified failure boundaries and typed/runtime replay-context refusals. |
+
+
+### Native self-try entry return bridge
+
+| Module | Defines |
+|---|---|
+| `Semantics/EntryReturn.lean` | Conditional source/serializer call composition, exact heap/reference/caller capture, failures and bounded-to-ordinary execution agreement. |
+| `Tools/EntryReturn.lean` | Exact-declaration, original-prefix-scope entry-only serializer for a primitive prefix plus one source-marked bytes/string memory result, or one return-only external-void function value. |
+| `Examples/Tactics/EntryReturn.lean` | Actual native bridge quotations, bytes/once-only kernel snapshots, normal ordinary witnesses and negative admission/input controls. |
+| `Examples/Tactics/EntryReturnFlow.lean` | Legacy loop-return, alias-mutation, modifier-continuation and default-memory kernel controls. |
+| `Examples/Tactics/EntryReturnFlowIR.lean` | The same controls under existing viaIR modifier frames, with safe kernel declaration factoring for the large quotation. |
+| `Examples/Tactics/EntryReturnMetadata.lean` | Signed narrow and fixed-byte return metadata, exact order and empty memory kernel control. |
+| `Examples/Tactics/EntryReturnFunction.lean` | Output-only external-function address/selector, bytes24 padding, order and once-only kernel witnesses in both evaluation modes; function-input refusals remain. |
