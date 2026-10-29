@@ -393,6 +393,7 @@ import Solidity.Evm.MemoryCapture
 import Solidity.Evm.MemoryCompile
 import Solidity.Evm.Compiler
 import Solidity.Roadmap.Contracts
+import Solidity.Roadmap.TypedRun
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
