@@ -90,7 +90,8 @@ evidence directory.
    kernel checks/controls and independent finder/skeptic follow-ups pass.
 3. Certified assembler linking, disjointness, exact widths and refusal: implemented;
    focused target and independent review follow-ups pass.
-4. Typed immutable patches and frame/installation proofs: pending.
+4. Typed immutable patches and frame/installation proofs: implemented;
+   focused target and independent review follow-ups pass.
 A. Constructor-prefix return/revert composition: pending.
 B. Determinism, commutation, encoding/provenance and external vectors: pending.
 
@@ -183,3 +184,34 @@ Both independent finder/skeptic reviews found the missing actual-assembly and
 origin composition controls. Those were fixed as above; both follow-up reviews
 report no new correctness finding, without Lean servers or builds.
 Headline axiom pins contain only `propext`, `Classical.choice`, `Quot.sound` subsets.
+
+## Checkpoint 4: immutable runtime patches
+
+`ImmutablePatch total Key` carries a bounded location and exactly 32 encoded
+bytes. `immutablePatch?` rejects a raw offset when the whole word does not fit.
+`checkImmutableTable` checks pairwise separation; adjacent regions are accepted.
+`patchImmutables_length` and `patchImmutables_frame` preserve size and every
+untouched byte. `patchImmutables_read` consumes the disjointness certificate to
+prove each member's bytes survive all later writes; `ImmutableTable.read`
+proves its complete exact word can be extracted from the final runtime.
+`patched_installs` composes that runtime with the independent installation proof.
+`compatible_iff` specifies an executable check of every immutable/link pair;
+`combinedArtifact` requires that cross-table certificate and `combined_installs`
+installs its linked and patched runtime. `immutable_link_commute` proves the
+single disjoint address/word rewrite commutes.
+
+The immutable-only helper `patchedArtifact` retains unresolved metadata and is
+not itself a combined linking API. The certified combined API must be used for
+that claim. Keys identify provenance labels; proving source declaration identity,
+repeated-reference value agreement, source initializer evaluation and postdeploy
+write exclusion remains with source constructor/lifetime composition.
+
+Inhabited controls cover two adjacent words, exact last-byte bounds, one-byte
+overflow, internal overlap rejection, exact values/readback, untouched boundaries,
+argument retention, actual installation and exclusion of the old unpatched result.
+Mixed link/immutable controls accept separated tables, reject cross overlap and
+install a combined artifact. Independent finder and skeptic initially identified
+missing generic readback and cross-table safety. Both follow-up reviews confirm
+those fixes with no remaining concrete correctness finding; no Lean servers or
+builds were used by reviewers. Focused immutable target passes (10 jobs), axiom
+pins use only standard `propext`, `Classical.choice`, `Quot.sound` subsets.

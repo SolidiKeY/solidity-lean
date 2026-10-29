@@ -681,3 +681,6 @@ import Solidity.Backend.Creation.Linking
 
 import Solidity.Backend.Creation.LinkLayout
 import Solidity.Backend.Creation.LinkingChecks
+
+import Solidity.Backend.Creation.Immutables
+import Solidity.Backend.Creation.ImmutableChecks

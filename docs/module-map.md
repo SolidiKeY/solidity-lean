@@ -948,3 +948,6 @@ At the root, the notation's own tests:
 
 | `Backend/Creation/LinkLayout.lean` | Bounds and pairwise disjointness derived from actual assembler link metadata for every successful assembly. |
 | `Backend/Creation/LinkingChecks.lean` | Inhabited library-link/install controls, unresolved/missing/wrong-origin/truncated-argument negatives and axiom pins. |
+
+| `Backend/Creation/Immutables.lean` | Typed bounded immutable words, disjoint table checks, per-patch readback/frame laws and certified link/immutable combination. |
+| `Backend/Creation/ImmutableChecks.lean` | Immutable bounds/overlap/readback/frame/install and combined library/immutable controls with axiom pins. |
