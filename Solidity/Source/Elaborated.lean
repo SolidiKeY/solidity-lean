@@ -17,8 +17,8 @@ themselves.  `Elaborated` is a resolution together with a `Program`:
 - every constructor's base-constructor arguments, resolved in that
   constructor's parameters (`RBaseArg`).
 
-**Canonical choice.**  Typing derivations are data and are not unique (a
-hexadecimal literal is a constant or a `bytesN`, S01's `litBytes`), so the
+**Canonical choice.**  Typing derivations are data and are not unique (`(1)`
+is `const` or `paren (const …)`; `return (x);` is `retVal` or `retTuple`), so the
 elaborated program *is* the choice: an `Elaborated` fixes one derivation per
 body, and `Elaborated.bodies_typed` records that each carried body is the
 elaboration (`ItemsD.toR`) of a derivation of that body's syntax.  The

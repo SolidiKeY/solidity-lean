@@ -73,7 +73,29 @@ analysis over the constructors that share a syntax shape:
 | `assign` | `assign`/`assignCopy` (`implicit` and `copiesTo` are disjoint) |
 | `index` | by the base's type |
 
-None of these cases involves literals any more.
+It also needs these rows:
+
+- `LVal` (`paren`, `indexArray`, `indexMapping`, `indexBytes`, `member`);
+- `compound` versus `assign` (`AssignOp.fits` is false for `.assign`);
+- `cond`;
+- `order`/`eq` versus `compareConst`: a literal case, settled by
+  `constShape` on the operands with `STy.common?_const`, but not stated as a
+  theorem;
+- `TypedArgs`, `TypedSlots`, `OptCond` and `OptExpr`.
+
+Statements are not unique either, so the full theorem also needs
+`StmtD`/`ItemsD` (skeptic review):
+
+- `return (x);` with one return type is both `retVal (paren …)` and
+  `retTuple … .nil`, and the two elaborate differently. `StmtD.retTuple`
+  needs a non-empty-slots premise, a `Typed` rule change.
+- `_;` in a modifier is `placeholder` or `expr (ident "_")` if `_` resolved
+  to a declaration.
+
+`Typed.const_unique` proves the corollary for constant expressions: any two
+derivations have one type and one elaboration. That is uniqueness of
+meaning, not of derivations: `(1)` is both `const` and `paren (const …)`,
+and both elaborate to `const 1`.
 
 ### Typed rules changed (for G13's checker)
 
@@ -88,10 +110,53 @@ None of these cases involves literals any more.
 | `STy.implicit` | — | adds `rational q → bytesN` when `q = 0`; `hexConst q n` to integers and fixed point as a rational, and to `bytes{m}` when `m = n` or `q = 0` |
 | `STy.explicit` | — | `hexConst` like `rational` |
 | `STy.mobile`, `isAmount`, `isIndex`, `isZeroConst`, `inBounds`, `abiArg` | — | `hexConst` like `rational` (`mobile` keeps `hexConst` when no integer type holds it) |
-| `RExpr.bytesLit` | — | now `bytesLit (n : NumLit) (len : Nat) : RExpr E Γ (.hexConst n.value len)` |
+| `RExpr.bytesLit` | `bytesLit (n) (hn : fitsBytes) : RExpr (fixedBytes len h)` | now `bytesLit (n : NumLit) (len : Nat) : RExpr E Γ (.hexConst n.value len)` |
 | `RVal` | — | gains `hex` |
 
 `NumLit.fitsBytes` is kept but no rule reads it any more.
+
+Further consumer-visible changes:
+
+- `HasType.of_const` takes `e.hexLen? = none`.
+- `Typed.lit_num` concludes `hexConst` instead of `fixedBytes`.
+- `Syn.const` no longer folds checksummed address literals. Array lengths
+  and the constant premises of `shift`/`exp` read it too.
+- `.hex` values are consumed only by conversion nodes; the evaluator's
+  fallbacks treat them as stuck elsewhere.
+- The new `rational 0 → bytesN` rule applies to any constant expression
+  equal to zero (`bytes4 x = 1 - 1;`), as solc's `m_value == 0` test does.
+
+Controls (`Unique.lean`, `SemanticsExamples.lean`):
+
+| Theorem | Statement |
+|---|---|
+| `hex_to_bytes2`, `hex_to_bytes4_refused`, `hex_to_uint16`, `zero_to_bytes4` | which conversions a literal admits |
+| `zeroLength_illTyped` | `0.length` has no derivation |
+| `hex_literal_bytes` | evaluating `bytes2(0x1234)` gives `0x12 0x34` |
+
+### Review (Q1)
+
+A read-only finder and a separate skeptic reviewed the Q1 change. Fixed:
+
+- the stale docstrings (`Elaborated`, `Const`, `Value`, `Unique`);
+- the module title, which now says uniqueness of *meaning*;
+- the missing corollary, now `Typed.const_unique`;
+- the missing conversion controls;
+- the stale lines in `source-s00-s01.md`.
+
+Recorded, not fixed:
+
+| Finding | Status |
+|---|---|
+| Statement-level non-uniqueness (`retVal`/`retTuple`, `_`) | above |
+| `lit << x` and `lit ** x` | typed at the literal's mobile type; solc types them at `uint256`/`int256`, so `1 << x` wraps at `uint8`. This predates Q1 and now extends to hex literals. |
+| Hex literals of 39–41 digits that are not a checksummed address | accepted as numbers or bytes; solc refuses them ("looks like an address") |
+| A literal on the left of a `bytesN` operand (`0x12 == b`, `0 == b`) | accepted; solc's `binaryOperatorResult` refuses it |
+| `STy.common?` | skips solc's mobile-type step, so `x + 0x0100` with `x : uint8` is refused where solc types `uint16` |
+| `abi.encodePacked` of a literal | accepted; solc error 7279 |
+| An enum conversion of an out-of-range constant | panics at run time instead of being a compile error |
+| `RExpr.bytesLit` | does not tie `len` to the digit count; only `Typed.litBytes` does |
+| `Typed.const`'s `isAddressLit` premise | now redundant (harmless) |
 
 ### Typing gaps closed
 

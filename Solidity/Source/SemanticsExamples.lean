@@ -118,6 +118,16 @@ def shortCircuit : RExpr E0 [uint] uint :=
 
 theorem short_circuit : intOf ((evalE (G0 .viaIR) F0 20 shortCircuit).run (l1, s0)) = some 1 := by decide
 
+/-- `bytes2(0x1234)` as an implicit conversion of the literal: the bytes
+`0x12 0x34`, left to right. -/
+def hexBytes2 : RExpr E0 [] (.fixedBytes 2 (by decide)) :=
+  .conv (.bytesLit (.hex [1, 2, 3, 4] false) 2) (.inl rfl)
+
+theorem hex_literal_bytes :
+    (match ((evalE (G0 .legacy) F0 5 hexBytes2).run (.nil, s0)).1 with
+      | .ok (.val (.fixedBytes bs _)) => some bs
+      | _ => none) = some [0x12, 0x34] := by decide
+
 /-! ## S03: a modifier with two placeholders -/
 
 /-- `modifier repeat(bool twice) { if (twice) _; _; }` -/

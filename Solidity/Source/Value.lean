@@ -8,9 +8,11 @@ The values S02's expression semantics computes, intrinsic in S01's static
 types (`STy`), and the pure operations on them:
 
 - `RVal D τ`: a value of an expression of type `τ`.  A value or reference
-  type's value is S04.01's `Val D τ`; a constant (`.rational q`) and a string
-  literal (`.stringLit bs`) carry no run-time data beyond their type, so their
-  values are `const q` and `strLit bs`; a tuple is its components;
+  type's value is S04.01's `Val D τ`; a constant (`.rational q`), a
+  hexadecimal literal (`.hexConst q len`) and a string literal
+  (`.stringLit bs`) carry no run-time data beyond their type, so their values
+  are `const q`, `hex q len` and `strLit bs`, which only a conversion node
+  consumes; a tuple is its components;
 - `Halt`: how an evaluation stops early: a revert with its exact data
   (`Panic(uint256)` codes included, G01 Q5), a stuck state (a run-time type
   mismatch that well-formed programs never reach), or the end of the

@@ -1,7 +1,7 @@
 import Solidity.Source.Resolved
 
 /-!
-# Uniqueness of typing derivations (Q1)
+# Uniqueness of meaning for constants (Q1)
 
 With solc's literal typing (a number literal is always a constant; a
 hexadecimal literal's type `STy.hexConst` records its compatible bytes
@@ -144,8 +144,12 @@ theorem ConstShape.isConstTy {Γ : Ctx} {e : Syn .expr} {q : Q} {τ : STy} {r : 
     (h : ConstShape Γ e q τ r) : τ.isConstTy = true := by
   rcases h with ⟨rfl, _, _⟩ | ⟨_, _, _, _, _, rfl, _⟩ <;> rfl
 
-/-- **Constant expressions have only their constant types**: no operation,
-comparison or conversion types a constant (they fold). -/
+/-- **Constant expressions have only their constant types**: every
+derivation of an expression that folds (`Syn.const`) is its constant (an
+arithmetic, bitwise, shift or power operation on constants never types as
+an operation), and elaborates to it.  This is uniqueness of meaning, not of
+derivations: `(1)` is both `const` and `paren (const …)`, which elaborate
+alike. -/
 theorem Typed.constShape {Γ : Ctx} {e : Syn .expr} {τ : STy} {q : Q} (d : Typed Γ e τ)
     (hq : e.const = Option.some q) : ConstShape Γ e q τ d.toR := by
   cases d
@@ -219,6 +223,33 @@ decreasing_by
   all_goals first
     | (subst_vars; simp only [Syn.tuple.sizeOf_spec, Syn.some.sizeOf_spec, Syn.unaryPrefix.sizeOf_spec]; omega)
     | (subst_vars; omega)
+
+/-- **Two derivations of a constant expression have one type and one
+elaboration.** -/
+theorem Typed.const_unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} {q : Q} (d : Typed Γ e τ)
+    (d' : Typed Γ e τ') (hq : e.const = Option.some q) : τ = τ' ∧ HEq d.toR d'.toR := by
+  rcases Typed.constShape d hq with ⟨rfl, hx, h1⟩ | ⟨nl, len, hl, hx, -, rfl, h1⟩ <;>
+    rcases Typed.constShape d' hq with ⟨rfl, hx', h2⟩ | ⟨nl', len', hl', hx', -, rfl, h2⟩
+  · exact ⟨rfl, h1.trans h2.symm⟩
+  · rw [hx] at hx'; cases hx'
+  · rw [hx] at hx'; cases hx'
+  · rw [hl] at hl'; cases hl'; rw [hx] at hx'; cases hx'; exact ⟨rfl, h1.trans h2.symm⟩
+
+/-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
+
+/-- `bytes2 x = 0x1234;` converts. -/
+theorem hex_to_bytes2 (B : DeclName → DeclName → Bool) :
+    STy.implicit B (.hexConst (Q.ofInt 0x1234) 2) (.fixedBytes 2 (by decide)) = true := rfl
+/-- `bytes4 x = 0x1234;` does not (solc requires the exact size). -/
+theorem hex_to_bytes4_refused (B : DeclName → DeclName → Bool) :
+    STy.implicit B (.hexConst (Q.ofInt 0x1234) 2) (.fixedBytes 4 (by decide)) = false := rfl
+/-- `uint16 x = 0x1234;` converts by value. -/
+theorem hex_to_uint16 (B : DeclName → DeclName → Bool) :
+    STy.implicit B (.hexConst (Q.ofInt 0x1234) 2) (.int ⟨false, 16, by decide⟩) = true := rfl
+/-- `bytes4 x = 0;` converts (zero to every `bytesN`); `bytes4 x = 1;` does not. -/
+theorem zero_to_bytes4 (B : DeclName → DeclName → Bool) :
+    STy.implicit B (.rational (Q.ofInt 0)) (.fixedBytes 4 (by decide)) = true ∧
+    STy.implicit B (.rational (Q.ofInt 1)) (.fixedBytes 4 (by decide)) = false := ⟨rfl, rfl⟩
 
 /-- **`0.length` is ill typed** (solc refuses it): `0` is a constant,
 never a `bytesN`, and a constant has no `length`.  Under S01's former

@@ -16,8 +16,10 @@ evaluation over S00's syntax (`Syn .expr`):
   not a compile-time number: a variable, a call, a division by zero, an
   exponent or shift beyond solc's bounds, a bitwise operation or shift on a
   non-integer);
-- `Q.FitsInt`, `Q.toFixed?` and `Q.fitsBytes`: the implicit conversions of a
-  constant (`Solidity/Source/Types.lean` uses them).
+- `Q.FitsInt` and `Q.toFixed?`: the implicit conversions of a constant
+  (`Solidity/Source/Types.lean` uses them); `NumLit.fitsBytes` is no longer
+  read by any typing rule (a hexadecimal literal's bytes length is
+  `Syn.hexLen?`).
 
 Bitwise operations on negative integers are two's complement of unbounded
 width, as solc's `RationalNumberType` computes them (`Int.bitAnd` …).  The
