@@ -887,6 +887,12 @@ standard axioms, pinned, listed in `TrustAudit.lean`'s two backfill blocks.
 **Premises**: none; no `sorry`, axiom, `native_decide`, `implemented_by`
 or heartbeat option. `decide +kernel` evaluates the 77-digit values.
 
+**Checks** (end of lane, `071d907`): `lean_diagnostic_messages` clean on
+every touched file; `./run-lean.sh` completes both builds (exit 1 only from
+the baselined 37 `solkeycheck` mismatches); `node scripts/check-g07.mjs
+--log` over it: 0 new failures. The new modules elaborate below Lake's
+timing threshold except where reported above.
+
 **For lane-semantics**: S01's tuple and conditional rules (`Typing.lean`)
 should take `STy.standalone` instead of `STy.mobile`, inline arrays and
 `abi.encode` should type their elements and arguments by it (`AbiArgTyped`
