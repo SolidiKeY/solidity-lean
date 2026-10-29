@@ -2303,3 +2303,50 @@ working, the reference-valued struct getter remains broken, and contract-key
 and raw receive/fallback adapter cases remain blocked. These refusals and
 feature inventory statuses are unchanged. The complete 62-test command and
 full core check remain to be repeated on this final policy at this commit.
+
+
+#### Preserved payment admission boundary (2026-10-29)
+
+The original full-library check found two real regressions in the bounded
+handler increment: the unchanged `SourceAdmissionImport` guards for
+`PaymentFallback.pay` and `InheritedPayment.pay` lost their named
+`solidity.selfPayment` refusals. The original expectations and fixtures are
+unchanged. New inherited receive and fallback registration now requires the
+value-call receiver's canonical `address payable` source type string; an
+optional type identifier must be exactly `t_address_payable` when supplied.
+Bare address receivers, missing required metadata and malformed supplied
+identifiers retain the named refusal. This is a conservative importer profile,
+not a Solidity restriction: ordinary addresses can legally use `.call`.
+Historical own-receive admission remains unchanged. New handler refusals also
+survive the historical optional-scanner bypass, preserving the scanner's
+existing diagnostic priority for functions, modifiers and deployment roots.
+
+[Paired source controls](../../tests/solc/EntryPointsReceiverProfile.sol) and
+[their importer checks](../../tests/upstream/EntryPointsReceiverProfile.lean)
+exercise both receiver types and the own-receive path in legacy and viaIR
+compiler pipelines, with source scanning enabled and bypassed. All 24 paired
+receiver and 32 malformed-metadata checks pass. The exact 0.8.38 compiler SHA
+is unchanged; both fixture headers match source SHA
+`d7f9139e29cfcb1cf017708cf8835a6935e211474c47a5ff2809423cd4906cce`.
+Strict per-file diagnostics report success without errors or incomplete work,
+and the original admission module builds successfully. Independent read-only
+finder and skeptic reviews found and closed a malformed optional-identifier
+loophole; numeric and null mutations now refuse. Failed annotation attempts
+and the interrupted failing library run remain separately recorded.
+
+The recovered earlier core command actually reached its 1800-second bound;
+its transport failure is distinct from the saved exit -9. A later command
+stopped on its OS-headroom guard, not OOM. Both remain blocked evidence.
+The supervisor's availability measurement now conservatively credits only
+clean inactive file cache, with raw counters retained, an unchanged 2 GiB
+reserve, hard 12 GiB aggregate cap and zero swap. No memory/cgroup/cache
+configuration was mutated. Both reviewers examined this measurement change.
+The exact unchanged OpenLoops component then passes in 533.257 seconds,
+peak 9259114496 bytes, minimum conservative headroom 2855940096 bytes and
+zero limit/OOM events. This component pass is not the whole core gate.
+
+The code's earlier 62/62 and 22/22 passes remain tied to their recorded
+configuration/artifact hashes. Fresh full gates and the final closure seal
+are still pending after this scoped admission repair. No feature inventory
+status or proof/search budget is raised; reference/function returns and
+broader dispatch remain partial.

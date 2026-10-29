@@ -129,3 +129,16 @@ The integrated source checks require the complete 26-row FunctionTypes roster:
 16 proofs, seven internal helpers and three pending false claims. See
 [dafny-verification.md](dafny-verification.md#integration-with-current-origin)
 for the focused build, source tests and independent merge reviews.
+
+
+### Registered payment handler source profile (2026-10-29)
+
+The [declarations continuation](declarations-metadata.md) records preservation
+of the original inherited/fallback self-payment refusals. Newly registered
+handlers admit only canonical `address payable` value-call receivers, with a
+consistent optional identifier; this is importer scope, not Solidity legality.
+Nonpayable address projections remain `solidity.selfPayment`, including when
+the historical optional source scanner is bypassed. Existing own-receive
+behavior and earlier diagnostic priority are unchanged. Both required compiler
+pipelines and scanner modes pass paired receiver and malformed-metadata
+controls in [the regression check](../../tests/upstream/EntryPointsReceiverProfile.lean).

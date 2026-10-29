@@ -543,13 +543,22 @@ private def paymentDiagnostics (ownReceive entry body : Option Json) (root : Jso
   if !nativePayment root then [] else
     let stipend := (J.nodes root).any fun node => J.kind node == "MemberAccess" &&
       nativeMember node && ["send", "transfer"].contains ((J.str? node "memberName").getD "")
+    -- New handler registration is bounded to source-payable receiver values.
+    -- This is an importer profile, not a Solidity restriction on `.call`.
+    -- Historical own-receive execution keeps its existing admission policy.
+    let unprofiledReceiver := (J.nodes root).any fun node =>
+      (valueCall? node).any fun (_, receiver, _) =>
+        J.tyStr receiver != "address payable" ||
+        !((J.opt receiver "typeDescriptions").bind
+          (fun types => (types.getObjVal? "typeIdentifier").toOption)).all
+          (· == Json.str "t_address_payable")
     let unsupported := match ownReceive with
       | some receive => !(J.arrD receive "modifiers").isEmpty
-      | none => entry.isSome && (body.isNone || stipend)
+      | none => entry.isSome && (body.isNone || stipend || unprofiledReceiver)
     if unsupported then [{
       kind := .missingImplementation
       name := `solidity.selfPayment
-      reason := "self-payment needs unsupported stipend, nonpayable, byte-oriented, helper-call or modifier dispatch"
+      reason := "self-payment has an unsupported receiver, stipend, nonpayable handler, byte-oriented fallback, helper call or modifier"
       line := J.line root
       feature := some .emptyDataValueCall }] else []
 
@@ -824,6 +833,14 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     J.str? node "kind" == some "receive"
   let (paymentEntry, paymentBody) ← paymentSelection ownReceive c3Nodes
   let paymentIssues := paymentDiagnostics ownReceive paymentEntry paymentBody
+  -- Newly registered handlers cannot bypass their implementation boundary
+  -- through a historical input that disables the optional source scan.
+  let scanPayment (request : Source.AdmissionRequest) : Source.ScopeScan :=
+    let scan := scanSource request
+    if ownReceive.isSome then scan else
+      request.diagnostics.foldl (fun result issue =>
+        if issue.name == `solidity.selfPayment then result.append (.rejected [] issue)
+        else result) scan
   let baseContracts := lineage.filterMap J.id?
   let functionAliases ← if lineage.length == 1 then pure [] else
     overrideAliases c3Nodes (c3Nodes.filter fun node =>
@@ -1462,7 +1479,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let contractClauses := cspec.filterMap fun clause =>
       if ["requires", "ensures", "invariant", "assignable"].contains clause.kind then
         some (clause.lexicalNames, s!"{clause.kind} {clause.text};") else none
-    let sourceScope := scanSource {
+    let sourceScope := scanPayment {
       entry := f
       evaluatedRoots := f :: modifierRoots
       declarationRoots := [c]
@@ -1576,7 +1593,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       !(J.id? v).any fixedIds.contains && (J.opt v "value").isSome &&
       !(kept.any fun (_, _, declaration) => declaration == v)
   let deploymentRoots := kept.map (·.2.2) ++ omittedInitializers
-  let initScope := scanSource {
+  let initScope := scanPayment {
     entry := c, evaluatedRoots := deploymentRoots, declarationRoots := [c]
     constantIds := constants.map Prod.fst
     unresolvedDispatch := deploymentRoots.flatMap fun node => (dispatchOf node).unresolved
@@ -1773,7 +1790,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let compositeScope := (compositeReach.foldl (fun scan id =>
       match lookupBy id byId with
       | some f => scan.append f.sourceScope
-      | none => scan) (initScope.append (scanSource {
+      | none => scan) (initScope.append (scanPayment {
         entry := c, evaluatedRoots := compositeRoots, declarationRoots := [c]
         constantIds := constants.map Prod.fst
         unresolvedDispatch := compositeRoots.flatMap fun root => (dispatchOf root).unresolved
