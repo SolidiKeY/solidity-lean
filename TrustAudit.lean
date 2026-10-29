@@ -38,6 +38,7 @@ import Solidity.Source.StateExamples
 import Solidity.Source.SemanticsExamples
 import Solidity.Source.Unique
 import Solidity.Source.Horizon
+import Solidity.Source.Session
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -743,7 +744,9 @@ run_cmd do
     ``Solidity.Source.StmtD.unique, ``Solidity.Source.ItemsD.unique,
     ``Solidity.Source.RBody.ofDerivation_unique,
     ``Solidity.Source.belowAt, ``Solidity.Source.runTx_stable, ``Solidity.Source.deploy_stable,
-    ``Solidity.Source.firstDone_runTx, ``Solidity.Source.runTx_stuck_stable]
+    ``Solidity.Source.firstDone_runTx, ``Solidity.Source.runTx_stuck_stable,
+    ``Solidity.Source.growAt, ``Solidity.Source.approxAt, ``Solidity.Source.runTx_events_mono,
+    ``Solidity.Source.sessionAtEvents_consistent]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

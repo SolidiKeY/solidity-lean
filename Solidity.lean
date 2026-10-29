@@ -431,6 +431,8 @@ import Solidity.Source.Horizon
 import Solidity.Source.Infer
 import Solidity.Source.Elaborate
 import Solidity.Source.ElaborateExamples
+import Solidity.Source.Session
+import Solidity.Source.SessionExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic

@@ -61,11 +61,12 @@ What `sourceLang` does not give G01 (also under `limitations:`):
   [Horizons](#horizon-independence)), so the two differ in the model even
   though G01's `Prefix` shows them alike. A progress theorem would rule it
   out; it is not proved.
-- **Events of unfinished transactions.** A transaction that never
-  completes (an endless reentrancy loop, say) shows none of its events.
-  Showing them needs horizon monotonicity of the events (`Approx` in
-  `Horizon.lean`), which is not proved; monotonicity of the results is
-  (`belowAt`).
+- **Events of unfinished transactions.** `sourceLang` (`sessionAt`) shows
+  none of the events of a transaction that never completes.
+  `sourceLangEvents` (`sessionAtEvents`, `Solidity/Source/Session.lean`)
+  shows them and is consistent; see
+  [Events of unfinished transactions](#events-of-unfinished-transactions).
+  An unfinished *deployment* still shows no events.
 - **Request validity.** `Lang.Affordable` (unaffordable requests are
   dropped) and `Lang.PrecompilesFixed` (precompile addresses are not
   environment accounts) are not met.
@@ -127,6 +128,35 @@ default heartbeats; `below_go` walks the two copies of a body (binds,
 for it, with the same meaning: `evalBuiltin` matches the builtin, then its
 arguments one level at a time; `abi.encodeWithSelector` reads the selector
 with `Val.bytesOf`; `assignCopy` copies through `copyInto`.
+
+## Events of unfinished transactions
+
+`Horizon.lean` also proves that the interpreter only appends events and
+that a run that times out shows a prefix of the events at every larger
+horizon:
+
+| Theorem | Statement |
+|---|---|
+| `growAt G n` | every interpreter function only appends events (`Grow`) |
+| `approxAt G n` | every interpreter function at `n` approximates itself at `n + 1` (`Approx`: both grow; on every state the first times out with events the second extends, or the two agree) |
+| `runTx_events_mono` | a transaction not completed at `k` shows a prefix of its events at every `k' ≥ k` |
+
+`sessionGoEvents` (`Session.lean`) is `sessionGo` except at a transaction
+that completes within no horizon up to `n`: the prefix ends with the events
+its run at `n` produced, or a `stuck` run's events. `sessionAtEvents` is
+consistent (`sessionAtEvents_consistent`), so `sourceLangEvents E` has the
+type of G01's `Lang Event Outcome` with the same fields as `sourceLang`.
+The control (`SessionExamples.lean`, `#guard`) runs a function that loops
+forever calling out: at horizon 30 `sessionFrom` shows only the deployment,
+`sessionFromEvents` the calls and answers as well, and more at horizon 60.
+
+Helpers keep the events (`Const`, every helper but `emitEvent`), so their
+`Approx` lemmas come from the `Below` ones (`Approx.of_below`). Large
+bodies are split across declarations to stay within the default heartbeats
+(`evalE_apart_*` by constructor index, `evalBuiltin_apart_*` by builtin,
+`dispatch_apart_*` by what the call data selects); two interpreter pieces
+were named for this with the same meaning (`Glob.pickFn`,
+`Glob.pickGetter`, `extReturn`).
 
 ## Well-formedness and progress interfaces
 

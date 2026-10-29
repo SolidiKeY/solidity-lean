@@ -2099,6 +2099,48 @@ theorem approxAt (G : Glob E) : ∀ n, ApproxAt G n
 
 end
 
+/-! ### Transactions show a prefix of their events -/
+
+theorem runTx_grow (G : Glob E) (n : Nat) (q : Request) : Grow (runTx G n q) := by
+  have gn := growAt { G with timestamp := q.timestamp } n
+  unfold runTx
+  dsimp only
+  grow_go [gn.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow]
+
+theorem runTx_approx (G : Glob E) (n : Nat) (q : Request) : Approx (runTx G n q) (runTx G (n + 1) q) := by
+  have ih := approxAt { G with timestamp := q.timestamp } n
+  unfold runTx
+  dsimp only
+  refine Approx.bind (Approx.refl (mark_grow)) fun m => ?_
+  refine Approx.bind (Approx.refl (instanceAt_grow _ _)) fun oc => ?_
+  split
+  · exact Approx.refl (by grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow])
+  · refine Approx.attempt_bind ?_ (fun _ => Approx.refl (by grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow])) (fun _ => ⟨rfl, rfl⟩)
+    exact Approx.bind (Approx.refl (credit_grow _ _)) fun _ => ih.dispatch _ _
+
+theorem Approx.mono {Γ : RCtx} {α : Type} {f : Nat → EM E Γ α} (h : ∀ n, Approx (f n) (f (n + 1)))
+    (hg : ∀ n, Grow (f n)) {n m : Nat} (hnm : n ≤ m) : Approx (f n) (f m) := by
+  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hnm
+  induction d with
+  | zero => exact Approx.refl (hg n)
+  | succ d ih => exact (ih (by omega)).trans (h _)
+
+/-- **A transaction's events grow with its horizon**: a run that has not
+completed at horizon `k` shows a prefix of the events of the run at every
+`k' ≥ k`. -/
+theorem runTx_events_mono (G : Glob E) (q : Request) (s : St E) {k k' : Nat} (hk : k ≤ k')
+    (hd : Done (runAt (fun f => runTx G f q) s k) = false) :
+    (runAt (fun f => runTx G f q) s k).2.events <+: (runAt (fun f => runTx G f q) s k').2.events := by
+  have ha := Approx.mono (f := fun f => runTx G f q) (fun n => runTx_approx G n q) (fun n => runTx_grow G n q) hk
+  simp only [runAt]
+  rcases ha.2.2 (L0 E, s) with ⟨_, he⟩ | he
+  · exact he
+  · rw [he]; exact List.prefix_refl _
+
+/-- A transaction's events extend the events before it. -/
+theorem runTx_extends (G : Glob E) (q : Request) (s : St E) (k : Nat) :
+    s.events <+: (runAt (fun f => runTx G f q) s k).2.events := runTx_grow G k q (L0 E, s)
+
 /-- info: 'Solidity.Source.belowAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms belowAt
