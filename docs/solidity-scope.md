@@ -73,7 +73,7 @@ manifest and the G01 statements.
 | G00 Q1 — the 30 recorded exclusions | All 30 confirmed as approved exclusions (for example assembly/Yul, gas, `delegatecall`, low-level calls, selfdestruct, salted creation, raw code, physical layout, logs, extra block/transaction fields). |
 | G00 Q2 — premises of the 23 `abstract` rows | Approved: opaque hashes and `ecrecover`, and `msg`/`block`/`this`/balance values as universally quantified inputs. Not approved: `worldAssumptions` and the payment-acceptance boolean, which must be replaced or proposed again. The no-callback reading must become a proved special case (not yet proved; G01 Q4). The remaining abstract rows follow G01 Q4 and Q8. |
 | G00 Q3 — EVM fork | Osaka, for the pinned semantics and the compiled bytecode. |
-| G00 Q4 — settings | The public theorem quantifies over all eight `EvalOrder` flag combinations. The frozen profile is solc 0.8.38; 0.8.34 fixtures are SolKey compatibility checks only. |
+| G00 Q4 — settings | Revised in the second round below: solc's two pipelines only. The frozen profile is solc 0.8.38; 0.8.34 fixtures are SolKey compatibility checks only. |
 | G00 Q5 — `creationCode`/`runtimeCode` | The bytes this compiler produces, read from G01's whole-input `Artifact` table, which the source semantics takes as a parameter. |
 | G00 Q6 — fixed-point types | Full fixed-point support, beyond the acceptance boundary of pinned solc. |
 | G01 Q1 — source resources | Idealized source: unbounded fuel and recursion. |
@@ -102,9 +102,8 @@ Follow-up the decisions require (none is done yet):
 - **Pins (G00, G05, G06).** Re-pin the vector scripts and the bridge from
   Cancun to Osaka, modulo EIP-170/EIP-3860 as recorded above; resolve G00's
   disagreements 5 (reference-EVM versions) and 6 (`validateSettings` rejects
-  `libraries`, while G01 Q8 puts linked libraries in the system). Six of the
-  eight `EvalOrder` combinations have no solc setting; the public theorem's
-  settings must express them.
+  `libraries`, while G01 Q8 puts linked libraries in the system; settled
+  below as an empty link map).
 - **Manifest.** `fixedPoint` is still scoped `upstream`. Full support needs
   a manifest change, owners and a reference semantics beyond solc 0.8.38;
   the 174 in-profile count changes with it.
@@ -117,6 +116,30 @@ Follow-up the decisions require (none is done yet):
   balance follows the ledger. "solc's slot behaviour" for dangling aliases
   fixes the logical alias semantics, not solc's physical packing, which
   stays unobservable.
+
+### Second round (2026-10-29)
+
+**User decision (2026-10-29):** the user answered the questions raised by
+the roadmap-w1 cloud batch (G03, G05, G06, the hash bound and the fixed-point
+design), and revised G00 Q4.
+
+| Question | Decision |
+|---|---|
+| G00 Q4 (revised) / G05 Q2 — settings | solc's two pipelines only: the legacy order with the pragma's ABI coder (v1 or v2), and the via-IR order with coder v2. The other six `EvalOrder` flag combinations are not in the profile. |
+| G06 Q2 — Osaka gas caps | EIP-7825's per-transaction cap and the block gas limit are a recorded idealization, like EIP-170/EIP-3860. A gas limit chosen too low still makes a transaction revert. |
+| G06 Q1 — forced ether | The environment may credit the system's balance (block beneficiary, a foreign `SELFDESTRUCT`, withdrawals) between transactions and during environment frames; the ledger records these credits and the source lets the own balance grow. |
+| G06 Q3 — stipend payments to our own instances | A compiler-independent source cost rule decides which `receive`/fallback bodies fit the 2300-gas stipend; the source fails the payment otherwise, and the compiler is proved to fit every body the rule admits. |
+| Hash regions | The per-run premise extends to hashed regions: no two regions of length at most L based at hashed slots (or at root slots) overlap, with a probability lemma of about q²·L/2²⁵⁶. |
+| G03 Q1 — shared compiler foundation | Shared-foundation child packages ahead of wave 3 (frozen slot, state and statement interfaces under G24); the work-package manifest and the VM table grow accordingly. |
+| G05 Q1 — library addresses | Only an empty link map is admitted: the session deploys and links every library itself; a pre-assigned map is refused. |
+| Fixed point — `*` and `/` | The exact product or quotient, truncated. |
+| Fixed point — implicit conversions | Only range-contained pairs; lossy pairs need an explicit conversion. |
+| Fixed point — explicit conversions out of range | Wrap at run time; an out-of-range constant is a compile error. |
+| Fixed point — rounding | Toward zero. |
+| Fixed point — shifts | As solc: its type checker admits them but reaches an internal assertion, so no such program compiles; treated as rejected. |
+| Fixed point — unary minus on `ufixed` | Accepted as solc's type checker does: `Panic(0x11)` unless the operand is 0; wraps in `unchecked`. |
+| Fixed point — `++`/`--` | Add or subtract the value 1. |
+| Fixed point — explicit fixed/integer and `bytesM` conversions | Integers by value; `bytesM` by bit pattern. |
 
 ## What belongs in the model
 
