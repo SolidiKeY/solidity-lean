@@ -137,7 +137,7 @@ def load_restrictions(root):
     text = (root / "docs/feature-work/roadmap-g04-restrictions.md").read_text()
     out = {}
     for m in re.finditer(r"^\| (R\d\d) \|.*\| ([^|]+) \|$", text, re.M):
-        out[m.group(1)] = m.group(2).strip()
+        out.setdefault(m.group(1), m.group(2).strip())  # the restriction table, not later tables
     return out
 
 
@@ -241,6 +241,17 @@ def refine(fid, stage, cell, plan, errors):
     return out
 
 
+def expand_g00_cell(cell, g00, plan):
+    """G00 writes some owners as ranges (`G08–G15` = every group in it); expand
+    them, a split parent inside a range standing for all its children."""
+    if "–" not in cell:
+        return cell
+    out = []
+    for t in g00.expand(cell):
+        out += [c for c in plan["children"] if c.startswith(t + ".")] if t in plan["parents"] else [t]
+    return " ".join(out)
+
+
 def is_evm(t):
     return t.startswith("G46") or t == "G47"
 
@@ -253,6 +264,8 @@ def feature_owners(f, g00, plan, errors):
     """The six stage owner lists of one in-profile row."""
     fid, cat = f["id"], f["category"]
     o = g00.owners(f) if f["scope"] in ("model", "abstract") else None
+    if o is not None:
+        o = tuple(expand_g00_cell(c, g00, plan) for c in o)
     extra = D.FEATURE_EXTRA.get(fid)
     if o is None:
         o = extra["g00"] if extra and "g00" in extra else None
@@ -367,7 +380,7 @@ def dependency_ledger(plan, imports, root, errors):
                 errors.append(f"VM table: {i} in {vm_of[i]} and {vm}")
             vm_of[i] = vm
             vm_order[i] = pos
-        vm_pre[vm] = [v.strip() for v in pre.split(",") if v.strip() not in ("—", "")]
+        vm_pre[vm] = re.findall(r"\bV\d\d\b", pre)
     for i in pk:
         if i not in vm_of:
             errors.append(f"VM table: work package {i} has no VM")
@@ -605,7 +618,7 @@ def build(root):
                 errors.append(f"{fid} {st}: reason recorded but owners present")
         # G00's owners must survive refinement
         if f["scope"] in ("model", "abstract"):
-            o = g00.owners(f)
+            o = tuple(expand_g00_cell(c, g00, plan) for c in g00.owners(f))
             for si, st in enumerate(('source', "admission", "lowering", "backend")):
                 have = cols[st] + (cols["evm"] + cols["theorem"] if st == "backend" else [])
                 for t in tokens(o[si]):
@@ -710,15 +723,16 @@ def build(root):
     # ledger symbol combinations (shared punctuation): owned through G15 and
     # the owners of their in-profile rows
     ledger = json.loads((root / "docs/solidity-upstream-inventory.json").read_text())
-    scope = {f["id"]: f["scope"] for f in features}
+    # G00's own row statuses (in-profile, excluded, unresolved, upstream-rejected)
+    status = {f["id"]: g00.g00_status(f["scope"], g00.decision_tier(root, f) == "A") for f in features}
     owned = {r["id"] for r in ledger_rows}
     symbol_combos = []
     for kind, table in ledger["symbols"].items():
         for name, targets in sorted(table.items()):
             targets = g00.targets_of(kind, name, targets)
-            st = g00.symbol_status(targets, scope)
+            st = g00.symbol_status(targets, status)
             if st.startswith("combination"):
-                ins = [t for t in targets if scope[t] in ("model", "abstract")]
+                ins = [t for t in targets if status[t] == "in-profile"]
                 for t in ins:
                     if t not in owned:
                         errors.append(f"symbol combination {kind}.{name}: in-profile {t} unowned")
@@ -1427,7 +1441,7 @@ class D:
     REQUIRED_DECISION_ROWS = {
         "per-run hash premise and bound": "D11", "decode export": "D14", "artifact table": "D06",
         "frame failure semantics": "D19", "transaction failure semantics": "D20",
-        "memory frames for recursion": "D10", "EvalOrder settings (revised: two pipelines)": "D04",
+        "memory frames for recursion": "D10", "shared-foundation children": "D25", "EvalOrder settings (revised: two pipelines)": "D04",
         "fixed point": "D07",
     }
 
@@ -1468,16 +1482,16 @@ class D:
          "g06-osaka-repin; g06-evm-interface"),
         ("D04", "Public theorem over solc's two pipelines: the legacy and via-IR `EvalOrder` settings "
                 "(revised 2026-10-29: the other six flag combinations are dropped)",
-         ["G00 Q4 — settings", "Pins (G00, G05, G06)"],
-         {"source": "S02 S03.01 S03.02 S03.03", "admission": "G05 G15", "lowering": "G16 G17 G19",
+         ["G00 Q4 — settings", "G00 Q4 (revised) / G05 Q2 — settings", "Pins (G00, G05, G06)"],
+         {"source": "S02 S03.01 S03.02 S03.03 S04.02", "admission": "G05 G15", "lowering": "G16 G17 G19",
           "backend": "G26", "theorem": "G49.02 G49.03"},
          ["the public theorem's settings type must range over exactly the two pipelines and map each to its "
           "`EvalOrder` (`{}` for legacy, `EvalOrder.viaIR`); admission must refuse the other six flag "
           "combinations (manual `evalOrder` overrides)",
           "no source semantics parameterized by the pipeline independently of the elaborator",
           "lowering (`hoist`/`captureExpr`, `wrapMods`) has regressions but no theorem for either order",
-          "the revision is the coordinator's relay of the user's second-round answer; the binding table at "
-          "this base still reads 'all eight' until the 'Second round (2026-10-29)' section lands"],
+          "each pipeline fixes its ABI coder: legacy with the pragma's coder (v1 or v2), via-IR with v2; "
+          "legacy ABI-v1 decoding is today an implementation diagnostic (`pragmaAbicoder`)"],
          "g05-frontend; g01-contracts-rev"),
         ("D05", "Frozen profile solc 0.8.38; 0.8.34 fixtures only as SolKey compatibility checks",
          ["G00 Q4 — settings", "Pins (G00, G05, G06)"],
@@ -1495,13 +1509,24 @@ class D:
           "no compiled artifact exists for any contract: `type(C).creationCode` has no producer"],
          "g01-contracts-rev"),
         ("D07", "Full fixed-point types beyond pinned solc's acceptance boundary",
-         ["G00 Q6 — fixed-point types", "Manifest"],
+         ["G00 Q6 — fixed-point types", "Manifest", "Fixed point — `*` and `/`", "Fixed point — implicit conversions",
+          "Fixed point — explicit conversions out of range", "Fixed point — rounding", "Fixed point — shifts",
+          "Fixed point — unary minus on `ufixed`", "Fixed point — `++`/`--`",
+          "Fixed point — explicit fixed/integer and `bytesM` conversions",
+          "Fixed point — fractional constant on the left (`0.5 * x`)",
+          "Fixed point — standalone fractional constants", "Fixed point"],
          {"source": "S00 S01 S02", "admission": "G08 G09 G13 G15", "lowering": "G16", "backend": "G25",
           "evm": "G46.01", "theorem": "G49.02 G49.03"},
-         ["the manifest scopes `fixedPoint` as `upstream` (g00-manifest-rev moves it into the profile)",
+         ["the manifest row is `model`/`missing` since the G00 follow-up; no implementation yet",
           "no reference semantics for fixed-point arithmetic/rounding/conversions beyond solc 0.8.38 "
           "(fixed-point-semantics)",
-          "no lexer, type, lowering or compiler support at all"],
+          "no lexer, type, lowering or compiler support at all",
+          "the reference semantics must encode the second-round answers: exact product/quotient truncated toward "
+          "zero, range-contained implicit conversions only, explicit out-of-range conversions wrap (constants "
+          "are compile errors), `++`/`--` by 1, unary minus on `ufixed` panics `0x11` unless 0, integer/`bytesM` "
+          "conversions by value/bit pattern",
+          "shifts are rejected as solc's checker reaches an internal assertion: G15 must refuse them (narrows "
+          "G00 Q6)"],
          "g00-manifest-rev; fixed-point-semantics"),
         ("D08", "Idealized source resources: unbounded fuel and recursion",
          ["G01 Q1 — source resources"],
@@ -1510,7 +1535,7 @@ class D:
           "`SourceSpec.Idealized` has no instance; `Prefixes.Consistent` of `Prog.runF` is unproved"],
          None),
         ("D09", "Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized",
-         ["G01 Q2 — fixed EVM limits", "Resources in the contracts", "Contracts (G01)"],
+         ["G01 Q2 — fixed EVM limits", "G06 Q2 — Osaka gas caps", "Resources in the contracts", "Contracts (G01)"],
          {"source": "S03.04 S04.04", "backend": "G44.02", "evm": "G06 G46.06 G47", "theorem": "G49.03 G50.02",
           "interface": "G01"},
          ["`EvmSpec` resources still list code size (g01-contracts-rev drops it)",
@@ -1527,7 +1552,7 @@ class D:
          "memory-internal-calls"),
         ("D11", "Per-run hash premise and bound: the preimages hashed by an execution prefix do not collide, "
                 "plus a random-oracle collision bound (about q²/2²⁵⁷)",
-         ["G01 Q3 / G04 Q1 — hash collisions", "Contracts (G01)"],
+         ["G01 Q3 / G04 Q1 — hash collisions", "Hash regions", "Hash bound", "Contracts (G01)"],
          {"source": "S04.02", "backend": "G27.05 G31", "evm": "G46.03 G46.05", "theorem": "G49.02 G50.02",
           "interface": "G01"},
          ["storage slots are symbolic terms that never collide (`Slot`, G04 R34) — global injectivity in the type",
@@ -1536,7 +1561,9 @@ class D:
           "the premise must quantify over the prefix's actual preimages, including mapping keys and "
           "dynamic-array bases",
           "the core has no probability library: the bound must be stated combinatorially, as a count over "
-          "oracle functions in the idealized random-oracle model the decision names, not about keccak itself"],
+          "oracle functions in the idealized random-oracle model the decision names, not about keccak itself",
+          "the premise extends to hashed regions: no region of length at most L based at a hashed slot overlaps "
+          "another or a root region (bound about q²·L/2²⁵⁶); the region predicate and its counting bound are new"],
          "hash-collision-bound; g01-contracts-rev; evm-storage-slots"),
         ("D12", "History-dependent callee strategies with unbounded reentrancy; address 0 has no code",
          ["G01 Q4 — environment"],
@@ -1568,11 +1595,11 @@ class D:
          ["`CALL` takes only address and value in the machine; forwarded gas is absent (G04 R27)"],
          None),
         ("D16", "System boundary: the whole input, every contract and linked library, is compiled",
-         ["G01 Q8 — system boundary", "Pins (G00, G05, G06)"],
+         ["G01 Q8 — system boundary", "G05 Q1 — library addresses", "Frontend (G05)", "Pins (G00, G05, G06)"],
          {"admission": "G05 G12 G15", "lowering": "G22.04", "backend": "G42.04 G44.02", "evm": "G47",
           "theorem": "G49.02 G50.01"},
-         ["`validateSettings` rejects `libraries` (G00 disagreement 6) while the decision puts linked "
-          "libraries in the system",
+         ["`validateSettings` must admit exactly the empty link map; a pre-assigned map is refused and the "
+          "session deploys and links every library itself (G05 Q1, resolving G00 disagreement 6)",
           "no link-settings provenance (G00 ownership gap 2; G05)"],
          "g05-frontend"),
         ("D17", "Storage aliases after `pop`/`delete` in profile, with solc's logical slot behaviour",
@@ -1600,7 +1627,7 @@ class D:
          None),
         ("D20", "Transaction failure semantics: any transaction may revert from gas exhaustion and the session "
                 "continues",
-         ["Follow-up — block gas limit", "Resources in the contracts"],
+         ["Follow-up — gas exhaustion", "G06 Q2 — Osaka gas caps", "Resources in the contracts"],
          {"source": "S04.04", "evm": "G47", "theorem": "G50.02", "interface": "G01"},
          ["`Lang.Res` ends a session at gas exhaustion (contract revision needed)",
           "`Lifetime.System` and `ContractWorld.Step` have no exhaustion transition"],
@@ -1619,8 +1646,38 @@ class D:
           "addresses 1–3",
           "typed calls to a precompile address are environment calls in `ContractWorld`"],
          None),
+        ("D23", "Forced ether: the environment may credit the system's balance between transactions and during "
+                "environment frames; the ledger records the credits",
+         ["G06 Q1 — forced ether"],
+         {"source": "S04.03 S04.04", "lowering": "G22.05", "backend": "G43", "evm": "G46.04 G47",
+          "theorem": "G50.02", "interface": "G01"},
+         ["the core `Sim`/ledger relation fixes balances between steps; credits by beneficiary rewards, foreign "
+          "`SELFDESTRUCT` or withdrawals have no source transition",
+          "the own balance must be allowed to grow in the source (`address(this).balance` reads)"],
+         "g01-contracts-rev"),
+        ("D24", "Stipend payments to our own instances: a compiler-independent source cost rule decides which "
+                "`receive`/fallback bodies fit 2300 gas; the compiler is proved to fit every admitted body",
+         ["G06 Q3 — stipend payments to our own instances"],
+         {"source": "S04.03", "lowering": "G22.05", "backend": "G43 G45.06", "evm": "G46.06 G47",
+          "theorem": "G50.02", "interface": "G01"},
+         ["no source cost rule exists; it must assume cold (EIP-2929) access costs and be independent of the "
+          "compiler",
+          "the compiler must be proved to fit every admitted body within the stipend, and to fail the payment for "
+          "every body the rule rejects",
+          "carve-out from 'Follow-up — nested-frame failures' for these payments only; gas stays unobserved"],
+         None),
+        ("D25", "Shared compiler foundation: frozen slot, state and statement interfaces as children of G24 ahead "
+                "of wave 3",
+         ["G03 Q1 — shared compiler foundation", "Roadmap (G03)"],
+         {"backend": "G24.01 G24.02 G24.03 G24.04"},
+         ["the child rows are not yet in coverage-plan.md's manifest and VM table (integration step 1); the "
+          "checker applies them from `PROPOSED_PACKAGES` until they land",
+          "no frozen interface exists: `Slot`, `Sim`/`StateRepr` and `StmtOut` are concrete today"],
+         None),
     ]
     DECISION_COVER = {
+        "D23": [("backend", "Solidity.Evm.compile_net", "Solidity/Evm/Correct.lean",
+                 "machine success gives net payments; no external credit")],
         "D01": [('admission', "Solidity.Language.Feature.exclusion_complete", "Solidity/Language/Features.lean",
                  "every excluded feature has a structured diagnostic"),
                 ('admission', "Solidity.Language.Unmodelled.excluded", "Solidity/Language/Features.lean",
@@ -1640,7 +1697,7 @@ class D:
         "D08": [('source', "Solidity.recDepth", "Solidity/Syntax/Scoped.lean", "fixed 1024-frame unrolling to remove"),
                 ('source', "Solidity.Prog.runF_approx", "Solidity/Semantics/RunFuel.lean",
                  "fuel approximation of the classical run"),
-                ('theorem', "Solidity.Roadmap.typedRunPrefixes", "Solidity/Roadmap/Contracts.lean",
+                ('theorem', "Solidity.Roadmap.typedRunPrefixes", "Solidity/Roadmap/TypedRun.lean",
                  "intrinsic prefix family plug")],
         "D09": [('theorem', "Solidity.Roadmap.EvmSpec", "Solidity/Roadmap/Contracts.lean",
                  "pinned EVM language with resources"),
@@ -1801,7 +1858,7 @@ class D:
         "S00": "new", "S01": "new", "S02": "new", "S03.01": "new", "S03.02": "new", "S03.03": "new",
         "S03.04": "new", "S04.01": "new", "S04.02": "new", "S04.03": "new", "S04.04": "new",
         "S05": "new",
-        "G00": "new", "G01": "Solidity.Roadmap.Contracts", "G02": "new", "G03": "new", "G04": "new",
+        "G00": "new", "G01": "Solidity.Roadmap.Contracts Solidity.Roadmap.TypedRun", "G02": "new", "G03": "new", "G04": "new",
         "G05": "Solidity.Frontend.Source Solidity.Frontend.SourceUnits",
         "G06": "SolidityBridge.ExternalEvm",
         "G07": "new",
@@ -1962,7 +2019,7 @@ class D:
          ["inline calls, value arguments only, fixed source depth; frames in memory per D10"]),
         ("storage aliases across pop/delete and pushes",
          ["storageAliasing", "danglingReferences", "arrayPop", "arrayPushReference", "deleteExpression"], [],
-         {"source": "S04.01", "lowering": "G18.05", "backend": "G27.03 G28 G30 G35.02"}, ["R16", "R18", "R36"],
+         {"source": "S04.01 S02", "lowering": "G18.05", "backend": "G27.03 G28 G30 G35.02"}, ["R16", "R18", "R36"],
          ["fragile aliases forgotten at a shrink; `T storage p = arr.push()` refused"]),
         ("runtime-length storage copies with nested mappings",
          ["storageCopy", "dynamicArrays", "stringType", "mappings", "deleteMappingTails"], [],
@@ -3304,7 +3361,7 @@ class D:
         'Solidity.Evm.Exp': ('G06 G24.03 G25', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Semantics.RevertData': ('G01 G06 G16 G21', 'intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
         'Solidity.Evm.Signed': ('G06 G24.03 G25', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
-        'Solidity.Evm.Machine': ('G01 G06 G24.01 G27.05', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Machine': ('G06 G24.01 G27.05', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Evm.Stmt': ('G06 G24.03 G28 G30 G38 G43', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Evm.Compile': ('G06 G24.03 G29.01 G37.01', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Evm.Sim': ('G06 G24.02 G43', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
@@ -3317,7 +3374,7 @@ class D:
         'Solidity.Frontend.SourceUnits': ('G05 G12', "untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates"),
         'Solidity.RevertBytes': ('G01 G06 G16 G17 G18.01 G18.02 G18.03 G18.04 G18.05 G19 G21', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
         'Solidity.Semantics.ContractWorldCertificates': ('G22.03 G22.04', 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
-        'Solidity.Semantics.Deploy': ('G01 G22.01 G22.03', 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
+        'Solidity.Semantics.Deploy': ('G22.01 G22.03', 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
         'Solidity.Semantics.Heap': ('G01 G06 G16 G18.03', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
         'Solidity.Semantics.RecursiveStorage.Copy': ('G18.01 G18.05', "G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05"),
         'Solidity.Semantics.RecursiveStorage.Paths': ('G18.01 G18.02', "G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05"),

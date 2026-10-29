@@ -1037,10 +1037,20 @@ override.
   memory-loops lane), so `run-lean.sh` stopped before its last step;
   `check-solkey.sh` run separately: 37 mismatches (baseline). Elapsed 63 min
   wall time, peak system memory 15.1 GiB (sampled every 20 s, including the
-  Lean server).
-- Not proved or not done: no fixed-point fixture exercises the new refusal;
-  the follow-up edits after the master merge were not re-reviewed or
-  rebuilt (they change one generated requirement string); the stale
+  Lean server). Warm rerun at `f0e5b6a` (after the master merge and the
+  refusal test): `lake build` completed (718 jobs, including
+  `Solidity.Examples.Tactics.SourceAdmissionImport`), `lake build
+  SolkeyTestSuite` completed (262 jobs, Derived17 included), and
+  `check-solkey.sh` reported 37 mismatches (the baseline drift; it is the
+  script's only nonzero exit). 4 min 33 s, peak 12.5 GiB; an earlier warm
+  attempt in which the TestSuite rebuilt in parallel lost Derived17 to the
+  out-of-memory kill again (26 min, 14.8 GiB).
+- Test: the admission check in `Solidity/Examples/Tactics/SourceAdmissionImport.lean`
+  scans an `ElementaryTypeName` `fixed128x18` and requires the
+  `missingImplementation` diagnostic `solidity.fixedPoint`; it passes.
+- Not proved or not done: the refusal is tested on a hand-built node, not a
+  solc fixture; the follow-up edits after the master merge were not
+  re-reviewed; the stale
   `solidity-scope.md` lines are left to that file's owner.
 
 ### First audit

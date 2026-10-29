@@ -156,21 +156,21 @@ them.
 
 | ID | Restriction (where) | Excludes | In-profile example | Kind | Discharging group(s) |
 |---|---|---|---|---|---|
-| R32 | **Payment asymmetry.** Disjunct (iii) of T1/T6/T12/T13 (`Prog.pays P = true ∧ machine revert ∧ source ok`), and the `pays ∧ revert` alternative in (iv). The Bridge results T17–T19 require `pays = false`. **Finding:** at the base, the only leaf for payments, `transfer_sim` (`Solidity/Evm/Stmt.lean:892`), returns `.inl` or `.inr` only. Exact agreement on refusal comes from `Sim.funds`/`Sim.oracle` (`Sim.lean:223–228`; fields `funds` and `oracle`). `StmtOut.refused` (`Stmt.lean:107`) is only propagated (`Correct.lean:79,95,111,168,504,583,922,933,937`), never constructed. `StmtOut.mono` (`Stmt.lean:123`) also only re-raises it. The `pays ∧ revert` branch of `diverge` is built only at `Correct.lean:939`, from a refused first statement. `TurnRel` has no refused case. Both branches are therefore unreachable by construction, and the needed facts are `Sim` fields already in CoreIn. Dropping `refused` from `StmtOut` looks like a statement-only strengthening; that is not proved here. Affected statements: T1, T6, T12, T13, T15. | As stated, the theorem lets a compiler revert every paying program. | Any `owner.transfer(1);`: the theorem allows the machine to revert where the source succeeds. | S + N | G43 (discharge the asymmetry). G36.03 then relies on it. ⟳ diamond-payments |
-| R33 | Recipient code is not run. Acceptance is the oracle `Machine.accepts` (`Machine.lean:336`), tied to the source `tx.ext` `sendKey` table by `Sim.oracle`. The world is balances only. | Reentrant or state-changing recipients, stipend gas. | A `transfer` to a contract whose `receive()` writes storage. | P | G22.02, G42.03, G43, G47 |
+| R32 | **Payment asymmetry.** Disjunct (iii) of T1/T6/T12/T13 (`Prog.pays P = true ∧ machine revert ∧ source ok`), and the `pays ∧ revert` alternative in (iv). The Bridge results T17–T19 require `pays = false`. **Finding:** at the base, the only leaf for payments, `transfer_sim` (`Solidity/Evm/Stmt.lean:892`), returns `.inl` or `.inr` only. Exact agreement on refusal comes from `Sim.funds`/`Sim.oracle` (`Sim.lean:223–228`; fields `funds` and `oracle`). `StmtOut.refused` (`Stmt.lean:107`) is only propagated (`Correct.lean:79,95,111,168,504,583,922,933,937`) from an inner `refused`, never originated. `StmtOut.mono` (`Stmt.lean:123`) also only re-raises it. The `pays ∧ revert` branch of `diverge` is built only at `Correct.lean:939`, from a refused first statement. `TurnRel` has no refused case. Both branches are therefore unreachable by construction, and the needed facts are `Sim` fields already in CoreIn. Dropping `refused` from `StmtOut` looks like a statement-only strengthening; that is not proved here. Affected statements: T1, T6, T12, T13, T15. **Decided (G04 Q3, G00 Q2):** an untyped recipient may accept or refuse each payment, depending on history, and the payment-acceptance boolean is not an approved premise. The source refusal test (`State.canPay`, `Solidity/Semantics/Run.lean:164`) reads the per-transaction table `tx.ext` at `sendKey addr amt` (`Solidity/Semantics.lean:111`), one answer per address and amount for the whole transaction, so T1–T15 hold for a history-free special case of the approved environment. The discharge is an exact agreement against a history-dependent recipient strategy shared by source and machine. | As stated, the theorem lets a compiler revert every paying program. | Any `owner.transfer(1);`: the theorem allows the machine to revert where the source succeeds. Under the decision: two `transfer`s of the same amount to one untyped recipient, the first accepted, the second refused. | S + N | G43 (discharge the asymmetry against the approved environment), S04.03 (history-dependent payment response), G22.05. G36.03 then relies on it. ⟳ diamond-payments |
+| R33 | Recipient code is not run. Acceptance is the oracle `Machine.accepts` (`Machine.lean:336`), tied to the source `tx.ext` `sendKey` table by `Sim.oracle`. The world is balances only. **Decided (G04 Q3, G00 Q2, G01 Q4/Q7, nested-frame follow-up):** the boolean oracle is not approved. Untyped recipients answer any outcome, depending on history; typed recipients (in the compiled system, G01 Q8) run their own code; any recipient frame may fail with a revert its caller sees, whatever gas is forwarded. | Reentrant or state-changing recipients, stipend gas, history-dependent refusals. | A `transfer` to a contract of the compiled system whose `receive()` writes storage; an untyped recipient that refuses only its second payment. | N (the premise form is now decided; the current oracle is narrower than it) | G22.02, G42.03, G43, G47 |
 
 ### 2.8 Hashes and storage representation
 
 | ID | Restriction (where) | Excludes | In-profile example | Kind | Discharging group(s) |
 |---|---|---|---|---|---|
-| R34 | Storage slots are symbolic terms (`Slot.root/hash/data`, `Machine.lean:99`). Distinct terms never collide, and offsets do not wrap (`Slot.add`, `:106`). That is global keccak injectivity built into the type, which the roadmap forbids. T21 proves that no injective numeric encoding exists. | Collisions and wrap-around; any numeric storage claim. | Every mapping or dynamic-array access is related only symbolically. | N (premise in disguise) | G27.05, G46.03, G46.05. ⟳ evm-storage-slots |
-| R35 | `KECCAK256` takes its inputs from the stack (`keccakMap`/`keccakArr`, `Machine.lean:45–46`), not from memory. | Byte-level hashing of memory. | — | O now, N for the final target | G46.02, G46.05 |
+| R34 | Storage slots are symbolic terms (`Slot.root/hash/data`, `Machine.lean:99`). Distinct terms never collide, and offsets do not wrap (`Slot.add`, `:106`). That is global keccak injectivity built into the type, which the roadmap forbids. T21 proves that no injective numeric encoding exists. **Decided (G01 Q3 / G04 Q1, G00 Q2):** the approved premise is per run: the preimages hashed by the execution prefix do not collide, stated as an explicit hypothesis, together with a random-oracle lemma bounding its failure probability (about q²/2²⁵⁷ for q hashes). The hash is a fixed parameter instantiated by keccak, not an environment input. Global injectivity stays forbidden. | Collisions and wrap-around; any numeric storage claim. | Every mapping or dynamic-array access is related only symbolically. | N (premise in disguise; replacement form decided) | G27.05, G46.03, G46.05 (per-run premise on numeric slots), G31/S04.02 (fixed hash parameter); probability lemma: the hash-collision-bound module of this batch. ⟳ evm-storage-slots |
+| R35 | `KECCAK256` takes its inputs from the stack (`keccakMap`/`keccakArr`, `Machine.lean:45–46`), not from memory. **Decided (G00 Q3, G01 Q3):** the target is Osaka bytecode, whose `KECCAK256` hashes memory bytes, and the per-run premise ranges over those byte preimages. | Byte-level hashing of memory. | — | O now, N for the final target | G46.02, G46.05. ⟳ evm-byte-memory |
 
 ### 2.9 Alias liveness
 
 | ID | Restriction (where) | Excludes | In-profile example | Kind | Discharging group(s) |
 |---|---|---|---|---|---|
-| R36 | An alias bound through an array index is `fragile` (`bindFl`, `Compile.lean:161`). It is forgotten at every `pop`/`delete` (`Frag.dropFragile`, `:87`), including in branches (`meet`) and callee bodies (`Stmt.shrinks`). Later use is rejected. `ReprAt` relates live elements only. | Use of a storage alias after a shrink: dangling, compiler-specific behaviour ([solc-alignment.md](../solc-alignment.md#arrays-past-their-end)). | ✓ `Person storage p = persons[0]; persons.pop(); p.age = 1;` and the branch variant (`rejected`) | N, or a scope decision (Q2) | G28, G30, G27.03 |
+| R36 | An alias bound through an array index is `fragile` (`bindFl`, `Compile.lean:161`). It is forgotten at every `pop`/`delete` (`Frag.dropFragile`, `:87`), including in branches (`meet`) and callee bodies (`Stmt.shrinks`). Later use is rejected. `ReprAt` relates live elements only. | Use of a storage alias after a shrink: dangling, compiler-specific behaviour ([solc-alignment.md](../solc-alignment.md#arrays-past-their-end)). **Decided (G04 Q2):** in profile, with solc's logical slot behaviour; solc's physical packing stays unobservable. The source keeps the slots past the end (`SVal.array elems shadow fixed`), and an empty `push()` exposes a recycled slot as solc leaves it (`pushSlot`, `Solidity/Semantics/Storage/Ops.lean:785`). One source delta remains: `push(v)` of a struct or array value lays it on fresh slots (`SVal.strip`), dropping what a dangling alias wrote into that slot's own arrays past their ends, where solc keeps it ([solc-alignment.md](../solc-alignment.md#remaining-deltas-documented-intentionally-out-of-scope), "`push` over a recycled slot"); under the decision this is a source/solc mismatch. On the compiler side `ReprAt` leaves `shadow` unconstrained (`Solidity/Evm/Repr.lean:32–36`), and the same gap refuses `push()` of a struct (R18). | ✓ `Person storage p = persons[0]; persons.pop(); p.age = 1;` and the branch variant (`rejected`) | N | G28, G30, G27.03 (relate `shadow` slots); S04.01/S02 (restate `push(v)` over a recycled slot to keep what solc keeps) |
 
 ### 2.10 Failures, observations, divergence
 
@@ -276,15 +276,21 @@ These do not block this audit. They need a user decision; evidence is given.
   (`no_injective_slot_encoding`). Which exact cryptographic premise, if any, is
   approved for G27.05/G46.05: for example, collision freedom restricted to the
   slots reached by a finite execution, stated as an explicit hypothesis?
+  *Decided:* a per-run premise over the preimages the execution prefix
+  hashes, plus a random-oracle bound; no global injectivity (R34, §8).
 - **Q2 — Dangling storage aliases (R36).** solc-alignment classifies writes
   through an alias to a popped element as "compiler-specific/undefined".
   G28 compiles them "under the selected source semantics". Are such programs in
   profile with solc's slot behaviour, or should G00 record an exclusion? Until
   decided, R36 is a narrowing.
+  *Decided:* in profile, with solc's logical slot behaviour (R36, §8).
 - **Q3 — Payment acceptance oracle (R33).** An oracle over recipients is
   existing behaviour. The roadmap (G47) replaces it with actual execution
   "where typed code is in scope". The exact quantification over untyped
   recipients must be stated as an approved environment premise.
+  *Decided:* any outcome; an untyped recipient may accept or refuse each
+  payment depending on history, and typed recipients run their own code
+  (R32, R33, §8).
 
 ## 7. Handoff
 
@@ -303,6 +309,46 @@ These do not block this audit. They need a user decision; evidence is given.
   - Q1–Q3 for the user/G00;
   - lane re-checks in §5.
 - **Elapsed:** about 45 minutes wall-clock (01:01–01:45 UTC, 2026-10-29) on a 4-core VM; no Lean process run, so peak RSS is not applicable.
+
+## 8. Decision follow-up (2026-10-29)
+
+The [user decisions](../solidity-scope.md#user-decisions-2026-10-29) answer
+Q1–Q3. R32–R36 above now carry the decided premise form. This section records
+what changed and what each row still needs. The full repository impact of
+every decision is in [roadmap-decisions-impact.md](roadmap-decisions-impact.md).
+The base for this follow-up is `caf52ecd4dde5d37cbc0098d47de1a01aa218285`. No
+file cited in §1–§2 changed between `127c2ee` and that base, so every
+`file:line` above still holds.
+
+| Row | Decision | Status before | Status now | What the discharge must state |
+|---|---|---|---|---|
+| R32 | G04 Q3, G00 Q2 | S + N | S + N. Kind unchanged; the environment it must be discharged against is fixed. | Exact agreement on success and refusal of every payment, with the same history-dependent recipient strategy read by source and machine. No proof constructs the stale disjunct, so the interim statement-only strengthening (§3 item 1) is still open. |
+| R33 | G04 Q3, G00 Q2, G01 Q4/Q7/Q8, nested-frame follow-up | P | N | Replace `Machine.accepts`/`Sim.oracle`'s per-transaction table by: untyped recipients answer any outcome, depending on history; recipients in the compiled system run their code; any recipient frame may fail with a revert its caller sees. Precompile addresses follow their EVM definitions, never environment code. |
+| R34 | G01 Q3 / G04 Q1, G00 Q2 | N (premise in disguise) | N. The replacement premise is decided. | Numeric slots under a per-run hypothesis that the preimages hashed by the execution prefix do not collide, plus a random-oracle lemma bounding its failure probability (about q²/2²⁵⁷). The hash is a fixed parameter instantiated by keccak. `no_injective_slot_encoding` (T21) stays as the evidence that no global premise is possible. The second-round decision (on `origin/master` after this base) extends the premise to regions of length at most L based at hashed slots (about q²·L/2²⁵⁶), which covers the offsets `Slot.add` adds. |
+| R35 | G00 Q3, G01 Q3 | O now, N final | Unchanged | Osaka `KECCAK256` over memory bytes; the per-run premise ranges over those byte preimages. |
+| R36 | G04 Q2 | N, or a scope decision | N, plus a source delta | Compile alias use after `pop`/`delete` with solc's logical slot behaviour by relating the source's past-the-end `shadow` slots in `ReprAt`. Physical packing stays unobservable. The same relation unblocks `push()` of a struct (R18). The source must first keep what solc keeps when `push(v)` lands on a recycled slot (`SVal.strip`). |
+
+**Handoff given to the owners.**
+
+- **R32/R33 → G43, G47, G22.02/G22.05, S04.03.** The current results remain
+  valid as statements about a narrower environment: a history-free payment
+  response, fixed for a transaction by `tx.ext` at `sendKey addr amt`,
+  with recipient code never run. They need restating, not retracting. The
+  "no-callback reading is a special case" requirement (G01 Q4) applies to
+  payments too: the history-free statements must become corollaries.
+- **R34/R35 → G27.05, G46.02/G46.03/G46.05, G01.** `PublicCorrectness`
+  (`Solidity/Roadmap/Contracts.lean:410`) has no hash premise yet. G01 adds
+  it (g01-contracts-rev). The probability lemma is this batch's
+  hash-collision-bound task. The calculus already uses a narrower, per-goal
+  premise (`Fml.ValidH`, `Solidity/Calculus/HashPremise.lean:117`), which
+  G51 must bridge to the per-run reading.
+- **R36 → G28, G30, G27.03.** The dangling-alias programs are in profile;
+  the `rejected` regression (`Solidity/Evm/Examples.lean:354`) records the
+  current gap. It must be reversed by G28, not deleted.
+
+**Not done here.** No Lean changed. The R32 strengthening, the history-dependent
+response and the per-run premise are child obligations of the groups named
+above.
 
 ## Review
 

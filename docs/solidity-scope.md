@@ -143,6 +143,8 @@ documents as each is integrated.
 | Fixed point — unary minus on `ufixed` | Accepted as solc's type checker does: `Panic(0x11)` unless the operand is 0; wraps in `unchecked`. |
 | Fixed point — `++`/`--` | Add or subtract the value 1. |
 | Fixed point — explicit fixed/integer and `bytesM` conversions | Integers by value; `bytesM` by bit pattern. |
+| Fixed point — fractional constant on the left (`0.5 * x`) | Refused, as solc's type checker does (lane decision, 2026-10-29). |
+| Fixed point — standalone fractional constants | Take solc's mobile type with truncation, also as ABI arguments (where solc refuses `abi.encode(0.1)`) (lane decision, 2026-10-29). |
 
 Follow-up the second round requires:
 

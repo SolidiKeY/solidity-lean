@@ -3,8 +3,8 @@
 // (docs/feature-work/roadmap-g01-interfaces.md, "Non-circularity as a
 // checkable gate"; docs/feature-work/roadmap-g07-gates.md, §3), mechanically.
 //
-// 0. The contracts. `Solidity.Roadmap.Contracts` reaches only
-//    `Solidity.Keccak`, and defines no function into `Artifact` (no compiler).
+// 0. The contracts. `Solidity.Roadmap.Contracts` reaches only `CONTRACT_DEPS`
+//    (`Solidity.Keccak`, `Solidity.Hash.CollisionBound`, `Solidity.Roadmap.Evm`), and defines no function into `Artifact` (no compiler).
 // 1. Import whitelist. A source module (`Solidity/Source/**`) or a module
 //    that instantiates `SourceSpec` reaches, transitively, only other source
 //    modules, `Solidity.Roadmap.Contracts`, `Solidity.Keccak` and the named
@@ -36,10 +36,14 @@ import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { blankLean } from "./check-trust.mjs";
 
-export const WHITELIST = [/^Solidity\.Source(\.|$)/, /^Solidity\.Roadmap\.Contracts$/, /^Solidity\.Keccak$/];
+export const WHITELIST = [/^Solidity\.Source(\.|$)/, /^Solidity\.Roadmap\.(Contracts|Evm)$/, /^Solidity\.Keccak$/,
+  /^Solidity\.Hash\.CollisionBound$/];
 // Named datatype modules a source module may import:
 // { module, theorem, theoremModule }: `theorem` (its last component) must be
 // declared in `theoremModule`.
+/** What the contracts may import: statements-only modules (G01 imports
+ * G06's EVM interface and the hash-collision premises). */
+export const CONTRACT_DEPS = ["Solidity.Keccak", "Solidity.Hash.CollisionBound", "Solidity.Roadmap.Evm"];
 export const DATATYPES = [];
 // Modules of the pinned EVM an `EvmSpec` instance may import (G06/G46).
 export const EVM_MODULES = [];
@@ -99,7 +103,7 @@ export function check(modules) {
   }
   const contracts = modules.get("Solidity.Roadmap.Contracts");
   if (contracts !== undefined) {
-    const path = reachPath(graph, "Solidity.Roadmap.Contracts", (n) => n !== "Solidity.Keccak");
+    const path = reachPath(graph, "Solidity.Roadmap.Contracts", (n) => !CONTRACT_DEPS.includes(n));
     if (path) out.push(`CONTRACTS ${path.join(" → ")}`);
     const clean = blankLean(contracts);
     for (const m of clean.matchAll(/^(?:noncomputable\s+)?(?:def|abbrev)\s+([\w'.]+)[^\n]*(?:\n(?!\S)[^\n]*)*/gmu)) {
