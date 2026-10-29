@@ -519,6 +519,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/Stmt.lean` | One lemma per statement of the fragment over the typed run, a storage write the typed save (`save_repr`): `StmtOut` (with `Keeps`: cells below the frame, array lengths), `assign_sim` … `transfer_sim`. |
 | `Evm/Correct.lean` | `stmt_sim`/`prog_sim` over the scoped syntax and `Prog.run` (within `maxHeartbeats 11000`) (one lemma per family, `ite_sim`, `block_sim`, `callNone_sim`/`callVal_sim`), then `compile_correct`, `compile_exact`, `compile_box`, `compile_net`, `compile_storage`; no `not_stuck` (no stuck outcome). |
 | `Evm/Interpreter.lean` | The compiler's interpreter theorems over `Prog.run` (`setAge_interpreter`, `overflow_interpreter`, `payOwner_interpreter`, `callTwice_interpreter`), from `Evm/Examples.lean`'s machine runs. |
+| `Roadmap/Contracts.lean` | Roadmap G01: the six final source-to-bytecode contracts, observations, resourced prefix families and compositional pass certificates as statements only (`Cert.comp`, `PublicCorrectness`); no final theorem is claimed ([roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md)). |
 
 ## Tools
 

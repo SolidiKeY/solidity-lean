@@ -57,6 +57,33 @@ including recursive struct shapes. Those are in-scope implementation work in
 this catalog. `Unmodelled` records the deliberate observation/profile boundary;
 it is not a mechanical renaming of legacy importer statuses.
 
+## User decisions (2026-10-29)
+
+**User decision (2026-10-29):** the user answered the open scope questions of
+roadmap groups G00, G01 and G04 ([G00](feature-work/roadmap-g00-scope.md#open-scope-questions),
+[G01](feature-work/roadmap-g01-interfaces.md#open-scope-questions),
+[G04](feature-work/roadmap-g04-restrictions.md#6-open-scope-questions)).
+These answers fix the profile; they close no proof obligation.
+
+| Question | Decision |
+|---|---|
+| G00 Q1 — the 30 recorded exclusions | All 30 confirmed as approved exclusions (assembly/Yul, gas, `delegatecall`, low-level calls, selfdestruct, salted creation, raw code, physical layout, logs, extra block/transaction fields). |
+| G00 Q2 — premises of the 23 `abstract` rows | Approved: opaque hashes and `ecrecover`, and `msg`/`block`/`this`/balance values as universally quantified inputs. Not approved: `worldAssumptions` and the payment-acceptance boolean, which must be replaced or proposed again. The no-callback reading becomes a proved case (G01 Q4). |
+| G00 Q3 — EVM fork | Osaka, for the pinned semantics and the compiled bytecode. |
+| G00 Q4 — settings | The public theorem quantifies over all eight `EvalOrder` flag combinations. The frozen profile is solc 0.8.38; 0.8.34 fixtures are SolKey compatibility checks only. |
+| G00 Q5 — `creationCode`/`runtimeCode` | The bytes this compiler produces, read from G01's whole-input `Artifact` table, which the source semantics takes as a parameter. |
+| G00 Q6 — fixed-point types | Full fixed-point support, beyond the acceptance boundary of pinned solc. |
+| G01 Q1 — source resources | Idealized source: unbounded fuel and recursion. |
+| G01 Q2 — fixed EVM limits | Gas, call-depth and stack exhaustion end a finite prefix; internal calls keep their frames in memory, so recursion depth is bounded only by gas. The code-size limits (EIP-170, EIP-3860) are a recorded idealization: the theorem assumes any code size deploys. |
+| G01 Q3 / G04 Q1 — hash collisions | A per-run premise that the preimages hashed by the execution prefix do not collide, plus a random-oracle lemma bounding the probability of a collision (about q²/2²⁵⁷ for q hashes). Global injectivity stays forbidden. |
+| G01 Q4 — environment | History-dependent callee strategies with unbounded reentrancy; address 0 having no code stays an assumption. |
+| G01 Q5 — observation | The full `Event` list with exact ABI and revert bytes, `Panic` codes included. |
+| G01 Q6 — state transfer | The public theorem exports `decode : EvmWorld → Option IntrinsicWorld`. |
+| G01 Q7 — gas and the environment | Over-approximation: callee answers range over all outcomes regardless of forwarded gas; one resource bound per session. |
+| G01 Q8 — system boundary | The whole input, every contract and linked library, is the compiled system. |
+| G04 Q2 — storage aliases after `pop`/`delete` | In profile, with solc's slot behaviour (G28). |
+| G04 Q3 — payment acceptance | Any outcome: an untyped recipient may accept or refuse each payment, depending on history; typed recipients run their own code (G47). |
+
 ## What belongs in the model
 
 The target includes lexical forms and compile-time values; file/import

@@ -266,6 +266,8 @@ Facts here are pinned to `127c2ee`. Re-audit them after the lane merges.
 
 ## 6. Open scope questions
 
+**Answered 2026-10-29:** see [User decisions](../solidity-scope.md#user-decisions-2026-10-29). The questions below are kept as asked.
+
 These do not block this audit. They need a user decision; evidence is given.
 
 - **Q1 — Hash/slot premise.** R34 is a global injectivity assumption, and the

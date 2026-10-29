@@ -251,6 +251,8 @@ exclusions:
 
 ## Open scope questions
 
+**Answered 2026-10-29:** see [User decisions](../solidity-scope.md#user-decisions-2026-10-29). The questions below are kept as asked.
+
 None blocks the rest of G00; each needs a user decision.
 
 - **Q1 — the 30 recorded exclusions.** Confirm or reject each row (or each

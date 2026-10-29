@@ -568,6 +568,8 @@ marked †.
 
 ## Open scope questions
 
+**Answered 2026-10-29:** see [User decisions](../solidity-scope.md#user-decisions-2026-10-29). The questions below are kept as asked.
+
 Each needs a user decision. None blocks this document.
 
 ### Q1. Source resources
