@@ -1,0 +1,110 @@
+[
+  {
+    "command": [
+      "python3",
+      "-B",
+      "scripts/solidity-baseline.test.py"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.14139096300004894,
+    "log": "tests/upstream/baseline-20261028/gates-after/0.log",
+    "sha256": "6c6dc0c6593441f133b30761e982acbb0c95d7aa874960c1a96fbe3eb866a286"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "scripts/solidity-baseline-retries.test.py"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.08816393000006428,
+    "log": "tests/upstream/baseline-20261028/gates-after/1.log",
+    "sha256": "888a0c0ed615e57d32cf72be501b0c355f33b8613c81dfdaa99db33d7959487e"
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "scripts/run-solidity-baseline.sh"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.0034554290000414767,
+    "log": "tests/upstream/baseline-20261028/gates-after/2.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "command": [
+      "node",
+      "--test",
+      "--test-isolation=none",
+      "scripts/solidity-upstream.test.mjs"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 2.7640975999997863,
+    "log": "tests/upstream/baseline-20261028/gates-after/3.log",
+    "sha256": "d375e22db43fd69ef35ceeaeb4b66312dc2c2a3ab08cede14d22e354f14a7bc5"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-orphans.mjs"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.21881139400011307,
+    "log": "tests/upstream/baseline-20261028/gates-after/4.log",
+    "sha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-layers.mjs"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.1729075810003451,
+    "log": "tests/upstream/baseline-20261028/gates-after/5.log",
+    "sha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-automatic.mjs",
+      "--strict"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.0588405230000717,
+    "log": "tests/upstream/baseline-20261028/gates-after/6.log",
+    "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/check-trust.sh"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 4.699972562999847,
+    "log": "tests/upstream/baseline-20261028/gates-after/7.log",
+    "sha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668"
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/solidity-feature-audit.py",
+      "--check"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.05464221800002633,
+    "log": "tests/upstream/baseline-20261028/gates-after/8.log",
+    "sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/solidity-upstream.mjs",
+      "verify"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 1.051583300999937,
+    "log": "tests/upstream/baseline-20261028/gates-after/9.log",
+    "sha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+  }
+]

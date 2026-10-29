@@ -1,0 +1,2406 @@
+{
+  "SolkeyTestSuite": {
+    "imports": {
+      "SolkeyTestSuite": [
+        "Solidity.Solkey.TestSuite",
+        "Solidity.TestSuite.Report",
+        "Solidity.TestSuite.Suggestions"
+      ],
+      "Solidity.TestSuite.Suggestions": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.ScopedProblems": [
+        "Solidity.TestSuite.Problems",
+        "Solidity.Calculus.Surface"
+      ],
+      "Solidity.Calculus.Surface": [
+        "Solidity.Calculus.Notation",
+        "Solidity.Calculus.Spec",
+        "Solidity.Calculus.SurfaceSpec",
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.Proves",
+        "Solidity.Calculus.SequentNotation"
+      ],
+      "Solidity.Calculus.SequentNotation": [
+        "Solidity.Calculus.Proves",
+        "Solidity.Calculus.RuleSyntax"
+      ],
+      "Solidity.Calculus.RuleSyntax": [
+        "Solidity.Calculus.RuleSyntax.Grammar",
+        "Solidity.Calculus.RuleSyntax.Schemas",
+        "Solidity.Calculus.RuleSyntax.Print"
+      ],
+      "Solidity.Calculus.RuleSyntax.Print": [
+        "Solidity.Calculus.RuleSyntax.Schemas"
+      ],
+      "Solidity.Calculus.RuleSyntax.Schemas": [
+        "Solidity.Calculus.RuleSyntax.Grammar"
+      ],
+      "Solidity.Calculus.RuleSyntax.Grammar": [
+        "Solidity.Update",
+        "Solidity.Syntax.PushSource"
+      ],
+      "Solidity.Syntax.PushSource": [
+        "Solidity.Syntax.Scoped"
+      ],
+      "Solidity.Syntax.Scoped": [
+        "Solidity.Syntax",
+        "Solidity.Scope"
+      ],
+      "Solidity.Scope": [
+        "Solidity.AST"
+      ],
+      "Solidity.AST": [
+        "Lean",
+        "Solidity.KeySort"
+      ],
+      "Solidity.KeySort": [],
+      "Solidity.Syntax": [
+        "Solidity.Syntax.Raw",
+        "Solidity.Syntax.Grammar",
+        "Solidity.Syntax.Contract"
+      ],
+      "Solidity.Syntax.Contract": [
+        "Solidity.Syntax.Grammar"
+      ],
+      "Solidity.Syntax.Grammar": [
+        "Solidity.Syntax.Raw"
+      ],
+      "Solidity.Syntax.Raw": [
+        "Solidity.AST",
+        "Solidity.SpecSyntax"
+      ],
+      "Solidity.SpecSyntax": [
+        "Solidity.AST"
+      ],
+      "Solidity.Update": [
+        "Solidity.Theory.Segs"
+      ],
+      "Solidity.Theory.Segs": [
+        "Solidity.Semantics"
+      ],
+      "Solidity.Semantics": [
+        "Solidity.Syntax.Checked"
+      ],
+      "Solidity.Syntax.Checked": [
+        "Solidity.Syntax.Scoped",
+        "Solidity.RevertBytes"
+      ],
+      "Solidity.RevertBytes": [
+        "Solidity.Keccak"
+      ],
+      "Solidity.Keccak": [],
+      "Solidity.Calculus.Proves": [
+        "Solidity.Calculus.Taclet",
+        "Solidity.Calculus.FirstOrder",
+        "Solidity.Calculus.Graft",
+        "Solidity.Calculus.Hyp",
+        "Solidity.Calculus.SeqRewrite"
+      ],
+      "Solidity.Calculus.SeqRewrite": [
+        "Solidity.Calculus.Graft",
+        "Solidity.Calculus.TermEq"
+      ],
+      "Solidity.Calculus.TermEq": [
+        "Solidity.Calculus.Logic"
+      ],
+      "Solidity.Calculus.Logic": [
+        "Solidity.Calculus.Lands"
+      ],
+      "Solidity.Calculus.Lands": [
+        "Solidity.Calculus.Step",
+        "Solidity.Semantics.RunFrame",
+        "Solidity.Theory.Bridge.Denote"
+      ],
+      "Solidity.Theory.Bridge.Denote": [
+        "Solidity.Signature",
+        "Solidity.Typing.CleanTail"
+      ],
+      "Solidity.Typing.CleanTail": [
+        "Solidity.Typing.Values"
+      ],
+      "Solidity.Typing.Values": [
+        "Solidity.Theory.Typed.Obs",
+        "Solidity.Semantics.StorageWt"
+      ],
+      "Solidity.Semantics.StorageWt": [
+        "Solidity.Semantics.Storage"
+      ],
+      "Solidity.Semantics.Storage": [
+        "Solidity.Semantics.Storage.Values",
+        "Solidity.Semantics.Storage.Ops",
+        "Solidity.Semantics.Storage.Anon"
+      ],
+      "Solidity.Semantics.Storage.Anon": [
+        "Solidity.Semantics.Storage.Ops"
+      ],
+      "Solidity.Semantics.Storage.Ops": [
+        "Solidity.Semantics.Storage.Values"
+      ],
+      "Solidity.Semantics.Storage.Values": [
+        "Solidity.Semantics.Value",
+        "Solidity.Eqns"
+      ],
+      "Solidity.Eqns": [
+        "Lean"
+      ],
+      "Solidity.Semantics.Value": [
+        "Solidity.Semantics"
+      ],
+      "Solidity.Theory.Typed.Obs": [
+        "Solidity.Theory.Typed.Obs.Paths",
+        "Solidity.Theory.Typed.Obs.Values",
+        "Solidity.Theory.Typed.Obs.Ops"
+      ],
+      "Solidity.Theory.Typed.Obs.Ops": [
+        "Solidity.Theory.Typed.Obs.Values"
+      ],
+      "Solidity.Theory.Typed.Obs.Values": [
+        "Solidity.Theory.Typed.Obs.Paths"
+      ],
+      "Solidity.Theory.Typed.Obs.Paths": [
+        "Solidity.Semantics.Heap"
+      ],
+      "Solidity.Semantics.Heap": [
+        "Solidity.Semantics.Storage",
+        "Solidity.Keccak",
+        "Solidity.Hashes",
+        "Solidity.Secp256k1"
+      ],
+      "Solidity.Secp256k1": [
+        "Solidity.RevertBytes"
+      ],
+      "Solidity.Hashes": [],
+      "Solidity.Signature": [
+        "Solidity.Update",
+        "Solidity.Semantics.Run",
+        "Solidity.Semantics.StorageWt",
+        "Solidity.Theory.Typed.Obs"
+      ],
+      "Solidity.Semantics.Run": [
+        "Solidity.Semantics.State",
+        "Solidity.Semantics.Ops",
+        "Solidity.Semantics.RevertData"
+      ],
+      "Solidity.Semantics.RevertData": [
+        "Solidity.Semantics.Value",
+        "Solidity.RevertBytes"
+      ],
+      "Solidity.Semantics.Ops": [
+        "Solidity.Semantics.Value"
+      ],
+      "Solidity.Semantics.State": [
+        "Solidity.Semantics.Heap"
+      ],
+      "Solidity.Semantics.RunFrame": [
+        "Solidity.Semantics.RunWk",
+        "Solidity.Calculus.WkOver"
+      ],
+      "Solidity.Calculus.WkOver": [
+        "Solidity.Calculus.Blocks"
+      ],
+      "Solidity.Calculus.Blocks": [
+        "Solidity.Calculus.Arms",
+        "Solidity.Calculus.LexDiamond",
+        "Solidity.Calculus.CallSummary",
+        "Solidity.Semantics.NoPanic",
+        "Solidity.Syntax.Join"
+      ],
+      "Solidity.Syntax.Join": [
+        "Solidity.Syntax.Scoped"
+      ],
+      "Solidity.Semantics.NoPanic": [
+        "Solidity.Semantics.Ends"
+      ],
+      "Solidity.Semantics.Ends": [
+        "Solidity.Semantics.Run"
+      ],
+      "Solidity.Calculus.CallSummary": [
+        "Solidity.Calculus.Lower",
+        "Solidity.Calculus.SyntaxSize"
+      ],
+      "Solidity.Calculus.SyntaxSize": [
+        "Solidity.Calculus.Fml"
+      ],
+      "Solidity.Calculus.Fml": [
+        "Solidity.Signature"
+      ],
+      "Solidity.Calculus.Lower": [
+        "Solidity.Calculus.TermEval"
+      ],
+      "Solidity.Calculus.TermEval": [
+        "Solidity.Calculus.Fml"
+      ],
+      "Solidity.Calculus.LexDiamond": [
+        "Solidity.Calculus.Arms",
+        "Solidity.Calculus.LexVariant"
+      ],
+      "Solidity.Calculus.LexVariant": [
+        "Solidity.Calculus.Lower"
+      ],
+      "Solidity.Calculus.Arms": [
+        "Solidity.Calculus.Shift",
+        "Solidity.Syntax.PushSource"
+      ],
+      "Solidity.Calculus.Shift": [
+        "Solidity.Calculus.Lower"
+      ],
+      "Solidity.Semantics.RunWk": [
+        "Solidity.Semantics.Run",
+        "Solidity.Calculus.WkOver"
+      ],
+      "Solidity.Calculus.Step": [
+        "Solidity.Calculus.Blocks"
+      ],
+      "Solidity.Calculus.Graft": [
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.FirstOrder",
+        "Solidity.Calculus.StateFacts"
+      ],
+      "Solidity.Calculus.StateFacts": [
+        "Solidity.Signature",
+        "Solidity.Calculus.ReadWrite"
+      ],
+      "Solidity.Calculus.ReadWrite": [
+        "Solidity.Update"
+      ],
+      "Solidity.Calculus.FirstOrder": [
+        "Solidity.Calculus.Fml"
+      ],
+      "Solidity.Calculus.Hyp": [
+        "Solidity.Calculus.RuleSyntax"
+      ],
+      "Solidity.Calculus.Taclet": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.RuleKit"
+      ],
+      "Solidity.Calculus.RuleKit": [
+        "Solidity.Calculus.RuleSyntax",
+        "Solidity.Calculus.KeyTaclets"
+      ],
+      "Solidity.Calculus.KeyTaclets": [],
+      "Solidity.Calculus.Rules": [
+        "Solidity.Calculus.Step",
+        "Solidity.Calculus.RuleSyntax"
+      ],
+      "Solidity.Calculus.SurfaceSpec": [
+        "Solidity.Calculus.Close",
+        "Solidity.Calculus.FilteredMembership",
+        "Solidity.Calculus.NotationResolve",
+        "Solidity.Calculus.RefInputs",
+        "Solidity.Syntax.Elab"
+      ],
+      "Solidity.Syntax.Elab": [
+        "Solidity.Syntax.Elab.Context",
+        "Solidity.Syntax.Elab.Values",
+        "Solidity.Syntax.Elab.Lower",
+        "Solidity.Syntax.Elab.Arms",
+        "Solidity.Syntax.Elab.Stmt"
+      ],
+      "Solidity.Syntax.Elab.Stmt": [
+        "Solidity.Syntax.Elab.Arms"
+      ],
+      "Solidity.Syntax.Elab.Arms": [
+        "Solidity.Syntax.Elab.Lower"
+      ],
+      "Solidity.Syntax.Elab.Lower": [
+        "Solidity.Syntax.Elab.Values",
+        "Solidity.ERC7201"
+      ],
+      "Solidity.ERC7201": [
+        "Solidity.RevertBytes",
+        "Lean.Elab.Tactic.Omega"
+      ],
+      "Solidity.Syntax.Elab.Values": [
+        "Solidity.Syntax.Elab.Context",
+        "Solidity.Syntax.Numeric"
+      ],
+      "Solidity.Syntax.Numeric": [
+        "Solidity.Syntax.Scoped"
+      ],
+      "Solidity.Syntax.Elab.Context": [
+        "Solidity.Syntax.Scoped",
+        "Solidity.Syntax.Join",
+        "Solidity.Syntax.Checked",
+        "Solidity.Keccak",
+        "Solidity.RevertBytes"
+      ],
+      "Solidity.Calculus.RefInputs": [
+        "Solidity.Calculus.NotationResolve"
+      ],
+      "Solidity.Calculus.NotationResolve": [
+        "Solidity.Calculus.Step",
+        "Solidity.Calculus.NamedTerm"
+      ],
+      "Solidity.Calculus.NamedTerm": [
+        "Solidity.Calculus.Lower",
+        "Solidity.Syntax.Elab.Context"
+      ],
+      "Solidity.Calculus.FilteredMembership": [
+        "Solidity.Calculus.FiniteMembership",
+        "Solidity.Calculus.TermWk"
+      ],
+      "Solidity.Calculus.TermWk": [
+        "Solidity.Calculus.Lands"
+      ],
+      "Solidity.Calculus.FiniteMembership": [
+        "Solidity.Calculus.Logic"
+      ],
+      "Solidity.Calculus.Close": [
+        "Solidity.Calculus.SurfaceNotation",
+        "Solidity.Calculus.TacticSyntax",
+        "Solidity.Calculus.CloseLemmas",
+        "Solidity.Calculus.CloseNonlin",
+        "Solidity.Calculus.CloseAll"
+      ],
+      "Solidity.Calculus.CloseAll": [
+        "Solidity.Calculus.Budget"
+      ],
+      "Solidity.Calculus.Budget": [
+        "Lean"
+      ],
+      "Solidity.Calculus.CloseNonlin": [
+        "Solidity.Calculus.Budget"
+      ],
+      "Solidity.Calculus.CloseLemmas": [
+        "Solidity.Calculus.ReadWrite",
+        "Solidity.Theory.Bridge.Denote"
+      ],
+      "Solidity.Calculus.TacticSyntax": [
+        "Solidity.Syntax.Quote",
+        "Solidity.Calculus.Hyp"
+      ],
+      "Solidity.Syntax.Quote": [
+        "Lean.Util.ShareCommon",
+        "Std.Data.HashMap",
+        "Solidity.Syntax.Scoped"
+      ],
+      "Solidity.Calculus.SurfaceNotation": [
+        "Solidity.Calculus.Hyp",
+        "Solidity.Syntax.Quote",
+        "Solidity.Calculus.Lower",
+        "Solidity.Calculus.NamedTerm",
+        "Solidity.Syntax.Elab.Values"
+      ],
+      "Solidity.Calculus.Spec": [
+        "Solidity.Calculus.Problem",
+        "Solidity.Calculus.NotationResolve",
+        "Solidity.Calculus.Quote"
+      ],
+      "Solidity.Calculus.Quote": [
+        "Solidity.Calculus.Fml",
+        "Solidity.Syntax.Quote"
+      ],
+      "Solidity.Calculus.Problem": [
+        "Solidity.Typing.CanonTest",
+        "Solidity.Calculus.SurfaceSpec",
+        "Solidity.Calculus.NotationResolve",
+        "Solidity.Calculus.Quote",
+        "Solidity.Calculus.Logic",
+        "Solidity.Syntax.Splice"
+      ],
+      "Solidity.Syntax.Splice": [
+        "Solidity.Syntax.Quote",
+        "Solidity.Syntax.Inlined",
+        "Solidity.Syntax.Elab"
+      ],
+      "Solidity.Syntax.Inlined": [
+        "Solidity.Syntax.Scoped"
+      ],
+      "Solidity.Typing.CanonTest": [
+        "Solidity.Typing.Constructibility"
+      ],
+      "Solidity.Typing.Constructibility": [
+        "Solidity.Typing.Fits"
+      ],
+      "Solidity.Typing.Fits": [
+        "Solidity.Typing.Tight"
+      ],
+      "Solidity.Typing.Tight": [
+        "Solidity.Typing.Reachability"
+      ],
+      "Solidity.Typing.Reachability": [
+        "Solidity.Typing.HeredRun"
+      ],
+      "Solidity.Typing.HeredRun": [
+        "Solidity.Typing.Values",
+        "Solidity.Typing.TypedRunInv"
+      ],
+      "Solidity.Typing.TypedRunInv": [
+        "Solidity.Typing.Soundness",
+        "Solidity.Semantics.RunFrame"
+      ],
+      "Solidity.Typing.Soundness": [
+        "Solidity.Semantics.State"
+      ],
+      "Solidity.Calculus.Notation": [
+        "Solidity.Calculus.SurfaceNotation",
+        "Solidity.Calculus.NotationResolve",
+        "Solidity.Calculus.Quote",
+        "Solidity.Syntax.Splice"
+      ],
+      "Solidity.TestSuite.Problems": [
+        "Solidity.Solkey.TestSuite",
+        "Solidity.Frontend.Problems"
+      ],
+      "Solidity.Frontend.Problems": [
+        "Solidity.Frontend.Import",
+        "Solidity.Calculus.Problem",
+        "Solidity.Calculus.Spec",
+        "Solidity.Calculus.ProvesDerive",
+        "Solidity.Calculus.Print"
+      ],
+      "Solidity.Calculus.Print": [
+        "Solidity.Calculus.PrintStmt",
+        "Solidity.Calculus.Quote",
+        "Solidity.Syntax.Quote"
+      ],
+      "Solidity.Calculus.PrintStmt": [
+        "Solidity.Calculus.PrintTerm"
+      ],
+      "Solidity.Calculus.PrintTerm": [
+        "Solidity.Calculus.DelabErase"
+      ],
+      "Solidity.Calculus.DelabErase": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.RuleKit"
+      ],
+      "Solidity.Calculus.ProvesDerive": [
+        "Solidity.Calculus.Rigid",
+        "Solidity.Calculus.AllLeft"
+      ],
+      "Solidity.Calculus.AllLeft": [
+        "Solidity.Calculus.UpdateRules"
+      ],
+      "Solidity.Calculus.UpdateRules": [
+        "Solidity.Calculus.Sound"
+      ],
+      "Solidity.Calculus.Sound": [
+        "Solidity.Calculus.Correct",
+        "Solidity.Calculus.StmtSound",
+        "Solidity.Calculus.ProvesSound"
+      ],
+      "Solidity.Calculus.ProvesSound": [
+        "Solidity.Calculus.Proves",
+        "Solidity.Calculus.PremiseSound"
+      ],
+      "Solidity.Calculus.PremiseSound": [
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.Step"
+      ],
+      "Solidity.Calculus.StmtSound": [
+        "Solidity.Calculus.SoundStep",
+        "Solidity.Calculus.SoundCalls",
+        "Solidity.Calculus.SoundLoops",
+        "Solidity.Calculus.SoundCatch"
+      ],
+      "Solidity.Calculus.SoundCatch": [
+        "Solidity.Calculus.SoundCalls",
+        "Solidity.Calculus.DataIn",
+        "Solidity.Semantics.AllocBytes",
+        "Solidity.Theory.Typed.Mem"
+      ],
+      "Solidity.Theory.Typed.Mem": [
+        "Solidity.Calculus.StateFacts",
+        "Solidity.Typing.Values"
+      ],
+      "Solidity.Semantics.AllocBytes": [
+        "Solidity.Semantics.Run"
+      ],
+      "Solidity.Calculus.DataIn": [
+        "Solidity.Calculus.Blocks",
+        "Solidity.Semantics.NoPanic"
+      ],
+      "Solidity.Calculus.SoundCalls": [
+        "Solidity.Calculus.SoundArms",
+        "Solidity.Calculus.SoundSummary",
+        "Solidity.Calculus.DataIn",
+        "Solidity.Calculus.SoundCapture",
+        "Solidity.Calculus.SoundStore",
+        "Solidity.Calculus.SoundKit",
+        "Solidity.Semantics.NativeDeferred",
+        "Solidity.Semantics.RevertOnly"
+      ],
+      "Solidity.Semantics.RevertOnly": [
+        "Solidity.Semantics.Ends"
+      ],
+      "Solidity.Semantics.NativeDeferred": [
+        "Solidity.Semantics.DeferredSource"
+      ],
+      "Solidity.Semantics.DeferredSource": [
+        "Solidity.Semantics.RunWk",
+        "Solidity.Semantics.RunFrame",
+        "Solidity.Syntax.Join"
+      ],
+      "Solidity.Calculus.SoundKit": [
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.PremiseSound",
+        "Solidity.Semantics.Ends",
+        "Solidity.Calculus.LowerRun",
+        "Solidity.Semantics.Callback",
+        "Solidity.Semantics.NoPanic"
+      ],
+      "Solidity.Semantics.Callback": [
+        "Solidity.Semantics.RunFrame",
+        "Solidity.Semantics.NoPanic"
+      ],
+      "Solidity.Calculus.LowerRun": [
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.Lower"
+      ],
+      "Solidity.Calculus.SoundStore": [
+        "Solidity.Calculus.SoundCapture",
+        "Solidity.Semantics.NoPanic"
+      ],
+      "Solidity.Calculus.SoundCapture": [
+        "Solidity.Calculus.SoundArms",
+        "Solidity.Semantics.NoPanic"
+      ],
+      "Solidity.Calculus.SoundArms": [
+        "Solidity.Calculus.SoundKit"
+      ],
+      "Solidity.Calculus.SoundSummary": [
+        "Solidity.Calculus.SoundArms",
+        "Solidity.Calculus.Graft",
+        "Solidity.Calculus.CallSummary"
+      ],
+      "Solidity.Calculus.SoundLoops": [
+        "Solidity.Theory.Bridge.Denote",
+        "Solidity.Calculus.SoundArms",
+        "Solidity.Calculus.SoundCalls",
+        "Solidity.Semantics.NoPanic",
+        "Solidity.Calculus.TermWk",
+        "Solidity.Calculus.Sound.LoopLexErase",
+        "Solidity.Calculus.Sound.LoopLexDiamond"
+      ],
+      "Solidity.Calculus.Sound.LoopLexDiamond": [
+        "Solidity.Calculus.LexDiamond",
+        "Solidity.Calculus.LexVariantSound",
+        "Solidity.Calculus.SoundArms",
+        "Solidity.Calculus.SoundCalls",
+        "Solidity.Calculus.TermWk"
+      ],
+      "Solidity.Calculus.LexVariantSound": [
+        "Solidity.Calculus.LexVariant",
+        "Solidity.Calculus.LowerRun",
+        "Solidity.Semantics.LexMetrics"
+      ],
+      "Solidity.Semantics.LexMetrics": [
+        "Solidity.Semantics.Termination"
+      ],
+      "Solidity.Semantics.Termination": [
+        "Solidity.Semantics.Run"
+      ],
+      "Solidity.Calculus.Sound.LoopLexErase": [
+        "Solidity.Calculus.SoundKit"
+      ],
+      "Solidity.Calculus.SoundStep": [
+        "Solidity.Calculus.SoundControl",
+        "Solidity.Calculus.SoundMem",
+        "Solidity.Calculus.SoundStore",
+        "Solidity.Calculus.SoundPush"
+      ],
+      "Solidity.Calculus.SoundPush": [
+        "Solidity.Calculus.SoundCapture"
+      ],
+      "Solidity.Calculus.SoundMem": [
+        "Solidity.Calculus.SoundStore",
+        "Solidity.Semantics.NoPanic"
+      ],
+      "Solidity.Calculus.SoundControl": [
+        "Solidity.Calculus.SoundLocal"
+      ],
+      "Solidity.Calculus.SoundLocal": [
+        "Solidity.Calculus.SoundCapture"
+      ],
+      "Solidity.Calculus.Correct": [
+        "Solidity.Calculus.Lands",
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.RuleSyntax"
+      ],
+      "Solidity.Calculus.Rigid": [
+        "Solidity.Calculus.RewritePast",
+        "Solidity.Calculus.LeafDerive",
+        "Solidity.Calculus.TermSize"
+      ],
+      "Solidity.Calculus.TermSize": [
+        "Solidity.Calculus.Step"
+      ],
+      "Solidity.Calculus.LeafDerive": [
+        "Solidity.Calculus.Derive"
+      ],
+      "Solidity.Calculus.Derive": [
+        "Solidity.Calculus.Symex",
+        "Solidity.Calculus.Completeness",
+        "Solidity.Calculus.ProofTree",
+        "Solidity.Calculus.DecideComplete",
+        "Solidity.Calculus.SurfaceSpec",
+        "Solidity.Calculus.TreeData",
+        "Solidity.Calculus.CloseFrame"
+      ],
+      "Solidity.Calculus.CloseFrame": [
+        "Solidity.Calculus.CloseScoped",
+        "Solidity.Calculus.TermLaws",
+        "Solidity.Theory.Typed.MemMirror"
+      ],
+      "Solidity.Theory.Typed.MemMirror": [
+        "Solidity.Theory.Typed.Mem"
+      ],
+      "Solidity.Calculus.TermLaws": [
+        "Solidity.Calculus.TermLaws.Storage",
+        "Solidity.Calculus.TermLaws.Reads",
+        "Solidity.Calculus.TermLaws.Fresh"
+      ],
+      "Solidity.Calculus.TermLaws.Fresh": [
+        "Solidity.Calculus.TermLaws.Reads"
+      ],
+      "Solidity.Calculus.TermLaws.Reads": [
+        "Solidity.Calculus.TermLaws.Storage"
+      ],
+      "Solidity.Calculus.TermLaws.Storage": [
+        "Solidity.Calculus.TermLib",
+        "Solidity.Calculus.SeqRewrite",
+        "Solidity.Calculus.StateFacts",
+        "Solidity.Theory.Typed.Mem"
+      ],
+      "Solidity.Calculus.TermLib": [
+        "Solidity.Calculus.TermLib.Rules",
+        "Solidity.Calculus.PrintTerm"
+      ],
+      "Solidity.Calculus.TermLib.Rules": [
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.TermEq",
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.StateFacts"
+      ],
+      "Solidity.Calculus.CloseScoped": [
+        "Solidity.Calculus.CloseScoped.Leaf",
+        "Solidity.Calculus.CloseScoped.Steps"
+      ],
+      "Solidity.Calculus.CloseScoped.Steps": [
+        "Solidity.Calculus.CloseScoped.Leaf",
+        "Solidity.Calculus.LeafShare",
+        "Solidity.Calculus.LeafSplit"
+      ],
+      "Solidity.Calculus.LeafSplit": [
+        "Solidity.Calculus.Logic"
+      ],
+      "Solidity.Calculus.LeafShare": [
+        "Solidity.Calculus.TermWk",
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.CallSummary"
+      ],
+      "Solidity.Calculus.CloseScoped.Leaf": [
+        "Solidity.Calculus.Close",
+        "Solidity.Calculus.SeqRewrite",
+        "Solidity.Theory.Typed.Mem",
+        "Solidity.Calculus.EvalEqs",
+        "Solidity.Calculus.TermAgree"
+      ],
+      "Solidity.Calculus.TermAgree": [
+        "Solidity.Calculus.DeclarationFacts",
+        "Solidity.Calculus.SoundArms"
+      ],
+      "Solidity.Calculus.DeclarationFacts": [
+        "Solidity.Calculus.SurfaceSpec",
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.Quote"
+      ],
+      "Solidity.Calculus.EvalEqs": [
+        "Solidity.Calculus.TermAgree"
+      ],
+      "Solidity.Calculus.TreeData": [
+        "Solidity.Calculus.RuleKit"
+      ],
+      "Solidity.Calculus.DecideComplete": [
+        "Solidity.Calculus.DecideCleanTail",
+        "Solidity.Calculus.CondLift",
+        "Solidity.Calculus.Symex"
+      ],
+      "Solidity.Calculus.Symex": [
+        "Solidity.Calculus.Sound",
+        "Solidity.Calculus.Quote",
+        "Solidity.Calculus.TacticSyntax"
+      ],
+      "Solidity.Calculus.CondLift": [
+        "Solidity.Calculus.Decide"
+      ],
+      "Solidity.Calculus.Decide": [
+        "Solidity.Calculus.DecideLang",
+        "Solidity.Calculus.TermEq"
+      ],
+      "Solidity.Calculus.DecideLang": [
+        "Solidity.Calculus.Quote"
+      ],
+      "Solidity.Calculus.DecideCleanTail": [
+        "Solidity.Calculus.DecideTyped",
+        "Solidity.Calculus.MemRead",
+        "Solidity.Calculus.TailMode"
+      ],
+      "Solidity.Calculus.TailMode": [
+        "Solidity.Calculus.Logic",
+        "Solidity.Typing.CleanTailRun"
+      ],
+      "Solidity.Typing.CleanTailRun": [
+        "Solidity.Typing.CleanTail",
+        "Solidity.Typing.HeredRun"
+      ],
+      "Solidity.Calculus.MemRead": [
+        "Solidity.Calculus.MemRead.Spine",
+        "Solidity.Calculus.MemRead.Laws",
+        "Solidity.Calculus.MemRead.Ok",
+        "Solidity.Calculus.MemRead.Pass"
+      ],
+      "Solidity.Calculus.MemRead.Pass": [
+        "Solidity.Calculus.MemRead.Ok"
+      ],
+      "Solidity.Calculus.MemRead.Ok": [
+        "Solidity.Calculus.MemRead.Laws"
+      ],
+      "Solidity.Calculus.MemRead.Laws": [
+        "Solidity.Calculus.MemRead.Spine"
+      ],
+      "Solidity.Calculus.MemRead.Spine": [
+        "Solidity.Calculus.Closer",
+        "Solidity.Calculus.ElimFacts",
+        "Solidity.Calculus.DecideEval",
+        "Solidity.Calculus.TermLaws",
+        "Solidity.Theory.Typed.MemMirror"
+      ],
+      "Solidity.Calculus.DecideEval": [
+        "Solidity.Calculus.DecideEval.Readers",
+        "Solidity.Calculus.DecideEval.Storages",
+        "Solidity.Calculus.DecideEval.Memory"
+      ],
+      "Solidity.Calculus.DecideEval.Memory": [
+        "Solidity.Calculus.DecideEval.Storages"
+      ],
+      "Solidity.Calculus.DecideEval.Storages": [
+        "Solidity.Calculus.DecideEval.Readers"
+      ],
+      "Solidity.Calculus.DecideEval.Readers": [
+        "Solidity.Calculus.Decide",
+        "Solidity.Theory.Typed.Mem"
+      ],
+      "Solidity.Calculus.ElimFacts": [
+        "Solidity.Calculus.Closer",
+        "Solidity.Calculus.DecideEval"
+      ],
+      "Solidity.Calculus.Closer": [
+        "Solidity.Calculus.Closer.Facts",
+        "Solidity.Calculus.Closer.Normal",
+        "Solidity.Calculus.Closer.Bytes",
+        "Solidity.Calculus.Closer.Leaf"
+      ],
+      "Solidity.Calculus.Closer.Leaf": [
+        "Solidity.Calculus.Closer.Bytes"
+      ],
+      "Solidity.Calculus.Closer.Bytes": [
+        "Solidity.Calculus.Closer.Normal"
+      ],
+      "Solidity.Calculus.Closer.Normal": [
+        "Solidity.Calculus.Closer.Facts"
+      ],
+      "Solidity.Calculus.Closer.Facts": [
+        "Solidity.Calculus.DecideLang",
+        "Solidity.Calculus.ReadBounds",
+        "Solidity.Calculus.TermEq",
+        "Solidity.Calculus.Decide"
+      ],
+      "Solidity.Calculus.ReadBounds": [
+        "Solidity.Calculus.DecideLang"
+      ],
+      "Solidity.Calculus.DecideTyped": [
+        "Solidity.Calculus.DecideScoped",
+        "Solidity.Calculus.DecideEval"
+      ],
+      "Solidity.Calculus.DecideScoped": [
+        "Solidity.Calculus.Decide",
+        "Solidity.Calculus.ReadBounds",
+        "Solidity.Calculus.TermEq",
+        "Solidity.Calculus.TermAgree",
+        "Solidity.Calculus.MemRead"
+      ],
+      "Solidity.Calculus.ProofTree": [
+        "Solidity.Calculus.TreeData",
+        "Solidity.Calculus.RuleShapes",
+        "Solidity.Calculus.Close",
+        "Solidity.Calculus.Completeness",
+        "Solidity.Calculus.Delab"
+      ],
+      "Solidity.Calculus.Delab": [
+        "Solidity.Calculus.DelabRules",
+        "Solidity.Calculus.Proves"
+      ],
+      "Solidity.Calculus.DelabRules": [
+        "Solidity.Calculus.PrintStmt",
+        "Solidity.Calculus.Taclet"
+      ],
+      "Solidity.Calculus.Completeness": [
+        "Solidity.Calculus.Taclet"
+      ],
+      "Solidity.Calculus.RuleShapes": [
+        "Solidity.Calculus.CallbackRules"
+      ],
+      "Solidity.Calculus.CallbackRules": [
+        "Solidity.Calculus.Taclet"
+      ],
+      "Solidity.Calculus.RewritePast": [
+        "Solidity.Calculus.RewritePast.Scope",
+        "Solidity.Calculus.RewritePast.Merge",
+        "Solidity.Calculus.RewritePast.Apply"
+      ],
+      "Solidity.Calculus.RewritePast.Apply": [
+        "Solidity.Calculus.RewritePast.Merge"
+      ],
+      "Solidity.Calculus.RewritePast.Merge": [
+        "Solidity.Calculus.RewritePast.Scope"
+      ],
+      "Solidity.Calculus.RewritePast.Scope": [
+        "Solidity.Calculus.RewriteScoped"
+      ],
+      "Solidity.Calculus.RewriteScoped": [
+        "Solidity.Calculus.StatePartsScoped",
+        "Solidity.Calculus.Merge",
+        "Solidity.Calculus.TermLaws",
+        "Solidity.Calculus.SeqRewrite"
+      ],
+      "Solidity.Calculus.Merge": [
+        "Solidity.Calculus.Graft",
+        "Solidity.Calculus.Sound",
+        "Solidity.Calculus.Logic",
+        "Solidity.Calculus.FirstOrder",
+        "Solidity.Calculus.Close"
+      ],
+      "Solidity.Calculus.StatePartsScoped": [
+        "Solidity.Calculus.UpdRuleScoped",
+        "Solidity.Calculus.StateFacts"
+      ],
+      "Solidity.Calculus.UpdRuleScoped": [
+        "Solidity.Calculus.UpdateRules"
+      ],
+      "Solidity.Frontend.Import": [
+        "Lean",
+        "Solidity.Frontend.SolcJson",
+        "Solidity.Syntax.Splice"
+      ],
+      "Solidity.Frontend.SolcJson": [
+        "Solidity.Frontend.SolcJson.Body",
+        "Solidity.Frontend.SolcJson.Contract"
+      ],
+      "Solidity.Frontend.SolcJson.Contract": [
+        "Solidity.Frontend.SolcJson.Admission",
+        "Solidity.Frontend.SolcJson.Getters"
+      ],
+      "Solidity.Frontend.SolcJson.Getters": [
+        "Solidity.Frontend.SolcJson.Body",
+        "Solidity.Keccak"
+      ],
+      "Solidity.Frontend.SolcJson.Body": [
+        "Lean.Data.Json",
+        "Solidity.Syntax",
+        "Solidity.Frontend.Source"
+      ],
+      "Solidity.Frontend.Source": [
+        "Lean",
+        "Solidity.Language.Features"
+      ],
+      "Solidity.Language.Features": [
+        "Lean.Data.Name"
+      ],
+      "Solidity.Frontend.SolcJson.Admission": [
+        "Solidity.Frontend.SolcJson.Body"
+      ],
+      "Solidity.Solkey.TestSuite": [
+        "Solidity.Frontend.Import"
+      ],
+      "Solidity.TestSuite.Report": [
+        "Solidity.TestSuite.Derived1",
+        "Solidity.TestSuite.Derived2",
+        "Solidity.TestSuite.Derived3",
+        "Solidity.TestSuite.Derived4",
+        "Solidity.TestSuite.Derived5",
+        "Solidity.TestSuite.Derived6",
+        "Solidity.TestSuite.Derived7",
+        "Solidity.TestSuite.Derived8",
+        "Solidity.TestSuite.Derived9",
+        "Solidity.TestSuite.Derived10",
+        "Solidity.TestSuite.Derived11",
+        "Solidity.TestSuite.Derived12",
+        "Solidity.TestSuite.Derived13",
+        "Solidity.TestSuite.Derived14",
+        "Solidity.TestSuite.Derived15",
+        "Solidity.TestSuite.Derived16",
+        "Solidity.TestSuite.Derived17",
+        "Solidity.TestSuite.Derived18",
+        "Solidity.TestSuite.Derived19",
+        "Solidity.TestSuite.Derived20",
+        "Solidity.TestSuite.Derived21",
+        "Solidity.TestSuite.Refuted"
+      ],
+      "Solidity.TestSuite.Refuted": [
+        "Solidity.TestSuite.ScopedProblems",
+        "Solidity.Tools.Counterexample"
+      ],
+      "Solidity.Tools.Counterexample": [
+        "Solidity.Calculus.SolSpec",
+        "Solidity.Calculus.Surface",
+        "Solidity.Calculus.SoundLoops",
+        "Solidity.Semantics.RunFuel",
+        "Solidity.Semantics.RunAccel",
+        "Solidity.Tools.LazyStorage",
+        "Solidity.Tools.Common",
+        "Solidity.Calculus.DeclarationFacts"
+      ],
+      "Solidity.Tools.Common": [
+        "Solidity.Syntax",
+        "Solidity.Tools.Show"
+      ],
+      "Solidity.Tools.Show": [
+        "Solidity.Semantics",
+        "Solidity.Semantics.Run"
+      ],
+      "Solidity.Tools.LazyStorage": [
+        "Solidity.Calculus.Problem",
+        "Solidity.Tools.Common"
+      ],
+      "Solidity.Semantics.RunAccel": [
+        "Solidity.Semantics.RunFuel",
+        "Solidity.Semantics.RunFrame"
+      ],
+      "Solidity.Semantics.RunFuel": [
+        "Solidity.Semantics.RunWk"
+      ],
+      "Solidity.Calculus.SolSpec": [
+        "Solidity.Calculus.Derive",
+        "Solidity.Calculus.Spec",
+        "Solidity.Calculus.SurfaceSpec"
+      ],
+      "Solidity.TestSuite.Derived21": [
+        "Solidity.TestSuite.ScopedProblems",
+        "Solidity.Calculus.Closers"
+      ],
+      "Solidity.Calculus.Closers": [
+        "Solidity.Calculus.ProvesDerive",
+        "Solidity.Calculus.WalkSyntax",
+        "Solidity.Calculus.DecideComplete",
+        "Solidity.Calculus.UpdRuleScoped"
+      ],
+      "Solidity.Calculus.WalkSyntax": [
+        "Solidity.Calculus.Derive",
+        "Solidity.Calculus.Surface",
+        "Solidity.Calculus.TacticSyntax"
+      ],
+      "Solidity.TestSuite.Derived20": [
+        "Solidity.TestSuite.ScopedProblems",
+        "Solidity.Calculus.Closers"
+      ],
+      "Solidity.TestSuite.Derived19": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived18": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived17": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived16": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived15": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived14": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived13": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived12": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived11": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived10": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived9": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived8": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived7": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived6": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived5": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived4": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived3": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived2": [
+        "Solidity.TestSuite.ScopedProblems"
+      ],
+      "Solidity.TestSuite.Derived1": [
+        "Solidity.TestSuite.ScopedProblems"
+      ]
+    },
+    "externalModules": [
+      "Lean",
+      "Lean.Data.Json",
+      "Lean.Data.Name",
+      "Lean.Elab.Tactic.Omega",
+      "Lean.Util.ShareCommon",
+      "Std.Data.HashMap"
+    ],
+    "blockedDecisionInClosure": false,
+    "cachedOleans": [
+      {
+        "module": "Solidity.AST",
+        "oleanExists": true,
+        "bytes": 5286720
+      },
+      {
+        "module": "Solidity.Calculus.AllLeft",
+        "oleanExists": true,
+        "bytes": 1990072
+      },
+      {
+        "module": "Solidity.Calculus.Arms",
+        "oleanExists": true,
+        "bytes": 3423360
+      },
+      {
+        "module": "Solidity.Calculus.Blocks",
+        "oleanExists": true,
+        "bytes": 2455680
+      },
+      {
+        "module": "Solidity.Calculus.Budget",
+        "oleanExists": true,
+        "bytes": 164976
+      },
+      {
+        "module": "Solidity.Calculus.CallSummary",
+        "oleanExists": true,
+        "bytes": 2931168
+      },
+      {
+        "module": "Solidity.Calculus.CallbackRules",
+        "oleanExists": true,
+        "bytes": 222648
+      },
+      {
+        "module": "Solidity.Calculus.Close",
+        "oleanExists": true,
+        "bytes": 2160592
+      },
+      {
+        "module": "Solidity.Calculus.CloseAll",
+        "oleanExists": true,
+        "bytes": 1779480
+      },
+      {
+        "module": "Solidity.Calculus.CloseFrame",
+        "oleanExists": true,
+        "bytes": 1269736
+      },
+      {
+        "module": "Solidity.Calculus.CloseLemmas",
+        "oleanExists": true,
+        "bytes": 568368
+      },
+      {
+        "module": "Solidity.Calculus.CloseNonlin",
+        "oleanExists": true,
+        "bytes": 1511600
+      },
+      {
+        "module": "Solidity.Calculus.CloseScoped",
+        "oleanExists": true,
+        "bytes": 23184
+      },
+      {
+        "module": "Solidity.Calculus.CloseScoped.Leaf",
+        "oleanExists": true,
+        "bytes": 2217056
+      },
+      {
+        "module": "Solidity.Calculus.CloseScoped.Steps",
+        "oleanExists": true,
+        "bytes": 9903816
+      },
+      {
+        "module": "Solidity.Calculus.Closer",
+        "oleanExists": true,
+        "bytes": 22672
+      },
+      {
+        "module": "Solidity.Calculus.Closer.Bytes",
+        "oleanExists": true,
+        "bytes": 10847680
+      },
+      {
+        "module": "Solidity.Calculus.Closer.Facts",
+        "oleanExists": true,
+        "bytes": 16744296
+      },
+      {
+        "module": "Solidity.Calculus.Closer.Leaf",
+        "oleanExists": true,
+        "bytes": 7457032
+      },
+      {
+        "module": "Solidity.Calculus.Closer.Normal",
+        "oleanExists": true,
+        "bytes": 4514024
+      },
+      {
+        "module": "Solidity.Calculus.Closers",
+        "oleanExists": true,
+        "bytes": 858864
+      },
+      {
+        "module": "Solidity.Calculus.Completeness",
+        "oleanExists": true,
+        "bytes": 1226208
+      },
+      {
+        "module": "Solidity.Calculus.CondLift",
+        "oleanExists": true,
+        "bytes": 3124536
+      },
+      {
+        "module": "Solidity.Calculus.Correct",
+        "oleanExists": true,
+        "bytes": 1090432
+      },
+      {
+        "module": "Solidity.Calculus.DataIn",
+        "oleanExists": true,
+        "bytes": 2185152
+      },
+      {
+        "module": "Solidity.Calculus.Decide",
+        "oleanExists": true,
+        "bytes": 22839240
+      },
+      {
+        "module": "Solidity.Calculus.DecideCleanTail",
+        "oleanExists": true,
+        "bytes": 6775872
+      },
+      {
+        "module": "Solidity.Calculus.DecideComplete",
+        "oleanExists": true,
+        "bytes": 645400
+      },
+      {
+        "module": "Solidity.Calculus.DecideEval",
+        "oleanExists": true,
+        "bytes": 22056
+      },
+      {
+        "module": "Solidity.Calculus.DecideEval.Memory",
+        "oleanExists": true,
+        "bytes": 2882536
+      },
+      {
+        "module": "Solidity.Calculus.DecideEval.Readers",
+        "oleanExists": true,
+        "bytes": 4040216
+      },
+      {
+        "module": "Solidity.Calculus.DecideEval.Storages",
+        "oleanExists": true,
+        "bytes": 2282912
+      },
+      {
+        "module": "Solidity.Calculus.DecideLang",
+        "oleanExists": true,
+        "bytes": 12068904
+      },
+      {
+        "module": "Solidity.Calculus.DecideScoped",
+        "oleanExists": true,
+        "bytes": 2420136
+      },
+      {
+        "module": "Solidity.Calculus.DecideTyped",
+        "oleanExists": true,
+        "bytes": 27816392
+      },
+      {
+        "module": "Solidity.Calculus.DeclarationFacts",
+        "oleanExists": true,
+        "bytes": 861504
+      },
+      {
+        "module": "Solidity.Calculus.Delab",
+        "oleanExists": true,
+        "bytes": 825080
+      },
+      {
+        "module": "Solidity.Calculus.DelabErase",
+        "oleanExists": true,
+        "bytes": 374008
+      },
+      {
+        "module": "Solidity.Calculus.DelabRules",
+        "oleanExists": true,
+        "bytes": 959296
+      },
+      {
+        "module": "Solidity.Calculus.Derive",
+        "oleanExists": true,
+        "bytes": 2183992
+      },
+      {
+        "module": "Solidity.Calculus.ElimFacts",
+        "oleanExists": true,
+        "bytes": 6676752
+      },
+      {
+        "module": "Solidity.Calculus.EvalEqs",
+        "oleanExists": true,
+        "bytes": 526616
+      },
+      {
+        "module": "Solidity.Calculus.FilteredMembership",
+        "oleanExists": true,
+        "bytes": 400056
+      },
+      {
+        "module": "Solidity.Calculus.FiniteMembership",
+        "oleanExists": true,
+        "bytes": 95072
+      },
+      {
+        "module": "Solidity.Calculus.FirstOrder",
+        "oleanExists": true,
+        "bytes": 136976
+      },
+      {
+        "module": "Solidity.Calculus.Fml",
+        "oleanExists": true,
+        "bytes": 2927320
+      },
+      {
+        "module": "Solidity.Calculus.Graft",
+        "oleanExists": true,
+        "bytes": 7208544
+      },
+      {
+        "module": "Solidity.Calculus.Hyp",
+        "oleanExists": true,
+        "bytes": 261896
+      },
+      {
+        "module": "Solidity.Calculus.KeyTaclets",
+        "oleanExists": true,
+        "bytes": 12682648
+      },
+      {
+        "module": "Solidity.Calculus.Lands",
+        "oleanExists": true,
+        "bytes": 15134280
+      },
+      {
+        "module": "Solidity.Calculus.LeafDerive",
+        "oleanExists": true,
+        "bytes": 3564952
+      },
+      {
+        "module": "Solidity.Calculus.LeafShare",
+        "oleanExists": true,
+        "bytes": 5863408
+      },
+      {
+        "module": "Solidity.Calculus.LeafSplit",
+        "oleanExists": true,
+        "bytes": 542504
+      },
+      {
+        "module": "Solidity.Calculus.LexDiamond",
+        "oleanExists": true,
+        "bytes": 151784
+      },
+      {
+        "module": "Solidity.Calculus.LexVariant",
+        "oleanExists": true,
+        "bytes": 262024
+      },
+      {
+        "module": "Solidity.Calculus.LexVariantSound",
+        "oleanExists": true,
+        "bytes": 965432
+      },
+      {
+        "module": "Solidity.Calculus.Logic",
+        "oleanExists": true,
+        "bytes": 205592
+      },
+      {
+        "module": "Solidity.Calculus.Lower",
+        "oleanExists": true,
+        "bytes": 893552
+      },
+      {
+        "module": "Solidity.Calculus.LowerRun",
+        "oleanExists": true,
+        "bytes": 949624
+      },
+      {
+        "module": "Solidity.Calculus.MemRead",
+        "oleanExists": true,
+        "bytes": 23600
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Laws",
+        "oleanExists": true,
+        "bytes": 23908688
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Ok",
+        "oleanExists": true,
+        "bytes": 25233696
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Pass",
+        "oleanExists": true,
+        "bytes": 21613056
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Spine",
+        "oleanExists": true,
+        "bytes": 30594704
+      },
+      {
+        "module": "Solidity.Calculus.Merge",
+        "oleanExists": true,
+        "bytes": 1763040
+      },
+      {
+        "module": "Solidity.Calculus.NamedTerm",
+        "oleanExists": true,
+        "bytes": 2990624
+      },
+      {
+        "module": "Solidity.Calculus.Notation",
+        "oleanExists": true,
+        "bytes": 3046728
+      },
+      {
+        "module": "Solidity.Calculus.NotationResolve",
+        "oleanExists": true,
+        "bytes": 749584
+      },
+      {
+        "module": "Solidity.Calculus.PremiseSound",
+        "oleanExists": true,
+        "bytes": 218928
+      },
+      {
+        "module": "Solidity.Calculus.Print",
+        "oleanExists": true,
+        "bytes": 1735248
+      },
+      {
+        "module": "Solidity.Calculus.PrintStmt",
+        "oleanExists": true,
+        "bytes": 10647576
+      },
+      {
+        "module": "Solidity.Calculus.PrintTerm",
+        "oleanExists": true,
+        "bytes": 5775208
+      },
+      {
+        "module": "Solidity.Calculus.Problem",
+        "oleanExists": true,
+        "bytes": 1047416
+      },
+      {
+        "module": "Solidity.Calculus.ProofTree",
+        "oleanExists": true,
+        "bytes": 1913288
+      },
+      {
+        "module": "Solidity.Calculus.Proves",
+        "oleanExists": true,
+        "bytes": 3570800
+      },
+      {
+        "module": "Solidity.Calculus.ProvesDerive",
+        "oleanExists": true,
+        "bytes": 4222984
+      },
+      {
+        "module": "Solidity.Calculus.ProvesSound",
+        "oleanExists": true,
+        "bytes": 1086216
+      },
+      {
+        "module": "Solidity.Calculus.Quote",
+        "oleanExists": true,
+        "bytes": 4546104
+      },
+      {
+        "module": "Solidity.Calculus.ReadBounds",
+        "oleanExists": true,
+        "bytes": 4783032
+      },
+      {
+        "module": "Solidity.Calculus.ReadWrite",
+        "oleanExists": true,
+        "bytes": 183592
+      },
+      {
+        "module": "Solidity.Calculus.RefInputs",
+        "oleanExists": true,
+        "bytes": 137048
+      },
+      {
+        "module": "Solidity.Calculus.RewritePast",
+        "oleanExists": true,
+        "bytes": 23136
+      },
+      {
+        "module": "Solidity.Calculus.RewritePast.Apply",
+        "oleanExists": true,
+        "bytes": 12008136
+      },
+      {
+        "module": "Solidity.Calculus.RewritePast.Merge",
+        "oleanExists": true,
+        "bytes": 5434368
+      },
+      {
+        "module": "Solidity.Calculus.RewritePast.Scope",
+        "oleanExists": true,
+        "bytes": 3200728
+      },
+      {
+        "module": "Solidity.Calculus.RewriteScoped",
+        "oleanExists": true,
+        "bytes": 22526032
+      },
+      {
+        "module": "Solidity.Calculus.Rigid",
+        "oleanExists": true,
+        "bytes": 331536
+      },
+      {
+        "module": "Solidity.Calculus.RuleKit",
+        "oleanExists": true,
+        "bytes": 547560
+      },
+      {
+        "module": "Solidity.Calculus.RuleShapes",
+        "oleanExists": true,
+        "bytes": 2236696
+      },
+      {
+        "module": "Solidity.Calculus.RuleSyntax",
+        "oleanExists": true,
+        "bytes": 26888
+      },
+      {
+        "module": "Solidity.Calculus.RuleSyntax.Grammar",
+        "oleanExists": true,
+        "bytes": 11821624
+      },
+      {
+        "module": "Solidity.Calculus.RuleSyntax.Print",
+        "oleanExists": true,
+        "bytes": 1540176
+      },
+      {
+        "module": "Solidity.Calculus.RuleSyntax.Schemas",
+        "oleanExists": true,
+        "bytes": 8236048
+      },
+      {
+        "module": "Solidity.Calculus.Rules",
+        "oleanExists": true,
+        "bytes": 5443888
+      },
+      {
+        "module": "Solidity.Calculus.SeqRewrite",
+        "oleanExists": true,
+        "bytes": 3226944
+      },
+      {
+        "module": "Solidity.Calculus.SequentNotation",
+        "oleanExists": true,
+        "bytes": 1014952
+      },
+      {
+        "module": "Solidity.Calculus.Shift",
+        "oleanExists": true,
+        "bytes": 673832
+      },
+      {
+        "module": "Solidity.Calculus.SolSpec",
+        "oleanExists": true,
+        "bytes": 21600
+      },
+      {
+        "module": "Solidity.Calculus.Sound",
+        "oleanExists": true,
+        "bytes": 30336
+      },
+      {
+        "module": "Solidity.Calculus.Sound.LoopLexDiamond",
+        "oleanExists": true,
+        "bytes": 687720
+      },
+      {
+        "module": "Solidity.Calculus.Sound.LoopLexErase",
+        "oleanExists": true,
+        "bytes": 31760
+      },
+      {
+        "module": "Solidity.Calculus.SoundArms",
+        "oleanExists": true,
+        "bytes": 2676400
+      },
+      {
+        "module": "Solidity.Calculus.SoundCalls",
+        "oleanExists": true,
+        "bytes": 3539128
+      },
+      {
+        "module": "Solidity.Calculus.SoundCapture",
+        "oleanExists": true,
+        "bytes": 2551704
+      },
+      {
+        "module": "Solidity.Calculus.SoundCatch",
+        "oleanExists": true,
+        "bytes": 827776
+      },
+      {
+        "module": "Solidity.Calculus.SoundControl",
+        "oleanExists": true,
+        "bytes": 3227936
+      },
+      {
+        "module": "Solidity.Calculus.SoundKit",
+        "oleanExists": true,
+        "bytes": 2039600
+      },
+      {
+        "module": "Solidity.Calculus.SoundLocal",
+        "oleanExists": true,
+        "bytes": 5510024
+      },
+      {
+        "module": "Solidity.Calculus.SoundLoops",
+        "oleanExists": true,
+        "bytes": 2091224
+      },
+      {
+        "module": "Solidity.Calculus.SoundMem",
+        "oleanExists": true,
+        "bytes": 1183096
+      },
+      {
+        "module": "Solidity.Calculus.SoundPush",
+        "oleanExists": true,
+        "bytes": 1669224
+      },
+      {
+        "module": "Solidity.Calculus.SoundStep",
+        "oleanExists": true,
+        "bytes": 539576
+      },
+      {
+        "module": "Solidity.Calculus.SoundStore",
+        "oleanExists": true,
+        "bytes": 5330768
+      },
+      {
+        "module": "Solidity.Calculus.SoundSummary",
+        "oleanExists": true,
+        "bytes": 16303632
+      },
+      {
+        "module": "Solidity.Calculus.Spec",
+        "oleanExists": true,
+        "bytes": 510944
+      },
+      {
+        "module": "Solidity.Calculus.StateFacts",
+        "oleanExists": true,
+        "bytes": 2003856
+      },
+      {
+        "module": "Solidity.Calculus.StatePartsScoped",
+        "oleanExists": true,
+        "bytes": 8374944
+      },
+      {
+        "module": "Solidity.Calculus.Step",
+        "oleanExists": true,
+        "bytes": 813984
+      },
+      {
+        "module": "Solidity.Calculus.StmtSound",
+        "oleanExists": true,
+        "bytes": 245088
+      },
+      {
+        "module": "Solidity.Calculus.Surface",
+        "oleanExists": true,
+        "bytes": 481216
+      },
+      {
+        "module": "Solidity.Calculus.SurfaceNotation",
+        "oleanExists": true,
+        "bytes": 9742848
+      },
+      {
+        "module": "Solidity.Calculus.SurfaceSpec",
+        "oleanExists": true,
+        "bytes": 3274760
+      },
+      {
+        "module": "Solidity.Calculus.Symex",
+        "oleanExists": true,
+        "bytes": 1655568
+      },
+      {
+        "module": "Solidity.Calculus.SyntaxSize",
+        "oleanExists": true,
+        "bytes": 1022632
+      },
+      {
+        "module": "Solidity.Calculus.Taclet",
+        "oleanExists": true,
+        "bytes": 27859112
+      },
+      {
+        "module": "Solidity.Calculus.TacticSyntax",
+        "oleanExists": true,
+        "bytes": 151240
+      },
+      {
+        "module": "Solidity.Calculus.TailMode",
+        "oleanExists": true,
+        "bytes": 132768
+      },
+      {
+        "module": "Solidity.Calculus.TermAgree",
+        "oleanExists": true,
+        "bytes": 23855088
+      },
+      {
+        "module": "Solidity.Calculus.TermEq",
+        "oleanExists": true,
+        "bytes": 13493152
+      },
+      {
+        "module": "Solidity.Calculus.TermEval",
+        "oleanExists": true,
+        "bytes": 1596952
+      },
+      {
+        "module": "Solidity.Calculus.TermLaws",
+        "oleanExists": true,
+        "bytes": 22808
+      },
+      {
+        "module": "Solidity.Calculus.TermLaws.Fresh",
+        "oleanExists": true,
+        "bytes": 25544288
+      },
+      {
+        "module": "Solidity.Calculus.TermLaws.Reads",
+        "oleanExists": true,
+        "bytes": 33020712
+      },
+      {
+        "module": "Solidity.Calculus.TermLaws.Storage",
+        "oleanExists": true,
+        "bytes": 9086760
+      },
+      {
+        "module": "Solidity.Calculus.TermLib",
+        "oleanExists": true,
+        "bytes": 900520
+      },
+      {
+        "module": "Solidity.Calculus.TermLib.Rules",
+        "oleanExists": true,
+        "bytes": 7931504
+      },
+      {
+        "module": "Solidity.Calculus.TermSize",
+        "oleanExists": true,
+        "bytes": 21212632
+      },
+      {
+        "module": "Solidity.Calculus.TermWk",
+        "oleanExists": true,
+        "bytes": 535272
+      },
+      {
+        "module": "Solidity.Calculus.TreeData",
+        "oleanExists": true,
+        "bytes": 866528
+      },
+      {
+        "module": "Solidity.Calculus.UpdRuleScoped",
+        "oleanExists": true,
+        "bytes": 11098792
+      },
+      {
+        "module": "Solidity.Calculus.UpdateRules",
+        "oleanExists": true,
+        "bytes": 1942392
+      },
+      {
+        "module": "Solidity.Calculus.WalkSyntax",
+        "oleanExists": true,
+        "bytes": 1828168
+      },
+      {
+        "module": "Solidity.Calculus.WkOver",
+        "oleanExists": true,
+        "bytes": 468672
+      },
+      {
+        "module": "Solidity.ERC7201",
+        "oleanExists": true,
+        "bytes": 84000
+      },
+      {
+        "module": "Solidity.Eqns",
+        "oleanExists": true,
+        "bytes": 104112
+      },
+      {
+        "module": "Solidity.Frontend.Import",
+        "oleanExists": true,
+        "bytes": 4230320
+      },
+      {
+        "module": "Solidity.Frontend.Problems",
+        "oleanExists": true,
+        "bytes": 2333872
+      },
+      {
+        "module": "Solidity.Frontend.SolcJson",
+        "oleanExists": true,
+        "bytes": 25936
+      },
+      {
+        "module": "Solidity.Frontend.SolcJson.Admission",
+        "oleanExists": true,
+        "bytes": 2451768
+      },
+      {
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "oleanExists": true,
+        "bytes": 9551096
+      },
+      {
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "oleanExists": true,
+        "bytes": 10486160
+      },
+      {
+        "module": "Solidity.Frontend.SolcJson.Getters",
+        "oleanExists": true,
+        "bytes": 838128
+      },
+      {
+        "module": "Solidity.Frontend.Source",
+        "oleanExists": true,
+        "bytes": 3013448
+      },
+      {
+        "module": "Solidity.Hashes",
+        "oleanExists": true,
+        "bytes": 794968
+      },
+      {
+        "module": "Solidity.Keccak",
+        "oleanExists": true,
+        "bytes": 297248
+      },
+      {
+        "module": "Solidity.KeySort",
+        "oleanExists": true,
+        "bytes": 929504
+      },
+      {
+        "module": "Solidity.Language.Features",
+        "oleanExists": true,
+        "bytes": 8760336
+      },
+      {
+        "module": "Solidity.RevertBytes",
+        "oleanExists": true,
+        "bytes": 106760
+      },
+      {
+        "module": "Solidity.Scope",
+        "oleanExists": true,
+        "bytes": 2166056
+      },
+      {
+        "module": "Solidity.Secp256k1",
+        "oleanExists": true,
+        "bytes": 315056
+      },
+      {
+        "module": "Solidity.Semantics",
+        "oleanExists": true,
+        "bytes": 681400
+      },
+      {
+        "module": "Solidity.Semantics.AllocBytes",
+        "oleanExists": true,
+        "bytes": 825616
+      },
+      {
+        "module": "Solidity.Semantics.Callback",
+        "oleanExists": true,
+        "bytes": 26579336
+      },
+      {
+        "module": "Solidity.Semantics.DeferredSource",
+        "oleanExists": true,
+        "bytes": 1213904
+      },
+      {
+        "module": "Solidity.Semantics.Ends",
+        "oleanExists": true,
+        "bytes": 540120
+      },
+      {
+        "module": "Solidity.Semantics.Heap",
+        "oleanExists": true,
+        "bytes": 889472
+      },
+      {
+        "module": "Solidity.Semantics.LexMetrics",
+        "oleanExists": true,
+        "bytes": 367120
+      },
+      {
+        "module": "Solidity.Semantics.NativeDeferred",
+        "oleanExists": true,
+        "bytes": 153448
+      },
+      {
+        "module": "Solidity.Semantics.NoPanic",
+        "oleanExists": true,
+        "bytes": 2609240
+      },
+      {
+        "module": "Solidity.Semantics.Ops",
+        "oleanExists": true,
+        "bytes": 522616
+      },
+      {
+        "module": "Solidity.Semantics.RevertData",
+        "oleanExists": true,
+        "bytes": 49584
+      },
+      {
+        "module": "Solidity.Semantics.RevertOnly",
+        "oleanExists": true,
+        "bytes": 50120
+      },
+      {
+        "module": "Solidity.Semantics.Run",
+        "oleanExists": true,
+        "bytes": 3335648
+      },
+      {
+        "module": "Solidity.Semantics.RunAccel",
+        "oleanExists": true,
+        "bytes": 4419200
+      },
+      {
+        "module": "Solidity.Semantics.RunFrame",
+        "oleanExists": true,
+        "bytes": 5321536
+      },
+      {
+        "module": "Solidity.Semantics.RunFuel",
+        "oleanExists": true,
+        "bytes": 1671808
+      },
+      {
+        "module": "Solidity.Semantics.RunWk",
+        "oleanExists": true,
+        "bytes": 5493992
+      },
+      {
+        "module": "Solidity.Semantics.State",
+        "oleanExists": true,
+        "bytes": 385552
+      },
+      {
+        "module": "Solidity.Semantics.Storage",
+        "oleanExists": true,
+        "bytes": 22824
+      },
+      {
+        "module": "Solidity.Semantics.Storage.Anon",
+        "oleanExists": true,
+        "bytes": 604088
+      },
+      {
+        "module": "Solidity.Semantics.Storage.Ops",
+        "oleanExists": true,
+        "bytes": 5567120
+      },
+      {
+        "module": "Solidity.Semantics.Storage.Values",
+        "oleanExists": true,
+        "bytes": 4470584
+      },
+      {
+        "module": "Solidity.Semantics.StorageWt",
+        "oleanExists": true,
+        "bytes": 225064
+      },
+      {
+        "module": "Solidity.Semantics.Termination",
+        "oleanExists": true,
+        "bytes": 171080
+      },
+      {
+        "module": "Solidity.Semantics.Value",
+        "oleanExists": true,
+        "bytes": 223384
+      },
+      {
+        "module": "Solidity.Signature",
+        "oleanExists": true,
+        "bytes": 2945904
+      },
+      {
+        "module": "Solidity.Solkey.TestSuite",
+        "oleanExists": true,
+        "bytes": 6310800
+      },
+      {
+        "module": "Solidity.SpecSyntax",
+        "oleanExists": true,
+        "bytes": 2132672
+      },
+      {
+        "module": "Solidity.Syntax",
+        "oleanExists": true,
+        "bytes": 24552
+      },
+      {
+        "module": "Solidity.Syntax.Checked",
+        "oleanExists": true,
+        "bytes": 2053632
+      },
+      {
+        "module": "Solidity.Syntax.Contract",
+        "oleanExists": true,
+        "bytes": 4995536
+      },
+      {
+        "module": "Solidity.Syntax.Elab",
+        "oleanExists": true,
+        "bytes": 22968
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Arms",
+        "oleanExists": true,
+        "bytes": 13870736
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Context",
+        "oleanExists": true,
+        "bytes": 6634768
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Lower",
+        "oleanExists": true,
+        "bytes": 7043928
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Stmt",
+        "oleanExists": true,
+        "bytes": 3195232
+      },
+      {
+        "module": "Solidity.Syntax.Elab.Values",
+        "oleanExists": true,
+        "bytes": 10829056
+      },
+      {
+        "module": "Solidity.Syntax.Grammar",
+        "oleanExists": true,
+        "bytes": 7183896
+      },
+      {
+        "module": "Solidity.Syntax.Inlined",
+        "oleanExists": true,
+        "bytes": 531936
+      },
+      {
+        "module": "Solidity.Syntax.Join",
+        "oleanExists": true,
+        "bytes": 61880
+      },
+      {
+        "module": "Solidity.Syntax.Numeric",
+        "oleanExists": true,
+        "bytes": 120968
+      },
+      {
+        "module": "Solidity.Syntax.PushSource",
+        "oleanExists": true,
+        "bytes": 211424
+      },
+      {
+        "module": "Solidity.Syntax.Quote",
+        "oleanExists": true,
+        "bytes": 2602600
+      },
+      {
+        "module": "Solidity.Syntax.Raw",
+        "oleanExists": true,
+        "bytes": 5102328
+      },
+      {
+        "module": "Solidity.Syntax.Scoped",
+        "oleanExists": true,
+        "bytes": 10262032
+      },
+      {
+        "module": "Solidity.Syntax.Splice",
+        "oleanExists": true,
+        "bytes": 732912
+      },
+      {
+        "module": "Solidity.TestSuite.Derived1",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived10",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived11",
+        "oleanExists": true,
+        "bytes": 35656
+      },
+      {
+        "module": "Solidity.TestSuite.Derived12",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived13",
+        "oleanExists": true,
+        "bytes": 25752
+      },
+      {
+        "module": "Solidity.TestSuite.Derived14",
+        "oleanExists": true,
+        "bytes": 44912
+      },
+      {
+        "module": "Solidity.TestSuite.Derived15",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived16",
+        "oleanExists": true,
+        "bytes": 30600
+      },
+      {
+        "module": "Solidity.TestSuite.Derived17",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived18",
+        "oleanExists": true,
+        "bytes": 34680
+      },
+      {
+        "module": "Solidity.TestSuite.Derived19",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived2",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived20",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived21",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived3",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived4",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived5",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived6",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived7",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived8",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Derived9",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Problems",
+        "oleanExists": true,
+        "bytes": 27600
+      },
+      {
+        "module": "Solidity.TestSuite.Refuted",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.Report",
+        "oleanExists": false,
+        "bytes": null
+      },
+      {
+        "module": "Solidity.TestSuite.ScopedProblems",
+        "oleanExists": true,
+        "bytes": 1275832
+      },
+      {
+        "module": "Solidity.TestSuite.Suggestions",
+        "oleanExists": true,
+        "bytes": 26752
+      },
+      {
+        "module": "Solidity.Theory.Bridge.Denote",
+        "oleanExists": true,
+        "bytes": 3683216
+      },
+      {
+        "module": "Solidity.Theory.Segs",
+        "oleanExists": true,
+        "bytes": 42280
+      },
+      {
+        "module": "Solidity.Theory.Typed.Mem",
+        "oleanExists": true,
+        "bytes": 2641808
+      },
+      {
+        "module": "Solidity.Theory.Typed.MemMirror",
+        "oleanExists": true,
+        "bytes": 772760
+      },
+      {
+        "module": "Solidity.Theory.Typed.Obs",
+        "oleanExists": true,
+        "bytes": 22672
+      },
+      {
+        "module": "Solidity.Theory.Typed.Obs.Ops",
+        "oleanExists": true,
+        "bytes": 2018624
+      },
+      {
+        "module": "Solidity.Theory.Typed.Obs.Paths",
+        "oleanExists": true,
+        "bytes": 4821560
+      },
+      {
+        "module": "Solidity.Theory.Typed.Obs.Values",
+        "oleanExists": true,
+        "bytes": 2988992
+      },
+      {
+        "module": "Solidity.Tools.Common",
+        "oleanExists": true,
+        "bytes": 592384
+      },
+      {
+        "module": "Solidity.Tools.Counterexample",
+        "oleanExists": true,
+        "bytes": 7252128
+      },
+      {
+        "module": "Solidity.Tools.LazyStorage",
+        "oleanExists": true,
+        "bytes": 72080
+      },
+      {
+        "module": "Solidity.Tools.Show",
+        "oleanExists": true,
+        "bytes": 398728
+      },
+      {
+        "module": "Solidity.Typing.CanonTest",
+        "oleanExists": true,
+        "bytes": 108160
+      },
+      {
+        "module": "Solidity.Typing.CleanTail",
+        "oleanExists": true,
+        "bytes": 866048
+      },
+      {
+        "module": "Solidity.Typing.CleanTailRun",
+        "oleanExists": true,
+        "bytes": 8483400
+      },
+      {
+        "module": "Solidity.Typing.Constructibility",
+        "oleanExists": true,
+        "bytes": 2875936
+      },
+      {
+        "module": "Solidity.Typing.Fits",
+        "oleanExists": true,
+        "bytes": 327632
+      },
+      {
+        "module": "Solidity.Typing.HeredRun",
+        "oleanExists": true,
+        "bytes": 2811000
+      },
+      {
+        "module": "Solidity.Typing.Reachability",
+        "oleanExists": true,
+        "bytes": 155104
+      },
+      {
+        "module": "Solidity.Typing.Soundness",
+        "oleanExists": true,
+        "bytes": 70552
+      },
+      {
+        "module": "Solidity.Typing.Tight",
+        "oleanExists": true,
+        "bytes": 215176
+      },
+      {
+        "module": "Solidity.Typing.TypedRunInv",
+        "oleanExists": true,
+        "bytes": 889128
+      },
+      {
+        "module": "Solidity.Typing.Values",
+        "oleanExists": true,
+        "bytes": 4266928
+      },
+      {
+        "module": "Solidity.Update",
+        "oleanExists": true,
+        "bytes": 163632
+      },
+      {
+        "module": "SolkeyTestSuite",
+        "oleanExists": false,
+        "bytes": null
+      }
+    ]
+  },
+  "SolkeyCheck": {
+    "imports": {
+      "SolkeyCheck": [
+        "Solidity.SortCheck.Parser"
+      ],
+      "Solidity.SortCheck.Parser": [
+        "Solidity.SortCheck.Annotations"
+      ],
+      "Solidity.SortCheck.Annotations": [
+        "Solidity.AST"
+      ],
+      "Solidity.AST": [
+        "Lean",
+        "Solidity.KeySort"
+      ],
+      "Solidity.KeySort": []
+    },
+    "externalModules": [
+      "Lean"
+    ],
+    "blockedDecisionInClosure": false,
+    "cachedOleans": [
+      {
+        "module": "Solidity.AST",
+        "oleanExists": true,
+        "bytes": 5286720
+      },
+      {
+        "module": "Solidity.KeySort",
+        "oleanExists": true,
+        "bytes": 929504
+      },
+      {
+        "module": "Solidity.SortCheck.Annotations",
+        "oleanExists": true,
+        "bytes": 846184
+      },
+      {
+        "module": "Solidity.SortCheck.Parser",
+        "oleanExists": true,
+        "bytes": 898536
+      },
+      {
+        "module": "SolkeyCheck",
+        "oleanExists": true,
+        "bytes": 297464
+      }
+    ]
+  },
+  "frozenKey": {
+    "path": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+    "sha256": "02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb"
+  }
+}

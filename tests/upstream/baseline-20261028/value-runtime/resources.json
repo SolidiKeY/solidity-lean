@@ -1,0 +1,512 @@
+{
+  "timedRecordedCommands": 23,
+  "elapsedSeconds": 59.90926780003065,
+  "aggregatePeakCgroupBytes": 828518400,
+  "rootCompile": [
+    {
+      "ledger": "commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "900",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "-o",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/overlay/Solidity/Semantics/Lifetime.olean",
+        "-i",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/overlay/Solidity/Semantics/Lifetime.ilean",
+        "-c",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/overlay/Solidity/Semantics/Lifetime.c",
+        "Solidity/Semantics/Lifetime.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.5535425240013865,
+      "maxChildRssKiB": 686824,
+      "log": "logs/root-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cgroupPeakBytes": 828518400
+    }
+  ],
+  "allCommands": [
+    {
+      "ledger": "commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "bash",
+        "-c",
+        "lean --version; lake --version"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.396751160005806,
+      "maxChildRssKiB": 39156,
+      "log": "logs/versions.log",
+      "sha256": "159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4",
+      "cgroupPeakBytes": 135368704
+    },
+    {
+      "ledger": "commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "python3",
+        "scripts/solidity-baseline-cache-audit.py",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/cache"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 6.267135683003289,
+      "maxChildRssKiB": 107380,
+      "log": "logs/cache-audit.log",
+      "sha256": "c03235a46ce9500e3fac4e0a07a399b86e022405f11a7acb97a6c620d019683e",
+      "cgroupPeakBytes": 697245696
+    },
+    {
+      "ledger": "commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--run",
+        "tests/upstream/baseline-20261028/native-cache/FileHashes.lean",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/cache/hash-jobs.json",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/cache/file-hashes.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.9061473969995859,
+      "maxChildRssKiB": 254868,
+      "log": "logs/file-hashes.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cgroupPeakBytes": 711426048
+    },
+    {
+      "ledger": "commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "python3",
+        "scripts/solidity-baseline-cache-audit.py",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/cache",
+        "--hashes",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/cache/file-hashes.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.274326099002792,
+      "maxChildRssKiB": 254868,
+      "log": "logs/cache-verify.log",
+      "sha256": "6d701854a9d65d72acbfbf31705684199641e3f051e4e7d15b84aa85df5db087",
+      "cgroupPeakBytes": 739553280
+    },
+    {
+      "ledger": "commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--deps",
+        "Solidity/Semantics/Lifetime.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.14328516900422983,
+      "maxChildRssKiB": 254868,
+      "log": "logs/root-deps.log",
+      "sha256": "c6d17d67caed68a405327a558771693cedd119a7962d36b139a67001d877adfe",
+      "cgroupPeakBytes": 739553280
+    },
+    {
+      "ledger": "commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "900",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "-o",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/overlay/Solidity/Semantics/Lifetime.olean",
+        "-i",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/overlay/Solidity/Semantics/Lifetime.ilean",
+        "-c",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/overlay/Solidity/Semantics/Lifetime.c",
+        "Solidity/Semantics/Lifetime.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.5535425240013865,
+      "maxChildRssKiB": 686824,
+      "log": "logs/root-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cgroupPeakBytes": 828518400
+    },
+    {
+      "ledger": "commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/RootPreflight.lean"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 0.1482088710035896,
+      "maxChildRssKiB": 686824,
+      "log": "logs/root-preflight.log",
+      "sha256": "dd9a594b24748ab2eb094d45adac7d6cc2b22066edb9f4b6556ddd1f9eba4b1f",
+      "cgroupPeakBytes": 828518400
+    },
+    {
+      "ledger": "overlay-completion-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "--deps",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/RootPreflight.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.06404341500456212,
+      "log": "logs/resolved-preflight-deps.log",
+      "sha256": "3f968aba2820515ea6ed4ecb8018c6ad16296f9bc1f6c6f034a486c801be1084",
+      "cgroupPeakBytes": 138522624
+    },
+    {
+      "ledger": "overlay-completion-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/RootPreflight.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.9201261310008704,
+      "log": "logs/resolved-preflight.log",
+      "sha256": "ca305845ae98f4e408b425754fa431fcb17109abdf1b05e17a6d22b80f4fa908",
+      "cgroupPeakBytes": 253505536
+    },
+    {
+      "ledger": "runtime-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "node",
+        "scripts/solc-ast.mjs",
+        "--compiler-file",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--compiler-sha256",
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "--source",
+        "/workspace/solidity-lean/tests/upstream/baseline-20261028/value-runtime/inputs/ValueEntry.sol",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime/legacy/source.ast.json",
+        "--no-wrapper"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.4083125729957828,
+      "log": "runtime/legacy/compiler.log",
+      "sha256": "79deb69ea66a0b11fae6d2ba6a83e071fcc1668509f3336ac43d788fbaa6b6e8",
+      "cgroupPeakBytes": 266485760
+    },
+    {
+      "ledger": "runtime-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime/legacy/ValueRuntime.lean"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 3.7212724260025425,
+      "log": "runtime/legacy/typed-value-runtime.log",
+      "sha256": "d84c914b6e54bb097c838d0e421af718820ebf7cc825a76cd9f7ac1551b03b5d",
+      "cgroupPeakBytes": 266485760
+    },
+    {
+      "ledger": "runtime-corrected-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "node",
+        "scripts/solc-ast.mjs",
+        "--compiler-file",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--compiler-sha256",
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "--source",
+        "/workspace/solidity-lean/tests/upstream/baseline-20261028/value-runtime/inputs/ValueEntry.sol",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-corrected/legacy/source.ast.json",
+        "--no-wrapper"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.3572692009984166,
+      "log": "runtime-corrected/legacy/compiler.log",
+      "sha256": "4f4df2a39256cb4d52dd3f71f8800e694beea194ca30026b83b5f5ee0d4a47f6",
+      "cgroupPeakBytes": 262361088
+    },
+    {
+      "ledger": "runtime-corrected-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-corrected/legacy/ValueRuntime.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.457887775999552,
+      "log": "runtime-corrected/legacy/typed-value-runtime.log",
+      "sha256": "3091653d4b9c3490d37219ec465ed7b9466dd18fec09f82644a068b9c8fabd66",
+      "cgroupPeakBytes": 262361088
+    },
+    {
+      "ledger": "runtime-corrected-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-corrected/legacy/FalseOutput.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.905527732000337,
+      "log": "runtime-corrected/legacy/unchanged-false-output.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cgroupPeakBytes": 262361088
+    },
+    {
+      "ledger": "runtime-corrected-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "node",
+        "scripts/solc-ast.mjs",
+        "--compiler-file",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--compiler-sha256",
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "--source",
+        "/workspace/solidity-lean/tests/upstream/baseline-20261028/value-runtime/inputs/ValueEntry.sol",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-corrected/viaIR/source.ast.json",
+        "--no-wrapper",
+        "--via-ir"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.5204685349963256,
+      "log": "runtime-corrected/viaIR/compiler.log",
+      "sha256": "139c8f8267d611959bd765bfdaaee6b0640cb9b369709c033102f3304d008a71",
+      "cgroupPeakBytes": 264024064
+    },
+    {
+      "ledger": "runtime-corrected-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-corrected/viaIR/ValueRuntime.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.718558950000443,
+      "log": "runtime-corrected/viaIR/typed-value-runtime.log",
+      "sha256": "3091653d4b9c3490d37219ec465ed7b9466dd18fec09f82644a068b9c8fabd66",
+      "cgroupPeakBytes": 264024064
+    },
+    {
+      "ledger": "runtime-corrected-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-corrected/viaIR/FalseOutput.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.3479651329980697,
+      "log": "runtime-corrected/viaIR/unchanged-false-output.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cgroupPeakBytes": 264024064
+    },
+    {
+      "ledger": "runtime-final-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "node",
+        "scripts/solc-ast.mjs",
+        "--compiler-file",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--compiler-sha256",
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "--source",
+        "/workspace/solidity-lean/tests/upstream/baseline-20261028/value-runtime/inputs/ValueEntry.sol",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-final/legacy/source.ast.json",
+        "--no-wrapper"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.2914182390013593,
+      "log": "runtime-final/legacy/compiler.log",
+      "sha256": "4eaae49c874839ebcabeba96f6b35c1a73bac490fb588b479b4979ef1367c2a0",
+      "cgroupPeakBytes": 263348224
+    },
+    {
+      "ledger": "runtime-final-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-final/legacy/ValueRuntime.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.9897412569989683,
+      "log": "runtime-final/legacy/typed-value-runtime.log",
+      "sha256": "3091653d4b9c3490d37219ec465ed7b9466dd18fec09f82644a068b9c8fabd66",
+      "cgroupPeakBytes": 263348224
+    },
+    {
+      "ledger": "runtime-final-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-final/legacy/FalseOutput.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.328676330005692,
+      "log": "runtime-final/legacy/unchanged-false-output.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cgroupPeakBytes": 263348224
+    },
+    {
+      "ledger": "runtime-final-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "node",
+        "scripts/solc-ast.mjs",
+        "--compiler-file",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--compiler-sha256",
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "--source",
+        "/workspace/solidity-lean/tests/upstream/baseline-20261028/value-runtime/inputs/ValueEntry.sol",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-final/viaIR/source.ast.json",
+        "--no-wrapper",
+        "--via-ir"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.9252144750062143,
+      "log": "runtime-final/viaIR/compiler.log",
+      "sha256": "78b641f0fb25e6f2ac28222472f84386f1a9ae0cfed46afee77957586db9f848",
+      "cgroupPeakBytes": 265441280
+    },
+    {
+      "ledger": "runtime-final-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-final/viaIR/ValueRuntime.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.253247076005209,
+      "log": "runtime-final/viaIR/typed-value-runtime.log",
+      "sha256": "3091653d4b9c3490d37219ec465ed7b9466dd18fec09f82644a068b9c8fabd66",
+      "cgroupPeakBytes": 265441280
+    },
+    {
+      "ledger": "runtime-final-commands.json",
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "/workspace/solidity-lean/.lake/upstream/value-entry-runtime-20261028/runtime-final/viaIR/FalseOutput.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.0101416479956242,
+      "log": "runtime-final/viaIR/unchanged-false-output.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cgroupPeakBytes": 265441280
+    }
+  ],
+  "missingMeasurement": "The initial standalone verifier lookup failure exit1 has no measured elapsed/peak and is not assigned invented metrics.",
+  "bounds": {
+    "memoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "LEAN_NUM_THREADS": 1,
+    "leanThreadsArgument": "-j1",
+    "rootTimeoutSeconds": 900,
+    "diagnosticTimeoutSeconds": 120
+  },
+  "noAdditionalProjectModuleBuild": true
+}

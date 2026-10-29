@@ -1,0 +1,31 @@
+✔ fixture boundaries preserve sources and ignore expectation text as Solidity (3.223252ms)
+✔ external sources and duplicate source units cannot silently disappear (0.603082ms)
+✔ preamble follows the native harness without rewriting fixture source (0.265422ms)
+✔ diagnostics retain exact order, messages, source names and byte offsets (0.267134ms)
+✔ EVM constraints are checked rather than ignored or retargeted (0.50323ms)
+✔ implicit and explicit upstream pipeline defaults both require two interpreter modes (0.466415ms)
+✔ runtime vectors retain every call and compare ABI words exactly (1.807833ms)
+✔ signed words are decoded and encoded with canonical ABI extension (0.222076ms)
+✔ noncanonical and truncated inputs retain raw bytes for typed decoder replay (2.503204ms)
+✔ aggregate vectors retain offsets, lengths, bytes and exact tuple schemas (1.035085ms)
+✔ unsupported gas, logs, revert data and extra observations prevent success (0.971188ms)
+✔ a second constructor cannot accidentally retain the first deployment state (0.375267ms)
+✔ partitions are exhaustive and unknown/notRun results cannot pass (0.328416ms)
+✔ isolated retries retain completed modes and cannot change conclusive results (1.942256ms)
+✔ multiple retries of one fixture preserve every contributing report (14.25161ms)
+✔ exact failure data retains raw selector bytes and complete signed ABI words (0.907862ms)
+✔ concurrent snapshot publication retains complete bytes; reuse rejects drift (938.640125ms)
+✔ native parameter alignment, quoted commas/hash and byte escapes are exact (1.018229ms)
+✔ v1 raw vectors require canonical-prefix replay without dropping suffix bytes (0.425834ms)
+✔ original named-error sequences retain every selector, word and dynamic observation (299.779233ms)
+✔ original numeric failure sequences retain exact panic codes and fixed-byte padding (535.165491ms)
+✔ original aggregate custom errors retain complete arrays, nested offsets and call order (341.275984ms)
+✔ compound array decoder vectors retain dimensions, all calls and raw suffixes (499.941085ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2699.76127

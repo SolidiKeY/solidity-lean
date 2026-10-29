@@ -39,3 +39,8 @@ weakLeanArgs = ["--tstack=131072"]
 [[lean_lib]]
 name = "LeanTeX"
 srcDir = "vendor/LeanTeX"
+
+# Generated real-solc differential cases; optional Node runner lives outside Lake.
+[[lean_exe]]
+name = "solcases"
+root = "SolCases"

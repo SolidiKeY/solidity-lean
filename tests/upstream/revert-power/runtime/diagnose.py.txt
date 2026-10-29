@@ -1,0 +1,13 @@
+import asyncio, os, sys
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+async def main():
+    server=StdioServerParameters(command='/workspace/solidity-lean/scripts/run-lean-mcp.sh',cwd='/workspace/solidity-lean',env=dict(os.environ))
+    async with stdio_client(server) as (rd,wr):
+        async with ClientSession(rd,wr) as session:
+            await session.initialize()
+            for path in sys.argv[1:]:
+                r=await session.call_tool('lean_diagnostic_messages',{'file_path':path,'severity':'error','timeout_s':120})
+                print(path,r.model_dump_json(),flush=True)
+                if r.isError: raise RuntimeError(path)
+asyncio.run(main())

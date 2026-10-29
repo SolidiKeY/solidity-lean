@@ -1,0 +1,8 @@
+/results/
+/combined/
+/isolated/
+/cold/
+/warm/
+/gates-before/doc-paths-before.log
+/gates-after/doc-paths*.log
+/final-gates/doc-paths*.log

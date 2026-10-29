@@ -1,0 +1,32 @@
+{
+  "command": [
+    "node",
+    "scripts/merge-solidity-upstream-retries.mjs",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/combined",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/b5076f99846c55f9153a",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/7cec7729ce8b4b2ff509",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/8078d627eb8c49a52351",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/a2404843a8e7686bcd21",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/51546d0e4d9fbec4d588",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/6027cfb3b523a9bba74f",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/a85bdd267af1ef419003",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/02c17b98eb27b5e014b3",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/2a62629aba1eee539691",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/3d44a776a9ee47a24477",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/3ecf14dbd772fae2311a",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/e58c78ebea285308469e",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/aa02c4349ef02078ebb3",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/3b62827f11440583152b",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/51b91bc30fd03dc470d9",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/f317ed535d920c4cc622",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/f73d4d168abf7236c2cf",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/b8ce970900cb8d8ac65c",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/f81e7ddbb1f56cd8008d",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/8c2be1d16c253d1725b4",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/f085fb47678db5dbcc48",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/isolated/results/8f763238bf11a6d6fe62"
+  ],
+  "exitCode": 0,
+  "stdout": "{\"working\":4135,\"broken\":196,\"blocked\":5329}\n",
+  "allObservationGuardsPassed": true
+}

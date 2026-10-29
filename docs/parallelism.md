@@ -27,9 +27,15 @@ elaborator.
   Hyp,Correct,FirstOrder,Transient,Lifetime,ContractWorld}` and `RuleSyntax`'s pieces;
 - their soundness: `Calculus.{Sound*,StmtSound,ProvesSound,PremiseSound,
   UpdRuleScoped,UpdateRules,TermLib.Rules}`;
-- what those import: `Calculus.{TermEval,TermEq,TermWk,Lower,LowerRun,Shift,
+- what those import: `Calculus.{TermEval,TermEq,TermWk,LoopInvariantWk,Lower,LowerRun,Shift,
   WkOver,Lands,StateFacts,ReadWrite,DataIn,SeqRewrite,SyntaxSize,Graft,
-  CallSummary}`.
+  CallSummary,KIntTwoAnchors}`.
+- the hash bound and hashed layout: `Hash.{CollisionBound,Adaptive}`,
+  `Storage.{HashedLayout,HashedKeccak,HashedSeparation}`;
+- the backend: `Backend.{Opcode,Jumpdest,Assembler,Control}`.
+
+`Tools.SolCases` is an external-source printer and is explicitly included in
+the forbidden frontend set checked from the core.
 
 The list is closed under imports: no core module imports a module outside
 it.  The elaborator is `Syntax/{Elab,Quote,Splice}` and

@@ -1,0 +1,3482 @@
+{
+  "metadata": {
+    "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "b766ead28ffa16ee06cf12b1be7496965671af951ab85139b32fd4f3fba77a3e",
+    "compilationUnitAdapterSha256": "cffcf54fa55575e6236f0aa2402dad6e0b04cefeaf96f3299f694d78f11baee4",
+    "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+    "modelSha256": "74d8f0fdefccefeaf688dd4bf7701c45f8433f48cb5b8a05083951768928df06",
+    "harnessSha256": "f97b9713101135ff2456d4be1250279cc99f2ad1ca72614438c9ef3628b21d29",
+    "method": "Current upstream prepare and #upstream_batch; direct Lean in seccomp single-process RLIMIT_AS=12GiB groups. No Lake build substitution.",
+    "threads": 1,
+    "leanArgs": [
+      "--tstack=131072",
+      "-j1"
+    ],
+    "batchSize": 16,
+    "timeoutMs": 120000,
+    "loopFuel": 1000,
+    "elapsedSeconds": 28.498766247,
+    "complete": true
+  },
+  "counts": {
+    "working": 31,
+    "broken": 1,
+    "blocked": 7
+  },
+  "results": [
+    {
+      "path": "test/libsolidity/semanticTests/abicoder/abi_encode_v2_in_function_inherited_in_v1_contract.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/abicoder/abi_encode_v2_in_modifier_used_in_v1_contract.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/constants/constants_at_file_level_referencing.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/constants/constants_at_file_level_referencing.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "failed": false,
+              "calldataBytes": []
+            },
+            {
+              "values": [],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "failed": false,
+              "calldataBytes": []
+            },
+            {
+              "values": [],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                5
+              ],
+              "failed": false,
+              "calldataBytes": []
+            },
+            {
+              "values": [],
+              "signature": "i()",
+              "revertBytes": [],
+              "returnBytes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "failed": false,
+              "calldataBytes": []
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/constants/constants_at_file_level_referencing.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "failed": false,
+              "calldataBytes": []
+            },
+            {
+              "values": [],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "failed": false,
+              "calldataBytes": []
+            },
+            {
+              "values": [],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                5
+              ],
+              "failed": false,
+              "calldataBytes": []
+            },
+            {
+              "values": [],
+              "signature": "i()",
+              "revertBytes": [],
+              "returnBytes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "failed": false,
+              "calldataBytes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/constants/same_constants_different_files.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/constants/same_constants_different_files.sol",
+          "observed": [
+            {
+              "values": [
+                "13",
+                "89",
+                "89",
+                "89"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/constants/same_constants_different_files.sol",
+          "observed": [
+            {
+              "values": [
+                "13",
+                "89",
+                "89",
+                "89"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/deployedCodeExclusion/module_function_deployed.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/deployedCodeExclusion/module_function_deployed.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "test()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/deployedCodeExclusion/module_function_deployed.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "test()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/deployedCodeExclusion/module_function.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "frontend import gaps",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "frontend import gaps",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/deployedCodeExclusion/module_function.sol",
+          "gaps": [
+            {
+              "status": "excluded",
+              "reason": "main.sol:14: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+              "function": "test()"
+            }
+          ]
+        },
+        {
+          "status": "broken",
+          "reason": "frontend import gaps",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/deployedCodeExclusion/module_function.sol",
+          "gaps": [
+            {
+              "status": "excluded",
+              "reason": "main.sol:14: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+              "function": "test()"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/errors/error_throw_from_module_via_member_access.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/errors/error_throw_from_module_via_member_access.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "error1()",
+              "revertBytes": [
+                165,
+                249,
+                236,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7,
+                66,
+                32,
+                101,
+                114,
+                114,
+                111,
+                114,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "error2()",
+              "revertBytes": [
+                165,
+                249,
+                236,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                17,
+                66,
+                46,
+                66,
+                67,
+                111,
+                110,
+                116,
+                114,
+                97,
+                99,
+                116,
+                32,
+                101,
+                114,
+                114,
+                111,
+                114,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "error3()",
+              "revertBytes": [
+                35,
+                176,
+                219,
+                20,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                9,
+                66,
+                46,
+                65,
+                32,
+                101,
+                114,
+                114,
+                111,
+                114,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returnBytes": [],
+              "failed": true
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/errors/error_throw_from_module_via_member_access.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "error1()",
+              "revertBytes": [
+                165,
+                249,
+                236,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7,
+                66,
+                32,
+                101,
+                114,
+                114,
+                111,
+                114,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "error2()",
+              "revertBytes": [
+                165,
+                249,
+                236,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                17,
+                66,
+                46,
+                66,
+                67,
+                111,
+                110,
+                116,
+                114,
+                97,
+                99,
+                116,
+                32,
+                101,
+                114,
+                114,
+                111,
+                114,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "error3()",
+              "revertBytes": [
+                35,
+                176,
+                219,
+                20,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                32,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                9,
+                66,
+                46,
+                65,
+                32,
+                101,
+                114,
+                114,
+                111,
+                114,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "returnBytes": [],
+              "failed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/errors/panic_via_import.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/errors/panic_via_import.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "a()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "b()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "returnBytes": [],
+              "failed": true
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/errors/panic_via_import.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "a()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "b()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "returnBytes": [],
+              "failed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/errors/via_import.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/errors/via_import.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "x()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "y()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "z()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3
+              ],
+              "returnBytes": [],
+              "failed": true
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/errors/via_import.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "x()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "y()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2
+              ],
+              "returnBytes": [],
+              "failed": true
+            },
+            {
+              "values": [],
+              "signature": "z()",
+              "revertBytes": [
+                0,
+                47,
+                240,
+                103,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3
+              ],
+              "returnBytes": [],
+              "failed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/events/event_emit_from_module_via_member_access.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "fixture comment outside argument/expectation boundary",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked",
+          "executed": false,
+          "reason": "fixture comment outside argument/expectation boundary"
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked",
+          "executed": false,
+          "reason": "fixture comment outside argument/expectation boundary"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/expressions/module_from_ternary_expression.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/expressions/module_from_ternary_expression.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/expressions/module_from_ternary_expression.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/freeFunctions/import.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/freeFunctions/import.sol",
+          "observed": [
+            {
+              "values": [
+                "7",
+                "8"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/freeFunctions/import.sol",
+          "observed": [
+            {
+              "values": [
+                "7",
+                "8"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/functionCall/file_level_call_via_module.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/functionCall/file_level_call_via_module.sol",
+          "observed": [
+            {
+              "values": [
+                "7",
+                "3"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/functionCall/file_level_call_via_module.sol",
+          "observed": [
+            {
+              "values": [
+                "7",
+                "3"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inheritance/member_notation_ctor.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/circular_import_2.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/circular_import_2.sol",
+          "observed": [
+            {
+              "values": [
+                "992"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/circular_import_2.sol",
+          "observed": [
+            {
+              "values": [
+                "992"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/circular_import.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/circular_import.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/circular_import.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/circular_reimport_2.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/circular_reimport_2.sol",
+          "observed": [
+            {
+              "values": [
+                "8996"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/circular_reimport_2.sol",
+          "observed": [
+            {
+              "values": [
+                "8996"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/circular_reimport.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/circular_reimport.sol",
+          "observed": [
+            {
+              "values": [
+                "96"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/circular_reimport.sol",
+          "observed": [
+            {
+              "values": [
+                "96"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/free_different_interger_types.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/free_different_interger_types.sol",
+          "observed": [
+            {
+              "values": [
+                "24",
+                "1"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/free_different_interger_types.sol",
+          "observed": [
+            {
+              "values": [
+                "24",
+                "1"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_base_contract.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_base_contract.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_base_contract.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual_super.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual_super.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual_super.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual_transitive.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual_transitive.sol",
+          "observed": [
+            {
+              "values": [
+                "1339"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual_transitive.sol",
+          "observed": [
+            {
+              "values": [
+                "1339"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_resolution_override_virtual.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/free_function_transitive_import.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_transitive_import.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "i()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/free_function_transitive_import.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "i()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/import_overloaded_function.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/import_overloaded_function.sol",
+          "observed": [
+            {
+              "values": [
+                "1",
+                "2"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/import_overloaded_function.sol",
+          "observed": [
+            {
+              "values": [
+                "1",
+                "2"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/import.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/import.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1338"
+              ],
+              "signature": "g(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/import.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1338"
+              ],
+              "signature": "g(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/imported_free_function_via_alias_direct_call.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/imported_free_function_via_alias_direct_call.sol",
+          "observed": [
+            {
+              "values": [
+                "61337"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/imported_free_function_via_alias_direct_call.sol",
+          "observed": [
+            {
+              "values": [
+                "61337"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/imported_free_function_via_alias.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/imported_free_function_via_alias.sol",
+          "observed": [
+            {
+              "values": [
+                "61337"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/imported_free_function_via_alias.sol",
+          "observed": [
+            {
+              "values": [
+                "61337"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/multiSource/reimport_imported_function.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/multiSource/reimport_imported_function.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/multiSource/reimport_imported_function.sol",
+          "observed": [
+            {
+              "values": [
+                "1337"
+              ],
+              "signature": "foo()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/userDefinedValueType/multisource_module.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/userDefinedValueType/multisource_module.sol",
+          "observed": [
+            {
+              "values": [
+                "5"
+              ],
+              "signature": "f(int256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "g(int256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/userDefinedValueType/multisource_module.sol",
+          "observed": [
+            {
+              "values": [
+                "5"
+              ],
+              "signature": "f(int256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "g(int256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/userDefinedValueType/multisource.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/userDefinedValueType/multisource.sol",
+          "observed": [
+            {
+              "values": [
+                "5"
+              ],
+              "signature": "f(int256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(address)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/userDefinedValueType/multisource.sol",
+          "observed": [
+            {
+              "values": [
+                "5"
+              ],
+              "signature": "f(int256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(address)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/using/imported_functions.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/using/imported_functions.sol",
+          "observed": [
+            {
+              "values": [
+                "12"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "22"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/using/imported_functions.sol",
+          "observed": [
+            {
+              "values": [
+                "12"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "22"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/using/library_through_module.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/using/module_renamed.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/using/module_renamed.sol",
+          "observed": [
+            {
+              "values": [
+                "9",
+                "3"
+              ],
+              "signature": "test(uint256,uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/using/module_renamed.sol",
+          "observed": [
+            {
+              "values": [
+                "9",
+                "3"
+              ],
+              "signature": "test(uint256,uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/using/recursive_import.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/using/recursive_import.sol",
+          "observed": [
+            {
+              "values": [
+                "11"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/using/recursive_import.sol",
+          "observed": [
+            {
+              "values": [
+                "11"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/using/using_global_all_the_types.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/using/using_global_all_the_types.sol",
+          "observed": [
+            {
+              "values": [
+                "1",
+                "7",
+                "9"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/using/using_global_all_the_types.sol",
+          "observed": [
+            {
+              "values": [
+                "1",
+                "7",
+                "9"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/using/using_global_for_global.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/using/using_global_for_global.sol",
+          "observed": [
+            {
+              "values": [
+                "111"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/using/using_global_for_global.sol",
+          "observed": [
+            {
+              "values": [
+                "111"
+              ],
+              "signature": "f(uint256)",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/using/using_global_invisible.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/using/using_global_library.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked",
+          "executed": false,
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+        }
+      ]
+    }
+  ]
+}

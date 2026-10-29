@@ -1,0 +1,10 @@
+{
+  "outerDriverExitCode": 0,
+  "countedAsPassing": false,
+  "readerStageExitCode": 1,
+  "reason": "Generated reader wrapper tuple types needed explicit annotations; Lean refused evaluation after elaboration failure. No sorry or eval! was added. The initial driver exit0 did not establish passing stages. Fail-fast guard now checks them.",
+  "sourceCandidateIssue": "ScalarMatrix address payable to uint160 is compiler-invalid. Original input retained. ScalarMatrixValid adds the required intermediate address conversion and uses a distinct contract/file.",
+  "originalDriverSnapshot": "driver-priority.mjs.snapshot",
+  "originalRuns": "runs/",
+  "correctedRuns": "rechecked/runs/"
+}

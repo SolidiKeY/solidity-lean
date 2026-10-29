@@ -1,0 +1,11 @@
+{
+  "command": [
+    "bash",
+    "scripts/check-doc-paths.sh"
+  ],
+  "exitCode": 1,
+  "historicalMissingReferences": 20,
+  "byteIdenticalToPreviouslyRecordedLog": true,
+  "uncompressedLogSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+  "reason": "Staged newly created review/handoff/validation records are included; no new missing citations."
+}

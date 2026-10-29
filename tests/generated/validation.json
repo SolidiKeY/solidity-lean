@@ -1,0 +1,166 @@
+{
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "implementationCommit": "016184b5564044d22d1d387dfb88d1209d8ea190",
+  "branch": "codex/generated-differential",
+  "runtime": {
+    "leanVersion": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lakeVersion": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+  },
+  "resourceBounds": {
+    "scope": "offline Docker cgroup on same attached VM and checkout",
+    "memoryMax": 12884901888,
+    "memorySwapMax": 0,
+    "cpus": 1,
+    "LEAN_NUM_THREADS": 1,
+    "leanArgs": [
+      "-j1",
+      "--tstack=131072"
+    ],
+    "peakBytes": 1160622080,
+    "maxEvents": 0,
+    "oomEvents": 0,
+    "oomKillEvents": 0,
+    "leanServer": false
+  },
+  "commands": [
+    {
+      "command": "lake build Solidity.KeySort",
+      "status": "passed",
+      "wallSeconds": 0.19
+    },
+    {
+      "command": "lake -f .lake-solcases.toml build solcases",
+      "status": "passed",
+      "wallSeconds": null
+    },
+    {
+      "command": "lake -f .lake-solcases.toml build Solidity.Examples.SolCases",
+      "status": "passed",
+      "wallSeconds": 1.596
+    },
+    {
+      "command": "lake env lean -j1 --tstack=131072 <each of SolCases.lean, Solidity/Tools/SolCases.lean, Solidity/Examples/SolCases.lean>",
+      "status": "passed"
+    },
+    {
+      "command": "lake -q exe solcases 0",
+      "status": "passed",
+      "records": 160,
+      "wallSeconds": 0.354
+    },
+    {
+      "command": "node --test scripts/evm-reference/generated.test.mjs",
+      "status": "passed",
+      "tests": 7,
+      "wallSeconds": 4.911
+    },
+    {
+      "command": "node scripts/evm-reference/generated.mjs --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --seed 0 --out tests/generated/seed-0.json",
+      "status": "passed",
+      "summary": {
+        "agree": 640,
+        "mismatch": 0,
+        "blocked": 0
+      },
+      "wallSeconds": 38.381,
+      "executionSeconds": 36.908539153
+    },
+    {
+      "command": "node scripts/evm-reference/generated.mjs --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --seed 1 --index 9 --out tests/generated/replay-seed-1-index-9.json",
+      "status": "passed",
+      "summary": {
+        "agree": 4,
+        "mismatch": 0,
+        "blocked": 0
+      }
+    },
+    {
+      "command": "node --test scripts/evm-reference/replay.test.mjs",
+      "status": "passed",
+      "tests": 14,
+      "wallSeconds": 2.523
+    },
+    {
+      "command": "python3 scripts/solidity-feature-audit.py [--check]",
+      "status": "passed",
+      "manifestChanged": false
+    },
+    {
+      "command": "node scripts/check-layers.mjs",
+      "status": "passed",
+      "coreModules": 152,
+      "forbiddenPaths": 0
+    },
+    {
+      "command": "node scripts/check-orphans.mjs",
+      "status": "passed",
+      "reachable": 702,
+      "orphans": 0
+    },
+    {
+      "command": "bash scripts/check-trust.sh",
+      "status": "passed",
+      "sources": 717,
+      "inventoriedSites": 240,
+      "findings": 0
+    },
+    {
+      "command": "node scripts/check-automatic.mjs --strict",
+      "status": "passed",
+      "automatic": 491,
+      "budgeted": 61,
+      "refuted": 11,
+      "pending": 0
+    },
+    {
+      "command": "bash scripts/check-doc-paths.sh",
+      "status": "failed_preexisting",
+      "exitCode": 1,
+      "output": "missing:   Solidity/Eqns.lean cites `Mathlib/Tactic/Eqns.lean`\nambiguous: Solidity/Examples/Notation.lean cites `RuleSyntax.lean` (2 files share that name)\nambiguous: scripts/latex-chains.sh cites `Storage.lean` (3 files share that name)\nambiguous: tests/upstream/group03-validation.json cites `Decide.lean` (2 files share that name)\nmissing:   tests/upstream/group03-validation.json cites `Main.lean`\nambiguous: tests/upstream/group03-validation.json cites `Problems.lean` (2 files share that name)\nambiguous: tests/upstream/group03-validation.json cites `ProofTree.lean` (4 files share that name)\nambiguous: tests/upstream/group03-validation.json cites `Storage.lean` (3 files share that name)\nmissing:   tests/upstream/group03-validation.json cites `Widget.lean`\nmissing:   tests/upstream/group03-validation.json cites `lakefile.lean`\nmissing:   tests/upstream/group03-validation.json cites `test/basic.lean`\nmissing:   tests/upstream/group03-validation.json cites `test/subscript.lean`\nmissing:   tests/upstream/group03-validation.json cites `test/widget_basic.lean`\nmissing:   tests/upstream/group10-validation.json cites `Cslib/Foundations/Logic/InferenceSystem.lean`\nmissing:   tests/upstream/group10-validation.json cites `Cslib/Foundations/Logic/LogicalEquivalence.lean`\nmissing:   tests/upstream/group10-validation.json cites `Cslib/Foundations/Syntax/Congruence.lean`\nmissing:   tests/upstream/group10-validation.json cites `Cslib/Foundations/Syntax/Context.lean`\nmissing:   tests/upstream/group10-validation.json cites `Cslib/Logics/Propositional/Defs.lean`\nmissing:   tests/upstream/group10-validation.json cites `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean`\nmissing:   tests/upstream/group10-validation.json cites `Main.lean`\nmissing:   tests/upstream/group10-validation.json cites `Mathlib/Tactic/Eqns.lean`\nmissing:   tests/upstream/group10-validation.json cites `Widget.lean`\nmissing:   tests/upstream/group10-validation.json cites `lakefile.lean`\nmissing:   tests/upstream/group10-validation.json cites `test/basic.lean`\nmissing:   tests/upstream/group10-validation.json cites `test/subscript.lean`\nmissing:   tests/upstream/group10-validation.json cites `test/widget_basic.lean`\n\nFAIL: 20 reference(s) name a file that does not exist.\n",
+      "note": "Citing files unchanged from starting commit; branch deletes no files. No missing reference introduced here."
+    },
+    {
+      "command": "./run-lean.sh",
+      "status": "not_run",
+      "reason": "No semantic core edits; new executable and example import closure plus per-file diagnostics checked."
+    }
+  ],
+  "axioms": {
+    "Solidity.Tools.SolCases.roundTrip_exact": [
+      "propext"
+    ],
+    "Solidity.Tools.SolCases.refuse_assumption": [
+      "propext"
+    ],
+    "Solidity.Tools.SolCases.literal_division_exact": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "failedAttempts": [
+    {
+      "kind": "systemd scope",
+      "result": "user bus unavailable; superseded by enforced Docker cgroup"
+    },
+    {
+      "kind": "4GiB address-space native build",
+      "result": "thread creation failure; not passing"
+    },
+    {
+      "kind": "per-file parser check with stale cached dependencies",
+      "result": "exit 139; dependencies refreshed before successful checks"
+    },
+    {
+      "kind": "first parser/literal test builds",
+      "result": "local test type errors; fixed before final passes"
+    }
+  ],
+  "reviews": {
+    "finder": "Independent read-only review and final audit of all 640 observations/hashes; no remaining finding.",
+    "skeptic": "Independent read-only review and final audit of all 640 observations/hashes; no remaining finding."
+  },
+  "scope": "bounded differential evidence; concrete kernel facts only; remaining full D/E work in feature document"
+}

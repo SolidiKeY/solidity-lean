@@ -1,0 +1,611 @@
+{
+  "version": 1,
+  "feature": "transientState",
+  "featureStatus": "partial",
+  "branch": "codex/transient-world-step8",
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "scope": "Closed source factory targets with certified transient roots; explicit typed composition of imported frames under World.transact. No general source-world statement lowering or Reachable transition.",
+  "runtime": {
+    "checkout": "/workspace/solidity-lean",
+    "environmentId": "ccarenv_b64_Y2NhcmVudl9mYjc2NzI1YTU2YTA4MTkxYmJiM2FmYmNjYTc4YmI5Ng",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "smoke": "lake -f lakefile.transient.toml build Solidity.KeySort: exit 0, 2 jobs",
+    "node": "v24.19.0",
+    "optionalReferencePackages": {
+      "@ethereumjs/vm": "10.1.3",
+      "@ethereumjs/common": "10.1.3",
+      "@ethereumjs/tx": "10.1.3",
+      "@ethereumjs/util": "10.1.3",
+      "ethers": "6.17.0"
+    },
+    "savedConfigurationId": "2b5c5391-0738-4da9-8acc-99dd89f04e4d~cecfg_6adc9c634c9481a3b462f748c24a047a",
+    "configurationChanged": false
+  },
+  "sourceSha256": {
+    "Solidity.lean": "36d9ce5dc6556463121be9252c75c4f0195bee2ca6fcfb1dade55fd6da373824",
+    "Solidity/Frontend/WorldImport.lean": "35766b6e241b0e3e0de4c8a40e79c6a8351c652d715b4cc8c73fbad6d0d1d052",
+    "Solidity/Semantics/TransientWorld.lean": "95baaeed84dd7652e72db5137cf6f8e1dc8af0351a2c3965276c3d63b0aacea5",
+    "Solidity/Examples/Tactics/TransientWorldSource.lean": "88a1ae159c460a5ea2953c039113d2c5c8be9664648823cf14bb1ee62a4500e5",
+    "Solidity/Language/Features.lean": "30162c5ccedd7bbe86ff0f2d43cf21de19c4c24615c01d9f86b78c628c0bc388",
+    "scripts/check-transient-world-vectors.mjs": "b3c1d48d4c6892a0655f9c42ee11a68ce93ae16abe755b1c32645c758ac43ba5",
+    "tests/solc/TransientFactory.sol": "1a86c998bce8a5423c863f78568c5458b00074ca8c450e12fac15c0bdb09819b",
+    "tests/solc/TransientFactory.ast.json": "71618f99fa4427bdb3fcce4b3fc6c50676181b826c313b555b6878dcd92833d9",
+    "tests/solc/TransientFactory.viaIR.ast.json": "b8d4751eb9b27184edda53b4f5dd9b5067b9704e3f265019764565a757486d6a",
+    "tests/solc/TransientWorldScenario.sol": "78b0a19b679bfd4bf19888fe8c21002faf0c93a3a975370d540c4895fbad0418",
+    "docs/solidity-features.json": "e433fff24ed32d34a544fcd254b9423ae4c3c341d4300e6697a1a283d7328ab2"
+  },
+  "before": {
+    "preImplementationLegacy": "before.log.gz: expected named refusal kernel-checked before implementation (exit0).",
+    "frozenMasterReplayBothPipelines": "baseline-both.log.gz: source of WorldImport from starting commit replayed unchanged against both fixtures after implementation, exit0. This is a frozen-baseline replay, not a claim of temporal pre-implementation viaIR execution.",
+    "frozenImporterSha256": "368efc2eda3f982f0c372e94beb43b67545e2cb8fc3b8ee247290fe649640ef9",
+    "diagnostic": "solidity.worldFactory.constructor: transient state needs the shared world transaction interface",
+    "recipe": "git show START:Solidity/Frontend/WorldImport.lean > .lake/transient-step8/BaselineWorldImport.lean; append baseline-probes.txt; run recorded baseline-both command"
+  },
+  "kernel": {
+    "axiomAudit": "axioms.json",
+    "newGeneralTheorems": 5,
+    "concreteNamedControlsPerPipeline": 11,
+    "exactResourceHaltExamplesPerPipeline": 2,
+    "namedOwnerRefusalsPerPipeline": 1,
+    "sourcePipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "statementOrTacletAdded": false,
+    "compilerCorrectnessClaim": false
+  },
+  "compilerEvm": {
+    "report": "evm-observations.json",
+    "pipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "signedTransactionsPerPipeline": 11,
+    "totalSignedTransactions": 22,
+    "staticCreationEvidence": "kernel model only; absent from external EVM transaction sequence",
+    "universalCompilerEquivalence": false
+  },
+  "upstream": [
+    {
+      "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+      "fixtureSha256": "a249900c559975086ef3baaa5d8b1e5a3d604f7774efc4890f3f222f796a2284",
+      "fixtureCopy": "fixtures/transient_state_variable_initialization.sol",
+      "result": {
+        "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all supported runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+            "observed": [
+              {
+                "values": [
+                  "100"
+                ],
+                "signature": "f()",
+                "revertBytes": [],
+                "returnBytes": [],
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all supported runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+            "observed": [
+              {
+                "values": [
+                  "100"
+                ],
+                "signature": "f()",
+                "revertBytes": [],
+                "returnBytes": [],
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "report": "upstream-constructor.json"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/getters/transient_value_types_multi_frame_call.sol",
+      "fixtureSha256": "61ac05196a59c65acf003da0e09effa05d616b5e0909215dc65d59c7ad800989",
+      "fixtureCopy": "fixtures/transient_value_types_multi_frame_call.sol",
+      "result": {
+        "path": "test/libsolidity/semanticTests/getters/transient_value_types_multi_frame_call.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      "report": "upstream-frames.json"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+      "fixtureSha256": "b2eb96c2b63d186964446e288a8e207f00e6ca2600a50c8ce20a1448f8f6460f",
+      "fixtureCopy": "fixtures/transient_state_variable_tuple_assignment.sol",
+      "result": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all supported runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+            "observed": [
+              {
+                "values": [
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "signature": "f()",
+                "revertBytes": [],
+                "returnBytes": [],
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all supported runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+            "observed": [
+              {
+                "values": [
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "signature": "f()",
+                "revertBytes": [],
+                "returnBytes": [],
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "report": "upstream-tuple.json"
+    }
+  ],
+  "validation": {
+    "combined": [
+      {
+        "label": "full-cgroup",
+        "command": [
+          "bash",
+          "./run-lean.sh"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 10448.087908716,
+        "finished_at": "2026-10-28T04:15:00.901781+00:00",
+        "cgroup_peak_bytes": 12884901888,
+        "cgroup_events": "low 0\nhigh 0\nmax 1303\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "node-tests-final",
+        "command": [
+          "node",
+          "--test",
+          "scripts/contract-world.test.mjs",
+          "scripts/transient-storage.test.mjs",
+          "scripts/solidity-upstream.test.mjs"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 88.43215636799869,
+        "finished_at": "2026-10-28T04:16:29.335519+00:00",
+        "cgroup_peak_bytes": 12884901888,
+        "cgroup_events": "low 0\nhigh 0\nmax 1303\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "upstream-constructor",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          "/workspace/solidity-lean/.lake/transient-step8/upstream-constructor"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 5.733280915999785,
+        "finished_at": "2026-10-28T04:16:35.069649+00:00",
+        "cgroup_peak_bytes": 12884901888,
+        "cgroup_events": "low 0\nhigh 0\nmax 1303\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "upstream-frames",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/getters/transient_value_types_multi_frame_call.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          "/workspace/solidity-lean/.lake/transient-step8/upstream-frames"
+        ],
+        "exit": 1,
+        "elapsed_seconds": 1.2671879009994882,
+        "finished_at": "2026-10-28T04:16:36.337238+00:00",
+        "cgroup_peak_bytes": 12884901888,
+        "cgroup_events": "low 0\nhigh 0\nmax 1303\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "upstream-tuple",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          "/workspace/solidity-lean/.lake/transient-step8/upstream-tuple"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 4.133789555000476,
+        "finished_at": "2026-10-28T04:16:40.471471+00:00",
+        "cgroup_peak_bytes": 12884901888,
+        "cgroup_events": "low 0\nhigh 0\nmax 1303\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    ],
+    "remaining": [
+      {
+        "label": "baseline-both",
+        "command": [
+          "/workspace/.setup/tools/lean-4.24.0-linux/bin/lake",
+          "-f",
+          "lakefile.transient.toml",
+          "env",
+          "lean",
+          "-j1",
+          "--tstack=131072",
+          ".lake/transient-step8/BaselineWorldImport.lean"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 3.577881821000119,
+        "finished_at": "2026-10-28T04:17:52.396262+00:00",
+        "cgroup_peak_bytes": 307245056,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "core-final",
+        "command": [
+          "/workspace/.setup/tools/lean-4.24.0-linux/bin/lake",
+          "-f",
+          "lakefile.transient.toml",
+          "env",
+          "lean",
+          "-j1",
+          "--tstack=131072",
+          "Solidity/Semantics/TransientWorld.lean"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 1.1382982889990672,
+        "finished_at": "2026-10-28T04:17:53.534981+00:00",
+        "cgroup_peak_bytes": 307245056,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "source-final",
+        "command": [
+          "/workspace/.setup/tools/lean-4.24.0-linux/bin/lake",
+          "-f",
+          "lakefile.transient.toml",
+          "env",
+          "lean",
+          "-j1",
+          "--tstack=131072",
+          "Solidity/Examples/Tactics/TransientWorldSource.lean"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 10.825144725000428,
+        "finished_at": "2026-10-28T04:18:04.360468+00:00",
+        "cgroup_peak_bytes": 462700544,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "axioms-final",
+        "command": [
+          "/workspace/.setup/tools/lean-4.24.0-linux/bin/lake",
+          "-f",
+          "lakefile.transient.toml",
+          "env",
+          "lean",
+          "-j1",
+          "--tstack=131072",
+          ".lake/transient-step8/AxiomAudit.lean"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 2.6661997659994086,
+        "finished_at": "2026-10-28T04:18:07.027026+00:00",
+        "cgroup_peak_bytes": 462700544,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "reference-final",
+        "command": [
+          "node",
+          "scripts/check-transient-world-vectors.mjs",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "/workspace/.setup/transient-reference/node_modules"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 2.884364417001052,
+        "finished_at": "2026-10-28T04:18:09.912264+00:00",
+        "cgroup_peak_bytes": 462700544,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    ],
+    "staticBeforePackaging": [
+      {
+        "label": "diff-check",
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.1351463450000665,
+        "finished_at": "2026-10-28T01:11:56.014961+00:00"
+      },
+      {
+        "label": "inventory",
+        "command": [
+          "python3",
+          "scripts/solidity-feature-audit.py",
+          "--check"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.13605081400010022,
+        "finished_at": "2026-10-28T01:12:02.872319+00:00"
+      },
+      {
+        "label": "orphans",
+        "command": [
+          "node",
+          "scripts/check-orphans.mjs"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.23536589200011804,
+        "finished_at": "2026-10-28T01:12:03.107882+00:00"
+      },
+      {
+        "label": "layers",
+        "command": [
+          "node",
+          "scripts/check-layers.mjs"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.23620497100000648,
+        "finished_at": "2026-10-28T01:12:03.344331+00:00"
+      },
+      {
+        "label": "automatic",
+        "command": [
+          "node",
+          "scripts/check-automatic.mjs",
+          "--strict"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.12980552600015471,
+        "finished_at": "2026-10-28T01:12:03.474317+00:00"
+      },
+      {
+        "label": "trust",
+        "command": [
+          "bash",
+          "scripts/check-trust.sh"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 5.445656804999999,
+        "finished_at": "2026-10-28T01:12:08.920153+00:00"
+      },
+      {
+        "label": "baseline-trust",
+        "command": [
+          "node",
+          ".lake/transient-step8/baseline-trust.mjs"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 14.714461048999965,
+        "finished_at": "2026-10-28T01:12:23.634996+00:00"
+      },
+      {
+        "label": "doc-paths",
+        "command": [
+          "bash",
+          "scripts/check-doc-paths.sh"
+        ],
+        "exit": 1,
+        "elapsed_seconds": 7.2427723020000485,
+        "finished_at": "2026-10-28T01:12:30.878804+00:00"
+      },
+      {
+        "label": "snapshot",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "verify"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.8662541439998677,
+        "finished_at": "2026-10-28T01:12:31.745905+00:00"
+      }
+    ],
+    "memoryMetric": "Linux cgroup memory.peak is charged memory, cumulative within each container; later gate values are cumulative high-water values, not individual per-fixture RSS.",
+    "hardMemoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "threads": "LEAN_NUM_THREADS=1; explicit Lean -j1 through temporary weakLeanArgs and direct lean checks",
+    "combinedOutcome": "686 library jobs, 259 TestSuite jobs, 377 taclets/131 read-bearing annotations matched, exit0. 26 affected Node tests passed.",
+    "memoryLimitEvents": "Combined max=1303 reclaim/limit events, oom=0, oom_kill=0. Full command completed; no resource stop counted as success.",
+    "baselineDocumentationFailure": "20 preexisting missing references in three unchanged citing files, independently checked against starting master; not a passing gate.",
+    "baselineTrust": "714 sources,240 sites,0 findings; task715 sources,240 sites,0 findings.",
+    "staticFinal": [
+      {
+        "label": "staged-diff",
+        "command": [
+          "git",
+          "diff",
+          "--cached",
+          "--check"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.014763844999833964,
+        "cgroup_peak_bytes": 8171520,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "inventory-final",
+        "command": [
+          "python3",
+          "scripts/solidity-feature-audit.py",
+          "--check"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.08714795699961542,
+        "cgroup_peak_bytes": 15872000,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "orphans-final",
+        "command": [
+          "node",
+          "scripts/check-orphans.mjs"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.3126281459990423,
+        "cgroup_peak_bytes": 68575232,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "layers-final",
+        "command": [
+          "node",
+          "scripts/check-layers.mjs"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.3564582029994199,
+        "cgroup_peak_bytes": 68575232,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "automatic-final",
+        "command": [
+          "node",
+          "scripts/check-automatic.mjs",
+          "--strict"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.06590084100025706,
+        "cgroup_peak_bytes": 68575232,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "trust-final",
+        "command": [
+          "bash",
+          "scripts/check-trust.sh"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 5.56138424799974,
+        "cgroup_peak_bytes": 174456832,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      },
+      {
+        "label": "doc-paths-final",
+        "command": [
+          "bash",
+          "scripts/check-doc-paths.sh"
+        ],
+        "exit": 1,
+        "elapsed_seconds": 4.386511193999468,
+        "cgroup_peak_bytes": 174456832,
+        "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+      }
+    ]
+  },
+  "interruptedOrBlockedEvidence": [
+    {
+      "run": "initial full address-space-bounded attempt",
+      "status": "blocked",
+      "diagnostic": "LinearDecision failed to create thread, Lean exit134; task stopped remaining subtree; no terminal full success claimed",
+      "log": "logs/full-address-space-blocked.log.gz"
+    },
+    {
+      "run": "initial Node run before dependency rebuild",
+      "status": "blocked",
+      "reason": "build:false dependencies stale; final 26-test run passed after full build",
+      "log": "logs/node-tests.log.gz"
+    },
+    {
+      "run": "exec-c6b585ab Docker driver",
+      "status": "observer interrupted / exit -1 at 02:23 UTC per audit dc0ac441-6aee-4c01-b8db-2087d739208b",
+      "cause": "unknown",
+      "recovery": "Exact original container solidity-step08-final2 and worker survived. Recovered shell/toolchain, inspected process/log/lock, waited original build, then collected durable command exits. No duplicate full build or VM."
+    }
+  ],
+  "remainingRefusals": [
+    "General multi-statement source-world dispatch and arbitrary nested external constructor calls remain refused by existing WorldImport guards.",
+    "Transient factory owners: solidity.worldFactory.owner: transient state needs the shared world transaction interface.",
+    "Stateful factories, dynamic factory arguments, unsupported alias/function-valued source calls and library transient owners retain existing named refusals.",
+    "Computed nonempty static bodies remain refused by existing world frame guards.",
+    "Multi-frame upstream getter remains blocked before pipeline scheduling by transaction/block/self-address or cross-contract host behavior not adapted.",
+    "Invalid transient reference declarations remain compiler/importer refusals; no parallel recursive representation.",
+    "Delegatecall, assembly/tload/tstore, physical layout, gas, observable-log and excluded environment semantics unchanged."
+  ],
+  "sharedFilesChanged": [
+    "Solidity.lean",
+    "Solidity/Frontend/WorldImport.lean",
+    "Solidity/Semantics/TransientWorld.lean",
+    "Solidity/Language/Features.lean",
+    "docs/solidity-features.json",
+    "docs/solidity-feature-inventory.md",
+    "docs/module-map.md",
+    "docs/feature-work/transient-storage.md",
+    "docs/feature-work/contract-world.md"
+  ],
+  "seams": {
+    "step6": "No edit to ContractWorld.lean, Step, Reachable, Operation.run or generated source run semantics. Only inspectClosed transient-target guard removed.",
+    "recursive": "No State, Contract, Raw/Scoped syntax, TypeGraph or recursive storage representation changes."
+  },
+  "reviews": {
+    "finder": "Read-only initial/final/recovery reviews; no Lean server. Found dirty-entry and preexisting-owner rollback control gaps; both added. Final no confirmed defect. Verified source scopes/axioms and current baseline doc/trust findings.",
+    "skeptic": "Independent read-only initial/final/recovery reviews; no Lean server. No semantic defect. Evidence limits explicit: composition is Lean; full scenario not imported; static creation has kernel-only evidence. Packaging reviewed after population.",
+    "packaging": "Independent finder and skeptic verified all27 initial gzip hashes/lengths,11 source hashes,27 axiom rows,3 pinned raw fixture copies and report rows,22 EVM observations,686/259 and377/131 logs,Node26,resource counters,blocked getter and compiler/kernel limits. No confirmed defect. Final static records appended without source changes."
+  },
+  "historicalReportsChanged": false,
+  "pushedOrMerged": false
+}

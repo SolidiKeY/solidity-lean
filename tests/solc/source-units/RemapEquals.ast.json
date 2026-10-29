@@ -1,0 +1,187 @@
+{
+  "header": {
+    "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+    "solkeyCommit": "",
+    "provenanceVersion": 2,
+    "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "validationStage": "analysis",
+    "settings": {
+      "viaIR": false,
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "libraries": {},
+      "remappings": [
+        "@p/=deps=v1/"
+      ],
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ]
+        }
+      }
+    },
+    "mainSource": "Main.sol"
+  },
+  "sourceUnits": [
+    {
+      "name": "Main.sol",
+      "id": 0,
+      "sourceSha256": "5148ebe0564469d145d3cf972c644207bedf707db27d72f7d137d73217638ec3",
+      "acceptedPragmas": [
+        [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ]
+      ],
+      "ast": {
+        "absolutePath": "Main.sol",
+        "exportedSymbols": {
+          "Main": [
+            5
+          ],
+          "X": [
+            8
+          ]
+        },
+        "id": 6,
+        "nodeType": "SourceUnit",
+        "nodes": [
+          {
+            "id": 1,
+            "literals": [
+              "solidity",
+              "^",
+              "0.8",
+              ".0"
+            ],
+            "nodeType": "PragmaDirective",
+            "src": "0:23:0",
+            "line": 1
+          },
+          {
+            "absolutePath": "deps=v1/X.sol",
+            "file": "@p/X.sol",
+            "id": 2,
+            "nameLocation": "-1:-1:-1",
+            "nodeType": "ImportDirective",
+            "scope": 6,
+            "sourceUnit": 9,
+            "src": "24:18:0",
+            "symbolAliases": [],
+            "unitAlias": "",
+            "line": 1
+          },
+          {
+            "abstract": false,
+            "baseContracts": [
+              {
+                "baseName": {
+                  "id": 3,
+                  "name": "X",
+                  "nameLocations": [
+                    "60:1:0"
+                  ],
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 8,
+                  "src": "60:1:0",
+                  "line": 1
+                },
+                "id": 4,
+                "nodeType": "InheritanceSpecifier",
+                "src": "60:1:0",
+                "line": 1
+              }
+            ],
+            "canonicalName": "Main",
+            "contractDependencies": [],
+            "contractKind": "contract",
+            "fullyImplemented": true,
+            "id": 5,
+            "linearizedBaseContracts": [
+              5,
+              8
+            ],
+            "name": "Main",
+            "nameLocation": "52:4:0",
+            "nodeType": "ContractDefinition",
+            "nodes": [],
+            "scope": 6,
+            "src": "43:21:0",
+            "usedErrors": [],
+            "usedEvents": [],
+            "line": 1
+          }
+        ],
+        "src": "0:64:0",
+        "line": 1
+      }
+    },
+    {
+      "name": "deps=v1/X.sol",
+      "id": 1,
+      "sourceSha256": "d72eefe3b921d88fe641400b9dc6aea6d19aa24e40aafe7acaa1a6d61ca280bb",
+      "acceptedPragmas": [
+        [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ]
+      ],
+      "ast": {
+        "absolutePath": "deps=v1/X.sol",
+        "exportedSymbols": {
+          "X": [
+            8
+          ]
+        },
+        "id": 9,
+        "nodeType": "SourceUnit",
+        "nodes": [
+          {
+            "id": 7,
+            "literals": [
+              "solidity",
+              "^",
+              "0.8",
+              ".0"
+            ],
+            "nodeType": "PragmaDirective",
+            "src": "0:23:1",
+            "line": 1
+          },
+          {
+            "abstract": false,
+            "baseContracts": [],
+            "canonicalName": "X",
+            "contractDependencies": [],
+            "contractKind": "contract",
+            "fullyImplemented": true,
+            "id": 8,
+            "linearizedBaseContracts": [
+              8
+            ],
+            "name": "X",
+            "nameLocation": "33:1:1",
+            "nodeType": "ContractDefinition",
+            "nodes": [],
+            "scope": 9,
+            "src": "24:13:1",
+            "usedErrors": [],
+            "usedEvents": [],
+            "line": 1
+          }
+        ],
+        "src": "0:37:1",
+        "line": 1
+      }
+    }
+  ]
+}

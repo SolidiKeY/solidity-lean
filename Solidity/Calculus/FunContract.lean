@@ -975,6 +975,7 @@ def elabFmlAtC (ns : List (String × LTy)) (φ : RawFml) :
     Except String (Fml C (ctxOfLocals ns).ctx) :=
   let scope : ECtx := ns.reverse.filterMap fun (x, t) => match t with
     | .val p => some (x, LocalTy.val p)
+    | .kint => some (x, LocalTy.kint)
     | .old => some (x, LocalTy.store)
     | .mem R => some (x, LocalTy.mem R)
     | .alias R => some (x, LocalTy.alias R)
@@ -1000,17 +1001,22 @@ syntax ident : cdl_local
 listed, outermost first. -/
 syntax "cdlIn[" term " | " cdl_local,* "]{ " dl_fml " }" : term
 
-/-- `cdlIn![uint x, old, oldNet, uint r]{ φ }`: `cdlIn[C | …]{ φ }` for the
-file's `InContract` contract. -/
+/-- An open formula at an explicit modality, including hidden integer binders. -/
+syntax "cdlIn[" term ", " term " | " cdl_local,* "]{ " dl_fml " }" : term
+
+/-- `cdlIn![uint x, old, oldNet, uint r]{ φ }`: the file's contract. -/
 syntax "cdlIn![" cdl_local,* "]{ " dl_fml " }" : term
 
 open Lean Elab Term Meta in
-elab_rules : term
-  | `(cdlIn[ $c | $ls,* ]{ $φ:dl_fml }) => do
+/-- Read an explicitly named context, retaining typed formula holes and the
+reading modality. `kint` is the unbounded KeY sort, distinct from `int`. -/
+def elabCdlInAt (c : Lean.Term) (m? : Option Lean.Term)
+    (ls : Syntax.TSepArray `cdl_local ",") (φ : TSyntax `dl_fml) : TermElabM Expr := do
     let holes := fmlHoles φ
-    unless holes.isEmpty do throwError "cdlIn: a Lean formula cannot stand in a contract's formula"
     let items ← ls.getElems.mapM fun l => match l with
       | `(cdl_local| $t:ident $x:ident) => do
+        if t.getId.toString == "kint" then
+          return ← `(($(quote x.getId.toString), LTy.kint))
         let p : Lean.Term ← match t.getId.toString with
           | "uint" | "address" => `(PrimTy.uint)
           | "int" => `(PrimTy.int)
@@ -1040,8 +1046,25 @@ elab_rules : term
         | s => throwErrorAt x "cdlIn: {s} has no type; the snapshots are `old` and `oldNet`"
       | _ => throwUnsupportedSyntax
     let ns ← `([$items,*])
-    let raw ← liftMacroM (expandFml { holes } φ)
-    elabAgainstQ c fun q => `((elabFmlAtC $c $ns $raw).map (Fml.quote $q))
+    let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
+    let once (μ : Option Lean.Name) : TermElabM Expr := do
+      let raw ← liftMacroM (expandFml { holes, either := μ.map fun n => (mkCIdent n : Lean.Term) } φ)
+      elabAgainstQ c fun q => `((elabFmlAtC $c $ns $raw).map (Fml.quote $q))
+    let (d, b) ← match m? with
+      | none => do let e ← once none; pure (e, e)
+      | some m =>
+        if m.isConstOf ``Modality.box || m.isConstOf ``Modality.diamond then
+          let e ← once m.constName?
+          pure (e, e)
+        else pure (← once (some ``Modality.diamond), ← once (some ``Modality.box))
+    if holes.isEmpty && d == b then return d
+    let cE ← withTransparency .instances <| whnf (← elabTermAndSynthesize c (mkConst ``Contract))
+    cacheLookups (← fillSlotsC cE m? holes d b)
+
+open Lean Elab Term Meta in
+elab_rules : term
+  | `(cdlIn[ $c | $ls,* ]{ $φ:dl_fml }) => elabCdlInAt c none ls φ
+  | `(cdlIn[ $c, $m | $ls,* ]{ $φ:dl_fml }) => elabCdlInAt c (some m) ls φ
 
 macro_rules
   | `(cdlIn![ $ls,* ]{ $φ:dl_fml }) => `(cdlIn[InContract.contract | $ls,* ]{ $φ })

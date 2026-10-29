@@ -25,7 +25,7 @@ const {Interface} = req('ethers');
 const source = readFileSync(fileURLToPath(new URL('../tests/solc/SliceCopies.sol', import.meta.url)), 'utf8');
 function output(text, viaIR, bytecode = true) {
   return JSON.parse(compile(JSON.stringify({language:'Solidity', sources:{'SliceCopies.sol':{content:text}},
-    settings:{viaIR, evmVersion:'cancun', optimizer:{enabled:false,runs:200},
+    settings:{viaIR, evmVersion:'osaka', optimizer:{enabled:false,runs:200},
       outputSelection:{'*':{'*':bytecode ? ['abi','evm.deployedBytecode.object'] : [], '':['ast']}}}}),0,0));
 }
 const errors = out => (out.errors ?? []).filter(e => e.severity === 'error');
@@ -37,7 +37,7 @@ for (const viaIR of [false,true]) {
   assert.deepEqual(errors(out), [], 'positive source must compile to bytecode');
   const c = out.contracts['SliceCopies.sol'].SliceCopies;
   const iface = new Interface(c.abi);
-  const vm = await createVM({common:new Common({chain:Mainnet, hardfork:Hardfork.Cancun})});
+  const vm = await createVM({common:new Common({chain:Mainnet, hardfork:Hardfork.Osaka})});
   await vm.stateManager.putAccount(address, createAccount({balance:0n}));
   for (const [name,args,expected] of [
     ['copies',[xs],null], ['passing',[xs],null], ['storageCopy',[xs],null],

@@ -1,0 +1,30 @@
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.008s
+
+OK
+{
+  "counts": {
+    "working": 0,
+    "broken": 0,
+    "blocked": 1
+  },
+  "exactVariantGaps": 0,
+  "partialFeatures": 1,
+  "routes": {
+    "step-01-entrypoints": 0,
+    "step-02-source-units": 0,
+    "step-03-expressions": 0,
+    "step-04-panic-revert": 0,
+    "step-06-world": 0,
+    "step-07-recursive": 0,
+    "step-10-revert-proof-interface": 0,
+    "step-11-diamond-calls": 0,
+    "step-12-specs": 0,
+    "step-08-transient": 0,
+    "profile-decision-environment-logs": 0,
+    "excluded-machine-semantics": 0,
+    "resource": 0
+  },
+  "unrouted": 1
+}

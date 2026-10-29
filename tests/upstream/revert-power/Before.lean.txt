@@ -1,0 +1,15 @@
+import Solidity.Syntax.Splice
+import Solidity.Semantics.RunFuel
+open Solidity
+namespace RevertPowerBefore
+def C : Contract := contract!{
+  function power(uint x, uint y) returns (uint r) { r = x ** y; }
+}
+def initial : State C [] := { State.init C with tx := { selfAddress := ⟨7, rfl⟩ } }
+def cutoff := sol[C]{ try this.power(2, 256) returns (uint r) { assert(false); }
+  catch Panic(uint c) { assert(c == 17); } catch { assert(false); } }
+def multiply := sol[C]{ try this.power(57896044618658097711785492504343953926634992332820282019728792003956564819968, 2)
+  returns (uint r) { assert(false); } catch Panic(uint c) { assert(c == 17); } catch { assert(false); } }
+#eval (cutoff.runF 1000 initial).halt?
+#eval (multiply.runF 1000 initial).halt?
+end RevertPowerBefore

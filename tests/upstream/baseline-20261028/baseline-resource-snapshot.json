@@ -1,0 +1,6 @@
+{
+  "memory.events": "low 0\nhigh 0\nmax 233\noom 1\noom_kill 1\noom_group_kill 0\n",
+  "memory.peak": "12884901888\n",
+  "memory.max": "12884901888\n",
+  "observedAt": "2026-10-28T01:26:27.887866+00:00"
+}

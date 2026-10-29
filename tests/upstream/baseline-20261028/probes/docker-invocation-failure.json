@@ -1,0 +1,8 @@
+{
+  "exitCode": 125,
+  "stage": "docker argument parsing",
+  "invalidArgument": "/lib:/lib:64:ro",
+  "correctedArgument": "/lib:/lib:ro",
+  "noCompilerOrLeanProcessRan": true,
+  "countedAsPassing": false
+}

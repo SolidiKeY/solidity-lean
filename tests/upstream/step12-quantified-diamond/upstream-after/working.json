@@ -1,0 +1,362 @@
+[
+  {
+    "path": "test/libsolidity/semanticTests/viaYul/loops/break.sol",
+    "stage": "lean-runtime",
+    "status": "working",
+    "reason": "functional runtime vectors match in every required source evaluation mode",
+    "requiredPipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "variants": [
+      {
+        "status": "working",
+        "reason": "all supported runtime vectors match",
+        "pipeline": "legacy",
+        "path": "test/libsolidity/semanticTests/viaYul/loops/break.sol",
+        "observed": [
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "f()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "g()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "h()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          }
+        ]
+      },
+      {
+        "status": "working",
+        "reason": "all supported runtime vectors match",
+        "pipeline": "viaIR",
+        "path": "test/libsolidity/semanticTests/viaYul/loops/break.sol",
+        "observed": [
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "f()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "g()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "h()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/viaYul/loops/continue.sol",
+    "stage": "lean-runtime",
+    "status": "working",
+    "reason": "functional runtime vectors match in every required source evaluation mode",
+    "requiredPipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "variants": [
+      {
+        "status": "working",
+        "reason": "all supported runtime vectors match",
+        "pipeline": "legacy",
+        "path": "test/libsolidity/semanticTests/viaYul/loops/continue.sol",
+        "observed": [
+          {
+            "values": [
+              "11"
+            ],
+            "signature": "f()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "11"
+            ],
+            "signature": "g()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "5"
+            ],
+            "signature": "h()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          }
+        ]
+      },
+      {
+        "status": "working",
+        "reason": "all supported runtime vectors match",
+        "pipeline": "viaIR",
+        "path": "test/libsolidity/semanticTests/viaYul/loops/continue.sol",
+        "observed": [
+          {
+            "values": [
+              "11"
+            ],
+            "signature": "f()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "11"
+            ],
+            "signature": "g()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "5"
+            ],
+            "signature": "h()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/viaYul/loops/return.sol",
+    "stage": "lean-runtime",
+    "status": "working",
+    "reason": "functional runtime vectors match in every required source evaluation mode",
+    "requiredPipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "variants": [
+      {
+        "status": "working",
+        "reason": "all supported runtime vectors match",
+        "pipeline": "legacy",
+        "path": "test/libsolidity/semanticTests/viaYul/loops/return.sol",
+        "observed": [
+          {
+            "values": [
+              "1"
+            ],
+            "signature": "f()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "1"
+            ],
+            "signature": "g()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "h()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          }
+        ]
+      },
+      {
+        "status": "working",
+        "reason": "all supported runtime vectors match",
+        "pipeline": "viaIR",
+        "path": "test/libsolidity/semanticTests/viaYul/loops/return.sol",
+        "observed": [
+          {
+            "values": [
+              "1"
+            ],
+            "signature": "f()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "1"
+            ],
+            "signature": "g()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "h()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/viaYul/loops/simple.sol",
+    "stage": "lean-runtime",
+    "status": "working",
+    "reason": "functional runtime vectors match in every required source evaluation mode",
+    "requiredPipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "variants": [
+      {
+        "status": "working",
+        "reason": "all supported runtime vectors match",
+        "pipeline": "legacy",
+        "path": "test/libsolidity/semanticTests/viaYul/loops/simple.sol",
+        "observed": [
+          {
+            "values": [
+              "1024"
+            ],
+            "signature": "f()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "1024"
+            ],
+            "signature": "g()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "h()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "3"
+            ],
+            "signature": "i()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [],
+            "signature": "j()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          }
+        ]
+      },
+      {
+        "status": "working",
+        "reason": "all supported runtime vectors match",
+        "pipeline": "viaIR",
+        "path": "test/libsolidity/semanticTests/viaYul/loops/simple.sol",
+        "observed": [
+          {
+            "values": [
+              "1024"
+            ],
+            "signature": "f()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "1024"
+            ],
+            "signature": "g()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "2"
+            ],
+            "signature": "h()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [
+              "3"
+            ],
+            "signature": "i()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          },
+          {
+            "values": [],
+            "signature": "j()",
+            "revertBytes": [],
+            "returnBytes": [],
+            "failed": false
+          }
+        ]
+      }
+    ]
+  }
+]

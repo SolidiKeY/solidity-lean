@@ -194,6 +194,13 @@ had that restriction: `SVal.defaultOf` keeps a fixed-size array's `n` elements
 
 ## Memory allocation, aliasing, declarations
 
+The M7 given-heap witness fallback (`Calculus/MemoryWitness.lean`) is Lean-only
+finite semantic checking, not a new taclet. Its binder enumeration preserves
+existing identities and unset; it performs no allocation rewrite. Alias write
+controls use the same identity/index distinction as `memoryRules.key`'s
+`readOnWrite`, via the existing typed heap read/write laws.
+
+
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `memoryReferenceDeclFreshAlloc` | same | same | `T memory mv; ⇝ { mv := freshId(addM(memory)) ‖ memory := addM(memory) }`, the pair KeY writes: `ITerm.alloc` and `MTerm.addM` agree on the minted root because both read the same pre-state |
@@ -407,7 +414,7 @@ does not claim coverage of the wider upstream syntax.
 | `whileUnwind` | `Taclet.whileUnwind` | literal schema, bounded search | `while (cond) body` ⇝ `if (cond) { body; while (cond) body; }`, KeY's `s#cond`, `s#body` as `cond`, `body`. Unannotated loops use `LoopAnn.auto`; the one constructor's `LoopUnwind` mode also supports explicit bounds, decrementing `unwind n + 1` to `unwind n`. Sound by `Premise.sound_whileUnwind` (`TLoop.run_unfold`, `Calculus/SoundLoops.lean`). Annotations are proof-strategy metadata and do not change execution; exhausted search fails, while an exhausted explicit bound leaves an exit obligation. `sol_prove?` retains its discovered walk budget for replay |
 | — | `LeanTaclet.loopExit` | Lean only | a loop at its bound (`unwind 0`, the annotation of a loop with no clause): a check (`Premise.check`, `Proves.check`; walk: `apply checkLean r`), "loop exited" the rest with `{ b := cond } (b = FALSE)` assumed, "unwound to the end" `{ b := cond } (b = FALSE)`: the condition read by an update under the diamond, as the invariant rules read it, so a condition that halts is not false (KeY's terms cannot halt; the program evaluates them). Sound by `Premise.sound_loopExit`. Not `assert(!cond)`, which would make running out of unwindings a panic of the program |
 | `whileInvariantBox` | `Taclet.whileInvariantBox` | restricted port | `[ /// @custom:key invariant inv while (cond) body; ]` ⇝ "invariant initially valid": `inv = TRUE ∧ ¬broke`, where `inv = TRUE` is the invariant with its quantified clauses (`invFml inv qs`: `\forall T x; a -> c` read as `∀`, solkey's `\getInvariant` over the specification language); "invariant preserved and used": `{anon(body)} (inv = TRUE ∧ ¬broke → { b := cond } (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ; b = FALSE ⟹ ⟨[ ]⟩))`. `broke` is solkey's `\getLoopBreak` (`loopBreak`): the lowered `break` flag read `true` where the elaborator lowered one (`LoopAnn.inv … brk`) and the condition starts with its negation (`Val.breakExit`), none otherwise, where the goals are the ones above without it. Deviation: the first goal also asks `¬broke`, which solkey's lowering gives by declaring the flag `false` before the loop; Lean's rule is sound for any loop. The body's goal is split by `andRight` (`Proves.andIntro`), the walk's step for a conjunction still holding a program. KeY's `s#b` (`bType b = cond;`) is a fresh local (printed `se`), `#loopAnon` is `{anon(body)}` (`Fml.anonHavoc`: `{anon(xs)}` of the body's frame `Prog.frame`, and for the storage KeY's anonymising update of the roots the body may write, `{storage := anon(storage, L, s')}` for every `s'` (its modifies set `Prog.storeAt`, `docs/loops.md` "Modifies sets"), or `{havoc}` where it may write any root, pay or call out). `b = TRUE` is KeY's `=` (`Fml.eq`) of a local and a literal; `inv = TRUE` is the Theory equation, any state predicate the rule needs. Premise `Premise.inv`; in a walk the scoped `Proves.inv` (a `Proves` step by `Taclet.toStep`; `apply invBox r`, `apply invLean r` under the diamond), its goals `init`, and `thn`, `els` past the context's `{anon(body)}` (`Hyps.anonHavoc`): solkey's two goals. A condition, invariant or variant that needs a capture (a call, a cast, a narrow operation, a constructor, an `++`) is refused at elaboration (`loopExpr`), where solkey evaluates it per iteration. Sound by `Premise.sound_whileInvBox` (`Calculus/SoundLoops.lean`, `TLoop.run_induct`) |
-| `whileInvariantDiamond` | `Taclet.whileInvariantDiamond` | restricted port | the box's premise with `{ variant := dec ‖ b := cond }` and the body's postcondition `inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)`: KeY's skolem `variant` a fresh local (printed `ie`), the variant checked only where the condition holds again, `0 <= dec ∧ dec < variant` read in the Theory (KeY's `=`): the bound is the Theory value of `dec`, which the next head's update reads as the interpreter does (`Tm.denote_eval`); and under the diamond the cover (`b` is `TRUE` or `FALSE`, `Premise.inv`). Sound by `Premise.sound_whileInvDiamond` (`TLoop.run_variant`) |
+| `whileInvariantDiamond` | `Taclet.whileInvariantDiamond` | restricted port | the box's premise with `{ variant := dec ‖ b := cond }` and the body's postcondition `inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)`: KeY's skolem `variant` a fresh local (printed `ie`), the variant checked only where the condition holds again, `0 <= dec ∧ dec < variant` read in the Theory (KeY's `=`): the bound is the Theory value of `dec`, which the next head's update reads as the interpreter does (`Tm.denote_eval`); and under the diamond the cover (`b` is `TRUE` or `FALSE`, `Premise.inv`). Quantified `LoopQ` clauses are retained in `invFml` and shifted under the typed snapshot (`invFml_up_holds`). Sound by `Premise.sound_whileInvDiamond` (`TLoop.run_variant_or`) |
 | — | `LeanTaclet.whileClose` | Lean only | a loop with an invariant whose body has no frame (`Prog.frame`: it writes memory, pushes, pops, rebinds an alias or calls out), under either modality, closes to `false`: sound, and nothing about it is derived. solkey refuses only memory-writing bodies (and unwinds them); a push, a pop or a call it frames as writing storage and the ledger, so those refusals are Lean's own (`Stmt.within`) |
 | — | `LeanTaclet.whileNoVariantDiamond` | Lean only | a loop with an invariant and no `decreases` closes to `false` under the diamond (solkey unwinds it). `Stmt.inSolkey` is `false` on every loop |
 | — | `LeanTaclet.loopLexErase` | Lean only | Typed tuple annotation erasure for the existing invariant safety path, preserving the invariant, break flag and quantified clauses. `LoopLex.eraseAllowed` prevents supported ordinary diamond loops from bypassing metric checks. Ordinary and callback erasure have separate semantic lemmas (`Premise.sound_loopAnnotation`, `CallbackCapture.loop_ann_all`) |
@@ -639,6 +646,7 @@ names"), with the lemma it restates.  A name is an identity term: KeY's
 | — (Lean only: a guard of a memory) | `guardQ`, `guardL`, `seqMemL`: a guard `d; a` read as the words its memory's returning comes to, a word the closer folds to `true` dropped | `guardQ_sound`, `guardL_eval`, `seqMemL_eval` | — | used |
 | — (Lean only: solkey names a copy's root by a Skolem `freshIdp`) | `copyRes` (`Op2.memRes`'s `.copy` arm, applied at formation by `foldRead2`): a copy's root `copy(M, S)` read as `copy(stripW(M), S)`, the memory without its writes (`LTm.stripW`), guarded by the words `M`'s writes land on (`seqMemL`); the copy's laws read such a root at the node that copies it (`LTm.onSpineS`, `LTm.base_eval`, `LTm.unstripAddr`), and a memory's own landing guard is read as its words (`UpdElem.toLS`) | `copyRes_eval`, `LTm.stripW_eval`, `SVal.copyStToM_id_eq`, `LTm.read_unstrip` | — | used |
 | — (solkey's `keccak256` is uninterpreted) | `keccakRes`, `keccakAt` (`Op2.memRes`'s `.keccak` arm): a byte string whose length (`lenAtN`) and every byte (`memReadN` at `t[i]`) read down the memory to literals (`LTm.litIn?`), at most `keccakMaxBytes` (64), hashes to `keccakBytes` of them, evaluated by the kernel; `orElse` the symbol where the memory does not return | `keccakAt_eval` (`keccakWords_spec`, `eval_read_mat`, `eval_mlen_some`) | — | Lean only: a locally built byte string's hash under `⟨⟩`, two allocations of the same literal bytes hash equal (`Examples/Tactics/Hashing.lean`, `hashTwiceDiamond`, `abcHash`, `twoAllocations`) |
+| — (Lean-only M7 composition; no new taclet) | `WrittenMemory.hashEq_afterT_iff`: equal hash inputs inside actual memory-update landings, under the formula’s existing finite premise; `HashInputReduction.cut` composes a certified intrinsic input formula with the existing memory cut | `hashFree_lands`, `hashEq_iff_input`, `hashInput_write_index`, `Fml.hoist_holds`, `Fml.mxTop_holds` | existing `HashKind.apply_congr` / `Grown.hashId_of_input` | `Examples/DecisionWrittenMemory.lean`; exact written-equality schema realized by `HashWrittenRealize` and tried last by `decideHash`; target unchanged; general negative-array production remains open |
 | — (Lean only: a read walks every write) | `memFuel`: a read walks at most 256 writes and allocations down, then is kept | — | — | used |
 
 ## The data-structure theories
@@ -664,6 +672,19 @@ old one, computed from the type (`TVal.overlay`, one component at a time:
 `TVal.ovR`): no lazy leaf, so the `selectOnSaveEmpty*` rows are the reads of
 that overlay.  `docs/solkey-feedback.md` carries the request that solkey drop
 the fold.
+
+### Two-threshold integer quantifiers (Lean-only)
+
+`Calculus/KIntTwoAnchors.lean` is exact arithmetic preparation, not a new
+SolKey program taclet. It keeps the existing KeY-int `gt`/`ge` symbols:
+`∀ y : Int. y > z → y > k` becomes `z >= k`. Side conditions: both
+comparisons read the same innermost integer, `z` is an outer KeY-int local,
+`k` is a literal, and both Boolean observations are exactly `true`.
+The thresholds are total and independent of `y`; `y = k` is the
+counterexample point when `z < k`. A typed shape certificate and
+`Fml.holds_kintTwoAnchor` prove equivalence at every state and polarity.
+No term/formula syntax or printer is added. Other shapes, including
+symbolic multiplication, are not admitted by this preparation.
 
 ### The update vocabulary (`Solidity/Update.lean`)
 
@@ -707,6 +728,19 @@ operation here (`Storage.obs_save`, `obs_write`, `obs_delete`, `obs_push`,
 | `selectOnEmptyStorage`, `fixedEmpty`, `selectOnShapeSize` in `sol_decide` (`structRules.key`) | `SFun.mt`, `mtRd`, `TSegs.mtHas` (`Calculus/Decide.lean`) | done: the elimination reads `mtSt` as `Storage.init`: a word its type's default, a dynamic array's length `0`, a location there below a member, a key or a fixed index in range, never below a dynamic index (`SFun.mt_rep`, `SVal.findM_dflt`, `TSegs.mtHas_eval`, `Calculus/DecideEval.lean`); a `save` on it is the ordinary write over this reader, so `saveOnEmptyStorage` needs no clause of its own |
 | `selectOnShape*`, `wf*`, `fixed*`, `wfFixedIsFixed`, `wfDynIsNotFixed`, `fieldShapeDef` | the typed storage (`Storage C`, `Semantics/Storage.lean`) | **not modelled as taclets**: a typed storage is in its contract's shape, clause for clause |
 | `sizeNotNegative` | — | **arch**: a length is a `uint`, at least `0` by its type (the closer's `Facts.range`) |
+
+### Fresh struct scalar cut (Lean-only constructive decision support)
+
+`MemoryWitness.Plan` and `realize` record child-first allocations with typed
+references into earlier objects; reusing a reference retains sharing.
+`keeps`, `root_fresh` and `root_field` use the typed allocation/frame laws
+below. `word_cut` retains heap-relative realizability; `word_cut_global`
+constructs children for the global scalar correspondence. The
+`MemStructCut` classifier carries complete syntax equalities, and
+`fieldEq_refutes` constructs the pre-parent child heap returned by
+`decideStruct`. This is an auxiliary scalar decision schema, not a new
+SolKey taclet or a change to `allocAll`. Its scope and evidence are in the
+[memory-struct witness record](feature-work/next10-memory-struct-witness.md).
 
 ### `memoryRules.key`, `structMemoryRules.key` → `Theory/Typed/Mem.lean`
 

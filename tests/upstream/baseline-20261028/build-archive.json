@@ -1,0 +1,16 @@
+{
+  "command": [
+    "tar",
+    "--sort=name",
+    "--mtime=@0",
+    "--owner=0",
+    "--group=0",
+    "--numeric-owner",
+    "-czf",
+    "/workspace/solidity-lean/tests/upstream/baseline-20261028/build-evidence.tar.gz",
+    "tests/upstream/baseline-20261028/cold"
+  ],
+  "sha256": "a104e630900b984b45e126caa4934515c7999b3df572e1ca850740cb4f0b23d8",
+  "bytes": 24546,
+  "scope": "Blocked cold command logs, actual configuration/wrapper/harness, state, fingerprint and last resource samples; compiled partial artifacts remain on this VM, not in the archive."
+}

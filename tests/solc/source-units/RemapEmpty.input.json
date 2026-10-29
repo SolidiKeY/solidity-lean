@@ -1,0 +1,30 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "Main.sol": {
+      "content": "pragma solidity ^0.8.0; import \"@p/X.sol\"; contract Main is X {}"
+    },
+    "X.sol": {
+      "content": "pragma solidity ^0.8.0; contract X {}"
+    }
+  },
+  "settings": {
+    "viaIR": false,
+    "evmVersion": "osaka",
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "libraries": {},
+    "remappings": [
+      "@p/="
+    ],
+    "outputSelection": {
+      "*": {
+        "": [
+          "ast"
+        ]
+      }
+    }
+  }
+}

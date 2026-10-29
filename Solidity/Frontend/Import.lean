@@ -1,5 +1,6 @@
 import Lean
 import Solidity.Frontend.SolcJson
+import Solidity.Frontend.SourceUnits
 import Solidity.Syntax.Splice
 
 /-!
@@ -536,21 +537,24 @@ private def callsLeftOut? (bad : List (String × String)) (calls : List String) 
 private def readImportedContract (ast : Json) (name : String)
     (ren : List (String × String)) (testing entrypoints : Bool)
     (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
-    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool) :
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json := []) :
     Except String SolcContract :=
   readContract ast name ren testing
     (rewriteSpecBindings env sourceNames) (rewriteLoopBindings env sourceNames)
     (if provenance.legacyFixture then fun _ => default else fun request =>
-      (Admission.scan ast provenance { request with
+      (Admission.scan (if compilationUnits.isEmpty then ast else .arr compilationUnits.toArray) provenance { request with
         declarationRoots := request.declarationRoots ++
-          [Admission.header [] ast] ++ (J.arrD ast "nodes").toList.filter (J.kind · == "PragmaDirective") }).append
+          (if compilationUnits.isEmpty then [ast] else compilationUnits).flatMap (fun unit =>
+            [Admission.header [] unit] ++ (J.arrD unit "nodes").toList.filter (fun node =>
+              ["PragmaDirective", "ImportDirective", "UsingForDirective"].contains (J.kind node))) }).append
         (scanSpecifications env sourceNames request) |>.normalize |>.requireCompilerCode (!compilerCode.isEmpty))
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
         specifications := [(bound, "/// @custom:key " ++ text)] })
     (readsSpecification env sourceNames) entrypoints
-    (!provenance.legacyFixture && provenance.pipeline == some .viaIR) compilerCode namedErrorSourceOrder
+    (!provenance.legacyFixture && provenance.pipeline == some .viaIR) compilerCode namedErrorSourceOrder compilationUnits
 
 private structure ImportedMembers where
   members : List String
@@ -649,15 +653,15 @@ def elabSolcImport : CommandElab := fun stx => do
       re-run scripts/solc-ast.mjs, which rewrites the literal"
   let some text := String.fromUTF8? bytes | throwError "{path} is not UTF-8"
   let j ← ofExcept (Json.parse text)
-  let ast ← ofExcept (j.getObjVal? "ast")
-  let provenance ← ofExcept (Source.read j ast)
+  let compilation ← ofExcept (Source.readCompilationUnit j)
+  let ast := compilation.primary
+  let provenance := compilation.provenance
   let compilerCode ← ofExcept (Source.readCompilerCode j ast provenance)
-  let source := ((j.getObjVal? "header").toOption.bind fun hd =>
-    (hd.getObjValAs? String "source").toOption).getD "?"
+  let source := provenance.source
   let srcName := (System.FilePath.mk source).fileName.getD source
   let env ← getEnv
   -- Quotation names are not semantic specification bindings.
-  let sourceNames := (J.nodes ast).filterMap (J.str? · "name")
+  let sourceNames := (J.nodes (.arr compilation.asts.toArray)).filterMap (J.str? · "name")
     |>.flatMap (·.splitOn ".") |>.eraseDups
   let legacyOrderOverride : Option EvalOrder ←
     if provenance.legacyFixture && !stx[8].isNone then
@@ -669,7 +673,8 @@ def elabSolcImport : CommandElab := fun stx => do
   let namedErrorSourceOrder := (legacyOrderOverride.map (·.binaryLeftToRight)).getD
     (provenance.pipeline == some .viaIR)
   let c ← ofExcept (readImportedContract ast N.getString! ren (!stx[7].isNone)
-    (!stx[9].isNone) env sourceNames provenance compilerCode namedErrorSourceOrder)
+    (!stx[9].isNone) env sourceNames provenance compilerCode namedErrorSourceOrder
+    (if provenance.sources.isEmpty then [] else compilation.asts))
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then

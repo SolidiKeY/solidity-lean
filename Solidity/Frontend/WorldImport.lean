@@ -1,5 +1,5 @@
 import Solidity.Frontend.Import
-import Solidity.Semantics.ContractWorld
+import Solidity.Semantics.ContractWorldCertificates
 
 /-!
 # Source creation factories in the typed contract world
@@ -82,13 +82,12 @@ private def paymentAddress : Nat → Json → Except String Nat
 
 /-- Inspect a declaration for unsupported nested world effects. Ordinary
 external calls cannot be replaced by the single-contract response table.
-Transfers are admitted only with explicit no-code recipient premises. -/
+Transfers are admitted only with explicit no-code recipient premises. Transient
+declarations use the imported contract certificate and ordinary typed roots;
+callers select an outer transaction boundary for a complete composition. -/
 private def inspectClosed (declarations : List Json) (node : Json) : Except String (List Nat) := do
   let mut payments : List Nat := []
   for n in J.nodes node do
-    if J.kind n == "VariableDeclaration" &&
-        (J.str? n "storageLocation" == some "transient" || J.opt n "transient" == some (.bool true)) then
-      throw "solidity.worldFactory.constructor: transient state needs the shared world transaction interface"
     if J.kind n == "TryStatement" then
       throw "solidity.worldFactory.constructor: nested external try requires world-aware statements"
     if J.kind n == "NewExpression" then
@@ -283,7 +282,17 @@ def elabSolcWorldFactory : CommandElab := fun stx => do
   let finish := match factory.branches with
     | none => s!"next.create .target fresh {namespaceText}.constructor \{ sender := self.address, mode := .ordinary ⟨{factory.value}, by decide +kernel⟩, ext := ctx.ext }"
     | some (ok, err) => s!"next.tryCreate (.ok ()) .target (fun _ => fresh) (fun _ => {namespaceText}.constructor) (fun _ => \{ sender := self.address, mode := .ordinary ⟨{factory.value}, by decide +kernel⟩, ext := ctx.ext }) (fun w _ => .ok (w, {ok})) (fun w _ => .ok (w, {err}))"
-  command s!"def {namespaceText}.run (w : Solidity.ContractWorld.World {namespaceText}.contracts) (self : Solidity.ContractWorld.Handle {namespaceText}.Code.factory) (ctx : Solidity.ContractWorld.Context) (fresh : Solidity.ContractWorld.Address) (_admitted : {namespaceText}.assumptions w ctx = true) : Solidity.TRes (Solidity.ContractWorld.World {namespaceText}.contracts × {resultType}) := do\n if w.isLibrary .factory || ctx.isStatic then .error .revert else do\n  let st ← Solidity.TRes.ofOpt (w.storage? self)\n  let entry ← w.enter self.address ctx st {factory.payable}\n  let next ← w.finish self.address entry\n  {finish}"
+  command s!"def {namespaceText}.run (w : Solidity.ContractWorld.World {namespaceText}.contracts) (self : Solidity.ContractWorld.Handle {namespaceText}.Code.factory) (ctx : Solidity.ContractWorld.Context) (fresh : Solidity.ContractWorld.Address) (_admitted : {namespaceText}.assumptions w ctx = true) : Solidity.TRes (Solidity.ContractWorld.World {namespaceText}.contracts × {resultType}) := do\n if w.isLibrary .factory || ctx.isStatic then .error .revert else do\n  w.paidRun self ctx {factory.payable} (fun next => {finish})"
+
+  let creation := match factory.branches with
+    | none => s!".create .target fresh {namespaceText}.constructor \{ sender := self.address, mode := .ordinary ⟨{factory.value}, by decide +kernel⟩, ext := ctx.ext }"
+    | some _ => s!".tryCreate (.ok ()) .target (fun _ => fresh) (fun _ => {namespaceText}.constructor) (fun _ => \{ sender := self.address, mode := .ordinary ⟨{factory.value}, by decide +kernel⟩, ext := ctx.ext })"
+  let tailProof := match factory.branches with
+    | none => "Solidity.ContractWorld.Operation.create_certificate"
+    | some _ => "Solidity.ContractWorld.Operation.tryCreate_certificate"
+  command s!"def {namespaceText}.operation (self : Solidity.ContractWorld.Handle {namespaceText}.Code.factory) (ctx : Solidity.ContractWorld.Context) (fresh : Solidity.ContractWorld.Address) : Solidity.ContractWorld.Operation {namespaceText}.contracts := .seq (.guard (!ctx.isStatic)) (.seq (.call .factory self (Solidity.ContractWorld.Entry.unit .nil {factory.payable}) ctx) ({creation}))"
+  command s!"theorem {namespaceText}.run_certificate (w : Solidity.ContractWorld.World {namespaceText}.contracts) (self : Solidity.ContractWorld.Handle {namespaceText}.Code.factory) (ctx : Solidity.ContractWorld.Context) (fresh : Solidity.ContractWorld.Address) (admitted : {namespaceText}.assumptions w ctx = true) : Solidity.ContractWorld.forgetResult ({namespaceText}.run w self ctx fresh admitted) = ({namespaceText}.operation self ctx fresh).run w := by\n apply Solidity.ContractWorld.World.guardedPaidRun_certificate\n intro next\n exact {tailProof} .."
+  command s!"theorem {namespaceText}.run_reachable \{funding roles allowed} \{w next : Solidity.ContractWorld.World {namespaceText}.contracts} \{result : {resultType}} (self : Solidity.ContractWorld.Handle {namespaceText}.Code.factory) (ctx : Solidity.ContractWorld.Context) (fresh : Solidity.ContractWorld.Address) (admitted : {namespaceText}.assumptions w ctx = true) (before : Solidity.ContractWorld.Reachable funding roles allowed w) (permitted : allowed w ({namespaceText}.operation self ctx fresh)) (success : {namespaceText}.run w self ctx fresh admitted = .ok (next, result)) : Solidity.ContractWorld.Reachable funding roles allowed next := Solidity.ContractWorld.Reachable.of_certificate before permitted ({namespaceText}.run_certificate w self ctx fresh admitted) success"
 
 /-- Metadata of the exact source linked-mutation fragment. -/
 structure WorldLinked where
@@ -423,6 +432,10 @@ def elabSolcWorldLibrary : CommandElab := fun stx => do
   command s!"def {namespaceText}.roles : {namespaceText}.Code → Solidity.ContractWorld.Role\n | .caller => .contractCode\n | .library => .libraryCode"
   command s!"def {namespaceText}.deployCaller (w : Solidity.ContractWorld.World {namespaceText}.contracts) (self : Solidity.ContractWorld.Address) (ctx : Solidity.ContractWorld.Context) := w.create {namespaceText}.Code.caller self Solidity.Prog.nil ctx"
   command s!"def {namespaceText}.deployLibrary (w : Solidity.ContractWorld.World {namespaceText}.contracts) (self : Solidity.ContractWorld.Address) (ctx : Solidity.ContractWorld.Context) := w.deployLibrary {namespaceText}.Code.library self ctx"
-  command s!"def {namespaceText}.run (w : Solidity.ContractWorld.World {namespaceText}.contracts) (self : Solidity.ContractWorld.Handle {namespaceText}.Code.caller) (ctx : Solidity.ContractWorld.Context) (linkedAddress : Solidity.ContractWorld.Address) : Solidity.TRes (Solidity.ContractWorld.World {namespaceText}.contracts × Unit) := do\n let st ← Solidity.TRes.ofOpt (w.storage? self)\n let entry ← w.enter self.address ctx st {linked.payable}\n let next ← w.finish self.address entry\n next.libraryCall self ⟨.library, linkedAddress, Solidity.ContractWorld.Entry.unit {namespaceText}.linkedBody⟩ ctx"
+  command s!"def {namespaceText}.run (w : Solidity.ContractWorld.World {namespaceText}.contracts) (self : Solidity.ContractWorld.Handle {namespaceText}.Code.caller) (ctx : Solidity.ContractWorld.Context) (linkedAddress : Solidity.ContractWorld.Address) : Solidity.TRes (Solidity.ContractWorld.World {namespaceText}.contracts × Unit) := do\n w.paidRun self ctx {linked.payable} (fun next => next.libraryCall self ⟨.library, linkedAddress, Solidity.ContractWorld.Entry.unit {namespaceText}.linkedBody⟩ ctx)"
+
+  command s!"def {namespaceText}.operation (self : Solidity.ContractWorld.Handle {namespaceText}.Code.caller) (ctx : Solidity.ContractWorld.Context) (linkedAddress : Solidity.ContractWorld.Address) : Solidity.ContractWorld.Operation {namespaceText}.contracts := .seq (.call .caller self (Solidity.ContractWorld.Entry.unit .nil {linked.payable}) ctx) (.libraryCall .caller self ⟨.library, linkedAddress, Solidity.ContractWorld.Entry.unit {namespaceText}.linkedBody⟩ ctx)"
+  command s!"theorem {namespaceText}.run_certificate (w : Solidity.ContractWorld.World {namespaceText}.contracts) (self : Solidity.ContractWorld.Handle {namespaceText}.Code.caller) (ctx : Solidity.ContractWorld.Context) (linkedAddress : Solidity.ContractWorld.Address) (ordinary : w.isLibrary .caller = false) : Solidity.ContractWorld.forgetResult ({namespaceText}.run w self ctx linkedAddress) = ({namespaceText}.operation self ctx linkedAddress).run w := by\n apply Solidity.ContractWorld.World.paidRun_certificate _ _ _ _ _ _ ordinary\n intro next\n exact Solidity.ContractWorld.Operation.libraryCall_certificate .."
+  command s!"theorem {namespaceText}.run_reachable \{funding roles allowed} \{w next : Solidity.ContractWorld.World {namespaceText}.contracts} (self : Solidity.ContractWorld.Handle {namespaceText}.Code.caller) (ctx : Solidity.ContractWorld.Context) (linkedAddress : Solidity.ContractWorld.Address) (ordinary : w.isLibrary .caller = false) (before : Solidity.ContractWorld.Reachable funding roles allowed w) (permitted : allowed w ({namespaceText}.operation self ctx linkedAddress)) (success : {namespaceText}.run w self ctx linkedAddress = .ok (next, ())) : Solidity.ContractWorld.Reachable funding roles allowed next := Solidity.ContractWorld.Reachable.of_certificate before permitted ({namespaceText}.run_certificate w self ctx linkedAddress ordinary) success"
 
 end Solidity.Frontend

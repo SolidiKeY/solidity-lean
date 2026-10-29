@@ -1,6 +1,12 @@
 -- The root of the `Solidity` library: every module of the default build.
 import Solidity.KeySort
 import Solidity.Language.Features
+import Solidity.Language.FixedPoint
+import Solidity.Language.FixedPoint.Abi
+import Solidity.Language.FixedPoint.Conformance
+import Solidity.Language.FixedPoint.Laws
+import Solidity.Language.FixedPoint.Literals
+import Solidity.Language.FixedPoint.Storage
 import Solidity.Eqns
 import Solidity.AST
 import Solidity.TypeGraph
@@ -14,6 +20,7 @@ import Solidity.Syntax.PushSource
 import Solidity.Syntax.Inlined
 import Solidity.Syntax.Join
 import Solidity.Syntax.Elab
+import Solidity.Syntax.Elab.SliceCopy
 import Solidity.Syntax.Quote
 import Solidity.Syntax.Splice
 import Solidity.FreshNames
@@ -391,10 +398,19 @@ import Solidity.Evm.MemoryCompound
 import Solidity.Evm.MemoryCapture
 import Solidity.Evm.MemoryCompile
 import Solidity.Evm.Compiler
+import Solidity.Roadmap.Contracts
+import Solidity.Roadmap.Frontend
+import Solidity.Roadmap.Evm
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
 import Solidity.Evm.Interpreter
+import Solidity.Backend.Opcode
+import Solidity.Backend.Jumpdest
+import Solidity.Backend.Assembler
+import Solidity.Backend.Control
+import Solidity.Backend.EvmVectors
+import Solidity.Backend.Checks
 import Solidity.Tools.Show
 import Solidity.Tools.Common
 import Solidity.Tools.Run
@@ -486,6 +502,7 @@ import Solidity.Calculus.QuantExpand
 import Solidity.Calculus.FloorRegion
 import Solidity.Calculus.ArrayProperty
 import Solidity.Calculus.QuantReduction
+import Solidity.Calculus.QuantLedger
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerCut
 import Solidity.Calculus.LedgerArithmetic
@@ -501,10 +518,26 @@ import Solidity.Calculus.HashKinds
 import Solidity.Calculus.HashKinds3
 import Solidity.Calculus.HashMove
 import Solidity.Calculus.MemSwap
+import Solidity.Calculus.MemFloor
+import Solidity.Calculus.MemInst
+import Solidity.Calculus.MemObserve
+import Solidity.Calculus.MemNegPrep
+import Solidity.Calculus.MemStructWitness
 import Solidity.Calculus.MemHoist
+import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
+import Solidity.Calculus.KIntTwoAnchors
 import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
+import Solidity.Calculus.HashWritten
+import Solidity.Calculus.HashWrittenInput
+import Solidity.Calculus.HashWrittenRealize
+import Solidity.Hash.CollisionBound
+import Solidity.Hash.Adaptive
+import Solidity.Storage.HashedLayout
+import Solidity.Storage.HashedLayoutEvm
+import Solidity.Storage.HashedKeccak
+import Solidity.Storage.HashedSeparation
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction
@@ -512,7 +545,14 @@ import Solidity.Examples.AutoComplete
 import Solidity.Examples.Decision
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
+import Solidity.Examples.DecisionQuantLedger
 import Solidity.Examples.DecisionMemory
+import Solidity.Examples.DecisionWrittenMemory
+import Solidity.Examples.MemoryFloor
+import Solidity.Examples.MemoryInstantiation
+import Solidity.Examples.MemoryNegativeCountermodel
+import Solidity.Examples.MemoryNegativeDecision
+import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.DecisionArrays
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
@@ -523,6 +563,7 @@ import Solidity.Examples.Verify
 import Solidity.Examples.ProofTree
 import Solidity.Theorems
 import Solidity.Frontend.SolcJson
+import Solidity.Frontend.SourceUnits
 import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
 import Solidity.Frontend.Testing
@@ -574,10 +615,13 @@ import Solidity.Examples.Tactics.AggregatesImport
 import Solidity.Examples.Tactics.AggregateSlices
 import Solidity.Examples.Tactics.SliceCopies
 import Solidity.Examples.Tactics.SliceCopiesImport
+import Solidity.Examples.Tactics.SliceReferenceCopies
 import Solidity.Frontend.Source
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Examples.Tactics.SourceLiteralsImport
 import Solidity.Examples.Tactics.SourceIdentifiersImport
+import Solidity.Examples.Tactics.SourceUnitsMetadata
+import Solidity.Examples.Tactics.SourceUnitsImport
 import Solidity.Examples.Tactics.SourceAdmissionImport
 import Solidity.Examples.RecursiveStorage
 import Solidity.Examples.RecursiveCopy
@@ -587,14 +631,24 @@ import Solidity.Examples.Tactics.CallExceptions
 import Solidity.Examples.Tactics.TransientStorage
 import Solidity.Examples.Tactics.TransientSourceImport
 import Solidity.Semantics.ContractWorld
+import Solidity.Semantics.ContractWorldCertificates
 import Solidity.Semantics.TransientWorld
 import Solidity.Calculus.ContractWorld
 import Solidity.Frontend.WorldImport
 import Solidity.Examples.Tactics.ContractWorld
 import Solidity.Examples.Tactics.ContractWorldSource
 import Solidity.Examples.Tactics.TransientWorld
+import Solidity.Examples.Tactics.TransientWorldSource
 import Solidity.Tools.Upstream
 
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport
 import Solidity.Syntax.Numeric
+import Solidity.Examples.Tactics.SelfPowerData
+
+import Solidity.Calculus.LoopInvariantWk
+import Solidity.Examples.Tactics.QuantifiedDiamond
+import Solidity.Solkey.QuantifiedDiamond
+
+import Solidity.Tools.SolCases
+import Solidity.Examples.SolCases

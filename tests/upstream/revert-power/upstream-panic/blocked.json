@@ -1,0 +1,8 @@
+[
+  {
+    "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+    "stage": "lean-runtime",
+    "status": "blocked",
+    "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+  }
+]

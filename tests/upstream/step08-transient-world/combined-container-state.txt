@@ -1,0 +1,1 @@
+{"Status":"exited","Running":false,"Paused":false,"Restarting":false,"OOMKilled":false,"Dead":false,"Pid":0,"ExitCode":0,"Error":"","StartedAt":"2026-10-28T01:20:52.637155772Z","FinishedAt":"2026-10-28T04:16:40.48700741Z"} 12884901888 12884901888

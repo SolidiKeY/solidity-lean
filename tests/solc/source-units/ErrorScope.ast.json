@@ -1,0 +1,38 @@
+{
+ "header": {
+  "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+  "sourceSha256": "481f2aa3ad6aa83107799c48ad55f9aed785995881ec91c96e5352d548dfe362",
+  "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+  "source": "tests/solc/source-units/ErrorScope.sol",
+  "provenanceVersion": 1,
+  "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "validationStage": "analysis",
+  "settings": {
+   "viaIR": false,
+   "evmVersion": "osaka",
+   "optimizer": {
+    "enabled": false,
+    "runs": 200
+   },
+   "libraries": {},
+   "remappings": [],
+   "outputSelection": {
+    "*": {
+     "": [
+      "ast"
+     ]
+    }
+   }
+  },
+  "acceptedPragmas": [
+   [
+    "solidity",
+    "^",
+    "0.8",
+    ".0"
+   ]
+  ]
+ },
+ "ast": {"id":51,"nodeType":"SourceUnit","nodes":[{"literals":["solidity","^","0.8",".0"],"nodeType":"PragmaDirective","src":"0:23:0","line":1},{"canonicalName":"Other","contractKind":"contract","id":14,"name":"Other","nodeType":"ContractDefinition","nodes":[{"errorSelector":"7ca78412","id":5,"name":"Bad","nodeType":"ErrorDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":3,"mutability":"mutable","name":"x","nodeType":"VariableDeclaration","src":"51:7:0","line":2,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint8"},"typeName":{"name":"uint8","nodeType":"ElementaryTypeName","src":"51:5:0","line":2,"typeDescriptions":{"typeString":"uint8"}},"visibility":"internal"}],"src":"50:9:0","line":2},"src":"41:19:0","line":2},{"body":{"nodeType":"Block","src":"92:18:0","line":2,"statements":[{"errorCall":{"arguments":[{"kind":"number","nodeType":"Literal","src":"105:1:0","line":2,"typeDescriptions":{"typeString":"int_const 1"},"value":"1"}],"expression":{"name":"Bad","nodeType":"Identifier","referencedDeclaration":5,"src":"101:3:0","line":2,"typeDescriptions":{"typeString":"function (uint8) pure returns (error)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","src":"101:6:0","line":2,"typeDescriptions":{"typeString":"error"}},"nodeType":"RevertStatement","src":"94:13:0","line":2}]},"functionSelector":"2c23d2b4","id":13,"kind":"function","name":"wrong","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"75:2:0","line":2},"returnParameters":{"nodeType":"ParameterList","parameters":[],"src":"92:0:0","line":2},"src":"61:49:0","line":2,"stateMutability":"pure","visibility":"external"}],"src":"24:88:0","line":2},{"canonicalName":"ErrorScope","contractKind":"contract","id":50,"name":"ErrorScope","nodeType":"ContractDefinition","nodes":[{"errorSelector":"a2f43130","id":18,"name":"Bad","nodeType":"ErrorDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":16,"mutability":"mutable","name":"x","nodeType":"VariableDeclaration","src":"149:9:0","line":4,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint256","nodeType":"ElementaryTypeName","src":"149:7:0","line":4,"typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"src":"148:11:0","line":4},"src":"139:21:0","line":4},{"body":{"nodeType":"Block","src":"204:18:0","line":5,"statements":[{"expression":{"arguments":[],"expression":{"expression":{"name":"other","nodeType":"Identifier","referencedDeclaration":21,"src":"206:5:0","line":5,"typeDescriptions":{"typeString":"contract Other"}},"memberName":"wrong","nodeType":"MemberAccess","referencedDeclaration":13,"src":"206:11:0","line":5,"typeDescriptions":{"typeString":"function () pure external"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","src":"206:13:0","line":5,"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"206:13:0","line":5}]},"functionSelector":"38e6876a","id":30,"kind":"function","name":"callOther","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":21,"mutability":"mutable","name":"other","nodeType":"VariableDeclaration","src":"184:11:0","line":5,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"contract Other"},"typeName":{"nodeType":"UserDefinedTypeName","pathNode":{"name":"Other","nodeType":"IdentifierPath","referencedDeclaration":14,"src":"184:5:0","line":5},"referencedDeclaration":14,"src":"184:5:0","line":5,"typeDescriptions":{"typeString":"contract Other"}},"visibility":"internal"}],"src":"183:13:0","line":5},"returnParameters":{"nodeType":"ParameterList","parameters":[],"src":"204:0:0","line":5},"src":"165:57:0","line":5,"stateMutability":"nonpayable","visibility":"public"},{"body":{"nodeType":"Block","src":"256:18:0","line":6,"statements":[{"errorCall":{"arguments":[{"kind":"number","nodeType":"Literal","src":"269:1:0","line":6,"typeDescriptions":{"typeString":"int_const 7"},"value":"7"}],"expression":{"name":"Bad","nodeType":"Identifier","referencedDeclaration":18,"src":"265:3:0","line":6,"typeDescriptions":{"typeString":"function (uint256) pure returns (error)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","src":"265:6:0","line":6,"typeDescriptions":{"typeString":"error"}},"nodeType":"RevertStatement","src":"258:13:0","line":6}]},"functionSelector":"3fa4f245","id":38,"kind":"function","name":"value","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"241:2:0","line":6},"returnParameters":{"nodeType":"ParameterList","parameters":[],"src":"256:0:0","line":6},"src":"227:47:0","line":6,"stateMutability":"pure","visibility":"public"},{"body":{"nodeType":"Block","src":"315:27:0","line":7,"statements":[{"expression":{"arguments":[{"kind":"bool","nodeType":"Literal","src":"325:5:0","line":7,"typeDescriptions":{"typeString":"bool"},"value":"false"},{"arguments":[{"kind":"number","nodeType":"Literal","src":"336:1:0","line":7,"typeDescriptions":{"typeString":"int_const 7"},"value":"7"}],"expression":{"name":"Bad","nodeType":"Identifier","referencedDeclaration":18,"src":"332:3:0","line":7,"typeDescriptions":{"typeString":"function (uint256) pure returns (error)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","src":"332:6:0","line":7,"typeDescriptions":{"typeString":"error"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"src":"317:7:0","line":7,"typeDescriptions":{"typeString":"function (bool,error) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","src":"317:22:0","line":7,"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"317:22:0","line":7}]},"functionSelector":"6efc00e9","id":49,"kind":"function","name":"requireValue","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"300:2:0","line":7},"returnParameters":{"nodeType":"ParameterList","parameters":[],"src":"315:0:0","line":7},"src":"279:63:0","line":7,"stateMutability":"pure","visibility":"public"}],"src":"113:231:0","line":3}],"src":"0:345:0","line":1}
+}

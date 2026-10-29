@@ -1,0 +1,37 @@
+{
+  "reviewers": [
+    {
+      "agent": "/root/baseline_finder",
+      "mode": "independent read-only; no Lean server or build",
+      "result": "approved latest catalog; exact84 IDs, all30 archived gap pointers independently checked; hashes and generator agree"
+    },
+    {
+      "agent": "/root/baseline_skeptic",
+      "mode": "independent read-only; no Lean server or build",
+      "result": "approved latest catalog; existing assertion/modular proofs and invalid pointer-delete exclusions credited; no confirmed blocker"
+    }
+  ],
+  "assessmentCounts": {
+    "documentedOrSourceBoundaries": 59,
+    "evidenceNeeded": 25,
+    "documentedBoundariesWithAdditionalEvidenceQuestions": 15,
+    "directObservedRows": 10
+  },
+  "confirmedFindingsFixed": [
+    "Storage pointer delete is invalid Solidity, not an importer gap.",
+    "Retained external/self-frame modular0x12 bytes already work.",
+    "Assertion literal0x01 transport and arbitrary-state entryGuard lemmas already exist.",
+    "Dynamic bytesN[] copy is not evidence of a fixedArrays defect.",
+    "Enum conversion is not evidence of a typeBounds projection defect.",
+    "Runtime ERC7201 folding failure is not a valid numeric literal defect.",
+    "for-loop condition failure is not doWhile evidence."
+  ],
+  "reviewedFiles": {
+    "scripts/solidity-baseline-attribution.py": "2e2e0f8524662dfb6d9a4aa42b58722369d7416e4e7c4fb5ec5ee0f9e10e19ee",
+    "scripts/solidity-baseline-attribution.test.py": "224b645c1995e4081a0d04d91e2f456d84c9d918a7051b9aaddfdebda8702a84",
+    "tests/upstream/baseline-20261028/attribution/reviewed.tsv": "6dbc06482135746e8bdb7bce2244ebf0143dfb6240f22f46f65db3ab423c427a",
+    "tests/upstream/baseline-20261028/attribution/index.json": "1373bb0acd6c82efb92c7e6acfa29a018d60b4ed66320a98b22eddb2a71f8bee",
+    "tests/upstream/baseline-20261028/attribution/README.md": "84e0e7ca9a2bb7fcd7c1eca8d4096bbd462f8a1b8fb70244528bd793e474fbb2"
+  },
+  "newKernelOrCompilerEvmEvidence": false
+}

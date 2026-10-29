@@ -534,12 +534,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "declarations", spelling := "source files and top-level declarations",
       scope := .model, current := .limited,
       requirement := r#"Preserve file-level namespaces and all reachable declaration identities across the compilation unit."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 12 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 12 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Frontend/SourceUnits.lean", "Solidity/Examples/Tactics/SourceUnitsImport.lean", "Solidity/Examples/Tactics/SourceUnitsMetadata.lean", "scripts/source-units.test.mjs", "docs/feature-work/source-admission.md"] }
   | .imports =>
     { category := "declarations", spelling := "import path; as; named aliases; wildcard namespace",
       scope := .model, current := .limited,
       requirement := r#"Resolve imports/remappings in solc; preserve qualified references and declaration IDs in the importer."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 34 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 34 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Frontend/SourceUnits.lean", "Solidity/Examples/Tactics/SourceUnitsImport.lean", "Solidity/Examples/Tactics/SourceUnitsMetadata.lean", "scripts/source-units.test.mjs", "docs/feature-work/source-admission.md"] }
   | .contracts =>
     { category := "declarations", spelling := "contract C; abstract contract C",
       scope := .model, current := .limited,
@@ -649,7 +649,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "declarations", spelling := "error E(T a, ...)",
       scope := .model, current := .limited,
       requirement := r#"Preserve signature, selector and argument evaluation/encoding for custom errors, including qualified declarations."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 317 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 317 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Frontend/SourceUnits.lean", "Solidity/Examples/Tactics/SourceUnitsImport.lean", "Solidity/Examples/Tactics/SourceUnitsMetadata.lean", "scripts/source-units.test.mjs", "docs/feature-work/source-admission.md"] }
   | .eventDeclarations =>
     { category := "declarations", spelling := "event E(... indexed ...) anonymous",
       scope := .model, current := .limited,
@@ -659,7 +659,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "declarations", spelling := "using L for T/*; using {f} for T; global",
       scope := .model, current := .limited,
       requirement := r#"Resolve extension calls by solc identity and bind the receiver once; global applicability is lexical/type-specific."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 346 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 346 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Frontend/SourceUnits.lean", "Solidity/Examples/Tactics/SourceUnitsImport.lean", "Solidity/Examples/Tactics/SourceUnitsMetadata.lean", "scripts/source-units.test.mjs", "docs/feature-work/source-admission.md"] }
   | .operatorAliases =>
     { category := "declarations", spelling := "using {f as op} for T global; op in &, ~, |, ^, +, /, %, *, -, ==, >, >=, <, <=, !=",
       scope := .model, current := .limited,
@@ -794,7 +794,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "expressions", spelling := "a[start:end]; omitted endpoints",
       scope := .model, current := .limited,
       requirement := r#"Model legal calldata views with zero-based derived lengths, endpoint checks and shared immutable content."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 385 }], localEvidence := ["Solidity/Syntax/Grammar.lean", "Solidity/Examples/Tactics/AggregateSlices.lean", "docs/feature-work/aggregates.md"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 385 }], localEvidence := ["Solidity/Syntax/Grammar.lean", "Solidity/Examples/Tactics/AggregateSlices.lean", "docs/feature-work/aggregates.md", "Solidity/Syntax/Elab/SliceCopy.lean", "Solidity/Examples/Tactics/SliceReferenceCopies.lean", "docs/calldata-slice-copies.md"] }
   | .unaryArithmetic =>
     { category := "expressions", spelling := "-x; ~x; !x",
       scope := .model, current := .limited,
@@ -919,12 +919,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "statements", spelling := "while(c) s",
       scope := .model, current := .limited,
       requirement := r#"Reevaluate condition and distinguish termination, revert, break, continue and divergence."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 487 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 487 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Calculus/LoopInvariantWk.lean", "Solidity/Examples/Tactics/QuantifiedDiamond.lean", "tests/solc/QuantifiedDiamond.sol", "docs/loops.md"] }
   | .forStatement =>
     { category := "statements", spelling := "for(init;condition;post) s",
       scope := .model, current := .limited,
       requirement := r#"Handle omitted clauses, initializer scope and continue-through-post behavior."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 486 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 486 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Calculus/LoopInvariantWk.lean", "Solidity/Examples/Tactics/QuantifiedDiamond.lean", "tests/solc/QuantifiedDiamond.sol", "docs/loops.md"] }
   | .doWhileStatement =>
     { category := "statements", spelling := "do s while(c);",
       scope := .model, current := .limited,
@@ -1173,13 +1173,13 @@ def Feature.info : Feature → FeatureInfo
   | .newContract =>
     { category := "calls", spelling := "new C(args) without salt",
       scope := .abstract, current := .limited,
-      requirement := r#"Typed catalog world allocation, constructor execution, payment and rollback exist, with restricted solc_world_factory source fragments. General source new C with dynamic arguments, ABI/memory transfer, callbacks and composed worlds remains unintegrated."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
+      requirement := r#"Typed catalog world allocation, constructor execution, payment and rollback exist, with restricted solc_world_factory source fragments. General source new C with dynamic arguments, ABI/memory transfer, callbacks and composed worlds remains unintegrated. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/ContractWorldCertificates.lean"] }
   | .creationTry =>
     { category := "calls", spelling := "try new C(args) returns(C c)",
       scope := .abstract, current := .limited,
-      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
+      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/ContractWorldCertificates.lean"] }
   | .callbackSemantics =>
     { category := "calls", spelling := "reentrancy during modeled external calls",
       scope := .abstract, current := .limited,
@@ -1188,8 +1188,8 @@ def Feature.info : Feature → FeatureInfo
   | .externalLibraryCalls =>
     { category := "calls", spelling := "linked library public/external calls",
       scope := .abstract, current := .limited,
-      requirement := r#"Typed linked execution uses caller storage and explicit library identity, with restricted solc_world_library literal field-mutation fragments. General library arguments, aggregate returns and nested external source execution remain unsupported."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1261 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
+      requirement := r#"Typed linked execution uses caller storage and explicit library identity, with restricted solc_world_library literal field-mutation fragments. General library arguments, aggregate returns and nested external source execution remain unsupported. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1261 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/ContractWorldCertificates.lean"] }
   | .abiEncode =>
     { category := "abi", spelling := "abi.encode(...)",
       scope := .model, current := .limited,
@@ -1298,8 +1298,8 @@ def Feature.info : Feature → FeatureInfo
   | .transientState =>
     { category := "storage", spelling := "T transient x",
       scope := .model, current := .limited,
-      requirement := r#"Typed primitive and established signature-marked function-tag source declarations use disjoint regions of the joint logical root product; nested self-calls share cells, failure rolls back the product, and lifetime/replay transaction boundaries reset cells. Physical layout, raw tload/tstore, raw function addresses and general source world/delegate execution remain unsupported."#,
-      upstream := [{ path := "libsolidity/parsing/Parser.cpp", line := 895 }, { path := "docs/contracts/transient-storage.rst", line := 6 }], localEvidence := ["Solidity/Semantics/Storage/Anon.lean", "Solidity/Semantics/Lifetime.lean", "Solidity/Examples/Tactics/TransientStorage.lean", "Solidity/Semantics/TransientWorld.lean", "Solidity/Examples/Tactics/TransientWorld.lean"] }
+      requirement := r#"Typed primitive and established signature-marked function-tag source declarations use disjoint regions of the joint logical root product; nested self-calls share cells and failure rolls back the product. Closed source factory targets may contain certified transient roots; typed compositions of imported frames use an explicit outer World.transact boundary with per-owner reset and full rollback. General source-world statement lowering, transient factory owners, physical layout, raw tload/tstore and raw function addresses remain unsupported."#,
+      upstream := [{ path := "libsolidity/parsing/Parser.cpp", line := 895 }, { path := "docs/contracts/transient-storage.rst", line := 6 }], localEvidence := ["Solidity/Semantics/Storage/Anon.lean", "Solidity/Semantics/Lifetime.lean", "Solidity/Examples/Tactics/TransientStorage.lean", "Solidity/Semantics/TransientWorld.lean", "Solidity/Examples/Tactics/TransientWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/TransientWorldSource.lean", "scripts/check-transient-world-vectors.mjs"] }
   | .checkedArithmetic =>
     { category := "semantics", spelling := "Solidity 0.8 default checked arithmetic",
       scope := .model, current := .limited,
@@ -1334,12 +1334,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "semantics", spelling := "Panic 0x00/01/11/12/21/22/31/32/41/51",
       scope := .model, current := .limited,
       requirement := r#"Retain applicable Solidity panic codes and payloads; some current paths lose data, and malformed storage encoding 0x22 is tied to excluded low-level corruption."#,
-      upstream := [{ path := "docs/control-structures.rst", line := 612 }], localEvidence := ["docs/solc-alignment.md"] }
+      upstream := [{ path := "docs/control-structures.rst", line := 612 }], localEvidence := ["docs/solc-alignment.md", "docs/feature-work/calls-exceptions.md", "Solidity/Examples/Tactics/SelfPowerData.lean", "tests/solc/SelfPowerData.sol"] }
   | .revertPayloads =>
     { category := "semantics", spelling := "Error(string), custom errors, Panic, raw bytes",
       scope := .model, current := .limited,
       requirement := r#"Distinguish runtime byte precision from what the current proof modalities can observe; do not advertise exact computed-data proofs where unavailable."#,
-      upstream := [{ path := "docs/control-structures.rst", line := 589 }], localEvidence := ["docs/solc-alignment.md"] }
+      upstream := [{ path := "docs/control-structures.rst", line := 589 }], localEvidence := ["docs/solc-alignment.md", "docs/feature-work/calls-exceptions.md", "Solidity/Examples/Tactics/SelfPowerData.lean", "tests/solc/SelfPowerData.sol"] }
   | .rollback =>
     { category := "semantics", spelling := "require/revert/panic/call failure",
       scope := .model, current := .limited,
@@ -1486,9 +1486,9 @@ def Feature.info : Feature → FeatureInfo
       requirement := r#"Mathematical execution/fuel bounds are not real gas or stack accounting; exact resource-sensitive outcomes need an EVM semantics."#,
       upstream := [{ path := "docs/control-structures.rst", line := 61 }], localEvidence := [] }
   | .fixedPoint =>
-    { category := "upstream", spelling := "fixed/ufixed; fixedMxN/ufixedMxN",
-      scope := .upstream, current := .notApplicable,
-      requirement := r#"Grammar/type placeholders exist but fixed-point code generation is upstream incomplete; do not claim complete Solidity runtime support."#,
+    { category := "types", spelling := "fixed/ufixed; fixedMxN/ufixedMxN",
+      scope := .model, current := .missing,
+      requirement := r#"Full fixed-point support beyond the acceptance boundary of pinned solc 0.8.38, which accepts some declarations such as `type T is fixed;` and reports UnimplementedFeatureError for most other uses: fixed/ufixed and fixedMxN/ufixedMxN declarations, literals, conversions and arithmetic need a reference semantics defined in this repository, since solc gives none. Nothing is implemented. Shifts on fixed-point operands stay rejected, as by solc (second-round decision, narrowing G00 Q6); the reference semantics follows the second-round fixed-point answers."#,
       upstream := [{ path := "libsolidity/analysis/TypeChecker.cpp", line := 814 }], localEvidence := [] }
   | .removedAliases =>
     { category := "upstream", spelling := "now; sha3; suicide; throw; msg.gas; block.blockhash; callcode; legacy f.gas()/value()",

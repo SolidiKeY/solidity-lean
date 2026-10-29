@@ -597,7 +597,7 @@ theorem Stmt.ite.ruleExists {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : P
   revert "revertDiamond revertBox"
   assumeFalse "lean.assumeFalse"
   tryCall "lean.tryCallDiamond tryCallNoCallbackBox lean.tryCallSelfDiamond lean.tryCallSelfBox"
-  loop "lean.loopExit whileUnwind lean.whileClose lean.whileNoVariantDiamond whileInvariantDiamond lean.whileNoVariantDiamond whileInvariantBox lean.loopLexErase lean.whileInvariantLexDiamond 3*lean.loopLexErase whileUnwind"
+  loop "lean.loopExit whileUnwind lean.whileClose lean.whileNoVariantDiamond whileInvariantDiamond whileInvariantBox lean.loopLexErase lean.whileInvariantLexDiamond 3*lean.loopLexErase whileUnwind"
   block "blockEmpty"
   pushOpAssign "lean.pushCompoundUnfoldReceiver /BinOp storagePushAddAssign storagePushSubAssign storagePushMulAssign 20*! /BinOp 4*! storagePushDivAssign storagePushModAssign 17*! 9*pushCompoundAssignValueRhsCapture"
   pushIncDec "lean.pushIncrementUnfoldReceiver /IncDec storagePushPreincrement storagePushPredecrement storagePushPostincrement storagePushPostdecrement"
