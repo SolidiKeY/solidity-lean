@@ -361,7 +361,8 @@ def solcImplicit (t t' : FxTy) : Bool :=
     decide (t.maxInt ≤ t'.maxInt) && decide (t'.minInt ≤ t.minInt)
 
 /-- The implicit conversion: solc's, restricted to the exact ones (the
-user's answer to Q1 of the document). -/
+user's answer to Q1 of the document); `FxTy.implicitOK_iff` (`FixedPoint/Laws.lean`)
+proves it equal to `subsumes`. -/
 def implicitOK (t t' : FxTy) : Bool := solcImplicit t t' && subsumes t t'
 
 /-- The type a binary operation or comparison of `t` and `t'` runs at

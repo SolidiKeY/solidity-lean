@@ -14,7 +14,9 @@ feature manifest.
 
 - **Base revision:** `caf52ecd4dde5d37cbc0098d47de1a01aa218285`
   ("Record resource and environment decisions").
-- **Branch:** `cloud/roadmap-w1-20261029/fixed-point-semantics`.
+- **Branch:** `cloud/roadmap-w1-20261029/fixed-point-semantics`; continued
+  by the lane `cloud/roadmap-l1-20261029/lane-fixed` (§6), which merged it
+  at base `ceb0d54b5be37fe04b8417a9be4ef9fedeeac429`.
 - **Deliverables:** this document; `Solidity/Language/FixedPoint.lean`
   (imports nothing), registered in `Solidity.lean`; one row each in
   [module-map.md](../module-map.md), [README.md](../README.md) and one status
@@ -261,13 +263,12 @@ with it. This task did not edit the manifest.
 - g00-manifest-rev: update the `fixedPoint` row (§4).
 - S01/S02: prove the source typing and expression semantics against `Fx`.
 - Not proved here: associativity laws (they fail under truncation, e.g.
-  `(a·b)·c ≠ a·(b·c)`); that `FxTy.subsumes` implies `FxTy.solcImplicit`
-  (both reviewers' sweeps found no counterexample, so `FxTy.implicitOK`
-  very likely equals `FxTy.subsumes`; the conjunction is kept until it is
-  proved); value preservation of `Fx.explicit` when digits drop (only the
-  subsumed case, `Fx.explicit_of_subsumes`); the 104,198 count of F1 is a
-  script result, not a Lean theorem (only its two witnesses are,
-  `Fx.solc_lossy`).
+  `(a·b)·c ≠ a·(b·c)`); value preservation of `Fx.explicit` when digits
+  drop (only the subsumed case, `Fx.explicit_of_subsumes`); the 104,198
+  count of F1 is a script result, not a Lean theorem (only its two
+  witnesses are, `Fx.solc_lossy`). That `FxTy.subsumes` implies
+  `FxTy.solcImplicit`, open here before, is `FxTy.solcImplicit_of_subsumes`
+  (§6.1), so `FxTy.implicitOK` is exactly `FxTy.subsumes`.
 
 ## Gates
 
@@ -327,3 +328,54 @@ assertion that stops every fixed shift.
 Not changed: the finder's suggestion to drop `FxTy.solcImplicit` from
 `FxTy.implicitOK` (the implication is unproved; §5), and P1's
 double-rounding claim, which both reviewers confirmed.
+
+## 6. Lane `lane-fixed` (roadmap-l1, 2026-10-29)
+
+The lane owns this document, `Solidity/Language/FixedPoint.lean` and the
+modules `Solidity/Language/FixedPoint/*.lean`. Its work queue: (1) the
+decisions' laws, (2) literals and constants, (3) the ABI, (4) storage
+packing, (5) a conformance sweep over the pinned upstream tests. Each
+checkpoint below has its handoff and review.
+
+### 6.1 Checkpoint 1 — the decisions and their laws
+
+The second-round decisions were already encoded (§3; `Mode` keeps only
+`checked`/`unchecked`, no obsolete variant is left: explicit conversions
+took their mode out in `fb5c81a`). The new module
+`Solidity/Language/FixedPoint/Laws.lean` proves the laws the reviews asked
+for:
+
+- **Checked/unchecked agreement.** `Fx.result_unchecked_of_checked`,
+  `Fx.result_agree`; per operation `Fx.add_agree`, `Fx.sub_agree`,
+  `Fx.neg_agree`, `Fx.mul_agree`, `Fx.div_agree`, `Fx.mod_agree`,
+  `Fx.inc_agree`, `Fx.dec_agree`: where the checked operation succeeds, the
+  unchecked one gives the same value. `Fx.result_val` (every result is the
+  wrapped exact integer), `Fx.result_checked_val` (a checked one is the
+  exact integer).
+- **`*`/`/` exactness and truncation (Q3, Q8).** `tdiv_trunc`, `tdiv_rem`
+  (truncating division on `Int`); `Fx.mul_trunc` (`r·10^N` is within one
+  `10^N` of `a·b`, toward zero), `Fx.mul_exact` (exact when `10^N ∣ a·b`);
+  `Fx.div_trunc` (`a·10^N = r·b + e`, `|e| < |b|`, `e` of the sign of `a`),
+  `Fx.div_exact`; `Fx.inc_val`, `Fx.dec_val` (`++`/`--` move by the value 1,
+  Q6).
+- **Lossless round trips.** `Fx.rescale_up_down`, `Fx.explicit_implicit`
+  (implicit then explicit back), `Fx.toIntTrunc_ofIntegerExplicit` (integer
+  → fixed → integer, in range), `Fx.toBits_ofBits` and `Fx.ofBits_toBits`
+  (`bytesM` bit patterns, Q7; `Fx.toBits` is the `M`-bit pattern).
+- **Implicit ⇒ value-preserving (Q1).** `FxTy.solcImplicit_of_subsumes`
+  and `FxTy.implicitOK_iff` (`implicitOK = subsumes`), `FxTy.subsumes_refl`,
+  `FxTy.common?_subsumes` (both operands convert to the common type),
+  `Fx.implicit_preserves` (value and order), `Fx.common?_preserves`.
+
+`#print axioms` pins (`#guard_msgs`) at the end of the module:
+`FxTy.implicitOK_iff`, `Fx.result_unchecked_of_checked`, `Fx.mul_trunc`,
+`Fx.div_trunc`, `Fx.explicit_implicit`, `Fx.implicit_preserves`, each
+`[propext, Classical.choice, Quot.sound]`.
+
+**Handoff.** S01/S02 can take `implicitOK` as `subsumes` and cite
+`Fx.common?_preserves` for mixed operands; G16/G25 lowering proofs can
+target `Fx.result_val` (unchecked = wrap of the exact integer) and
+`Fx.mul_trunc`/`Fx.div_trunc` for the 512-bit multiply-divide. Not proved:
+the bounds for unchecked `*`/`/` beyond `Fx.result_val`, and value
+preservation of digit-dropping explicit conversions beyond
+`Fx.explicit_implicit`.

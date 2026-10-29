@@ -2,6 +2,7 @@
 import Solidity.KeySort
 import Solidity.Language.Features
 import Solidity.Language.FixedPoint
+import Solidity.Language.FixedPoint.Laws
 import Solidity.Eqns
 import Solidity.AST
 import Solidity.TypeGraph
