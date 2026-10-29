@@ -34,7 +34,7 @@ let count = 0;
 for (const viaIR of [false, true]) {
   const out = JSON.parse(compile(JSON.stringify({ language: 'Solidity',
     sources: { 'CallExceptions.sol': { content } }, settings: {
-      viaIR, evmVersion: 'cancun', optimizer: { enabled: true },
+      viaIR, evmVersion: 'osaka', optimizer: { enabled: true },
       outputSelection: { '*': { '*': ['abi', 'evm.deployedBytecode.object'] } }
     } }), 0, 0));
   assert.deepEqual((out.errors ?? []).filter(e => e.severity === 'error'), []);
@@ -46,7 +46,7 @@ for (const viaIR of [false, true]) {
   async function call(name, args, expected, errorData) {
     // A fresh VM makes storage and transaction caches independent per vector.
     // Install code at its actual address: self-calls must execute it.
-    const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Cancun }) });
+    const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Osaka }) });
     await vm.stateManager.putCode(to, code);
     const { execResult: r } = await vm.evm.runCall({ to, caller,
       data: hexToBytes(iface.encodeFunctionData(name, args)), gasLimit: 30000000n });
@@ -89,4 +89,4 @@ for (const viaIR of [false, true]) {
   for (const name of ['falseEffectExpectation','wrongEnumCode','wrongUnsetCode','wrongFailureCode','wrongCustomBytesPayload'])
     await call(name, [], [], panic(1));
 }
-console.log(`${count} ${version} legacy/viaIR Cancun call/exception vectors passed`);
+console.log(`${count} ${version} legacy/viaIR Osaka call/exception vectors passed`);

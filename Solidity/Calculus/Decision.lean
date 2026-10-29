@@ -1,11 +1,14 @@
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
+import Solidity.Calculus.QuantLedger
 import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.LedgerBlock
 import Solidity.Calculus.HashMove
+import Solidity.Calculus.HashWrittenRealize
 import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
+import Solidity.Calculus.MemNegPrep
 import Solidity.Calculus.MemStructCut
 import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
@@ -96,7 +99,9 @@ with blocks over them instantiated likewise (`Fml.arrayBlockCovered`,
 `arrayBlockReduction?_isSome`, feature 32)
 (`Fml.arrayCovered`, `arrayReduction?_isSome`), or positive binders of KeY's
 `int` read as ledger entries (`Fml.kintCovered`, `decideKInt`), or binders of
-KeY's `int` read over two words (`Fml.kencCovered`, `decideKEnc`); `decideGoal` likewise
+KeY's `int` read over two words (`Fml.kencCovered`, `decideKEnc`), or quantified
+leaves over the ledger cut (`Fml.quantLedgerCovered`, `decideQuantLedger`);
+`decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete` on covered leaves without a hash,
 `decideGoal_complete_hash` on `Fml.hashCovered`).  `Fml.Covered`
@@ -386,11 +391,12 @@ theorem decideStruct_complete {φ : Fml C []}
   | none => simp only [ha, Option.isSome_none, Bool.false_eq_true] at h
   | some a => cases a <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true]
 
-/-- Cut fresh arrays or decide their certified fresh-struct schema; otherwise
-try a certified given-heap countermodel. A single witness never proves validity. -/
+/-- Exact negative-block preparation and fresh-array cutting, with a certified
+fresh-struct fallback or a concrete given-heap countermodel. Truth at one
+witness state is never promoted to validity. -/
 def decideMem (φ : Fml C []) : LeafVerdict C :=
   if φ.hasAllocAll then
-    match (φ.hoist 1024).mxTop with
+    match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => decideLeafA ψ
     | none => decideStruct φ
   else
@@ -403,7 +409,9 @@ theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid
   split at h
   · split at h
     · rename_i ψ hψ
-      exact fun σ => (Fml.hoist_holds 1024 φ σ).1 ((Fml.mxTop_valid hψ).2 (decideLeafA_sound h) σ)
+      exact fun σ => ((mxNegativePrepare φ).exact σ).1
+        ((Fml.hoist_holds 1024 (mxNegativePrepare φ).body σ).1
+          ((Fml.mxTop_valid hψ).2 (decideLeafA_sound h) σ))
     · exact decideStruct_sound h
   · split at h <;> cases h
 
@@ -413,7 +421,9 @@ theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = 
   split at h
   · split at h
     · rename_i ψ hψ
-      exact fun hφ => decideLeafA_refutes h ((Fml.mxTop_holds hψ σ).1 ((Fml.hoist_holds 1024 φ σ).2 hφ))
+      exact fun hφ => decideLeafA_refutes h ((Fml.mxTop_holds hψ σ).1
+        ((Fml.hoist_holds 1024 (mxNegativePrepare φ).body σ).2
+          (((mxNegativePrepare φ).exact σ).2 hφ)))
     · exact decideStruct_refutes h
   · split at h
     · rename_i w _
@@ -489,17 +499,54 @@ theorem decideKEnc_refutes {φ : Fml C []} {σ : State C []} (h : decideKEnc φ 
     exact fun hφ => hn ((Fml.holds_kenc φ σ).2 hφ)
   · cases h
 
+/-- A ledger cut before abstraction, with certified proof or countermodel. -/
+def decideQuantLedger (φ : Fml C []) : LeafVerdict C :=
+  match quantLedgerReduction? φ with
+  | none => .unknown
+  | some r => match r.verify with
+    | .inl _ => .proved
+    | .inr cm => .refuted cm.1
+
+theorem decideQuantLedger_sound {φ : Fml C []} (h : decideQuantLedger φ = .proved) : Fml.Valid φ := by
+  unfold decideQuantLedger at h
+  split at h
+  · cases h
+  · split at h
+    · rename_i hv _; exact hv.down
+    · cases h
+
+theorem decideQuantLedger_refutes {φ : Fml C []} {σ : State C []}
+    (h : decideQuantLedger φ = .refuted σ) : ¬ holds σ φ := by
+  unfold decideQuantLedger at h
+  split at h
+  · cases h
+  · split at h
+    · cases h
+    · rename_i cm _; cases h; exact cm.2
+
+theorem decideQuantLedger_complete {φ : Fml C []} (h : φ.quantLedgerCovered = true) :
+    decideQuantLedger φ ≠ .unknown := by
+  obtain ⟨r, hr⟩ := Option.isSome_iff_exists.mp (quantLedgerReduction?_isSome φ h)
+  unfold decideQuantLedger
+  rw [hr]
+  dsimp only
+  split <;> exact fun h => nomatch h
+
 /-- **The decision**: `decideLeafA`, then on a leaf it answers `unknown` on,
 the one with its fresh arrays cut (`decideMem`), then the one with its
 binders of KeY's `int` read as ledger entries (`decideKInt`), then the one
-with them read over two words (`decideKEnc`). -/
+with them read over two words (`decideKEnc`), then quantified ledger leaves
+with the ledger cut before abstraction (`decideQuantLedger`). -/
 def decideLeaf (φ : Fml C []) : LeafVerdict C :=
   match decideLeafA φ with
   | .unknown =>
     match decideMem φ with
     | .unknown =>
       match decideKInt φ with
-      | .unknown => decideKEnc φ
+      | .unknown =>
+        match decideKEnc φ with
+        | .unknown => decideQuantLedger φ
+        | v => v
       | v => v
     | v => v
   | v => v
@@ -510,7 +557,9 @@ theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Val
   split at h
   · split at h
     · split at h
-      · exact decideKEnc_sound h
+      · split at h
+        · exact decideQuantLedger_sound h
+        · exact decideKEnc_sound h
       · exact decideKInt_sound h
     · exact decideMem_sound h
   · exact decideLeafA_sound h
@@ -522,7 +571,9 @@ theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ 
   split at h
   · split at h
     · split at h
-      · exact decideKEnc_refutes h
+      · split at h
+        · exact decideQuantLedger_refutes h
+        · exact decideKEnc_refutes h
       · exact decideKInt_refutes h
     · exact decideMem_refutes h
   · exact decideLeafA_refutes h
@@ -531,10 +582,11 @@ theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf �
     ¬ Fml.Valid φ :=
   fun hv => decideLeaf_refutes h (hv σ)
 
-/-- **The fragment with fresh arrays**: the leaf binds one, its cut is
-defined and in `Fml.CoveredA`. -/
+/-- **The fragment with fresh memory objects**: after the same exact
+preparation and hoisting as `decideMem`, its array cut is in `Fml.CoveredA`,
+or the cut is unavailable and the fresh-struct schema is certified. -/
 def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
-  φ.hasAllocAll && match (φ.hoist 1024).mxTop with
+  φ.hasAllocAll && match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => ψ.CoveredA
     | none => (MemoryWitness.structAnswer φ).isSome
 
@@ -549,13 +601,14 @@ remaining positive binders read as ledger entries, in `Fml.kintCovered`. -/
 def _root_.Solidity.Fml.kencCovered (φ : Fml C []) : Bool :=
   φ.kencB.2 && (φ.kencB.1.CoveredA || φ.kencB.1.kintCovered)
 
-/-- **The fragment proved complete**: `Fml.CoveredA`, or a leaf with fresh
-arrays whose cut is in it (`Fml.memCovered`, M7 step 6), or one with
-binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
+/-- **The fragment proved complete**: `Fml.CoveredA`, or a leaf with a covered
+fresh-array cut or a certified fresh-struct schema (`Fml.memCovered`, M7 step 6),
+or one with binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
 feature 26), or one with them over two words (`Fml.kencCovered`,
-features 30 and 31). -/
+features 30 and 31), or a certified quantified ledger reduction
+(`Fml.quantLedgerCovered`, feature 33). -/
 def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
-  φ.CoveredA || φ.memCovered || φ.kintCovered || φ.kencCovered
+  φ.CoveredA || φ.memCovered || φ.kintCovered || φ.kencCovered || φ.quantLedgerCovered
 
 theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMem φ ≠ .unknown := by
   unfold Fml.memCovered at h
@@ -600,11 +653,15 @@ theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf
     · rename_i hm
       split
       · rename_i hk
-        rcases h with ((h | h) | h) | h
-        · exact absurd hv (decideLeafA_complete h)
-        · exact absurd hm (decideMem_complete h)
-        · exact absurd hk (decideKInt_complete h)
-        · exact decideKEnc_complete h
+        split
+        · rename_i he
+          rcases h with (((h | h) | h) | h) | h
+          · exact absurd hv (decideLeafA_complete h)
+          · exact absurd hm (decideMem_complete h)
+          · exact absurd hk (decideKInt_complete h)
+          · exact absurd he (decideKEnc_complete h)
+          · exact decideQuantLedger_complete h
+        · assumption
       · assumption
     · assumption
   · assumption
@@ -1206,8 +1263,39 @@ def tryK3 (k₁ k₂ k₃ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k�
   ⟨decideHash3 k₁ k₂ k₃ hk₁ hk₂ hk₃, Fml.coveredK3 k₁ k₂ k₃, decideHash3_sound, decideHash3_refutes,
     decideHash3_complete hk₁ hk₂ hk₃⟩
 
+/-- A realized written-memory certificate supplies an actual countermodel.
+The producer refuses all syntax outside its proved schema. -/
+def decideWrittenHash (φ : Fml C []) : LeafVerdict C :=
+  match WrittenMemory.Realize.refutation? φ with
+  | none => .unknown
+  | some _ => .refuted (State.init C)
+
+theorem decideWrittenHash_sound {φ : Fml C []} (h : decideWrittenHash φ = .proved) : Fml.ValidH φ := by
+  unfold decideWrittenHash at h
+  split at h <;> cases h
+
+theorem decideWrittenHash_refutes {φ : Fml C []} {σ : State C []}
+    (h : decideWrittenHash φ = .refuted σ) : ¬ Fml.holdsH σ φ := by
+  unfold decideWrittenHash at h
+  split at h
+  · cases h
+  · rename_i r _
+    cases h
+    exact r.down
+
+/-- This stage's coverage means that its actual realization certificate exists. -/
+def tryWritten : HashTry C :=
+  ⟨decideWrittenHash, (fun φ => (WrittenMemory.Realize.refutation? φ).isSome),
+    decideWrittenHash_sound, decideWrittenHash_refutes, by
+      intro φ hc
+      unfold decideWrittenHash
+      cases hr : WrittenMemory.Realize.refutation? φ with
+      | none => simp only [hr, Option.isSome_none, Bool.false_eq_true] at hc
+      | some r => exact fun h => nomatch h⟩
+
 /-- **The ways of deciding a leaf with hashes**: of one kind, each kind in
-turn; of two, each ordered pair; of three, each order. -/
+turn; of two, each ordered pair; of three, each order; finally the exact
+written-memory realization schema. -/
 def hashTries : List (HashTry C) :=
   [tryK .keccak (by decide), tryK .sha256 (by decide), tryK .ripemd160 (by decide),
     tryK2 .keccak .sha256 (by decide) (by decide), tryK2 .sha256 .keccak (by decide) (by decide),
@@ -1218,7 +1306,7 @@ def hashTries : List (HashTry C) :=
     tryK3 .sha256 .keccak .ripemd160 (by decide) (by decide) (by decide),
     tryK3 .sha256 .ripemd160 .keccak (by decide) (by decide) (by decide),
     tryK3 .ripemd160 .keccak .sha256 (by decide) (by decide) (by decide),
-    tryK3 .ripemd160 .sha256 .keccak (by decide) (by decide) (by decide)]
+    tryK3 .ripemd160 .sha256 .keccak (by decide) (by decide) (by decide), tryWritten]
 
 /-- **A leaf with hashes**: the first way that answers. -/
 def decideHash (φ : Fml C []) : LeafVerdict C := firstKnown (hashTries.map (·.run)) φ

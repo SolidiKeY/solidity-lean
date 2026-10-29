@@ -96,15 +96,16 @@ EVM integration stays in `Bridge/`; the core stays dependency-free.
 
 ## VM execution contract
 
-The initial schedule is **32 VM assignments**, each on an isolated **16 GiB
-VM** with **up to 10 hours including validation**, one branch/worktree and a
-reviewable patch. The 115 proof work packages below are checkpoints within
+The schedule is **32 lanes** (see [VM assignments](#vm-assignments-revised-2026-10-29)),
+each on an isolated **16 GiB VM** for **four to ten hours including
+validation**, with one branch/worktree and a reviewable patch per
+checkpoint. The 115 proof work packages below are checkpoints within
 those assignments, **not 115 separate VM launches**. An assignment performs
 its checkpoints sequentially, reusing the environment, caches and context.
 
 These are unmeasured allocation estimates, not a guarantee that an open research
 proof finishes within ten hours. G02 calibrates costs before the implementation
-launches. Rebalance checkpoints between assignments when measurements support it;
+launches; the first batches' measurements are in the sizing rules below. Rebalance checkpoints between assignments when measurements support it;
 add a continuation assignment only for actual unfinished work. Keep all theorem
 obligations open until integrated. Splitting a proof into smaller lemmas does
 not automatically allocate another VM. Never replace an unfinished deliverable
@@ -177,6 +178,56 @@ assuming each other's unproved conclusions.
 | G05 | Audit current frontend/provenance/unsafe elaborator paths and define checked certificate interfaces for raw source, parsed syntax and resolved metadata. Digests prove identity only. |
 | G06 | Establish reproducible pinned EVM semantics/observation interfaces and a dependency-free core certificate boundary, with external adapters in Bridge. Inventory every existing machine disagreement and required bridge lemma. |
 | G07 | Establish proof/trust regression gates, axiom inventories and inhabited source-to-machine controls; record existing failures separately. Check that malformed source, altered bytecode and always-revert output cannot satisfy the planned contracts. |
+
+G00 status (2026-10-29): pins, exclusion evidence, reconciliation and owners in [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md); its questions Q1–Q6 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which confirms all 30 exclusions.
+
+G00 manifest status (2026-10-29): the manifest cites the decisions (30 exclusions tier A, G00 Q2 outcomes on the 23 abstract rows) and `fixedPoint` is in profile (model/missing, owners S00–S02, G08–G47); pin work left for G05/G06 is in [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md#pin-decisions-2026-10-29).
+
+G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which lists the contract revisions they require before G01 counts as frozen.
+
+G02 status (2026-10-29): cold/warm/cache-restore measurements on the 16 GiB VM in [roadmap-g02-measure.md](feature-work/roadmap-g02-measure.md): cold `./run-lean.sh` 58 min with `TestSuite/Derived17` OOM-killed beside its siblings (11.5 GiB peak alone), warm 2 s, cache restore 3 s, Bridge 17 min with `Arith/Widths` failing at the base; splits recommended there, not made.
+
+G03 status (2026-10-29): constructor-to-theorem, combination, decision-row and module/lemma dependency ledger in [roadmap-g03-ledger.md](feature-work/roadmap-g03-ledger.md), checked by `scripts/roadmap-g03-ledger.py --check`; no obligation closed, no feature status changed.
+
+G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
+
+G05 status (2026-10-29): base-revision audit and certificate interfaces in [roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md) and `Solidity/Roadmap/Frontend.lean` (statements only); G00 disagreement 6 resolved (link maps recorded, only the empty map admitted; settings are solc's two pipelines); no frontend code changed and no instance exists.
+
+G06 status (2026-10-29): machine inventory (23 disagreements with pinned Osaka), the pinned semantics and observation interfaces, the core/Bridge certificate boundary and bridge lemmas B01–B28 with owners in [roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) and `Solidity/Roadmap/Evm.lean` (statements only); no obligation closed; its questions Q1–Q3 are answered (second round, 2026-10-29) and encoded.
+
+G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.
+
+Fixed-point status (2026-10-29): reference semantics for G00 Q6 in [fixed-point-semantics.md](feature-work/fixed-point-semantics.md) and `Solidity/Language/FixedPoint.lean` (values, operations and laws; not wired into the frontend or compiler); its scope questions Q1–Q8 are answered and encoded; owners (S00–S02, S04.02, G08–G53) are listed in its §4.
+
+Decision impact (2026-10-29): [roadmap-decisions-impact.md](feature-work/roadmap-decisions-impact.md) maps every user decision to the definitions, theorems, rules, tests, scripts, documents and Codex lanes it affects, with owners; G04 R32–R36 now carry the decided premises; no obligation closed.
+
+Integration notes (2026-10-29):
+
+- **G01 revision held back (second time, 2026-10-29).** Its rework fixed both
+  defects below, but `refines` is still unmeetable through `Collided`, which
+  requires the source to be failure-free (a real collision after any gas
+  failure has no source match).
+- **Original hold-back.** Integration review found that its
+  `PublicCorrectness.refines` cannot be met for long sessions (the
+  2^128-hash bound restricts only the target) and that unconstrained
+  `Fixed.regionLen`/`rootSlots` can make the hash premise false on every
+  hashing run, letting an always-reverting compiler through. It returns to
+  its session; the contracts on master are still the first G01 version.
+- **Pending on the G01 revision:** G06's findings F1–F8
+  ([roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md)), G05's C1 adapter,
+  and one correspondence between G01's and G06's `Fixed`, precompile
+  predicates and `keccakWord`, and the hash premises in
+  `Solidity/Hash/CollisionBound.lean`.
+- **G03 checker follow-ups** (review of the merge): `FROZEN` also silences
+  parallel shared writes; `ACK_MODULES` silences findings by module whatever
+  their kind; refusal anchors count as stage coverage; some definition
+  anchors are tagged `theorem`; proposed G24 children are labelled
+  `roadmap`. The discharge parser now reads only the G04 restriction table.
+- **Decision-impact follow-ups:** `Storage.full`'s verdict should cite G04
+  R24 (solc's `Panic(0x41)` past 2^64 elements); the Lean docstrings of
+  `StmtOut.refused`/`compile_correct` still describe the stale payment
+  disjunct as live.
+
 
 ### Independent source definitions — after G00–G07, before wave 1
 
@@ -268,6 +319,24 @@ proof, and their final checks must use the actual implementations.
 | G45 | Implement and prove instruction selection/expansion to actual EVM operations, stack manipulation, labels/jumps, assembly and byte encoding/decoding. Structured LOOP/relative jumps must have checked executable realizations. |
 | G46 | Prove primitive instruction/byte-memory/storage/environment correspondence with the pinned EVM semantics. Discharge symbolic-slot, word-addressing, truncation and hash-model obstructions or identify an unresolved approved-premise obligation; unresolved means incomplete. |
 | G47 | Prove EVM call/create/return/revert and transaction correspondence, including excluded-resource abstraction and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
+
+G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`, and for adaptive runs (eager sampling, repeated queries, early stopping, regions) in `Solidity/Hash/Adaptive.lean` (random-oracle model; `q` counts every oracle query of the run and of whoever chose its inputs); bounded slot offsets are proved for the model's terms (`STy.locate_bounded`); only their tie to compiled code is open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
+
+G27.05/G46.05 hashed layout status (lane-hashing, 2026-10-29): `Solidity/Storage/HashedLayout.lean` models the storage layout as slot terms read through a hash parameter, proves offsets stay inside their regions for every access path (`STy.locate_bounded`) and that distinct bounded slot terms of one run denote distinct words under the region premise (`Loc.word_inj`, `located_word_inj`); `Solidity/Storage/HashedLayoutEvm.lean` relates the terms to `Evm.Slot` read-only; `Solidity/Storage/HashedKeccak.lean` instantiates the hash with keccak-256 over the injective ABI preimage encoding (`keccak_word_inj`) and `#guard`s solc's slot formula; `Solidity/Storage/HashedSeparation.lean` proves the G27.01–G27.03 separation statements (struct members, mapping keys, array elements and header occupy disjoint slot terms, and distinct words under the region premise); value representation (G27.01–03 read/write agreement), widths and packing, `string`/`bytes` keys and headers remain. The relation to `Evm/Layout.lean` and to compiled code remains G27.05 ([feature-work/storage-hashed-layout.md](feature-work/storage-hashed-layout.md)).
+
+**G45 lane status (assembler, 2026-10-29).** G45.05 byte encoding: the
+Osaka instruction datatype, `decode_encode`, `encode_injective` and the
+jump-destination theorems are proved in `Solidity/Backend/`. G45.04: the
+assembler with labels, relocation, per-label push widths by a terminating
+fixpoint and library placeholders, with `assemble_pushTag` (every resolved
+jump reaches its label's `JUMPDEST`) and `link_patch`. Decoder agreement
+(partial): generated `#guard` vectors against EthereumJS at Osaka and the
+vendored EVMYulLean tables; a Bridge module running the vendored decoder
+waits on a reachable Mathlib cache. G45.03 preparation: structured
+branch/loop expansion into labelled items with unique, defined labels and a
+loop layout theorem; the expanded code's execution meaning remains G45.03.
+Handoffs per checkpoint are in
+[backend-assembler.md](feature-work/backend-assembler.md).
 
 ### Wave 6 — whole pipeline, verification transfer and release (G48–G55)
 
@@ -371,23 +440,57 @@ completed G36.01/G36.02 first; the wave-5 barrier excludes only that
 deferred check, which remains mandatory before wave 6. G43 cannot assume
 G36.03: its payment relation must be proved independently of loop composition.
 
-## Initial VM assignments — 10 hours each
+## VM assignments (revised 2026-10-29)
 
-This is a scheduling proposal to calibrate with G02, not a measured claim that
-32 runs suffice. Each row allocates one 16 GiB VM for up to ten hours. A parent
-ID includes all its child checkpoints. The rows cover all 115 work packages
-exactly once; several checkpoints share a VM and run sequentially. Prerequisites
-are integrated revisions, not other VMs' unproved interfaces. Independent rows
-can run together; dependency chains run in order. Keep inherited workstream
-proof dependencies when rebalancing.
+This is a scheduling proposal calibrated by the first two cloud batches, not
+a measured claim that 32 runs suffice. Each row is a **lane**: one 16 GiB VM
+working through an ordered queue of checkpoints on one branch. A parent ID
+includes all its child checkpoints. The rows cover all work packages exactly
+once. Prerequisites are integrated revisions, not other lanes' unproved
+interfaces.
 
-| VM | Checkpoints | Prerequisite VMs |
-|---|---|---|
-| V00 | G00, G01 | — |
-| V01 | G02, G04 | V00 |
-| V02 | G03, G05, G06, G07 | V00, V01 |
-| V03 | S00, S01, S04.01–S04.03 | V02 |
-| V04 | S02, S03, S04.04, S05 | V03 |
+### What the first batches showed
+
+Two cloud batches on 2026-10-29 ran 13 wave-0 audit, specification and
+measurement assignments (`roadmap-w0-20261029`, `roadmap-w1-20261029`). Each
+took **15–60 minutes** of agent work. The only long step was one cold build
+of about 50 minutes on a 4-core, 15 GB VM. Costs ran from about $5 to $28 per
+VM. An audit or a specification is therefore not a VM's worth of work, and a
+VM that stops after its first checkpoint wastes its setup and cold build.
+
+### Sizing rules
+
+- **Fill several hours.** A lane holds enough checkpoints for at least four
+  hours and at most ten hours of work, including validation. Every lane
+  contains at least one implementation checkpoint with kernel-checked proofs.
+- **No lone audits.** An audit, specification or measurement never gets its
+  own VM. It becomes the first checkpoint of the lane that consumes its
+  result.
+- **Keep going.** When a checkpoint is finished (gates pass, finder/skeptic
+  reviews applied, pushed to the lane branch), the VM starts the next
+  checkpoint in its queue on the same branch, reusing the build cache. It
+  stops only when:
+  - the queue is empty;
+  - the next checkpoint needs an unmerged prerequisite from another lane;
+  - about ten hours are spent;
+  - or a resource limit stops it.
+- **Backfill before stopping.** A blocked or empty lane takes the next ready
+  item from the [backfill queue](#backfill-queue) before it stops.
+- **One cold build per lane.** The cold build is paid once. Later
+  checkpoints use per-file Lean server diagnostics and warm rebuilds.
+- **Handoff per checkpoint.** Each checkpoint records its own handoff
+  (revision, theorems, premises, checks, remaining obligations) in its
+  feature document, so the coordinator can integrate a lane in parts.
+
+### Lanes
+
+| Lane | Checkpoints, in order | Starts after | Status (2026-10-29) |
+|---|---|---|---|
+| V00 | G00, G01 | — | Integrated; G00 manifest follow-up and G01 contract revision in flight (`roadmap-w1`). |
+| V01 | G02, G04 | V00 | G04 integrated; G02 measurement in flight. |
+| V02 | G03, G05, G06 | V00, V01 | In flight (`roadmap-w1`); the G06 Osaka re-pin child is integrated. |
+| V03 | G07, S00, S01, S04.01–S04.03 | V02 integrated, G01 revision frozen | Next. G07 heads the lane because it alone is short. |
+| V04 | S02, S03, S04.04, S05 | V03 | — |
 | V05 | G08, G09 | V04 |
 | V06 | G10, G11 | V05 |
 | V07 | G12, G13 | V04 |
@@ -416,12 +519,45 @@ proof dependencies when rebalancing.
 | V30 | G52, G53 | V27 |
 | V31 | G54, G55 | V29, V30 |
 
-G02 must assess whether the larger source-definition, aggregate, world and EVM
-bridge assignments fit ten hours using current code and checked prerequisites.
-If they do not, publish revised assignments before dispatch rather than claim
-the initial count is sufficient. Each continuation inherits the same scope and
-completion gate. Faster VMs can take another ready checkpoint within their
-budget; no blanket rule requires a fresh VM for every lemma or work package.
+G02 checks these lane sizes against measured build and proof costs. G03's
+shared-foundation child packages under G24 (decision G03 Q1) are not yet in
+the manifest or lane V14: G03's ledger lists them under "Integration steps"
+and its checker applies them through `PROPOSED_PACKAGES` until they land. The other large lanes (source
+definitions, aggregates, world, EVM bridge) may need splitting by
+measurement. A split keeps each part at four hours or more, and every
+continuation inherits the same scope and completion gate.
+
+### Backfill queue
+
+These items are ready now, are independent of the lane order, and are owned
+as listed. A lane takes them in this order when it is blocked or its queue
+is empty, unless the item touches files an open Codex lane owns
+(`Solidity/Evm/**`, the Bridge Widths files, TestSuite `Derived*`).
+
+1. **Hash regions** — done (lane-hashing, 2026-10-29). (G27.05/G46.05 preparation): the region predicate and its
+   counting bound next to `Solidity.Hash.CollisionFree`, if the hash-bound
+   task leaves it as a child obligation.
+2. **Fixed-point reference semantics** (S01/S02 preparation): complete the
+   fixed-point module of the fixed-point-semantics task for the second-round
+   decisions and prove the remaining laws.
+3. **Osaka residue** (G06): the Bridge `TargetSchedule`, the hash-pinned
+   Cancun AST fixtures and the core machine's fork, after the Codex
+   evm-* lanes merge.
+4. **Stale payment disjunct** (G04 R32, G43 preparation): a statement-only
+   change that drops the never-constructed `refused` case of `StmtOut`. It
+   waits for the Codex memory/evm lanes, because it edits
+   `Solidity/Evm/**`.
+5. **Fixed-point mobile constants** (S01): encode the decision that a
+   standalone fractional constant takes solc's mobile type with truncation,
+   also as an ABI argument, in `Solidity/Language/FixedPoint/Literals.lean`
+   (the merged model still refuses `abi.encode(0.1)` as solc does).
+6. **Source cost rule for stipend payments** (decision G06 Q3, S02/G43
+   preparation): define the compiler-independent rule and its examples.
+7. **Bridge decoder agreement** (G45.05, decision 2026-10-29): once the Lean
+   environment allows the Mathlib cache hosts (`lakecache.blob.core.windows.net`,
+   `mathlib4.lean-cache.cloud`), add a `Bridge/` adapter that runs the vendored
+   EVMYulLean `decode`/`D_J` against `Solidity/Backend`; until then agreement
+   rests on the generated vectors in `Solidity/Backend/EvmVectors.lean`.
 
 ## Done when
 

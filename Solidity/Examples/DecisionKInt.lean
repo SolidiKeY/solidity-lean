@@ -1,4 +1,5 @@
 import Solidity.Examples.Decision
+import Solidity.Calculus.FunContract
 
 /-!
 # Binders of KeY's `int` over two words (M7, features 30 and 31)
@@ -14,11 +15,13 @@ proved and refuted; a binder compared with a ledger entry (`kintNet`) and
 two binders compared under a negation (`kintNested`) are decided past
 their anchors.  Coverage is the kernel's (`*_covered`), so each is
 answered and exactly (`*_answers`, `*_iff`); the verdicts are recorded
-below. The original `gapKIntTwoAnchors` statement is retained and now has
-an exact kernel-certified proved verdict: the test point `y = k` reduces
-`∀ y. y > z → y > k` to `z >= k`, including under negation. The other
-original gap, a negative quantifier in a leaf reading the ledger,
-remains (`gapQuantLedger`, `(∀ uint y. y > 0) → net(0) > 0`).
+below, not evaluated in the build. The original `gapKIntTwoAnchors`
+statement now has an exact kernel-certified proved verdict: the test point
+`y = k` reduces `∀ y. y > z → y > k` to `z >= k`, including under negation.
+The original negative-quantifier ledger statement `gapQuantLedger`,
+`(∀ uint y. y > 0) → net(0) > 0`, is retained below and now proved by
+`Examples/DecisionQuantLedger.lean`, through the ledger cut before
+abstraction (`Calculus/QuantLedger.lean`).
 -/
 
 namespace Solidity.Examples.DecisionKInt
@@ -69,9 +72,10 @@ def kintNestedBad : Fml Gaps [] :=
   .imp (bindZ "z" (bindZ "y" (.imp (zcmp .gt rfl zv (.pvZ (.there .here)))
     (zcmp .ge rfl zv (.pvZ (.there .here)))))) ff
 
-/-- The two original gap statements, retained unchanged: two integer
-thresholds, and a negative quantifier in a leaf reading the ledger.
-The test-point certificates below settle only the former. -/
+/-- Original gap statements, retained unchanged with their target
+certificates: the test-point certificates below settle the two-anchor binder;
+`Examples/DecisionQuantLedger.lean` decides the negative scalar quantifier
+beside a ledger read exactly. -/
 def gapKIntTwoAnchors : Fml Gaps [] :=
   .imp (bindZ "z" (bindZ "y" (.imp (zcmp .gt rfl zv (.pvZ (.there .here))) (zcmp .gt rfl zv (zlit 0))))) ff
 def gapQuantLedger : Fml Gaps [] :=
@@ -120,10 +124,11 @@ evaluation overflowed the language server's stack and did not end within
 half an hour in `lake build`.  Evaluated: `gapKIntNeg`, `kintNetElse`,
 `kintNegWord`, `kintNet`, `kintNested` proved; `kintNegBad`,
 `kintNetElseBad`, `kintNetBad`, `kintNestedBad` refuted;
-`gapKIntTwoAnchors`, `gapQuantLedger` unknown.  The theorems above are the
-pins: coverage by the kernel, so `decideLeaf` answers, and exactly.
-The later test-point certificates below supersede only the recorded
-`gapKIntTwoAnchors` unknown verdict. -/
+`gapKIntTwoAnchors`, `gapQuantLedger` unknown at that checkpoint. The later
+test-point certificates below supersede the former unknown verdict; the latter
+now has kernel-proved exact Leaf and Goal verdicts in
+`Examples/DecisionQuantLedger.lean` (2026-10-28). The theorems above are the
+pins: coverage by the kernel, so `decideLeaf` answers, and exactly. -/
 
 theorem kintNegBad_answers : decideLeaf kintNegBad ≠ .unknown := decideLeaf_complete kintNegBad_covered
 theorem kintNetElseBad_answers : decideLeaf kintNetElseBad ≠ .unknown :=
@@ -140,14 +145,23 @@ controls use the existing formula helpers independently of the new view.
 
 /-- `∀ z. z >= k → ∀ y. y > z → y > k`, under either hidden-binder modality. -/
 def twoAnchorGood (m : Modality) (k : Int) : Fml Gaps [] :=
+  bindZ "z" (cdlIn[Gaps, m | kint z]{
+    ‹zcmp .ge rfl zv (zlit k)› → ∀ given kint y;
+    ‹zcmp .gt rfl zv (.pvZ (.there .here))› → ‹zcmp .gt rfl zv (zlit k)› })
+
+example (m : Modality) (k : Int) : twoAnchorGood m k =
   bindZ "z" (.imp (zcmp .ge rfl zv (zlit k))
     (.bind m (.user "y") .kint
-      (.imp (zcmp .gt rfl zv (.pvZ (.there .here))) (zcmp .gt rfl zv (zlit k)))))
+      (.imp (zcmp .gt rfl zv (.pvZ (.there .here))) (zcmp .gt rfl zv (zlit k))))) := rfl
 
 /-- The false universal premise: `z = k - 1`, `y = k` refutes it. -/
 def twoAnchorBad (m : Modality) (k : Int) : Fml Gaps [] :=
+  bindZ "z" (cdlIn[Gaps, m | kint z]{ ∀ given kint y;
+    ‹zcmp .gt rfl zv (.pvZ (.there .here))› → ‹zcmp .gt rfl zv (zlit k)› })
+
+example (m : Modality) (k : Int) : twoAnchorBad m k =
   bindZ "z" (.bind m (.user "y") .kint
-    (.imp (zcmp .gt rfl zv (.pvZ (.there .here))) (zcmp .gt rfl zv (zlit k))))
+    (.imp (zcmp .gt rfl zv (.pvZ (.there .here))) (zcmp .gt rfl zv (zlit k)))) := rfl
 
 theorem twoAnchorGood_covered (m : Modality) : (twoAnchorGood m (-3)).Covered = true := by
   cases m <;> decide +kernel
@@ -211,7 +225,10 @@ theorem twoAnchorBad_refuted (m : Modality) :
   | unknown => exact False.elim ((decideLeaf_complete (twoAnchorBad_covered m)) h)
 
 /-- A true two-anchor universal in negative polarity must be refuted. -/
-def twoAnchorNegative : Fml Gaps [] := .imp (twoAnchorGood .box (-3)) ff
+def twoAnchorNegative : Fml Gaps [] := cdl[Gaps]{ ‹twoAnchorGood .box (-3)› → ff }
+
+example : twoAnchorNegative =
+  .imp (twoAnchorGood .box (-3)) ff := rfl
 
 theorem twoAnchorNegative_inTarget : twoAnchorNegative.inTarget {} = true := by decide +kernel
 theorem twoAnchorNegative_kencCovered : twoAnchorNegative.kencCovered = true := by decide +kernel
@@ -219,7 +236,7 @@ theorem twoAnchorNegative_covered : twoAnchorNegative.Covered = true := by decid
 
 theorem twoAnchorNegative_countermodel (σ : State Gaps []) : ¬ holds σ twoAnchorNegative := by
   intro h
-  have hf := h (twoAnchorGood_valid .box (-3) σ)
+  have hf : holds σ ff := h (twoAnchorGood_valid .box (-3) σ)
   change (some (uintOfNat 0)) = some (uintOfNat 1) at hf
   exact (by decide +kernel : (some (uintOfNat 0)) ≠ some (uintOfNat 1)) hf
 
@@ -234,8 +251,9 @@ theorem twoAnchorNegative_refuted :
       ((decideKEnc_sound h) (State.init Gaps)))
   | refuted σ =>
     have hl : decideLeaf twoAnchorNegative = .refuted σ := by
-      change decideKEnc twoAnchorNegative = .refuted σ
-      exact h
+      unfold decideLeaf
+      rw [h]
+      rfl
     have hg : decideGoal twoAnchorNegative = .refuted σ := by
       change decideLeaf twoAnchorNegative = .refuted σ
       exact hl
@@ -244,7 +262,11 @@ theorem twoAnchorNegative_refuted :
 
 /-- An unrelated local between the two integers must retain its position. -/
 def twoAnchorDeep : Fml Gaps [.kint, .val .bool, .kint] :=
-  .imp (zcmp .gt rfl zv (.pvZ (.there (.there .here)))) (zcmp .gt rfl zv (zlit (-3)))
+  cdlIn[Gaps | kint z, bool b, kint y]{
+    ‹zcmp .gt rfl zv (.pvZ (.there (.there .here)))› → ‹zcmp .gt rfl zv (zlit (-3))› }
+
+example : twoAnchorDeep =
+  .imp (zcmp .gt rfl zv (.pvZ (.there (.there .here)))) (zcmp .gt rfl zv (zlit (-3))) := rfl
 
 theorem twoAnchorDeep_recognized :
     twoAnchorDeep.kintTwoAnchorView?.map (fun v => (v.index.toNat, v.threshold)) = some (1, -3) := by
@@ -252,25 +274,39 @@ theorem twoAnchorDeep_recognized :
 
 /-- A Boolean false observation is not the supported truth literal. -/
 def twoAnchorFalseTruth : Fml Gaps [.kint, .kint] :=
+  cdlIn[Gaps | kint z, kint y]{
+    (y > z) = false → ‹zcmp .gt rfl zv (zlit 0)› }
+
+example : twoAnchorFalseTruth =
   .imp (.eq (.app2 (.zcmp .gt rfl) zv (.pvZ (.there .here))) (.app0 (.lit false)))
-    (zcmp .gt rfl zv (zlit 0))
+    (zcmp .gt rfl zv (zlit 0)) := rfl
 
 theorem twoAnchorFalseTruth_refused : twoAnchorFalseTruth.kintTwoAnchorView?.isSome = false := by
   decide +kernel
 
 /-- Reading the outer integer on the left is not a read of the bound `y`. -/
 def twoAnchorDifferentLocal : Fml Gaps [.kint, .kint] :=
+  cdlIn[Gaps | kint z, kint y]{
+    ‹zcmp .gt rfl (.pvZ (.there .here)) (.pvZ (.there .here))› → ‹zcmp .gt rfl zv (zlit 0)› }
+
+example : twoAnchorDifferentLocal =
   .imp (zcmp .gt rfl (.pvZ (.there .here)) (.pvZ (.there .here)))
-    (zcmp .gt rfl zv (zlit 0))
+    (zcmp .gt rfl zv (zlit 0)) := rfl
 
 theorem twoAnchorDifferentLocal_refused : twoAnchorDifferentLocal.kintTwoAnchorView?.isSome = false := by
   decide +kernel
 
 /-- Symbolic multiplication remains outside the target and undecided. -/
 def twoAnchorNonlinear : Fml Gaps [] :=
+  cdl[Gaps]{ ‹bindZ "z" (bindZ "y"
+    (cdlIn[Gaps | kint z, kint y]{
+      ‹zcmp .gt rfl (.app2 (.zbin .mul rfl) zv zv) (.pvZ (.there .here))› →
+      ‹zcmp .gt rfl zv (zlit 0)› }))› → ff }
+
+example : twoAnchorNonlinear =
   .imp (bindZ "z" (bindZ "y"
     (.imp (zcmp .gt rfl (.app2 (.zbin .mul rfl) zv zv) (.pvZ (.there .here)))
-      (zcmp .gt rfl zv (zlit 0))))) ff
+      (zcmp .gt rfl zv (zlit 0))))) ff := rfl
 
 theorem twoAnchorNonlinear_outside : twoAnchorNonlinear.inTarget {} = false := by decide +kernel
 theorem twoAnchorNonlinear_not_encoded : twoAnchorNonlinear.kencB.2 = false := by decide +kernel
@@ -284,5 +320,10 @@ theorem twoAnchorNonlinear_unknown : decideGoal twoAnchorNonlinear = .unknown :=
 #print axioms twoAnchorBad_refuted
 #print axioms twoAnchorNegative_countermodel
 #print axioms twoAnchorNegative_refuted
+
+/-- Explicit binder modalities keep a mixed box/diamond AST printable. -/
+example : (cdl[Gaps]{ ∀ given[box] kint z; ∀ given[diamond] kint y; y > z }) =
+    bindZ "z" (.bind .diamond (.user "y") .kint
+      (zcmp .gt rfl zv (.pvZ (.there .here)))) := rfl
 
 end Solidity.Examples.DecisionKInt

@@ -953,7 +953,7 @@ theorem gapIntAnd_answers : decideLeaf gapIntAnd ≠ .unknown := decideLeaf_comp
 theorem gapIntAnd_iff : decideLeaf gapIntAnd = .proved ↔ Fml.Valid gapIntAnd :=
   decideLeaf_proved_iff gapIntAnd_covered
 
-/-- info: ["unknown", "unknown"] -/
+/-- info: ["refuted", "unknown"] -/
 #guard_msgs in
 #eval [verdict gapWrittenMemory, verdict gapHashNegForall]
 

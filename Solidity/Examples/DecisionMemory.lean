@@ -168,10 +168,11 @@ write). -/
 def memWriteDia : Fml Gaps [] := .allocAll (.user "s") UA
   (.upd .diamond (wrU .here 0 5) (.eq (mrdG .dyn .here (litU 0)) (litU 5)))
 
-/-! ### Counterexamples to `DecisionTheorem` left with memory
+/-! ### Original memory gaps
 
-Each in `Fml.inTarget` (by the kernel). The negative block remains
-`unknown`; the hidden memory parameter and fresh struct pins are refuted
+Each remains in `Fml.inTarget` (by the kernel). The negative block is now
+refuted by exact preparation, the hidden memory parameter by its given-heap
+witness, and the fresh struct by its constructed child heap
 (`docs/automation.md`, M7): a negative-position block
 over an array's contents (its index bound after the array), a hidden memory
 binder (it ranges over the objects already there, and over none), a fresh
@@ -206,7 +207,7 @@ theorem gapMemInner_inTarget : gapMemInner.inTarget {} = true := by decide +kern
 theorem gapMemParam_inTarget : gapMemParam.inTarget {} = true := by decide +kernel
 theorem gapMemStruct_inTarget : gapMemStruct.inTarget {} = true := by decide +kernel
 
-/-- info: ["unknown", "refuted", "refuted"] -/
+/-- info: ["refuted", "refuted", "refuted"] -/
 #guard_msgs in
 #eval [verdict gapMemInnerNeg, verdict gapMemParam, verdict gapMemStruct]
 
@@ -245,45 +246,69 @@ The original Person pin is unchanged. Its countermodel contains constructed
 Token and Account children before the parent binder is evaluated. -/
 
 /-- A fresh Person may have any age: reading the same field twice agrees. -/
-def memStructSame : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
+def memStructSame : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Person p; p.age = p.age }
+
+example : memStructSame =
+  .allocAll (.user "p") (.struct "Person")
   (.eq (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide))
-    (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide)))
+    (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide))) := rfl
 
 /-- The schema is generic over literal words, not tied to zero. -/
-def memStructFive : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
-  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide)) (.app0 (.lit (uintOfNat 5))))
+def memStructFive : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Person p; p.age = 5 }
+
+example : memStructFive =
+  .allocAll (.user "p") (.struct "Person")
+  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide)) (.app0 (.lit (uintOfNat 5)))) := rfl
 
 /-- Boolean members use their own typed witness word. -/
-def memStructBool : Fml StandardExample [] := .allocAll (.user "t") (.struct "Toggle")
-  (.eq (MemoryWitness.fieldRead (p := .bool) (f := "on") (by decide)) (.app0 (.lit false)))
+def memStructBool : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Toggle t; t.on = false }
+
+example : memStructBool =
+  .allocAll (.user "t") (.struct "Toggle")
+  (.eq (MemoryWitness.fieldRead (p := .bool) (f := "on") (by decide)) (.app0 (.lit false))) := rfl
 
 /-- A fixed-array child is realized before its containing struct. -/
-def memStructFixed : Fml StandardExample [] := .allocAll (.user "t") (.struct "FixedTriple")
-  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "tag") (by decide)) (.app0 (.lit (uintOfNat 0))))
+def memStructFixed : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh FixedTriple t; t.tag = 0 }
+
+example : memStructFixed =
+  .allocAll (.user "t") (.struct "FixedTriple")
+  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "tag") (by decide)) (.app0 (.lit (uintOfNat 0)))) := rfl
 
 /-- Mapping-bearing structs retain their scope refusal, even for reflexivity. -/
-def memStructMapping : Fml StandardExample [] := .allocAll (.user "w") (.struct "Wallet")
+def memStructMapping : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Wallet w; w.owner = w.owner }
+
+example : memStructMapping =
+  .allocAll (.user "w") (.struct "Wallet")
   (.eq (MemoryWitness.fieldRead (p := .uint) (f := "owner") (by decide))
-    (MemoryWitness.fieldRead (p := .uint) (f := "owner") (by decide)))
+    (MemoryWitness.fieldRead (p := .uint) (f := "owner") (by decide))) := rfl
 
 /-- info: ["proved", "refuted", "refuted", "refuted", "unknown"] -/
 #guard_msgs in #eval [verdict memStructSame, verdict memStructFive, verdict memStructBool,
   verdict memStructFixed, verdict memStructMapping]
 
 /-- A reversed equation is a classifier near miss, not a recognized field/literal schema. -/
-def memStructReversed : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
+def memStructReversed : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Person p; 0 = p.age }
+
+example : memStructReversed =
+  .allocAll (.user "p") (.struct "Person")
   (.eq (.app0 (.lit (uintOfNat 0)))
-    (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide)))
+    (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide))) := rfl
 
 /-- A literal buried inside an operator cannot be mistaken for the whole RHS. -/
-def memStructBuried : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
+def memStructBuried : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Person p; p.age = 0 + 1 }
+
+example : memStructBuried =
+  .allocAll (.user "p") (.struct "Person")
   (.eq (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide))
-    (.app2 (.binop .add rfl) (.app0 (.lit (uintOfNat 0))) (.app0 (.lit (uintOfNat 1)))))
+    (.app2 (.binop .add rfl) (.app0 (.lit (uintOfNat 0))) (.app0 (.lit (uintOfNat 1))))) := rfl
 
 /-- A signed word with a dynamic-array child uses the same typed schema. -/
-def memStructSigned : Fml StandardExample [] := .allocAll (.user "p") (.struct "Packed")
+def memStructSigned : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Packed p; p.b = -7 }
+
+example : memStructSigned =
+  .allocAll (.user "p") (.struct "Packed")
   (.eq (MemoryWitness.fieldRead (p := .int) (f := "b") (by decide))
-    (.app0 (.lit (p := .int) ⟨-7, by decide⟩)))
+    (.app0 (.lit (p := .int) ⟨-7, by decide⟩))) := rfl
 
 /-- info: ["unknown", "unknown", "refuted"] -/
 #guard_msgs in #eval [verdict memStructReversed, verdict memStructBuried, verdict memStructSigned]

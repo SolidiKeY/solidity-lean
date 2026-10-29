@@ -195,6 +195,28 @@ success assumption. Two universal claims are false (see "Discrepancies").
 | `Bridge/SolidityBridge/Arith/Signature.lean` | Actual `Op1`/`Op2` signature evaluators call the same primitive operators. Signature `Op1.toInt` widens uint to unbounded KeY `kint`; it is distinguished from signed word cast `UnOp.toInt`. |
 | `Bridge/SolidityBridge/Arith/Lowering.lean` | Exact source equations for wrapping rewrites, signed division's two strategies, unsigned complement/left shift, negative-literal addition/subtraction, and literal power bases. `castCapture_factor` retains the real checker/fresh capture continuation and their errors; `castCapture_typed` selects identity or conversion. `narrowCheck_guard` identifies the emitted statement, including default require, explicit checking, self-call panic data, and ignoring mode; `narrowCheck_full` proves the full-width no-op. |
 
+The generic synthesis/checking helpers in `Arith/Widths.lean` require
+`p = .int → op ≠ .shr`: signed right shift takes its count from an unsigned
+operand. `Bridge/SolidityBridge/Arith/WidthsSignedShift.lean` proves that separate source-checking path;
+`Bridge/SolidityBridge/Arith/WidthsObstructions.lean` retains kernel-checked counterexamples to the old
+generic statement. `Bridge/SolidityBridge/Arith/WidthsSyntax.lean` supplies structural checker facts
+without depending on generated equation numbers.
+
+`narrowCheck_guard` retains panic data when either `selfFrame` or
+`retainFailureData` is set. `Bridge/SolidityBridge/Arith/LoweringObstructions.lean` refutes the earlier
+statement that tested only `selfFrame`; `Bridge/SolidityBridge/Arith/GuardRetentionExamples.lean`
+checks all flag combinations in default, checking and ignoring modes. These
+repairs change Bridge statements and proofs, preserving source execution,
+the concrete width results and proof resource limits.
+
+The shared arithmetic repair (2026-10-29) passed the complete optional Bridge
+build, its pinned axiom checks and the rule checker (seed 42, 1,000 samples
+per case), with explicit `-j1` under a 12 GiB/no-swap scope. Per-file Lean MCP
+diagnostics, trust, import-layer and orphan checks passed. Independent
+read-only finder and skeptic reviews found no confirmed defects. The prose
+path check adds no missing reference; its 46 pre-existing failures are outside
+this change. The separate `Derived17` performance repair is still pending.
+
 `PrimTy` contains uint256/int256/bool; narrow widths are metadata carried by
 `intTyOf` and the cast/cut/guard lowerings. `intTyOf_head` demonstrates any
 width on an ordinary local. Division and comparisons use genuine width-sized

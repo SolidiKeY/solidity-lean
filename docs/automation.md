@@ -2,7 +2,7 @@
 
 The milestones towards a closer that decides a fragment and a symbolic
 execution of polynomial size.  M0–M5 and M8's A1/A3 are built; M6 is the
-gate in force and the user's decisions; M7 is the decision theorem, its 32
+gate in force and the user's decisions; M7 is the decision theorem, its 33
 features and what is still open; M7-next is the plan waiting for the
 user's go.  Labels (M*n*, features *n*, plan steps *n*, decisions c … e3″)
 are cited by Lean docstrings: keep them.
@@ -581,6 +581,23 @@ a proved and a refuted leaf per shape, coverage kernel-checked
     atom in the index set (`lenPrep`), instances folded (`LFml.litFold`,
     `LFml.slotFold`; `gapArrayBlock` 1626 → 187 lifted nodes).
 
+33. **Negative scalar quantifiers beside ledger reads**
+    (`Calculus/QuantLedger.lean`, `quantLedgerReduction?`): exact expansion
+    and hoisting, then the existing ledger cut **before** quantifier
+    abstraction. The main layout retains two unrestricted natural codes
+    per ledger integer; only primitive inputs receive range constraints.
+    `QuantLedgerBody.valid_iff` and its countermodel construction prove
+    exactness. Closed, reference-free quantified definitions are decided
+    separately with `QArith`/`QFml`, then the equivalent intrinsic leaf is
+    decided by the existing ledger arithmetic backend. Nonclosed
+    definitions retain the generic quantified path and shared parameters.
+    This is the final fallback, preserving earlier returned verdicts and
+    counterstates. `gapQuantLedger` is now `proved` in both public pipelines
+    by kernel theorems; all six original gap statements and their target
+    certificates remain. The unchanged `netOK` guard requires remaining
+    binders to be ledger-free. See the [lane handoff](feature-work/quant-ledger.md)
+    for controls, resource evidence, scope and remaining limits.
+
 ### Running time
 
 Both decisions walk their derivative graphs depth first, the states seen
@@ -638,15 +655,21 @@ fallback does not establish general memory-binder completeness or change
 The [task handoff](feature-work/next10-memory-parameter-witness.md) records exact
 scope, proof/native evidence, resource measurements, review and gate status.
 
-The combined integration keeps the fresh-struct decision branch and the
-given-heap countermodel branch together. Read-only finder and skeptic reviews
-checked that both sides retain their declarations, the struct coverage proof
-still follows its original branch, and a positive witness check cannot produce
-a global proof. The combined memory pin expects `["unknown", "refuted",
-"refuted"]` for the negative array block, hidden parameter and fresh struct.
-Per-file Lean MCP error diagnostics pass for `Calculus/Decision.lean` and
-`Examples/DecisionMemory.lean`; the printed struct theorem axiom sets contain
-only `propext`, `Classical.choice` and `Quot.sound`.
+The combined integration keeps exact negative-array preparation, the
+fresh-struct decision branch and the given-heap countermodel branch together.
+Read-only finder and skeptic reviews confirmed that both sides retain their
+imports and declarations, soundness/refutation transport and coverage branches.
+They found and corrected a stale combined verdict and array-only coverage
+docstrings. The combined memory pin expects `["refuted", "refuted", "refuted"]`
+for the negative array block, hidden parameter and fresh struct. The original
+formulas, target certificates and decision budgets are unchanged.
+
+For this fresh-master resolution, per-file MCP error diagnostics completed
+successfully for `Calculus/Decision.lean`. Diagnostics for
+`Examples/DecisionMemory.lean` and the import root `Solidity.lean` remained
+partial, with no reported errors; they are not passing validation results.
+Conflict-marker and `git diff --check` checks pass. No full build was run;
+the individual lanes' historical build and axiom evidence is separate.
 
 ### What is not proved
 
@@ -666,9 +689,10 @@ only `propext`, `Classical.choice` and `Quot.sound`.
   A region refutation can be a term too large to build; no construction
   does better in general (a sorted mapping read at three far keys).
 * **The original gap witnesses**: all six statements and their kernel
-  `*_inTarget` certificates are retained. `gapKIntTwoAnchors` is now proved,
-  and `gapMemParam` and `gapMemStruct` refuted; the other three still answer
-  *unknown*. The original statements are retained below:
+  `*_inTarget` certificates are retained. `gapKIntTwoAnchors` and
+  `gapQuantLedger` are now proved; `gapMemInnerNeg`, `gapMemParam`,
+  `gapMemStruct` and `gapWrittenMemory` are refuted. All six retained
+  witnesses now have verdicts. The original statements are retained below:
   * `gapKIntTwoAnchors` (`Examples/DecisionKInt.lean`,
     `(∀ int z. ∀ int y. y > z → y > 0) → 0 == 1`): **closed by an exact
     test point**. `∀ y : Int. y > z → y > k`, for an outer KeY-int local
@@ -684,17 +708,27 @@ only `propext`, `Classical.choice` and `Quot.sound`.
     [task evidence and limits](feature-work/kint-two-anchors.md); the recovered full-suite
     resource gate and all 26 strict module timings now pass.
   * `gapQuantLedger` (`(∀ uint y. y > 0) → net(0) > 0`): a negative
-    quantifier in a leaf that reads the ledger.  Next: the ledger cut ahead
-    of `quantReduction?`'s abstraction, the entries as parameters of the
-    abstracted subformulas (`Rep`, `QArith.compile` over two codes an
-    entry).
+    quantifier in a leaf that reads the ledger. **Closed by feature 33**:
+    the ledger cut precedes abstraction; typed primitive parameters and
+    unrestricted entry-code pairs share one exact layout.
+    `DecisionQuantLedger.original_proved` and `original_goal_proved` pin
+    its exact verdict without changing the original formula.
   * `gapMemInnerNeg` (`Examples/DecisionMemory.lean`,
     `(∀ i. i < len(s) → s[i] == 0) → s[0] == 0`): a negative block over a
-    fresh memory array.  Next: in `Calculus/MemSwap.lean`, before `Fml.mx`,
-    instantiate it at the index set of the array's other reads, its length
-    binder and the guards' operands with successors (the `Fml` analogue of
-    `LFml.apfInst`); exactness needs a memory-array floor (feature 32's
-    `arr_rebuild_slot` argument over `MxMap`).
+    fresh memory array. Closed for this exact original leaf: `decideGoal`
+    returns *refuted*, kernel-certified with its returned countermodel in
+    `Examples/MemoryNegativeDecision.lean`. Before hoisting and `mxTop`,
+    `Calculus/MemNegPrep.lean` recognizes a uniform range block with an
+    equality-certified typed exterior, introduces a scoped length atom,
+    and instantiates at zero, retained literal reads, length and checked
+    successors. `MemObserve` proves stable optional exterior observations;
+    `MemFloor`/`MemInst` reconstruct the same fresh object and preserve
+    failed reads, bounds, zero length and local identity. Unsupported
+    terms/binders keep the original formula. Positive prefix value binders
+    are preserved; the length name reserves the whole input's fresh supply.
+    This closes this gap, not all memory or written-hash shapes. The
+    [task handoff](feature-work/memory-negative-block.md) records the exact
+    accepted fragment, additive hashing interface and validation evidence.
   * `gapMemParam`: a hidden memory binder ranges over the given heap's
     objects, which may alias; a refutation needs a heap object holding the
     witness words, which `decideLeafA`'s state does not carry. This pin is now
@@ -717,6 +751,10 @@ only `propext`, `Classical.choice` and `Quot.sound`.
     `∀ s t. [ s[0] = 1; ] keccak256(s) == keccak256(t)`): a hash of written
     memory.  Next: `decideMem`'s cut inside `decideHash`, input equality as
     a negative `∀` over the written arrays (after `gapMemInnerNeg`).
+    Independent [written-memory/hash helpers](feature-work/written-memory-hash.md)
+    prove byte-input and update/cut composition. The continuation adds an
+    exact syntax-schema realization certificate that refutes this original
+    pin through `decideHash`; general negative-array extraction remains open.
 * Unpinned shapes in the target: fixed arrays and arrays below a mapping
   key in a block (`FloorShape.of` keeps them; they need a `fixed` shape and
   their length in the index set, or a length atom); cut leaves past 511
@@ -744,14 +782,16 @@ completeness proof through the stages.
 2. Literal division, modulo, shifts, masks, wrapping operators: done
    (features 5, 14, 22).
 3. KeY `int`: done for linear terms, ledger reads and writes, binders of
-   either polarity (features 8, 9, 25, 26, 30, 31).  Left:
-   `gapQuantLedger`. The strict two-threshold implication in
-   `gapKIntTwoAnchors` is closed by the test point above.
+   either polarity (features 8, 9, 25, 26, 30, 31).
+   The strict two-threshold implication in `gapKIntTwoAnchors` is closed
+   by the test point above; `gapQuantLedger` is closed by feature 33.
 4. Quantifiers in the arithmetic: done (features 3, 6).
 5. The array property fragment: done for mappings at any depth, `bool`,
    `uint` and `int` keys, the ledger, dynamic storage arrays at roots
    (features 7, 16–21, 32).  Left: fixed arrays and arrays below keys,
-   memory (`gapMemInnerNeg`), the halting `||` operand.
+   broader memory blocks, the halting `||` operand. The fresh primitive-array
+   uniform negative block (`gapMemInnerNeg`) is now closed by the exact
+   intrinsic preparation above.
 6. Memory and array indices: done for storage arrays of primitives at
    roots and fresh memory arrays of primitives (features 10, 13, 23, 24).
    Left: arrays below fields and keys, of structs and arrays; the memory
@@ -870,12 +910,26 @@ conjunct separately.  The only `maxRecDepth` settings left are
 
 Features 30–31 (`kintneg`) and 32 (`apfarrays`) merged; steps 2–5 of the
 original plan moved to M7-next. At that milestone, the six retained
-witnesses were in `Fml.inTarget` and answered unknown (M7, "What is not proved"): `gapKIntTwoAnchors`,
-`gapQuantLedger`, `gapMemInnerNeg`, `gapMemParam`, `gapMemStruct`,
-`gapWrittenMemory`. The later [two-anchor follow-up](feature-work/kint-two-anchors.md)
-certifies `gapKIntTwoAnchors` as proved; the given-heap witness above certifies
-`gapMemParam` as refuted; the fresh-struct schema certifies `gapMemStruct`
-as refuted. The other three original witnesses remain unknown.
+witnesses were in `Fml.inTarget` and answered unknown (M7, "What is not proved"):
+`gapKIntTwoAnchors`, `gapQuantLedger`, `gapMemInnerNeg`, `gapMemParam`,
+`gapMemStruct`, `gapWrittenMemory`. The later
+[two-anchor follow-up](feature-work/kint-two-anchors.md) certifies
+`gapKIntTwoAnchors` as proved; feature 33 proves `gapQuantLedger`; exact
+fresh-array preparation certifies `gapMemInnerNeg` as refuted, and the
+given-heap witness certifies `gapMemParam` as refuted; the fresh-struct
+schema certifies `gapMemStruct` as refuted. The written-memory continuation
+refutes its original pin. All six original definitions and target
+certificates are retained; the six-gap list above records the dated step-1
+checkpoint.
+
+Fresh-master integration review: read-only finder and skeptic passes checked
+these combined statuses and the `Examples/DecisionMemory.lean` and
+`Examples/DecisionWrittenMemory.lean` module-map rows against the retained
+source certificates and verdict pins. The conflict resolution preserves both
+lanes' results and records verdicts for all six original witnesses. The
+module map retains both example families, and `Solidity.lean` imports both.
+No formula, target certificate or decision implementation is changed by the
+conflict repair.
 
 Group 07 direct file-backed profiling found its coverage proofs take about
 one second each; the final verdict evaluation is the slow stage, rather than
@@ -885,7 +939,11 @@ pin in 2,262 s; this is not a controlled comparison with the historical timing.
 The 300 s budget of the gate covers TestSuite modules only.
 ## M7-next · A checkpoint of the theorem (not started)
 
-Waits for the user's go.  A fresh session starts here.
+The ledger-quantifier lane implements feature 33; repository-wide validation
+is recorded in its handoff. This does not
+execute the broader checkpoint proposal below, introduce a `Residue`, or
+change `inTarget`, exclusions, `Waivers` or `DecisionTheorem`. The remaining
+checkpoint work still needs its own authorization.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
@@ -905,7 +963,7 @@ pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
    counterexample.  It needs `Fml.inTarget ∧ ¬ Fml.Residue → Fml.Covered`,
    with no `sorry` and no new axioms (only propext, Classical.choice,
    Quot.sound).  `Fml.Residue` is a decidable predicate that names
-   exactly the gaps still open (the three above, plus the unpinned shapes
+   exactly the gaps still open (the remaining unknown pin above, plus the unpinned shapes
    the proof finds it needs), each with a one-line reason.
 2. **The goal is unchanged.** `DecisionTheorem` stays stated as it is;
    later milestones may only shrink `Fml.Residue`.
