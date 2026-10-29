@@ -944,3 +944,8 @@ At the root, the notation's own tests:
 | `Storage/Representation/ArrayControls.lean` | Heterogeneous fixed/dynamic, nested save, defaults, stale aliases, live failures and header controls. |
 | `Storage/Representation/Transport.lean` | Finite per-run numeric realization, covered writes/sequences, frames and existing exact source observations. |
 | `Storage/Representation/TransportControls.lean` | Inhabited root/hash/data run, source read/save/header combinations and collision/bound/coverage/failure controls. |
+| `Storage/Representation/GraphLayout.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphFrames.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphRepresentation.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphCompatibility.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphControls.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |

@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
-"""Task-local serial Docker resource guard and evidence recorder (no Lean server)."""
+"""Task-local Docker resource guard and evidence recorder (no Lean server).
+Caller must hold /tmp/solidity-lean-feature-groups-20261025/writer.lock before
+invoking this script; the outer flock supplies writer ownership and seriality.
+"""
 import json, os, pathlib, subprocess, sys, time
 label, *command = sys.argv[1:]
 root = pathlib.Path(__file__).resolve().parents[2]
 evidence = pathlib.Path('/workspace/scratch/storage-values-evidence')
 evidence.mkdir(exist_ok=True)
+# Reconstruct the private configuration from pinned project settings.
+source_config = (root/'lakefile.toml').read_text()
+needle = 'weakLeanArgs = ["--tstack=131072"]'
+if needle not in source_config:
+    raise SystemExit('review required: project Lean arguments changed')
+(root/'lakefile.storage-values.toml').write_text(source_config.replace(
+    needle, 'weakLeanArgs = ["--tstack=131072", "-j1"]'))
 limit = 12 * 1024**3
 outer = pathlib.Path('/sys/fs/cgroup')
 maximum = (outer/'memory.max').read_text().strip()
@@ -20,12 +30,13 @@ args = docker + ['run','--rm','--name',name,'--network','none',
     '--memory',str(limit),'--memory-swap',str(limit),'--user','1000:1000',
     '--mount','type=bind,src=/workspace,dst=/workspace',
     '--mount','type=bind,src=/usr,dst=/usr,readonly',
+    '--mount','type=bind,src=/opt/codex/runtimes/codex-primary-runtime/dependencies/node,dst=/opt/task-node,readonly',
     '--mount','type=bind,src=/lib,dst=/lib,readonly',
     '--mount','type=bind,src=/lib64,dst=/lib64,readonly',
     '-w',str(root),'-e','LEAN_NUM_THREADS=1',
-    '-e','PATH=/workspace/.setup/tools/lean-4.24.0-linux/bin:/usr/bin:/bin',
+    '-e','PATH=/workspace/.setup/tools/lean-4.24.0-linux/bin:/opt/task-node/bin:/usr/bin:/bin',
     'ubuntu:24.04','sh','-c',
-    'cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max; "$@"; r=$?; echo CGROUP_PEAK; cat /sys/fs/cgroup/memory.peak; exit "$r"',
+    'cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max; "$@"; r=$?; echo CGROUP_PEAK; cat /sys/fs/cgroup/memory.peak; echo MEMORY_EVENTS; cat /sys/fs/cgroup/memory.events; exit "$r"',
     'bounded'] + command
 started = time.monotonic()
 peak_rss = 0
@@ -41,6 +52,7 @@ record = dict(command=command, exit=code, seconds=time.monotonic()-started,
     sampled_peak_aggregate_rss_bytes=peak_rss or None, memory_max=limit, swap_max=0,
     enclosing_memory_max=maximum, enclosing_memory_current_before=current)
 (evidence/(label+'.json')).write_text(json.dumps(record,indent=2)+'\n')
-print((evidence/(label+'.log')).read_text())
+print('Evidence: ' + str(evidence/(label+'.log')))
+print('\n'.join((evidence/(label+'.log')).read_text().splitlines()[-30:]))
 print(json.dumps(record))
 raise SystemExit(code)
