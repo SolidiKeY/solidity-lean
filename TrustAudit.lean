@@ -32,6 +32,7 @@ import Solidity.Examples.Tactics.OpenLoops
 import Solidity.Examples.Tactics.ComputedRevert
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.Tactics.Rigid
+import Solidity.Roadmap.Controls
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -588,3 +589,32 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} headline theorems use only the standard axioms"
+
+/-! Roadmap G07: the inhabited and negative controls of the G01 contracts
+(`Solidity/Roadmap/Controls.lean`, `docs/feature-work/roadmap-g07-gates.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Roadmap.PublicCorrectness.transfer,
+    ``Solidity.Roadmap.PublicCorrectness.not_alwaysRevert,
+    ``Solidity.Roadmap.PublicCorrectness.observes,
+    ``Solidity.Roadmap.PublicCorrectness.rejects,
+    ``Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse,
+    ``Solidity.Roadmap.Admission.rejects,
+    ``Solidity.Roadmap.Controls.toy_publicCorrectness,
+    ``Solidity.Roadmap.Controls.toySource_nonVacuous,
+    ``Solidity.Roadmap.Controls.toySource_approved,
+    ``Solidity.Roadmap.Controls.toyEvm_approved,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler,
+    ``Solidity.Roadmap.Controls.not_admission_sloppy,
+    ``Solidity.Roadmap.Controls.not_nonVacuous_emptySource]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} roadmap control theorems use only the standard axioms"

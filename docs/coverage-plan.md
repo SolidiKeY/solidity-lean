@@ -199,6 +199,8 @@ G05 status (2026-10-29): base-revision audit and certificate interfaces in [road
 
 G06 status (2026-10-29): machine inventory (23 disagreements with pinned Osaka), the pinned semantics and observation interfaces, the core/Bridge certificate boundary and bridge lemmas B01–B28 with owners in [roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) and `Solidity/Roadmap/Evm.lean` (statements only); no obligation closed; its questions Q1–Q3 are answered (second round, 2026-10-29) and encoded.
 
+G07 status (2026-10-29): controls and gates in [roadmap-g07-gates.md](feature-work/roadmap-g07-gates.md): a toy source, EVM and compiler meet `PublicCorrectness` (`Solidity/Roadmap/Controls.lean`), and always-reverting, byte-altering, data-erasing and malformed-source-accepting compilers are refuted; `node scripts/check-g07.mjs` runs the non-circularity, axiom-pin and trust gates and reports base failures (46 doc paths, 38 G03 ledger errors, `Derived17` memory, 37 SolKey mismatches) apart from new ones.
+
 ### Independent source definitions — after G00–G07, before wave 1
 
 These six source-definition workstreams implement the source side of G01's interfaces. They

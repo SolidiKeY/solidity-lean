@@ -27,6 +27,7 @@ history is in git.
 | [feature-work/cloud-integration-01-09.md](feature-work/cloud-integration-01-09.md) | Combined cloud tasks 01–09: snapshot scope, conflict resolutions, regression checks and remaining blockers. |
 | [feature-work/roadmap-g02-measure.md](feature-work/roadmap-g02-measure.md) | Roadmap G02: measured cold/warm/cache-restore build baseline, slowest and largest modules, OOM, cache recipe, stale artifacts and the ten-hour VM assessment. |
 | [feature-work/roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) | Roadmap G06: every EVM-like machine and its disagreements with pinned Osaka, the pinned semantics and observation interfaces, the core/Bridge certificate boundary and the bridge lemmas with owners. |
+| [feature-work/roadmap-g07-gates.md](feature-work/roadmap-g07-gates.md) | Roadmap G07: inhabited and negative controls of the G01 contracts, the non-circularity, axiom-pin and baselined regression gates, and the failures recorded at the base. |
 | [feature-work/roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) | Roadmap G04: current compiler theorems, every fragment/input restriction and its discharging group. |
 | [feature-work/roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md) | Roadmap G06 child: hand-written EVM vector scripts re-pinned from Cancun to Osaka; both-fork measurements, bytecode comparison, lane re-runs and Lean-side pin obligations. |
 - [Cloud task 10 integration](feature-work/cloud-integration-10.md) — committed ABI/error repairs, merge decisions and combined validation.

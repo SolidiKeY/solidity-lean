@@ -396,6 +396,7 @@ import Solidity.Roadmap.Contracts
 import Solidity.Roadmap.Frontend
 import Solidity.Roadmap.Evm
 import Solidity.Roadmap.TypedRun
+import Solidity.Roadmap.Controls
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
