@@ -275,6 +275,8 @@ proof, and their final checks must use the actual implementations.
 | G46 | Prove primitive instruction/byte-memory/storage/environment correspondence with the pinned EVM semantics. Discharge symbolic-slot, word-addressing, truncation and hash-model obstructions or identify an unresolved approved-premise obligation; unresolved means incomplete. |
 | G47 | Prove EVM call/create/return/revert and transaction correspondence, including excluded-resource abstraction and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
 
+G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premise `CollisionFree` and the non-adaptive and lazily sampled adaptive birthday bounds (q²/2²⁵⁷ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`; the eager adaptive case and the connection to executions are open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
+
 ### Wave 6 — whole pipeline, verification transfer and release (G48–G55)
 
 | Group | Deliverable and completion evidence |
