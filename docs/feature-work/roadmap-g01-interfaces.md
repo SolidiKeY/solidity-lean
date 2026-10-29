@@ -59,7 +59,7 @@ implements it.
 | Decision | Implemented by |
 |---|---|
 | G01 Q3 / G04 Q1: a per-run hash premise, never global injectivity; G06 F7: over the preimages the source determines | `SourceSpec.hashed` (the preimages a source prefix determines: `keccak256` arguments and slot preimages under the pinned layout), `SourceSpec.guard_iff`; `HashPremise F xs` = `Solidity.Hash.CollisionFree` ∧ `Solidity.Hash.RegionsDisjoint`; `RefinesUnder`, refinement under a premise on the **source** bound, in `PublicCorrectness.refines`, `Cert` and `SpecTransfer`; `PublicCorrectness.hashes_source` (the bytes hash only source-determined preimages). `CollisionFree` is an alias of `Solidity.Hash.CollisionFree`; `CollisionFree.singleton` shows the premise never asks for injectivity. |
-| Second round: hashed regions of length at most L overlap neither each other nor a root | `Fixed.regionLen` (L), `Fixed.rootSlots`, `Fixed.Sane` (1 ≤ L ≤ 2^64, at most 2^64 roots; in both `Approved` predicates and `Fixed.Keccak`), `HashPremise`, `HashPremise.nil`, `HashPremise.of_prefix`. |
+| Second round: hashed regions of length at most L overlap neither each other nor a root | `Fixed.regionLen` (L), `Fixed.rootSlots`, `Fixed.Sane` (1 ≤ L ≤ 2^128, at most 2^128 roots; in both `Approved` predicates and `Fixed.Keccak`), `HashPremise`, `HashPremise.nil`, `HashPremise.of_prefix`. |
 | The hash is a fixed parameter instantiated by Keccak, not an environment input; G06 F5 | `Fixed.evm : Evm.Fixed` (G06's hash, precompiles and precompile gas), `Fixed.hash`, shared by `SourceSpec.fixed` and `EvmSpec.fixed` (`PublicCorrectness.fixed`); `Fixed.Keccak` instantiates it with G06's `Evm.keccakWord`. |
 | G01 Q6: export `decode : EvmWorld → Option IntrinsicWorld` | `StateExport` (`lowering`, `decode`, given the run's preimages, `envAbs`); `EvmSpec.World`, `worlds`, `balances`, `resume`; `IntrinsicSpec.worlds`; the fields `decode_reach` and `decode_commutes` of `PublicCorrectness`. |
 | G00 Q5: `creationCode`/`runtimeCode` from the whole-input `Artifact` table, a parameter of the source semantics | `SourceSpec.meaning : … → Artifact → lang.Prog`; `Lowering.lower` takes the table; `PublicCorrectness.refines` instantiates it with the compiler's output; `PublicCorrectness.creates_table` makes `new C` run the table's bytes. The [gate](#non-circularity-as-a-checkable-gate) explains why this parameter is not circular. |
@@ -88,7 +88,8 @@ signatures changed as follows, which a citing sibling must follow:
   `Cert.refines` gives `RefinesUnder`; `Cert.comp` takes no extra premise.
 - `Refines.completes`, `Refines.sound`, `Refines.diverges` and
   `Refines.safety` are kept; `RefinesUnder AS AT FS G` (source forward
-  bounds `FS`, source premise `G`) is the guarded form, with
+  bounds `FS`, source premise `G`; the escape `Collided G` needs only `G`)
+  is the guarded form, with
   `RefinesUnder.*` its lemmas (`sound`, `diverges` and `safety` take
   `NoCollisionUpTo`), and `Refines.under` and `RefinesUnder.refines`
   convert.
@@ -264,15 +265,17 @@ layout's slot preimages (G27, "solc's slot behaviour" of G04 Q2).
 
 Two parameters bound the premise:
 
-- **`hashBound = 2^128`.** Adequacy speaks only of source prefixes hashing
-  fewer than `2^128` distinct preimages (`SourceSpec.forward_iff`, with
+- **`hashBound = 2^128`.** The premise includes that the source prefix
+  hashes fewer than `2^128` distinct preimages (`SourceSpec.guard_iff`, with
   `distinctCount`, the length of `Solidity.Hash.dedup` computed without
-  choice); below that no
-  collision and no overlap is forced by counting, so the premise fails only
-  on an actual collision. A source prefix that hashes `2^128` or more
-  preimages (an environment sending that many requests to a contract reading
-  a mapping) is outside adequacy; the bound is compiler-independent, and
-  soundness still covers it.
+  choice); below that no collision and no overlap is forced by counting.
+  Adequacy (`Forward`, just "no resource failure", `SourceSpec.forward_iff`)
+  is claimed only under the premise, so a source prefix that hashes `2^128`
+  or more preimages (an environment sending that many requests to a
+  contract reading a mapping) is outside it; the bound is
+  compiler-independent. Soundness covers such prefixes up to the point
+  where the bound is crossed, which counts as a violation of the premise
+  (`Collided`).
 - **`Fixed.Sane`**: `1 ≤ regionLen ≤ 2^128` and `rootSlots ≤ 2^128`. Without
   it `rootSlots ≥ 2^256` would fail the premise on every hashing run and
   `regionLen = 0` would drop the region premise. Both `Approved` predicates
@@ -315,10 +318,14 @@ target; at the EVM, only ever a target, both are trivial
    an admissible target bound above it. The source bound is universally
    quantified, so no choice of the prover can make the premise fail.
 2. **Backward.** Every admissible target prefix is below an admissible
-   source prefix, or the source **collided first** (`Collided`): a source
-   prefix in `FS` violating `G` whose events lead the target's. The
-   collision must happen within the shared observations and below
-   `hashBound`, so it is an actual collision, not one forced by counting.
+   source prefix, or the source **collided first** (`Collided`): an
+   admissible source prefix, with or without resource failures, that
+   violates `G` (a collision, an overlap, or `hashBound` distinct preimages
+   reached) and whose events lead the target's. The violation must happen
+   within the shared observations. A source prefix with a failure counts:
+   a real collision after an out-of-gas transaction (tx1 out of gas, tx2
+   writes `m[k1]`, tx3 reads a colliding `m[k2]`) must offer the escape,
+   or no correct compiler could meet `refines`.
 
 `NoCollisionUpTo` says the source does not collide up to a target prefix's
 observations; the lemmas that read the backward direction take it.
@@ -722,9 +729,12 @@ The final public statement is the conjunction of:
 - `I` the concrete typed intrinsic layer (G24): with a freely chosen `I`
   the state export would say nothing;
 - `SourceSpec.NonVacuous`: admitted inputs whose meanings, at allowed
-  environments, in the forward bounds and under the premise (say, hashing
-  nothing), complete with a success with data and with a revert, and one
-  that diverges without failures, for every artifact table.
+  environments, in the forward bounds and under the premise, complete with
+  a success with data, with a success after hashing (a nonempty
+  `SourceSpec.hashed`; `PublicCorrectness.succeeds_hashing` then refutes a
+  compiler that reverts whenever the source hashes, without any fact about
+  Keccak's values), and with a revert, and one whose single request
+  diverges without failures, for every artifact table.
 
 The roadmap's obligations read off this contract as follows:
 
@@ -1160,6 +1170,32 @@ theorem is restated against them.
 
 ## Review
 
+### Fourth round: second integration hold
+
+Integration review held the revision back a second time; master `2abccb70`
+is merged. Fixed:
+
+1. *Confirmed: `refines` unmeetable through the backward escape.*
+   `Collided` required the source prefix to be in `FS` (no failure, below
+   `hashBound`), so a real collision after an out-of-gas transaction had
+   no escape. The bound moved into the premise (`guard_iff`: fewer than
+   `hashBound` distinct preimages and `HashPremise`), `Forward` is only
+   "no resource failure" (`forward_iff`), and `Collided`,
+   `NoCollisionUpTo`, `Cert.back`/`reflect`, `Cert.comp` and `SpecTransfer`
+   no longer mention `FS`. The intrinsic layer's `forward_iff`/`guard_iff`
+   follow.
+2. *Plausible: no hashing witness.* `SourceSpec.NonVacuous` has a success
+   witness whose run hashes; `PublicCorrectness.succeeds_hashing` carries it
+   to the bytes.
+3. *Doc:* the `Fixed.Sane` cap in the decisions table is `2^128`.
+4. *G03 ledger:* `MODULES["G01"]` lists `Solidity.Roadmap.TypedRun`, D08
+   cites `typedRunPrefixes` in `TypedRun.lean`; the acknowledgements naming
+   G01 for `Solidity.Evm.Machine` and `Solidity.Semantics.Deploy` no longer
+   do, because `Contracts.lean` imports neither any more (the checker
+   flagged them); those for RevertData, RevertBytes, Heap, Storage, Checked
+   and the `G01 <- G24.04` inversion stay. `roadmap-g03-ledger.py --write`
+   and `--check` pass (0 errors).
+
 ### Third round: finder and skeptic on the second integration round
 
 A read-only finder and skeptic (neither using the Lean server) reviewed the
@@ -1210,12 +1246,13 @@ Integration review held the revision back. Its points and what was done:
 1. *Confirmed: `refines` could not be met for long sessions*: the
    `2^128` bound restricted only the EVM's hashes, while adequacy ranged
    over every source bound without failures. The bound is now on the
-   source (`SourceSpec.forward_iff`: no failure and fewer than `hashBound`
+   source (then `SourceSpec.forward_iff`: no failure and fewer than `hashBound`
    source-determined preimages), compiler-independent; the EVM has no
    forward restriction (`EvmSpec.Approved`), and `Cert` carries the source's
    `Forward` to each target.
 2. *Confirmed: unconstrained `regionLen`/`rootSlots`.* `Fixed.Sane`
-   (`1 ≤ regionLen ≤ 2^64`, `rootSlots ≤ 2^64`) is part of both `Approved`
+   (then `1 ≤ regionLen ≤ 2^64`, `rootSlots ≤ 2^64`; raised to `2^128` in
+   the third round) is part of both `Approved`
    predicates and `Fixed.Keccak`. `not_alwaysRevert` no longer assumes
    anything about the bytes' hashes: the premise is on the source, and
    `NonVacuous`'s success witness meets it.

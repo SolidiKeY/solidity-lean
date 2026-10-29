@@ -2367,8 +2367,8 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: CI downloads only solc 0.8.34 (G00 pins); the frozen 0.8.38 pin must reach `Source.Provenance`
   - missing: the 0.8.34 fixture boundary is not recorded per fixture (G05)
 - **D06 Artifact table: `creationCode`/`runtimeCode` read from G01's whole-input `Artifact` table, a source-semantics parameter**
-  - theorem: `Solidity.Roadmap.Artifact` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:373`) — whole-input table of code units
-  - theorem: `Solidity.Roadmap.CodeUnit` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:364`) — initcode, runtime and link sites
+  - theorem: `Solidity.Roadmap.Artifact` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:663`) — whole-input table of code units
+  - theorem: `Solidity.Roadmap.CodeUnit` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:652`) — initcode, runtime and link sites
   - missing: `SourceSpec` does not yet take the `Artifact` table as a parameter (g01-contracts-rev)
   - missing: the G07 non-circularity whitelist must admit exactly this compiler-output parameter
   - missing: no compiled artifact exists for any contract: `type(C).creationCode` has no producer
@@ -2381,12 +2381,12 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
 - **D08 Idealized source resources: unbounded fuel and recursion**
   - source: `Solidity.recDepth` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:469`) — fixed 1024-frame unrolling to remove
   - source: `Solidity.Prog.runF_approx` (Solidity.Semantics.RunFuel, `Solidity/Semantics/RunFuel.lean:449`) — fuel approximation of the classical run
-  - theorem: `Solidity.Roadmap.typedRunPrefixes` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:455`) — intrinsic prefix family plug
+  - theorem: `Solidity.Roadmap.typedRunPrefixes` (Solidity.Roadmap.TypedRun, `Solidity/Roadmap/TypedRun.lean:30`) — intrinsic prefix family plug
   - missing: intrinsic recursion is unrolled to `recDepth = 1024` with an `exhausted` bottom (G04 R08)
   - missing: `SourceSpec.Idealized` has no instance; `Prefixes.Consistent` of `Prog.runF` is unproved
 - **D09 Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized**
-  - theorem: `Solidity.Roadmap.EvmSpec` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:382`) — pinned EVM language with resources
-  - theorem: `Solidity.Roadmap.Prefixes.Consistent` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:85`) — consistency of resourced prefix families
+  - theorem: `Solidity.Roadmap.EvmSpec` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:892`) — pinned EVM language with resources
+  - theorem: `Solidity.Roadmap.Prefixes.Consistent` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:132`) — consistency of resourced prefix families
   - missing: `EvmSpec` resources still list code size (g01-contracts-rev drops it)
   - missing: `Lang.Res` ends a session at gas exhaustion; the decision requires the session to continue
   - missing: machine `.fault` conflates divergence with malformed code (G04 R38)
@@ -2410,8 +2410,8 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: the Bridge adversary covers a payment boundary only
   - missing: no transaction-level quantification over strategies in a contract
 - **D13 Observation: the full `Event` list with exact ABI and revert bytes, `Panic` codes included**
-  - theorem: `Solidity.Roadmap.Event` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:258`) — shared observable events
-  - theorem: `Solidity.Roadmap.Outcome` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:245`) — outcomes with bytes
+  - theorem: `Solidity.Roadmap.Event` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:422`) — shared observable events
+  - theorem: `Solidity.Roadmap.Outcome` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:411`) — outcomes with bytes
   - source: `Solidity.Prog.withPanics` (Solidity.Syntax.Checked, `Solidity/Syntax/Checked.lean:587`) — solc panic codes in callees
   - missing: revert data is erased in the compiler theorem (G04 R37); `THalt` loses panic codes
   - missing: the call, creation and callee-answer events of the `Event` list have no producer: typed calls and creation are not compiled (G42.02, G44.03)
@@ -2615,7 +2615,7 @@ Module hot spots: the remaining inversions, parallel imports and shared writes, 
 | `Solidity.Evm.Exp` | 2 inversion | G06 G24.03 G25 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
 | `Solidity.Evm.Expr` | 2 inversion | G06 G24.03 G26 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
 | `Solidity.Evm.Layout` | 2 inversion | G06 G24.03 G25 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
-| `Solidity.Evm.Machine` | 4 inversion | G01 G06 G24.01 G27.05 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
+| `Solidity.Evm.Machine` | 2 inversion | G06 G24.01 G27.05 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
 | `Solidity.Evm.Repr` | 3 inversion | G06 G24.02 G27.01 G27.02 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
 | `Solidity.Evm.Signed` | 2 inversion | G06 G24.03 G25 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
 | `Solidity.Evm.Sim` | 2 inversion | G06 G24.02 G43 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
@@ -2626,7 +2626,7 @@ Module hot spots: the remaining inversions, parallel imports and shared writes, 
 | `Solidity.Frontend.SourceUnits` | 1 inversion | G05 G12 | untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates |
 | `Solidity.RevertBytes` | 2 inversion, 13 parallel-import | G01 G06 G16 G17 G18.01 G18.02 G18.03 G18.04 G18.05 G19 G21 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.ContractWorldCertificates` | 1 inversion | G22.03 G22.04 | G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
-| `Solidity.Semantics.Deploy` | 2 inversion | G01 G22.01 G22.03 | G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.Semantics.Deploy` | 1 inversion | G22.01 G22.03 | G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.Heap` | 2 inversion, 1 parallel-import | G01 G06 G16 G18.03 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.RecursiveStorage.Copy` | 1 inversion | G18.01 G18.05 | G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05 |
 | `Solidity.Semantics.RecursiveStorage.Paths` | 1 inversion | G18.01 G18.02 | G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05 |
@@ -2648,7 +2648,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | package | VM | cells | edited modules | lines | flag | lemma split |
 |---|---|---|---|---|---|---|
 | G00 | V00 | 0 | new | 0 | — | — |
-| G01 | V00 | 9 | `Solidity.Roadmap.Contracts` | 467 | — | — |
+| G01 | V00 | 9 | `Solidity.Roadmap.Contracts`, `Solidity.Roadmap.TypedRun` | 1180 | — | — |
 | G02 | V01 | 0 | new | 0 | — | — |
 | G03 | V02 | 0 | new | 0 | — | — |
 | G04 | V01 | 0 | new | 0 | — | — |
