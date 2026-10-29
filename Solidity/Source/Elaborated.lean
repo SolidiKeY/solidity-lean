@@ -22,10 +22,10 @@ hexadecimal literal is a constant or a `bytesN`, S01's `litBytes`), so the
 elaborated program *is* the choice: an `Elaborated` fixes one derivation per
 body, and `Elaborated.bodies_typed` records that each carried body is the
 elaboration (`ItemsD.toR`) of a derivation of that body's syntax.  The
-semantics (`Solidity/Source/Eval.lean`) reads only the carried program, so
-a unit's meaning is a function of its elaboration (`meaning_of_program`):
-two elaborations with the same program have the same behaviour by
-construction.  That every *two* derivations of one body elaborate to terms
+semantics (`Solidity/Source/Eval.lean`, `Solidity/Source/Semantics.lean`)
+reads only the carried program (`SrcProg`), so a unit's meaning is a
+function of its elaboration: two elaborations with the same program have
+the same behaviour by construction.  That every *two* derivations of one body elaborate to terms
 with the same behaviour is not proved here (see
 `docs/feature-work/source-s02.md`, "Uniqueness").
 -/

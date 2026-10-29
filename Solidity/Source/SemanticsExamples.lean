@@ -1,5 +1,6 @@
 import Solidity.Source.Semantics
 import Solidity.Source.Examples
+import Solidity.Source.Ledger
 
 /-!
 # Controls of the source semantics (S02, S03, S04.04, S05)
@@ -259,7 +260,7 @@ def sB : St EB :=
 def GB (callee : Solidity.Roadmap.Strategy) : Glob EB :=
   ⟨PB, .legacy, toyFixed, fun _ => word 0, fun _ _ => true, callee, word 0⟩
 
-def selOf (sig : String) : Bytes := (wordBytes (toyFixed.hash sig.toUTF8.toList)).take 4
+def selOf (sig : String) : Bytes := (wordBytes (toyFixed.hash (asciiBytes sig.toList))).take 4
 
 def tx (input : Bytes) : Request := ⟨user, thisC, word 0, word 0, input⟩
 
@@ -283,9 +284,6 @@ def outcomeOf (r : Except Halt Outcome × St EB) : Option Outcome :=
   | _ => none
 
 def answerOnly : Solidity.Roadmap.Strategy := fun _ => .answer (.success [])
-
--- Kernel evaluation of a whole transaction nests deeply (no heartbeat limit is raised).
-set_option maxRecDepth 20000
 
 /-- **A revert rolls back storage and transient storage**: `poke` writes
 `x` and `t`, then reverts; both keep their values (the transient one until
@@ -333,13 +331,116 @@ theorem reentrant_callback :
 theorem no_callback :
     readX (runTxB answerOnly sB (selOf "callOut(address)" ++ wordBytes (toWord ext.val))).2 = some 3 := by decide +kernel
 
+
+/-! ## S03.02: constructor order -/
+
+/-- ```
+contract A { uint256 a = 1; constructor() { a = a + 1; } }
+contract B is A { uint256 b = a; }
+``` -/
+def stA : Syn (.part false) := .stateVar u256 none none none false "a" .none
+def stB : Syn (.part false) := .stateVar u256 none none none false "b" .none
+def unitAB : Syn .unit :=
+  .unit (.cons (.contract false "A" .none .nil (.cons stA (.cons (.constructor .nil .nil false none (.block .nil)) .nil)))
+    (.cons (.contract false "B" .none (.cons (.inherit ⟨"A", []⟩ .none) .nil) (.cons stB .nil)) .nil))
+
+def EAB : Env := unitAB.env
+def dA : Decl := ⟨.stateVar, "a", some "A", false, stA⟩
+def dB : Decl := ⟨.stateVar, "b", some "B", false, stB⟩
+theorem dA_ty : dA.varTy EAB = some uint := by decide
+theorem dB_ty : dB.varTy EAB = some uint := by decide
+
+def litAB {Γ : RCtx} (k : Nat) (h : (Q.ofInt k).FitsInt IntTy.u256 := by decide) : RExpr EAB Γ uint :=
+  .conv (.const (Q.ofInt k)) (.inl (lit_ok _ k h))
+
+def ctorA : RBody EAB := ⟨[], [], false, [], [],
+  .stmt (.expr (.assign (.state dA dA_ty rfl) (.binary .add (.state dA dA_ty) (litAB 1)))) .nil, []⟩
+
+def PAB : Program EAB where
+  body _ := none
+  consts _ := none
+  inits c := if c = "A" then [⟨dA, uint, dA_ty, litAB 1⟩] else if c = "B" then [⟨dB, uint, dB_ty, .state dA dA_ty⟩] else []
+  ctor c := if c = "A" then some ctorA else none
+  ctorLocals _ := []
+  baseArgs _ := []
+  contracts := ["A", "B"]
+
+def GAB (p : Pipeline) : Glob EAB := ⟨PAB, p, toyFixed, fun _ => word 0, fun _ _ => true, answerOnly, word 0⟩
+
+/-- `b` after deploying `B` at `thisC`. -/
+def deployB (p : Pipeline) : Option Int :=
+  let r := runAt (fun n => deploy (GAB p) n "B" thisC user (word 0) []) (St.init EAB) 20
+  match (r.2.ex.world.accounts thisC).storage.read dB.path with
+  | some (.int v _) => some v
+  | _ => none
+
+/-- **Constructor order**: under legacy every initializer runs before the
+constructor bodies, so `b` reads `a = 1`; via IR `A`'s body runs before
+`B`'s initializers, so `b` reads `a = 2` (solc's `ir-breaking-changes`,
+"order of state variable initialization"). -/
+theorem ctor_order_legacy : deployB .legacy = some 1 := by decide +kernel
+theorem ctor_order_viaIR : deployB .viaIR = some 2 := by decide +kernel
+
+/-! ## Horizons and sessions -/
+
+/-- **The outcome does not depend on the horizon once complete** (checked
+here on a transaction: `g()` at horizons 20 and 40). -/
+theorem horizon_stable : outcomeOf (runTxB answerOnly sB (selOf "g()") 20) =
+    outcomeOf (runTxB answerOnly sB (selOf "g()") 40) := by decide +kernel
+
+/-- A horizon too small for the transaction completes nothing. -/
+theorem horizon_short : outcomeOf (runTxB answerOnly sB (selOf "g()") 3) = none := by decide +kernel
+
+/-- The session family of every program is consistent (G01). -/
+theorem session_consistent {E : Env} (P : SrcProg E) (env : SessionEnv) :
+    Solidity.Roadmap.Prefixes.Consistent (sessionAt P env) := sessionAt_consistent P env
+
 end Solidity.Source.SemanticsExamples
 
 
+/-! ## Axiom pins -/
 
-namespace Solidity.Source.SemanticsExamples
-example : (selOf "poke()").length = 4 := by decide +kernel
-example : readX sB = some 3 := by decide +kernel
-example : EB.cellTy dX.path = uint := by decide +kernel
-example : (EB.exposed "C").length = 4 := by decide +kernel
-end Solidity.Source.SemanticsExamples
+
+/-- info: 'Solidity.Source.sessionAt_consistent' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.sessionAt_consistent
+
+/-- info: 'Solidity.Source.firstDone_mono' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.firstDone_mono
+
+/-- info: 'Solidity.Source.firstDone_none_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.firstDone_none_iff
+
+/-- info: 'Solidity.Source.wrapBits_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.wrapBits_mem
+
+/-- info: 'Solidity.Source.Env.fieldTy?_of_fieldAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.Env.fieldTy?_of_fieldAt
+
+/-- info: 'Solidity.Source.Ledger.semExprCoverage_of_typed' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Source.Ledger.semExprCoverage_of_typed
+
+/-- info: 'Solidity.Source.SemanticsExamples.reentrant_callback' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.SemanticsExamples.reentrant_callback
+
+/-- info: 'Solidity.Source.SemanticsExamples.revert_rolls_back' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.SemanticsExamples.revert_rolls_back
+
+/-- info: 'Solidity.Source.SemanticsExamples.modifier_twice_legacy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.SemanticsExamples.modifier_twice_legacy
+
+/-- info: 'Solidity.Source.SemanticsExamples.ctor_order_viaIR' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.SemanticsExamples.ctor_order_viaIR
+
+/-- info: 'Solidity.Source.SemanticsExamples.order_legacy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.SemanticsExamples.order_legacy

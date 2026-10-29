@@ -1791,6 +1791,57 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.Env.fieldTy?_of_fieldAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.firstDone_mono": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.firstDone_none_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.Ledger.semExprCoverage_of_typed": [
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.SemanticsExamples.ctor_order_viaIR": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.SemanticsExamples.modifier_twice_legacy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.SemanticsExamples.order_legacy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.SemanticsExamples.reentrant_callback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.SemanticsExamples.revert_rolls_back": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.sessionAt_consistent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.wrapBits_mem": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/StateExamples.lean:Solidity.Source.Heap.copy_independent": [
   "Quot.sound",
   "propext"

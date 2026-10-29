@@ -35,6 +35,7 @@ import Solidity.Examples.Tactics.Rigid
 import Solidity.Roadmap.Controls
 import Solidity.Source.TypingExamples
 import Solidity.Source.StateExamples
+import Solidity.Source.SemanticsExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -710,3 +711,32 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} source-state theorems use only the standard axioms"
+
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.wrapBits_mem,
+    ``Solidity.Source.Env.fieldTy?_of_fieldAt,
+    ``Solidity.Source.firstDone_mono,
+    ``Solidity.Source.firstDone_none_iff,
+    ``Solidity.Source.sessionAt_consistent,
+    ``Solidity.Source.Ledger.semExprCoverage_of_typed,
+    ``Solidity.Source.Ledger.semStmtCoverage_of_typed,
+    ``Solidity.Source.Ledger.semExprGaps_spec,
+    ``Solidity.Source.SemanticsExamples.add_overflow_checked,
+    ``Solidity.Source.SemanticsExamples.order_legacy,
+    ``Solidity.Source.SemanticsExamples.order_viaIR,
+    ``Solidity.Source.SemanticsExamples.modifier_twice_legacy,
+    ``Solidity.Source.SemanticsExamples.modifier_twice_viaIR,
+    ``Solidity.Source.SemanticsExamples.revert_rolls_back,
+    ``Solidity.Source.SemanticsExamples.transient_cleared,
+    ``Solidity.Source.SemanticsExamples.reentrant_callback,
+    ``Solidity.Source.SemanticsExamples.ctor_order_legacy,
+    ``Solidity.Source.SemanticsExamples.ctor_order_viaIR]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-semantics theorems use only the standard axioms"

@@ -72,32 +72,45 @@ variable {E : Env}
 
 /-! ## ABI encoding and decoding -/
 
+/-- Decimal digits (signatures are character lists, which the kernel
+evaluates directly, rather than `String`s). -/
+def decChars (n : Nat) : List Char := Nat.toDigits 10 n
+
 /-- The ABI name of an elementary type. -/
-def STy.elemAbiName : STy → String
-  | .int t => (if t.signed then "int" else "uint") ++ toString t.bits
-  | .bool => "bool"
-  | .address _ | .contract _ => "address"
-  | .fixedBytes n _ => "bytes" ++ toString n
-  | .fixed f => (if f.signed then "fixed" else "ufixed") ++ toString f.bits ++ "x" ++ toString f.digits
-  | .enum _ => "uint8"
-  | .bytes _ => "bytes"
-  | .string _ => "string"
-  | .fn true _ _ _ => "function"
-  | _ => "tuple"
+def STy.elemAbiName : STy → List Char
+  | .int t => (if t.signed then "int".toList else "uint".toList) ++ decChars t.bits
+  | .bool => "bool".toList
+  | .address _ | .contract _ => "address".toList
+  | .fixedBytes n _ => "bytes".toList ++ decChars n
+  | .fixed f => (if f.signed then "fixed".toList else "ufixed".toList) ++ decChars f.bits ++ 'x' :: decChars f.digits
+  | .enum _ => "uint8".toList
+  | .bytes _ => "bytes".toList
+  | .string _ => "string".toList
+  | .fn true _ _ _ => "function".toList
+  | _ => "tuple".toList
 
 /-- The ABI name of a type in a signature. -/
-def STy.abiName (D : Layout) : STy → String
+def STy.abiName (D : Layout) : STy → List Char
   | .udvt d => (D.underlying d).elemAbiName
-  | .array _ τ n => τ.abiName D ++ "[" ++ ((n.map toString).getD "") ++ "]"
+  | .array _ τ n => τ.abiName D ++ '[' :: ((n.map decChars).getD []) ++ [']']
   | τ => τ.elemAbiName
 
-/-- A function's, event's or error's signature. -/
-def sigOf (D : Layout) (name : String) (ps : List STy) : String :=
-  name ++ "(" ++ ",".intercalate (ps.map (STy.abiName D)) ++ ")"
+/-- Names joined by commas. -/
+def commaJoin : List (List Char) → List Char
+  | [] => []
+  | [x] => x
+  | x :: xs => x ++ ',' :: commaJoin xs
+
+/-- A function's, event's or error's signature, `name(T1,T2,…)`. -/
+def sigOf (D : Layout) (name : String) (ps : List STy) : List Char :=
+  name.toList ++ '(' :: commaJoin (ps.map (STy.abiName D)) ++ [')']
+
+/-- The bytes of an ASCII signature. -/
+def asciiBytes (cs : List Char) : Bytes := cs.map fun c => c.toNat.toUInt8
 
 /-- The first four bytes of the fixed hash of a signature. -/
-def Glob.selector (G : Glob E) (sig : String) : Bytes :=
-  (wordBytes (G.fixed.hash sig.toUTF8.toList)).take 4
+def Glob.selector (G : Glob E) (sig : List Char) : Bytes :=
+  (wordBytes (G.fixed.hash (asciiBytes sig))).take 4
 
 /-- The bytes of a byte-array value (`bytes`/`string` in memory or
 storage, a string literal). -/
