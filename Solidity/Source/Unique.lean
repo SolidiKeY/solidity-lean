@@ -1174,6 +1174,148 @@ theorem uniqE_callIdent {Γ : Ctx} {n : String} {A : Syn .callArgs}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
+/-- **Calls through a member**: external calls, payments, ABI encoding. -/
+theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callArgs}
+    (ih : Uniq Γ (sizeOf (Syn.call (.member c n) A))) : UniqE Γ (.call (.member c n) A) := by
+  intro τ τ' d
+  have hce : (Syn.call (.member c n) A).const = Option.none := rfl
+  have hbo : (Syn.call (.member c n) A).binOp? = Option.none := rfl
+  suffices H : ∀ n0 (d' : Typed Γ (.call (.member c n0) A) τ'), (n == n0) = true →
+      τ = τ' ∧ HEq d.toR d'.toR from fun d' => H n d' (beq_self_eq_true n)
+  intro n0 d' hn
+  cases d with
+  | @extCall c _ args dn dd ps rs σs dc da hf hs =>
+    have hsz : sizeOf c < sizeOf (Syn.call (.member c n) (.positional args)) ∧
+        sizeOf args < sizeOf (Syn.call (.member c n) (.positional args)) := by simp only [Syn.call.sizeOf_spec, Syn.member.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+    cases d' with
+    | extCall dc' da' hf' hs' =>
+      cases (eq_of_beq hn)
+      obtain ⟨h1, e1⟩ := ih.e c hsz.1 dc dc'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.a args hsz.2 da da'
+      cases h2
+      rw [hf] at hf'; cases hf'
+      rw [hs] at hs'; cases hs'
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | transfer da' _ _ => cases (ih.e c hsz.1 dc da').1
+    | send da' _ _ => cases (ih.e c hsz.1 dc da').1
+    | abiEncode hr _ _ _ => cases Typed.ident_builtin hr dc
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @transfer _ v σ da dv h =>
+    have hsz : sizeOf c < sizeOf (Syn.call (.member c "transfer") (.positional (.cons v .nil))) ∧
+        sizeOf v < sizeOf (Syn.call (.member c "transfer") (.positional (.cons v .nil))) := by simp only [Syn.call.sizeOf_spec, Syn.member.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+    cases d' with
+    | extCall dc' _ _ _ => cases (ih.e c hsz.1 da dc').1
+    | transfer da' dv' _ =>
+      obtain ⟨-, e1⟩ := ih.e c hsz.1 da da'
+      obtain ⟨h2, e2⟩ := ih.e v hsz.2 dv dv'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | send _ _ _ => exact absurd hn (by decide)
+    | abiEncode hr _ _ _ => cases Typed.ident_builtin hr da
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @send _ v σ da dv h =>
+    have hsz : sizeOf c < sizeOf (Syn.call (.member c "send") (.positional (.cons v .nil))) ∧
+        sizeOf v < sizeOf (Syn.call (.member c "send") (.positional (.cons v .nil))) := by simp only [Syn.call.sizeOf_spec, Syn.member.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+    cases d' with
+    | extCall dc' _ _ _ => cases (ih.e c hsz.1 da dc').1
+    | transfer _ _ _ => exact absurd hn (by decide)
+    | send da' dv' _ =>
+      obtain ⟨-, e1⟩ := ih.e c hsz.1 da da'
+      obtain ⟨h2, e2⟩ := ih.e v hsz.2 dv dv'
+      cases h2
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2]
+    | abiEncode hr _ _ _ => cases Typed.ident_builtin hr da
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @abiEncode g m args σs k hr hk da h =>
+    cases d' with
+    | extCall dc' _ _ _ => cases Typed.ident_builtin hr dc'
+    | transfer da' _ _ => cases Typed.ident_builtin hr da'
+    | send da' _ _ => cases Typed.ident_builtin hr da'
+    | abiEncode _ hk' da' _ =>
+      cases (eq_of_beq hn)
+      rw [hk] at hk'; cases hk'
+      have hsz : sizeOf args < sizeOf (Syn.call (.member (.ident g) n) (.positional args)) := by
+        simp only [Syn.call.sizeOf_spec, Syn.member.sizeOf_spec, Syn.positional.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.a args hsz da da'
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **Conversions to an elementary type** (`T(x)`). -/
+theorem uniqE_callElem {Γ : Ctx} {el : Elem} {hel : el ≠ .addressPayable} {A : Syn .callArgs}
+    (ih : Uniq Γ (sizeOf (Syn.call (.elemType el hel) A))) : UniqE Γ (.call (.elemType el hel) A) := by
+  intro τ τ' d d'
+  have hce : (Syn.call (.elemType el hel) A).const = Option.none := rfl
+  have hbo : (Syn.call (.elemType el hel) A).binOp? = Option.none := rfl
+  cases d with
+  | @convElem x _ _ σ τ1 dx hτ h =>
+    cases d' with
+    | convElem dx' hτ' _ =>
+      have hsz : sizeOf x < sizeOf (Syn.call (.elemType el hel) (.positional (.cons x .nil))) := by
+        simp only [Syn.call.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e x hsz dx dx'
+      cases h1
+      subst hτ hτ'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **External calls with value** (`c.f{value: v}(args)`). -/
+theorem uniqE_callOpts {Γ : Ctx} {f : Syn .expr} {o : Syn .namedArg} {os : Syn (.list .namedArg)}
+    {A : Syn .callArgs} (ih : Uniq Γ (sizeOf (Syn.call (.callOptions f o os) A))) :
+    UniqE Γ (.call (.callOptions f o os) A) := by
+  intro τ τ' d d'
+  have hce : (Syn.call (.callOptions f o os) A).const = Option.none := rfl
+  have hbo : (Syn.call (.callOptions f o os) A).binOp? = Option.none := rfl
+  cases d with
+  | @extCallValue c v fn args dn dd ps rs σs σ dc dv hv da hf hs hm =>
+    have hsz : sizeOf c < sizeOf (Syn.call (.callOptions (.member c fn) (.namedArg "value" v) .nil) (.positional args)) ∧
+        sizeOf v < sizeOf (Syn.call (.callOptions (.member c fn) (.namedArg "value" v) .nil) (.positional args)) ∧
+        sizeOf args < sizeOf (Syn.call (.callOptions (.member c fn) (.namedArg "value" v) .nil) (.positional args)) := by
+      simp only [Syn.call.sizeOf_spec, Syn.callOptions.sizeOf_spec, Syn.member.sizeOf_spec,
+        Syn.namedArg.sizeOf_spec, Syn.positional.sizeOf_spec]; omega
+    cases d' with
+    | extCallValue dc' dv' _ da' hf' hs' _ =>
+      obtain ⟨h1, e1⟩ := ih.e c hsz.1 dc dc'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e v hsz.2.1 dv dv'
+      cases h2
+      obtain ⟨h3, e3⟩ := ih.a args hsz.2.2 da da'
+      cases h3
+      rw [hf] at hf'; cases hf'
+      rw [hs] at hs'; cases hs'
+      refine ⟨rfl, ?_⟩
+      simp only [Typed.toR]
+      rw [eq_of_heq e1, eq_of_heq e2, eq_of_heq e3]
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
