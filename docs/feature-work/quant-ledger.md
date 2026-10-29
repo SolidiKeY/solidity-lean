@@ -366,3 +366,17 @@ and `twoAnchorNegative_refuted` repair remain unchanged. No gate, budget,
 observation, invariant or target predicate changed, and no `sorry` or axiom
 was added. Combined validation and runtime execution remain for the coordinator;
 this follow-up ran no build or runtime runner and made no commit.
+
+The attempt-7 finder also identified an inferred `hy` in
+`DecisionQuantLedger.original_valid`. It now explicitly states
+`(some false : Option Bool) = some true`, the zero instance of the unchanged
+antecedent. Local read-only finder and skeptic passes confirmed that both
+QuantLedger files have concrete types on every proof `have`, and that erasing
+this annotation restores the previous example exactly. Separate review-agent
+launch was again unavailable because its thread context could not be loaded.
+The core annotations, dispatcher and shared-countermodel theorem are unchanged.
+Per-file MCP error diagnostics for the edited example returned no errors but
+remained partial with lines 3–101 still elaborating; the hover request timed
+out after 300 seconds. This is not a passing Lean check. Annotation-erasure,
+the complete `have` sweep and diff whitespace checks passed. The coordinator
+must retain the pending Lean and combined-validation gates.

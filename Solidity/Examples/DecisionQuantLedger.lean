@@ -53,7 +53,7 @@ theorem original_covered : gapQuantLedger.Covered = true := by decide +kernel
 antecedent, independently of every ledger observation. -/
 theorem original_valid : Fml.Valid gapQuantLedger := by
   intro σ h
-  have hy := h (uintOfNat 0)
+  have hy : (some false : Option Bool) = some true := h (uintOfNat 0)
   cases hy
 /-- The exact verdict of the original pin, proved in the kernel. -/
 theorem original_proved : decideLeaf gapQuantLedger = .proved :=
