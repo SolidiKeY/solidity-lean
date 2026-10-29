@@ -24,5 +24,5 @@ while depth:
 Path(sys.argv[2]).write_text('#include "lean/lean.h"\nlean_object* memset_zero(size_t);\n' + src[start:end] + '\n')
 PYABI
 "${CC:-cc}" -shared -fPIC -I"$(lean --print-prefix)/include" tests/memory-zeroes.c .lake/build/memory-observe/memory-abi.c -o .lake/build/memory-observe/libmemory-zeroes.so
-lake build SolidityBridge.ExternalEvm.MemoryRefinement
+lake build SolidityBridge.ExternalEvm.MemoryRefinement SolidityBridge.ExternalEvm.MemoryComposition
 exec lake env lean -j1 --tstack=131072 --load-dynlib=.lake/build/memory-observe/libmemory-zeroes.so --run tests/MemoryObserve.lean

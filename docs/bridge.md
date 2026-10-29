@@ -508,6 +508,36 @@ reviews found no remaining proof obligation within this explicitly conditional,
 preallocated fragment; the conflicting present-tense documentation-debt count
 was corrected.
 
+A subsequent whole-scope review identified a weakness in the controls: the
+original zero-filled neighbor could not detect accidental zeroing, and the
+explicit composed witness covered only fixed store/fixed load.
+`Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean` now provides a pure,
+allocator-independent two-cell initializer for arbitrary words and proves all
+four fixed/dynamic store/load compositions against the actual core runner and
+upstream evaluator runner. Dynamic source reads include an actual index PUSH;
+no stack is injected between the store and load. The theorem retains the
+persistent byte relation, exact value and arbitrary stack tail, and the other
+cell's specified original value. The allocator hypothesis remains explicit and
+unproved; neither the populated initializer nor native execution proves it.
+Eight additional native cases use distinct nonzero initial cells, zero and
+maximum-word writes, and the sentinel tail `[7, 9]`, checking the neighbor's
+bytes as well as its read. All original controls and expected values remain.
+The new module checked in 5 seconds at 360,980,480 bytes peak; the native group
+passed in 10 seconds at 488,419,328 bytes, with 12 GiB/no-swap limits and no
+limit or OOM events. Five new guarded audits report only `propext`,
+`Classical.choice` and `Quot.sound`, bringing the explicit audit total to 36.
+
+The populated-composition final group passed affected targets, all 36 explicit
+axiom audits, native controls, complete TestSuite/static checks, orphan/layer,
+strict automatic and trust gates. It took 19 seconds at 279,638,016 bytes peak,
+with no memory-limit or OOM events. Its documentation-path check remains red
+with exactly the previous finding set (46 missing, 16 ambiguous). Independent
+read-only finder and skeptic reviews confirmed the two control gaps above are
+repaired and found no further independent obligation within this bounded
+conditional memory fragment. Neither used a Lean server. Published master
+`cc155f36` has no relevant Bridge, source-syntax or core-run changes relative
+to the validation base; the shared Widths prerequisite remains unpublished.
+
 The refreshed published base has additional historical documentation debt:
 the checker fails with 46 missing and 16 ambiguous references. A read-only
 reconstruction against exactly `127c2ee5` yields the identical finding set;
@@ -515,14 +545,14 @@ this task introduces and resolves none. The earlier 20-missing result belongs
 to the pre-refresh base and remains recorded in its logs.
 
 Full optional acceptance remains **BLOCKED** on the designated storage-slots
-owner's Widths repair. Fresh `origin/master` at `78daf24c` still has the same
+owner's Widths repair. Fresh `origin/master` at `cc155f36` still has the same
 Widths source and synthesis definitions implicated by these errors. No
 unpublished work was imported and this task does not duplicate that repair.
 
 The earlier checkpoint commit `200153d3` and its exports are retained. Its
 full optional gate failed in unchanged `Arith/Widths.lean` source-synthesis
 proofs; the designated storage-slots task owns that narrow prerequisite
-repair. At fresh master `78daf24c` it was still not merged. This is a separate
+repair. At fresh master `cc155f36` it was still not merged. This is a separate
 integration dependency, not a passing full gate.
 
 This optional refinement admits no raw-memory/assembly Solidity source shape,

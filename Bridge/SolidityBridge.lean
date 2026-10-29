@@ -27,3 +27,4 @@ import SolidityBridge.ExternalEvm.StackOps
 import SolidityBridge.ExternalEvm.Obstructions
 import SolidityBridge.ExternalEvm.Memory
 import SolidityBridge.ExternalEvm.MemoryRefinement
+import SolidityBridge.ExternalEvm.MemoryComposition

@@ -1,4 +1,4 @@
-import SolidityBridge.ExternalEvm.MemoryRefinement
+import SolidityBridge.ExternalEvm.MemoryComposition
 
 /-! Native observations against the exact pinned upstream zero allocator.
 Run through scripts/check-external-memory.sh. This is separate from the kernel
@@ -33,6 +33,36 @@ private def one (dynamic : Bool) (i : Nat) (v : EvmYul.UInt256) : IO Unit := do
     | _, _ => throw (IO.userError "unexpected load outcome")
   | _, _ => throw (IO.userError "unexpected store outcome")
 
+/-- A real concatenated program, including PUSH-index for dynamic reads, on
+nonzero initial cells and a nonempty stack tail. Existing zero controls remain. -/
+private def populated (storeDynamic loadDynamic : Bool) (i : Fin 2) : IO Unit := do
+  let lo := EvmYul.UInt256.ofNat 17
+  let hi := EvmYul.UInt256.ofNat (2^255 + 3)
+  let v := EvmYul.UInt256.ofNat (if i.val = 0 then 0 else EvmYul.UInt256.size - 1)
+  let tail := [EvmYul.UInt256.ofNat 7, .ofNat 9]
+  let input := storeInput storeDynamic i v tail
+  let cm := {(populatedCore lo hi) with stack := words input}
+  let es := {(populatedState lo hi) with stack := input}
+  let other := 1 - i.val
+  let expectedOther := if other = 0 then lo else hi
+  require (expectedOther.toNat != 0 && es.toMachineState.lookupMemory (address other) == expectedOther)
+    "populated initial neighbor is not the expected nonzero word"
+  match Solidity.Evm.run (memoryInstructions storeDynamic loadDynamic i) cm,
+      run (memoryOperations storeDynamic loadDynamic i) es with
+  | .ok cm' 0, .ok es' =>
+    require (cm'.stack == .val (wmod v.toNat) :: words tail && cm'.stack == words es'.stack)
+      "populated composed readback or sentinel tail mismatch"
+    require (cm'.mem other == .val (wmod expectedOther.toNat) &&
+      es'.toMachineState.lookupMemory (address other) == expectedOther)
+      "populated nonzero neighbor read frame mismatch"
+    require (es'.memory.readWithPadding (32 * other) 32 == encoding expectedOther)
+      "populated nonzero neighbor byte frame mismatch"
+    require (es'.memory.readWithPadding (32 * i.val) 32 == encoding v &&
+      es'.memory.size == 64 && es'.activeWords.toNat == 2)
+      "populated final encoding or extent mismatch"
+    IO.println s!"populated storeDynamic={storeDynamic} loadDynamic={loadDynamic} cell={i.val} value={v.toNat} neighbor={expectedOther.toNat} core={cm'.stack} upstream={es'.stack} sourceIndexPush={loadDynamic}"
+  | _, _ => throw (IO.userError "populated composed program failed")
+
 def main : IO Unit := do
   for n in List.range 33 do
     let bytes := ffi.ByteArray.zeroes (USize.ofNat n)
@@ -53,3 +83,7 @@ def main : IO Unit := do
   | .error .StackUnderflow, .error .StackUnderflow => pure ()
   | _, _ => throw (IO.userError "underflow mismatch")
   IO.println "memory observations: 28 core/upstream store-load pairs, 33 allocator samples, 6 boundary/negative observations passed; PaddingCorrect remains an explicit unproved contract"
+  for storeDynamic in [false, true] do
+    for loadDynamic in [false, true] do
+      for i in [(0 : Fin 2), 1] do populated storeDynamic loadDynamic i
+  IO.println "populated memory observations: 8 composed mode/cell cases with nonzero neighbors, sentinel tails and actual PUSH-index passed"
