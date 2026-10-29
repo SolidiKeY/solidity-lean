@@ -274,6 +274,8 @@ S04.01–S04.03 status (2026-10-29): [source-s04-state.md](feature-work/source-s
 | G14 | Check inheritance linearization, overrides, modifier binding, constructor order, library/using-for resolution and callable identities; prove resolution against the independent source definitions. |
 | G15 | Complete admission extraction over all execution roots and observations; prove exact profile classification and coverage. Prove the existing solc-JSON import agrees with certified source, or route the public compiler through the checked frontend. |
 
+G12 status (2026-10-29, lane-static): [frontend-static.md](feature-work/frontend-static.md#g12-imports-identities-scopes-and-overloads). Multi-unit programs over S00 syntax with solc's path resolution and remappings, declaration identities, the file-level scope across imports as a least fixpoint (`Sees`), the judgment `UnitsOK` (imports and imported symbols found, no clash) decided by a resolver proved sound and complete (`globals_sound`, `globals_complete`, `unitsOK_iff`) and conservative over S01's lookup; overload sets across bases (`InheritedFn`, `mem_inheritedFns`) and overload selection. Typing across units and S01's use of the merged overloads are handoffs to lane-semantics.
+
 G11 may link against G08–G10 certificate interfaces during parallel development;
 its integrated whole-parser check runs after their implementations merge. The
 same rule applies to later composition groups: an interface is not a completed
@@ -516,7 +518,7 @@ several groups (noted per row); a lane starts by reading those results.
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
 | V04 | S02, S03, S04.04, S05 | V03 | — |
 | V05 | G08, G09, G10, G11 | V04 | — |
-| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). |
+| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). lane-static: G12 done. |
 | V07 | G16, G17, G18, G19 | V06 | — |
 | V08 | G20, G21, G22, G23 | V07 | — |
 | V09 | G24, G25, G26, G31 | V08 | G24's foundation children come from G03; G31's precompile and stipend parts are prepared (`Solidity/Precompiles/`, `Solidity/Stipend/Rule.lean`). |

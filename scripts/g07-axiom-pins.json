@@ -1456,6 +1456,75 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.globals_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.globals_lookup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.globals_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.iter_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.lookup_sub_globals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.lookup_sub_inheritedFns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.mem_inheritedFns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.ambiguous_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.clash_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.crossBase_merged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.cycle_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.fnEvent_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.missingSym_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.unitsOK_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/Adaptive.lean:Solidity.Hash.eagerAdaptiveBound": [
   "Classical.choice",
   "Quot.sound",

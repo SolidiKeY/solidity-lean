@@ -34,6 +34,8 @@ import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.Tactics.Rigid
 import Solidity.Roadmap.Controls
 import Solidity.Source.TypingExamples
+import Solidity.Frontend.Static.UnitsExamples
+import Solidity.Frontend.Static.Certificates
 import Solidity.Source.StateExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
@@ -710,3 +712,44 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} source-state theorems use only the standard axioms"
+
+/-! Roadmap G12: the import resolver, declaration identities and overloads
+across bases (`Solidity/Frontend/Static/`, `docs/feature-work/frontend-static.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.iter_sound,
+    ``Solidity.Frontend.Static.iter_complete,
+    ``Solidity.Frontend.Static.globals_sound,
+    ``Solidity.Frontend.Static.globals_complete,
+    ``Solidity.Frontend.Static.unitsOK_iff,
+    ``Solidity.Frontend.Static.globals_lookup,
+    ``Solidity.Source.Sees.decl_exists,
+    ``Solidity.Frontend.Static.mem_inheritedFns,
+    ``Solidity.Frontend.Static.lookup_sub_inheritedFns,
+    ``Solidity.Frontend.Static.selectOverload_unique,
+    ``Solidity.Frontend.Static.unitsChecker_complete,
+    ``Solidity.Frontend.Static.UnitsExamples.cycle_resolves,
+    ``Solidity.Frontend.Static.UnitsExamples.cycle_ok,
+    ``Solidity.Frontend.Static.UnitsExamples.diamond_one_identity,
+    ``Solidity.Frontend.Static.UnitsExamples.clash_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.missing_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.alias_hides_original,
+    ``Solidity.Frontend.Static.UnitsExamples.shadowed_member,
+    ``Solidity.Frontend.Static.UnitsExamples.ambiguous_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.exact_selected,
+    ``Solidity.Frontend.Static.UnitsExamples.crossBase_merged,
+    ``Solidity.Frontend.Static.UnitsExamples.override_hides,
+    ``Solidity.Frontend.Static.lookup_sub_globals,
+    ``Solidity.Frontend.Static.UnitsExamples.missingSym_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.aliasCycle_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.fnEvent_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.freeOverloads_ok,
+    ``Solidity.Frontend.Static.UnitsExamples.namespace_binds]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} G12 resolver theorems use only the standard axioms"

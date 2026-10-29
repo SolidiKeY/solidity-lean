@@ -419,6 +419,8 @@ import Solidity.Source.State
 import Solidity.Source.Observe
 import Solidity.Source.World
 import Solidity.Source.StateExamples
+import Solidity.Source.Units
+import Solidity.Source.Overloads
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic
@@ -598,6 +600,11 @@ import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
 import Solidity.Frontend.Testing
 import Solidity.Frontend.Cli
+import Solidity.Frontend.Static.Closure
+import Solidity.Frontend.Static.Units
+import Solidity.Frontend.Static.Overloads
+import Solidity.Frontend.Static.UnitsExamples
+import Solidity.Frontend.Static.Certificates
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.ScopedFlip
 import Solidity.Tools.LatexTerm
