@@ -120,7 +120,7 @@ Headline axiom sets are pinned with `#guard_msgs`: only `propext` and
 `Quot.sound`; no new axiom, recovery hook or proof-budget override.
 The final CLI checks supplement the focused module build because no MCP exists.
 Independent review summaries are saved in `cp1-reviews.md` in the evidence
-directory. Checkpoints 2–4 and final closure validation remain outstanding.
+directory. At checkpoint 1, checkpoints 2–4 and final closure validation were still outstanding; their later results are recorded below.
 
 ## Checkpoint 2 and backfill A handoff
 
@@ -257,7 +257,7 @@ projections, their mutation journal and real frame boundaries remains open.
 `finish_rel`, functionality, snapshot projections, idempotence, outer rollback
 dominance and success-after-inner-rollback are proved without emitter imports.
 
-`Unwind.execute` first runs the actual checked instruction slice and captures
+`Local.execute` first runs the actual checked instruction slice and captures
 its Outcome, then applies those rules. `execute_emitter` and
 `execute_checkpoint` compose both results. `execute_failure` restores the
 named P and T snapshots and the caller's entire machine, while retaining the
@@ -348,5 +348,91 @@ references. Both independent final reviews cleared source/proofs/replay and
 verified saved source/vector/provenance hashes. Their wording fixes (module
 versus namespace, and offset-zero marker applicability) were applied.
 Review record: `backfill-reviews.md`. All assigned implementation/backfill
-items are now covered; final full/import-closure validation and committed
-final handoff remain pending, so this is not whole-assignment completion.
+items were covered at this checkpoint; final full/import-closure validation
+and committed final handoff were still pending then. Their completed results
+are recorded in the final section below.
+
+
+## Final assignment handoff
+
+All four component checkpoints and backfills A/B are complete against the
+assigned base. This completes this preparation lane only. No global manifest,
+coverage verdict, source semantics, Evm implementation, approved profile,
+refusal or target predicate was changed. Whole source-to-bytecode composition,
+gas/memory-expansion correspondence, generic byte-memory integration, general
+return ABI encoding and real call/world/catch rollback remain open integration
+obligations with G37/G42/G47 and the prerequisite owners.
+
+Committed checkpoints (full hashes):
+
+| Item | Commit |
+|---|---|
+| 1 | `af931bab70fbf1babd753ca9880f6427348b0e52` |
+| 2 and A | `4cb5d0aff8b4e71e2de0726869bb408a69b4719b` |
+| 3 | `5a0af45cac74d2003afdf6e8b42618b86373f123` |
+| 4 | `43e72020157130cf982e5158a5e992f5416ab392` |
+| B and external vectors | `24f0937d7e61cbc8f9ee02d6c7fe235829a51c0b` |
+
+The final documentation commit and full committed head are recorded in the
+external absolute-path HANDOFF.md after committing this section; no empty
+result-marker commit is needed. The component's exact current source anchors
+are Run.lean THalt:58, THalt.ofData:70, require:799, assert:803,
+RevPart.evalT:936 and TRun.revertData:948; Roadmap/Contracts.lean Outcome:367;
+RevertBytes.lean selectorBytes:33, encodeError:50 and encodePanic:54.
+The earlier sections give the theorem names and premises. In particular,
+`checkedRun_emit_suffix` needs `Fits` and two free operand-stack slots;
+`intrinsic_emission` additionally needs the existing intrinsic result's
+`inputOfResult` equation, and `Local.nested_failure` needs both emitted slices'
+address/stack side conditions. CheckpointRel is independently stated over
+separately typed persistent/transient snapshots; it is not a theorem about
+whole Solidity worlds. No small fixed payload bound appears in the arbitrary
+write/chunk/frame/composition theorems.
+
+Final commands run in the saved offline runner with actual Lean4.24.0,
+Lake5.0.0-src+797c613, LEAN_NUM_THREADS=1, explicit -j1 and the real12 GiB
+aggregate/no-swap cap. The saved alternate lakefile adds only -j1 to weak Lean
+arguments; the private toolchain wrapper serializes actual Lean processes.
+It changes no proof or test budget. The package remains dependency-free.
+
+| Final gate command | Actual result / decisive evidence |
+|---|---|
+| `./run-lean.sh` through `run-capped.sh` | Pass, exit0,9734s. Default build:765 jobs; SolkeyTestSuite:262 jobs; `solkeycheck: parsed 377 taclets, 131 read-bearing, table covers 131`; `solkeycheck: OK — annotations match /reference-solkey.key`. Peak sampled aggregate RSS11,276,044 KiB; cgroup peak12,884,901,888 B, cap12 GiB, swap.max0. `final-run-lean-recovered.log`. Derived17 actually passed157s; no historical OOM or37 mismatches were waived. |
+| For each of14 owned modules, Solidity.lean and tests/failure-emission/Export.lean: `lake -f .failure-emission.lakefile.toml env lean -j1 --tstack=131072 <file>` | All16 passed, no warning/error diagnostics, exit0,18s; RSS1,390,996 KiB, cgroup peak1,852,895,232 B; `final-diagnostics-materialized.log`. Guarded headline axiom pins passed, using only standard propext/Quot.sound/Classical.choice where applicable, no new axiom. |
+| `node scripts/check-layers.mjs` | Pass:168 core modules,0 reach elaborator; `final-layers.log`. |
+| `node tests/failure-emission/check-imports.mjs` | Pass:14 modules,0 import/independence findings; `final-imports.log`. |
+| `node scripts/check-orphans.mjs` | Pass:780 reachable,0 orphaned,0 not allowed; `final-orphans.log`. |
+| `bash scripts/check-trust.sh` | Pass:795 sources,241 inventoried implementation/recovery sites,0 findings; `final-trust.log`. |
+| `bash scripts/check-doc-paths.sh`, final and untouched exact base | Raw checker fails exit1 on46 missing references on both. Outputs byte-identical: no-new-findings gate passes. `final-docs.log`, `final-base-docs.log`, `final-static.json`. The raw inherited failure is not called a pass. |
+| Fresh Export.lean JSON versus committed vectors.json | Pass:all12 exact vector objects identical; `final-static.json`. |
+
+The first final direct sweep passed all14 owned files but failed at the root
+because Lake's synthetic cache traces did not materialize11 import .olean files.
+Those exact current trace-selected artifacts were materialized from the private
+source/toolchain-keyed cache, with hashes recorded in
+`materialized-final-artifacts.json`; the complete16-file repeat then passed.
+`final-diagnostics.log` remains a failed attempt, not relabeled green.
+
+Polling/environment interruptions left the Docker build alive but cleaned up
+its host log/lock clients. No source writes or other heavy checks occurred in
+those intervals. The same container's complete log was recovered, its initial
+bytes matched the original log exactly, and a foreground canonical writer-lock
+and log client was reattached. No build step was restarted or skipped. Actual
+container limits and serial compiler execution remained in force throughout.
+The original partial log and lock-guard attempt are retained as evidence.
+
+Final independent finder/skeptic audits used no Lean server or builds and
+found no further implementation/control/ownership blocker. Finder's namespace
+and historical-status wording corrections are fixed here; its fresh Emit
+check request is satisfied by the complete final sweep. Every checkpoint's
+review findings/fixes remain in its saved review record. Final review follow-up
+and exact ownership/source-hash audits are saved with the external handoff.
+
+Absolute saved artifact locations:
+`/workspace/scratch/failure-emission-artifacts/original.patch`,
+`/workspace/scratch/failure-emission-artifacts/HANDOFF.md`,
+`/workspace/scratch/failure-emission-evidence`, and
+`/workspace/scratch/failure-emission-artifacts/SHA256SUMS`.
+The evidence archive excludes private caches, node_modules and toolchain
+symlinks; those caches remain on this VM for reuse. The external handoff records
+actual final head, observed elapsed interval, final review results and checksums.
+No scope question is outstanding. No push, merge or PR was performed.
