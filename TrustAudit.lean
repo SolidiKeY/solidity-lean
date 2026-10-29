@@ -32,6 +32,9 @@ import Solidity.Examples.Tactics.OpenLoops
 import Solidity.Examples.Tactics.ComputedRevert
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.Tactics.Rigid
+import Solidity.Roadmap.Controls
+import Solidity.Source.TypingExamples
+import Solidity.Source.StateExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -588,3 +591,122 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} headline theorems use only the standard axioms"
+
+/-! Roadmap G07: the inhabited and negative controls of the G01 contracts
+(`Solidity/Roadmap/Controls.lean`, `docs/feature-work/roadmap-g07-gates.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Roadmap.PublicCorrectness.transfer,
+    ``Solidity.Roadmap.PublicCorrectness.not_alwaysRevert,
+    ``Solidity.Roadmap.PublicCorrectness.observes,
+    ``Solidity.Roadmap.PublicCorrectness.rejects,
+    ``Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse,
+    ``Solidity.Roadmap.Admission.rejects,
+    ``Solidity.Roadmap.Controls.toy_publicCorrectness,
+    ``Solidity.Roadmap.Controls.toySource_nonVacuous,
+    ``Solidity.Roadmap.Controls.toySource_approved,
+    ``Solidity.Roadmap.Controls.toyEvm_approved,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler,
+    ``Solidity.Roadmap.Controls.not_admission_sloppy,
+    ``Solidity.Roadmap.Controls.not_nonVacuous_emptySource,
+    ``Solidity.Roadmap.PublicCorrectness.observedBySource,
+    ``Solidity.Roadmap.SourceSpec.NonVacuous.admits,
+    ``Solidity.Roadmap.HashPremise.not_of_rootSlots,
+    ``Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler,
+    ``Solidity.Roadmap.Fixed.Sane.rootSlots_lt,
+    ``Solidity.Roadmap.Controls.toyFixed_keccak]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} roadmap control theorems use only the standard axioms"
+
+/-! Roadmap S00/S01: the source syntax, its rejection and mapping, and static
+typing (`Solidity/Source/`, `docs/feature-work/source-s00-s01.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Ctor.mem_all,
+    ``Solidity.Source.Syn.nodes_eq,
+    ``Solidity.Source.Syn.rejections_of_sub,
+    ``Solidity.Source.Syn.rejections_witnessed,
+    ``Solidity.Source.Syn.excl_ctor,
+    ``Solidity.Source.Excl.mapped,
+    ``Solidity.Source.Ctor.grammar_covers,
+    ``Solidity.Source.Syn.decls_ctor,
+    ``Solidity.Source.Examples.no_break_outside_loop,
+    ``Solidity.Source.Examples.no_nested_unchecked,
+    ``Solidity.Source.implicit_int_range,
+    ``Solidity.Source.FixTy.subsumes_inRange,
+    ``Solidity.Source.Q.toFixedExplicit?_of_toFixed?,
+    ``Solidity.Source.resolve_iff,
+    ``Solidity.Source.Resolves.unique,
+    ``Solidity.Source.StmtD.locals_suffix,
+    ``Solidity.Source.HasType.resolved,
+    ``Solidity.Source.ItemsOK.resolved,
+    ``Solidity.Source.TypingExamples.shl18_folded,
+    ``Solidity.Source.TypingExamples.shlTooBig_illTyped,
+    ``Solidity.Source.TypingExamples.bareReturn_refused,
+    ``Solidity.Source.TypingExamples.twoCtors_illFormed,
+    ``Solidity.Source.TypingExamples.noVisibility_illFormed,
+    ``Solidity.Source.TypingExamples.exprCoverage_total,
+    ``Solidity.Source.TypingExamples.stmtCoverage_total,
+    ``Solidity.Source.TypingExamples.msgValue_refused,
+    ``Solidity.Source.TypingExamples.sameSig_illFormed,
+    ``Solidity.Source.TypingExamples.ifaceBody_illFormed,
+    ``Solidity.Source.TypingExamples.unknownPragma_illFormed,
+    ``Solidity.Source.TypingExamples.exprCoverage_typed,
+    ``Solidity.Source.TypingExamples.counter_wellFormed,
+    ``Solidity.Source.TypingExamples.tooBig_illTyped,
+    ``Solidity.Source.TypingExamples.clashing_illFormed,
+    ``Solidity.Source.TypingExamples.gasleft_untyped]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-definition theorems use only the standard axioms"
+
+/-! Roadmap S04.01–S04.03: source state, observations and world
+(`Solidity/Source/{State,Observe,World}.lean`,
+`docs/feature-work/source-s04-state.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Heap.copy_get,
+    ``Solidity.Source.Heap.copy_independent,
+    ``Solidity.Source.Heap.write_get,
+    ``Solidity.Source.Heap.write_ty,
+    ``Solidity.Source.Storage.write_read,
+    ``Solidity.Source.Storage.set_restore,
+    ``Solidity.Source.wordBytes_value,
+    ``Solidity.Source.Val.word_int,
+    ``Solidity.Source.readInt_reject,
+    ``Solidity.Source.panicData_code,
+    ``Solidity.Source.panic_distinct,
+    ``Solidity.Source.ExecState.undoN_run,
+    ``Solidity.Source.rollback_run,
+    ``Solidity.Source.rollback_inner,
+    ``Solidity.Source.rollback_outer_after_commit,
+    ``Solidity.Source.rollback_transfer,
+    ``Solidity.Source.transfer_none_iff,
+    ``Solidity.Source.StateExamples.alias_seen,
+    ``Solidity.Source.StateExamples.revert_undoes,
+    ``Solidity.Source.StateExamples.transfers]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-state theorems use only the standard axioms"

@@ -569,9 +569,31 @@ Commands for people; they prove nothing beyond the certificates they check.
 | Module | What it defines |
 |---|---|
 | `Roadmap/Contracts.lean` | Roadmap G01: the six final source-to-bytecode contracts, observations, resourced prefix families and compositional pass certificates as statements only (`Cert.comp`, `PublicCorrectness`); no final theorem is claimed ([roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md)). |
-| `Roadmap/TypedRun.lean` | `typedRunPrefixes`: the fuelled typed run (`Prog.runF`) read as a G01 prefix family, kept apart from `Roadmap/Contracts.lean` so that a source semantics importing the contracts does not reach the intrinsic run. |
 | `Roadmap/Frontend.lean` | Roadmap G05: checked frontend certificate interfaces as statements only: raw input, parse, resolution and metadata checkers (`Chain.checked`), digests as identity (`Digests.identity`, `Digests.only_invariant`), admitted settings: solc's two pipelines (three order/coder pairs) and the empty link map ([roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md)). |
 | `Roadmap/Evm.lean` | Roadmap G06: the pinned Osaka EVM interface as statements only: the pin and its idealizations (`pinned`), the Osaka precompile table, the shared fixed functions with the per-run hash premise and `CREATE` addresses (`Fixed`), resources as gas schedules, fuel and source failure points (`GasRes`, `FailurePoints`), frame observation (`Halt.observe`) and the core/Bridge `Certificate` ([roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md)). |
+| `Roadmap/TypedRun.lean` | `typedRunPrefixes`: the fuelled typed run (`Prog.runF`) read as a G01 prefix family, kept apart from `Roadmap/Contracts.lean` so that a source semantics importing the contracts does not reach the intrinsic run. |
+| `Roadmap/Controls.lean` | Roadmap G07: inhabited and negative controls for the G01 contracts: a toy source, intrinsic layer, EVM and compiler meeting `PublicCorrectness` (`toy_publicCorrectness`), and refutations of an always-reverting, a byte-altering, a data-erasing and a malformed-source-accepting compiler; `PublicCorrectness.observes`, `PublicCorrectness.rejects`, `SourceSpec.not_nonVacuous_of_no_parse`. |
+
+## Independent source definitions
+
+| Module | What it defines |
+|---|---|
+| `Source/Syntax.lean` | S00: the pinned solc 0.8.38 grammar as intrinsic syntax `Syn : Cat → Type`, indexed by category and by statement context (`SCtx`: loop, `unchecked`), excluded syntax (assembly/Yul, `layout at`, `>>>`, `years`) included. |
+| `Source/Ctor.lean` | S00: the constructor index `Ctor` (`Ctor.mem_all`), `Syn.nodes`/`Syn.children`, the syntax-level exclusions `Excl` and precise rejection (`Syn.rejections_of_sub`). |
+| `Source/Upstream.lean` | S00: the explicit mapping from grammar rules/labels and manifest features to constructors (`grammarCtors`, `featureCtors`; `Ctor.grammar_covers`), checked by `scripts/check-source-grammar.mjs`. |
+| `Source/Decls.lean` | S00: the typed declaration graph (`Decl`, `Syn.decls`, `Decl.refs`, `Syn.decls_ctor`). |
+| `Source/Examples.lean` | S00 controls: an in-profile counter and rejected assembly, `layout at`, `>>>` and `years` programs. |
+| `Source/Const.lean` | S01: compile-time constants: exact rationals `Q`, literal values and units, `Syn.const` (folding `+ - * / % **`, shifts and two's-complement bitwise operations), the implicit and explicit conversions of constants to integer and fixed-point types. |
+| `Source/Types.lean` | S01: static types `STy`, elaboration of elementary types, implicit and explicit conversions (fixed point per the second-round decisions) with `implicit_int_range` and `FixTy.subsumes_inRange`. |
+| `Source/Resolve.lean` | S01: name resolution: C3 linearization, scoped lookup, builtins classified against the profile (`Builtin.status`, member and call-option status), the `Resolves` judgment with `resolve_iff` and `Resolves.unique`. |
+| `Source/Typing.lean` | S01: type-name elaboration (`Syn.tys`), typing contexts, expression typing as data (`Typed`, `HasType`) and statement typing in a fixed body context (`StmtD`/`ItemsD`, `StmtOK`/`ItemsOK`). |
+| `Source/Resolved.lean` | S01: the intrinsic resolved form (`RExpr`/`RStmt` over local types, de Bruijn `Idx`, explicit implicit-conversion evidence) and the elaboration of derivations into it (`Typed.toR`, `StmtD.toR`). |
+| `Source/WellFormed.lean` | S01: settings over solc's two pipelines (`Settings.coder`), resolutions, body frames (`Decl.frame?`), and well-formedness of a resolved unit (bases, clashes and overloads, pragmas, declared types, placement, constants, bodies). |
+| `Source/TypingExamples.lean` | S01 controls: a derivation per typed expression constructor (`exprCoverage_typed`, `exprCoverage_total`, `stmtCoverage_total`), the counter well formed, C3 on a diamond, refuted ill-typed, `msg.value`, clashing, same-signature, interface-body and unknown-pragma programs. |
+| `Source/State.lean` | S04.01: source values `Val` over a declaration `Layout` (ranges, enum bounds and reference locations intrinsic), contents `Data` (recursive aggregates, content-keyed mappings), typed `memory` (`Heap`, copy and alias laws), read-only `Calldata`, `Storage` typed by its layout, defaults. |
+| `Source/Observe.lean` | S04.02: ABI words and bytes of values (`Val.word`, `Val.word_int`), selectors, `Panic`/`Error` revert data (`panicData_code`, `panic_distinct`) and `revertOutcome`. |
+| `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
+| `Source/StateExamples.lean` | S04.01–S04.03 controls: nested memory aliasing, an independent memory copy, storage round trips, distinct panic outcomes, transfers, a reverted call undoing its writes. |
 
 ## Precompiles
 
