@@ -98,18 +98,58 @@ nothing and makes no allocator-preservation claim.
 children and a two-element parent. Indexed rebinding changes an existing local,
 parent redirection leaves its old alias intact, and old/new child writes yield
 matching source/machine observations. Three bounds controls, a corrupt-pointer
-refutation, and explicit allocation/default/fixed-index refusals are checked by
+refutation, and explicit allocation/default refusals and positive fixed-index registration are checked by
 the kernel. The new theorem and witness names are in the enforcing axiom audit.
 Independent read-only finder and skeptic reviews found no soundness defect;
 their requests for observable rebinding, refusal controls and enforced witness
 auditing were incorporated.
 
-This is **not completion of the reference-array assignment**: allocation and
-default construction, allocator live-interval preservation, fixed-array layouts
-and compilation, broader statement composition, and source-fixture pipeline
-validation remain work in this lane. Existing source semantics already construct
-ordinary nested-array defaults; there is no claimed dependency on the recursive
-or reference-bearing struct lanes. No source-coverage inventory row is promoted.
+**Complete object ownership and fixed-array checkpoint.** A further public
+fallback, `Memory.Objects.compileProg` (`Compilation.isObject`), accepts
+headerless fixed-array indexing as well as dynamic indexing. Its additive
+`Objects.StateRepr` requires positive, pairwise disjoint reservations for every
+actual typed heap object, typed primitive/child-pointer element words, pointer
+locals, primitive struct fields and `RefFieldsRepr`. Existing compiler input
+relations retain their earlier premises. Fixed bounds come from the source type;
+a model bound at least `2^256` is handled without wrapping it into a zero word.
+Indices remain core-fragment values. Primitive value reads compose with existing
+checked operators; linear local assignments/declarations and alias declarations
+are supported alongside indexed writes and rebinding. No loops or calls are
+admitted by this path.
+
+Successful object programs preserve a supplied **complete** allocator, whose live
+intervals include reference arrays, fixed arrays, and even empty objects. The
+public input/output helpers expose these assumptions without reducing a computed
+compiler certificate. Both `Evm/MemoryObjectArrayExamples.lean` and
+`Evm/MemoryFixedChildArrayExamples.lean` inhabit the state and allocator premises,
+instantiate public allocator preservation, and check source/machine observations
+for retained aliases, value reads, alias declarations and three bounds failures.
+An overlapping cursor and a corrupt child pointer are rejected. The generic
+adoption theorem preserves old typed child identities across heap growth.
+`Objects.defaultEmpty_correct` additionally relates the actual source default
+copy to empty-array allocation and complete allocator preservation. A populated
+input instantiates it with source/machine observations `[40,32,24,0,9]` and
+advances the cursor from 40 to 41; **public
+allocation compilation is still refused** at this checkpoint.
+
+`tests/memory-reference-arrays/ReferenceArrays.sol` and
+`scripts/check-memory-reference-arrays.mjs` provide 32 independent solc 0.8.34 /
+EVM executions across legacy/viaIR and optimizer off/on: retained-alias results
+11013, distinct fixed defaults, and bounds panic `0x32`. Constructor setup and the
+distinct-default control are upstream observations, not claims that the checked
+compiler already accepts those constructors. The checked compiler's existing
+coarse revert observation remains unchanged. Run the script with the published
+soljson and an external node_modules directory containing the optional EVM test
+dependencies; these are not Lean dependencies.
+
+This is **not completion of the reference-array assignment**. Public allocation
+and default construction (especially nonempty distinct children), broader
+statement composition, and a populated reference-bearing-struct array input
+remain work in this lane. Existing source semantics already construct ordinary
+nested-array defaults; no external dependency blocks that work. Construction of
+reference-bearing structs retains its other-lane boundary. No source-coverage
+inventory row is promoted.
+
 Validation uses the published Lean 4.24.0 / Lake 5.0.0-src+797c613,
 `LEAN_NUM_THREADS=1`, explicit `-j1`, and verified 12 GiB/no-swap cgroups.
 The first `./run-lean.sh` passed 691 library and 259 TestSuite jobs and the
@@ -135,8 +175,7 @@ no speed-driven intrinsic representation decision was reversed. Full commands,
 terminal logs, hashes, measured cgroups and review outcomes are exported with
 the checkpoint handoff.
 
-**Out of the memory path**: reference-element array allocation/defaults and fixed
-reference-array paths, construction of structs
+**Out of the memory path**: reference-element array allocation/defaults, construction of structs
 with reference members, other reference-member default layouts, copies other
 than the primitive-member storage-root clause (including memory back to
 storage and runtime-length objects, which need iteration), loops, `assert`,
@@ -364,3 +403,25 @@ they do, so the proof needs no argument about it.
 is the slowest (the `decide +kernel` runs, the unrolled `**` code under a
 raised `maxRecDepth`); `Evm/Correct.lean`'s `stmt_sim` dispatches one lemma
 per family, held to `maxHeartbeats 11000`.
+
+The fixed-array increment checked its two inhabited public fixtures in 10.439 s /
+361,484,288 bytes aggregate peak, generic array adoption in 1.727 s /
+191,942,656 bytes, empty-default simulation in 2.172 s / 197,185,536 bytes,
+and the 32 upstream fixture runs in 2.568 s / 258,355,200 bytes. All used the
+same 12 GiB/no-swap bound with zero limit/OOM events. An initial optional npm
+installation stalled and was stopped (exit -15, **blocked**, not a pass); adding
+the documented proxy CA and explicit proxy routing completed the dependency
+installation in 5.201 s. Independent finder/skeptic reviews requested root/audit
+registration, fixed-child/read/alias witnesses and inhabited allocator
+preservation; those requests were incorporated. Full milestone gate evidence
+is exported separately from the immutable first-checkpoint logs.
+
+The full fixed-array milestone run passed 704 library jobs, 259 TestSuite jobs
+and the SolKey comparison in 129.035 s; its 598-headline axiom audit passed in
+94.160 s. The complete validation group took 231.556 s and peaked at
+2,976,473,088 bytes, with zero limit/OOM events. Orphan, layer, strict automatic,
+source-trust (733 sources, 240 inventoried sites, zero findings) and trust-script
+tests passed. The documentation-path output was byte-for-byte identical to the
+20 historical missing-reference failures recorded above; that gate remains
+failed. Adding the inhabited empty-default witness checked in 3.271 s /
+343,101,440 bytes before final confirmation.

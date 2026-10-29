@@ -363,6 +363,9 @@ import Solidity.Evm.MemoryStructAlloc
 import Solidity.Evm.MemoryStructGrow
 import Solidity.Evm.MemoryRefs
 import Solidity.Evm.MemoryRefArrayExamples
+import Solidity.Evm.MemoryObjectArrayExamples
+import Solidity.Evm.MemoryFixedChildArrayExamples
+import Solidity.Evm.MemoryObjectEmpty
 import Solidity.Evm.MemoryStructSource
 import Solidity.Evm.MemoryPaths
 import Solidity.Evm.MemoryRefWrite

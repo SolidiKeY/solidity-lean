@@ -229,9 +229,9 @@ private def fixedΓ : Ctx := [.mem childTy, .mem (.fixed (.ref childTy) 2)]
 private def fixedPath : MPath C fixedΓ (.ref childTy) :=
   .loc (.index .fixed (.var (.there .here) rfl) (.simple (.lit 0 rfl)))
 
-theorem fixed_index_refused :
+theorem fixed_index_supported :
     (Compiler.compile (C := C) 1 (Frag.init fixedΓ) (.cons
-      (.rebindMem .here (.alias fixedPath)) .nil)).isNone = true := by
+      (.rebindMem .here (.alias fixedPath)) .nil)).isSome = true := by
   decide +kernel
 
 end Solidity.Evm.Memory.RefArrayExamples

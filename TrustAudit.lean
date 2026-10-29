@@ -18,6 +18,9 @@ import Solidity.Evm.MemoryStructDefaultExamples
 import Solidity.Evm.MemoryStructCopyExamples
 import Solidity.Evm.MemoryPathExamples
 import Solidity.Evm.MemoryRefArrayExamples
+import Solidity.Evm.MemoryObjectArrayExamples
+import Solidity.Evm.MemoryFixedChildArrayExamples
+import Solidity.Evm.MemoryObjectEmpty
 import Solidity.Evm.MemoryAllocExamples
 import Solidity.Evm.MemoryAllocSourceExamples
 import Solidity.Evm.MemoryExamples
@@ -40,6 +43,65 @@ open Lean Elab Command
 
 run_cmd do
   let headlines : List Name := [
+    ``Solidity.Evm.Memory.ObjectArrayExamples.empty_default_simulation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.empty_source_observation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.empty_target_observation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.empty_cursor_advanced,
+
+    ``Solidity.Evm.Memory.Objects.emptyArray_copy,
+    ``Solidity.Evm.Memory.Objects.newEmptyArray_copy,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.allocateEmpty,
+    ``Solidity.Evm.Memory.Objects.defaultEmpty_correct,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.initial_repr,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.initial_allocator,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.allocator_preserved,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.allocator_overlap_refuted,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.compiled_input,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.source_observation,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.target_observation,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.failed_input,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.failed_agrees,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.source_bounds,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.target_bounds,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.read_input,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.read_agrees,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.source_read,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.target_read,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.alias_input,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.alias_agrees,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.source_alias,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.target_alias,
+
+    ``Solidity.Evm.Memory.Objects.Ownership.base_injective,
+    ``Solidity.Evm.Memory.Objects.ArrayRepr.read,
+    ``Solidity.Evm.Memory.Objects.ArrayRepr.write,
+    ``Solidity.Evm.Memory.Objects.HeapRepr.setArray,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.setArray,
+    ``Solidity.Evm.Memory.Objects.HeapRepr.adoptArray,
+    ``Solidity.Evm.Memory.Objects.ProgFrag.correct,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.initial_repr,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.initial_allocator,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.allocator_overlap_refuted,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.allocator_preserved,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.compiled_input,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.source_observation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.target_observation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.wrong_pointer_refuted,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.failed_input,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.failed_agrees,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.source_bounds,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.target_bounds,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.read_input,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.read_agrees,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.source_read,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.target_read,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.alias_input,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.alias_agrees,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.source_alias,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.target_alias,
+
     ``Solidity.Evm.Memory.RefArrayRepr.read,
     ``Solidity.Evm.Memory.RefArrayRepr.write,
     ``Solidity.Evm.Memory.ReferenceArrays.ProgFrag.correct,
@@ -56,7 +118,7 @@ run_cmd do
     ``Solidity.Evm.Memory.RefArrayExamples.target_bounds,
     ``Solidity.Evm.Memory.RefArrayExamples.allocation_refused,
     ``Solidity.Evm.Memory.RefArrayExamples.default_declaration_refused,
-    ``Solidity.Evm.Memory.RefArrayExamples.fixed_index_refused,
+    ``Solidity.Evm.Memory.RefArrayExamples.fixed_index_supported,
     ``Solidity.Evm.Memory.copiedFields_copy,
     ``Solidity.Evm.Memory.copiedStruct_alloc,
     ``Solidity.Evm.Memory.copiedFields_get,
@@ -595,3 +657,8 @@ run_cmd do
 #print axioms Solidity.Evm.Memory.ReferenceArrays.ProgFrag.correct
 #print axioms Solidity.Evm.Memory.RefArrayExamples.compiled_agrees
 #print axioms Solidity.Evm.Memory.RefArrayExamples.failed_agrees
+
+#print axioms Solidity.Evm.Memory.Objects.ProgFrag.correct
+#print axioms Solidity.Evm.Memory.Objects.defaultEmpty_correct
+#print axioms Solidity.Evm.Memory.ObjectArrayExamples.allocator_preserved
+#print axioms Solidity.Evm.Memory.FixedChildArrayExamples.compiled_agrees

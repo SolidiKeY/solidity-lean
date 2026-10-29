@@ -484,6 +484,19 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/MemoryRefArrayStatements.lean` | Source alias rebinding and reference/primitive indexed assignment simulations. |
 | `Evm/MemoryRefArrayCompile.lean` | Narrow certified nonallocating reference-array program compiler and composition theorem. |
 | `Evm/MemoryRefArrayExamples.lean` | Inhabited public input, old/new child alias observations, bounds failures, corrupt-pointer refutation and unsupported-shape refusals. |
+| `Evm/MemoryObjects.lean` | Typed value words and complete positive ownership for dynamic/fixed arrays, structs and reference fields. |
+| `Evm/MemoryObjectAccess.lean` | Headerless fixed bounds and generic primitive/reference indexed read/write simulations. |
+| `Evm/MemoryObjectFrame.lean` | All-object separation, identity injectivity, element/local write framing. |
+| `Evm/MemoryObjectAllocator.lean` | Complete live intervals, projected legacy allocator and cursor/free-tail preservation. |
+| `Evm/MemoryObjectPaths.lean` | Fallible typed local/field/dynamic/fixed pointer paths and primitive reads. |
+| `Evm/MemoryObjectExpr.lean` | Expression composition over full ownership, sharing existing arithmetic tails. |
+| `Evm/MemoryObjectValues.lean` | Certified primitive reads and expressions through either array layout. |
+| `Evm/MemoryObjectStatements.lean` | Generic typed indexed stores and local/alias statements preserving the complete allocator. |
+| `Evm/MemoryObjectCompile.lean` | Narrow full-object certificate compiler and sequence correctness. |
+| `Evm/MemoryObjectGrow.lean` | Typed array adoption and old-child pointer preservation across actual source heap growth. |
+| `Evm/MemoryObjectEmpty.lean` | Actual empty-array default/new copying and allocator-separated default declaration simulation; not public allocation yet. |
+| `Evm/MemoryObjectArrayExamples.lean` | Inhabited fixed-parent/dynamic-child public inputs, reads, alias changes, bounds and allocator controls. |
+| `Evm/MemoryFixedChildArrayExamples.lean` | Inhabited headerless primitive children, fixed reference parents, aliases, reads and bounds controls. |
 | `Evm/MemoryPaths.lean` | Structurally compiled typed local/reference-field paths with exact pointer simulation, nested primitive-field/array reads, lengths and writes with exact RHS/bounds failures, and child aliases/rebinding. |
 | `Evm/MemoryRefDelete.lean` | Fresh default primitive-array/primitive-member-struct children installed after resolving a reference-valued parent field; exact source growth, retained old aliases, target stack order, ownership and cursor simulation. |
 | `Evm/MemoryRefWrite.lean` | Reference-valued struct-field assignment updates the actual typed child identity and pointer word, preserving primitive data, mixed heap ownership, local frames and allocator state without allocation/copying. |
