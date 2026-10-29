@@ -1,5 +1,4 @@
 import Solidity.Keccak
-import Solidity.Syntax.Raw
 
 /-!
 # The roadmap's final theorem contracts (G01), as statements
@@ -38,7 +37,7 @@ strategy with unbounded reentrancy, opening balances); the public contract
 requires the source environment to be the EVM's.
 
 The module stays below the elaborator and the compiler: it imports the
-Keccak function and the raw syntax (for `EvalOrder`) only, so a source
+Keccak function only, so a source
 semantics may import it for `Artifact` (see the non-circularity gate of the
 G01 document).
 -/
@@ -157,9 +156,12 @@ def Prefixes.Diverges {R E O : Type} (A : R → Prop) (p : Prefixes R E O) : Pro
 /-- A language at one layer of the pipeline, over the shared events `E` and
 final observations `O`.  `Res` is a horizon together with the layer's
 resource choices; `Admissible` is the approved resource profile of the layer.
-`Guard` is the per-run premise under which the layer is a compilation target:
-trivial except at the EVM, where it is collision freedom of the run's hash
-preimages.  Every execution is a consistent family. -/
+`Forward` marks the bounds resource adequacy speaks of: as a source, the
+bounds whose runs adequacy must realize (at the source, the runs without
+exhaustion); as a target, the bounds adequacy may name (at the EVM, runs
+hashing fewer than `hashBound` preimages).  `Guard` is the per-run premise
+under which the layer is a compilation target: trivial except at the EVM,
+where it is the hash premise.  Every execution is a consistent family. -/
 structure Lang (E O : Type) where
   Prog : Type
   Env : Type
@@ -170,6 +172,7 @@ structure Lang (E O : Type) where
   sem : Prog → Env → Prefixes Res E O
   consistent : ∀ p e, @Prefixes.Consistent Res E O resLE (sem p e)
   Guard : Prog → Env → Res → Prop := fun _ _ _ => True
+  Forward : Prog → Env → Res → Prop := fun _ _ _ => True
 
 /-- Two-sided refinement of one execution at admissible resources. -/
 def Refines {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop)
@@ -177,13 +180,15 @@ def Refines {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop)
   (∀ rs, AS rs → ∃ rt, AT rt ∧ (s rs).Le (t rt)) ∧
   (∀ rt, AT rt → ∃ rs, AS rs ∧ (t rt).Le (s rs))
 
-/-- Two-sided refinement under a per-run premise `G` on the target prefix:
-the target prefix the forward direction names is above the source prefix if
-it satisfies `G`, and every target prefix satisfying `G` is below a source
+/-- Two-sided refinement under a per-run premise `G` on the target prefix.
+Forward: every admissible source bound in `FS` names an admissible target
+bound in `FT` above it if that bound satisfies `G`.  Backward: every
+admissible target prefix satisfying `G` is below an admissible source
 prefix. -/
-def RefinesUnder {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop) (G : RT → Prop)
+def RefinesUnder {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop)
+    (FS : RS → Prop) (FT : RT → Prop) (G : RT → Prop)
     (s : Prefixes RS E O) (t : Prefixes RT E O) : Prop :=
-  (∀ rs, AS rs → ∃ rt, AT rt ∧ (G rt → (s rs).Le (t rt))) ∧
+  (∀ rs, AS rs → FS rs → ∃ rt, AT rt ∧ FT rt ∧ (G rt → (s rs).Le (t rt))) ∧
   (∀ rt, AT rt → G rt → ∃ rs, AS rs ∧ (t rt).Le (s rs))
 
 theorem Refines.trans {E O R₁ R₂ R₃ : Type} {A₁ : R₁ → Prop} {A₂ : R₂ → Prop} {A₃ : R₃ → Prop}
@@ -197,31 +202,36 @@ theorem Refines.trans {E O R₁ R₂ R₃ : Type} {A₁ : R₁ → Prop} {A₂ :
     obtain ⟨r₁, a₁, l₂₁⟩ := h₁₂.2 r₂ a₂
     exact ⟨r₁, a₁, l₃₂.trans l₂₁⟩
 
-/-- Unguarded refinement is refinement under any premise. -/
+/-- Unguarded refinement is refinement under any premise, for any source
+bounds and every target bound. -/
 theorem Refines.under {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t) (G : RT → Prop) :
-    RefinesUnder AS AT G s t :=
-  ⟨fun rs hrs => (h.1 rs hrs).imp fun _ ⟨a, l⟩ => ⟨a, fun _ => l⟩, fun rt hrt _ => h.2 rt hrt⟩
+    {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t) (FS : RS → Prop)
+    (G : RT → Prop) : RefinesUnder AS AT FS (fun _ => True) G s t :=
+  ⟨fun rs hrs _ => (h.1 rs hrs).imp fun _ ⟨a, l⟩ => ⟨a, trivial, fun _ => l⟩,
+    fun rt hrt _ => h.2 rt hrt⟩
 
-/-- Under a premise that every admissible target prefix satisfies, guarded
-refinement is refinement. -/
+/-- With every source bound in `FS` and a premise that every admissible target
+prefix satisfies, guarded refinement is refinement. -/
 theorem RefinesUnder.refines {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {G : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O} (h : RefinesUnder AS AT G s t)
+    {FS : RS → Prop} {FT : RT → Prop} {G : RT → Prop} {s : Prefixes RS E O}
+    {t : Prefixes RT E O} (h : RefinesUnder AS AT FS FT G s t) (hF : ∀ rs, AS rs → FS rs)
     (hG : ∀ rt, AT rt → G rt) : Refines AS AT s t :=
-  ⟨fun rs hrs => (h.1 rs hrs).imp fun rt ⟨a, l⟩ => ⟨a, l (hG rt a)⟩,
+  ⟨fun rs hrs => (h.1 rs hrs (hF rs hrs)).imp fun rt ⟨a, _, l⟩ => ⟨a, l (hG rt a)⟩,
     fun rt hrt => h.2 rt hrt (hG rt hrt)⟩
 
 /-- **Non-vacuity of refinement.**  A source completion at an admissible bound
-is, at an admissible target bound satisfying the premise, a target completion
-with the same observation and events: a target that never completes with `o`
-(always reverting, always out of gas, `o` erased) refines no source that
-completes with `o`, unless its runs violate the premise. -/
+in `FS` is, at an admissible target bound in `FT` satisfying the premise, a
+target completion with the same observation and events: a target that never
+completes with `o` (always reverting, always out of gas, `o` erased) refines
+no source that completes with `o`, unless its runs in `FT` violate the
+premise. -/
 theorem RefinesUnder.completes {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {G : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O} (h : RefinesUnder AS AT G s t)
-    {rs : RS} (hrs : AS rs) {o : O} (ho : (s rs).final = some o) :
-    ∃ rt, AT rt ∧ (G rt → (t rt).final = some o ∧ (t rt).events = (s rs).events) := by
-  obtain ⟨rt, hrt, hle⟩ := h.1 rs hrs
-  refine ⟨rt, hrt, fun g => ?_⟩
+    {FS : RS → Prop} {FT : RT → Prop} {G : RT → Prop} {s : Prefixes RS E O}
+    {t : Prefixes RT E O} (h : RefinesUnder AS AT FS FT G s t)
+    {rs : RS} (hrs : AS rs) (hf : FS rs) {o : O} (ho : (s rs).final = some o) :
+    ∃ rt, AT rt ∧ FT rt ∧ (G rt → (t rt).final = some o ∧ (t rt).events = (s rs).events) := by
+  obtain ⟨rt, hrt, hft, hle⟩ := h.1 rs hrs hf
+  refine ⟨rt, hrt, hft, fun g => ?_⟩
   have heq : t rt = s rs := (hle g).final_eq ho
   exact ⟨by rw [heq, ho], by rw [heq]⟩
 
@@ -229,7 +239,8 @@ theorem RefinesUnder.completes {E O RS RT : Type} {AS : RS → Prop} {AT : RT �
 satisfying the premise completes with, an admissible source prefix completes
 with too. -/
 theorem RefinesUnder.sound {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {G : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O} (h : RefinesUnder AS AT G s t)
+    {FS : RS → Prop} {FT : RT → Prop} {G : RT → Prop} {s : Prefixes RS E O}
+    {t : Prefixes RT E O} (h : RefinesUnder AS AT FS FT G s t)
     {rt : RT} (hrt : AT rt) (hg : G rt) {o : O} (ho : (t rt).final = some o) :
     ∃ rs, AS rs ∧ (s rs).final = some o ∧ (s rs).events = (t rt).events := by
   obtain ⟨rs, hrs, hle⟩ := h.2 rt hrt hg
@@ -239,7 +250,8 @@ theorem RefinesUnder.sound {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Pr
 /-- **Divergence transfers**: a source no admissible bound completes has a
 target no admissible bound satisfying the premise completes. -/
 theorem RefinesUnder.diverges {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {G : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O} (h : RefinesUnder AS AT G s t)
+    {FS : RS → Prop} {FT : RT → Prop} {G : RT → Prop} {s : Prefixes RS E O}
+    {t : Prefixes RT E O} (h : RefinesUnder AS AT FS FT G s t)
     (hs : s.Diverges AS) : t.Diverges fun rt => AT rt ∧ G rt := by
   intro rt ⟨hrt, hg⟩
   cases ho : (t rt).final with
@@ -253,7 +265,8 @@ theorem RefinesUnder.diverges {E O RS RT : Type} {AS : RS → Prop} {AT : RT →
 reads: no admissible prefix violates it) holds of every admissible target
 prefix satisfying the premise if it holds of the source. -/
 theorem RefinesUnder.safety {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
-    {G : RT → Prop} {s : Prefixes RS E O} {t : Prefixes RT E O} (h : RefinesUnder AS AT G s t)
+    {FS : RS → Prop} {FT : RT → Prop} {G : RT → Prop} {s : Prefixes RS E O}
+    {t : Prefixes RT E O} (h : RefinesUnder AS AT FS FT G s t)
     (Φ : Prefix E O → Prop) (down : ∀ a b, a.Le b → Φ b → Φ a)
     (hs : ∀ rs, AS rs → Φ (s rs)) : ∀ rt, AT rt → G rt → Φ (t rt) := by
   intro rt hrt hg
@@ -265,27 +278,28 @@ theorem Refines.completes {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Pro
     {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t)
     {rs : RS} (hrs : AS rs) {o : O} (ho : (s rs).final = some o) :
     ∃ rt, AT rt ∧ (t rt).final = some o ∧ (t rt).events = (s rs).events :=
-  ((h.under fun _ => True).completes hrs ho).imp fun _ ⟨a, f⟩ => ⟨a, f trivial⟩
+  ((h.under (fun _ => True) fun _ => True).completes hrs trivial ho).imp
+    fun _ ⟨a, _, f⟩ => ⟨a, f trivial⟩
 
 /-- `RefinesUnder.sound` without a premise. -/
 theorem Refines.sound {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
     {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t)
     {rt : RT} (hrt : AT rt) {o : O} (ho : (t rt).final = some o) :
     ∃ rs, AS rs ∧ (s rs).final = some o ∧ (s rs).events = (t rt).events :=
-  (h.under fun _ => True).sound hrt trivial ho
+  (h.under (fun _ => True) fun _ => True).sound hrt trivial ho
 
 /-- `RefinesUnder.diverges` without a premise. -/
 theorem Refines.diverges {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
     {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t)
     (hs : s.Diverges AS) : t.Diverges AT :=
-  fun rt hrt => (h.under fun _ => True).diverges hs rt ⟨hrt, trivial⟩
+  fun rt hrt => (h.under (fun _ => True) fun _ => True).diverges hs rt ⟨hrt, trivial⟩
 
 /-- `RefinesUnder.safety` without a premise. -/
 theorem Refines.safety {E O RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
     {s : Prefixes RS E O} {t : Prefixes RT E O} (h : Refines AS AT s t)
     (Φ : Prefix E O → Prop) (down : ∀ a b, a.Le b → Φ b → Φ a)
     (hs : ∀ rs, AS rs → Φ (s rs)) : ∀ rt, AT rt → Φ (t rt) :=
-  fun rt hrt => (h.under fun _ => True).safety Φ down hs rt hrt trivial
+  fun rt hrt => (h.under (fun _ => True) fun _ => True).safety Φ down hs rt hrt trivial
 
 /-- A compiler pass from `L₁` to `L₂`.  `Dom` is the pass's input domain;
 the composition lemma requires every output of the pass before to lie in it,
@@ -297,18 +311,20 @@ structure Pass {E O : Type} (L₁ L₂ : Lang E O) where
 
 /-- **A pass certificate**: the target environments map to source ones and
 reach all of them; resources are given constructively (`need`); every
-admissible source prefix is below the target prefix at `need` if that
-satisfies the target's per-run premise, and every admissible target prefix
-satisfying it is below an admissible source prefix.  `need` is an explicit
-bound function; that the final one is computable (not obtained by choice) is
-a check of the final theorems' axioms and definitions (G49.03, G54), not
+admissible source prefix in the source's `Forward` bounds is below the target
+prefix at `need`, a bound in the target's `Forward` bounds, if that satisfies
+the target's per-run premise; and every admissible target prefix satisfying
+it is below an admissible source prefix.  `need` is an explicit bound
+function; that the final one is computable (not obtained by choice) is a
+check of the final theorems' axioms and definitions (G49.03, G54), not
 something this type enforces. -/
 structure Cert {E O : Type} {L₁ L₂ : Lang E O} (π : Pass L₁ L₂) where
   envSound : ∀ e, L₂.Allowed e → L₁.Allowed (π.envAbs e)
   envOnto : ∀ e, L₁.Allowed e → ∃ e', L₂.Allowed e' ∧ π.envAbs e' = e
   need : (p : L₁.Prog) → π.Dom p → L₂.Env → L₁.Res → L₂.Res
   need_ok : ∀ p (h : π.Dom p) e r, L₂.Allowed e → L₁.Admissible r →
-    L₂.Admissible (need p h e r) ∧
+    L₁.Forward p (π.envAbs e) r →
+    L₂.Admissible (need p h e r) ∧ L₂.Forward (π.run p h) e (need p h e r) ∧
       (L₂.Guard (π.run p h) e (need p h e r) →
         (L₁.sem p (π.envAbs e) r).Le (L₂.sem (π.run p h) e (need p h e r)))
   back : ∀ p (h : π.Dom p) e r, L₂.Allowed e → L₂.Admissible r → L₂.Guard (π.run p h) e r →
@@ -317,9 +333,10 @@ structure Cert {E O : Type} {L₁ L₂ : Lang E O} (π : Pass L₁ L₂) where
 /-- What a certificate gives for one program and environment. -/
 theorem Cert.refines {E O : Type} {L₁ L₂ : Lang E O} {π : Pass L₁ L₂} (c : Cert π)
     (p : L₁.Prog) (h : π.Dom p) (e : L₂.Env) (he : L₂.Allowed e) :
-    RefinesUnder L₁.Admissible L₂.Admissible (L₂.Guard (π.run p h) e)
+    RefinesUnder L₁.Admissible L₂.Admissible (L₁.Forward p (π.envAbs e))
+      (L₂.Forward (π.run p h) e) (L₂.Guard (π.run p h) e)
       (L₁.sem p (π.envAbs e)) (L₂.sem (π.run p h) e) :=
-  ⟨fun r hr => ⟨c.need p h e r, (c.need_ok p h e r he hr).1, (c.need_ok p h e r he hr).2⟩,
+  ⟨fun r hr hf => ⟨c.need p h e r, c.need_ok p h e r he hr hf⟩,
     fun r hr hg => c.back p h e r he hr hg⟩
 
 /-- Two passes in turn, the second defined on every output of the first. -/
@@ -342,10 +359,10 @@ def Cert.comp {E O : Type} {L₁ L₂ L₃ : Lang E O} {π₁ : Pass L₁ L₂} 
     obtain ⟨e₃, he₃, rfl⟩ := c₂.envOnto e₂ he₂
     exact ⟨e₃, he₃, rfl⟩
   need p h e r := c₂.need (π₁.run p h) (closed p h) e (c₁.need p h (π₂.envAbs e) r)
-  need_ok p h e r he hr := by
-    have h₁ := c₁.need_ok p h (π₂.envAbs e) r (c₂.envSound e he) hr
-    have h₂ := c₂.need_ok (π₁.run p h) (closed p h) e _ he h₁.1
-    exact ⟨h₂.1, fun g => (h₁.2 (mid _ _ _)).trans (h₂.2 g)⟩
+  need_ok p h e r he hr hf := by
+    have h₁ := c₁.need_ok p h (π₂.envAbs e) r (c₂.envSound e he) hr hf
+    have h₂ := c₂.need_ok (π₁.run p h) (closed p h) e _ he h₁.1 h₁.2.1
+    exact ⟨h₂.1, h₂.2.1, fun g => (h₁.2.2 (mid _ _ _)).trans (h₂.2.2 g)⟩
   back p h e r he hr hg := by
     obtain ⟨r₂, hr₂, l₃₂⟩ := c₂.back (π₁.run p h) (closed p h) e r he hr hg
     obtain ⟨r₁, hr₁, l₂₁⟩ := c₁.back p h (π₂.envAbs e) r₂ (c₂.envSound e he) hr₂ (mid _ _ _)
@@ -437,48 +454,65 @@ inductive Action where
 /-- A history-dependent callee strategy. -/
 abbrev Strategy := List Event → Move
 
-/-- The balance of an account after a history, from the opening balances:
-the G03 ledger, a fixed definition. -/
-abbrev Ledger := (Address → Word) → List Event → Address → Nat
+/-- The balance of an external account after a history, from the opening
+balances: the G03 ledger, a fixed definition.  An external account's balance
+moves only by events (payments to it, the value it sends, credits); value
+moved between instances of the system is internal to the semantics. -/
+abbrev Ledger := (Address → Word) → List Event → Address → Word
 
 /-- The environment of a session.  `this` is the address the deployment
-produces from `deployer` and `deployNonce`; the system's own balance is the
-ledger's, from `balance` and the history, credits included. -/
+produces from `deployer` and `deployNonce` (`Fixed.createAddress`); the
+system's own balance follows from the deployment value, the events (credits
+included) and its internal transfers. -/
 structure SessionEnv where
   deployer : Address
-  deployNonce : Nat
+  deployNonce : Fin (2 ^ 64)
   deployValue : Word
   deployArgs : Bytes
   balance : Address → Word
+  /-- Whether an account outside the system has code after a history (what
+  `extcodesize` reads). -/
+  hasCode : List Event → Address → Bool
   /-- The next action after a history, a request or a credit; `none` ends
   the session. -/
   requests : List Event → Option Action
   callee : Strategy
 
 /-- The fixed parameters both sides read, none of them an environment input:
-the hash, the ledger, the length `regionLen` of the storage region a hashed
-slot starts (an array's elements, a struct's fields) and the number
-`rootSlots` of root slots `0, …, rootSlots - 1` of the static layout. -/
+the hash, the ledger, the precompiles' functions (the Osaka definitions,
+pinned by G06), the address a creation produces (from the creator and its
+nonce), the length `regionLen` of the storage region a hashed slot starts
+(an array's elements, a struct's fields) and the number `rootSlots` of root
+slots `0, …, rootSlots - 1` of the static layout. -/
 structure Fixed where
   hash : Bytes → Word
   ledger : Ledger
+  precompile : Address → Bytes → Outcome
+  createAddress : Address → Fin (2 ^ 64) → Address
   regionLen : Nat
   rootSlots : Nat
 
 /-- Every request is affordable: its value is at most the sender's ledger
 balance.  A request the sender cannot afford is invalid and never runs. -/
 def SessionEnv.Affordable (ledger : Ledger) (e : SessionEnv) : Prop :=
-  e.deployValue.val ≤ ledger e.balance [] e.deployer ∧
-    ∀ h q, e.requests h = some (.request q) → q.value.val ≤ ledger e.balance h q.sender
+  e.deployValue.val ≤ (ledger e.balance [] e.deployer).val ∧
+    ∀ h q, e.requests h = some (.request q) → q.value.val ≤ (ledger e.balance h q.sender).val
 
-/-- Address 0 has no code: a call to it succeeds at once with no data. -/
+/-- Address 0 has no code. -/
 def SessionEnv.ZeroHasNoCode (e : SessionEnv) : Prop :=
-  ∀ h v i s, e.callee (h ++ [.call Address.zero v i s]) = .answer (.success [])
+  ∀ h, e.hasCode h Address.zero = false
 
-/-- The allowed session environments: affordable, address 0 without code, and
-otherwise any strategy (unbounded reentrancy, any answer to any payment). -/
+/-- A call to an account without code runs nothing: it succeeds at once with
+no data. -/
+def SessionEnv.CodelessSucceeds (e : SessionEnv) : Prop :=
+  ∀ h a v i s, e.hasCode h a = false →
+    e.callee (h ++ [.call a v i s]) = .answer (.success [])
+
+/-- The allowed session environments: affordable, address 0 without code,
+codeless accounts running nothing, and otherwise any strategy (unbounded
+reentrancy, any answer to any call or payment to an account with code). -/
 def SessionEnv.Allowed (F : Fixed) (e : SessionEnv) : Prop :=
-  e.Affordable F.ledger ∧ e.ZeroHasNoCode
+  e.Affordable F.ledger ∧ e.ZeroHasNoCode ∧ e.CodelessSucceeds
 
 /-- The no-callback reading (`transferSemantics:noCallback`): the strategy
 never calls back. -/
@@ -502,7 +536,16 @@ contain the no-callback ones, so a statement over every allowed environment
 holds of them; it is never a premise. -/
 theorem SessionEnv.Allowed.withoutCallbacks {F : Fixed} {e : SessionEnv} (he : e.Allowed F) :
     e.withoutCallbacks.Allowed F :=
-  ⟨he.1, fun h v i s => by simp only [SessionEnv.withoutCallbacks, he.2 h v i s]⟩
+  ⟨he.1, he.2.1, fun h a v i s hc => by
+    simp only [SessionEnv.withoutCallbacks, he.2.2 h a v i s hc]⟩
+
+/-- Every deployment the language reports produces the address `Fixed`
+computes from the session's deployer and nonce: `this` comes from the
+deployment. -/
+def Lang.ThisFromDeployment (L : Lang Event Outcome) (F : Fixed)
+    (session : L.Env → SessionEnv) : Prop :=
+  ∀ p e r s v a o x, Event.deploy s v a o (some x) ∈ (L.sem p e r).events →
+    x = F.createAddress (session e).deployer (session e).deployNonce
 
 /-- No event of the language calls a precompile: precompiles are fixed
 functions inside the semantics. -/
@@ -523,11 +566,6 @@ inductive Pipeline where
   | legacy
   | viaIR
   deriving DecidableEq, Repr
-
-/-- The evaluation order of a pipeline. -/
-def Pipeline.order : Pipeline → EvalOrder
-  | .legacy => {}
-  | .viaIR => EvalOrder.viaIR
 
 /-- The two pipelines. -/
 def pipelines : List Pipeline := [.legacy, .viaIR]
@@ -564,14 +602,32 @@ structure Artifact where
   contracts : List CodeUnit
   main : Nat
 
+/-- The creation bytes the table holds for the contract at position `k`. -/
+def Artifact.initcode (art : Artifact) (k : Nat) : Bytes :=
+  ((art.contracts[k]?).map CodeUnit.initcode).getD []
+
+/-- No unit's creation bytes are a prefix of another's, so the creation bytes
+of a `CREATE` name the unit they come from. -/
+def Artifact.PrefixFree (art : Artifact) : Prop :=
+  ∀ j k, j < art.contracts.length → k < art.contracts.length → j ≠ k →
+    ¬ art.initcode j <+: art.initcode k
+
+/-- The creations of a history: the position of the created contract and the
+constructor arguments. -/
+def createsOf (h : List Event) : List (Nat × Bytes) :=
+  h.filterMap fun
+    | .create _ c a => some (c, a)
+    | _ => none
+
 /-! ## The six contracts -/
 
 /-- The source side, all independent of the compiler (S00–S05): raw input,
 syntax, the resolved typed declaration graph, its judgments and the
 transaction-sequence semantics.  `Input` is a whole compilation input (named
 source units, the selected unit and the settings, its pipeline and an empty
-library link map among them).  `meaning` reads the artifact table only for `creationCode` and
-`runtimeCode`, as bytes. -/
+library link map among them); a resolution records the pipeline and ABI coder
+it was resolved under.  `meaning` reads the artifact table only for
+`creationCode` and `runtimeCode`, as bytes. -/
 structure SourceSpec where
   Input : Type
   Syntax : Type
@@ -598,33 +654,43 @@ structure SourceSpec where
   coder : Input → AbiCoder
   coder_legacy : ∀ i, pipeline i = .legacy → coder i = pragmaCoder i
   coder_viaIR : ∀ i, pipeline i = .viaIR → coder i = .v2
+  /-- The pipeline and ABI coder a resolution was resolved under, which the
+  meaning reads. -/
+  pipelineOf : Resolved → Pipeline
+  coderOf : Resolved → AbiCoder
   /-- The settings' library link map (library name, address). -/
   linkMap : Input → List (String × Address)
   /-- The source cost rule (compiler-independent): whether the `receive` or
   fallback body of the contract at a position of the input fits the 2300-gas
   stipend of a `transfer` or `send` to an instance of it. -/
   stipendFits : Resolved → Nat → Bool
-  /-- The fixed hash and ledger. -/
+  /-- The fixed parameters. -/
   fixed : Fixed
-  /-- The environment is the session environment. -/
+  /-- The environment is the session environment, exactly. -/
   session : lang.Env → SessionEnv
   ofSession : SessionEnv → lang.Env
   session_of : ∀ s, session (ofSession s) = s
+  of_session : ∀ e, ofSession (session e) = e
   allowed_iff : ∀ e, lang.Allowed e ↔ (session e).Allowed fixed
   /-- The exhaustion choices of a bound: which frames fail as if out of gas
-  (S03.04).  `never` is the run without failures. -/
+  (S03.04).  `never` is the run without gas exhaustion, in which the only
+  failing frames are external calls at the 1024 call-depth limit, as on the
+  EVM. -/
   Exhaust : Type
   never : Exhaust
   exhaust : lang.Res → Exhaust
   withExhaust : lang.Res → Exhaust → lang.Res
   exhaust_with : ∀ r x, exhaust (withExhaust r x) = x
+  /-- Adequacy speaks of the runs without exhaustion. -/
+  forward_iff : ∀ p e r, lang.Forward p e r ↔ exhaust r = never
 
 /-- The source is idealized: every bound is admissible (unbounded fuel and
 recursion, every exhaustion choice), so its prefixes are all of its
 behaviour (G01 Q1). -/
 def SourceSpec.Idealized (S : SourceSpec) : Prop := ∀ r, S.lang.Admissible r
 
-/-- A bound with no exhaustion: the run as if gas were unbounded. -/
+/-- A bound with no exhaustion: the run as if gas were unbounded (only the
+call-depth limit fails frames). -/
 def SourceSpec.NoExhaust (S : SourceSpec) (r : S.lang.Res) : Prop := S.exhaust r = S.never
 
 /-- The source's judgments are functions where the contract needs them: an
@@ -637,22 +703,24 @@ def SourceSpec.Unambiguous (S : SourceSpec) : Prop :=
 def SourceSpec.Admitted (S : SourceSpec) (i : S.Input) (r : S.Resolved) : Prop :=
   ∃ s, S.Parses i s ∧ S.Resolves s r ∧ S.WellFormed r ∧ S.InProfile r
 
-/-- The evaluation order of an input: its pipeline's. -/
-def SourceSpec.order (S : SourceSpec) (i : S.Input) : EvalOrder := (S.pipeline i).order
-
 /-- Both pipelines are settings: an admitted input stays admitted under
 each (G00 Q4, second round). -/
 def SourceSpec.AllPipelines (S : SourceSpec) : Prop :=
   ∀ i q, (∃ r, S.Admitted i r) → ∃ r, S.Admitted (S.setPipeline i q) r
 
+/-- A resolution records the settings of its input. -/
+def SourceSpec.SettingsResolved (S : SourceSpec) : Prop :=
+  ∀ i r, S.Admitted i r → S.pipelineOf r = S.pipeline i ∧ S.coderOf r = S.coder i
+
 /-- Only the empty library link map is admitted. -/
 def SourceSpec.NoLinkMap (S : SourceSpec) : Prop :=
   ∀ i r, S.Admitted i r → S.linkMap i = []
 
-/-- The source's approved readings: idealized, precompiles fixed, and only
-the empty link map. -/
+/-- The source's approved readings: idealized, precompiles fixed, `this`
+from the deployment, settings recorded, and only the empty link map. -/
 def SourceSpec.Approved (S : SourceSpec) : Prop :=
-  S.Idealized ∧ S.lang.PrecompilesFixed ∧ S.NoLinkMap
+  S.Idealized ∧ S.lang.PrecompilesFixed ∧ S.lang.ThisFromDeployment S.fixed S.session ∧
+    S.SettingsResolved ∧ S.NoLinkMap
 
 /-- **Non-vacuity of a source definition** (G07, S05): inputs the source
 admits whose meanings, at allowed environments and without exhaustion,
@@ -697,6 +765,8 @@ structure IntrinsicSpec where
   lang : Lang Event Outcome
   ofWorld : World → lang.Prog
   worlds : lang.Prog → lang.Env → lang.Res → List World
+  /-- The intrinsic layer carries no per-run premise. -/
+  guard_trivial : ∀ p e r, lang.Guard p e r
 
 /-- **Contract 2, lowering.**  Total on admitted source (the proofs are
 arguments: no `Option`), for every artifact table, and the source meaning
@@ -709,6 +779,10 @@ structure Lowering (S : SourceSpec) (I : IntrinsicSpec) where
   agrees : ∀ r w p art, pass.run (S.meaning r w p art) (dom r w p art) = I.ofWorld (lower r w p art)
   cert : Cert pass
 
+/-- How many preimages a run adequacy names may hash: far below the `2^256`
+at which collisions are forced by counting. -/
+def hashBound : Nat := 2 ^ 128
+
 /-- The pinned Osaka EVM (G06): accounts with code, executing transactions
 from bytes, with every account outside the system played by the session
 environment's strategy.  A bound is a horizon and a gas schedule (`gas`: the
@@ -717,17 +791,20 @@ what the environment forwards into a callback); a frame out of gas reverts
 and the session continues.  Every gas schedule is admissible: the
 per-transaction cap (EIP-7825) and the block gas limit are a recorded
 idealization, as are the code-size limits (EIP-170, EIP-3860), so code size
-is not a resource; nor are stack and memory:
-internal calls keep their frames in memory, so recursion is bounded only by
-gas.  `Guard` is collision freedom of the preimages the run hashes. -/
+is not a resource; nor are stack and memory: internal calls keep their
+frames in memory, so recursion is bounded only by gas.  `Guard` is the hash
+premise on the preimages the run hashes; adequacy names only runs hashing
+fewer than `hashBound` preimages (`Forward`). -/
 structure EvmSpec where
   lang : Lang Event Outcome
-  /-- A deployment session of the artifact: install, then run transactions. -/
+  /-- A deployment session of the artifact: install the selected unit's
+  creation bytes with the libraries linked, then run transactions. -/
   load : Artifact → lang.Prog
   fixed : Fixed
   session : lang.Env → SessionEnv
   ofSession : SessionEnv → lang.Env
   session_of : ∀ s, session (ofSession s) = s
+  of_session : ∀ e, ofSession (session e) = e
   allowed_iff : ∀ e, lang.Allowed e ↔ (session e).Allowed fixed
   gas : lang.Res → List Event → Nat
   withGas : lang.Res → (List Event → Nat) → lang.Res
@@ -736,10 +813,15 @@ structure EvmSpec where
   hashed : lang.Prog → lang.Env → lang.Res → List Bytes
   hashed_consistent : ∀ p e r r', lang.resLE.le r r' → hashed p e r <+: hashed p e r'
   guard : ∀ p e r, lang.Guard p e r ↔ HashPremise fixed (hashed p e r)
+  forward_iff : ∀ p e r, lang.Forward p e r ↔ (hashed p e r).length < hashBound
+  /-- The creation bytes (with constructor arguments) of each `CREATE` the
+  system executes in a prefix, in order. -/
+  created : lang.Prog → lang.Env → lang.Res → List Bytes
   /-- EVM worlds (accounts, code, storage, balances) at transaction
-  boundaries, and the sessions from one. -/
+  boundaries, their balances, and the sessions from one. -/
   World : Type
   worlds : lang.Prog → lang.Env → lang.Res → List World
+  balances : World → Address → Word
   resume : World → lang.Prog
 
 /-- **The per-run hash premise** (G01 Q3): the preimages this execution
@@ -751,9 +833,11 @@ def EvmSpec.RunCollisionFree (V : EvmSpec) (p : V.lang.Prog) (e : V.lang.Env)
   HashPremise V.fixed (V.hashed p e r)
 
 /-- The EVM's approved readings: its hash is Keccak-256, every horizon and
-gas schedule is admissible, and precompiles are fixed functions. -/
+gas schedule is admissible, precompiles are fixed functions, and `this`
+comes from the deployment. -/
 def EvmSpec.Approved (V : EvmSpec) : Prop :=
-  V.fixed.hash = keccakWord ∧ (∀ r, V.lang.Admissible r) ∧ V.lang.PrecompilesFixed
+  V.fixed.hash = keccakWord ∧ (∀ r, V.lang.Admissible r) ∧ V.lang.PrecompilesFixed ∧
+    V.lang.ThisFromDeployment V.fixed V.session
 
 /-- **Contract 3, compilation.**  Every lowered world has an artifact (total),
 through a chain of certified passes from the intrinsic language to an
@@ -764,6 +848,8 @@ structure Compilation (I : IntrinsicSpec) (Asm : Lang Event Outcome) where
   dom : ∀ w, pass.Dom (I.ofWorld w)
   agrees : ∀ w, pass.run (I.ofWorld w) (dom w) = compile w
   cert : Cert pass
+  /-- The assembly language carries no per-run premise. -/
+  asm_guard : ∀ p e r, Asm.Guard p e r
 
 /-- **Contract 4, EVM execution.**  Assembly, encoding and the pinned EVM:
 every assembly program has bytes whose execution refines it. -/
@@ -775,22 +861,23 @@ structure Execution (Asm : Lang Event Outcome) (V : EvmSpec) where
   cert : Cert pass
 
 /-- The state export of the public theorem (G01 Q6): the lowering whose
-worlds are decoded, the decoding of EVM worlds, and the environment map to
-the intrinsic layer. -/
+worlds are decoded, the decoding of EVM worlds given the preimages hashed so
+far (a slot is decoded through the preimage it was hashed from, never by
+inverting the hash), and the environment map to the intrinsic layer. -/
 structure StateExport (S : SourceSpec) (I : IntrinsicSpec) (V : EvmSpec) where
   lowering : Lowering S I
-  decode : V.World → Option I.World
+  decode : List Bytes → V.World → Option I.World
   envAbs : V.lang.Env → I.lang.Env
 
 /-- **Contract 5, composition: the public theorem.**  For every admitted
-input, under both pipelines, the compiler produces bytes; the source
-reads the EVM's own session environment, hash and ledger (Keccak-256, by
-`EvmSpec.Approved`); for every allowed
-EVM environment the source meaning, at the artifact table the compiler
-produced, refines the deployed bytes' sessions under the per-run hash
-premise; and `decode` maps every EVM world the sessions reach to the
-intrinsic world the lowered program reaches, with the same observations
-from there on. -/
+input, under both pipelines, the compiler produces bytes whose creations
+come from its own table; the source reads the EVM's own session environment
+and fixed parameters (Keccak-256 by `EvmSpec.Approved`, a separate conjunct
+of the final statement); for every allowed EVM environment the source
+meaning, at the artifact table the compiler produced, refines the deployed
+bytes' sessions under the per-run hash premise; and `decode` maps every EVM
+world the sessions reach to the intrinsic world the lowered program reaches,
+with the same observations from there on. -/
 structure PublicCorrectness {I : IntrinsicSpec} (S : SourceSpec) (V : EvmSpec)
     (compiler : S.Input → Option Artifact) (envAbs : V.lang.Env → S.lang.Env)
     (X : StateExport S I V) : Prop where
@@ -800,28 +887,40 @@ structure PublicCorrectness {I : IntrinsicSpec} (S : SourceSpec) (V : EvmSpec)
   fixed : S.fixed = V.fixed
   session : ∀ e, S.session (envAbs e) = V.session e
   envAbs_agrees : ∀ e, X.lowering.pass.envAbs (X.envAbs e) = envAbs e
+  /-- `type(C).creationCode` is what `new C` deploys: every `CREATE` runs the
+  table's creation bytes for the contract its event names. -/
+  creates_table : ∀ i art, compiler i = some art → art.PrefixFree ∧
+    ∀ e rt, V.created (V.load art) e rt =
+      (createsOf (V.lang.sem (V.load art) e rt).events).map fun ca => art.initcode ca.1 ++ ca.2
   refines : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e, V.lang.Allowed e → S.lang.Allowed (envAbs e) ∧
-      RefinesUnder S.lang.Admissible V.lang.Admissible (V.RunCollisionFree (V.load art) e)
+      RefinesUnder S.lang.Admissible V.lang.Admissible
+        (S.lang.Forward (S.meaning r w p art) (envAbs e)) (V.lang.Forward (V.load art) e)
+        (V.RunCollisionFree (V.load art) e)
         (S.lang.sem (S.meaning r w p art) (envAbs e)) (V.lang.sem (V.load art) e)
   decode_reach : ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art,
     compiler i = some art → ∀ e, V.lang.Allowed e → ∀ rt, V.lang.Admissible rt →
       V.RunCollisionFree (V.load art) e rt →
       ∃ ri, I.lang.Admissible ri ∧
-        (V.worlds (V.load art) e rt).map X.decode =
+        (V.worlds (V.load art) e rt).map (X.decode (V.hashed (V.load art) e rt)) =
           (I.worlds (I.ofWorld (X.lowering.lower r w p art)) (X.envAbs e) ri).map some
   decode_commutes : ∀ i r, S.Admitted i r → ∀ (_ : S.WellFormed r) (_ : S.InProfile r) art,
     compiler i = some art → ∀ e rt, V.lang.Allowed e → V.lang.Admissible rt →
-      ∀ ω, ω ∈ V.worlds (V.load art) e rt → ∀ ω', X.decode ω = some ω' →
-      ∀ e', V.lang.Allowed e' → I.lang.Allowed (X.envAbs e') ∧
-        RefinesUnder I.lang.Admissible V.lang.Admissible (V.RunCollisionFree (V.resume ω) e')
+      ∀ ω, ω ∈ V.worlds (V.load art) e rt →
+      ∀ ω', X.decode (V.hashed (V.load art) e rt) ω = some ω' →
+      ∀ e', V.lang.Allowed e' → (V.session e').balance = V.balances ω →
+        I.lang.Allowed (X.envAbs e') ∧
+        RefinesUnder I.lang.Admissible V.lang.Admissible
+          (I.lang.Forward (I.ofWorld ω') (X.envAbs e')) (V.lang.Forward (V.resume ω) e')
+          (fun rt' => HashPremise V.fixed
+            (V.hashed (V.load art) e rt ++ V.hashed (V.resume ω) e' rt'))
           (I.lang.sem (I.ofWorld ω') (X.envAbs e')) (V.lang.sem (V.resume ω) e')
 
 /-- **Contract 6, specification transfer.**  A source specification, read on
 the source's prefixes, holds of the bytes under the per-run hash premise: a
-safety specification at every admissible prefix, a completion specification
-at some admissible prefix.  `Proves` derivations reach it through G51's
-bridge from `⊨` to `holdsSafe`. -/
+safety specification at every admissible prefix, a completion without
+exhaustion at some admissible prefix.  `Proves` derivations reach it through
+G51's bridge from `⊨` to `holdsSafe`. -/
 def SpecTransfer (S : SourceSpec) (V : EvmSpec) (compiler : S.Input → Option Artifact)
     (envAbs : V.lang.Env → S.lang.Env) : Prop :=
   ∀ i r, S.Admitted i r → ∀ (w : S.WellFormed r) (p : S.InProfile r) art, compiler i = some art →
@@ -830,7 +929,7 @@ def SpecTransfer (S : SourceSpec) (V : EvmSpec) (compiler : S.Input → Option A
         (∀ rs, S.lang.Admissible rs → Φ (S.lang.sem (S.meaning r w p art) (envAbs e) rs)) →
         ∀ rt, V.lang.Admissible rt → V.RunCollisionFree (V.load art) e rt →
           Φ (V.lang.sem (V.load art) e rt)) ∧
-      (∀ o, (∃ rs, S.lang.Admissible rs ∧
+      (∀ o, (∃ rs, S.lang.Admissible rs ∧ S.lang.Forward (S.meaning r w p art) (envAbs e) rs ∧
           (S.lang.sem (S.meaning r w p art) (envAbs e) rs).final = some o) →
         ∃ rt, V.lang.Admissible rt ∧
           (V.RunCollisionFree (V.load art) e rt → (V.lang.sem (V.load art) e rt).final = some o))
@@ -846,15 +945,15 @@ theorem PublicCorrectness.transfer (h : PublicCorrectness S V compiler envAbs X)
     SpecTransfer S V compiler envAbs := by
   intro i r adm w p art hc e he
   have href := (h.refines i r adm w p art hc e he).2
-  refine ⟨fun Φ down hs => href.safety Φ down hs, fun o ⟨rs, hrs, ho⟩ => ?_⟩
-  obtain ⟨rt, hrt, hfin⟩ := href.completes hrs ho
+  refine ⟨fun Φ down hs => href.safety Φ down hs, fun o ⟨rs, hrs, hf, ho⟩ => ?_⟩
+  obtain ⟨rt, hrt, _, hfin⟩ := href.completes hrs hf ho
   exact ⟨rt, hrt, fun g => (hfin g).1⟩
 
 /-- Every admitted input compiles under both pipelines. -/
 theorem PublicCorrectness.allPipelines (h : PublicCorrectness S V compiler envAbs X)
-    {i : S.Input} (hi : ∃ r, S.Admitted i r) :
-    ∀ q : Pipeline, q ∈ pipelines → (compiler (S.setPipeline i q)).isSome :=
-  fun q _ => (h.coverage _).1 (h.bothPipelines i q hi)
+    {i : S.Input} (hi : ∃ r, S.Admitted i r) (q : Pipeline) :
+    (compiler (S.setPipeline i q)).isSome :=
+  (h.coverage _).1 (h.bothPipelines i q hi)
 
 /-- **A never-compiling compiler fails**: given a non-vacuous source, the
 public contract makes the compiler produce an artifact. -/
@@ -867,35 +966,48 @@ theorem PublicCorrectness.compiles (h : PublicCorrectness S V compiler envAbs X)
   | some art => exact ⟨i, art, hc⟩
 
 /-- The source's success witness is a success of the compiled bytes at an
-allowed environment and admissible bound, under the per-run hash premise. -/
+allowed environment and an admissible bound hashing fewer than `hashBound`
+preimages, under the per-run hash premise. -/
 theorem PublicCorrectness.succeeds (h : PublicCorrectness S V compiler envAbs X)
     (hv : S.NonVacuous) : ∃ i art e rt d, compiler i = some art ∧ V.lang.Allowed e ∧
-      V.lang.Admissible rt ∧ d ≠ [] ∧
+      V.lang.Admissible rt ∧ V.lang.Forward (V.load art) e rt ∧ d ≠ [] ∧
       (V.RunCollisionFree (V.load art) e rt →
         (V.lang.sem (V.load art) e rt).final = some (.success d)) := by
-  obtain ⟨i, r, w, p, e, rs, d, adm, _, hrs, _, hd, hfin⟩ := hv.1
+  obtain ⟨i, r, w, p, e, rs, d, adm, _, hrs, hno, hd, hfin⟩ := hv.1
   have hs := (h.coverage i).1 ⟨r, adm⟩
   cases hc : compiler i with
   | none => rw [hc] at hs; cases hs
   | some art =>
     obtain ⟨e', he', rfl⟩ := h.envOnto e (by assumption)
-    obtain ⟨rt, hrt, ht⟩ := (h.refines i r adm w p art hc e' he').2.completes hrs (hfin art)
-    exact ⟨i, art, e', rt, d, hc, he', hrt, hd, fun g => (ht g).1⟩
+    have hf : S.lang.Forward (S.meaning r w p art) (envAbs e') rs := (S.forward_iff _ _ _).2 hno
+    obtain ⟨rt, hrt, hft, ht⟩ :=
+      (h.refines i r adm w p art hc e' he').2.completes hrs hf (hfin art)
+    exact ⟨i, art, e', rt, d, hc, he', hrt, hft, hd, fun g => (ht g).1⟩
 
-/-- **An always-reverting compiler fails**: bytes that never complete with a
-success, on runs that meet the hash premise (say, that hash nothing),
-satisfy the public contract for no non-vacuous source. -/
+/-- **An always-reverting compiler fails**: compiled bytes that never complete
+with a success, on runs that meet the hash premise whenever they hash fewer
+than `hashBound` preimages (say, bytes that hash nothing), satisfy the
+public contract for no non-vacuous source. -/
 theorem PublicCorrectness.not_alwaysRevert (h : PublicCorrectness S V compiler envAbs X)
-    (hv : S.NonVacuous) (hcf : ∀ art e rt, V.RunCollisionFree (V.load art) e rt)
-    (hrev : ∀ art e rt d, (V.lang.sem (V.load art) e rt).final ≠ some (.success d)) : False := by
-  obtain ⟨_, art, e, rt, d, _, _, _, _, ht⟩ := h.succeeds hv
-  exact hrev art e rt d (ht (hcf art e rt))
+    (hv : S.NonVacuous)
+    (hcf : ∀ i art e rt, compiler i = some art → V.lang.Forward (V.load art) e rt →
+      V.RunCollisionFree (V.load art) e rt)
+    (hrev : ∀ i art e rt d, compiler i = some art →
+      (V.lang.sem (V.load art) e rt).final ≠ some (.success d)) : False := by
+  obtain ⟨i, art, e, rt, d, hc, _, _, hft, _, ht⟩ := h.succeeds hv
+  exact hrev i art e rt d hc (ht (hcf i art e rt hc hft))
 
 /-- The source environment is allowed exactly when the EVM's is: both read
 the same session environment against the same fixed parameters. -/
 theorem PublicCorrectness.allowed_iff (h : PublicCorrectness S V compiler envAbs X)
     (e : V.lang.Env) : S.lang.Allowed (envAbs e) ↔ V.lang.Allowed e := by
   rw [S.allowed_iff, V.allowed_iff, h.session, h.fixed]
+
+/-- `envAbs` is forced: it reads the EVM environment as the same session
+environment. -/
+theorem PublicCorrectness.envAbs_eq (h : PublicCorrectness S V compiler envAbs X)
+    (e : V.lang.Env) : envAbs e = S.ofSession (V.session e) := by
+  rw [← h.session e, S.of_session]
 
 end
 

@@ -11,10 +11,19 @@ contracts (`Solidity/Roadmap/Contracts.lean`): the intrinsic language of
 contract 2 still needs events, the transaction boundary and a call semantics
 without the fixed recursion unrolling (`recDepth`).  It is kept apart from
 the contracts so that a source semantics importing them for `Artifact` does
-not reach the intrinsic run.
+not reach the intrinsic run; so is the evaluation order of each pipeline,
+which reads the raw syntax's `EvalOrder`.
 -/
 
 namespace Solidity.Roadmap
+
+/-- The evaluation order of a pipeline. -/
+def Pipeline.order : Pipeline → EvalOrder
+  | .legacy => {}
+  | .viaIR => EvalOrder.viaIR
+
+/-- The evaluation order of an input: its pipeline's. -/
+def SourceSpec.order (S : SourceSpec) (i : S.Input) : EvalOrder := (S.pipeline i).order
 
 /-- One typed run as a resourced family with no events, completing with the
 typed result. -/

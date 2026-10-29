@@ -11,12 +11,14 @@ on top of `caf52ecd4dde5d37cbc0098d47de1a01aa218285`.
 
 The contracts are stated in Lean, as definitions only, in
 `Solidity/Roadmap/Contracts.lean` (namespace `Solidity.Roadmap`). The module
-imports `Solidity.Keccak` (the fixed hash) and `Solidity.Syntax.Raw` (for
-`EvalOrder`) only, so it is below the elaborator and below the compiler:
+imports `Solidity.Keccak` (the fixed hash, a module without imports) only,
+so it is below the elaborator and below the compiler:
 `scripts/check-layers.mjs` lists `Solidity.Roadmap.*` in its core. The plug of
 the existing typed run, `typedRunPrefixes`, moved to
-`Solidity/Roadmap/TypedRun.lean`, so that a source semantics may import the
-contracts (for `Artifact`) without reaching the intrinsic run. Neither module
+`Solidity/Roadmap/TypedRun.lean`, with `Pipeline.order` and
+`SourceSpec.order` (which read the raw syntax's `EvalOrder`), so that a
+source semantics may import the contracts (for `Artifact`) without reaching
+the intrinsic run or the raw syntax. Neither module
 contains a `sorry` or an axiom. The lemmas check the shape of the contracts
 and nothing more: the order is a preorder, refinement composes and transfers
 safety, completion and divergence, the allowed environments contain the
@@ -53,12 +55,12 @@ ether.
 
 | Decision | Implemented by |
 |---|---|
-| G01 Q3 / G04 Q1: a per-run hash premise, never global injectivity | `CollisionFree f xs` (equal outputs imply equal inputs over `xs`); `EvmSpec.hashed` (the `KECCAK256` preimages of a prefix, consistent along the horizon) and `EvmSpec.guard`; the premise `EvmSpec.RunCollisionFree V p e r`; `RefinesUnder`, refinement under that premise, in `PublicCorrectness.refines` and `SpecTransfer`. The hash is a fixed parameter (`Fixed.hash`, shared by `SourceSpec.fixed` and `EvmSpec.fixed`), Keccak-256 by `EvmSpec.Approved` (`keccakWord`), not an environment input. `CollisionFree.singleton` shows the premise never asks for injectivity. |
-| G01 Q6: export `decode : EvmWorld → Option IntrinsicWorld` | `StateExport` (`lowering`, `decode`, `envAbs`); `EvmSpec.World`, `worlds`, `resume`; `IntrinsicSpec.worlds`; the fields `decode_reach` and `decode_commutes` of `PublicCorrectness`. |
+| G01 Q3 / G04 Q1: a per-run hash premise, never global injectivity | `CollisionFree f xs` (equal outputs imply equal inputs over `xs`); `EvmSpec.hashed` (the `KECCAK256` preimages of a prefix, consistent along the horizon) and `EvmSpec.guard`; the premise `EvmSpec.RunCollisionFree V p e r`; `RefinesUnder`, refinement under that premise, in `PublicCorrectness.refines` and `SpecTransfer`. The hash is a fixed parameter (`Fixed.hash`, shared by `SourceSpec.fixed` and `EvmSpec.fixed`), Keccak-256 by `EvmSpec.Approved` (`keccakWord`), not an environment input. `CollisionFree.singleton` shows the premise never asks for injectivity. Adequacy names only runs hashing fewer than `hashBound` preimages (`EvmSpec.forward_iff`), so counting cannot refute the premise. |
+| G01 Q6: export `decode : EvmWorld → Option IntrinsicWorld` | `StateExport` (`lowering`, `decode`, given the run's preimages, `envAbs`); `EvmSpec.World`, `worlds`, `resume`; `IntrinsicSpec.worlds`; the fields `decode_reach` and `decode_commutes` of `PublicCorrectness`. |
 | G00 Q5: `creationCode`/`runtimeCode` from the whole-input `Artifact` table, a parameter of the source semantics | `SourceSpec.meaning : … → Artifact → lang.Prog`; `Lowering.lower` takes the table; `PublicCorrectness.refines` instantiates it with the compiler's output. The [gate](#non-circularity-as-a-checkable-gate) explains why this parameter is not circular. |
 | G01 Q2 and the follow-up rows on nested frames and the block gas limit | `Lang.Res` is a horizon with resource choices; running out of gas is a revert and the session continues. `SourceSpec.Exhaust`/`never`/`exhaust`/`withExhaust` (every frame and transaction may fail); `EvmSpec.gas`/`withGas` (a gas schedule per frame); code size, stack and memory are not EVM resources (`EvmSpec` docstring). |
-| G01 Q4, G04 Q3 and the follow-up rows on sender funds and precompiles | `SessionEnv` (requests and a history-dependent `Strategy` of `Move`s, with `Event.reenter`/`reentered` for unbounded reentrancy); `SessionEnv.Allowed` (`Affordable` against the `Ledger`, `ZeroHasNoCode`); `SessionEnv.NoCallback` and `SessionEnv.Allowed.withoutCallbacks` (the no-callback reading is a special case); `Lang.PrecompilesFixed`; `PublicCorrectness.session` (source and EVM read one environment). |
-| G00 Q4, revised in the second round: solc's two pipelines, legacy with the pragma's ABI coder (v1 or v2) and via-IR with v2, not all eight `EvalOrder` combinations | `Pipeline` (`legacy`, `viaIR`), `Pipeline.order`, `AbiCoder`; `SourceSpec.pipeline`/`setPipeline`/`pipeline_set`, `pragmaCoder`, `coder` with `coder_legacy` and `coder_viaIR`; `SourceSpec.order`; `SourceSpec.AllPipelines` as the field `PublicCorrectness.bothPipelines`; `pipelines`, `mem_pipelines`, `PublicCorrectness.allPipelines`. |
+| G01 Q4, G04 Q3 and the follow-up rows on sender funds and precompiles | `SessionEnv` (requests and a history-dependent `Strategy` of `Move`s, with `Event.reenter`/`reentered` for unbounded reentrancy); `SessionEnv.Allowed` (`Affordable` against the `Ledger`, `ZeroHasNoCode`, `CodelessSucceeds` over `SessionEnv.hasCode`); `Lang.ThisFromDeployment` with `Fixed.createAddress`; `Fixed.precompile`; `SessionEnv.NoCallback` and `SessionEnv.Allowed.withoutCallbacks` (the no-callback reading is a special case); `Lang.PrecompilesFixed`; `PublicCorrectness.session` (source and EVM read one environment). |
+| G00 Q4, revised in the second round: solc's two pipelines, legacy with the pragma's ABI coder (v1 or v2) and via-IR with v2, not all eight `EvalOrder` combinations | `Pipeline` (`legacy`, `viaIR`), `Pipeline.order`, `AbiCoder`; `SourceSpec.pipeline`/`setPipeline`/`pipeline_set`, `pragmaCoder`, `coder` with `coder_legacy` and `coder_viaIR`; `SourceSpec.order` (in `TypedRun.lean`); `SourceSpec.pipelineOf`/`coderOf` with `SourceSpec.SettingsResolved` (a resolution records its settings); `SourceSpec.AllPipelines` as the field `PublicCorrectness.bothPipelines`; `pipelines`, `mem_pipelines`, `PublicCorrectness.allPipelines`. |
 | *Second round:* the per-transaction gas cap (EIP-7825) and the block gas limit are a recorded idealization | `EvmSpec.Approved` admits every gas schedule (`EvmSpec` docstring). |
 | *Second round:* forced ether: the environment may credit the own balance (block beneficiary, foreign `SELFDESTRUCT`, withdrawals), and the ledger records it | `Event.credit`; `Move.credit` (during a pending call); `Action.credit` (between transactions, with `Action.request`); the `Ledger` reads the history, credits included. |
 | *Second round:* stipend payments to our own instances: a compiler-independent source cost rule decides which `receive`/fallback bodies fit 2300 gas | `SourceSpec.stipendFits`, a field of the compiler-independent source. |
@@ -74,13 +76,18 @@ The public names `Lang`, `Pass`, `Cert`, `SourceSpec`, `EvmSpec`,
 `Admission`, `PublicCorrectness` and `SpecTransfer` are kept. Their
 signatures changed as follows, which a citing sibling must follow:
 
-- `Lang` has a new field `Guard` with the default `True`.
-- `Cert.need_ok` and `Cert.back` are guarded by the target's `Guard`;
-  `Cert.refines` gives `RefinesUnder`; `Cert.comp` takes the premise
-  `mid : ∀ p e r, L₂.Guard p e r` (the middle language has no premise).
+- `Lang` has new fields `Guard` and `Forward`, both defaulting to `True`.
+- `Cert.need_ok` assumes the source bound in the source's `Forward`, yields
+  a target bound in the target's `Forward`, and is guarded by the target's
+  `Guard`, as is `Cert.back`; `Cert.refines` gives `RefinesUnder`;
+  `Cert.comp` takes the premise `mid : ∀ p e r, L₂.Guard p e r` (the middle
+  language has no premise).
 - `Refines.completes`, `Refines.sound`, `Refines.diverges` and
-  `Refines.safety` are kept; `RefinesUnder.*` are their forms under a
-  per-run premise, and `Refines.under` and `RefinesUnder.refines` convert.
+  `Refines.safety` are kept; `RefinesUnder AS AT FS FT G` (forward bounds
+  `FS`, `FT`, premise `G`) is the guarded form, with `RefinesUnder.*` its
+  lemmas, and `Refines.under` and `RefinesUnder.refines` convert.
+- `IntrinsicSpec` has `worlds` and `guard_trivial`; `Compilation` has
+  `asm_guard`.
 - `SourceSpec` and `EvmSpec` have new fields; `SourceSpec.meaning` and
   `Lowering.lower` take an `Artifact`.
 - `Event` addresses and values are `Address`/`Word`; `Event.tx` gained its
@@ -167,17 +174,31 @@ decisions):
 On the source this is an exhaustion choice in the bound: `SourceSpec.Exhaust`
 (the choices: which frames fail as if out of gas), `exhaust r` (the choice of
 a bound), `withExhaust r x` with `exhaust_with`, and `never`, the run without
-failures (`SourceSpec.NoExhaust`). On the EVM it is the gas schedule of the
+gas exhaustion (`SourceSpec.NoExhaust`). At `never` the only failing frames
+are external calls at the 1024 call-depth limit, which fail on the EVM
+whatever the gas, so the source counts call depth along the history. On the EVM it is the gas schedule of the
 bound: `EvmSpec.gas r h`, the gas of the frame the system starts after the
 history `h` (a transaction's gas limit, or what the environment forwards
 into a callback), with `withGas` and `gas_with`.
 
-Refinement then reads naturally (next section): soundness is "for every gas
-schedule there are exhaustion choices", adequacy is "for every exhaustion
-choice, `never` included, there is a gas schedule". A source loop that does
-not terminate has, at `never`, prefixes that never complete; its compiled
-transaction runs out of every finite gas and reverts, which the source
-allows by an exhaustion choice.
+Refinement then reads (next section): soundness is "for every gas schedule
+there are exhaustion choices", adequacy is "at `never` there is a gas
+schedule" (`Lang.Forward`; `SourceSpec.forward_iff`). Adequacy does not
+range over the other exhaustion choices: a choice that fails a call between
+two instances while a later, expensive sibling call succeeds has no gas
+schedule, because a call forwards all but 1/64 of the caller's gas. The
+failures are a soundness allowance (the decision), not something the
+compiled code must reproduce. A source loop that does not terminate has, at
+`never`, prefixes that never complete; its compiled transaction runs out of
+every finite gas and reverts, which the source allows by an exhaustion
+choice.
+
+Because every gas schedule is admissible and adequacy asks only for *some*
+schedule, a compiler that is correct only with very large gas (say above
+2^100, far beyond EIP-7825's 2^24 per-transaction cap) and reverts or takes
+a catch path below it satisfies the contracts. That is the price of the
+recorded gas idealization; a quantitative bound on `need` is not part of
+the contracts.
 
 Code size is not an EVM resource: the EIP-170 and EIP-3860 limits are a
 recorded idealization, so the theorem assumes any code size deploys. Nor are
@@ -244,14 +265,22 @@ and a per-run premise `Guard : Prog → Env → Res → Prop` that defaults to
 2. **Backward (soundness).** Every admissible target prefix is below some
    admissible source prefix.
 
-`RefinesUnder AS AT G s t` is the same under a per-run premise `G` on the
-target bound: the forward direction names a target bound that is above the
-source prefix if it satisfies `G`, and the backward direction holds of
-target bounds that satisfy `G`. The premise cannot make the forward
-direction vacuous in practice: the target bound is chosen before the
-premise is checked, and refuting the premise at it means exhibiting a
-Keccak collision among the run's own preimages. `Refines.under` and
-`RefinesUnder.refines` convert between the two. Proved consequences:
+`RefinesUnder AS AT FS FT G s t` is the same with forward bounds and a
+per-run premise `G` on the target bound: every admissible source bound in
+`FS` names an admissible target bound in `FT` that is above the source
+prefix if it satisfies `G`, and the backward direction holds of target
+bounds that satisfy `G`. In the public contract `FS` is the source's
+`Forward` (no exhaustion) and `FT` the EVM's: runs hashing fewer than
+`hashBound = 2^128` preimages (`EvmSpec.forward_iff`). Without `FT` the
+premise could make the forward direction vacuous: bytes that hash more than
+`2^256` distinct preimages have a collision by counting, provably without
+exhibiting one, at every large enough bound. Below `2^128` preimages no
+collision or region overlap follows by counting, so refuting the premise at
+the named bound means exhibiting a Keccak collision among the run's own
+preimages. The cost: adequacy is not claimed for a source prefix whose
+compiled run must hash `2^128` or more preimages (more than `2^133` gas).
+`Refines.under` and `RefinesUnder.refines` convert between the two. Proved
+consequences:
 
 - **Completion transfers** (`RefinesUnder.completes`, `Refines.completes`).
   A source prefix that completes with `o` at an admissible bound gives an
@@ -300,15 +329,27 @@ Every layer reads one environment type, `SessionEnv`
 - `Affordable`: the deployment value and every request's `msg.value` are at
   most the sender's ledger balance; a request the sender cannot afford is
   invalid and never runs;
-- `ZeroHasNoCode`: a call to address 0 is answered at once with success and
-  no data (the recorded assumption that address 0 has no code).
+- `ZeroHasNoCode`: address 0 has no code (`hasCode h 0 = false`, the
+  recorded assumption);
+- `CodelessSucceeds`: a call to an account without code runs nothing and
+  succeeds at once with no data, as on the EVM. `SessionEnv.hasCode` is what
+  `extcodesize` reads, so solc's code-existence check before a typed call
+  reads the same answer on both sides. Accounts with code may accept or
+  refuse any call or payment.
+
+The `Ledger` gives external accounts' balances: they move only by events
+(payments, values sent, credits). Value moved between instances of the
+system is internal; the system's own balances are part of each side's
+worlds, from the deployment value, the events and those transfers.
 
 Nothing else restricts the strategy. `SourceSpec` and `EvmSpec` each read
-their environments as session environments (`session`, `ofSession`,
-`session_of`) and allow exactly the allowed ones (`allowed_iff`); the public
-contract requires the source environment to be the EVM's
-(`PublicCorrectness.session`), so `envAbs` cannot choose an environment in
-which nothing happens. `PublicCorrectness.allowed_iff` derives that the two
+their environments as session environments, exactly (`session`,
+`ofSession`, `session_of`, `of_session`: each environment type is equivalent
+to `SessionEnv`), and allow exactly the allowed ones (`allowed_iff`); the
+public contract requires the source environment to be the EVM's
+(`PublicCorrectness.session`), so `envAbs` is forced
+(`PublicCorrectness.envAbs_eq`) and cannot choose an environment in which
+nothing happens. `PublicCorrectness.allowed_iff` derives that the two
 sides allow the same environments.
 
 The **no-callback reading** (`transferSemantics:noCallback`) is
@@ -326,7 +367,14 @@ of `L` calls an `Address.Precompile` (the Osaka addresses `0x01`–`0x11` and
 P256VERIFY at `0x100`), so a call to one is computed inside the semantics,
 the cryptographic ones through the approved fixed functions, and never
 consults the strategy. Both `SourceSpec.Approved` and `EvmSpec.Approved`
-require it.
+require it, and both sides read the same functions, `Fixed.precompile`
+(shared through `PublicCorrectness.fixed`; G06 pins it to the Osaka
+definitions).
+
+**`this` comes from the deployment**: `Lang.ThisFromDeployment` says every
+`Event.deploy` reports the address `Fixed.createAddress` computes from the
+session's `deployer` and `deployNonce` (a 64-bit nonce); both `Approved`
+predicates require it.
 
 The EVM plays every account outside the system by the strategy. A concrete
 Osaka world with arbitrary external code is one such strategy for a fixed
@@ -386,8 +434,11 @@ lemmas, owned as follows:
 The public theorem also **exports a decoding** of EVM worlds to intrinsic
 worlds ([G01 Q6](#q6-state-level-transfer)), as a function, so that it cannot
 be a trivial relation. `StateExport S I V` holds the `lowering : Lowering S
-I` whose worlds are meant, `decode : V.World → Option I.World` and the
-environment map `envAbs` to the intrinsic layer. Two fields of
+I` whose worlds are meant, `decode : List Bytes → V.World → Option I.World`
+and the environment map `envAbs` to the intrinsic layer. `decode` is given
+the preimages the run has hashed (`EvmSpec.hashed`): a world alone cannot
+determine which key a hashed slot belongs to, since two keys may collide in
+another run, and decoding must never invert the hash. Two fields of
 `PublicCorrectness` constrain it, for every compiled input, allowed EVM
 environment and admissible bound:
 
@@ -400,8 +451,16 @@ environment and admissible bound:
 - `decode_commutes`: **decoding commutes with the observations.** For every
   reached EVM world `ω` decoding to `ω'`, the sessions continued from `ω`
   (`EvmSpec.resume`) refine and are refined by the intrinsic sessions from
-  `ω'` (`IntrinsicSpec.ofWorld`), at every allowed environment, under the
-  per-run hash premise.
+  `ω'` (`IntrinsicSpec.ofWorld`), at every allowed environment whose opening
+  balances are `ω`'s (`EvmSpec.balances`), under the hash premise over the
+  prefix's preimages followed by the continuation's (a later key may collide
+  with an earlier one).
+
+Both compare intrinsic worlds by equality, so the intrinsic world must be a
+canonical representation (G22, G24). The final statement must name the
+concrete typed intrinsic layer (G24) for `I`: `Contracts.lean` cannot
+import it, and with a freely chosen `I` (a copy of the EVM) the export
+would say nothing.
 
 `PublicCorrectness.envAbs_agrees` ties the intrinsic environment map to the
 public one through the lowering's own map.
@@ -464,8 +523,9 @@ language, `ofWorld` and `worlds`. `Lowering S I` has:
 
 **Observation and relation.** The shared `Event` and `Outcome`. The
 certificate gives refinement in both directions at every allowed environment
-(`Cert.refines`). The intrinsic language has no per-run premise, so this is
-plain refinement (`RefinesUnder.refines`). Typing preservation is in the
+(`Cert.refines`). The intrinsic language has no per-run premise
+(`IntrinsicSpec.guard_trivial`), so only the forward bounds remain: adequacy
+at the source's runs without exhaustion. Typing preservation is in the
 target type itself, since `lower` produces intrinsic `Prog C Γ Γ'`.
 
 **Premises.** Only the approved environment set `I.lang.Allowed` and its
@@ -544,12 +604,19 @@ these fields:
    source environment is the EVM's session environment.
 5. `envAbs_agrees`: the state export's environment map agrees with
    `envAbs` through the lowering.
-6. `refines`: for every admitted input, artifact the compiler returns and
+6. `creates_table`: the artifact's units have prefix-free creation bytes
+   (`Artifact.PrefixFree`), and every `CREATE` the EVM runs
+   (`EvmSpec.created`) executes the table's creation bytes for the contract
+   its `Event.create` names, followed by the constructor arguments
+   (`createsOf`, `Artifact.initcode`). So `type(C).creationCode`, read from
+   the table, is what `new C` deploys.
+7. `refines`: for every admitted input, artifact the compiler returns and
    allowed EVM environment `e`, `envAbs e` is allowed and the source meaning
    **at that artifact table** refines the artifact's EVM sessions at `e`,
-   under the per-run hash premise (`RefinesUnder … (V.RunCollisionFree
-   (V.load art) e)`).
-7. `decode_reach` and `decode_commutes`: the state export (above).
+   with adequacy at the source's `never` and the EVM's `hashBound`, under the
+   per-run hash premise (`RefinesUnder … (V.RunCollisionFree (V.load art)
+   e)`).
+8. `decode_reach` and `decode_commutes`: the state export (above).
 
 The final public statement is the conjunction of:
 
@@ -573,9 +640,9 @@ The roadmap's obligations read off this contract as follows:
   non-vacuous source, the compiler returns an artifact.
 - **No always-revert compiler.** `PublicCorrectness.succeeds` turns the
   source's success witness into an EVM success under the per-run premise,
-  and `PublicCorrectness.not_alwaysRevert` refutes any compiler whose bytes
-  never complete with a success on collision-free runs (say, runs that hash
-  nothing).
+  and `PublicCorrectness.not_alwaysRevert` refutes any compiler whose
+  compiled bytes never complete with a success while meeting the premise on
+  their runs below `hashBound` (say, bytes that hash nothing).
 - **Divergence** is matched by `RefinesUnder.diverges` and the forward
   direction; a diverging source transaction is, on the EVM, a transaction
   that runs out of gas, which the source allows by an exhaustion choice.
@@ -598,8 +665,8 @@ bytes under the per-run hash premise:
   every admissible source prefix holds at every admissible EVM prefix whose
   preimages do not collide.
 - **Completion (diamond-like).** A source completion at an admissible bound
-  gives an admissible EVM bound at which, if its preimages do not collide,
-  the bytes complete with the same outcome.
+  without exhaustion gives an admissible EVM bound at which, under the
+  premise, the bytes complete with the same outcome.
 
 The semantic half is proved from contract 5 (`PublicCorrectness.transfer`,
 no axioms, pinned by `#guard_msgs`). The rest of contract 6 is meta-level and
@@ -627,8 +694,8 @@ The gate G07 implements has four parts:
    and instantiating `SourceSpec` may import only an explicit whitelist:
    Lean's prelude, the new source modules, named datatype modules (such as
    the one defining `Ty`), each with its S05 correspondence theorem, and
-   `Solidity.Roadmap.Contracts` itself, whose closure is `Solidity.Keccak`
-   and `Solidity.Syntax.Raw` and their imports. In particular they reach
+   `Solidity.Roadmap.Contracts` itself, whose closure is `Solidity.Keccak`,
+   a module without imports (not even `Lean`). In particular they reach
    neither `Solidity.Syntax.Scoped` (the intrinsic programs) nor
    `Solidity.Semantics.Run` (their run), nor `Solidity.Roadmap.TypedRun`,
    `Solidity.Evm.*`, `Solidity.Frontend.*` or `Solidity.Syntax.Elab*`. A
@@ -663,9 +730,9 @@ compiler is correct by construction. Here:
   `runtimeCode` expression evaluates to. The source never executes those
   bytes (executing arbitrary bytecode is a recorded exclusion), and `new C`
   runs the source meaning of `C`, not the table's bytes. So a table cannot
-  make wrong code look right: if the bytes for `C` were wrong, the EVM's
-  `new C` would execute them and its observations would differ from the
-  source's.
+  make wrong code look right: `PublicCorrectness.creates_table` makes the
+  EVM's `new C` execute exactly the table's bytes for `C`, so if they were
+  wrong its observations would differ from the source's.
 - The decision fixes these expressions' value as "the bytes this compiler
   produces" ([G00 Q5](../solidity-scope.md#user-decisions-2026-10-29)); the
   parameter is the only way to state that value without a fixed compiler
@@ -675,7 +742,9 @@ compiler is correct by construction. Here:
 - The composed pipeline must output a table consistent with itself (a
   contract embedding `C`'s bytes embeds the bytes the table holds for `C`).
   solc rejects cyclic creation dependencies, so this is a well-founded
-  construction (G44), not a fixed point the theorem assumes.
+  construction (G44), not a fixed point the theorem assumes. `PublicCorrectness`
+  does not check that `compiler i` is the pipeline run on the same table;
+  that is part of the concrete pipeline's definition (G44, G49.03).
 
 ## Pass certificates and proof boundaries
 
@@ -688,8 +757,9 @@ domain and `envAbs`. A **certificate** `Cert π` is data. Its fields are:
 - `need : (p : L₁.Prog) → π.Dom p → L₂.Env → L₁.Res → L₂.Res`, the
   constructive resource bound (on the EVM, a gas schedule);
 - `need_ok`: at every allowed target environment and admissible source
-  bound, `need` is admissible and, under the target's `Guard`, the source
-  prefix is below the target prefix there;
+  bound in the source's `Forward`, `need` is admissible and in the target's
+  `Forward`, and, under the target's `Guard`, the source prefix is below the
+  target prefix there;
 - `back`: every admissible target prefix satisfying the `Guard` is below an
   admissible source prefix.
 
@@ -744,7 +814,7 @@ marked †.
 |---|---|---|---|
 | solc JSON import, `solc_import` | `Solidity/Frontend/Import.lean` | At most an untrusted `CheckedFrontend.produce` (G15) | Parsing and resolution are solc's. The AST is printed to `sol` text and elaborated by the macros, so there is no `Parses`/`Resolves` relation to be sound against. |
 | `Source.Provenance`, `ScopeScan`, `ScopeScan.within` | `Solidity/Frontend/Source.lean:117`, `:271`, `:299` | Pins of `Input` (G00); feature evidence toward `InProfile` | They certify the identity of the input and the extracted feature list. They say nothing of source correspondence or extraction completeness (the docstring at `Source.lean:269`). |
-| Source premise `address(this) < 2^160` | [source-inputs.md](../source-inputs.md), `Solidity/Frontend/Problems.lean:89` | A conjunct of the EVM `Allowed` environment set | — (an existing environment premise; it is listed for G00 to confirm) |
+| Source premise `address(this) < 2^160` | [source-inputs.md](../source-inputs.md), `Solidity/Frontend/Problems.lean:89` | Discharged by the type: `Address := Fin (2^160)`, and `this` comes from the deployment (`Lang.ThisFromDeployment`) | — |
 | Elaborated `Prog C Γ Γ'` via `Prog.run` | `Solidity/Semantics/Run.lean:1153` | **Not** the source semantics | Defining the source as `Prog.run ∘ lower` would make contract 2 true by construction. It is the intrinsic layer (below). |
 
 ### Intrinsic layer (L5)
@@ -884,8 +954,12 @@ Every field of the contracts has an owner.
 | `linkMap`, `NoLinkMap` | Only the empty library link map; `load` links the input's libraries | G00, G44 |
 | `stipendFits` | The compiler-independent stipend cost rule, and compiled `receive`/fallback bodies that agree with it | S04, G43, G47 |
 | `Fixed.regionLen`, `Fixed.rootSlots` | Static layout below `rootSlots`, hashed regions within `regionLen` | G27 |
+| `Fixed.ledger`, `Fixed.precompile`, `Fixed.createAddress` | The G03 ledger, the Osaka precompile functions and the `CREATE` address, pinned in the final statement | G03, G06 |
+| `Lang.resLE`, `Exhaust` (meaning) | Bounds ordered by horizon only; an exhaustion choice only turns a frame into `revert []` at some point after its last event, the run agreeing with `never` before | S03.04, S05 |
+| `SessionEnv.hasCode`, `EvmSpec.balances`, `EvmSpec.created` | The EVM's code existence, world balances and `CREATE` bytes, read off the pinned EVM | G06, G47 |
+| Canonical `IntrinsicSpec.World`; concrete `I` in the final statement | Decoded worlds compared by equality; the typed intrinsic layer named for `I` | G22, G24, G49.03 |
 | `lang`, `meaning`, `inhabited` | Session semantics with events and outcomes, parametric in the artifact table, consistent prefix families, nontrivial allowed environments | S02–S04, S05 |
-| `Exhaust`, `never`, `exhaust`, `withExhaust` | Exhaustion choices at event granularity: every frame of the system (a transaction, a callback, a call between instances) may fail with `revert []` before its next event, its caller continuing; `never` is the unexhausted meaning | S03.04 |
+| `Exhaust`, `never`, `exhaust`, `withExhaust`, `forward_iff` | Exhaustion choices at event granularity: every frame of the system (a transaction, a callback, a call between instances) may fail with `revert []` before its next event, its caller continuing; `never` is the unexhausted meaning, with call-depth failures at 1024 | S03.04 |
 | `fixed`, `session`, `allowed_iff` (both specs) | The shared environment and fixed parameters; the `Ledger` | S03, G03, G06 |
 | `Approved` (both specs) | Idealized source; Keccak-256; every gas schedule admissible; precompiles fixed | S03.04, G06 |
 | `Admission` or `CheckedFrontend` | Sound and complete frontend | G05 (interface), G08–G15 |
@@ -928,7 +1002,7 @@ theorem is restated against them.
   `safety`; `SessionEnv.withoutCallbacks_noCallback`,
   `SessionEnv.Allowed.withoutCallbacks`; `mem_pipelines`; `HashPremise.nil`;
   `PublicCorrectness.allPipelines`, `compiles`, `succeeds`,
-  `not_alwaysRevert`, `allowed_iff`.
+  `not_alwaysRevert`, `allowed_iff`, `envAbs_eq`.
 
 ### First version
 
@@ -942,10 +1016,76 @@ theorem is restated against them.
 
 ### This revision
 
-Findings of the read-only finder and skeptic reviews of this revision are
-recorded below.
+A read-only finder and a separate skeptic reviewed the first push of this
+revision, neither using the Lean server. Their findings and what was done:
 
-REVIEW_PLACEHOLDER
+**Fixed** (all in `Contracts.lean` and this document):
+
+1. *Blocking (finder): the hash premise could make the public contract
+   vacuous.* Bytes hashing more than `2^256` preimages violate the premise
+   by counting at every large bound, so the guarded forward direction held
+   vacuously. Adequacy now names only bounds in the EVM's `Forward`, runs
+   hashing fewer than `hashBound = 2^128` preimages (`Lang.Forward`,
+   `EvmSpec.forward_iff`, `RefinesUnder`'s `FT`). The false claim that
+   refuting the premise needs an exhibited collision is corrected.
+2. *Blocking (finder, skeptic): adequacy over every exhaustion choice was
+   unsatisfiable* (63/64 forwarding; the 1024 call-depth limit). Adequacy
+   now ranges over the source's `Forward` bounds, `never` only
+   (`SourceSpec.forward_iff`, `RefinesUnder`'s `FS`, `Cert.need_ok`), and
+   `never` includes the deterministic call-depth failures.
+3. *Blocking (skeptic): `decode` of a world alone and `decode_commutes`' guard
+   over the continuation only* were false for mappings with colliding keys.
+   `decode` now takes the run's preimages, and the continuation's guard is
+   the premise over the prefix's preimages followed by its own.
+4. *`creationCode` was not tied to what `new C` deploys* (skeptic). Added
+   `EvmSpec.created`, `Artifact.initcode`, `Artifact.PrefixFree`, `createsOf`
+   and the field `PublicCorrectness.creates_table`.
+5. *The non-session part of an environment was free* (skeptic). Added
+   `of_session` to both specs; `PublicCorrectness.envAbs_eq` shows `envAbs`
+   is forced.
+6. *Intermediate languages could set `Guard := False`* (finder). Added
+   `IntrinsicSpec.guard_trivial` and `Compilation.asm_guard`.
+7. *Settings were not tied to the meaning* (finder, skeptic). Added
+   `SourceSpec.pipelineOf`, `coderOf` and `SettingsResolved` (in
+   `SourceSpec.Approved`); `PublicCorrectness.allPipelines` no longer takes
+   an unused membership hypothesis.
+8. *Precompile functions not shared; code existence not in the environment;
+   resumed sessions' balances unrelated to the world* (skeptic). Added
+   `Fixed.precompile`, `SessionEnv.hasCode` with `CodelessSucceeds`,
+   `EvmSpec.balances` and the balance premise of `decode_commutes`.
+9. *`not_alwaysRevert`'s hypothesis ranged over every artifact* (finder);
+   it now ranges over compiled artifacts and bounds below `hashBound`.
+10. *Remaining `Nat` values; `this` only in prose* (finder). `Ledger` returns
+    `Word`, `deployNonce` is 64-bit; `Fixed.createAddress` and
+    `Lang.ThisFromDeployment` (in both `Approved`) tie `this` to the
+    deployment.
+11. *Gate text* (finder): `Contracts.lean` no longer imports
+    `Solidity.Syntax.Raw` (`Pipeline.order` and `SourceSpec.order` moved to
+    `TypedRun.lean`), so its closure is `Solidity.Keccak`, which has no
+    imports.
+12. *Stale wording* (finder): the reuse-map row for `address(this) < 2^160`,
+    the `PublicCorrectness` docstring on Keccak, the `docs/README.md` row,
+    the "for the user to confirm" readings (removed when the second-round
+    decisions settled them).
+13. *Solc-style layout not covered by the premise* (skeptic): already
+    covered by the second-round regions (`RegionsDisjoint`).
+
+**Recorded, not changed:**
+
+- *Ledger not pinned; exhaustion choices and the bound order uninterpreted;
+  intrinsic worlds compared by equality; the intrinsic layer `I` free*
+  (skeptic): child obligations in the table above (G03/G06 pins, S03.04,
+  S05, G22/G24, G49.03). The final statement must name the concrete
+  intrinsic layer.
+- *Gas thresholds* (skeptic): with every gas schedule admissible, a
+  compiler correct only above huge gas satisfies the contracts; stated under
+  [resources](#resources-horizons-exhaustion-and-gas).
+- *The table fixed point* (skeptic): not checked by `PublicCorrectness`;
+  stated in the gate.
+- *Outside this task's files* (finder): `docs/solidity-scope.md` still says
+  "none is done yet" for the follow-up list, and `docs/parallelism.md`'s
+  family list of the core does not name `Roadmap`; both are for the
+  integrator.
 
 ### First version
 
