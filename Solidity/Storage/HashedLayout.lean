@@ -14,8 +14,8 @@ slot terms of one run denote distinct words under the per-run hash premises
   term, as the EVM hashes it.
 * **Words** (`Loc.word N H`) read a term with `N` words and a hash parameter
   `H : Pre → Nat`; no property of `H` is assumed beyond `H p < N` and the
-  run's premises. `Solidity/Storage/HashedKeccak.lean` instantiates `H` with
-  keccak-256 over the ABI encoding.
+  run's premises. Work queue item 3 instantiates `H` with keccak-256 over
+  the ABI encoding.
 * **Layout** (`STy`, `STy.locate`): a word, a struct, a static array, a
   dynamic array of length below `lmax = 2^64`, or a mapping, laid out as
   solc does without packing: members consecutively, element `i` at
@@ -33,7 +33,8 @@ slot terms of one run denote distinct words under the per-run hash premises
   (`word_data_alias`).
 
 Global injectivity is not claimed: it is impossible
-(`Solidity.Evm.External.no_injective_slot_encoding`); the theorems speak of
+(`Solidity.Evm.External.no_injective_slot_encoding`, in
+`Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`); the theorems speak of
 the terms of one run.
 -/
 
@@ -414,3 +415,9 @@ end Solidity.Storage
 
 /-- info: 'Solidity.Storage.located_word_inj' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Storage.located_word_inj
+
+/-- info: 'Solidity.Storage.STy.locate_bounded' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.STy.locate_bounded
+
+/-- info: 'Solidity.Storage.Loc.nodup_map_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.Loc.nodup_map_word

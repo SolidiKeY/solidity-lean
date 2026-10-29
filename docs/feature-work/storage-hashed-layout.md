@@ -1,4 +1,4 @@
-# Storage: the hashed layout, its separation and the keccak instantiation
+# Storage: the hashed layout and its separation
 
 Lane `lane-hashing` of batch `roadmap-l1-20261029` (branch
 `cloud/roadmap-l1-20261029/lane-hashing`, base `ceb0d54`). Preparation for
@@ -44,24 +44,25 @@ and every hashed offset below `L` (the region length).
 
 | Name | Statement |
 |---|---|
-| `off_eq_of_mod_eq` | `a < N → i < N → j < N → (a + i) % N = (a + j) % N → i = j` (one region). |
-| `hashed_ne_root` | Under `RegionsDisjoint N L H (List.range R) P`, `(H p + o) % N ≠ r % N` for `p ∈ P`, `o < L`, `r < R ≤ N` (a hashed word never lands on a root word; `Covers`). |
-| `hashed_ne_hashed` | Different preimages in `P`, offsets below `L ≤ N`: different words, also across the wrap-around (`Near`). |
+| `Loc.off_eq_of_mod_eq` | `a < N → i < N → j < N → (a + i) % N = (a + j) % N → i = j` (one region). |
+| `Loc.hashed_ne_root` | Under `RegionsDisjoint N L H (List.range R) P`, `(H p + o) % N ≠ r % N` for `p ∈ P`, `o < L`, `r < R ≤ N` (a hashed word never lands on a root word; `Covers`). |
+| `Loc.hashed_ne_hashed` | Different preimages in `P`, offsets below `L ≤ N`: different words, also across the wrap-around (`Near`). |
 | `Loc.word_inj` | Two `Bounded L R` terms whose preimages lie in `P` have the same word only if they are equal. |
-| `nodup_map_word` | A run's distinct bounded terms denote distinct words. |
-| `word_data_alias` | Without the bound, `data s 0 ≠ data s N` have one word: the offset bound is needed. |
+| `Loc.nodup_map_word` | A run's distinct bounded terms denote distinct words. |
+| `Loc.word_data_alias` | Without the bound, `data s 0 ≠ data s N` have one word: the offset bound is needed. |
 
 The proof of `word_inj` is by induction on both terms. Root/root: offsets
-below `R ≤ N` are their own words. Root/hashed: `hashed_ne_root`. Hashed at
-different preimages (including `entry` against `data`): `hashed_ne_hashed`.
+below `R ≤ N` are their own words. Root/hashed: `Loc.hashed_ne_root`. Hashed at
+different preimages (including `entry` against `data`): `Loc.hashed_ne_hashed`.
 Hashed at the same preimage: the preimage's parts are equal, so the inner
 words are equal and the induction hypothesis gives equal inner terms; then
-`off_eq_of_mod_eq` gives equal offsets. Only the region premise is used; it
-implies the point premise `CollisionFree` (`RegionsDisjoint.collisionFree`).
+`Loc.off_eq_of_mod_eq` gives equal offsets. Only the region premise is used;
+for `L > 0` it implies the point premise `CollisionFree`
+(`RegionsDisjoint.collisionFree`).
 
 These are the root and region cases the hash-bound reviews named:
 wrap-around (`Near` reads distance around the circle), root overlap
-(`Covers`) and offset aliasing (`Bounded`, `word_data_alias`).
+(`Covers`) and offset aliasing (`Bounded`, `Loc.word_data_alias`).
 
 ### Types, paths and bounded offsets
 
@@ -102,9 +103,25 @@ not in `CORE`, like `Evm/**`; `Machine.lean` is not edited):
 | `ofSlot_injective`, `ofSlot_add` | Injective; `ofSlot (s.add i) = (ofSlot s).add i`. |
 | `keysBelow_ofSlot`, `exists_ofSlot` | The image is exactly the terms whose keys are below `W` (`KeysBelow W`). |
 | `lmax_eq_Lmax` | `lmax = Lmax`, by `rfl`. |
-| `slot_word_inj` | `Loc.word_inj` read on slots: `Loc.word W H (ofSlot s) = Loc.word W H (ofSlot t) → s = t` for bounded slots with preimages in `P`. |
+| `slot_word_inj` | `Loc.word_inj` moved along `ofSlot`: `Loc.word W H (ofSlot s) = Loc.word W H (ofSlot t) → s = t` for bounded slots with preimages in `P`. |
+
+The EVM model's store is symbolic (`WordStore.cells : Slot → Fin W`) and
+never computes a slot's word, so `slot_word_inj` does not refine the machine;
+it is what a word-addressed refinement of the store would need.
 
 ### Limitations (checkpoint 2)
+
+- **Word keys only.** `Pre.entry` takes the key as one word, which covers
+  value-type keys (`uint`, `int`, `address`, `bool`, `bytesN`). `string` and
+  `bytes` keys hash their unpadded bytes (`keccak(bytes(k) ‖ p)`); the key
+  `""` then gives the same bytes as a dynamic array's data at `p`, so such
+  keys need another preimage shape and are not modelled. Nor are `bytes` and
+  `string` storage values (their long form is data at `keccak(p)`).
+- **One region length.** `L` must cover every hashed region of the type
+  (`STy.Fits`), so the bound degrades with the largest one; a type with a
+  region of `2^192` words or more cannot satisfy `L ≤ N` usefully. The
+  premise is satisfiable only when `(q² + q·R)·L ≪ N` (for `L = N` and two
+  preimages every pair is `Near`).
 
 - **No packing.** solc packs value types smaller than a word into one slot
   (and `bytes`/`string` use a short in-place encoding). The model is word
@@ -120,3 +137,47 @@ not in `CORE`, like `Evm/**`; `Machine.lean` is not edited):
   queue takes it up.
 - **`P` must contain the preimages.** The theorems take the run's preimage
   list as a hypothesis; G46.05 is to expose it per execution prefix.
+
+### Handoff — checkpoint 2
+
+Work queue item 2 is done: the layout model, bounded offsets for every
+access path, separation (including the root and wrap-around cases) and the
+read-only `Evm.Slot` correspondence. `Solidity/Evm/Machine.lean` is not
+edited.
+
+Gates on the checkpoint's final commit:
+
+- `lean_diagnostic_messages`: no messages on `Solidity/Storage/HashedLayout.lean`
+  and `Solidity/Storage/HashedLayoutEvm.lean`. `#guard_msgs` pins:
+  `Loc.word_inj`, `located_word_inj`, `Loc.nodup_map_word` and
+  `slot_word_inj` at `[propext, Classical.choice, Quot.sound]`,
+  `STy.locate_bounded` at `[propext, Quot.sound]`. No `sorry`, new axiom,
+  `native_decide`, `decide` tactic, `grind`, `implemented_by` or
+  `maxHeartbeats`.
+- `HashedLayout.lean` elaborates in a few seconds; `HashedLayoutEvm.lean`'s
+  cost is that of loading `Solidity.Evm.Machine` (about a minute in a cold
+  language server), its own declarations are immediate.
+- `node scripts/check-layers.mjs`: 158 core modules, 0 reach the elaborator
+  (`Solidity.Storage.HashedLayout` in `CORE`; the `Evm` correspondence stays
+  outside, as `Evm/**` does). `node scripts/check-orphans.mjs`: 737
+  reachable, 0 orphaned. `bash scripts/check-trust.sh`: 0 findings.
+  `bash scripts/check-doc-paths.sh`: 46, the base count.
+
+### Review (checkpoint 2)
+
+A read-only finder and a separate skeptic reviewed commit `110f306` without
+the Lean server. Both found the formal content sound: the layout matches
+solc at word granularity (and `Evm/Layout.lean`'s sizes), the bounds have no
+off-by-one, the induction in `word_inj` is sound, and the hypotheses are
+satisfiable for realistic parameters. Confirmed findings, fixed in the
+following commit:
+
+| Finding | Fix |
+|---|---|
+| The module docstring, this document's title and the README row named a keccak module that did not exist yet (finder 1, skeptic 5). | Reworded as work queue item 3 (it lands in checkpoint 3). |
+| `string`/`bytes` keys and values were not in the limitations; for keys the empty string makes an `entry` preimage's bytes equal a `data` one's (finder, skeptic 6). | "Word keys only" limitation. |
+| The bound's dependence on the largest region and when the premise is satisfiable were unstated (skeptic 1, 3). | "One region length" limitation. |
+| "Region premise implies point premise" omitted `L > 0` (skeptic 4). | Added. |
+| The `Evm.Slot` reading suggested a refinement of the machine, whose store is symbolic (skeptic 7). | Reworded here and in the module docstring. |
+| `no_injective_slot_encoding` cited without its `Bridge/` location; `Loc.` names cited bare (finder 2, 3). | Location added; names qualified. |
+| `STy.locate_bounded` and `Loc.nodup_map_word` had no axiom pins (finder 4). | Pinned. |

@@ -8,9 +8,11 @@ A read-only correspondence: `Solidity.Evm.Slot` (`Solidity/Evm/Machine.lean`,
 not edited here) and `Solidity.Storage.Loc` have the same three shapes, with
 a `Slot`'s mapping key a word (`Fin W`) and a `Loc`'s a `Nat`. `ofSlot` is
 injective, commutes with adding to the offset, and reaches exactly the terms
-whose keys are words (`KeysBelow W`). So the separation theorems of
-`HashedLayout.lean` apply to the EVM model's slots read through
-`Loc.word W H ∘ ofSlot`, and `lmax` is the EVM model's `Lmax`.
+whose keys are words (`KeysBelow W`); `lmax` is the EVM model's `Lmax`.
+The machine's store (`WordStore.cells : Slot → Fin W`) is symbolic and never
+computes a slot's word, so `slot_word_inj` does not refine the machine: it is
+`Loc.word_inj` moved along `ofSlot`, the separation a word-addressed
+refinement of the store would need.
 -/
 
 namespace Solidity.Storage
