@@ -35,6 +35,9 @@ history is in git.
 | [feature-work/roadmap-decisions-impact.md](feature-work/roadmap-decisions-impact.md) | Roadmap: what each 2026-10-29 user decision affects, whether existing proofs survive, and the owning group. |
 | [feature-work/storage-hashed-layout.md](feature-work/storage-hashed-layout.md) | The hashed storage layout model (slot terms, words through a hash parameter, bounded offsets), its separation under the region premise, the EVM `Slot` correspondence and the keccak instantiation with solc slot vectors (G27.05/G46.05 preparation). |
 | [feature-work/backend-assembler.md](feature-work/backend-assembler.md) | Roadmap G45.05/G45.04 lane: the Osaka instruction datatype, byte encoder/decoder and jump-destination analysis, then the assembler; a handoff per checkpoint. |
+| [feature-work/precompiles.md](feature-work/precompiles.md) | Osaka's 18 precompiles as computed core functions with gas and failure laws, G06's `Fixed` instance, the vector provenance and the Bridge agreement. |
+| [feature-work/stipend-cost-rule.md](feature-work/stipend-cost-rule.md) | The compiler-independent stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs, its examples and the compiler obligation (G43). |
+- [Cloud task 10 integration](feature-work/cloud-integration-10.md) — committed ABI/error repairs, merge decisions and combined validation.
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
 
