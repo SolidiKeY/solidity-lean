@@ -449,6 +449,117 @@ def Decl.fitsParams (E : Env) (isBase : DeclName → DeclName → Bool) (σs : L
   | Option.none => false
 
 
+/-! ## Structs, external functions, payments and ABI encoding (S02 prerequisites) -/
+
+/-- The member names of a struct, in order. -/
+def Syn.memberNames : {c : Cat} → Syn c → List String
+  | _, .cons x xs => x.memberNames ++ xs.memberNames
+  | _, .structMember _ n => [n]
+  | _, _ => []
+
+/-- A struct declaration's members, at a location: their names and types. -/
+def Decl.structFields (E : Env) (d : Decl) (l : DataLoc) : Option (List (String × STy)) :=
+  match d.kind, d.top, d.node with
+  | .struct, _, .struct _ m ms =>
+    match (Syn.cons m ms).tys E d.scope l with
+    | Option.some τs => Option.some ((Syn.cons m ms).memberNames.zip τs)
+    | Option.none => Option.none
+  | _, _, _ => Option.none
+
+/-- The declaration a resolved type name denotes. -/
+def Env.declOf (E : Env) (k : DeclKind) (dn : DeclName) : Option Decl :=
+  E.decls.find? fun d => d.kind == k && d.scope == dn.scope && d.name == dn.name
+
+/-- The members of struct `dn` at location `l`. -/
+def Env.structFields (E : Env) (dn : DeclName) (l : DataLoc) : Option (List (String × STy)) :=
+  (E.declOf .struct dn).bind (·.structFields E l)
+
+/-- The type of the `i`-th member of struct `dn` at location `l`. -/
+def Env.fieldTy? (E : Env) (dn : DeclName) (l : DataLoc) (i : Nat) : Option STy :=
+  (E.structFields dn l).bind fun fs => (fs[i]?).map Prod.snd
+
+/-- The position and type of member `x` of struct `dn` at location `l`. -/
+def Env.fieldAt (E : Env) (dn : DeclName) (l : DataLoc) (x : String) : Option (Nat × STy) :=
+  (E.structFields dn l).bind fun fs =>
+    ((fs.zipIdx).find? (·.1.1 == x)).map fun (p, i) => (i, p.2)
+
+/-- The struct a call's callee names (`S(…)`). -/
+def Ctx.structOf (Γ : Ctx) (x : String) : Option DeclName :=
+  match Γ.resolve x with
+  | Option.some (.decls [d]) => if d.kind == .struct then Option.some ⟨d.scope, d.name⟩ else Option.none
+  | _ => Option.none
+
+/-- The mutability of a function declaration. -/
+def Decl.fnMut (d : Decl) : Option Mutability :=
+  match d.kind, d.top, d.node with
+  | .function, _, .function _ _ _ m _ _ _ _ _ => m
+  | _, _, _ => Option.none
+
+/-- The functions named `f` that contract `dn` exposes externally
+(`external` or `public`, found along its linearization). -/
+def Env.extFunctions (E : Env) (dn : DeclName) (f : String) : List Decl :=
+  (E.lookup (Option.some dn.name) f).filter fun d =>
+    d.kind == .function && (d.fnVis == Option.some .external || d.fnVis == Option.some .pub)
+
+/-- The external overload that accepts arguments of types `σs`. -/
+def extOverloads (E : Env) (B : DeclName → DeclName → Bool) (dn : DeclName) (f : String)
+    (σs : List STy) : List Decl :=
+  (E.extFunctions dn f).filter fun d' => match d'.fnSig E with
+    | Option.some (ps', _) => argsFit B σs ps'
+    | Option.none => false
+
+/-- The ABI encoding functions. -/
+inductive AbiKind where
+  | encode | encodePacked | encodeWithSelector | encodeWithSignature
+  deriving DecidableEq, Repr
+
+/-- The `abi` member of an encoding function. -/
+def AbiKind.ofMember : String → Option AbiKind
+  | "encode" => Option.some .encode
+  | "encodePacked" => Option.some .encodePacked
+  | "encodeWithSelector" => Option.some .encodeWithSelector
+  | "encodeWithSignature" => Option.some .encodeWithSignature
+  | _ => Option.none
+
+/-- A type `abi.encode*` takes as an argument here: a value type other than
+an internal function, an integral constant (at its mobile type), a string
+literal or a `bytes`/`string` in memory. -/
+def STy.abiArg : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
+  | .fn ext _ _ _ => ext
+  | .rational q => q.isInt
+  | .stringLit _ | .bytes .memory | .string .memory => true
+  | _ => false
+
+/-- The arguments an encoding function accepts: a `bytes4` selector or a
+signature string first, where it takes one. -/
+def AbiKind.argsOK (B : DeclName → DeclName → Bool) : AbiKind → List STy → Bool
+  | .encode, σs | .encodePacked, σs => σs.all STy.abiArg
+  | .encodeWithSelector, σ :: σs => σ.implicit B (.fixedBytes 4 (by decide)) && σs.all STy.abiArg
+  | .encodeWithSignature, σ :: σs => σ.isStringy && σs.all STy.abiArg
+  | _, _ => false
+
+/-- A reference type moved to a location (nested arrays with it). -/
+def STy.withLoc (l : DataLoc) : STy → STy
+  | .bytes _ => .bytes l
+  | .string _ => .string l
+  | .array _ τ n => .array l (τ.withLoc l) n
+  | .struct _ d => .struct l d
+  | τ => τ
+
+/-- A copy into storage (`s = m`): the source is the target's type in
+`memory` or `calldata`, or a string literal into `bytes`/`string`
+`storage` (solc copies member by member; S01's `assign` covers pointer
+assignments). -/
+def STy.copiesTo (σ τ : STy) : Bool :=
+  match σ, τ with
+  | .stringLit _, .bytes .storage | .stringLit _, .string .storage => true
+  | .bytes l, .bytes .storage | .string l, .string .storage => l != .storage
+  | .array l σ n, .array .storage τ n' => l != .storage && n == n' && STy.same (σ.withLoc .storage) τ
+  | .struct l d, .struct .storage d' => l != .storage && d == d'
+  | _, _ => false
+
+
 mutual
 
 /-- **Expression typing**, as data: a derivation is the elaborated term. -/
@@ -590,6 +701,46 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       {feature : String} : Γ.resolve f = Option.some (.builtin b) →
       b.status = .admitted feature → TypedArgs Γ args σs →
       b.callTy Γ.isBase σs = Option.some τ → Typed Γ (.call (.ident f) (.positional args)) τ
+  /-- `a.x` on a struct: its member. -/
+  | member {a : Syn .expr} {x : String} {l : DataLoc} {dn : DeclName} {i : Nat} {τ : STy} :
+      Typed Γ a (.struct l dn) → Γ.env.fieldAt dn l x = Option.some (i, τ) → Typed Γ (.member a x) τ
+  /-- `S(args)`: a new struct in memory, the members accepting the arguments. -/
+  | structNew {S : String} {args : Syn (.list .expr)} {dn : DeclName} {fs : List (String × STy)}
+      {σs : List STy} : Γ.structOf S = Option.some dn → Γ.env.structFields dn .memory = Option.some fs →
+      TypedArgs Γ args σs → argsFit Γ.isBase σs (fs.map Prod.snd) = true →
+      Typed Γ (.call (.ident S) (.positional args)) (.struct .memory dn)
+  /-- `c.f(args)`: an external call; exactly one exposed overload accepts
+  the arguments. -/
+  | extCall {c : Syn .expr} {f : String} {args : Syn (.list .expr)} {dn : DeclName} {d : Decl}
+      {ps rs σs : List STy} : Typed Γ c (.contract dn) → TypedArgs Γ args σs →
+      extOverloads Γ.env Γ.isBase dn f σs = [d] → d.fnSig Γ.env = Option.some (ps, rs) →
+      Typed Γ (.call (.member c f) (.positional args)) (STy.ret rs)
+  /-- `c.f{value: v}(args)`: an external call of a `payable` function with
+  value. -/
+  | extCallValue {c v : Syn .expr} {f : String} {args : Syn (.list .expr)} {dn : DeclName} {d : Decl}
+      {ps rs σs : List STy} {σ : STy} : Typed Γ c (.contract dn) → Typed Γ v σ →
+      σ.implicit Γ.isBase (.int IntTy.u256) = true → TypedArgs Γ args σs →
+      extOverloads Γ.env Γ.isBase dn f σs = [d] → d.fnSig Γ.env = Option.some (ps, rs) →
+      d.fnMut = Option.some .payable →
+      Typed Γ (.call (.callOptions (.member c f) (.namedArg "value" v) .nil) (.positional args)) (STy.ret rs)
+  /-- `a.transfer(v)` on an `address payable`. -/
+  | transfer {a v : Syn .expr} {σ : STy} : Typed Γ a (.address true) → Typed Γ v σ →
+      σ.implicit Γ.isBase (.int IntTy.u256) = true →
+      Typed Γ (.call (.member a "transfer") (.positional (.cons v .nil))) (.tuple [])
+  /-- `a.send(v)` on an `address payable`: whether the payment succeeded. -/
+  | send {a v : Syn .expr} {σ : STy} : Typed Γ a (.address true) → Typed Γ v σ →
+      σ.implicit Γ.isBase (.int IntTy.u256) = true →
+      Typed Γ (.call (.member a "send") (.positional (.cons v .nil))) .bool
+  /-- `abi.encode(…)`, `abi.encodePacked(…)`, `abi.encodeWithSelector(…)`,
+  `abi.encodeWithSignature(…)`: `bytes memory`. -/
+  | abiEncode {g m : String} {args : Syn (.list .expr)} {σs : List STy} {k : AbiKind} :
+      Γ.resolve g = Option.some (.builtin .abi) → AbiKind.ofMember m = Option.some k →
+      TypedArgs Γ args σs → k.argsOK Γ.isBase σs = true →
+      Typed Γ (.call (.member (.ident g) m) (.positional args)) (.bytes .memory)
+  /-- `s = e` copying into storage: from `memory`, `calldata`, or a string
+  literal. -/
+  | assignCopy {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ → σ.copiesTo τ = true →
+      Typed Γ (.assign .assign a b) τ
 
 /-- Typing of an argument list. -/
 inductive TypedArgs (Γ : Ctx) : Syn (.list .expr) → List STy → Type where
@@ -621,6 +772,10 @@ inductive LVal (Γ : Ctx) : Syn .expr → STy → Type where
   /-- A byte of a `storage` or `memory` `bytes`. -/
   | indexBytes {a i : Syn .expr} {l : DataLoc} {σ : STy} : Typed Γ a (.bytes l) → l ≠ .calldata →
       Typed Γ i σ → σ.isIndex = true → LVal Γ (.index a (.some i)) (.fixedBytes 1 (by decide))
+  /-- A member of a `storage` or `memory` struct. -/
+  | member {a : Syn .expr} {x : String} {l : DataLoc} {dn : DeclName} {i : Nat} {τ : STy} :
+      Typed Γ a (.struct l dn) → l ≠ .calldata → Γ.env.fieldAt dn l x = Option.some (i, τ) →
+      LVal Γ (.member a x) τ
 
 end
 

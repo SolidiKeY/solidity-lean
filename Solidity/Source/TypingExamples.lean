@@ -111,6 +111,28 @@ theorem gasleft_untyped (τ : STy) (h : HasType Γ (.call (.ident "gasleft") (.p
     cases hr
     cases hs
   | callInternal _ hd _ => cases hd
+  | structNew hs =>
+    have e : Γ.structOf "gasleft" = none := rfl
+    rw [e] at hs
+    cases hs
+  | const hq => nomatch hq
+  | arith hb => nomatch hb
+  | bit hb => nomatch hb
+  | shift hb => nomatch hb
+  | exp hb => nomatch hb
+  | order hb => nomatch hb
+  | eq hb => nomatch hb
+  | compareConst hb => nomatch hb
+  | logic hb => nomatch hb
+
+/-- A name that denotes a builtin is no struct value. -/
+theorem Typed.ident_builtin_not_struct {Γ : Ctx} {x : String} {b : Builtin} {l : DataLoc} {dn : DeclName}
+    (hr : Γ.resolve x = some (.builtin b)) (d : Typed Γ (.ident x) (.struct l dn)) : False := by
+  generalize ht : STy.struct l dn = τ at d
+  cases d with
+  | loc h _ => rw [hr] at h; cases h
+  | state h _ => rw [hr] at h; cases h
+  | this => cases ht
   | const hq => nomatch hq
   | arith hb => nomatch hb
   | bit hb => nomatch hb
@@ -139,6 +161,9 @@ theorem msgValue_refused (τ : STy) (h : HasType Γv (.member (.ident "msg") "va
     subst hm
     revert hv
     decide
+  | member ha _ =>
+    have e : Γv.resolve "msg" = some (.builtin .msg) := rfl
+    exact Typed.ident_builtin_not_struct e ha
   | const hq => nomatch hq
   | arith hb => nomatch hb
   | bit hb => nomatch hb

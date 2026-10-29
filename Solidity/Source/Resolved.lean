@@ -120,6 +120,24 @@ theorem mobile_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ 
   | stringLit bs => exact .inl rfl
   | _ => exact .inr rfl
 
+/-- A member found by name has its type at its position. -/
+theorem Env.fieldTy?_of_fieldAt {E : Env} {dn : DeclName} {l : DataLoc} {x : String} {i : Nat}
+    {τ : STy} (h : E.fieldAt dn l x = some (i, τ)) : E.fieldTy? dn l i = some τ := by
+  simp only [Env.fieldAt, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+  obtain ⟨fs, hfs, ⟨p, j⟩, hf, he⟩ := h
+  cases he
+  have hm := List.mem_of_find?_eq_some hf
+  rw [List.mem_zipIdx_iff_getElem?] at hm
+  simp only [Env.fieldTy?, hfs, Option.bind_some, Nat.zero_add] at hm ⊢
+  rw [hm]
+  rfl
+
+/-- The constant `0` converts to `uint256` (an external call's default value). -/
+theorem zero_u256 (B : DeclName → DeclName → Bool) :
+    STy.implicit B (.rational (Q.ofInt 0)) (.int IntTy.u256) = true := by
+  simp only [STy.implicit]
+  decide
+
 mutual
 
 /-- **Resolved expressions** over environment `E`, intrinsically typed. -/
@@ -169,6 +187,23 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | balance {p : Bool} (a : RExpr E Γ (.address p)) : RExpr E Γ (.int IntTy.u256)
   | builtin {σs : List STy} {τ : STy} (b : Builtin) (args : RArgs E Γ σs)
       (h : b.callTy E.isBase σs = some τ) : RExpr E Γ τ
+  /-- The `i`-th member of a struct. -/
+  | member {l : DataLoc} {dn : DeclName} {τ : STy} (a : RExpr E Γ (.struct l dn)) (i : Nat)
+      (h : E.fieldTy? dn l i = some τ) : RExpr E Γ τ
+  /-- A new struct in memory from its members' values. -/
+  | structNew {dn : DeclName} {ps : List STy}
+      (h : (E.structFields dn .memory).map (·.map Prod.snd) = some ps) (args : RConvArgs E Γ ps) :
+      RExpr E Γ (.struct .memory dn)
+  /-- An external call of function `d` of the contract at `target`, with
+  `value` (zero without the option). -/
+  | extCall {dn : DeclName} {ps rs : List STy} (target : RExpr E Γ (.contract dn)) (d : Decl)
+      (h : d.fnSig E = some (ps, rs)) (value : RExpr E Γ (.int IntTy.u256)) (args : RConvArgs E Γ ps) :
+      RExpr E Γ (STy.ret rs)
+  | transfer (a : RExpr E Γ (.address true)) (v : RExpr E Γ (.int IntTy.u256)) : RExpr E Γ (.tuple [])
+  | send (a : RExpr E Γ (.address true)) (v : RExpr E Γ (.int IntTy.u256)) : RExpr E Γ .bool
+  | abiEncode {σs : List STy} (k : AbiKind) (args : RArgs E Γ σs) : RExpr E Γ (.bytes .memory)
+  /-- A copy into storage. -/
+  | assignCopy {τ σ : STy} (l : RLVal E Γ τ) (e : RExpr E Γ σ) (h : σ.copiesTo τ = true) : RExpr E Γ τ
 
 /-- Resolved argument lists. -/
 inductive RArgs (E : Env) (Γ : RCtx) : List STy → Type where
@@ -190,6 +225,8 @@ inductive RLVal (E : Env) (Γ : RCtx) : STy → Type where
   | indexMapping {τk τv : STy} (a : RExpr E Γ (.mapping τk τv)) (k : RExpr E Γ τk) : RLVal E Γ τv
   | indexBytes {l : DataLoc} {σ : STy} (a : RExpr E Γ (.bytes l)) (hl : l ≠ .calldata) (i : RExpr E Γ σ)
       (h : σ.isIndex = true) : RLVal E Γ (.fixedBytes 1 (by decide))
+  | member {l : DataLoc} {dn : DeclName} {τ : STy} (a : RExpr E Γ (.struct l dn)) (hl : l ≠ .calldata)
+      (i : Nat) (h : E.fieldTy? dn l i = some τ) : RLVal E Γ τ
 
 end
 
@@ -267,6 +304,22 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .magic (b := b) (m := m) _ _ h _ => .magic b m h
   | .balance da => .balance da.toR
   | .builtinCall (b := b) _ _ da h => .builtin b da.toR h
+  | .member (i := i) da h => .member da.toR i (Env.fieldTy?_of_fieldAt h)
+  | .structNew _ hf da h => .structNew (by simp only [hf, Option.map_some]) (RArgs.convert _ da.toR h)
+  | .extCall (d := d) (ps := ps) dc da hf hs =>
+    .extCall dc.toR d hs (.conv (.const (Q.ofInt 0)) (.inl (zero_u256 _))) (RArgs.convert ps da.toR (by
+      have hp := mem_of_filter_eq hf
+      simp only [hs] at hp
+      exact hp))
+  | .extCallValue (d := d) (ps := ps) dc dv hv da hf hs _ =>
+    .extCall dc.toR d hs (.conv dv.toR (.inl hv)) (RArgs.convert ps da.toR (by
+      have hp := mem_of_filter_eq hf
+      simp only [hs] at hp
+      exact hp))
+  | .transfer da dv h => .transfer da.toR (.conv dv.toR (.inl h))
+  | .send da dv h => .send da.toR (.conv dv.toR (.inl h))
+  | .abiEncode (k := k) _ _ da _ => .abiEncode k da.toR
+  | .assignCopy l db h => .assignCopy l.toR db.toR h
 
 /-- Elaboration of argument lists. -/
 def TypedArgs.toR {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} :
@@ -294,6 +347,7 @@ def LVal.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : LVal Γ e τ → RLVal Γ.e
   | .indexArray da hl di h _ => .indexArray da.toR hl di.toR h
   | .indexMapping da di h => .indexMapping da.toR (.conv di.toR (.inl h))
   | .indexBytes da hl di h => .indexBytes da.toR hl di.toR h
+  | .member (i := i) da hl h => .member da.toR hl i (Env.fieldTy?_of_fieldAt h)
 
 end
 
