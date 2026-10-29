@@ -55,6 +55,48 @@ def toInt : UnaryCertificate .toInt .uint rfl where
 /-- Both representation-level casts compose to identity on every word. -/
 theorem cast_code_chain (st : Stack) : run (toInt.code ++ toUint.code) st = some st := rfl
 
+/-- Source cast round trip at `uint256`, not just identity of emitted code. -/
+theorem cast_roundtrip_uint (a : PrimTy.uint.Denote) :
+    (UnOp.evalT .toInt (p := .uint) rfl a).bind
+      (fun b => UnOp.evalT .toUint (p := .int) rfl b) = some a := by
+  have h1 := toInt.correct a []
+  change some [encodeValue .uint a] =
+    (UnOp.evalT .toInt (p := .uint) rfl a).map (fun b => [encodeValue .int b]) at h1
+  cases hx : UnOp.evalT .toInt (p := .uint) rfl a with
+  | none => simp only [hx, Option.map_none, reduceCtorEq] at h1
+  | some b =>
+    simp only [hx, Option.map_some, Option.some.injEq, List.cons.injEq, and_true] at h1
+    have h2 := toUint.correct b []
+    change some [encodeValue .int b] =
+      (UnOp.evalT .toUint (p := .int) rfl b).map (fun c => [encodeValue .uint c]) at h2
+    cases hy : UnOp.evalT .toUint (p := .int) rfl b with
+    | none => simp only [hy, Option.map_none, reduceCtorEq] at h2
+    | some c =>
+      simp only [hy, Option.map_some, Option.some.injEq, List.cons.injEq, and_true] at h2
+      have hc : c = a := encode_uint_injective (h2.symm.trans h1.symm)
+      simp only [hy, Option.bind_some, hc]
+
+/-- Source cast round trip at `int256`, not just identity of emitted code. -/
+theorem cast_roundtrip_int (a : PrimTy.int.Denote) :
+    (UnOp.evalT .toUint (p := .int) rfl a).bind
+      (fun b => UnOp.evalT .toInt (p := .uint) rfl b) = some a := by
+  have h1 := toUint.correct a []
+  change some [encodeValue .int a] =
+    (UnOp.evalT .toUint (p := .int) rfl a).map (fun b => [encodeValue .uint b]) at h1
+  cases hx : UnOp.evalT .toUint (p := .int) rfl a with
+  | none => simp only [hx, Option.map_none, reduceCtorEq] at h1
+  | some b =>
+    simp only [hx, Option.map_some, Option.some.injEq, List.cons.injEq, and_true] at h1
+    have h2 := toInt.correct b []
+    change some [encodeValue .uint b] =
+      (UnOp.evalT .toInt (p := .uint) rfl b).map (fun c => [encodeValue .int c]) at h2
+    cases hy : UnOp.evalT .toInt (p := .uint) rfl b with
+    | none => simp only [hy, Option.map_none, reduceCtorEq] at h2
+    | some c =>
+      simp only [hy, Option.map_some, Option.some.injEq, List.cons.injEq, and_true] at h2
+      have hc : c = a := encode_int_injective (h2.symm.trans h1.symm)
+      simp only [hy, Option.bind_some, hc]
+
 /-- Positive and negative boundary controls include a real intrinsic signed value. -/
 example : UnOp.evalT .toInt (p := .uint) rfl ⟨255, by decide⟩ =
     some ⟨255, by decide⟩ := by rfl
@@ -67,5 +109,9 @@ example : run (toInt.code ++ toUint.code) [BitVec.ofInt 256 (-1), 99] =
 #guard_msgs in #print axioms toUint
 /-- info: 'Solidity.Backend.Scalar.cast_code_chain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms cast_code_chain
+
+
+#print axioms cast_roundtrip_uint
+#print axioms cast_roundtrip_int
 
 end Solidity.Backend.Scalar

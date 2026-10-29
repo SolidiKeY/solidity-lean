@@ -70,6 +70,23 @@ def uintXor : BinaryCertificate .bxor .uint rfl where
     apply uintBitwise_encoded
     simp only [BitVec.toNat_xor, encode_uint_toNat]
 
+/-- Unsigned complement retains exactly the existing 256-bit source meaning. -/
+def uintNot : UnaryCertificate .bnot .uint rfl where
+  code := [.op .NOT]
+  correct := by
+    intro a tail
+    change some ((~~~encodeValue .uint a) :: tail) =
+      (PrimTy.uint.ofInt? (Semantics.uintBound - 1 - a.val)).map
+        (fun v => encodeValue .uint v :: tail)
+    have he : Semantics.uintBound - 1 - a.val =
+        ((~~~encodeValue .uint a).toNat : Int) := by
+      rw [BitVec.toNat_not, encode_uint_toNat]
+      have ha := uint_range a
+      unfold Semantics.uintBound
+      omega
+    rw [he]
+    exact (encoded_word _ tail).symm
+
 example : run uintAnd.code [0xf0, 0x3c, 99] = some [0x30, 99] := by decide +kernel
 example : run uintOr.code [0xf0, 0x3c, 99] = some [0xfc, 99] := by decide +kernel
 example : run uintXor.code [0xf0, 0x3c, 99] = some [0xcc, 99] := by decide +kernel
@@ -80,5 +97,8 @@ example : run uintXor.code [0xf0, 0x3c, 99] = some [0xcc, 99] := by decide +kern
 #guard_msgs in #print axioms uintOr
 /-- info: 'Solidity.Backend.Scalar.uintXor' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms uintXor
+
+
+#print axioms uintNot
 
 end Solidity.Backend.Scalar

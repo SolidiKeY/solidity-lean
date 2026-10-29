@@ -947,3 +947,19 @@ At the root, the notation's own tests:
 | `Backend/Scalar/Modular.lean` | Source-exact addmod/mulmod with unbounded intermediate arithmetic and zero-modulus failure. |
 | `Backend/Scalar/Bitwise.lean` | Intrinsic unsigned bitwise AND/OR/XOR certificates. |
 | `Backend/Scalar/Values.lean` | State-uniform closed intrinsic Val certificates and actual encoded-byte controls. |
+| `Backend/Scalar/Checked.lean` | Scalar instruction-slice Checked contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Division.lean` | Scalar instruction-slice Division contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Exponentiation.lean` | Scalar instruction-slice Exponentiation contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Heights.lean` | Scalar instruction-slice Heights contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Negation.lean` | Scalar instruction-slice Negation contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/PowerBounds.lean` | Scalar instruction-slice PowerBounds contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/PowerGuard.lean` | Scalar instruction-slice PowerGuard contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Shifts.lean` | Scalar instruction-slice Shifts contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedBits.lean` | Scalar instruction-slice SignedBits contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedChecked.lean` | Scalar instruction-slice SignedChecked contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedDivision.lean` | Scalar instruction-slice SignedDivision contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedGuards.lean` | Scalar instruction-slice SignedGuards contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedMul.lean` | Scalar instruction-slice SignedMul contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedShift.lean` | Scalar instruction-slice SignedShift contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/UnsignedMul.lean` | Scalar instruction-slice UnsignedMul contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Axioms.lean` | Scalar instruction-slice Axioms contracts; see backend-scalar-lowering.md for exact premises and boundaries. |

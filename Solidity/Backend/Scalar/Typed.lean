@@ -57,6 +57,22 @@ theorem encode_uint_injective {a b : PrimTy.uint.Denote}
   have hb := uint_range b
   omega
 
+/-- The arithmetic encoding agrees with the existing intrinsic ABI-word
+observation; signed negative values do not acquire a second interpretation. -/
+theorem encodeValue_toWord (p : PrimTy) (v : p.Denote) :
+    encodeValue p v = BitVec.ofInt 256 (PrimTy.toWord v).val := by
+  cases p with
+  | bool => cases v <;> rfl
+  | uint => rfl
+  | int =>
+    by_cases hn : 0 ≤ v.val
+    · simp only [encodeValue, PrimTy.toWord, hn, dite_true]
+    · have hW : (2 : Int) ^ 256 = ((2 ^ 256 : Nat) : Int) :=
+        (Int.natCast_pow 2 256).symm
+      apply BitVec.eq_of_toNat_eq
+      simp only [encodeValue, PrimTy.toWord, hn, dite_false, BitVec.toNat_ofInt, hW,
+        Int.add_emod, Int.emod_self, Int.add_zero, Int.emod_emod]
+
 /-- Literal selection, normalized at the typed ABI-word boundary. -/
 def literal (p : PrimTy) (v : p.Denote) : Program := [pushWord (encodeValue p v)]
 
@@ -155,5 +171,8 @@ example : ¬ ValueRel .bool true (BitVec.ofNat 256 2) := by
 #guard_msgs in #print axioms encode_int_injective
 /-- info: 'Solidity.Backend.Scalar.encode_uint_injective' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms encode_uint_injective
+
+
+#print axioms encodeValue_toWord
 
 end Solidity.Backend.Scalar

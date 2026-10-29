@@ -30,7 +30,7 @@ def zeroTest (n : Fin 16) : Program := [.op (.DUP n), .op .ISZERO]
 theorem zeroTest_correct (n : Fin 16) (st : Stack) (a : Word)
     (ha : st[n.val]? = some a) :
     run (zeroTest n) st = some (flag (a == 0) :: st) := by
-  simp only [zeroTest, run, step, duplicateIndex, duplicate, ha, Option.map_some,
+  simp only [zeroTest, run, step, numericStep, duplicate, ha, Option.map_some,
     unary, applyUnary, Option.bind_some]
 
 /-- Failure and success are different observations even when the EVM body

@@ -54,7 +54,7 @@ theorem addmod_correct (a b k : PrimTy.uint.Denote) (tail : Stack) :
       rw [ModOp.wide, ha, hb, hkk, ← Int.natCast_add, ← Int.natCast_emod,
         BitVec.ofInt_natCast]
       simp only [Int.toNat_natCast]
-    simp only [modularBody, run, step, duplicateIndex, unary, binary, ternary,
+    simp only [modularBody, run, step, numericStep, unary, binary, ternary,
       applyTernary, uint_word_zero, hk, decide_false, Bool.false_eq_true, if_false, Option.bind_some,
       Option.map_some]
     rw [encode_uint_toNat, encode_uint_toNat, encode_uint_toNat]
@@ -85,7 +85,7 @@ theorem mulmod_correct (a b k : PrimTy.uint.Denote) (tail : Stack) :
       rw [ModOp.wide, ha, hb, hkk, ← Int.natCast_mul, ← Int.natCast_emod,
         BitVec.ofInt_natCast]
       simp only [Int.toNat_natCast]
-    simp only [modularBody, run, step, duplicateIndex, unary, binary, ternary,
+    simp only [modularBody, run, step, numericStep, unary, binary, ternary,
       applyTernary, uint_word_zero, hk, decide_false, Bool.false_eq_true, if_false, Option.bind_some,
       Option.map_some]
     rw [encode_uint_toNat, encode_uint_toNat, encode_uint_toNat]

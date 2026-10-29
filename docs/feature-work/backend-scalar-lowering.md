@@ -72,12 +72,12 @@ coverage remain open. The exact bytes are Backend.encode of the actual code.
 
 | Queue item | Status | Implemented evidence | Still required |
 |---|---|---|---|
-| Work 1 | partial | Arbitrary typed literals; Boolean not/and/or/eq/ne; uint/int lt/gt/le/ge; uint AND/OR/XOR; source-exact uint/int word casts; all 32 signed/unsigned cleanup widths | Signed bitwise, numeric equality, complement, fixed-bytes conversion alignment and proof against source width/cast expansion; finish controls and checkpoint reviews/gates |
-| Work 2 | partial | Source-exact uint addW/subW/mulW; all-width cleanup composition for ADD; independent DIV/SDIV/MOD/SMOD/SHL/SHR/SAR meanings and zero/saturation boundaries | Full division/remainder/shifts selection certificates and all-width source composition, signed minimum/-1 and negative-count reconciliation |
-| Work 3 | partial | Operand-preserving zeroTest; distinct existing Panic(0x11)/Panic(0x12) bytes; zero-modulus failure selection and sequence laws | Checked add/sub/mul/power/negation and checked range guards, complete failure classes and inhabited mixed-width combinations |
-| Work 4 | partial | Typed operator certificates, state-uniform ClosedCertificate composition, literal/not source witness, actual Backend.encode bytes | Broader Val/operation certificate coverage, representative external execution, final axiom/import/trust/validation closure |
-| Backfill A | partial | addmod_correct/mulmod_correct at the guarded numeric-slice boundary, with wide-intermediate and zero controls | Exponentiation selection/guard certificates and final boundary/composition validation |
-| Backfill B | partial | Universal successful tail/sequence laws; unsigned_chain; cast_code_chain; narrowing/sign/operand-order controls | Stack-height and full cast-chain/source-expansion laws, remaining negative boundaries and every constructor's axiom pins |
+| Work 1 | partial | Literals; all primitive Boolean/equality/order comparisons; unsigned complement and uint/int AND/OR/XOR; word casts and round trips; all 32 signed/unsigned cleanup widths | Fixed-bytes conversion alignment and intrinsic cast-expansion connection; final component controls/gates |
+| Work 2 | partial | Unsigned wrapping add/sub/mul/power; uint DIV/MOD and signed SDIV/SMOD complete guarded observations; uint shifts and signed SAR with negative-count clamp; signed minimum/-1 rejection; successful height/tail laws | All-width arithmetic/width-expansion composition and combination regressions |
+| Work 3 | partial | Checked uint/int add/sub/mul; checked uint power; checked signed negation; zero and signed-overflow tests select distinct existing panic data | Checked width/cast range tests, inhabited mixed-width combinations, capacity-bearing consumer certificate and final validation |
+| Work 4 | partial | Typed source operator certificates; ABI word observation relation; state-uniform ClosedCertificate; actual Backend.encode byte control | Representative external execution and broader constructor composition; final import/trust/full gates |
+| Backfill A | partial | addmod/mulmod wide intermediate and zero controls; wrapping and checked uint exponentiation; all-width checked-power test | Boundary regression execution and remaining integration/composition checks |
+| Backfill B | partial | All DUP/SWAP/POP framing; universal successful height/tail and prefix-capacity laws; unsigned cleanup chain; source cast round trips; 51 additional axiom pins | Remaining signed/fixed-bytes cast-chain laws, capacity witnesses, mixed-width controls and final validation |
 
 The widths metadata is Fin 32 (byte count minus one), not a new source type or
 term IR. Existing source PrimTy is bool/uint/int; narrow widths live in frontend
@@ -164,3 +164,101 @@ This is a reviewable partial preparation checkpoint, not completion of any
 numbered queue item. Full assignment validation and all remaining rows above
 are still required. The absolute handoff records its actual committed head;
 no self-referential commit hash is embedded in this document.
+
+
+## Arithmetic checkpoint P1 in progress
+
+The source-native certificates now include scalarEq/scalarNe, uintNot,
+intAnd/intOr/intXor, uintShl/uintShr/intShr, wrappingPow,
+checkedUintAdd/Sub/Mul/Pow and checkedIntAdd/Sub/Mul. uint_div_correct,
+uint_mod_correct, int_div_correct and int_mod_correct quantify over every
+intrinsic operand and every untouched tail, including exceptional divisors.
+int_div_body separately records its precise nonzero and minimum/-1 premises;
+int_mod_body requires only a nonzero divisor. checked_negation_correct covers
+the minimum integer. These are contracts for real Backend instruction slices
+and the explicit guarded/guardedNext observation boundary, not a proof of
+emitted control transfer or generic revert payload emission.
+
+Signed division first chooses Panic(0x12) at zero, then Panic(0x11) at the
+minimum integer divided by -1. The signed multiplication test includes the
+minimum second factor/negative first factor check; division-back alone misses
+that case. Signed right shift clamps negative source counts to zero rather
+than passing their unsigned word readings directly to SAR.
+
+PowerBounds holds 32×255 compiler constants. The Python generator uses only
+integer arithmetic, and threshold_bounds kernel-checks both neighboring
+power inequalities at every entry. powerFits_correct proves the independent
+all-width range characterization, powerTest_correct proves the actual flat
+opcode test, and checkedUintPow connects it to the original intrinsic pow.
+Bases zero/one and exponent zero are handled separately; exponents at least
+256 at bases at least two cannot fit. No root oracle is trusted. The initial
+monolithic proof was stopped after 72 seconds as memory grew; its failed log
+is retained. Splitting proofs by width passed in 292.1 seconds with 7721 MiB
+summed Lean RSS and 8309 MiB sampled cgroup use (8713469952-byte cgroup peak),
+one worker, no OOM, and the same 12 GiB/no-swap cap. No proof limit was raised.
+
+Heights establishes step_height, run_height, run_capacity and prefix_capacity.
+The executable stackBound includes temporary instruction-boundary peaks.
+Tail preservation alone does not discharge it: unsignedAddTest at an initial
+1023 words temporarily reaches 1025. A caller must prove the actual height
+bound as well as operand availability. Source terms/values/states remain the
+existing intrinsic types; no source semantics imports the compiler.
+
+Axioms pins the actual dependencies of 51 additional headline declarations,
+including all admitted primitive certificates, full guard observations,
+capacity laws and threshold bounds. Its 67-job focused closure passed in
+8.4 seconds with one peak Lean worker, 666 MiB summed Lean RSS and 184 MiB
+sampled cgroup use. P0 guards remain in their original files. The separate
+pin module avoids rebuilding the large constant table merely to guard its
+message output.
+
+Finder Dewey and skeptic Schrodinger independently inspected the stable P1
+numeric/height files without Lean/LSP/build/tests or writes. They found no
+semantic counterexample. Finder's missing-axiom-pin finding is addressed by
+Axioms; skeptic's split-division-contract finding is addressed by the four
+universal guarded theorems. Both retained the source halt-to-panic, generic
+payload emission, frontend width expansion and physical capacity boundaries.
+They expressly excluded the then-active power and signed-division modules.
+An additional independent finder (Feynman) and skeptic (Euclid) pair inspected
+those modules, SignedChecked/Mul/Guards, universal Division additions, Axioms,
+the generator/checker, this document and append-only registrations without
+Lean/LSP/server/build/tests or writes. Both found no confirmed semantic or
+proof-boundary defect. Full assignment gates remain pending.
+
+
+### P1 committed handoff section
+
+Checkpoint status: reviewed partial arithmetic preparation; every numbered
+queue item and both backfill items remain partial as detailed above. This
+checkpoint adds sixteen owned modules (including the separate Axioms module)
+to the ten P0 modules. No parent-group or full-assignment completion is claimed.
+
+Gate commands and outcomes:
+
+- `lake -f .scalar-lowering.toml build Solidity.Backend.Scalar.Axioms`:
+  passed, 67 jobs, all owned-file diagnostics clean and 51 additional guarded
+  axiom outputs accepted; only propext, Classical.choice and Quot.sound occur.
+- `node scripts/check-layers.mjs`: passed, 168 core modules, zero frontend reaches.
+- `node scripts/check-backend-scalar.mjs`: passed, 26 owned scalar roots,
+  zero layer/source/trust/generation findings; 32×255 generated constants agree.
+- `node scripts/check-orphans.mjs`: passed, 792 reachable, zero orphaned/not allowed.
+- `bash scripts/check-trust.sh`: passed, 807 sources, 241 existing inventoried
+  implementation/recovery sites, zero findings.
+- `bash scripts/check-doc-paths.sh`: failed at both exact base and checkpoint
+  with the same 46 missing references. Same-base comparison: zero additions
+  and zero removals. The no-new-findings requirement passes; the whole command
+  is not mislabeled green.
+
+All focused checks used LEAN_NUM_THREADS=1, explicit Lean -j1, the writer lock
+and the 12 GiB/no-swap Docker cgroup. Evidence is under the absolute directory
+`/workspace/scalar-lowering-artifacts/evidence`; p1-axioms/summary.json and
+p1-static-summary.json retain outcomes and measurements. The absolute
+handoff.md, original.patch and SHA256SUMS in that artifact directory's parent
+are refreshed after committing and record the full head, exact base and branch.
+The separately saved review records identify all four read-only reviewers.
+
+Required full/default/import/TestSuite/run-lean gates and actual encoded
+sequence execution are pending; no inherited full-build failure is presumed.
+The installed pinned EthereumJS Osaka runner has passed only an API bootstrap,
+which is not evidence for this compiler's emitted bytes. Remaining casts,
+width laws, capacity consumer and mixed-width witnesses continue next.

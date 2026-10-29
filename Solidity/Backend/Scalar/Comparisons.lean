@@ -96,6 +96,58 @@ def intGe : BinaryCertificate .ge .int rfl where
     rw [encode_int_toInt, encode_int_toInt]
     rw [flag_not_lt]
 
+/-- ISZERO on a canonical Boolean word implements Boolean complement. -/
+theorem flag_iszero (b : Bool) : flag (flag b == 0) = flag (!b) := by
+  cases b <;> rfl
+
+theorem encode_uint_beq (a b : PrimTy.uint.Denote) :
+    (encodeValue .uint a == encodeValue .uint b) = decide (a.val = b.val) := by
+  apply Bool.eq_iff_iff.mpr
+  simp only [beq_iff_eq, decide_eq_true_eq]
+  constructor
+  · intro h
+    exact congrArg Subtype.val (encode_uint_injective h)
+  · intro h
+    exact congrArg (encodeValue .uint) (Subtype.ext h)
+
+theorem encode_int_beq (a b : PrimTy.int.Denote) :
+    (encodeValue .int a == encodeValue .int b) = decide (a.val = b.val) := by
+  apply Bool.eq_iff_iff.mpr
+  simp only [beq_iff_eq, decide_eq_true_eq]
+  constructor
+  · intro h
+    exact congrArg Subtype.val (encode_int_injective h)
+  · intro h
+    exact congrArg (encodeValue .int) (Subtype.ext h)
+
+/-- Equality selection at every existing intrinsic primitive type. -/
+def scalarEq (p : PrimTy) : BinaryCertificate .eqB p (by cases p <;> rfl) where
+  code := [.op .EQ]
+  correct := by
+    intro a b tail
+    cases p with
+    | bool => exact booleanEq.correct a b tail
+    | uint =>
+      change some (flag (encodeValue .uint a == encodeValue .uint b) :: tail) = some (flag (decide (a.val = b.val)) :: tail)
+      rw [encode_uint_beq]
+    | int =>
+      change some (flag (encodeValue .int a == encodeValue .int b) :: tail) = some (flag (decide (a.val = b.val)) :: tail)
+      rw [encode_int_beq]
+
+/-- Equality selection at every existing intrinsic primitive type. -/
+def scalarNe (p : PrimTy) : BinaryCertificate .neB p (by cases p <;> rfl) where
+  code := [.op .EQ, .op .ISZERO]
+  correct := by
+    intro a b tail
+    cases p with
+    | bool => exact booleanNe.correct a b tail
+    | uint =>
+      change some (flag (flag (encodeValue .uint a == encodeValue .uint b) == 0) :: tail) = some (flag (!decide (a.val = b.val)) :: tail)
+      rw [encode_uint_beq, flag_iszero]
+    | int =>
+      change some (flag (flag (encodeValue .int a == encodeValue .int b) == 0) :: tail) = some (flag (!decide (a.val = b.val)) :: tail)
+      rw [encode_int_beq, flag_iszero]
+
 /-- Signed ordering must not accidentally use unsigned LT. -/
 example : run uintLt.code [BitVec.ofInt 256 (-1), 0] = some [0] := by decide +kernel
 example : run intLt.code [BitVec.ofInt 256 (-1), 0] = some [1] := by decide +kernel
@@ -118,5 +170,9 @@ example : run intLe.code [7, 7, 99] = some [1, 99] := by decide +kernel
 #guard_msgs in #print axioms intLe
 /-- info: 'Solidity.Backend.Scalar.intGe' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms intGe
+
+
+#print axioms scalarEq
+#print axioms scalarNe
 
 end Solidity.Backend.Scalar

@@ -55,7 +55,7 @@ theorem signed_correct (w : Fin 32) (x : Word) (tail : Stack) :
     run (signedCode w) (x :: tail) = some (signedClean w x :: tail) := by
   have hw : w.val < 2 ^ 256 := by have := w.isLt; omega
   rw [signedCode, run, step_pushWord]
-  simp only [run, step, duplicateIndex, unary, binary, applyBinary, Option.bind_some, BitVec.toNat_ofNat,
+  simp only [run, step, numericStep, unary, binary, applyBinary, Option.bind_some, BitVec.toNat_ofNat,
     Nat.mod_eq_of_lt hw, w.isLt, if_true, signedClean, widthBits]
 
 /-- Truncating first to a wider unsigned width and then a narrower one

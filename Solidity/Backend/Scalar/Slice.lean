@@ -79,26 +79,41 @@ def applyTernary (f : Word → Word → Word → Word) : Stack → Option Stack
   | _ => none
 
 /-- DUPn's existing opcode index is zero-based. -/
-def duplicateIndex : Op → Option Nat
-  | .DUP n => some n.val
-  | _ => none
-
 def duplicate (n : Nat) (st : Stack) : Option Stack :=
   st[n]?.map (fun a => a :: st)
 
-/-- One instruction from the independently specified numeric slice. -/
+/-- Replace one stack cell, returning its previous word. -/
+def exchange (a : Word) : Nat → Stack → Option (Word × Stack)
+  | 0, b :: st => some (b, a :: st)
+  | n + 1, b :: st => (exchange a n st).map (fun p => (p.1, b :: p.2))
+  | _, [] => none
+
+def swap (n : Nat) : Stack → Option Stack
+  | a :: st => (exchange a n st).map (fun p => p.1 :: p.2)
+  | [] => none
+
+def pop : Stack → Option Stack
+  | _ :: st => some st
+  | [] => none
+
+/-- Numeric dispatch is separate from the real stack-operation families. -/
+def numericStep (o : Op) (st : Stack) : Option Stack :=
+  match unary o with
+  | some f => applyUnary f st
+  | none => match binary o with
+    | some f => applyBinary f st
+    | none => match ternary o with
+      | some f => applyTernary f st
+      | none => none
+
+/-- One instruction from the independently specified numeric/stack slice. -/
 def step : Instr → Stack → Option Stack
   | .push _ bs, st => some (immediate bs.toList :: st)
-  | .op o, st =>
-      match duplicateIndex o with
-      | some n => duplicate n st
-      | none => match unary o with
-        | some f => applyUnary f st
-        | none => match binary o with
-          | some f => applyBinary f st
-          | none => match ternary o with
-            | some f => applyTernary f st
-            | none => none
+  | .op o, st => match o with
+    | .DUP n => duplicate n.val st
+    | .SWAP n => swap n.val st
+    | .POP => pop st
+    | _ => numericStep o st
 
 /-- A whole straight-line slice; no jumps or source semantics. -/
 def run : Program → Stack → Option Stack
@@ -174,32 +189,68 @@ theorem duplicate_frame (n : Nat) {s t : Stack}
     rw [duplicate, List.getElem?_append_left (List.getElem?_eq_some_iff.mp hh).1, hh]
     rfl
 
+theorem exchange_frame (a : Word) (n : Nat) {s t : Stack} {b : Word}
+    (h : exchange a n s = some (b, t)) (tail : Stack) :
+    exchange a n (s ++ tail) = some (b, t ++ tail) := by
+  induction n generalizing s t with
+  | zero =>
+    cases s with
+    | nil => cases h
+    | cons x s => cases h; rfl
+  | succ n ih =>
+    cases s with
+    | nil => cases h
+    | cons x s =>
+      obtain ⟨⟨y, ys⟩, hh, he⟩ := Option.map_eq_some_iff.mp h
+      simp only [Prod.mk.injEq] at he
+      rcases he with ⟨rfl, rfl⟩
+      simp only [List.cons_append, exchange, ih hh, Option.map_some]
+
+theorem swap_frame (n : Nat) {s t : Stack}
+    (h : swap n s = some t) (tail : Stack) :
+    swap n (s ++ tail) = some (t ++ tail) := by
+  cases s with
+  | nil => cases h
+  | cons a s =>
+    obtain ⟨⟨b, bs⟩, hh, he⟩ := Option.map_eq_some_iff.mp h
+    subst t
+    simp only [List.cons_append, swap, exchange_frame a n hh tail, Option.map_some]
+
+theorem pop_frame {s t : Stack} (h : pop s = some t) (tail : Stack) :
+    pop (s ++ tail) = some (t ++ tail) := by
+  cases s with
+  | nil => cases h
+  | cons a s => cases h; rfl
+
+theorem numericStep_frame {o : Op} {s t : Stack} (h : numericStep o s = some t)
+    (tail : Stack) : numericStep o (s ++ tail) = some (t ++ tail) := by
+  cases hu : unary o with
+  | some f =>
+    simp only [numericStep, hu] at h ⊢
+    exact applyUnary_frame f h tail
+  | none =>
+    cases hb : binary o with
+    | some f =>
+      simp only [numericStep, hu, hb] at h ⊢
+      exact applyBinary_frame f h tail
+    | none =>
+      cases ht : ternary o with
+      | some f =>
+        simp only [numericStep, hu, hb, ht] at h ⊢
+        exact applyTernary_frame f h tail
+      | none => simp only [numericStep, hu, hb, ht, reduceCtorEq] at h
+
 /-- Successful instructions never read beyond their operands. -/
 theorem step_frame {i : Instr} {s t : Stack} (h : step i s = some t)
     (tail : Stack) : step i (s ++ tail) = some (t ++ tail) := by
   cases i with
   | push n bs => cases h; rfl
   | op o =>
-    cases hd : duplicateIndex o with
-    | some n =>
-      simp only [step, hd] at h ⊢
-      exact duplicate_frame n h tail
-    | none =>
-      cases hu : unary o with
-      | some f =>
-        simp only [step, hd, hu] at h ⊢
-        exact applyUnary_frame f h tail
-      | none =>
-        cases hb : binary o with
-        | some f =>
-          simp only [step, hd, hu, hb] at h ⊢
-          exact applyBinary_frame f h tail
-        | none =>
-          cases ht : ternary o with
-          | some f =>
-            simp only [step, hd, hu, hb, ht] at h ⊢
-            exact applyTernary_frame f h tail
-          | none => simp only [step, hd, hu, hb, ht, reduceCtorEq] at h
+    cases o <;> simp only [step] at h ⊢
+    case DUP n => exact duplicate_frame n.val h tail
+    case SWAP n => exact swap_frame n.val h tail
+    case POP => exact pop_frame h tail
+    all_goals exact numericStep_frame h tail
 
 /-- Arbitrary successful slices preserve any untouched suffix. -/
 theorem run_frame {p : Program} {s t : Stack} (h : run p s = some t)
