@@ -214,15 +214,15 @@ theorem source_bounds : ∀ k : Fin 3, sourceReverted ((failingProgram k).run st
 theorem target_bounds : ∀ k : Fin 3, targetReverted (run (failed k).code machine) = true := by
   decide +kernel
 
-/-- Nonempty construction is still refused, rather than emitting zero child pointers. -/
-theorem allocation_refused :
+/-- Nonempty construction now selects a separate growing certificate path. -/
+theorem allocation_supported :
     (Compiler.compile (C := C) 1 (Frag.init Γ) (.cons
-      (.declMem parentTy (.user "fresh") (some (.newArr (.lit 1 rfl) rfl)) rfl rfl) .nil)).isNone = true := by
+      (.declMem parentTy (.user "fresh") (some (.newArr (.lit 1 rfl) rfl)) rfl rfl) .nil)).isSome = true := by
   decide +kernel
 
-theorem default_declaration_refused :
+theorem default_declaration_supported :
     (Compiler.compile (C := C) 1 (Frag.init Γ) (.cons
-      (.declMem parentTy (.user "fresh") none rfl rfl) .nil)).isNone = true := by
+      (.declMem parentTy (.user "fresh") none rfl rfl) .nil)).isSome = true := by
   decide +kernel
 
 private def fixedΓ : Ctx := [.mem childTy, .mem (.fixed (.ref childTy) 2)]

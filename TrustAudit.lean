@@ -20,6 +20,8 @@ import Solidity.Evm.MemoryPathExamples
 import Solidity.Evm.MemoryRefArrayExamples
 import Solidity.Evm.MemoryObjectArrayExamples
 import Solidity.Evm.MemoryFixedChildArrayExamples
+import Solidity.Evm.MemoryObjectConstructionExamples
+import Solidity.Evm.MemoryStructArrayInputExamples
 import Solidity.Evm.MemoryObjectEmpty
 import Solidity.Evm.MemoryAllocExamples
 import Solidity.Evm.MemoryAllocSourceExamples
@@ -43,6 +45,67 @@ open Lean Elab Command
 
 run_cmd do
   let headlines : List Name := [
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.reserveArray,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.writeGap,
+    ``Solidity.Evm.Memory.Objects.Gap.allocateEmpty,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.adoptReservedArray,
+    ``Solidity.Evm.Memory.Objects.childrenCopy_ids,
+    ``Solidity.Evm.Memory.Objects.children_sim,
+    ``Solidity.Evm.Memory.Objects.nestedCopy_source,
+    ``Solidity.Evm.Memory.Objects.nested_correct,
+    ``Solidity.Evm.Memory.Objects.StateRepr.adopt,
+    ``Solidity.Evm.Memory.Objects.nestedDeclare_correct,
+    ``Solidity.Evm.Memory.Objects.nestedRebind_correct,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.allocatePrimitive,
+    ``Solidity.Evm.Memory.Objects.primitiveDeclare_correct,
+    ``Solidity.Evm.Memory.Objects.primitiveRebind_correct,
+    ``Solidity.Evm.Memory.Objects.newEmpty_correct,
+    ``Solidity.Evm.Memory.Objects.rebindEmpty_correct,
+    ``Solidity.Evm.Memory.Construction.StmtFrag.correct,
+    ``Solidity.Evm.Memory.Construction.ProgFrag.correct,
+    ``Solidity.Evm.Memory.ConstructionExamples.initial_repr,
+    ``Solidity.Evm.Memory.ConstructionExamples.initial_allocator,
+    ``Solidity.Evm.Memory.ConstructionExamples.source_cost,
+    ``Solidity.Evm.Memory.ConstructionExamples.compiled_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.source_result,
+    ``Solidity.Evm.Memory.ConstructionExamples.target_result,
+    ``Solidity.Evm.Memory.ConstructionExamples.failed_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.failed_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.source_bounds,
+    ``Solidity.Evm.Memory.ConstructionExamples.target_bounds,
+    ``Solidity.Evm.Memory.ConstructionExamples.source_default_identities,
+    ``Solidity.Evm.Memory.ConstructionExamples.target_default_identities,
+    ``Solidity.Evm.Memory.ConstructionExamples.exact_capacity_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.exact_capacity_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.insufficient_capacity_refuted,
+    ``Solidity.Evm.Memory.ConstructionExamples.unreachable_cost,
+    ``Solidity.Evm.Memory.ConstructionExamples.unreachable_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.unreachable_source,
+    ``Solidity.Evm.Memory.ConstructionExamples.unreachable_target,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_source_length,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_target_allocation,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_public_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_public_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_public_source,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_zero_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_zero_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_zero_source,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_zero_target,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_child_nonempty_allocation_refused,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_parent_default_refused,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.initial_repr,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.compiled_input,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.source_observation,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.target_observation,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.wrong_reference_field_refuted,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.reference_struct_construction_refused,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.failed_input,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.failed_agrees,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.source_bounds,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.target_bounds,
+
     ``Solidity.Evm.Memory.ObjectArrayExamples.empty_default_simulation,
     ``Solidity.Evm.Memory.ObjectArrayExamples.empty_source_observation,
     ``Solidity.Evm.Memory.ObjectArrayExamples.empty_target_observation,
@@ -116,8 +179,8 @@ run_cmd do
     ``Solidity.Evm.Memory.RefArrayExamples.failed_agrees,
     ``Solidity.Evm.Memory.RefArrayExamples.source_bounds,
     ``Solidity.Evm.Memory.RefArrayExamples.target_bounds,
-    ``Solidity.Evm.Memory.RefArrayExamples.allocation_refused,
-    ``Solidity.Evm.Memory.RefArrayExamples.default_declaration_refused,
+    ``Solidity.Evm.Memory.RefArrayExamples.allocation_supported,
+    ``Solidity.Evm.Memory.RefArrayExamples.default_declaration_supported,
     ``Solidity.Evm.Memory.RefArrayExamples.fixed_index_supported,
     ``Solidity.Evm.Memory.copiedFields_copy,
     ``Solidity.Evm.Memory.copiedStruct_alloc,
@@ -662,3 +725,9 @@ run_cmd do
 #print axioms Solidity.Evm.Memory.Objects.defaultEmpty_correct
 #print axioms Solidity.Evm.Memory.ObjectArrayExamples.allocator_preserved
 #print axioms Solidity.Evm.Memory.FixedChildArrayExamples.compiled_agrees
+
+#print axioms Solidity.Evm.Memory.Objects.nested_correct
+#print axioms Solidity.Evm.Memory.Construction.ProgFrag.correct
+#print axioms Solidity.Evm.Memory.ConstructionExamples.target_result
+#print axioms Solidity.Evm.Memory.ConstructionExamples.unreachable_target
+#print axioms Solidity.Evm.Memory.StructArrayInputExamples.compiled_agrees

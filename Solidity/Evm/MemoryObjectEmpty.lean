@@ -129,4 +129,66 @@ theorem defaultEmpty_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
       (h.allocateEmpty ha hb E hs).consMem (σ.alloc (emptyArray E)).2 hcap
   · exact (ha.allocateEmpty E hs).localWrite (b + Γ.length) (by omega) (by omega) _
 
+/-- A literal zero allocates no child constructors, at any map-free element type. -/
+theorem newEmpty_decl {Γ : Ctx} (σ : State C Γ) (E : Ty)
+    (hn : (RefTy.array E).newArrOk = true) (hm : (Ty.ref (.array E)).mapFree = true) :
+    TRun.declMem (.array E) (some (.newArr (.lit 0 rfl) hn)) hm σ =
+      .ok ⟨σ.allocPush (emptyArray E), List.prefix_append _ _⟩ := by
+  have he := newEmptyArray_copy σ.heap E (RefTy.mapFree_of_newArrOk hn) hn
+  simp only [TRun.declMem, MRhs.evalT, State.copyStToMG, State.grow,
+    bind, Except.bind, pure, Except.pure]
+  with_unfolding_all exact State.adopt_push_alloc σ _ _ he _ _
+
+theorem newEmpty_rebind {Γ : Ctx} (σ : State C Γ) (E : Ty)
+    (dst : Idx Γ (.mem (.array E))) (hn : (RefTy.array E).newArrOk = true) :
+    TRun.rebindMem dst (.newArr (.lit 0 rfl) hn) σ =
+      .ok ⟨(σ.alloc (emptyArray E)).1.setLocal dst (some (σ.alloc (emptyArray E)).2),
+        List.prefix_append _ _⟩ := by
+  have he := newEmptyArray_copy σ.heap E (RefTy.mapFree_of_newArrOk hn) hn
+  simp only [TRun.rebindMem, MRhs.evalT, State.copyStToMG, State.grow,
+    bind, Except.bind, pure, Except.pure]
+  exact congrArg (fun g : Grown σ.H (MVal · (.ref (.array E))) =>
+    (Except.ok ⟨(σ.adopt g).1.setLocal dst (some g.val), g.ext⟩ :
+      TRes (Solidity.Out C σ.H Γ))) he
+
+theorem newEmpty_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
+    {σ : State C Γ} {base : Nat → Fin W} {cursor : Fin W} {m : Machine}
+    (h : StateRepr L b frame F σ base m)
+    (ha : AllocatorRepr σ.heap base frame cursor m) (hb : 0 < b)
+    (E : Ty) (hn : (RefTy.array E).newArrOk = true) (hm : (Ty.ref (.array E)).mapFree = true)
+    (hs : cursor.val + 1 < W) (hcap : b + (Γ.length + 1) ≤ frame) :
+    let σ' := σ.allocPush (emptyArray E)
+    let base' := upd base σ.H.length cursor
+    let m' := writeMachine (allocateMachine m cursor (wmod 0))
+      (cell (b + Γ.length)) (.val cursor)
+    TRun.declMem (.array E) (some (.newArr (.lit 0 rfl) hn)) hm σ = .ok ⟨σ', List.prefix_append _ _⟩ ∧
+      run ([.push w[0]] ++ allocateArrayCode ++ [.mstore (cell (b + Γ.length))]) m = .ok m' 0 ∧
+      StateRepr L b frame (F.push (.mem (.array E)) .ok) σ' base' m' ∧
+      AllocatorRepr σ'.heap base' frame ⟨cursor.val + 1, hs⟩ m' ∧ m'.stack = m.stack :=
+  ⟨newEmpty_decl σ E hn hm, (defaultEmpty_correct h ha hb E hm hs hcap).2⟩
+
+theorem rebindEmpty_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
+    {σ : State C Γ} {base : Nat → Fin W} {cursor : Fin W} {m : Machine}
+    (h : StateRepr L b frame F σ base m)
+    (ha : AllocatorRepr σ.heap base frame cursor m) (hb : 0 < b)
+    (E : Ty) (dst : Idx Γ (.mem (.array E))) (hn : (RefTy.array E).newArrOk = true)
+    (hs : cursor.val + 1 < W) :
+    let σ' := (σ.alloc (emptyArray E)).1.setLocal dst (some (σ.alloc (emptyArray E)).2)
+    let base' := upd base σ.H.length cursor
+    let m' := writeMachine (allocateMachine m cursor (wmod 0)) (cellOf b dst) (.val cursor)
+    TRun.rebindMem dst (.newArr (.lit 0 rfl) hn) σ = .ok ⟨σ', List.prefix_append _ _⟩ ∧
+      run ([.push w[0]] ++ allocateArrayCode ++ [.mstore (cellOf b dst)]) m = .ok m' 0 ∧
+      StateRepr L b frame F σ' base' m' ∧
+      AllocatorRepr σ'.heap base' frame ⟨cursor.val + 1, hs⟩ m' ∧ m'.stack = m.stack := by
+  refine ⟨newEmpty_rebind σ E dst hn, ?_, ?_, ?_, rfl⟩
+  · have hz : w[0] = Word.val (wmod 0) := congrArg Word.val (Fin.ext rfl)
+    rw [List.append_assoc, run_append_ok (m' := m.push w[0]) rfl, hz,
+      run_append_ok (allocateArray_run m cursor (wmod 0) ha.free.cell)]
+    rfl
+  · have hid : (σ.alloc (emptyArray E)).2.id = σ.H.length := rfl
+    simpa only [hid, upd_same] using
+      (h.allocateEmpty ha hb E hs).setMem dst (σ.alloc (emptyArray E)).2
+  · exact (ha.allocateEmpty E hs).localWrite (cellOf b dst)
+      (Nat.lt_of_lt_of_le hb (le_lvl b dst)) (Nat.lt_of_lt_of_le (lvl_lt b dst) h.locals) _
+
 end Solidity.Evm.Memory.Objects
