@@ -21,14 +21,17 @@ changes no feature status: every row is open work.
   the decision table, the work-package manifest and VM table of
   `coverage-plan.md`, and the Lean import graph.
 - **Result:** 174 in-profile rows plus `fixedPoint` (in scope by decision
-  G00 Q6, manifest still `upstream`), 39 named combinations (G00's 17 and 22
+  G00 Q6, manifest still `upstream`), 41 named combinations (G00's 17 and 24
   in-profile ones), 122 ledger-symbol combinations, 22 decision-driven
-  obligations and all 41 G04 restrictions, each owned per stage by work
-  packages of the roadmap manifest (115). 649 existing declarations are cited
-  as partial coverage. The dependency ledger adds 23 lemma-level edges and
-  one deferred cross-wave check, finds 9 conflicts with the VM schedule, 126 import
-  inversions and one shared write over 41 existing modules, no cycle, and 11
-  oversized checkpoints, each with a recorded resolution or lemma split.
+  obligations and all 41 G04 restrictions (every discharging package G04
+  names is an owner of a row citing it), each owned by work packages of the
+  roadmap manifest (115). 684 existing declarations are cited as partial
+  coverage (648 on feature rows, 75 of them fixed-program regressions). The
+  dependency ledger adds 23 lemma-level edges and one deferred cross-wave
+  check, finds 9 conflicts with the VM schedule, 106 import inversions, 32
+  parallel imports and one shared write over 36 existing modules, and 11
+  oversized checkpoints, each with a recorded resolution or lemma split; the
+  inversions through the shared compiler foundation are question Q1.
 
 ## Method and reproduction
 
@@ -69,9 +72,13 @@ names them where the row's obligation is specific.
 collected 1–4 declarations per row from the manifest's `localEvidence`, the
 module map and the feature documents; the checker verifies each is declared
 in its file with the cited qualified name and computes its line. They are
-partial evidence only: an anchor at the `theorem` stage is an existing
-calculus, Bridge or corpus theorem, not an instance of a G01 contract (none
-exists). The `missing` lines name in-profile cases no stage covers, citing
+partial evidence only. `--check` enforces where each stage's anchors may
+live: an `evm` anchor must be a Bridge agreement with the external EVM
+(`Bridge/SolidityBridge/ExternalEvm*`); a `theorem` anchor is a general
+calculus, typing or Bridge theorem about source programs, never compiler or
+semantics code, and never an instance of a G01 contract (none exists); a
+fixed-program corpus, example or test result is a `regression` anchor, shown
+as `r` and counted for no stage. The `missing` lines name in-profile cases no stage covers, citing
 G04's restriction IDs where they apply; `R` columns are derived from them.
 
 **Combinations.** G00's 17 named combinations (in-profile parts beside
@@ -79,9 +86,13 @@ confirmed exclusions) are matched by their ID sets and refined to work
 packages. 22 in-profile combinations are new here, mostly the G04
 restrictions that bind two constructs together (mixed core/memory programs,
 loops that push or pay, aliases across shrinks, recursion with memory frames,
-hashed keys under the per-run premise, …). G00's 122 ledger-symbol
-combinations are owned by G15 plus the admission owners of their in-profile
-rows.
+hashed keys under the per-run premise, …). A combination names owners for the
+stages where it adds an obligation; G15 always owns its classification, and
+any other stage it does not name is owned through its rows (listed as
+"through its rows"; `--check` fails if that is empty). G00's owners of its
+combinations must survive refinement. G00's 122 ledger-symbol combinations
+are derived as in G00 and owned by G15 plus the admission owners of their
+in-profile rows; that ownership is structural, not an independent check.
 
 **Dependencies.** Edges transcribe the roadmap (wave order, sub-wave
 prerequisites, S-group order and the rule that a G-parent's children run in
@@ -93,18 +104,25 @@ whitelist holds for all S-groups). The checker then derives, from the Lean
 import graph: **schedule** findings (a dependency whose prerequisite is not
 scheduled first by wave and VM order), **inversions** (a package edits a
 module that imports a module a later package edits, so the earlier package's
-final check depends on later work), **shared writes** between unordered
-packages, and cycles over the declared edges plus the wave order. Integrated
-wave-0 packages (G00, G01, G04) are excluded from inversions, since every
-build rechecks them. Size flags are static proxies for G02's measurements:
+final check depends on later work), **parallel imports** (the same between
+packages the schedule does not order), **shared writes** between unordered
+packages, and cycles over the declared edges plus the wave order. A deferred
+edge must name the VM that runs the final check after its prerequisite. The
+integrated G00 and G04 are excluded from inversions; G01 is not, since its
+contracts are not frozen. Inversions are module-level cycles (an earlier
+package's final check depends on a later package): each is acknowledged
+either per finding, keyed by kind and package pair, or per module, where the
+acknowledgement names exactly the packages involved and `--check` fails when
+another package appears through that module. Size flags are static proxies for G02's measurements:
 more than 60 owned ledger cells, more than 12,000 edited lines, or an edited
 module over 2,500 lines.
 
 ## Findings
 
-1. **No row has an end-to-end proof.** Of 175 rows, 118 have no existing
-   backend anchor and 142 no EVM anchor; the existing EVM anchors are the
-   Bridge's word-operation and environment-opcode agreements. Every row's
+1. **No row has an end-to-end proof.** Of 175 rows, 117 have no existing
+   backend anchor, 152 no EVM anchor and 136 no general theorem anchor; the
+   16 EVM anchors are all Bridge word-operation or environment-opcode
+   agreements with the external EVM. Every row's
    `missing` list is open work for its owners.
 2. **New lemma-level dependencies** (`g03` edges): G13 and G14 ← G12; G17 ←
    G16; G19 ← G16, G17; G20 ← G18.06; G21 ← G18.04; G22.04 ← G20; G26 ← G25;
@@ -115,7 +133,11 @@ module over 2,500 lines.
    and callbacks, which G42.01/G42.03 (wave 5) compile. Like G36.03 ← G43 it
    is recorded as a deferred final check: G39 exports its transient
    representation, reset and rollback in wave 4, and its self-call/callback
-   case is checked after G42.03.
+   case is checked after G42.03, proposed in V23. coverage-plan.md (the
+   "Groups and dependencies" preamble and the note after the manifest) names
+   G36.03 as the only deferred check; that text needs the G39 exception, and
+   V23's checkpoint list the G39 final check (handed to G02/the coordinator,
+   since this group may not rewrite those lines).
 3. **The VM table conflicts with nine dependencies.** V11 (G19, G20) and
    V12 (G21) run beside V09/V10 although they lower expressions and
    aggregates; V17 (G31) beside V15 (G27.05's hash premise); V21 (G38) beside
@@ -134,25 +156,34 @@ module over 2,500 lines.
    editing `Machine`, and G48–G50 compose in new modules rather than in
    `Frontend.Import`, `Evm.Compiler`, `Theorems`, `Lifetime` or
    `ContractWorld` (the module ledger already plans it so). On the frontend
-   side, wave-1 packages import elaborator and adapter modules that wave-2
-   packages edit; by G01's boundary the checked frontend must not depend on
-   them, so their certificates belong in new modules.
-5. **No cycle** over the declared edges and the wave order; the two
-   cross-wave dependencies are deferred checks (G36.03 ← G43, G39 ← G42.01,
-   G42.03).
+   side, by G01's boundary the checked frontend must not depend on elaborator
+   or adapter modules, so G13 and G14 are planned as new modules and G12
+   extends only `Frontend.SourceUnits`; G15 owns the adapter route
+   (`Admission`, `Source`, `SolcJson.Body`). The remaining
+   wave-2 parallel imports (for example G16's `NumericLowering` importing the
+   `Storage`/`Heap` modules G18.02/G18.03 edit beside it) are serialized by
+   VM order or rechecked, per the module table. "Re-run the dependent final
+   checks" is a rebase obligation, not independence: the roadmap asks for
+   cyclic interfaces to become shared-foundation children, which is Q1.
+5. **No cycle over the declared edges and the wave order.** This only says no
+   declared dependency points to a later wave except the deferred checks
+   (G36.03 ← G43; G39 ← G42.01, G42.03), each with its final-check VM. The
+   module-level cycles are the inversions of finding 4.
 6. **Oversized checkpoints.** G10, G13, G15, G46.01, G46.02, G47, G48,
    G49.01–G49.03 and G51.01 own more than 60 ledger cells; each has a lemma
    split in the module table, which refines the checkpoint without changing
-   its obligation or adding a VM. No package edits more than 12,000 existing
-   lines, and no planned edit touches a module over 2,500 lines.
+   its obligation or adding a VM. G15's planned edit of
+   `Frontend/SolcJson/Body.lean` (2,586 lines) is also flagged. No package
+   edits more than 12,000 existing lines.
 7. **Ownership gaps closed here.** G00's gaps: (1) the settings surface →
    D04/D05 (G05, G15, G49.02); (2) link-settings provenance → D16 (G05);
    (3) static code constants → D06 (the `Artifact` table); (4) external
    reference tooling → D03 (G06, with the g06-osaka-repin lane); (5)
    canonical-rethrow syntax → G11 in its combination row; (6) combinations
    through shared punctuation → the ledger-symbol rows (G15). G04's §3:
-   (1) the stale payment disjunct → D18/R32 (G43; no interim restatement is
-   owned); (2) `fault` conflating divergence and malformed code → D09 (G47,
+   (1) the stale payment disjunct → D18/R32: G24 owns the interim
+   restatement of T1/T12/T13/T15 without it (a statement-only strengthening,
+   not yet proved), G43 the payment relation; (2) `fault` conflating divergence and malformed code → D09 (G47,
    G49.03); (3) `recDepth = 1024` → D08 (S03.03, G37.02); (4) the missing
    `2^64` bound and `Panic(0x41)` → the allocation-capacity combination
    (S02, S04.01, G33, G38) and R24 (G30); (5) the source-only environment
@@ -170,193 +201,252 @@ module over 2,500 lines.
 ## Ledger
 
 <!-- BEGIN generated by scripts/roadmap-g03-ledger.py -->
-175 feature rows (174 in-profile + 1 decision-driven), 39 named combinations (17 from G00, 22 in-profile), 122 ledger-symbol combinations, 22 decision-driven obligations, 115 work packages, 649 existing-coverage anchors, 41 G04 restrictions mapped.
+175 feature rows (174 in-profile + 1 decision-driven), 41 named combinations (17 from G00, 24 in-profile), 122 ledger-symbol combinations, 22 decision-driven obligations, 115 work packages, 684 existing-coverage anchors (648 on feature rows), 41 G04 restrictions mapped.
 
-Stages with no existing anchor (rows): source 65, admission 114, lowering 56, backend 118, evm 142, theorem 65.
+Stages with no existing anchor (rows): source 62, admission 114, lowering 56, backend 117, evm 152, theorem 136.
 
 ### Feature owners
 
-Columns: owning work packages per stage; `cov` lists the stages with an existing anchor (s source, a admission, l lowering, b backend, e EVM, t theorem); `R` the G04 restrictions.
+Columns: owning work packages per stage; `cov` lists the stages with an existing anchor (s source, a admission, l lowering, b backend, e EVM, t theorem), then `r` for fixed-program regressions, which cover no stage; `R` the G04 restrictions cited in the row's missing cases.
 
 | ID | cat | cur | source | admission | lowering | backend | EVM | theorem | cov | R |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `abiDecode` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `··l··t` | R04, R20 |
-| `abiEncode` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al··t` | R04 |
-| `abiEncodeCall` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `··l··t` | R04 |
-| `abiEncodePacked` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al···` | R04 |
-| `abiEncodeWithSelector` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al···` | R04 |
-| `abiEncodeWithSignature` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 G46.05 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `sal···` | R04 |
-| `addmodBuiltin` | builtins | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s···et` | R10, R37 |
-| `assertBuiltin` | builtins | partial | S02 S04.02 | G10 G13 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s··bet` | R01, R29, R37 |
-| `bytesConcat` | builtins | partial | S02 | G10 G13 G15 | G18.03 | G33 G35.03 G35.04 | G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `··l···` | R10, R28, R31 |
-| `ecrecoverBuiltin` | builtins | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s····t` | R10 |
-| `erc7201Builtin` | builtins | present | S02 S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t` | R10 |
-| `keccakBuiltin` | builtins | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l···` | R10, R34, R35 |
-| `mulmodBuiltin` | builtins | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s···et` | R10, R37 |
-| `requireBuiltin` | builtins | partial | S02 S04.02 | G10 G13 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·lb·t` | R07, R37 |
-| `revertBuiltin` | builtins | partial | S02 S04.02 | G10 G13 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l···` | R07, R37 |
-| `ripemd160Builtin` | builtins | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l···` | R10, R13 |
-| `sha256Builtin` | builtins | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l···` | R10 |
-| `stringConcat` | builtins | partial | S02 | G10 G13 G15 | G18.03 | G33 G35.03 G35.04 | G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `··l···` | R28, R31 |
-| `wrapUnwrap` | builtins | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `··l··t` | R13 |
-| `callbackSemantics` | calls | partial | S03.03 S04.03 | G13 G15 | G22.02 | G42.03 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s···et` |  |
-| `creationTry` | calls | partial | S03.03 S04.04 | G11 G13 G15 | G22.03 | G44.03 | G47 | G48 G49.02 G50.01 G50.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa···t` |  |
-| `emptyDataValueCall` | calls | partial | S03.03 S04.03 | G10 G13 G15 | G22.02 G22.05 | G43 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l··t` | R06, R33 |
-| `extensionCalls` | calls | partial | S03.03 | G10 G14 G15 | G20 | G37.01 | G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al··t` |  |
-| `externalLibraryCalls` | calls | partial | S03.03 S04.03 | G10 G14 G15 | G22.04 | G42.04 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa···t` |  |
-| `externalSelfCalls` | calls | partial | S03.03 | G10 G14 G15 | G22.01 | G42.01 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l··t` | R07 |
-| `externalTypedCalls` | calls | partial | S03.03 S04.03 | G10 G14 G15 | G22.01 | G42.02 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l··t` | R07, R33 |
-| `functionValues` | calls | partial | S03.03 | G10 G13 G15 | G20 | G37.03 G42.05 | G46.01 G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l···` |  |
-| `internalCalls` | calls | partial | S03.03 | G10 G14 G15 | G20 | G37.01 G37.02 | G46.01 G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R09, R27 |
-| `newContract` | calls | partial | S03.03 S04.04 | G10 G13 G15 | G22.03 | G44.03 | G47 | G48 G49.02 G50.01 G50.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa···t` |  |
-| `recursiveCalls` | calls | partial | S03.03 S03.04 | G10 G14 G15 | G20 | G37.02 | G46.02 G46.06 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t` | R08, R27, R39 |
-| `sendTransfer` | calls | partial | S03.03 S04.03 | G10 G13 G15 | G22.02 G22.05 | G43 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··bet` | R06, R32, R33 |
-| `valueOption` | calls | partial | S03.03 S04.03 | G10 G13 G15 | G22.01 G22.03 G22.05 | G43 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sal···` | R06 |
-| `constants` | declarations | partial | S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` |  |
-| `constructors` | declarations | partial | S03.02 S04.04 | G11 G14 G15 | G19 G22.03 | G44.01 | G47 | G48 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` | R04 |
-| `contracts` | declarations | partial | S00 S01 | G11 G14 G15 | G20 | G40 G44.01 G44.02 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` | R04, R05 |
-| `enumDeclarations` | declarations | partial | S00 S01 | G09 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` | R13 |
-| `errorDeclarations` | declarations | partial | S00 S01 S04.02 | G09 G11 G15 | G21 | G38 G41 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` | R07 |
-| `eventDeclarations` | declarations | partial | S00 S01 | G09 G11 G15 | G23 | G31 | G46.02 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `·al··t` |  |
-| `fallbackFunction` | declarations | partial | S03.03 S04.04 | G11 G14 G15 | G20 | G40 | G46.02 G47 | G48 G49.02 G50.02 (Admission, Lowering, Compilation, PublicCorrectness) | `sal···` |  |
-| `freeFunctions` | declarations | partial | S00 S01 | G11 G12 G15 | G20 | G37.01 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` | R08, R09 |
-| `functions` | declarations | partial | S00 S01 S03.01 S03.03 | G11 G13 G15 | G20 | G37.01 G37.03 G40 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·lb·t` | R04, R08, R09 |
-| `immutables` | declarations | partial | S01 S04.03 | G09 G13 G15 | G19 | G44.01 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···` | R04 |
-| `imports` | declarations | partial | S00 | G11 G12 G15 | G23 | G44.02 | — | G48 (Admission) | `·al··t` |  |
-| `inheritance` | declarations | partial | S01 S03.02 | G11 G14 G15 | G19 G20 | G44.01 | G46.02 G47 | G48 G49.02 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` | R04 |
-| `interfaces` | declarations | partial | S00 S01 | G11 G14 G15 | G20 | G42.02 G42.05 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` | R07 |
-| `libraries` | declarations | partial | S00 S01 S03.03 | G11 G14 G15 | G22.04 | G42.04 G44.02 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` | R04, R09 |
-| `modifierPlaceholder` | declarations | partial | S03.02 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` |  |
-| `modifiers` | declarations | partial | S03.02 | G11 G14 G15 | G19 | G36.01 G37.01 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` | R01, R08, R09 |
-| `operatorAliases` | declarations | partial | S01 | G11 G13 G14 G15 | G16 G20 | G25 G37.01 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` |  |
-| `overrideDeclarations` | declarations | partial | S01 | G11 G14 G15 | G20 | G37.03 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···` |  |
-| `publicGetters` | declarations | partial | S01 S03.03 | G13 G14 G15 | G20 | G40 G41 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` | R07 |
-| `receiveFunction` | declarations | partial | S03.03 S04.04 | G11 G14 G15 | G20 | G40 | G46.02 G47 | G48 G49.02 G50.02 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` | R04, R06, R33 |
-| `sourceUnits` | declarations | partial | S00 | G11 G12 G15 | G23 | G44.02 | G47 | G48 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `·a···t` |  |
-| `stateMutability` | declarations | partial | S01 S03.03 | G11 G13 G15 | G20 G22.01 G22.05 | G40 G42.02 G42.05 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s···et` | R32 |
-| `stateVariables` | declarations | partial | S01 S04.01 | G09 G11 G15 | G18.02 | G27.01 G27.02 G27.03 G27.05 G44.01 | G46.03 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s··b·t` | R14, R17 |
-| `structDeclarations` | declarations | partial | S00 S01 | G09 G15 | G18.01 G18.02 G18.03 G18.04 G18.05 | G27.01 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·lb··` | R20, R28 |
-| `usingFor` | declarations | partial | S01 | G11 G14 G15 | G20 | G37.01 G37.03 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` | R09 |
-| `valueTypeDeclarations` | declarations | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` |  |
-| `visibility` | declarations | partial | S01 | G11 G14 G15 | G20 | G40 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···` | R04 |
-| `addressBalance` | environment | partial | S04.02 S04.03 | G10 G13 G15 | G23 | G31 G43 | G46.04 G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `s··be·` | R11 |
-| `blockTimestamp` | environment | present | S04.02 | G10 G13 G15 | G23 | G31 | G46.04 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sa··e·` |  |
-| `msgSender` | environment | present | S04.02 | G10 G13 G15 | G23 | G31 | G46.04 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sa·be·` | R27 |
-| `msgValue` | environment | partial | S04.02 | G10 G13 G15 | G23 | G31 G43 | G46.04 G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `s··be·` |  |
-| `thisAddress` | environment | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.04 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sa··e·` | R27 |
-| `arithmetic` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··bet` | R05, R12, R13, R37 |
-| `assignment` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 G28 G34 | G46.01 G46.02 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R17, R19, R20 |
-| `bitwise` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··be·` | R12, R13 |
-| `callOptions` | expressions | partial | S02 S03.03 | G10 G15 | G22.01 G22.03 G22.05 | G42.02 G43 G44.03 | G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sal···` | R06, R33 |
-| `comparisons` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··be·` | R13 |
-| `compoundAssignment` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 G28 | G46.01 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb··` | R18, R29 |
-| `conditional` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R28 |
-| `deleteExpression` | expressions | partial | S02 S04.01 | G10 G13 G15 | G18.05 | G28 G30 G34 | G46.02 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t` | R21, R28, R29 |
-| `explicitConversions` | expressions | partial | S01 S02 | G10 G13 G15 | G16 G18.05 | G25 G35.01 G35.02 G35.03 G35.04 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al·e·` | R13, R27 |
-| `functionCalls` | expressions | partial | S02 S03.03 | G10 G13 G15 | G20 | G37.01 G37.03 G42.01 G42.02 G42.04 | G46.01 G47 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R04, R07, R08, R09 |
-| `implicitConversions` | expressions | partial | S01 | G13 G15 | G16 G18.05 | G25 G35.01 G35.02 G35.03 G35.04 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l·e·` | R13 |
-| `increments` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 G28 | G46.01 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb··` | R18, R21, R29 |
-| `indexAccess` | expressions | partial | S02 | G10 G13 G15 | G17 G18.02 G18.03 G18.04 | G26 G28 G34 | G46.01 G46.02 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t` | R10, R13, R14 |
-| `inlineArrays` | expressions | partial | S02 | G10 G13 G15 | G18.03 | G33 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al··t` | R28 |
-| `memberAccess` | expressions | partial | S02 | G10 G13 G15 | G17 G18.02 G18.03 G18.04 | G26 G28 G34 | G46.01 G46.02 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `salb··` | R11 |
-| `metaTypeExpression` | expressions | partial | S01 | G10 G13 G15 | G23 | G31 | G46.01 G46.05 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al··t` |  |
-| `namedArguments` | expressions | partial | S02 | G10 G13 G15 | G20 | G37.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al··t` |  |
-| `names` | expressions | partial | S01 S02 | G10 G12 G15 | G16 G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `salb··` | R04 |
-| `newMemory` | expressions | partial | S02 S04.01 | G10 G13 G15 | G18.03 | G33 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R22, R25, R28 |
-| `parentheses` | expressions | present | S00 S02 | G10 G15 | G16 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l··t` |  |
-| `rangeAccess` | expressions | partial | S02 | G10 G13 G15 | G18.04 G21 | G35.03 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l··t` | R04, R20 |
-| `shifts` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s···et` | R12 |
-| `shortCircuit` | expressions | partial | S02 | G10 G15 | G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa···t` | R09, R10 |
-| `structConstruction` | expressions | partial | S02 | G10 G13 G15 | G18.03 | G33 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·alb··` | R28 |
-| `tupleExpressions` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al··t` | R09 |
-| `unaryArithmetic` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··be·` | R12, R13 |
-| `addressLiterals` | lexical | partial | S00 | G08 G15 | G16 | G25 | G46.01 G46.04 | G48 G49.03 (Admission, Lowering) | `sa···t` | R13 |
-| `booleanLiterals` | lexical | present | S00 | G08 G15 | G16 | G25 | G46.01 | G48 G49.03 (Admission, Lowering) | `··lbet` |  |
-| `comments` | lexical | partial | S00 | G08 G15 | — | — | — | G48 (Admission) | `·a···t` |  |
-| `etherUnits` | lexical | present | S00 | G08 G15 | G16 | G25 | G46.01 | G48 G49.03 (Admission, Lowering) | `s·l··t` |  |
-| `hexLiterals` | lexical | partial | S00 S02 | G08 G15 | G18.03 | G33 | G46.01 | G48 G49.03 (Admission, Lowering) | `s·l··t` | R10, R31 |
-| `identifiers` | lexical | partial | S00 S01 | G08 G12 G15 | G16 G17 | G26 | — | G48 (Admission, Lowering) | `·al··t` |  |
-| `numericLiterals` | lexical | partial | S00 | G08 G15 | G16 | G25 | G46.01 | G48 G49.03 (Admission, Lowering) | `··lbe·` | R13 |
-| `pragmaAbicoder` | lexical | partial | S00 S04.02 | G08 G11 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 (Admission, Lowering, Execution, PublicCorrectness) | `·a····` | R04 |
-| `pragmaOther` | lexical | partial | S00 | G08 G11 G15 | — | — | — | G48 (Admission) | `·a····` |  |
-| `pragmaVersion` | lexical | partial | S00 | G08 G11 G15 | — | — | — | G48 (Admission) | `·a····` |  |
-| `stringLiterals` | lexical | partial | S00 S02 | G08 G15 | G18.03 | G33 | G46.01 | G48 G49.03 (Admission, Lowering) | `s·l··t` | R10, R17 |
-| `timeUnits` | lexical | present | S00 | G08 G15 | G16 | G25 | G46.01 | G48 G49.03 (Admission, Lowering) | `s·l··t` |  |
-| `unicodeLiterals` | lexical | partial | S00 S02 | G08 G15 | G18.03 | G33 | G46.01 | G48 G49.03 (Admission, Lowering) | `·al··t` | R10, R17 |
-| `creationCode` | metadata | partial | S04.02 | G13 G15 | G23 | G44.02 | G46.02 G47 | G48 G49.02 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `·al··t` | R05 |
-| `errorEventSelector` | metadata | present | S01 S04.02 | G13 G15 | G23 | G31 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` | R10 |
-| `functionAddress` | metadata | partial | S04.03 | G13 G15 | G22.04 | G42.05 | G46.01 G47 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` |  |
-| `functionSelector` | metadata | partial | S01 S04.02 | G13 G15 | G23 | G31 G40 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··t` |  |
-| `interfaceId` | metadata | present | S01 | G13 G15 | G23 | G31 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` |  |
-| `runtimeCode` | metadata | partial | S04.02 | G13 G15 | G23 | G44.02 | G46.02 G47 | G48 G49.02 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `·al··t` | R05 |
-| `typeBounds` | metadata | partial | S01 | G13 G15 | G16 | G25 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l··t` |  |
-| `typeName` | metadata | present | S01 | G13 G15 | G23 | G31 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `·al···` | R10, R17 |
-| `abiEntryValidation` | semantics | partial | S04.02 | G13 G15 | G21 | G40 | G46.02 G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sal···` | R04 |
-| `checkedArithmetic` | semantics | partial | S02 | G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `··l··t` | R12 |
-| `constructorLifetime` | semantics | partial | S04.04 | G14 G15 | G22.03 | G44.01 G44.03 G50.01 | G47 | G48 G49.02 G50.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s····t` | R04 |
-| `defaultInitialization` | semantics | partial | S02 S04.01 | G13 G15 | G18.02 G18.03 | G30 G33 | G46.02 G46.03 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `sa·b··` | R16, R28 |
-| `evaluationOrder` | semantics | partial | S02 S03.01 S03.03 | G13 G15 | G16 G17 | G26 | G46.06 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al···` |  |
-| `exactConstants` | semantics | partial | S01 | G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al···` |  |
-| `featureDetection` | semantics | partial | S05 | G15 | — | — | — | G48 G49.03 (Admission, PublicCorrectness) | `·a····` |  |
-| `nonpayableEntry` | semantics | partial | S04.04 | G13 G15 | G22.05 | G40 G43 | G46.04 G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sa··e·` | R04 |
-| `panicCodes` | semantics | partial | S04.02 | G13 G15 | G21 | G38 | G46.02 G47 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s····t` | R24, R25, R37 |
-| `referenceCopyRules` | semantics | partial | S04.01 | G13 G15 | G18.05 | G29.01 G29.02 G29.03 G35.01 G35.02 G35.03 G35.04 G35.05 G35.06 | G46.02 G46.03 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t` | R19, R20 |
-| `revertPayloads` | semantics | partial | S04.02 | G13 G15 | G21 | G38 G41 | G46.02 G47 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t` | R07, R37 |
-| `rollback` | semantics | partial | S03.04 S04.03 | G13 G15 | G21 G22.01 G22.02 G22.03 G22.05 | G38 G39 | G47 G46.03 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `s····t` | R07, R41 |
-| `staticCallRestriction` | semantics | partial | S03.03 S04.03 | G13 G15 | G22.01 G22.04 | G42.02 G42.05 | G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t` | R07 |
-| `termination` | semantics | partial | S03.04 | G13 G15 | G19 | G36.03 G37.02 G49.03 | G46.06 G47 | G49.02 G49.03 G50.02 G51.02 (Compilation, Execution, PublicCorrectness, SpecTransfer) | `s···et` | R08, R38, R39 |
-| `typeValidation` | semantics | partial | S01 | G13 G15 | — | — | — | G48 (Admission) | `·a····` | R15, R16 |
-| `uncheckedArithmetic` | semantics | partial | S02 | G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t` | R12 |
-| `worldAssumptions` | semantics | partial | S04.03 | G13 G15 | G22.02 G22.05 | G42.02 G43 | G47 | G49.02 G50.02 G51.02 (Execution, PublicCorrectness, SpecTransfer) | `·····t` | R33 |
-| `blocks` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa·b·t` | R01, R02, R05 |
-| `breakStatement` | statements | present | S03.01 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l··t` |  |
-| `canonicalRethrow` | statements | partial | S03.01 S04.02 | G11 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l··t` | R07, R31, R37 |
-| `catchClauses` | statements | partial | S03.03 S04.02 | G11 G15 | G21 | G38 G41 | G46.02 G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t` | R07 |
-| `continueStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l··t` |  |
-| `doWhileStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 G36.02 G36.03 | G46.01 G46.06 | G48 G49.01 G49.02 G49.03 G51.01 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sal··t` | R21, R22, R38 |
-| `emitStatement` | statements | partial | S03.01 S04.02 | G11 G15 | G23 | G31 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l··t` |  |
-| `expressionStatements` | statements | partial | S03.01 | G11 G15 | G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·alb··` | R09, R29 |
-| `forStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 G36.02 G36.03 | G46.01 G46.06 | G48 G49.01 G49.02 G49.03 G51.01 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··lb·t` | R21, R22 |
-| `ifStatement` | statements | present | S03.01 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R23, R36 |
-| `returnStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 G37.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb··` | R09, R41 |
-| `revertStatement` | statements | partial | S03.01 S04.02 | G11 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l··t` | R07, R37 |
-| `tryStatement` | statements | partial | S03.03 S04.03 | G11 G15 | G21 G22.01 G22.03 | G38 G42.02 G42.06 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R07 |
-| `uncheckedBlock` | statements | partial | S02 S03.01 | G11 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·alb·t` | R12 |
-| `variableDeclarations` | statements | partial | S03.01 | G11 G13 G15 | G17 G19 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R16, R28 |
-| `whileStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 G36.02 G36.03 | G46.01 G46.06 | G48 G49.01 G49.02 G49.03 G51.01 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t` | R21, R22, R38 |
-| `arrayLength` | storage | partial | S04.01 | G10 G13 G15 | G18.02 G18.03 G18.04 | G28 G34 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa·b··` | R24 |
-| `arrayPop` | storage | partial | S04.01 | G10 G13 G15 | G18.02 | G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t` | R21, R36 |
-| `arrayPush` | storage | partial | S04.01 | G10 G13 G15 | G18.02 | G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t` | R18, R21 |
-| `arrayPushReference` | storage | partial | S04.01 | G10 G13 G15 | G18.02 | G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t` | R18 |
-| `danglingReferences` | storage | partial | S04.01 | G13 G15 | G18.05 | G28 G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t` | R36 |
-| `deleteMappingTails` | storage | partial | S04.01 | G13 G15 | G18.05 | G29.02 G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t` | R21 |
-| `logicalStorageBase` | storage | partial | S04.01 | G09 G13 G15 | G18.02 | G27.05 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa····` | R34 |
-| `memoryAliasing` | storage | partial | S04.01 | G13 G15 | G18.03 | G34 | G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t` | R04, R20, R30 |
-| `storageAliasing` | storage | partial | S04.01 | G13 G15 | G18.02 | G28 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b··` | R09, R36 |
-| `storageCopy` | storage | partial | S04.01 | G13 G15 | G18.05 | G29.01 G29.02 G29.03 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t` | R17, R19 |
-| `transientState` | storage | partial | S04.03 | G09 G13 G15 | G23 | G39 | G46.03 G47 | G48 G49.02 G50.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa···t` |  |
-| `addressTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 G42.02 G42.05 | G46.01 G46.04 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s·l·e·` | R27 |
-| `boolType` | types | present | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s··be·` | R34 |
-| `calldataLocation` | types | partial | S01 S04.01 | G09 G13 G15 | G18.04 | G35.03 G40 | G46.02 G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `··l···` | R20 |
-| `dynamicArrays` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 G18.03 G18.04 G18.05 | G27.03 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s··b··` | R22, R24, R28 |
-| `dynamicBytesType` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 G18.03 G18.04 G18.05 | G27.03 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s·l···` | R17, R31 |
-| `enumTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al···` |  |
-| `externalFunctionTypes` | types | partial | S00 S01 S04.03 | G09 G13 G15 | G20 G22.04 | G42.05 | G46.01 G47 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `sal··t` | R07 |
-| `fixedArrays` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 G18.03 G18.04 G18.05 | G27.03 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `sa·b··` | R19, R28 |
-| `fixedBytesTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al···` | R13 |
-| `integerTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al·et` | R12, R13 |
-| `internalFunctionTypes` | types | partial | S00 S01 | G09 G13 G15 | G20 | G37.03 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al···` |  |
-| `mappings` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 | G27.02 | G46.03 G46.05 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `sa·b··` | R14, R34 |
-| `memoryLocation` | types | partial | S01 S04.01 | G09 G13 G15 | G18.03 | G32 G34 | G46.02 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s··b·t` | R01, R02, R25, R31 |
-| `recursiveTypes` | types | missing | S00 S01 S04.01 | G09 G13 G15 | G18.01 | G27.04 G35.05 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s···e·` |  |
-| `storageLocation` | types | partial | S01 S04.01 | G09 G13 G15 | G18.02 | G27.01 G27.02 G27.03 G27.04 G27.05 G28 | G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s··b·t` | R09, R34 |
-| `stringType` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 G18.03 G18.04 G18.05 | G27.03 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al···` | R10, R14, R17 |
-| `structTypes` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.01 G18.02 G18.03 G18.04 G18.05 | G27.01 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `salb··` | R19, R20, R28 |
-| `tupleTypes` | types | partial | S00 S01 | G09 G13 G15 | G17 | G26 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `salb··` | R09 |
-| `valueTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al···` |  |
-| `fixedPoint` | upstream | notApplicable | S00 S01 S02 | G08 G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `······` |  |
+| `abiDecode` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `··l···r` | R04, R20 |
+| `abiEncode` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al···r` | R04 |
+| `abiEncodeCall` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `··l···r` | R04 |
+| `abiEncodePacked` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al····` | R04 |
+| `abiEncodeWithSelector` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al····` | R04 |
+| `abiEncodeWithSignature` | abi | partial | S04.02 | G10 G13 G15 | G21 | G40 G41 | G46.02 G46.05 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `sal····` | R04 |
+| `addmodBuiltin` | builtins | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·····r` | R10, R37 |
+| `assertBuiltin` | builtins | partial | S02 S04.02 | G10 G13 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s··b··r` | R01, R29, R37 |
+| `bytesConcat` | builtins | partial | S02 | G10 G13 G15 | G18.03 | G33 G35.03 G35.04 | G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `··l····` | R10, R28, R31 |
+| `ecrecoverBuiltin` | builtins | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·····r` | R10 |
+| `erc7201Builtin` | builtins | present | S02 S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l···r` | R10 |
+| `keccakBuiltin` | builtins | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l····` | R10, R34, R35 |
+| `mulmodBuiltin` | builtins | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·····r` | R10, R37 |
+| `requireBuiltin` | builtins | partial | S02 S04.02 | G10 G13 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·lb··r` | R07, R37 |
+| `revertBuiltin` | builtins | partial | S02 S04.02 | G10 G13 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l····` | R07, R37 |
+| `ripemd160Builtin` | builtins | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l····` | R10, R13 |
+| `sha256Builtin` | builtins | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.05 G46.02 G47 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l····` | R10 |
+| `stringConcat` | builtins | partial | S02 | G10 G13 G15 | G18.03 | G33 G35.03 G35.04 | G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `··l····` | R28, R31 |
+| `wrapUnwrap` | builtins | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness) | `··l···r` | R13 |
+| `callbackSemantics` | calls | partial | S03.03 S04.03 | G13 G15 | G22.02 | G42.03 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t·` |  |
+| `creationTry` | calls | partial | S03.03 S04.04 | G11 G13 G15 | G22.03 | G44.03 | G47 | G48 G49.02 G50.01 G50.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa·····` |  |
+| `emptyDataValueCall` | calls | partial | S03.03 S04.03 | G10 G13 G15 | G22.02 G22.05 | G43 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l··t·` | R06, R33 |
+| `extensionCalls` | calls | partial | S03.03 | G10 G14 G15 | G20 | G37.01 | G46.01 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al···r` |  |
+| `externalLibraryCalls` | calls | partial | S03.03 S04.03 | G10 G14 G15 | G22.04 | G42.04 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa·····` |  |
+| `externalSelfCalls` | calls | partial | S03.03 | G10 G14 G15 | G22.01 | G42.01 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l···r` | R07 |
+| `externalTypedCalls` | calls | partial | S03.03 S04.03 | G10 G14 G15 | G22.01 | G42.02 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l··t·` | R07, R33 |
+| `functionValues` | calls | partial | S03.03 | G10 G13 G15 | G20 | G37.03 G42.05 | G46.01 G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l····` |  |
+| `internalCalls` | calls | partial | S03.03 | G10 G14 G15 | G20 | G37.01 G37.02 | G46.01 G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t·` | R09, R27 |
+| `newContract` | calls | partial | S03.03 S04.04 | G10 G13 G15 | G22.03 | G44.03 | G47 | G48 G49.02 G50.01 G50.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa···t·` |  |
+| `recursiveCalls` | calls | partial | S03.03 S03.04 | G10 G14 G15 | G20 | G37.02 | G46.02 G46.06 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t·` | R08, R27, R39 |
+| `sendTransfer` | calls | partial | S03.03 S04.03 | G10 G13 G15 | G22.02 G22.05 | G43 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t·` | R06, R32, R33 |
+| `valueOption` | calls | partial | S03.03 S04.03 | G10 G13 G15 | G22.01 G22.03 G22.05 | G43 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sal····` | R06 |
+| `constants` | declarations | partial | S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` |  |
+| `constructors` | declarations | partial | S03.02 S04.04 | G11 G14 G15 | G19 G22.03 | G44.01 | G47 | G48 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l··tr` | R04 |
+| `contracts` | declarations | partial | S00 S01 | G11 G14 G15 | G20 | G40 G44.01 G44.02 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` | R04, R05 |
+| `enumDeclarations` | declarations | partial | S00 S01 | G09 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` | R13 |
+| `errorDeclarations` | declarations | partial | S00 S01 S04.02 | G09 G11 G15 | G21 | G38 G41 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` | R07 |
+| `eventDeclarations` | declarations | partial | S00 S01 | G09 G11 G15 | G23 | G31 | G46.02 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `·al···r` |  |
+| `fallbackFunction` | declarations | partial | S03.03 S04.04 | G11 G14 G15 | G20 | G40 | G46.02 G47 | G48 G49.02 G50.02 (Admission, Lowering, Compilation, PublicCorrectness) | `sal····` |  |
+| `freeFunctions` | declarations | partial | S00 S01 | G11 G12 G15 | G20 | G37.01 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` | R08, R09 |
+| `functions` | declarations | partial | S00 S01 S03.01 S03.03 | G11 G13 G15 | G20 | G37.01 G37.03 G40 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·lb··r` | R04, R08, R09 |
+| `immutables` | declarations | partial | S01 S04.03 | G09 G13 G15 | G19 | G44.01 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l····` | R04 |
+| `imports` | declarations | partial | S00 | G11 G12 G15 | G23 | G44.02 | — | G48 (Admission) | `·al···r` |  |
+| `inheritance` | declarations | partial | S01 S03.02 | G11 G14 G15 | G19 G20 | G44.01 | G46.02 G47 | G48 G49.02 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` | R04 |
+| `interfaces` | declarations | partial | S00 S01 | G11 G14 G15 | G20 | G42.02 G42.05 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` | R07 |
+| `libraries` | declarations | partial | S00 S01 S03.03 | G11 G14 G15 | G22.04 | G42.04 G44.02 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` | R04, R09 |
+| `modifierPlaceholder` | declarations | partial | S03.02 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` |  |
+| `modifiers` | declarations | partial | S03.02 | G11 G14 G15 | G19 | G36.01 G37.01 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` | R01, R08, R09 |
+| `operatorAliases` | declarations | partial | S01 | G11 G13 G14 G15 | G16 G20 | G25 G37.01 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` |  |
+| `overrideDeclarations` | declarations | partial | S01 | G11 G14 G15 | G20 | G37.03 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l····` |  |
+| `publicGetters` | declarations | partial | S01 S03.03 | G13 G14 G15 | G20 | G40 G41 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` | R07 |
+| `receiveFunction` | declarations | partial | S03.03 S04.04 | G11 G14 G15 | G20 | G40 | G46.02 G47 | G48 G49.02 G50.02 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` | R04, R06, R33 |
+| `sourceUnits` | declarations | partial | S00 | G11 G12 G15 | G23 | G44.02 | G47 | G48 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `·a····r` |  |
+| `stateMutability` | declarations | partial | S01 S03.03 | G11 G13 G15 | G20 G22.01 G22.05 | G40 G42.02 G42.05 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s···e··` | R32 |
+| `stateVariables` | declarations | partial | S01 S04.01 | G09 G11 G15 | G18.02 | G27.01 G27.02 G27.03 G27.05 G44.01 | G46.03 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s··b···` | R14, R17 |
+| `structDeclarations` | declarations | partial | S00 S01 | G09 G15 | G18.01 G18.02 G18.03 G18.04 G18.05 | G27.01 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·lb···` | R20, R28 |
+| `usingFor` | declarations | partial | S01 | G11 G14 G15 | G20 | G37.01 G37.03 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` | R09 |
+| `valueTypeDeclarations` | declarations | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` |  |
+| `visibility` | declarations | partial | S01 | G11 G14 G15 | G20 | G40 | G46.02 G47 | G48 G49.02 G49.03 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l····` | R04 |
+| `addressBalance` | environment | partial | S04.02 S04.03 | G10 G13 G15 | G23 | G31 G43 | G46.04 G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `s··be··` | R11 |
+| `blockTimestamp` | environment | present | S04.02 | G10 G13 G15 | G23 | G31 | G46.04 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sa··e··` |  |
+| `msgSender` | environment | present | S04.02 | G10 G13 G15 | G23 | G31 | G46.04 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sa·be··` | R27 |
+| `msgValue` | environment | partial | S04.02 | G10 G13 G15 | G23 | G31 G43 | G46.04 G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `s··be··` |  |
+| `thisAddress` | environment | partial | S04.02 | G10 G13 G15 | G23 | G31 | G46.04 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sa··e··` | R27 |
+| `arithmetic` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t·` | R05, R12, R13, R37 |
+| `assignment` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 G28 G34 | G46.01 G46.02 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb··r` | R17, R19, R20 |
+| `bitwise` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··be··` | R12, R13 |
+| `callOptions` | expressions | partial | S02 S03.03 | G10 G15 | G22.01 G22.03 G22.05 | G42.02 G43 G44.03 | G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sal····` | R06, R33 |
+| `comparisons` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··be··` | R13 |
+| `compoundAssignment` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 G28 | G46.01 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb···` | R18, R29 |
+| `conditional` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb··r` | R28 |
+| `deleteExpression` | expressions | partial | S02 S04.01 | G10 G13 G15 | G18.05 | G28 G30 G34 | G46.02 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b··r` | R21, R28, R29 |
+| `explicitConversions` | expressions | partial | S01 S02 | G10 G13 G15 | G16 G18.05 | G25 G35.01 G35.02 G35.03 G35.04 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al····` | R13, R27 |
+| `functionCalls` | expressions | partial | S02 S03.03 | G10 G13 G15 | G20 | G37.01 G37.03 G42.01 G42.02 G42.04 | G46.01 G47 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb··r` | R04, R07, R08, R09 |
+| `implicitConversions` | expressions | partial | S01 | G13 G15 | G16 G18.05 | G25 G35.01 G35.02 G35.03 G35.04 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l····` | R13 |
+| `increments` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 G28 | G46.01 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb···` | R18, R21, R29 |
+| `indexAccess` | expressions | partial | S02 | G10 G13 G15 | G17 G18.02 G18.03 G18.04 | G26 G28 G34 | G46.01 G46.02 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b··r` | R10, R13, R14 |
+| `inlineArrays` | expressions | partial | S02 | G10 G13 G15 | G18.03 | G33 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al···r` | R28 |
+| `memberAccess` | expressions | partial | S02 | G10 G13 G15 | G17 G18.02 G18.03 G18.04 | G26 G28 G34 | G46.01 G46.02 G46.03 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `salb···` | R11 |
+| `metaTypeExpression` | expressions | partial | S01 | G10 G13 G15 | G23 | G31 | G46.01 G46.05 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al···r` |  |
+| `namedArguments` | expressions | partial | S02 | G10 G13 G15 | G20 | G37.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al···r` |  |
+| `names` | expressions | partial | S01 S02 | G10 G12 G15 | G16 G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `salb···` | R04 |
+| `newMemory` | expressions | partial | S02 S04.01 | G10 G13 G15 | G18.03 | G33 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb···` | R22, R25, R28 |
+| `parentheses` | expressions | present | S00 S02 | G10 G15 | G16 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l···r` |  |
+| `rangeAccess` | expressions | partial | S02 | G10 G13 G15 | G18.04 G21 | G35.03 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l···r` | R04, R20 |
+| `shifts` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s···e·r` | R12 |
+| `shortCircuit` | expressions | partial | S02 | G10 G15 | G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa···tr` | R09, R10 |
+| `structConstruction` | expressions | partial | S02 | G10 G13 G15 | G18.03 | G33 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·alb···` | R28 |
+| `tupleExpressions` | expressions | partial | S02 | G10 G13 G15 | G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·al···r` | R09 |
+| `unaryArithmetic` | expressions | partial | S02 | G10 G13 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··be··` | R12, R13 |
+| `addressLiterals` | lexical | partial | S00 | G08 G15 | G16 | G25 | G46.01 G46.04 | G48 G49.03 (Admission, Lowering) | `sa····r` | R13 |
+| `booleanLiterals` | lexical | present | S00 | G08 G15 | G16 | G25 | G46.01 | G48 G49.03 (Admission, Lowering) | `··lbe·r` |  |
+| `comments` | lexical | partial | S00 | G08 G15 | — | — | — | G48 (Admission) | `·a····r` |  |
+| `etherUnits` | lexical | present | S00 | G08 G15 | G16 | G25 | G46.01 | G48 G49.03 (Admission, Lowering) | `s·l···r` |  |
+| `hexLiterals` | lexical | partial | S00 S02 | G08 G15 | G18.03 | G33 | G46.01 | G48 G49.03 (Admission, Lowering) | `s·l···r` | R10, R31 |
+| `identifiers` | lexical | partial | S00 S01 | G08 G12 G15 | G16 G17 | G26 | — | G48 (Admission, Lowering) | `·al···r` |  |
+| `numericLiterals` | lexical | partial | S00 | G08 G15 | G16 | G25 | G46.01 | G48 G49.03 (Admission, Lowering) | `··lbe··` | R13 |
+| `pragmaAbicoder` | lexical | partial | S00 S04.02 | G08 G11 G15 | G21 | G40 G41 | G46.02 | G48 G49.02 (Admission, Lowering, Execution, PublicCorrectness) | `·a·····` | R04 |
+| `pragmaOther` | lexical | partial | S00 | G08 G11 G15 | — | — | — | G48 (Admission) | `·a·····` |  |
+| `pragmaVersion` | lexical | partial | S00 | G08 G11 G15 | — | — | — | G48 (Admission) | `·a·····` |  |
+| `stringLiterals` | lexical | partial | S00 S02 | G08 G15 | G18.03 | G33 | G46.01 | G48 G49.03 (Admission, Lowering) | `s·l···r` | R10, R17 |
+| `timeUnits` | lexical | present | S00 | G08 G15 | G16 | G25 | G46.01 | G48 G49.03 (Admission, Lowering) | `s·l···r` |  |
+| `unicodeLiterals` | lexical | partial | S00 S02 | G08 G15 | G18.03 | G33 | G46.01 | G48 G49.03 (Admission, Lowering) | `·al···r` | R10, R17 |
+| `creationCode` | metadata | partial | S04.02 | G13 G15 | G23 | G44.02 | G46.02 G47 | G48 G49.02 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `·al····` | R05 |
+| `errorEventSelector` | metadata | present | S01 S04.02 | G13 G15 | G23 | G31 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` | R10 |
+| `functionAddress` | metadata | partial | S04.03 | G13 G15 | G22.04 | G42.05 | G46.01 G47 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` |  |
+| `functionSelector` | metadata | partial | S01 S04.02 | G13 G15 | G23 | G31 G40 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `··l···r` |  |
+| `interfaceId` | metadata | present | S01 | G13 G15 | G23 | G31 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` |  |
+| `runtimeCode` | metadata | partial | S04.02 | G13 G15 | G23 | G44.02 | G46.02 G47 | G48 G49.02 G50.01 (Admission, Lowering, Compilation, PublicCorrectness) | `·al····` | R05 |
+| `typeBounds` | metadata | partial | S01 | G13 G15 | G16 | G25 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `s·l···r` |  |
+| `typeName` | metadata | present | S01 | G13 G15 | G23 | G31 | G46.01 | G48 G49.02 (Admission, Lowering, Compilation, PublicCorrectness) | `·al····` | R10, R17 |
+| `abiEntryValidation` | semantics | partial | S04.02 | G13 G15 | G21 | G40 | G46.02 G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sal····` | R04 |
+| `checkedArithmetic` | semantics | partial | S02 | G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t·` | R12 |
+| `constructorLifetime` | semantics | partial | S04.04 | G14 G15 | G22.03 | G44.01 G44.03 | G47 | G48 G49.02 G50.01 (Lowering, Compilation, Execution, PublicCorrectness) | `s····t·` | R04 |
+| `defaultInitialization` | semantics | partial | S02 S04.01 | G13 G15 | G18.02 G18.03 | G30 G33 | G46.02 G46.03 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `sa·b···` | R16, R28 |
+| `evaluationOrder` | semantics | partial | S02 S03.01 S03.03 | G13 G15 | G16 G17 | G26 | G46.06 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al····` |  |
+| `exactConstants` | semantics | partial | S01 | G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `·al····` |  |
+| `featureDetection` | semantics | partial | S05 | G15 | — | — | — | G48 G49.03 (Admission, PublicCorrectness) | `·a·····` |  |
+| `nonpayableEntry` | semantics | partial | S04.04 | G13 G15 | G22.05 | G40 G43 | G46.04 G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `sa··e··` | R04 |
+| `panicCodes` | semantics | partial | S04.02 | G13 G15 | G21 | G38 | G46.02 G47 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s····t·` | R24, R25, R37 |
+| `referenceCopyRules` | semantics | partial | S04.01 | G13 G15 | G18.05 | G29.01 G29.02 G29.03 G35.01 G35.02 G35.03 G35.04 G35.05 G35.06 | G46.02 G46.03 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t·` | R19, R20 |
+| `revertPayloads` | semantics | partial | S04.02 | G13 G15 | G21 | G38 G41 | G46.02 G47 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t·` | R07, R37 |
+| `rollback` | semantics | partial | S03.04 S04.03 | G13 G15 | G21 G22.01 G22.02 G22.03 G22.05 | G38 G39 | G47 G46.03 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `s······` | R07, R41 |
+| `staticCallRestriction` | semantics | partial | S03.03 S04.03 | G13 G15 | G22.01 G22.04 | G42.02 G42.05 | G47 | G48 G49.02 G50.02 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l····` | R07 |
+| `termination` | semantics | partial | S03.04 | G13 G15 | G19 | G36.03 G37.02 | G46.06 G47 | G49.02 G49.03 G50.02 G51.02 (Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t·` | R08, R38, R39 |
+| `typeValidation` | semantics | partial | S01 | G13 G15 | — | — | — | G48 (Admission) | `·a·····` | R15, R16 |
+| `uncheckedArithmetic` | semantics | partial | S02 | G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 (Lowering, Compilation, Execution, PublicCorrectness) | `s·l··t·` | R12 |
+| `worldAssumptions` | semantics | partial | S04.03 | G13 G15 | G22.02 G22.05 | G42.02 G43 | G47 | G49.02 G50.02 G51.02 (Execution, PublicCorrectness, SpecTransfer) | `s····t·` | R33 |
+| `blocks` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa·b·t·` | R01, R02, R05 |
+| `breakStatement` | statements | present | S03.01 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l··t·` |  |
+| `canonicalRethrow` | statements | partial | S03.01 S04.02 | G11 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l····` | R07, R31, R37 |
+| `catchClauses` | statements | partial | S03.03 S04.02 | G11 G15 | G21 | G38 G41 | G46.02 G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t·` | R07 |
+| `continueStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l··t·` |  |
+| `doWhileStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 G36.02 G36.03 | G46.01 G46.06 | G48 G49.01 G49.02 G49.03 G51.01 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sal··t·` | R21, R22, R38 |
+| `emitStatement` | statements | partial | S03.01 S04.02 | G11 G15 | G23 | G31 | G46.02 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··l···r` |  |
+| `expressionStatements` | statements | partial | S03.01 | G11 G15 | G17 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·alb···` | R09, R29 |
+| `forStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 G36.02 G36.03 | G46.01 G46.06 | G48 G49.01 G49.02 G49.03 G51.01 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `··lb·t·` | R21, R22 |
+| `ifStatement` | statements | present | S03.01 | G11 G15 | G19 | G36.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t·` | R23, R36 |
+| `returnStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 G37.01 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb···` | R09, R41 |
+| `revertStatement` | statements | partial | S03.01 S04.02 | G11 G15 | G21 | G38 | G46.02 G47 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·l··tr` | R07, R37 |
+| `tryStatement` | statements | partial | S03.03 S04.03 | G11 G15 | G21 G22.01 G22.03 | G38 G42.02 G42.06 | G47 | G48 G49.02 G50.02 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t·` | R07 |
+| `uncheckedBlock` | statements | partial | S02 S03.01 | G11 G15 | G16 | G25 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `·alb··r` | R12 |
+| `variableDeclarations` | statements | partial | S03.01 | G11 G13 G15 | G17 G19 | G26 | G46.01 | G48 G49.01 G49.02 G49.03 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t·` | R16, R28 |
+| `whileStatement` | statements | partial | S03.01 | G11 G15 | G19 | G36.01 G36.02 G36.03 | G46.01 G46.06 | G48 G49.01 G49.02 G49.03 G51.01 G51.02 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s·lb·t·` | R21, R22, R38 |
+| `arrayLength` | storage | partial | S04.01 | G10 G13 G15 | G18.02 G18.03 G18.04 | G28 G34 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa·b···` | R24 |
+| `arrayPop` | storage | partial | S04.01 | G10 G13 G15 | G18.02 | G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t·` | R21, R36 |
+| `arrayPush` | storage | partial | S04.01 | G10 G13 G15 | G18.02 | G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t·` | R18, R21 |
+| `arrayPushReference` | storage | partial | S04.01 | G10 G13 G15 | G18.02 | G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t·` | R18 |
+| `danglingReferences` | storage | partial | S04.01 | G13 G15 | G18.05 | G28 G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t·` | R36 |
+| `deleteMappingTails` | storage | partial | S04.01 | G13 G15 | G18.05 | G29.02 G30 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s····t·` | R21 |
+| `logicalStorageBase` | storage | partial | S04.01 | G09 G13 G15 | G18.02 | G27.05 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa·····` | R34 |
+| `memoryAliasing` | storage | partial | S04.01 | G13 G15 | G18.03 | G34 | G46.02 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t·` | R04, R20, R30 |
+| `storageAliasing` | storage | partial | S04.01 | G13 G15 | G18.02 | G28 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b···` | R09, R36 |
+| `storageCopy` | storage | partial | S04.01 | G13 G15 | G18.05 | G29.01 G29.02 G29.03 | G46.03 | G48 G49.01 G49.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `s··b·t·` | R17, R19 |
+| `transientState` | storage | partial | S04.03 | G09 G13 G15 | G23 | G39 | G46.03 G47 | G48 G49.02 G50.02 G51.01 (Lowering, Compilation, Execution, PublicCorrectness, SpecTransfer) | `sa·····` |  |
+| `addressTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 G42.02 G42.05 | G46.01 G46.04 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s·l·e··` | R27 |
+| `boolType` | types | present | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s··be··` | R34 |
+| `calldataLocation` | types | partial | S01 S04.01 | G09 G13 G15 | G18.04 | G35.03 G40 | G46.02 G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `··l····` | R20 |
+| `dynamicArrays` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 G18.03 G18.04 G18.05 | G27.03 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s··b···` | R22, R24, R28 |
+| `dynamicBytesType` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 G18.03 G18.04 G18.05 | G27.03 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s·l····` | R17, R31 |
+| `enumTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al····` |  |
+| `externalFunctionTypes` | types | partial | S00 S01 S04.03 | G09 G13 G15 | G20 G22.04 | G42.05 | G46.01 G47 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `sal··t·` | R07 |
+| `fixedArrays` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 G18.03 G18.04 G18.05 | G27.03 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `sa·b···` | R19, R28 |
+| `fixedBytesTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al····` | R13 |
+| `integerTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al·et·` | R12, R13 |
+| `internalFunctionTypes` | types | partial | S00 S01 | G09 G13 G15 | G20 | G37.03 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al····` |  |
+| `mappings` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 | G27.02 | G46.03 G46.05 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `sa·b···` | R14, R34 |
+| `memoryLocation` | types | partial | S01 S04.01 | G09 G13 G15 | G18.03 | G32 G34 | G46.02 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s··b···` | R01, R02, R25, R31 |
+| `recursiveTypes` | types | missing | S00 S01 S04.01 | G09 G13 G15 | G18.01 | G27.04 G35.05 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s······` |  |
+| `storageLocation` | types | partial | S01 S04.01 | G09 G13 G15 | G18.02 | G27.01 G27.02 G27.03 G27.04 G27.05 G28 | G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `s··b·t·` | R09, R34 |
+| `stringType` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.02 G18.03 G18.04 G18.05 | G27.03 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al····` | R10, R14, R17 |
+| `structTypes` | types | partial | S00 S01 S04.01 | G09 G13 G15 | G18.01 G18.02 G18.03 G18.04 G18.05 | G27.01 G32 | G46.02 G46.03 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `salb···` | R19, R20, R28 |
+| `tupleTypes` | types | partial | S00 S01 | G09 G13 G15 | G17 | G26 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `salb···` | R09 |
+| `valueTypes` | types | partial | S00 S01 | G09 G13 G15 | G16 | G25 | G46.01 | G48 G49.02 G49.03 G51.01 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·al····` |  |
+| `fixedPoint` | upstream | notApplicable | S00 S01 S02 S04.01 S04.02 | G08 G09 G13 G15 | G16 G18.02 G21 | G25 G27.01 G35.03 G40 G41 | G46.01 G46.02 G46.03 | G48 G49.02 G49.03 (Admission, Lowering, Compilation, Execution, PublicCorrectness) | `·······` |  |
 
 Stages with no owner, by recorded reason: `identifiers` evm: names are resolved before code generation; `comments` lowering: no behaviour beyond token separation (G08 owns the lexer); `comments` backend: erased before lowering; `comments` evm: erased before lowering; `pragmaVersion` lowering: acceptance and provenance only; `pragmaVersion` backend: acceptance only; `pragmaVersion` evm: acceptance only; `pragmaOther` lowering: acceptance and provenance only; `pragmaOther` backend: acceptance only; `pragmaOther` evm: acceptance only; `imports` evm: resolved before code generation; linking is G44.02/G47; `typeValidation` lowering: static checking, carried by G13/G15; `typeValidation` backend: static checking only; `typeValidation` evm: static checking only; `featureDetection` lowering: admission classification only (G15); `featureDetection` backend: admission classification only; `featureDetection` evm: admission classification only.
+
+Split parents in G00's cells, refined to child packages (`REFINE`):
+
+| row | parent | children |
+|---|---|---|
+| `addressTypes` | G42 | G42.02 G42.05 |
+| `arrayLength` | G18 | G18.02 G18.03 G18.04 |
+| `bytesConcat` | G35 | G35.03 G35.04 |
+| `callOptions` | G22 | G22.01 G22.03 G22.05 |
+| `callOptions` | G42 | G42.02 |
+| `constructorLifetime` | G44 | G44.01 G44.03 |
+| `contracts` | G44 | G44.01 G44.02 |
+| `defaultInitialization` | G18 | G18.02 G18.03 |
+| `deleteMappingTails` | G29 | G29.02 |
+| `doWhileStatement` | G36 | G36.01 G36.02 G36.03 |
+| `dynamicArrays` | G18 | G18.02 G18.03 G18.04 G18.05 |
+| `dynamicBytesType` | G18 | G18.02 G18.03 G18.04 G18.05 |
+| `emptyDataValueCall` | G22 | G22.02 G22.05 |
+| `evaluationOrder` | S03 | S03.01 S03.03 |
+| `explicitConversions` | G35 | G35.01 G35.02 G35.03 G35.04 |
+| `extensionCalls` | G37 | G37.01 |
+| `fixedArrays` | G18 | G18.02 G18.03 G18.04 G18.05 |
+| `forStatement` | G36 | G36.01 G36.02 G36.03 |
+| `freeFunctions` | G37 | G37.01 |
+| `functionCalls` | G37 | G37.01 G37.03 |
+| `functionCalls` | G42 | G42.01 G42.02 G42.04 |
+| `functions` | G37 | G37.01 G37.03 |
+| `functions` | S03 | S03.01 S03.03 |
+| `implicitConversions` | G35 | G35.01 G35.02 G35.03 G35.04 |
+| `indexAccess` | G18 | G18.02 G18.03 G18.04 |
+| `interfaces` | G42 | G42.02 G42.05 |
+| `internalCalls` | G37 | G37.01 G37.02 |
+| `memberAccess` | G18 | G18.02 G18.03 G18.04 |
+| `modifiers` | G37 | G37.01 |
+| `namedArguments` | G37 | G37.01 |
+| `operatorAliases` | G37 | G37.01 |
+| `overrideDeclarations` | G37 | G37.03 |
+| `referenceCopyRules` | G29 | G29.01 G29.02 G29.03 |
+| `referenceCopyRules` | G35 | G35.01 G35.02 G35.03 G35.04 G35.05 G35.06 |
+| `returnStatement` | G37 | G37.01 |
+| `rollback` | G22 | G22.01 G22.02 G22.03 G22.05 |
+| `sendTransfer` | G22 | G22.02 G22.05 |
+| `sourceUnits` | G44 | G44.02 |
+| `stateMutability` | G22 | G22.01 G22.05 |
+| `stateMutability` | G42 | G42.02 G42.05 |
+| `stateVariables` | G27 | G27.01 G27.02 G27.03 G27.05 |
+| `staticCallRestriction` | G22 | G22.01 G22.04 |
+| `storageCopy` | G29 | G29.01 G29.02 G29.03 |
+| `storageLocation` | G27 | G27.01 G27.02 G27.03 G27.04 G27.05 |
+| `stringConcat` | G35 | G35.03 G35.04 |
+| `stringType` | G18 | G18.02 G18.03 G18.04 G18.05 |
+| `structDeclarations` | G18 | G18.01 G18.02 G18.03 G18.04 G18.05 |
+| `structTypes` | G18 | G18.01 G18.02 G18.03 G18.04 G18.05 |
+| `tryStatement` | G22 | G22.01 G22.03 |
+| `tryStatement` | G42 | G42.02 G42.06 |
+| `usingFor` | G37 | G37.01 G37.03 |
+| `valueOption` | G22 | G22.01 G22.03 G22.05 |
+| `whileStatement` | G36 | G36.01 G36.02 G36.03 |
+| `worldAssumptions` | G22 | G22.02 G22.05 |
 
 ### Feature detail
 
@@ -366,8 +456,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.abiDecodeWith` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1465`) — decode lowering
   - lowering: `Solidity.abiBounds` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1318`) — offset/length checks before traversal
   - lowering: `Solidity.abiReadGen` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1340`) — recursive reader, noncanonical offsets accepted
-  - theorem: `Solidity.Examples.Tactics.AbiFeatures.byte_roundtrip` (Solidity.Examples.Tactics.AbiFeatures, `Solidity/Examples/Tactics/AbiFeatures.lean:229`) — encode/decode roundtrip
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.AbiFeatures.byte_roundtrip` (Solidity.Examples.Tactics.AbiFeatures, `Solidity/Examples/Tactics/AbiFeatures.lean:229`) — encode/decode roundtrip
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Enum decoding is refused ('requires nominal cardinality checks'). Lazy/noncanonical aggregate entry decoding is pending.
   - missing: No backend/EVM stage. Calldata/ABI entry is outside the compiler theorems (R04, R20).
 
@@ -375,8 +465,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.magicMember` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:27`) — abi.encode tagged
   - lowering: `Solidity.abiWriteGen` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1196`) — head/tail offset writer
   - lowering: `Solidity.abiEncodeNested?` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1274`) — recursive shape encoding
-  - theorem: `Solidity.Examples.Tactics.AbiFeatures.byte_roundtrip` (Solidity.Examples.Tactics.AbiFeatures, `Solidity/Examples/Tactics/AbiFeatures.lean:229`) — decode(encode(x)) == x for uint8
-  - no existing anchor: source, backend, evm
+  - regression: `Solidity.Examples.Tactics.AbiFeatures.byte_roundtrip` (Solidity.Examples.Tactics.AbiFeatures, `Solidity/Examples/Tactics/AbiFeatures.lean:229`) — decode(encode(x)) == x for uint8
+  - no existing anchor: source, backend, evm, theorem
   - missing: ABI is absent from the compiler theorems (R04), with no backend/EVM stage.
   - missing: Internal function markers are refused. Struct enum members lose nominal identity, so recursive coverage is partial.
 
@@ -384,8 +474,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.Frontend.abiCallComponents?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1444`) — target/tuple components checked vs declaration
   - lowering: `Solidity.encodeCallTypes?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1010`) — exact parameter typing
   - lowering: `Solidity.encodeCallArg` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1316`) — contextual argument conversions
-  - theorem: `Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid` (Solidity.Examples.Tactics.AbiHexCall, `Solidity/Examples/Tactics/AbiHexCall.lean:108`) — exact-width hex encodeCall assertion
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid` (Solidity.Examples.Tactics.AbiHexCall, `Solidity/Examples/Tactics/AbiHexCall.lean:108`) — exact-width hex encodeCall assertion
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Implicit fixed-byte narrowing is refused. ABI identity of inherited renamed function values is left.
   - missing: No backend/EVM stage (R04).
 
@@ -417,19 +507,19 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 
 - **`addmodBuiltin`** (model/partial)
   - source: `Solidity.ModOp.evalT` (Solidity.Semantics.Ops, `Solidity/Semantics/Ops.lean:130`) — wide intermediate, zero-modulus failure
-  - evm: `Solidity.Bridge.Arith.modular_exact` (SolidityBridge.Arith.Modular, `Bridge/SolidityBridge/Arith/Modular.lean:6`) — modular op exactness
-  - evm: `Solidity.Bridge.Arith.addmod_zmod` (SolidityBridge.Arith.Modular, `Bridge/SolidityBridge/Arith/Modular.lean:21`) — addmod equals ZMod sum
-  - theorem: `Solidity.Corpus.TestSuite.addmodMulmod` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2390`) — addmod/mulmod corpus
-  - no existing anchor: admission, lowering, backend
+  - source: `Solidity.Bridge.Arith.modular_exact` (SolidityBridge.Arith.Modular, `Bridge/SolidityBridge/Arith/Modular.lean:6`) — modular op exactness
+  - source: `Solidity.Bridge.Arith.addmod_zmod` (SolidityBridge.Arith.Modular, `Bridge/SolidityBridge/Arith/Modular.lean:21`) — addmod equals ZMod sum
+  - regression: `Solidity.Corpus.TestSuite.addmodMulmod` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2390`) — addmod/mulmod corpus
+  - no existing anchor: admission, lowering, backend, evm, theorem
   - missing: The compiler refuses modular values (R10: valIn rejects modular).
   - missing: The Panic(0x12) code is erased at the machine (R37). Constant-zero-modulus rejection depends on solc admission only.
 
 - **`assertBuiltin`** (model/partial)
   - source: `Solidity.TRun.assert` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:803`) — false raises panic
   - backend: `Solidity.Evm.assert_sim` (Solidity.Evm.Stmt, `Solidity/Evm/Stmt.lean:332`) — assert simulation
-  - evm: `Solidity.Bridge.Arith.uintGuard_assert` (SolidityBridge.Arith.NarrowChecked, `Bridge/SolidityBridge/Arith/NarrowChecked.lean:66`) — guard via assert
-  - theorem: `Solidity.Corpus.TestSuite.testSimpleAssert` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1405`) — assert corpus case
-  - no existing anchor: admission, lowering
+  - source: `Solidity.Bridge.Arith.uintGuard_assert` (SolidityBridge.Arith.NarrowChecked, `Bridge/SolidityBridge/Arith/NarrowChecked.lean:66`) — guard via assert
+  - regression: `Solidity.Corpus.TestSuite.testSimpleAssert` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1405`) — assert corpus case
+  - no existing anchor: admission, lowering, evm, theorem
   - missing: Revert data is erased: a failed assert (Panic 0x01) matches a plain machine revert (R37).
   - missing: assert is a core-only construct, refused in memory programs (R29, R01).
 
@@ -445,17 +535,17 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`ecrecoverBuiltin`** (abstract/partial)
   - source: `Solidity.Secp256k1.recover` (Solidity.Secp256k1, `Solidity/Secp256k1.lean:127`) — bounded recovery, zero on failure
   - source: `Solidity.ecrecoverBytes` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:514`) — ecrecover interpretation over bytes
-  - theorem: `Solidity.Examples.Tactics.Recovery.recover_address` (Solidity.Examples.Tactics.Recovery, `Solidity/Examples/Tactics/Recovery.lean:16`) — concrete recovery vector
-  - no existing anchor: admission, lowering, backend, evm
+  - regression: `Solidity.Examples.Tactics.Recovery.recover_address` (Solidity.Examples.Tactics.Recovery, `Solidity/Examples/Tactics/Recovery.lean:16`) — concrete recovery vector
+  - no existing anchor: admission, lowering, backend, evm, theorem
   - missing: General group-law and precompile-equivalence proofs are open. Proofs are concrete vectors only.
   - missing: The compiler refuses hash values (R10), so there is no backend/EVM stage. Signer authorization needs separate premises.
 
 - **`erc7201Builtin`** (model/present)
   - source: `Solidity.ERC7201.root` (Solidity.ERC7201, `Solidity/ERC7201.lean:24`) — namespace formula
-  - theorem: `Solidity.ERC7201.root_aligned` (Solidity.ERC7201, `Solidity/ERC7201.lean:31`) — low byte cleared for all ids
+  - source: `Solidity.ERC7201.root_aligned` (Solidity.ERC7201, `Solidity/ERC7201.lean:31`) — low byte cleared for all ids
   - lowering: `Solidity.hoistERC7201With` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1613`) — runtime/literal erc7201 lowering
-  - theorem: `Solidity.Examples.Tactics.AbiFeaturesImport.namespace_property` (Solidity.Examples.Tactics.AbiFeaturesImport, `Solidity/Examples/Tactics/AbiFeaturesImport.lean:59`) — imported namespace property
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.AbiFeaturesImport.namespace_property` (Solidity.Examples.Tactics.AbiFeaturesImport, `Solidity/Examples/Tactics/AbiFeaturesImport.lean:59`) — imported namespace property
+  - no existing anchor: admission, backend, evm, theorem
   - missing: No backend/EVM stage: hash values are refused by the compiler (R10).
   - missing: The namespace integer is not linked to physical storage layout, which is intentionally out.
 
@@ -470,9 +560,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 
 - **`mulmodBuiltin`** (model/partial)
   - source: `Solidity.ModOp.wide` (Solidity.Semantics.Ops, `Solidity/Semantics/Ops.lean:124`) — arbitrary-precision intermediate
-  - evm: `Solidity.Bridge.Arith.mulmod_zmod` (SolidityBridge.Arith.Modular, `Bridge/SolidityBridge/Arith/Modular.lean:32`) — mulmod equals ZMod product
-  - theorem: `Solidity.Corpus.TestSuite.addmodMulmod` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2390`) — addmod/mulmod corpus
-  - no existing anchor: admission, lowering, backend
+  - source: `Solidity.Bridge.Arith.mulmod_zmod` (SolidityBridge.Arith.Modular, `Bridge/SolidityBridge/Arith/Modular.lean:32`) — mulmod equals ZMod product
+  - regression: `Solidity.Corpus.TestSuite.addmodMulmod` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2390`) — addmod/mulmod corpus
+  - no existing anchor: admission, lowering, backend, evm, theorem
   - missing: The compiler refuses modular values (R10). There is no backend or MULMOD opcode bridge.
   - missing: The Panic(0x12) distinction is erased (R37).
 
@@ -480,8 +570,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.TRun.require` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:799`) — failure reverts with rollback
   - lowering: `Solidity.RawStmt.requireWith` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:254`) — require with reason lowering
   - backend: `Solidity.Evm.Memory.requireValue_correct` (Solidity.Evm.MemoryStatements, `Solidity/Evm/MemoryStatements.lean:57`) — memory-path require correct
-  - theorem: `Solidity.Corpus.TestSuite.requireFalseLiteral` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:170`) — failing require reverts
-  - no existing anchor: admission, evm
+  - regression: `Solidity.Corpus.TestSuite.requireFalseLiteral` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:170`) — failing require reverts
+  - no existing anchor: admission, evm, theorem
   - missing: The compiler erases Error(string)/custom-error encodings (R37). require with a custom error uses revertData, which is out (R07).
   - missing: No backend theorem that reason arguments are evaluated when the condition succeeds.
 
@@ -522,8 +612,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1798`) — wrap/unwrap rendered as underlying cast
   - lowering: `Solidity.Frontend.valueTypeExpr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:745`) — UDVT expression typing
   - lowering: `Solidity.valueRows?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:554`) — UDVT range rows
-  - theorem: `Solidity.Corpus.TestSuite.valueTypeWrapUnwrap` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2380`) — wrap/unwrap corpus case
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.valueTypeWrapUnwrap` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2380`) — wrap/unwrap corpus case
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Admission gives no distinct tag (memberAccess only). Multi-argument wrap/unwrap is refused.
   - missing: UDVTs are erased to uint before the compiler (R13), with no nominal-check theorem. Nominal UDVT slices are refused.
 
@@ -533,18 +623,18 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.Stmt.callsBack` (Solidity.Semantics.Callback, `Solidity/Semantics/Callback.lean:248`) — statements that may call back
   - source: `Solidity.ExecS` (Solidity.Semantics.Callback, `Solidity/Semantics/Callback.lean:493`) — callback execution relation with invariant
   - theorem: `Solidity.Main.callback_soundness` (Solidity.Theorems, `Solidity/Theorems.lean:226`) — callback-modality calculus soundness
-  - evm: `Solidity.Bridge.Adversary.exec_iff_trace` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:99`) — adversary LTS matches transfer reading
-  - no existing anchor: admission, lowering, backend
+  - theorem: `Solidity.Bridge.Adversary.exec_iff_trace` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:99`) — adversary LTS matches transfer reading
+  - no existing anchor: admission, lowering, backend, evm
   - missing: Adversary boundary covers transfer only, not try, send or whole EVM accounts
   - missing: Callback catches and ownership-aware memory frames remain (calls-exceptions Left)
   - missing: Callee preserving the invariant is assumed, not proved
 
 - **`creationTry`** (abstract/partial)
   - source: `Solidity.ContractWorld.World.tryCreate` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:357`) — creation-frame catch boundary
-  - theorem: `Solidity.ContractWorld.World.tryCreate_argument_failure` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:371`) — argument failures outside catch
-  - theorem: `Solidity.ContractWorld.Operation.tryCreate_caught` (Solidity.Semantics.ContractWorldCertificates, `Solidity/Semantics/ContractWorldCertificates.lean:149`) — caught creation certificate
+  - source: `Solidity.ContractWorld.World.tryCreate_argument_failure` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:371`) — argument failures outside catch
+  - source: `Solidity.ContractWorld.Operation.tryCreate_caught` (Solidity.Semantics.ContractWorldCertificates, `Solidity/Semantics/ContractWorldCertificates.lean:149`) — caught creation certificate
   - admission: `Solidity.Frontend.elabSolcWorldFactory` (Solidity.Frontend.WorldImport, `Solidity/Frontend/WorldImport.lean:245`) — constant-result try-new fragment
-  - no existing anchor: lowering, backend, evm
+  - no existing anchor: lowering, backend, evm, theorem
   - missing: Only bare catch with constant Boolean results; general typed catches and handler code unsupported
   - missing: Divergence/exhaustion not caught; no compiler/EVM stage
 
@@ -560,16 +650,16 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`extensionCalls`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — UsingForDirective tagged usingFor
   - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1798`) — attached free function: receiver as first arg
-  - theorem: `Solidity.Corpus.TestSuite.libraryCallAndUsingFor` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2375`) — corpus regression
-  - no existing anchor: source, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.libraryCallAndUsingFor` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2375`) — corpus regression
+  - no existing anchor: source, backend, evm, theorem
   - missing: Receiver-bound-once is not proved; only internal/free attached functions lowered
   - missing: External-library extension calls need the ContractWorld library abstraction (not integrated)
 
 - **`externalLibraryCalls`** (abstract/partial)
   - admission: `Solidity.Frontend.WorldLinked.read` (Solidity.Frontend.WorldImport, `Solidity/Frontend/WorldImport.lean:310`) — solc_world_library fragment reader
   - source: `Solidity.ContractWorld.World.libraryCall` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:334`) — linked run over caller storage
-  - theorem: `Solidity.ContractWorld.Operation.libraryCall_certificate` (Solidity.Semantics.ContractWorldCertificates, `Solidity/Semantics/ContractWorldCertificates.lean:96`) — library-call operation certificate
-  - no existing anchor: lowering, backend, evm
+  - source: `Solidity.ContractWorld.Operation.libraryCall_certificate` (Solidity.Semantics.ContractWorldCertificates, `Solidity/Semantics/ContractWorldCertificates.lean:96`) — library-call operation certificate
+  - no existing anchor: lowering, backend, evm, theorem
   - missing: Only one storage root with a literal field assignment; general args and aggregate returns unsupported
   - missing: Pure/view library calls and nested external execution refused; no backend/EVM
 
@@ -577,8 +667,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.trySelfBody` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:557`) — self callee inlined in own frame
   - lowering: `Solidity.selfReturnAbiCompatible` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1676`) — self-return ABI kind check
   - source: `Solidity.TRun.tryCall` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:877`) — self flag: sender=this, value 0
-  - theorem: `Solidity.Examples.Tactics.TryCatch.selfCall_noCallback` (Solidity.Examples.Tactics.TryCatch, `Solidity/Examples/Tactics/TryCatch.lean:288`) — self-call example proof
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.TryCatch.selfCall_noCallback` (Solidity.Examples.Tactics.TryCatch, `Solidity/Examples/Tactics/TryCatch.lean:288`) — self-call example proof
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Self-call frames fix msg.value to 0; value-carrying self-calls not modelled
   - missing: Only callees declared before the caller; no backend/EVM support (R07)
 
@@ -613,7 +703,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`newContract`** (abstract/partial)
   - admission: `Solidity.Frontend.WorldCreation.read` (Solidity.Frontend.WorldImport, `Solidity/Frontend/WorldImport.lean:155`) — solc_world_factory fragment reader
   - source: `Solidity.ContractWorld.World.create` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:203`) — alloc, ctor run, payment, install
-  - theorem: `Solidity.ContractWorld.World.create_ok` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:293`) — successful creation characterised
+  - source: `Solidity.ContractWorld.World.create_ok` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:293`) — successful creation characterised
   - theorem: `Solidity.ContractWorld.World.create_post_of_spec` (Solidity.Calculus.ContractWorld, `Solidity/Calculus/ContractWorld.lean:34`) — Spec proof to creation postcondition
   - no existing anchor: lowering, backend, evm
   - missing: General source new C with dynamic args, ABI/memory transfer and callbacks not integrated into Stmt
@@ -634,8 +724,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.TRun.transfer` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:717`) — transfer reverts on refusal
   - theorem: `Solidity.sendStep_sound` (Solidity.Calculus.SoundControl, `Solidity/Calculus/SoundControl.lean:90`) — send rule: both outcomes
   - backend: `Solidity.Evm.transfer_sim` (Solidity.Evm.Stmt, `Solidity/Evm/Stmt.lean:892`) — transfer compiled; refusal asymmetry
-  - evm: `Solidity.Bridge.Adversary.call_step_sound` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:199`) — adversarial callee at transfer
-  - no existing anchor: admission, lowering
+  - theorem: `Solidity.Bridge.Adversary.call_step_sound` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:199`) — adversarial callee at transfer
+  - no existing anchor: admission, lowering, evm
   - missing: send not compiled (R06); payment asymmetry disjunct (R32)
   - missing: Recipient code not run; oracle acceptance only (R33)
   - missing: Bare r.send(a); not read
@@ -655,9 +745,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`constants`** (model/partial)
   - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:955`) — evaluates constant initializers
   - lowering: `Solidity.RawExpr.foldConst` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:474`) — folds constants in sol{}
-  - theorem: `Solidity.Corpus.TestSuite.constantInlined` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2355`) — constant inlined by identity
-  - theorem: `Solidity.Corpus.TestSuite.contractQualifiedConstantAndEnum` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2360`) — qualified constant resolved
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.constantInlined` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2355`) — constant inlined by identity
+  - regression: `Solidity.Corpus.TestSuite.contractQualifiedConstantAndEnum` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2360`) — qualified constant resolved
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Unsupported constant forms (non-foldable, bytes/string) give diagnostics
   - missing: No theorem that folding preserves contextual width
 
@@ -665,7 +755,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.elabCtor` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:664`) — runs initializers then constructor body
   - lowering: `Solidity.Frontend.renderInitializers` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:728`) — state initializers in declaration order
   - theorem: `Solidity.Problem.deploy_of_valid` (Solidity.Calculus.Deploy, `Solidity/Calculus/Deploy.lean:60`) — deployment obligation soundness
-  - theorem: `Solidity.Examples.Tactics.ContractWorld.failed_constructor_payment_rollback` (Solidity.Examples.Tactics.ContractWorld, `Solidity/Examples/Tactics/ContractWorld.lean:157`) — failed constructor rolls back payment
+  - regression: `Solidity.Examples.Tactics.ContractWorld.failed_constructor_payment_rollback` (Solidity.Examples.Tactics.ContractWorld, `Solidity/Examples/Tactics/ContractWorld.lean:157`) — failed constructor rolls back payment
   - no existing anchor: source, admission, backend, evm
   - missing: No compiled deployment or creation code: compiler theorems exclude constructors (R04)
   - missing: Unsupported initializers leave a refused constructor row
@@ -675,8 +765,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.Frontend.readContract` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:805`) — solc ContractDefinition into intrinsic Contract
   - source: `Solidity.Contract` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:404`) — intrinsic contract: roots, funs, ctor, inits, errors
   - source: `Solidity.State.deploy` (Solidity.Semantics.Deploy, `Solidity/Semantics/Deploy.lean:20`) — deployment state
-  - theorem: `Solidity.Examples.Tactics.Contracts.callAddOne` (Solidity.Examples.Tactics.Contracts, `Solidity/Examples/Tactics/Contracts.lean:52`) — contract function call obligation
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.Contracts.callAddOne` (Solidity.Examples.Tactics.Contracts, `Solidity/Examples/Tactics/Contracts.lean:52`) — contract function call obligation
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Backend theorems cover Prog only: no contract, dispatch, ABI or transaction (R04)
   - missing: No bytecode-level claim (R05)
   - missing: Abstract vs deployable is checked only at import; abstract .interfaceId refused
@@ -684,9 +774,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`enumDeclarations`** (model/partial)
   - source: `Solidity.enumRows` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:548`) — enum ordinal rows
   - lowering: `Solidity.enumLit?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:50`) — enum member to uint ordinal
-  - theorem: `IRLocal_checked` (tests.upstream.EnumBounds, `tests/upstream/EnumBounds.lean:30`) — enum conversion bounds checked (viaIR)
-  - theorem: `Solidity.Examples.Tactics.CallExceptions.exact_enum` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:102`) — exact enum range result
-  - no existing anchor: admission, backend, evm
+  - regression: `IRLocal_checked` (tests.upstream.EnumBounds, `tests/upstream/EnumBounds.lean:30`) — enum conversion bounds checked (viaIR)
+  - regression: `Solidity.Examples.Tactics.CallExceptions.exact_enum` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:102`) — exact enum range result
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Enums erased to uint (R13); nominal enums Left
   - missing: Composite ABI inputs with enums refused until recursive cardinality checks
   - missing: Enum conversions need identity-safe enum model names
@@ -694,8 +784,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`errorDeclarations`** (model/partial)
   - lowering: `Solidity.Frontend.selectErrorDeclarations` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:777`) — selects errors by declaration ID
   - lowering: `Solidity.revertErrParts` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:998`) — encodes custom error revert data
-  - theorem: `Solidity.Examples.Tactics.SourceUnitsImport.qualified_errors` (Solidity.Examples.Tactics.SourceUnitsImport, `Solidity/Examples/Tactics/SourceUnitsImport.lean:105`) — qualified error signatures kept
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.SourceUnitsImport.qualified_errors` (Solidity.Examples.Tactics.SourceUnitsImport, `Solidity/Examples/Tactics/SourceUnitsImport.lean:105`) — qualified error signatures kept
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: revert with data out of backend (R07 revertData)
   - missing: Conflicting/nominal errors sharing a short name refused
   - missing: Error ABI with enums gated (errorAbiHasEnum)
@@ -703,8 +793,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`eventDeclarations`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — EventDefinition/EmitStatement classified
   - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2202`) — emit checked against resolved event
-  - theorem: `Solidity.Examples.Tactics.CallExceptions.event_argument_panics` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:49`) — event argument evaluation can panic
-  - no existing anchor: source, backend, evm
+  - regression: `Solidity.Examples.Tactics.CallExceptions.event_argument_panics` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:49`) — event argument evaluation can panic
+  - no existing anchor: source, backend, evm, theorem
   - missing: Logs dropped: no log observation (by design)
   - missing: Indexed/anonymous metadata not kept in the intrinsic model
 
@@ -720,8 +810,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`freeFunctions`** (model/partial)
   - source: `Solidity.SourceLocalVisibility` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:281`) — freeFn visibility without receiver
   - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1798`) — resolves free/imported functions by ID
-  - theorem: `Solidity.Corpus.TestSuite.fileLevelConstantEnumAndFunction` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2365`) — file-level function call proved
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.fileLevelConstantEnumAndFunction` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2365`) — file-level function call proved
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Same inline-call backend limits as functions (R08/R09)
   - missing: Namespace-qualified calls need module-alias adapters (sourceUnits gaps)
 
@@ -729,8 +819,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.FunDecl` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:345`) — params, named returns, modifiers, payable
   - lowering: `Solidity.Frontend.SolcFun.member` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:612`) — solc function into model member
   - backend: `Solidity.Evm.call_family` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:857`) — inlined internal calls compile correctly
-  - theorem: `Solidity.Corpus.TestSuite.overloadedInternalCall` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2275`) — overload resolution by solc identity
-  - no existing anchor: admission, evm
+  - regression: `Solidity.Corpus.TestSuite.overloadedInternalCall` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2275`) — overload resolution by solc identity
+  - no existing anchor: admission, evm, theorem
   - missing: Backend: value arguments only, return shapes none/val only (R09)
   - missing: Recursive calls out (callRec, R08); source unrolled to depth 1024
   - missing: No external entry/ABI dispatch in compiler theorems (R04)
@@ -748,8 +838,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Source.checkTree` (Solidity.Frontend.SourceUnits, `Solidity/Frontend/SourceUnits.lean:31`) — validates resolved import path/source-ID pairs
   - lowering: `Solidity.Frontend.errorAliasScope?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1237`) — resolves import alias scope for errors
   - lowering: `Solidity.Frontend.errorNamespace` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1222`) — module/contract namespace of a declaration
-  - theorem: `Solidity.Examples.Tactics.SourceUnitsImport.aliased_errors` (Solidity.Examples.Tactics.SourceUnitsImport, `Solidity/Examples/Tactics/SourceUnitsImport.lean:124`) — aliased imported errors keep signature
-  - no existing anchor: source, backend
+  - regression: `Solidity.Examples.Tactics.SourceUnitsImport.aliased_errors` (Solidity.Examples.Tactics.SourceUnitsImport, `Solidity/Examples/Tactics/SourceUnitsImport.lean:124`) — aliased imported errors keep signature
+  - no existing anchor: source, backend, theorem
   - missing: Remapping and resolution are delegated to solc; no Lean model
   - missing: Module-valued expressions outside the checked discard shape refused
   - missing: Conflicting short-named custom errors across imports refused
@@ -757,27 +847,27 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`inheritance`** (model/partial)
   - lowering: `Solidity.Frontend.mergeC3` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:597`) — C3 merge for linearization
   - lowering: `Solidity.Frontend.contractLineage` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:626`) — uses solc linearizedBaseContracts
-  - theorem: `Solidity.Examples.Tactics.Inheritance.diamond_initialization` (Solidity.Examples.Tactics.Inheritance, `Solidity/Examples/Tactics/Inheritance.lean:21`) — diamond base init order
-  - theorem: `Solidity.Examples.Tactics.Inheritance.base_constructors` (Solidity.Examples.Tactics.Inheritance, `Solidity/Examples/Tactics/Inheritance.lean:49`) — base constructors run once
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.Inheritance.diamond_initialization` (Solidity.Examples.Tactics.Inheritance, `Solidity/Examples/Tactics/Inheritance.lean:21`) — diamond base init order
+  - regression: `Solidity.Examples.Tactics.Inheritance.base_constructors` (Solidity.Examples.Tactics.Inheritance, `Solidity/Examples/Tactics/Inheritance.lean:49`) — base constructors run once
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Inherited receive/fallback/modifier payment dispatch refused
   - missing: Mixed-ABI-coder legacy units with inheritance refused
   - missing: Virtual dispatch resolved statically at import; no backend dispatch (R04)
 
 - **`interfaces`** (model/partial)
   - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1059`) — interface metadata (own external selectors)
-  - theorem: `Solidity.Examples.Tactics.DeclarationMetadata.ownInterface` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:23`) — interfaceId excludes inherited members
-  - theorem: `Solidity.Examples.Tactics.PublicGetters.interfaceOverride` (Solidity.Examples.Tactics.PublicGetters, `Solidity/Examples/Tactics/PublicGetters.lean:28`) — getter overriding interface function
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.DeclarationMetadata.ownInterface` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:23`) — interfaceId excludes inherited members
+  - regression: `Solidity.Examples.Tactics.PublicGetters.interfaceOverride` (Solidity.Examples.Tactics.PublicGetters, `Solidity/Examples/Tactics/PublicGetters.lean:28`) — getter overriding interface function
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: External calls through interfaces are outside the backend fragment (R07 tryCall)
   - missing: No theorem that interface members have no bodies or that inherited members are kept
 
 - **`libraries`** (model/partial)
   - lowering: `Solidity.Frontend.elabSolcWorldLibrary` (Solidity.Frontend.WorldImport, `Solidity/Frontend/WorldImport.lean:405`) — imports linked library into contract world
   - source: `Solidity.ContractWorld.World.libraryCall` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:334`) — linked library call with caller storage
-  - theorem: `Solidity.ContractWorld.Operation.libraryCall_certificate` (Solidity.Semantics.ContractWorldCertificates, `Solidity/Semantics/ContractWorldCertificates.lean:96`) — library call certificate
-  - theorem: `Solidity.Corpus.TestSuite.libraryCallAndUsingFor` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2375`) — inlined internal library call proved
-  - no existing anchor: admission, backend, evm
+  - source: `Solidity.ContractWorld.Operation.libraryCall_certificate` (Solidity.Semantics.ContractWorldCertificates, `Solidity/Semantics/ContractWorldCertificates.lean:96`) — library call certificate
+  - regression: `Solidity.Corpus.TestSuite.libraryCallAndUsingFor` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2375`) — inlined internal library call proved
+  - no existing anchor: admission, backend, evm, theorem
   - missing: ContractWorld library execution has no compiler/EVM bridge (R04)
   - missing: Receiver-style library calls (callReceiver) out of backend (R09)
   - missing: Direct library calls and `new Library` rejected (examples library_direct_call_rejected/library_new_rejected)
@@ -785,9 +875,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`modifierPlaceholder`** (model/partial)
   - lowering: `Solidity.RawStmt.fillHole` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:550`) — substitutes function body at each _
   - lowering: `Solidity.RawStmt.hasHole` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:545`) — requires a placeholder
-  - theorem: `Solidity.Corpus.TestSuite.modifierSkippedPlaceholder` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2435`) — placeholder that is not run
-  - theorem: `Solidity.Tests.ModifierFrameProofs.multi_ir` (tests.upstream.ModifierFrameProofs, `tests/upstream/ModifierFrameProofs.lean:23`) — repeated placeholder frames (viaIR)
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.modifierSkippedPlaceholder` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2435`) — placeholder that is not run
+  - regression: `Solidity.Tests.ModifierFrameProofs.multi_ir` (tests.upstream.ModifierFrameProofs, `tests/upstream/ModifierFrameProofs.lean:23`) — repeated placeholder frames (viaIR)
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: The no-placeholder-in-unchecked rule is solc's alone
   - missing: Multiple placeholders duplicate inlined code; no correctness theorem for it
 
@@ -795,17 +885,17 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.ModApp` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:268`) — modifier application: params, args, body
   - lowering: `Solidity.wrapMods` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:646`) — inlines modifiers, first listed outermost
   - lowering: `Solidity.modifierFrame` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:611`) — separate per-application frames (viaIR)
-  - theorem: `Solidity.Corpus.TestSuite.modifierFirstListedOutermost` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2290`) — modifier nesting order proved
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.modifierFirstListedOutermost` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2290`) — modifier nesting order proved
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Receive modifiers refused
   - missing: Inlined bodies with loops/calls hit backend limits (R01/R08/R09)
   - missing: No general theorem that wrapMods preserves semantics
 
 - **`operatorAliases`** (model/partial)
   - lowering: `Solidity.Frontend.operatorAlias?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:762`) — resolves UDVT operator to pure free function
-  - theorem: `Solidity.Examples.Tactics.OperatorAliasesImport.legacy_numeric` (Solidity.Examples.Tactics.OperatorAliasesImport, `Solidity/Examples/Tactics/OperatorAliasesImport.lean:39`) — aliased numeric ops (legacy)
-  - theorem: `Solidity.Examples.Tactics.OperatorAliasesImport.viaIR_order` (Solidity.Examples.Tactics.OperatorAliasesImport, `Solidity/Examples/Tactics/OperatorAliasesImport.lean:133`) — evaluation order (viaIR)
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.OperatorAliasesImport.legacy_numeric` (Solidity.Examples.Tactics.OperatorAliasesImport, `Solidity/Examples/Tactics/OperatorAliasesImport.lean:39`) — aliased numeric ops (legacy)
+  - regression: `Solidity.Examples.Tactics.OperatorAliasesImport.viaIR_order` (Solidity.Examples.Tactics.OperatorAliasesImport, `Solidity/Examples/Tactics/OperatorAliasesImport.lean:133`) — evaluation order (viaIR)
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Aggregate/UDVT-field shapes and general dispatch Left
   - missing: Failure order outside argument lists unchanged
 
@@ -821,9 +911,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`publicGetters`** (model/partial)
   - lowering: `Solidity.Frontend.publicGetterPlan` (Solidity.Frontend.SolcJson.Getters, `Solidity/Frontend/SolcJson/Getters.lean:243`) — synthesizes getter params/results
   - lowering: `Solidity.Frontend.publicGetterIdentity` (Solidity.Frontend.SolcJson.Getters, `Solidity/Frontend/SolcJson/Getters.lean:252`) — getter ABI identity
-  - theorem: `Solidity.Examples.Tactics.PublicGetters.scalar_exec` (Solidity.Examples.Tactics.PublicGetters, `Solidity/Examples/Tactics/PublicGetters.lean:288`) — scalar getter execution
-  - theorem: `Solidity.Examples.Tactics.PublicGetters.storedGetterSelector` (Solidity.Examples.Tactics.PublicGetters, `Solidity/Examples/Tactics/PublicGetters.lean:137`) — getter selector stored
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.PublicGetters.scalar_exec` (Solidity.Examples.Tactics.PublicGetters, `Solidity/Examples/Tactics/PublicGetters.lean:288`) — scalar getter execution
+  - regression: `Solidity.Examples.Tactics.PublicGetters.storedGetterSelector` (Solidity.Examples.Tactics.PublicGetters, `Solidity/Examples/Tactics/PublicGetters.lean:137`) — getter selector stored
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Enum-valued, contract/function, bytes/string, nested aggregate results refused
   - missing: Reference-valued getters need world return interface
   - missing: Getters run via external self calls, outside backend (R07)
@@ -832,8 +922,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.Frontend.tagOf` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:135`) — receive/fallback classified as internal entries
   - source: `Solidity.SourceCallable` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:301`) — receive callable role
   - lowering: `Solidity.receiveSelfBody` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:590`) — self-payment runs receive body
-  - theorem: `Solidity.Examples.Tactics.SelfCall.receiveRuns` (Solidity.Examples.Tactics.SelfCall, `Solidity/Examples/Tactics/SelfCall.lean:185`) — receive body runs on self-payment
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.SelfCall.receiveRuns` (Solidity.Examples.Tactics.SelfCall, `Solidity/Examples/Tactics/SelfCall.lean:185`) — receive body runs on self-payment
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Inherited receive and receive modifiers refused
   - missing: No transaction entry/dispatch in backend (R04); send/value calls out (R06)
   - missing: Recipient code not run by the machine oracle (R33)
@@ -842,8 +932,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Source.readCompilationUnit` (Solidity.Frontend.SourceUnits, `Solidity/Frontend/SourceUnits.lean:63`) — reads multi-source compilation unit
   - admission: `Solidity.Frontend.Source.checkTree` (Solidity.Frontend.SourceUnits, `Solidity/Frontend/SourceUnits.lean:31`) — checks source IDs and import pairs
   - admission: `Solidity.Frontend.Source.SourceFile` (Solidity.Frontend.Source, `Solidity/Frontend/Source.lean:106`) — per-file SHA and pragma metadata
-  - theorem: `Solidity.Examples.Tactics.SourceUnitsImport.normal_legacy` (Solidity.Examples.Tactics.SourceUnitsImport, `Solidity/Examples/Tactics/SourceUnitsImport.lean:44`) — multi-unit import executes (legacy)
-  - no existing anchor: source, lowering, backend, evm
+  - regression: `Solidity.Examples.Tactics.SourceUnitsImport.normal_legacy` (Solidity.Examples.Tactics.SourceUnitsImport, `Solidity/Examples/Tactics/SourceUnitsImport.lean:44`) — multi-unit import executes (legacy)
+  - no existing anchor: source, lowering, backend, evm, theorem
   - missing: Schema 2 requires multiple units; one-source self-import provenance unfinished
   - missing: Schema-2 static compiler-code artifacts unfinished
   - missing: File-local spec namespace adapter missing
@@ -851,9 +941,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`stateMutability`** (model/partial)
   - source: `Solidity.SourceMutability` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:295`) — nonpayable/pure/view/payable
   - source: `Solidity.Mutability` (Solidity.AST, `Solidity/AST.lean:1240`) — intrinsic mutability
-  - theorem: `Solidity.nonpayable_of_within'` (Solidity.Semantics.RunFrame, `Solidity/Semantics/RunFrame.lean:208`) — nonpayable payment guard
+  - source: `Solidity.nonpayable_of_within'` (Solidity.Semantics.RunFrame, `Solidity/Semantics/RunFrame.lean:208`) — nonpayable payment guard
   - evm: `Solidity.Evm.External.callvalue_upstream` (SolidityBridge.ExternalEvm.Environment, `Bridge/SolidityBridge/ExternalEvm/Environment.lean:114`) — CALLVALUE agrees with upstream
-  - no existing anchor: admission, lowering, backend
+  - no existing anchor: admission, lowering, backend, theorem
   - missing: Mutability erased in function types (declarations-metadata Left)
   - missing: Payment asymmetry: pays and revert disjunct; bridge needs pays=false (R32)
   - missing: view/pure are not statically checked in Lean
@@ -862,8 +952,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.Contract` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:404`) — typed storage roots with okDeep defaults
   - backend: `Solidity.Evm.rootSlot` (Solidity.Evm.Layout, `Solidity/Evm/Layout.lean:78`) — root slot layout
   - backend: `Solidity.Evm.initStorage_repr` (Solidity.Evm.Repr, `Solidity/Evm/Repr.lean:1016`) — zero-initialised storage is represented
-  - theorem: `Solidity.Evm.compile_storage` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:1197`) — compiled storage effects correct
-  - no existing anchor: admission, lowering, evm
+  - backend: `Solidity.Evm.compile_storage` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:1197`) — compiled storage effects correct
+  - no existing anchor: admission, lowering, evm, theorem
   - missing: Logical slot layout, not solc slots/packing (T21 no_injective_slot_encoding)
   - missing: Mapping keys uint only (R14); dynamic copies (R17)
   - missing: Initializers run only via the source constructor, not compiled
@@ -880,9 +970,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 
 - **`usingFor`** (model/partial)
   - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1798`) — attached calls bind receiver once
-  - theorem: `Solidity.Corpus.TestSuite.libraryCallAndUsingFor` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2375`) — using-for call proved
-  - theorem: `Solidity.Corpus.TestSuite.fileLevelStructThroughLibrary` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2370`) — file struct through library
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.libraryCallAndUsingFor` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2375`) — using-for call proved
+  - regression: `Solidity.Corpus.TestSuite.fileLevelStructThroughLibrary` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2370`) — file struct through library
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Broader using-for (global, type-specific) Left
   - missing: Receiver-style calls out of backend (R09 callReceiver)
   - missing: Ambiguous same-scope overloads rejected
@@ -890,8 +980,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`valueTypeDeclarations`** (model/partial)
   - lowering: `Solidity.Frontend.valueTypeExpr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:745`) — UDVT wrap/unwrap lowering
   - source: `Solidity.valueRows?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:554`) — underlying width/sign rows
-  - theorem: `Solidity.Corpus.TestSuite.valueTypeWrapUnwrap` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2380`) — wrap/unwrap proved
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.valueTypeWrapUnwrap` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2380`) — wrap/unwrap proved
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Nominal identity erased below lowering; no type-preservation theorem
   - missing: UDVT fields and aggregate shapes Left; UDVT compound assignment rejected
 
@@ -957,9 +1047,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`arithmetic`** (model/partial)
   - source: `Solidity.BinOp.evalNum` (Solidity.Semantics.Ops, `Solidity/Semantics/Ops.lean:74`) — checked/wrapping/signed div-mod semantics
   - backend: `Solidity.Evm.val_sim` (Solidity.Evm.Expr, `Solidity/Evm/Expr.lean:255`) — compiled expression simulation
-  - evm: `Solidity.Bridge.Arith.uint_checked_all_widths` (SolidityBridge.Arith.NarrowChecked, `Bridge/SolidityBridge/Arith/NarrowChecked.lean:274`) — checked uint ops all widths
+  - source: `Solidity.Bridge.Arith.uint_checked_all_widths` (SolidityBridge.Arith.NarrowChecked, `Bridge/SolidityBridge/Arith/NarrowChecked.lean:274`) — checked uint ops all widths
   - theorem: `Solidity.Main.compiler_correct` (Solidity.Theorems, `Solidity/Theorems.lean:269`) — public compiler correctness
-  - no existing anchor: admission, lowering
+  - no existing anchor: admission, lowering, evm
   - missing: Signed `**` is refused by the source (R12). Narrow widths reach the compiler as uint, so correctness rests on lowering (R13).
   - missing: Target is the word-level macro Machine, not EVM bytecode (R05). Panic codes are erased (R37).
 
@@ -967,15 +1057,15 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.hoistAssign` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:126`) — rhs/lhs capture scheduling
   - source: `Solidity.TRun.assign` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:640`) — typed assignment semantics
   - backend: `Solidity.Evm.assign_sim` (Solidity.Evm.Stmt, `Solidity/Evm/Stmt.lean:191`) — storage assignment simulation
-  - theorem: `Solidity.Corpus.TestSuite.storageAssignmentValueRhsBeforeIndex` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:300`) — rhs before index order
-  - no existing anchor: admission, evm
+  - regression: `Solidity.Corpus.TestSuite.storageAssignmentValueRhsBeforeIndex` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:300`) — rhs before index order
+  - no existing anchor: admission, evm, theorem
   - missing: Storage-to-storage copies are compiled only for static types (R17). Memory→storage and fixed copies are out (R19).
   - missing: Memory-path copies are limited to primitive-member storage structs (R20).
 
 - **`bitwise`** (model/partial)
   - source: `Solidity.Semantics.uintBitwise` (Solidity.Semantics.Ops, `Solidity/Semantics/Ops.lean:39`) — finite-width bitwise semantics
   - backend: `Solidity.Evm.binInFrag` (Solidity.Evm.Layout, `Solidity/Evm/Layout.lean:410`) — & | ^ compiled only at uint
-  - evm: `Solidity.Bridge.Arith.int_band_all_widths` (SolidityBridge.Arith.NarrowBitwise, `Bridge/SolidityBridge/Arith/NarrowBitwise.lean:33`) — signed AND all widths
+  - source: `Solidity.Bridge.Arith.int_band_all_widths` (SolidityBridge.Arith.NarrowBitwise, `Bridge/SolidityBridge/Arith/NarrowBitwise.lean:33`) — signed AND all widths
   - evm: `Solidity.Evm.External.and_step` (SolidityBridge.ExternalEvm, `Bridge/SolidityBridge/ExternalEvm.lean:98`) — AND agrees with reference EVM
   - no existing anchor: admission, lowering, theorem
   - missing: The compiler refuses signed &,|,^ although the source accepts them (R12).
@@ -993,7 +1083,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`comparisons`** (model/partial)
   - source: `Solidity.BinOp.evalBool` (Solidity.Semantics.Ops, `Solidity/Semantics/Ops.lean:102`) — typed comparison semantics
   - backend: `Solidity.Evm.scmp_tail` (Solidity.Evm.Signed, `Solidity/Evm/Signed.lean:160`) — signed compare code tail
-  - evm: `Solidity.Bridge.Arith.int_lt_all_widths` (SolidityBridge.Arith.Comparison, `Bridge/SolidityBridge/Arith/Comparison.lean:77`) — signed < all widths
+  - source: `Solidity.Bridge.Arith.int_lt_all_widths` (SolidityBridge.Arith.Comparison, `Bridge/SolidityBridge/Arith/Comparison.lean:77`) — signed < all widths
   - evm: `Solidity.Evm.External.slt_step` (SolidityBridge.ExternalEvm.SignedOps, `Bridge/SolidityBridge/ExternalEvm/SignedOps.lean:42`) — SLT agrees with reference EVM
   - no existing anchor: admission, lowering, theorem
   - missing: Comparisons of address/bytesN/enum/function values rest on uint lowering (R13), with no nominal legality theorem.
@@ -1011,8 +1101,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.Val` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:77`) — Val.ternary evaluates one arm
   - lowering: `Solidity.mobileTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1145`) — inferred mobile type of arms
   - backend: `Solidity.Evm.Memory.conditionalValue_correct` (Solidity.Evm.MemoryExpr, `Solidity/Evm/MemoryExpr.lean:167`) — conditional code correct
-  - theorem: `Solidity.Corpus.TestSuite.mappingPointerTernary` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1560`) — reference-valued arms
-  - no existing anchor: admission, evm
+  - regression: `Solidity.Corpus.TestSuite.mappingPointerTernary` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1560`) — reference-valued arms
+  - no existing anchor: admission, evm, theorem
   - missing: Reference-valued ternary arms are not compiled (Val.ternary is primitive-only, memory reference paths R28).
   - missing: Side-effecting arms rely on hoisting to if/else. There is no backend theorem for that lowering.
 
@@ -1020,8 +1110,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.TRun.clearT` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:762`) — typed reset of target
   - backend: `Solidity.Evm.delete_sim` (Solidity.Evm.Stmt, `Solidity/Evm/Stmt.lean:867`) — storage delete simulation
   - backend: `Solidity.Evm.Memory.deleteStruct_correct` (Solidity.Evm.MemoryStructDefault, `Solidity/Evm/MemoryStructDefault.lean:155`) — memory struct delete correct
-  - theorem: `Solidity.Corpus.TestSuite.testDeleteKeepsMappingElementEntries` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1320`) — mappings survive delete
-  - no existing anchor: admission, lowering, evm
+  - regression: `Solidity.Corpus.TestSuite.testDeleteKeepsMappingElementEntries` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1320`) — mappings survive delete
+  - no existing anchor: admission, lowering, evm, theorem
   - missing: Core loops that delete or shrink are refused (R21). Storage delete inside memory programs is refused (R29).
   - missing: Delete of reference-element memory arrays is outside the memory path (R28).
 
@@ -1029,8 +1119,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — typeConversion tagged explicitConversions
   - lowering: `Solidity.Frontend.sourceCast` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:282`) — renders solc casts
   - lowering: `Solidity.castCapture` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1823`) — truncation/sign-extension capture
-  - evm: `Solidity.Bridge.Arith.castCapture_typed` (SolidityBridge.Arith.Lowering, `Bridge/SolidityBridge/Arith/Lowering.lean:87`) — cast lowering typed/correct
-  - no existing anchor: source, backend, theorem
+  - lowering: `Solidity.Bridge.Arith.castCapture_typed` (SolidityBridge.Arith.Lowering, `Bridge/SolidityBridge/Arith/Lowering.lean:87`) — cast lowering typed/correct
+  - no existing anchor: source, backend, evm, theorem
   - missing: Enum conversions without validated native declaration identity are refused.
   - missing: bytesN alignment differs from solc (R13). Addresses are not truncated to 160 bits (R27).
 
@@ -1038,8 +1128,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.hoistCallArgs` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:209`) — arguments evaluated once, left to right
   - source: `Solidity.TRun.call` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:810`) — fresh call frame semantics
   - backend: `Solidity.Evm.compileStmt` (Solidity.Evm.Compile, `Solidity/Evm/Compile.lean:433`) — inline-call compilation
-  - theorem: `Solidity.Corpus.TestSuite.internalCallInExpression` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2150`) — call in expression proved
-  - no existing anchor: admission, evm
+  - regression: `Solidity.Corpus.TestSuite.internalCallInExpression` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2150`) — call in expression proved
+  - no existing anchor: admission, evm, theorem
   - missing: Calls compile inline with value arguments only, and receiver calls are out (R09). Recursion is out (R08).
   - missing: External calls/try (R07) and whole-contract dispatch (R04) have no backend theorem.
 
@@ -1047,8 +1137,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.Frontend.tyOf` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:417`) — reads solc resolved types
   - lowering: `Solidity.intTyOf` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1157`) — operand width inference
   - lowering: `Solidity.widenBytes` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1457`) — fixed-bytes widening
-  - evm: `Solidity.Bridge.Arith.Widths.unsigned_widen` (SolidityBridge.Arith.Widths, `Bridge/SolidityBridge/Arith/Widths.lean:571`) — unsigned widening preserved
-  - no existing anchor: source, admission, backend, theorem
+  - source: `Solidity.Bridge.Arith.Widths.unsigned_widen` (SolidityBridge.Arith.Widths, `Bridge/SolidityBridge/Arith/Widths.lean:571`) — unsigned widening preserved
+  - no existing anchor: admission, backend, evm, theorem
   - missing: No theorem that elaborated widths equal solc's resolved type before enclosing operations. Correctness rests on lowering (R13).
   - missing: Implicit fixed-byte narrowing in encodeCall and aggregate contextual coercions (hex arrays) are refused.
 
@@ -1065,8 +1155,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.IndexTy` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:758`) — mapping/array index typing
   - source: `Solidity.Loc.resolveT` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:271`) — index resolution with bounds failure
   - backend: `Solidity.Evm.Memory.readArray_correct` (Solidity.Evm.Memory, `Solidity/Evm/Memory.lean:102`) — memory array index read correct
-  - theorem: `Solidity.Corpus.TestSuite.storageIndexArrayReadOutOfBoundsReverts` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:70`) — out-of-bounds read reverts
-  - no existing anchor: admission, lowering, evm
+  - regression: `Solidity.Corpus.TestSuite.storageIndexArrayReadOutOfBoundsReverts` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:70`) — out-of-bounds read reverts
+  - no existing anchor: admission, lowering, evm, theorem
   - missing: Compiler mapping keys are uint only (R14). Hashed string/bytes keys are refused through R10.
   - missing: Memory reads on the core path are refused (R10 readMem). Bytes indexing relies on uint lowering (R13).
 
@@ -1074,8 +1164,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — isInlineArray TupleExpression tagged inlineArrays
   - lowering: `Solidity.inlineArrayTy` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:149`) — infers fixed memory array type independent of target
   - lowering: `Solidity.inlineExprTy` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:86`) — mobile/common element type inference
-  - theorem: `Solidity.Examples.Tactics.AggregatesImport.literals_valid` (Solidity.Examples.Tactics.AggregatesImport, `Solidity/Examples/Tactics/AggregatesImport.lean:51`) — imported inline-array literals validated
-  - no existing anchor: source, backend, evm
+  - regression: `Solidity.Examples.Tactics.AggregatesImport.literals_valid` (Solidity.Examples.Tactics.AggregatesImport, `Solidity/Examples/Tactics/AggregatesImport.lean:51`) — imported inline-array literals validated
+  - no existing anchor: source, backend, evm, theorem
   - missing: Enum/nominal element identities are refused ('enum array literal without its resolved declaration identity'). Recursive shapes are partial.
   - missing: Fixed memory arrays and reference-element arrays are outside the memory compiler (R28), so there is no backend/EVM coverage.
 
@@ -1093,8 +1183,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.builtinFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:87`) — type builtin tagged metaTypeExpression
   - lowering: `Solidity.Frontend.typeBound?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1118`) — integer type(T).max/min folded
   - lowering: `Solidity.typeBoundExpr` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:576`) — only max/min modelled
-  - theorem: `Solidity.Corpus.TestSuite.typeBounds` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2385`) — type bounds proved
-  - no existing anchor: source, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.typeBounds` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2385`) — type bounds proved
+  - no existing anchor: source, backend, evm, theorem
   - missing: Contract/interface metatype members (creationCode, runtimeCode, interfaceId, name) get separate tags and are not modelled.
   - missing: Enum type(E).min/max is partial (enumLit?). There is no backend stage beyond constants.
 
@@ -1102,8 +1192,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — names on FunctionCall tagged
   - lowering: `Solidity.Frontend.isNamedCall` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2021`) — detects named calls
   - lowering: `Solidity.RawExpr.orderNamed` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:380`) — binds by formal name
-  - theorem: `Solidity.Corpus.TestSuite.namedArgumentsBindByName` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2415`) — name binding proved
-  - no existing anchor: source, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.namedArgumentsBindByName` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2415`) — name binding proved
+  - no existing anchor: source, backend, evm, theorem
   - missing: Named arguments to callees whose parameters the import does not know are refused.
   - missing: No theorem that the reordered evaluation matches the actual compiler (legacy vs viaIR) order.
 
@@ -1118,37 +1208,37 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 
 - **`newMemory`** (model/partial)
   - source: `Solidity.newArrT` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:242`) — fresh defaulted array allocation
-  - lowering: `Solidity.elabNewTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1053`) — new T[](n) typing
+  - lowering: `Solidity.elabNewTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1053`) — new T\[\](n) typing
   - backend: `Solidity.Evm.Memory.newArray_correct` (Solidity.Evm.MemoryAllocSource, `Solidity/Evm/MemoryAllocSource.lean:122`) — allocation code correct
-  - theorem: `Solidity.Evm.Memory.compile_correct` (Solidity.Evm.MemoryCompile, `Solidity/Evm/MemoryCompile.lean:1245`) — memory compiler GrowingResult
-  - no existing anchor: admission, evm
+  - backend: `Solidity.Evm.Memory.compile_correct` (Solidity.Evm.MemoryCompile, `Solidity/Evm/MemoryCompile.lean:1245`) — memory compiler GrowingResult
+  - no existing anchor: admission, evm, theorem
   - missing: Memory capacity is a premise, and the generated code has no capacity check or Panic(0x41) (R25).
-  - missing: Nested/reference-element arrays (new uint[][](n)) are outside the memory path (R28). Memory loops are out (R22).
+  - missing: Nested/reference-element arrays (new uint\[\]\[\](n)) are outside the memory path (R28). Memory loops are out (R22).
 
 - **`parentheses`** (model/present)
   - lowering: `Solidity.Frontend.unparen` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1187`) — strips grouping from solc nodes
   - lowering: `Solidity.Frontend.operand` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1794`) — re-parenthesises operator operands when rendering
-  - theorem: `Solidity.Corpus.TestSuite.parenthesizedRightOperand` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1805`) — grouping preserved in proof corpus
-  - theorem: `Solidity.Corpus.TestSuite.parenthesizedCondition` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1815`) — parenthesised condition corpus case
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.parenthesizedRightOperand` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1805`) — grouping preserved in proof corpus
+  - regression: `Solidity.Corpus.TestSuite.parenthesizedCondition` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1815`) — parenthesised condition corpus case
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: No theorem that unparen/operand rendering preserves evaluation order. Correctness is checked only syntactically.
   - missing: Telling a parenthesised single value apart from a 1-tuple depends on the solc AST alone.
 
 - **`rangeAccess`** (model/partial)
   - lowering: `Solidity.sliceViewOf?` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1002`) — calldata slice view construction
   - lowering: `Solidity.sliceElementCopy` (Solidity.Syntax.Elab.SliceCopy, `Solidity/Syntax/Elab/SliceCopy.lean:13`) — slice element copies
-  - theorem: `Solidity.Examples.Tactics.AggregateSlices.successful_run` (Solidity.Examples.Tactics.AggregateSlices, `Solidity/Examples/Tactics/AggregateSlices.lean:67`) — successful slice run
-  - theorem: `Solidity.Examples.Tactics.SliceReferenceCopies.legacy.invalidRange_run` (Solidity.Examples.Tactics.SliceReferenceCopies, `Solidity/Examples/Tactics/SliceReferenceCopies.lean:153`) — invalid endpoints fail
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.AggregateSlices.successful_run` (Solidity.Examples.Tactics.AggregateSlices, `Solidity/Examples/Tactics/AggregateSlices.lean:67`) — successful slice run
+  - regression: `Solidity.Examples.Tactics.SliceReferenceCopies.legacy.invalidRange_run` (Solidity.Examples.Tactics.SliceReferenceCopies, `Solidity/Examples/Tactics/SliceReferenceCopies.lean:153`) — invalid endpoints fail
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Slices of nominal UDVT/enum elements are refused (need declaration identity and range premises).
   - missing: No backend/EVM stage: calldata copies (R20) and ABI entry (R04) are outside the compiler theorems.
 
 - **`shifts`** (model/partial)
   - source: `Solidity.BinOp.evalNum` (Solidity.Semantics.Ops, `Solidity/Semantics/Ops.lean:74`) — shift semantics, left type preserved
-  - evm: `Solidity.Bridge.Arith.int_shr_all_widths` (SolidityBridge.Arith.NarrowShifts, `Bridge/SolidityBridge/Arith/NarrowShifts.lean:15`) — sign-extending SAR all widths
+  - source: `Solidity.Bridge.Arith.int_shr_all_widths` (SolidityBridge.Arith.NarrowShifts, `Bridge/SolidityBridge/Arith/NarrowShifts.lean:15`) — sign-extending SAR all widths
   - evm: `Solidity.Evm.External.shr_step` (SolidityBridge.ExternalEvm.WordOps, `Bridge/SolidityBridge/ExternalEvm/WordOps.lean:82`) — SHR agrees with reference EVM
-  - theorem: `Solidity.Corpus.TestSuite.testShiftRightNegativeRoundsDown` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2600`) — negative >> rounds down
-  - no existing anchor: admission, lowering, backend
+  - regression: `Solidity.Corpus.TestSuite.testShiftRightNegativeRoundsDown` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2600`) — negative >> rounds down
+  - no existing anchor: admission, lowering, backend, theorem
   - missing: The compiler refuses signed `>>` (R12). The source refuses signed `<<`.
   - missing: `>>>` is tagged unsignedRightShift and is not modelled.
 
@@ -1156,7 +1246,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — &&/|| tagged shortCircuit
   - source: `Solidity.BinOp.shortT` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:218`) — lazy second operand
   - theorem: `Solidity.BinOp.shortT_none` (Solidity.Calculus.SoundLocal, `Solidity/Calculus/SoundLocal.lean:49`) — calculus soundness lemma for short-circuit
-  - theorem: `Solidity.Corpus.TestSuite.logicalAndShortCircuitRhs` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:285`) — RHS skipped when not needed
+  - regression: `Solidity.Corpus.TestSuite.logicalAndShortCircuitRhs` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:285`) — RHS skipped when not needed
   - no existing anchor: lowering, backend, evm
   - missing: No dedicated backend/EVM lemma for the lazy RHS was found. The backend relies on generic val_sim.
   - missing: RHS effects in the compiled path are limited to the core fragment (no calls or hashes, R09/R10).
@@ -1174,15 +1264,15 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — non-inline TupleExpression tagged tupleExpressions
   - lowering: `Solidity.Frontend.explicitTupleAssignment` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2109`) — tuple assignment leaves with empty targets
   - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:747`) — elaborates tuple assignment/declaration
-  - theorem: `Solidity.Corpus.TestSuite.tupleAssignmentRotates` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2185`) — commit-order rotation proved
-  - no existing anchor: source, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.tupleAssignmentRotates` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2185`) — commit-order rotation proved
+  - no existing anchor: source, backend, evm, theorem
   - missing: Tuple/reference returns of internal calls are outside the compiler (R09: CallRetIn only .none/.val).
   - missing: Mixed storage tuple calls outside their validated declaration context are refused by the importer.
 
 - **`unaryArithmetic`** (model/partial)
   - source: `Solidity.UnOp.evalT` (Solidity.Semantics.Ops, `Solidity/Semantics/Ops.lean:139`) — neg/not/bnot semantics
   - backend: `Solidity.Evm.Memory.unaryValue_correct` (Solidity.Evm.MemoryExpr, `Solidity/Evm/MemoryExpr.lean:115`) — unary code correct (memory path)
-  - evm: `Solidity.Bridge.Arith.int_neg_checked_all_widths` (SolidityBridge.Arith.NarrowChecked, `Bridge/SolidityBridge/Arith/NarrowChecked.lean:305`) — checked min-int negation, all widths
+  - source: `Solidity.Bridge.Arith.int_neg_checked_all_widths` (SolidityBridge.Arith.NarrowChecked, `Bridge/SolidityBridge/Arith/NarrowChecked.lean:305`) — checked min-int negation, all widths
   - evm: `Solidity.Evm.External.not_step` (SolidityBridge.ExternalEvm.WordOps, `Bridge/SolidityBridge/ExternalEvm/WordOps.lean:47`) — NOT agrees with reference EVM
   - no existing anchor: admission, lowering, theorem
   - missing: The source refuses signed `~` (R12). `~` on bytesN is not told apart from uint (R13).
@@ -1192,9 +1282,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`addressLiterals`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — number literal typed address maps to addressLiterals
   - source: `Solidity.addressRows` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:544`) — address width rows (160-bit)
-  - theorem: `Solidity.Examples.Tactics.SourceLiteralsImport.address_context_initial` (Solidity.Examples.Tactics.SourceLiteralsImport, `Solidity/Examples/Tactics/SourceLiteralsImport.lean:14`) — address literal context preserved
-  - theorem: `Solidity.Corpus.TestSuite.returnDefaultAddressIsZero` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2230`) — address default is zero
-  - no existing anchor: lowering, backend, evm
+  - regression: `Solidity.Examples.Tactics.SourceLiteralsImport.address_context_initial` (Solidity.Examples.Tactics.SourceLiteralsImport, `Solidity/Examples/Tactics/SourceLiteralsImport.lean:14`) — address literal context preserved
+  - regression: `Solidity.Corpus.TestSuite.returnDefaultAddressIsZero` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2230`) — address default is zero
+  - no existing anchor: lowering, backend, evm, theorem
   - missing: Checksum and length checks are solc's alone; no Lean check
   - missing: address reaches backend as uint (R13); no proved 160-bit bound at the compiler
 
@@ -1202,32 +1292,32 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.Frontend.expr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1522`) — renders bool Literal nodes
   - backend: `Solidity.Evm.compileVal` (Solidity.Evm.Compile, `Solidity/Evm/Compile.lean:351`) — compiles bool values as words
   - evm: `Solidity.Evm.External.decode_bool` (SolidityBridge.ExternalEvm.WordOps, `Bridge/SolidityBridge/ExternalEvm/WordOps.lean:6`) — bool word decoding agrees with EVM
-  - theorem: `Solidity.Corpus.TestSuite.requireTrueLiteral` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:165`) — require(true) obligation proved
-  - no existing anchor: source, admission
+  - regression: `Solidity.Corpus.TestSuite.requireTrueLiteral` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:165`) — require(true) obligation proved
+  - no existing anchor: source, admission, theorem
   - missing: No stated theorem that numeric-to-bool coercion is impossible (rests on typing)
 
 - **`comments`** (model/partial)
   - admission: `Solidity.Frontend.scanSpecifications` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:493`) — scans NatSpec spec annotations by lexical binders
   - lowering: `Solidity.Frontend.specCommentTokens` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:264`) — tokenizes spec comments; ordinary comments stay data
   - lowering: `Solidity.Frontend.docText` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:21`) — reads documentation nodes for clauses
-  - theorem: `Solidity.Examples.Tactics.SourceIdentifiersImport.escaped_spec_valid` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:21`) — spec with escaped identifiers is valid
-  - no existing anchor: source
+  - regression: `Solidity.Examples.Tactics.SourceIdentifiersImport.escaped_spec_valid` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:21`) — spec with escaped identifiers is valid
+  - no existing anchor: source, theorem
   - missing: Multi-source NatSpec @custom:key and loopSpec refused (compilationUnitSpecifications)
   - missing: No end-to-end proof that comments carry no meaning or that spans are kept
 
 - **`etherUnits`** (model/present)
   - source: `Solidity.unitFactor?` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:416`) — wei/gwei/ether factors
   - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:955`) — multiplies subdenomination before range check
-  - theorem: `Solidity.Corpus.TestSuite.numberLiteralForms` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1585`) — 1 gwei and other literal forms proved
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.numberLiteralForms` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1585`) — 1 gwei and other literal forms proved
+  - no existing anchor: admission, backend, evm, theorem
   - missing: No theorem that the folded factor matches solc for every unit and rational case
 
 - **`hexLiterals`** (model/partial)
   - lowering: `Solidity.Frontend.validHexBytes` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1369`) — checks hex digits of solc hexValue
   - source: `Solidity.hexBytes?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:608`) — decodes hex literal into bytes
   - lowering: `Solidity.Frontend.abiHexLiteral?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1430`) — hex literals as ABI call payloads
-  - theorem: `Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid` (Solidity.Examples.Tactics.AbiHexCall, `Solidity/Examples/Tactics/AbiHexCall.lean:108`) — exact hex payload property holds
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid` (Solidity.Examples.Tactics.AbiHexCall, `Solidity/Examples/Tactics/AbiHexCall.lean:108`) — exact hex payload property holds
+  - no existing anchor: admission, backend, evm, theorem
   - missing: A hex literal without solc bytes is refused (Body.lean:1390)
   - missing: Byte-memory backend absent: word-addressed memory (R31), no hashes (R10)
 
@@ -1235,8 +1325,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.scan` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:418`) — admission walk; declarations keyed by compiler IDs
   - lowering: `Solidity.Frontend.identText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:22`) — quotes raw source names, including $ names and keywords
   - lowering: `Solidity.freshenStmt` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1229`) — renames locals so shadowed names stay apart
-  - theorem: `Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:12`) — imported shadowing runs correctly
-  - no existing anchor: source, backend
+  - regression: `Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:12`) — imported shadowing runs correctly
+  - no existing anchor: source, backend, theorem
   - missing: No general theorem that lowering keeps declaration identity or scope; only regressions
   - missing: Qualified names across modules rely on import adapters with no proof (see sourceUnits)
 
@@ -1282,8 +1372,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.Frontend.byteLiteralText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1375`) — renders exact string/unicode/hex bytes from solc
   - lowering: `Solidity.strLit` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:436`) — sol{} string literal expansion
   - source: `Solidity.litBytes` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:1215`) — intrinsic byte literal
-  - theorem: `Solidity.Examples.Tactics.ComputedRevert.unicode_hex_reason_exact` (Solidity.Examples.Tactics.ComputedRevert, `Solidity/Examples/Tactics/ComputedRevert.lean:159`) — exact revert-reason bytes from literals
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.ComputedRevert.unicode_hex_reason_exact` (Solidity.Examples.Tactics.ComputedRevert, `Solidity/Examples/Tactics/ComputedRevert.lean:159`) — exact revert-reason bytes from literals
+  - no existing anchor: admission, backend, evm, theorem
   - missing: bytes/string values excluded from core backend (R10 hashes, R17 dynamic copies)
   - missing: Direct string conversions refused (declarations-metadata.md)
   - missing: No proof of escape decoding or adjacent-literal concatenation; solc's value is trusted
@@ -1291,15 +1381,15 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`timeUnits`** (model/present)
   - source: `Solidity.unitFactor?` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:416`) — seconds..weeks factors
   - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:955`) — folds time subdenomination
-  - theorem: `Solidity.Corpus.TestSuite.numberLiteralForms` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1585`) — 2 days folded and proved
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.numberLiteralForms` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1585`) — 2 days folded and proved
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Only literal factor folding; no general folding theorem
 
 - **`unicodeLiterals`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — unicodeString literal maps to unicodeLiterals
   - lowering: `Solidity.Frontend.byteLiteralText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1375`) — unicode literal keeps solc-validated UTF-8 bytes
-  - theorem: `Solidity.Examples.Tactics.AbiFeatures.utf8_namespace` (Solidity.Examples.Tactics.AbiFeatures, `Solidity/Examples/Tactics/AbiFeatures.lean:35`) — UTF-8 namespace bytes exact
-  - no existing anchor: source, backend, evm
+  - regression: `Solidity.Examples.Tactics.AbiFeatures.utf8_namespace` (Solidity.Examples.Tactics.AbiFeatures, `Solidity/Examples/Tactics/AbiFeatures.lean:35`) — UTF-8 namespace bytes exact
+  - no existing anchor: source, backend, evm, theorem
   - missing: UTF-8 validity is checked only by solc and the input helper; no Lean check or proof
   - missing: No backend or EVM path for dynamic byte values (R10/R17)
 
@@ -1309,24 +1399,24 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Source.readCompilerCode` (Solidity.Frontend.Source, `Solidity/Frontend/Source.lean:360`) — reads bound, linked code artifacts with provenance
   - admission: `Solidity.Frontend.Source.ScopeScan.requireCompilerCode` (Solidity.Frontend.Source, `Solidity/Frontend/Source.lean:287`) — requires matching artifact
   - lowering: `Solidity.Frontend.staticCompilerBytes?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1203`) — static creationCode bytes
-  - theorem: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1197`) — folded length matches emitted bytes
-  - no existing anchor: source, backend, evm
+  - lowering: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1197`) — folded length matches emitted bytes
+  - no existing anchor: source, backend, evm, theorem
   - missing: Deployed account code, unresolved linking, oversized materialization unsupported
   - missing: Schema-2 artifact inputs unfinished; no compiler-correctness link (R05)
 
 - **`errorEventSelector`** (model/present)
   - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1059`) — error bytes4 / event bytes32; anonymous refused
-  - theorem: `Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:27`) — error selectors
-  - theorem: `Solidity.Examples.Tactics.DeclarationMetadata.eventSelector` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:31`) — event selector
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:27`) — error selectors
+  - regression: `Solidity.Examples.Tactics.DeclarationMetadata.eventSelector` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:31`) — event selector
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Selectors come from solc ABI metadata, not recomputed in Lean
   - missing: bytes32 hash values excluded from backend (R10)
 
 - **`functionAddress`** (model/partial)
   - lowering: `Solidity.Frontend.storedFunctionMemberType?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:312`) — .address typed address
-  - theorem: `Solidity.Examples.Tactics.FunctionTypes.addressOfValue` (Solidity.Examples.Tactics.FunctionTypes, `Solidity/Examples/Tactics/FunctionTypes.lean:228`) — address of function value
-  - theorem: `Solidity.Examples.Tactics.SourceAdmissionImport.boundSelf_iff` (Solidity.Examples.Tactics.SourceAdmissionImport, `Solidity/Examples/Tactics/SourceAdmissionImport.lean:242`) — bound self receiver projection
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.FunctionTypes.addressOfValue` (Solidity.Examples.Tactics.FunctionTypes, `Solidity/Examples/Tactics/FunctionTypes.lean:228`) — address of function value
+  - regression: `Solidity.Examples.Tactics.SourceAdmissionImport.boundSelf_iff` (Solidity.Examples.Tactics.SourceAdmissionImport, `Solidity/Examples/Tactics/SourceAdmissionImport.lean:242`) — bound self receiver projection
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Effectful C(receiver()).f.address refused
   - missing: Not all declaration contexts validated
 
@@ -1334,32 +1424,32 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.fnSelector?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:967`) — selector of external function value
   - lowering: `Solidity.Frontend.declarationSelector` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1031`) — static declaration selectors fold
   - lowering: `Solidity.Frontend.storedFunctionMemberType?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:312`) — .selector typed bytes4
-  - theorem: `Solidity.Examples.Tactics.FunctionTypes.selectorOfValue` (Solidity.Examples.Tactics.FunctionTypes, `Solidity/Examples/Tactics/FunctionTypes.lean:236`) — selector of function value
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.FunctionTypes.selectorOfValue` (Solidity.Examples.Tactics.FunctionTypes, `Solidity/Examples/Tactics/FunctionTypes.lean:236`) — selector of function value
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Effectful stored-member receivers refused (read twice)
   - missing: Not all declaration contexts validated; no uniqueness (by design)
 
 - **`interfaceId`** (model/present)
   - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1059`) — XOR of own external selectors
   - source: `Solidity.Keccak.selector` (Solidity.Keccak, `Solidity/Keccak.lean:109`) — 4-byte selector
-  - theorem: `Solidity.Examples.Tactics.DeclarationMetadata.ownInterface` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:23`) — interfaceId value
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.DeclarationMetadata.ownInterface` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:23`) — interfaceId value
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Abstract-contract interfaceId refused
   - missing: No general XOR theorem
 
 - **`runtimeCode`** (model/partial)
   - admission: `Solidity.Frontend.Source.readCompilerCode` (Solidity.Frontend.Source, `Solidity/Frontend/Source.lean:360`) — runtime artifact with provenance
   - lowering: `Solidity.Frontend.staticCompilerBytes?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1203`) — static runtimeCode bytes
-  - theorem: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1197`) — length agreement
-  - no existing anchor: source, backend, evm
+  - lowering: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1197`) — length agreement
+  - no existing anchor: source, backend, evm, theorem
   - missing: Same gaps as creationCode; immutables are not reflected in runtime bytes
   - missing: No link between the artifact and the verified machine (R05)
 
 - **`typeBounds`** (model/partial)
   - lowering: `Solidity.Frontend.typeBound?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1118`) — type(T).min/max incl. signed minimum
   - source: `Solidity.typeBoundExpr` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:576`) — sol{} type bounds
-  - theorem: `Solidity.Corpus.TestSuite.typeBounds` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2385`) — type bounds proved
-  - no existing anchor: admission, backend, evm
+  - regression: `Solidity.Corpus.TestSuite.typeBounds` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2385`) — type bounds proved
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Enum min/max cardinality not shown in typeBound? (integers only)
   - missing: No general theorem on bounds
 
@@ -1382,10 +1472,10 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 
 - **`checkedArithmetic`** (model/partial)
   - lowering: `Solidity.Prog.checkOF` (Solidity.Syntax.Checked, `Solidity/Syntax/Checked.lean:379`) — inserts overflow guards per intermediate op
-  - theorem: `Solidity.Checked.add_uint_exact` (Solidity.Syntax.CheckedExact, `Solidity/Syntax/CheckedExact.lean:22`) — checked uint addition guard exact
+  - source: `Solidity.Checked.add_uint_exact` (Solidity.Syntax.CheckedExact, `Solidity/Syntax/CheckedExact.lean:22`) — checked uint addition guard exact
   - theorem: `Solidity.Bridge.Arith.narrowCheck_full` (SolidityBridge.Arith.Lowering, `Bridge/SolidityBridge/Arith/Lowering.lean:176`) — narrow-width checked lowering correct
   - theorem: `Solidity.Main.compiler_checked` (Solidity.Theorems, `Solidity/Theorems.lean:297`) — compiler correctness for checked programs
-  - no existing anchor: source, admission, backend, evm
+  - no existing anchor: admission, backend, evm
   - missing: Overflow is plain .revert, not Panic 0x11 (solc-alignment)
   - missing: Signed bitwise/arith >> refused by compiler (R12)
 
@@ -1447,7 +1537,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.Semantics.encodePanic` (Solidity.RevertBytes, `Solidity/RevertBytes.lean:54`) — Panic(uint256) payload encoding
   - source: `Solidity.TRun.selfPanicCode` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:862`) — panic code data in self-call frames
   - theorem: `Solidity.Semantics.decodeError_encodePanic` (Solidity.Calculus.SoundCatch, `Solidity/Calculus/SoundCatch.lean:28`) — panic payload decoding round-trips
-  - theorem: `Solidity.Prog.run_noPanic` (Solidity.Semantics.NoPanic, `Solidity/Semantics/NoPanic.lean:544`) — assert-free programs never panic
+  - source: `Solidity.Prog.run_noPanic` (Solidity.Semantics.NoPanic, `Solidity/Semantics/NoPanic.lean:544`) — assert-free programs never panic
   - no existing anchor: admission, lowering, backend, evm
   - missing: Outside self frames, 0x11/0x12/0x31/0x32 collapse to .revert (solc-alignment)
   - missing: Compiler erases panic: failing assert is a plain revert (R37)
@@ -1473,27 +1563,27 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 
 - **`rollback`** (model/partial)
   - source: `Solidity.TRun.tryCall` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:877`) — try/catch frame boundary with rollback
-  - theorem: `Solidity.ContractWorld.atomic_failure` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:387`) — failed operation restores the world
-  - theorem: `Solidity.Transient.Program.attempt_rollback` (Solidity.Semantics.Transient, `Solidity/Semantics/Transient.lean:204`) — caught failure rolls back transient cells
-  - theorem: `Solidity.ContractWorld.World.transact_failure` (Solidity.Semantics.TransientWorld, `Solidity/Semantics/TransientWorld.lean:65`) — transaction failure rolls back fully
-  - no existing anchor: admission, lowering, backend, evm
+  - source: `Solidity.ContractWorld.atomic_failure` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:387`) — failed operation restores the world
+  - source: `Solidity.Transient.Program.attempt_rollback` (Solidity.Semantics.Transient, `Solidity/Semantics/Transient.lean:204`) — caught failure rolls back transient cells
+  - source: `Solidity.ContractWorld.World.transact_failure` (Solidity.Semantics.TransientWorld, `Solidity/Semantics/TransientWorld.lean:65`) — transaction failure rolls back fully
+  - no existing anchor: admission, lowering, backend, evm, theorem
   - missing: No compiled try/catch, so no EVM-level rollback theorem (R07)
   - missing: Rollback of returndata/outputs not observed (R41)
 
 - **`staticCallRestriction`** (abstract/partial)
   - source: `Solidity.ContractWorld.Context.isStatic` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:103`) — static call context flag
-  - theorem: `Solidity.Transient.Program.static_preserves` (Solidity.Semantics.Transient, `Solidity/Semantics/Transient.lean:222`) — static frames preserve transient state
+  - source: `Solidity.Transient.Program.static_preserves` (Solidity.Semantics.Transient, `Solidity/Semantics/Transient.lean:222`) — static frames preserve transient state
   - lowering: `Solidity.roStmt` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:696`) — view/pure write checking in elaborator
-  - no existing anchor: admission, backend, evm
+  - no existing anchor: admission, backend, evm, theorem
   - missing: No transitive static enforcement for arbitrary external callees
   - missing: Static-context payments/writes not in compiler (external calls excluded, R07)
 
 - **`termination`** (model/partial)
   - source: `Solidity.Stmt.loop_terminates_of_wellFounded` (Solidity.Semantics.Termination, `Solidity/Semantics/Termination.lean:82`) — loop termination from well-founded measure
   - source: `Solidity.Prog.runF_approx` (Solidity.Semantics.RunFuel, `Solidity/Semantics/RunFuel.lean:449`) — fuel evaluator approximates semantic run
-  - evm: `Solidity.Evm.compile_terminates_iff` (SolidityBridge.Evm, `Bridge/SolidityBridge/Evm.lean:171`) — compiled code terminates iff source does
+  - backend: `Solidity.Evm.compile_terminates_iff` (SolidityBridge.Evm, `Bridge/SolidityBridge/Evm.lean:171`) — compiled code terminates iff source does
   - theorem: `Solidity.TLoop.run_correct_of_wellFounded_on` (SolidityBridge.LoopFixpoint, `Bridge/SolidityBridge/LoopFixpoint.lean:65`) — loop fixpoint correctness under well-foundedness
-  - no existing anchor: admission, lowering, backend
+  - no existing anchor: admission, lowering, evm
   - missing: Divergence matched classically to .fault; no gas-indexed prefixes (R38)
   - missing: Recursion depth fixed fuel 1024 (R08); exhausted never in compiler theorem (R39)
 
@@ -1518,8 +1608,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`worldAssumptions`** (abstract/partial)
   - theorem: `Solidity.Bridge.Adversary.holdsC_iff_all_callees` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:250`) — properties hold for all callee interpretations
   - theorem: `Solidity.Main.callback_soundness` (Solidity.Theorems, `Solidity/Theorems.lean:226`) — soundness under explicit callback invariant
-  - theorem: `Solidity.ContractWorld.reachable_invariant` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:452`) — multi-contract world invariant over reachable states
-  - no existing anchor: source, admission, lowering, backend, evm
+  - source: `Solidity.ContractWorld.reachable_invariant` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:452`) — multi-contract world invariant over reachable states
+  - no existing anchor: admission, lowering, backend, evm
+  - missing: Not approved (G00 Q2): the premise must be replaced by the callee semantics of D02/D12, not discharged as stated
   - missing: Compiler world is balances only; recipient code not run (R33)
   - missing: msg.sender != this premise not imposed (solc-alignment)
 
@@ -1547,9 +1638,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`canonicalRethrow`** (abstract/partial)
   - lowering: `Solidity.Frontend.memoryRethrow?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2147`) — only whole-buffer revert(add(p,32),mload(p))
   - source: `Solidity.RevPart` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:315`) — RevPart.mem raw buffer payload
-  - theorem: `Solidity.RevPart.evalT_mem` (Solidity.Semantics.RevertMemory, `Solidity/Semantics/RevertMemory.lean:17`) — memory payload evaluation
-  - theorem: `Solidity.TRun.catchBytes_self_data` (Solidity.Semantics.RevertMemory, `Solidity/Semantics/RevertMemory.lean:67`) — bytes transported to catch
-  - no existing anchor: admission, backend, evm
+  - source: `Solidity.RevPart.evalT_mem` (Solidity.Semantics.RevertMemory, `Solidity/Semantics/RevertMemory.lean:17`) — memory payload evaluation
+  - source: `Solidity.TRun.catchBytes_self_data` (Solidity.Semantics.RevertMemory, `Solidity/Semantics/RevertMemory.lean:67`) — bytes transported to catch
+  - no existing anchor: admission, backend, evm, theorem
   - missing: Backend/EVM refuse revertData; raw bytes unobservable (R07/R37)
   - missing: Machine memory is word-addressed, so the byte-level revert(ptr,len) is not modelled (R31)
 
@@ -1557,7 +1648,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.TRun.catchData` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:1020`) — catch binds reason/raw bytes
   - source: `Solidity.CatchKind.decode` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:995`) — Error(string) decode vs raw
   - theorem: `Solidity.Stmt.sound_catchData` (Solidity.Calculus.SoundCatch, `Solidity/Calculus/SoundCatch.lean:278`) — catch-data rule soundness
-  - theorem: `Solidity.TRun.catchData_self_data` (Solidity.Semantics.RevertMemory, `Solidity/Semantics/RevertMemory.lean:83`) — self-call bytes reach typed catch
+  - source: `Solidity.TRun.catchData_self_data` (Solidity.Semantics.RevertMemory, `Solidity/Semantics/RevertMemory.lean:83`) — self-call bytes reach typed catch
   - no existing anchor: admission, lowering, backend, evm
   - missing: Non-self catch data comes from the oracle table; malformed-payload dispatch only for Error/Panic/raw kinds
   - missing: Typed custom-error catches unsupported; compiler refuses catchData (R07)
@@ -1582,8 +1673,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`emitStatement`** (model/partial)
   - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2202`) — resolved positional emit; named args refused
   - lowering: `Solidity.eagerArgsWith` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1958`) — operands evaluated in order, log dropped
-  - theorem: `Solidity.Examples.Tactics.CallExceptions.event_argument_panics` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:49`) — erased event argument still panics
-  - no existing anchor: source, admission, backend, evm
+  - regression: `Solidity.Examples.Tactics.CallExceptions.event_argument_panics` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:49`) — erased event argument still panics
+  - no existing anchor: source, admission, backend, evm, theorem
   - missing: Logs not observable anywhere (no LOG at source or Machine); erasure valid only for log-blind properties
   - missing: Named event arguments and qualified event names refused
   - missing: No general erasure-soundness theorem
@@ -1629,7 +1720,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.revertErrParts` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:998`) — custom error selector/word parts
   - source: `Solidity.TRun.revertData` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:948`) — revert with byte payload
   - theorem: `Solidity.sound_revertData` (Solidity.Calculus.SoundArms, `Solidity/Calculus/SoundArms.lean:1369`) — revertData rule soundness
-  - theorem: `Solidity.Examples.Tactics.CallExceptions.revert_argument_panics` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:44`) — operands evaluated before revert
+  - regression: `Solidity.Examples.Tactics.CallExceptions.revert_argument_panics` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:44`) — operands evaluated before revert
   - no existing anchor: admission, backend, evm
   - missing: Revert data erased at backend: Out.revert has no bytes; revertData refused (R07, R37)
   - missing: Exact bytes retained only in self frames or with retainFailureData; otherwise a plain revert
@@ -1648,8 +1739,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — UncheckedBlock tagged uncheckedBlock/uncheckedArithmetic
   - lowering: `Solidity.uncheckStmts` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:705`) — + - * ** to wrapping ops; callees stay checked
   - backend: `Solidity.Evm.binInFrag` (Solidity.Evm.Layout, `Solidity/Evm/Layout.lean:410`) — addW/subW/mulW/powW compiled at uint only
-  - theorem: `Solidity.Examples.Tactics.Checked.uncheckedWrap` (Solidity.Examples.Tactics.Checked, `Solidity/Examples/Tactics/Checked.lean:75`) — regression example only
-  - no existing anchor: source, evm
+  - regression: `Solidity.Examples.Tactics.Checked.uncheckedWrap` (Solidity.Examples.Tactics.Checked, `Solidity/Examples/Tactics/Checked.lean:75`) — regression example only
+  - no existing anchor: source, evm, theorem
   - missing: No general theorem that uncheckStmts keeps division/index checks and leaves callees checked
   - missing: Signed unchecked goes through uint wrapping and casts; signed bitwise ops refused by compiler (R12)
 
@@ -1720,7 +1811,6 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.Storage.delete` (Solidity.Semantics.Storage.Ops, `Solidity/Semantics/Storage/Ops.lean:972`) — delete keeps mapping entries in place
   - source: `Solidity.Storage.CleanTail` (Solidity.Typing.CleanTail, `Solidity/Typing/CleanTail.lean:74`) — explicit clean-tail predicate on storage
   - theorem: `Solidity.Prog.run_cleanTail` (Solidity.Typing.CleanTailRun, `Solidity/Typing/CleanTailRun.lean:1777`) — runs preserve clean tails
-  - theorem: `Solidity.Main.cleanTail_holds` (Solidity.Theorems, `Solidity/Theorems.lean:246`) — clean-tail validity theorem
   - no existing anchor: admission, lowering, backend, evm
   - missing: Compiled delete covered only for its fragment; pop/delete in loops refused (R21)
   - missing: Dirty-tail semantics only via the clean/arbitrary tail mode, no compiler link
@@ -1764,9 +1854,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`transientState`** (model/partial)
   - source: `Solidity.Storage.RegionRoot.disjoint` (Solidity.Semantics.Storage.Anon, `Solidity/Semantics/Storage/Anon.lean:417`) — persistent/transient roots disjoint
   - source: `Solidity.Transient.Program.attempt_rollback` (Solidity.Semantics.Transient, `Solidity/Semantics/Transient.lean:204`) — failure rolls back the transient product
-  - theorem: `Solidity.ContractWorld.World.resetTransient_persistent` (Solidity.Semantics.TransientWorld, `Solidity/Semantics/TransientWorld.lean:107`) — transaction reset keeps persistent storage
+  - source: `Solidity.ContractWorld.World.resetTransient_persistent` (Solidity.Semantics.TransientWorld, `Solidity/Semantics/TransientWorld.lean:107`) — transaction reset keeps persistent storage
   - admission: `Solidity.Frontend.elabSolcWorldFactory` (Solidity.Frontend.WorldImport, `Solidity/Frontend/WorldImport.lean:245`) — closed factory targets with transient roots
-  - no existing anchor: lowering, backend, evm
+  - no existing anchor: lowering, backend, evm, theorem
   - missing: General source-world statement lowering and transient factory owners unsupported
   - missing: Physical transient layout, raw tload/tstore absent; no compiler support
 
@@ -1885,8 +1975,8 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - source: `Solidity.Heap.Keeps` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:154`) — heap extension preserves existing object identity
   - source: `Solidity.Heap.alloc` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:144`) — fresh typed heap allocation
   - backend: `Solidity.Evm.Memory.compile_correct` (Solidity.Evm.MemoryCompile, `Solidity/Evm/MemoryCompile.lean:1245`) — memory-path compiler correctness
-  - theorem: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:86`) — unified compiler correctness, either path
-  - no existing anchor: admission, lowering, evm
+  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:86`) — unified compiler correctness, either path
+  - no existing anchor: admission, lowering, evm, theorem
   - missing: Core and memory paths cannot mix in one program (R01/R02)
   - missing: Memory capacity is a premise; no 0x41 panic (R25)
   - missing: Word-addressed headerless memory, not EVM bytes (R31)
@@ -1894,9 +1984,9 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`recursiveTypes`** (model/missing)
   - source: `Solidity.TypeGraph.Schema.no_inline_cycle` (Solidity.TypeGraph, `Solidity/TypeGraph.lean:143`) — graph schema has no inline cycles
   - source: `Solidity.TypeGraph.Path.read_save` (Solidity.Semantics.RecursiveStorage.Paths, `Solidity/Semantics/RecursiveStorage/Paths.lean:107`) — graph storage read-after-write
-  - evm: `Solidity.TypeGraph.Legacy.KeyPath.observe_encode` (Solidity.Semantics.RecursiveStorage.Legacy, `Solidity/Semantics/RecursiveStorage/Legacy.lean:158`) — legacy layout encoding observationally faithful
+  - source: `Solidity.TypeGraph.Legacy.KeyPath.observe_encode` (Solidity.Semantics.RecursiveStorage.Legacy, `Solidity/Semantics/RecursiveStorage/Legacy.lean:158`) — legacy layout encoding observationally faithful
   - source: `Solidity.TypeGraph.CopyPermit.no_mapping` (Solidity.Semantics.RecursiveStorage.Admission, `Solidity/Semantics/RecursiveStorage/Admission.lean:48`) — copy permits exclude mappings
-  - no existing anchor: admission, lowering, backend, theorem
+  - no existing anchor: admission, lowering, backend, evm, theorem
   - missing: solc_import, scoped syntax, State, heap and calculus reject recursive structs
   - missing: Graph foundation not connected to the ordinary pipeline or compiler
 
@@ -1914,7 +2004,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
   - lowering: `Solidity.dynBytesTy` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:541`) — string shares the byte-array representation
   - admission: `Solidity.Frontend.sourceType` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:269`) — imports string-typed source declarations
   - no existing anchor: source, backend, evm, theorem
-  - missing: string storage copies refused by the compiler (R17, string[] example)
+  - missing: string storage copies refused by the compiler (R17, string\[\] example)
   - missing: string-keyed mappings route through hashing refused at valIn (R10/R14)
 
 - **`structTypes`** (model/partial)
@@ -1949,6 +2039,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 - **`fixedPoint`** (upstream/notApplicable) — G00 Q6 (full fixed-point support beyond pinned solc); the manifest still scopes it `upstream` until the g00-manifest-rev change lands
   - no existing anchor: source, admission, lowering, backend, evm, theorem
   - missing: no lexer, type, semantics, lowering or compiler support (decision D07)
+  - missing: until the manifest change lands, G15 must still refuse it as `upstream`
   - missing: no reference semantics beyond solc 0.8.38's acceptance boundary
   - missing: manifest scope is still `upstream`
 
@@ -1964,7 +2055,7 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 | `(bool ok,) = a.call{value:v}("")` vs `a.call(data)` | emptyDataValueCall, callOptions, valueOption | lowLevelCall, rawReturndata | source: S00 S04.03; admission: G10 G15; lowering: G22.05; backend: G43; evm: G47 | R06 |
 | literal `layout at` base vs physical layout | logicalStorageBase | storageLayout | source: S04.01; admission: G09 G15; backend: G27.05 | R34 |
 | `T transient x` vs physical transient slots | transientState | transientLayout | source: S04.03; admission: G15; lowering: G23; backend: G39; evm: G46.03 |  |
-| loops/recursion vs gas/stack exhaustion | termination, recursiveCalls | machineResources | source: S03.04; backend: G36.03 G37.02; evm: G46.06 G47; theorem: G49.03 | R08, R27, R38, R39 |
+| loops/recursion vs gas/stack exhaustion | termination, recursiveCalls | machineResources | source: S03.04; backend: G36.03 G37.02; evm: G46.06 G47; theorem: G49.03; interface: G01 G06; admission: G15 | R08, R27, R38, R39 |
 | `send`/`transfer` vs exact stipend | sendTransfer | gasOption, machineResources | source: S04.03; admission: G15; lowering: G22.05; backend: G43; evm: G47 | R32, R33 |
 | `type(C).creationCode`/`runtimeCode` vs `address.code` | creationCode, runtimeCode | addressCode, addressCodehash | source: S04.02; admission: G15; lowering: G23; backend: G44.02 |  |
 | `block.timestamp` vs other `block.*`/`tx.*` members and hashes | blockTimestamp | blockCoinbase, blockDifficulty, blockPrevrandao, blockNumber, blockGaslimit, blockChainid, blockBasefee, blockBlobbasefee, blockSlotnum, txOrigin, txGasprice, blockhashBuiltin, blobhashBuiltin | source: S04.02; admission: G10 G15; lowering: G23 |  |
@@ -1973,112 +2064,158 @@ Stages with no owner, by recorded reason: `identifiers` evm: names are resolved 
 | `catch (bytes memory d)` vs raw low-level return bytes | catchClauses, revertPayloads | rawReturndata | source: S04.02; admission: G15; lowering: G21; backend: G38 G41 | R07, R37 |
 | `view` external call vs low-level `staticcall` | staticCallRestriction, externalTypedCalls | lowLevelStaticcall | source: S03.03; admission: G15; lowering: G22.01; backend: G42.02 G42.05 |  |
 | linked library call vs `delegatecall` | externalLibraryCalls | delegatecall | source: S03.03; admission: G15; lowering: G22.04; backend: G42.04; evm: G47 |  |
-| mixed core/memory programs | memoryLocation, storageLocation, whileStatement, internalCalls, sendTransfer, assertBuiltin | — | backend: G24 G36.02 G37.01 G38 G43; theorem: G49.01 G49.03 | R01, R02, R03, R29 |
-| whole contracts: dispatch, ABI entry, deployment and sessions | contracts, functions, abiEntryValidation, constructors | — | backend: G40 G41 G44.01; evm: G47; theorem: G49.02 G50.01 G50.02 | R04, R05, R40, R41 |
-| loops whose bodies push, pop, delete or pay | whileStatement, forStatement, arrayPush, arrayPop, deleteExpression, sendTransfer | — | lowering: G19; backend: G30 G36.02 G36.03 G43 | R21, R22, R24 |
-| recursion with memory frames and reference results | recursiveCalls, memoryLocation, returnStatement, internalFunctionTypes | — | source: S03.03; backend: G32 G37.01 G37.02 G37.03; evm: G46.02 | R08, R09, R26, R30 |
-| storage aliases across pop/delete and pushes | storageAliasing, danglingReferences, arrayPop, arrayPushReference, deleteExpression | — | source: S04.01; lowering: G18.05; backend: G28 G30 | R16, R18, R36 |
-| runtime-length storage copies with nested mappings | storageCopy, dynamicArrays, stringType, mappings, deleteMappingTails | — | lowering: G18.05; backend: G29.01 G29.02 G29.03 | R15, R17 |
-| cross-location copies of nested aggregates | referenceCopyRules, memoryLocation, calldataLocation, storageLocation, structTypes, fixedArrays | — | lowering: G18.05 G18.06; backend: G35.01 G35.02 G35.03 G35.04 G35.05 G35.06; evm: G46.02 | R19, R20, R28, R30, R31 |
-| hashed mapping keys and dynamic-array bases under the per-run hash premise | mappings, keccakBuiltin, stringType, dynamicBytesType, dynamicArrays | — | backend: G27.02 G27.05 G31; evm: G46.03 G46.05 | R10, R14, R15, R34, R35 |
-| checked/unchecked arithmetic at every width, sign and operator | checkedArithmetic, uncheckedArithmetic, integerTypes, bitwise, shifts, compoundAssignment, panicCodes | — | lowering: G16; backend: G25; evm: G46.01 | R12, R13 |
-| modular and hash builtins on the core path | addmodBuiltin, mulmodBuiltin, keccakBuiltin, sha256Builtin, ripemd160Builtin | — | backend: G25 G31; evm: G46.05 | R10 |
-| own balance and payments | addressBalance, sendTransfer, msgValue, nonpayableEntry | — | source: S04.03 S04.04; lowering: G22.05; backend: G31 G43; evm: G46.04 G47 | R11, R32, R33 |
-| try/catch over custom errors, panics and revert payloads | tryStatement, catchClauses, errorDeclarations, revertPayloads, panicCodes | — | lowering: G21 G22.01; backend: G38 G41 G42.02 G42.06; evm: G47 | R07, R37 |
-| transient state through self-calls, callbacks and rollback | transientState, externalSelfCalls, callbackSemantics, rollback | — | source: S04.03; lowering: G23; backend: G39 G42.01 G42.03; evm: G46.03 G47 |  |
-| divergence and finite-prefix correspondence | termination, whileStatement, recursiveCalls | — | source: S03.04; backend: G36.03; evm: G47; theorem: G49.03 G50.02 | R38, R39, R40 |
-| memory allocation with capacity and `Panic(0x41)` | newMemory, dynamicArrays, panicCodes | — | source: S02 S04.01; backend: G33 G38; evm: G46.02 | R24, R25 |
-| calls with storage/memory reference arguments and tuple returns | internalCalls, storageLocation, memoryLocation, tupleTypes, extensionCalls | — | lowering: G17 G20; backend: G37.01 G37.03 | R09 |
-| modifiers with repeated placeholders, early returns and constructors | modifiers, modifierPlaceholder, returnStatement, constructors, inheritance | — | source: S03.02; lowering: G19; backend: G36.01 G44.01 |  |
-| executable bytecode for every lowered program | contracts, functions, arithmetic, whileStatement | — | backend: G45.01 G45.02 G45.03 G45.04 G45.05 G45.06; evm: G46.06; theorem: G49.02 | R05 |
-| structured control realized as EVM jumps | whileStatement, ifStatement, breakStatement | — | backend: G45.03; evm: G46.01 G46.06 | R23 |
-| abstract machine vs pinned EVM resources | termination, addressTypes | — | evm: G46.04 G46.06 G47 | R27 |
-| getters and ABI of nested aggregates | publicGetters, mappings, structTypes, abiEncode, abiDecode | — | lowering: G18.06 G20 G21; backend: G40 G41; evm: G46.02 |  |
-| payable creation and failed-constructor rollback | newContract, creationTry, valueOption, constructorLifetime, rollback | — | source: S04.04; lowering: G22.03; backend: G43 G44.03; evm: G47; theorem: G50.01 |  |
+| mixed core/memory programs | memoryLocation, storageLocation, whileStatement, internalCalls, sendTransfer, assertBuiltin | — | backend: G24 G36.02 G37.01 G37.02 G37.03 G38 G43; theorem: G48 G49.01 G49.03; admission: G15 | R01, R02, R03, R29 |
+| whole contracts: dispatch, ABI entry, deployment and sessions | contracts, functions, abiEntryValidation, constructors | — | backend: G40 G41 G44.01; evm: G46.03 G46.04 G46.05 G47; theorem: G49.02 G50.01 G50.02; admission: G15 | R04, R05, R40, R41 |
+| loops whose bodies push, pop, delete or pay | whileStatement, forStatement, arrayPush, arrayPop, deleteExpression, sendTransfer | — | lowering: G19; backend: G24 G30 G36.02 G36.03 G43; admission: G15 | R21, R22, R24 |
+| recursion with memory frames and reference results | recursiveCalls, memoryLocation, returnStatement, internalFunctionTypes | — | source: S03.03; backend: G32 G37.01 G37.02 G37.03 G45.02; evm: G46.02; admission: G15 | R08, R09, R26, R30 |
+| storage aliases across pop/delete and pushes | storageAliasing, danglingReferences, arrayPop, arrayPushReference, deleteExpression | — | source: S04.01; lowering: G18.05; backend: G27.03 G28 G30 G35.02; admission: G15 | R16, R18, R36 |
+| runtime-length storage copies with nested mappings | storageCopy, dynamicArrays, stringType, mappings, deleteMappingTails | — | lowering: G18.05; backend: G29.01 G29.02 G29.03; admission: G15 | R15, R17 |
+| cross-location copies of nested aggregates | referenceCopyRules, memoryLocation, calldataLocation, storageLocation, structTypes, fixedArrays | — | lowering: G18.05 G18.06; backend: G35.01 G35.02 G35.03 G35.04 G35.05 G35.06; evm: G46.02; admission: G15 | R19, R20, R28, R30, R31 |
+| hashed mapping keys and dynamic-array bases under the per-run hash premise | mappings, keccakBuiltin, stringType, dynamicBytesType, dynamicArrays | — | lowering: G18.01; backend: G27.02 G27.05 G31; evm: G46.03 G46.05; admission: G15 | R10, R14, R15, R34, R35 |
+| checked/unchecked arithmetic at every width, sign and operator | checkedArithmetic, uncheckedArithmetic, integerTypes, bitwise, shifts, compoundAssignment, panicCodes | — | lowering: G16; backend: G25 G27.01; evm: G46.01; admission: G15 | R12, R13 |
+| modular and hash builtins on the core path | addmodBuiltin, mulmodBuiltin, keccakBuiltin, sha256Builtin, ripemd160Builtin | — | backend: G25 G31; evm: G46.05; admission: G15 | R10 |
+| own balance and payments | addressBalance, sendTransfer, msgValue, nonpayableEntry | — | source: S04.03 S04.04; lowering: G22.05; backend: G24 G31 G36.03 G42.03 G43; evm: G46.04 G47; admission: G15 | R11, R32, R33 |
+| try/catch over custom errors, panics and revert payloads | tryStatement, catchClauses, errorDeclarations, revertPayloads, panicCodes | — | lowering: G21 G22.01; backend: G38 G41 G42.02 G42.03 G42.06; evm: G47; admission: G15 | R07, R37 |
+| transient state through self-calls, callbacks and rollback | transientState, externalSelfCalls, callbackSemantics, rollback | — | source: S04.03; lowering: G23; backend: G39 G42.01 G42.03; evm: G46.03 G47; admission: G15 |  |
+| divergence and finite-prefix correspondence | termination, whileStatement, recursiveCalls | — | source: S03.04; backend: G36.03; evm: G47; theorem: G49.03 G50.02; admission: G15 | R38, R39, R40 |
+| memory allocation with capacity and `Panic(0x41)` | newMemory, dynamicArrays, panicCodes | — | source: S02 S04.01; backend: G33 G38; evm: G46.02; admission: G15 | R24, R25 |
+| calls with storage/memory reference arguments and tuple returns | internalCalls, storageLocation, memoryLocation, tupleTypes, extensionCalls | — | lowering: G17 G20; backend: G37.01 G37.03; admission: G15 | R09 |
+| modifiers with repeated placeholders, early returns and constructors | modifiers, modifierPlaceholder, returnStatement, constructors, inheritance | — | source: S03.02; lowering: G19; backend: G36.01 G44.01; admission: G15 |  |
+| executable bytecode for every lowered program | contracts, functions, arithmetic, whileStatement | — | backend: G45.01 G45.02 G45.03 G45.04 G45.05 G45.06; evm: G46.01 G46.02 G46.03 G46.04 G46.05 G46.06; theorem: G49.02; admission: G15 | R05 |
+| recursive type graphs across storage paths, copies and ABI | recursiveTypes, structTypes, mappings, dynamicArrays, storageCopy, abiEncode | — | source: S04.01; lowering: G18.01 G18.06; backend: G27.04 G35.05; evm: G46.03; admission: G15 |  |
+| fixed-point values in arithmetic, storage, ABI and conversions | fixedPoint, explicitConversions, storageLocation, abiEncode, abiDecode | — | source: S02 S04.01 S04.02; lowering: G16 G21; backend: G25 G27.01 G40 G41; evm: G46.01 G46.02; admission: G15 |  |
+| structured control realized as EVM jumps | whileStatement, ifStatement, breakStatement | — | backend: G45.03; evm: G46.01 G46.06; admission: G15 | R23 |
+| abstract machine vs pinned EVM resources | termination, addressTypes | — | evm: G46.04 G46.06 G47; interface: G01 G06; admission: G15 | R27 |
+| getters and ABI of nested aggregates | publicGetters, mappings, structTypes, abiEncode, abiDecode | — | lowering: G18.06 G20 G21; backend: G40 G41; evm: G46.02; admission: G15 |  |
+| payable creation and failed-constructor rollback | newContract, creationTry, valueOption, constructorLifetime, rollback | — | source: S04.04; lowering: G22.03; backend: G43 G44.03; evm: G47; theorem: G50.01; admission: G15 |  |
 
 - **`f{value:v,gas:g}(…)`**
+  - through its rows: evm: G47; theorem: G48 G49.02 G50.02 G51.02
   - missing: refuse exactly the `gas` part while `{value:}` on typed calls is admitted; `ExtCall` has no value field
 - **`new C{salt:s,value:v}(…)`**
+  - through its rows: evm: G47; theorem: G48 G49.02 G50.01 G50.02 G51.02
   - missing: salted creation refused while `new C{value:}` is admitted; no compiled creation at all
 - **byte-oriented `fallback(bytes calldata) returns (bytes memory)`**
+  - through its rows: evm: G46.02 G47; theorem: G48 G49.02 G50.02
   - missing: the parameterless fallback is admitted, the byte-oriented form refused, by a checked classification
 - **`emit E(args)` under a log-observing property**
+  - through its rows: evm: G46.02
   - missing: no erasure-soundness theorem: argument effects kept, logs dropped, log-observing specs refused
 - **`assembly { revert(add(d,32), mload(d)) }` vs any other assembly**
+  - through its rows: theorem: G48 G49.01 G49.02 G49.03 G51.01
   - missing: the 20 Yul symbols of the idiom have no wave-1 parser (G00 gap 5; owned here by G11)
   - missing: byte-level `revert(ptr, len)` needs byte memory (G04 R31)
 - **`(bool ok,) = a.call{value:v}("")` vs `a.call(data)`**
+  - through its rows: theorem: G48 G49.02 G50.02 G51.02
   - missing: empty-data value call is not compiled (R06); arbitrary data must be refused exactly
 - **literal `layout at` base vs physical layout**
+  - through its rows: lowering: G18.02; evm: G46.03; theorem: G48 G49.01 G49.02 G51.01
   - missing: no theorem relating a logical base to the internal representation
 - **`T transient x` vs physical transient slots**
+  - through its rows: theorem: G48 G49.02 G50.02 G51.01
   - missing: no compiled transient state; TLOAD/TSTORE bridge absent
 - **loops/recursion vs gas/stack exhaustion**
+  - through its rows: lowering: G19 G20
   - source: `Solidity.recDepth` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:469`) — fixed source recursion depth
   - missing: resource exhaustion must be an allowed failure (D09), not an observation; no resource-indexed theorem
 - **`send`/`transfer` vs exact stipend**
+  - through its rows: theorem: G48 G49.02 G50.02 G51.02
   - missing: stipend-dependent recipient behaviour is over-approximated (D15, D18); `send` not compiled
 - **`type(C).creationCode`/`runtimeCode` vs `address.code`**
+  - through its rows: evm: G46.02 G47; theorem: G48 G49.02 G50.01
   - missing: the artifact-table parameter (D06) is not in the contracts; no code observation of deployed accounts
 - **`block.timestamp` vs other `block.*`/`tx.*` members and hashes**
+  - through its rows: backend: G31; evm: G46.04; theorem: G48 G49.02 G50.02
   - missing: refusal is by solc member names; the checked frontend must classify each member
 - **`msg.sender`/`msg.value` vs `msg.data`/`msg.sig`**
+  - through its rows: backend: G31 G43; evm: G46.04 G47; theorem: G48 G49.02 G50.02
   - missing: exact member classification by the checked frontend
 - **`msg.data[4:]` (slice of raw calldata)**
+  - through its rows: backend: G35.03 G40; evm: G46.01 G46.02; theorem: G48 G49.01 G49.02 G49.03 G51.01
   - missing: typed calldata slices admitted, slices of raw calldata refused, by checked classification
 - **`catch (bytes memory d)` vs raw low-level return bytes**
+  - through its rows: evm: G46.02 G47; theorem: G48 G49.02 G49.03 G50.02 G51.02
   - missing: caught revert bytes are not compiled (R07); returndata of other calls refused
 - **`view` external call vs low-level `staticcall`**
+  - through its rows: evm: G47; theorem: G48 G49.02 G50.02 G51.02
   - missing: no static-context enforcement for arbitrary callees
 - **linked library call vs `delegatecall`**
+  - through its rows: theorem: G48 G49.02 G50.02 G51.02
   - missing: the library call is itself a DELEGATECALL in the bytecode: the bridge must admit exactly the compiler-emitted linked form
 - **mixed core/memory programs**
+  - through its rows: source: S01 S02 S03.01 S03.03 S04.01 S04.02 S04.03; lowering: G18.02 G18.03 G19 G20 G21 G22.02 G22.05; evm: G46.01 G46.02 G46.03 G46.06 G47
   - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:86`) — unified entry, one path per program
   - missing: one compiler per whole program; a core prefix cannot feed a memory suffix
 - **whole contracts: dispatch, ABI entry, deployment and sessions**
+  - through its rows: source: S00 S01 S03.01 S03.02 S03.03 S04.02 S04.04; lowering: G19 G20 G21 G22.03
   - missing: the compiler theorems relate one program from a represented state; no contract-level statement
 - **loops whose bodies push, pop, delete or pay**
+  - through its rows: source: S02 S03.01 S03.03 S04.01 S04.03; evm: G46.01 G46.02 G46.03 G46.06 G47; theorem: G48 G49.01 G49.02 G49.03 G50.02 G51.01 G51.02
   - backend: `Solidity.Evm.Examples.loop_push_rejected` (Solidity.Evm.Examples, `Solidity/Evm/Examples.lean:386`) — kernel-checked rejection of a pushing loop
   - missing: core loop bodies must not push/pay/shrink; no loops on the memory path
 - **recursion with memory frames and reference results**
+  - through its rows: lowering: G18.03 G19 G20; theorem: G48 G49.01 G49.02 G49.03 G51.01
   - missing: inline calls, value arguments only, fixed source depth; frames in memory per D10
 - **storage aliases across pop/delete and pushes**
+  - through its rows: evm: G46.02 G46.03; theorem: G48 G49.01 G49.02 G49.03 G51.01
   - backend: `Solidity.Evm.Examples.rejected` (Solidity.Evm.Examples, `Solidity/Evm/Examples.lean:354`) — kernel-checked rejections incl. dangling alias
   - missing: fragile aliases forgotten at a shrink; `T storage p = arr.push()` refused
 - **runtime-length storage copies with nested mappings**
+  - through its rows: source: S00 S01 S04.01; evm: G46.02 G46.03 G46.05; theorem: G48 G49.01 G49.02 G49.03 G51.01
   - missing: copies only for static types; tail clearing and mapping preservation unproved for runtime lengths
 - **cross-location copies of nested aggregates**
+  - through its rows: source: S00 S01 S04.01; theorem: G48 G49.02 G49.03 G51.01
   - missing: memory path: primitive-member storage struct → memory only
 - **hashed mapping keys and dynamic-array bases under the per-run hash premise**
+  - through its rows: source: S00 S01 S04.01 S04.02; theorem: G48 G49.01 G49.02 G49.03 G51.01
   - missing: uint keys only; symbolic slots with global injectivity; KECCAK256 from the stack
 - **checked/unchecked arithmetic at every width, sign and operator**
+  - through its rows: source: S00 S01 S02 S04.02; theorem: G48 G49.01 G49.02 G49.03 G51.01
   - missing: signed bitwise/arithmetic `>>` refused by the compiler; width rests on lowering
 - **modular and hash builtins on the core path**
+  - through its rows: source: S02 S04.02; lowering: G16 G23; theorem: G48 G49.01 G49.02 G51.01
   - missing: `valIn` refuses `modular` and `hash` values
 - **own balance and payments**
+  - through its rows: theorem: G48 G49.02 G50.02 G51.02
   - backend: `Solidity.Evm.compile_net` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:1157`) — net payments on machine success
   - missing: `address(this).balance` refused; payment asymmetry; recipient code not run
 - **try/catch over custom errors, panics and revert payloads**
+  - through its rows: source: S00 S01 S03.03 S04.02 S04.03; theorem: G48 G49.02 G49.03 G50.01 G50.02 G51.02
   - missing: `tryCall`/`revertData`/`catchData` out of the compiler; revert bytes erased
 - **transient state through self-calls, callbacks and rollback**
+  - through its rows: theorem: G48 G49.02 G50.02 G51.01 G51.02
   - source: `Solidity.ContractWorld.World.resetTransient_persistent` (Solidity.Semantics.TransientWorld, `Solidity/Semantics/TransientWorld.lean:107`) — transaction reset keeps persistent storage
   - missing: no compiled transient state; sharing across frames needs G42 (deferred check of G39)
 - **divergence and finite-prefix correspondence**
-  - evm: `Solidity.Evm.compile_terminates_iff` (SolidityBridge.Evm, `Bridge/SolidityBridge/Evm.lean:171`) — successful trace iff source success (pays = false)
+  - through its rows: lowering: G19 G20
+  - backend: `Solidity.Evm.compile_terminates_iff` (SolidityBridge.Evm, `Bridge/SolidityBridge/Evm.lean:171`) — successful trace iff source success (pays = false)
   - missing: divergence matched classically to `.fault`; the Bridge LTS relates successful boundaries only
 - **memory allocation with capacity and `Panic(0x41)`**
+  - through its rows: lowering: G18.02 G18.03 G18.04 G18.05 G21; theorem: G48 G49.01 G49.02 G49.03 G51.01
   - missing: capacity is a theorem premise; no `0x41` panic at `2^64` lengths or memory exhaustion
 - **calls with storage/memory reference arguments and tuple returns**
+  - through its rows: source: S00 S01 S03.03 S04.01; evm: G46.01 G46.02 G46.03; theorem: G48 G49.01 G49.02 G49.03 G51.01
   - missing: value arguments and `.none`/`.val` returns only; `callReceiver` refused
 - **modifiers with repeated placeholders, early returns and constructors**
+  - through its rows: evm: G46.01 G46.02 G47; theorem: G48 G49.01 G49.02 G49.03 G50.01 G51.01
   - missing: no theorem for `wrapMods`/`lowerReturns`; via-IR re-initialisation at each `_` not followed
 - **executable bytecode for every lowered program**
+  - through its rows: source: S00 S01 S02 S03.01 S03.03; lowering: G16 G19 G20
   - missing: the target is the word-level `Machine` with macro instructions; no instruction selection, assembler or byte encoding
+- **recursive type graphs across storage paths, copies and ABI**
+  - through its rows: theorem: G48 G49.01 G49.02 G49.03 G51.01
+  - missing: the graph foundation (`TypeGraph`, `RecursiveStorage`) is not connected to import, `State` or the compiler; recursive ABI shapes are refused
+- **fixed-point values in arithmetic, storage, ABI and conversions**
+  - through its rows: theorem: G48 G49.01 G49.02 G49.03 G51.01
+  - missing: no fixed-point support at any stage (D07)
 - **structured control realized as EVM jumps**
+  - through its rows: source: S03.01; lowering: G19; theorem: G48 G49.01 G49.02 G49.03 G51.01 G51.02
   - missing: structured `LOOP` and relative jumps; `checked_exp_helper` unrolled 255 times
 - **abstract machine vs pinned EVM resources**
+  - through its rows: source: S00 S01 S03.04; lowering: G16 G19; backend: G25 G36.03 G37.02 G42.02 G42.05; theorem: G48 G49.02 G49.03 G50.02 G51.01 G51.02
   - missing: no gas, no stack limit, 256-bit addresses, `CALL` without forwarded gas
 - **getters and ABI of nested aggregates**
+  - through its rows: source: S00 S01 S03.03 S04.01 S04.02; theorem: G48 G49.02 G49.03 G50.01 G51.01
   - missing: enum/bytes/nested aggregate getter results refused; no ABI in the compiler theorems
 - **payable creation and failed-constructor rollback**
   - missing: creation through ContractWorld fragments only; no compiled initcode
@@ -2153,28 +2290,30 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
 
 ### Decision-driven obligations
 
+`in-flight` names the parallel lanes (sibling sessions of this batch or Codex lanes) that change the row; they are not repository paths.
+
 | ID | obligation | decisions | owners (stage: packages) | in-flight |
 |---|---|---|---|---|
 | D01 | Precise refusal of the 30 confirmed exclusions | G00 Q1 — the 30 recorded exclusions | source: S00; admission: G07 G08 G11 G15; theorem: G48 G49.03 | — |
 | D02 | Approved abstract premises: opaque hashes and `ecrecover` as fixed parameters, `msg`/`block`/`this`/balance as quantified inputs; replace `worldAssumptions` and the payment boolean; no-callback reading as a proved special case | G00 Q2 — premises of the 23 `abstract` rows; Readings | source: S04.02 S04.03; lowering: G22.02 G23; backend: G31 G43; evm: G46.04 G46.05 G47; theorem: G49.02 G51.02 | diamond-payments; readonly-external |
-| D03 | Osaka fork pin for the pinned EVM semantics and the compiled bytecode | G00 Q3 — EVM fork; Pins (G00, G05, G06) | evm: G06 G46.06 G47; theorem: G49.02 G54.01 | g06-osaka-repin; g06-evm-interface |
-| D04 | Public theorem over all eight EvalOrder combinations | G00 Q4 — settings; Pins (G00, G05, G06) | source: S02 S03.01 S03.03; admission: G05 G15; lowering: G16 G17 G19; backend: G26; theorem: G49.02 G49.03 | g05-frontend |
-| D05 | Frozen profile solc 0.8.38; 0.8.34 fixtures only as SolKey compatibility checks | G00 Q4 — settings; Pins (G00, G05, G06) | admission: G05 G15; theorem: G53 G54.02 | g05-frontend |
-| D06 | Artifact table: `creationCode`/`runtimeCode` read from G01's whole-input `Artifact` table, a source-semantics parameter | G00 Q5 — `creationCode`/`runtimeCode`; Contracts (G01) | source: S04.02; lowering: G23; backend: G44.02; evm: G47; theorem: G01 G07 G49.02 G50.01 | g01-contracts-rev |
+| D03 | Osaka fork pin for the pinned EVM semantics and the compiled bytecode | G00 Q3 — EVM fork; Pins (G00, G05, G06) | evm: G06 G46.06 G47; theorem: G49.02; validation: G54.01 | g06-osaka-repin; g06-evm-interface |
+| D04 | Public theorem over all eight EvalOrder combinations | G00 Q4 — settings; Pins (G00, G05, G06) | source: S02 S03.01 S03.02 S03.03; admission: G05 G15; lowering: G16 G17 G19; backend: G26; theorem: G49.02 G49.03 | g05-frontend |
+| D05 | Frozen profile solc 0.8.38; 0.8.34 fixtures only as SolKey compatibility checks | G00 Q4 — settings; Pins (G00, G05, G06) | admission: G05 G15; theorem: G48; validation: G53 G54.02 | g05-frontend |
+| D06 | Artifact table: `creationCode`/`runtimeCode` read from G01's whole-input `Artifact` table, a source-semantics parameter | G00 Q5 — `creationCode`/`runtimeCode`; Contracts (G01) | source: S04.02; lowering: G23; backend: G44.02; evm: G47; theorem: G49.02 G50.01; interface: G01 G07 | g01-contracts-rev |
 | D07 | Full fixed-point types beyond pinned solc's acceptance boundary | G00 Q6 — fixed-point types; Manifest | source: S00 S01 S02; admission: G08 G09 G13 G15; lowering: G16; backend: G25; evm: G46.01; theorem: G49.02 G49.03 | g00-manifest-rev; fixed-point-semantics |
 | D08 | Idealized source resources: unbounded fuel and recursion | G01 Q1 — source resources | source: S03.03 S03.04; lowering: G20; backend: G37.02; theorem: G49.03 | — |
-| D09 | Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized | G01 Q2 — fixed EVM limits; Resources in the contracts; Contracts (G01) | source: S03.04 S04.04; evm: G06 G46.06 G47; theorem: G01 G49.03 G50.02 | g01-contracts-rev |
+| D09 | Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized | G01 Q2 — fixed EVM limits; Resources in the contracts; Contracts (G01) | source: S03.04 S04.04; backend: G44.02; evm: G06 G46.06 G47; theorem: G49.03 G50.02; interface: G01 | g01-contracts-rev |
 | D10 | Memory frames for recursion: internal calls keep their frames in memory, depth bounded by gas only | G01 Q2 — fixed EVM limits | backend: G32 G37.01 G37.02 G45.02; evm: G46.02 G46.06; theorem: G49.03 | memory-internal-calls |
-| D11 | Per-run hash premise and bound: the preimages hashed by an execution prefix do not collide, plus a random-oracle collision bound (about q²/2²⁵⁷) | G01 Q3 / G04 Q1 — hash collisions; Contracts (G01) | source: S04.02; backend: G27.05 G31; evm: G46.03 G46.05; theorem: G01 G49.02 G50.02 | hash-collision-bound; g01-contracts-rev; evm-storage-slots |
+| D11 | Per-run hash premise and bound: the preimages hashed by an execution prefix do not collide, plus a random-oracle collision bound (about q²/2²⁵⁷) | G01 Q3 / G04 Q1 — hash collisions; Contracts (G01) | source: S04.02; backend: G27.05 G31; evm: G46.03 G46.05; theorem: G49.02 G50.02; interface: G01 | hash-collision-bound; g01-contracts-rev; evm-storage-slots |
 | D12 | History-dependent callee strategies with unbounded reentrancy; address 0 has no code | G01 Q4 — environment | source: S03.03 S04.03; lowering: G22.02; backend: G42.03; evm: G47; theorem: G50.02 G51.02 | — |
-| D13 | Observation: the full `Event` list with exact ABI and revert bytes, `Panic` codes included | G01 Q5 — observation | source: S04.02; lowering: G21; backend: G38 G41; evm: G46.02 G47; theorem: G49.02 G50.02 | revert-outcome-specs |
-| D14 | `decode : EvmWorld → Option IntrinsicWorld` exported by the public theorem | G01 Q6 — state transfer; Contracts (G01) | backend: G24; evm: G46.02 G46.03 G47; theorem: G01 G49.02 G50.02 | g01-contracts-rev |
+| D13 | Observation: the full `Event` list with exact ABI and revert bytes, `Panic` codes included | G01 Q5 — observation | source: S04.02; lowering: G21; backend: G38 G41 G42.02 G44.03; evm: G46.02 G47; theorem: G49.02 G50.02 | revert-outcome-specs |
+| D14 | `decode : EvmWorld → Option IntrinsicWorld` exported by the public theorem | G01 Q6 — state transfer; Contracts (G01) | backend: G24 G27.05; evm: G46.02 G46.03 G47; theorem: G49.02 G50.02; interface: G01 | g01-contracts-rev |
 | D15 | Gas over-approximation: callee answers range over all outcomes regardless of forwarded gas | G01 Q7 — gas and the environment | source: S04.03; backend: G42.02; evm: G47; theorem: G50.02 | — |
 | D16 | System boundary: the whole input, every contract and linked library, is compiled | G01 Q8 — system boundary; Pins (G00, G05, G06) | admission: G05 G12 G15; lowering: G22.04; backend: G42.04 G44.02; evm: G47; theorem: G49.02 G50.01 | g05-frontend |
 | D17 | Storage aliases after `pop`/`delete` in profile, with solc's logical slot behaviour | G04 Q2 — storage aliases after `pop`/`delete`; Readings | source: S04.01; lowering: G18.05; backend: G28 G30; theorem: G49.02 | — |
-| D18 | Payment acceptance: any outcome for untyped recipients, history-dependent; typed recipients run their own code | G04 Q3 — payment acceptance | source: S04.03; lowering: G22.02 G22.05; backend: G43; evm: G47; theorem: G50.02 | diamond-payments |
-| D19 | Frame failure semantics: any external call frame may fail with a revert its caller sees (1024 depth, forwarded-gas exhaustion in callbacks) | Follow-up — nested-frame failures; Resources in the contracts | source: S03.03 S04.03; lowering: G22.01 G22.02; backend: G42.02 G42.06; evm: G47; theorem: G50.02 | — |
-| D20 | Transaction failure semantics: any transaction may revert from gas exhaustion and the session continues | Follow-up — block gas limit; Resources in the contracts | source: S04.04; evm: G47; theorem: G01 G50.02 | g01-contracts-rev |
+| D18 | Payment acceptance: any outcome for untyped recipients, history-dependent; typed recipients run their own code | G04 Q3 — payment acceptance | source: S04.03; lowering: G22.02 G22.05; backend: G24 G43; evm: G47; theorem: G50.02 | diamond-payments |
+| D19 | Frame failure semantics: any external call frame may fail with a revert its caller sees (1024 depth, forwarded-gas exhaustion in callbacks) | Follow-up — nested-frame failures; Resources in the contracts | source: S03.03 S04.03; lowering: G22.01 G22.02; backend: G42.02 G42.03 G42.06; evm: G47; theorem: G50.02 | — |
+| D20 | Transaction failure semantics: any transaction may revert from gas exhaustion and the session continues | Follow-up — block gas limit; Resources in the contracts | source: S04.04; evm: G47; theorem: G50.02; interface: G01 | g01-contracts-rev |
 | D21 | Sender funds: `msg.value` bounded by the sender's ledger balance; unaffordable transactions never execute | Follow-up — sender funds | source: S04.04; backend: G43; evm: G46.04 G47; theorem: G50.02 | — |
 | D22 | Precompile addresses behave as their Osaka definitions, never as environment code | Follow-up — precompile addresses | source: S04.03; backend: G42.02; evm: G46.05 G47; theorem: G50.02 | — |
 
@@ -2187,7 +2326,7 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: G07 controls for each excluded family (malformed/excluded source rejected) are not written
 - **D02 Approved abstract premises: opaque hashes and `ecrecover` as fixed parameters, `msg`/`block`/`this`/balance as quantified inputs; replace `worldAssumptions` and the payment boolean; no-callback reading as a proved special case**
   - theorem: `Solidity.Main.noCallback_iff` (Solidity.Theorems, `Solidity/Theorems.lean:239`) — no-callback validity agrees for callback-free formulas
-  - evm: `Solidity.Bridge.Adversary.holdsC_iff_all_policies` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:146`) — callback modality equals quantification over adversary policies
+  - theorem: `Solidity.Bridge.Adversary.holdsC_iff_all_policies` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:146`) — callback modality equals quantification over adversary policies
   - missing: the payment-acceptance boolean (`Machine.accepts`, tied by `Sim.oracle`) is still a premise of the core theorem (G04 R33)
   - missing: `noCallback_iff` proves agreement only for formulas without callbacks; the no-callback reading is not derived from the history-dependent callee semantics
   - missing: `this` from deployment and the own balance following the ledger are not stated in any contract
@@ -2195,12 +2334,14 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: the vector scripts and the bridge are pinned to Cancun (g06-osaka-repin re-pins the scripts)
   - missing: no `EvmSpec` instance names a fork; G06's interface must fix Osaka
   - missing: reference-EVM versions unlocked (G00 disagreement 5)
+  - missing: the code-size idealization (D09) means the reference EVM used for vectors must be configured or patched to skip EIP-170/EIP-3860, or such vectors kept below the limits
 - **D04 Public theorem over all eight EvalOrder combinations**
   - lowering: `Solidity.EvalOrder` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:392`) — the three evaluation-order flags
   - lowering: `Solidity.EvalOrder.viaIR` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:400`) — the via-IR combination
   - missing: six of the eight `EvalOrder` flag combinations have no solc setting; the public theorem's settings type must express all eight
   - missing: lowering (`hoist`/`captureExpr`) is exercised for the legacy and via-IR orders only
   - missing: no source semantics parameterized by `EvalOrder` independently of the elaborator
+  - missing: solc cannot produce the six combinations without a setting, so G52's differential tests cover only two; the other six need source-level controls
 - **D05 Frozen profile solc 0.8.38; 0.8.34 fixtures only as SolKey compatibility checks**
   - missing: CI downloads only solc 0.8.34 (G00 pins); the frozen 0.8.38 pin must reach `Source.Provenance`
   - missing: the 0.8.34 fixture boundary is not recorded per fixture (G05)
@@ -2237,8 +2378,9 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: storage slots are symbolic terms that never collide (`Slot`, G04 R34) — global injectivity in the type
   - missing: `PublicCorrectness` has no per-run premise yet (g01-contracts-rev); the bound lemma is new (hash-collision-bound)
   - missing: the premise must quantify over the prefix's actual preimages, including mapping keys and dynamic-array bases
+  - missing: the core has no probability library: the bound must be stated combinatorially, as a count over oracle functions in the idealized random-oracle model the decision names, not about keccak itself
 - **D12 History-dependent callee strategies with unbounded reentrancy; address 0 has no code**
-  - evm: `Solidity.Bridge.Adversary.holdsC_iff_all_callees` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:250`) — callback modality over all callees at a payment boundary
+  - theorem: `Solidity.Bridge.Adversary.holdsC_iff_all_callees` (SolidityBridge.Adversary, `Bridge/SolidityBridge/Adversary.lean:250`) — callback modality over all callees at a payment boundary
   - source: `Solidity.TTx` (Solidity.Semantics.State, `Solidity/Semantics/State.lean:105`) — static response table to generalize
   - missing: `TTx.ext` is a static response table: identical calls read the same entry (G01 reuse map)
   - missing: the Bridge adversary covers a payment boundary only
@@ -2248,6 +2390,7 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - theorem: `Solidity.Roadmap.Outcome` (Solidity.Roadmap.Contracts, `Solidity/Roadmap/Contracts.lean:245`) — outcomes with bytes
   - source: `Solidity.Prog.withPanics` (Solidity.Syntax.Checked, `Solidity/Syntax/Checked.lean:587`) — solc panic codes in callees
   - missing: revert data is erased in the compiler theorem (G04 R37); `THalt` loses panic codes
+  - missing: the call, creation and callee-answer events of the `Event` list have no producer: typed calls and creation are not compiled (G42.02, G44.03)
   - missing: function results are not observed (G04 R41)
 - **D14 `decode : EvmWorld → Option IntrinsicWorld` exported by the public theorem**
   - backend: `Solidity.Evm.Sim` (Solidity.Evm.Sim, `Solidity/Evm/Sim.lean:574`) — core state relation (not a decoder)
@@ -2267,7 +2410,7 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
   - missing: source semantics of a dangling alias (logical slot reuse, not packing) is not defined
 - **D18 Payment acceptance: any outcome for untyped recipients, history-dependent; typed recipients run their own code**
   - missing: acceptance is the oracle `Machine.accepts` (G04 R33); recipient code is never run
-  - missing: the payment disjunct (iii) of `compile_correct` is a stale weakening (G04 R32)
+  - missing: the payment disjunct (iii) of `compile_correct` is a stale weakening (G04 R32); G24 owns the interim restatement of T1/T12/T13/T15 without it (G04 §3.1), G43 the payment relation
 - **D19 Frame failure semantics: any external call frame may fail with a revert its caller sees (1024 depth, forwarded-gas exhaustion in callbacks)**
   - source: `Solidity.ContractWorld.Step` (Solidity.Semantics.ContractWorld, `Solidity/Semantics/ContractWorld.lean:431`) — multi-instance world steps with rollback
   - missing: the source semantics lets typed calls fail only through the response table
@@ -2408,7 +2551,7 @@ Schedule findings (each with its resolution):
 | package | prerequisite | evidence | resolution |
 |---|---|---|---|
 | G19 | G16 | loop conditions, returns and modifier arguments are expressions | V11 (G19, G20) runs beside V09 (G16, G17): add V09 to V11's prerequisites, or let G19 prepare against the expression-lowering relation and pass its final check after V09 integrates |
-| G19 | G17 | loop conditions, returns and modifier arguments are expressions | as G19 ← G16 |
+| G19 | G17 | loop conditions, returns and modifier arguments are expressions | V11 runs beside V09: as G19 ← G16 |
 | G20 | G18.06 | getters and signatures of aggregate parameters lower through aggregate lowering | V11 runs beside V10 (G18): add V10 to V11's prerequisites, or prepare against the G18.06 interface with the final check after V10 |
 | G21 | G18.04 | ABI/calldata lowering of nested values uses the calldata aggregate relation | V12 runs beside V10: add V10 to V12's prerequisites, or prepare against the G18.04 relation with the final check after V10 |
 | G31 | G27.05 | hash builtins share the per-run hash premise of the storage representation (D11) | V17 runs beside V15: add V15 to V17's prerequisites so the per-run hash premise (D11) is shared, not duplicated |
@@ -2421,12 +2564,12 @@ Module hot spots: inversions and shared writes grouped by the module through whi
 
 | module | findings | packages | resolution |
 |---|---|---|---|
-| `Solidity.Evm.Compile` | 14 inversion | G06 G24 G26 G28 G29.01 G30 G32 G33 G34 G37.01 | the fragment checker `inFrag` that G24 replaces by typed certificates: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
+| `Solidity.Evm.Compile` | 14 inversion, 1 parallel-import | G06 G24 G26 G28 G29.01 G30 G32 G33 G34 G35.01 G37.01 | the fragment checker `inFrag` that G24 replaces by typed certificates: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
 | `Solidity.Evm.Correct` | 2 inversion | G06 G24 G36.01 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
 | `Solidity.Evm.Exp` | 2 inversion | G06 G24 G25 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration |
 | `Solidity.Evm.Expr` | 2 inversion | G06 G24 G26 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
 | `Solidity.Evm.Layout` | 2 inversion | G06 G24 G25 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration |
-| `Solidity.Evm.Machine` | 8 inversion | G06 G24 G25 G26 G27.01 G27.02 G27.05 | G27.05 replaces the symbolic `Slot` (G04 R34) under every compiler proof: G24 freezes an abstract slot interface and G27.05 changes only its implementation, first in V15 before G28; G45 targets a new assembly layer instead of editing `Machine` |
+| `Solidity.Evm.Machine` | 9 inversion | G01 G06 G24 G25 G26 G27.01 G27.02 G27.05 | G27.05 replaces the symbolic `Slot` (G04 R34) under every compiler proof: G24 freezes an abstract slot interface and G27.05 changes only its implementation, first in V15 before G28; G45 targets a new assembly layer instead of editing `Machine` |
 | `Solidity.Evm.MemoryAlloc` | 2 inversion | G24 G32 G33 | memory foundation: G32 freezes `StateRepr`/allocator signatures; existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
 | `Solidity.Evm.MemoryCompile` | 1 inversion | G24 G36.02 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
 | `Solidity.Evm.MemoryGrowResult` | 1 inversion | G24 G33 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration |
@@ -2434,36 +2577,31 @@ Module hot spots: inversions and shared writes grouped by the module through whi
 | `Solidity.Evm.MemoryPaths` | 1 inversion | G24 G34 | memory path code: G34 extends it behind G24's frozen entry and re-runs G24's checks |
 | `Solidity.Evm.MemoryRefWrite` | 1 inversion | G24 G34 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration |
 | `Solidity.Evm.MemorySource` | 1 inversion | G24 G32 | memory state relation: G32 freezes `StateRepr`; G24's unified entry is restated against it, and the edit re-runs G24's checks |
-| `Solidity.Evm.MemoryStructCopy` | 1 inversion | G24 G35.01 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
-| `Solidity.Evm.Repr` | 7 inversion | G06 G24 G26 G27.01 G27.02 | G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
+| `Solidity.Evm.MemoryStructCopy` | 1 inversion, 1 parallel-import | G24 G35.01 G36.02 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
+| `Solidity.Evm.Repr` | 7 inversion, 2 parallel-import | G06 G24 G26 G27.01 G27.02 G31 | G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
 | `Solidity.Evm.Signed` | 2 inversion | G06 G24 G25 | signed-operator code: G25 extends it after G06's bridge seed; G06 re-runs its signed-op checks |
 | `Solidity.Evm.Sim` | 13 inversion | G06 G24 G26 G28 G30 G32 G33 G34 G35.01 G36.01 G36.02 G38 G43 | the core state relation; G43 adds the joint payment/world relation: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
-| `Solidity.Evm.SimLemmas` | 3 inversion | G06 G24 G26 G31 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
-| `Solidity.Evm.Stmt` | 15 inversion | G06 G24 G28 G30 G36.01 G38 G43 | statement leaf lemmas: G28, G30, G38 and G43 edit it in this order (waves 3, 4, 5); existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
-| `Solidity.Evm.StorageLemmas` | 5 inversion | G06 G24 G26 G27.01 G27.02 G27.03 | G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
-| `Solidity.Frontend.SolcJson.Admission` | 2 inversion | G12 G14 G15 | the solc admission scan G15 replaces by checked classification; G14's adapter code re-runs its regressions after G15 |
-| `Solidity.Frontend.SolcJson.Contract` | 3 inversion | G12 G14 G20 | untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates |
-| `Solidity.Frontend.SolcJson.Getters` | 2 inversion | G12 G14 G20 | untrusted solc adapter (G01 frontend boundary): G20 edits getter plans after G12/G14; their adapter code re-runs its regressions, and their certificates live in new modules |
-| `Solidity.Frontend.Source` | 5 inversion | G05 G12 G14 G15 | provenance and pins: G05 fixes the certificate interface first; G12/G15 extend it; untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates |
+| `Solidity.Evm.SimLemmas` | 3 inversion, 2 parallel-import | G06 G24 G26 G28 G30 G31 | existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
+| `Solidity.Evm.Stmt` | 15 inversion, 1 parallel-import | G06 G24 G28 G30 G36.01 G38 G43 | statement leaf lemmas: G28, G30, G38 and G43 edit it in this order (waves 3, 4, 5); existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
+| `Solidity.Evm.StorageLemmas` | 5 inversion, 1 parallel-import | G06 G24 G26 G27.01 G27.02 G27.03 G31 | G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration |
+| `Solidity.Frontend.Source` | 3 inversion | G05 G12 G15 | provenance and pins: G05 fixes the certificate interface first; G12/G15 extend it; untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates |
 | `Solidity.Frontend.SourceUnits` | 1 inversion | G05 G12 | untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates |
-| `Solidity.Language.Features` | 2 inversion | G05 S05 | generated catalog of the manifest (g00-manifest-rev owns it): regenerated by `solidity-feature-audit.py`, never hand-edited |
-| `Solidity.RevertBytes` | 4 inversion | G06 G12 G13 G21 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.RevertBytes` | 2 inversion, 13 parallel-import | G01 G06 G16 G17 G18.01 G18.02 G18.03 G18.04 G18.05 G19 G21 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.ContractWorldCertificates` | 1 inversion | G22.03 G22.04 | G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
-| `Solidity.Semantics.Deploy` | 1 inversion | G22.01 G22.03 | G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
-| `Solidity.Semantics.Heap` | 1 inversion | G06 G18.03 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.Semantics.Deploy` | 2 inversion | G01 G22.01 G22.03 | G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.Semantics.Heap` | 2 inversion, 1 parallel-import | G01 G06 G16 G18.03 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.RecursiveStorage.Copy` | 1 inversion | G18.01 G18.05 | G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05 |
 | `Solidity.Semantics.RecursiveStorage.Paths` | 1 inversion | G18.01 G18.02 | G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05 |
-| `Solidity.Semantics.RevertData` | 1 inversion | G06 G21 | intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
-| `Solidity.Semantics.Storage` | 1 inversion | G06 G18.02 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
-| `Solidity.Syntax.Checked` | 4 inversion | G06 G12 G13 G16 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
-| `Solidity.Syntax.Elab.Context` | 4 inversion | G12 G13 G18.04 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
-| `Solidity.Syntax.Elab.Lower` | 2 inversion, 1 shared-write | G12 G17 G19 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
-| `Solidity.Syntax.Elab.SliceCopy` | 1 inversion | G12 G18.04 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
-| `Solidity.Syntax.Elab.Stmt` | 1 inversion | G12 G17 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits |
-| `Solidity.Syntax.Elab.Values` | 3 inversion | G12 G13 G16 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
+| `Solidity.Semantics.RevertData` | 2 inversion, 1 parallel-import | G01 G06 G16 G21 | intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.Semantics.RunFuel` | 1 inversion | G01 G24 | None |
+| `Solidity.Semantics.Storage` | 2 inversion, 1 parallel-import | G01 G06 G16 G18.02 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.Syntax.Checked` | 2 inversion, 2 parallel-import | G01 G06 G16 G18.01 G18.05 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
+| `Solidity.Syntax.Elab.Context` | 4 parallel-import | G16 G17 G18.04 G19 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
+| `Solidity.Syntax.Elab.Lower` | 1 parallel-import, 1 shared-write | G17 G19 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
+| `Solidity.Syntax.Elab.SliceCopy` | 1 parallel-import | G17 G18.04 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
 | `SolidityBridge.ExternalEvm` | 1 inversion | G06 G46.01 | G06 fixes the EVM interface; G46.01 extends it and re-runs G06's checks |
 
-No cycle over roadmap, G03 and module-induced edges.
+No cycle over the declared (roadmap and G03, non-deferred) edges and the wave order; module-induced edges are the inversions above, not cycle edges.
 
 #### Module ledger and checkpoint sizes
 
@@ -2472,33 +2610,33 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | package | VM | cells | edited modules | lines | flag | lemma split |
 |---|---|---|---|---|---|---|
 | G00 | V00 | 0 | new | 0 | — | — |
-| G01 | V00 | 5 | `Solidity.Roadmap.Contracts` | 467 | — | — |
+| G01 | V00 | 7 | `Solidity.Roadmap.Contracts` | 467 | — | — |
 | G02 | V01 | 0 | new | 0 | — | — |
 | G03 | V02 | 0 | new | 0 | — | — |
 | G04 | V01 | 0 | new | 0 | — | — |
 | G05 | V02 | 3 | `Solidity.Frontend.Source`, `Solidity.Frontend.SourceUnits` | 557 | — | — |
-| G06 | V02 | 2 | `SolidityBridge.ExternalEvm` | 255 | — | — |
+| G06 | V02 | 4 | `SolidityBridge.ExternalEvm` | 255 | — | — |
 | G07 | V02 | 2 | new | 0 | — | — |
 | S00 | V03 | 51 | new | 0 | — | — |
 | S01 | V03 | 53 | new | 0 | — | — |
-| S02 | V04 | 45 | new | 0 | — | — |
-| S05 | V04 | 1 | `Solidity.Language.Features` | 1943 | — | — |
+| S02 | V04 | 46 | new | 0 | — | — |
+| S05 | V04 | 1 | new | 0 | — | — |
 | G08 | V05 | 16 | new | 0 | — | — |
 | G09 | V05 | 32 | new | 0 | — | — |
 | G10 | V06 | 70 | new | 0 | 70 owned cells > 60 | (a) primary and postfix forms: names, member/index/range access, calls, named arguments and call options; (b) operator precedence and associativity, one lemma per binding level; (c) tuples, inline arrays, conditional and `new`; compose into whole-expression parse correspondence |
 | G11 | V06 | 44 | new | 0 | — | — |
-| G12 | V07 | 6 | `Solidity.Frontend.SourceUnits`, `Solidity.Frontend.Import` | 1030 | — | — |
-| G13 | V07 | 116 | `Solidity.Syntax.Elab.Values`, `Solidity.Syntax.Elab.Context` | 3509 | 116 owned cells > 60 | (a) elementary types, literals, units and exact constants; (b) conversions and implicit widening; (c) aggregate and data-location typing; (d) overload selection and UDVT operators; (e) function/ABI metadata typing; then the static-semantics certificate |
-| G14 | V08 | 20 | `Solidity.Frontend.SolcJson.Contract` | 2000 | — | — |
-| G15 | V08 | 196 | `Solidity.Frontend.SolcJson.Admission`, `Solidity.Frontend.Source` | 863 | 196 owned cells > 60 | one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots |
-| G16 | V09 | 38 | `Solidity.Syntax.Elab.Values`, `Solidity.Syntax.Checked`, `Solidity.Semantics.NumericLowering` | 2950 | — | — |
+| G12 | V07 | 6 | `Solidity.Frontend.SourceUnits` | 143 | — | — |
+| G13 | V07 | 116 | new | 0 | 116 owned cells > 60 | (a) elementary types, literals, units and exact constants; (b) conversions and implicit widening; (c) aggregate and data-location typing; (d) overload selection and UDVT operators; (e) function/ABI metadata typing; then the static-semantics certificate |
+| G14 | V08 | 20 | new | 0 | — | — |
+| G15 | V08 | 221 | `Solidity.Frontend.SolcJson.Admission`, `Solidity.Frontend.Source`, `Solidity.Frontend.SolcJson.Body` | 3449 | 221 owned cells > 60; modules over 2500 lines: Solidity.Frontend.SolcJson.Body | one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots; the `SolcJson.Body` adapter edit (2,586 lines) is split by AST node class (declarations, expressions, statements) before it starts |
+| G16 | V09 | 39 | `Solidity.Syntax.Elab.Values`, `Solidity.Syntax.Checked`, `Solidity.Semantics.NumericLowering` | 2950 | — | — |
 | G17 | V09 | 16 | `Solidity.Syntax.Elab.Stmt`, `Solidity.Syntax.Elab.Lower` | 2525 | — | — |
 | G19 | V11 | 18 | `Solidity.Syntax.Elab.Lower` | 1698 | — | — |
 | G20 | V11 | 25 | `Solidity.Frontend.SolcJson.Getters`, `Solidity.Frontend.SolcJson.Contract` | 2268 | — | — |
-| G21 | V12 | 26 | `Solidity.Semantics.RevertData`, `Solidity.RevertBytes` | 99 | — | — |
+| G21 | V12 | 28 | `Solidity.Semantics.RevertData`, `Solidity.RevertBytes` | 99 | — | — |
 | G23 | V13 | 30 | `Solidity.Semantics.Transient`, `Solidity.Semantics.TransientWorld` | 485 | — | — |
-| G24 | V14 | 2 | `Solidity.Evm.Compiler`, `Solidity.Semantics.RunFuel` | 571 | — | — |
-| G25 | V14 | 34 | `Solidity.Evm.Layout`, `Solidity.Evm.Signed`, `Solidity.Evm.Exp` | 1163 | — | — |
+| G24 | V14 | 5 | `Solidity.Evm.Compiler`, `Solidity.Semantics.RunFuel` | 571 | — | — |
+| G25 | V14 | 35 | `Solidity.Evm.Layout`, `Solidity.Evm.Signed`, `Solidity.Evm.Exp` | 1163 | — | — |
 | G26 | V14 | 16 | `Solidity.Evm.Expr` | 452 | — | — |
 | G28 | V15 | 12 | `Solidity.Evm.Stmt` | 980 | — | — |
 | G30 | V16 | 10 | `Solidity.Evm.Stmt` | 980 | — | — |
@@ -2508,78 +2646,78 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | G34 | V18 | 7 | `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite` | 438 | — | — |
 | G38 | V21 | 17 | `Solidity.Evm.Stmt` | 980 | — | — |
 | G39 | V21 | 4 | new | 0 | — | — |
-| G40 | V22 | 21 | new | 0 | — | — |
-| G41 | V22 | 16 | new | 0 | — | — |
+| G40 | V22 | 23 | new | 0 | — | — |
+| G41 | V22 | 18 | new | 0 | — | — |
 | G43 | V24 | 18 | `Solidity.Evm.Sim`, `Solidity.Evm.Stmt` | 2137 | — | — |
-| G47 | V27 | 76 | new | 0 | 76 owned cells > 60 | (a) CALL/STATICCALL frames, returndata and the frame-failure rule (D19); (b) CREATE and initcode installation; (c) REVERT and persistent/transient/balance rollback; (d) transactions, sender funds (D21) and gas-exhaustion failures (D20); (e) precompiles (D22); compose under the resource abstraction |
-| G48 | V28 | 174 | new | 0 | 174 owned cells > 60 | (a) admission → resolved graph; (b) resolved → intrinsic per area: declarations, expressions/statements, aggregates, world/calls; (c) whole-unit coverage over compilation units; each a `Cert` composed by `Cert.comp` |
+| G47 | V27 | 79 | new | 0 | 79 owned cells > 60 | (a) CALL/STATICCALL frames, returndata and the frame-failure rule (D19); (b) CREATE and initcode installation; (c) REVERT and persistent/transient/balance rollback; (d) transactions, sender funds (D21) and gas-exhaustion failures (D20); (e) precompiles (D22); compose under the resource abstraction |
+| G48 | V28 | 176 | new | 0 | 176 owned cells > 60 | (a) admission → resolved graph; (b) resolved → intrinsic per area: declarations, expressions/statements, aggregates, world/calls; (c) whole-unit coverage over compilation units; each a `Cert` composed by `Cert.comp` |
 | G52 | V30 | 0 | `Solidity.Tools.DiffTest` | 358 | — | — |
 | G53 | V30 | 1 | new | 0 | — | — |
 | G55 | V31 | 0 | new | 0 | — | — |
 | S03.01 | V04 | 17 | new | 0 | — | — |
-| S03.02 | V04 | 5 | new | 0 | — | — |
+| S03.02 | V04 | 6 | new | 0 | — | — |
 | S03.03 | V04 | 32 | new | 0 | — | — |
 | S03.04 | V04 | 7 | new | 0 | — | — |
-| S04.01 | V03 | 29 | new | 0 | — | — |
-| S04.02 | V03 | 41 | new | 0 | — | — |
+| S04.01 | V03 | 32 | new | 0 | — | — |
+| S04.02 | V03 | 43 | new | 0 | — | — |
 | S04.03 | V03 | 26 | new | 0 | — | — |
 | S04.04 | V04 | 12 | new | 0 | — | — |
-| G18.01 | V10 | 3 | `Solidity.TypeGraph`, `Solidity.Semantics.RecursiveStorage.Admission` | 234 | — | — |
-| G18.02 | V10 | 18 | `Solidity.Semantics.Storage`, `Solidity.Semantics.RecursiveStorage.Paths` | 184 | — | — |
+| G18.01 | V10 | 5 | `Solidity.TypeGraph`, `Solidity.Semantics.RecursiveStorage.Admission` | 234 | — | — |
+| G18.02 | V10 | 19 | `Solidity.Semantics.Storage`, `Solidity.Semantics.RecursiveStorage.Paths` | 184 | — | — |
 | G18.03 | V10 | 20 | `Solidity.Semantics.Heap` | 537 | — | — |
 | G18.04 | V10 | 11 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1552 | — | — |
 | G18.05 | V10 | 17 | `Solidity.Semantics.RecursiveStorage.Copy` | 187 | — | — |
-| G18.06 | V10 | 2 | new | 0 | — | — |
+| G18.06 | V10 | 3 | new | 0 | — | — |
 | G22.01 | V13 | 12 | `Solidity.Semantics.ContractWorld` | 461 | — | — |
 | G22.02 | V13 | 9 | `Solidity.Semantics.Callback` | 1611 | — | — |
 | G22.03 | V13 | 10 | `Solidity.Semantics.Deploy`, `Solidity.Frontend.WorldImport` | 476 | — | — |
 | G22.04 | V13 | 7 | `Solidity.Semantics.ContractWorldCertificates` | 174 | — | — |
 | G22.05 | V13 | 12 | new | 0 | — | — |
-| G27.01 | V15 | 4 | `Solidity.Evm.Repr` | 1023 | — | — |
+| G27.01 | V15 | 7 | `Solidity.Evm.Repr` | 1023 | — | — |
 | G27.02 | V15 | 4 | `Solidity.Evm.Repr` | 1023 | — | — |
-| G27.03 | V15 | 6 | `Solidity.Evm.StorageLemmas` | 214 | — | — |
-| G27.04 | V15 | 2 | new | 0 | — | — |
-| G27.05 | V15 | 6 | `Solidity.Evm.Machine` | 685 | — | — |
+| G27.03 | V15 | 7 | `Solidity.Evm.StorageLemmas` | 214 | — | — |
+| G27.04 | V15 | 3 | new | 0 | — | — |
+| G27.05 | V15 | 7 | `Solidity.Evm.Machine` | 685 | — | — |
 | G29.01 | V16 | 3 | `Solidity.Evm.Compile` | 487 | — | — |
 | G29.02 | V16 | 4 | new | 0 | — | — |
 | G29.03 | V16 | 3 | new | 0 | — | — |
 | G35.01 | V19 | 4 | `Solidity.Evm.MemoryStructCopy` | 128 | — | — |
-| G35.02 | V19 | 4 | new | 0 | — | — |
-| G35.03 | V19 | 8 | new | 0 | — | — |
+| G35.02 | V19 | 5 | new | 0 | — | — |
+| G35.03 | V19 | 9 | new | 0 | — | — |
 | G35.04 | V19 | 6 | new | 0 | — | — |
-| G35.05 | V19 | 3 | new | 0 | — | — |
+| G35.05 | V19 | 4 | new | 0 | — | — |
 | G35.06 | V19 | 2 | new | 0 | — | — |
 | G36.01 | V20 | 11 | `Solidity.Evm.Correct` | 1232 | — | — |
 | G36.02 | V20 | 5 | `Solidity.Evm.MemoryCompile` | 1254 | — | — |
-| G36.03 | V24 | 7 | new | 0 | — | — |
+| G36.03 | V24 | 8 | new | 0 | — | — |
 | G37.01 | V20 | 14 | `Solidity.Evm.Compile` | 487 | — | — |
-| G37.02 | V20 | 7 | new | 0 | — | — |
-| G37.03 | V20 | 8 | new | 0 | — | — |
+| G37.02 | V20 | 8 | new | 0 | — | — |
+| G37.03 | V20 | 9 | new | 0 | — | — |
 | G42.01 | V23 | 3 | new | 0 | — | — |
-| G42.02 | V23 | 14 | new | 0 | — | — |
-| G42.03 | V23 | 3 | new | 0 | — | — |
+| G42.02 | V23 | 15 | new | 0 | — | — |
+| G42.03 | V23 | 6 | new | 0 | — | — |
 | G42.04 | V23 | 5 | new | 0 | — | — |
 | G42.05 | V23 | 8 | new | 0 | — | — |
 | G42.06 | V23 | 3 | new | 0 | — | — |
 | G44.01 | V25 | 8 | new | 0 | — | — |
-| G44.02 | V25 | 9 | new | 0 | — | — |
-| G44.03 | V25 | 6 | new | 0 | — | — |
+| G44.02 | V25 | 10 | new | 0 | — | — |
+| G44.03 | V25 | 7 | new | 0 | — | — |
 | G45.01 | V26 | 1 | new | 0 | — | — |
-| G45.02 | V26 | 2 | new | 0 | — | — |
+| G45.02 | V26 | 3 | new | 0 | — | — |
 | G45.03 | V26 | 2 | new | 0 | — | — |
 | G45.04 | V26 | 1 | new | 0 | — | — |
 | G45.05 | V26 | 1 | new | 0 | — | — |
 | G45.06 | V26 | 1 | new | 0 | — | — |
-| G46.01 | V27 | 78 | `SolidityBridge.ExternalEvm`, `SolidityBridge.ExternalEvm.WordOps` | 354 | 78 owned cells > 60 | (a) arithmetic, comparison and bitwise opcodes (seed: `ExternalEvm.simulation`); (b) signedness, narrow truncation and casts; (c) PUSH constants and control primitives JUMP/JUMPI/JUMPDEST |
-| G46.02 | V27 | 68 | new | 0 | 68 owned cells > 60 | (a) MLOAD/MSTORE/MSTORE8 against the byte-addressed representation; (b) CALLDATALOAD/CALLDATACOPY against the calldata representation; (c) memory expansion and its resource bound; (d) RETURN/REVERT byte ranges |
-| G46.03 | V27 | 34 | new | 0 | — | — |
-| G46.04 | V27 | 12 | `SolidityBridge.ExternalEvm.Environment` | 128 | — | — |
-| G46.05 | V27 | 13 | `SolidityBridge.ExternalEvm.Obstructions` | 82 | — | — |
+| G46.01 | V27 | 80 | `SolidityBridge.ExternalEvm`, `SolidityBridge.ExternalEvm.WordOps` | 354 | 80 owned cells > 60 | (a) arithmetic, comparison and bitwise opcodes (seed: `ExternalEvm.simulation`); (b) signedness, narrow truncation and casts; (c) PUSH constants and control primitives JUMP/JUMPI/JUMPDEST |
+| G46.02 | V27 | 71 | new | 0 | 71 owned cells > 60 | (a) MLOAD/MSTORE/MSTORE8 against the byte-addressed representation; (b) CALLDATALOAD/CALLDATACOPY against the calldata representation; (c) memory expansion and its resource bound; (d) RETURN/REVERT byte ranges |
+| G46.03 | V27 | 38 | new | 0 | — | — |
+| G46.04 | V27 | 14 | `SolidityBridge.ExternalEvm.Environment` | 128 | — | — |
+| G46.05 | V27 | 15 | `SolidityBridge.ExternalEvm.Obstructions` | 82 | — | — |
 | G46.06 | V27 | 13 | `SolidityBridge.ExternalEvm.Dispatch` | 258 | — | — |
 | G49.01 | V28 | 66 | new | 0 | 66 owned cells > 60 | one composition lemma per pass family: expressions, statements/control, calls and frames, aggregates and copies, world and ABI; then their `Cert.comp` with the closure hypotheses |
 | G49.02 | V28 | 170 | new | 0 | 170 owned cells > 60 | (a) runtime refinement per deployed contract; (b) observation mapping incl. return/revert bytes and panics (D13); (c) the `decode` export (D14); (d) threading the per-run hash premise (D11); (e) the EvalOrder quantifier (D04) |
-| G49.03 | V28 | 117 | `SolidityBridge.CompilerSimulation` | 77 | 117 owned cells > 60 | (a) compiler totality on admitted input; (b) non-vacuity controls (success with data, revert, divergence); (c) failure preservation (no always-revert); (d) resource-indexed progress and finite-prefix families |
-| G50.01 | V29 | 34 | new | 0 | — | — |
+| G49.03 | V28 | 116 | `SolidityBridge.CompilerSimulation` | 77 | 116 owned cells > 60 | (a) compiler totality on admitted input; (b) non-vacuity controls (success with data, revert, divergence); (c) failure preservation (no always-revert); (d) resource-indexed progress and finite-prefix families |
+| G50.01 | V29 | 33 | new | 0 | — | — |
 | G50.02 | V29 | 40 | new | 0 | — | — |
 | G51.01 | V29 | 85 | `Solidity.Calculus.Sound` | 45 | 85 owned cells > 60 | one soundness bridge per rule family: storage, memory, control/loops, internal calls, external calls/callbacks, arithmetic/checked guards; each against the composed runtime theorem |
 | G51.02 | V29 | 18 | `Solidity.Calculus.CorrectCallback` | 104 | — | — |
@@ -2616,9 +2754,16 @@ Every row stays open; the ledger assigns, it does not discharge. Handed on:
 ## Limitations
 
 - The module ledger is a planning estimate: which existing module a future
-  package edits is a design choice. Findings derived from it (inversions,
-  shared writes, sizes) are as good as that estimate, and the checker makes
-  each one explicit rather than hiding it.
+  package edits is a design choice, and the inversions, parallel imports,
+  shared writes and sizes are as good as that estimate. A changed estimate
+  that brings a new package through an acknowledged module fails `--check`;
+  one that moves edits into unlisted modules is caught only if those modules
+  import or are imported by other packages' modules.
+- Several ownership checks are structural: the `evm` and `theorem` columns
+  and G15's admission cell come from category defaults, the ledger-symbol
+  ownership is derived, and a `missing` list or a REFINE choice is checked
+  for presence and shape, not for content. The refinements are printed
+  for review.
 - Existing-coverage anchors come from read-only research passes. The checker
   proves each declaration exists where cited, not that it is the strongest
   or only relevant one; the `missing` text summarizes the feature documents
@@ -2627,10 +2772,123 @@ Every row stays open; the ledger assigns, it does not discharge. Handed on:
   overrides; they are obligations to discharge, not evidence.
 - No Lean file was added, so no new theorem exists; the Lean gates were run
   on the unchanged tree.
+- The lane names in the decision table are this batch's sibling sessions and
+  the Codex lanes, as given in the assignment; the checker does not validate
+  them.
+
+## Open scope questions
+
+### Q1. Shared compiler foundation
+
+**Evidence.** The existing compiler modules (`Evm.Machine`, `Evm.Stmt`,
+`Evm.Compile`, `Evm.Sim`, `Evm.Repr`, `Evm.StorageLemmas`, the `Memory*`
+modules) are imported by every backend proof and are edited by packages in
+waves 3–5 (G27.05 replaces `Slot`; G28, G30, G38 and G43 edit `Stmt`; G29.01
+and G37.01 edit `Compile`; G43 edits `Sim`). This gives 106 inversions, so an
+earlier package's final check depends on later work. The roadmap ("Groups
+and dependencies") says to split cyclic proof interfaces into mutual
+induction or shared-foundation child groups, which adds rows to the
+115-package manifest and to the VM table. This group may not rewrite those
+lines. The ledger records the interim resolution: G24 freezes the
+signatures and later edits re-run the dependent checks.
+
+**Question for the user.** How should the shared compiler foundation be
+scheduled?
+
+- **Foundation children (Recommended):** add shared-foundation child
+  packages ahead of wave 3 (for example the frozen slot/state/statement-leaf
+  interfaces as children of G24). This follows the roadmap's own rule. The
+  manifest count and the VM table change, and the inversions become ordinary
+  dependencies.
+- **Freeze in G24:** keep 115 packages. G24 freezes the signatures, and
+  every later edit carries a rebase obligation that re-runs the dependent
+  final checks. There is no manifest change, but the earlier packages'
+  checks stay provisional until wave 5.
+- **New modules only:** after G24, packages may not edit the existing
+  compiler modules and must wrap them in new modules. There is no manifest
+  change and no inversion, at the cost of duplicated or adapter proofs.
 
 ## Review
 
-<!-- review results are recorded below -->
+A read-only finder and a separate skeptic review ran after the first draft
+(`54217502`). Both used git, grep and Python only, without the Lean server.
+The skeptic tested the checker by mutating its data in a copy. Confirmed
+findings and their fixes:
+
+1. **Mis-staged anchors.** 10 `evm` anchors were not EVM bridges (the
+   `Bridge.Arith` lemmas, `observe_encode`, `compile_terminates_iff`, the
+   Adversary LTS). 25 `theorem` anchors were compiler or semantics lemmas,
+   and 75 were fixed-program regressions counted as theorem coverage.
+   *Fix:* 116 anchors were restaged. `--check` now enforces where each
+   stage's anchors may live, and adds the `regression` stage, which counts
+   for no stage. The summary counts were corrected.
+2. **Unordered import pairs were ignored.** *Fix:* a new `parallel-import`
+   kind (32 findings), each acknowledged.
+3. **G01 was treated as integrated** although its contracts are not frozen.
+   *Fix:* G01 was removed from `INTEGRATED`. Its RunFuel/Machine dependency
+   is acknowledged with the revision obligation.
+4. **Deferred edges bypassed every check.** Any later-wave edge could be
+   declared `deferred`, and G39's check had no VM. *Fix:* every deferred edge
+   must name a final-check VM after its prerequisite (`DEFERRED_CHECKS`). The
+   G39 exception and the coverage-plan wording were handed to G02.
+5. **The cycle sentence was false or tautological.** *Fix:* it now says what
+   the graph contains. The prose states that inversions are module-level
+   cycles. Q1 records the roadmap rule that applies.
+6. **Blanket acknowledgements.** Module acknowledgements matched on the
+   module only, and pair acknowledgements were symmetric and ignored the
+   finding kind. *Fix:* pair acknowledgements are now keyed by kind and pair.
+   A module acknowledgement must name exactly the packages its findings
+   involve, so a new package appearing through it fails `--check`.
+7. **The module ledger contradicted its resolutions.** G13 and G14 edited
+   elaborator and adapter modules, S05 edited the generated catalog, and
+   `SolcJson.Body` was unassigned. *Fix:* G13, G14 and S05 are `new`, and
+   G15 owns `Body`, which is now flagged over 2,500 lines and covered by
+   G15's split.
+8. **Combinations had no per-stage ownership, and G00's combination owners
+   were never compared** (G01 was dropped from loops/recursion). *Fix:* G15
+   is always added. Unnamed stages are owned through the combination's rows
+   and must be non-empty. G00 owners must survive refinement. G01 was
+   restored.
+9. **G04 restrictions accepted any one discharging package, and en-dash
+   ranges were not expanded.** *Fix:* every discharging package must be an
+   owner of a row citing the restriction (owners were added to 11
+   combinations), or carry a recorded waiver. Ranges are now expanded.
+10. **The "G00 owner dropped" check compared the refinement with itself.**
+    *Fix:* it now checks against G00's raw tokens (a parent is satisfied by
+    any of its children), and the refinement table is printed for review.
+    The `R` columns are now derived from the missing cases.
+11. **Decision rows.** Several owners were missing: S03.02 for D04, G42.03
+    for D19, G44.02 for D09, G42.02/G44.03 for D13 (call and creation
+    events) and G27.05 for D14. Decision theorem columns named G01, G07, G53
+    and G54. *Fix:* the owners were added. Stage-token checks now apply to
+    feature, combination and decision rows, with the separate `interface`
+    (G01, G05–G07) and `validation` (G52–G55) stages. D03, D04 and D11
+    record the reference-EVM configuration, the six combinations solc cannot
+    produce, and the combinatorial form the random-oracle bound needs
+    without a probability library.
+12. **Ownership-gap claim.** G04 §3.1's interim restatement was said to be
+    "closed" while it was unowned. *Fix:* G24 owns it (D18, payments
+    combination).
+13. **Under-owned or contradicting rows.** *Fix:* `fixedPoint` gained
+    storage, ABI and conversion owners, a combination row, and the interim
+    refusal note. The precompile builtins gained G47 (D22). A
+    recursive-type combination was added (G18.06 asks for it).
+    `worldAssumptions` now states that its premise is not approved.
+    `cleanTail_holds` was removed from `deleteMappingTails`. G49.03 moved
+    from `termination`'s backend to its theorem column.
+14. **Minor.** Markdown link brackets in generated notes are now escaped,
+    vendored Bridge modules are excluded from the import graph, the anchor
+    count includes combination and decision anchors, and lane names are
+    explained as sibling sessions.
+
+Not changed, after inspection: the reading of G01 Q5's `Event` list (Roadmap
+events, not the excluded logs; both reviews agree); the 23 `g03` edges, the
+nine schedule conflicts, the parsing of coverage-plan.md, decisions and
+restrictions (both reviews re-derived them); and fixedPoint's consistency
+with the manifest, whose scope is unchanged. The skeptic's points that the
+`evm`/`theorem` defaults, G15's admission cell and the ledger-symbol
+ownership are structural are recorded under Limitations rather than turned
+into checks. Lane-name validation was not added. Q1 is left to the user.
 
 ## Handoff
 

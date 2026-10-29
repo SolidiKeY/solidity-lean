@@ -35,7 +35,7 @@ import re
 import sys
 from pathlib import Path
 
-STAGES = ("source", "admission", "lowering", "backend", "evm", "theorem")
+STAGES = ('source', "admission", "lowering", "backend", "evm", "theorem")
 
 DOC = "docs/feature-work/roadmap-g03-ledger.md"
 JSON_OUT = "docs/feature-work/roadmap-g03-ledger.json"
@@ -168,7 +168,7 @@ def lean_imports(root):
     graph = {}
     for base in ("Solidity", "Bridge"):
         for p in (root / base).rglob("*.lean"):
-            if ".lake" in p.parts:
+            if ".lake" in p.parts or "vendor" in p.parts:
                 continue
             rel = p.relative_to(root)
             parts = list(rel.with_suffix("").parts)
@@ -190,6 +190,31 @@ def module_of(path):
 # --------------------------------------------------------------------------
 # Owners
 # --------------------------------------------------------------------------
+
+# Where an anchor of each stage may live: an `evm` anchor is a bridge to an
+# independent EVM implementation; a `theorem` anchor is a calculus, corpus,
+# example or Bridge theorem about source programs, never compiler or
+# semantics infrastructure.
+EVM_PATHS = ("Bridge/SolidityBridge/ExternalEvm",)
+THEOREM_PATHS = ("Solidity/Calculus/", "Solidity/Corpus/", "Solidity/Examples/", "Solidity/Typing/",
+                 "Solidity/Theorems.lean", "Solidity/Roadmap/", "Bridge/SolidityBridge/", "tests/")
+BACKEND_PATHS = ("Solidity/Evm/", "Bridge/SolidityBridge/Evm.lean", "Bridge/SolidityBridge/CompilerSimulation.lean")
+
+
+REGRESSION_PATHS = ("Solidity/Corpus/", "Solidity/Examples/", "tests/")
+
+
+def stage_mismatch(stage, path):
+    if stage == "regression" and not path.startswith(REGRESSION_PATHS):
+        return "regression anchors are fixed-program corpus/example/test results"
+    if stage == "theorem" and path.startswith(REGRESSION_PATHS):
+        return "a fixed-program corpus/example/test result is a `regression` anchor, not a theorem"
+    if stage == "evm" and not path.startswith(EVM_PATHS):
+        return "evm anchors must bridge to the external EVM (" + ", ".join(EVM_PATHS) + ")"
+    if stage == "theorem" and (not path.startswith(THEOREM_PATHS) or path.startswith(EVM_PATHS + BACKEND_PATHS)):
+        return "theorem anchors must be calculus/corpus/example/Bridge theorems, not compiler or semantics code"
+    return None
+
 
 def tokens(cell):
     return [t for t in cell.split() if t != "—"]
@@ -213,6 +238,10 @@ def is_evm(t):
     return t.startswith("G46") or t == "G47"
 
 
+def is_composition(t):
+    return t.startswith(("G48", "G49", "G50", "G51"))
+
+
 def feature_owners(f, g00, plan, errors):
     """The six stage owner lists of one in-profile row."""
     fid, cat = f["id"], f["category"]
@@ -227,21 +256,39 @@ def feature_owners(f, g00, plan, errors):
     syn = refine(fid, "admission", o[1], plan, errors)
     low = refine(fid, "lowering", o[2], plan, errors)
     back_all = refine(fid, "backend", o[3], plan, errors)
-    back = [t for t in back_all if not is_evm(t)]
+    back = [t for t in back_all if not is_evm(t) and not is_composition(t)]
     evm = [t for t in back_all if is_evm(t)]
     adds = D.STAGE_ADD.get(fid, {})
     evm += [t for t in (adds.get("evm") or D.EVM_BY_CATEGORY[cat]).split() if t not in evm and t != "—"]
     theorem = (adds.get("theorem") or D.THEOREM_BY_CATEGORY[cat]).split()
+    theorem += [t for t in back_all if is_composition(t) and t not in theorem]
     adm = syn + [t for t in ("G15",) if t not in syn]
     cols = {"source": src, "admission": adm, "lowering": low, "backend": back,
             "evm": evm, "theorem": theorem}
     for st, extra_cell in adds.items():
-        if st in ("source", "admission", "lowering", "backend"):
+        if st in ('source', "admission", "lowering", "backend"):
             cols[st] += [t for t in extra_cell.split() if t not in cols[st]]
     for st in STAGES:
         if adds.get(st) == "—":
             cols[st] = []
     return cols
+
+
+# Decision rows may also name the wave-0 interface/gate packages that fix a
+# contract or a check (`interface`), and the validation packages (`validation`).
+EXTRA_STAGES = ("interface", "validation")
+STAGE_PREFIX = {
+    "source": ("S",), "admission": ("G05", "G07", "G08", "G09", "G10", "G11", "G12", "G13", "G14", "G15"),
+    "lowering": tuple(f"G{i}" for i in range(16, 24)), "backend": tuple(f"G{i}" for i in range(24, 46)),
+    "evm": ("G06", "G46", "G47"), "theorem": ("G48", "G49", "G50", "G51"),
+    "interface": ("G01", "G05", "G06", "G07"), "validation": ("G52", "G53", "G54", "G55"),
+}
+
+
+def check_stage_tokens(where, st, owners, errors):
+    for t in owners:
+        if st in STAGE_PREFIX and not t.startswith(STAGE_PREFIX[st]):
+            errors.append(f"{where} {st}: {t} is not a {st} package")
 
 
 def check_owner_list(where, owners, plan, errors, reason=None):
@@ -379,7 +426,21 @@ def dependency_ledger(plan, imports, root, errors):
         return vb in vm_closure.get(va, set())
 
     findings = []
-    acked = {(a, b): why for a, b, why in D.ACKNOWLEDGED}
+    acked = {(k, a, b): why for k, a, b, why in D.ACKNOWLEDGED}
+    for a in sorted(edges):
+        for b in sorted(edges[a]):
+            if origin[(a, b)][0] != "deferred":
+                continue
+            vm = D.DEFERRED_CHECKS.get((a, b))
+            if vm is None:
+                errors.append(f"deferred check {a} <- {b} has no VM for its final check")
+                continue
+            vb = vm_of.get(b)
+            if not (vm == vb or vb in vm_closure.get(vm, set())):
+                errors.append(f"deferred check {a} <- {b}: VM {vm} does not follow {b}'s VM {vb}")
+    for (a, b) in D.DEFERRED_CHECKS:
+        if b not in edges.get(a, ()) or origin[(a, b)][0] != "deferred":
+            errors.append(f"DEFERRED_CHECKS: {a} <- {b} is not a deferred edge")
     # 1. declared/G03 dependency against the schedule
     for a in sorted(edges):
         for b in sorted(edges[a]):
@@ -399,6 +460,12 @@ def dependency_ledger(plan, imports, root, errors):
                 for m, y in sorted(induced_why[(a, b)]):
                     via = "is" if m == y else f"imports {y}, which is"
                     findings.append(("inversion", a, b, f"{m} {via} edited later by {b}", y))
+            elif a < b or a not in induced.get(b, ()):
+                for m, y in sorted(induced_why[(a, b)]):
+                    if m == y:
+                        continue  # same module: a shared write, reported below
+                    findings.append(("parallel-import", a, b,
+                                     f"{m} imports {y}, which {b} edits in parallel", y))
     # 3. shared writes between unordered packages
     for m, wps in sorted(mod_edit.items()):
         for i, a in enumerate(wps):
@@ -420,20 +487,23 @@ def dependency_ledger(plan, imports, root, errors):
     for c in cycles:
         if tuple(c) not in acked_cycles:
             errors.append(f"unacknowledged dependency cycle: {' '.join(c)}")
-    used_mod = set()
+    used_mod = collections.defaultdict(set)
     for kind, a, b, why, mod in findings:
-        if (a, b) in acked or (b, a) in acked:
+        if (kind, a, b) in acked:
             continue
         if mod in D.ACK_MODULES:
-            used_mod.add(mod)
+            used_mod[mod] |= {a, b}
             continue
         errors.append(f"unacknowledged {kind} {a} <- {b}: {why}")
-    for m in D.ACK_MODULES:
+    for m, (pks, _) in D.ACK_MODULES.items():
         if m not in used_mod:
             errors.append(f"stale module acknowledgement {m}")
-    for (a, b) in acked:
-        if not any((x, y) in ((a, b), (b, a)) for _, x, y, _, _ in findings):
-            errors.append(f"stale acknowledgement {a} <- {b}: no such finding")
+        elif used_mod[m] != set(pks.split()):
+            errors.append(f"module acknowledgement {m} names {pks}; its findings involve "
+                          f"{' '.join(sorted(used_mod[m]))}")
+    for (k, a, b) in acked:
+        if not any((x, y, z) == (k, a, b) for x, y, z, _, _ in findings):
+            errors.append(f"stale acknowledgement {k} {a} <- {b}: no such finding")
     for c, _ in D.ACKNOWLEDGED_CYCLES:
         if tuple(sorted(c.split())) not in {tuple(x) for x in cycles}:
             errors.append(f"stale cycle acknowledgement: {c}")
@@ -472,8 +542,11 @@ def build(root):
 
     def anchor(where, a):
         stage, name, path, note = a
-        if stage not in STAGES:
+        if stage not in STAGES + ("regression",):
             errors.append(f"{where}: unknown stage {stage}")
+        why = stage_mismatch(stage, path)
+        if why:
+            errors.append(f"{where}: {name} cited at stage {stage}, but {why}")
         line = idx.get((path, name))
         if line is None:
             errors.append(f"{where}: {name} is not declared in {path}")
@@ -506,17 +579,14 @@ def build(root):
         # G00's owners must survive refinement
         if f["scope"] in ("model", "abstract"):
             o = g00.owners(f)
-            for si, st in enumerate(("source", "admission", "lowering", "backend")):
-                want = []
+            for si, st in enumerate(('source', "admission", "lowering", "backend")):
+                have = cols[st] + (cols["evm"] + cols["theorem"] if st == "backend" else [])
                 for t in tokens(o[si]):
-                    want += D.REFINE.get((fid, t), t).split() if t in plan["parents"] else [t]
-                have = cols[st] + (cols["evm"] if st == "backend" else [])
-                for t in want:
-                    if t not in have:
+                    ok = (any(h.startswith(t + ".") for h in have) if t in plan["parents"] else t in have)
+                    if not ok:
                         errors.append(f"{fid} {st}: G00 owner {t} dropped")
-        for t in cols["theorem"]:
-            if not (t.startswith(("G48", "G49", "G50", "G51"))):
-                errors.append(f"{fid} theorem: {t} is not a composition package (G48-G51)")
+        for st in STAGES:
+            check_stage_tokens(fid, st, cols[st], errors)
         contracts = D.STAGE_ADD.get(fid, {}).get("contracts") or D.CONTRACT_BY_CATEGORY[f["category"]]
         contracts = contracts.split()
         for c in contracts:
@@ -526,12 +596,12 @@ def build(root):
         missing = D.MISSING.get(fid, [])
         if f["scope"] in ("model", "abstract") and not missing:
             errors.append(f"{fid}: no missing cases recorded (current {f['current']})")
-        covered = sorted({a["stage"] for a in anchors}, key=STAGES.index)
+        covered = sorted({a["stage"] for a in anchors if a["stage"] in STAGES}, key=STAGES.index)
         ledger_rows.append({
             "id": fid, "category": f["category"], "scope": f["scope"], "current": f["current"],
             "owners": cols, "contracts": contracts, "reasons": reasons, "cover": anchors,
             "uncovered": [s for s in STAGES if s not in covered and s not in reasons],
-            "missing": missing, "restrictions": D.FEATURE_RESTRICTIONS.get(fid, []),
+            "missing": missing, "restrictions": sorted(set(re.findall(r"\bR\d\d\b", " ".join(missing)))),
             "decision": D.FEATURE_EXTRA.get(fid, {}).get("note"),
         })
     for fid in list(D.COVER) + list(D.MISSING) + list(D.STAGE_ADD) + list(D.DASH):
@@ -564,9 +634,10 @@ def build(root):
         if not owners:
             errors.append(f"combination {key}: no owner")
         for st, cell in owners.items():
-            if st not in STAGES:
+            if st not in STAGES + EXTRA_STAGES:
                 errors.append(f"combination {key}: unknown stage {st}")
             check_owner_list(f"combination {key} {st}", cell.split(), plan, errors)
+            check_stage_tokens(f"combination {key}", st, cell.split(), errors)
         if not missing:
             errors.append(f"combination {key}: no missing cases recorded")
         k2 = (tuple(sorted(ins)), tuple(sorted(outs)))
@@ -575,9 +646,34 @@ def build(root):
             if k2 not in g00_keys:
                 errors.append(f"combination {key}: not one of G00's named combinations")
         anchors = [anchor(f"combination {key}", a) for a in D.COMBO_COVER.get(key, [])]
-        combos.append({"key": key, "in": ins, "out": outs, "owners": {s: owners[s].split() for s in owners},
+        # stages the row does not name are owned by its constituent rows'
+        # owners (recorded as derived); classification is always G15's
+        own = {st: owners[st].split() for st in owners}
+        derived = {}
+        if "admission" in own and "G15" not in own["admission"]:
+            own["admission"].append("G15")
+        for st in STAGES:
+            if st in own:
+                continue
+            if st == "admission":
+                own[st] = ["G15"]
+                continue
+            union = sorted({o for r in ledger_rows if r["id"] in ins for o in r["owners"][st]})
+            if not union:
+                errors.append(f"combination {key}: no owner at stage {st}, explicit or through its rows")
+            derived[st] = union
+        combos.append({"key": key, "in": ins, "out": outs, "owners": own, "derivedOwners": derived,
                        "restrictions": restr, "cover": anchors, "missing": missing,
                        "source": "G00" if outs else "G03"})
+    g00_owner = {(tuple(sorted(i)), tuple(sorted(o))): own for _, i, o, own in g00.COMBINATIONS}
+    for c in combos:
+        k2 = (tuple(sorted(c["in"])), tuple(sorted(c["out"])))
+        if k2 not in g00_owner:
+            continue
+        have = {o for v in c["owners"].values() for o in v}
+        for t in g00_owner[k2].split():
+            if not (any(h.startswith(t + ".") for h in have) if t in plan["parents"] else t in have):
+                errors.append(f"combination {c['key']}: G00 owner {t} dropped")
     for k in g00_keys - seen_g00:
         errors.append(f"G00 combination {k} has no G03 row (combination without an owner)")
     for key in D.COMBO_COVER:
@@ -619,11 +715,17 @@ def build(root):
             errors.append(f"G04 restriction {rid} has no G03 row")
             continue
         want = set()
-        for t in re.findall(r"\b([SG]\d\d(?:\.\d\d)?)\b", disc):
-            want |= set(expand_ids(t, plan)) if t in plan["parents"] else {t}
+        for t in re.findall(r"\b([SG]\d\d(?:\.\d\d)?(?:–[SG]\d\d\.\d\d)?)\b", disc):
+            want |= set(expand_ids(t, plan))
         want &= pk
-        if want and not any(want & ow for _, _, ow in referenced[rid]):
-            errors.append(f"G04 restriction {rid}: no G03 row owns any discharging package of {sorted(want)}")
+        owned_r = set().union(*(ow for _, _, ow in referenced[rid]))
+        waived = set(D.RESTRICTION_WAIVERS.get(rid, {}))
+        for t in sorted(want - owned_r - waived):
+            errors.append(f"G04 restriction {rid}: discharging package {t} is owned by no G03 row citing it")
+        for t in sorted(waived & owned_r):
+            errors.append(f"RESTRICTION_WAIVERS {rid}: {t} is owned, no waiver needed")
+        for t in sorted(waived - want):
+            errors.append(f"RESTRICTION_WAIVERS {rid}: {t} is not a discharging package")
     for rid in referenced:
         if rid not in restrictions:
             errors.append(f"unknown G04 restriction {rid}")
@@ -639,9 +741,10 @@ def build(root):
                 errors.append(f"decision {did}: unknown decision key {k!r}")
             seen_dec[k] += 1
         for st, cell in owners.items():
-            if st not in STAGES:
+            if st not in STAGES + EXTRA_STAGES:
                 errors.append(f"decision {did}: unknown stage {st}")
             check_owner_list(f"decision {did} {st}", cell.split(), plan, errors)
+            check_stage_tokens(f"decision {did}", st, cell.split(), errors)
         if not owners:
             errors.append(f"decision {did}: no owner")
         if not missing:
@@ -720,14 +823,19 @@ def cell(xs):
     return " ".join(xs) if xs else "—"
 
 
+def md(text):
+    """Escape link brackets outside code spans (`new T[](n)` in prose)."""
+    parts = text.split("`")
+    return "`".join(p if i % 2 else p.replace("[", "\\[").replace("]", "\\]") for i, p in enumerate(parts))
+
+
 def anchor_md(a):
-    return f"`{a['decl']}` ({a['module']}, `{a['file']}:{a['line']}`) — {a['note']}"
+    return f"`{a['decl']}` ({a['module']}, `{a['file']}:{a['line']}`) — {md(a['note'])}"
 
 
-def resolution(a, b, m):
-    ack = {(x, y): r for x, y, r in D.ACKNOWLEDGED}
-    r = ack.get((a, b)) or ack.get((b, a))
-    return r or (f"module {m}: see the module resolutions" if m in D.ACK_MODULES else None)
+def resolution(k, a, b, m):
+    r = {(x, y, z): w for x, y, z, w in D.ACKNOWLEDGED}.get((k, a, b))
+    return r or (D.ACK_MODULES[m][1] if m in D.ACK_MODULES else None)
 
 
 def to_json(L):
@@ -744,9 +852,9 @@ def to_json(L):
             "edges": [{"package": a, "dependsOn": b, "kind": dep["origin"][(a, b)][0],
                        "why": dep["origin"][(a, b)][1]} for a in sorted(dep["edges"]) for b in sorted(dep["edges"][a])],
             "findings": [{"kind": k, "package": a, "other": b, "why": w,
-                          "module": m, "resolution": resolution(a, b, m)}
+                          "module": m, "resolution": resolution(k, a, b, m)}
                          for k, a, b, w, m in dep["findings"]],
-            "moduleResolutions": D.ACK_MODULES,
+            "moduleResolutions": {m: {"packages": p.split(), "resolution": r} for m, (p, r) in D.ACK_MODULES.items()},
             "cycles": [{"packages": c, "resolution": dict((tuple(sorted(x.split())), r)
                                                           for x, r in D.ACKNOWLEDGED_CYCLES).get(tuple(c))}
                        for c in dep["cycles"]],
@@ -776,13 +884,14 @@ def report(L):
     out = []
     emit = out.append
     rows, combos, decs, dep, plan = L["rows"], L["combos"], L["decisions"], L["dep"], L["plan"]
-    n_anchor = sum(len(r["cover"]) for r in rows)
+    n_anchor = sum(len(r["cover"]) for r in rows + combos + decs)
     emit(f"{len(rows)} feature rows ({sum(1 for r in rows if r['scope'] in ('model', 'abstract'))} in-profile"
          f" + {sum(1 for r in rows if r['scope'] not in ('model', 'abstract'))} decision-driven), "
          f"{len(combos)} named combinations ({sum(1 for c in combos if c['source'] == 'G00')} from G00, "
          f"{sum(1 for c in combos if c['source'] == 'G03')} in-profile), {len(L['symbol_combos'])} ledger-symbol "
          f"combinations, {len(decs)} decision-driven obligations, {len(plan['packages'])} work packages, "
-         f"{n_anchor} existing-coverage anchors, {len(L['restrictions'])} G04 restrictions mapped.")
+         f"{n_anchor} existing-coverage anchors ({sum(len(r['cover']) for r in rows)} on feature rows), "
+         f"{len(L['restrictions'])} G04 restrictions mapped.")
     emit("")
     unc = collections.Counter(s for r in rows for s in r["uncovered"])
     emit("Stages with no existing anchor (rows): " + ", ".join(f"{s} {unc[s]}" for s in STAGES) + ".")
@@ -790,19 +899,28 @@ def report(L):
     emit("### Feature owners")
     emit("")
     emit("Columns: owning work packages per stage; `cov` lists the stages with an existing anchor "
-         "(s source, a admission, l lowering, b backend, e EVM, t theorem); `R` the G04 restrictions.")
+         "(s source, a admission, l lowering, b backend, e EVM, t theorem), then `r` for fixed-program "
+         "regressions, which cover no stage; `R` the G04 restrictions cited in the row's missing cases.")
     emit("")
     emit("| ID | cat | cur | source | admission | lowering | backend | EVM | theorem | cov | R |")
     emit("|---|---|---|---|---|---|---|---|---|---|---|")
     for r in sorted(rows, key=lambda r: (r["category"], r["id"])):
         o = r["owners"]
         cov = "".join(s[0] if s not in r["uncovered"] and s not in r["reasons"] else "·" for s in STAGES)
+        cov += "r" if any(a["stage"] == "regression" for a in r["cover"]) else "·"
         emit(f"| `{r['id']}` | {r['category']} | {r['current']} | {cell(o['source'])} | {cell(o['admission'])} | "
              f"{cell(o['lowering'])} | {cell(o['backend'])} | {cell(o['evm'])} | "
              f"{cell(o['theorem'])} ({', '.join(r['contracts'])}) | `{cov}` | {', '.join(r['restrictions'])} |")
     emit("")
     dash = [(r["id"], s, why) for r in rows for s, why in r["reasons"].items()]
     emit("Stages with no owner, by recorded reason: " + "; ".join(f"`{i}` {s}: {w}" for i, s, w in dash) + ".")
+    emit("")
+    emit("Split parents in G00's cells, refined to child packages (`REFINE`):")
+    emit("")
+    emit("| row | parent | children |")
+    emit("|---|---|---|")
+    for (fid, parent), r in sorted(D.REFINE.items()):
+        emit(f"| `{fid}` | {parent} | {r} |")
     emit("")
     emit("### Feature detail")
     for cat in sorted({r["category"] for r in rows}):
@@ -819,7 +937,7 @@ def report(L):
             if r["uncovered"]:
                 emit(f"  - no existing anchor: {', '.join(r['uncovered'])}")
             for m in r["missing"]:
-                emit(f"  - missing: {m}")
+                emit(f"  - missing: {md(m)}")
     emit("")
     emit("### Named combinations")
     emit("")
@@ -831,10 +949,12 @@ def report(L):
     emit("")
     for c in combos:
         emit(f"- **{c['key']}**")
+        if c["derivedOwners"]:
+            emit("  - through its rows: " + "; ".join(f"{s}: {' '.join(v)}" for s, v in c["derivedOwners"].items()))
         for a in c["cover"]:
             emit(f"  - {a['stage']}: {anchor_md(a)}")
         for m in c["missing"]:
-            emit(f"  - missing: {m}")
+            emit(f"  - missing: {md(m)}")
     emit("")
     emit("### Ledger-symbol combinations")
     emit("")
@@ -866,6 +986,9 @@ def report(L):
     emit("")
     emit("### Decision-driven obligations")
     emit("")
+    emit("`in-flight` names the parallel lanes (sibling sessions of this batch or Codex lanes) that change "
+         "the row; they are not repository paths.")
+    emit("")
     emit("| ID | obligation | decisions | owners (stage: packages) | in-flight |")
     emit("|---|---|---|---|---|")
     for d in decs:
@@ -877,7 +1000,7 @@ def report(L):
         for a in d["cover"]:
             emit(f"  - {a['stage']}: {anchor_md(a)}")
         for m in d["missing"]:
-            emit(f"  - missing: {m}")
+            emit(f"  - missing: {md(m)}")
     emit("")
     emit("### Dependency ledger")
     emit("")
@@ -895,7 +1018,7 @@ def report(L):
     for (a, k, why), bs in sorted(grouped.items()):
         emit(f"| {a} | {' '.join(sorted(bs))} | {k} | {why} |")
     emit("")
-    ack = {(a, b): r for a, b, r in D.ACKNOWLEDGED}
+    ack = {(k, a, b): r for k, a, b, r in D.ACKNOWLEDGED}
     emit("#### Findings")
     emit("")
     emit("`schedule`: a dependency whose prerequisite is not scheduled first (wave, then VM order); "
@@ -908,7 +1031,7 @@ def report(L):
     emit("|---|---|---|---|")
     for k, a, b, w, m in dep["findings"]:
         if k == "schedule":
-            emit(f"| {a} | {b} | {w} | {ack.get((a, b)) or ack.get((b, a))} |")
+            emit(f"| {a} | {b} | {w} | {ack.get((k, a, b))} |")
     emit("")
     emit("Module hot spots: inversions and shared writes grouped by the module through which they arise, "
          "each with one resolution.")
@@ -923,16 +1046,17 @@ def report(L):
         pk = sorted({x for _, a, b in bym[m] for x in (a, b)})
         kinds = collections.Counter(k for k, _, _ in bym[m])
         emit(f"| `{m}` | {', '.join(f'{n} {k}' for k, n in sorted(kinds.items()))} | {' '.join(pk)} | "
-             f"{D.ACK_MODULES.get(m)} |")
+             f"{D.ACK_MODULES.get(m, (None, None))[1]} |")
     emit("")
     acyc = {tuple(sorted(x.split())): r for x, r in D.ACKNOWLEDGED_CYCLES}
     if dep["cycles"]:
-        emit("Cycles over roadmap, G03 and module-induced edges:")
+        emit("Cycles over the declared edges and the wave order:")
         emit("")
         for c in dep["cycles"]:
             emit(f"- {' '.join(c)} — {acyc.get(tuple(c))}")
     else:
-        emit("No cycle over roadmap, G03 and module-induced edges.")
+        emit("No cycle over the declared (roadmap and G03, non-deferred) edges and the wave order; "
+             "module-induced edges are the inversions above, not cycle edges.")
     emit("")
     emit("#### Module ledger and checkpoint sizes")
     emit("")
@@ -1174,9 +1298,9 @@ class D:
         "requireBuiltin": {"evm": "G46.02 G47"},
         "revertBuiltin": {"evm": "G46.02 G47"},
         "keccakBuiltin": {"evm": "G46.02"},
-        "sha256Builtin": {"evm": "G46.02"},
-        "ripemd160Builtin": {"evm": "G46.02"},
-        "ecrecoverBuiltin": {"evm": "G46.02"},
+        "sha256Builtin": {"evm": "G46.02 G47"},
+        "ripemd160Builtin": {"evm": "G46.02 G47"},
+        "ecrecoverBuiltin": {"evm": "G46.02 G47"},
         "erc7201Builtin": {"evm": "G46.01"},
         "bytesConcat": {"evm": "G46.02"},
         "stringConcat": {"evm": "G46.02"},
@@ -1216,7 +1340,7 @@ class D:
         "referenceCopyRules": {"evm": "G46.02 G46.03"},
         "evaluationOrder": {"evm": "G46.06"},
         "exactConstants": {"evm": "G46.01"},
-        "fixedPoint": {"evm": "G46.01", "theorem": "G48 G49.02 G49.03",
+        "fixedPoint": {"evm": "G46.01 G46.02 G46.03", "theorem": "G48 G49.02 G49.03",
                        "contracts": "Admission Lowering Compilation Execution PublicCorrectness"},
     }
     # Stages with no owner, and why (`--check` requires a reason).
@@ -1238,7 +1362,7 @@ class D:
     # scope; "g00" supplies the four G00 columns while G00 has none.
     FEATURE_EXTRA = {
         "fixedPoint": {
-            "g00": ("S00 S01 S02", "G08 G09 G13", "G16", "G25"),
+            "g00": ("S00 S01 S02 S04.01 S04.02", "G08 G09 G13", "G16 G18.02 G21", "G25 G27.01 G35.03 G40 G41"),
             "note": "G00 Q6 (full fixed-point support beyond pinned solc); the manifest still scopes it "
                     "`upstream` until the g00-manifest-rev change lands",
         },
@@ -1290,23 +1414,27 @@ class D:
          "diamond-payments; readonly-external"),
         ("D03", "Osaka fork pin for the pinned EVM semantics and the compiled bytecode",
          ["G00 Q3 — EVM fork", "Pins (G00, G05, G06)"],
-         {"evm": "G06 G46.06 G47", "theorem": "G49.02 G54.01"},
+         {"evm": "G06 G46.06 G47", "theorem": "G49.02", "validation": "G54.01"},
          ["the vector scripts and the bridge are pinned to Cancun (g06-osaka-repin re-pins the scripts)",
           "no `EvmSpec` instance names a fork; G06's interface must fix Osaka",
-          "reference-EVM versions unlocked (G00 disagreement 5)"],
+          "reference-EVM versions unlocked (G00 disagreement 5)",
+          "the code-size idealization (D09) means the reference EVM used for vectors must be configured or "
+          "patched to skip EIP-170/EIP-3860, or such vectors kept below the limits"],
          "g06-osaka-repin; g06-evm-interface"),
         ("D04", "Public theorem over all eight EvalOrder combinations",
          ["G00 Q4 — settings", "Pins (G00, G05, G06)"],
-         {"source": "S02 S03.01 S03.03", "admission": "G05 G15", "lowering": "G16 G17 G19",
+         {"source": "S02 S03.01 S03.02 S03.03", "admission": "G05 G15", "lowering": "G16 G17 G19",
           "backend": "G26", "theorem": "G49.02 G49.03"},
          ["six of the eight `EvalOrder` flag combinations have no solc setting; the public theorem's settings "
           "type must express all eight",
           "lowering (`hoist`/`captureExpr`) is exercised for the legacy and via-IR orders only",
-          "no source semantics parameterized by `EvalOrder` independently of the elaborator"],
+          "no source semantics parameterized by `EvalOrder` independently of the elaborator",
+          "solc cannot produce the six combinations without a setting, so G52's differential tests cover only "
+          "two; the other six need source-level controls"],
          "g05-frontend"),
         ("D05", "Frozen profile solc 0.8.38; 0.8.34 fixtures only as SolKey compatibility checks",
          ["G00 Q4 — settings", "Pins (G00, G05, G06)"],
-         {"admission": "G05 G15", "theorem": "G53 G54.02"},
+         {"admission": "G05 G15", "theorem": "G48", "validation": "G53 G54.02"},
          ["CI downloads only solc 0.8.34 (G00 pins); the frozen 0.8.38 pin must reach `Source.Provenance`",
           "the 0.8.34 fixture boundary is not recorded per fixture (G05)"],
          "g05-frontend"),
@@ -1314,7 +1442,7 @@ class D:
                 "a source-semantics parameter",
          ["G00 Q5 — `creationCode`/`runtimeCode`", "Contracts (G01)"],
          {"source": "S04.02", "lowering": "G23", "backend": "G44.02", "evm": "G47",
-          "theorem": "G01 G07 G49.02 G50.01"},
+          "theorem": "G49.02 G50.01", "interface": "G01 G07"},
          ["`SourceSpec` does not yet take the `Artifact` table as a parameter (g01-contracts-rev)",
           "the G07 non-circularity whitelist must admit exactly this compiler-output parameter",
           "no compiled artifact exists for any contract: `type(C).creationCode` has no producer"],
@@ -1336,7 +1464,8 @@ class D:
          None),
         ("D09", "Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized",
          ["G01 Q2 — fixed EVM limits", "Resources in the contracts", "Contracts (G01)"],
-         {"source": "S03.04 S04.04", "evm": "G06 G46.06 G47", "theorem": "G01 G49.03 G50.02"},
+         {"source": "S03.04 S04.04", "backend": "G44.02", "evm": "G06 G46.06 G47", "theorem": "G49.03 G50.02",
+          "interface": "G01"},
          ["`EvmSpec` resources still list code size (g01-contracts-rev drops it)",
           "`Lang.Res` ends a session at gas exhaustion; the decision requires the session to continue",
           "machine `.fault` conflates divergence with malformed code (G04 R38)"],
@@ -1352,12 +1481,15 @@ class D:
         ("D11", "Per-run hash premise and bound: the preimages hashed by an execution prefix do not collide, "
                 "plus a random-oracle collision bound (about q²/2²⁵⁷)",
          ["G01 Q3 / G04 Q1 — hash collisions", "Contracts (G01)"],
-         {"source": "S04.02", "backend": "G27.05 G31", "evm": "G46.03 G46.05", "theorem": "G01 G49.02 G50.02"},
+         {"source": "S04.02", "backend": "G27.05 G31", "evm": "G46.03 G46.05", "theorem": "G49.02 G50.02",
+          "interface": "G01"},
          ["storage slots are symbolic terms that never collide (`Slot`, G04 R34) — global injectivity in the type",
           "`PublicCorrectness` has no per-run premise yet (g01-contracts-rev); the bound lemma is new "
           "(hash-collision-bound)",
           "the premise must quantify over the prefix's actual preimages, including mapping keys and "
-          "dynamic-array bases"],
+          "dynamic-array bases",
+          "the core has no probability library: the bound must be stated combinatorially, as a count over "
+          "oracle functions in the idealized random-oracle model the decision names, not about keccak itself"],
          "hash-collision-bound; g01-contracts-rev; evm-storage-slots"),
         ("D12", "History-dependent callee strategies with unbounded reentrancy; address 0 has no code",
          ["G01 Q4 — environment"],
@@ -1369,14 +1501,16 @@ class D:
          None),
         ("D13", "Observation: the full `Event` list with exact ABI and revert bytes, `Panic` codes included",
          ["G01 Q5 — observation"],
-         {"source": "S04.02", "lowering": "G21", "backend": "G38 G41", "evm": "G46.02 G47",
+         {"source": "S04.02", "lowering": "G21", "backend": "G38 G41 G42.02 G44.03", "evm": "G46.02 G47",
           "theorem": "G49.02 G50.02"},
          ["revert data is erased in the compiler theorem (G04 R37); `THalt` loses panic codes",
+          "the call, creation and callee-answer events of the `Event` list have no producer: typed calls and "
+          "creation are not compiled (G42.02, G44.03)",
           "function results are not observed (G04 R41)"],
          "revert-outcome-specs"),
         ("D14", "`decode : EvmWorld → Option IntrinsicWorld` exported by the public theorem",
          ["G01 Q6 — state transfer", "Contracts (G01)"],
-         {"backend": "G24", "evm": "G46.02 G46.03 G47", "theorem": "G01 G49.02 G50.02"},
+         {"backend": "G24 G27.05", "evm": "G46.02 G46.03 G47", "theorem": "G49.02 G50.02", "interface": "G01"},
          ["`PublicCorrectness` has no `decode` field (g01-contracts-rev)",
           "the core relation `Sim` is a relation, not a computable decoder; memory `StateRepr` likewise",
           "decoding symbolic slots back from numeric EVM storage needs the D11 hash premise"],
@@ -1403,15 +1537,16 @@ class D:
         ("D18", "Payment acceptance: any outcome for untyped recipients, history-dependent; typed recipients "
                 "run their own code",
          ["G04 Q3 — payment acceptance"],
-         {"source": "S04.03", "lowering": "G22.02 G22.05", "backend": "G43", "evm": "G47",
+         {"source": "S04.03", "lowering": "G22.02 G22.05", "backend": "G24 G43", "evm": "G47",
           "theorem": "G50.02"},
          ["acceptance is the oracle `Machine.accepts` (G04 R33); recipient code is never run",
-          "the payment disjunct (iii) of `compile_correct` is a stale weakening (G04 R32)"],
+          "the payment disjunct (iii) of `compile_correct` is a stale weakening (G04 R32); G24 owns the "
+          "interim restatement of T1/T12/T13/T15 without it (G04 §3.1), G43 the payment relation"],
          "diamond-payments"),
         ("D19", "Frame failure semantics: any external call frame may fail with a revert its caller sees "
                 "(1024 depth, forwarded-gas exhaustion in callbacks)",
          ["Follow-up — nested-frame failures", "Resources in the contracts"],
-         {"source": "S03.03 S04.03", "lowering": "G22.01 G22.02", "backend": "G42.02 G42.06",
+         {"source": "S03.03 S04.03", "lowering": "G22.01 G22.02", "backend": "G42.02 G42.03 G42.06",
           "evm": "G47", "theorem": "G50.02"},
          ["the source semantics lets typed calls fail only through the response table",
           "no theorem relates a callee-side out-of-gas or depth failure to the caller's observed revert"],
@@ -1419,7 +1554,7 @@ class D:
         ("D20", "Transaction failure semantics: any transaction may revert from gas exhaustion and the session "
                 "continues",
          ["Follow-up — block gas limit", "Resources in the contracts"],
-         {"source": "S04.04", "evm": "G47", "theorem": "G01 G50.02"},
+         {"source": "S04.04", "evm": "G47", "theorem": "G50.02", "interface": "G01"},
          ["`Lang.Res` ends a session at gas exhaustion (contract revision needed)",
           "`Lifetime.System` and `ContractWorld.Step` have no exhaustion transition"],
          "g01-contracts-rev"),
@@ -1439,54 +1574,54 @@ class D:
          None),
     ]
     DECISION_COVER = {
-        "D01": [("admission", "Solidity.Language.Feature.exclusion_complete", "Solidity/Language/Features.lean",
+        "D01": [('admission', "Solidity.Language.Feature.exclusion_complete", "Solidity/Language/Features.lean",
                  "every excluded feature has a structured diagnostic"),
-                ("admission", "Solidity.Language.Unmodelled.excluded", "Solidity/Language/Features.lean",
+                ('admission', "Solidity.Language.Unmodelled.excluded", "Solidity/Language/Features.lean",
                  "every diagnostic denotes an excluded feature"),
-                ("admission", "Solidity.Frontend.Source.ScopeScan.within", "Solidity/Frontend/Source.lean",
+                ('admission', "Solidity.Frontend.Source.ScopeScan.within", "Solidity/Frontend/Source.lean",
                  "a successful scan's feature list is within the profile")],
-        "D02": [("theorem", "Solidity.Main.noCallback_iff", "Solidity/Theorems.lean",
+        "D02": [('theorem', "Solidity.Main.noCallback_iff", "Solidity/Theorems.lean",
                  "no-callback validity agrees for callback-free formulas"),
-                ("evm", "Solidity.Bridge.Adversary.holdsC_iff_all_policies", "Bridge/SolidityBridge/Adversary.lean",
+                ('theorem', "Solidity.Bridge.Adversary.holdsC_iff_all_policies", "Bridge/SolidityBridge/Adversary.lean",
                  "callback modality equals quantification over adversary policies")],
-        "D04": [("lowering", "Solidity.EvalOrder", "Solidity/Syntax/Raw.lean", "the three evaluation-order flags"),
-                ("lowering", "Solidity.EvalOrder.viaIR", "Solidity/Syntax/Raw.lean", "the via-IR combination")],
-        "D06": [("theorem", "Solidity.Roadmap.Artifact", "Solidity/Roadmap/Contracts.lean",
+        "D04": [('lowering', "Solidity.EvalOrder", "Solidity/Syntax/Raw.lean", "the three evaluation-order flags"),
+                ('lowering', "Solidity.EvalOrder.viaIR", "Solidity/Syntax/Raw.lean", "the via-IR combination")],
+        "D06": [('theorem', "Solidity.Roadmap.Artifact", "Solidity/Roadmap/Contracts.lean",
                  "whole-input table of code units"),
-                ("theorem", "Solidity.Roadmap.CodeUnit", "Solidity/Roadmap/Contracts.lean",
+                ('theorem', "Solidity.Roadmap.CodeUnit", "Solidity/Roadmap/Contracts.lean",
                  "initcode, runtime and link sites")],
-        "D08": [("source", "Solidity.recDepth", "Solidity/Syntax/Scoped.lean", "fixed 1024-frame unrolling to remove"),
-                ("source", "Solidity.Prog.runF_approx", "Solidity/Semantics/RunFuel.lean",
+        "D08": [('source', "Solidity.recDepth", "Solidity/Syntax/Scoped.lean", "fixed 1024-frame unrolling to remove"),
+                ('source', "Solidity.Prog.runF_approx", "Solidity/Semantics/RunFuel.lean",
                  "fuel approximation of the classical run"),
-                ("theorem", "Solidity.Roadmap.typedRunPrefixes", "Solidity/Roadmap/Contracts.lean",
+                ('theorem', "Solidity.Roadmap.typedRunPrefixes", "Solidity/Roadmap/Contracts.lean",
                  "intrinsic prefix family plug")],
-        "D09": [("theorem", "Solidity.Roadmap.EvmSpec", "Solidity/Roadmap/Contracts.lean",
+        "D09": [('theorem', "Solidity.Roadmap.EvmSpec", "Solidity/Roadmap/Contracts.lean",
                  "pinned EVM language with resources"),
-                ("theorem", "Solidity.Roadmap.Prefixes.Consistent", "Solidity/Roadmap/Contracts.lean",
+                ('theorem', "Solidity.Roadmap.Prefixes.Consistent", "Solidity/Roadmap/Contracts.lean",
                  "consistency of resourced prefix families")],
-        "D10": [("backend", "Solidity.Evm.Memory.frameNeedProg", "Solidity/Evm/MemoryCompile.lean",
+        "D10": [('backend', "Solidity.Evm.Memory.frameNeedProg", "Solidity/Evm/MemoryCompile.lean",
                  "peak frame need: a static frame, not a call stack")],
         "D11": [("evm", "Solidity.Evm.External.no_injective_slot_encoding",
                  "Bridge/SolidityBridge/ExternalEvm/Obstructions.lean", "symbolic slots admit no injective encoding"),
-                ("backend", "Solidity.Evm.Slot", "Solidity/Evm/Machine.lean", "symbolic slot terms (to replace)")],
-        "D12": [("evm", "Solidity.Bridge.Adversary.holdsC_iff_all_callees", "Bridge/SolidityBridge/Adversary.lean",
+                ('backend', "Solidity.Evm.Slot", "Solidity/Evm/Machine.lean", "symbolic slot terms (to replace)")],
+        "D12": [('theorem', "Solidity.Bridge.Adversary.holdsC_iff_all_callees", "Bridge/SolidityBridge/Adversary.lean",
                  "callback modality over all callees at a payment boundary"),
-                ("source", "Solidity.TTx", "Solidity/Semantics/State.lean", "static response table to generalize")],
-        "D13": [("theorem", "Solidity.Roadmap.Event", "Solidity/Roadmap/Contracts.lean", "shared observable events"),
-                ("theorem", "Solidity.Roadmap.Outcome", "Solidity/Roadmap/Contracts.lean", "outcomes with bytes"),
-                ("source", "Solidity.Prog.withPanics", "Solidity/Syntax/Checked.lean", "solc panic codes in callees")],
-        "D14": [("backend", "Solidity.Evm.Sim", "Solidity/Evm/Sim.lean", "core state relation (not a decoder)"),
-                ("backend", "Solidity.Evm.compile_storage", "Solidity/Evm/Correct.lean",
+                ('source', "Solidity.TTx", "Solidity/Semantics/State.lean", "static response table to generalize")],
+        "D13": [('theorem', "Solidity.Roadmap.Event", "Solidity/Roadmap/Contracts.lean", "shared observable events"),
+                ('theorem', "Solidity.Roadmap.Outcome", "Solidity/Roadmap/Contracts.lean", "outcomes with bytes"),
+                ('source', "Solidity.Prog.withPanics", "Solidity/Syntax/Checked.lean", "solc panic codes in callees")],
+        "D14": [('backend', "Solidity.Evm.Sim", "Solidity/Evm/Sim.lean", "core state relation (not a decoder)"),
+                ('backend', "Solidity.Evm.compile_storage", "Solidity/Evm/Correct.lean",
                  "live uint storage paths equal machine slots")],
-        "D16": [("admission", "Solidity.Frontend.Source.validateSettings", "Solidity/Frontend/Source.lean",
+        "D16": [('admission', "Solidity.Frontend.Source.validateSettings", "Solidity/Frontend/Source.lean",
                  "rejects `libraries` today")],
-        "D17": [("backend", "Solidity.Evm.Examples.rejected", "Solidity/Evm/Examples.lean",
+        "D17": [('backend', "Solidity.Evm.Examples.rejected", "Solidity/Evm/Examples.lean",
                  "kernel-checked rejection of a dangling alias")],
-        "D19": [("source", "Solidity.ContractWorld.Step", "Solidity/Semantics/ContractWorld.lean",
+        "D19": [('source', "Solidity.ContractWorld.Step", "Solidity/Semantics/ContractWorld.lean",
                  "multi-instance world steps with rollback")],
-        "D20": [("source", "Solidity.Lifetime.System", "Solidity/Semantics/Lifetime.lean",
+        "D20": [('source', "Solidity.Lifetime.System", "Solidity/Semantics/Lifetime.lean",
                  "deploy-then-call sessions, no exhaustion transition")],
-        "D21": [("backend", "Solidity.Evm.Sim.init", "Solidity/Evm/Correct.lean",
+        "D21": [('backend', "Solidity.Evm.Sim.init", "Solidity/Evm/Correct.lean",
                  "fresh start state with zero caller/value")],
     }
 
@@ -1615,16 +1750,16 @@ class D:
     MODULES = {
         "S00": "new", "S01": "new", "S02": "new", "S03.01": "new", "S03.02": "new", "S03.03": "new",
         "S03.04": "new", "S04.01": "new", "S04.02": "new", "S04.03": "new", "S04.04": "new",
-        "S05": "Solidity.Language.Features",
+        "S05": "new",
         "G00": "new", "G01": "Solidity.Roadmap.Contracts", "G02": "new", "G03": "new", "G04": "new",
         "G05": "Solidity.Frontend.Source Solidity.Frontend.SourceUnits",
         "G06": "SolidityBridge.ExternalEvm",
         "G07": "new",
         "G08": "new", "G09": "new", "G10": "new", "G11": "new",
-        "G12": "Solidity.Frontend.SourceUnits Solidity.Frontend.Import",
-        "G13": "Solidity.Syntax.Elab.Values Solidity.Syntax.Elab.Context",
-        "G14": "Solidity.Frontend.SolcJson.Contract",
-        "G15": "Solidity.Frontend.SolcJson.Admission Solidity.Frontend.Source",
+        "G12": "Solidity.Frontend.SourceUnits",
+        "G13": "new",
+        "G14": "new",
+        "G15": "Solidity.Frontend.SolcJson.Admission Solidity.Frontend.Source Solidity.Frontend.SolcJson.Body",
         "G16": "Solidity.Syntax.Elab.Values Solidity.Syntax.Checked Solidity.Semantics.NumericLowering",
         "G17": "Solidity.Syntax.Elab.Stmt Solidity.Syntax.Elab.Lower",
         "G18.01": "Solidity.TypeGraph Solidity.Semantics.RecursiveStorage.Admission",
@@ -1712,7 +1847,8 @@ class D:
          {"source": "S04.03", "admission": "G15", "lowering": "G23", "backend": "G39", "evm": "G46.03"}, [],
          ["no compiled transient state; TLOAD/TSTORE bridge absent"]),
         ("loops/recursion vs gas/stack exhaustion", ["termination", "recursiveCalls"], ["machineResources"],
-         {"source": "S03.04", "backend": "G36.03 G37.02", "evm": "G46.06 G47", "theorem": "G49.03"},
+         {"source": "S03.04", "backend": "G36.03 G37.02", "evm": "G46.06 G47", "theorem": "G49.03",
+          "interface": "G01 G06"},
          ["R08", "R27", "R38", "R39"],
          ["resource exhaustion must be an allowed failure (D09), not an observation; no resource-indexed theorem"]),
         ("`send`/`transfer` vs exact stipend", ["sendTransfer"], ["gasOption", "machineResources"],
@@ -1750,24 +1886,26 @@ class D:
         # --- in-profile combinations (G03) ---
         ("mixed core/memory programs", ["memoryLocation", "storageLocation", "whileStatement", "internalCalls",
                                         "sendTransfer", "assertBuiltin"], [],
-         {"backend": "G24 G36.02 G37.01 G38 G43", "theorem": "G49.01 G49.03"}, ["R01", "R02", "R03", "R29"],
+         {"backend": "G24 G36.02 G37.01 G37.02 G37.03 G38 G43", "theorem": "G48 G49.01 G49.03"},
+         ["R01", "R02", "R03", "R29"],
          ["one compiler per whole program; a core prefix cannot feed a memory suffix"]),
         ("whole contracts: dispatch, ABI entry, deployment and sessions",
          ["contracts", "functions", "abiEntryValidation", "constructors"], [],
-         {"backend": "G40 G41 G44.01", "evm": "G47", "theorem": "G49.02 G50.01 G50.02"},
+         {"backend": "G40 G41 G44.01", "evm": "G46.03 G46.04 G46.05 G47", "theorem": "G49.02 G50.01 G50.02"},
          ["R04", "R05", "R40", "R41"],
          ["the compiler theorems relate one program from a represented state; no contract-level statement"]),
         ("loops whose bodies push, pop, delete or pay",
          ["whileStatement", "forStatement", "arrayPush", "arrayPop", "deleteExpression", "sendTransfer"], [],
-         {"lowering": "G19", "backend": "G30 G36.02 G36.03 G43"}, ["R21", "R22", "R24"],
+         {"lowering": "G19", "backend": "G24 G30 G36.02 G36.03 G43"}, ["R21", "R22", "R24"],
          ["core loop bodies must not push/pay/shrink; no loops on the memory path"]),
         ("recursion with memory frames and reference results",
          ["recursiveCalls", "memoryLocation", "returnStatement", "internalFunctionTypes"], [],
-         {"source": "S03.03", "backend": "G32 G37.01 G37.02 G37.03", "evm": "G46.02"}, ["R08", "R09", "R26", "R30"],
+         {"source": "S03.03", "backend": "G32 G37.01 G37.02 G37.03 G45.02", "evm": "G46.02"},
+         ["R08", "R09", "R26", "R30"],
          ["inline calls, value arguments only, fixed source depth; frames in memory per D10"]),
         ("storage aliases across pop/delete and pushes",
          ["storageAliasing", "danglingReferences", "arrayPop", "arrayPushReference", "deleteExpression"], [],
-         {"source": "S04.01", "lowering": "G18.05", "backend": "G28 G30"}, ["R16", "R18", "R36"],
+         {"source": "S04.01", "lowering": "G18.05", "backend": "G27.03 G28 G30 G35.02"}, ["R16", "R18", "R36"],
          ["fragile aliases forgotten at a shrink; `T storage p = arr.push()` refused"]),
         ("runtime-length storage copies with nested mappings",
          ["storageCopy", "dynamicArrays", "stringType", "mappings", "deleteMappingTails"], [],
@@ -1781,24 +1919,26 @@ class D:
          ["memory path: primitive-member storage struct → memory only"]),
         ("hashed mapping keys and dynamic-array bases under the per-run hash premise",
          ["mappings", "keccakBuiltin", "stringType", "dynamicBytesType", "dynamicArrays"], [],
-         {"backend": "G27.02 G27.05 G31", "evm": "G46.03 G46.05"}, ["R10", "R14", "R15", "R34", "R35"],
+         {"lowering": "G18.01", "backend": "G27.02 G27.05 G31", "evm": "G46.03 G46.05"},
+         ["R10", "R14", "R15", "R34", "R35"],
          ["uint keys only; symbolic slots with global injectivity; KECCAK256 from the stack"]),
         ("checked/unchecked arithmetic at every width, sign and operator",
          ["checkedArithmetic", "uncheckedArithmetic", "integerTypes", "bitwise", "shifts", "compoundAssignment",
           "panicCodes"], [],
-         {"lowering": "G16", "backend": "G25", "evm": "G46.01"}, ["R12", "R13"],
+         {"lowering": "G16", "backend": "G25 G27.01", "evm": "G46.01"}, ["R12", "R13"],
          ["signed bitwise/arithmetic `>>` refused by the compiler; width rests on lowering"]),
         ("modular and hash builtins on the core path", ["addmodBuiltin", "mulmodBuiltin", "keccakBuiltin",
                                                          "sha256Builtin", "ripemd160Builtin"], [],
          {"backend": "G25 G31", "evm": "G46.05"}, ["R10"],
          ["`valIn` refuses `modular` and `hash` values"]),
         ("own balance and payments", ["addressBalance", "sendTransfer", "msgValue", "nonpayableEntry"], [],
-         {"source": "S04.03 S04.04", "lowering": "G22.05", "backend": "G31 G43", "evm": "G46.04 G47"},
+         {"source": "S04.03 S04.04", "lowering": "G22.05", "backend": "G24 G31 G36.03 G42.03 G43",
+          "evm": "G46.04 G47"},
          ["R11", "R32", "R33"],
          ["`address(this).balance` refused; payment asymmetry; recipient code not run"]),
         ("try/catch over custom errors, panics and revert payloads",
          ["tryStatement", "catchClauses", "errorDeclarations", "revertPayloads", "panicCodes"], [],
-         {"lowering": "G21 G22.01", "backend": "G38 G41 G42.02 G42.06", "evm": "G47"}, ["R07", "R37"],
+         {"lowering": "G21 G22.01", "backend": "G38 G41 G42.02 G42.03 G42.06", "evm": "G47"}, ["R07", "R37"],
          ["`tryCall`/`revertData`/`catchData` out of the compiler; revert bytes erased"]),
         ("transient state through self-calls, callbacks and rollback",
          ["transientState", "externalSelfCalls", "callbackSemantics", "rollback"], [],
@@ -1820,14 +1960,25 @@ class D:
          {"source": "S03.02", "lowering": "G19", "backend": "G36.01 G44.01"}, [],
          ["no theorem for `wrapMods`/`lowerReturns`; via-IR re-initialisation at each `_` not followed"]),
         ("executable bytecode for every lowered program", ["contracts", "functions", "arithmetic", "whileStatement"], [],
-         {"backend": "G45.01 G45.02 G45.03 G45.04 G45.05 G45.06", "evm": "G46.06", "theorem": "G49.02"},
+         {"backend": "G45.01 G45.02 G45.03 G45.04 G45.05 G45.06",
+          "evm": "G46.01 G46.02 G46.03 G46.04 G46.05 G46.06", "theorem": "G49.02"},
          ["R05"],
          ["the target is the word-level `Machine` with macro instructions; no instruction selection, assembler or byte encoding"]),
+        ("recursive type graphs across storage paths, copies and ABI",
+         ["recursiveTypes", "structTypes", "mappings", "dynamicArrays", "storageCopy", "abiEncode"], [],
+         {"source": "S04.01", "lowering": "G18.01 G18.06", "backend": "G27.04 G35.05", "evm": "G46.03"}, [],
+         ["the graph foundation (`TypeGraph`, `RecursiveStorage`) is not connected to import, `State` or the "
+          "compiler; recursive ABI shapes are refused"]),
+        ("fixed-point values in arithmetic, storage, ABI and conversions",
+         ["fixedPoint", "explicitConversions", "storageLocation", "abiEncode", "abiDecode"], [],
+         {"source": "S02 S04.01 S04.02", "lowering": "G16 G21", "backend": "G25 G27.01 G40 G41",
+          "evm": "G46.01 G46.02"}, [],
+         ["no fixed-point support at any stage (D07)"]),
         ("structured control realized as EVM jumps", ["whileStatement", "ifStatement", "breakStatement"], [],
          {"backend": "G45.03", "evm": "G46.01 G46.06"}, ["R23"],
          ["structured `LOOP` and relative jumps; `checked_exp_helper` unrolled 255 times"]),
         ("abstract machine vs pinned EVM resources", ["termination", "addressTypes"], [],
-         {"evm": "G46.04 G46.06 G47"}, ["R27"],
+         {"evm": "G46.04 G46.06 G47", "interface": "G01 G06"}, ["R27"],
          ["no gas, no stack limit, 256-bit addresses, `CALL` without forwarded gas"]),
         ("getters and ABI of nested aggregates", ["publicGetters", "mappings", "structTypes", "abiEncode",
                                                   "abiDecode"], [],
@@ -1841,24 +1992,24 @@ class D:
     ]
     COMBO_COVER = {
         "mixed core/memory programs": [
-            ("backend", "Solidity.Evm.Compiler.Compilation.correct", "Solidity/Evm/Compiler.lean",
+            ('backend', "Solidity.Evm.Compiler.Compilation.correct", "Solidity/Evm/Compiler.lean",
              "unified entry, one path per program")],
         "loops whose bodies push, pop, delete or pay": [
-            ("backend", "Solidity.Evm.Examples.loop_push_rejected", "Solidity/Evm/Examples.lean",
+            ('backend', "Solidity.Evm.Examples.loop_push_rejected", "Solidity/Evm/Examples.lean",
              "kernel-checked rejection of a pushing loop")],
         "storage aliases across pop/delete and pushes": [
-            ("backend", "Solidity.Evm.Examples.rejected", "Solidity/Evm/Examples.lean",
+            ('backend', "Solidity.Evm.Examples.rejected", "Solidity/Evm/Examples.lean",
              "kernel-checked rejections incl. dangling alias")],
         "own balance and payments": [
-            ("backend", "Solidity.Evm.compile_net", "Solidity/Evm/Correct.lean", "net payments on machine success")],
+            ('backend', "Solidity.Evm.compile_net", "Solidity/Evm/Correct.lean", "net payments on machine success")],
         "divergence and finite-prefix correspondence": [
-            ("evm", "Solidity.Evm.compile_terminates_iff", "Bridge/SolidityBridge/Evm.lean",
+            ('backend', "Solidity.Evm.compile_terminates_iff", "Bridge/SolidityBridge/Evm.lean",
              "successful trace iff source success (pays = false)")],
         "transient state through self-calls, callbacks and rollback": [
-            ("source", "Solidity.ContractWorld.World.resetTransient_persistent", "Solidity/Semantics/TransientWorld.lean",
+            ('source', "Solidity.ContractWorld.World.resetTransient_persistent", "Solidity/Semantics/TransientWorld.lean",
              "transaction reset keeps persistent storage")],
         "loops/recursion vs gas/stack exhaustion": [
-            ("source", "Solidity.recDepth", "Solidity/Syntax/Scoped.lean", "fixed source recursion depth")],
+            ('source', "Solidity.recDepth", "Solidity/Syntax/Scoped.lean", "fixed source recursion depth")],
     }
     # ---- existing coverage (stage, declaration, file, note) and missing cases ----
     # Collected by four read-only research passes over the base and checked
@@ -1868,19 +2019,19 @@ class D:
             ('lowering', 'Solidity.abiDecodeWith', 'Solidity/Syntax/Elab/Lower.lean', 'decode lowering'),
             ('lowering', 'Solidity.abiBounds', 'Solidity/Syntax/Elab/Lower.lean', 'offset/length checks before traversal'),
             ('lowering', 'Solidity.abiReadGen', 'Solidity/Syntax/Elab/Lower.lean', 'recursive reader, noncanonical offsets accepted'),
-            ('theorem', 'Solidity.Examples.Tactics.AbiFeatures.byte_roundtrip', 'Solidity/Examples/Tactics/AbiFeatures.lean', 'encode/decode roundtrip'),
+            ('regression', 'Solidity.Examples.Tactics.AbiFeatures.byte_roundtrip', 'Solidity/Examples/Tactics/AbiFeatures.lean', 'encode/decode roundtrip'),
         ],
         'abiEncode': [
             ('admission', 'Solidity.Frontend.Admission.magicMember', 'Solidity/Frontend/SolcJson/Admission.lean', 'abi.encode tagged'),
             ('lowering', 'Solidity.abiWriteGen', 'Solidity/Syntax/Elab/Lower.lean', 'head/tail offset writer'),
             ('lowering', 'Solidity.abiEncodeNested?', 'Solidity/Syntax/Elab/Lower.lean', 'recursive shape encoding'),
-            ('theorem', 'Solidity.Examples.Tactics.AbiFeatures.byte_roundtrip', 'Solidity/Examples/Tactics/AbiFeatures.lean', 'decode(encode(x)) == x for uint8'),
+            ('regression', 'Solidity.Examples.Tactics.AbiFeatures.byte_roundtrip', 'Solidity/Examples/Tactics/AbiFeatures.lean', 'decode(encode(x)) == x for uint8'),
         ],
         'abiEncodeCall': [
             ('lowering', 'Solidity.Frontend.abiCallComponents?', 'Solidity/Frontend/SolcJson/Body.lean', 'target/tuple components checked vs declaration'),
             ('lowering', 'Solidity.encodeCallTypes?', 'Solidity/Syntax/Elab/Values.lean', 'exact parameter typing'),
             ('lowering', 'Solidity.encodeCallArg', 'Solidity/Syntax/Elab/Values.lean', 'contextual argument conversions'),
-            ('theorem', 'Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid', 'Solidity/Examples/Tactics/AbiHexCall.lean', 'exact-width hex encodeCall assertion'),
+            ('regression', 'Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid', 'Solidity/Examples/Tactics/AbiHexCall.lean', 'exact-width hex encodeCall assertion'),
         ],
         'abiEncodePacked': [
             ('admission', 'Solidity.Frontend.Admission.magicMember', 'Solidity/Frontend/SolcJson/Admission.lean', 'abi.encodePacked tagged'),
@@ -1905,9 +2056,9 @@ class D:
         ],
         'addmodBuiltin': [
             ('source', 'Solidity.ModOp.evalT', 'Solidity/Semantics/Ops.lean', 'wide intermediate, zero-modulus failure'),
-            ('evm', 'Solidity.Bridge.Arith.modular_exact', 'Bridge/SolidityBridge/Arith/Modular.lean', 'modular op exactness'),
-            ('evm', 'Solidity.Bridge.Arith.addmod_zmod', 'Bridge/SolidityBridge/Arith/Modular.lean', 'addmod equals ZMod sum'),
-            ('theorem', 'Solidity.Corpus.TestSuite.addmodMulmod', 'Solidity/Corpus/TestSuite.lean', 'addmod/mulmod corpus'),
+            ('source', 'Solidity.Bridge.Arith.modular_exact', 'Bridge/SolidityBridge/Arith/Modular.lean', 'modular op exactness'),
+            ('source', 'Solidity.Bridge.Arith.addmod_zmod', 'Bridge/SolidityBridge/Arith/Modular.lean', 'addmod equals ZMod sum'),
+            ('regression', 'Solidity.Corpus.TestSuite.addmodMulmod', 'Solidity/Corpus/TestSuite.lean', 'addmod/mulmod corpus'),
         ],
         'addressBalance': [
             ('source', 'Solidity.State.envVal', 'Solidity/Semantics/Run.lean', 'address(this).balance from selfBalance'),
@@ -1918,8 +2069,8 @@ class D:
         'addressLiterals': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'number literal typed address maps to addressLiterals'),
             ('source', 'Solidity.addressRows', 'Solidity/Syntax/Raw.lean', 'address width rows (160-bit)'),
-            ('theorem', 'Solidity.Examples.Tactics.SourceLiteralsImport.address_context_initial', 'Solidity/Examples/Tactics/SourceLiteralsImport.lean', 'address literal context preserved'),
-            ('theorem', 'Solidity.Corpus.TestSuite.returnDefaultAddressIsZero', 'Solidity/Corpus/TestSuite.lean', 'address default is zero'),
+            ('regression', 'Solidity.Examples.Tactics.SourceLiteralsImport.address_context_initial', 'Solidity/Examples/Tactics/SourceLiteralsImport.lean', 'address literal context preserved'),
+            ('regression', 'Solidity.Corpus.TestSuite.returnDefaultAddressIsZero', 'Solidity/Corpus/TestSuite.lean', 'address default is zero'),
         ],
         'addressTypes': [
             ('source', 'Solidity.ContractWorld.Address', 'Solidity/Semantics/ContractWorld.lean', 'logical address domain in the contract world'),
@@ -1930,7 +2081,7 @@ class D:
         'arithmetic': [
             ('source', 'Solidity.BinOp.evalNum', 'Solidity/Semantics/Ops.lean', 'checked/wrapping/signed div-mod semantics'),
             ('backend', 'Solidity.Evm.val_sim', 'Solidity/Evm/Expr.lean', 'compiled expression simulation'),
-            ('evm', 'Solidity.Bridge.Arith.uint_checked_all_widths', 'Bridge/SolidityBridge/Arith/NarrowChecked.lean', 'checked uint ops all widths'),
+            ('source', 'Solidity.Bridge.Arith.uint_checked_all_widths', 'Bridge/SolidityBridge/Arith/NarrowChecked.lean', 'checked uint ops all widths'),
             ('theorem', 'Solidity.Main.compiler_correct', 'Solidity/Theorems.lean', 'public compiler correctness'),
         ],
         'arrayLength': [
@@ -1957,19 +2108,19 @@ class D:
         'assertBuiltin': [
             ('source', 'Solidity.TRun.assert', 'Solidity/Semantics/Run.lean', 'false raises panic'),
             ('backend', 'Solidity.Evm.assert_sim', 'Solidity/Evm/Stmt.lean', 'assert simulation'),
-            ('evm', 'Solidity.Bridge.Arith.uintGuard_assert', 'Bridge/SolidityBridge/Arith/NarrowChecked.lean', 'guard via assert'),
-            ('theorem', 'Solidity.Corpus.TestSuite.testSimpleAssert', 'Solidity/Corpus/TestSuite.lean', 'assert corpus case'),
+            ('source', 'Solidity.Bridge.Arith.uintGuard_assert', 'Bridge/SolidityBridge/Arith/NarrowChecked.lean', 'guard via assert'),
+            ('regression', 'Solidity.Corpus.TestSuite.testSimpleAssert', 'Solidity/Corpus/TestSuite.lean', 'assert corpus case'),
         ],
         'assignment': [
             ('lowering', 'Solidity.hoistAssign', 'Solidity/Syntax/Elab/Stmt.lean', 'rhs/lhs capture scheduling'),
             ('source', 'Solidity.TRun.assign', 'Solidity/Semantics/Run.lean', 'typed assignment semantics'),
             ('backend', 'Solidity.Evm.assign_sim', 'Solidity/Evm/Stmt.lean', 'storage assignment simulation'),
-            ('theorem', 'Solidity.Corpus.TestSuite.storageAssignmentValueRhsBeforeIndex', 'Solidity/Corpus/TestSuite.lean', 'rhs before index order'),
+            ('regression', 'Solidity.Corpus.TestSuite.storageAssignmentValueRhsBeforeIndex', 'Solidity/Corpus/TestSuite.lean', 'rhs before index order'),
         ],
         'bitwise': [
             ('source', 'Solidity.Semantics.uintBitwise', 'Solidity/Semantics/Ops.lean', 'finite-width bitwise semantics'),
             ('backend', 'Solidity.Evm.binInFrag', 'Solidity/Evm/Layout.lean', '& | ^ compiled only at uint'),
-            ('evm', 'Solidity.Bridge.Arith.int_band_all_widths', 'Bridge/SolidityBridge/Arith/NarrowBitwise.lean', 'signed AND all widths'),
+            ('source', 'Solidity.Bridge.Arith.int_band_all_widths', 'Bridge/SolidityBridge/Arith/NarrowBitwise.lean', 'signed AND all widths'),
             ('evm', 'Solidity.Evm.External.and_step', 'Bridge/SolidityBridge/ExternalEvm.lean', 'AND agrees with reference EVM'),
         ],
         'blockTimestamp': [
@@ -1994,7 +2145,7 @@ class D:
             ('lowering', 'Solidity.Frontend.expr', 'Solidity/Frontend/SolcJson/Body.lean', 'renders bool Literal nodes'),
             ('backend', 'Solidity.Evm.compileVal', 'Solidity/Evm/Compile.lean', 'compiles bool values as words'),
             ('evm', 'Solidity.Evm.External.decode_bool', 'Bridge/SolidityBridge/ExternalEvm/WordOps.lean', 'bool word decoding agrees with EVM'),
-            ('theorem', 'Solidity.Corpus.TestSuite.requireTrueLiteral', 'Solidity/Corpus/TestSuite.lean', 'require(true) obligation proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.requireTrueLiteral', 'Solidity/Corpus/TestSuite.lean', 'require(true) obligation proved'),
         ],
         'breakStatement': [
             ('lowering', 'Solidity.Abrupt', 'Solidity/Syntax/Elab/Lower.lean', 'brk/cnt/ret abrupt kinds'),
@@ -2017,7 +2168,7 @@ class D:
             ('source', 'Solidity.Stmt.callsBack', 'Solidity/Semantics/Callback.lean', 'statements that may call back'),
             ('source', 'Solidity.ExecS', 'Solidity/Semantics/Callback.lean', 'callback execution relation with invariant'),
             ('theorem', 'Solidity.Main.callback_soundness', 'Solidity/Theorems.lean', 'callback-modality calculus soundness'),
-            ('evm', 'Solidity.Bridge.Adversary.exec_iff_trace', 'Bridge/SolidityBridge/Adversary.lean', 'adversary LTS matches transfer reading'),
+            ('theorem', 'Solidity.Bridge.Adversary.exec_iff_trace', 'Bridge/SolidityBridge/Adversary.lean', 'adversary LTS matches transfer reading'),
         ],
         'calldataLocation': [
             ('lowering', 'Solidity.calldataCheck', 'Solidity/Syntax/Elab/Context.lean', 'enforces immutability of calldata parameters'),
@@ -2028,18 +2179,18 @@ class D:
         'canonicalRethrow': [
             ('lowering', 'Solidity.Frontend.memoryRethrow?', 'Solidity/Frontend/SolcJson/Body.lean', 'only whole-buffer revert(add(p,32),mload(p))'),
             ('source', 'Solidity.RevPart', 'Solidity/Syntax/Scoped.lean', 'RevPart.mem raw buffer payload'),
-            ('theorem', 'Solidity.RevPart.evalT_mem', 'Solidity/Semantics/RevertMemory.lean', 'memory payload evaluation'),
-            ('theorem', 'Solidity.TRun.catchBytes_self_data', 'Solidity/Semantics/RevertMemory.lean', 'bytes transported to catch'),
+            ('source', 'Solidity.RevPart.evalT_mem', 'Solidity/Semantics/RevertMemory.lean', 'memory payload evaluation'),
+            ('source', 'Solidity.TRun.catchBytes_self_data', 'Solidity/Semantics/RevertMemory.lean', 'bytes transported to catch'),
         ],
         'catchClauses': [
             ('source', 'Solidity.TRun.catchData', 'Solidity/Semantics/Run.lean', 'catch binds reason/raw bytes'),
             ('source', 'Solidity.CatchKind.decode', 'Solidity/Semantics/Run.lean', 'Error(string) decode vs raw'),
             ('theorem', 'Solidity.Stmt.sound_catchData', 'Solidity/Calculus/SoundCatch.lean', 'catch-data rule soundness'),
-            ('theorem', 'Solidity.TRun.catchData_self_data', 'Solidity/Semantics/RevertMemory.lean', 'self-call bytes reach typed catch'),
+            ('source', 'Solidity.TRun.catchData_self_data', 'Solidity/Semantics/RevertMemory.lean', 'self-call bytes reach typed catch'),
         ],
         'checkedArithmetic': [
             ('lowering', 'Solidity.Prog.checkOF', 'Solidity/Syntax/Checked.lean', 'inserts overflow guards per intermediate op'),
-            ('theorem', 'Solidity.Checked.add_uint_exact', 'Solidity/Syntax/CheckedExact.lean', 'checked uint addition guard exact'),
+            ('source', 'Solidity.Checked.add_uint_exact', 'Solidity/Syntax/CheckedExact.lean', 'checked uint addition guard exact'),
             ('theorem', 'Solidity.Bridge.Arith.narrowCheck_full', 'Bridge/SolidityBridge/Arith/Lowering.lean', 'narrow-width checked lowering correct'),
             ('theorem', 'Solidity.Main.compiler_checked', 'Solidity/Theorems.lean', 'compiler correctness for checked programs'),
         ],
@@ -2047,12 +2198,12 @@ class D:
             ('admission', 'Solidity.Frontend.scanSpecifications', 'Solidity/Frontend/Import.lean', 'scans NatSpec spec annotations by lexical binders'),
             ('lowering', 'Solidity.Frontend.specCommentTokens', 'Solidity/Frontend/Import.lean', 'tokenizes spec comments; ordinary comments stay data'),
             ('lowering', 'Solidity.Frontend.docText', 'Solidity/Frontend/SolcJson/Contract.lean', 'reads documentation nodes for clauses'),
-            ('theorem', 'Solidity.Examples.Tactics.SourceIdentifiersImport.escaped_spec_valid', 'Solidity/Examples/Tactics/SourceIdentifiersImport.lean', 'spec with escaped identifiers is valid'),
+            ('regression', 'Solidity.Examples.Tactics.SourceIdentifiersImport.escaped_spec_valid', 'Solidity/Examples/Tactics/SourceIdentifiersImport.lean', 'spec with escaped identifiers is valid'),
         ],
         'comparisons': [
             ('source', 'Solidity.BinOp.evalBool', 'Solidity/Semantics/Ops.lean', 'typed comparison semantics'),
             ('backend', 'Solidity.Evm.scmp_tail', 'Solidity/Evm/Signed.lean', 'signed compare code tail'),
-            ('evm', 'Solidity.Bridge.Arith.int_lt_all_widths', 'Bridge/SolidityBridge/Arith/Comparison.lean', 'signed < all widths'),
+            ('source', 'Solidity.Bridge.Arith.int_lt_all_widths', 'Bridge/SolidityBridge/Arith/Comparison.lean', 'signed < all widths'),
             ('evm', 'Solidity.Evm.External.slt_step', 'Bridge/SolidityBridge/ExternalEvm/SignedOps.lean', 'SLT agrees with reference EVM'),
         ],
         'compoundAssignment': [
@@ -2065,13 +2216,13 @@ class D:
             ('source', 'Solidity.Val', 'Solidity/Syntax/Scoped.lean', 'Val.ternary evaluates one arm'),
             ('lowering', 'Solidity.mobileTy', 'Solidity/Syntax/Elab/Values.lean', 'inferred mobile type of arms'),
             ('backend', 'Solidity.Evm.Memory.conditionalValue_correct', 'Solidity/Evm/MemoryExpr.lean', 'conditional code correct'),
-            ('theorem', 'Solidity.Corpus.TestSuite.mappingPointerTernary', 'Solidity/Corpus/TestSuite.lean', 'reference-valued arms'),
+            ('regression', 'Solidity.Corpus.TestSuite.mappingPointerTernary', 'Solidity/Corpus/TestSuite.lean', 'reference-valued arms'),
         ],
         'constants': [
             ('lowering', 'Solidity.Frontend.constVal', 'Solidity/Frontend/SolcJson/Body.lean', 'evaluates constant initializers'),
             ('lowering', 'Solidity.RawExpr.foldConst', 'Solidity/Syntax/Elab/Context.lean', 'folds constants in sol{}'),
-            ('theorem', 'Solidity.Corpus.TestSuite.constantInlined', 'Solidity/Corpus/TestSuite.lean', 'constant inlined by identity'),
-            ('theorem', 'Solidity.Corpus.TestSuite.contractQualifiedConstantAndEnum', 'Solidity/Corpus/TestSuite.lean', 'qualified constant resolved'),
+            ('regression', 'Solidity.Corpus.TestSuite.constantInlined', 'Solidity/Corpus/TestSuite.lean', 'constant inlined by identity'),
+            ('regression', 'Solidity.Corpus.TestSuite.contractQualifiedConstantAndEnum', 'Solidity/Corpus/TestSuite.lean', 'qualified constant resolved'),
         ],
         'constructorLifetime': [
             ('source', 'Solidity.Contract.deployT', 'Solidity/Semantics/Deploy.lean', 'typed constructor deployment'),
@@ -2083,7 +2234,7 @@ class D:
             ('lowering', 'Solidity.elabCtor', 'Solidity/Syntax/Elab/Stmt.lean', 'runs initializers then constructor body'),
             ('lowering', 'Solidity.Frontend.renderInitializers', 'Solidity/Frontend/SolcJson/Contract.lean', 'state initializers in declaration order'),
             ('theorem', 'Solidity.Problem.deploy_of_valid', 'Solidity/Calculus/Deploy.lean', 'deployment obligation soundness'),
-            ('theorem', 'Solidity.Examples.Tactics.ContractWorld.failed_constructor_payment_rollback', 'Solidity/Examples/Tactics/ContractWorld.lean', 'failed constructor rolls back payment'),
+            ('regression', 'Solidity.Examples.Tactics.ContractWorld.failed_constructor_payment_rollback', 'Solidity/Examples/Tactics/ContractWorld.lean', 'failed constructor rolls back payment'),
         ],
         'continueStatement': [
             ('lowering', 'Solidity.Abrupt', 'Solidity/Syntax/Elab/Lower.lean', 'cnt flag kind'),
@@ -2094,18 +2245,18 @@ class D:
             ('lowering', 'Solidity.Frontend.readContract', 'Solidity/Frontend/SolcJson/Contract.lean', 'solc ContractDefinition into intrinsic Contract'),
             ('source', 'Solidity.Contract', 'Solidity/Syntax/Raw.lean', 'intrinsic contract: roots, funs, ctor, inits, errors'),
             ('source', 'Solidity.State.deploy', 'Solidity/Semantics/Deploy.lean', 'deployment state'),
-            ('theorem', 'Solidity.Examples.Tactics.Contracts.callAddOne', 'Solidity/Examples/Tactics/Contracts.lean', 'contract function call obligation'),
+            ('regression', 'Solidity.Examples.Tactics.Contracts.callAddOne', 'Solidity/Examples/Tactics/Contracts.lean', 'contract function call obligation'),
         ],
         'creationCode': [
             ('admission', 'Solidity.Frontend.Source.readCompilerCode', 'Solidity/Frontend/Source.lean', 'reads bound, linked code artifacts with provenance'),
             ('admission', 'Solidity.Frontend.Source.ScopeScan.requireCompilerCode', 'Solidity/Frontend/Source.lean', 'requires matching artifact'),
             ('lowering', 'Solidity.Frontend.staticCompilerBytes?', 'Solidity/Frontend/SolcJson/Body.lean', 'static creationCode bytes'),
-            ('theorem', 'Solidity.Frontend.staticCompilerLength_agrees', 'Solidity/Frontend/SolcJson/Body.lean', 'folded length matches emitted bytes'),
+            ('lowering', 'Solidity.Frontend.staticCompilerLength_agrees', 'Solidity/Frontend/SolcJson/Body.lean', 'folded length matches emitted bytes'),
         ],
         'creationTry': [
             ('source', 'Solidity.ContractWorld.World.tryCreate', 'Solidity/Semantics/ContractWorld.lean', 'creation-frame catch boundary'),
-            ('theorem', 'Solidity.ContractWorld.World.tryCreate_argument_failure', 'Solidity/Semantics/ContractWorld.lean', 'argument failures outside catch'),
-            ('theorem', 'Solidity.ContractWorld.Operation.tryCreate_caught', 'Solidity/Semantics/ContractWorldCertificates.lean', 'caught creation certificate'),
+            ('source', 'Solidity.ContractWorld.World.tryCreate_argument_failure', 'Solidity/Semantics/ContractWorld.lean', 'argument failures outside catch'),
+            ('source', 'Solidity.ContractWorld.Operation.tryCreate_caught', 'Solidity/Semantics/ContractWorldCertificates.lean', 'caught creation certificate'),
             ('admission', 'Solidity.Frontend.elabSolcWorldFactory', 'Solidity/Frontend/WorldImport.lean', 'constant-result try-new fragment'),
         ],
         'danglingReferences': [
@@ -2123,13 +2274,12 @@ class D:
             ('source', 'Solidity.TRun.clearT', 'Solidity/Semantics/Run.lean', 'typed reset of target'),
             ('backend', 'Solidity.Evm.delete_sim', 'Solidity/Evm/Stmt.lean', 'storage delete simulation'),
             ('backend', 'Solidity.Evm.Memory.deleteStruct_correct', 'Solidity/Evm/MemoryStructDefault.lean', 'memory struct delete correct'),
-            ('theorem', 'Solidity.Corpus.TestSuite.testDeleteKeepsMappingElementEntries', 'Solidity/Corpus/TestSuite.lean', 'mappings survive delete'),
+            ('regression', 'Solidity.Corpus.TestSuite.testDeleteKeepsMappingElementEntries', 'Solidity/Corpus/TestSuite.lean', 'mappings survive delete'),
         ],
         'deleteMappingTails': [
             ('source', 'Solidity.Storage.delete', 'Solidity/Semantics/Storage/Ops.lean', 'delete keeps mapping entries in place'),
             ('source', 'Solidity.Storage.CleanTail', 'Solidity/Typing/CleanTail.lean', 'explicit clean-tail predicate on storage'),
             ('theorem', 'Solidity.Prog.run_cleanTail', 'Solidity/Typing/CleanTailRun.lean', 'runs preserve clean tails'),
-            ('theorem', 'Solidity.Main.cleanTail_holds', 'Solidity/Theorems.lean', 'clean-tail validity theorem'),
         ],
         'doWhileStatement': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'DoWhileStatement tagged'),
@@ -2152,12 +2302,12 @@ class D:
         'ecrecoverBuiltin': [
             ('source', 'Solidity.Secp256k1.recover', 'Solidity/Secp256k1.lean', 'bounded recovery, zero on failure'),
             ('source', 'Solidity.ecrecoverBytes', 'Solidity/Semantics/Heap.lean', 'ecrecover interpretation over bytes'),
-            ('theorem', 'Solidity.Examples.Tactics.Recovery.recover_address', 'Solidity/Examples/Tactics/Recovery.lean', 'concrete recovery vector'),
+            ('regression', 'Solidity.Examples.Tactics.Recovery.recover_address', 'Solidity/Examples/Tactics/Recovery.lean', 'concrete recovery vector'),
         ],
         'emitStatement': [
             ('lowering', 'Solidity.Frontend.stmt1', 'Solidity/Frontend/SolcJson/Body.lean', 'resolved positional emit; named args refused'),
             ('lowering', 'Solidity.eagerArgsWith', 'Solidity/Syntax/Elab/Values.lean', 'operands evaluated in order, log dropped'),
-            ('theorem', 'Solidity.Examples.Tactics.CallExceptions.event_argument_panics', 'Solidity/Examples/Tactics/CallExceptions.lean', 'erased event argument still panics'),
+            ('regression', 'Solidity.Examples.Tactics.CallExceptions.event_argument_panics', 'Solidity/Examples/Tactics/CallExceptions.lean', 'erased event argument still panics'),
         ],
         'emptyDataValueCall': [
             ('lowering', 'Solidity.Frontend.valueCall?', 'Solidity/Frontend/SolcJson/Body.lean', 'matches only (bool ok,)=r.call{value:v}("")'),
@@ -2168,8 +2318,8 @@ class D:
         'enumDeclarations': [
             ('source', 'Solidity.enumRows', 'Solidity/Syntax/Raw.lean', 'enum ordinal rows'),
             ('lowering', 'Solidity.enumLit?', 'Solidity/Syntax/Elab/Values.lean', 'enum member to uint ordinal'),
-            ('theorem', 'IRLocal_checked', 'tests/upstream/EnumBounds.lean', 'enum conversion bounds checked (viaIR)'),
-            ('theorem', 'Solidity.Examples.Tactics.CallExceptions.exact_enum', 'Solidity/Examples/Tactics/CallExceptions.lean', 'exact enum range result'),
+            ('regression', 'IRLocal_checked', 'tests/upstream/EnumBounds.lean', 'enum conversion bounds checked (viaIR)'),
+            ('regression', 'Solidity.Examples.Tactics.CallExceptions.exact_enum', 'Solidity/Examples/Tactics/CallExceptions.lean', 'exact enum range result'),
         ],
         'enumTypes': [
             ('lowering', 'Solidity.enumRows', 'Solidity/Syntax/Raw.lean', 'enum members as bounded uint rows'),
@@ -2178,24 +2328,24 @@ class D:
         ],
         'erc7201Builtin': [
             ('source', 'Solidity.ERC7201.root', 'Solidity/ERC7201.lean', 'namespace formula'),
-            ('theorem', 'Solidity.ERC7201.root_aligned', 'Solidity/ERC7201.lean', 'low byte cleared for all ids'),
+            ('source', 'Solidity.ERC7201.root_aligned', 'Solidity/ERC7201.lean', 'low byte cleared for all ids'),
             ('lowering', 'Solidity.hoistERC7201With', 'Solidity/Syntax/Elab/Lower.lean', 'runtime/literal erc7201 lowering'),
-            ('theorem', 'Solidity.Examples.Tactics.AbiFeaturesImport.namespace_property', 'Solidity/Examples/Tactics/AbiFeaturesImport.lean', 'imported namespace property'),
+            ('regression', 'Solidity.Examples.Tactics.AbiFeaturesImport.namespace_property', 'Solidity/Examples/Tactics/AbiFeaturesImport.lean', 'imported namespace property'),
         ],
         'errorDeclarations': [
             ('lowering', 'Solidity.Frontend.selectErrorDeclarations', 'Solidity/Frontend/SolcJson/Contract.lean', 'selects errors by declaration ID'),
             ('lowering', 'Solidity.revertErrParts', 'Solidity/Syntax/Elab/Lower.lean', 'encodes custom error revert data'),
-            ('theorem', 'Solidity.Examples.Tactics.SourceUnitsImport.qualified_errors', 'Solidity/Examples/Tactics/SourceUnitsImport.lean', 'qualified error signatures kept'),
+            ('regression', 'Solidity.Examples.Tactics.SourceUnitsImport.qualified_errors', 'Solidity/Examples/Tactics/SourceUnitsImport.lean', 'qualified error signatures kept'),
         ],
         'errorEventSelector': [
             ('lowering', 'Solidity.Frontend.declarationMetadata', 'Solidity/Frontend/SolcJson/Body.lean', 'error bytes4 / event bytes32; anonymous refused'),
-            ('theorem', 'Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors', 'Solidity/Examples/Tactics/DeclarationMetadata.lean', 'error selectors'),
-            ('theorem', 'Solidity.Examples.Tactics.DeclarationMetadata.eventSelector', 'Solidity/Examples/Tactics/DeclarationMetadata.lean', 'event selector'),
+            ('regression', 'Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors', 'Solidity/Examples/Tactics/DeclarationMetadata.lean', 'error selectors'),
+            ('regression', 'Solidity.Examples.Tactics.DeclarationMetadata.eventSelector', 'Solidity/Examples/Tactics/DeclarationMetadata.lean', 'event selector'),
         ],
         'etherUnits': [
             ('source', 'Solidity.unitFactor?', 'Solidity/Syntax/Grammar.lean', 'wei/gwei/ether factors'),
             ('lowering', 'Solidity.Frontend.constVal', 'Solidity/Frontend/SolcJson/Body.lean', 'multiplies subdenomination before range check'),
-            ('theorem', 'Solidity.Corpus.TestSuite.numberLiteralForms', 'Solidity/Corpus/TestSuite.lean', '1 gwei and other literal forms proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.numberLiteralForms', 'Solidity/Corpus/TestSuite.lean', '1 gwei and other literal forms proved'),
         ],
         'evaluationOrder': [
             ('lowering', 'Solidity.EvalOrder', 'Solidity/Syntax/Raw.lean', 'selected compiler pipeline order'),
@@ -2206,7 +2356,7 @@ class D:
         'eventDeclarations': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'EventDefinition/EmitStatement classified'),
             ('lowering', 'Solidity.Frontend.stmt1', 'Solidity/Frontend/SolcJson/Body.lean', 'emit checked against resolved event'),
-            ('theorem', 'Solidity.Examples.Tactics.CallExceptions.event_argument_panics', 'Solidity/Examples/Tactics/CallExceptions.lean', 'event argument evaluation can panic'),
+            ('regression', 'Solidity.Examples.Tactics.CallExceptions.event_argument_panics', 'Solidity/Examples/Tactics/CallExceptions.lean', 'event argument evaluation can panic'),
         ],
         'exactConstants': [
             ('admission', 'Solidity.Frontend.Q', 'Solidity/Frontend/SolcJson/Body.lean', 'exact rational constant values'),
@@ -2218,7 +2368,7 @@ class D:
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'typeConversion tagged explicitConversions'),
             ('lowering', 'Solidity.Frontend.sourceCast', 'Solidity/Frontend/SolcJson/Body.lean', 'renders solc casts'),
             ('lowering', 'Solidity.castCapture', 'Solidity/Syntax/Elab/Values.lean', 'truncation/sign-extension capture'),
-            ('evm', 'Solidity.Bridge.Arith.castCapture_typed', 'Bridge/SolidityBridge/Arith/Lowering.lean', 'cast lowering typed/correct'),
+            ('lowering', 'Solidity.Bridge.Arith.castCapture_typed', 'Bridge/SolidityBridge/Arith/Lowering.lean', 'cast lowering typed/correct'),
         ],
         'expressionStatements': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'ExpressionStatement tagged'),
@@ -2229,7 +2379,7 @@ class D:
         'extensionCalls': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'UsingForDirective tagged usingFor'),
             ('lowering', 'Solidity.Frontend.call', 'Solidity/Frontend/SolcJson/Body.lean', 'attached free function: receiver as first arg'),
-            ('theorem', 'Solidity.Corpus.TestSuite.libraryCallAndUsingFor', 'Solidity/Corpus/TestSuite.lean', 'corpus regression'),
+            ('regression', 'Solidity.Corpus.TestSuite.libraryCallAndUsingFor', 'Solidity/Corpus/TestSuite.lean', 'corpus regression'),
         ],
         'externalFunctionTypes': [
             ('admission', 'Solidity.Frontend.externalFunctionType', 'Solidity/Frontend/SolcJson/Body.lean', 'imports external function types'),
@@ -2240,13 +2390,13 @@ class D:
         'externalLibraryCalls': [
             ('admission', 'Solidity.Frontend.WorldLinked.read', 'Solidity/Frontend/WorldImport.lean', 'solc_world_library fragment reader'),
             ('source', 'Solidity.ContractWorld.World.libraryCall', 'Solidity/Semantics/ContractWorld.lean', 'linked run over caller storage'),
-            ('theorem', 'Solidity.ContractWorld.Operation.libraryCall_certificate', 'Solidity/Semantics/ContractWorldCertificates.lean', 'library-call operation certificate'),
+            ('source', 'Solidity.ContractWorld.Operation.libraryCall_certificate', 'Solidity/Semantics/ContractWorldCertificates.lean', 'library-call operation certificate'),
         ],
         'externalSelfCalls': [
             ('lowering', 'Solidity.trySelfBody', 'Solidity/Syntax/Elab/Stmt.lean', 'self callee inlined in own frame'),
             ('lowering', 'Solidity.selfReturnAbiCompatible', 'Solidity/Syntax/Elab/Lower.lean', 'self-return ABI kind check'),
             ('source', 'Solidity.TRun.tryCall', 'Solidity/Semantics/Run.lean', 'self flag: sender=this, value 0'),
-            ('theorem', 'Solidity.Examples.Tactics.TryCatch.selfCall_noCallback', 'Solidity/Examples/Tactics/TryCatch.lean', 'self-call example proof'),
+            ('regression', 'Solidity.Examples.Tactics.TryCatch.selfCall_noCallback', 'Solidity/Examples/Tactics/TryCatch.lean', 'self-call example proof'),
         ],
         'externalTypedCalls': [
             ('lowering', 'Solidity.extCallStmt', 'Solidity/Syntax/Elab/Lower.lean', 'bare call as try that reverts on failure'),
@@ -2285,24 +2435,24 @@ class D:
         'freeFunctions': [
             ('source', 'Solidity.SourceLocalVisibility', 'Solidity/Syntax/Raw.lean', 'freeFn visibility without receiver'),
             ('lowering', 'Solidity.Frontend.call', 'Solidity/Frontend/SolcJson/Body.lean', 'resolves free/imported functions by ID'),
-            ('theorem', 'Solidity.Corpus.TestSuite.fileLevelConstantEnumAndFunction', 'Solidity/Corpus/TestSuite.lean', 'file-level function call proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.fileLevelConstantEnumAndFunction', 'Solidity/Corpus/TestSuite.lean', 'file-level function call proved'),
         ],
         'functionAddress': [
             ('lowering', 'Solidity.Frontend.storedFunctionMemberType?', 'Solidity/Frontend/SolcJson/Body.lean', '.address typed address'),
-            ('theorem', 'Solidity.Examples.Tactics.FunctionTypes.addressOfValue', 'Solidity/Examples/Tactics/FunctionTypes.lean', 'address of function value'),
-            ('theorem', 'Solidity.Examples.Tactics.SourceAdmissionImport.boundSelf_iff', 'Solidity/Examples/Tactics/SourceAdmissionImport.lean', 'bound self receiver projection'),
+            ('regression', 'Solidity.Examples.Tactics.FunctionTypes.addressOfValue', 'Solidity/Examples/Tactics/FunctionTypes.lean', 'address of function value'),
+            ('regression', 'Solidity.Examples.Tactics.SourceAdmissionImport.boundSelf_iff', 'Solidity/Examples/Tactics/SourceAdmissionImport.lean', 'bound self receiver projection'),
         ],
         'functionCalls': [
             ('lowering', 'Solidity.hoistCallArgs', 'Solidity/Syntax/Elab/Stmt.lean', 'arguments evaluated once, left to right'),
             ('source', 'Solidity.TRun.call', 'Solidity/Semantics/Run.lean', 'fresh call frame semantics'),
             ('backend', 'Solidity.Evm.compileStmt', 'Solidity/Evm/Compile.lean', 'inline-call compilation'),
-            ('theorem', 'Solidity.Corpus.TestSuite.internalCallInExpression', 'Solidity/Corpus/TestSuite.lean', 'call in expression proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.internalCallInExpression', 'Solidity/Corpus/TestSuite.lean', 'call in expression proved'),
         ],
         'functionSelector': [
             ('lowering', 'Solidity.fnSelector?', 'Solidity/Syntax/Elab/Values.lean', 'selector of external function value'),
             ('lowering', 'Solidity.Frontend.declarationSelector', 'Solidity/Frontend/SolcJson/Body.lean', 'static declaration selectors fold'),
             ('lowering', 'Solidity.Frontend.storedFunctionMemberType?', 'Solidity/Frontend/SolcJson/Body.lean', '.selector typed bytes4'),
-            ('theorem', 'Solidity.Examples.Tactics.FunctionTypes.selectorOfValue', 'Solidity/Examples/Tactics/FunctionTypes.lean', 'selector of function value'),
+            ('regression', 'Solidity.Examples.Tactics.FunctionTypes.selectorOfValue', 'Solidity/Examples/Tactics/FunctionTypes.lean', 'selector of function value'),
         ],
         'functionValues': [
             ('lowering', 'Solidity.fnTag', 'Solidity/Syntax/Elab/Values.lean', 'tag encoding of internal function values'),
@@ -2313,19 +2463,19 @@ class D:
             ('source', 'Solidity.FunDecl', 'Solidity/Syntax/Raw.lean', 'params, named returns, modifiers, payable'),
             ('lowering', 'Solidity.Frontend.SolcFun.member', 'Solidity/Frontend/SolcJson/Contract.lean', 'solc function into model member'),
             ('backend', 'Solidity.Evm.call_family', 'Solidity/Evm/Correct.lean', 'inlined internal calls compile correctly'),
-            ('theorem', 'Solidity.Corpus.TestSuite.overloadedInternalCall', 'Solidity/Corpus/TestSuite.lean', 'overload resolution by solc identity'),
+            ('regression', 'Solidity.Corpus.TestSuite.overloadedInternalCall', 'Solidity/Corpus/TestSuite.lean', 'overload resolution by solc identity'),
         ],
         'hexLiterals': [
             ('lowering', 'Solidity.Frontend.validHexBytes', 'Solidity/Frontend/SolcJson/Body.lean', 'checks hex digits of solc hexValue'),
             ('source', 'Solidity.hexBytes?', 'Solidity/Syntax/Raw.lean', 'decodes hex literal into bytes'),
             ('lowering', 'Solidity.Frontend.abiHexLiteral?', 'Solidity/Frontend/SolcJson/Body.lean', 'hex literals as ABI call payloads'),
-            ('theorem', 'Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid', 'Solidity/Examples/Tactics/AbiHexCall.lean', 'exact hex payload property holds'),
+            ('regression', 'Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid', 'Solidity/Examples/Tactics/AbiHexCall.lean', 'exact hex payload property holds'),
         ],
         'identifiers': [
             ('admission', 'Solidity.Frontend.Admission.scan', 'Solidity/Frontend/SolcJson/Admission.lean', 'admission walk; declarations keyed by compiler IDs'),
             ('lowering', 'Solidity.Frontend.identText', 'Solidity/Frontend/SolcJson/Body.lean', 'quotes raw source names, including $ names and keywords'),
             ('lowering', 'Solidity.freshenStmt', 'Solidity/Syntax/Elab/Context.lean', 'renames locals so shadowed names stay apart'),
-            ('theorem', 'Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution', 'Solidity/Examples/Tactics/SourceIdentifiersImport.lean', 'imported shadowing runs correctly'),
+            ('regression', 'Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution', 'Solidity/Examples/Tactics/SourceIdentifiersImport.lean', 'imported shadowing runs correctly'),
         ],
         'ifStatement': [
             ('lowering', 'Solidity.Frontend.stmt1', 'Solidity/Frontend/SolcJson/Body.lean', 'IfStatement to sol ite'),
@@ -2342,13 +2492,13 @@ class D:
             ('lowering', 'Solidity.Frontend.tyOf', 'Solidity/Frontend/SolcJson/Body.lean', 'reads solc resolved types'),
             ('lowering', 'Solidity.intTyOf', 'Solidity/Syntax/Elab/Values.lean', 'operand width inference'),
             ('lowering', 'Solidity.widenBytes', 'Solidity/Syntax/Elab/Values.lean', 'fixed-bytes widening'),
-            ('evm', 'Solidity.Bridge.Arith.Widths.unsigned_widen', 'Bridge/SolidityBridge/Arith/Widths.lean', 'unsigned widening preserved'),
+            ('source', 'Solidity.Bridge.Arith.Widths.unsigned_widen', 'Bridge/SolidityBridge/Arith/Widths.lean', 'unsigned widening preserved'),
         ],
         'imports': [
             ('admission', 'Solidity.Frontend.Source.checkTree', 'Solidity/Frontend/SourceUnits.lean', 'validates resolved import path/source-ID pairs'),
             ('lowering', 'Solidity.Frontend.errorAliasScope?', 'Solidity/Frontend/SolcJson/Body.lean', 'resolves import alias scope for errors'),
             ('lowering', 'Solidity.Frontend.errorNamespace', 'Solidity/Frontend/SolcJson/Body.lean', 'module/contract namespace of a declaration'),
-            ('theorem', 'Solidity.Examples.Tactics.SourceUnitsImport.aliased_errors', 'Solidity/Examples/Tactics/SourceUnitsImport.lean', 'aliased imported errors keep signature'),
+            ('regression', 'Solidity.Examples.Tactics.SourceUnitsImport.aliased_errors', 'Solidity/Examples/Tactics/SourceUnitsImport.lean', 'aliased imported errors keep signature'),
         ],
         'increments': [
             ('source', 'Solidity.OpLoc.bumpT', 'Solidity/Semantics/Run.lean', 'old/new value bump at lvalue'),
@@ -2360,19 +2510,19 @@ class D:
             ('source', 'Solidity.IndexTy', 'Solidity/Syntax/Raw.lean', 'mapping/array index typing'),
             ('source', 'Solidity.Loc.resolveT', 'Solidity/Semantics/Run.lean', 'index resolution with bounds failure'),
             ('backend', 'Solidity.Evm.Memory.readArray_correct', 'Solidity/Evm/Memory.lean', 'memory array index read correct'),
-            ('theorem', 'Solidity.Corpus.TestSuite.storageIndexArrayReadOutOfBoundsReverts', 'Solidity/Corpus/TestSuite.lean', 'out-of-bounds read reverts'),
+            ('regression', 'Solidity.Corpus.TestSuite.storageIndexArrayReadOutOfBoundsReverts', 'Solidity/Corpus/TestSuite.lean', 'out-of-bounds read reverts'),
         ],
         'inheritance': [
             ('lowering', 'Solidity.Frontend.mergeC3', 'Solidity/Frontend/SolcJson/Contract.lean', 'C3 merge for linearization'),
             ('lowering', 'Solidity.Frontend.contractLineage', 'Solidity/Frontend/SolcJson/Contract.lean', 'uses solc linearizedBaseContracts'),
-            ('theorem', 'Solidity.Examples.Tactics.Inheritance.diamond_initialization', 'Solidity/Examples/Tactics/Inheritance.lean', 'diamond base init order'),
-            ('theorem', 'Solidity.Examples.Tactics.Inheritance.base_constructors', 'Solidity/Examples/Tactics/Inheritance.lean', 'base constructors run once'),
+            ('regression', 'Solidity.Examples.Tactics.Inheritance.diamond_initialization', 'Solidity/Examples/Tactics/Inheritance.lean', 'diamond base init order'),
+            ('regression', 'Solidity.Examples.Tactics.Inheritance.base_constructors', 'Solidity/Examples/Tactics/Inheritance.lean', 'base constructors run once'),
         ],
         'inlineArrays': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'isInlineArray TupleExpression tagged inlineArrays'),
             ('lowering', 'Solidity.inlineArrayTy', 'Solidity/Syntax/Elab/Lower.lean', 'infers fixed memory array type independent of target'),
             ('lowering', 'Solidity.inlineExprTy', 'Solidity/Syntax/Elab/Lower.lean', 'mobile/common element type inference'),
-            ('theorem', 'Solidity.Examples.Tactics.AggregatesImport.literals_valid', 'Solidity/Examples/Tactics/AggregatesImport.lean', 'imported inline-array literals validated'),
+            ('regression', 'Solidity.Examples.Tactics.AggregatesImport.literals_valid', 'Solidity/Examples/Tactics/AggregatesImport.lean', 'imported inline-array literals validated'),
         ],
         'integerTypes': [
             ('admission', 'Solidity.Frontend.narrowShape', 'Solidity/Frontend/SolcJson/Body.lean', 'imports nested narrow-width shapes from solc types'),
@@ -2383,12 +2533,12 @@ class D:
         'interfaceId': [
             ('lowering', 'Solidity.Frontend.declarationMetadata', 'Solidity/Frontend/SolcJson/Body.lean', 'XOR of own external selectors'),
             ('source', 'Solidity.Keccak.selector', 'Solidity/Keccak.lean', '4-byte selector'),
-            ('theorem', 'Solidity.Examples.Tactics.DeclarationMetadata.ownInterface', 'Solidity/Examples/Tactics/DeclarationMetadata.lean', 'interfaceId value'),
+            ('regression', 'Solidity.Examples.Tactics.DeclarationMetadata.ownInterface', 'Solidity/Examples/Tactics/DeclarationMetadata.lean', 'interfaceId value'),
         ],
         'interfaces': [
             ('lowering', 'Solidity.Frontend.declarationMetadata', 'Solidity/Frontend/SolcJson/Body.lean', 'interface metadata (own external selectors)'),
-            ('theorem', 'Solidity.Examples.Tactics.DeclarationMetadata.ownInterface', 'Solidity/Examples/Tactics/DeclarationMetadata.lean', 'interfaceId excludes inherited members'),
-            ('theorem', 'Solidity.Examples.Tactics.PublicGetters.interfaceOverride', 'Solidity/Examples/Tactics/PublicGetters.lean', 'getter overriding interface function'),
+            ('regression', 'Solidity.Examples.Tactics.DeclarationMetadata.ownInterface', 'Solidity/Examples/Tactics/DeclarationMetadata.lean', 'interfaceId excludes inherited members'),
+            ('regression', 'Solidity.Examples.Tactics.PublicGetters.interfaceOverride', 'Solidity/Examples/Tactics/PublicGetters.lean', 'getter overriding interface function'),
         ],
         'internalCalls': [
             ('lowering', 'Solidity.elabCall', 'Solidity/Syntax/Elab/Stmt.lean', 'resolved internal call to Stmt.call'),
@@ -2411,8 +2561,8 @@ class D:
         'libraries': [
             ('lowering', 'Solidity.Frontend.elabSolcWorldLibrary', 'Solidity/Frontend/WorldImport.lean', 'imports linked library into contract world'),
             ('source', 'Solidity.ContractWorld.World.libraryCall', 'Solidity/Semantics/ContractWorld.lean', 'linked library call with caller storage'),
-            ('theorem', 'Solidity.ContractWorld.Operation.libraryCall_certificate', 'Solidity/Semantics/ContractWorldCertificates.lean', 'library call certificate'),
-            ('theorem', 'Solidity.Corpus.TestSuite.libraryCallAndUsingFor', 'Solidity/Corpus/TestSuite.lean', 'inlined internal library call proved'),
+            ('source', 'Solidity.ContractWorld.Operation.libraryCall_certificate', 'Solidity/Semantics/ContractWorldCertificates.lean', 'library call certificate'),
+            ('regression', 'Solidity.Corpus.TestSuite.libraryCallAndUsingFor', 'Solidity/Corpus/TestSuite.lean', 'inlined internal library call proved'),
         ],
         'logicalStorageBase': [
             ('admission', 'Solidity.Frontend.Admission.validateNode', 'Solidity/Frontend/SolcJson/Admission.lean', 'validates StorageLayoutSpecifier base expressions'),
@@ -2442,25 +2592,25 @@ class D:
             ('source', 'Solidity.Heap.Keeps', 'Solidity/Semantics/Heap.lean', 'heap extension preserves existing object identity'),
             ('source', 'Solidity.Heap.alloc', 'Solidity/Semantics/Heap.lean', 'fresh typed heap allocation'),
             ('backend', 'Solidity.Evm.Memory.compile_correct', 'Solidity/Evm/MemoryCompile.lean', 'memory-path compiler correctness'),
-            ('theorem', 'Solidity.Evm.Compiler.Compilation.correct', 'Solidity/Evm/Compiler.lean', 'unified compiler correctness, either path'),
+            ('backend', 'Solidity.Evm.Compiler.Compilation.correct', 'Solidity/Evm/Compiler.lean', 'unified compiler correctness, either path'),
         ],
         'metaTypeExpression': [
             ('admission', 'Solidity.Frontend.Admission.builtinFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'type builtin tagged metaTypeExpression'),
             ('lowering', 'Solidity.Frontend.typeBound?', 'Solidity/Frontend/SolcJson/Body.lean', 'integer type(T).max/min folded'),
             ('lowering', 'Solidity.typeBoundExpr', 'Solidity/Syntax/Grammar.lean', 'only max/min modelled'),
-            ('theorem', 'Solidity.Corpus.TestSuite.typeBounds', 'Solidity/Corpus/TestSuite.lean', 'type bounds proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.typeBounds', 'Solidity/Corpus/TestSuite.lean', 'type bounds proved'),
         ],
         'modifierPlaceholder': [
             ('lowering', 'Solidity.RawStmt.fillHole', 'Solidity/Syntax/Elab/Lower.lean', 'substitutes function body at each _'),
             ('lowering', 'Solidity.RawStmt.hasHole', 'Solidity/Syntax/Elab/Lower.lean', 'requires a placeholder'),
-            ('theorem', 'Solidity.Corpus.TestSuite.modifierSkippedPlaceholder', 'Solidity/Corpus/TestSuite.lean', 'placeholder that is not run'),
-            ('theorem', 'Solidity.Tests.ModifierFrameProofs.multi_ir', 'tests/upstream/ModifierFrameProofs.lean', 'repeated placeholder frames (viaIR)'),
+            ('regression', 'Solidity.Corpus.TestSuite.modifierSkippedPlaceholder', 'Solidity/Corpus/TestSuite.lean', 'placeholder that is not run'),
+            ('regression', 'Solidity.Tests.ModifierFrameProofs.multi_ir', 'tests/upstream/ModifierFrameProofs.lean', 'repeated placeholder frames (viaIR)'),
         ],
         'modifiers': [
             ('source', 'Solidity.ModApp', 'Solidity/Syntax/Raw.lean', 'modifier application: params, args, body'),
             ('lowering', 'Solidity.wrapMods', 'Solidity/Syntax/Elab/Lower.lean', 'inlines modifiers, first listed outermost'),
             ('lowering', 'Solidity.modifierFrame', 'Solidity/Syntax/Elab/Lower.lean', 'separate per-application frames (viaIR)'),
-            ('theorem', 'Solidity.Corpus.TestSuite.modifierFirstListedOutermost', 'Solidity/Corpus/TestSuite.lean', 'modifier nesting order proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.modifierFirstListedOutermost', 'Solidity/Corpus/TestSuite.lean', 'modifier nesting order proved'),
         ],
         'msgSender': [
             ('admission', 'Solidity.Frontend.Admission.magicMember', 'Solidity/Frontend/SolcJson/Admission.lean', 'msg.sender tagged msgSender'),
@@ -2476,14 +2626,14 @@ class D:
         ],
         'mulmodBuiltin': [
             ('source', 'Solidity.ModOp.wide', 'Solidity/Semantics/Ops.lean', 'arbitrary-precision intermediate'),
-            ('evm', 'Solidity.Bridge.Arith.mulmod_zmod', 'Bridge/SolidityBridge/Arith/Modular.lean', 'mulmod equals ZMod product'),
-            ('theorem', 'Solidity.Corpus.TestSuite.addmodMulmod', 'Solidity/Corpus/TestSuite.lean', 'addmod/mulmod corpus'),
+            ('source', 'Solidity.Bridge.Arith.mulmod_zmod', 'Bridge/SolidityBridge/Arith/Modular.lean', 'mulmod equals ZMod product'),
+            ('regression', 'Solidity.Corpus.TestSuite.addmodMulmod', 'Solidity/Corpus/TestSuite.lean', 'addmod/mulmod corpus'),
         ],
         'namedArguments': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'names on FunctionCall tagged'),
             ('lowering', 'Solidity.Frontend.isNamedCall', 'Solidity/Frontend/SolcJson/Body.lean', 'detects named calls'),
             ('lowering', 'Solidity.RawExpr.orderNamed', 'Solidity/Syntax/Elab/Context.lean', 'binds by formal name'),
-            ('theorem', 'Solidity.Corpus.TestSuite.namedArgumentsBindByName', 'Solidity/Corpus/TestSuite.lean', 'name binding proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.namedArgumentsBindByName', 'Solidity/Corpus/TestSuite.lean', 'name binding proved'),
         ],
         'names': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'Identifier/IdentifierPath nodes tagged identifiers+names'),
@@ -2494,14 +2644,14 @@ class D:
         'newContract': [
             ('admission', 'Solidity.Frontend.WorldCreation.read', 'Solidity/Frontend/WorldImport.lean', 'solc_world_factory fragment reader'),
             ('source', 'Solidity.ContractWorld.World.create', 'Solidity/Semantics/ContractWorld.lean', 'alloc, ctor run, payment, install'),
-            ('theorem', 'Solidity.ContractWorld.World.create_ok', 'Solidity/Semantics/ContractWorld.lean', 'successful creation characterised'),
+            ('source', 'Solidity.ContractWorld.World.create_ok', 'Solidity/Semantics/ContractWorld.lean', 'successful creation characterised'),
             ('theorem', 'Solidity.ContractWorld.World.create_post_of_spec', 'Solidity/Calculus/ContractWorld.lean', 'Spec proof to creation postcondition'),
         ],
         'newMemory': [
             ('source', 'Solidity.newArrT', 'Solidity/Semantics/Run.lean', 'fresh defaulted array allocation'),
             ('lowering', 'Solidity.elabNewTy', 'Solidity/Syntax/Elab/Values.lean', 'new T[](n) typing'),
             ('backend', 'Solidity.Evm.Memory.newArray_correct', 'Solidity/Evm/MemoryAllocSource.lean', 'allocation code correct'),
-            ('theorem', 'Solidity.Evm.Memory.compile_correct', 'Solidity/Evm/MemoryCompile.lean', 'memory compiler GrowingResult'),
+            ('backend', 'Solidity.Evm.Memory.compile_correct', 'Solidity/Evm/MemoryCompile.lean', 'memory compiler GrowingResult'),
         ],
         'nonpayableEntry': [
             ('source', 'Solidity.ContractWorld.World.enter', 'Solidity/Semantics/ContractWorld.lean', 'nonpayable/static entry refuses nonzero value'),
@@ -2517,8 +2667,8 @@ class D:
         ],
         'operatorAliases': [
             ('lowering', 'Solidity.Frontend.operatorAlias?', 'Solidity/Frontend/SolcJson/Body.lean', 'resolves UDVT operator to pure free function'),
-            ('theorem', 'Solidity.Examples.Tactics.OperatorAliasesImport.legacy_numeric', 'Solidity/Examples/Tactics/OperatorAliasesImport.lean', 'aliased numeric ops (legacy)'),
-            ('theorem', 'Solidity.Examples.Tactics.OperatorAliasesImport.viaIR_order', 'Solidity/Examples/Tactics/OperatorAliasesImport.lean', 'evaluation order (viaIR)'),
+            ('regression', 'Solidity.Examples.Tactics.OperatorAliasesImport.legacy_numeric', 'Solidity/Examples/Tactics/OperatorAliasesImport.lean', 'aliased numeric ops (legacy)'),
+            ('regression', 'Solidity.Examples.Tactics.OperatorAliasesImport.viaIR_order', 'Solidity/Examples/Tactics/OperatorAliasesImport.lean', 'evaluation order (viaIR)'),
         ],
         'overrideDeclarations': [
             ('lowering', 'Solidity.Frontend.overrideAliases', 'Solidity/Frontend/SolcJson/Contract.lean', 'maps overridden declarations to their selected body'),
@@ -2529,13 +2679,13 @@ class D:
             ('source', 'Solidity.Semantics.encodePanic', 'Solidity/RevertBytes.lean', 'Panic(uint256) payload encoding'),
             ('source', 'Solidity.TRun.selfPanicCode', 'Solidity/Semantics/Run.lean', 'panic code data in self-call frames'),
             ('theorem', 'Solidity.Semantics.decodeError_encodePanic', 'Solidity/Calculus/SoundCatch.lean', 'panic payload decoding round-trips'),
-            ('theorem', 'Solidity.Prog.run_noPanic', 'Solidity/Semantics/NoPanic.lean', 'assert-free programs never panic'),
+            ('source', 'Solidity.Prog.run_noPanic', 'Solidity/Semantics/NoPanic.lean', 'assert-free programs never panic'),
         ],
         'parentheses': [
             ('lowering', 'Solidity.Frontend.unparen', 'Solidity/Frontend/SolcJson/Body.lean', 'strips grouping from solc nodes'),
             ('lowering', 'Solidity.Frontend.operand', 'Solidity/Frontend/SolcJson/Body.lean', 're-parenthesises operator operands when rendering'),
-            ('theorem', 'Solidity.Corpus.TestSuite.parenthesizedRightOperand', 'Solidity/Corpus/TestSuite.lean', 'grouping preserved in proof corpus'),
-            ('theorem', 'Solidity.Corpus.TestSuite.parenthesizedCondition', 'Solidity/Corpus/TestSuite.lean', 'parenthesised condition corpus case'),
+            ('regression', 'Solidity.Corpus.TestSuite.parenthesizedRightOperand', 'Solidity/Corpus/TestSuite.lean', 'grouping preserved in proof corpus'),
+            ('regression', 'Solidity.Corpus.TestSuite.parenthesizedCondition', 'Solidity/Corpus/TestSuite.lean', 'parenthesised condition corpus case'),
         ],
         'pragmaAbicoder': [
             ('admission', 'Solidity.Frontend.Source.AbiCoder', 'Solidity/Frontend/Source.lean', 'ABI coder selection recorded'),
@@ -2557,20 +2707,20 @@ class D:
         'publicGetters': [
             ('lowering', 'Solidity.Frontend.publicGetterPlan', 'Solidity/Frontend/SolcJson/Getters.lean', 'synthesizes getter params/results'),
             ('lowering', 'Solidity.Frontend.publicGetterIdentity', 'Solidity/Frontend/SolcJson/Getters.lean', 'getter ABI identity'),
-            ('theorem', 'Solidity.Examples.Tactics.PublicGetters.scalar_exec', 'Solidity/Examples/Tactics/PublicGetters.lean', 'scalar getter execution'),
-            ('theorem', 'Solidity.Examples.Tactics.PublicGetters.storedGetterSelector', 'Solidity/Examples/Tactics/PublicGetters.lean', 'getter selector stored'),
+            ('regression', 'Solidity.Examples.Tactics.PublicGetters.scalar_exec', 'Solidity/Examples/Tactics/PublicGetters.lean', 'scalar getter execution'),
+            ('regression', 'Solidity.Examples.Tactics.PublicGetters.storedGetterSelector', 'Solidity/Examples/Tactics/PublicGetters.lean', 'getter selector stored'),
         ],
         'rangeAccess': [
             ('lowering', 'Solidity.sliceViewOf?', 'Solidity/Syntax/Elab/Context.lean', 'calldata slice view construction'),
             ('lowering', 'Solidity.sliceElementCopy', 'Solidity/Syntax/Elab/SliceCopy.lean', 'slice element copies'),
-            ('theorem', 'Solidity.Examples.Tactics.AggregateSlices.successful_run', 'Solidity/Examples/Tactics/AggregateSlices.lean', 'successful slice run'),
-            ('theorem', 'Solidity.Examples.Tactics.SliceReferenceCopies.legacy.invalidRange_run', 'Solidity/Examples/Tactics/SliceReferenceCopies.lean', 'invalid endpoints fail'),
+            ('regression', 'Solidity.Examples.Tactics.AggregateSlices.successful_run', 'Solidity/Examples/Tactics/AggregateSlices.lean', 'successful slice run'),
+            ('regression', 'Solidity.Examples.Tactics.SliceReferenceCopies.legacy.invalidRange_run', 'Solidity/Examples/Tactics/SliceReferenceCopies.lean', 'invalid endpoints fail'),
         ],
         'receiveFunction': [
             ('lowering', 'Solidity.Frontend.tagOf', 'Solidity/Frontend/SolcJson/Contract.lean', 'receive/fallback classified as internal entries'),
             ('source', 'Solidity.SourceCallable', 'Solidity/Syntax/Raw.lean', 'receive callable role'),
             ('lowering', 'Solidity.receiveSelfBody', 'Solidity/Syntax/Elab/Stmt.lean', 'self-payment runs receive body'),
-            ('theorem', 'Solidity.Examples.Tactics.SelfCall.receiveRuns', 'Solidity/Examples/Tactics/SelfCall.lean', 'receive body runs on self-payment'),
+            ('regression', 'Solidity.Examples.Tactics.SelfCall.receiveRuns', 'Solidity/Examples/Tactics/SelfCall.lean', 'receive body runs on self-payment'),
         ],
         'recursiveCalls': [
             ('source', 'Solidity.recUnroll', 'Solidity/Syntax/Scoped.lean', 'unrolled to recDepth; bottom exhausted'),
@@ -2581,7 +2731,7 @@ class D:
         'recursiveTypes': [
             ('source', 'Solidity.TypeGraph.Schema.no_inline_cycle', 'Solidity/TypeGraph.lean', 'graph schema has no inline cycles'),
             ('source', 'Solidity.TypeGraph.Path.read_save', 'Solidity/Semantics/RecursiveStorage/Paths.lean', 'graph storage read-after-write'),
-            ('evm', 'Solidity.TypeGraph.Legacy.KeyPath.observe_encode', 'Solidity/Semantics/RecursiveStorage/Legacy.lean', 'legacy layout encoding observationally faithful'),
+            ('source', 'Solidity.TypeGraph.Legacy.KeyPath.observe_encode', 'Solidity/Semantics/RecursiveStorage/Legacy.lean', 'legacy layout encoding observationally faithful'),
             ('source', 'Solidity.TypeGraph.CopyPermit.no_mapping', 'Solidity/Semantics/RecursiveStorage/Admission.lean', 'copy permits exclude mappings'),
         ],
         'referenceCopyRules': [
@@ -2594,7 +2744,7 @@ class D:
             ('source', 'Solidity.TRun.require', 'Solidity/Semantics/Run.lean', 'failure reverts with rollback'),
             ('lowering', 'Solidity.RawStmt.requireWith', 'Solidity/Syntax/Raw.lean', 'require with reason lowering'),
             ('backend', 'Solidity.Evm.Memory.requireValue_correct', 'Solidity/Evm/MemoryStatements.lean', 'memory-path require correct'),
-            ('theorem', 'Solidity.Corpus.TestSuite.requireFalseLiteral', 'Solidity/Corpus/TestSuite.lean', 'failing require reverts'),
+            ('regression', 'Solidity.Corpus.TestSuite.requireFalseLiteral', 'Solidity/Corpus/TestSuite.lean', 'failing require reverts'),
         ],
         'returnStatement': [
             ('lowering', 'Solidity.lowerReturns', 'Solidity/Syntax/Elab/Lower.lean', 'early returns inlined into guarded code'),
@@ -2618,7 +2768,7 @@ class D:
             ('lowering', 'Solidity.revertErrParts', 'Solidity/Syntax/Elab/Lower.lean', 'custom error selector/word parts'),
             ('source', 'Solidity.TRun.revertData', 'Solidity/Semantics/Run.lean', 'revert with byte payload'),
             ('theorem', 'Solidity.sound_revertData', 'Solidity/Calculus/SoundArms.lean', 'revertData rule soundness'),
-            ('theorem', 'Solidity.Examples.Tactics.CallExceptions.revert_argument_panics', 'Solidity/Examples/Tactics/CallExceptions.lean', 'operands evaluated before revert'),
+            ('regression', 'Solidity.Examples.Tactics.CallExceptions.revert_argument_panics', 'Solidity/Examples/Tactics/CallExceptions.lean', 'operands evaluated before revert'),
         ],
         'ripemd160Builtin': [
             ('source', 'Solidity.Hashes.ripemd160', 'Solidity/Hashes.lean', 'executable RIPEMD-160'),
@@ -2627,20 +2777,20 @@ class D:
         ],
         'rollback': [
             ('source', 'Solidity.TRun.tryCall', 'Solidity/Semantics/Run.lean', 'try/catch frame boundary with rollback'),
-            ('theorem', 'Solidity.ContractWorld.atomic_failure', 'Solidity/Semantics/ContractWorld.lean', 'failed operation restores the world'),
-            ('theorem', 'Solidity.Transient.Program.attempt_rollback', 'Solidity/Semantics/Transient.lean', 'caught failure rolls back transient cells'),
-            ('theorem', 'Solidity.ContractWorld.World.transact_failure', 'Solidity/Semantics/TransientWorld.lean', 'transaction failure rolls back fully'),
+            ('source', 'Solidity.ContractWorld.atomic_failure', 'Solidity/Semantics/ContractWorld.lean', 'failed operation restores the world'),
+            ('source', 'Solidity.Transient.Program.attempt_rollback', 'Solidity/Semantics/Transient.lean', 'caught failure rolls back transient cells'),
+            ('source', 'Solidity.ContractWorld.World.transact_failure', 'Solidity/Semantics/TransientWorld.lean', 'transaction failure rolls back fully'),
         ],
         'runtimeCode': [
             ('admission', 'Solidity.Frontend.Source.readCompilerCode', 'Solidity/Frontend/Source.lean', 'runtime artifact with provenance'),
             ('lowering', 'Solidity.Frontend.staticCompilerBytes?', 'Solidity/Frontend/SolcJson/Body.lean', 'static runtimeCode bytes'),
-            ('theorem', 'Solidity.Frontend.staticCompilerLength_agrees', 'Solidity/Frontend/SolcJson/Body.lean', 'length agreement'),
+            ('lowering', 'Solidity.Frontend.staticCompilerLength_agrees', 'Solidity/Frontend/SolcJson/Body.lean', 'length agreement'),
         ],
         'sendTransfer': [
             ('source', 'Solidity.TRun.transfer', 'Solidity/Semantics/Run.lean', 'transfer reverts on refusal'),
             ('theorem', 'Solidity.sendStep_sound', 'Solidity/Calculus/SoundControl.lean', 'send rule: both outcomes'),
             ('backend', 'Solidity.Evm.transfer_sim', 'Solidity/Evm/Stmt.lean', 'transfer compiled; refusal asymmetry'),
-            ('evm', 'Solidity.Bridge.Adversary.call_step_sound', 'Bridge/SolidityBridge/Adversary.lean', 'adversarial callee at transfer'),
+            ('theorem', 'Solidity.Bridge.Adversary.call_step_sound', 'Bridge/SolidityBridge/Adversary.lean', 'adversarial callee at transfer'),
         ],
         'sha256Builtin': [
             ('source', 'Solidity.Hashes.sha256', 'Solidity/Hashes.lean', 'executable SHA-256'),
@@ -2649,37 +2799,37 @@ class D:
         ],
         'shifts': [
             ('source', 'Solidity.BinOp.evalNum', 'Solidity/Semantics/Ops.lean', 'shift semantics, left type preserved'),
-            ('evm', 'Solidity.Bridge.Arith.int_shr_all_widths', 'Bridge/SolidityBridge/Arith/NarrowShifts.lean', 'sign-extending SAR all widths'),
+            ('source', 'Solidity.Bridge.Arith.int_shr_all_widths', 'Bridge/SolidityBridge/Arith/NarrowShifts.lean', 'sign-extending SAR all widths'),
             ('evm', 'Solidity.Evm.External.shr_step', 'Bridge/SolidityBridge/ExternalEvm/WordOps.lean', 'SHR agrees with reference EVM'),
-            ('theorem', 'Solidity.Corpus.TestSuite.testShiftRightNegativeRoundsDown', 'Solidity/Corpus/TestSuite.lean', 'negative >> rounds down'),
+            ('regression', 'Solidity.Corpus.TestSuite.testShiftRightNegativeRoundsDown', 'Solidity/Corpus/TestSuite.lean', 'negative >> rounds down'),
         ],
         'shortCircuit': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', '&&/|| tagged shortCircuit'),
             ('source', 'Solidity.BinOp.shortT', 'Solidity/Semantics/Run.lean', 'lazy second operand'),
             ('theorem', 'Solidity.BinOp.shortT_none', 'Solidity/Calculus/SoundLocal.lean', 'calculus soundness lemma for short-circuit'),
-            ('theorem', 'Solidity.Corpus.TestSuite.logicalAndShortCircuitRhs', 'Solidity/Corpus/TestSuite.lean', 'RHS skipped when not needed'),
+            ('regression', 'Solidity.Corpus.TestSuite.logicalAndShortCircuitRhs', 'Solidity/Corpus/TestSuite.lean', 'RHS skipped when not needed'),
         ],
         'sourceUnits': [
             ('admission', 'Solidity.Frontend.Source.readCompilationUnit', 'Solidity/Frontend/SourceUnits.lean', 'reads multi-source compilation unit'),
             ('admission', 'Solidity.Frontend.Source.checkTree', 'Solidity/Frontend/SourceUnits.lean', 'checks source IDs and import pairs'),
             ('admission', 'Solidity.Frontend.Source.SourceFile', 'Solidity/Frontend/Source.lean', 'per-file SHA and pragma metadata'),
-            ('theorem', 'Solidity.Examples.Tactics.SourceUnitsImport.normal_legacy', 'Solidity/Examples/Tactics/SourceUnitsImport.lean', 'multi-unit import executes (legacy)'),
+            ('regression', 'Solidity.Examples.Tactics.SourceUnitsImport.normal_legacy', 'Solidity/Examples/Tactics/SourceUnitsImport.lean', 'multi-unit import executes (legacy)'),
         ],
         'stateMutability': [
             ('source', 'Solidity.SourceMutability', 'Solidity/Syntax/Raw.lean', 'nonpayable/pure/view/payable'),
             ('source', 'Solidity.Mutability', 'Solidity/AST.lean', 'intrinsic mutability'),
-            ('theorem', "Solidity.nonpayable_of_within'", 'Solidity/Semantics/RunFrame.lean', 'nonpayable payment guard'),
+            ('source', "Solidity.nonpayable_of_within'", 'Solidity/Semantics/RunFrame.lean', 'nonpayable payment guard'),
             ('evm', 'Solidity.Evm.External.callvalue_upstream', 'Bridge/SolidityBridge/ExternalEvm/Environment.lean', 'CALLVALUE agrees with upstream'),
         ],
         'stateVariables': [
             ('source', 'Solidity.Contract', 'Solidity/Syntax/Raw.lean', 'typed storage roots with okDeep defaults'),
             ('backend', 'Solidity.Evm.rootSlot', 'Solidity/Evm/Layout.lean', 'root slot layout'),
             ('backend', 'Solidity.Evm.initStorage_repr', 'Solidity/Evm/Repr.lean', 'zero-initialised storage is represented'),
-            ('theorem', 'Solidity.Evm.compile_storage', 'Solidity/Evm/Correct.lean', 'compiled storage effects correct'),
+            ('backend', 'Solidity.Evm.compile_storage', 'Solidity/Evm/Correct.lean', 'compiled storage effects correct'),
         ],
         'staticCallRestriction': [
             ('source', 'Solidity.ContractWorld.Context.isStatic', 'Solidity/Semantics/ContractWorld.lean', 'static call context flag'),
-            ('theorem', 'Solidity.Transient.Program.static_preserves', 'Solidity/Semantics/Transient.lean', 'static frames preserve transient state'),
+            ('source', 'Solidity.Transient.Program.static_preserves', 'Solidity/Semantics/Transient.lean', 'static frames preserve transient state'),
             ('lowering', 'Solidity.roStmt', 'Solidity/Syntax/Elab/Context.lean', 'view/pure write checking in elaborator'),
         ],
         'storageAliasing': [
@@ -2708,7 +2858,7 @@ class D:
             ('lowering', 'Solidity.Frontend.byteLiteralText', 'Solidity/Frontend/SolcJson/Body.lean', 'renders exact string/unicode/hex bytes from solc'),
             ('lowering', 'Solidity.strLit', 'Solidity/Syntax/Grammar.lean', 'sol{} string literal expansion'),
             ('source', 'Solidity.litBytes', 'Solidity/Syntax/Scoped.lean', 'intrinsic byte literal'),
-            ('theorem', 'Solidity.Examples.Tactics.ComputedRevert.unicode_hex_reason_exact', 'Solidity/Examples/Tactics/ComputedRevert.lean', 'exact revert-reason bytes from literals'),
+            ('regression', 'Solidity.Examples.Tactics.ComputedRevert.unicode_hex_reason_exact', 'Solidity/Examples/Tactics/ComputedRevert.lean', 'exact revert-reason bytes from literals'),
         ],
         'stringType': [
             ('lowering', 'Solidity.stringReason?', 'Solidity/Syntax/Elab/Values.lean', 'refuses string indexing/length with a reason'),
@@ -2736,7 +2886,7 @@ class D:
         'termination': [
             ('source', 'Solidity.Stmt.loop_terminates_of_wellFounded', 'Solidity/Semantics/Termination.lean', 'loop termination from well-founded measure'),
             ('source', 'Solidity.Prog.runF_approx', 'Solidity/Semantics/RunFuel.lean', 'fuel evaluator approximates semantic run'),
-            ('evm', 'Solidity.Evm.compile_terminates_iff', 'Bridge/SolidityBridge/Evm.lean', 'compiled code terminates iff source does'),
+            ('backend', 'Solidity.Evm.compile_terminates_iff', 'Bridge/SolidityBridge/Evm.lean', 'compiled code terminates iff source does'),
             ('theorem', 'Solidity.TLoop.run_correct_of_wellFounded_on', 'Bridge/SolidityBridge/LoopFixpoint.lean', 'loop fixpoint correctness under well-foundedness'),
         ],
         'thisAddress': [
@@ -2748,12 +2898,12 @@ class D:
         'timeUnits': [
             ('source', 'Solidity.unitFactor?', 'Solidity/Syntax/Grammar.lean', 'seconds..weeks factors'),
             ('lowering', 'Solidity.Frontend.constVal', 'Solidity/Frontend/SolcJson/Body.lean', 'folds time subdenomination'),
-            ('theorem', 'Solidity.Corpus.TestSuite.numberLiteralForms', 'Solidity/Corpus/TestSuite.lean', '2 days folded and proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.numberLiteralForms', 'Solidity/Corpus/TestSuite.lean', '2 days folded and proved'),
         ],
         'transientState': [
             ('source', 'Solidity.Storage.RegionRoot.disjoint', 'Solidity/Semantics/Storage/Anon.lean', 'persistent/transient roots disjoint'),
             ('source', 'Solidity.Transient.Program.attempt_rollback', 'Solidity/Semantics/Transient.lean', 'failure rolls back the transient product'),
-            ('theorem', 'Solidity.ContractWorld.World.resetTransient_persistent', 'Solidity/Semantics/TransientWorld.lean', 'transaction reset keeps persistent storage'),
+            ('source', 'Solidity.ContractWorld.World.resetTransient_persistent', 'Solidity/Semantics/TransientWorld.lean', 'transaction reset keeps persistent storage'),
             ('admission', 'Solidity.Frontend.elabSolcWorldFactory', 'Solidity/Frontend/WorldImport.lean', 'closed factory targets with transient roots'),
         ],
         'tryStatement': [
@@ -2766,7 +2916,7 @@ class D:
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'non-inline TupleExpression tagged tupleExpressions'),
             ('lowering', 'Solidity.Frontend.explicitTupleAssignment', 'Solidity/Frontend/SolcJson/Body.lean', 'tuple assignment leaves with empty targets'),
             ('lowering', 'Solidity.elabTuple', 'Solidity/Syntax/Elab/Stmt.lean', 'elaborates tuple assignment/declaration'),
-            ('theorem', 'Solidity.Corpus.TestSuite.tupleAssignmentRotates', 'Solidity/Corpus/TestSuite.lean', 'commit-order rotation proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.tupleAssignmentRotates', 'Solidity/Corpus/TestSuite.lean', 'commit-order rotation proved'),
         ],
         'tupleTypes': [
             ('admission', 'Solidity.Frontend.explicitTupleAssignment', 'Solidity/Frontend/SolcJson/Body.lean', 'imports simultaneous tuple assignment'),
@@ -2777,7 +2927,7 @@ class D:
         'typeBounds': [
             ('lowering', 'Solidity.Frontend.typeBound?', 'Solidity/Frontend/SolcJson/Body.lean', 'type(T).min/max incl. signed minimum'),
             ('source', 'Solidity.typeBoundExpr', 'Solidity/Syntax/Grammar.lean', 'sol{} type bounds'),
-            ('theorem', 'Solidity.Corpus.TestSuite.typeBounds', 'Solidity/Corpus/TestSuite.lean', 'type bounds proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.typeBounds', 'Solidity/Corpus/TestSuite.lean', 'type bounds proved'),
         ],
         'typeName': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'type(C).name maps to typeName'),
@@ -2792,7 +2942,7 @@ class D:
         'unaryArithmetic': [
             ('source', 'Solidity.UnOp.evalT', 'Solidity/Semantics/Ops.lean', 'neg/not/bnot semantics'),
             ('backend', 'Solidity.Evm.Memory.unaryValue_correct', 'Solidity/Evm/MemoryExpr.lean', 'unary code correct (memory path)'),
-            ('evm', 'Solidity.Bridge.Arith.int_neg_checked_all_widths', 'Bridge/SolidityBridge/Arith/NarrowChecked.lean', 'checked min-int negation, all widths'),
+            ('source', 'Solidity.Bridge.Arith.int_neg_checked_all_widths', 'Bridge/SolidityBridge/Arith/NarrowChecked.lean', 'checked min-int negation, all widths'),
             ('evm', 'Solidity.Evm.External.not_step', 'Bridge/SolidityBridge/ExternalEvm/WordOps.lean', 'NOT agrees with reference EVM'),
         ],
         'uncheckedArithmetic': [
@@ -2805,17 +2955,17 @@ class D:
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'UncheckedBlock tagged uncheckedBlock/uncheckedArithmetic'),
             ('lowering', 'Solidity.uncheckStmts', 'Solidity/Syntax/Elab/Lower.lean', '+ - * ** to wrapping ops; callees stay checked'),
             ('backend', 'Solidity.Evm.binInFrag', 'Solidity/Evm/Layout.lean', 'addW/subW/mulW/powW compiled at uint only'),
-            ('theorem', 'Solidity.Examples.Tactics.Checked.uncheckedWrap', 'Solidity/Examples/Tactics/Checked.lean', 'regression example only'),
+            ('regression', 'Solidity.Examples.Tactics.Checked.uncheckedWrap', 'Solidity/Examples/Tactics/Checked.lean', 'regression example only'),
         ],
         'unicodeLiterals': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'unicodeString literal maps to unicodeLiterals'),
             ('lowering', 'Solidity.Frontend.byteLiteralText', 'Solidity/Frontend/SolcJson/Body.lean', 'unicode literal keeps solc-validated UTF-8 bytes'),
-            ('theorem', 'Solidity.Examples.Tactics.AbiFeatures.utf8_namespace', 'Solidity/Examples/Tactics/AbiFeatures.lean', 'UTF-8 namespace bytes exact'),
+            ('regression', 'Solidity.Examples.Tactics.AbiFeatures.utf8_namespace', 'Solidity/Examples/Tactics/AbiFeatures.lean', 'UTF-8 namespace bytes exact'),
         ],
         'usingFor': [
             ('lowering', 'Solidity.Frontend.call', 'Solidity/Frontend/SolcJson/Body.lean', 'attached calls bind receiver once'),
-            ('theorem', 'Solidity.Corpus.TestSuite.libraryCallAndUsingFor', 'Solidity/Corpus/TestSuite.lean', 'using-for call proved'),
-            ('theorem', 'Solidity.Corpus.TestSuite.fileLevelStructThroughLibrary', 'Solidity/Corpus/TestSuite.lean', 'file struct through library'),
+            ('regression', 'Solidity.Corpus.TestSuite.libraryCallAndUsingFor', 'Solidity/Corpus/TestSuite.lean', 'using-for call proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.fileLevelStructThroughLibrary', 'Solidity/Corpus/TestSuite.lean', 'file struct through library'),
         ],
         'valueOption': [
             ('admission', 'Solidity.Frontend.Admission.nodeFeatures', 'Solidity/Frontend/SolcJson/Admission.lean', 'FunctionCallOptions value tagged valueOption'),
@@ -2826,7 +2976,7 @@ class D:
         'valueTypeDeclarations': [
             ('lowering', 'Solidity.Frontend.valueTypeExpr', 'Solidity/Frontend/SolcJson/Body.lean', 'UDVT wrap/unwrap lowering'),
             ('source', 'Solidity.valueRows?', 'Solidity/Syntax/Raw.lean', 'underlying width/sign rows'),
-            ('theorem', 'Solidity.Corpus.TestSuite.valueTypeWrapUnwrap', 'Solidity/Corpus/TestSuite.lean', 'wrap/unwrap proved'),
+            ('regression', 'Solidity.Corpus.TestSuite.valueTypeWrapUnwrap', 'Solidity/Corpus/TestSuite.lean', 'wrap/unwrap proved'),
         ],
         'valueTypes': [
             ('admission', 'Solidity.Frontend.valueTypeSupported', 'Solidity/Frontend/SolcJson/Body.lean', 'UDVT admission after solc nominal checks'),
@@ -2853,17 +3003,18 @@ class D:
         'worldAssumptions': [
             ('theorem', 'Solidity.Bridge.Adversary.holdsC_iff_all_callees', 'Bridge/SolidityBridge/Adversary.lean', 'properties hold for all callee interpretations'),
             ('theorem', 'Solidity.Main.callback_soundness', 'Solidity/Theorems.lean', 'soundness under explicit callback invariant'),
-            ('theorem', 'Solidity.ContractWorld.reachable_invariant', 'Solidity/Semantics/ContractWorld.lean', 'multi-contract world invariant over reachable states'),
+            ('source', 'Solidity.ContractWorld.reachable_invariant', 'Solidity/Semantics/ContractWorld.lean', 'multi-contract world invariant over reachable states'),
         ],
         'wrapUnwrap': [
             ('lowering', 'Solidity.Frontend.call', 'Solidity/Frontend/SolcJson/Body.lean', 'wrap/unwrap rendered as underlying cast'),
             ('lowering', 'Solidity.Frontend.valueTypeExpr', 'Solidity/Frontend/SolcJson/Body.lean', 'UDVT expression typing'),
             ('lowering', 'Solidity.valueRows?', 'Solidity/Syntax/Raw.lean', 'UDVT range rows'),
-            ('theorem', 'Solidity.Corpus.TestSuite.valueTypeWrapUnwrap', 'Solidity/Corpus/TestSuite.lean', 'wrap/unwrap corpus case'),
+            ('regression', 'Solidity.Corpus.TestSuite.valueTypeWrapUnwrap', 'Solidity/Corpus/TestSuite.lean', 'wrap/unwrap corpus case'),
         ],
     }
     MISSING = {
         'fixedPoint': ["no lexer, type, semantics, lowering or compiler support (decision D07)",
+                       "until the manifest change lands, G15 must still refuse it as `upstream`",
                        "no reference semantics beyond solc 0.8.38's acceptance boundary",
                        "manifest scope is still `upstream`"],
         'abiDecode': ["Enum decoding is refused ('requires nominal cardinality checks'). Lazy/noncanonical aggregate entry decoding is pending.", 'No backend/EVM stage. Calldata/ABI entry is outside the compiler theorems (R04, R20).'],
@@ -3038,207 +3189,76 @@ class D:
         'variableDeclarations': ['Unset storage aliases are dead and unreadable (R16); reference-element/nested memory declarations off the memory path (R28)', 'Tuple declarations (elabTuple) and memory declarations do not compile on the core path (declMem => none)', 'No proof that declaration identity/initializer capture order survives import lowering'],
         'visibility': ["Access enforcement is solc's; no Lean check", 'No external dispatch in backend (R04)', 'Remaining visibility distinctions listed as Left in declarations-metadata.md'],
         'whileStatement': ['Loop bodies that push, pay, pop or change fragment flags are rejected (R21); no loops on memory path (R22)', 'Divergence is matched classically against machine fault; no gas-bounded prefix theorem (R38)', 'No correctness theorem for the lowerLoop flag encoding'],
-        'worldAssumptions': ['Compiler world is balances only; recipient code not run (R33)', 'msg.sender != this premise not imposed (solc-alignment)'],
+        'worldAssumptions': ['Not approved (G00 Q2): the premise must be replaced by the callee semantics of D02/D12, not discharged as stated', 'Compiler world is balances only; recipient code not run (R33)', 'msg.sender != this premise not imposed (solc-alignment)'],
         'wrapUnwrap': ['Admission gives no distinct tag (memberAccess only). Multi-argument wrap/unwrap is refused.', 'UDVTs are erased to uint before the compiler (R13), with no nominal-check theorem. Nominal UDVT slices are refused.'],
-    }
-    FEATURE_RESTRICTIONS = {
-        'abiDecode': ['R04', 'R20'],
-        'abiEncode': ['R04'],
-        'abiEncodeCall': ['R04'],
-        'abiEncodePacked': ['R04'],
-        'abiEncodeWithSelector': ['R04'],
-        'abiEncodeWithSignature': ['R04'],
-        'abiEntryValidation': ['R04'],
-        'addmodBuiltin': ['R10', 'R37'],
-        'addressBalance': ['R11'],
-        'addressLiterals': ['R13'],
-        'addressTypes': ['R27'],
-        'arithmetic': ['R05', 'R12', 'R13', 'R37'],
-        'arrayLength': ['R24'],
-        'arrayPop': ['R21', 'R36'],
-        'arrayPush': ['R18', 'R21'],
-        'arrayPushReference': ['R18'],
-        'assertBuiltin': ['R01', 'R29', 'R37'],
-        'assignment': ['R17', 'R19', 'R20'],
-        'bitwise': ['R12', 'R13'],
-        'blocks': ['R01', 'R02', 'R05'],
-        'boolType': ['R34'],
-        'bytesConcat': ['R10', 'R28', 'R31'],
-        'callOptions': ['R06', 'R33'],
-        'calldataLocation': ['R20'],
-        'canonicalRethrow': ['R07', 'R31', 'R37'],
-        'catchClauses': ['R07'],
-        'checkedArithmetic': ['R12'],
-        'comparisons': ['R13'],
-        'compoundAssignment': ['R18', 'R29'],
-        'conditional': ['R28'],
-        'constructorLifetime': ['R04'],
-        'constructors': ['R04'],
-        'contracts': ['R04', 'R05'],
-        'creationCode': ['R05'],
-        'danglingReferences': ['R36'],
-        'defaultInitialization': ['R16', 'R28'],
-        'deleteExpression': ['R21', 'R28', 'R29'],
-        'deleteMappingTails': ['R21'],
-        'doWhileStatement': ['R21', 'R22', 'R38'],
-        'dynamicArrays': ['R22', 'R24', 'R28'],
-        'dynamicBytesType': ['R17', 'R31'],
-        'ecrecoverBuiltin': ['R10'],
-        'emptyDataValueCall': ['R06', 'R33'],
-        'enumDeclarations': ['R13'],
-        'erc7201Builtin': ['R10'],
-        'errorDeclarations': ['R07'],
-        'errorEventSelector': ['R10'],
-        'explicitConversions': ['R13', 'R27'],
-        'expressionStatements': ['R09', 'R29'],
-        'externalFunctionTypes': ['R07'],
-        'externalSelfCalls': ['R07'],
-        'externalTypedCalls': ['R07', 'R33'],
-        'fixedArrays': ['R19', 'R28'],
-        'fixedBytesTypes': ['R13'],
-        'forStatement': ['R21', 'R22'],
-        'freeFunctions': ['R08', 'R09'],
-        'functionCalls': ['R04', 'R07', 'R08', 'R09'],
-        'functions': ['R04', 'R08', 'R09'],
-        'hexLiterals': ['R10', 'R31'],
-        'ifStatement': ['R23', 'R36'],
-        'immutables': ['R04'],
-        'implicitConversions': ['R13'],
-        'increments': ['R18', 'R21', 'R29'],
-        'indexAccess': ['R10', 'R13', 'R14'],
-        'inheritance': ['R04'],
-        'inlineArrays': ['R28'],
-        'integerTypes': ['R12', 'R13'],
-        'interfaces': ['R07'],
-        'internalCalls': ['R09', 'R27'],
-        'keccakBuiltin': ['R10', 'R34', 'R35'],
-        'libraries': ['R04', 'R09'],
-        'logicalStorageBase': ['R34'],
-        'mappings': ['R14', 'R34'],
-        'memberAccess': ['R11'],
-        'memoryAliasing': ['R04', 'R20', 'R30'],
-        'memoryLocation': ['R01', 'R02', 'R25', 'R31'],
-        'modifiers': ['R01', 'R08', 'R09'],
-        'msgSender': ['R27'],
-        'mulmodBuiltin': ['R10', 'R37'],
-        'names': ['R04'],
-        'newMemory': ['R22', 'R25', 'R28'],
-        'nonpayableEntry': ['R04'],
-        'numericLiterals': ['R13'],
-        'panicCodes': ['R24', 'R25', 'R37'],
-        'pragmaAbicoder': ['R04'],
-        'publicGetters': ['R07'],
-        'rangeAccess': ['R04', 'R20'],
-        'receiveFunction': ['R04', 'R06', 'R33'],
-        'recursiveCalls': ['R08', 'R27', 'R39'],
-        'referenceCopyRules': ['R19', 'R20'],
-        'requireBuiltin': ['R07', 'R37'],
-        'returnStatement': ['R09', 'R41'],
-        'revertBuiltin': ['R07', 'R37'],
-        'revertPayloads': ['R07', 'R37'],
-        'revertStatement': ['R07', 'R37'],
-        'ripemd160Builtin': ['R10', 'R13'],
-        'rollback': ['R07', 'R41'],
-        'runtimeCode': ['R05'],
-        'sendTransfer': ['R06', 'R32', 'R33'],
-        'sha256Builtin': ['R10'],
-        'shifts': ['R12'],
-        'shortCircuit': ['R09', 'R10'],
-        'stateMutability': ['R32'],
-        'stateVariables': ['R14', 'R17'],
-        'staticCallRestriction': ['R07'],
-        'storageAliasing': ['R09', 'R36'],
-        'storageCopy': ['R17', 'R19'],
-        'storageLocation': ['R09', 'R34'],
-        'stringConcat': ['R28', 'R31'],
-        'stringLiterals': ['R10', 'R17'],
-        'stringType': ['R10', 'R14', 'R17'],
-        'structConstruction': ['R28'],
-        'structDeclarations': ['R20', 'R28'],
-        'structTypes': ['R19', 'R20', 'R28'],
-        'termination': ['R08', 'R38', 'R39'],
-        'thisAddress': ['R27'],
-        'tryStatement': ['R07'],
-        'tupleExpressions': ['R09'],
-        'tupleTypes': ['R09'],
-        'typeName': ['R10', 'R17'],
-        'typeValidation': ['R15', 'R16'],
-        'unaryArithmetic': ['R12', 'R13'],
-        'uncheckedArithmetic': ['R12'],
-        'uncheckedBlock': ['R12'],
-        'unicodeLiterals': ['R10', 'R17'],
-        'usingFor': ['R09'],
-        'valueOption': ['R06'],
-        'variableDeclarations': ['R16', 'R28'],
-        'visibility': ['R04'],
-        'whileStatement': ['R21', 'R22', 'R38'],
-        'worldAssumptions': ['R33'],
-        'wrapUnwrap': ['R13'],
     }
 
     # ---- acknowledged dependency findings --------------------------------
     # Integrated wave-0 packages: their modules are rechecked by every build,
     # so later edits below them are ordinary integration checks, not findings.
-    INTEGRATED = ("G00", "G01", "G04")
+    INTEGRATED = ("G00", "G04")
+    # G04 discharging packages no G03 row citing the restriction owns, and why.
+    RESTRICTION_WAIVERS = {}
+    # Deferred edges: the VM that runs the package's final check after its
+    # prerequisite (G36.03 in V24 after G43; G39's self-call/callback case is
+    # a G03 proposal for V23, after G42.03, for G02 to schedule).
+    DEFERRED_CHECKS = {("G36.03", "G43"): "V24", ("G39", "G42.01"): "V23", ("G39", "G42.03"): "V23"}
     ACKNOWLEDGED = [
-        ('G19', 'G16', "V11 (G19, G20) runs beside V09 (G16, G17): add V09 to V11's prerequisites, or let G19 prepare against the expression-lowering relation and pass its final check after V09 integrates"),
-        ('G19', 'G17', 'as G19 ← G16'),
-        ('G20', 'G18.06', "V11 runs beside V10 (G18): add V10 to V11's prerequisites, or prepare against the G18.06 interface with the final check after V10"),
-        ('G21', 'G18.04', "V12 runs beside V10: add V10 to V12's prerequisites, or prepare against the G18.04 relation with the final check after V10"),
-        ('G31', 'G27.05', "V17 runs beside V15: add V15 to V17's prerequisites so the per-run hash premise (D11) is shared, not duplicated"),
-        ('G38', 'G37.01', "V21 runs beside V20: add V20 to V21's prerequisites, or prove unwind against the G37.01 frame interface with the final check after V20"),
-        ('G44.02', 'G45.04', "V25 runs beside V26: add V26 to V25's prerequisites, or split artifact layout (G44.02) from relocation (G45.04) with a deferred final check"),
-        ('G44.03', 'G43', "V25 runs beside V24: add V24 to V25's prerequisites; G43's payment relation must not wait on G44"),
-        ('G52', 'G49.02', "V30 depends on V27 only: add V28 to V30's prerequisites for whole-pipeline differential tests"),
+        ('inversion', 'G01', 'G24', "the contracts' intrinsic plug `typedRunPrefixes` reads `Prog.runF`, whose "
+         "consistency G24 proves; the G01 revision (g01-contracts-rev) must keep the contracts abstract over the "
+         "intrinsic run and over `Evm.Machine`'s `Slot`, and every build rechecks them"),
+        ('schedule', 'G19', 'G16', "V11 (G19, G20) runs beside V09 (G16, G17): add V09 to V11's prerequisites, or let G19 prepare against the expression-lowering relation and pass its final check after V09 integrates"),
+        ('schedule', 'G19', 'G17', 'V11 runs beside V09: as G19 ← G16'),
+        ('schedule', 'G20', 'G18.06', "V11 runs beside V10 (G18): add V10 to V11's prerequisites, or prepare against the G18.06 interface with the final check after V10"),
+        ('schedule', 'G21', 'G18.04', "V12 runs beside V10: add V10 to V12's prerequisites, or prepare against the G18.04 relation with the final check after V10"),
+        ('schedule', 'G31', 'G27.05', "V17 runs beside V15: add V15 to V17's prerequisites so the per-run hash premise (D11) is shared, not duplicated"),
+        ('schedule', 'G38', 'G37.01', "V21 runs beside V20: add V20 to V21's prerequisites, or prove unwind against the G37.01 frame interface with the final check after V20"),
+        ('schedule', 'G44.02', 'G45.04', "V25 runs beside V26: add V26 to V25's prerequisites, or split artifact layout (G44.02) from relocation (G45.04) with a deferred final check"),
+        ('schedule', 'G44.03', 'G43', "V25 runs beside V24: add V24 to V25's prerequisites; G43's payment relation must not wait on G44"),
+        ('schedule', 'G52', 'G49.02', "V30 depends on V27 only: add V28 to V30's prerequisites for whole-pipeline differential tests"),
     ]
     ACK_MODULES = {
-        'Solidity.Evm.Layout': "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration",
-        'Solidity.Evm.Exp': "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration",
-        'Solidity.Evm.MemoryHeap': "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration",
-        'Solidity.Evm.MemoryGrowResult': "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration",
-        'Solidity.Evm.MemoryRefWrite': "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration",
-        'Solidity.Semantics.RevertData': "intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build",
-        'Solidity.Frontend.SolcJson.Getters': "untrusted solc adapter (G01 frontend boundary): G20 edits getter plans after G12/G14; their adapter code re-runs its regressions, and their certificates live in new modules",
-        'Solidity.Evm.Signed': "signed-operator code: G25 extends it after G06's bridge seed; " + "G06 re-runs its signed-op checks",
-        'Solidity.Syntax.Elab.Stmt': "elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits",
-        'Solidity.Frontend.SolcJson.Admission': "the solc admission scan G15 replaces by checked classification; G14's adapter code re-runs its regressions after G15",
-        'Solidity.Evm.MemorySource': "memory state relation: G32 freezes `StateRepr`; G24's unified entry is restated against it, and the edit re-runs G24's checks",
-        'Solidity.Evm.MemoryPaths': "memory path code: G34 extends it behind G24's frozen entry and re-runs G24's checks",
-        'Solidity.Evm.Machine': 'G27.05 replaces the symbolic `Slot` (G04 R34) under every compiler proof: G24 freezes an abstract slot interface and G27.05 changes only its implementation, first in V15 before G28; G45 targets a new assembly layer instead of editing `Machine`',
-        'Solidity.Evm.Stmt': 'statement leaf lemmas: G28, G30, G38 and G43 edit it in this order (waves 3, 4, 5); existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.Compile': 'the fragment checker `inFrag` that G24 replaces by typed certificates: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.Sim': 'the core state relation; G43 adds the joint payment/world relation: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.SimLemmas': 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.Repr': 'G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.StorageLemmas': 'G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.Correct': 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.Expr': 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.MemoryAlloc': 'memory foundation: G32 freezes `StateRepr`/allocator signatures; existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.MemoryCompile': 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Evm.MemoryStructCopy': 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration',
-        'Solidity.Frontend.SolcJson.Contract': "untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates",
-        'Solidity.Frontend.Source': "provenance and pins: G05 fixes the certificate interface first; G12/G15 extend it; untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates",
-        'Solidity.Frontend.SourceUnits': "untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates",
-        'Solidity.Language.Features': 'generated catalog of the manifest (g00-manifest-rev owns it): regenerated by `solidity-feature-audit.py`, never hand-edited',
-        'Solidity.RevertBytes': 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build',
-        'Solidity.Semantics.ContractWorldCertificates': 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build',
-        'Solidity.Semantics.Deploy': 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build',
-        'Solidity.Semantics.Heap': 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build',
-        'Solidity.Semantics.RecursiveStorage.Copy': "G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05",
-        'Solidity.Semantics.RecursiveStorage.Paths': "G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05",
-        'Solidity.Semantics.Storage': 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build',
-        'Solidity.Syntax.Checked': 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)',
-        'Solidity.Syntax.Elab.Context': 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)',
-        'Solidity.Syntax.Elab.Lower': 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)',
-        'Solidity.Syntax.Elab.SliceCopy': 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)',
-        'Solidity.Syntax.Elab.Values': 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)',
-        'SolidityBridge.ExternalEvm': "G06 fixes the EVM interface; G46.01 extends it and re-runs G06's checks",
+        'Solidity.Evm.Layout': ('G06 G24 G25', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
+        'Solidity.Evm.Exp': ('G06 G24 G25', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
+        'Solidity.Evm.MemoryHeap': ('G24 G32', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
+        'Solidity.Evm.MemoryGrowResult': ('G24 G33', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
+        'Solidity.Evm.MemoryRefWrite': ('G24 G34', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
+        'Solidity.Semantics.RevertData': ('G01 G06 G16 G21', 'intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
+        'Solidity.Evm.Signed': ('G06 G24 G25', "signed-operator code: G25 extends it after G06's bridge seed; G06 re-runs its signed-op checks"),
+        'Solidity.Evm.MemorySource': ('G24 G32', "memory state relation: G32 freezes `StateRepr`; G24's unified entry is restated against it, and the edit re-runs G24's checks"),
+        'Solidity.Evm.MemoryPaths': ('G24 G34', "memory path code: G34 extends it behind G24's frozen entry and re-runs G24's checks"),
+        'Solidity.Evm.Machine': ('G01 G06 G24 G25 G26 G27.01 G27.02 G27.05', 'G27.05 replaces the symbolic `Slot` (G04 R34) under every compiler proof: G24 freezes an abstract slot interface and G27.05 changes only its implementation, first in V15 before G28; G45 targets a new assembly layer instead of editing `Machine`'),
+        'Solidity.Evm.Stmt': ('G06 G24 G28 G30 G36.01 G38 G43', 'statement leaf lemmas: G28, G30, G38 and G43 edit it in this order (waves 3, 4, 5); existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.Compile': ('G06 G24 G26 G28 G29.01 G30 G32 G33 G34 G35.01 G37.01', 'the fragment checker `inFrag` that G24 replaces by typed certificates: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.Sim': ('G06 G24 G26 G28 G30 G32 G33 G34 G35.01 G36.01 G36.02 G38 G43', 'the core state relation; G43 adds the joint payment/world relation: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.SimLemmas': ('G06 G24 G26 G28 G30 G31', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.Repr': ('G06 G24 G26 G27.01 G27.02 G31', 'G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.StorageLemmas': ('G06 G24 G26 G27.01 G27.02 G27.03 G31', 'G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.Correct': ('G06 G24 G36.01', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.Expr': ('G06 G24 G26', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.MemoryAlloc': ('G24 G32 G33', 'memory foundation: G32 freezes `StateRepr`/allocator signatures; existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.MemoryCompile': ('G24 G36.02', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.MemoryStructCopy': ('G24 G35.01 G36.02', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Frontend.Source': ('G05 G12 G15', "provenance and pins: G05 fixes the certificate interface first; G12/G15 extend it; untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates"),
+        'Solidity.Frontend.SourceUnits': ('G05 G12', "untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates"),
+        'Solidity.RevertBytes': ('G01 G06 G16 G17 G18.01 G18.02 G18.03 G18.04 G18.05 G19 G21', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
+        'Solidity.Semantics.ContractWorldCertificates': ('G22.03 G22.04', 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
+        'Solidity.Semantics.Deploy': ('G01 G22.01 G22.03', 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
+        'Solidity.Semantics.Heap': ('G01 G06 G16 G18.03', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
+        'Solidity.Semantics.RecursiveStorage.Copy': ('G18.01 G18.05', "G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05"),
+        'Solidity.Semantics.RecursiveStorage.Paths': ('G18.01 G18.02', "G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05"),
+        'Solidity.Semantics.Storage': ('G01 G06 G16 G18.02', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
+        'Solidity.Syntax.Checked': ('G01 G06 G16 G18.01 G18.05', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
+        'Solidity.Syntax.Elab.Context': ('G16 G17 G18.04 G19', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
+        'Solidity.Syntax.Elab.Lower': ('G17 G19', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
+        'Solidity.Syntax.Elab.SliceCopy': ('G17 G18.04', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
+        'SolidityBridge.ExternalEvm': ('G06 G46.01', "G06 fixes the EVM interface; G46.01 extends it and re-runs G06's checks"),
     }
     ACKNOWLEDGED_CYCLES = []
     SPLITS = {
         'G10': '(a) primary and postfix forms: names, member/index/range access, calls, named arguments and call options; (b) operator precedence and associativity, one lemma per binding level; (c) tuples, inline arrays, conditional and `new`; compose into whole-expression parse correspondence',
         'G13': '(a) elementary types, literals, units and exact constants; (b) conversions and implicit widening; (c) aggregate and data-location typing; (d) overload selection and UDVT operators; (e) function/ABI metadata typing; then the static-semantics certificate',
-        'G15': 'one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots',
+        'G15': 'one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots; the `SolcJson.Body` adapter edit (2,586 lines) is split by AST node class (declarations, expressions, statements) before it starts',
         'G47': '(a) CALL/STATICCALL frames, returndata and the frame-failure rule (D19); (b) CREATE and initcode installation; (c) REVERT and persistent/transient/balance rollback; (d) transactions, sender funds (D21) and gas-exhaustion failures (D20); (e) precompiles (D22); compose under the resource abstraction',
         'G48': '(a) admission → resolved graph; (b) resolved → intrinsic per area: declarations, expressions/statements, aggregates, world/calls; (c) whole-unit coverage over compilation units; each a `Cert` composed by `Cert.comp`',
         'G46.01': '(a) arithmetic, comparison and bitwise opcodes (seed: `ExternalEvm.simulation`); (b) signedness, narrow truncation and casts; (c) PUSH constants and control primitives JUMP/JUMPI/JUMPDEST',
