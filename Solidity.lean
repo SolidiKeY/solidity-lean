@@ -406,6 +406,12 @@ import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
 import Solidity.Evm.Interpreter
+import Solidity.Backend.Opcode
+import Solidity.Backend.Jumpdest
+import Solidity.Backend.Assembler
+import Solidity.Backend.Control
+import Solidity.Backend.EvmVectors
+import Solidity.Backend.Checks
 import Solidity.Tools.Show
 import Solidity.Tools.Common
 import Solidity.Tools.Run
@@ -528,6 +534,11 @@ import Solidity.Calculus.HashWritten
 import Solidity.Calculus.HashWrittenInput
 import Solidity.Calculus.HashWrittenRealize
 import Solidity.Hash.CollisionBound
+import Solidity.Hash.Adaptive
+import Solidity.Storage.HashedLayout
+import Solidity.Storage.HashedLayoutEvm
+import Solidity.Storage.HashedKeccak
+import Solidity.Storage.HashedSeparation
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction

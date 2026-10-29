@@ -1,3 +1,7 @@
+import SolidityBridge.Arith.GuardRetentionExamples
+import SolidityBridge.Arith.LoweringObstructions
+import SolidityBridge.Arith.WidthsSignedShift
+import SolidityBridge.Arith.WidthsObstructions
 import SolidityBridge.Arith
 import SolidityBridge.WeakestPre
 import SolidityBridge.LoomRules

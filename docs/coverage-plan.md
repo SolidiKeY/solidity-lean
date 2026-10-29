@@ -229,9 +229,7 @@ Integration notes (2026-10-29):
   R24 (solc's `Panic(0x41)` past 2^64 elements); the Lean docstrings of
   `StmtOut.refused`/`compile_correct` still describe the stale payment
   disjunct as live.
-G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.
 
-Fixed-point status (2026-10-29): reference semantics for G00 Q6 in [fixed-point-semantics.md](feature-work/fixed-point-semantics.md) and `Solidity/Language/FixedPoint.lean` with `Solidity/Language/FixedPoint/` (laws, constants and mobile types, ABI words, storage packing with a per-variable frame, and an upstream conformance sweep: three intended deviations, no defect); not wired into the frontend or compiler; scope questions Q1–Q8 answered and encoded, QL1–QL2 open (§6.2); owners (S00–S02, S04.02, G08–G53) in its §4.
 
 ### Independent source definitions — after G00–G07, before wave 1
 
@@ -324,7 +322,23 @@ proof, and their final checks must use the actual implementations.
 | G46 | Prove primitive instruction/byte-memory/storage/environment correspondence with the pinned EVM semantics. Discharge symbolic-slot, word-addressing, truncation and hash-model obstructions or identify an unresolved approved-premise obligation; unresolved means incomplete. |
 | G47 | Prove EVM call/create/return/revert and transaction correspondence, including excluded-resource abstraction and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
 
-G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`; adaptive queries (eager sampling, repeats), bounded slot offsets and the connection to executions are open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
+G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`, and for adaptive runs (eager sampling, repeated queries, early stopping, regions) in `Solidity/Hash/Adaptive.lean` (random-oracle model; `q` counts every oracle query of the run and of whoever chose its inputs); bounded slot offsets are proved for the model's terms (`STy.locate_bounded`); only their tie to compiled code is open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
+
+G27.05/G46.05 hashed layout status (lane-hashing, 2026-10-29): `Solidity/Storage/HashedLayout.lean` models the storage layout as slot terms read through a hash parameter, proves offsets stay inside their regions for every access path (`STy.locate_bounded`) and that distinct bounded slot terms of one run denote distinct words under the region premise (`Loc.word_inj`, `located_word_inj`); `Solidity/Storage/HashedLayoutEvm.lean` relates the terms to `Evm.Slot` read-only; `Solidity/Storage/HashedKeccak.lean` instantiates the hash with keccak-256 over the injective ABI preimage encoding (`keccak_word_inj`) and `#guard`s solc's slot formula; `Solidity/Storage/HashedSeparation.lean` proves the G27.01–G27.03 separation statements (struct members, mapping keys, array elements and header occupy disjoint slot terms, and distinct words under the region premise); value representation (G27.01–03 read/write agreement), widths and packing, `string`/`bytes` keys and headers remain. The relation to `Evm/Layout.lean` and to compiled code remains G27.05 ([feature-work/storage-hashed-layout.md](feature-work/storage-hashed-layout.md)).
+
+**G45 lane status (assembler, 2026-10-29).** G45.05 byte encoding: the
+Osaka instruction datatype, `decode_encode`, `encode_injective` and the
+jump-destination theorems are proved in `Solidity/Backend/`. G45.04: the
+assembler with labels, relocation, per-label push widths by a terminating
+fixpoint and library placeholders, with `assemble_pushTag` (every resolved
+jump reaches its label's `JUMPDEST`) and `link_patch`. Decoder agreement
+(partial): generated `#guard` vectors against EthereumJS at Osaka and the
+vendored EVMYulLean tables; a Bridge module running the vendored decoder
+waits on a reachable Mathlib cache. G45.03 preparation: structured
+branch/loop expansion into labelled items with unique, defined labels and a
+loop layout theorem; the expanded code's execution meaning remains G45.03.
+Handoffs per checkpoint are in
+[backend-assembler.md](feature-work/backend-assembler.md).
 
 ### Wave 6 — whole pipeline, verification transfer and release (G48–G55)
 
@@ -522,7 +536,7 @@ as listed. A lane takes them in this order when it is blocked or its queue
 is empty, unless the item touches files an open Codex lane owns
 (`Solidity/Evm/**`, the Bridge Widths files, TestSuite `Derived*`).
 
-1. **Hash regions** (G27.05/G46.05 preparation): the region predicate and its
+1. **Hash regions** — done (lane-hashing, 2026-10-29). (G27.05/G46.05 preparation): the region predicate and its
    counting bound next to `Solidity.Hash.CollisionFree`, if the hash-bound
    task leaves it as a child obligation.
 2. **Fixed-point reference semantics** (S01/S02 preparation): complete the
@@ -541,6 +555,11 @@ is empty, unless the item touches files an open Codex lane owns
    (the merged model still refuses `abi.encode(0.1)` as solc does).
 6. **Source cost rule for stipend payments** (decision G06 Q3, S02/G43
    preparation): define the compiler-independent rule and its examples.
+7. **Bridge decoder agreement** (G45.05, decision 2026-10-29): once the Lean
+   environment allows the Mathlib cache hosts (`lakecache.blob.core.windows.net`,
+   `mathlib4.lean-cache.cloud`), add a `Bridge/` adapter that runs the vendored
+   EVMYulLean `decode`/`D_J` against `Solidity/Backend`; until then agreement
+   rests on the generated vectors in `Solidity/Backend/EvmVectors.lean`.
 
 ## Done when
 
