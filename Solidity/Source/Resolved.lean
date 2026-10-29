@@ -114,9 +114,13 @@ theorem mobile_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ 
     cases hm : q.mobileInt? with
     | none => exact .inr rfl
     | some t =>
-      left
-      simp only [STy.implicit, decide_eq_true_eq]
-      exact Q.mobileInt?_fits hm
+      exact .inl (decide_eq_true (Q.mobileInt?_fits hm))
+  | hexConst q n =>
+    simp only [Conv, STy.mobile]
+    cases hm : q.mobileInt? with
+    | none => exact .inr rfl
+    | some t =>
+      exact .inl (decide_eq_true (Q.mobileInt?_fits hm))
   | stringLit bs => exact .inl rfl
   | _ => exact .inr rfl
 
@@ -128,23 +132,22 @@ theorem Env.fieldTy?_of_fieldAt {E : Env} {dn : DeclName} {l : DataLoc} {x : Str
   cases he
   have hm := List.mem_of_find?_eq_some hf
   rw [List.mem_zipIdx_iff_getElem?] at hm
-  simp only [Env.fieldTy?, hfs, Option.bind_some, Nat.zero_add] at hm ⊢
+  simp only [Env.fieldTy?, hfs, Option.bind_some] at hm ⊢
   rw [hm]
   rfl
 
 /-- The constant `0` converts to `uint256` (an external call's default value). -/
 theorem zero_u256 (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.rational (Q.ofInt 0)) (.int IntTy.u256) = true := by
-  simp only [STy.implicit]
-  decide
+    STy.implicit B (.rational (Q.ofInt 0)) (.int IntTy.u256) = true :=
+  decide_eq_true (p := (Q.ofInt 0).FitsInt IntTy.u256) (by decide)
 
 mutual
 
 /-- **Resolved expressions** over environment `E`, intrinsically typed. -/
 inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | const (q : Q) : RExpr E Γ (.rational q)
-  | bytesLit {len : Nat} {h : 1 ≤ len ∧ len ≤ 32} (n : NumLit) (hn : n.fitsBytes len = true) :
-      RExpr E Γ (.fixedBytes len h)
+  /-- A hexadecimal literal: its value, convertible to `bytes{len}`. -/
+  | bytesLit (n : NumLit) (len : Nat) : RExpr E Γ (.hexConst n.value len)
   | addressLit (ds : List (Fin 16)) : RExpr E Γ (.address false)
   | bool (b : Bool) : RExpr E Γ .bool
   | str (bs : List UInt8) : RExpr E Γ (.stringLit bs)
@@ -259,8 +262,8 @@ mutual
 
 /-- **Elaboration**: a typing derivation as a resolved expression. -/
 def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ.env Γ.tys τ
-  | .const (q := q) _ _ => .const q
-  | .litBytes (n := n) h => .bytesLit n h
+  | .const (q := q) _ _ _ => .const q
+  | .litBytes (n := n) (len := len) _ => .bytesLit n len
   | .litAddress (ds := ds) _ => .addressLit ds
   | .bool b => .bool b
   | .str bs => .str bs

@@ -137,7 +137,7 @@ def STy.packedWidth : STy → Nat
 def encodeOne {Γ : RCtx} (F : Fr) (n : Nat) (packed : Bool) {τ : STy} (v : RVal E.layout τ) :
     EM E Γ (Bool × Bytes) := do
   match τ, v with
-  | .rational q, _ =>
+  | .rational q, _ | .hexConst q _, _ =>
     let w := intWord q.toInt
     match q.mobileInt? with
     | some t => pure (false, if packed then natBytes (t.bits / 8) (wrapBits false t.bits q.toInt).toNat else wordBytes w)
@@ -232,6 +232,8 @@ def convRV {Γ : RCtx} (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layo
   if h : σ = τ then return h ▸ v
   match σ, τ, v with
   | .rational q, τ, _ => return .val (← lift (constVal q τ))
+  | .hexConst q _, .fixedBytes k hk, _ => return .val (mkBytes (n := k) (h := hk) (natBytes k q.toInt.toNat))
+  | .hexConst q _, τ, _ => return .val (← lift (constVal q τ))
   | .stringLit bs, .bytes .memory, _ => return .val (← allocRef (Data.bytes (D := E.layout) (l := .memory) bs))
   | .stringLit bs, .string .memory, _ => return .val (← allocRef (Data.string (D := E.layout) (l := .memory) bs))
   | .stringLit bs, .fixedBytes k hk, _ => return .val (mkBytes (n := k) (h := hk) bs)
@@ -248,6 +250,10 @@ def convExplicitRV {Γ : RCtx} (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVa
     EM E Γ (RVal E.layout τ) := do
   match σ, v with
   | .rational q, _ => return .val (← lift (constExplicit q τ))
+  | .hexConst q _, _ =>
+    match τ with
+    | .fixedBytes k hk => return .val (mkBytes (n := k) (h := hk) (natBytes k q.toInt.toNat))
+    | τ => return .val (← lift (constExplicit q τ))
   | _, .val (.memRef _ a) =>
     match τ with
     | .fixedBytes k hk => return .val (mkBytes (n := k) (h := hk) (← heapBytes a))
@@ -555,8 +561,7 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
   | n + 1 =>
   match e with
   | .const q => pure (.const q)
-  | .bytesLit (len := len) (h := h) nl _ =>
-    pure (.val (mkBytes (n := len) (h := h) (natBytes len nl.value.toInt.toNat)))
+  | .bytesLit nl len => pure (.hex nl.value len)
   | .addressLit ds =>
     let v := ds.foldl (fun acc d => acc * 16 + d.val) 0
     pure (.val (.address ⟨v % 2 ^ 160, Nat.mod_lt _ (by decide)⟩))

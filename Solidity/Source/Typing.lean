@@ -191,7 +191,7 @@ def STy.isStringy : STy → Bool
 
 /-- A constant zero (a modulus solc refuses). -/
 def STy.isZeroConst : STy → Bool
-  | .rational q => q.num == 0
+  | .rational q | .hexConst q _ => q.num == 0
   | _ => false
 
 /-- The result type of a call of an admitted builtin function on arguments
@@ -302,6 +302,9 @@ def STy.mobile : STy → STy
   | .rational q => match q.mobileInt? with
     | Option.some t => .int t
     | Option.none => .rational q
+  | .hexConst q n => match q.mobileInt? with
+    | Option.some t => .int t
+    | Option.none => .hexConst q n
   | .stringLit _ => .string .memory
   | τ => τ
 
@@ -324,7 +327,7 @@ def STy.isBits : STy → Bool
 amount or an exponent. -/
 def STy.isAmount : STy → Bool
   | .int t => !t.signed
-  | .rational q => q.isInt && decide (0 ≤ q.toInt)
+  | .rational q | .hexConst q _ => q.isInt && decide (0 ≤ q.toInt)
   | _ => false
 
 /-- Ordered types besides numbers: `bytesN`, addresses, enums. -/
@@ -342,14 +345,14 @@ def STy.hasEq : STy → Bool
 /-- An index: an unsigned integer, or a constant that fits `uint256`. -/
 def STy.isIndex : STy → Bool
   | .int t => !t.signed
-  | .rational q => decide (q.FitsInt IntTy.u256)
+  | .rational q | .hexConst q _ => decide (q.FitsInt IntTy.u256)
   | _ => false
 
 /-- A constant index within a static length (a non-constant index is
 checked at run time). -/
 def inBounds (σ : STy) (n : Option Nat) : Bool :=
   match σ, n with
-  | .rational q, Option.some len => decide (q.toInt < len)
+  | .rational q, Option.some len | .hexConst q _, Option.some len => decide (q.toInt < len)
   | _, _ => true
 
 /-- Reference types: `bytes`, `string`, arrays, structs, mappings. -/
@@ -426,9 +429,22 @@ def Syn.isDivMod : Syn .expr → Bool
   | _ => false
 
 /-- A checksummed 40-digit hexadecimal literal: an address, not a number. -/
-def Syn.isAddressLit : Syn .expr → Bool
-  | .lit (.num (.hex ds true)) => ds.length == 40
-  | _ => false
+def Syn.isAddressLit : {c : Cat} → Syn c → Bool
+  | _, .lit (.num (.hex ds true)) => ds.length == 40
+  | _, .tuple (.some e) .nil => e.isAddressLit
+  | _, _ => false
+
+/-- The compatible bytes length of a hexadecimal literal of `2·len` digits
+(`1 ≤ len ≤ 32`), through parentheses; a checksummed 40-digit literal is
+an address, not bytes.  solc types such a literal as a constant that also
+converts to `bytes{len}` (`STy.hexConst`). -/
+def Syn.hexLen? : {c : Cat} → Syn c → Option Nat
+  | _, .lit (.num (.hex ds cs)) =>
+    if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧ ¬ (cs = true ∧ ds.length = 40) then
+      Option.some (ds.length / 2)
+    else Option.none
+  | _, .tuple (.some e) .nil => e.hexLen?
+  | _, _ => Option.none
 
 /-- A declaration statement (solc refuses one as the body of `if` or a
 loop: "Variable declarations can only be used inside blocks"). -/
@@ -527,7 +543,7 @@ literal or a `bytes`/`string` in memory. -/
 def STy.abiArg : STy → Bool
   | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
   | .fn ext _ _ _ => ext
-  | .rational q => q.isInt
+  | .rational q | .hexConst q _ => q.isInt
   | .stringLit _ | .bytes .memory | .string .memory => true
   | _ => false
 
@@ -566,10 +582,11 @@ mutual
 inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   /-- A constant expression has its exact value as its type. -/
   | const {e : Syn .expr} {q : Q} : e.const = Option.some q → e.isAddressLit = false →
-      Typed Γ e (.rational q)
-  /-- A hexadecimal literal of `2N` digits, or zero, as `bytesN`. -/
-  | litBytes {n : NumLit} {len : Nat} {h : 1 ≤ len ∧ len ≤ 32} : n.fitsBytes len = true →
-      Typed Γ (.lit (.num n)) (.fixedBytes len h)
+      e.hexLen? = Option.none → Typed Γ e (.rational q)
+  /-- A hexadecimal literal of `2·len` digits: its value, convertible to
+  `bytes{len}` (solc: a literal is always a constant, `STy.hexConst`). -/
+  | litBytes {n : NumLit} {len : Nat} : (Syn.lit (.num n)).hexLen? = Option.some len →
+      Typed Γ (.lit (.num n)) (.hexConst n.value len)
   /-- A checksummed 40-digit hexadecimal literal is an `address`. -/
   | litAddress {ds : List (Fin 16)} : ds.length = 40 → Typed Γ (.lit (.num (.hex ds true))) (.address false)
   | bool (b : Bool) : Typed Γ (.lit (.bool b)) .bool
@@ -900,8 +917,10 @@ theorem StmtD.locals_suffix {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {
     | exact ⟨[_], rfl⟩
 
 /-- **Constants have their value as type**: every constant expression other
-than an address literal is typed by its exact rational. -/
+than an address literal or a bare hexadecimal literal is typed by its exact
+rational. -/
 theorem HasType.of_const {Γ : Ctx} {e : Syn .expr} {q : Q} (h : e.const = Option.some q)
-    (ha : e.isAddressLit = false) : HasType Γ e (.rational q) := ⟨.const h ha⟩
+    (ha : e.isAddressLit = false) (hx : e.hexLen? = Option.none) : HasType Γ e (.rational q) :=
+  ⟨.const h ha hx⟩
 
 end Solidity.Source

@@ -70,7 +70,7 @@ theorem STy.same_refl : (a : STy) → STy.same a a = true
     simp only [STy.same, beq_self_eq_true, STy.sameList_refl ps, STy.sameList_refl rs, Bool.and_self]
   | .tuple ts => by simp only [STy.same, STy.sameList_refl ts]
   | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _
-  | .bytes _ | .string _ | .struct _ _ | .rational _ | .stringLit _ => by
+  | .bytes _ | .string _ | .struct _ _ | .rational _ | .hexConst _ _ | .stringLit _ => by
     simp only [STy.same, beq_self_eq_true, Bool.and_self]
 
 theorem STy.sameList_refl : (a : List STy) → STy.sameList a a = true
@@ -112,6 +112,8 @@ inductive RVal (D : Layout) : STy → Type where
   | const (q : Q) : RVal D (.rational q)
   /-- A string literal: its bytes are its type's. -/
   | strLit (bs : List UInt8) : RVal D (.stringLit bs)
+  /-- A hexadecimal literal: its value is its type's. -/
+  | hex (q : Q) (len : Nat) : RVal D (.hexConst q len)
   | tuple {τs : List STy} (vs : RVals D τs) : RVal D (.tuple τs)
 
 /-- Values of a list of types. -/
@@ -328,7 +330,7 @@ def cmpConst (op : BinOp) (a b : Q) : R Bool :=
 /-- A shift amount or exponent: an unsigned integer, or a constant. -/
 def RVal.amount {σ : STy} : RVal D σ → R Nat
   | .val (.int v _) => pure v.toNat
-  | .const q => pure q.toInt.toNat
+  | .const q | .hex q _ => pure q.toInt.toNat
   | _ => stuck "not an amount"
 
 /-- **Shifts and powers**: `<<` wraps, `>>` is arithmetic on signed
