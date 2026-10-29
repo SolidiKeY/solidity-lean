@@ -228,6 +228,318 @@ theorem Typed.const_unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} {q : Q} (d 
   · rw [hx] at hx'; cases hx'
   · rw [hl] at hl'; cases hl'; rw [hx] at hx'; cases hx'; exact ⟨rfl, h1.trans h2.symm⟩
 
+/-! ## Uniqueness of meaning for every expression
+
+By strong induction on the size of the syntax (`Uniq`), one lemma per
+syntactic shape, each over the pairs of rules that type that shape. -/
+
+/-- Uniqueness of meaning at one expression. -/
+def UniqE (Γ : Ctx) (e : Syn .expr) : Prop :=
+  ∀ {τ τ' : STy} (d : Typed Γ e τ) (d' : Typed Γ e τ'), τ = τ' ∧ HEq d.toR d'.toR
+
+/-- … of its lvalue derivations. -/
+def UniqL (Γ : Ctx) (e : Syn .expr) : Prop :=
+  ∀ {τ τ' : STy} (l : LVal Γ e τ) (l' : LVal Γ e τ'), τ = τ' ∧ HEq l.toR l'.toR
+
+/-- … of argument lists. -/
+def UniqA (Γ : Ctx) (es : Syn (.list .expr)) : Prop :=
+  ∀ {τs τs' : List STy} (d : TypedArgs Γ es τs) (d' : TypedArgs Γ es τs'), τs = τs' ∧ HEq d.toR d'.toR
+
+/-- … of tuple slots (at mobile types and as arguments). -/
+def UniqS (Γ : Ctx) (s : Syn (.list (.opt .expr))) : Prop :=
+  ∀ {τs τs' : List STy} (d : TypedSlots Γ s τs) (d' : TypedSlots Γ s τs'),
+    τs = τs' ∧ HEq d.toR d'.toR ∧ HEq (TypedArgs.ofSlots d) (TypedArgs.ofSlots d')
+
+/-- The induction hypothesis: uniqueness below size `n`. -/
+structure Uniq (Γ : Ctx) (n : Nat) : Prop where
+  e : ∀ e : Syn .expr, sizeOf e < n → UniqE Γ e
+  l : ∀ e : Syn .expr, sizeOf e < n → UniqL Γ e
+  a : ∀ es : Syn (.list .expr), sizeOf es < n → UniqA Γ es
+  s : ∀ s : Syn (.list (.opt .expr)), sizeOf s < n → UniqS Γ s
+
+theorem no_binOp {e a b : Syn .expr} {k : BinKind} (hbo : e.binOp? = Option.none)
+    (h : e.binOp? = Option.some (k, a, b)) : False := by
+  rw [hbo] at h; cases h
+
+theorem no_const {e : Syn .expr} {q : Q} (hce : e.const = Option.none) (h : e.const = Option.some q) :
+    False := by
+  rw [hce] at h; cases h
+
+theorem uniqE_cond {Γ : Ctx} {c a b : Syn .expr} (ih : Uniq Γ (sizeOf (Syn.cond c a b))) :
+    UniqE Γ (.cond c a b) := by
+  intro τ τ' d d'
+  have hce : (Syn.cond c a b).const = Option.none := rfl
+  have hbo : (Syn.cond c a b).binOp? = Option.none := rfl
+  cases d
+  all_goals first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+    | skip
+  cases d'
+  all_goals first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+    | skip
+  rename_i τa τb dc da db hc τa' τb' dc' da' db' hc'
+  have hs : sizeOf c < sizeOf (Syn.cond c a b) ∧ sizeOf a < sizeOf (Syn.cond c a b) ∧
+      sizeOf b < sizeOf (Syn.cond c a b) := by
+    simp only [Syn.cond.sizeOf_spec]; omega
+  obtain ⟨-, e1⟩ := ih.e c hs.1 dc dc'
+  obtain ⟨rfl, e2⟩ := ih.e a hs.2.1 da da'
+  obtain ⟨rfl, e3⟩ := ih.e b hs.2.2 db db'
+  rw [hc] at hc'; cases hc'
+  refine ⟨rfl, ?_⟩
+  simp only [Typed.toR]
+  rw [eq_of_heq e1, eq_of_heq e2, eq_of_heq e3]
+
+theorem bin_same {e a b a' b' : Syn .expr} {k k' : BinKind} (hb : e.binOp? = Option.some (k, a, b))
+    (h : e.binOp? = Option.some (k', a', b')) : k = k' ∧ a = a' ∧ b = b' := by
+  rw [hb] at h; cases h; exact ⟨rfl, rfl, rfl⟩
+
+/-- Two constant operands make no typed operation (they fold). -/
+theorem bin_const_false {Γ : Ctx} {a b : Syn .expr} {qa qb : Q} {τa τb τ : STy} (ha : a.const = Option.some qa)
+    (hb : b.const = Option.some qb) (da : Typed Γ a τa) (db : Typed Γ b τb)
+    (hc : STy.common? Γ.isBase τa τb = Option.some τ) : False := by
+  rw [STy.common?_const (Typed.constShape da ha).isConstTy (Typed.constShape db hb).isConstTy] at hc
+  cases hc
+
+/-- **Binary operations.** -/
+theorem uniqE_bin {Γ : Ctx} {e a b : Syn .expr} {k : BinKind} (hb : e.binOp? = Option.some (k, a, b))
+    (hce : e.const = Option.none) (ih : Uniq Γ (sizeOf e)) : UniqE Γ e := by
+  intro τ τ' d d'
+  have hs := Syn.binOp?_sizeOf hb
+  cases d with
+  | arith hb1 da1 db1 hc1 hn1 hz1 =>
+    obtain ⟨rfl, rfl, rfl⟩ := bin_same hb hb1
+    cases d' with
+    | arith hb2 da2 db2 hc2 hn2 hz2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        obtain ⟨rfl, e1⟩ := ih.e _ hs.1 da1 da2
+        obtain ⟨rfl, e2⟩ := ih.e _ hs.2 db1 db2
+        rw [hc1] at hc2; cases hc2
+        refine ⟨rfl, ?_⟩
+        simp only [Typed.toR]
+        rw [eq_of_heq e1, eq_of_heq e2]
+    | bit hb2 da2 db2 hc2 hn2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | shift hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | exp hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | order hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | eq hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | compareConst hb2 hk2 ha2 hq2 =>
+        obtain ⟨rfl, -, -⟩ := bin_same hb hb2
+        rcases hk2 with h | h <;> cases h
+    | logic hb2 da2 db2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (cases hb; done)
+  | bit hb1 da1 db1 hc1 hn1 =>
+    obtain ⟨rfl, rfl, rfl⟩ := bin_same hb hb1
+    cases d' with
+    | arith hb2 da2 db2 hc2 hn2 hz2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | bit hb2 da2 db2 hc2 hn2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        obtain ⟨rfl, e1⟩ := ih.e _ hs.1 da1 da2
+        obtain ⟨rfl, e2⟩ := ih.e _ hs.2 db1 db2
+        rw [hc1] at hc2; cases hc2
+        refine ⟨rfl, ?_⟩
+        simp only [Typed.toR]
+        rw [eq_of_heq e1, eq_of_heq e2]
+    | shift hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | exp hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | order hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | eq hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | compareConst hb2 hk2 ha2 hq2 =>
+        obtain ⟨rfl, -, -⟩ := bin_same hb hb2
+        rcases hk2 with h | h <;> cases h
+    | logic hb2 da2 db2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (cases hb; done)
+  | shift hb1 da1 db1 hm1 ham1 hk1 =>
+    obtain ⟨rfl, rfl, rfl⟩ := bin_same hb hb1
+    cases d' with
+    | arith hb2 da2 db2 hc2 hn2 hz2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | bit hb2 da2 db2 hc2 hn2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | shift hb2 da2 db2 hm2 ham2 hk2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        obtain ⟨rfl, e1⟩ := ih.e _ hs.1 da1 da2
+        obtain ⟨rfl, e2⟩ := ih.e _ hs.2 db1 db2
+        refine ⟨rfl, ?_⟩
+        simp only [Typed.toR]
+        rw [eq_of_heq e1, eq_of_heq e2]
+    | exp hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | order hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | eq hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | compareConst hb2 hk2 ha2 hq2 =>
+        obtain ⟨rfl, -, -⟩ := bin_same hb hb2
+        rcases hk2 with h | h <;> cases h
+    | logic hb2 da2 db2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (cases hb; done)
+  | exp hb1 da1 db1 hm1 ham1 hk1 =>
+    obtain ⟨rfl, rfl, rfl⟩ := bin_same hb hb1
+    cases d' with
+    | arith hb2 da2 db2 hc2 hn2 hz2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | bit hb2 da2 db2 hc2 hn2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | shift hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | exp hb2 da2 db2 hm2 ham2 hk2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        obtain ⟨rfl, e1⟩ := ih.e _ hs.1 da1 da2
+        obtain ⟨rfl, e2⟩ := ih.e _ hs.2 db1 db2
+        refine ⟨rfl, ?_⟩
+        simp only [Typed.toR]
+        rw [eq_of_heq e1, eq_of_heq e2]
+    | order hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | eq hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | compareConst hb2 hk2 ha2 hq2 =>
+        obtain ⟨rfl, -, -⟩ := bin_same hb hb2
+        rcases hk2 with h | h <;> cases h
+    | logic hb2 da2 db2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (cases hb; done)
+  | order hb1 da1 db1 hc1 ho1 =>
+    obtain ⟨rfl, rfl, rfl⟩ := bin_same hb hb1
+    cases d' with
+    | arith hb2 da2 db2 hc2 hn2 hz2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | bit hb2 da2 db2 hc2 hn2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | shift hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | exp hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | order hb2 da2 db2 hc2 ho2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        obtain ⟨rfl, e1⟩ := ih.e _ hs.1 da1 da2
+        obtain ⟨rfl, e2⟩ := ih.e _ hs.2 db1 db2
+        rw [hc1] at hc2; cases hc2
+        refine ⟨rfl, ?_⟩
+        simp only [Typed.toR]
+        rw [eq_of_heq e1, eq_of_heq e2]
+    | eq hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | compareConst hb2 hk2 ha2 hq2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        exact (bin_const_false ha2 hq2 da1 db1 hc1).elim
+    | logic hb2 da2 db2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (cases hb; done)
+  | eq hb1 da1 db1 hc1 ho1 =>
+    obtain ⟨rfl, rfl, rfl⟩ := bin_same hb hb1
+    cases d' with
+    | arith hb2 da2 db2 hc2 hn2 hz2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | bit hb2 da2 db2 hc2 hn2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | shift hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | exp hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | order hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | eq hb2 da2 db2 hc2 ho2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        obtain ⟨rfl, e1⟩ := ih.e _ hs.1 da1 da2
+        obtain ⟨rfl, e2⟩ := ih.e _ hs.2 db1 db2
+        rw [hc1] at hc2; cases hc2
+        refine ⟨rfl, ?_⟩
+        simp only [Typed.toR]
+        rw [eq_of_heq e1, eq_of_heq e2]
+    | compareConst hb2 hk2 ha2 hq2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        exact (bin_const_false ha2 hq2 da1 db1 hc1).elim
+    | logic hb2 da2 db2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (cases hb; done)
+  | compareConst hb1 hk1 ha1 hq1 =>
+    obtain ⟨rfl, rfl, rfl⟩ := bin_same hb hb1
+    cases d' with
+    | arith hb2 da2 db2 hc2 hn2 hz2 =>
+        rcases hk1 with rfl | rfl <;> exact absurd (bin_same hb hb2).1 (by decide)
+    | bit hb2 da2 db2 hc2 hn2 =>
+        rcases hk1 with rfl | rfl <;> exact absurd (bin_same hb hb2).1 (by decide)
+    | shift hb2 da2 db2 hm2 ham2 hk2 =>
+        rcases hk1 with rfl | rfl <;> exact absurd (bin_same hb hb2).1 (by decide)
+    | exp hb2 da2 db2 hm2 ham2 hk2 =>
+        rcases hk1 with rfl | rfl <;> exact absurd (bin_same hb hb2).1 (by decide)
+    | order hb2 da2 db2 hc2 ho2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        exact (bin_const_false ha1 hq1 da2 db2 hc2).elim
+    | eq hb2 da2 db2 hc2 ho2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        exact (bin_const_false ha1 hq1 da2 db2 hc2).elim
+    | compareConst hb2 hk2 ha2 hq2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        rw [ha1] at ha2; cases ha2
+        rw [hq1] at hq2; cases hq2
+        exact ⟨rfl, HEq.rfl⟩
+    | logic hb2 da2 db2 =>
+        rcases hk1 with rfl | rfl <;> exact absurd (bin_same hb hb2).1 (by decide)
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (cases hb; done)
+  | logic hb1 da1 db1 =>
+    obtain ⟨rfl, rfl, rfl⟩ := bin_same hb hb1
+    cases d' with
+    | arith hb2 da2 db2 hc2 hn2 hz2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | bit hb2 da2 db2 hc2 hn2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | shift hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | exp hb2 da2 db2 hm2 ham2 hk2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | order hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | eq hb2 da2 db2 hc2 ho2 =>
+        exact absurd (bin_same hb hb2).1 (by decide)
+    | compareConst hb2 hk2 ha2 hq2 =>
+        obtain ⟨rfl, -, -⟩ := bin_same hb hb2
+        rcases hk2 with h | h <;> cases h
+    | logic hb2 da2 db2 =>
+        obtain ⟨-, rfl, rfl⟩ := bin_same hb hb2
+        obtain ⟨-, e1⟩ := ih.e _ hs.1 da1 da2
+        obtain ⟨-, e2⟩ := ih.e _ hs.2 db1 db2
+        refine ⟨rfl, ?_⟩
+        simp only [Typed.toR]
+        rw [eq_of_heq e1, eq_of_heq e2]
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (cases hb; done)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (cases hb; done)
+
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
