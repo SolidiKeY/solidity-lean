@@ -86,7 +86,8 @@ evidence directory.
 
 1. Artifact layout: implemented; focused target and controls pass; two reviews complete.
    Final global gates remain lane-wide obligations.
-2. Independent slice execution and installed-runtime theorem: pending.
+2. Independent slice execution and installed-runtime theorem: implemented,
+   kernel checks/controls and independent finder/skeptic follow-ups pass.
 3. Certified assembler linking, disjointness, exact widths and refusal: pending.
 4. Typed immutable patches and frame/installation proofs: pending.
 A. Constructor-prefix return/revert composition: pending.
@@ -105,3 +106,46 @@ The documentation path script fails with 46 missing references in inherited
 files; same-base classification remains a final validation obligation. No new
 creation-document finding appeared in the recorded output. This failure is not
 marked passed.
+
+## Checkpoint 2: independent slice execution
+
+`Execution.fetch` decodes exactly one intrinsic instruction, refusing truncated
+PUSH bytes. `fetch_encode` proves its exact instruction boundary. `effect`
+independently specifies PUSH (modulo 2^256), zero-padded CODECOPY, RETURN and REVERT;
+stack underflow and unsupported instructions are refused. `run` is a finite
+fuelled byte interpreter. `Exec` means an actual successful finite run.
+`run_add` proves successful outcomes persist with extra fuel;
+`Exec.deterministic` proves unique outcomes, with only `[propext, Quot.sound]`.
+This is not source fuel, a gas model, or whole pinned-EVM agreement. Memory lists
+represent byte contents, not MSIZE, allocation rounding or resource charges;
+in particular a zero-length write may change representation length without
+changing any observed byte. Those operations are outside this exact slice.
+
+`wrapper_exec` derives the wrapper's returned bytes from the independent runner.
+`installs_runtime` states `Exec a.payload a.payload [] [] (.returned a.runtime)`
+for every bounded runtime byte list and arbitrary constructor arguments.
+`Placement.installs` handles relocated wrapper entry under an arithmetic
+alignment certificate and empty entry stack/memory. It does not assume a source
+constructor reaches that entry. Its offset uses minimal `byteWidth`; prefix
+lengths 245/246 give offsets 255/257 (the second width increases the header).
+
+Inhabited kernel controls cover empty runtime, nonempty arguments, lengths
+31/32/33 and 255/256, and offset PUSH1/PUSH2 transitions. A literal malformed
+wrapper (`wrongSource`) copies bytes `[0x2a, 0, 0xaa]` instead of the supplied
+`[0x60, 0x2a, 0]`; `wrongSource_exec` proves that execution and determinism
+refutes the desired output. Separate controls check too-short/long/wrong-offset
+reads and correct zero-padding and overwrites.
+
+Focused commands: `lake -f creation-runtime.lakefile.toml build
+Solidity.Backend.Creation.ExecutionChecks` and separately
+`lake -f creation-runtime.lakefile.toml build
+Solidity.Backend.Creation.PlacementChecks`. Placement target passes (8 jobs).
+No heartbeat/recursion budget was raised: a concrete associativity/control
+reduction failure was fixed by explicit length simplification.
+The two independent reviews initially found missing unique-outcome and actual
+malformed-execution controls and offset-width transitions. These are now added;
+both follow-up reviews confirm the fixes with no new correctness finding.
+Neither review used a Lean server or build. Placement is a suffix-entry theorem,
+not execution of its prefix (backfill A). `fetch` refuses truncated PUSH data,
+unlike full EVM zero-padding; generated wrappers contain complete immediates,
+and this refusal is an explicit slice boundary.

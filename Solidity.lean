@@ -669,3 +669,9 @@ import Solidity.Examples.SolCases
 import Solidity.Backend.Creation.Artifact
 
 import Solidity.Backend.Creation.Checks
+
+import Solidity.Backend.Creation.Execution
+import Solidity.Backend.Creation.ExecutionChecks
+
+import Solidity.Backend.Creation.Placement
+import Solidity.Backend.Creation.PlacementChecks

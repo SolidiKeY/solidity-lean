@@ -936,3 +936,9 @@ At the root, the notation's own tests:
 | `Backend/Creation/Artifact.lean` | G44.02 intrinsic artifact sections, executable CODECOPY/RETURN wrapper, exact minimal PUSH widths, layout and argument extraction laws. |
 
 | `Backend/Creation/Checks.lean` | G44.02 inhabited layout, argument separation and negative controls with headline kernel axiom pins. |
+
+| `Backend/Creation/Execution.lean` | Independent byte-consuming PUSH/CODECOPY/RETURN/REVERT slice semantics and exact installed runtime proof. |
+| `Backend/Creation/ExecutionChecks.lean` | Inhabited empty, word and PUSH-width boundary installation witnesses, byte-range negative controls and axiom pins. |
+
+| `Backend/Creation/Placement.lean` | Relocated runtime-return slice with arithmetic alignment certificate and minimal offset PUSH width. |
+| `Backend/Creation/PlacementChecks.lean` | Inhabited PUSH1/PUSH2 offset transition controls with nonempty runtime and arguments. |
