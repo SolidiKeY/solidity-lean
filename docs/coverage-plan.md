@@ -178,7 +178,7 @@ assuming each other's unproved conclusions.
 | G06 | Establish reproducible pinned EVM semantics/observation interfaces and a dependency-free core certificate boundary, with external adapters in Bridge. Inventory every existing machine disagreement and required bridge lemma. |
 | G07 | Establish proof/trust regression gates, axiom inventories and inhabited source-to-machine controls; record existing failures separately. Check that malformed source, altered bytecode and always-revert output cannot satisfy the planned contracts. |
 
-G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); open scope questions Q1–Q6 await the user.
+G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); open scope questions Q1–Q8 await the user.
 
 ### Independent source definitions — after G00–G07, before wave 1
 

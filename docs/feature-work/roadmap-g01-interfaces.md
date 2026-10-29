@@ -47,7 +47,7 @@ representation, which follows [intrinsic.md](../intrinsic.md). The
 | L5 | Intrinsic typed contract world: `Contract`, `Prog C Γ Γ'`, `State C Γ` and a world of typed instances | `IntrinsicSpec.World`, `IntrinsicSpec.lang` | G16–G24 (see the [reuse map](#reuse-map)) |
 | L6 | Backend languages chosen by the compiler, one per pass | any `Lang Event Outcome` | G24–G44 |
 | L7 | Assembly: instruction lists with labels | `Lang Event Outcome` with programs over instructions | G45 |
-| L8 | Bytecode artifacts | `Artifact` (`initcode`, `runtime : List UInt8`) | G44, G45 |
+| L8 | Bytecode artifacts | `Artifact`: a table of `CodeUnit`s (`initcode`, `runtime : List UInt8`, library link sites), one per contract and library, and the selected one | G44, G45 |
 | L9 | Pinned EVM: accounts with code, executing transactions | `EvmSpec.lang`, `EvmSpec.load` | G06, G46, G47 |
 
 The judgments at L1 and L2 are relations defined from the pinned grammar and
@@ -64,11 +64,17 @@ A `Prefix E O` (line 51) is what a finite execution prefix shows: `events :
 List E` and `final : Option O`. A prefix whose `final` is `none` is still
 running or has run out of resources. Running out of an excluded resource is
 therefore **not an observation**: it ends a prefix without a final value.
+This applies to the compiled system's own resources. A callee outside the
+system that runs out of gas is an environment answer (a revert), and how gas
+the system forwards shapes such answers is open scope question
+[Q7](#q7-gas-dependent-environment-behaviour).
 
 One execution is `Prefixes R E O := R → Prefix E O` (line 81), a prefix at
-each resource bound `r : R`. Every language's semantics must be consistent,
+each resource bound `r : R`. Every language's semantics is consistent,
 `Prefixes.Consistent` (line 85): more resources extend the events, and a
-completed prefix stays the same. Under this reading:
+completed prefix stays the same. This is a field of `Lang` (`consistent`,
+with the order `resLE` on resources), so a semantics that completes with a
+success at one bound and with a revert at a larger one is not a language. Under this reading:
 
 - an execution **completes** with `o` when some bound completes it
   (`Prefixes.Completes`, line 89);
@@ -88,42 +94,47 @@ itself (`Prefix.Le.final_eq`, line 74).
 
 ### Refinement, resources and the resource abstraction
 
-`Lang E O` (line 107) is a language at one layer. It has programs,
-environments, a resource type `Res`, `Allowed : Env → Prop`, `Admissible :
-Res → Prop` and `sem : Prog → Env → Prefixes Res E O`.
+`Lang E O` (line 104) is a language at one layer. It has programs,
+environments, a resource type `Res` with an order `resLE`, `Allowed : Env →
+Prop`, `Admissible : Res → Prop`, `sem : Prog → Env → Prefixes Res E O` and
+the proof `consistent` that every execution is a consistent family.
 
-`Refines AS AT s t` (line 116) is two-sided:
+`Refines AS AT s t` (line 115) is two-sided:
 
 1. **Forward (resource adequacy).** Every admissible source prefix is below
    some admissible target prefix.
 2. **Backward (functional soundness).** Every admissible target prefix is
    below some admissible source prefix.
 
-It is transitive (`Refines.trans`, line 121). Three consequences are proved
+It is transitive (`Refines.trans`, line 120). Three consequences are proved
 in the module:
 
-- **Completion transfers** (`Refines.completes`, line 136). A source prefix
+- **Completion transfers** (`Refines.completes`, line 135). A source prefix
   that completes with `o` at an admissible bound gives an admissible target
   prefix with the same final observation and the same events.
-- **Nothing is invented** (`Refines.sound`, line 146). A target completion is
+- **Nothing is invented** (`Refines.sound`, line 145). A target completion is
   a source completion with the same events.
-- **Divergence transfers** (`Refines.diverges`, line 156). A source that never
+- **Divergence transfers** (`Refines.diverges`, line 155). A source that never
   completes at admissible bounds has a target that never completes at
   admissible bounds.
 
-`Refines.safety` (line 170) transfers any downward-closed prefix property
+`Refines.safety` (line 169) transfers any downward-closed prefix property
 from source to target.
 
 The resource abstraction is `Lang.Admissible`, chosen per layer, plus the
-**constructive** bound `Cert.need` of each pass certificate (below). `need`
+explicit bound function `Cert.need` of each pass certificate (below). `need`
 maps each admissible source bound to an admissible target bound at which the
 target prefix lies above the source prefix. So resource adequacy is a
 function proved correct, never the assumption that the target execution
-already has the desired result.
+already has the desired result. The type does not force `need` to be
+computable: a `need` defined by `Classical.choose` would only restate the
+forward direction. That the final bound is a definition without choice
+(constructive, or a proved closed-form bound) is checked on the final
+theorems' definitions and axioms (G49.03, G54).
 
 At the ends of the pipeline:
 
-- **Source.** The proposed default is `SourceSpec.Idealized` (line 290):
+- **Source.** The proposed default is `SourceSpec.Idealized` (line 302):
   every fuel bound is admissible, so the source's prefixes are all of its
   behaviour.
 - **EVM.** `Admissible` is the set of gas/memory/stack/code resources the
@@ -155,17 +166,27 @@ environment.
 The observation types are fixed once for every layer, so no pass can pick a
 weaker observation.
 
-- **`Outcome`** (line 243): `success (returnData)` or `revert (revertData)`,
+- **`Outcome`** (line 245): `success (returnData)` or `revert (revertData)`,
   as ABI bytes. A panic is a revert with `Panic(uint256)` data. A custom error
   is a revert with its selector and arguments. `Error(string)` is a revert
   with its encoding. The empty revert is `revert []`.
-- **`Event`** (line 252): what the contract asks of the environment and what
-  the environment answers:
-  - outgoing typed external calls, payments and library calls (`call`, with
-    callee, value, ABI input and the static flag);
-  - creations (`create`);
-  - the environment's `answer` (an outcome and the created address, if any);
+- **`Event`** (line 258): what the compiled system asks of the environment
+  and what the environment answers:
+  - the deployment of the selected contract with its outcome and address
+    (`deploy`), so a failed deployment is not hidden behind later empty
+    successes;
+  - outgoing typed external calls and payments to accounts outside the
+    system (`call`, with callee, value, ABI input and the static flag);
+  - creations (`create`), naming the created contract by its position in
+    the compilation input, a source identity, so neither side numbers code;
+  - the environment's `answer` (an outcome, or the created address);
   - a session's completed transactions (`tx`, with request and outcome).
+
+  The **compiled system** is every contract and linked library of the
+  compilation input. A call between its instances, and a linked library
+  call (which runs on the caller's storage), is internal to the semantics,
+  not an event. Whether this is the approved boundary is open scope question
+  [Q8](#q8-system-boundary-libraries-and-created-contracts).
 
 The recorded exclusions are omitted on purpose: logs, gas, raw layout,
 `selfdestruct`, raw calldata and the extra block fields
@@ -196,7 +217,7 @@ exported in functional form. That is open scope question
 
 ## The six contracts
 
-`SourceSpec` (line 269) bundles the independent source side: `Input`,
+`SourceSpec` (line 281) bundles the independent source side: `Input`,
 `Syntax`, `Resolved`, the judgments `Parses`, `Resolves`, `WellFormed`,
 `InProfile`, the session language `lang` and `meaning : (r : Resolved) →
 WellFormed r → InProfile r → lang.Prog`. `meaning` is total on admitted
@@ -204,15 +225,15 @@ input because its proofs are arguments.
 
 ### 1. Source admission and parsing — `Admission`, `CheckedFrontend`
 
-**Types.** `Admission S` (line 306) has `frontend : S.Input → Option
+**Types.** `Admission S` (line 330) has `frontend : S.Input → Option
 S.Resolved` and two fields:
 
-- `sound`: an accepted input is `S.Admitted` (line 299), meaning it parses
+- `sound`: an accepted input is `S.Admitted` (line 323), meaning it parses
   under `Parses`, resolves under `Resolves`, is `WellFormed` and is
   `InProfile`;
 - `complete`: every admitted input is accepted with exactly its resolution.
 
-For a proof-producing frontend, `CheckedFrontend S` (line 312) splits
+For a proof-producing frontend, `CheckedFrontend S` (line 336) splits
 `frontend` into `produce` and a Lean `check`, with three fields:
 
 - `checked`: acceptance by the checker implies admission;
@@ -220,7 +241,7 @@ For a proof-producing frontend, `CheckedFrontend S` (line 312) splits
 - `complete`: every admitted input produces its resolution with some
   certificate.
 
-`SourceSpec.Unambiguous` (line 294) requires `Parses` and `Resolves` to be
+`SourceSpec.Unambiguous` (line 306) requires `Parses` and `Resolves` to be
 functional, which `complete` needs to be meaningful. It is an S00/S01
 obligation.
 
@@ -242,8 +263,8 @@ malformed-source controls exercise both.
 
 ### 2. Lowering — `Lowering`
 
-**Types.** `IntrinsicSpec` (line 322) is the intrinsic world type, its
-session language and `ofWorld`. `Lowering S I` (line 330) has:
+**Types.** `IntrinsicSpec` (line 346) is the intrinsic world type, its
+session language and `ofWorld`. `Lowering S I` (line 354) has:
 
 - `lower : (r : S.Resolved) → S.WellFormed r → S.InProfile r → I.World`.
   It is total by its type, which proves admission coverage: there is no
@@ -254,7 +275,7 @@ session language and `ofWorld`. `Lowering S I` (line 330) has:
 
 **Observation and relation.** The shared `Event` and `Outcome`. The
 certificate gives `Refines` in both directions at every allowed environment
-(`Cert.refines`, line 200). Typing preservation is in the target type
+(`Cert.refines`, line 202). Typing preservation is in the target type
 itself, since `lower` produces intrinsic `Prog C Γ Γ'`. Evaluation order and
 failures are preserved because they show in the events and outcomes.
 
@@ -268,10 +289,15 @@ on any source program that completes with a success (G07 control).
 
 ### 3. Compilation — `Compilation`
 
-**Types.** `Compilation I Asm` (line 353) has `compile : I.World →
+**Types.** `Compilation I Asm` (line 389) has `compile : I.World →
 Asm.Prog`, total, a pass whose domain contains every lowered world (`dom`),
 `agrees`, and `cert`. Its pass is the composition of all backend passes
-(G24–G44) by `Cert.comp`.
+(G24–G44) by `Cert.comp`. Calls, deployment, runtime dispatch and linking
+are passes like any other, not side conditions: dispatch on the ABI
+selector, receive and fallback (G40) and constructor/initcode generation
+(G44) produce the session behaviour that `Event.deploy` and `Event.tx`
+observe, and linking is the `CodeUnit.links` table of the `Artifact`
+(line 372) that contract 4 resolves.
 
 **Premises.** None beyond allowed environments. Fragment predicates may be
 the `Dom` of an inner pass. The closure hypothesis of `Pass.comp` and the
@@ -283,28 +309,41 @@ backend fails `need_ok` at the first source success.
 
 ### 4. EVM execution — `Execution`
 
-**Types.** `Execution Asm V` (line 362) has `assemble : Asm.Prog → Artifact`,
+**Types.** `Execution Asm V` (line 398) has `assemble : Asm.Prog → Artifact`,
 total, and a certified pass `Asm → V.lang` whose output is `V.load (assemble a)`.
 The pass composes:
 
 - instruction selection, stack lowering, labels and loops, assembly and byte
   encoding (G45);
-- the bridges to the pinned EVM: numeric, byte memory, storage with real
-  hashing, environment, hash, call/create/return and the transaction (G46,
-  G47).
+- jump and `JUMPDEST` realization of structured control (G45.03);
+- the bridges to the pinned EVM: numeric, byte memory and calldata, storage
+  with real hashing, transient storage (`TLOAD`/`TSTORE`, reset at the end
+  of the transaction), environment, hash, call/create/return with returndata
+  and revert bytes, and rollback of persistent and transient state and of
+  balances on revert, and the transaction (G46, G47).
 
-`EvmSpec` (line 345) is the pinned EVM as a `Lang`, with `load` installing
+The `Artifact` is a table of `CodeUnit`s (`initcode`, `runtime`, library
+link sites) for every contract and library of the input, with the selected
+one (`main`); `load` deploys it with its libraries linked.
+
+`EvmSpec` (line 381) is the pinned EVM as a `Lang`, with `load` installing
 an artifact and running a session. Its resources are gas, memory, stack and
 code size. Its `Admissible` is the approved resource profile
-([Q2](#q2-fixed-evm-limits)).
+([Q2](#q2-fixed-evm-limits)). Its `Allowed` is the full set of pinned EVM
+environments less approved premises only ([Q4](#q4-environment-model),
+[Q7](#q7-gas-dependent-environment-behaviour)): it is fixed by G06 and the
+user, never chosen by the compiler, so it cannot leave out malformed
+calldata, value sent to a non-payable function or hostile callees.
 
 **Non-circular because** `EvmSpec` is the pinned EVM semantics from G06, not
-the compiler's own machine. The current `Evm.Machine` is at most an inner
+the compiler's own machine, and the import gate (below) applies to it as to
+the source: `load` must decode bytes by the pinned EVM's own decoder, never
+by an inverse of `assemble`. The current `Evm.Machine` is at most an inner
 language here (see the [reuse map](#reuse-map)).
 
 ### 5. Composition: the public theorem — `PublicCorrectness`
 
-`PublicCorrectness S V compiler envAbs` (line 373) is the conjunction of
+`PublicCorrectness S V compiler envAbs` (line 409) is the conjunction of
 three statements:
 
 1. **Coverage, and no success on unsupported input.** For every input, the
@@ -317,9 +356,19 @@ three statements:
    - the source session meaning at `envAbs e` refines the artifact's EVM
      sessions at `e`, at the source's and the EVM's admissible resources.
 
-Sessions include deployment and every sequence of transactions (G50). The
-final public statement is `PublicCorrectness` with `SourceSpec.Idealized`,
-unless the user approves a source-side resource ([Q1](#q1-source-resources)).
+Sessions include deployment (`Event.deploy`) and every sequence of
+transactions (G50). The final public statement is the conjunction of:
+
+- `PublicCorrectness` with `compiler` the concrete pipeline definition, the
+  composition of the frontend and of contracts 2–4. It must be computable
+  (no `noncomputable`, no choice in its definition) and be run on G07's
+  controls, since the type alone does not make a parameter executable;
+- `SourceSpec.Idealized`, unless the user approves a source-side resource
+  ([Q1](#q1-source-resources));
+- `SourceSpec.NonVacuous` (line 315): admitted inputs whose meanings, at
+  allowed environments, complete with a success with data, complete with a
+  revert, and diverge. Without it an empty input type, `InProfile := False`
+  or a `sem` that ignores the program would make every contract vacuous.
 
 The obligations of the roadmap read off this contract as follows:
 
@@ -343,7 +392,7 @@ hash-injectivity premise. Adding one requires approval
 
 ### 6. Verification and trust — `SpecTransfer`
 
-`SpecTransfer S V compiler envAbs` (line 386) says that for every admitted
+`SpecTransfer S V compiler envAbs` (line 422) says that for every admitted
 input and allowed EVM environment, two kinds of source specification hold
 of the bytes:
 
@@ -355,7 +404,7 @@ of the bytes:
   gives an EVM completion with the same outcome at an admissible bound.
 
 The semantic half is proved from contract 5 (`PublicCorrectness.transfer`,
-line 398, no axioms). The rest of contract 6 is meta-level and owned by G51,
+line 434, no axioms). The rest of contract 6 is meta-level and owned by G51,
 G54 and G55:
 
 - **Rule soundness.** Every added calculus rule is sound. `Proves.valid`
@@ -371,22 +420,38 @@ G54 and G55:
 - **Trust.** No `sorry`, no new axioms and a reproducible kernel check. The
   existing gates are `scripts/check-trust.sh` and `TrustAudit.lean`
   ([assurance.md](../assurance.md)).
+- **Automatic search is separate.** `SpecTransfer` transfers whatever is
+  proved; it does not ask any tactic to find the proof. The approved target
+  and exclusions of `sol_prove`/`sol_decide` remain unchanged, and a
+  specification that automation does not prove is a search limitation, not a
+  gap in the compiler's contracts (roadmap obligation 6). G51.02 records the
+  approved search target separately from these contracts.
 
 ### Non-circularity as a checkable gate
 
 The proposal for G07 has three parts:
 
-1. **Import closure.** The modules instantiating `SourceSpec` (S00–S05) must
-   not import, transitively:
-   - `Solidity.Evm.*`, `Solidity.Frontend.*` or `Solidity.Syntax.Elab*`;
-   - any module defining `Lowering.lower`, `Compilation.compile` or
-     `Execution.assemble`.
-
-   This is a mechanical check in the style of `scripts/check-layers.mjs`.
-2. **No `meaning` through the pipeline.** `S.meaning` must not be stated as
-   `I.lang.sem (I.ofWorld (lower …))` or through any later layer. With (1)
-   this is enforced by the absence of the import.
-3. **Reuse of an intrinsic type is a correspondence theorem.** If the source
+1. **Import whitelist.** The modules instantiating `SourceSpec` (S00–S05)
+   may import only an explicit whitelist: Lean's prelude, the new source
+   modules, and named datatype modules (such as the one defining `Ty`), each
+   with its S05 correspondence theorem. In particular they reach neither
+   `Solidity.Syntax.Scoped` (the intrinsic programs) nor
+   `Solidity.Semantics.Run` (their run), nor `Solidity.Evm.*`,
+   `Solidity.Frontend.*` or `Solidity.Syntax.Elab*`. A blacklist would not
+   do: an S04 module could define its own `toIntrinsic : Resolved → Prog …`
+   and set `meaning := Prog.run ∘ toIntrinsic`, and `Lowering.lower :=
+   toIntrinsic` would make contract 2 an identity. This is a mechanical
+   check in the style of `scripts/check-layers.mjs`.
+2. **No `meaning` through the pipeline, checked both ways.** `S.meaning` must
+   not mention `I.lang`, `lower` or a later layer (enforced by (1)), and the
+   converse check: the constants `Lowering.lower` unfolds to include no
+   constant of the source closure other than the whitelisted datatypes and
+   the judgments it consumes.
+3. **The EVM end too.** The module instantiating `EvmSpec` imports the pinned
+   EVM (G06: the core interface, or the external adapter in `Bridge/`) and no
+   compiler module, so `load` cannot decode an artifact by the inverse of
+   `assemble`.
+4. **Reuse of an intrinsic type is a correspondence theorem.** If the source
    semantics reuses an intrinsic datatype (say `Ty` or `Storage C`), S05
    proves its correspondence. Reuse never defines the source by compiled or
    lowered output (roadmap, "Independent source definitions").
@@ -395,8 +460,8 @@ The proposal for G07 has three parts:
 
 ### Certificate shape
 
-A pass `π : Pass L₁ L₂` (line 181) has an input domain `Dom`, a function
-`run` on that domain and `envAbs`. A **certificate** `Cert π` (line 190) is
+A pass `π : Pass L₁ L₂` (line 180) has an input domain `Dom`, a function
+`run` on that domain and `envAbs`. A **certificate** `Cert π` (line 192) is
 data, not only a proposition. Its fields are:
 
 - `envSound` and `envOnto`;
@@ -408,12 +473,12 @@ data, not only a proposition. Its fields are:
 - `back`: every admissible target prefix is below an admissible source
   prefix.
 
-`Cert.refines` (line 200) turns a certificate into `Refines` for one program
+`Cert.refines` (line 202) turns a certificate into `Refines` for one program
 and environment.
 
 ### Composition lemma
 
-`Pass.comp π₁ π₂ closed` (line 207) needs
+`Pass.comp π₁ π₂ closed` (line 209) needs
 `closed : ∀ p h, π₂.Dom (π₁.run p h)`. The second pass must accept every
 output of the first, so a domain cannot remain a restriction of the composed
 pass. Its statement:
@@ -423,7 +488,7 @@ def Cert.comp (c₁ : Cert π₁) (c₂ : Cert π₂) (closed : ∀ p h, π₂.D
     Cert (π₁.comp π₂ closed)
 ```
 
-This is `Solidity/Roadmap/Contracts.lean:215`, proved; it depends on
+This is `Solidity/Roadmap/Contracts.lean:217`, proved; it depends on
 `propext` only, pinned by `#guard_msgs`. The composed bound is
 `need₂ ∘ need₁`; the backward direction chains the two `back` fields.
 
@@ -475,7 +540,7 @@ marked †.
 | `Contract`, `Stmt`, `Prog`, `State`, `TTx` | `Solidity/Syntax/Raw.lean:404`, `Solidity/Syntax/Scoped.lean:335`, `:445`, `Solidity/Semantics/State.lean:115`, `:105` | Components of `IntrinsicSpec.World` and its states | (a) Function bodies live inside call statements (an inductive-inductive contract is avoided, [intrinsic.md](../intrinsic.md), "What stays extrinsic"). (b) A recursive call is unrolled to `recDepth = 1024` frames whose bottom is `exhausted` (`Stmt.callRec`, `Scoped.lean:429`; `Prog.recBase`, `:455`; `recDepth`, `:469`). Under `Idealized` source resources this is a cutoff that G37 must remove, unless [Q1](#q1-source-resources) approves call depth as a source resource. (c) `TTx.ext` is a static response table keyed by call: two identical calls read the same entry ([Q4](#q4-environment-model)). |
 | `THalt`, `TRes`, `Prog.run` | `Solidity/Semantics/Run.lean:58`, `:79`, `:1153` | The final value of an intrinsic prefix, after mapping to `Outcome` | `THalt` erases error classes. A failing `assert` is `.panic` without its code; `.revertWith d` keeps revert data where the run has it, but overflow, bounds, empty `pop` and division by zero are plain `.revert` and lose their `Panic` codes, as do `Error(string)` and the distinction of empty data ([solc-alignment.md](../solc-alignment.md), "Remaining deltas", first item). Mapping to `Outcome` needs `Prog.withPanics` (`Solidity/Syntax/Checked.lean:587`) or the G38 revision. `.exhausted` must become "prefix ends" (`final = none`), never an observation. |
 | `TLoop.run` (classical, divergence by `Classical.choose`) | `Solidity/Semantics/Run.lean:565` | The limit of a prefix family | It is not itself a resourced family. |
-| `Prog.runF` (loop fuel) and `Prog.runF_approx` | `Solidity/Semantics/RunFuel.lean:319`, `:449` | The intrinsic family indexed by loop fuel; `Roadmap.typedRunPrefixes` (`Contracts.lean:418`) is the plug | `Prefixes.Consistent` (fuel monotonicity) is not proved yet: a child obligation of G24. There are no events; external calls are a table lookup, not an `Event`. |
+| `Prog.runF` (loop fuel) and `Prog.runF_approx` | `Solidity/Semantics/RunFuel.lean:319`, `:449` | The intrinsic family indexed by loop fuel; `Roadmap.typedRunPrefixes` (`Contracts.lean:454`) is the plug | `Prefixes.Consistent` (fuel monotonicity) is not proved yet: a child obligation of G24. There are no events; external calls are a table lookup, not an `Event`. |
 | Push at `2^256 - 1` elements is `exhausted` (decision 15) | [intrinsic.md](../intrinsic.md), decision 15 | A resource stop (`final = none`) | solc panics with `0x41` at length `2^64` ([solc-alignment.md](../solc-alignment.md), "No bound on a dynamic array's length"). The pinned language is solc's, so S04 must define the `0x41` panic, and the intrinsic run then deviates from the source. G23/G30 must close the gap through `R_low`; it is not an exclusion. |
 | `Contract.deployT`, `State.deploy` | `Solidity/Semantics/Deploy.lean:28`, `:20` | The deployment step of an intrinsic session | Only the single contract; value refusal as solc's creation code. |
 | `Lifetime.World`, `System`, `System.run`, `System.Init`, `Reachable` | `Solidity/Semantics/Lifetime.lean:25`, `:87`, `:97`, `:124`, `:162` | A candidate intrinsic session semantics (deploy, then calls) | Deterministic and without callbacks ("not a realization of callback havoc"). The entry interface `System` is supplied by the model, since visibility is not retained by `Contract`, so G20/G40 must produce it from source. Divergence and exhaustion have no transition, so a prefix family per transaction is still to be added. |
@@ -570,7 +635,8 @@ EVM one. Narrowing is a scope decision.
 ### Q5. Observation granularity
 
 Is the external `Event` list right as the public observation? It contains
-calls, payments, creations, answers and transaction outcomes with ABI bytes.
+the deployment, calls, payments, creations, answers and transaction outcomes
+with ABI bytes.
 Logs are excluded per the scope.
 
 **Evidence.** Under these observations exact revert bytes are observable, so
@@ -589,6 +655,46 @@ properties of interactions (`SpecTransfer`). A state invariant over
 "reachable worlds" (`Lifetime.Reachable`, `ContractWorld.Reachable`) needs
 `R_rep` exported, and a relation exported as a relation could be trivial.
 Hence a function: `decode : EvmWorld → Option IntrinsicWorld`.
+
+### Q7. Gas-dependent environment behaviour
+
+How do gas and the environment interact? The contracts give one resource
+bound per session (`Lang.Res`) and read exhaustion of the compiled system's
+own execution as the end of a prefix. Two things are not decided:
+
+- **Per-transaction gas.** A real session has a gas limit per transaction
+  request, chosen by the sender. `Event.tx` records no gas, because gas is
+  an excluded observation. Is "one bound per session, admissible per the
+  profile" the approved reading, or must `Res` be a gas limit per request?
+- **Gas-shaped answers.** In the EVM a call forwards at most 63/64 of the
+  remaining gas, `transfer` and `send` forward a 2300 stipend, and a
+  reentrant callback can run out of gas and be caught by the callee, after
+  which the session continues. A callee's answer can therefore depend on gas.
+  An `Allowed` set that ignores gas is a decision. The alternatives: let
+  callee answers range over all outcomes regardless of gas (an
+  over-approximation the source must also allow), or model the forwarded gas
+  in the environment.
+
+**Evidence.** [solidity-scope.md](../solidity-scope.md) excludes "exact gas
+forwarding/stipends/refunds and real machine resource limits" as
+observations; it does not say how the environment's gas-dependent answers
+are quantified.
+
+### Q8. System boundary: libraries and created contracts
+
+Is the compiled system every contract and linked library of the compilation
+input, so that linked library calls and calls between its own instances are
+internal semantics, not environment events?
+
+**Evidence.** Linked external library calls run on the caller's storage
+([solidity-scope.md](../solidity-scope.md), "What requires explicit
+abstraction"). An environment answer cannot mutate our storage, so modelling
+libraries as environment would lose behaviour. The contracts therefore take
+the whole input as the system: `Event.create` names a contract by its
+position in the input, and `Artifact` is a table of `CodeUnit`s with library
+link sites. The user should confirm this boundary, and whether
+`type(C).creationCode`/`runtimeCode` (admitted only with matching artifacts,
+[source-admission.md](source-admission.md)) observe the artifact table.
 
 ## Child obligations
 
@@ -611,6 +717,10 @@ Every field of the contracts has an owner.
 | Non-circularity gate | The import-closure check described above | G07 |
 | Always-revert and erased-observation controls | Instances of `Refines.completes` on inhabited programs | G07, G49.03 |
 | Trust | Axiom inventory of the final theorems | G54, G55 |
+| `Lang.consistent` for every layer | Consistency of each prefix family (fuel or gas monotonicity) | owner of that layer: S03.04, G24, G45, G46.06 |
+| `SourceSpec.NonVacuous` | Success-with-data, revert and divergence witnesses at allowed environments | S05, G07 |
+| Concrete `compiler`, computable `need` | The public theorem instantiated with the actual pipeline; no choice in `need` | G49.03, G54 |
+| Import whitelist and the `EvmSpec` gate | The gate described in "Non-circularity as a checkable gate" | G07 |
 
 Not done here: no instance of any contract is constructed, and no existing
 theorem is restated against them.
@@ -638,7 +748,7 @@ theorem is restated against them.
     batch.
   - Every cited declaration and line was checked with `git grep` at the head.
 - **Ledger:** the [child obligations](#child-obligations) table.
-- **Remaining:** every contract instance (all groups above) and the six open
+- **Remaining:** every contract instance (all groups above) and the eight open
   scope questions.
 - **Not edited** (forbidden by the batch rules):
   - `docs/module-map.md` has no row for `Solidity/Roadmap/` yet; it is a
@@ -649,4 +759,56 @@ theorem is restated against them.
 
 ## Review
 
-Filled in after the finder and skeptic reviews.
+Two read-only reviews were run on the first pushed version, neither using the
+Lean server.
+
+**Finder** (citations and claims against the source). Confirmed and fixed:
+
+1. `Prog.withPanics` is at `Solidity/Syntax/Checked.lean:587`, not `:568`
+   (that line is `Stmt.withPanics`).
+2. The `Lang` docstring named Q3 for the EVM resource profile; it is Q2.
+3. The handoff misattributed which axiom results are pinned by
+   `#guard_msgs`. The pinned ones are `Cert.comp` and
+   `PublicCorrectness.transfer`.
+4. Parts of the roadmap's obligations were not addressed: runtime dispatch
+   and linking (obligation 3), jumps, rollback and transient state
+   (obligation 4), and the separation of automatic search (obligation 6).
+   Added to contracts 3, 4 and 6.
+5. The reuse map missed `Agrees`' second disjunct (a source panic becomes a
+   machine revert without `Panic(0x01)` data) and the
+   `b + Memory.frameNeedProg P ≤ frame` premise. Both added.
+6. In `CompilerSimulation`, payment freedom is a premise of the `Transition`
+   constructors, not of the labels. Corrected.
+7. `THalt` keeps `revertWith` data. The text now says exactly what is lost.
+8. The `EvmSpec` docstring now lists code size, as the document does.
+9. The `ContractWorld` static-frame claim now quotes its docstring.
+
+**Skeptic** (adversarial reading of the contracts). Confirmed and fixed:
+
+1. **Blocking: the non-circularity gate could be bypassed** by a source
+   module defining its own lowering to `Prog` and running `Prog.run`. The gate
+   is now a whitelist, with a converse check on `Lowering.lower` and a gate
+   on `EvmSpec`.
+2. **Vacuous endpoints.** Added `SourceSpec.NonVacuous` (success with data,
+   revert and divergence witnesses). `EvmSpec.Allowed` is fixed as the
+   pinned environment set less approved premises, and `load` may not decode
+   by the compiler's inverse.
+3. **Consistency was only prose.** `Lang` now has `resLE` and `consistent`.
+4. **`need` was called constructive without enforcement.** The wording is
+   corrected; computability of the final `need` is a child obligation
+   (G49.03, G54).
+5. **Gas-dependent environment behaviour and per-transaction gas** were
+   decided silently. They are now open scope question Q7.
+6. **Observation gaps.**
+   - There was no deployment observation: added `Event.deploy`.
+   - Created code was named by a compiler-chosen number: now a source
+     identity, read off `Artifact.contracts`.
+   - Linked libraries were environment events: the compiled system now
+     includes them, and `Artifact` carries link sites. The boundary is open
+     scope question Q8.
+7. **An arbitrary `compiler` parameter** does not make output executable.
+   The final statement uses the concrete, computable pipeline run on G07's
+   controls. The unused `Prefixes.Emits` was removed.
+
+Not changed: the skeptic's "already acknowledged" items (Q1–Q5, G51's meta
+half, `Prog.runF` monotonicity, now covered by the `Lang.consistent` row).

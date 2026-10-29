@@ -94,23 +94,22 @@ admitted resources never finish. -/
 def Prefixes.Diverges {R E O : Type} (A : R → Prop) (p : Prefixes R E O) : Prop :=
   ∀ r, A r → (p r).final = none
 
-/-- The events the execution emits within some admitted bound. -/
-def Prefixes.Emits {R E O : Type} (A : R → Prop) (p : Prefixes R E O) (es : List E) : Prop :=
-  ∃ r, A r ∧ es <+: (p r).events
-
 /-! ## Languages, refinement and pass certificates -/
 
 /-- A language at one layer of the pipeline, over the shared events `E` and
 final observations `O`.  `Admissible` is the approved resource abstraction of
 this layer: every bound for an idealized source, the bounds the approved
-profile permits for the EVM (open scope question Q3 of the G01 document). -/
+profile permits for the EVM (open scope question Q2 of the G01 document).
+Resources are ordered, and every execution is a consistent family. -/
 structure Lang (E O : Type) where
   Prog : Type
   Env : Type
   Res : Type
+  resLE : LE Res
   Allowed : Env → Prop
   Admissible : Res → Prop
   sem : Prog → Env → Prefixes Res E O
+  consistent : ∀ p e, @Prefixes.Consistent Res E O resLE (sem p e)
 
 /-- Two-sided refinement of one execution at admissible resources. -/
 def Refines {E O RS RT : Type} (AS : RS → Prop) (AT : RT → Prop)
@@ -186,7 +185,10 @@ structure Pass {E O : Type} (L₁ L₂ : Lang E O) where
 /-- **A pass certificate**: the target environments map to source ones and
 reach all of them; resources are given constructively (`need`); every
 admissible source prefix is below the target prefix at `need`, and every
-admissible target prefix below an admissible source prefix. -/
+admissible target prefix below an admissible source prefix.  `need` is an
+explicit bound function; that the final one is computable (not obtained by
+choice) is a check of the final theorems' axioms and definitions (G49.03,
+G54), not something this type enforces. -/
 structure Cert {E O : Type} {L₁ L₂ : Lang E O} (π : Pass L₁ L₂) where
   envSound : ∀ e, L₂.Allowed e → L₁.Allowed (π.envAbs e)
   envOnto : ∀ e, L₁.Allowed e → ∃ e', L₂.Allowed e' ∧ π.envAbs e' = e
@@ -245,16 +247,26 @@ inductive Outcome where
   | revert (revertData : List UInt8)
   deriving DecidableEq, Repr
 
-/-- An observable event inside a transaction: what the contract asks of the
+/-- An observable event of a session: what the compiled system asks of the
 environment and what the environment answers.  Addresses and values are
 EVM words read as natural numbers below `2^256` (`Evm.W`); `input` is the
-ABI-encoded call data. -/
+ABI-encoded call data.  The compiled system is every contract and linked
+library of the compilation input: a call between two of its instances is
+internal to the semantics, not an event (a linked library runs on its
+caller's storage).  Whether that is the approved boundary is open scope
+question Q8 of the G01 document. -/
 inductive Event where
-  /-- A typed external call, payment or library call leaving the contract. -/
+  /-- The deployment of the selected contract, with its outcome and, on
+  success, its address. -/
+  | deploy (sender value : Nat) (args : List UInt8) (outcome : Outcome) (address : Option Nat)
+  /-- A typed external call or payment to an account outside the system. -/
   | call (callee : Nat) (value : Nat) (input : List UInt8) (static : Bool)
-  /-- A creation leaving the contract, with its initcode's arguments. -/
-  | create (value : Nat) (code : Nat) (args : List UInt8)
-  /-- The environment's answer to the newest pending call or creation. -/
+  /-- A creation by the system: `contract` is the created contract's position
+  in the compilation input (a source identity), so neither side numbers code;
+  the EVM side reads it off the artifact's table (`Artifact.contracts`). -/
+  | create (value : Nat) (contract : Nat) (args : List UInt8)
+  /-- The environment's answer to the newest pending call, or the address a
+  creation produced (`none` when it failed). -/
   | answer (outcome : Outcome) (created : Option Nat)
   /-- A completed transaction of a session, with its request and outcome. -/
   | tx (sender value timestamp : Nat) (input : List UInt8) (outcome : Outcome)
@@ -295,6 +307,18 @@ def SourceSpec.Unambiguous (S : SourceSpec) : Prop :=
   (∀ i s s', S.Parses i s → S.Parses i s' → s = s') ∧
   (∀ s r r', S.Resolves s r → S.Resolves s r' → r = r')
 
+/-- **Non-vacuity of a source definition** (G07, S05): admitted inputs whose
+meanings, at allowed environments, complete with a success carrying data,
+complete with a revert, and diverge.  A `SourceSpec` without these makes
+every contract vacuous (an empty input type, `InProfile := False`, a `sem`
+ignoring the program). -/
+def SourceSpec.NonVacuous (S : SourceSpec) : Prop :=
+  (∃ r w p e rs d, S.lang.Allowed e ∧ S.lang.Admissible rs ∧ d ≠ [] ∧
+    (S.lang.sem (S.meaning r w p) e rs).final = some (.success d)) ∧
+  (∃ r w p e rs d, S.lang.Allowed e ∧ S.lang.Admissible rs ∧
+    (S.lang.sem (S.meaning r w p) e rs).final = some (.revert d)) ∧
+  (∃ r w p e, S.lang.Allowed e ∧ (S.lang.sem (S.meaning r w p) e).Diverges S.lang.Admissible)
+
 /-- The admitted source inputs, with their resolution. -/
 def SourceSpec.Admitted (S : SourceSpec) (i : S.Input) (r : S.Resolved) : Prop :=
   ∃ s, S.Parses i s ∧ S.Resolves s r ∧ S.WellFormed r ∧ S.InProfile r
@@ -334,14 +358,26 @@ structure Lowering (S : SourceSpec) (I : IntrinsicSpec) where
   agrees : ∀ r w p, pass.run (S.meaning r w p) (dom r w p) = I.ofWorld (lower r w p)
   cert : Cert pass
 
-/-- The bytecode artifacts of one compilation: creation and runtime bytes. -/
-structure Artifact where
+/-- The code of one contract or library: creation and runtime bytes, with
+the positions of its unresolved library references. -/
+structure CodeUnit where
   initcode : List UInt8
   runtime : List UInt8
+  /-- Byte offsets in `runtime` and the library (its position in
+  `Artifact.contracts`) each must be linked to. -/
+  links : List (Nat × Nat) := []
+
+/-- The bytecode artifacts of one compilation: a unit per contract and
+library of the input, by position, and the selected one. -/
+structure Artifact where
+  contracts : List CodeUnit
+  main : Nat
 
 /-- The pinned EVM (G06): accounts with code, executing transactions from
-bytes.  Its resources are gas, memory and stack; `Admissible` is the
-approved resource profile. -/
+bytes.  Its resources are gas, memory, stack and code size; `Admissible` is
+the approved resource profile (Q2) and `Allowed` the full pinned environment
+set less approved premises only (Q4, Q7); both are fixed by G06 and the
+user, never chosen by the compiler. -/
 structure EvmSpec where
   lang : Lang Event Outcome
   /-- A deployment session of the artifact: install, then run transactions. -/
