@@ -242,8 +242,21 @@ These are listed under `limitations:`.
   `maxHeartbeats` changes. The pins in `SemanticsExamples.lean` are
   recorded with `node scripts/check-axiom-pins.mjs --write`.
 - `TrustAudit.lean` has a source-semantics block (21 theorems).
-- `node scripts/check-g07.mjs` reports 0 new failures, and the full
-  `./run-lean.sh` result is in the final CLOUD-RESULT.
+- `node scripts/check-g07.mjs --log` over a full `./run-lean.sh` (head
+  `6269063`) reports 0 new failures:
+  - check-trust: 0 findings.
+  - check-layers: 0 modules reach the elaborator.
+  - check-orphans: 0 orphaned (790 reachable).
+  - check-noncircular: 0 violations (23 source modules).
+  - check-axiom-pins: 497 pins, 0 errors.
+  - check-source-grammar and `source-ctors --check`: clean.
+  - Script tests: pass.
+  - check-doc-paths: 46 missing, which is the baseline.
+  - G03 ledger: 0 errors.
+  - The build: "Build completed successfully (775 jobs)" and "(262 jobs)".
+  - check-solkey: 37 mismatches, which is the baseline.
+  - An earlier run on `3419665` hit the baselined `Derived17` out-of-memory
+    kill; the final run did not.
 
 **Elaboration times** (`./run-lean.sh`, warm):
 
