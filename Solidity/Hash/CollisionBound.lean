@@ -39,10 +39,11 @@ induction, with no `decide` tactic.
 **Scope of the bound.** The main bound fixes the `q` inputs before the
 oracle is sampled (non-adaptive queries); a run that hashes a preimage twice
 counts it once (`keccak_premise_fails_prob_le_dedup`). Queries that depend on
-earlier answers are covered only under lazy sampling and only for strategies
-that never repeat a query (`adaptive_lazy_collision_prob_le`, where the event
+earlier answers are covered here under lazy sampling for strategies that
+never repeat a query (`adaptive_lazy_collision_prob_le`, where the event
 reduces to the non-adaptive one). An oracle fixed before an adaptive game is
-the child obligation `EagerAdaptiveBound` below, stated and not proved
+`EagerAdaptiveBound` below; `Solidity/Hash/Adaptive.lean` proves it, together
+with repeated queries, early stopping and the region premise
 (`docs/feature-work/hash-collision-bound.md`, "Adaptive queries").
 -/
 
@@ -851,6 +852,37 @@ theorem keccak_region_premise_fails_prob_le {xs : List α} (hxs : xs.Nodup)
   rw [hcount]
   exact @keccak_region_prob_le L roots hroots xs.length
 
+omit [DecidableEq α] in
+/-- Like `CollisionFree`, the region premise depends only on membership. -/
+theorem regionsDisjoint_congr {f : α → Nat} {xs ys : List α} (h : ∀ x, x ∈ xs ↔ x ∈ ys) :
+    RegionsDisjoint N L f roots xs ↔ RegionsDisjoint N L f roots ys :=
+  ⟨fun hx => hx.mono fun x hy => (h x).mpr hy, fun hy => hy.mono fun x hx => (h x).mp hx⟩
+
+/-- A run may hash the same preimage twice; the region premise is that of its
+distinct preimages. -/
+theorem regionsDisjoint_dedup {f : α → Nat} (xs : List α) :
+    RegionsDisjoint N L f roots (dedup xs) ↔ RegionsDisjoint N L f roots xs :=
+  regionsDisjoint_congr fun _ => mem_dedup
+
+/-- The region bound for a preimage list with repetitions: `q` is the number
+of distinct preimages and the oracle is drawn on those. -/
+theorem keccak_region_premise_fails_prob_le_dedup (xs : List α)
+    (hroots : ∀ r ∈ roots, r < 2 ^ 256) :
+    2 ^ (256 + 1) * (tuples (2 ^ 256) (dedup xs).length).countP
+        (fun t => decide (¬ RegionsDisjoint (2 ^ 256) L (oracleOf (dedup xs) t) roots xs)) ≤
+      ((dedup xs).length * ((dedup xs).length - 1) * (2 * L - 1) +
+          2 * (dedup xs).length * roots.length * L) * 2 ^ (256 * (dedup xs).length) := by
+  have e : (tuples (2 ^ 256) (dedup xs).length).countP
+        (fun t => decide (¬ RegionsDisjoint (2 ^ 256) L (oracleOf (dedup xs) t) roots xs)) =
+      (tuples (2 ^ 256) (dedup xs).length).countP
+        (fun t => decide (¬ RegionsDisjoint (2 ^ 256) L (oracleOf (dedup xs) t) roots
+          (dedup xs))) := by
+    apply List.countP_congr
+    intro t _
+    simp only [decide_eq_true_iff, regionsDisjoint_dedup]
+  rw [e]
+  exact @keccak_region_premise_fails_prob_le α L roots _ (dedup xs) (nodup_dedup xs) hroots
+
 end RegionOracle
 
 /-! ## Adaptive queries -/
@@ -893,15 +925,13 @@ def eagerQueries (s : List Nat → α) (g : α → Nat) : Nat → List α
   | 0 => []
   | k + 1 => let qs := eagerQueries s g k; qs ++ [s (qs.map g)]
 
-/-- **Child obligation, not proved.** The adaptive bound for an eagerly
-sampled oracle: a uniformly random function on a finite domain `dom` (one of
-the `N^|dom|` tuples, read by `oracleOf dom`) is queried `q` times by an
-adaptive strategy; the functions under which distinct queries collide are at
-most a `q(q-1)/(2N)` fraction. It follows from
-`adaptive_lazy_collision_prob_le` once eager and lazy sampling are shown to
-agree (the answers to distinct adaptive queries of a uniform function are
-uniform and independent); that equivalence is the missing step
-(`docs/feature-work/hash-collision-bound.md`, "Adaptive queries"). -/
+/-- The adaptive bound for an eagerly sampled oracle: a uniformly random
+function on a finite domain `dom` (one of the `N^|dom|` tuples, read by
+`oracleOf dom`) is queried `q` times by an adaptive strategy; the functions
+under which distinct queries collide are at most a `q(q-1)/(2N)` fraction.
+Proved as `eagerAdaptiveBound` in `Solidity/Hash/Adaptive.lean`, which
+imports this module (`docs/feature-work/hash-collision-bound.md`, "Adaptive
+queries"). -/
 def EagerAdaptiveBound.{u} : Prop :=
   ∀ (β : Type u) [DecidableEq β] (dom : List β), dom.Nodup →
     ∀ (s : List Nat → β), (∀ t, s t ∈ dom) → ∀ N q : Nat,
@@ -931,3 +961,6 @@ end Solidity.Hash
 
 /-- info: 'Solidity.Hash.near_of_overlap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.near_of_overlap
+
+/-- info: 'Solidity.Hash.keccak_region_premise_fails_prob_le_dedup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.keccak_region_premise_fails_prob_le_dedup

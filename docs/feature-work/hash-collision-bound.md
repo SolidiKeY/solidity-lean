@@ -120,27 +120,44 @@ earlier ones. What is proved and what is not:
   on an adaptive query list and carries no adaptive content of its own. Its
   model gives a repeated query a fresh answer, which a real oracle does not,
   so it covers only strategies that never repeat a query.
-- **Not proved, child obligation (repeats).** A strategy that may repeat a
-  query reduces to one that does not (answer repeats from memory, skip them,
-  pad to `q` distinct queries). The reduction is not stated in Lean; runs
-  also stop after a varying number of queries, which the same padding must
-  handle.
-- **Not proved, child obligation `EagerAdaptiveBound`.** The same bound when
-  the oracle is a uniformly random function on a finite domain `dom`, fixed
-  before the game (`oracleOf dom g`, `g` one of the `N^|dom|` tuples) and
-  queried by `eagerQueries s g q`. It follows from the lazy bound once eager
-  and lazy sampling are shown to agree: the answers to distinct adaptive
-  queries of a uniform function are uniform and independent. That
-  equivalence, a bijection between functions on `dom` and (answers to the
-  queries, values elsewhere), is the missing step. The non-adaptive bound has
-  the same gap in eager form: it counts output tuples, not functions on a
-  larger domain; `EagerAdaptiveBound` with a strategy that ignores the answers
-  (query `i` is the `i`-th element of a fixed list) covers it.
+- **Proved, eager sampling** (`Solidity/Hash/Adaptive.lean`, lane-hashing
+  checkpoint 1). `eagerAdaptiveBound : EagerAdaptiveBound`: the oracle is a
+  uniformly random function on a finite domain `dom`, fixed before the game
+  (`oracleOf dom g`, `g` one of the `N^|dom|` tuples), and queried by
+  `eagerQueries s g q`. The proof needs no eager/lazy equivalence: it is a
+  union bound over the first query that goes wrong, counted over functions.
+  For step `k + 1` at point `x`, the functions that agree off `x` form groups
+  of `N` (`upd dom h x b`, `b < N`); redefining a function at a new point
+  `x` keeps the first `k` answers, hence the first `k + 1` queries
+  (`eagerQueries_upd`), so at most `k` members of a group repeat an earlier
+  answer (`eager_step_le`, double counting with `sumOver_swap`).
+- **Proved, repeats and stopping.** `two_mul_eagerCollides_le` counts every
+  function under which the first `q` queries collide, with repeated queries
+  allowed (a repeat gets the same answer, so it is no collision, and the
+  step event asks only that the new point be fresh):
+  `2 * N * bad ≤ q * (q - 1) * N ^ |dom|`. `two_mul_eager_stopped_le` covers
+  runs that stop after `τ g ≤ q` queries, `τ` any function of the oracle
+  (a stopped run's queries are a prefix of the first `q`).
+  `keccak_eager_collision_prob_le` is the 2²⁵⁶ reading, `q(q-1)/2²⁵⁷`.
+- **Proved, regions.** `two_mul_eagerRegionsFail_le` and
+  `keccak_eager_region_prob_le`: the same union bound with a bad value being
+  one whose region is `Near` an earlier answer's or `Covers` a root word
+  (`regionBadValue`, at most `k(2L-1) + |roots| L` bad values,
+  `countP_regionBadValue_le`), giving the non-adaptive region bound
+  `(q(q-1)(2L-1) + 2q·|roots|·L) · N^|dom|` for adaptive runs.
+
+What remains between these theorems and a real run is the modelling step
+that keccak behaves as a uniformly random function on the (finite) set of
+byte strings a run can hash: `dom` is any finite list containing every
+preimage the strategy can produce (`hs : ∀ t, s t ∈ dom`). The bound does not
+depend on `|dom|`. That keccak is not a random function is the reason the
+public theorem stays conditional on the premise.
 
 A repeated query is not a collision (`CollisionFree` relates equal images of
 *different* preimages). For a fixed preimage list, repetitions are removed by
 `collisionFree_dedup` and `keccak_premise_fails_prob_le_dedup`, so `q` counts
-distinct preimages; for adaptive runs this needs the repeat reduction above.
+distinct preimages; for adaptive runs `two_mul_eagerCollides_le` takes `q` to
+be the number of queries, repeats included.
 
 ## How G27.05 and G46.05 will use it
 
@@ -170,8 +187,9 @@ No file under `Solidity/Evm/**` is edited here. The plan for the owners:
    probability that the premise fails for a random oracle by q²/2²⁵⁷, q the
    number of distinct preimages, when the preimages are fixed in advance.
    Real runs choose preimages adaptively (attacker-controlled keys; nested
-   mappings hash earlier hash outputs), so the bound applies to them only
-   once `EagerAdaptiveBound` and the repeat reduction are proved. Either way
+   mappings hash earlier hash outputs); `keccak_eager_collision_prob_le` and
+   `keccak_eager_region_prob_le` (`Solidity/Hash/Adaptive.lean`) cover them,
+   with `q` the number of hash queries. Either way
    it is a statement about a random oracle, not about keccak: the public
    theorem stays conditional on the premise.
 
@@ -204,6 +222,7 @@ Proved here, in the same style as the preimage bound:
 | `covers_of_hit` | `a < N → L ≤ N → i < L → (a + i) % N = r → Covers N L a r`. |
 | `RegionsDisjoint N L f roots xs` | `(∀ x ∈ xs, ∀ y ∈ xs, x ≠ y → ¬ Near N L (f x) (f y)) ∧ ∀ x ∈ xs, ∀ r ∈ roots, ¬ Covers N L (f x) r`. |
 | `RegionsDisjoint.nil`, `.mono`, `.of_prefix`, `regionsDisjoint_cons` | The same algebra as `CollisionFree`. |
+| `regionsDisjoint_congr`, `regionsDisjoint_dedup` | Membership only; `RegionsDisjoint … (dedup xs) ↔ RegionsDisjoint … xs`. |
 | `RegionsDisjoint.collisionFree` | `0 < L → RegionsDisjoint N L f roots xs → CollisionFree f xs`. |
 | `regionBad`, `regionCollisions N L roots q` | The bad tuples and their count. |
 | `countP_near_le`, `countP_covers_le` | For `b, r < N`, at most `2L - 1` (resp. `L`) bases `a < N` are near `b` (resp. cover `r`). |
@@ -212,6 +231,7 @@ Proved here, in the same style as the preimage bound:
 | `pow_two_region_prob_le`, `keccak_region_prob_le` | The same at `N = 2^k` and `N = 2^256`, with `2 ^ (256 + 1)` on the left. |
 | `regionsDisjoint_iff_regionBad` | `xs.Nodup → (RegionsDisjoint N L f roots xs ↔ regionBad N L roots (xs.map f) = false)`. |
 | `keccak_region_premise_fails_prob_le` | For `xs.Nodup` and roots below `2^256`: `2 ^ (256 + 1) * bad ≤ (q(q-1)(2L-1) + 2q·\|roots\|·L) · 2^(256 q)` with `q = xs.length`. |
+| `keccak_region_premise_fails_prob_le_dedup` | The same for a list with repetitions, `q = (dedup xs).length`. |
 
 Read as a probability, the bound is
 `q(q-1)(2L-1)/2²⁵⁷ + q·|roots|·L/2²⁵⁶ ≤ (q²·L + q·R·L)/2²⁵⁶`, which is the
@@ -233,10 +253,10 @@ Left to the users of the premise (G27.05):
 - **Words below `N`.** `near_of_overlap` reads hashes as words below `N`,
   and both it and `covers_of_hit` need `L ≤ N`. The hypothesis that roots are
   below `2^256` belongs to the counting lemmas.
-- **Adaptive and repeated preimages.** As for the preimage bound: the
-  `RegionsDisjoint` counterpart of `EagerAdaptiveBound` and of the repeat
-  reduction is also open. `RegionsDisjoint` depends only on membership, as
-  `CollisionFree` does, but no `dedup` lemma is stated for it yet.
+- **Adaptive and repeated preimages.** Proved (lane-hashing checkpoint 1):
+  `regionsDisjoint_congr`, `regionsDisjoint_dedup`,
+  `keccak_region_premise_fails_prob_le_dedup` for repeats in a fixed list,
+  and `keccak_eager_region_prob_le` for adaptive runs.
 
 ## Checking cost
 
@@ -254,15 +274,14 @@ corollaries instantiate the general `k`-bit theorem.
 
 ## Remaining child obligations
 
-- `EagerAdaptiveBound`: eager/lazy sampling equivalence (above), which also
-  covers restricting a uniform function on a larger domain to the `N^q`
-  tuple model.
-- The repeat reduction for adaptive strategies (above).
-- For regions: the eager/adaptive and repeat counterparts, a `dedup` lemma
-  for `RegionsDisjoint`, and G27.05's proof that reached offsets stay below
-  `L` (above).
+- G27.05's proof that reached offsets stay below `L` (above); the lane's
+  hashed layout model (work queue item 2) is to supply it for its slot terms.
 - The G46.05 preimage list per prefix and the G01 `PublicCorrectness`
   premise (owners: G46.05 and the G01 revision).
+
+(`EagerAdaptiveBound`, the repeat reduction, the region `dedup` lemma and the
+region adaptive bound were closed in lane-hashing checkpoint 1; see
+"Adaptive queries" and the checkpoint's handoff below.)
 
 ## Handoff and gates
 
