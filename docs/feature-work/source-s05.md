@@ -55,18 +55,24 @@ What `sourceLang` does not give G01 (also under `limitations:`):
   require that any external frame or transaction may fail (gas, the depth
   limit apart from 1024 frames), and G01's `Failures` and `withFailures`
   need them. They are not modelled.
-- **Stuck runs.** A `stuck` run shows as an unfinished prefix,
-  indistinguishable from divergence. A progress theorem would rule it out.
+- **Stuck runs.** A `stuck` run shows as an unfinished prefix, like
+  divergence. It is not a lack of horizon: a transaction stuck at one
+  horizon is stuck at every larger one (`runTx_stuck_stable`,
+  [Horizons](#horizon-independence)), so the two differ in the model even
+  though G01's `Prefix` shows them alike. A progress theorem would rule it
+  out; it is not proved.
 - **Events of unfinished transactions.** A transaction that never
   completes (an endless reentrancy loop, say) shows none of its events.
-  Showing them needs horizon monotonicity of the events, which is not
-  proved.
+  Showing them needs horizon monotonicity of the events (`Approx` in
+  `Horizon.lean`), which is not proved; monotonicity of the results is
+  (`belowAt`).
 - **Request validity.** `Lang.Affordable` (unaffordable requests are
   dropped) and `Lang.PrecompilesFixed` (precompile addresses are not
   environment accounts) are not met.
 - **`SourceSpec`.** It is not instantiated: `Parses` is lanes V05 and
-  V06, `meaning` needs an elaborator from `Resolution` to `Program`, and
-  `stipendFits` is G06 Q3.
+  V06, `stipendFits` is G06 Q3, `hashed`/`slotHashed` need the semantics to
+  record every preimage it hashes, and `Failures` needs the failure points.
+  `meaning` now has its elaborator (`elaborate`, item 1b).
 
 ## Ledger
 
@@ -99,6 +105,28 @@ some inputs:
 
 These are recorded in [source-s02.md](source-s02.md#what-s02-does-not-do)
 and [source-s03.md](source-s03.md#what-s03-does-not-do).
+
+## Horizon independence
+
+`Solidity/Source/Horizon.lean` proves that the interpreter is monotone in
+its horizon. `Below m m'` says that on every state `m` either times out or
+runs exactly as `m'`.
+
+| Theorem | Statement |
+|---|---|
+| `belowAt G n` | every interpreter function at horizon `n` is `Below` itself at `n + 1` (`evalE` … `dispatch`, by induction on `n`) |
+| `deploy_below`, `runTx_below` | so are a deployment and a transaction |
+| `runTx_stable`, `deploy_stable` | a result that completes at horizon `k` is the result at every `k' ≥ k` |
+| `firstDone_runTx` | what `firstDone` finds is the run at every larger horizon: the least completing horizon is not a choice |
+| `runTx_stuck_stable` | a transaction stuck at `k` is stuck at every `k' ≥ k` |
+
+The proof is one step theorem per function (`evalE_step`, …), each over
+the hypothesis `BelowAt G n` for all functions, so each stays within the
+default heartbeats; `below_go` walks the two copies of a body (binds,
+`attempt`s, `match`es, `if`s). Three interpreter matches were restructured
+for it, with the same meaning: `evalBuiltin` matches the builtin, then its
+arguments one level at a time; `abi.encodeWithSelector` reads the selector
+with `Val.bytesOf`; `assignCopy` copies through `copyInto`.
 
 ## Well-formedness and progress interfaces
 
@@ -191,9 +219,10 @@ These are listed under `limitations:`.
   failure points (gas, frame failures), the stipend rule, sender-funds
   validity, precompile addresses, stuck runs read as divergence, and no
   events from unfinished transactions.
-- **Horizon independence** (skeptic 4): not proved.
-- **Getters** (skeptic 7): public state-variable getters are not
-  dispatched; a call to one reaches `fallback` or reverts.
+- **Horizon independence** (skeptic 4): proved after S05 (`runTx_stable`, `firstDone_runTx`, below).
+- **Getters** (skeptic 7): value-type getters are dispatched after S05
+  ([source-s03.md](source-s03.md#item-3-gaps-closed-after-s05)); struct,
+  `bytes` and `string` getters are not.
 - **ABI** (finder 7, 11; skeptic 11): struct parameters' signatures,
   user-defined value types and external function types, dynamic
   parameters and returns, and coder v1 under legacy.

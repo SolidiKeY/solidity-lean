@@ -1791,6 +1791,31 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/Horizon.lean:Solidity.Source.belowAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Horizon.lean:Solidity.Source.deploy_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Horizon.lean:Solidity.Source.firstDone_runTx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Horizon.lean:Solidity.Source.runTx_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Horizon.lean:Solidity.Source.runTx_stuck_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SemanticsExamples.lean:Solidity.Source.Env.fieldTy?_of_fieldAt": [
   "Classical.choice",
   "Quot.sound",
