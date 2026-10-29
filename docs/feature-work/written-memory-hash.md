@@ -258,3 +258,125 @@ and this record; semantics, observations, target predicates, invariants and
 budgets are preserved. No full build, index write, commit, push, source VM,
 skill or monitor modification is performed. Independent review and combined
 gates remain with the coordinator.
+
+## Complete-range notation follow-up (2026-10-29)
+
+The retained review of `7cbb819e` and the whole-batch finder/skeptic notes
+required notation repair across the six-result range beginning at
+`fd35566ee3138dd93d456191cc3447c021b1a87b`. This follow-up preserves the
+existing integration resolutions and fact annotations, and completes the
+fixture migration in `DecisionKInt`, `DecisionMemory`, `MemoryInstantiation`,
+`MemoryNegativeDecision` and `DecisionWrittenMemory`. Every replacement,
+including the formulas embedded in theorem statements, has an `rfl` check
+against its former intrinsic AST. Original baseline gaps, existing formula
+helpers, heap/state/term/update constructors, exterior observation values
+and expected-AST sides of tests remain intact.
+
+The scoped grammar now reads fresh allocation for arbitrary reference types,
+explicit hidden unbounded `kint` binders, negative signed primitive literals
+and Boolean ordering terms. `cdlIn` accepts named `kint` locals, typed formula
+holes and an explicit reading modality. The existing no-hole/default-modality
+path retains its single reading. Fresh allocation and given-heap binding,
+local positions, `.fresh "se"` identities, Theory equality and Boolean
+comparison retain their exact original representations. No bounded primitive
+`int` replaces a hidden `kint`.
+
+Both printer backends retain fresh reference types. The read-only skeptic
+found that the initial hidden-integer printer lost mixed binder modalities;
+this was fixed with explicit `given[box]` and `given[diamond]` spellings and
+a mixed-modality AST control. The term printer also handles the signed
+literal and Boolean ordering observation needed by these fixtures. The
+read-only finder found a misplaced raw-syntax docstring, which was corrected.
+Its complete-range sweep confirmed no omitted new raw fixture definitions
+and no newly added untyped `have` facts. Neither reviewer used the Lean
+server.
+
+Verification is sequential under the coordinator's inherited writer lock,
+12 GiB/no-swap process cap, 12 GiB available-memory reserve and explicit Lean
+`-j1`. The initial MCP import setup failed when Lake attempted to write its
+read-only toolchain cache; it is retained as a failure, not a pass. A private
+writable artifact cache and focused import-artifact assembly allow the
+per-file MCP checks to proceed. These import prerequisites are not the full
+combined gates. The check sequence and individual diagnostic logs are retained
+under `/tmp/integration-notation-sequence.log` and
+`/tmp/integration-*-diagnostics.log`. Final per-file outcomes are recorded
+below when the sequence completes. Earlier pending checks remain pending
+unless explicitly superseded by a completed result here.
+
+No semantics, observations, target predicates, invariants or proof budgets
+are weakened. No `sorry`, new axiom, source-VM change, receipt update, index
+write, commit, push, skill edit or monitor change is part of this follow-up.
+Independent final review and complete combined gates remain the coordinator's.
+
+### Recovery of the retained notation checks
+
+The configured MCP client completed the previously pending `DecisionKInt`
+check and exposed a missing direct import: `cdlIn` is defined by
+`Calculus/FunContract`, which the decision fixtures did not import. Its parse
+errors caused the downstream AST and proof failures. Importing that module
+directly repairs the fixture without changing any formula or proof. The same
+import is now explicit in `MemoryInstantiation`, `MemoryNegativeDecision`
+and `DecisionWrittenMemory`, the other migrated users of `cdlIn`.
+
+`DecisionKInt` now has complete successful per-file diagnostics, including
+all former-AST `rfl` checks and its existing axiom reports (only `propext`,
+`Classical.choice` and `Quot.sound`; no `sorryAx`). The failed result is
+retained separately in `/tmp/integration-notation-recovery-evidence.json`.
+Partial results before completion are not counted as passes. The remaining
+migrated fixture and printer round-trip checks are pending until recorded
+below. Only the configured client is used during this recovery, with one
+active document and no concurrent import builder or private stdio client.
+
+The `haltedCompare` former-AST control caught a real migration error:
+the bare program-expression comparison `s[0] == s[0]` was not the original
+Boolean term observed equal to `true`. Writing `(s[0] == s[0]) = true`
+restores the exact original AST and the unchanged `refuted` observation.
+`DecisionMemory`, `MemoryInstantiation` and `MemoryNegativeDecision` all
+completed per-file diagnostics without errors or warnings, including their
+AST controls and existing observation guards.
+
+The written-memory fixture also exposed missing reader support for the
+printer's explicit `keccak256(memory, identity)` term. The notation reader
+now resolves the memory and reference intrinsically before constructing
+the existing `Op2.hash`; all four `HashKind` names use this same reader.
+No hash semantics or supported decision scope changes. The fixtures spell
+the reserved identifier as `«memory»` and supply the explicit memory
+argument. `SurfaceNotation` diagnostics pass after this addition. Printer
+round-trip controls cover all four hashes, a memory update, and separate
+Theory-equality and Boolean-comparison observations.
+
+### Completed focused recovery
+
+The configured client's `DecisionWrittenMemory` check completed with no errors,
+warnings, failed dependencies or pending elaboration. Its former-AST `rfl`
+controls, ordered observation guards, refusal controls and guarded axiom reports
+all pass. Import preparation completed sequentially before the next file opened.
+
+The final printer test initially failed because its harness used the reserved
+identifier `syntax` and omitted the direct `Calculus.Print` import. Fixing these
+exposed a genuine reader/printer mismatch: both printers spell `bytesR` as
+`bytes`, but fresh allocation passed that spelling to the ordinary type reader,
+which rejects it there. Both fresh-binder readers now accept exactly `bytes` as
+the existing `bytesR` alias; every other reference type retains `elabTy` checking.
+A separate `rfl` control pins its AST equality with `uint[]`. No heap, term,
+formula semantics or decision target changes.
+
+Complete per-file diagnostics now pass for `Calculus/Notation` after this repair
+and for `Examples/Notation` after its final edit. The latter checks all 14
+formulas through both printer backends, including binder precedence, mixed
+hidden-integer modalities, reference types, signed literals, memory updates,
+all four hash names, and Theory equality versus Boolean comparison. The
+successful `DecisionKInt`, `DecisionMemory`, `MemoryInstantiation` and repaired
+`MemoryNegativeDecision` results retained above remain focused evidence; no
+unedited regression sweep or combined build was launched. These completed
+results supersede the pending states recorded earlier in this follow-up, while
+the failed attempts remain recorded as failures.
+
+Final structured diagnostics, observations and failure summaries are retained
+in `/tmp/integration-notation-recovery-final.json`, alongside the earlier
+`integration-notation-recovery-evidence.json` and
+`integration-notation-recovery-fixtures.json`. A fresh complete-range scan finds
+no added `have` fact without an explicit type. Read-only finder and skeptic
+reviews found no omitted migration or altered AST; neither used Lean. Actual
+conflict-marker and whitespace checks pass. Repairs remain uncommitted for the
+coordinator's index staging, independent review and full combined gates.

@@ -1,4 +1,5 @@
 import Solidity.Calculus.MemInst
+import Solidity.Calculus.FunContract
 import Solidity.Examples.DecisionMemory
 
 /-!
@@ -31,13 +32,16 @@ def prepared : MxInstPrep Gaps MΓ (.user "i") body :=
 positions: the outer value becomes here, not the substituted literal. -/
 theorem capture_preserved :
     Fml.instTm (C := Gaps) (.user "i") .uint
-      (.eq (.pvV .here) (.pvV (.there .here)) : Fml Gaps [.val .uint, .val .uint])
-      (litU 7) = some (.eq (litU 7) (.pvV .here)) := rfl
+      (cdlIn[Gaps | uint x, uint i]{ i = x })
+      (litU 7) = some (cdlIn[Gaps | uint x]{ 7 = x }) := rfl
 
 /-- The unsupported nested value binder is explicitly refused. -/
 def nested : Fml Gaps (.val .uint :: MΓ) :=
+  cdlIn[Gaps | uint[] memory s, uint i]{ ∀ uint j; j = i }
+
+example : nested =
   .all (.user "j") .uint
-    (.eq (.pvV .here) (.pvV (.there .here)))
+    (.eq (.pvV .here) (.pvV (.there .here))) := rfl
 
 #guard !(mxRangeBody? nested).isSome
 
@@ -59,8 +63,12 @@ theorem nested_unrecognized : (mxRangeBody? nested).isSome = false := by decide 
 
 /-- A guard on one local does not license a read through another local. -/
 def wrongArray : Fml Gaps [.val .uint, .mem UA, .mem UA] :=
+  cdlIn[Gaps | uint[] memory t, uint[] memory s, uint i]{
+    s.length > i → t[i] = 0 }
+
+example : wrongArray =
   .imp (isT (gtB (mlenG (.there .here)) (.pvV .here)))
-    (.eq (mrdG .dyn (.there (.there .here)) (.pvV .here)) (litU 0))
+    (.eq (mrdG .dyn (.there (.there .here)) (.pvV .here)) (litU 0)) := rfl
 
 #guard !(mxRangeBody? wrongArray).isSome
 
@@ -100,7 +108,7 @@ instances vacuous, while its exterior zero read still halts. -/
 def empty {H : HTy} : MObj H UA := ⟨[], by change 0 < 2 ^ 256; decide⟩
 
 theorem empty_block (σ : State Gaps []) :
-    holds (σ.allocPush empty) (.all (.user "i") .uint body) := by
+    holds (σ.allocPush empty) (cdlIn[Gaps | uint[] memory s]{ ∀ uint i; ‹body› }) := by
   unfold body
   rw [mxRangeBlock_holds]
   intro k hk
@@ -128,8 +136,11 @@ theorem alias_preserved (σ : State Gaps [.mem UA]) (o : MObj σ.H UA) (B : List
 /-- Retained failed attempt: using raw memory-length points directly as
 indices does not yet give the unchanged memory cut a supported leaf. -/
 def rawPreparedLeaf : Fml Gaps [] :=
+  cdl[Gaps]{ ∀ fresh uint[] s; ‹prepared.body› → s[0] = 0 }
+
+example : rawPreparedLeaf =
   .allocAll (.user "s") UA
-    (.imp prepared.body (.eq (mrdG .dyn .here (litU 0)) (litU 0)))
+    (.imp prepared.body (.eq (mrdG .dyn .here (litU 0)) (litU 0))) := rfl
 
 #guard !(rawPreparedLeaf.mxTop).isSome
 /-- The original bound index cannot be pulled before its array binder. -/
@@ -152,5 +163,12 @@ theorem ground_index_collected :
 #print axioms empty_prepared
 #print axioms empty_exterior_halts
 #print axioms alias_preserved
+
+example : (cdlIn[Gaps | uint x, uint i]{ i = x }) =
+    (.eq (.pvV .here) (.pvV (.there .here)) : Fml Gaps [.val .uint, .val .uint]) := rfl
+example : (cdlIn[Gaps | uint x]{ 7 = x }) =
+    (.eq (litU 7) (.pvV .here) : Fml Gaps [.val .uint]) := rfl
+example : (cdlIn[Gaps | uint[] memory s]{ ∀ uint i; ‹body› }) =
+    .all (.user "i") .uint body := rfl
 
 end Solidity.Examples.MemoryInstantiation

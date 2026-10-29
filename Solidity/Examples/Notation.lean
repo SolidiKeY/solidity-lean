@@ -4,6 +4,7 @@ import Solidity.Calculus.Surface
 import Solidity.Calculus.Derive
 import Solidity.Tools.Inspect
 import Solidity.Calculus.SequentNotation
+import Solidity.Calculus.Print
 
 /-!
 # The notation, pinned
@@ -377,5 +378,44 @@ example {C : Contract} {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {a �
   Proves.impRight
 
 end Sequents
+
+example : (cdl[StandardExample]{ ∀ fresh bytes s; s.length = 0 }) =
+    (cdl[StandardExample]{ ∀ fresh uint[] s; s.length = 0 }) := rfl
+
+/-- info: fresh and given binders preserve their AST through both formula printers -/
+#guard_msgs in
+run_meta do
+  let fixtures : List (Fml StandardExample []) := [
+    cdl[StandardExample]{ ∀ fresh uint[] s; s.length = 0 },
+    cdl[StandardExample]{ ¬(∀ fresh uint[] s; s.length = 0) },
+    cdl[StandardExample]{ (∀ fresh uint[] s; s.length = 0) → false },
+    cdl[StandardExample]{ ∀ fresh Packed p; p.b = -7 },
+    cdl[StandardExample]{ ∀ given[box] kint z; ∀ given[diamond] kint y; y > z },
+    cdl[StandardExample]{ ¬(∀ given[diamond] kint z; z > 0) },
+    cdl[StandardExample]{ (∀ given[box] kint z; z > 0) → false },
+    cdl[StandardExample]{ ∀ given[box] kint z; (z > z) = false },
+    cdl[StandardExample]{ ∀ fresh uint[] s;
+      { «memory» := write(«memory», s[0], 1) }
+      keccak256(«memory», s) = keccak256(«memory», s) },
+    cdl[StandardExample]{ ∀ fresh uint[] s; sha256(«memory», s) = 0 },
+    cdl[StandardExample]{ ∀ fresh bool[] s; ripemd160(«memory», s) = 0 },
+    cdl[StandardExample]{ ∀ fresh uint[] s; ecrecover(«memory», s) = 0 },
+    cdl[StandardExample]{ ∀ fresh uint[] s; s[0] = s[0] },
+    cdl[StandardExample]{ ∀ fresh uint[] s; (s[0] == s[0]) = true }]
+  let c := Lean.mkConst ``StandardExample
+  for φ in fixtures do
+    let original := Fml.quote c φ
+    let printed ← Delab.withPrinter original false (Delab.ppFmlS [] original)
+    for text in [← fmtCat `dl_fml printed, ← φ.show c []] do
+      let .ok parsedSyntax := Lean.Parser.runParserCategory (← Lean.getEnv) `term
+          s!"cdl[StandardExample]\{ {text} }"
+        | throwError "binder formula does not parse: {text}"
+      let parsed ← Lean.Elab.Term.TermElabM.run' do
+        let parsed ← Lean.Elab.Term.elabTermEnsuringType parsedSyntax (← Lean.Meta.inferType original)
+        Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
+        pure parsed
+      unless ← Lean.Meta.isDefEq original parsed do
+        throwError "binder formula roundtrip changed its AST: {text}"
+  Lean.logInfo "fresh and given binders preserve their AST through both formula printers"
 
 end Solidity.Examples.Notation

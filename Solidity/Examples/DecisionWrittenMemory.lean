@@ -1,26 +1,41 @@
 import Solidity.Examples.Decision
 import Solidity.Calculus.HashWritten
+import Solidity.Calculus.FunContract
 
 /-!
 # Written-memory/hash composition controls
 
 The original M7 pin is refuted by the certified written-memory stage. The
-full ordered matrix retains every prior path and records that improvement. `allocAll` has no `dl!`
-notation, as in `Examples/Decision.lean`; all terms use existing printed
-memory/hash symbols. The certificate test proves composition without claiming
+full ordered matrix retains every prior path and records that improvement.
+The fixtures use typed fresh-allocation notation and printed memory/hash
+symbols. The certificate test proves composition without claiming
 general negative-array extraction beyond the exact written-equality schema.
 -/
 namespace Solidity.Examples.DecisionWrittenMemory
 open Solidity.Decide Solidity.Examples.DecisionHashes
 open Solidity.Examples.Tactics.Hashing (Names)
 set_option Elab.async false
+local instance : InContract := ⟨Names⟩
+open scoped Solidity.Scoped
 
 def writeFirst : Upd Names Γst Γst :=
   .snoc .nil (.memory (.app3 .write (.app0 .memory)
     (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 1))))
-def writtenSelf : Fml Names [] := strings (.upd .box writeFirst (.eq hS hS))
-def inputSelf : Fml Names [] := strings (.upd .box writeFirst .tt)
-def inputDiamond : Fml Names [] := strings (.upd .diamond writeFirst .tt)
+def writtenSelf : Fml Names [] := dl![.box]{
+  ∀ fresh uint[] s; ∀ fresh uint[] t;
+  { «memory» := write(«memory», s[0], 1) } keccak256(«memory», s) = keccak256(«memory», s) }
+def inputSelf : Fml Names [] := dl![.box]{
+  ∀ fresh uint[] s; ∀ fresh uint[] t;
+  { «memory» := write(«memory», s[0], 1) } true }
+def inputDiamond : Fml Names [] := dl![.diamond]{
+  ∀ fresh uint[] s; ∀ fresh uint[] t;
+  { «memory» := write(«memory», s[0], 1) } true }
+
+/- The migration keeps the exact intrinsic formulas, including both binders
+and each update's modality; the full ordered observation guards stay below. -/
+example : writtenSelf = strings (.upd .box writeFirst (.eq hS hS)) := rfl
+example : inputSelf = strings (.upd .box writeFirst .tt) := rfl
+example : inputDiamond = strings (.upd .diamond writeFirst .tt) := rfl
 
 def observation {C : Contract} : LeafVerdict C → String × Option Nat
   | .proved => ("proved", none)
@@ -176,21 +191,22 @@ private def emptyState : State Names [.mem UA] :=
 private def emptyWrite : Upd Names [.mem UA] [.mem UA] :=
   .snoc .nil (.memory (.app3 .write (.app0 .memory)
     (.app2 (.mat .dyn) (.pvI .here) (num 0)) (.app1 .mval (num 1))))
-private def emptyPair : Fml Names [.mem UA] := .eq (hnode .keccak .here) (hnode .keccak .here)
+private def emptyPair : Fml Names [.mem UA] :=
+  cdlIn[Names | uint[] memory s]{ keccak256(«memory», s) = keccak256(«memory», s) }
 
 /-- A write into a zero-length allocated array fails in the actual updater. -/
 private theorem empty_write_fails : emptyWrite.globT emptyState = none := by
   exact Option.isNone_iff_eq_none.mp (by decide +kernel)
 
 /-- The failed zero-length write is accepted by the box. -/
-theorem empty_box_control : Fml.holdsS emptyState (.upd .box emptyWrite emptyPair) := by
+theorem empty_box_control : Fml.holdsS emptyState cdlIn[Names, .box | uint[] memory s]{ { «memory» := write(«memory», s[0], 1) } keccak256(«memory», s) = keccak256(«memory», s) } := by
   change emptyWrite.afterT .box emptyState _
   simp only [Upd.afterT, empty_write_fails]
   exact Or.inl trivial
 
 /-- The same write is rejected by the diamond, with exhaustion excluded by
 its existing push-free theorem rather than a changed halt policy. -/
-theorem empty_diamond_control : ¬ Fml.holdsS emptyState (.upd .diamond emptyWrite emptyPair) := by
+theorem empty_diamond_control : ¬ Fml.holdsS emptyState cdlIn[Names, .diamond | uint[] memory s]{ { «memory» := write(«memory», s[0], 1) } keccak256(«memory», s) = keccak256(«memory», s) } := by
   change ¬ emptyWrite.afterT .diamond emptyState _
   have hx : emptyWrite.exh emptyState = false := Upd.exh_of_pushFree rfl
   simp only [Upd.afterT, empty_write_fails, hx, Modality.onHalt, Bool.false_eq_true, or_self, not_false_eq_true]
@@ -233,28 +249,24 @@ by this exact schema producer. Existing failure controls remain above. -/
 #guard decideWrittenHash writtenSelf matches .unknown
 #guard decideWrittenHash
   (WrittenMemory.Realize.schema (.user "s") (.user "t") .ecrecover .box : Fml Names []) matches .unknown
-private def otherWrite : Fml Names [] := strings (.upd .box
-  (.snoc .nil (.memory (.app3 .write (.app0 .memory)
-    (.app2 (.mat .dyn) (.pvI (.there .here)) (num 1)) (.app1 .mval (num 1))))) (.eq hS hT))
+private def otherWrite : Fml Names [] := dl![.box]{
+  ∀ fresh uint[] s; ∀ fresh uint[] t;
+  { «memory» := write(«memory», s[1], 1) } keccak256(«memory», s) = keccak256(«memory», t) }
 #guard decideWrittenHash otherWrite matches .unknown
 
-private def otherValue : Fml Names [] := strings (.upd .box
-  (.snoc .nil (.memory (.app3 .write (.app0 .memory)
-    (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 2))))) (.eq hS hT))
+private def otherValue : Fml Names [] := dl![.box]{
+  ∀ fresh uint[] s; ∀ fresh uint[] t;
+  { «memory» := write(«memory», s[0], 2) } keccak256(«memory», s) = keccak256(«memory», t) }
 #guard decideWrittenHash otherValue matches .unknown
 
-private def otherType : Fml Names [] :=
-  .allocAll (.user "s") (.array (.prim .bool)) (.allocAll (.user "t") UA
-    (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory)
-      (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (.app0 (.lit false))))))
-      (.eq (hnode .keccak (.there .here)) (hnode .keccak .here))))
+private def otherType : Fml Names [] := dl![.box]{
+  ∀ fresh bool[] s; ∀ fresh uint[] t;
+  { «memory» := write(«memory», s[0], false) } keccak256(«memory», s) = keccak256(«memory», t) }
 #guard decideWrittenHash otherType matches .unknown
 
-private def extraScope : Fml Names [] :=
-  .allocAll (.user "extra") UA (.allocAll (.user "s") UA (.allocAll (.user "t") UA
-    (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory)
-      (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 1)))))
-      (.eq (hnode .keccak (.there .here)) (hnode .keccak .here)))))
+private def extraScope : Fml Names [] := dl![.box]{
+  ∀ fresh uint[] extra; ∀ fresh uint[] s; ∀ fresh uint[] t;
+  { «memory» := write(«memory», s[0], 1) } keccak256(«memory», s) = keccak256(«memory», t) }
 #guard decideWrittenHash extraScope matches .unknown
 #eval [("self", writtenSelf), ("index", otherWrite), ("value", otherValue),
   ("type", otherType), ("scope", extraScope)].map fun (n, φ) => (n, observation (decideWrittenHash φ))
@@ -293,5 +305,36 @@ private def extraScope : Fml Names [] :=
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms alias_written_hashes
+
+example : emptyPair =
+  .eq (hnode .keccak .here) (hnode .keccak .here) := rfl
+
+example : otherWrite =
+  strings (.upd .box
+  (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+    (.app2 (.mat .dyn) (.pvI (.there .here)) (num 1)) (.app1 .mval (num 1))))) (.eq hS hT)) := rfl
+
+example : otherValue =
+  strings (.upd .box
+  (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+    (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 2))))) (.eq hS hT)) := rfl
+
+example : otherType =
+  .allocAll (.user "s") (.array (.prim .bool)) (.allocAll (.user "t") UA
+    (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+      (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (.app0 (.lit false))))))
+      (.eq (hnode .keccak (.there .here)) (hnode .keccak .here)))) := rfl
+
+example : extraScope =
+  .allocAll (.user "extra") UA (.allocAll (.user "s") UA (.allocAll (.user "t") UA
+    (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+      (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 1)))))
+      (.eq (hnode .keccak (.there .here)) (hnode .keccak .here))))) := rfl
+
+example : (cdlIn[Names, .box | uint[] memory s]{ { «memory» := write(«memory», s[0], 1) } keccak256(«memory», s) = keccak256(«memory», s) }) =
+  .upd .box emptyWrite emptyPair := rfl
+
+example : (cdlIn[Names, .diamond | uint[] memory s]{ { «memory» := write(«memory», s[0], 1) } keccak256(«memory», s) = keccak256(«memory», s) }) =
+  .upd .diamond emptyWrite emptyPair := rfl
 
 end Solidity.Examples.DecisionWrittenMemory
