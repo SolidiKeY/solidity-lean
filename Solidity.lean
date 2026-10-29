@@ -670,3 +670,6 @@ import Solidity.Backend.Failure.Immediate
 import Solidity.Backend.Failure.Gap
 import Solidity.Backend.Failure.Emit
 import Solidity.Backend.Failure.EmissionChecks
+import Solidity.Backend.Failure.Slice
+import Solidity.Backend.Failure.Correct
+import Solidity.Backend.Failure.SliceChecks

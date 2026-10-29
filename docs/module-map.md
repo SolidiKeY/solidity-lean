@@ -936,3 +936,6 @@ At the root, the notation's own tests:
 | `Backend/Failure/Gap.lean` | Base-interface panic boundary gap controls. |
 | `Backend/Failure/Emit.lean` | Typed failure/return payloads and actual MSTORE8/RETURN/REVERT instruction emission. |
 | `Backend/Failure/EmissionChecks.lean` | Inhabited emission, byte vector, negative and combination controls with axiom pins. |
+| `Backend/Failure/Slice.lean` | Independent typed-word PUSH/MSTORE8/RETURN/REVERT byte-memory execution and checked stack heights. |
+| `Backend/Failure/Correct.lean` | Exact emitter execution, stack/memory frames, bounded-stack certificate and arbitrary chunk/tail laws. |
+| `Backend/Failure/SliceChecks.lean` | Literal instruction, underflow/truncation, memory/frame/chunk, concatenation and1022/1023 stack controls. |

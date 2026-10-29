@@ -37,10 +37,10 @@ composition obligations. Nothing here revisits source failure semantics.
 | Item | State |
 |---|---|
 | 1: typed input and opcode emission | Done: focused gates and independent reviews passed |
-| 2: independent byte memory, stack tails, terminal slices | Pending |
+| 2: independent byte memory, stack tails, terminal slices | Done: kernel proofs, controls and independent reviews |
 | 3: intrinsic observations and discriminating controls | Pending |
 | 4: local checkpoint/unwind and nested failure | Pending |
-| A: arbitrary payload chunking, tails and address bounds | Chunk decomposition implemented; memory proof pending |
+| A: arbitrary payload chunking, tails and address bounds | Proved with checkpoint 2 |
 | B: concatenation, distinction, input preservation, external vectors | Internal exact byte vectors implemented; remaining proofs/tests pending |
 
 `Input` distinguishes empty failure, panic (bounded machine code), Error
@@ -121,3 +121,64 @@ Headline axiom sets are pinned with `#guard_msgs`: only `propext` and
 The final CLI checks supplement the focused module build because no MCP exists.
 Independent review summaries are saved in `cp1-reviews.md` in the evidence
 directory. Checkpoints 2–4 and final closure validation remain outstanding.
+
+## Checkpoint 2 and backfill A handoff
+
+`Slice` imports only existing Opcode and Roadmap.Contracts. Its memory
+functions, PUSH decoder, `step` and `run` do not import or mention the emitter.
+Stack entries are existing intrinsic `Roadmap.Word` values. MSTORE8 truncates
+the value to its low byte; RETURN/REVERT pop offset then length and read exact
+bytes. Unsupported instructions/underflow produce none; a terminal ignores
+all remaining instructions. Arbitrary initial memory and stack tails survive.
+
+`putBytes_frame`, `getBytes_putBytes`, `putBytes_append`, `getBytes_congr`
+and `getBytes_suffix_write` prove the independent memory laws. `run_writes`
+then proves actual emitted writes against those semantics, with only
+`a + payload.length ≤ wordLimit`. `run_emit_suffix` and `run_emit` yield the
+exact state and existing Outcome observation for `Fits`: base and length
+are representable machine words, and the entire half-open interval fits.
+The suffix theorem quantifies over arbitrary code, including another emitter.
+`address_in_bounds`, `tail_untouched`, `chunkWrites_eq` and `run_chunkWrites`
+cover all chunk counts/sizes, empty chunks, allocation endpoints and arbitrary
+untouched tail bytes. No 32/64/4096-byte payload cap is assumed. The last byte
+may be at wordLimit-1; the terminal length itself must fit one word.
+
+A skeptic found that the first generic run theorem alone omitted the real
+stack-capacity boundary. The generic theorem remains unchanged, but `Slice`
+now independently checks every reached pre/post height in `stackSafe` and
+exposes `checkedRun`. `stackSafe_writes`, `stackSafe_emit_suffix` and
+`checkedRun_emit_suffix` prove checked execution given two free slots:
+`initial.stack.length + 2 ≤ 1024`. `empty_stack_boundary` proves that boundary
+is exact for empty emission. The controls include 1022-word success and a
+1023-word rejection. This is an architectural boundary, not a scope exclusion.
+Neither interpreter models gas/expansion charges, code loading/PC execution,
+whole-world state or catching. The exact byte semantics and the stack check
+are local instruction-list results; external pinned-EVM composition stays open.
+
+`SliceChecks` includes a literal instruction program independent of `emit`,
+a nonzero patterned initial memory and a two-word tail; underflow and reversed
+operand negatives; an independent 0x01aa-to-aa truncation; crossing writes;
+untouched before/end/final-word bytes; nonobservable zero padding after the
+slice; arbitrary chunk combination; and checked terminal suffix noninterference.
+Headline axiom pins admit only Lean's standard `propext`, `Quot.sound` and,
+for the checked stack proof, `Classical.choice`. No new axioms are introduced.
+
+Actual focused target:
+`lake -f .failure-emission.lakefile.toml build Solidity.Backend.Failure.SliceChecks`:
+12 jobs, exit 0, 3s, sampled aggregate RSS 318,328 KiB, cgroup peak 149,315,584 B
+(`cp2-build.log`). Correct and Slice were separately checked/built clean;
+the earlier failed diagnostics are retained as failed attempts rather than
+rewritten to green. Fresh final per-file diagnostics and static gate outputs
+are saved with the checkpoint. Finder and skeptic reviews are read-only
+and use no Lean server; both follow-ups cleared the stack-bound fix and all remaining concrete findings.
+
+Final checkpoint-2 diagnostics: Slice exit 0 (1s, RSS 286,932 KiB,
+cgroup peak 93,937,664 B); Correct exit 0 (2s, RSS 321,908 KiB,
+peak 123,232,256 B); SliceChecks exit 0 (4s, RSS 298,148 KiB,
+peak 104,697,856 B). Logs: `cp2-Slice-diagnostics.log`,
+`cp2-Correct-diagnostics.log`, `cp2-SliceChecks-diagnostics.log`.
+Static gates (`cp2-static.json`): layers exit 0 (168 core, none reach frontend),
+orphans exit 0 (773 reachable, 0 orphaned), trust exit 0 (788 sources,
+241 inventoried sites, 0 findings); doc paths exit 1, output byte-identical
+to exact base (46 inherited missing references). No inherited failure is green.
+Independent final reviews are saved in `cp2-reviews.md`.
