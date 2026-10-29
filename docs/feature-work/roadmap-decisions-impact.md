@@ -348,26 +348,26 @@ the owners, not scope questions:
 - how `ValidH` (per goal) relates to the per-run premise in specification
   transfer: G51.02.
 
-## 5a. Second-round decisions: not yet audited
+## 5a. Second-round decisions
 
-The coordinator reported a second round of user decisions, to be recorded in
-`docs/solidity-scope.md` under "Second round (2026-10-29)". That section was
-not on `origin/master` when this audit finished (checked at 13:15 UTC), so
-none of these decisions is audited here. Several revise rows above:
+The second round of user decisions landed on `origin/master` (`ceb0d54`) in
+`docs/solidity-scope.md`, section "Second round (2026-10-29)", after this
+audit's base. The rows below grade it against the same base with the same
+key. It is a shorter pass: each row was re-read, but no separate search was
+run.
 
-- settings: solc's two pipelines only. This revises G00 Q4 and so §2.7 and
-  the eight-combination wording of §1.
-- Osaka gas caps idealized (§2.4, §2.6).
-- forced ether credited by the environment (§2.3, own balance).
-- a stipend cost rule for payments to our own instances. This interacts
-  with §2.2 and the R-verdicts on the stipend texts.
-- the hash-region premise (§2.5, G04 R34).
-- foundation child packages under G24.
-- empty link map only. This revises G01 Q8 and the §2.10 `validateSettings`
-  row.
-- the fixed-point choices (§2.9).
+| Decision | Revises | Affected here | Verdict | Owner |
+|---|---|---|---|---|
+| G00 Q4 revised: solc's two pipelines only (legacy order with the pragma's ABI coder; via-IR with coder v2) | §2.7, §1 G00 Q4 | `legacyOrderOverride` (`Solidity/Frontend/Import.lean:666`) no longer needs to express six more combinations: modern imports already reach the two pipeline orders. The ABI coder becomes a settings axis that `Solidity/Frontend/Source.lean` and `Solidity/Frontend/SolcJson/Admission.lean` already read. `compile_correct` is U. | U for the order; R for stating the public theorem over two pipelines | G01, G05 |
+| Osaka gas caps (EIP-7825, block limit) idealized | §2.4 | No Lean models gas. "Any transaction may revert from gas exhaustion" now covers only a gas limit chosen too low. The `Contracts.lean:382` resource list gains the cap idealization. | U for Lean; R for `EvmSpec` | G01, G06 |
+| Forced ether credited by the environment | §2.3, R32/R33 | `Sim.netSelf` (`Solidity/Evm/Sim.lean:211`, "the contract's own entry is never moved") and `compile_net` hold within one transaction without environment frames (V). `State.havoc` (`Solidity/Semantics/RunFrame.lean:1158`) already lets the own balance change across a callback: U, now justified. `World.enter` (`Solidity/Semantics/Lifetime.lean:50`, `Solidity/Semantics/ContractWorld.lean:134`) has no credit between transactions. | V / R | S04.03, S04.04, G43, G50 |
+| Stipend cost rule for payments to our own instances | §2.2 (stipend texts), R33 | A carve-out from G01 Q7. For our own instances the rule decides whether `receive`/fallback runs within 2300 gas; for environment callees, answers still range over all outcomes. The stipend texts in §2.2 and §4 stay R: they must say which case they cover. The rule has no Lean artifact, and the compiler must enforce failure for bodies it does not admit. | R | G01, G22.02, G43, G47 |
+| Hash regions (length ≤ L at a hashed slot, about q²·L/2²⁵⁶) | §2.5, R34 | The premise now covers what `Slot.add`'s no-wrap (`Solidity/Evm/Machine.lean:106`) and `occ_entries_disjoint` (`Solidity/Evm/Layout.lean:310`) build into the symbolic machine: the regions at `data s`/`hash k s` offsets. Those lemmas are V and become dischargeable on words under the region premise. | V; R for `PublicCorrectness` | G27.05, G46.03/G46.05, G01; the hash-bound task |
+| G03 Q1: foundation child packages under G24 | — | Roadmap structure only; no repository item audited here changes | U | G03 |
+| G05 Q1: empty link map only | §2.10 | `validateSettings` (`Solidity/Frontend/Source.lean:183`, `onlyKeys libraries []`) already admits exactly an empty map. The open part is that the session deploys and links every library itself. | U for the frontend check; R for deployment and linking | G05, G44.02 |
+| Fixed-point choices (`*`/`/`, conversions, rounding, shifts rejected, unary minus, `++`/`--`) | §2.9 | Shifts are rejected, which narrows G00 Q6. Fixed types are refused today (`Solidity/Frontend/SolcJson/Admission.lean:159`), so no existing proof is affected. | U for existing Lean; the semantics is missing | fixed-point-semantics task, S02, G16, G25 |
 
-A follow-up audit must re-grade the affected rows once that section lands.
+The second round asks no new question of this audit.
 
 ## 6. Handoff
 
@@ -376,6 +376,7 @@ A follow-up audit must re-grade the affected rows once that section lands.
   - this audit;
   - the G04 ledger update (R32–R36, §6 answers, §8);
   - the Markdown fixes of §4.
+  - a short pass over the second-round decisions (§5a).
 - **Checked:**
   - every cited line re-read at the base;
   - every F verdict against the decision text, and the V verdicts of the `⊨ᶠ` examples against their refuting theorems (`withdrawUnsafe_withCallback`, `selfCall_noCallback`);
