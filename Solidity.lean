@@ -1,6 +1,7 @@
 -- The root of the `Solidity` library: every module of the default build.
 import Solidity.KeySort
 import Solidity.Language.Features
+import Solidity.Language.FixedPoint
 import Solidity.Eqns
 import Solidity.AST
 import Solidity.TypeGraph
@@ -393,6 +394,8 @@ import Solidity.Evm.MemoryCapture
 import Solidity.Evm.MemoryCompile
 import Solidity.Evm.Compiler
 import Solidity.Roadmap.Contracts
+import Solidity.Roadmap.Frontend
+import Solidity.Roadmap.Evm
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
@@ -518,6 +521,7 @@ import Solidity.Calculus.Decision
 import Solidity.Calculus.HashWritten
 import Solidity.Calculus.HashWrittenInput
 import Solidity.Calculus.HashWrittenRealize
+import Solidity.Hash.CollisionBound
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction

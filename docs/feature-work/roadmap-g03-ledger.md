@@ -22,7 +22,7 @@ changes no feature status: every row is open work.
   `coverage-plan.md`, and the Lean import graph.
 - **Result:** 174 in-profile rows plus `fixedPoint` (in scope by decision
   G00 Q6, manifest still `upstream`), 41 named combinations (G00's 17 and 24
-  in-profile ones), 122 ledger-symbol combinations, 22 decision-driven
+  in-profile ones), 122 ledger-symbol combinations, 25 decision-driven
   obligations and all 41 G04 restrictions (every discharging package G04
   names is an owner of a row citing it), each owned by work packages of the
   roadmap manifest (115, plus the three G24 foundation children the user
@@ -35,10 +35,15 @@ changes no feature status: every row is open work.
   G24 foundation children (Q1, answered); the other 77, over 28 modules, each
   have a recorded resolution. 11 oversized checkpoints have lemma splits.
 - **Decisions after the first draft** (relayed by the batch coordinator,
-  2026-10-29; recorded in `docs/solidity-scope.md`, "Second round
-  (2026-10-29)", which is not yet on this base): Q1 → foundation child
+  2026-10-29; recorded in [solidity-scope.md](../solidity-scope.md#second-round-2026-10-29),
+  merged here from master `77f8878f`): Q1 → foundation child
   packages of G24; the settings cover solc's two pipelines only, so the
-  other six `EvalOrder` combinations are dropped (D04 revised).
+  other six `EvalOrder` combinations are dropped (D04 revised). The other
+  second-round answers extend D07 (fixed-point semantics; shifts refused),
+  D09/D20 (Osaka gas caps; "gas exhaustion"), D11 (hash regions), D16
+  (empty link map only) and add D23 (forced ether), D24 (the stipend cost
+  rule) and D25 (the G24 children). The G01 contract revision is not on
+  master, so the ledger cites the base `Contracts.lean`.
 
 ## Method and reproduction
 
@@ -204,8 +209,8 @@ module over 2,500 lines.
    keys → confirmed exclusions, no owner needed; (6) stale public
    documentation → G55. One owner had no row: the compiler's **calldata
    representation**; G35.03 owns it and G40 depends on it.
-8. **Decision-driven rows** D01–D22 cover every row of the binding decision
-   table and every follow-up label. The assignment's named obligations are
+8. **Decision-driven rows** D01–D25 cover every row of both binding decision
+   tables and every follow-up label. The assignment's named obligations are
    D11 (per-run hash premise and bound), D14 (`decode` export), D06
    (artifact table), D19/D20 (frame and transaction failure semantics),
    D10 (memory frames for recursion), D04 (the `EvalOrder` settings,
@@ -2943,7 +2948,10 @@ chose the foundation children.
 ## Handoff
 
 - **Base** `caf52ecd4dde5d37cbc0098d47de1a01aa218285`; branch
-  `cloud/roadmap-w1-20261029/g03-ledger`.
+  `cloud/roadmap-w1-20261029/g03-ledger`, with master `77f8878f` merged in (the
+  second-round decisions, g05, fixed-point, hash, g06 and g02). After that
+  merge `--check` passes; the Lean build ran before it, and the merge
+  touches no Lean file of this group.
 - **Done:**
   - this document;
   - `scripts/roadmap-g03-ledger.py`;
@@ -2959,7 +2967,7 @@ chose the foundation children.
   The obligations it assigns are the G01 contracts `Admission`/`CheckedFrontend`,
   `Lowering`, `Compilation`, `Execution`, `PublicCorrectness` and `SpecTransfer`
   (`Solidity/Roadmap/Contracts.lean`). Their premises are as G01 states them,
-  plus the decision rows D01–D22 (for example, the per-run hash premise D11
+  plus the decision rows D01–D25 (for example, the per-run hash premise D11
   and the `decode` export D14 are not yet in `PublicCorrectness`).
 - **Checked:**
   - `python3 -I scripts/roadmap-g03-ledger.py --check`: 0 errors. Ten

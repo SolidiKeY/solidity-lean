@@ -183,11 +183,35 @@ G00 status (2026-10-29): pins, exclusion evidence, reconciliation and owners in 
 
 G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which lists the contract revisions they require before G01 counts as frozen.
 
+G02 status (2026-10-29): cold/warm/cache-restore measurements on the 16 GiB VM in [roadmap-g02-measure.md](feature-work/roadmap-g02-measure.md): cold `./run-lean.sh` 58 min with `TestSuite/Derived17` OOM-killed beside its siblings (11.5 GiB peak alone), warm 2 s, cache restore 3 s, Bridge 17 min with `Arith/Widths` failing at the base; splits recommended there, not made.
+
 G03 status (2026-10-29): constructor-to-theorem, combination, decision-row and module/lemma dependency ledger in [roadmap-g03-ledger.md](feature-work/roadmap-g03-ledger.md), checked by `scripts/roadmap-g03-ledger.py --check`; no obligation closed, no feature status changed.
 
 G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
 
+G05 status (2026-10-29): base-revision audit and certificate interfaces in [roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md) and `Solidity/Roadmap/Frontend.lean` (statements only); G00 disagreement 6 resolved (link maps recorded, only the empty map admitted; settings are solc's two pipelines); no frontend code changed and no instance exists.
+
+G06 status (2026-10-29): machine inventory (23 disagreements with pinned Osaka), the pinned semantics and observation interfaces, the core/Bridge certificate boundary and bridge lemmas B01–B28 with owners in [roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) and `Solidity/Roadmap/Evm.lean` (statements only); no obligation closed; its questions Q1–Q3 are answered (second round, 2026-10-29) and encoded.
+
 G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.
+
+Fixed-point status (2026-10-29): reference semantics for G00 Q6 in [fixed-point-semantics.md](feature-work/fixed-point-semantics.md) and `Solidity/Language/FixedPoint.lean` (values, operations and laws; not wired into the frontend or compiler); its scope questions Q1–Q8 are answered and encoded; owners (S00–S02, S04.02, G08–G53) are listed in its §4.
+
+Integration notes (2026-10-29):
+
+- **G01 revision held back.** Integration review found that its
+  `PublicCorrectness.refines` cannot be met for long sessions (the
+  2^128-hash bound restricts only the target) and that unconstrained
+  `Fixed.regionLen`/`rootSlots` can make the hash premise false on every
+  hashing run, letting an always-reverting compiler through. It returns to
+  its session; the contracts on master are still the first G01 version.
+- **Pending on the G01 revision:** G06's findings F1–F8
+  ([roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md)), G05's C1 adapter,
+  and one correspondence between G01's and G06's `Fixed`, precompile
+  predicates and `keccakWord`, and the hash premises in
+  `Solidity/Hash/CollisionBound.lean`.
+- **G03 ledger** is not merged yet: its checker needs the second-round
+  decisions.
 
 ### Independent source definitions — after G00–G07, before wave 1
 
@@ -279,6 +303,8 @@ proof, and their final checks must use the actual implementations.
 | G45 | Implement and prove instruction selection/expansion to actual EVM operations, stack manipulation, labels/jumps, assembly and byte encoding/decoding. Structured LOOP/relative jumps must have checked executable realizations. |
 | G46 | Prove primitive instruction/byte-memory/storage/environment correspondence with the pinned EVM semantics. Discharge symbolic-slot, word-addressing, truncation and hash-model obstructions or identify an unresolved approved-premise obligation; unresolved means incomplete. |
 | G47 | Prove EVM call/create/return/revert and transaction correspondence, including excluded-resource abstraction and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
+
+G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`; adaptive queries (eager sampling, repeats), bounded slot offsets and the connection to executions are open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
 
 ### Wave 6 — whole pipeline, verification transfer and release (G48–G55)
 
