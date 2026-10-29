@@ -665,3 +665,8 @@ import Solidity.Solkey.QuantifiedDiamond
 
 import Solidity.Tools.SolCases
 import Solidity.Examples.SolCases
+
+import Solidity.Backend.Failure.Immediate
+import Solidity.Backend.Failure.Gap
+import Solidity.Backend.Failure.Emit
+import Solidity.Backend.Failure.EmissionChecks

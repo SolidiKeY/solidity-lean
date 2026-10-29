@@ -932,3 +932,7 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+| `Backend/Failure/Immediate.lean` | Big-endian PUSH32 machine immediates and exact numeric reading. |
+| `Backend/Failure/Gap.lean` | Base-interface panic boundary gap controls. |
+| `Backend/Failure/Emit.lean` | Typed failure/return payloads and actual MSTORE8/RETURN/REVERT instruction emission. |
+| `Backend/Failure/EmissionChecks.lean` | Inhabited emission, byte vector, negative and combination controls with axiom pins. |
