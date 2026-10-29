@@ -405,6 +405,12 @@ import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
 import Solidity.Evm.Interpreter
+import Solidity.Backend.Opcode
+import Solidity.Backend.Jumpdest
+import Solidity.Backend.Assembler
+import Solidity.Backend.Control
+import Solidity.Backend.EvmVectors
+import Solidity.Backend.Checks
 import Solidity.Tools.Show
 import Solidity.Tools.Common
 import Solidity.Tools.Run
