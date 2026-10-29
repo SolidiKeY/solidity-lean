@@ -183,6 +183,8 @@ G00 status (2026-10-29): pins, exclusion evidence, reconciliation and owners in 
 
 G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which lists the contract revisions they require before G01 counts as frozen.
 
+G02 status (2026-10-29): cold/warm/cache-restore measurements on the 16 GiB VM in [roadmap-g02-measure.md](feature-work/roadmap-g02-measure.md): cold `./run-lean.sh` 58 min with `TestSuite/Derived17` OOM-killed beside its siblings (11.5 GiB peak alone), warm 2 s, cache restore 3 s, Bridge 17 min with `Arith/Widths` failing at the base; splits recommended there, not made.
+
 G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
 
 G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.
