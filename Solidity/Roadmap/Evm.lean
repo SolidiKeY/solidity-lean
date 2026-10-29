@@ -34,8 +34,9 @@ are fields of `Fixed`, shared by the source semantics and the pinned EVM;
 the public theorem quantifies over them, so their instance by the real
 functions is a bridge lemma, not a trust assumption.  Precompile gas is an
 EVM definition: the public theorem fixes `precompileGas` to Osaka's rather
-than quantifying it.  The only premise on them is the per-run
-`Fixed.NoCollision`.
+than quantifying it.  The only premise on them is per run: the decided
+`Fixed.NoCollision`, extended in the second round to `Fixed.NoOverlap`
+(no two hashed regions, nor a region and a root slot, overlap).
 -/
 
 namespace Solidity.Roadmap.Evm
@@ -59,9 +60,11 @@ structure Pin where
   runtimeCodeLimit : Option Nat
   /-- EIP-3860's initcode size limit. -/
   initcodeLimit : Option Nat
-  /-- EIP-7825's per-transaction gas limit cap (open: question Q2 of the
-  G06 document). -/
+  /-- EIP-7825's per-transaction gas limit cap. -/
   txGasCap : Option Nat
+  /-- Whether a block gas limit bounds the transactions of a block (its
+  value is the chain's choice, not the fork's). -/
+  blockGasLimited : Bool
   /-- The message-call/creation depth limit. -/
   callDepth : Nat
   /-- The operand stack limit, per frame. -/
@@ -76,17 +79,24 @@ def osaka : Pin where
   runtimeCodeLimit := some 24576
   initcodeLimit := some 49152
   txGasCap := some (2 ^ 24)
+  blockGasLimited := true
   callDepth := 1024
   stackLimit := 1024
   stipend := 2300
 
-/-- **The pin of the decisions:** Osaka with EIP-170 and EIP-3860 idealized
-(G01 Q2), any code size deploys.  The gas cap stays Osaka's until Q2 of the
-G06 document is answered. -/
-def pinned : Pin := { osaka with runtimeCodeLimit := none, initcodeLimit := none }
+/-- **The pin of the decisions:** Osaka with four recorded idealizations:
+EIP-170 and EIP-3860, so any code size deploys (G01 Q2), and EIP-7825's
+per-transaction cap and the block gas limit, so a transaction may carry any
+gas limit (G06 Q2, answered 2026-10-29).  A too-low limit still makes a
+transaction fail or be dropped. -/
+def pinned : Pin :=
+  { osaka with runtimeCodeLimit := none, initcodeLimit := none, txGasCap := none,
+               blockGasLimited := false }
 
-/-- The pin differs from Osaka in the code size limits only. -/
-theorem pinned_eq : pinned = { osaka with runtimeCodeLimit := none, initcodeLimit := none } := rfl
+/-- The pin differs from Osaka in the four idealized limits only. -/
+theorem pinned_eq : pinned = { osaka with
+    runtimeCodeLimit := none, initcodeLimit := none, txGasCap := none, blockGasLimited := false } :=
+  rfl
 
 /-- The gas a `CALL` can forward at most: all but one 64th (EIP-150). -/
 def allButOne64 (g : Nat) : Nat := g - g / 64
@@ -177,6 +187,25 @@ def Fixed.NoCollision (F : Fixed) (hashed : List Bytes) : Prop :=
 theorem Fixed.NoCollision.mono {F : Fixed} {hs hs' : List Bytes} (h : F.NoCollision hs')
     (sub : ∀ x ∈ hs, x ∈ hs') : F.NoCollision hs :=
   fun a ha b hb e => h a (sub a ha) b (sub b hb) e
+
+/-- **The extended per-run premise** (answered 2026-10-29): no two hashed
+regions of `L` slots overlap, nor a region and one of the `roots` root slots,
+counting addresses modulo `2^256`.  A region is a hash of a preimage the
+prefix hashes and the `L` slots from it (an array's elements, a struct's
+fields).  Its random-oracle bound is about `q² · L / 2^256` for `q` hashes. -/
+def Fixed.NoOverlap (F : Fixed) (L roots : Nat) (hashed : List Bytes) : Prop :=
+  (∀ a ∈ hashed, ∀ b ∈ hashed, a ≠ b → ∀ i < L, ∀ j < L,
+    (F.keccak a + i) % 2 ^ 256 ≠ (F.keccak b + j) % 2 ^ 256) ∧
+  ∀ a ∈ hashed, ∀ i < L, ∀ k < roots, (F.keccak a + i) % 2 ^ 256 ≠ k
+
+/-- Regions of at least one slot do not overlap only if their bases do not
+collide: the extended premise includes the decided one. -/
+theorem Fixed.NoOverlap.noCollision {F : Fixed} {L roots : Nat} {hs : List Bytes}
+    (h : F.NoOverlap L roots hs) (hL : 0 < L) : F.NoCollision hs := by
+  intro a ha b hb e
+  apply Classical.byContradiction
+  intro hne
+  exact h.1 a ha b hb hne 0 hL 0 hL (by rw [e])
 
 /-- The minimal big-endian bytes of a number (`0` has none), as RLP writes
 a scalar. -/
@@ -272,6 +301,10 @@ theorem GasRes.Admissible.of_le {p : Pin} {a b : GasRes} (h : a ≤ b)
   rw [← h.1]
   exact ha
 
+/-- At the pin every gas schedule is admissible: the cap is idealized. -/
+theorem GasRes.admissible_pinned (r : GasRes) : GasRes.Admissible pinned r :=
+  fun _ h => nomatch h
+
 /-- The source side of one request's gas: dropped as invalid (its sender
 cannot cover value and upfront fees, or its limit is below intrinsic gas),
 or run with the sender's balance after the upfront fees, failing from gas
@@ -292,6 +325,20 @@ frames; no failure point can avoid that. -/
 structure FailurePoints where
   tx : Nat → TxFate
   frame : Nat → Option Nat
+
+/-- **The stipend rule** (answered 2026-10-29): a compiler-independent source
+rule decides which `receive`/fallback bodies (of type `Body`) succeed under
+the 2300-gas stipend of `transfer` and `send` to an instance of the system;
+the source semantics fails the payment for every other body. -/
+structure StipendRule (Body : Type) where
+  fits : Body → Prop
+
+/-- What the compiler owes the rule: every body the rule admits compiles to
+code that completes within the pin's stipend (`gasUsed` is the compiled
+body's gas on its worst path, with EIP-2200's `SSTORE` sentry counted). -/
+def StipendRule.Fitted {Body : Type} (R : StipendRule Body) (p : Pin)
+    (gasUsed : Body → Nat) : Prop :=
+  ∀ b, R.fits b → gasUsed b < p.stipend
 
 /-! ## Observation -/
 

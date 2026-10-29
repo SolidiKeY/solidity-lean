@@ -13,8 +13,12 @@ what they owe.
 Base revision `caf52ecd4dde5d37cbc0098d47de1a01aa218285`. Branch
 `cloud/roadmap-w1-20261029/g06-evm-interface`. Binding decisions:
 [solidity-scope.md](../solidity-scope.md#user-decisions-2026-10-29). This
-document follows them. Three places where a decision cannot be met as stated
-are [questions](#open-scope-questions), not reopened decisions.
+document follows them. Three places where a decision could not be met as
+stated were raised as [scope questions](#scope-questions-answered-2026-10-29).
+The user answered them, together with a hash-region premise and two pin
+questions, in a second round recorded in
+[solidity-scope.md](../solidity-scope.md) ("Second round (2026-10-29)"). Both
+the module and this document encode the answers.
 
 ## Contents
 
@@ -26,7 +30,7 @@ are [questions](#open-scope-questions), not reopened decisions.
 6. [The core/Bridge certificate boundary](#6-the-corebridge-certificate-boundary)
 7. [Required bridge lemmas and owners](#7-required-bridge-lemmas-and-owners)
 8. [Reference tooling pins](#8-reference-tooling-pins)
-9. [Open scope questions](#open-scope-questions)
+9. [Scope questions (answered 2026-10-29)](#scope-questions-answered-2026-10-29)
 10. [Checks](#checks), [Handoff](#handoff), [Review](#review)
 
 ## 1. Machine inventory
@@ -72,12 +76,12 @@ group that discharges it. "Bridge lemma B*n*" refers to [§7](#7-required-bridge
 
 | # | Topic | Disagreeing machines | Disagreement (evidence) | Resolution / owner |
 |---|---|---|---|---|
-| D1 | Symbolic slots | M1–M4, M6 | Slots are terms `root ∣ hash k s off ∣ data s off`, so two slots are equal only as terms (`Solidity/Evm/Machine.lean:99`). No injective `Slot → Fin W` exists (`no_injective_slot_encoding`). Offsets do not wrap (`slot_add_wrap_mismatch`). | **Hashed layout.** The compiler places every storage word at the Keccak of a distinct preimage (roots at `keccak(tag ‖ i)`, array elements at `keccak(p ‖ i)`, mapping entries and struct fields likewise). Physical layout is an excluded observation (G00 Q1) and "solc's slot behaviour" fixes only the logical alias semantics, so this is allowed. Two words then share a slot only if two preimages collide, so the numeric storage relation B10 needs exactly `Fixed.NoCollision`. solc's layout (`keccak(p) + i`, small roots) would also need non-overlap of ranges, which the premise does not give ([Review](#review), S3). G27, G28, G46.03, G46.05. |
+| D1 | Symbolic slots | M1–M4, M6 | Slots are terms `root ∣ hash k s off ∣ data s off`, so two slots are equal only as terms (`Solidity/Evm/Machine.lean:99`). No injective `Slot → Fin W` exists (`no_injective_slot_encoding`). Offsets do not wrap (`slot_add_wrap_mismatch`). | **Hashed layout.** The compiler places every storage word at the Keccak of a distinct preimage (roots at `keccak(tag ‖ i)`, array elements at `keccak(p ‖ i)`, mapping entries and struct fields likewise). Physical layout is an excluded observation (G00 Q1) and "solc's slot behaviour" fixes only the logical alias semantics, so this is allowed. Two words then share a slot only if two preimages collide, so the numeric storage relation B10 needs exactly `Fixed.NoCollision`. solc's layout (`keccak(p) + i`, small roots) would also need non-overlap of ranges, which the first-round premise did not give ([Review](#review), S3). The second round extends the premise to `Fixed.NoOverlap`, so solc's layout is also available (B10). G27, G28, G46.03, G46.05. |
 | D2 | Word memory | M1, M1′ | `mem : Nat → Word` holds one *word or symbolic slot* per cell, at a cell index. Fixed-cell `mload l`/`mstore l` are macros (`mload_arity_mismatch`, `mstore_arity_mismatch`). The EVM has byte memory with 32-byte big-endian words and quadratic expansion gas. M1's stack-addressed `mloadAt`/`mstoreAt` match the opcodes' arity but address word cells. | Byte-memory relation (×32 scaling, numeric slot words, expansion bounded only by gas), B07. G46.02, G45.01. |
 | D3 | Jumps | M1, M2 | `JUMP n`/`JUMPI n` skip forward (relative) and `LOOP` is structured (`jump_arity_mismatch`, `jumpi_arity_mismatch`). The EVM takes absolute stack destinations that must be `JUMPDEST` outside PUSH data. | Label layout and jump-destination analysis against the pinned decoder, B03 and B04. G45.03–G45.05. |
 | D4 | Call frames | M1–M3, M6 | `CALL` pops 2 words, runs no callee and uses a static `accepts` predicate (`call_arity_mismatch`). It has no calldata, success data or reentrancy. The EVM's `CALL` takes 7 operands and runs callee code in a new frame with rollback. | Frames are observed through `Halt.observe` ([§4](#4-the-observation-interface)). Environment frames are abstracted to strategies (B13), our frames execute. G42, G47. |
 | D5 | Depth | M1–M4 | No call depth. M5 fails a call at depth 1024 (`Bridge/vendor/EvmYul/EVM/Semantics.lean:165`, `:201`) and a creation likewise (`:254`, `:321`). | Decided: such a frame fails and the caller continues. The source semantics *forces* that failure (`Pin.callFails`). It counts every external frame of the system (calls between instances, `this.f()`, creations, library frames) and environment entries at the depth the environment's code reaches, B12. Internal calls within one contract use memory frames (G01 Q2) and consume no depth. G37, G42.03, G47. |
-| D6 | Gas | M1–M4, M6 (zero gas) | The EVM charges gas per opcode, memory expansion, EIP-2929 warm/cold access, the 63/64 rule (`allButOne64`), the 2300 stipend, refunds and the EIP-7623 calldata floor. Osaka adds the EIP-7825 per-transaction cap of 2²⁴. M8 runs 10⁸ message gas, above that cap. | Gas is a resource (`Schedule`, `GasRes`), not an observation. Frames and transactions may fail from it and the caller continues (decided). Realizability is B11. The cap breaks forward adequacy: [Q2](#q2-the-osaka-per-transaction-gas-cap). G47. |
+| D6 | Gas | M1–M4, M6 (zero gas) | The EVM charges gas per opcode, memory expansion, EIP-2929 warm/cold access, the 63/64 rule (`allButOne64`), the 2300 stipend, refunds and the EIP-7623 calldata floor. Osaka adds the EIP-7825 per-transaction cap of 2²⁴. M8 runs 10⁸ message gas, above that cap. | Gas is a resource (`Schedule`, `GasRes`), not an observation. Frames and transactions may fail from it and the caller continues (decided). Realizability is B11. The cap broke forward adequacy ([Q2](#q2-the-osaka-per-transaction-gas-cap)). Answered: EIP-7825 and the block gas limit are idealized (`pinned.txGasCap = none`, `blockGasLimited = false`). G47. |
 | D7 | Returndata and revert bytes | M1–M4 | `REVERT` takes no operands and carries no data (`revert_arity_mismatch`). M1 has no `RETURN`, `RETURNDATASIZE` or `RETURNDATACOPY`. M5's `Υ` returns `(σ', A, z, gasUsed)` and drops the output bytes that `Θ`/`Lambda` compute (`Bridge/vendor/EvmYul/EVM/Semantics.lean:823`–`:946`). | The observation is the halt's bytes (G01 Q5: exact ABI and revert bytes, `Panic` included). The adapter reads `Θ`/`Lambda`'s output, not `Υ`'s result, B14. G38, G47. |
 | D8 | Transient storage | M1–M4 | Absent from the machine. The source has a logical store ([transient-storage.md](transient-storage.md)). M5 keeps a `tstorage` field per account (`Bridge/vendor/EvmYul/State/Account.lean:47`), clears it at transaction end (`Semantics.lean:944`) and rolls it back with the frame's account map. | `TLOAD`/`TSTORE` relation to the logical store, with reset at transaction end and frame rollback (EIP-1153), B09. G46.03. |
 | D9 | Precompiles | M1 (none); M5 (Cancun set 1–10 only, `Semantics.lean:787`–`:796`; SHA-256 and BLAKE2 via FFI) | Osaka has 18: 0x01–0x0a, Prague's BLS12-381 0x0b–0x11 (EIP-2537) and P256VERIFY at 0x100 (EIP-7951). MODEXP has Osaka's bounds and gas (EIP-7823, EIP-7883). Under M5, a call to 0x0b–0x11 or 0x100 reaches an empty account. | Decided: precompiles are fixed functions, never environment code. The table is `Precompile`, `Fixed.precompile` (quantified) and `precompileGas` (fixed to Osaka's), and calls to them are not `Event.call`s. Instances are B15 and B16; the repin is B01. G46.05, G47. |
@@ -86,14 +90,14 @@ group that discharges it. "Bridge lemma B*n*" refers to [§7](#7-required-bridge
 | D12 | Code-size limits | M5 (`i.size ≤ 49152`, `Semantics.lean:254`, `:321`, `:480`; `MAX_CODE_SIZE := 24576`, `:670`); M9 (caps on) | The decision idealizes both. M8 already disables them (`replay.mjs:54`). | `pinned.runtimeCodeLimit = none`, `initcodeLimit = none`. M5 needs a recorded vendor patch or parameter, B02. |
 | D13 | Keccak in M5 | M5 | `ffi.KEC` is an `@[extern]` opaque (`Bridge/vendor/EvmYul/FFI/ffi.lean`, lines 20–27), so no Lean proof relates it to `Solidity/Keccak.lean`. | `Fixed` is a parameter. The adapter instantiates it either with `ffi.KEC` (the public theorem then holds for it, but the random-oracle lemma says nothing about a C function) or, better, by a vendor patch defining `KEC` by the core Keccak, B15. G46.05. |
 | D14 | Transaction validity and fees | M5 (`Υ` does not validate; balance subtraction is `UInt256` and wraps, `Semantics.lean:823`) | Osaka rejects a request whose sender cannot cover `value + gasLimit·price` (plus blob fee). `Υ` would run it with a wrapped balance. | Decided: an unaffordable request never executes. The adapter must apply validity before `Υ`, B18. A request the EVM drops is `TxFate.dropped` on the source side, and the sender's balance after upfront fees is `TxFate.runs`'s `senderBalance` ([§3.5](#35-sender-funds)). |
-| D15 | Forced ether | source world, lifetime model ([lifetime.md](../lifetime.md)) | The own balance can rise with no frame of ours running. The coinbase fee credit is `Semantics.lean:939`. The other sources are another contract's `SELFDESTRUCT` beneficiary (EIP-6780 keeps the transfer) and EIP-4895 withdrawals. | Conflicts with "the own balance follows the ledger": [Q1](#q1-forced-ether-and-the-own-balance). |
+| D15 | Forced ether | source world, lifetime model ([lifetime.md](../lifetime.md)) | The own balance can rise with no frame of ours running. The coinbase fee credit is `Semantics.lean:939`. The other sources are another contract's `SELFDESTRUCT` beneficiary (EIP-6780 keeps the transfer) and EIP-4895 withdrawals. | [Q1](#q1-forced-ether-and-the-own-balance), answered: environment credits. The environment may raise the own balance between transactions and during environment frames, and the ledger records the credits. B19. |
 | D16 | Environment code vs strategies | source (strategies: arbitrary history-dependent functions, G01 Q4) vs M5 (environment accounts run code) | Code realizes only computable strategies, but every finite prefix of a strategy is realizable by code. | `envOnto` must be read on finite prefixes and committed history ([§5](#5-mapping-to-g01s-evmspec-and-findings-for-g01), F3), B13. G42.02. |
 | D17 | Stack limit | M1 (unbounded stack, `pushes` bound only on array length) | 1024 operand words per frame. | The compiler bounds each frame's stack. Recursion uses memory frames, so this is a compiler obligation, not a resource failure. G45.02. |
 | D18 | Evaluator fuel vs divergence | M1 (`loopRun` classical, a fault on divergence), M5 (`OutOfFuel`) | M1's divergence is a fault, not an unfinished prefix. M5's fuel is the right shape. | The fuel of `GasRes` indexes prefixes, and `OutOfFuel` gives `final = none`. M1 needs a step-indexed run (G01 reuse map). G36, G47. |
 | D19 | Static entries | M1–M4 (no static mode) | The environment may `STATICCALL` any of our functions. `SSTORE`, `TSTORE`, `LOG*` and value-carrying `CALL` then halt exceptionally. | Entries carry a static flag in the core semantics and the source, B24. G42.02, G42.05, G47. |
 | D20 | Code as data | M1 (code is an instruction list) | `CODECOPY`/`CODESIZE`, constructor arguments appended to initcode, and immutables patched into the runtime code make the installed code differ from `CodeUnit.runtime`. | Installed-code relation, B25. G44.01, G44.02. |
 | D21 | Nonces | source world (no nonces) | A contract's nonce starts at 1 (EIP-161), and the creator's nonce rises when `CREATE` starts, even if the initcode fails. Both fix later `createAddress` values. | The source tracks the system's nonces, B17. G44.03. |
-| D22 | Stipend payments to our own instances | source (G04 Q3: typed recipients run their own code) vs M5 | `transfer`/`send` to an instance of the system succeed only if the *compiled* `receive`/fallback fits in 2300 gas. EIP-2200 also makes `SSTORE` fail at 2300 gas or less remaining. | [Q3](#q3-stipend-payments-to-the-systems-own-instances). |
+| D22 | Stipend payments to our own instances | source (G04 Q3: typed recipients run their own code) vs M5 | `transfer`/`send` to an instance of the system succeed only if the *compiled* `receive`/fallback fits in 2300 gas. EIP-2200 also makes `SSTORE` fail at 2300 gas or less remaining. | [Q3](#q3-stipend-payments-to-the-systems-own-instances), answered: a compiler-independent `StipendRule` decides which bodies fit, and the compiler is proved to fit them (`StipendRule.Fitted`), B28. G43. |
 | D23 | Reentrant entries | G01 `Event` (no entry event) | An environment frame entering the system, and our answer to it, is not an observation, so wrong callback return data is not observed. | Finding F6. G42.03. |
 
 ## 3. The pinned semantics interface
@@ -106,9 +110,11 @@ reaches no compiler module through it (G01's import gate, item 3).
 
 `Pin` holds the fork, three optional limits, the depth, the stack and the
 stipend. `osaka` has the chain's values. `pinned` is the decisions' pin
-(`pinned_eq`): Osaka with `runtimeCodeLimit = initcodeLimit = none`.
-`txGasCap` stays `some (2 ^ 24)` until [Q2](#q2-the-osaka-per-transaction-gas-cap)
-is answered; the answer changes that one field. The public theorem must state
+(`pinned_eq`): Osaka with `runtimeCodeLimit = initcodeLimit = none`,
+`txGasCap = none` and `blockGasLimited = false`. The last two record the
+answer to [Q2](#q2-the-osaka-per-transaction-gas-cap). So every gas schedule
+is admissible (`GasRes.admissible_pinned`), while a too-low limit still makes
+a transaction fail or be dropped. The public theorem must state
 `V.pin = pinned` for its EVM, because `Pinned.pin` is a label that `sem` is
 not forced to respect.
 
@@ -147,6 +153,10 @@ Definitions over `Fixed`:
   - The compiled code's preimages are determined by the source's under the
     hashed layout (D1, B10).
   - The probability bound is the sibling hash-collision-bound task's lemma.
+- `Fixed.NoOverlap F L roots hashed` is **the extended per-run premise**
+  (second round): no two hashed regions of `L` slots overlap modulo 2²⁵⁶, nor
+  a region and a root slot. `NoOverlap.noCollision` shows it includes
+  `NoCollision` when `0 < L`.
 - `Fixed.createAddress F sender nonce` is the low 160 bits of
   `keccak(rlp [sender, nonce])`, built from `rlpBytes`, `rlpList`, `beBytes` and
   `beFixed`, with `createAddress_lt`. The `#guard`s check it at `withKeccak`
@@ -207,7 +217,8 @@ other.
     external frame);
   - a stipend-bounded payment whose recipient needs more gas: a precompile by
     `precompileGas`; an untyped recipient may refuse anyway (G04 Q3); our own
-    instances are [Q3](#q3-stipend-payments-to-the-systems-own-instances).
+    instances fail exactly where the `StipendRule` says the body does not fit
+    ([Q3](#q3-stipend-payments-to-the-systems-own-instances), answered).
 - **Nested-frame failures (decided).** Any external frame of ours may fail with
   a revert its caller sees, and the caller continues. Its effects roll back;
   its events stay observed.
@@ -434,7 +445,7 @@ core pinned semantics of §6.
 | B07 | Byte memory: M1 word cells ↔ 32-byte big-endian memory with numeric slot words and expansion gas | M1 → core | G46.02 | — |
 | B08 | Calldata and returndata: `CALLDATALOAD`/`COPY` and `RETURNDATA*` against the ABI views | core | G40, G41, G46.02, G47 | — |
 | B09 | Transient storage: `TLOAD`/`TSTORE` ↔ the logical transient store, reset at transaction end and rolled back with the frame | source/M1 → core ↔ M5 (`tstorage`) | G46.03 | `resetTransient_*` (source) |
-| B10 | Storage: symbolic `Slot` ↔ numeric slots of the hashed layout (D1) under `Fixed.NoCollision` of the source's preimages | M1 → core | G27, G46.03, G46.05 | `no_injective_slot_encoding`, `slot_add_wrap_mismatch` |
+| B10 | Storage: symbolic `Slot` ↔ numeric slots, under `Fixed.NoOverlap` of the source's preimages (answered) for solc's layout, or `Fixed.NoCollision` for the hashed layout (D1) | M1 → core | G27, G46.03, G46.05 | `no_injective_slot_encoding`, `slot_add_wrap_mismatch` |
 | B11 | Gas realizability: every `FailurePoints` is realized by some admissible `GasRes` and environment code (gas use monotone in the limit, the 63/64 rule), and every `GasRes` yields some `FailurePoints` | source ↔ core ↔ M5 | G47, G46.06 | — |
 | B12 | Depth: core frame depth = M5 `executionEnv.depth` over all external frames, and `Pin.callFails` matches M5's depth checks | core ↔ M5 | G47 | — |
 | B13 | Environment realization: every finite strategy prefix over committed history is realized by environment code (forth), and every environment code run is observed as a strategy (back), across reentrancy | core ↔ M5 | G42.02, G42.03, G47 | `CallbackTrace.lean` (source traces) |
@@ -443,8 +454,8 @@ core pinned semantics of §6.
 | B16 | Precompile instances: M5's `Ξ_*` (after B01) = `Fixed.precompile` and Osaka's `precompileGas` at each `Precompile`; the source's `Hashes`/`Secp256k1` = the same table at 0x01–0x03 | M5 ↔ `Fixed` ↔ source | G46.05 (S05 for the source side) | `Hashes.lean` vectors |
 | B17 | CREATE: M5's address computation = `Fixed.createAddress`, with nonce rules (EIP-161 start at 1, creator bump) and failure rules (EIP-684, EIP-7610 storage case missing from M5, EIP-2681), fresh typed storage, and a precompile-address creation | M5 ↔ core ↔ source world | G44.03, G46.05 | `createAddress` `#guard`s |
 | B18 | Transaction validity and fees: the core and the adapter drop invalid requests (validity, intrinsic gas, EIP-7623 floor) before execution; `TxFate` matches ([§3.5](#35-sender-funds)) | M5 → core → source | G43, G47 | `EnvironmentAgrees` (balances) |
-| B19 | Payments: value transfer, stipend, recipient acceptance (untyped: any outcome; typed: their code) and the own balance (pending [Q1](#q1-forced-ether-and-the-own-balance)) | source → core | G43, G47 | `Solidity/Evm/Machine.lean` `pay`, `accepts` |
-| B20 | Linked libraries: link addresses, the deployment of the libraries, the compiled call (on the caller's storage, a `DELEGATECALL` the compiler emits although source `delegatecall` is excluded) and call protection | core | G42.04, G44.02 | — |
+| B19 | Payments: value transfer, stipend, recipient acceptance (untyped: any outcome; typed: their code) and the own balance with environment credits ([Q1](#q1-forced-ether-and-the-own-balance), answered) | source → core | G43, G47 | `Solidity/Evm/Machine.lean` `pay`, `accepts` |
+| B20 | Linked libraries, under the empty link map only (answered): no unresolved link references; the compiled call (on the caller's storage, a `DELEGATECALL` the compiler emits although source `delegatecall` is excluded) and call protection | core | G42.04, G44.02 | — |
 | B21 | Composition: `Certificate (core F) ext` from B03–B18 and B23–B27, and the transfer of contract 5 to `ext` | core ↔ M5 | G46.06, G47, G49.02 | — |
 | B22 | Differential cross-check (evidence, not proof): core semantics vs M8 on the generated cases | core vs M8 | G52 | `scripts/evm-reference/generated.mjs` |
 | B23 | Environment opcodes and `envMap`: `CALLER`, `CALLVALUE`, `TIMESTAMP`, `ADDRESS`, `SELFBALANCE`, `BALANCE` and the admitted block fields read the same values in M5 and in the core at `envMap e` | core ↔ M5 | G46.04 | `EnvironmentAgrees`, `Environment.lean` |
@@ -452,6 +463,7 @@ core pinned semantics of §6.
 | B25 | Installed code: initcode with appended constructor arguments, immutables patched into runtime code, `CODECOPY`/`CODESIZE` | core | G44.01, G44.02 | — |
 | B26 | `decode` (G01 Q6): the EVM world's storage, read through B10's relation, decodes to the intrinsic world | core → source | G46.03, G49.02 | — |
 | B27 | Specified output: every compiled artifact's reachable decoded code uses only opcodes the core specifies; in-transaction events are extracted from M5's `Θ` (which emits no `Event.call`/`answer`, so it needs a vendor hook), with fuel prefixes realized for `SameObs` | compiler → core; M5 → core | G45.05, G46.06, G47 | — |
+| B28 | Stipend rule: every `receive`/fallback body the `StipendRule` admits compiles to code that completes within 2300 gas, with EIP-2200's sentry counted (`StipendRule.Fitted`). The source fails every other stipend payment to our own instances | source → core | G43, G47 | — |
 
 ## 8. Reference tooling pins
 
@@ -467,8 +479,9 @@ g06-osaka-repin.
     disagreement 5 as observed: the lockfile is the pin, and both versions are
     in use.
   - M8 runs `runCall` at 10⁸ gas, above Osaka's 2²⁴ transaction cap.
-    Message-level execution with a larger budget is the reading of
-    [Q2](#q2-the-osaka-per-transaction-gas-cap)'s first option, not the chain's.
+    Message-level execution with a larger budget matches the answered
+    [Q2](#q2-the-osaka-per-transaction-gas-cap) (gas caps idealized), not the
+    chain.
 - **M9**, at the base: `check-abi-hex-call.mjs`, `check-abi-vectors.mjs`,
   `check-call-exception-vectors.mjs`, `check-modifier-frames.mjs`,
   `check-operator-aliases.mjs`, `check-public-getters.mjs`,
@@ -482,11 +495,38 @@ g06-osaka-repin.
     dependencies.
 - **M5** is Cancun at `047f630` (B01/B02).
 
-## Open scope questions
+## Scope questions (answered 2026-10-29)
 
-Each question marks a place where a 2026-10-29 decision cannot be met as
-stated. The rest of this document does not depend on the answers; each answer
-changes one named definition.
+Each question marked a place where a first-round decision could not be met
+as stated. The coordinator relayed the user's answers in a second round. They
+are recorded in [solidity-scope.md](../solidity-scope.md), "Second round
+(2026-10-29)", and encoded here. The questions are kept as asked, each with
+its answer.
+
+**Second-round answers that concern G06:**
+
+- **Q1: environment credits.** The environment may raise the own balance
+  between transactions and during environment frames, and the ledger records
+  these credits. This is a source environment input (B19), not a resource.
+- **Q2: idealize both caps.** EIP-7825's per-transaction cap and the block
+  gas limit are idealized (`pinned`, `pinned_eq`, `GasRes.admissible_pinned`),
+  recorded like EIP-170/3860.
+- **Q3: a stipend rule.** A compiler-independent source cost rule decides
+  which `receive`/fallback bodies fit the 2300 stipend (`StipendRule`), and
+  the compiler is proved to fit them (`StipendRule.Fitted`, B28).
+- **Hash regions: the per-run premise is extended.** No two hashed regions of
+  length ≤ L overlap, nor a region and a root slot, with a bound of about
+  q²·L/2²⁵⁶. This is `Fixed.NoOverlap L roots hashed`.
+  `Fixed.NoOverlap.noCollision` shows that it includes the first-round
+  premise. B10 may therefore use solc's layout (`keccak(p) + i`, small roots)
+  under `NoOverlap`, besides the hashed layout of D1.
+- **Settings: solc's two pipelines only.** These are legacy with the
+  pragma-selected ABI coder, and via-IR with ABI coder v2. This fixes the
+  compiled bytecode's settings provenance (G00 disagreement 7, G05). It does
+  not change the pinned EVM.
+- **Library links: the empty link map only.** No artifact carries unresolved
+  library references (`CodeUnit.links = []`). B20's link-address part is
+  therefore empty; B20 keeps the compiled call and call protection.
 
 ### Q1. Forced ether and the own balance
 
@@ -605,16 +645,17 @@ Run at the head of this branch:
   - the pinned semantics, observation and certificate interfaces, as Lean
     statements;
   - findings F1–F8 for G01;
-  - bridge lemmas B01–B27 with owners;
-  - questions Q1–Q3.
+  - bridge lemmas B01–B28 with owners;
+  - questions Q1–Q3, answered in the second round and encoded.
 
   No source-to-bytecode obligation is closed.
 - **Definitions** (no premises unless stated): `Bytes`, `Fork`, `Pin`, `osaka`,
   `pinned`, `allButOne64`, `Pin.callFails`, `Precompile`, `Precompile.address`,
   `Precompile.all`, `Precompile.ofAddress?`, `Fixed`, `keccakWord`,
-  `Fixed.NoCollision`, `beBytes`, `beFixed`, `rlpHead`, `rlpBytes`, `rlpList`,
+  `Fixed.NoCollision`, `Fixed.NoOverlap`, `beBytes`, `beFixed`, `rlpHead`, `rlpBytes`, `rlpList`,
   `Fixed.createAddress`, `withKeccak`, `Schedule`, `GasRes` with its `LE`
-  instance, `GasRes.Admissible`, `TxFate`, `FailurePoints`, `Halt`,
+  instance, `GasRes.Admissible`, `TxFate`, `FailurePoints`, `StipendRule`,
+  `StipendRule.Fitted`, `Halt`,
   `Halt.observe`, `Pinned`, `SameObs`, `Certificate` and `Certificate.refl`
   (premise: a reflexive prefix order).
 - **Theorems:**
@@ -623,17 +664,20 @@ Run at the head of this branch:
     `Precompile.address_injective`, `Precompile.address_pos_lt`;
   - `Fixed.NoCollision.mono` (premises `F.NoCollision hs'` and `hs ⊆ hs'`),
     `Fixed.createAddress_lt`;
+  - `Fixed.NoOverlap.noCollision` (premises `F.NoOverlap L roots hs` and
+    `0 < L`);
   - `GasRes.le_refl`, `GasRes.le_trans`, `GasRes.Admissible.of_le` (premise
-    `a ≤ b`);
+    `a ≤ b`), `GasRes.admissible_pinned`;
   - `Halt.observe_exceptional`, `Halt.observe_success`;
   - `Certificate.back_le` (premises: a specified artifact, an allowed
     environment, an admissible resource).
 - **Remaining child obligations:**
-  - B01–B27 with owners (§7); B01/B02 are G06 residuals;
+  - B01–B28 with owners (§7); B01/B02 are G06 residuals;
   - findings F1–F8 for g01-contracts-rev (§5);
   - the core pinned semantics of §6 (G46.06, G47);
   - the discriminating certificate control (G07);
-  - answers to Q1–Q3.
+  - the random-oracle bound for `Fixed.NoOverlap` (sibling hash-collision-bound);
+  - B28 (stipend rule and compiler fit, G43).
 - **Resources:** @@TIME@@
 
 ## Review
