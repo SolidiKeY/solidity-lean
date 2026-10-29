@@ -20,6 +20,9 @@ set_option Elab.async false
 theorem gap_memCovered : gapMemInnerNeg.memCovered = true := by
   decide +kernel
 
+-- The compiled production coverage check agrees with the kernel reduction above.
+#guard gapMemInnerNeg.memCovered
+
 private abbrev exterior : MxExterior .uint :=
   .eq (.read (uintOfNat 0)) (.lit .uint (uintOfNat 0))
 

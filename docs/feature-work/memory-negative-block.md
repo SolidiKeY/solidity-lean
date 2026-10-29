@@ -892,3 +892,32 @@ recursor motives and fallbacks. No confirmed semantic finding remains.
 Independent review was attempted but the agent service returned a thread-store
 error before an agent could start. No index staging, commit, push, source-VM,
 skill or monitor change is part of this repair.
+
+### Refreshed integration verification (2026-10-29)
+
+The refreshed integration already contains the eleven-function G0 repair above.
+Reinspection found no remaining indexed match in those production traversals
+or their new helper views; pre-existing `MemSwap.mxAt?` is unchanged. The
+generalized structural `casesOn` form follows `TermWk.Tm.wk`; no compiled
+replacement or unlinked `implemented_by` twin is introduced.
+
+`Solidity/Examples/MemoryNegativeDecision.lean` now also checks the compiled
+`gapMemInnerNeg.memCovered` result directly beside its `decide +kernel`
+certificate. Both return true through the production parser. Temporary Lean
+LSP profiling measured the complete `gap_memCovered` theorem command at
+0.747857 seconds (including elaboration and kernel reduction, not an isolated
+kernel-only measurement). No heartbeat, recursion, target or observation budget
+was changed; the temporary profiling options were removed afterward.
+
+Complete per-file MCP diagnostics pass again for the three implementation
+files and all four requested example files. The earlier `DecisionMemory`
+partial timeout completed successfully on polling. A temporary documentation
+comment before `#guard`, and the placement of the temporary profiling options
+after a docstring, produced parser errors; both were corrected before the final
+successful diagnostic check. Raw timing and final example diagnostics are in
+`/tmp/memory-negative-block-g0-refresh.json`. Whitespace and conflict-marker
+checks pass. Local read-only finder and skeptic passes found no further
+confirmed issue. Both independent reviewer launches failed with the retained
+thread-store error, so independent review and full combined validation remain
+with the coordinator. No index, commit, push, source VM, skill or monitor was
+modified, and no genuine semantic decision is required.
