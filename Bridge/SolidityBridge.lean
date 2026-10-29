@@ -30,3 +30,4 @@ import SolidityBridge.ExternalEvm.Assembly.ControlChecks
 import SolidityBridge.ExternalEvm.Assembly.CompositionChecks
 import SolidityBridge.ExternalEvm.Assembly.StackLoopChecks
 import SolidityBridge.ExternalEvm.Assembly.Placement
+import SolidityBridge.ExternalEvm.Assembly.LinkedChecks

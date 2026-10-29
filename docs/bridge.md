@@ -365,7 +365,7 @@ The full instruction correspondence is **not complete**; what remains:
 |---|---|
 | `keccakMap`, `keccakArr`, `sload`, `sstore` | Numeric slot interpretation, concrete hashing/memory setup, and a storage relation handling address aliases. |
 | `mload`, `mstore`, `mloadAt`, `mstoreAt` | Word-cell to byte-memory relation, address scaling and macro expansion for fixed addresses. |
-| `jump`, `jumpi`, `loop` | General fetched-run simulation under explicit recursive decoder/layout certificates is proved below. Automatic image-to-certificate construction, scanner membership and gas/halting-driver refinement remain open. |
+| `jump`, `jumpi`, `loop` | General fetched-run simulation and automatic recursive certificates for accepted layouts; certified scanner destinations and charged X continuation refinement with explicit readiness/terminal gates. See below. |
 | `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
 | `revert` | Return-data operands and the driver's halting relation. |
 
@@ -401,8 +401,9 @@ cannot silently truncate an out-of-range input.
 upstream JUMPDESTs, and that the target frame preserves its code slice. This
 direct decoding fact is distinct from scanner membership: placing the image
 after a PUSH32 opcode can put its first byte inside the preceding immediate.
-The general simulation below therefore requires explicit actual decoder and
-address certificates; it does not infer them from raw byte checks. The existing
+The general simulation below therefore requires actual decoder and address
+certificates. The automatic linker described below constructs these by finite
+checking rather than inferring them from raw boundary bytes alone. The existing
 same-stack JUMP/JUMPI obstructions are unchanged. Source assembly remains excluded. No Solidity frontend admission changed,
 and the legacy/viaIR/optimizer fixture matrix and source-feature inventory
 are not promoted by this optional instruction-level refinement.
@@ -496,9 +497,10 @@ unfold its recursive equation with `rfl`. This is evidence of the available
 API boundary, not a scanner-correctness theorem. The concrete PUSH32-prefix
 control directly decodes JUMPDEST while the actual scanner excludes it.
 
-The general conditional theorem is proved, but **automatic certificate
-construction for every emitted image and scanner/driver refinement remain
-open**. `assemble` still returns `Image`, not `DecodedCode`. The successful-run
+At checkpoint `c956244263fa03edc6cec17725b75987bb3d05a7`, automatic
+certificate construction and scanner/driver refinement were still open; the
+continuation below adds them for accepted checked layouts. The raw `assemble`
+API still returns `Image`. The successful-run
 theorem covers the supported numeric instruction fragment and explicit local
 layout assumptions; it is not universal Solidity source coverage or a theorem
 for faults/reverts outside that fragment. Positive one-step evaluator fuel and
@@ -539,11 +541,97 @@ The documented Plausible runner passed 36 rule cases × 1,000 samples
 (seed 42), exit 0 in 70.142 s at 1,102,626,816 bytes. All terminal results
 are recorded in the task handoff; no failing gate is a pass. The final existing
 `scripts/check-bridge.sh` run, using a Lake wrapper only to select the temporary
-resource configs, exited 1 in 8.053 s / 1,814,028,288 bytes on the delivered
+resource configs, exited 1 in 8.053 s / 1,814,028,288 bytes on that checkpoint’s
 proof sources; its sole failing
-target was unchanged `Arith.Widths`, and all vendor checks passed. The original assignment
-remains incomplete while those gates and the remaining general assembler
-certificate/scanner obligations are unresolved.
+target was unchanged `Arith.Widths`, and all vendor checks passed. This checkpoint was incomplete. The continuation below adds automatic
+certificates and scanner/driver relations; a required full Bridge failure
+still prevents declaring the original assignment complete.
+
+### Automatic certificates, scanner and charged driver
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Static.lean` and
+`Bridge/SolidityBridge/ExternalEvm/Assembly/StaticLoop.lean` derive the universal
+primitive/loop layout obligations from finite source lookup, arithmetic and
+actual decoder checks. `Bridge/SolidityBridge/ExternalEvm/Assembly/Automatic.lean`
+recursively constructs `DecodedCode` for accepted placed images. Recursion is
+by the existing instruction/list size, without semantic fuel or an untyped IR.
+`assembleChecked` returns the image, placement and execution certificate;
+`assembleChecked_simulation` consumes that result and the actual successful
+core run. Unsupported instructions and failed placement/offset checks return
+`none`. Acceptance completeness for all valid layouts is not claimed.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Scanner.lean` certifies a walk of
+actual upstream `parseInstr` and `N`, skipping PUSH payloads. Its destination
+list contains only actually decoded JUMPDESTs; `scanFrom_success` proves
+availability when code size plus 33 fits the word address space. No equality
+to opaque `D_J_aux` is assumed or proved. The certified list's array is passed
+explicitly to actual upstream `X`.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Scanned.lean` checks every label in
+every recursive image, each atomic relocation and loop entry/exit.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Linked.lean` stores that certificate
+and its exact erasure to the execution certificate. Thus nested destinations
+are not justified merely by root metadata. `linkChecked` rejects prefixes
+that swallow required boundaries inside PUSH data; a complete aligned PUSH
+prefix remains accepted.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Driver.lean` proves `X_unfold` by
+`rfl` against the pinned driver, retaining all its gas, stack, destination,
+static and other exceptional checks. `fetchedSteps_driver` inductively lifts
+an arbitrary successful fetched prefix to equality of actual charged `X`
+continuations. The retained state relation omits exactly gas and execution
+count; world/environment, PC, stack, memory, active words, return data and
+H_return agree. `LinkedProgram.driver_simulation` composes it with the general
+source simulation. `DriverReady` explicitly checks positive finite dispatcher
+fuel, the emitted opcode fragment and the original driver gates along charged
+states. `checkReady` produces its proof. It does not assume an `X` outcome:
+a possible step-error branch is accepted by readiness and ruled out by the
+successful fetched trace and opcode congruence theorem. No source gas model
+or unconditional gas-sufficiency claim is introduced.
+
+`X_stop` and `X_destination_stop` separately prove successful halting at the
+final JUMPDEST followed by STOP under the two exact terminal gates and positive
+fuel. They retain upstream STOP's PC and clearing of returnData. The general
+prefix theorem is continuation equality; successful halting additionally uses
+these terminal checks. Arbitrarily long structured-loop fetched prefixes
+remain the divergence result; no finite-fuel/gas `X` divergence is asserted.
+Faults/reverts outside the supported successful fragment retain their named
+refusals and existing obstruction proofs.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/AutoChecks.lean` kernel-inhabits
+automatically generated branch and multi-turn loop certificates.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/LinkedChecks.lean` kernel-inhabits
+the recursive scanned loop and driver readiness, and kernel-checks actual
+`X 24` on conditions `[1,2,0]`, leaving `[9]` at STOP PC 73. Its live nested
+control executes both loop bodies and reaches PC 179 with `[9]`; an explicit
+kernel core-run proof uses the same `[1,1,0,0]` input and result. Other controls
+cover hidden/aligned PUSH prefixes, corrupt placement, unsupported instructions,
+invalid offsets, missing destinations, insufficient fuel and zero gas. The
+original same-stack jump obstructions and offset/invalid-destination controls
+remain unchanged. These optional instruction-level results do not promote
+frontend coverage or require a Solidity source-mode fixture change.
+
+The new headline and inhabited-proof axiom audit reports exactly `propext`,
+`Classical.choice`, `Quot.sound`; source assertions pin the driver-prefix and
+readiness results. Independent read-only finder and skeptic reviews found no
+concrete defect and explicitly retained the readiness, terminal and opaque
+scanner qualifications. No Lean server was used. The focused new closure
+passed in 13.888 s at 2,428,465,152 bytes sampled group RSS before the final
+axiom assertions; final command results and all failed development probes are
+retained in the cumulative task handoff. The final unchanged full
+`scripts/check-bridge.sh` (including vendor hashes) exited 1 in 36.880 s at
+2,430,226,432 bytes, solely on unchanged `Arith.Widths`; all new assembly
+modules built. That blocker is also unchanged on fetched published master
+`b6bc41d47632335dea8bf34a6fc550aee66c99cf`. It remains another owner's area.
+The paired nested proof then passed in 14.897 s at 2,428,059,648 bytes; the
+final unchanged full script on those exact proof sources again exited 1,
+solely on Widths, in 8.271 s at 1,809,760,256 bytes. The rule runner passed
+36 cases × 1,000 samples (seed 42), exit 0 in 2.521 s at 487,870,464 bytes.
+Layer, strict automatic, trust and orphan checks pass; the documentation-path
+gate still fails with exactly the previous historical diagnostic log.
+The original 1,200.115-second exit-75 attempt remains failed, not superseded
+by a pass. Measurements use the existing 16 GiB
+VM/no swap, hard 12 GiB per-process address-space limit and sampled 10 GiB group
+RSS/12 GiB VM-current stops, not a writable 12 GiB cgroup guarantee.
 
 To build the independent targets alone, from `Bridge/`:
 
