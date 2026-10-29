@@ -181,6 +181,8 @@ assuming each other's unproved conclusions.
 
 G00 status (2026-10-29): pins, exclusion evidence, reconciliation and owners in [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md); its questions Q1–Q6 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which confirms all 30 exclusions.
 
+G00 manifest status (2026-10-29): the manifest cites the decisions (30 exclusions tier A, G00 Q2 outcomes on the 23 abstract rows) and `fixedPoint` is in profile (model/missing, owners S00–S02, G08–G47); pin work left for G05/G06 is in [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md#pin-decisions-2026-10-29).
+
 G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which lists the contract revisions they require before G01 counts as frozen.
 
 G02 status (2026-10-29): cold/warm/cache-restore measurements on the 16 GiB VM in [roadmap-g02-measure.md](feature-work/roadmap-g02-measure.md): cold `./run-lean.sh` 58 min with `TestSuite/Derived17` OOM-killed beside its siblings (11.5 GiB peak alone), warm 2 s, cache restore 3 s, Bridge 17 min with `Arith/Widths` failing at the base; splits recommended there, not made.
