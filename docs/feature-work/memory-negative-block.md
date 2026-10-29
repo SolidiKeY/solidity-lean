@@ -817,7 +817,27 @@ merge stages, branch exactness, unchanged target certificates, expected verdicts
 and documentation counts. No declaration was lost and no sorry or axiom added.
 Independent review could not start because the agent service returned a
 thread-store error. Per-file MCP diagnostics completed without errors for
-`Decision.lean`; `DecisionMemory.lean` remains elaborating without reported
+`Solidity/Calculus/Decision.lean`;
+`Solidity/Examples/DecisionMemory.lean` remains elaborating without reported
 errors so far, so its diagnostic gate is pending. Layer and orphan checks pass;
 resolved-file whitespace and referenced feature-document paths pass. No full
 build was started, and no commit or push was made.
+
+
+## Combined-validation documentation repair (2026-10-29)
+
+Attempt 4 passed all 16 recorded semantic gates. Its documentation comparison
+reported one new finding: the unqualified calculus decision-module citation
+in the fresh-master repair record above. That citation and its neighboring
+example citation now use their full repository paths. Historical evidence is
+preserved. The rerun of `bash scripts/check-doc-paths.sh` exits 1 and matches
+attempt 4's baseline exactly: 62 findings (46 missing references), zero new
+findings. Its raw output is `/tmp/memory-negative-block-doc-repair.log`.
+`git diff --check` passes. No Lean check was rerun for this prose-only repair.
+
+Local read-only finder and skeptic passes confirmed the cited modules exist,
+the contexts identify the calculus and example modules correctly, and the
+repair changes no Lean source, gate or proof budget. Independent review was
+attempted but the agent service returned a thread-store error. The retained
+Gate G0 source-review finding is outside this documentation regression and
+remains open; this repair does not claim to resolve it.
