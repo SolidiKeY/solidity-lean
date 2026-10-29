@@ -440,3 +440,90 @@ Read-only finder and skeptic subagents, no Lean server.
 - **Remaining:** the Bridge module running the vendored functions, with
   the decoder statement given under Limits; it needs a reachable Mathlib
   cache (or a Mathlib build from source).
+
+## Checkpoint 4 — G45.03 preparation: structured control flow
+
+Checkpoint 3's revision is `aa884362cd180400f770d6706699d64372116440`.
+Module: [Control.lean](../../Solidity/Backend/Control.lean), vectors in
+`Solidity/Backend/Checks.lean`.
+
+`Block` is structured code: `code is` (straight-line instructions),
+`seq a b`, `ite cond thn els` and `loop cond body`, where a condition is
+an instruction sequence leaving one word. `Block.expand b n` turns it into
+assembler items over `Nat` labels drawn from `n` on, returning the next
+free label, in the shapes of solc's legacy code generator
+(`ContractCompiler`'s `IfStatement` and `WhileStatement`):
+
+| Block | Items (fresh labels `n`, `n+1`) |
+|---|---|
+| `ite c t e` | `c; ISZERO; pushTag n; JUMPI; t; pushTag (n+1); JUMP; tag n; e; tag (n+1)` |
+| `loop c b` | `tag n; c; ISZERO; pushTag (n+1); JUMPI; b; pushTag n; JUMP; tag (n+1)` |
+
+solc's `while` also places a `continue` tag before the backedge, and its
+`if` without `else` uses one tag; both come with `break`/`continue` below.
+
+| Theorem | Statement |
+|---|---|
+| `tags_range`, `expand_le` | the expansion defines labels only in `[n, next)` |
+| `tags_nodup` | it defines each label at most once |
+| `refs_defined` | every label it references, it defines |
+| `expand_assemble_isSome` | it assembles whenever its widest layout fits 32-byte pushes |
+| `loop_tagIndex`, `ite_tagIndex` | placed after any items `pre` (and before any `post`) among distinct tags, a loop's head and exit labels are its first and last items; an `if`'s false label follows `iteHead` (condition, conditional jump, true branch, jump to the end) and its end label is its last item |
+| `loop_jumps`, `ite_jumps` | in the assembled code, every push of those labels (the backedge, the loop exit, the jump to the false branch, the jump to the end) has the absolute offset of exactly that item as its value |
+| `pushTag_value` | the general form: a push of a label whose tag is item `j` pushes `base + offset out.code j` |
+| `expand_loop_layout` | for a top-level loop: head first, exit last, both `JUMPDEST`, exit offset plus one is the code size |
+
+The placement lemmas take the surrounding items as parameters, so a loop or
+`if` nested in a `seq`, a branch or another loop is covered as long as the
+whole item list has distinct tags; `tags_nodup` gives that for a whole
+expansion. That every jump of an expansion lands on its own label's
+`JUMPDEST` is the general `assemble_pushTag` with `tagIndex_unique`; the
+two `…_jumps` theorems state it for the structured jumps by position.
+
+`Checks.lean` assembles a countdown loop to
+`5b 5f 54 15 60 10 57 60 01 5f 54 03 5f 55 5f 56 5b` (backedge to the head
+at 0 by `PUSH0`, exit at the last byte `0x10`) and an `if`/`else` to
+`5f 54 15 60 0e 57 60 01 60 01 55 60 14 56 5b 60 02 60 01 55 5b` (false
+branch at `0x0e`, end at `0x14`).
+
+**Not claimed.** That the expanded code *runs* the structured program
+needs a step semantics of the EVM over these instructions (stack, `JUMPI`
+on the popped word, the backedge's iteration): that is G45.03 proper, and
+G45.01/G45.02 fix what conditions and bodies leave on the stack. `code`
+and conditions are raw instructions, so nothing yet forbids a raw jump
+inside them.
+
+### Review (checkpoint 4)
+
+Read-only finder and skeptic subagents, no Lean server.
+
+- Finder and skeptic: the `if` was not solc's legacy shape (no `ISZERO`,
+  branches swapped). It now emits `ISZERO` and the true branch first,
+  pinned by a byte vector.
+- Skeptic: the layout theorem covered a top-level loop only and never
+  named the backedge's value. Added `loop_tagIndex`/`loop_jumps` and
+  `ite_tagIndex`/`ite_jumps` for any placement, through `pushTag_value`.
+- Finder: `offset out.code 0 = 0` was a trivial conjunct (dropped); "every
+  jump lands" was stated as if it were a theorem of this module (reworded
+  above); the review section pointed nowhere; generic list helpers were
+  public (now `private`); no `if` byte vector (added).
+- Judgment calls kept, listed under Remaining: `Block` has no
+  `break`/`continue`/`return` and no stack discipline, and `code` may hold
+  raw jumps; the generic `tagIndex_isSome` and `itemOffset_succ` sit in
+  `Solidity/Backend/Control.lean` because only it uses them so far.
+
+### Handoff (checkpoint 4)
+
+- **Branch:** as above; this checkpoint in the commit that adds this
+  section.
+- **Theorems:** `Block.tags_nodup`, `Block.refs_defined`,
+  `Block.expand_assemble_isSome`, `Block.loop_jumps`, `Block.ite_jumps`,
+  `Block.expand_loop_layout`; axioms pinned in `Checks.lean` (Lean's
+  three).
+- **Checks:** `lean_diagnostic_messages` clean on all six
+  `Solidity/Backend/` modules (a convention pass typed the remaining
+  `have`s in `Opcode.lean`, `Jumpdest.lean` and `Assembler.lean`); layer,
+  orphan, trust and doc-path scripts.
+- **Remaining for G45.03:** the execution meaning of the expansion;
+  `break`/`continue`/`return` with an environment of exit labels; a block
+  type whose `code` excludes jump opcodes and carries a stack effect.

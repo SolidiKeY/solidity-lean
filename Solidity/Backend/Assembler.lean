@@ -377,7 +377,7 @@ theorem tagIndex_unique {items : List (Item L Lib)} (hnd : (tags items).Nodup) {
     simp only [tagIndex, List.findIdx?_isSome, List.any_eq_true]
     exact ⟨_, List.mem_of_getElem? hj, by simp only [Item.tag?, beq_self_eq_true]⟩
   obtain ⟨i, hi⟩ := Option.isSome_iff_exists.mp hsome
-  have hit := tagIndex_get hi
+  have hit : items[i]? = some (.tag l) := tagIndex_get hi
   rw [hi, filterMap_nodup_index Item.tag? items hnd (i := i) (j := j) (x := l)
     (by rw [hit]; rfl) (by rw [hj]; rfl)]
 
@@ -495,16 +495,18 @@ theorem tagOffset_mono {W W' : Widths L} (hW : ∀ l, (W l).val ≤ (W' l).val)
 theorem asmWidths_fit {base : Nat} {items : List (Item L Lib)} {l : L} (hl : l ∈ refs items)
     (h32 : base + tagOffset (fun _ => (32 : Fin 33)) items l < 256 ^ 32) :
     base + tagOffset (asmWidths base items) items l < 256 ^ (asmWidths base items l).val := by
-  have hst := fixWidths_stable base items (fun _ => 0) l hl
-  simp only [widen, Fin.ext_iff] at hst
-  change min 32 (max (asmWidths base items l).val
-    (byteWidth (base + tagOffset (asmWidths base items) items l))) = (asmWidths base items l).val at hst
+  have hst : min 32 (max (asmWidths base items l).val
+      (byteWidth (base + tagOffset (asmWidths base items) items l))) =
+      (asmWidths base items l).val :=
+    congrArg Fin.val (fixWidths_stable base items (fun _ => 0) l hl)
   by_cases hb : byteWidth (base + tagOffset (asmWidths base items) items l) ≤
       (asmWidths base items l).val
   · exact Nat.lt_of_lt_of_le (lt_pow_byteWidth _) (Nat.pow_le_pow_right (by omega) hb)
   · have h32eq : (asmWidths base items l).val = 32 := by omega
     rw [h32eq]
-    have hmono := tagOffset_mono (W := asmWidths base items) (W' := fun _ => (32 : Fin 33))
+    have hmono : tagOffset (asmWidths base items) items l ≤
+        tagOffset (fun _ => (32 : Fin 33)) items l :=
+      tagOffset_mono (W := asmWidths base items) (W' := fun _ => (32 : Fin 33))
       (fun l' => Nat.le_of_lt_succ (asmWidths base items l').isLt) items l
     omega
 
@@ -598,7 +600,10 @@ theorem linkBytes_from (W : Widths L) (target : L → Nat) (base : Nat)
             (P' ++ (encode (rest.map (Item.emit W target base link)) ++ X))
             (linkRefsFrom W link (P.length + 21) rest) =
             P' ++ (encode (rest.map (Item.emit W target base (fillLink link addr))) ++ X) := by
-          have h' := linkBytes_from W target base link addr rest P' X
+          have h' : linkBytes (P' ++ encode (rest.map (Item.emit W target base link)) ++ X)
+              (linkRefsFrom W link P'.length rest) addr =
+              P' ++ encode (rest.map (Item.emit W target base (fillLink link addr))) ++ X :=
+            linkBytes_from W target base link addr rest P' X
           simp only [linkBytes, hlen', List.append_assoc] at h'
           exact h'
         rw [show Item.size W (Item.pushLibraryAddress x : Item L Lib) = 21 from rfl, hrest]

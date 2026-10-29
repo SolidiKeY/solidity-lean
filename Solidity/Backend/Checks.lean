@@ -1,4 +1,4 @@
-import Solidity.Backend.Assembler
+import Solidity.Backend.Control
 
 /-!
 # Byte-encoding and assembler regressions (G45.05, G45.04)
@@ -98,6 +98,33 @@ def libCall : List (Item String String) :=
   (assemble 0 (fun _ => some (Vector.replicate 20 0xaa)) libCall).map (encode ·.code)
 #guard (assemble 0 (fun _ => some (Vector.replicate 20 0xaa)) libCall).map (·.linkRefs) = some []
 
+/-! ## Structured control flow -/
+
+/-- `while (slot0 != 0) slot0 -= 1;`, expanded from label 0. -/
+def countdown : Block :=
+  .loop [.push 0 #v[], .op .SLOAD]
+    (.code [.push 1 #v[1], .push 0 #v[], .op .SLOAD, .op .SUB, .push 0 #v[], .op .SSTORE])
+
+#guard (countdown.expand 0).2 = 2
+#guard (assemble 0 (fun _ => none) (countdown.expand 0).1).map (encode ·.code) =
+  some [0x5b, 0x5f, 0x54, 0x15, 0x60, 0x10, 0x57, 0x60, 0x01, 0x5f, 0x54, 0x03, 0x5f, 0x55,
+    0x5f, 0x56, 0x5b]
+-- The head (offset 0) is reached by PUSH0, the exit by PUSH1 0x10, the last byte.
+
+/-- `if (slot0 != 0) slot1 = 1 else slot1 = 2;` -/
+def branchy : Block :=
+  .ite [.push 0 #v[], .op .SLOAD] (.code [.push 1 #v[1], .push 1 #v[1], .op .SSTORE])
+    (.code [.push 1 #v[2], .push 1 #v[1], .op .SSTORE])
+
+-- solc's legacy shape: ISZERO, the false branch at 0x0e, the end at 0x14.
+#guard (assemble 0 (fun _ => none) (branchy.expand 0).1).map (encode ·.code) =
+  some [0x5f, 0x54, 0x15, 0x60, 0x0e, 0x57, 0x60, 0x01, 0x60, 0x01, 0x55, 0x60, 0x14, 0x56,
+    0x5b, 0x60, 0x02, 0x60, 0x01, 0x55, 0x5b]
+-- After the loop, the `if` takes labels 2 and 3.
+#guard ((Block.seq countdown
+    (.ite [.push 0 #v[], .op .SLOAD] (.code [.push 1 #v[1], .push 1 #v[1], .op .SSTORE])
+      (.code [.push 1 #v[2], .push 1 #v[1], .op .SSTORE]))).expand 0).2 = 4
+
 #guard ofBytesBE (toBytesBE 2 0x1234).toList = 0x1234
 #guard byteWidth 0 = 0 ∧ byteWidth 255 = 1 ∧ byteWidth 256 = 2
 
@@ -151,5 +178,20 @@ def libCall : List (Item String String) :=
 
 /-- info: 'Solidity.Backend.fixWidths_stable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms fixWidths_stable
+
+/-- info: 'Solidity.Backend.Block.tags_nodup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Block.tags_nodup
+
+/-- info: 'Solidity.Backend.Block.expand_assemble_isSome' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Block.expand_assemble_isSome
+
+/-- info: 'Solidity.Backend.Block.expand_loop_layout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Block.expand_loop_layout
+
+/-- info: 'Solidity.Backend.Block.loop_jumps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Block.loop_jumps
+
+/-- info: 'Solidity.Backend.Block.ite_jumps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Block.ite_jumps
 
 end Solidity.Backend.Checks

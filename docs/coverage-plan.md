@@ -286,7 +286,9 @@ fixpoint and library placeholders, with `assemble_pushTag` (every resolved
 jump reaches its label's `JUMPDEST`) and `link_patch`. Decoder agreement
 (partial): generated `#guard` vectors against EthereumJS at Osaka and the
 vendored EVMYulLean tables; a Bridge module running the vendored decoder
-waits on a reachable Mathlib cache. G45.03 preparation follows.
+waits on a reachable Mathlib cache. G45.03 preparation: structured
+branch/loop expansion into labelled items with unique, defined labels and a
+loop layout theorem; the expanded code's execution meaning remains G45.03.
 Handoffs per checkpoint are in
 [backend-assembler.md](feature-work/backend-assembler.md).
 

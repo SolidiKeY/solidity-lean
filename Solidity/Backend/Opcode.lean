@@ -414,20 +414,21 @@ theorem tableAgrees_all : (List.range 256).all (fun k => tableAgrees (UInt8.ofNa
 
 theorem tableAgrees_of (b : UInt8) : tableAgrees b = true := by
   have hb : UInt8.ofNat b.toNat = b := UInt8.ofNat_toNat
-  have h := List.all_eq_true.mp tableAgrees_all b.toNat (List.mem_range.mpr b.toNat_lt)
+  have h : tableAgrees (UInt8.ofNat b.toNat) = true :=
+    List.all_eq_true.mp tableAgrees_all b.toNat (List.mem_range.mpr b.toNat_lt)
   rw [hb] at h
   exact h
 
 theorem pushCode_of_pushWidth {b : UInt8} {n : Fin 33} (h : pushWidth b = some n) :
     pushCode n = b := by
-  have t := tableAgrees_of b
+  have t : tableAgrees b = true := tableAgrees_of b
   simp only [tableAgrees, h, Bool.and_eq_true, beq_iff_eq] at t
   exact t.1.1
 
 /-- No byte is both a `PUSH` and an opcode without immediate. -/
 theorem ofCode_of_pushWidth {b : UInt8} {n : Fin 33} (h : pushWidth b = some n) :
     Op.ofCode b = none := by
-  have t := tableAgrees_of b
+  have t : tableAgrees b = true := tableAgrees_of b
   simp only [tableAgrees, h, Bool.and_eq_true, beq_iff_eq, Option.isNone_iff_eq_none] at t
   exact t.1.2
 
@@ -442,7 +443,7 @@ theorem pushWidth_code : ∀ o : Op, pushWidth o.code = none := by
   cases o <;> first | rfl | (rename_i n; revert n; decide)
 
 theorem code_ofCode {b : UInt8} {o : Op} (h : ofCode b = some o) : o.code = b := by
-  have t := tableAgrees_of b
+  have t : tableAgrees b = true := tableAgrees_of b
   simp only [tableAgrees, h, Bool.and_eq_true, beq_iff_eq] at t
   exact t.2
 

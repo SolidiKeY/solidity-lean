@@ -94,7 +94,10 @@ theorem mem_starts (c : List UInt8) (i : Nat) :
       · rintro ⟨_, h⟩
         exact absurd (Or.inl ⟨by omega, hw⟩) h
     · have hk : i = (i - (immWidth b + 1)) + (immWidth b + 1) := by omega
-      have hiff := ih (i - (immWidth b + 1))
+      have hiff : i - (immWidth b + 1) ∈ starts (bs.drop (immWidth b)) ↔
+          i - (immWidth b + 1) < (bs.drop (immWidth b)).length ∧
+            ¬ InPushData (bs.drop (immWidth b)) (i - (immWidth b + 1)) :=
+        ih (i - (immWidth b + 1))
       constructor
       · rintro (h | ⟨k, hks, hki⟩)
         · omega
@@ -123,17 +126,18 @@ theorem Boundary.cons {b : UInt8} {bs : List UInt8} {k : Nat}
   have hlen : (bs.drop (immWidth b)).length = bs.length - immWidth b := List.length_drop
   induction h with
   | zero h0 =>
-    have := Boundary.next (c := b :: bs) (j := 0) (b := b)
+    have hb0 : Boundary (b :: bs) (0 + immWidth b + 1) := Boundary.next (j := 0) (b := b)
       (Boundary.zero (by simp only [List.length_cons]; omega)) rfl
       (by simp only [List.length_cons]; omega)
-    rwa [show 0 + immWidth b + 1 = 0 + (immWidth b + 1) by omega] at this
+    rwa [show 0 + immWidth b + 1 = 0 + (immWidth b + 1) by omega] at hb0
   | @next j b' _ hb' hlt ih =>
     have hget : (b :: bs)[j + (immWidth b + 1)]? = some b' := by
       rw [show j + (immWidth b + 1) = (immWidth b + j) + 1 by omega, List.getElem?_cons_succ,
         ← List.getElem?_drop, hb']
-    have := Boundary.next ih hget (by simp only [List.length_cons]; omega)
+    have hbn : Boundary (b :: bs) (j + (immWidth b + 1) + immWidth b' + 1) :=
+      Boundary.next ih hget (by simp only [List.length_cons]; omega)
     rwa [show j + (immWidth b + 1) + immWidth b' + 1 = j + immWidth b' + 1 + (immWidth b + 1) by
-      omega] at this
+      omega] at hbn
 
 /-- `starts` computes exactly the boundaries of the recurrence. -/
 theorem mem_starts_iff_boundary (c : List UInt8) (i : Nat) : i ∈ starts c ↔ Boundary c i := by
@@ -156,7 +160,7 @@ theorem mem_starts_iff_boundary (c : List UInt8) (i : Nat) : i ∈ starts c ↔ 
       rw [mem_starts] at ih ⊢
       refine ⟨hlt, ?_⟩
       rintro ⟨j', hj', b', hb', hlo, hhi⟩
-      have hj's := (mem_starts c j').mp hj'
+      have hj's : j' < c.length ∧ ¬ InPushData c j' := (mem_starts c j').mp hj'
       rcases Nat.lt_trichotomy j' j with hlt' | rfl | hgt
       · exact ih.2 ⟨j', hj', b', hb', hlt', by omega⟩
       · rw [hb] at hb'
@@ -276,20 +280,19 @@ theorem validJumpdest_encode_iff (p : Program) (n : Nat) :
     validJumpdest (encode p) n = true ↔ ∃ k, p[k]? = some (.op .JUMPDEST) ∧ offset p k = n := by
   constructor
   · intro hv
-    have hv' := hv
-    simp only [validJumpdest, jumpdests, List.contains_iff_mem, List.mem_filter, beq_iff_eq] at hv'
-    obtain ⟨hs, hb⟩ := hv'
-    have hs' := hs
-    rw [← List.append_nil (encode p), starts_encode_append] at hs'
-    simp only [starts, List.map_nil, List.append_nil, List.mem_map, List.mem_range] at hs'
-    obtain ⟨k, hk, rfl⟩ := hs'
+    simp only [validJumpdest, jumpdests, List.contains_iff_mem, List.mem_filter, beq_iff_eq] at hv
+    obtain ⟨hs, hb⟩ := hv
+    rw [← List.append_nil (encode p), starts_encode_append] at hs
+    simp only [starts, List.map_nil, List.append_nil, List.mem_map, List.mem_range] at hs
+    obtain ⟨k, hk, rfl⟩ := hs
     have hpk : p[k]? = some p[k] := List.getElem?_eq_getElem hk
-    have hb' := getElem?_encode_append_offset p [] hpk
+    have hb' : (encode p ++ [])[offset p k]? = some p[k].opcode :=
+      getElem?_encode_append_offset p [] hpk
     rw [List.append_nil, hb, Option.some.injEq] at hb'
     exact ⟨k, by rw [hpk, Instr.opcode_eq_jumpdest hb'.symm], rfl⟩
   · rintro ⟨k, hk, rfl⟩
-    have := validJumpdest_encode_append p [] hk
-    rwa [List.append_nil] at this
+    have hv : validJumpdest (encode p ++ []) (offset p k) = true := validJumpdest_encode_append p [] hk
+    rwa [List.append_nil] at hv
 
 theorem offset_lt_size {p : Program} {k : Nat} (hk : k < p.length) : offset p k < size p := by
   have hsplit : size p = offset p k + size (p.drop k) := by
@@ -317,7 +320,8 @@ theorem validJumpdest_encode_append_iff (p : Program) (X : List UInt8) {n : Nat}
     obtain ⟨hs, hb⟩ := hv
     rcases hs with ⟨k, hk, rfl⟩ | ⟨m, _, rfl⟩
     · have hpk : p[k]? = some p[k] := List.getElem?_eq_getElem hk
-      have hb' := getElem?_encode_append_offset p X hpk
+      have hb' : (encode p ++ X)[offset p k]? = some p[k].opcode :=
+        getElem?_encode_append_offset p X hpk
       rw [hb, Option.some.injEq] at hb'
       exact ⟨k, by rw [hpk, Instr.opcode_eq_jumpdest hb'.symm], rfl⟩
     · omega
@@ -336,7 +340,7 @@ theorem validJumpdest_encode_prefix (q : Program) (Y : List UInt8) (n : Nat) :
     simp only [List.mem_append, List.mem_map, List.mem_range]
     constructor
     · rintro (⟨k, hk, hkn⟩ | ⟨m, hm, hmn⟩)
-      · have := offset_lt_size hk
+      · have hlt : offset q k < size q := offset_lt_size hk
         omega
       · rwa [show n = m by omega]
     · intro h
