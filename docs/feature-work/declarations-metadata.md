@@ -2157,3 +2157,114 @@ Final static checks: trust has zero findings (after correcting the checker
 invocation), orphan/layer/strict automatic checks pass, generated inventory is
 current, and staged whitespace checks pass. Documentation paths retain exactly
 the baseline 20 findings and remain failed; raw historical reports are unchanged.
+
+
+### Proof-performance continuation, 2026-10-29 (validation ongoing)
+
+Continued in the same saved VM and branch from `daf3981c`; no pin, rules,
+source observations or expected verdicts changed. The original five-script
+62-test command was rerun after a measured exact-residue sharing increment:
+61 passed and the original unsplit PublicGetters test still timed out at its
+unchanged 300-second limit. Its AST SHA-256 remains
+`8d5cfe12f1c13f8814200bbfce1cc1310273f135cb3c27828b0f2de5793678e7`.
+This is failed aggregate evidence, not a passing split replay.
+
+The increment retains each original residue equality and reflexivity value as
+a closed typed let in Testing's final proof. Default tactic callers still
+check immediately. Testing synchronously kernel-checks the complete theorem
+and audits its axioms before reporting proved. Rejection/open proposals restore
+state and retry the original policy inside the original absolute heartbeat
+deadline. Read-only finder/skeptic reviews identified and corrected recursive
+scope leakage and a deadline-sampling discrepancy; the integrity control also
+keeps final fallback checking inside its capped reader and excludes duplicate
+names as a possible malformed-proof rejection cause.
+
+Narrow arrays and primitives runs improved from 88.374 to 70.495 seconds and
+117.505 to 83.595 seconds respectively. These are narrow results only. The full
+62-test run exited 1 in 655.164 seconds, with cgroup peak 3259453440 bytes under
+hard memory.max 12884901888 and memory.swap.max 0; all cgroup limit/OOM events
+were zero. Measured enclosing-VM headroom remained at least 10984767488 bytes.
+Raw logs, source/dependency/settings seals and all failed candidates remain in
+`.lake/upstream/entry-points-left/proof-repair-20261028/`.
+
+The next measured bottleneck is inheritedGetters: 17 retained checkCore
+certificates cost 47.154 seconds, while its final theorem check cost 9.447
+seconds. A further candidate shares these exact scoped-closer equalities under
+the same Testing-only policy. It preserves native evaluation, false/fragment/
+bounds refusal code, premises and every search/resource limit. Per-file Lean
+diagnostics pass, including real closer valid/malformed/rollback/default-mode
+controls and unchanged false/fragment outcomes. Its runtime gain and the original
+aggregate pass are not yet established. All four catalog statuses remain
+partial/model; this performance work adds no feature-coverage claim.
+
+
+### Proof-performance repair milestone, 2026-10-29
+
+The original complete affected command now passes, without changing its test
+files, full getter roster, observations, expected statuses, pipelines or
+300000 ms Lean subprocess timeout:
+
+```sh
+node --test --test-concurrency=1 scripts/finite-dispatch.test.mjs scripts/public-getters.test.mjs scripts/getter-dispatch.test.mjs scripts/getter-plans.test.mjs scripts/solidity-upstream.test.mjs
+```
+
+`final-full-affected-direct-rec.log` records 62/62 tests and exit 0; the original
+aggregate getter subtest takes 293225.435338 ms. The bounded supervisor takes
+651.349694 s. Its observed Docker cgroup has memory.max 12884901888,
+memory.swap.max 0, peak 3282722816 bytes and zero limit/OOM events. Minimum
+available memory in the enclosing 16 GiB VM is 10683834368 bytes. The source,
+settings, test and compiled-dependency seal is
+`.lake/upstream/entry-points-left/proof-repair-20261028/final-full-affected-direct-rec-inputs.json`.
+These are kernel/model and compiler/import checks, not EVM equivalence.
+
+The final checking policy retains the exact original equality premises as
+closed typed `id` annotations in large nonrecursive callback and ordinary
+unspecified testing proofs. A synchronous final theorem check and standard-axiom
+check precede every proved result. Every nonproved shared attempt restores state
+and retries the original immediate policy under the same absolute remaining
+heartbeat deadline. A bounded 8192-node syntax inspection chooses the original
+policy up front for small formulas; it adds no admission rule or search budget.
+The ordinary chunked fallback and all recursive/specification paths retain
+their previous policy. Public tactics retain immediate checking by default.
+
+Prefix reconstruction shares internal elimination equalities at the original
+immediate atom check. The atom, prefix and whole-context guards remain checked
+before pruning, with the original depth, fuel and heartbeat caps. The stronger
+`GetterKernelSharing.lean` controls reject corrupted production reduction and
+terminal premises at the actual original atom boundary and check bounded
+fallback. They also pin exact residue/closer equality types, malformed-proof
+rejection, original-policy retry and both sides of the strategy threshold.
+
+Actual kernel unfolding counters identified 94399 `Facts.rwWith` and 115091
+`List.brecOn` unfoldings in the primitives final certificate. `Closer/Facts.lean`
+now uses an explicit list recursor and preserves the original short-circuiting
+compiled implementation as `rwWithM`. The universal theorem
+`Facts.rwWith_eq_rwWithM` proves exact agreement at every contract, sort, input
+and fact list (axioms: propext only); the existing lookup soundness statement
+and premises are unchanged. `FactsLookupSharing.lean` checks first-match order,
+wrong-sort heads, no match, no chaining, empty lists and non-value sorts in the
+kernel and native evaluation. No model datatype, dependency, statement, ABI
+identity, source observation or proof/search limit changed.
+
+The matched profiling settings measure primitives at 75403 ms and arrays at
+63561 ms; the primitives final kernel check falls from 14.020663 to 11.210693 s.
+The final full-suite observations are retained separately from these profiles.
+Independent read-only finder and skeptic reviews found no semantic defect in
+the exact certificates, retry/deadline handling or universal lookup agreement.
+
+All unsuccessful attempts remain historical evidence. These include the
+300-second full-suite failures, rejected atom-local data cache, proof-node
+sharing, named-goal, remaining-atom-check batching and structural-walk
+experiments. The threshold-zero profile was explicitly interrupted and is not
+passing evidence. A preparation assertion accidentally reran a newly generated
+baseline and replaced its first raw log; the saved first result, separate repeat
+log and `stage-batch-preparation-error.json` record this exactly. Earlier
+published reports and commits remain intact. Diagnostic transport exit zero is
+not treated as Lean success: strict diagnostic jobs require structured success
+and no errors. Failed stage-control contexts and syntax attempts remain failed.
+
+This milestone establishes the original affected gate and new internal proofs.
+Fresh 42-certificate, 22-API/admission, upstream, static and full core validation
+are still pending at this commit. Feature inventory statuses and the previously
+named reference/function-return, wider dispatch and transaction-adapter refusals
+remain unchanged; this performance repair claims no extra feature coverage.

@@ -183,13 +183,41 @@ theorem Facts.inRets_sound {g : State C []} {ν : AEnv} {F : Facts C} (hF : F.Ok
   cases e
   exact hF.rets _ hu
 
-/-- `t` rewritten by the first fact whose left side it is. -/
-def Facts.rwWith {s : Srt} (t : LTm C s) : List (EqF C) → LTm C s
+/-- The short-circuiting compiled twin of `Facts.rwWith`. -/
+def Facts.rwWithM {s : Srt} (t : LTm C s) : List (EqF C) → LTm C s
   | [] => t
   | e :: es =>
     if h : s = .val e.p then
-      if t.beqR e.l then h ▸ e.r else Facts.rwWith t es
-    else Facts.rwWith t es
+      if t.beqR e.l then h ▸ e.r else Facts.rwWithM t es
+    else Facts.rwWithM t es
+
+/-- `t` rewritten by the first fact whose left side it is. The explicit
+list recursor avoids the generated course-of-values recursion in kernel
+certificates; compiled evaluation keeps the original short-circuiting twin. -/
+@[implemented_by Facts.rwWithM]
+def Facts.rwWith {s : Srt} (t : LTm C s) (es : List (EqF C)) : LTm C s :=
+  List.rec (motive := fun _ => LTm C s) t (fun e _ rewritten =>
+    if h : s = .val e.p then
+      if t.beqR e.l then h ▸ e.r else rewritten
+    else rewritten) es
+
+/-- Exact agreement with the original first-match lookup, at every typed sort. -/
+theorem Facts.rwWith_eq_rwWithM {s : Srt} (t : LTm C s) (es : List (EqF C)) :
+    Facts.rwWith t es = Facts.rwWithM t es := by
+  induction es with
+  | nil => rfl
+  | cons e es ih =>
+    change (if h : s = .val e.p then
+        (if t.beqR e.l then h ▸ e.r else Facts.rwWith t es)
+      else Facts.rwWith t es) =
+      (if h : s = .val e.p then
+        (if t.beqR e.l then h ▸ e.r else Facts.rwWithM t es)
+      else Facts.rwWithM t es)
+    split
+    · split
+      · rfl
+      · exact ih
+    · exact ih
 
 theorem Facts.rwWith_eval {g : State C []} {ν : AEnv} {s : Srt} (t : LTm C s) :
     (es : List (EqF C)) →
@@ -197,7 +225,9 @@ theorem Facts.rwWith_eval {g : State C []} {ν : AEnv} {s : Srt} (t : LTm C s) :
     (Facts.rwWith t es).eval g ν = t.eval g ν
   | [], _ => rfl
   | e :: es, h => by
-    unfold Facts.rwWith
+    change (if hs : s = .val e.p then
+        (if t.beqR e.l then hs ▸ e.r else Facts.rwWith t es)
+      else Facts.rwWith t es).eval g ν = t.eval g ν
     split
     · rename_i hs
       subst hs

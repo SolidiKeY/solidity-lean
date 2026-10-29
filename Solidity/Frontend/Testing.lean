@@ -184,6 +184,24 @@ def testOrdinaryTree (N : Lean.Name) (φ : Expr) : TermElabM Bool := do
   if ← hasCallRec N (← Symex.evaluable φ) then return false
   return !(← callsBackE N φ)
 
+initialize registerTraceClass `Solidity.Frontend.testingStrategy
+
+/-- Count at most `remaining` existing expression nodes, without unfolding or
+re-evaluating the typed formula. This selects a checking strategy only. -/
+private def expressionNodesLeft : Expr → Nat → Nat
+  | _, 0 => 0
+  | .app f a, n + 1 => expressionNodesLeft a (expressionNodesLeft f n)
+  | .forallE _ d b _, n + 1 | .lam _ d b _, n + 1 =>
+      expressionNodesLeft b (expressionNodesLeft d n)
+  | .letE _ t v b _, n + 1 =>
+      expressionNodesLeft b (expressionNodesLeft v (expressionNodesLeft t n))
+  | .mdata _ e, n + 1 | .proj _ _ e, n + 1 => expressionNodesLeft e n
+  | _, n + 1 => n
+
+/-- Testing shares large typed proofs; small goals use the original immediate
+checker from the start. This changes neither admission nor any proof budget. -/
+def testingShares (formula : Expr) : Bool := expressionNodesLeft formula 8192 == 0
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
@@ -198,143 +216,172 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
   -- the reading an obligation is stated under, kept for an error past that point
   let modeRef ← IO.mkRef TailMode.solc
   withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
-    liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
-      let C := mkConst N
-      -- a specification's obligation, scoped
-      let spec? ← if r.tag == .specified then do
-          -- a specification that does not elaborate is an error, not a
-          -- `sorry`; logged too, as the import reports it
-          let φ ← try
-              testFormula N r
-            catch e => logException e; throw e
-          if φ.hasSorry then throwError "the specification does not elaborate"
-          pure (some φ)
-        else pure none
-      -- a recursive call: `rec_auto`, each call by its callee's contract
-      -- (its `requires`/`ensures`, else `true`/`true`) proved by induction
-      -- over the frames (a specified row has no `N.f.problem`: `(← …)` in a
-      -- `&&` would run first)
-      let recursive ← match spec? with
-        | some φ => hasCallRec N φ
-        | none => hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
-      -- the callback reading (O7): a recursive call's frames read off one
-      -- (`sol_no_callback`), not unrolled by `whnf`
-      let obligation := spec?.getD (mkConst (f ++ `problem))
-      let cb ← if recursive then pure !(← noCallbackRecE N obligation)
-        else callsBackE N obligation
-      let callbackTy (φ : Expr) : TermElabM Expr := do
-        elabClosed (← `(ValidT (C := $(mkCIdent N))
-          (.noCallback invariant[$(mkCIdent N)]) $(← Term.exprToSyntax φ)))
-      -- a recursive call that may call back, or past a callee that may:
-      -- `rec_auto_c`, each call read without callbacks where nothing calls
-      -- back, else by a contract over the callback runs (`ProvesC.recContract`)
-      if recursive && cb then
-        let ty ← callbackTy obligation
-        -- the walk reads the formula by its value; the kernel unfolds it
-        let goalTy := mkApp ty.appFn! (← Symex.evaluable obligation)
-        let g ← mkFreshExprSyntheticOpaqueMVar goalTy
-        let tac ← `(tactic| rec_auto_c)
-        let pendingMsg := "a recursive call under the callback reading (O7) its contract does not prove"
-        let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
-            fun _ => pure none
-          | return ("pending", pendingMsg, .solc)
-        unless goals.isEmpty do return ("pending", pendingMsg, .solc)
-        let proof ← instantiateMVars g
-        if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", .solc)
-        let name := f ++ `tested
-        addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
-        unless (← collectAxioms name).all (standardAxioms.contains ·) do
-          return ("pending", pendingMsg, .solc)
-        return ("proved", "", .solc)
-      if recursive then
-        let (ty, goalTy) := match spec? with
-          | some φ => (mkApp2 (mkConst ``Fml.Valid) C φ, mkApp2 (mkConst ``Fml.Valid) C φ)
-          | none => (mkApp2 (mkConst ``Fml.Valid) C (mkConst (f ++ `problem)), mkConst ``True)
-        -- the walk reads the formula by its value; the kernel unfolds it
-        let goalTy ← if spec?.isSome then pure goalTy else
-          pure (mkApp2 (mkConst ``Fml.Valid) C (← Symex.evaluable (mkConst (f ++ `problem))))
-        let g ← mkFreshExprSyntheticOpaqueMVar goalTy
-        let tac ← `(tactic| rec_auto)
-        let pendingMsg := "a recursive call its callee's contract does not prove"
-        let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
-            fun _ => pure none
-          | return ("pending", pendingMsg, .solc)
-        unless goals.isEmpty do return ("pending", pendingMsg, .solc)
-        let proof ← instantiateMVars g
-        if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", .solc)
-        let name := f ++ `tested
-        addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
-        unless (← collectAxioms name).all (standardAxioms.contains ·) do
-          return ("pending", pendingMsg, .solc)
-        return ("proved", "", .solc)
-      -- the clean-tails reading (O6): a plain obligation of a contract whose
-      -- functions expose nothing, under the premise `cleanTail(storage) = true`
-      let mode : TailMode := if tail == .clean && spec?.isNone && !cb then .clean else .solc
-      modeRef.set mode
-      let problem := mkConst (f ++ `problem)
-      let premised (φ : Expr) : Expr :=
-        if mode == .clean then mkAppN (mkConst ``Fml.imp) #[C, ctxE [],
-          mkApp2 (mkConst ``Fml.cleanTail) C (ctxE []), φ] else φ
-      let (ty, goalTy) ← if cb then do
-          -- Specifications use their actual formula too: they need not have
-          -- a generated `problem` declaration.
+    liftTermElabM <| withCurrHeartbeats do
+      let usedShared ← IO.mkRef false
+      let attempt (share : Bool) : TermElabM (String × String × TailMode) :=
+        withOptions (·.setBool `sol.prove.sharedResidues false) <| tryCatchRuntimeEx (do
+        let C := mkConst N
+        -- a specification's obligation, scoped
+        let spec? ← if r.tag == .specified then do
+            -- a specification that does not elaborate is an error, not a
+            -- `sorry`; logged too, as the import reports it
+            let φ ← try
+                testFormula N r
+              catch e => logException e; throw e
+            if φ.hasSorry then throwError "the specification does not elaborate"
+            pure (some φ)
+          else pure none
+        -- a recursive call: `rec_auto`, each call by its callee's contract
+        -- (its `requires`/`ensures`, else `true`/`true`) proved by induction
+        -- over the frames (a specified row has no `N.f.problem`: `(← …)` in a
+        -- `&&` would run first)
+        let recursive ← match spec? with
+          | some φ => hasCallRec N φ
+          | none => hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
+        -- the callback reading (O7): a recursive call's frames read off one
+        -- (`sol_no_callback`), not unrolled by `whnf`
+        let obligation := spec?.getD (mkConst (f ++ `problem))
+        let cb ← if recursive then pure !(← noCallbackRecE N obligation)
+          else callsBackE N obligation
+        let callbackTy (φ : Expr) : TermElabM Expr := do
+          elabClosed (← `(ValidT (C := $(mkCIdent N))
+            (.noCallback invariant[$(mkCIdent N)]) $(← Term.exprToSyntax φ)))
+        -- a recursive call that may call back, or past a callee that may:
+        -- `rec_auto_c`, each call read without callbacks where nothing calls
+        -- back, else by a contract over the callback runs (`ProvesC.recContract`)
+        if recursive && cb then
           let ty ← callbackTy obligation
-          pure (ty, mkApp ty.appFn! (← Symex.evaluable obligation))
-        else if let some φ := spec? then do
-          let ty := mkApp2 (mkConst ``Fml.Valid) C φ
-          pure (ty, ty)
-        else if mode == .clean then do
           -- the walk reads the formula by its value; the kernel unfolds it
-          pure (ProofTree.provesE C (premised problem),
-            ProofTree.provesE C (premised (← Symex.evaluable problem)))
-        else
-          let ty := ProofTree.provesE C problem
-          pure (ty, ty)
-      let g ← mkFreshExprSyntheticOpaqueMVar goalTy
-      let goals ← if cb then do
-          let tac ← `(tactic| sol_prove)
-          -- only whether a leaf is left is reported: stop at the first
-          withOptions (·.setBool `sol.prove.stopAtOpen true) <|
-            Tactic.run g.mvarId! (Tactic.evalTactic tac)
-        else if r.tag == .specified then do
-          let tac ← `(tactic| sol_spec_try)
-          Tactic.run g.mvarId! (Tactic.evalTactic tac)
-        else do
-          let out ← IO.mkRef (none : Option Derive.Search)
-          let long ← IO.mkRef false
-          let _ ← Tactic.run g.mvarId! do
-            -- a walk past one kernel check: in chunks, each leaf searched
-            try out.set (some (← scopedSearch g.mvarId! (oneCheck := oneCheckSteps)))
-            catch e =>
-              unless (← e.toMessageData.toString).startsWith Seq.longWalkNote do throw e
-              long.set true
-          if ← long.get then
-            Tactic.run g.mvarId! do
-              let left ← Seq.proveChunked g.mvarId! chunkSteps fun l => do
-                pure (if (← Derive.searchLeaf l Seq.goalFits).isSome then [] else [l])
-              Tactic.setGoals left
+          let goalTy := mkApp ty.appFn! (← Symex.evaluable obligation)
+          let g ← mkFreshExprSyntheticOpaqueMVar goalTy
+          let tac ← `(tactic| rec_auto_c)
+          let pendingMsg := "a recursive call under the callback reading (O7) its contract does not prove"
+          let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
+              fun _ => pure none
+            | return ("pending", pendingMsg, .solc)
+          unless goals.isEmpty do return ("pending", pendingMsg, .solc)
+          let proof ← instantiateMVars g
+          if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", .solc)
+          let name := f ++ `tested
+          addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
+          unless (← collectAxioms name).all (standardAxioms.contains ·) do
+            return ("pending", pendingMsg, .solc)
+          return ("proved", "", .solc)
+        if recursive then
+          let (ty, goalTy) := match spec? with
+            | some φ => (mkApp2 (mkConst ``Fml.Valid) C φ, mkApp2 (mkConst ``Fml.Valid) C φ)
+            | none => (mkApp2 (mkConst ``Fml.Valid) C (mkConst (f ++ `problem)), mkConst ``True)
+          -- the walk reads the formula by its value; the kernel unfolds it
+          let goalTy ← if spec?.isSome then pure goalTy else
+            pure (mkApp2 (mkConst ``Fml.Valid) C (← Symex.evaluable (mkConst (f ++ `problem))))
+          let g ← mkFreshExprSyntheticOpaqueMVar goalTy
+          let tac ← `(tactic| rec_auto)
+          let pendingMsg := "a recursive call its callee's contract does not prove"
+          let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
+              fun _ => pure none
+            | return ("pending", pendingMsg, .solc)
+          unless goals.isEmpty do return ("pending", pendingMsg, .solc)
+          let proof ← instantiateMVars g
+          if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", .solc)
+          let name := f ++ `tested
+          addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
+          unless (← collectAxioms name).all (standardAxioms.contains ·) do
+            return ("pending", pendingMsg, .solc)
+          return ("proved", "", .solc)
+        -- the clean-tails reading (O6): a plain obligation of a contract whose
+        -- functions expose nothing, under the premise `cleanTail(storage) = true`
+        let mode : TailMode := if tail == .clean && spec?.isNone && !cb then .clean else .solc
+        modeRef.set mode
+        let problem := mkConst (f ++ `problem)
+        let premised (φ : Expr) : Expr :=
+          if mode == .clean then mkAppN (mkConst ``Fml.imp) #[C, ctxE [],
+            mkApp2 (mkConst ``Fml.cleanTail) C (ctxE []), φ] else φ
+        let (ty, goalTy) ← if cb then do
+            -- Specifications use their actual formula too: they need not have
+            -- a generated `problem` declaration.
+            let ty ← callbackTy obligation
+            pure (ty, mkApp ty.appFn! (← Symex.evaluable obligation))
+          else if let some φ := spec? then do
+            let ty := mkApp2 (mkConst ``Fml.Valid) C φ
+            pure (ty, ty)
+          else if mode == .clean then do
+            -- the walk reads the formula by its value; the kernel unfolds it
+            pure (ProofTree.provesE C (premised problem),
+              ProofTree.provesE C (premised (← Symex.evaluable problem)))
           else
-            let some s ← out.get | throwError "search did not run"
-            pure s.open_
-      unless goals.isEmpty do
-        if r.tag == .specified && !cb then
-          if let some output := counterexampleOutput then
-            if let some witness ← testCounterexample ty (f ++ `refuted) r then
-              output.set (some witness)
-              return ("refuted", "kernel-checked counterexample to the tested obligation", mode)
-        let detail ← if showGoals then do
-            let messages ← goals.mapM fun g => return (← Meta.ppGoal g).pretty
-            pure ("open proof goals\n" ++ "\n\n".intercalate messages)
-          else pure "open proof goals"
-        return ("pending", detail, mode)
-      let proof ← instantiateMVars g
-      if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", mode)
-      let name := f ++ `tested
-      addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
-      unless (← collectAxioms name).all (standardAxioms.contains ·) do
-        return ("unsupported", "proof uses nonstandard axioms", mode)
-      return ("proved", "", mode))
-      fun e => return ("error", ← e.toMessageData.toString, ← modeRef.get)
+            let ty := ProofTree.provesE C problem
+            pure (ty, ty)
+        let g ← mkFreshExprSyntheticOpaqueMVar goalTy
+        let selectedShare := share && testingShares goalTy.appArg!
+        trace[Solidity.Frontend.testingStrategy] "{r.name}: cb={cb} mode={repr mode} shared={selectedShare} head={goalTy.appArg!.getAppFn.constName?}"
+        let goals ← if cb then do
+            usedShared.set selectedShare
+            let tac ← `(tactic| sol_prove)
+            -- only whether a leaf is left is reported: stop at the first
+            withOptions (fun o => o.setBool `sol.prove.stopAtOpen true
+                |>.setBool `sol.prove.sharedResidues selectedShare) <|
+              Tactic.run g.mvarId! (Tactic.evalTactic tac)
+          else if r.tag == .specified then do
+            let tac ← `(tactic| sol_spec_try)
+            Tactic.run g.mvarId! (Tactic.evalTactic tac)
+          else do
+            usedShared.set selectedShare
+            let out ← IO.mkRef (none : Option Derive.Search)
+            let long ← IO.mkRef false
+            let _ ← withOptions (·.setBool `sol.prove.sharedResidues selectedShare) <|
+                Tactic.run g.mvarId! do
+              -- a walk past one kernel check: in chunks, each leaf searched
+              try out.set (some (← scopedSearch g.mvarId! (oneCheck := oneCheckSteps) (shareCheck := selectedShare)))
+              catch e =>
+                unless (← e.toMessageData.toString).startsWith Seq.longWalkNote do throw e
+                long.set true
+            trace[Solidity.Frontend.testingStrategy] "{r.name}: chunked={← long.get}"
+            if ← long.get then
+              Tactic.run g.mvarId! do
+                let left ← Seq.proveChunked g.mvarId! chunkSteps fun l => do
+                  pure (if (← Derive.searchLeaf l Seq.goalFits).isSome then [] else [l])
+                Tactic.setGoals left
+            else
+              let some s ← out.get | throwError "search did not run"
+              pure s.open_
+        unless goals.isEmpty do
+          if r.tag == .specified && !cb then
+            if let some output := counterexampleOutput then
+              if let some witness ← testCounterexample ty (f ++ `refuted) r then
+                output.set (some witness)
+                return ("refuted", "kernel-checked counterexample to the tested obligation", mode)
+          let detail ← if showGoals then do
+              let messages ← goals.mapM fun g => return (← Meta.ppGoal g).pretty
+              pure ("open proof goals\n" ++ "\n\n".intercalate messages)
+            else pure "open proof goals"
+          return ("pending", detail, mode)
+        let proof ← instantiateMVars g
+        if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", mode)
+        let name := f ++ `tested
+        withOptions (Elab.async.set · false) <|
+          addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
+        unless (← collectAxioms name).all (standardAxioms.contains ·) do
+          return ("unsupported", "proof uses nonstandard axioms", mode)
+        return ("proved", "", mode))
+        fun e => return ("error", ← e.toMessageData.toString, ← modeRef.get)
+
+      let saved ← Term.saveState
+      let context ← readThe Core.Context
+      let deadline := if context.maxHeartbeats == 0 then none
+        else some (context.initHeartbeats + context.maxHeartbeats)
+      let result ← attempt true
+      if result.1 == "proved" || !(← usedShared.get) then return result
+      -- Rejected or open proposals cannot retain unchecked search state.
+      -- Retry the original policy under the same absolute heartbeat deadline.
+      saved.restore
+      modeRef.set .solc
+      if let some output := counterexampleOutput then output.set none
+      let some deadline := deadline | return ← attempt false
+      let now ← IO.getNumHeartbeats
+      let remaining := deadline - now
+      if remaining == 0 then return ("error", "shared residue attempt exhausted the original heartbeat budget", ← modeRef.get)
+      withTheReader Core.Context (fun c => { c with initHeartbeats := now, maxHeartbeats := remaining }) <|
+        attempt false
 
 /-- Check a specified row's entry condition separately from its postcondition. -/
 def testPreconditions (N : Lean.Name) (r : ImportRow) : CommandElabM (String × String) :=
