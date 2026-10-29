@@ -25,7 +25,7 @@ level of `f` on each side without unfolding the right side's inner calls.
 namespace Solidity.Source
 
 open EM
-open Solidity.Roadmap (Address Word Bytes Request Outcome)
+open Solidity.Roadmap (Address Word Bytes Request Outcome Event)
 
 variable {E : Env}
 
@@ -734,6 +734,345 @@ theorem runTx_stuck_stable (G : Glob E) (q : Request) (s : St E) {k k' : Nat} (h
   have hd : Done (runAt (fun f => runTx G f q) s k) = true := by
     rw [done_iff, h]; exact fun h' => nomatch h'
   rw [runTx_stable G q s hk hd, h]
+
+/-! ## Events only grow -/
+
+theorem run_st {Γ : RCtx} (x : Locals E.layout Γ × St E) : (st : EM E Γ (St E)).run x = (.ok x.2, x) := rfl
+
+theorem Grow.st {Γ : RCtx} : Grow (st : EM E Γ (St E)) := fun _ => List.prefix_refl _
+theorem Grow.locals {Γ : RCtx} : Grow (locals : EM E Γ (Locals E.layout Γ)) := fun _ => List.prefix_refl _
+theorem Grow.setLocals {Γ : RCtx} (l : Locals E.layout Γ) : Grow (setLocals l : EM E Γ Unit) :=
+  fun _ => List.prefix_refl _
+theorem Grow.modSt {Γ : RCtx} (f : St E → St E) (hf : ∀ s, s.events <+: (f s).events) :
+    Grow (modSt f : EM E Γ Unit) := fun x => hf x.2
+theorem Grow.lift {Γ : RCtx} {α : Type} (r : R α) : Grow (lift r : EM E Γ α) := by
+  cases r <;> exact fun _ => List.prefix_refl _
+theorem Grow.sub {Γ Γ' : RCtx} {α : Type} (l' : Locals E.layout Γ') {m : EM E Γ' α} (h : Grow m) :
+    Grow (EM.sub (Γ := Γ) l' m) := by
+  intro x
+  rcases x with ⟨l, s⟩
+  rw [run_sub]
+  have := h (l', s)
+  rcases hr : m.run (l', s) with ⟨r, l'', s'⟩
+  rw [hr] at this
+  cases r <;> exact this
+theorem Grow.attempt {Γ : RCtx} {α : Type} {m : EM E Γ α} (h : Grow m) : Grow (EM.attempt m) := by
+  intro x
+  rw [run_attempt]
+  exact h x
+
+theorem heapPut_grow {Γ : RCtx} (a : Nat) (x : Σ τ, Data E.layout τ) : Grow (heapPut (Γ := Γ) a x) := by
+  intro y
+  unfold heapPut
+  rw [run_bind, run_st]
+  dsimp only
+  split
+  · exact List.prefix_refl _
+  · exact List.prefix_refl _
+
+theorem alloc_grow {Γ : RCtx} {τ : STy} (x : Data E.layout τ) : Grow (alloc (Γ := Γ) x) := by
+  intro y
+  unfold alloc
+  rw [run_bind, run_st]
+  exact List.prefix_refl _
+
+/-- Close `Grow body`: through binds, `match`es and `if`s, by the given
+lemmas at the calls; a `modSt` keeps or appends events. -/
+syntax "grow_go" "[" ident,* "]" : tactic
+macro_rules
+  | `(tactic| grow_go [$ls,*]) => `(tactic| repeat' (first
+      | (with_reducible exact Grow.pure _)
+      | (with_reducible exact Grow.halt _)
+      | (with_reducible exact Grow.st)
+      | (with_reducible exact Grow.locals)
+      | (with_reducible exact Grow.setLocals _)
+      | (with_reducible exact Grow.lift _)
+      | (with_reducible apply Grow.modSt; intro _; first | exact List.prefix_refl _ | exact List.prefix_append _ _)
+      | (first $[| with_reducible apply $ls:ident]*)
+      | (with_reducible apply Grow.sub)
+      | (with_reducible apply Grow.attempt)
+      | (refine Grow.bind ?_ ?_)
+      | (with_reducible intro _)
+      | split
+      | (dsimp only)))
+
+section
+variable {Γ : RCtx}
+
+theorem getV_grow {τ : STy} (v : RVal E.layout τ) : Grow (getV (Γ := Γ) v) := Grow.lift _
+theorem readCell_grow (F : Fr) (p : SPath) : Grow (readCell (E := E) (Γ := Γ) F p) := by
+  unfold readCell; grow_go []
+theorem readAt_grow (F : Fr) (p : SPath) (τ : STy) : Grow (readAt (E := E) (Γ := Γ) F p τ) := by
+  unfold readAt; grow_go [readCell_grow]
+theorem applyOp_grow (F : Fr) (o : Op E.layout E.lay E.lay) : Grow (applyOp (Γ := Γ) F o) := by
+  unfold applyOp; grow_go []
+theorem setCell_grow (F : Fr) (p : SPath) (o : Option (Val E.layout (E.cellTy p))) :
+    Grow (setCell (Γ := Γ) F p o) := by
+  unfold setCell; grow_go [applyOp_grow]
+theorem writeAt_grow {τ : STy} (F : Fr) (p : SPath) (v : Val E.layout τ) : Grow (writeAt (Γ := Γ) F p v) := by
+  unfold writeAt; grow_go [setCell_grow]
+theorem readLen_grow (F : Fr) (p : SPath) : Grow (readLen (E := E) (Γ := Γ) F p) := by
+  unfold readLen; grow_go [readAt_grow]
+theorem writeLen_grow (F : Fr) (p : SPath) (k : Nat) : Grow (writeLen (E := E) (Γ := Γ) F p k) := by
+  unfold writeLen; grow_go [writeAt_grow]
+theorem heapObj_grow (a : Nat) : Grow (heapObj (E := E) (Γ := Γ) a) := by
+  unfold heapObj; grow_go []
+theorem heapAt_grow (a : Nat) (τ : STy) : Grow (heapAt (E := E) (Γ := Γ) a τ) := by
+  unfold heapAt; grow_go [heapObj_grow]
+theorem heapBytes_grow (a : Nat) : Grow (heapBytes (E := E) (Γ := Γ) a) := by
+  unfold heapBytes; grow_go [heapObj_grow]
+theorem allocRef_grow {τ : STy} (x : Data E.layout τ) : Grow (allocRef (Γ := Γ) x) := by
+  unfold allocRef; grow_go [alloc_grow]
+theorem storRef_grow (τ : STy) (p : SPath) : Grow (storRef (E := E) (Γ := Γ) τ p) := by
+  unfold storRef; grow_go []
+
+end
+
+section
+variable {Γ : RCtx}
+
+mutual
+theorem zeroData_grow : ∀ (n : Nat) (τ : STy), Grow (zeroData (E := E) (Γ := Γ) n τ)
+  | 0, _ => Grow.halt _
+  | n + 1, τ => by
+    simp only [zeroData]
+    grow_go [zeroElems_grow, zeroFields_grow, zeroVal_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow]
+theorem zeroVal_grow : ∀ (n : Nat) (τ : STy), Grow (zeroVal (E := E) (Γ := Γ) n τ)
+  | 0, _ => Grow.halt _
+  | n + 1, τ => by
+    simp only [zeroVal]
+    grow_go [zeroData_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow]
+theorem zeroElems_grow : ∀ (n : Nat) (σ : STy) (m : Nat), Grow (zeroElems (E := E) (Γ := Γ) n σ m)
+  | 0, _, m => by cases m <;> exact Grow.halt _
+  | n + 1, _, 0 => Grow.pure _
+  | n + 1, σ, m + 1 => Grow.bind (zeroVal_grow n σ) fun _ => Grow.bind (zeroElems_grow n σ m) fun _ => Grow.pure _
+theorem zeroFields_grow : ∀ (n : Nat) (τs : List STy), Grow (zeroFields (E := E) (Γ := Γ) n τs)
+  | 0, τs => by cases τs <;> exact Grow.halt _
+  | n + 1, [] => Grow.pure _
+  | n + 1, τ :: τs => Grow.bind (zeroVal_grow n τ) fun _ => Grow.bind (zeroFields_grow n τs) fun _ => Grow.pure _
+end
+
+mutual
+theorem loadMem_grow (F : Fr) : ∀ (n : Nat) (τ : STy) (p : SPath), Grow (loadMem (E := E) (Γ := Γ) F n τ p)
+  | 0, _, _ => Grow.halt _
+  | n + 1, τ, p => by
+    simp only [loadMem]
+    grow_go [loadBytes_grow, loadElems_grow, loadFields_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow]
+theorem loadElem_grow (F : Fr) : ∀ (n : Nat) (τ : STy) (p : SPath), Grow (loadElem (E := E) (Γ := Γ) F n τ p)
+  | 0, _, _ => Grow.halt _
+  | n + 1, τ, p => by
+    simp only [loadElem]
+    grow_go [loadMem_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow]
+theorem loadElems_grow (F : Fr) : ∀ (n : Nat) (σ : STy) (p : SPath) (i m : Nat),
+    Grow (loadElems (E := E) (Γ := Γ) F n σ p i m)
+  | 0, _, _, _, m => by cases m <;> exact Grow.halt _
+  | n + 1, _, _, _, 0 => Grow.pure _
+  | n + 1, σ, p, i, m + 1 => Grow.bind (loadElem_grow F n σ _) fun _ =>
+      Grow.bind (loadElems_grow F n σ p (i + 1) m) fun _ => Grow.pure _
+theorem loadFields_grow (F : Fr) : ∀ (n : Nat) (τs : List STy) (p : SPath) (i : Nat),
+    Grow (loadFields (E := E) (Γ := Γ) F n τs p i)
+  | 0, τs, _, _ => by cases τs <;> exact Grow.halt _
+  | n + 1, [], _, _ => Grow.pure _
+  | n + 1, τ :: τs, p, i => Grow.bind (loadElem_grow F n τ _) fun _ =>
+      Grow.bind (loadFields_grow F n τs p (i + 1)) fun _ => Grow.pure _
+theorem loadBytes_grow (F : Fr) : ∀ (n : Nat) (p : SPath) (i k : Nat), Grow (loadBytes (E := E) (Γ := Γ) F n p i k)
+  | 0, _, _, k => by cases k <;> exact Grow.halt _
+  | n + 1, _, _, 0 => Grow.pure _
+  | n + 1, p, i, k + 1 => by
+    refine Grow.bind (readAt_grow F _ _) fun v => ?_
+    cases v <;> first
+      | exact Grow.bind (loadBytes_grow F n p (i + 1) k) fun _ => Grow.pure _
+      | (rename_i h; cases h)
+end
+
+mutual
+theorem deleteStor_grow (F : Fr) : ∀ (n : Nat) (τ : STy) (p : SPath), Grow (deleteStor (E := E) (Γ := Γ) F n τ p)
+  | 0, _, _ => Grow.halt _
+  | n + 1, τ, p => by
+    simp only [deleteStor]
+    grow_go [deleteRange_grow, deleteFields_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow]
+theorem deleteRange_grow (F : Fr) : ∀ (n : Nat) (σ : STy) (p : SPath) (i k : Nat),
+    Grow (deleteRange (E := E) (Γ := Γ) F n σ p i k)
+  | 0, _, _, _, k => by cases k <;> exact Grow.halt _
+  | n + 1, _, _, _, 0 => Grow.pure _
+  | n + 1, σ, p, i, k + 1 => Grow.bind (deleteStor_grow F n σ _) fun _ => deleteRange_grow F n σ p (i + 1) k
+theorem deleteFields_grow (F : Fr) : ∀ (n : Nat) (τs : List STy) (p : SPath) (i : Nat),
+    Grow (deleteFields (E := E) (Γ := Γ) F n τs p i)
+  | 0, τs, _, _ => by cases τs <;> exact Grow.halt _
+  | n + 1, [], _, _ => Grow.pure _
+  | n + 1, τ :: τs, p, i => Grow.bind (deleteStor_grow F n τ _) fun _ => deleteFields_grow F n τs p (i + 1)
+end
+
+mutual
+theorem storeData_grow (F : Fr) : ∀ (n : Nat) (τ : STy) (p : SPath) {σ : STy} (x : Data E.layout σ),
+    Grow (storeData (Γ := Γ) F n τ p x)
+  | 0, _, _, _, _ => Grow.halt _
+  | n + 1, τ, p, _, x => by
+    simp only [storeData]
+    grow_go [storeBytes_grow, deleteRange_grow, storeElems_grow, storeFields_grow, storeVal_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow]
+theorem storeVal_grow (F : Fr) : ∀ (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v : Val E.layout σ),
+    Grow (storeVal (Γ := Γ) F n τ p v)
+  | 0, _, _, _, _ => Grow.halt _
+  | n + 1, τ, p, _, v => by
+    simp only [storeVal]
+    grow_go [storeData_grow, loadMem_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow]
+theorem storeElems_grow (F : Fr) : ∀ (n : Nat) (τ : STy) (p : SPath) (i len : Nat) {σ : STy}
+    (xs : Fin len → Data E.layout σ), Grow (storeElems (Γ := Γ) F n τ p i len xs)
+  | 0, _, _, _, len, _, _ => by cases len <;> exact Grow.halt _
+  | n + 1, _, _, _, 0, _, _ => Grow.pure _
+  | n + 1, τ, p, i, len + 1, _, xs =>
+    Grow.bind (storeData_grow F n τ _ _) fun _ => storeElems_grow F n τ p (i + 1) len _
+theorem storeFields_grow (F : Fr) : ∀ (n : Nat) (τs : List STy) (p : SPath) (i : Nat) {σs : List STy}
+    (xs : DataList E.layout σs), Grow (storeFields (Γ := Γ) F n τs p i xs)
+  | 0, τs, _, _, _, xs => by cases τs <;> cases xs <;> exact Grow.halt _
+  | n + 1, [], _, _, _, _ => Grow.pure _
+  | n + 1, _ :: _, _, _, _, .nil => Grow.pure _
+  | n + 1, τ :: τs, p, i, _, .cons x xs =>
+    Grow.bind (storeData_grow F n τ _ x) fun _ => storeFields_grow F n τs p (i + 1) xs
+theorem storeBytes_grow (F : Fr) : ∀ (n : Nat) (p : SPath) (i : Nat) (bs : List UInt8),
+    Grow (storeBytes (E := E) (Γ := Γ) F n p i bs)
+  | 0, _, _, bs => by cases bs <;> exact Grow.halt _
+  | n + 1, _, _, [] => Grow.pure _
+  | n + 1, p, i, b :: bs => Grow.bind (writeAt_grow F _ _) fun _ => storeBytes_grow F n p (i + 1) bs
+end
+
+end
+
+section
+variable {Γ : RCtx}
+
+theorem List.mapM_grow {Γ : RCtx} {α β : Type} (f : α → EM E Γ β) (hf : ∀ a, Grow (f a)) :
+    ∀ (l : List α), Grow (l.mapM f) := by
+  intro l
+  suffices h : ∀ (acc : List β), Grow (List.mapM.loop f l acc) from h []
+  induction l with
+  | nil => intro acc; exact Grow.pure _
+  | cons a as ih => intro acc; exact Grow.bind (hf a) fun b => ih (b :: acc)
+
+theorem panicM_grow {α : Type} : Grow (memElem.panicM (E := E) (Γ := Γ) (α := α)) := Grow.lift _
+theorem memElem_grow (a i : Nat) (τ : STy) : Grow (memElem (E := E) (Γ := Γ) a i τ) := by
+  unfold memElem; grow_go [panicM_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow]
+theorem readLoc_grow (F : Fr) {τ : STy} (loc : Loc E.layout Γ τ) : Grow (readLoc F loc) := by
+  cases loc <;> simp only [readLoc] <;> grow_go [memElem_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow]
+theorem memSet_grow (a i : Nat) {τ : STy} (v : Val E.layout τ) : Grow (memSet (Γ := Γ) a i v) := by
+  unfold memSet; grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow]
+theorem lengthOf_grow (F : Fr) {τ : STy} (v : Val E.layout τ) : Grow (lengthOf (Γ := Γ) F v) := by
+  unfold lengthOf; grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow]
+theorem indexLoc_grow (F : Fr) {l : DataLoc} {σ : STy} {k : Option Nat} (a : Val E.layout (.array l σ k))
+    (i : Nat) : Grow (indexLoc (Γ := Γ) F a i) := by
+  unfold indexLoc; grow_go [lengthOf_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow]
+theorem indexNat_grow {σ : STy} (v : RVal E.layout σ) : Grow (indexNat (Γ := Γ) v) := Grow.lift _
+theorem instanceAt_grow (G : Glob E) (a : Address) : Grow (instanceAt (Γ := Γ) G a) := by
+  unfold instanceAt; grow_go []
+theorem emitEvent_grow (e : Event) : Grow (emitEvent (E := E) (Γ := Γ) e) := by
+  unfold emitEvent; grow_go []
+theorem credit_grow (a : Address) (v : Word) : Grow (credit (E := E) (Γ := Γ) a v) := by
+  unfold credit; grow_go []
+theorem debit_grow (a : Address) (v : Word) : Grow (debit (E := E) (Γ := Γ) a v) := by
+  unfold debit; grow_go []
+theorem mark_grow : Grow (mark (E := E) (Γ := Γ)) := by
+  unfold mark; grow_go []
+theorem rollbackTo_grow (m : Nat × Nat × Heap E.layout) : Grow (rollbackTo (Γ := Γ) m) := by
+  unfold rollbackTo; grow_go []
+theorem reraise_grow (o : Outcome) : Grow (reraise (E := E) (Γ := Γ) o) := by
+  unfold reraise; grow_go []
+theorem fieldsOf_grow : ∀ {ps : List STy} (vs : Vals E.layout ps) (τs : List STy),
+    Grow (fieldsOf (E := E) (Γ := Γ) vs τs)
+  | _, .nil, [] => Grow.pure _
+  | _, .nil, _ :: _ => Grow.halt _
+  | _, .cons _ _, [] => Grow.halt _
+  | _, .cons (τ := σ) v vs, τ :: τs => by
+    simp only [fieldsOf]
+    split
+    · exact Grow.bind (fieldsOf_grow vs τs) fun _ => Grow.pure _
+    · exact Grow.halt _
+theorem ret32_grow (τ : STy) (bs : Bytes) : Grow (ret32 (E := E) (Γ := Γ) τ bs) := by
+  unfold ret32; grow_go []
+theorem tailBytes_grow (data : Bytes) (i : Nat) : Grow (tailBytes (E := E) (Γ := Γ) data i) := by
+  unfold tailBytes
+  dsimp only
+  split
+  · exact Grow.pure _
+  · exact Grow.halt _
+theorem decodeArg_grow (data : Bytes) (i : Nat) (τ : STy) : Grow (decodeArg (E := E) (Γ := Γ) data i τ) := by
+  unfold decodeArg
+  split
+  · split
+    · exact Grow.bind (tailBytes_grow data i) fun _ => allocRef_grow _
+    · exact Grow.lift _
+  · split
+    · exact Grow.bind (tailBytes_grow data i) fun _ => allocRef_grow _
+    · exact Grow.lift _
+  · split
+    · split
+      · dsimp only
+        split
+        · exact Grow.bind (List.mapM_grow _ (fun _ => Grow.lift _) _) fun _ => allocRef_grow _
+        · exact Grow.halt _
+      · exact Grow.halt _
+    · exact Grow.lift _
+  · exact Grow.lift _
+theorem decodeArgs_grow (data : Bytes) : ∀ (τs : List STy) (i : Nat), Grow (decodeArgs (E := E) (Γ := Γ) data τs i)
+  | [], _ => Grow.pure _
+  | τ :: τs, i => Grow.bind (decodeArg_grow data i τ) fun _ =>
+      Grow.bind (decodeArgs_grow data τs (i + 1)) fun _ => Grow.pure _
+
+end
+
+section
+variable {Γ : RCtx}
+
+theorem bytesOfRV_grow (F : Fr) (n : Nat) {τ : STy} (v : RVal E.layout τ) : Grow (bytesOfRV (Γ := Γ) F n v) := by
+  unfold bytesOfRV; grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+theorem encodeOne_grow (F : Fr) (n : Nat) (packed : Bool) {τ : STy} (v : RVal E.layout τ) :
+    Grow (encodeOne (Γ := Γ) F n packed v) := by
+  unfold encodeOne; grow_go [bytesOfRV_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+theorem encodeParts_grow (F : Fr) (n : Nat) (packed : Bool) :
+    ∀ {τs : List STy} (vs : RVals E.layout τs), Grow (encodeParts (Γ := Γ) F n packed vs)
+  | _, .nil => Grow.pure _
+  | _, .cons v vs => Grow.bind (encodeOne_grow F n packed v) fun _ =>
+      Grow.bind (encodeParts_grow F n packed vs) fun _ => Grow.pure _
+theorem encodeVals_grow (F : Fr) (n : Nat) (packed : Bool) {τs : List STy} (vs : RVals E.layout τs) :
+    Grow (encodeVals (Γ := Γ) F n packed vs) := by
+  unfold encodeVals; grow_go [encodeParts_grow]
+theorem convRV_grow (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
+    Grow (convRV (Γ := Γ) F n τ v) := by
+  unfold convRV; grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+theorem convExplicitRV_grow (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
+    Grow (convExplicitRV (Γ := Γ) F n τ v) := by
+  unfold convExplicitRV; grow_go [convRV_grow, bytesOfRV_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+theorem writeLoc_grow (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ) (v : Val E.layout τ) :
+    Grow (writeLoc F n loc v) := by
+  unfold writeLoc; grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+theorem deleteLoc_grow (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ) : Grow (deleteLoc F n loc) := by
+  unfold deleteLoc; grow_go [writeLoc_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+theorem keyStep_grow (F : Fr) (n : Nat) {τ : STy} (k : RVal E.layout τ) : Grow (keyStep (Γ := Γ) F n k) := by
+  unfold keyStep; grow_go [bytesOfRV_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+theorem zeroVals_grow (n : Nat) : ∀ (τs : List STy), Grow (zeroVals (E := E) (Γ := Γ) n τs)
+  | [] => Grow.pure _
+  | τ :: τs => Grow.bind (zeroVal_grow n τ) fun _ => Grow.bind (zeroVals_grow n τs) fun _ => Grow.pure _
+theorem zeroInner_grow (n : Nat) : ∀ (k : Nat) {Γ' : RCtx} (l : Locals E.layout Γ'),
+    Grow (zeroInner (Γ' := Γ) n k l)
+  | 0, _, _ => Grow.pure _
+  | _ + 1, _, .nil => Grow.pure _
+  | k + 1, _, .cons _ r => Grow.bind (zeroVal_grow n _) fun _ => Grow.bind (zeroInner_grow n k r) fun _ => Grow.pure _
+theorem copyInto_grow (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v : RVal E.layout σ) :
+    Grow (copyInto (Γ := Γ) F n τ p v) := by
+  unfold copyInto; grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+theorem getterPath_grow (F : Fr) (n : Nat) (data : Solidity.Roadmap.Bytes) : ∀ (τ : STy) (p : SPath) (i : Nat),
+    Grow (getterPath (E := E) (Γ := Γ) F n data τ p i)
+  | .mapping k v, p, i => by
+    simp only [getterPath]
+    grow_go [keyStep_grow, getterPath_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+  | .array _ τ len, p, i => by
+    simp only [getterPath]
+    grow_go [getterPath_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+  | .int _, _, _ | .bool, _, _ | .address _, _, _ | .fixedBytes _ _, _, _ | .fixed _, _, _ | .enum _, _, _
+  | .udvt _, _, _ | .contract _, _, _ | .bytes _, _, _ | .string _, _, _ | .struct _ _, _, _
+  | .fn _ _ _ _, _, _ | .rational _, _, _ | .hexConst _ _, _, _ | .stringLit _, _, _ | .tuple _, _, _ =>
+    Grow.pure _
+
+end
 
 /-- info: 'Solidity.Source.belowAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

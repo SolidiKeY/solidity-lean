@@ -225,18 +225,27 @@ word; `bytes`, `string` and a dynamic array of value types (in memory) from
 their tail, into a new memory object. -/
 def decodeArg {Γ : RCtx} (data : Bytes) (i : Nat) (τ : STy) : EM E Γ (Val E.layout τ) :=
   match τ with
-  | .bytes .memory => do allocRef (Data.bytes (D := E.layout) (l := .memory) (← tailBytes data i))
-  | .string .memory => do allocRef (Data.string (D := E.layout) (l := .memory) (← tailBytes data i))
-  | .array .memory σ none =>
-    if σ.isValueTy then do
-      let off := wordAt data i
-      let len := wordAt (data.drop off) 0
-      if off + 32 + 32 * len ≤ data.length then
-        let xs ← (List.range len).mapM fun j => lift (decodeWord E.layout (wordAt (data.drop (off + 32)) j) σ)
-        allocRef (Data.array (D := E.layout) (l := .memory) (n := none) xs.length (fun _ h => nomatch h)
-          (fun k => .val (xs.get k)))
-      else halt (.revert [])
-    else halt (.stuck "dynamic ABI decoding of this type is not modelled")
+  | .bytes l =>
+    match l with
+    | .memory => do allocRef (Data.bytes (D := E.layout) (l := .memory) (← tailBytes data i))
+    | _ => lift (decodeWord E.layout (wordAt data i) _)
+  | .string l =>
+    match l with
+    | .memory => do allocRef (Data.string (D := E.layout) (l := .memory) (← tailBytes data i))
+    | _ => lift (decodeWord E.layout (wordAt data i) _)
+  | .array l σ len =>
+    match l, len with
+    | .memory, none =>
+      if σ.isValueTy then do
+        let off := wordAt data i
+        let len := wordAt (data.drop off) 0
+        if off + 32 + 32 * len ≤ data.length then
+          let xs ← (List.range len).mapM fun j => lift (decodeWord E.layout (wordAt (data.drop (off + 32)) j) σ)
+          allocRef (Data.array (D := E.layout) (l := .memory) (n := none) xs.length (fun _ h => nomatch h)
+            (fun k => .val (xs.get k)))
+        else halt (.revert [])
+      else halt (.stuck "dynamic ABI decoding of this type is not modelled")
+    | _, _ => lift (decodeWord E.layout (wordAt data i) _)
   | τ => lift (decodeWord E.layout (wordAt data i) τ)
 
 /-- Decoding arguments from ABI data, from the `i`-th head word. -/
@@ -621,10 +630,11 @@ def AssignOp.binOp : AssignOp → BinOp
 
 /-- A struct's fields from its members' values. -/
 def fieldsOf {Γ : RCtx} {D : Layout} : {ps : List STy} → Vals D ps → (τs : List STy) → EM E Γ (DataList D τs)
-  | [], .nil, [] => pure .nil
-  | σ :: _, .cons v vs, τ :: τs => do
+  | _, .nil, [] => pure .nil
+  | _, .nil, _ :: _ => halt (.stuck "member count")
+  | _, .cons _ _, [] => halt (.stuck "member count")
+  | _, .cons (τ := σ) v vs, τ :: τs => do
     if h : σ = τ then pure (.cons (.val (h ▸ v)) (← fieldsOf vs τs)) else halt (.stuck "member type")
-  | _, _, _ => halt (.stuck "member count")
 
 /-- A hash or digest as `bytesN`. -/
 def ret32 {Γ : RCtx} (τ : STy) (bs : Bytes) : EM E Γ (RVal E.layout τ) :=
