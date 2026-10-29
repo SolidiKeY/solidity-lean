@@ -561,3 +561,64 @@ Confirmed findings and their fixes:
 | `mobileFx?` described as the mobile type of every constant | finder | the bullet names fractional constants only |
 | `ratPow` docstring claimed an unchecked early return | finder | docstring corrected |
 | Untyped `have`s | finder | typed |
+
+### 6.3 Checkpoint 3 — ABI
+
+New module `Solidity/Language/FixedPoint/Abi.lean`. It reads the ABI
+specification (`abi-spec.rst:66–72, 218–221, 755` at `v0.8.38`, §Sources):
+the value `v / 10^N` is encoded through its scaled integer `v` as a 32-byte
+two's-complement word, as `int256`/`uint256` are.
+
+- **Words.** `Fx.encode : Fx t → Fin (2^256)` (`Fx.encode_val`: the word is
+  `Fx.toWord`).
+- **Coder v2 decoding (P5).** `Fx.decodeV2` reads the word as `int256`
+  where signed, then range-checks it, so a word whose upper bits are not
+  the sign or zero extension of an `M`-bit integer reverts (`none`), as
+  solc's v2 validator does for `intM`/`uintM`.
+  - `Fx.decodeV2_encode`: round trip.
+  - `Fx.encode_of_decodeV2`: only a value's canonical word decodes to it.
+  - `Fx.decodeV2_eq_none_iff`: every word that is no value's encoding is
+    rejected.
+  - `Fx.decodeV2_isSome_iff`: the upper-bit condition, explicitly. An
+    unsigned word must be `< 2^M`; a signed one must be `< 2^(M−1)` or
+    `≥ 2^256 − 2^(M−1)`.
+- **Coder v1 (G00 Q4: the legacy pipeline may select v1 by pragma).**
+  `Fx.decodeV1` does no validation; it cleans the low `M` bits as v1 cleans
+  `intM` (`Fx.decodeV1_eq_ofBits`). `Fx.decodeV1_of_decodeV2`: the coders
+  agree on every word v2 accepts. `Fx.decodeV1_encode`.
+- **Bytes.**
+  - `beBytes`/`beNat` (big-endian): `beNat_beBytes`, `beBytes_beNat`,
+    `beNat_lt`.
+  - `Fx.abiEncode` (32 bytes, `Fx.abiEncode_length`) and
+    `Fx.abiDecodeV2`: `Fx.abiDecodeV2_abiEncode` (round trip) and
+    `Fx.abiEncode_of_abiDecodeV2` (only the canonical bytes decode, so
+    every other 32-byte head is rejected).
+  - `Fx.encodePacked`/`Fx.decodePacked`: `abi.encodePacked`, the
+    `M/8`-byte two's complement, unpadded, with
+    `Fx.decodePacked_encodePacked`.
+- **Selector names (P4).** `FxTy.name`: `fixed` and `ufixed` are spelled
+  `fixed128x18` and `ufixed128x18`, and `N = 0` keeps its `x0` (example).
+- **Worked values.** `-1.0 : fixed8x1` is the word `2^256 − 10`. The word
+  `0xff` at `fixed8x1` is rejected by v2 and cleaned to `-0.1` by v1.
+  `256` at `ufixed8x2` is rejected.
+
+`#print axioms` pins: `Fx.decodeV2_eq_none_iff` and
+`Fx.abiEncode_of_abiDecodeV2` use `[propext, Quot.sound]`;
+`Fx.decodeV2_isSome_iff` and `Fx.decodePacked_encodePacked` use
+`[propext, Classical.choice, Quot.sound]`.
+
+**Handoff.** G40/G41 can lower fixed-point parameters and return values as
+`intM`/`uintM` words and cite `Fx.decodeV2_eq_none_iff` for the
+validation. The words are `Fin (2^256)`; `Semantics.Word` in
+`Solidity/Semantics.lean` is the repository's word type, and the
+correspondence is the bridge's (G40). The byte functions are local to this
+module. `wordBytes` in `Solidity/RevertBytes.lean` computes the same bytes
+for a 32-byte word, but this module does not import it (that would pull
+in Keccak), and the equality is not proved.
+
+Not done:
+- dynamic aggregates of fixed values (arrays, structs), which reuse the
+  word encoding through the general ABI (G40);
+- calldata decoding offsets;
+- the revert data of a v2 validation failure, which is empty, as for
+  `intM` (G01 Q5).
