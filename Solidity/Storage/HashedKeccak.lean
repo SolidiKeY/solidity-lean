@@ -10,19 +10,24 @@ solc computes storage slots: a mapping entry hashes the key's 32-byte word
 followed by the mapping's slot (`abi.encode(k, p)`), a dynamic array's data
 hashes the array's slot (`abi.encode(p)`).
 
-* `encode` is injective on preimages whose parts are words (`encode_inj`), so
-  for such preimages a collision of `keccakH` is exactly a collision of
-  keccak-256 on the encoded byte strings (`keccakH_eq_iff`): the per-run
-  premise on the run's `KECCAK256` inputs is the premise `CollisionFree` and
-  `RegionsDisjoint` need on `Pre` (`collisionFree_keccakH_iff`).
+* `encode` is injective on preimages whose parts are words (`encode_inj`;
+  keys must be below `2^256`, since `bytesBE` truncates), so for such
+  preimages a collision of `keccakH` is exactly a collision of keccak-256 on
+  the encoded byte strings (`keccakH_eq_iff`). The layout's premises on `P`
+  are the premises on the layout's own `KECCAK256` inputs `P.map encode`
+  (`collisionFree_keccakH_iff`, `regionsDisjoint_keccakH_iff`); a run that
+  hashes more gives them by `RegionsDisjoint.mono` once `P.map encode` is
+  shown to be among its inputs.
 * `keccakH p < 2^256` (`keccakH_lt`), the hypothesis `Loc.word_inj` asks of
   the hash parameter.
 * `#guard` vectors check `Loc.word W keccakH` against solc's slot formula
-  for value-type keys (`uint`, `int` in two's complement, `address`, `bool`,
-  `bytes32`, all a 32-byte word), nested mappings and dynamic arrays; the
-  digests were computed independently (pycryptodome's keccak) and the
-  well-known ones (`keccak256(uint256(0))`, `keccak256(0 ‖ 0)`) match solc's
-  documentation.
+  for value-type keys, each entering as its ABI word (`uint`, `bool`,
+  `address` left-padded; `int` sign-extended, two's complement; `bytesN`
+  left-aligned, `v · 256^(32-N)`), nested mappings and dynamic arrays. The
+  digests were computed independently with pycryptodome's keccak-256 (the
+  call is in `docs/feature-work/storage-hashed-layout.md`); the first ones
+  (`keccak256(uint256(0))`, `keccak256(0 ‖ 0)`, …) are constants common
+  tooling quotes.
 
 String and `bytes` keys hash their unpadded bytes and are not in this model
 (`Pre.entry` takes a word).
@@ -243,10 +248,17 @@ independently with pycryptodome's keccak-256. -/
 -- `keccak256(keccak256(1 ‖ 0))`.
 #guard Loc.word (2 ^ 256) keccakH (.data (.hash 1 (.root 0) 0) 0) ==
   0x3f9553dc324cd1fd24b54243720c42e18e5c20165bc5e523e42b440a8654abd1
--- The layout's own path: `STy.locate` reaches the same term.
+-- `mapping(bytes32 => ·)` at slot `1`, key `0xff00…00ab`; `mapping(bytes4 => ·)`
+-- at slot `1`, key `0x12345678` left-aligned.
+#guard Loc.word (2 ^ 256) keccakH (.hash (0xff * 2 ^ 248 + 0xab) (.root 1) 0) ==
+  0x68fdbafcd9d6403748641b179e98637175e2ddc787687c11385593d40da2c860
+#guard Loc.word (2 ^ 256) keccakH (.hash (0x12345678 * 256 ^ 28) (.root 1) 0) ==
+  0xd61b4b4c4215a3b160e238a68f0842f5b49688e7c37f01f944c1453922187815
+-- The layout's own path: in `struct { uint a; uint b; mapping(uint => uint[]) m; }`
+-- at slot `0`, `m[1][0]` is `keccak256(keccak256(1 ‖ 2))`.
 #guard (STy.locate (.strct [.word, .word, .map (.darr .word)]) (.root 0)
     [.field 2, .key 1, .index 0]).map (fun r => Loc.word (2 ^ 256) keccakH r.2) ==
-  some (Loc.word (2 ^ 256) keccakH (.data (.hash 1 (.root 2) 0) 0))
+  some 0x7fef4bf8f63cf9dd467136c679c02b5c17fcf6322d9562512bf5eb952cf7cc53
 
 end Solidity.Storage
 
@@ -258,3 +270,9 @@ end Solidity.Storage
 
 /-- info: 'Solidity.Storage.keccak_word_inj' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Storage.keccak_word_inj
+
+/-- info: 'Solidity.Storage.encode_inj' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.encode_inj
+
+/-- info: 'Solidity.Storage.regionsDisjoint_keccakH_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.regionsDisjoint_keccakH_iff

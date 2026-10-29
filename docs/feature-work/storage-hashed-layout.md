@@ -112,7 +112,8 @@ it is what a word-addressed refinement of the store would need.
 ### Limitations (checkpoint 2)
 
 - **Word keys only.** `Pre.entry` takes the key as one word, which covers
-  value-type keys (`uint`, `int`, `address`, `bool`, `bytesN`). `string` and
+  value-type keys (`uint`, `int`, `address`, `bool`, `bytesN`), each as its
+  ABI word: `int` sign-extended, `bytesN` left-aligned (`v · 256^(32-N)`). `string` and
   `bytes` keys hash their unpadded bytes (`keccak(bytes(k) ‖ p)`); the key
   `""` then gives the same bytes as a dynamic array's data at `p`, so such
   keys need another preimage shape and are not modelled. Nor are `bytes` and
@@ -195,22 +196,78 @@ Module `Solidity/Storage/HashedKeccak.lean` (imports `Solidity.Keccak` and
 | `keccakH` | `keccak256Nat ∘ encode`, the hash parameter. |
 | `keccak256_bytes`, `keccakH_lt` | The digest has at most 32 bytes, each below 256, so `keccakH p < 2^256` (the `hH` hypothesis of `Loc.word_inj`). |
 | `keccakH_eq_iff` | On word preimages, `keccakH` collides iff keccak-256 collides on the encoded inputs. |
-| `collisionFree_keccakH_iff`, `regionsDisjoint_keccakH_iff` | `CollisionFree keccakH ps ↔ CollisionFree keccak256Nat (ps.map encode)`, and the same for `RegionsDisjoint`: the premise on the run's byte-string `KECCAK256` inputs is exactly what the layout needs. |
-| `keccak_word_inj` | `Loc.word_inj` at `N = 2^256`, `H = keccakH`, with the region premise stated on `P.map encode`. |
+| `collisionFree_keccakH_iff`, `regionsDisjoint_keccakH_iff` | `CollisionFree keccakH ps ↔ CollisionFree keccak256Nat (ps.map encode)`, and the same for `RegionsDisjoint`: the layout's premise is the premise on the layout's own byte-string `KECCAK256` inputs. A run's premise on all its inputs `X` gives it by `RegionsDisjoint.mono` once `P.map encode ⊆ X` (not proved here: it needs the compiled code to hash exactly these cleaned words). |
+| `keccak_word_inj` | `Loc.word_inj` at `N = 2^256`, `H = keccakH`, with keys below `2^256` (`Pre.Words`; `bytesBE` truncates, so `k` and `k + 2^256` would alias) and the region premise stated on `P.map encode`. |
 
 `#guard` vectors check `Loc.word (2^256) keccakH` against solc's formula
 (`keccak256(abi.encode(k, p))` for a mapping entry, `keccak256(abi.encode(p))
 + i·s` for an array element): `uint256[]` at slots 0 and 1, a two-word struct
 array element, `uint`/`bool` keys, a negative `int` key (two's complement),
 an `address` key (left-padded), a nested mapping, an array inside a mapping,
-and one vector through `STy.locate`. The digests were computed independently
-with pycryptodome's keccak-256 (`pip install pycryptodome` in a scratch
-directory); `keccak256(uint256(0))` and `keccak256(0 ‖ 0)` are also the
-values solc's documentation and common tooling quote. `#guard` evaluates;
-no proof depends on it.
+`bytes32` and left-aligned `bytes4` keys, and one vector through
+`STy.locate` against a literal digest. The digests were computed
+independently with pycryptodome's keccak-256, installed with
+`pip install --target <scratch> pycryptodome`:
 
-Limitations: keys are value types (one word); `string`/`bytes` keys hash
-their unpadded bytes and are outside `Pre` (see checkpoint 2). The premise is
-about keccak's actual outputs on the run's inputs; it is not implied by
-anything proved here, and its probability is bounded only in the random
-oracle model ([hash-collision-bound.md](hash-collision-bound.md)).
+```python
+from Crypto.Hash import keccak
+def k(b): h = keccak.new(digest_bits=256); h.update(b); return int.from_bytes(h.digest(), 'big')
+w = lambda n: (n % 2**256).to_bytes(32, 'big')
+k(w(0))                 # uint256[] at slot 0: 0x290dec…e563
+k(w(9) + w(k(w(7) + w(2))))   # n[7][9], n at slot 2
+```
+
+The checkpoint-3 finder re-checked every literal with a separate pure-Python
+Keccak-f[1600]. `keccak256(uint256(0))`, `keccak256(1)`, `keccak256(2)` and
+`keccak256(0 ‖ 0)` are constants common tooling quotes. `#guard` evaluates;
+no proof depends on it, and the vectors are the only check that `keccakH`
+matches solc's byte order.
+
+Limitations:
+
+- Keys are value types (one word, below `2^256`); `string`/`bytes` keys
+  hash their unpadded bytes and are outside `Pre` (see checkpoint 2).
+- **Other hashed slots.** Slots user code or assembly computes from its own
+  hashes (`abi.encodePacked`, inline `keccak256`) are not `Loc`s, so
+  `keccak_word_inj` does not separate them from layout regions.
+- **The probability bound.** The premise is about keccak's actual outputs; it
+  is not implied by anything proved here. The bounds of
+  [hash-collision-bound.md](hash-collision-bound.md) are about a uniformly
+  random function on a finite domain; they apply with the domain `Pre` (or
+  the encoded byte strings, `encode` being injective on words), not to
+  `keccak256Nat`. No theorem restates them through `encode`
+  (e.g. `(dedup (P.map encode)).length = (dedup P).length`).
+- G46.05 records preimages as bytes; a `UInt8.toNat` map relates them to the
+  `List Nat` inputs here.
+
+### Handoff — checkpoint 3
+
+Work queue item 3 is done: `keccakH`, the injective encoding, the premises
+read on bytes, `keccak_word_inj`, and 13 `#guard` vectors.
+
+Gates on the checkpoint's final commit: `lean_diagnostic_messages` clean on
+`Solidity/Storage/HashedKeccak.lean` (the vectors evaluate keccak-256 in the
+language server in a few seconds); pins `keccakH_lt` at `[propext,
+Quot.sound]`, `encode_inj`, `collisionFree_keccakH_iff`,
+`regionsDisjoint_keccakH_iff`, `keccak_word_inj` at `[propext,
+Classical.choice, Quot.sound]`; no `sorry`, new axiom, `native_decide`,
+`decide` tactic, `grind`, `implemented_by` or `maxHeartbeats`.
+`check-layers`: 159 core modules, 0 reach the elaborator
+(`Solidity.Storage.HashedKeccak` in `CORE`); `check-orphans`: 738 reachable,
+0 orphaned; `check-trust`: 0 findings; `check-doc-paths`: 46, the base count.
+
+### Review (checkpoint 3)
+
+A read-only finder and a separate skeptic reviewed commit `b335a9d` without
+the Lean server. No proof bug; the finder re-checked all digests with its own
+Keccak implementation. Confirmed findings, fixed in the following commit:
+
+| Finding | Fix |
+|---|---|
+| "The premise on the run's `KECCAK256` inputs is exactly what the layout needs" overstated: a run hashes more, and `P.map encode ⊆ X` is not proved (skeptic 1). | Reworded (module docstring, table); `mono` route stated; other hashed slots listed as a limitation. |
+| Keys must be below `2^256` (truncation aliases) and this was unstated (skeptic 2, finder 2). | Stated in the docstring and the `keccak_word_inj` row. |
+| No theorem carries the random-oracle bound through `encode` (skeptic 3). | Limitation "The probability bound". |
+| The vectors' generation was unrecorded and "solc's documentation" was inaccurate (skeptic 5). | The pycryptodome call is recorded above; wording now "common tooling". |
+| `bytesN` keys are left-aligned, not the value (finder 1a); no `bytes32` vector (finder 1b). | Stated; `bytes32` and `bytes4` vectors added. |
+| The `STy.locate` vector compared two computed words and pinned no digest (finder 3). | Compared with the literal digest. |
+| `encode_inj` and `regionsDisjoint_keccakH_iff` had no axiom pins (finder 4). | Pinned. |
