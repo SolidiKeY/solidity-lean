@@ -208,6 +208,92 @@ def code : Op → UInt8
   | .SWAP n => UInt8.ofNat (0x90 + n.val)
   | .LOG n => UInt8.ofNat (0xa0 + n.val)
 
+/-- The mnemonic, as the execution specs write it. -/
+def name : Op → String
+  | .STOP => "STOP"
+  | .ADD => "ADD"
+  | .MUL => "MUL"
+  | .SUB => "SUB"
+  | .DIV => "DIV"
+  | .SDIV => "SDIV"
+  | .MOD => "MOD"
+  | .SMOD => "SMOD"
+  | .ADDMOD => "ADDMOD"
+  | .MULMOD => "MULMOD"
+  | .EXP => "EXP"
+  | .SIGNEXTEND => "SIGNEXTEND"
+  | .LT => "LT"
+  | .GT => "GT"
+  | .SLT => "SLT"
+  | .SGT => "SGT"
+  | .EQ => "EQ"
+  | .ISZERO => "ISZERO"
+  | .AND => "AND"
+  | .OR => "OR"
+  | .XOR => "XOR"
+  | .NOT => "NOT"
+  | .BYTE => "BYTE"
+  | .SHL => "SHL"
+  | .SHR => "SHR"
+  | .SAR => "SAR"
+  | .CLZ => "CLZ"
+  | .KECCAK256 => "KECCAK256"
+  | .ADDRESS => "ADDRESS"
+  | .BALANCE => "BALANCE"
+  | .ORIGIN => "ORIGIN"
+  | .CALLER => "CALLER"
+  | .CALLVALUE => "CALLVALUE"
+  | .CALLDATALOAD => "CALLDATALOAD"
+  | .CALLDATASIZE => "CALLDATASIZE"
+  | .CALLDATACOPY => "CALLDATACOPY"
+  | .CODESIZE => "CODESIZE"
+  | .CODECOPY => "CODECOPY"
+  | .GASPRICE => "GASPRICE"
+  | .EXTCODESIZE => "EXTCODESIZE"
+  | .EXTCODECOPY => "EXTCODECOPY"
+  | .RETURNDATASIZE => "RETURNDATASIZE"
+  | .RETURNDATACOPY => "RETURNDATACOPY"
+  | .EXTCODEHASH => "EXTCODEHASH"
+  | .BLOCKHASH => "BLOCKHASH"
+  | .COINBASE => "COINBASE"
+  | .TIMESTAMP => "TIMESTAMP"
+  | .NUMBER => "NUMBER"
+  | .PREVRANDAO => "PREVRANDAO"
+  | .GASLIMIT => "GASLIMIT"
+  | .CHAINID => "CHAINID"
+  | .SELFBALANCE => "SELFBALANCE"
+  | .BASEFEE => "BASEFEE"
+  | .BLOBHASH => "BLOBHASH"
+  | .BLOBBASEFEE => "BLOBBASEFEE"
+  | .POP => "POP"
+  | .MLOAD => "MLOAD"
+  | .MSTORE => "MSTORE"
+  | .MSTORE8 => "MSTORE8"
+  | .SLOAD => "SLOAD"
+  | .SSTORE => "SSTORE"
+  | .JUMP => "JUMP"
+  | .JUMPI => "JUMPI"
+  | .PC => "PC"
+  | .MSIZE => "MSIZE"
+  | .GAS => "GAS"
+  | .JUMPDEST => "JUMPDEST"
+  | .TLOAD => "TLOAD"
+  | .TSTORE => "TSTORE"
+  | .MCOPY => "MCOPY"
+  | .CREATE => "CREATE"
+  | .CALL => "CALL"
+  | .CALLCODE => "CALLCODE"
+  | .RETURN => "RETURN"
+  | .DELEGATECALL => "DELEGATECALL"
+  | .CREATE2 => "CREATE2"
+  | .STATICCALL => "STATICCALL"
+  | .REVERT => "REVERT"
+  | .INVALID => "INVALID"
+  | .SELFDESTRUCT => "SELFDESTRUCT"
+  | .DUP n => s!"DUP{n.val + 1}"
+  | .SWAP n => s!"SWAP{n.val + 1}"
+  | .LOG n => s!"LOG{n.val}"
+
 /-- The opcode a byte names, if it names one without immediate data:
 `none` for `PUSH0`–`PUSH32` and for undefined bytes. -/
 def ofCode (b : UInt8) : Option Op :=
@@ -307,6 +393,12 @@ def pushWidth (b : UInt8) : Option (Fin 33) :=
 
 /-- The opcode byte of `PUSHn`. -/
 def pushCode (n : Fin 33) : UInt8 := UInt8.ofNat (0x5f + n.val)
+
+/-- The mnemonic of the opcode a byte names, if it names one. -/
+def byteName (b : UInt8) : Option String :=
+  match pushWidth b with
+  | some n => some s!"PUSH{n.val}"
+  | none => (Op.ofCode b).map Op.name
 
 /-! ## The opcode table, checked over all 256 bytes -/
 

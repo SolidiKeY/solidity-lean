@@ -400,6 +400,7 @@ import Solidity.Evm.Interpreter
 import Solidity.Backend.Opcode
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.Assembler
+import Solidity.Backend.EvmVectors
 import Solidity.Backend.Checks
 import Solidity.Tools.Show
 import Solidity.Tools.Common

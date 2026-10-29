@@ -63,10 +63,8 @@ in seconds and sit outside both the core and the elaborator layer of
 `n` immediate bytes (whether or not they exist). `jumpdests c` keeps the
 boundaries that hold `0x5b`, and `validJumpdest c i` asks whether `i` is
 one; this is the yellow paper's `D_J`. EvmYul's `D_J_aux`
-(`Bridge/vendor/EvmYul/EVM/Semantics.lean`) differs: it stops scanning at
-the first byte its table rejects (an undefined opcode, and `CLZ`, which its
-pre-Osaka table lacks), so it drops every later `JUMPDEST`. Checkpoint 3
-records this as a known divergence.
+(`Bridge/vendor/EvmYul/EVM/Semantics.lean`) computes the same set, by the
+checkpoint 3 vectors (a test through its extracted table, not a theorem).
 `InPushData c i` holds when `i` lies inside the immediate of a `PUSH` at a
 boundary.
 
@@ -114,9 +112,11 @@ ones reasoning through `omega`/`by_cases` (`mem_starts`,
 Read-only finder and skeptic subagents, no Lean server. Confirmed
 findings, all fixed:
 
-- Finder: the document claimed `starts` is EvmYul's `D_J_aux`; it is not,
-  since EvmYul stops at the first byte it cannot parse. Reworded, and
-  recorded for checkpoint 3.
+- Finder: the document claimed `starts` is EvmYul's `D_J_aux` without
+  evidence. The finder's reason for doubting it (that `D_J_aux` stops at
+  the first unparsed byte) was itself wrong: `parseInstr` maps every byte
+  without an arm to `some INVALID`, so the scan never stops early.
+  Checkpoint 3 checks the agreement and corrects this entry.
 - Finder: the module docstring overstated what the 256-byte table proves,
   cited only G01 Q2 for gas, and two `have`s closed with bare `simp`
   (now `List.take_left'`/`List.drop_left'`). The README row described
@@ -162,8 +162,8 @@ Judgment calls kept as they are, with reasons:
   `bash scripts/check-trust.sh` pass; `bash scripts/check-doc-paths.sh`
   reports the base's 46 missing references and no new one. Elaboration of
   the three modules takes seconds (they import no `Solidity.*` module).
-- **Remaining:** agreement with EvmYul's decoder (checkpoint 3, with the
-  `D_J_aux` divergence above); the modules are not listed in
+- **Remaining:** program-level `decode` agreement with EvmYul, which needs
+  the Bridge build (checkpoint 3); the modules are not listed in
   `scripts/check-layers.mjs`'s `CORE` (that script is outside this lane's
   files), though they reach no elaborator module.
 
@@ -320,3 +320,123 @@ no minimality proof of the chosen widths.
   doc-path scripts as in checkpoint 1.
 - **Remaining:** multi-section images and solc's sub-assembly items
   (G44.02/G45.06); byte-identical solc output is not a goal.
+
+## Checkpoint 3 — agreement with EVMYulLean and EthereumJS
+
+Checkpoint 2's revision is `c1d3cf6ae79e08bd6bbebadb8ba9a7e047b338de`.
+
+### What could and could not be run
+
+The Bridge package needs Mathlib, and on this VM its build cache is
+unreachable: the network policy refuses `lakecache.blob.core.windows.net`
+(and `mathlib4.lean-cache.cloud`) with HTTP 403. Building Mathlib from
+source does not fit the lane, so no Bridge module was written: a Lean
+adapter that runs the vendored `decode`/`D_J` could not be elaborated, and
+unchecked Lean is not committed. The agreement is therefore checked from
+the core, against data taken from the references:
+
+- [scripts/check-backend-vectors.mjs](../../scripts/check-backend-vectors.mjs)
+  reads the vendored EVMYulLean tables from their source (`parseInstr` in
+  `Bridge/vendor/EvmYul/EVM/Instr.lean`, `argOnNBytesOfInstr` in
+  `Bridge/vendor/EvmYul/EVM/Semantics.lean`; not edited), and runs
+  EthereumJS at Osaka (`@ethereumjs/evm` 10.1.3, pinned in
+  `scripts/evm-vectors/package.json`): its opcode table
+  (`getOpcodesForHF`) and its jump-destination scan
+  (`Interpreter._getValidJumpDestinations`) on 300 randomized byte strings
+  biased towards `PUSHn`, `JUMPDEST` and undefined bytes, and on 200
+  randomized encoded programs (any Osaka opcode, `PUSHn` with `n` random
+  bytes), with the value EthereumJS reads for each `PUSH1`–`PUSH32`.
+  The script fails on any `parseInstr` or `argOnNBytesOfInstr` arm it
+  cannot read.
+- It writes them as literals to
+  [EvmVectors.lean](../../Solidity/Backend/EvmVectors.lean), whose
+  `#guard`s compare them with `byteName`, `immWidth` and `jumpdests`. With
+  no argument the script fails when the committed file differs from what
+  the references give now.
+
+```sh
+npm ci --ignore-scripts --prefix scripts/evm-vectors
+node scripts/check-backend-vectors.mjs          # drift check
+node scripts/check-backend-vectors.mjs --write  # regenerate
+```
+
+### Results
+
+| Check | Result |
+|---|---|
+| EthereumJS Osaka opcodes (150), by byte and name | equal to ours, and no other byte is defined by either |
+| EVMYulLean `parseInstr` arms (149), name and immediate width | equal to ours on every arm; the arms are our 150 opcodes minus `CLZ` |
+| EVMYulLean on all 256 bytes, through its table (`evmYulParse`) | our immediate width everywhere, `JUMPDEST` exactly at `0x5b` |
+| EthereumJS's jump-destination scan, 300 random codes | equal to `jumpdests` |
+| EVMYulLean's `D_J_aux`, transliterated over its table (`evmYulDJAux`), 300 random codes and 200 programs | equal to `jumpdests` |
+| 200 random encoded programs | `decode` accepts each, `encode` gives its bytes back, `jumpdests` is EthereumJS's, and every `PUSH1`–`PUSH32` value (`pushValues`, through `ofBytesBE`) is EthereumJS's |
+| EVMYulLean's `decode` immediate, transliterated (`evmYulPushValue`), on the 200 programs | equal to our values |
+
+### Recorded divergences of the vendored EVMYulLean
+
+- **`CLZ`.** Its table predates EIP-7939 (its `TargetSchedule` is still
+  Cancun, a G06 residue): `0x1e` parses as `INVALID`. Execution differs;
+  jump destinations do not, since neither reading has an immediate.
+- **Truncated final `PUSHn`.** Its `decode` takes the value of the bytes
+  present (`uInt256OfByteArray` of `extract'`), while the yellow paper and
+  EthereumJS (`setLengthRight`) pad the missing bytes with zeros on the
+  right: for `61 01` EVMYulLean pushes 1, the yellow paper `0x0100`
+  (both pinned in `Solidity/Backend/EvmVectors.lean`, EthereumJS's value as generated). Our `decode` refuses
+  such code; it concerns G46's execution bridge, not encoding.
+- Undefined bytes parse as `some INVALID`, so `D_J_aux` scans every byte
+  and agrees with `D_J` and with `jumpdests`.
+
+### Limits
+
+These are tests, not theorems: the EVMYulLean data is read from its
+source text, and `evmYulDJAux` is a transliteration of `D_J_aux` (with fuel
+for its `partial`), not the vendored function. The decoder agreement on
+programs (`decode` at each offset, with `UInt256` immediates) needs the
+Bridge build; its statement is ready: for `p : Program` and `k` below its
+length, EvmYul's `decode (encode p) (offset p k)` is the opcode of `p[k]`
+with, for `push n imm` and `n > 0`, the immediate `(ofBytesBE imm, n)`.
+
+EthereumJS's jump-destination scan reads byte ranges, not its opcode table,
+so the scan vectors check `starts` itself; the opcode-table vectors check
+the table.
+
+**Status: partial.** The opcode tables, jump destinations, `encode`/
+`decode` and `PUSH` values agree with EthereumJS at Osaka and with
+EVMYulLean's tables and a transliteration of its `D_J_aux` and `decode`
+immediate. Not done: a `Bridge/` module that runs the vendored `decode`
+and `D_J` themselves, blocked by the Mathlib cache (see above); it is the
+open question of this checkpoint.
+
+### Review (checkpoint 3)
+
+Read-only finder and skeptic subagents, no Lean server.
+
+- Skeptic: the decoder and `PUSH` values were not compared, and the random
+  inputs were byte strings only. Added the 200 random encoded programs
+  (decode, re-encode, jump destinations, `PUSH` values against EthereumJS)
+  and the transliterated EVMYulLean immediate.
+- Skeptic: no status was given; the status is now partial, with the
+  missing Bridge module named, and the checkpoint-1 lines say "test, not
+  theorem".
+- Finder: the source extraction could drop a differently written arm
+  silently. The script strips comments and fails unless every arm of both
+  functions was read.
+- Finder: the bytes `0xe6`–`0xe8` (EIP-8024, after Osaka) are now among
+  the biased bytes, the generated header records `@ethereumjs/common`'s
+  version, and the checkpoint-1 handoff names what remains precisely.
+- Judgment call kept: the vectors module lives in the core. It holds
+  literal data and `#guard`s, imports only `Solidity.Backend.Assembler`,
+  and runs nothing external; the Bridge module it stands in for is the
+  open item.
+
+### Handoff (checkpoint 3)
+
+- **Branch:** as above; checkpoint 2 at `c1d3cf6a`, this checkpoint in
+  the commit that adds this section.
+- **Checks:** `node scripts/check-backend-vectors.mjs` (no drift);
+  `lean_diagnostic_messages` clean on `Solidity/Backend/EvmVectors.lean`
+  and `Solidity/Backend/Opcode.lean` (new `Op.name`, `byteName`); layer,
+  orphan, trust and doc-path scripts as before.
+- **Remaining:** the Bridge module running the vendored functions, with
+  the decoder statement given under Limits; it needs a reachable Mathlib
+  cache (or a Mathlib build from source).
