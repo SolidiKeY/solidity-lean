@@ -572,14 +572,29 @@ cannot supply an equation. Missing or incomplete proofs, wrong roots and
 nonempty residual leaves are refused. Runtime exceptions clear the live job
 and restore the previous environment. Snapshots use the exact typed target.
 
-Twenty disk checkpoints bound repeated normalization and retain the default
-per-declaration heartbeat and recursion limits. Total work/heartbeats are
-distributed across declarations; this is not a claim that the monolithic
-aggregate heartbeat count is unchanged. No search, fuel or per-module timing
-budget was raised. No extra closer is used. The full scratch chain took
-1110.96 s, peak process-group RSS 1,950,941,184 bytes; slowest stage 115.31 s,
-below the existing 300 s gate. Production and full-suite terminal measurements
-are recorded in the task handoff and validation logs; failed experiments remain
-archived. The finder and skeptic found no proof-trust defect; their confirmed
-missing refusal controls, trust inventory and classifier-test findings were
-addressed in the production validation.
+Twenty disk checkpoints retain default per-declaration heartbeat and recursion
+limits, but do not satisfy the original effective timing policy. The original
+`Derived17` workload has one cumulative 300-second allowance, including the
+helper, discovery/assembly stages, root, refusals and the other nine proofs.
+The earlier 1110.96-second scratch group and 965.51-second production group
+are **not timing passes**, even though individual stages took less than 300 s.
+The prior completion decision is superseded by independent combined review.
+
+`scripts/check-memory-loop-timing.py` rechecks all 24 workload modules into a
+new directory, rewires group imports to those fresh outputs, retains source
+snapshots and per-member terminal results, and must run under one 300-second
+outer guard. `scripts/check-memory-loop-timing.mjs` rejects incomplete, cached,
+duplicate, stale, failed or over-budget group evidence. Timed automatic checks
+require `--replay-group-results`; a classification-only check establishes no
+timing result. Unit controls retain the 965.51-second rejection.
+
+The resumed repairs preserved every kernel check, original 1024-step walk,
+903 visits and proof/search limits. Checked scalar/weakening facts, constructor
+equations and deterministic-premise equations did not complete the cumulative
+gate. Timeout/address-space failures remain BLOCKED. Experimental helpers are
+archived with logs, not substituted for the last completely checked helper.
+The independent exact `maxIdx_wk` proof passed in 9.08 s and is archived as an
+unused independent increment, not registered as completed compiler support.
+The next repair must reduce repeated typed-state/context normalization and
+pass the entire fresh group within 300 seconds; more per-stage allowances or
+cached partial timings cannot resolve this blocker.

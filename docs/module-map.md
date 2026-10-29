@@ -858,3 +858,10 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+
+Memory-loop validation helpers: `scripts/memory-loop-evm.mjs` records actual
+four-mode upstream EVM observations and refusal controls;
+`scripts/check-memory-loop-timing.py` freshly checks the entire original
+`Derived17` group; `scripts/check-memory-loop-timing.mjs` validates cumulative
+300-second evidence, with negative controls in its `.test.mjs` companion.

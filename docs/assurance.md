@@ -157,3 +157,11 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |
 | Revert semantics | Exact symbolic catch relationships; literal data outside self-call frames; broader panic-code alignment (self-calls already fail with solc's `Panic` codes, `Prog.withPanics`). |
 | Exact verification | `docs/automation.md`, M7 "What is not proved". |
+
+
+Memory-loop compiler review follow-up: the finite-body simulations remain
+kernel checked, and actual four-mode upstream fixture executions now supplement
+them. Publication/completion remains blocked on the original cumulative
+300-second `Derived17` workload gate; previous per-stage checks did not satisfy
+it. See `compiler-verification.md` and `loops.md`. No source coverage status is
+promoted by those sampled EVM observations.

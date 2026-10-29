@@ -155,6 +155,12 @@ separate from the Lean source/machine observations and does not prove solc/EVM
 equivalence. No feature inventory status is promoted.
 
 
+Independent combined review supersedes the earlier completion decision:
+**the original assignment remains incomplete because the cumulative proof
+timing gate is blocked**. The kernel-checked finite-body compiler scope above
+is unchanged. Historical passing build results below establish kernel checking,
+not a pass of the original effective 300-second workload gate.
+
 Validation for batch `solidity-compiler10-20261028` (2026-10-29), based on
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`:
 
@@ -197,23 +203,25 @@ confirmed G0 concerns about indexed certificate metadata and new source dispatch
 were fixed with generalized recursors; final reviews found no outstanding
 correctness defect in the stated finite-body/sequential scope. The cumulative
 bundle, handoff, full logs, failed-attempt records and checksums accompany this
-batch. Mandatory whole-script validation now passes after the authorized
-shared `Derived17` proof-memory repair, with all original statements,
-observations and search budgets retained. The new helper and early cached
+batch. The whole script previously exited zero, but the shared `Derived17` repair
+failed the original cumulative timing requirement. That earlier completion
+claim is withdrawn; statements, observations and search budgets remain unchanged. The new helper and early cached
 stages were freshly rechecked under the guard; the final helper differs from
 the full-script source only by removal of trailing whitespace (token sequence
 unchanged, recorded in the evidence). No interrupted attempt counts as passed.
 
 
-The shared nested-return proof repair production group passed in 965.51 s
-with peak 2,886,291,456 bytes (early stages cached); the remaining nine
+The historical shared nested-return group exited zero in 965.51 s, with
+peak 2,886,291,456 bytes and early stages cached. This fails the original
+cumulative timing requirement. The remaining nine
 `Derived17` proofs passed unchanged in 48 s. The final axiom audit retains only
 `propext`, `Classical.choice`, `Quot.sound`. Missing-state, wrong-root,
 incomplete-checkpoint and residual-leaf refusals are checked. Finder and
-skeptic reviews confirmed those controls and the exact 1024-step walk. The
-unchanged 300-second automatic gate covers every replay stage; total work is
-distributed across default-budget declarations, not asserted equal to the
-monolithic aggregate heartbeat count.
+skeptic reviews confirmed those controls and the exact 1024-step walk.
+Those historical per-stage exits do not satisfy the original cumulative
+300-second gate, which remains BLOCKED. Work is distributed across
+default-budget declarations; aggregate monolithic heartbeats are not claimed
+equal.
 
 ## What is proved
 
@@ -427,3 +435,46 @@ they do, so the proof needs no argument about it.
 is the slowest (the `decide +kernel` runs, the unrolled `**` code under a
 raised `maxRecDepth`); `Evm/Correct.lean`'s `stmt_sim` dispatches one lemma
 per family, held to `maxHeartbeats 11000`.
+
+
+Resumed combined-review corrections (same VM/branch):
+
+* `node scripts/memory-loop-evm.mjs --output <results.json>` executes actual
+  EthereumJS deployment and calls in legacy/viaIR × optimizer-off/on modes.
+  `arrays`, `records`, `allocateTurn` return 4, 3, 0; `allocationBeforeRevert`
+  actually reverts with empty data. Corrected run exited 0 in 1.52 s,
+  sampled aggregate peak 277,245,952 bytes. Wrong-value and wrong-halt controls fail.
+  Separate instruction-limit controls stop deployment and a call as BLOCKED;
+  these host refusals do not establish source `THalt.exhausted` behavior.
+  Bytecode provenance hashes decoded bytes and checks deployed runtime code.
+  These sampled upstream observations are separate from kernel simulation;
+  they do not establish universal solc compiler refinement.
+* The coordinator correction authorizes the measured fallback described above;
+  its host-side record is not visible in this VM. The handoff preserves the
+  supplied instruction as a labelled transcription. Subsequent local Docker
+  checks additionally verify actual `memory.max=12884901888` and
+  `memory.swap.max=0`, with the unchanged sampled guard nested inside.
+  No earlier fallback run is relabelled as a hard-cgroup run.
+* `check-memory-loop-timing.py` and `check-memory-loop-timing.mjs` enforce
+  cumulative accounting for the entire original 24-module proof workload.
+  The earlier per-stage timing claim was insufficient. Full fresh attempts
+  still stop at 300 seconds; see `loops.md` and the new handoff for exact
+  command/result records. No timeout, allocation failure or cached partial
+  workload is a pass. The original assignment cannot be marked complete.
+
+Final resumed terminal checks: Lean 4.24.0 / Lake 5.0.0-src+797c613,
+`lake build Solidity.KeySort`, `./run-lean.sh`, and compiler/replay axiom
+queries each exited 0 under the verified hard Docker scope. The warm full
+script took 1.05 s; the complete runtime/build/axiom group took 9.29 s with
+sampled aggregate peak 1,227,821,056 bytes. These are cached build/audit costs,
+not a fresh proof timing pass. The retained-source fresh group stopped at
+300.024 s, exit 75, sampled peak 1,591,115,776 bytes; only the helper and
+Discover00–03 completed before Discover04 was interrupted. The cumulative
+gate and timed automatic gate correctly exit 1. All 22 affected script tests,
+trust (742 sources / 246 sites / zero findings), layers (152 core / zero
+elaborator reach), orphans (728 reachable / zero orphaned) and complete
+TestSuite audit passed. Documentation paths remain failed with the same
+20 byte-identical baseline findings. Independent finder/skeptic final reviews
+confirmed these distinctions and found no further defect; original completion
+remains false. Full commands, resource peaks, failures, reviews and hashes are
+in the new cumulative handoff.
