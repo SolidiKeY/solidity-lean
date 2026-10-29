@@ -271,3 +271,38 @@ Keccak implementation. Confirmed findings, fixed in the following commit:
 | `bytesN` keys are left-aligned, not the value (finder 1a); no `bytes32` vector (finder 1b). | Stated; `bytes32` and `bytes4` vectors added. |
 | The `STy.locate` vector compared two computed words and pinned no digest (finder 3). | Compared with the literal digest. |
 | `encode_inj` and `regionsDisjoint_keccakH_iff` had no axiom pins (finder 4). | Pinned. |
+
+## Checkpoint 4 — G27.01–G27.03 separation
+
+Module `Solidity/Storage/HashedSeparation.lean` (imports
+`Solidity.Storage.HashedLayout`, in `CORE`). `Occ t l x`: the slot term `x`
+belongs to a value of type `t` at `l` (a word's slot; a struct member's
+terms; a static or dynamic array element's terms, the dynamic index below
+`lmax`; a dynamic array's length slot; every mapping entry's terms). The
+argument follows `Solidity/Evm/Layout.lean`'s for `Evm.Slot`: `occ_reach`
+(every occupied term is reached by hashing from one in-place word `l + j`,
+`j < size`) and `reach_unique` (one ancestor per hash depth).
+
+| Name | Statement |
+|---|---|
+| `occ_fields_disjoint` (G27.01) | Members `i ≠ i'` of a struct occupy disjoint slot terms. |
+| `occ_keys_disjoint` (G27.02) | Entries at keys `k ≠ k'` (any word, any value types, nested paths below) occupy disjoint slot terms. |
+| `occ_map_slot_entry` | A mapping's own slot is no entry's. |
+| `occ_sarr_disjoint`, `occ_darr_disjoint` (G27.03) | Elements at indices `i ≠ i'` occupy disjoint slot terms. |
+| `occ_darr_len_elem` (G27.03) | A dynamic array's length slot is no element's. |
+| `occ_bounded` | `t.Fits L → Placed L R t l → Occ t l x → Loc.Bounded L R x`. |
+| `occ_word_ne` | Under the region premise, distinct occupied terms (with preimages in `P`) have distinct words. |
+| `keys_word_ne` | G27.02 on words: entries at different keys of a placed mapping have different words. |
+
+The symbolic statements use no hash premise and no `Classical.choice`
+(pins `[propext, Quot.sound]`); the word-level ones add the region premise
+through `Loc.word_inj`.
+
+Limitations (checkpoint 4): these are separation statements only. The
+*representation* half of G27.01–G27.03 (a source value's reading agrees
+with the words of its occupied terms, and a write to one member, entry or
+element preserves the others' readings) needs the source and EVM store
+semantics, which this dependency-free model does not have; `occ_word_ne` is
+the frame fact such a proof would use. Widths and packing (G27.01 "widths")
+are not modelled. G27.04 (recursive paths) and G27.05 (composition with the
+compiler) remain.

@@ -22,6 +22,7 @@ const CORE = [
   /^Solidity\.Hash\.Adaptive$/,
   /^Solidity\.Storage\.HashedLayout$/,
   /^Solidity\.Storage\.HashedKeccak$/,
+  /^Solidity\.Storage\.HashedSeparation$/,
   /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|LoopInvariantWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary|KIntTwoAnchors)$/,
 ];
 const ELABORATOR = [
