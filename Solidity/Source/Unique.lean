@@ -1034,6 +1034,146 @@ theorem uniqE_member {Γ : Ctx} {a : Syn .expr} {x : String} (ih : Uniq Γ (size
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
+/-! ### What a callee name denotes -/
+
+theorem Ctx.convTarget_spec {Γ : Ctx} {n : String} {τ : STy} (h : Γ.convTarget n = Option.some τ) :
+    ∃ d, Γ.resolve n = Option.some (.decls [d]) ∧ d.kind ≠ .function ∧ d.kind ≠ .struct := by
+  unfold Ctx.convTarget at h
+  split at h
+  · rename_i d hr
+    refine ⟨d, hr, ?_⟩
+    revert h
+    cases d.kind <;> intro h <;> first | (cases h; done) | exact ⟨by decide, by decide⟩
+  · cases h
+
+theorem Ctx.structOf_spec {Γ : Ctx} {n : String} {dn : DeclName} (h : Γ.structOf n = Option.some dn) :
+    ∃ d, Γ.resolve n = Option.some (.decls [d]) ∧ d.kind = .struct ∧ dn = ⟨d.scope, d.name⟩ := by
+  unfold Ctx.structOf at h
+  split at h
+  · rename_i d hr
+    by_cases hk : d.kind = .struct
+    · simp only [hk, beq_self_eq_true, if_true, Option.some.injEq] at h
+      exact ⟨d, hr, hk, h.symm⟩
+    · have : (d.kind == DeclKind.struct) = false := by simp only [beq_eq_false_iff_ne, ne_eq, hk, not_false_eq_true]
+      simp only [this, Bool.false_eq_true, if_false, reduceCtorEq] at h
+  · cases h
+
+theorem Ctx.functions_spec {Γ : Ctx} {n : String} {d : Decl} (h : d ∈ Γ.functions n) :
+    ∃ ds, Γ.resolve n = Option.some (.decls ds) ∧ d ∈ ds ∧ d.kind = .function := by
+  unfold Ctx.functions at h
+  split at h
+  · rename_i ds hr
+    have hm := List.mem_filter.1 h
+    simp only [Bool.and_eq_true, beq_iff_eq] at hm
+    exact ⟨ds, hr, hm.1, hm.2.1⟩
+  · cases h
+
+theorem mem_of_filter_singleton {α : Type} {p : α → Bool} {l : List α} {d : α} (h : l.filter p = [d]) : d ∈ l :=
+  (List.mem_filter.1 (h ▸ List.mem_singleton_self d)).1
+
+/-- Two names that resolve differently. -/
+theorem resolve_conflict {Γ : Ctx} {n : String} {a b : Denot} (ha : Γ.resolve n = Option.some a)
+    (hb : Γ.resolve n = Option.some b) : a = b := by
+  rw [ha] at hb; cases hb; rfl
+
+/-- **Calls of a name**: conversions to a contract or enum, internal calls,
+builtins, struct construction. -/
+theorem uniqE_callIdent {Γ : Ctx} {n : String} {A : Syn .callArgs}
+    (ih : Uniq Γ (sizeOf (Syn.call (.ident n) A))) : UniqE Γ (.call (.ident n) A) := by
+  intro τ τ' d d'
+  have hce : (Syn.call (.ident n) A).const = Option.none := rfl
+  have hbo : (Syn.call (.ident n) A).binOp? = Option.none := rfl
+  cases d with
+  | @convUser x _ τ1 σ hc dx h =>
+    obtain ⟨d0, hr0, hk1, hk2⟩ := Ctx.convTarget_spec hc
+    cases d' with
+    | convUser hc' dx' _ =>
+      rw [hc] at hc'; cases hc'
+      obtain ⟨h1, e1⟩ := ih.e x (by simp only [Syn.call.sizeOf_spec, Syn.ident.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega) dx dx'
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | callInternal _ hf' _ =>
+      obtain ⟨ds, hr1, hm, hk⟩ := Ctx.functions_spec (mem_of_filter_singleton hf')
+      cases resolve_conflict hr0 hr1
+      cases List.mem_singleton.1 hm
+      exact absurd hk hk1
+    | builtinCall hr _ _ _ => cases resolve_conflict hr0 hr
+    | structNew hs _ _ _ =>
+      obtain ⟨d1, hr1, hk, -⟩ := Ctx.structOf_spec hs
+      cases resolve_conflict hr0 hr1
+      exact absurd hk hk2
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @callInternal _ args dd ps rs σs da hf hs =>
+    obtain ⟨ds, hr0, hm0, hk0⟩ := Ctx.functions_spec (mem_of_filter_singleton hf)
+    cases d' with
+    | convUser hc _ _ =>
+      obtain ⟨d1, hr1, hk1, -⟩ := Ctx.convTarget_spec hc
+      cases resolve_conflict hr0 hr1
+      cases List.mem_singleton.1 hm0
+      exact absurd hk0 hk1
+    | callInternal da' hf' hs' =>
+      obtain ⟨h1, e1⟩ := ih.a args (by simp only [Syn.call.sizeOf_spec, Syn.ident.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega) da da'
+      cases h1
+      rw [hf] at hf'; cases hf'
+      rw [hs] at hs'; cases hs'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | builtinCall hr _ _ _ => cases resolve_conflict hr0 hr
+    | structNew hs' _ _ _ =>
+      obtain ⟨d1, hr1, hk, -⟩ := Ctx.structOf_spec hs'
+      cases resolve_conflict hr0 hr1
+      cases List.mem_singleton.1 hm0
+      rw [hk0] at hk; cases hk
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @builtinCall _ args b σs τ1 _ hr hst da h =>
+    cases d' with
+    | convUser hc _ _ =>
+      obtain ⟨d1, hr1, -, -⟩ := Ctx.convTarget_spec hc
+      cases resolve_conflict hr hr1
+    | callInternal _ hf' _ =>
+      obtain ⟨ds, hr1, -, -⟩ := Ctx.functions_spec (mem_of_filter_singleton hf')
+      cases resolve_conflict hr hr1
+    | builtinCall hr' _ da' h' =>
+      cases resolve_conflict hr hr'
+      obtain ⟨h1, e1⟩ := ih.a args (by simp only [Syn.call.sizeOf_spec, Syn.ident.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega) da da'
+      cases h1
+      rw [h] at h'; cases h'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | structNew hs _ _ _ =>
+      obtain ⟨d1, hr1, -, -⟩ := Ctx.structOf_spec hs
+      cases resolve_conflict hr hr1
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @structNew _ args dn fs σs hs hf da h =>
+    obtain ⟨d0, hr0, hk0, -⟩ := Ctx.structOf_spec hs
+    cases d' with
+    | convUser hc _ _ =>
+      obtain ⟨d1, hr1, -, hk1⟩ := Ctx.convTarget_spec hc
+      cases resolve_conflict hr0 hr1
+      exact absurd hk0 hk1
+    | callInternal _ hf' _ =>
+      obtain ⟨ds, hr1, hm, hk⟩ := Ctx.functions_spec (mem_of_filter_singleton hf')
+      cases resolve_conflict hr0 hr1
+      cases List.mem_singleton.1 hm
+      rw [hk0] at hk; cases hk
+    | builtinCall hr _ _ _ => cases resolve_conflict hr0 hr
+    | structNew hs' hf' da' _ =>
+      rw [hs] at hs'; cases hs'
+      rw [hf] at hf'; cases hf'
+      obtain ⟨h1, e1⟩ := ih.a args (by simp only [Syn.call.sizeOf_spec, Syn.ident.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega) da da'
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
