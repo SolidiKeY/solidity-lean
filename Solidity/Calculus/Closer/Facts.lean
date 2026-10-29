@@ -196,10 +196,11 @@ list recursor avoids the generated course-of-values recursion in kernel
 certificates; compiled evaluation keeps the original short-circuiting twin. -/
 @[implemented_by Facts.rwWithM]
 def Facts.rwWith {s : Srt} (t : LTm C s) (es : List (EqF C)) : LTm C s :=
-  List.rec (motive := fun _ => LTm C s) t (fun e _ rewritten =>
-    if h : s = .val e.p then
-      if t.beqR e.l then h ▸ e.r else rewritten
-    else rewritten) es
+  (List.rec (motive := fun _ => LTm C s → LTm C s) (fun input => input)
+    (fun e _ rewrite input =>
+      if h : s = .val e.p then
+        if input.beqR e.l then h ▸ e.r else rewrite input
+      else rewrite input) es) t
 
 /-- Exact agreement with the original first-match lookup, at every typed sort. -/
 theorem Facts.rwWith_eq_rwWithM {s : Srt} (t : LTm C s) (es : List (EqF C)) :
@@ -240,12 +241,48 @@ theorem Facts.rwWith_eval {g : State C []} {ν : AEnv} {s : Srt} (t : LTm C s) :
       · exact Facts.rwWith_eval t es fun e he => h e (List.mem_cons_of_mem _ he)
     · exact Facts.rwWith_eval t es fun e he => h e (List.mem_cons_of_mem _ he)
 
-/-- `t` rewritten by the facts. -/
-def Facts.rw (F : Facts C) {s : Srt} (t : LTm C s) : LTm C s := Facts.rwWith t F.eqs
+private theorem Facts.rwWith_nonvalue {s : Srt} (disjoint : ∀ p, s ≠ .val p)
+    (t : LTm C s) (es : List (EqF C)) : Facts.rwWith t es = t := by
+  rw [Facts.rwWith_eq_rwWithM]
+  induction es with
+  | nil => rfl
+  | cons e es ih =>
+    change (if h : s = .val e.p then
+      (if t.beqR e.l then h ▸ e.r else Facts.rwWithM t es)
+      else Facts.rwWithM t es) = t
+    rw [dif_neg (disjoint e.p)]
+    exact ih
+
+/-- `t` rewritten by the facts. Equality facts have value sort, so other
+sorts keep their input without scanning a list whose entries cannot match. -/
+def Facts.rw (F : Facts C) {s : Srt} (t : LTm C s) : LTm C s :=
+  (Srt.casesOn (motive := fun s => LTm C s → LTm C s) s
+    (fun _ input => Facts.rwWith input F.eqs)
+    (fun _ input => input) (fun input => input)
+    (fun _ input => input) (fun _ input => input) (fun _ input => input)
+    (fun input => input) (fun _ input => input) (fun _ input => input)
+    (fun _ _ input => input) (fun input => input)) t
+
+/-- The fast path preserves the complete original typed lookup. -/
+theorem Facts.rw_eq_rwWith (F : Facts C) {s : Srt} (t : LTm C s) :
+    F.rw t = Facts.rwWith t F.eqs := by
+  cases s with
+  | val p => rfl
+  | path T => exact (Facts.rwWith_nonvalue (s := .path T) (fun _ h => nomatch h) t F.eqs).symm
+  | st => exact (Facts.rwWith_nonvalue (s := .st) (fun _ h => nomatch h) t F.eqs).symm
+  | sv T => exact (Facts.rwWith_nonvalue (s := .sv T) (fun _ h => nomatch h) t F.eqs).symm
+  | ident R => exact (Facts.rwWith_nonvalue (s := .ident R) (fun _ h => nomatch h) t F.eqs).symm
+  | addr T => exact (Facts.rwWith_nonvalue (s := .addr T) (fun _ h => nomatch h) t F.eqs).symm
+  | mem => exact (Facts.rwWith_nonvalue (s := .mem) (fun _ h => nomatch h) t F.eqs).symm
+  | mv T => exact (Facts.rwWith_nonvalue (s := .mv T) (fun _ h => nomatch h) t F.eqs).symm
+  | sts name => exact (Facts.rwWith_nonvalue (s := .sts name) (fun _ h => nomatch h) t F.eqs).symm
+  | spath name T => exact (Facts.rwWith_nonvalue (s := .spath name T) (fun _ h => nomatch h) t F.eqs).symm
+  | kint => exact (Facts.rwWith_nonvalue (s := .kint) (fun _ h => nomatch h) t F.eqs).symm
 
 theorem Facts.rw_eval {g : State C []} {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {s : Srt}
     (t : LTm C s) : (F.rw t).eval g ν = t.eval g ν :=
-  Facts.rwWith_eval t F.eqs hF.eqs
+  (congrArg (fun u => u.eval g ν) (Facts.rw_eq_rwWith F t)).trans
+    (Facts.rwWith_eval t F.eqs hF.eqs)
 
 /-! ## Ranges
 

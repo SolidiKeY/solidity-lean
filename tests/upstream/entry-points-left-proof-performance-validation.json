@@ -1,0 +1,599 @@
+{
+  "phase": "original aggregate and current kernel/admission milestone; final combined gates pending",
+  "branch": "feature/entry-points-left-20261027",
+  "startingMaster": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "preservedBase": "aeee4bbae286c01ced30e9d2402c4b09cef1d7b0",
+  "toolchain": {
+    "lean": "4.24.0 797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+    "lake": "5.0.0-src+797c613"
+  },
+  "originalAggregate": {
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "--test-name-pattern",
+      "^getters execute through imported self calls; a false assertion stays pending$",
+      "scripts/public-getters.test.mjs"
+    ],
+    "exit": 0,
+    "elapsedSeconds": 299.76472439599456,
+    "originalDeadlineSeconds": 300,
+    "resources": {
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "peakBytes": 3223416832,
+      "events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0
+      },
+      "commandExit": 0,
+      "resourcePassEligible": true
+    },
+    "rows": [
+      {
+        "tag": "internal",
+        "status": "internal",
+        "sourceId": 89,
+        "signature": "solcGetter27()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "solcGetter27",
+        "elapsedMs": 0
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 118,
+        "signature": "scalar()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "scalar",
+        "elapsedMs": 5107
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 144,
+        "signature": "viaInterface()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "viaInterface",
+        "elapsedMs": 4973
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 222,
+        "signature": "primitives()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "primitives",
+        "elapsedMs": 81082
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 264,
+        "signature": "nestedMapping()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "nestedMapping",
+        "elapsedMs": 6346
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 299,
+        "signature": "boolKeys()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "boolKeys",
+        "elapsedMs": 13165
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 363,
+        "signature": "arrays()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "arrays",
+        "elapsedMs": 64088
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 407,
+        "signature": "structFields()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "structFields",
+        "elapsedMs": 7302
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 457,
+        "signature": "inheritedGetters()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "inheritedGetters",
+        "elapsedMs": 53647
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 490,
+        "signature": "fixedBounds()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "fixedBounds",
+        "elapsedMs": 11548
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 544,
+        "signature": "identity()",
+        "reason": "",
+        "reading": "clean",
+        "invalidSpecification": false,
+        "function": "identity",
+        "elapsedMs": 16945
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 561,
+        "signature": "selectorRead(uint)",
+        "reason": "",
+        "reading": "clean",
+        "invalidSpecification": false,
+        "function": "selectorRead",
+        "elapsedMs": 2104
+      },
+      {
+        "tag": "box",
+        "status": "proved",
+        "sourceId": 596,
+        "signature": "selectorBounds()",
+        "reason": "",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "selectorBounds",
+        "elapsedMs": 13553
+      },
+      {
+        "tag": "box",
+        "status": "pending",
+        "sourceId": 629,
+        "signature": "falseBoundsPanic()",
+        "reason": "open proof goals",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "falseBoundsPanic",
+        "elapsedMs": 5643
+      },
+      {
+        "tag": "box",
+        "status": "pending",
+        "sourceId": 646,
+        "signature": "falseScalar()",
+        "reason": "open proof goals",
+        "reading": "solc",
+        "invalidSpecification": false,
+        "function": "falseScalar",
+        "elapsedMs": 6338
+      },
+      {
+        "tag": "diamond",
+        "status": "proved",
+        "sourceId": 19,
+        "signature": "inherited(uint8)",
+        "reason": "",
+        "reading": "clean",
+        "invalidSpecification": false,
+        "function": "inherited",
+        "elapsedMs": 2463
+      }
+    ],
+    "evidenceRoot": "/workspace/solidity-lean/.lake/upstream/entry-points-left/proof-repair-20261028",
+    "inputs": "nonvalue-rw-original-aggregate300-inputs.json",
+    "actualImports": "nonvalue-rw-clean-import-closure-actual-imports.json",
+    "marginSeconds": 0.23527560400543734
+  },
+  "sourceSha256": {
+    "Solidity/Calculus/Closer/Facts.lean": "d418fc7be35fe9a2a029d1919bac57c1f553f19f25074022c6f9893e4701aa24",
+    "Solidity/Calculus/Closer/Bytes.lean": "73b7c1ad0349899e00effcc6e50f34d9d83d5870e4c0e7f80239a6a7a9e8cb0a",
+    "Solidity/Calculus/ElimFacts.lean": "cc76e119f2b54e6f0e09ffa39d757c70be1d17755f74ada84227115eee9597da",
+    "tests/upstream/FactsLookupSharing.lean": "ac1474926dc454c541375da822a37917e4ebf2b22910542fb4f24283f1b88bd6"
+  },
+  "kernelControls": {
+    "strictPerFile": "nonvalue-rw-wrapper-controls-diagnostics: success true, no errors",
+    "raw": "nonvalue-rw-kernel-primitive exit0; six original and six wrapper kernel/native controls, universal rw_eq_rwWith; printed axiom sets propext only"
+  },
+  "primitiveProfile": {
+    "beforeRowMs": 82770,
+    "afterRowMs": 78720,
+    "wholeGateRequired": true,
+    "note": "Profile is exploratory; only original aggregate result establishes its gate."
+  },
+  "reviews": {
+    "finder": "Universal nonvalue fast path sound; value lookup exact. Confirmed weak chaining/error-only controls strengthened. Final combined acceptance pending.",
+    "skeptic": "Full16 observations exactly match historical complete report except timings; all3879 input hashes and257 actual imported artifacts match. Margin extremely tight; final combined acceptance pending."
+  },
+  "history": {
+    "preservedEvidenceDirectory": "/workspace/solidity-lean/.lake/upstream/entry-points-left/proof-repair-20261028",
+    "rejectedCandidates": [
+      "typed Facts verdict checkpoint certificates",
+      "context-curried returns",
+      "whole-proof object sharing",
+      "opt-in one-boundary verdict certificates"
+    ],
+    "diagnosticCaptureLoss": "duplicate-diagnostic-launch-record.json records one accidental same-name duplicate diagnostic launch: stopped only own group; newly created prior diagnostic log/result overwritten and reconstructable only in part from tool transcript. All earlier user audit commits/reports intact. Runner logs/results and cap records now exclusive-create."
+  },
+  "pending": [
+    "full62 affected suite",
+    "22 API/admission tests",
+    "original-policy whole ./run-lean.sh within1800",
+    "assigned upstream and static/suite/sort gates",
+    "final independent reviews, commit/export seal"
+  ],
+  "coverage": "All four declaration feature statuses remain partial; no new semantic coverage from this performance increment.",
+  "currentCertificateAudit": {
+    "command": [
+      "bash",
+      "-c",
+      "set -e\nlake --quiet --no-build lean tests/upstream/EntryPointsLeft.lean -- --tstack=131072\nlake --quiet --no-build lean tests/upstream/EntryPointsAdmission.lean -- --tstack=131072\nlake --quiet --no-build lean tests/upstream/GetterKernelSharing.lean -- --tstack=131072\nlake --quiet --no-build lean tests/upstream/FactsLookupSharing.lean -- --tstack=131072\nlake --quiet --no-build lean tests/upstream/EntryPointsReceiverProfile.lean -- --tstack=131072\nlake --quiet --no-build lean Solidity/Examples/Tactics/SourceAdmissionImport.lean -- --tstack=131072\nlake --quiet --no-build lean /workspace/solidity-lean/.lake/upstream/entry-points-left/proof-repair-20261028/NonvalueRwAxioms.lean -- --tstack=131072\npython3 /workspace/.setup/verify-entrypoint-axioms-nonvalue-rw.py"
+    ],
+    "exit": 0,
+    "elapsedSeconds": 68.85441705099947,
+    "resources": {
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "peakBytes": 877375488,
+      "events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0
+      },
+      "commandExit": 0,
+      "resourcePassEligible": true
+    },
+    "axiomReport": {
+      "originalCertificates": 42,
+      "axioms": {
+        "Solidity.Tests.EntryPointsLeft.Legacy_ContractKeyGetter_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_ExternalOverloads_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_ExternalOverride_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_InheritedFallback_falseObservation": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_InheritedFallback_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_InheritedFrameFallback_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_InheritedFrameReceiver_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_InheritedReceiver_falseObservation": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_InheritedReceiver_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_InheritedRollback_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_contractScalar": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_enumMapping": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_enumScalar": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_enumStruct": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_falseEnum": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_OwnHelperReceiver_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_ReceiveOverride_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_ReceivePriority_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_RenamedExternal_falseObservation": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_RenamedExternal_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.Legacy_enumPanic": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_ContractKeyGetter_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_ExternalOverloads_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_ExternalOverride_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedFallback_falseObservation": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedFallback_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedFrameFallback_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedFrameReceiver_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedReceiver_falseObservation": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedReceiver_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedRollback_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_contractScalar": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_enumMapping": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_enumScalar": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_enumStruct": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_falseEnum": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_OwnHelperReceiver_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_ReceiveOverride_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_ReceivePriority_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_RenamedExternal_falseObservation": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_RenamedExternal_positive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.EntryPointsLeft.ViaIR_enumPanic": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "additionalAudits": {
+        "Solidity.Tests.GetterKernelSharing.prefixStagesChecked": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.GetterKernelSharing.prefixStagesShared": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.GetterKernelSharing.checkedStagedAtom": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.GetterKernelSharing.stagedAtomOriginalFallback": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Tests.FactsLookupSharing.emptyLookup": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.firstMatch": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.wrongSortHead": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.noMatch": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.noChaining": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.nonValueSort": [
+          "propext"
+        ],
+        "Solidity.Decide.Facts.rw_eq_rwWith": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.wrapperFirstMatch": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.wrapperNoChaining": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.wrapperStorage": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.wrapperMemory": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.wrapperInteger": [
+          "propext"
+        ],
+        "Solidity.Tests.FactsLookupSharing.wrapperPath": [
+          "propext"
+        ],
+        "Solidity.Decide.Facts.rwWith_eq_rwWithM": [
+          "propext"
+        ],
+        "Solidity.Decide.Facts.rwWith_eval": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Decide.Facts.rw_eval": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Decide.Facts.nf_eq_nfM": [
+          "propext"
+        ],
+        "Solidity.Decide.Facts.nf_eval": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Decide.ElimM.rwF_eq_rwFM": [
+          "propext"
+        ],
+        "Solidity.Decide.ElimM.rwF_rep": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Decide.LTm.elimF_rep": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "Solidity.Decide.LFml.elimF_holds": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "noNonstandardAxioms": true
+    }
+  },
+  "metadataPolicy": "No feature semantic/evidence manifest change; existing manifest localEvidence points to declarations-metadata.md, which links this report. Generated inventory regenerated and verified byte-exact original; avoids changing actual imported Features metadata."
+}

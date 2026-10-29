@@ -2350,3 +2350,57 @@ configuration/artifact hashes. Fresh full gates and the final closure seal
 are still pending after this scoped admission repair. No feature inventory
 status or proof/search budget is raised; reference/function returns and
 broader dispatch remain partial.
+
+
+#### Kernel lookup performance continuation (2026-10-29)
+
+The original complete PublicGetters aggregate now terminates successfully in
+299.765 seconds under its unchanged 300-second limit. All sixteen original
+observations, including both original pending controls, are retained. The margin
+is narrow; this is not yet the final combined affected-suite/core pass. The
+[new milestone report](../../tests/upstream/entry-points-left-proof-performance-validation.json)
+records exact commands, rows, hashes, hard 12 GiB/zero-swap resource evidence,
+and outstanding final gates. Peak aggregate memory was 3223416832 bytes, with
+zero limit/OOM events. Original observations and budgets are unchanged.
+
+The typed implementation now passes the rewrite input after the list recursor,
+passes Facts after the normalization recursor, and eliminates the sort before
+ElimM rewriting. Universal agreement with the original compiled implementations
+and all original soundness premises remain kernel-checked. Facts.rw additionally
+skips impossible nonvalue-sort scans while leaving its value lookup unchanged;
+Facts.rw_eq_rwWith proves exact agreement for every contract, Facts, sort and
+input. Its native computation also retains identical results. The existing
+trust inventory records the exact ElimM.rwFM override; no axiom is introduced.
+
+Independent read-only finder and skeptic reviews found two executable-control
+weaknesses: a chaining case without a second applicable rewrite and nonvalue
+cases using only err. The controls now use a true 0-to-1-to-2 chain, nonerror
+storage/memory/integer inputs and a path input. Six original and six new wrapper
+kernel/native controls pass; printed axiom sets contain only propext. Strict
+per-file diagnostics distinguish Lean success from transport exit status.
+
+Inclusive profiling identified actual synchronous kernel costs; exclusive
+profiler categories must not be read as inclusive timing. Typed Facts verdict
+checkpointing, curried returns, whole-proof object sharing and an opt-in single
+kernel-boundary verdict prototype did not improve cost and were rejected.
+Failed and budget-stopped attempts remain diagnostic evidence, not gate passes.
+Their sources are archived with hashes outside production. All three temporary
+profiling hooks are restored byte-for-byte. One accidental duplicate diagnostic
+launch overwrote its newly created prior same-name diagnostic log/result;
+duplicate-diagnostic-launch-record.json identifies the partial reconstruction
+from the tool transcript. Earlier audit reports and commits remain intact, and
+exclusive result/log/resource creation now prevents recurrence.
+
+The skeptic independently matched all sixteen full observations (apart from
+timing), all 3879 aggregate input hashes and all 257 actual imported artifacts.
+The 62-test suite, 22 API checks, 42-certificate audit, whole core gate and final
+export still require a current combined refresh. Feature statuses and remaining
+reference/function-return and broader-dispatch refusals remain unchanged.
+
+The current combined certificate/admission bundle subsequently passes in
+68.854 seconds, peak 877375488 bytes with zero limit/OOM events. It checks all
+42 original certificate names, the stage-corruption and original-budget
+fallback controls, twelve lookup/wrapper kernel and native cases, both receiver
+pipelines, and unchanged SourceAdmissionImport. Universal rwWith, rw, nf and
+elimF agreement/soundness axiom audits use only propext, Classical.choice and
+Quot.sound. Full-suite/API/core/upstream/static final gates remain pending.

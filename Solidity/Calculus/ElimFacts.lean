@@ -31,11 +31,26 @@ section Rw
 
 /-- What the premises rewrite, at a sort: a word, and each reading of a
 storage. -/
-def ElimM.rwF (F : Facts C) : (s : Srt) → ElimM C s → ElimM C s
+def ElimM.rwFM (F : Facts C) : (s : Srt) → ElimM C s → ElimM C s
   | .val _, e => F.rw (e : LTm C (.val _))
   | .st, S => (⟨(S : SFun C).ok, fun c P => F.rw ((S : SFun C).rd c P), (S : SFun C).orig⟩ :
       SFun C)
   | _, e => e
+
+/-- The same rewriting dispatch, eliminating the sort before the typed value. -/
+@[implemented_by ElimM.rwFM]
+def ElimM.rwF (F : Facts C) (s : Srt) : ElimM C s → ElimM C s :=
+  Srt.casesOn (motive := fun s => ElimM C s → ElimM C s) s
+    (fun _ e => F.rw e)
+    (fun _ e => e)
+    (fun S => (⟨S.ok, fun c P => F.rw (S.rd c P), S.orig⟩ : SFun C))
+    (fun _ e => e) (fun _ e => e) (fun _ e => e) (fun e => e)
+    (fun _ e => e) (fun _ e => e) (fun _ _ e => e) (fun e => e)
+
+/-- Exact agreement with the original dependent matching dispatch at every sort. -/
+theorem ElimM.rwF_eq_rwFM (F : Facts C) (s : Srt) (e : ElimM C s) :
+    ElimM.rwF F s e = ElimM.rwFM F s e := by
+  cases s <;> rfl
 
 /-- `LTm.elimF`'s compiled twin. -/
 def LTm.elimFM (F : Facts C) : {s : Srt} → LTm C s → ElimM C s

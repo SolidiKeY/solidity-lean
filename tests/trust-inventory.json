@@ -247,6 +247,11 @@
   {
     "file": "Solidity/Calculus/ElimFacts.lean",
     "kind": "override",
+    "code": "@[implemented_by ElimM.rwFM]"
+  },
+  {
+    "file": "Solidity/Calculus/ElimFacts.lean",
+    "kind": "override",
     "code": "@[implemented_by LTm.elimFM]"
   },
   {
