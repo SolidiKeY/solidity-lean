@@ -3,9 +3,9 @@ import EvmYul.EVM.Semantics
 
 /-!
 Actual upstream memory dispatch and fixed/stack-addressed macro lowering. This module
-is a checkpoint, not a persistent word-cell/byte-memory simulation: the latter
-still needs serialization, readback and frame laws under an explicit contract
-for the upstream opaque zero-padding primitive. No source assembly is admitted.
+provides the opcode/macro layer. MemoryBytes and MemoryRefinement establish a
+persistent preallocated word-cell/byte-memory simulation under an explicit
+contract for the upstream opaque zero-padding primitive. No source assembly is admitted.
 -/
 namespace Solidity.Evm.External.Memory
 

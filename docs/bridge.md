@@ -364,72 +364,129 @@ The full instruction correspondence is **not complete**; what remains:
 | Core instructions | Remaining obligation |
 |---|---|
 | `keccakMap`, `keccakArr`, `sload`, `sstore` | Numeric slot interpretation, concrete hashing/memory setup, and a storage relation handling address aliases. |
-| `mload`, `mstore`, `mloadAt`, `mstoreAt` | Persistent bounded 32-byte encoding/readback/frame relation and state invariant; dispatch/scaling/macros have a [proved checkpoint](#memory-lowering-checkpoint-compiler10-2026-10-28). |
+| `mload`, `mstore`, `mloadAt`, `mstoreAt` | [Bounded preallocated refinement](#bounded-memory-refinement-compiler10-2026-10-29) is proved under the explicit padding contract. Discharging that external contract, memory growth, instruction fetching and gas/bytecode equivalence remain outside the result. |
 | `jump`, `jumpi`, `loop` | Assembler from relative/structured control flow to absolute PC and valid jump destinations. |
 | `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
 | `revert` | Return-data operands and the driver's halting relation. |
 
-#### Memory lowering checkpoint (compiler10, 2026-10-28)
+#### Bounded memory refinement (compiler10, 2026-10-29)
 
-`Bridge/SolidityBridge/ExternalEvm/Memory.lean` is an independently checked
-checkpoint; **it does not close the memory row above**. It supplies actual
-`EvmYul.EVM.step` equations for MLOAD/MSTORE, fixed-cell PUSH32 macros, and
-stack-cell PUSH32(32)/MUL macros. Each cell address is `32 * cell` modulo the
-upstream word size. The returned states retain the actual PC, execution-length,
-zero charged-gas preparation, and upstream active-memory updates. The macro
-runner supplies opcodes; it does not verify instruction fetching or the driver.
-
-`load_core_macro` and `loadAt_core_macro` relate the actual core loads and actual upstream macros'
-terminal numeric stacks under an explicit **single-access** initial read
-relation. `empty_load_control` and `empty_loadAt_control` give inhabited empty-memory
-cases. `store_core_macro` and `storeAt_core_macro` prove both actual store executions, equal numeric
-stack tails, the core's written cell and unchanged other core cells, and the
-upstream's exact `ByteArray.write` expression with requested length 32. It does **not** prove that
-the resulting byte memory represents the resulting core memory. Symbolic words
-are outside these numeric premises. Neither fixed nor dynamic results establish
-a persistent core memory relation.
-
-The missing representation work is concrete: `UInt256.toByteArray`, padded
-reads, and writes call `ffi.ByteArray.zeroes`, whose upstream declaration has
-no Lean body or correctness specification, even at length zero. The module
-states a bounded `PaddingCorrect` predicate, including a bound below `2^64`,
-but assumes it in no theorem and claims no inhabitant for it. A conditional
-refinement with a noncircular padding contract remains possible. Serialization,
-readback and byte-frame laws still need to be derived under that contract;
-assuming those conclusions would merely restate the outstanding obligation.
-No FFI implementation is linked or evaluated by these controls.
-
-The eventual bounded relation must connect capacity to the actual state's
-`activeWords`, prevent both `32 * cell` and `activeWords * 32` from wrapping,
-and bound padding lengths before their `USize` conversions. `Bounded cells`
-only bounds capacity and does not itself constrain a state. Loads read before
-expanding the active extent: a persistent relation must preallocate the observed
-range or constrain inactive physical bytes, as well as prove a byte-write frame.
-Before word reduction, aligned distinct 32-byte windows are proved disjoint. The geometric unaligned-overlap control
-is not an evaluator counterexample. Separate actual controls show underflow,
-address-scaling aliasing, and that a concrete 32-byte big-endian encoding of one
-is read as zero when the active-byte extent wraps. Existing same-stack arity
+`Bridge/SolidityBridge/ExternalEvm/Memory.lean` supplies actual
+`EvmYul.EVM.step` MLOAD/MSTORE equations, fixed-cell PUSH32 macros, and
+stack-cell PUSH32(32)/MUL macros. The runner supplies opcodes with positive
+fuel and zero charged gas. Returned states retain the actual PC,
+execution-length, gas preparation and active-memory updates; this is not an
+instruction-fetching or gas-checking driver theorem. Existing same-stack
 counterexamples in `Obstructions` are unchanged.
 
-The edited file passed direct kernel checking with `-j1 --tstack=131072` in
-11 seconds at 315,539,456 bytes peak aggregate cgroup memory. All eleven guarded
-headline axiom audits report only `propext`, `Classical.choice`, and `Quot.sound`.
-An earlier paired-store elaboration reached the default heartbeat bound; the
-repair split typed obligations without raising any limit. The full optional umbrella attempt failed only in the unchanged
-`Bridge/SolidityBridge/Arith/Widths.lean` source-synthesis proofs (lines 21, 47,
-79, 111 and 501). It exited 1 after 3,323 seconds at 5,728,395,264 bytes peak
-aggregate cgroup memory, with no OOM events. Its memory target passed. Final
-direct memory and existing ExternalEvm target builds passed (12 and 1 seconds);
-the eleven explicit axiom audits passed (3 seconds). The native rule checker
-built in 70 seconds and passed 36 cases × 1,000 samples with seed 42 in 2
-seconds. The final umbrella retry still failed in unchanged `Widths` (9 seconds).
-That complete serial check group took 97 seconds at 865,034,240 bytes peak
-aggregate cgroup memory, under 12 GiB with zero swap and no OOM events.
-Read-only finder/skeptic reviews found no remaining code defect and used no
-Lean server; the finder's stale remaining-row wording was corrected. Both
-classify the original assignment as incomplete, not as a completed refinement. This work admits no
-raw-memory/assembly source shape and claims no gas or bytecode equivalence;
-there is no source inventory promotion or legacy/viaIR/optimizer scope change.
+`Bridge/SolidityBridge/ExternalEvm/MemoryBytes.lean` proves a pure 32-byte
+big-endian `encoding`, its exact length and decoder roundtrip. `serialize_eq`
+connects the actual upstream `UInt256.toByteArray` to this encoding under the
+explicit named hypothesis `PaddingCorrect bound`, with `32 ≤ bound`.
+The hypothesis specifies only the opaque zero allocator, not serialization,
+reads, writes, simulation or their desired conclusions. No new axiom is
+installed and **no inhabitant of this external contract is claimed**.
+
+The trust boundary is concrete. Upstream `ffi.ByteArray.zeroes` has no stated
+source body or correctness specification and names the native `memset_zero`
+implementation. Inspection of the actual Lean declaration reports no axioms;
+its elaborator-generated opaque value is `fun n => default`, not a checked
+zero-padding implementation. Native allocator correctness is therefore an
+external representation assumption, not established by an axiom audit or by
+sampled execution. These theorems do not verify or replace that primitive.
+
+`write_inbounds` normalizes the actual `ByteArray.write` definition.
+`write_size`, `write_get_same`, `write_get_frame`, `read_inbounds`, `readback`
+and `write_readback` derive size, exact written bytes, padded-read reduction,
+readback and the frame on every existing byte outside `[a,a+32)`. They require
+a full 32-byte source and `a+32 ≤ dest.size`; only the length-zero allocator
+contract is needed for these in-bounds byte operations. They do not assume
+readback or frame conclusions. No write-growth or partially allocated read is
+covered. Source arrays are immutable mathematical byte arrays, so the laws do
+not assume a mutable buffer aliasing implementation.
+
+`Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean` defines the persistent
+`Represents cells m s` relation independently of upstream reads: physical size
+is `32*cells`, `activeWords.toNat = cells`, and every cell below capacity is a
+numeric core word with all 32 physical bytes equal to its pure encoding.
+`Bounded cells` requires `32*cells < 2^256` and `< 2^64`. Thus cell scaling and
+`activeWords*32` do not wrap, and the accessed windows fit before the upstream
+`USize` conversions. Serialization padding lengths are at most 32 (also valid
+on a 32-bit platform). Symbolic words, cells outside capacity and memory
+expansion remain outside this relation.
+
+`lookup_represents` derives actual upstream read agreement from these bytes;
+it does not assume `ReadAgrees`. `load_preserves` and `store_preserves` prove
+the persistent postrelation for the actual upstream memory transformers.
+`load_refines`, `store_refines`, `loadAt_refines` and `storeAt_refines` relate
+the actual core steps to the actual upstream macros, with equal numeric
+stacks **and the whole persistent postrelation**. Every access requires its
+word-cell index below capacity. Distinct aligned cells have disjoint windows;
+the store proof uses the written-byte law at its cell and the physical-byte
+frame at every other cell. Loads read before expanding active memory; the
+preallocated active capacity makes that update stable.
+
+`control_represents` proves an inhabited two-cell input independently of the
+FFI hypothesis. Fixed/dynamic controls cover either valid boundary and all
+numeric stored values. `roundtrip_control` proves actual upstream store/load
+readback and the other-cell zero frame; `fixed_roundtrip` composes actual core
+store/load steps and actual macros, deriving the load from the store's proved
+postrelation and an exact final one-word stack. These evaluator claims remain
+conditional on the explicit allocator contract. The contract itself is not
+claimed inhabited. Under the same allocator contract, the new actual unaligned-store counterexample shows a
+store of one at byte 1 changes byte 32 of the next cell. Existing underflow,
+address-wrap, active-extent-wrap and same-stack obstructions remain; the
+access premise excludes the first out-of-capacity index; this is not an executable
+refusal. `capacity_load_counterexample` separately proves that an actual load
+at that index expands activeWords to 3 with physical size still 64, losing
+the original two-cell relation, independently of the FFI contract.
+
+The separate native regression `scripts/check-external-memory.sh` compiles only
+the verbatim `memset_zero` function from already-pinned EVMYulLean commit
+`047f63070309f436b66c61e276ab3b6d1169265a`, plus the ABI wrapper generated by
+the unchanged vendored FFI declaration and pinned Lean compiler.
+`Bridge/tests/memory-zeroes.provenance.json` records the full upstream source
+hash and verbatim function-body hash; the script verifies the copied fixture's
+checksum. It loads the memory symbol into Lean's interpreter and runs
+`Bridge/tests/MemoryObserve.lean`: 28 actual core/upstream fixed/dynamic
+store-load pairs, at cells 0 and 1, with values 0, 1, 255, 256, `2^248`, `2^255`
+and `2^256-1`. It checks numeric stacks, physical encoding, size, active extent,
+other-cell read frame, 33 zero-allocator samples and six boundary/error
+observations. No hashing libraries are linked. These are runtime observations,
+not kernel proof of the allocator contract, a Solidity source-admission test,
+or gas/bytecode equivalence. No reference Lean definition is replaced. The final native run passed in
+5 seconds at 275,124,224 bytes peak aggregate cgroup memory, with no OOM.
+The active-wrap observation starts from the nonzero unaligned-write state,
+so its expected zero is discriminating.
+
+All 17 new guarded headline axiom audits report only `propext`,
+`Classical.choice` and `Quot.sound`; the original eleven remain. Focused byte
+checking passed in 4 seconds at 297,611,264 bytes peak aggregate cgroup memory;
+focused refinement checking passed in 11 seconds at 318,976,000 bytes. A
+projection-normalization repair resolved the initial store proof's default
+heartbeat stop without changing budgets or claims. Independent read-only finder/skeptic reviews found no remaining proof defect.
+Their confirmed capacity-wording issue and nondiscriminating native active-wrap
+control were corrected; neither reviewer used a Lean server. New/existing
+ExternalEvm targets and the 36-case × 1,000-sample rule checker passed.
+Orphan/layer/strict automatic/trust gates and the trust regression passed.
+TestSuite's complete 564-row check passed with the repository's existing pinned
+snapshot (552 derived, 11 refuted, one excluded, zero pending; two skip).
+The incomplete setup snapshot first failed for a missing sibling pin file;
+no pin or source was changed to repair it. Documentation paths still fail
+with the same 20 historical findings, not new memory-reference failures.
+Full optional validation remains dependent on the designated Widths repair.
+
+The earlier checkpoint commit `200153d3` and its exports are retained. Its
+full optional gate failed in unchanged `Arith/Widths.lean` source-synthesis
+proofs; the designated storage-slots task owns that narrow prerequisite
+repair. At fresh master `6f267cc7` it was not yet merged. This is a separate
+integration dependency, not a passing full gate.
+
+This optional refinement admits no raw-memory/assembly Solidity source shape,
+changes no source compiler, inventory target or exclusion, and claims no gas
+or bytecode equivalence. Consequently no legacy/viaIR/optimizer source-admission
+fixture is added or promoted. Numeric storage hashing and jump/PC assembly
+remain outside this memory task.
 
 Symbolic-slot PUSH/ADD and DUP/SWAP depths outside 1–16 are also outside the
 numeric correspondence. `Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`
@@ -445,7 +502,7 @@ To build the independent targets alone, from `Bridge/`:
 lake build SolidityBridge.ModelTheory.LowenheimSkolem \
   SolidityBridge.CallbackTrace SolidityBridge.CallbackModalTrace \
   SolidityBridge.ExternalEvm.StackOps SolidityBridge.ExternalEvm.Obstructions \
-  SolidityBridge.ExternalEvm.Memory \
+  SolidityBridge.ExternalEvm.Memory SolidityBridge.ExternalEvm.MemoryRefinement \
   SolidityBridge.CompilerSimulation SolidityBridge.LoopFixpoint \
   SolidityBridge.AdversaryPolicy rulecheck
 lake exe rulecheck --seed 42 --samples 1000
