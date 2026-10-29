@@ -673,3 +673,5 @@ import Solidity.Backend.Failure.EmissionChecks
 import Solidity.Backend.Failure.Slice
 import Solidity.Backend.Failure.Correct
 import Solidity.Backend.Failure.SliceChecks
+import Solidity.Backend.Failure.Observe
+import Solidity.Backend.Failure.ObservationChecks

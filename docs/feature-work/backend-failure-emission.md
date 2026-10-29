@@ -38,7 +38,7 @@ composition obligations. Nothing here revisits source failure semantics.
 |---|---|
 | 1: typed input and opcode emission | Done: focused gates and independent reviews passed |
 | 2: independent byte memory, stack tails, terminal slices | Done: kernel proofs, controls and independent reviews |
-| 3: intrinsic observations and discriminating controls | Pending |
+| 3: intrinsic observations and discriminating controls | Done: proofs, controls, independent reviews and focused gates |
 | 4: local checkpoint/unwind and nested failure | Pending |
 | A: arbitrary payload chunking, tails and address bounds | Proved with checkpoint 2 |
 | B: concatenation, distinction, input preservation, external vectors | Internal exact byte vectors implemented; remaining proofs/tests pending |
@@ -182,3 +182,66 @@ orphans exit 0 (773 reachable, 0 orphaned), trust exit 0 (788 sources,
 241 inventoried sites, 0 findings); doc paths exit 1, output byte-identical
 to exact base (46 inherited missing references). No inherited failure is green.
 Independent final reviews are saved in `cp2-reviews.md`.
+
+## Checkpoint 3 handoff
+
+`Observe` imports the existing `Solidity/Semantics/Run.lean` read-only.
+`HaltObserves` and `ResultObserves` are observation relations on the committed
+`THalt`/`TRes`, not replacement source semantics. `HaltObserves.functional`
+and `ResultObserves.functional` prove uniqueness. Primitive `.panic` is the
+existing assert tag and observes Panic(1); all other panic codes already
+arrive as `revertWith` data. Empty require/revert preserves empty bytes;
+`revertWith` preserves every byte, including malformed payloads. Divergence
+and exhaustion have no adapter result; full resource/session behavior is
+not silently reinterpreted. Ordinary success starts from already ABI-encoded
+bytes. General source return encoding and modifier continuation composition
+remain parent obligations.
+
+`assert_false_intrinsic`, `require_false_intrinsic`, `revert_bytes_intrinsic`
+and `custom_parts_intrinsic` prove equations against actual source functions.
+The custom proof retains existing `customSelector`, `selectorBytes` and ABI
+argument bytes without a new encoder. Observation corollaries keep that
+exact selector and arguments. `inputOfResult_sound` and `intrinsic_emission`
+connect existing finite byte results to checked instruction execution under
+`Fits` and two-free-slot boundaries. The output equals the original immutable
+input payload for every initial machine memory; no mutable alias can change
+the input List. Return and revert with identical bytes are distinguished.
+
+`ObservationChecks` instantiates a real empty Contract and `State.init`;
+uses actual typed false/true expressions, evaluated custom parts, Error(boom)
+and ordinary return bytes; and combines actual assert evaluation with the
+checked emitter. Existing decoders have inhabited positives and malformed
+negatives. Wrong selectors retain full otherwise valid Panic and Error
+bodies, so rejection cannot be explained by truncation. Reviewer-requested
+`wrong_observation` and source-level negatives refute assert-as-empty,
+Panic(0), require-as-panic, swapped custom arguments and return-as-revert.
+Malformed bytes still observe exactly even when catch decoders reject them.
+Adapter rejection of diverge/exhausted is pinned explicitly.
+
+Focused target: `lake -f .failure-emission.lakefile.toml build
+Solidity.Backend.Failure.ObservationChecks`, 38 jobs, exit 0, 2s;
+aggregate RSS 736,816 KiB, cgroup peak 185,835,520 B (`cp3-build.log`).
+The unchanged AST module replays its existing unused-variable k warning;
+new modules are clean. Current intrinsic Run prerequisite built in 89s,
+peak aggregate RSS 965,028 KiB, cgroup peak 572,313,600 B.
+
+G02's cache A1 issue was reproduced: bare per-file elaboration could not
+find a fetched Eqns olean. Lake lean reproduced it too. The current
+Lake-selected synthetic trace artifacts for Eqns and Hashes were materialized
+from the private cache; paths and SHA256 hashes are recorded in
+`materialized-current-artifacts.json`. No source artifact was selected by
+name alone. The failed attempt is retained as `observe-cache-missing.log`.
+Fresh per-file diagnostics, guarded axiom pins, independent final reviews
+and static gate outputs accompany this checkpoint. `tests/failure-emission/check-imports.mjs`
+checks every owned module's closure and the independence of Slice/Gap,
+supplementing the shared checker without editing its closed CORE list.
+
+Final checkpoint-3 per-file diagnostics: Observe exit 0 (1s, aggregate RSS
+703,176 KiB, cgroup peak 152,326,144 B); ObservationChecks exit 0 (2s,
+RSS 715,332 KiB, peak 162,500,608 B). New files have no errors or warnings.
+Static gates in `cp3-static.json`: shared layers pass (168 core, none reach
+frontend); task-local imports pass (9 owned modules, 0 findings); orphans pass
+(775 reachable, 0 orphaned); trust pass (790 sources, 241 inventoried sites,
+0 findings). Docs exit 1, output still byte-identical to exact base's 46
+missing references, never classified passed. Both independent follow-ups
+cleared all concrete source/control findings; `cp3-reviews.md` records them.

@@ -939,3 +939,5 @@ At the root, the notation's own tests:
 | `Backend/Failure/Slice.lean` | Independent typed-word PUSH/MSTORE8/RETURN/REVERT byte-memory execution and checked stack heights. |
 | `Backend/Failure/Correct.lean` | Exact emitter execution, stack/memory frames, bounded-stack certificate and arbitrary chunk/tail laws. |
 | `Backend/Failure/SliceChecks.lean` | Literal instruction, underflow/truncation, memory/frame/chunk, concatenation and1022/1023 stack controls. |
+| `Backend/Failure/Observe.lean` | Existing THalt/TRes source observation relation, deterministic payload correspondence and checked emission. |
+| `Backend/Failure/ObservationChecks.lean` | Inhabited source assert/require/custom/return, complete-body selector negatives and wrong-observation refutations. |
