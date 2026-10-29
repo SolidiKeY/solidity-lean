@@ -264,6 +264,27 @@ corollaries instantiate the general `k`-bit theorem.
 - The G46.05 preimage list per prefix and the G01 `PublicCorrectness`
   premise (owners: G46.05 and the G01 revision).
 
+## Handoff and gates
+
+Base `caf52ecd4dde5d37cbc0098d47de1a01aa218285`; Lean checked at commit
+`4eb6d3a` (later commits change only this document).
+
+- `lean_diagnostic_messages` on `Solidity/Hash/CollisionBound.lean`: no
+  messages. No `sorry`, new axiom, `native_decide`, `implemented_by` or
+  `maxHeartbeats`; `#guard_msgs` pins the standard three axioms.
+- `node scripts/check-layers.mjs`: 156 core modules, 0 reach the elaborator.
+  `node scripts/check-orphans.mjs`: 734 reachable, 0 orphaned.
+  `bash scripts/check-trust.sh`: 0 findings.
+  `bash scripts/check-doc-paths.sh`: 46 missing references, the base count.
+- `./run-lean.sh` (23 min 17 s wall, 39 min 39 s user; peak memory not
+  measured, since `/usr/bin/time` is absent): `lake build` passed (719 jobs;
+  `Solidity.Hash.CollisionBound` built in 6.1 s). `lake build SolkeyTestSuite`
+  failed: Lean was killed with exit code 137 (out of memory) on
+  `Solidity/TestSuite/Derived17.lean`. That file is not touched here and does
+  not import this module; its repair belongs to the memory-loops lane. The
+  step therefore stopped before `check-solkey.sh`. Run on its own,
+  `check-solkey.sh` reports `37 mismatch(es)`, the base count.
+
 ## Registration
 
 `Solidity.lean` imports the module. It only states and proves, so following
