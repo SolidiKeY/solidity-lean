@@ -33,6 +33,9 @@ history is in git.
 | [feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md) | The approved per-run hash premise `CollisionFree` and the kernel-checked random-oracle birthday bound (q²/2²⁵⁷ for keccak), adaptive-query scope and how G27.05/G46.05 use them. |
 | [feature-work/cloud-integration-10.md](feature-work/cloud-integration-10.md) | Cloud task 10 integration: committed ABI/error repairs, merge decisions and combined validation. |
 | [feature-work/roadmap-decisions-impact.md](feature-work/roadmap-decisions-impact.md) | Roadmap: what each 2026-10-29 user decision affects, whether existing proofs survive, and the owning group. |
+| [feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md) | The approved per-run hash premise `CollisionFree` and the kernel-checked random-oracle birthday bound (q²/2²⁵⁷ for keccak), adaptive-query scope and how G27.05/G46.05 use them. |
+| [feature-work/storage-hashed-layout.md](feature-work/storage-hashed-layout.md) | The hashed storage layout model (slot terms, words through a hash parameter, bounded offsets), its separation under the region premise, the EVM `Slot` correspondence and the keccak instantiation with solc slot vectors (G27.05/G46.05 preparation). |
+- [Cloud task 10 integration](feature-work/cloud-integration-10.md) — committed ABI/error repairs, merge decisions and combined validation.
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
 
