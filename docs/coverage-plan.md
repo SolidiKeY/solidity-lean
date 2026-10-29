@@ -181,11 +181,15 @@ assuming each other's unproved conclusions.
 
 G00 status (2026-10-29): pins, exclusion evidence, reconciliation and owners in [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md); its questions Q1–Q6 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which confirms all 30 exclusions.
 
+G00 manifest status (2026-10-29): the manifest cites the decisions (30 exclusions tier A, G00 Q2 outcomes on the 23 abstract rows) and `fixedPoint` is in profile (model/missing, owners S00–S02, G08–G47); pin work left for G05/G06 is in [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md#pin-decisions-2026-10-29).
+
 G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which lists the contract revisions they require before G01 counts as frozen.
 
 G01 revision (2026-10-29): `Solidity/Roadmap/Contracts.lean` and [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md#decisions-applied) implement the G01 follow-up of both decision rounds, G06's findings F1–F8 and the integration reviews (the hash premise on source-determined preimages, `Fixed.Sane`, the unified hash premises); statements only, pending integration review.
 
 G02 status (2026-10-29): cold/warm/cache-restore measurements on the 16 GiB VM in [roadmap-g02-measure.md](feature-work/roadmap-g02-measure.md): cold `./run-lean.sh` 58 min with `TestSuite/Derived17` OOM-killed beside its siblings (11.5 GiB peak alone), warm 2 s, cache restore 3 s, Bridge 17 min with `Arith/Widths` failing at the base; splits recommended there, not made.
+
+G03 status (2026-10-29): constructor-to-theorem, combination, decision-row and module/lemma dependency ledger in [roadmap-g03-ledger.md](feature-work/roadmap-g03-ledger.md), checked by `scripts/roadmap-g03-ledger.py --check`; no obligation closed, no feature status changed.
 
 G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
 
@@ -197,9 +201,15 @@ G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vector
 
 Fixed-point status (2026-10-29): reference semantics for G00 Q6 in [fixed-point-semantics.md](feature-work/fixed-point-semantics.md) and `Solidity/Language/FixedPoint.lean` (values, operations and laws; not wired into the frontend or compiler); its scope questions Q1–Q8 are answered and encoded; owners (S00–S02, S04.02, G08–G53) are listed in its §4.
 
+Decision impact (2026-10-29): [roadmap-decisions-impact.md](feature-work/roadmap-decisions-impact.md) maps every user decision to the definitions, theorems, rules, tests, scripts, documents and Codex lanes it affects, with owners; G04 R32–R36 now carry the decided premises; no obligation closed.
+
 Integration notes (2026-10-29):
 
-- **G01 revision held back.** Integration review found that its
+- **G01 revision held back (second time, 2026-10-29).** Its rework fixed both
+  defects below, but `refines` is still unmeetable through `Collided`, which
+  requires the source to be failure-free (a real collision after any gas
+  failure has no source match).
+- **Original hold-back.** Integration review found that its
   `PublicCorrectness.refines` cannot be met for long sessions (the
   2^128-hash bound restricts only the target) and that unconstrained
   `Fixed.regionLen`/`rootSlots` can make the hash premise false on every
@@ -210,8 +220,18 @@ Integration notes (2026-10-29):
   and one correspondence between G01's and G06's `Fixed`, precompile
   predicates and `keccakWord`, and the hash premises in
   `Solidity/Hash/CollisionBound.lean`.
-- **G03 ledger** is not merged yet: its checker needs the second-round
-  decisions.
+- **G03 checker follow-ups** (review of the merge): `FROZEN` also silences
+  parallel shared writes; `ACK_MODULES` silences findings by module whatever
+  their kind; refusal anchors count as stage coverage; some definition
+  anchors are tagged `theorem`; proposed G24 children are labelled
+  `roadmap`. The discharge parser now reads only the G04 restriction table.
+- **Decision-impact follow-ups:** `Storage.full`'s verdict should cite G04
+  R24 (solc's `Panic(0x41)` past 2^64 elements); the Lean docstrings of
+  `StmtOut.refused`/`compile_correct` still describe the stale payment
+  disjunct as live.
+G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.
+
+Fixed-point status (2026-10-29): reference semantics for G00 Q6 in [fixed-point-semantics.md](feature-work/fixed-point-semantics.md) and `Solidity/Language/FixedPoint.lean` with `Solidity/Language/FixedPoint/` (laws, constants and mobile types, ABI words, storage packing with a per-variable frame, and an upstream conformance sweep: three intended deviations, no defect); not wired into the frontend or compiler; scope questions Q1–Q8 answered and encoded, QL1–QL2 open (§6.2); owners (S00–S02, S04.02, G08–G53) in its §4.
 
 ### Independent source definitions — after G00–G07, before wave 1
 
@@ -488,8 +508,9 @@ VM that stops after its first checkpoint wastes its setup and cold build.
 | V31 | G54, G55 | V29, V30 |
 
 G02 checks these lane sizes against measured build and proof costs. G03's
-shared-foundation child packages under G24 (decision G03 Q1) are added to the
-manifest and to lane V14 once G03 integrates. The other large lanes (source
+shared-foundation child packages under G24 (decision G03 Q1) are not yet in
+the manifest or lane V14: G03's ledger lists them under "Integration steps"
+and its checker applies them through `PROPOSED_PACKAGES` until they land. The other large lanes (source
 definitions, aggregates, world, EVM bridge) may need splitting by
 measurement. A split keeps each part at four hours or more, and every
 continuation inherits the same scope and completion gate.
@@ -514,7 +535,11 @@ is empty, unless the item touches files an open Codex lane owns
    change that drops the never-constructed `refused` case of `StmtOut`. It
    waits for the Codex memory/evm lanes, because it edits
    `Solidity/Evm/**`.
-5. **Source cost rule for stipend payments** (decision G06 Q3, S02/G43
+5. **Fixed-point mobile constants** (S01): encode the decision that a
+   standalone fractional constant takes solc's mobile type with truncation,
+   also as an ABI argument, in `Solidity/Language/FixedPoint/Literals.lean`
+   (the merged model still refuses `abi.encode(0.1)` as solc does).
+6. **Source cost rule for stipend payments** (decision G06 Q3, S02/G43
    preparation): define the compiler-independent rule and its examples.
 
 ## Done when

@@ -6,12 +6,15 @@ Reads docs/solidity-features.json and docs/solidity-upstream-inventory.json
 and every upstream symbol classified as in-profile, upstream-rejected or
 unresolved, the feature combinations, and the owning roadmap groups.
 
-The exclusion evidence below is transcribed from the repository history
-(docs/feature-work/roadmap-g00-scope.md, "Exclusion evidence"). No row is
-confirmed: confirmation needs an attributable user decision, which the
-history does not contain. `--check` fails if a manifest ID is unowned, an
-owner override names an unknown ID or group, or an excluded ID has no
-evidence entry.
+The historical exclusion tiers below are transcribed from the repository
+history (docs/feature-work/roadmap-g00-scope.md, "Exclusion evidence").
+Tier A, the attributable user decision, is read from the manifest's
+`decision` field and confirmed against the "**User decision (date):**"
+marker of the section it cites (docs/solidity-scope.md, "User decisions
+(2026-10-29)"). `--check` fails if a manifest ID is unowned, an owner
+override names an unknown ID or group, an excluded ID has no evidence entry,
+a cited decision is not in its record, or an `abstract` row has no G00 Q2
+outcome, or a decision cites a question for rows it does not cover.
 
 Usage: python3 scripts/roadmap-g00-scope.py [--check | --write] [--root DIR]
 `--write` replaces the generated block of docs/feature-work/roadmap-g00-scope.md;
@@ -29,10 +32,10 @@ from pathlib import Path
 # Evidence tiers for each `scope: exclude` row. "B" = named as deliberately
 # out of scope in docs/semantic-gaps.md at the root commit c3a3eef, before
 # PR #5 (419f8a4) created the manifest; "B-" = only covered
-# by a generic clause there; "C" = first appears in 419f8a4. Tier "A" would be
-# an explicit user-decision marker (the repository's convention is
-# "**User decision (date)**", docs/kernel-port.md); no exclusion has one, so
-# every row stays unresolved.
+# by a generic clause there; "C" = first appears in 419f8a4. These are the
+# history before the decision. Tier "A" is an explicit user-decision marker
+# (the repository's convention is "**User decision (date)**",
+# docs/kernel-port.md); it is computed by `decision_tier`, not stored here.
 EXCLUSION_EVIDENCE = {
     "inlineAssembly": ("B", "inline assembly other than a canonical whole-byte-buffer rethrow"),
     "gasleft": ("B", "`gasleft()`"),
@@ -255,6 +258,9 @@ OWNER_OVERRIDES = {
     "constructorLifetime": ("S04.04", "G14", "G22.03", "G44 G50.01"),
     "staticCallRestriction": ("S03.03 S04.03", "G13", "G22", "G42.02 G42.05"),
     "worldAssumptions": ("S04.03", "G13", "G22", "G47"),
+    # G00 Q6 (user decision 2026-10-29): full support. Ranges are whole roadmap
+    # waves; the sibling fixed-point-semantics task designs the semantics.
+    "fixedPoint": ("S00 S01 S02", "G08–G15", "G16–G23", "G24–G47"),
 }
 
 # Rejection owners: a precise refusal is an obligation for every
@@ -279,16 +285,25 @@ RETHROW_SYMBOLS = {
 
 # Upstream-incomplete rather than invalid: the obligation is solc's exact
 # acceptance boundary, not blanket rejection (Q6 in the document).
-UPSTREAM_NOTES = {
-    "fixedPoint": "upstream-incomplete: pinned solc accepts some uses (`type T is fixed;`, "
-                  "`syntaxTests/userDefinedValueType/all_value_types.sol`); match its exact boundary (Q6)",
+# `fixedPoint` was the only entry; G00 Q6 moved it into the profile.
+UPSTREAM_NOTES = {}
+
+DECISION_MARKER = "**User decision ({date}):**"
+# The question each decided scope must cite and its permitted outcomes. The
+# G00 Q1 decision ("All 30 confirmed") covers exactly the rows of
+# EXCLUSION_EVIDENCE; a later exclusion needs a decision of its own.
+DECISIONS = {
+    "exclude": ("G00 Q1", {"approvedExclusion"}),
+    "abstract": ("G00 Q2", {"approved", "replace", "provedSpecialCase", "followsG01"}),
 }
+DECIDED_ROWS = {"G00 Q1": set(EXCLUSION_EVIDENCE), "G00 Q6": {"fixedPoint"},
+                "G00 Q4 (revised)": {"evaluationOrder", "pragmaAbicoder"}}
 
 GROUPS = ({f"S0{i}" for i in range(6)} | {f"G{i:02d}" for i in range(56)})
 
 # Combinations the scope document names: one source construct whose
 # classification needs several feature IDs. "in" parts are owned; "out" parts
-# are unresolved exclusions.
+# are exclusions (approved by G00 Q1).
 COMBINATIONS = [
     ("`f{value:v,gas:g}(…)`", ["callOptions", "valueOption"], ["gasOption"], "G15 G22 G43"),
     ("`new C{salt:s,value:v}(…)`", ["callOptions", "newContract", "valueOption"], ["create2Salt"], "G15 G22.03 G44.03"),
@@ -332,17 +347,72 @@ def targets_of(kind, name, targets):
     return targets
 
 
-def g00_status(scope):
-    return {"model": "in-profile", "abstract": "in-profile",
-            "upstream": "upstream-rejected", "exclude": "unresolved"}[scope]
+def decision_section(root, record):
+    """The lines of the section a decision's `record` (path#anchor) names."""
+    path, _, anchor = record.partition("#")
+    if not anchor or not (root / path).is_file():
+        return None
+    lines = (root / path).read_text().splitlines()
+    slug = lambda h: re.sub(r"[^a-z0-9 -]", "", h.lower()).replace(" ", "-")
+    heads = [i for i, l in enumerate(lines) if l.startswith("#") and slug(l.lstrip("#").strip()) == anchor]
+    if len(heads) != 1:
+        return None
+    out = []
+    for line in lines[heads[0] + 1:]:
+        if line.startswith("#"):
+            break
+        out.append(line)
+    return "\n".join(out)
+
+
+def decision_tier(root, feature):
+    """"A" when the row cites a user decision whose record carries the marker
+    and the question's table row; otherwise None."""
+    d = feature.get("decision")
+    if not d:
+        return None
+    section = decision_section(root, d["record"])
+    if section is None or DECISION_MARKER.format(date=d["date"]) not in section \
+            or f"| {d['question']} " not in section:
+        return None
+    return "A"
+
+
+def g00_status(scope, decided=False):
+    if scope == "exclude":
+        return "excluded" if decided else "unresolved"
+    return {"model": "in-profile", "abstract": "in-profile", "upstream": "upstream-rejected"}[scope]
+
+
+def expand(cell):
+    """Owner tokens of a cell; `Gaa–Gbb` stands for every group in the range."""
+    toks = []
+    for tok in cell.split():
+        m = re.fullmatch(r"G(\d\d)–G(\d\d)", tok)
+        toks += [f"G{i:02d}" for i in range(int(m[1]), int(m[2]) + 1)] if m and m[1] < m[2] else [tok]
+    return [t for t in toks if t != "—"]
 
 
 def owners(feature):
     return OWNER_OVERRIDES.get(feature["id"], CATEGORY_OWNERS.get(feature["category"]))
 
 
-def check(features, ledger, children):
+def check(root, features, ledger, children):
     errors = []
+    for f in features["features"]:
+        if "decision" in f and decision_tier(root, f) != "A":
+            errors.append(f"{f['id']}: decision {f['decision']['question']} not found in {f['decision']['record']}")
+        d = f.get("decision") or {}
+        if f["scope"] in DECISIONS:
+            q, outcomes = DECISIONS[f["scope"]]
+            if d.get("question") != q or d.get("outcome") not in outcomes:
+                errors.append(f"{f['id']}: {f['scope']} row needs a {q} decision with an outcome in {sorted(outcomes)}")
+        if d.get("question") in DECIDED_ROWS and f["id"] not in DECIDED_ROWS[d["question"]]:
+            errors.append(f"{f['id']}: {d['question']} does not cover this row")
+    for q, rows in DECIDED_ROWS.items():
+        cited = {f["id"] for f in features["features"] if (f.get("decision") or {}).get("question") == q}
+        for key in sorted(rows - cited):
+            errors.append(f"{key}: no {q} decision cited")
     for kind, names in RETHROW_SYMBOLS.items():
         for name in names:
             if name not in ledger["symbols"].get(kind, {}):
@@ -364,7 +434,9 @@ def check(features, ledger, children):
     groups_used = set()
     for row in list(OWNER_OVERRIDES.values()) + list(CATEGORY_OWNERS.values()):
         for cell in row:
-            groups_used.update(tok for tok in cell.split() if tok != "—")
+            if re.search(r"–", cell) and not all(re.fullmatch(r"G\d\d(–G\d\d)?|[SG]\d\d(\.\d\d)?", x) for x in cell.split()):
+                errors.append(f"malformed owner cell {cell}")
+            groups_used.update(expand(cell))
     for _, _, _, own in COMBINATIONS:
         groups_used.update(own.split())
     for g in groups_used:
@@ -383,17 +455,22 @@ def check(features, ledger, children):
     return errors
 
 
-def symbol_status(targets, scope):
-    kinds = {g00_status(scope[t]) for t in targets}
+def symbol_status(targets, status):
+    kinds = {status[t] for t in targets}
     if len(kinds) == 1:
         return kinds.pop()
     if "in-profile" in kinds:
-        return "combination-unresolved" if "unresolved" in kinds else "combination-upstream"
+        for k in ("unresolved", "excluded"):
+            if k in kinds:
+                return "combination-" + k
+        return "combination-upstream"
     return "nonprofile-mixed"
 
 
-def report(features, ledger):
+def report(root, features, ledger):
     rows = features["features"]
+    tier = {f["id"]: decision_tier(root, f) for f in rows}
+    status = {f["id"]: g00_status(f["scope"], tier[f["id"]] == "A") for f in rows}
     scope = {f["id"]: f["scope"] for f in rows}
     out = []
     emit = out.append
@@ -405,19 +482,20 @@ def report(features, ledger):
     emit("")
     emit("| G00 status | manifest scope | rows |")
     emit("|---|---|---|")
-    for (status, sc), n in sorted(collections.Counter((g00_status(f["scope"]), f["scope"]) for f in rows).items()):
-        emit(f"| {status} | {sc} | {n} |")
+    for (st, sc), n in sorted(collections.Counter((status[f["id"]], f["scope"]) for f in rows).items()):
+        emit(f"| {st} | {sc} | {n} |")
     emit(f"| **total** | | **{len(rows)}** |")
     emit("")
     current = collections.Counter((f["scope"], f["current"]) for f in rows)
-    emit("Current statuses at the base (informative; G00 does not change them): "
+    emit("Current implementation statuses (informative; G00 changes only `fixedPoint`, from "
+         "upstream/notApplicable to model/missing, by the G00 Q6 decision): "
          + ", ".join(f"{s}/{c} {n}" for (s, c), n in sorted(current.items())) + ".")
     emit("")
     sym = collections.Counter()
     per_kind = collections.defaultdict(lambda: collections.defaultdict(list))
     for kind, table in ledger["symbols"].items():
         for name, targets in table.items():
-            st = symbol_status(targets_of(kind, name, targets), scope)
+            st = symbol_status(targets_of(kind, name, targets), status)
             sym[st] += 1
             per_kind[kind][st].append(name)
     emit("| upstream symbols | count |")
@@ -436,15 +514,20 @@ def report(features, ledger):
     emit("")
     emit("| ID | category | scope | G00 status | evidence | source | syntax | lowering | backend |")
     emit("|---|---|---|---|---|---|---|---|---|")
-    for f in sorted(rows, key=lambda f: (g00_status(f["scope"]), f["category"], f["id"])):
-        st = g00_status(f["scope"])
+    for f in sorted(rows, key=lambda f: (status[f["id"]], f["category"], f["id"])):
+        st = status[f["id"]]
+        d = f.get("decision")
         if st == "in-profile":
             o = owners(f)
             ev = "in profile" + (" (abstraction)" if f["scope"] == "abstract" else "")
+            if d:
+                ev += f"; {d['question']}: {d['outcome']}"
             emit(f"| `{f['id']}` | {f['category']} | {f['scope']} | {st} | {ev} | {o[0]} | {o[1]} | {o[2]} | {o[3]} |")
-        elif st == "unresolved":
-            tier, text = EXCLUSION_EVIDENCE[f["id"]]
-            emit(f"| `{f['id']}` | {f['category']} | {f['scope']} | {st} | {tier}: {text} | {REJECTION_OWNERS['exclude']} | | | |")
+        elif st in ("excluded", "unresolved"):
+            old, text = EXCLUSION_EVIDENCE[f["id"]]
+            ev = (f"A: {d['question']} ({d['date']}); before: {old}: {text}" if st == "excluded"
+                  else f"{old}: {text}")
+            emit(f"| `{f['id']}` | {f['category']} | {f['scope']} | {st} | {ev} | {REJECTION_OWNERS['exclude']} | | | |")
         elif f["id"] in UPSTREAM_NOTES:
             emit(f"| `{f['id']}` | {f['category']} | {f['scope']} | {st} | {UPSTREAM_NOTES[f['id']]} | {REJECTION_OWNERS['upstream']} | | | |")
         else:
@@ -454,8 +537,8 @@ def report(features, ledger):
     emit("")
     for kind in ledger["symbols"]:
         parts = []
-        for st in ("in-profile", "combination-unresolved", "combination-upstream", "unresolved",
-                   "nonprofile-mixed", "upstream-rejected"):
+        for st in ("in-profile", "combination-unresolved", "combination-excluded", "combination-upstream",
+                   "unresolved", "excluded", "nonprofile-mixed", "upstream-rejected"):
             names = per_kind[kind].get(st)
             if names:
                 parts.append(f"{st} ({len(names)}): " + ", ".join(f"`{n}`" for n in sorted(names)))
@@ -468,15 +551,15 @@ def report(features, ledger):
     for kind, table in ledger["symbols"].items():
         for name, targets in sorted(table.items()):
             targets = targets_of(kind, name, targets)
-            if symbol_status(targets, scope).startswith("combination"):
-                ins = [t for t in targets if g00_status(scope[t]) == "in-profile"]
-                oth = [t for t in targets if g00_status(scope[t]) != "in-profile"]
+            if symbol_status(targets, status).startswith("combination"):
+                ins = [t for t in targets if status[t] == "in-profile"]
+                oth = [t for t in targets if status[t] != "in-profile"]
                 mark = " (G00 supplement)" if name in RETHROW_SYMBOLS.get(kind, ()) else ""
                 emit(f"| {kind} | `{name}`{mark} | {', '.join(ins)} | {', '.join(oth)} |")
     emit("")
     emit("### Named feature combinations")
     emit("")
-    emit("| construct | in-profile IDs | unresolved IDs | owners |")
+    emit("| construct | in-profile IDs | excluded IDs | owners |")
     emit("|---|---|---|---|")
     for name, ins, outs, own in COMBINATIONS:
         emit(f"| {name} | {', '.join(ins)} | {', '.join(outs)} | {own} |")
@@ -490,14 +573,14 @@ def main():
     ap.add_argument("--root", default=str(Path(__file__).resolve().parent.parent))
     args = ap.parse_args()
     features, ledger, children = load(Path(args.root))
-    errors = check(features, ledger, children)
+    errors = check(Path(args.root), features, ledger, children)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
     doc = Path(args.root) / DOC
     text = doc.read_text()
     start, end = text.index(BEGIN) + len(BEGIN), text.index(END)
-    block = "\n" + report(features, ledger) + "\n"
+    block = "\n" + report(Path(args.root), features, ledger) + "\n"
     if args.write:
         doc.write_text(text[:start] + block + text[end:])
         return 0
@@ -506,11 +589,12 @@ def main():
             print(f"{DOC}: generated block is stale (run --write)", file=sys.stderr)
             return 1
         n = sum(1 for f in features["features"] if f["scope"] in ("model", "abstract"))
+        a = sum(1 for f in features["features"] if f["scope"] == "exclude" and decision_tier(Path(args.root), f) == "A")
         print(f"roadmap-g00: {len(features['features'])} rows, {n} in-profile owned, "
-              f"{len(EXCLUSION_EVIDENCE)} exclusions with evidence entries, "
+              f"{len(EXCLUSION_EVIDENCE)} exclusions with evidence entries ({a} tier A), "
               f"{len(COMBINATIONS)} named combinations; 0 errors")
         return 0
-    print(report(features, ledger))
+    print(report(Path(args.root), features, ledger))
     return 0
 
 

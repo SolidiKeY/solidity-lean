@@ -59,9 +59,12 @@ heap/pointer relation on the memory path).
   identity and pointer word.
 * Allocation is a bump allocator (`Evm/MemoryAlloc.lean`):
   `StructAllocatorRepr` owns every live interval below the cursor, a zeroed
-  free tail represents the fresh object's defaults, and capacity is the
-  strict bound `cursor + size + 1 < 2^256`, a theorem premise (the
-  generated code has no runtime capacity check).  Allocation needs frame
+  free tail represents the fresh object's defaults, and capacity is a
+  theorem premise (the generated code has no runtime capacity check): each
+  single-allocation lemma needs `cursor + size + 1 < 2^256`
+  (`Evm/MemoryAlloc.lean`), and the public input `AllocationInput`
+  (`Evm/MemoryGrowResult.lean`) states `cursor + cost < 2^256` over the cost
+  a run reaches (`cost = 0` needs no capacity).  Allocation needs frame
   base `0 < b` (cell zero is otherwise a local); non-allocating programs may
   use base zero.
 * The frame bound is the peak context anywhere in the program
