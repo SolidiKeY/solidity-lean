@@ -356,7 +356,8 @@ skeptic; `HashPremise.not_of_rootSlots` makes gap 1 a lemma). Others:
     - `check-noncircular` (0 violations) and `check-axiom-pins` (0 errors);
     - the script tests (11 pass);
     - `check-doc-paths`: 46 missing, all baselined;
-    - the G03 ledger: 38 errors, all baselined;
+    - the G03 ledger: 0 errors (the baseline was tightened from 38 at
+      integration);
     - the build log: both builds completed, SolKey 37 mismatches (the
       baseline).
   - `./run-lean.sh` (warm, after `cccc108`): `lake build` "Build completed
@@ -418,3 +419,17 @@ here:
 - `idCert.back` carries the premise up.
 - `observedBySource` takes the EVM premise.
 - `hashes_source` is proved for both lists.
+
+**Integration review (2026-10-29, merge into master).** A read-only
+finder and skeptic found nothing blocking. Some counts above describe
+earlier revisions. At integration:
+- the `run_cmd` block covers 25 theorems;
+- the non-circularity gate scans 980 modules;
+- there are 486 axiom pins;
+- the G03 ledger has 0 errors;
+- 16 source modules are under rules 1–3.
+
+Rules 0 and 1 also allow `Solidity.Hash.CollisionBound` and
+`Solidity.Roadmap.Evm`, the two modules `Contracts.lean` imports. §1 lists
+six contract gaps, not four. The earlier note that `EvmSpec`'s premise is
+trivial is superseded by round 6.

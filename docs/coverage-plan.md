@@ -199,8 +199,7 @@ G05 status (2026-10-29): base-revision audit and certificate interfaces in [road
 
 G06 status (2026-10-29): machine inventory (23 disagreements with pinned Osaka), the pinned semantics and observation interfaces, the core/Bridge certificate boundary and bridge lemmas B01–B28 with owners in [roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) and `Solidity/Roadmap/Evm.lean` (statements only); no obligation closed; its questions Q1–Q3 are answered (second round, 2026-10-29) and encoded.
 
-G07 status (2026-10-29): controls and gates in [roadmap-g07-gates.md](feature-work/roadmap-g07-gates.md): a toy source, EVM and compiler meet `PublicCorrectness` (`Solidity/Roadmap/Controls.lean`), and always-reverting, byte-altering, data-erasing and malformed-source-accepting compilers are refuted; `node scripts/check-g07.mjs` runs the non-circularity, axiom-pin and trust gates and reports base failures (46 doc paths, 38 G03 ledger errors, `Derived17` memory, 37 SolKey mismatches) apart from new ones.
-G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.
+G07 status (2026-10-29): controls and gates in [roadmap-g07-gates.md](feature-work/roadmap-g07-gates.md): a toy source, EVM and compiler meet `PublicCorrectness` (`Solidity/Roadmap/Controls.lean`), and always-reverting, byte-altering, data-erasing and malformed-source-accepting compilers are refuted; `node scripts/check-g07.mjs` runs the non-circularity, axiom-pin and trust gates and reports base failures (46 doc paths, `Derived17` memory, 37 SolKey mismatches; the G03 ledger baseline is 0 errors) apart from new ones.
 
 Fixed-point status (2026-10-29): reference semantics for G00 Q6 in [fixed-point-semantics.md](feature-work/fixed-point-semantics.md) and `Solidity/Language/FixedPoint.lean` (values, operations and laws; not wired into the frontend or compiler); its scope questions Q1–Q8 are answered and encoded; owners (S00–S02, S04.02, G08–G53) are listed in its §4.
 
@@ -232,8 +231,6 @@ Integration notes (2026-10-29):
   R24 (solc's `Panic(0x41)` past 2^64 elements); the Lean docstrings of
   `StmtOut.refused`/`compile_correct` still describe the stale payment
   disjunct as live.
-
-G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vectors pass 16/16 on Cancun and on Osaka; they exercise no Osaka-specific behaviour beyond the EIP-7825 transaction cap, and the frame trace behind "no differing vector" is not committed. The pin commit `0f92a28a` switches their pins ([roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)); the bridge `TargetSchedule` and the Cancun AST fixtures remain G06 obligations.
 
 G06 status (2026-10-29): machine inventory (23 disagreements with pinned Osaka), the pinned semantics and observation interfaces, the core/Bridge certificate boundary and bridge lemmas B01–B28 with owners in [roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) and `Solidity/Roadmap/Evm.lean` (statements only); no obligation closed; its questions Q1–Q3 are answered (second round, 2026-10-29) and encoded.
 

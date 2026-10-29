@@ -222,7 +222,7 @@ parameters, or are excluded by S01.
 - check-layers: 0 modules reach the elaborator.
 - check-orphans: 0 orphaned (753 reachable).
 - check-noncircular: 0 violations (16 source modules).
-- check-axiom-pins: 361 pins, 0 errors.
+- check-axiom-pins: 361 pins, 0 errors (486 at integration).
 - check-source-grammar and `source-ctors --check`: clean.
 - Script tests: pass.
 - check-doc-paths: 46 missing, which is the baseline.
