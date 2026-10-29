@@ -17,7 +17,8 @@ only when `{` is followed by `identifier :`, a statement beginning with a
 type name followed by a data location or an identifier is a declaration,
 `revert` followed by an identifier is a revert statement, `emit`/`revert`
 targets are paths, attribute keywords are taken at most once and greedily
-(so `function () internal x;` gives the function type the visibility).
+(so `function () internal x;` gives the function type the visibility, and a
+second visibility ends a function type's attributes).
 
 Recursion is structural on a fuel argument (`16 ×` the token count plus
 one), so the kernel can evaluate a parse; fuel bounds the nesting depth, and
@@ -186,7 +187,9 @@ def isAscii (b : Bytes) : Bool := b.all (·.toNat < 128)
 /-- A string token's bytes as a path or flag (ASCII only). -/
 def strArg (what : String) : P String := do
   match ← peek with
-  | some (.str b) => if isAscii b then advance; return b.str else P.fail s!"non-ASCII {what}"
+  | some (.str b) =>
+    if b.isEmpty then P.fail s!"empty {what}"
+    else if isAscii b then advance; return b.str else P.fail s!"non-ASCII {what}"
   | _ => P.fail s!"expected {what}"
 
 /-- A string literal's fragments: consecutive tokens of one kind. -/
@@ -214,6 +217,26 @@ def yulLitOf : Tok → Option YulLit
 
 /-- Yul identifiers separated by commas, possibly none before `stop`. -/
 def identList : P (List String) := sepBy1 ident
+
+/-- A function type's attributes: a visibility and a mutability, each at
+most once.  A second visibility ends the run (it is the state variable's, as
+the grammar's `{!$visibilitySet}?` and solc read it); a second mutability is
+an error. -/
+def fnTypeAttrs : Nat → Option Visibility → Option Mutability → List Slot →
+    P (Option Visibility × Option Mutability × List Slot)
+  | 0, v, m, o => pure (v, m, o.reverse)
+  | k + 1, v, m, o => do
+    match ← peek with
+    | some t =>
+      match visOf t, mutOf t with
+      | some x, _ =>
+        if v.isSome then pure (v, m, o.reverse)
+        else do advance; fnTypeAttrs k (some x) m (.vis :: o)
+      | _, some x =>
+        if m.isSome then P.fail "repeated function type attribute"
+        else do advance; fnTypeAttrs k v (some x) (.mutab :: o)
+      | _, _ => pure (v, m, o.reverse)
+    | none => pure (v, m, o.reverse)
 
 /-! ## The grammar -/
 
@@ -288,21 +311,11 @@ def fnType : Nat → P (Syn .typeName)
   | n + 1 => do
     expect (.kw .function) "'function'"
     let (ps, cps) ← capture (paramsParen n)
-    let attrs ← many do
-      match ← peek with
-      | some t => match visOf t, mutOf t with
-        | some v, _ => advance; return some (Sum.inl v)
-        | _, some m => advance; return some (Sum.inr m)
-        | _, _ => return none
-      | none => return none
-    let vs := attrs.filterMap fun | .inl v => some v | _ => none
-    let ms := attrs.filterMap fun | .inr m => some m | _ => none
-    if vs.length > 1 || ms.length > 1 then P.fail "repeated function type attribute"
-    else
-      record [.attrs (attrs.map fun | .inl _ => .vis | .inr _ => .mutab)]
-      record cps
-      let rets ← returnsOpt n
-      return .fnType ps vs.head? ms.head? rets
+    let (vis, mu, order) ← fnTypeAttrs 3 none none []
+    record [.attrs order]
+    record cps
+    let rets ← returnsOpt n
+    return .fnType ps vis mu rets
 
 def mappingType : Nat → P (Syn .typeName)
   | 0 => P.fail "nesting too deep"

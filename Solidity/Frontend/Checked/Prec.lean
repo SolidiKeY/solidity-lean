@@ -220,6 +220,12 @@ def Syn.all (p : {c : Cat} → Syn c → Bool) : {c : Cat} → Syn c → Bool
 
 /-- **The precedence predicate**: every node is read as the grammar (and
 solc) reads it. -/
-def Syn.prec {c : Cat} (t : Syn c) : Bool := t.all Syn.precNode
+def Syn.prec {c : Cat} (t : Syn c) : Bool := t.precNode && t.all Syn.precNode
+
+/-- The root of a precedence-selected tree satisfies the condition (`Syn.all`
+checks it too; stated at the root so no case split over `Syn` is needed). -/
+theorem Syn.prec_root {c : Cat} {t : Syn c} (h : t.prec = true) : t.precNode = true := by
+  simp only [Syn.prec, Bool.and_eq_true] at h
+  exact h.1
 
 end Solidity.Source

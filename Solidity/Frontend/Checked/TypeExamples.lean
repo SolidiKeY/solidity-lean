@@ -71,13 +71,22 @@ def tyErr (s : String) : Option String :=
   | .error e => some e.msg
   | .ok _ => none
 
+/-- A second visibility ends a function type's attributes (it belongs to the
+state variable); a second mutability is refused. -/
+theorem type_second_visibility :
+    parsesTo sourceUnit "contract C { function () internal public f; }"
+      (.unit (.cons (.contract false "C" .none .nil
+        (.cons (.stateVar (.fnType .nil (some .internal) none .nil) (some .pub) none none false "f"
+          .none) .nil)) .nil)) = true := by decide +kernel
+
 theorem type_refused :
     tyErr "mapping(address payable => uint)" = some "expected '=>'" ∧
     tyErr "uint[" = some "expected an expression" ∧
-    tyErr "function () public external" = some "repeated function type attribute" ∧
+    tyErr "function () public external" = some "unexpected token" ∧
     tyErr "mapping(uint => )" = some "expected a type name" ∧
     tyErr "function () returns ()" = some "empty returns list" ∧
-    tyErr "uint x" = some "unexpected token" := by decide +kernel
+    tyErr "uint x" = some "unexpected token" ∧
+    tyErr "function () view pure" = some "repeated function type attribute" := by decide +kernel
 
 /-! ## Declarations -/
 
@@ -113,6 +122,10 @@ def declCorpus : List String := [
      struct P { string s; }
      event Q();
      error R();
+     function(bytes memory) external public c3;
+     function () internal internal transient fiit;
+     mapping(a.K key => S) byKey;
+     function f(uint[] memory a, S storage s, bytes calldata c) internal {}
    }"]
 
 theorem declCorpus_accepted : declCorpus.all (fun s => !(ctorsOf s).isEmpty) = true := by
@@ -147,6 +160,17 @@ theorem recursive_struct :
 and its tokens under the canonical-order layout it was read with. -/
 def fingerprint (r : Except Error (Syn .unit × List Choice)) : Option (List Node × Option (List Tok)) :=
   r.toOption.map fun (u, L) => (u.nodes, u.toks L)
+
+/-- Mutually recursive declarations: each struct's edge names the other. -/
+theorem mutual_structs :
+    (match parse (ascii "struct A { B[] b; } struct B { A a; }") with
+      | .ok u => (Syn.decls u).map fun (d : Decl) => (d.name, d.refs)
+      | .error _ => []) = [("A", [(.use, ⟨"B", []⟩)]), ("B", [(.use, ⟨"A", []⟩)])] := by
+  decide +kernel
+
+/-- An empty import path is refused (`NonEmptyStringLiteral`). -/
+theorem import_empty_refused :
+    unitErr "import \"\";" = some (7, "empty import path") := by decide +kernel
 
 /-- State variable attributes in any order: the same nodes and tokens up to
 the attribute run, different layouts. -/
@@ -197,6 +221,16 @@ and tokens. -/
 theorem print_roundtrip :
     declCorpus.all (fun s => reprintFingerprint s == fingerprint (parseWithLayout (ascii s)) &&
       (reprintFingerprint s).isSome) = true := by
+  decide +kernel
+
+/-- A 40-digit hex literal whose lowercase spelling is its checksum, spelled
+otherwise, keeps its cleared flag through printing. -/
+theorem print_checksum_flag :
+    (reprintFingerprint "contract C { address a = 0x000000000000000000000000000000000000000B; }") ==
+      fingerprint (parseWithLayout (ascii
+        "contract C { address a = 0x000000000000000000000000000000000000000B; }")) &&
+    (reprintFingerprint "contract C { string s = unicode\"\\u2028\\u202e\\u202c\"; }").isSome
+      = true := by
   decide +kernel
 
 end Solidity.Frontend.Checked

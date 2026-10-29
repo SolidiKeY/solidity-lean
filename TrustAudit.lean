@@ -36,6 +36,7 @@ import Solidity.Roadmap.Controls
 import Solidity.Source.TypingExamples
 import Solidity.Source.StateExamples
 import Solidity.Frontend.Checked.LexExamples
+import Solidity.Frontend.Checked.TypeExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -731,3 +732,23 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} checked-lexer theorems use only the standard axioms"
+
+-- G09 (`docs/feature-work/frontend-parse.md`): checked parsing of types and
+-- declarations.
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Checked.parse_sound,
+    ``Solidity.Frontend.Checked.parse_derives,
+    ``Solidity.Frontend.Checked.parseType_derives,
+    ``Solidity.Frontend.Checked.declCtors_covered,
+    ``Solidity.Frontend.Checked.recursive_struct,
+    ``Solidity.Frontend.Checked.print_roundtrip,
+    ``Solidity.Frontend.Checked.strBody_sound]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checked-parse (G09) theorems use only the standard axioms"

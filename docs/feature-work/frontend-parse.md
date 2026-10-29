@@ -202,6 +202,136 @@ NatSpec flags for `////` and `/***/` (6); the stronger wrong-output control
 `ui|nt` (7). Recorded under Remaining: uniqueness, completeness, the
 precision of error offsets and the fuel bound (1, 4, 5, 9).
 
+## G09: type and declaration syntax
+
+### Design
+
+**The specification is the yield.** `Syn.yield t L` (`Solidity/Frontend/Checked/Print.lean`)
+is the token sequence `t` derives, one clause per S00 constructor, read off
+the grammar rule the constructor represents (`grammarCtors`,
+`Solidity/Source/Upstream.lean`): `mapping ( key name? => typeName name? )`,
+`function ( parameterList? ) attrs (returns ( parameterList ))?`,
+`typeName [ expression? ]`, `struct name { member+ }`, a state variable's
+`typeName attrs name (= expression)? ;`, and so on. S00's trees keep the
+source's parentheses (`(e)` is a one-component tuple), so the yield inserts
+none: it is a derivation, not a pretty printer.
+
+**Layouts.** Two spellings are below S00's abstraction: the order of a
+definition's attributes (the grammar's `( visibility | stateMutability |
+modifierInvocation | Virtual | overrideSpecifier )*` with at-most-once
+predicates, which S00 stores as fields) and the fragments of a concatenated
+string literal. A layout `L : List Choice` records them in pre-order:
+`attrs order` per attribute-bearing node (function, constructor, modifier,
+fallback, receive, state variable, function type), `frags lengths` per
+string literal, `layoutFirst` for a contract with both `layout at` and `is`.
+`Syn.toks t L = some ts` (the yield consuming all of `L`) is the derivation
+of `ts` under those choices, and `Syn.Derives t ts := ∃ L, t.toks L = some ts`.
+
+**The parser** (`Solidity/Frontend/Checked/Parser.lean`) is untrusted
+recursive descent, one function per grammar rule in a `mutual` block,
+structural on a fuel argument so the kernel evaluates it. It returns the
+tree and the layout it read; `capture` reorders the layout into the yield's
+pre-order (a function's attribute order is known only after its
+parameters). It is intrinsic: it builds `Syn c` directly, with the statement
+context `SCtx` and the `elementaryTypeName[false]` proofs, so no untyped
+intermediate layer exists.
+
+**The check** (`Solidity/Frontend/Checked/Check.lean`): `parseLocated`
+accepts the parser's tree only if its yield under the returned layout is
+exactly the lexed token sequence and `Syn.prec` holds (G10).
+`parseCat p` does the same for one category (`parseType`, `parseExpr`).
+
+**Printing** (`Solidity/Frontend/Checked/Render.lean`): `Tok.render`
+spells each token canonically (exact decimal mantissa and exponent, EIP-55
+casing for checksummed hex literals, `\xNN` escapes), `renderToks` joins
+tokens with one space, and `Syn.print t L` renders the yield.
+
+### Theorems
+
+| Name | Statement |
+|---|---|
+| `parse_sound` | `parseWithLayout src = .ok (u, L) → ∃ ps, lex src = .ok ps ∧ Lexed src ps ∧ u.toks L = some (tokensOf ps) ∧ u.prec` |
+| `parse_derives` | `parse src = .ok u → ∃ ps, lex src = .ok ps ∧ u.Derives (tokensOf ps) ∧ u.prec`: the grammar-derivation form of "`parse s = ok t` → `t` re-prints to `s`'s tokens" |
+| `parseCat_sound`, `parseType_derives`, `parseExpr_derives` | the same for one category |
+| `declCtors_covered` | **acceptance coverage**: each of the 21 type and declaration constructors (`elem`, `fnType`, `mapping`, `userType`, `array`, `param`, `struct`, `structMember`, `enum`, `udvt`, `stateVar`, `constant`, `event`, `eventParam`, `error`, `errorParam`, `usingPart`, `usingPath`, `usingAliases`, `usingAlias`, `topPart`) occurs in an accepted program of `declCorpus` |
+| `declCorpus_accepted`, `declCorpus_in_profile` | the corpus is accepted and has no syntax-level rejection (`Syn.rejections`) |
+| `recursive_struct`, `mutual_structs` | a struct mentioning itself (`S[]`, `mapping(uint => S)`), and two structs mentioning each other, have those edges in S00's declaration graph (`Syn.decls`, `Decl.refs`) |
+| `print_text`, `print_roundtrip`, `print_checksum_flag` | the printed text of a parse; printing the corpus and parsing it again gives the same nodes and tokens; a checksum flag and unicode line-break/override bytes survive printing |
+
+Witnesses (`decide +kernel`, `Solidity/Frontend/Checked/TypeExamples.lean`):
+`type_array_of_array` (`uint[2][]` is a dynamic array of `uint256[2]`),
+`type_mapping_named` (named keys and values), `type_function`,
+`type_payable_path` (`address payable`, `a.b.C[]`, `fixed128x18`),
+`type_attr_order` (one tree, two layouts), `stateVar_attr_order`,
+`transient_soft` (`transient` is an attribute before a name and a name
+before `;`), `type_second_visibility` (a second visibility ends a function
+type's attributes and is the state variable's, as in solc's
+`function_types_variable_visibility.sol`), data locations in parameters
+(`declCorpus`), `import_empty_refused`. Tree witnesses compare nodes and yields (`sameTree`), since
+`Syn` has no `DecidableEq` and elaborator `rfl` on whole units overflows the
+stack.
+
+Negative controls: `type_refused` (a payable mapping key, an unclosed
+`[`, a repeated function-type attribute, a missing value type, an empty
+`returns ()`, trailing tokens), `decl_refused` (repeated state-variable
+attribute, empty struct and enum, a constant without value, a UDVT over a
+non-elementary type, a non-user-definable operator), each with its offset.
+
+### G09 Handoff
+
+* **Theorems**: `parse_sound`, `parse_derives`, `parseType_derives`,
+  `declCtors_covered`, `recursive_struct`, `print_roundtrip`.
+* **Premises**: none. Axioms: `propext` for `parse_derives`, `parseType_derives`
+  and `declCtors_covered` (pinned); `parse_sound` as well.
+* **Status of the soundness statements**: translation validation. The
+  parser is untrusted and `parse_sound` holds because `parseLocated` checks
+  the yield; the assurance rests on `Syn.yield` being the grammar, a hand
+  transcription reviewed clause by clause against `SolidityParser.g4` (G09
+  finder review). Nothing here proves the parser accepts every grammatical
+  input; the corpus regression (G11) measures that.
+* **Remaining**: the yield is a transcription of the grammar per
+  constructor, checked against the grammar only through S00's
+  `grammarCtors` and the witnesses; that the printed text re-lexes to the
+  same tokens is checked on witnesses and the corpus, not proved for every
+  token; uniqueness of the parse for type names (that two trees with one
+  yield are equal) is not proved. The greedy reading of a function type's
+  attributes before a state variable's (`function () internal x;`) follows
+  solc and is not part of `Syn.prec`.
+* **Coverage scope**: `declCtors_covered` lists the type and data
+  declaration constructors; the declarations with bodies (`contract`,
+  `interface`, `library`, `inherit`, `function`, `modifier`, `constructor`,
+  `fallback`, `fbNoParams`, `fbParams`, `receive`, `modInv`) and `varDecl`
+  are G11's and covered by its whole-constructor theorem.
+  `declCorpus_in_profile` is near vacuous for types: no type or
+  declaration constructor triggers an S00 exclusion.
+* `sameTree` compares pre-order constructors and yields under one layout;
+  that it implies equality is not proved.
+* **For S00**: `fallback() external returns (uint) {}` is grammatical
+  (solc refuses it later, TypeError 5570) but has no S00 tree
+  (`fbNoParams` carries no returns), so the parser refuses it. S00's `importPath`/`assembly` flags as
+  `String` force non-ASCII import paths and flags to be refused (the
+  bytes would not round-trip through `String`); a `Bytes` field would admit
+  them.
+
+### G09 Review
+
+Finder (traced every type and declaration yield clause against
+`SolidityParser.g4`, and the layout order of functions with string-literal
+modifier arguments, fallbacks with returns, function-type state variables
+and contracts with both headers; no mismatch). Fixed: a second visibility
+after a function type was refused instead of ending the type (1:
+`fnTypeAttrs`, `type_second_visibility`); a 40-digit hex literal whose
+lowercase spelling is its checksum lost its cleared flag when printed (2);
+unicode literals printed raw bytes the lexer refuses (3: `\xNN` for every
+non-printable byte); empty import paths were accepted (4); docs (6, 7, 9),
+an invariant comment (8). Recorded: `fallback() … returns` (5, For S00).
+
+Skeptic: "partially supported". Fixed: data locations exercised (2), the
+statement status reworded as translation validation (1), coverage scope and
+the near-vacuous profile check stated (3, 4), the stale script name (5),
+`sameTree`'s status (6), the docstring and a mutual-reference witness (7).
+Recorded: printed text re-lexing is tested, not proved (5).
+
 ## Reviews
 
 Each checkpoint ends with a read-only finder and a separate skeptic review

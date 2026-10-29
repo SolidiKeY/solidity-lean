@@ -7,16 +7,17 @@ import Solidity.Frontend.Checked.Token
 `Solidity/Source/Syntax.lean`) derives in the pinned grammar
 (`SolidityParser.g4`), one clause per constructor, read off the grammar's
 rule for it.  It is the specification the parser is checked against:
-`parse ts = .ok t` implies `t.yield L = some (ts, [])` for the layout `L` the
-parser returns (`Solidity/Frontend/Checked/Check.lean`).
+`parse ts = .ok t` implies `t.toks L = some ts` (the yield consuming all of
+`L`) for the layout `L` the parser returns (`Solidity/Frontend/Checked/Check.lean`).
 
-**Layouts.**  S00 abstracts two spellings the grammar distinguishes: the
+**Layouts.**  S00 abstracts spellings the grammar distinguishes: the
 order of a definition's attributes (`public view`, `view public`), which the
 grammar allows in any order but S00 stores as fields, and the fragments of a
 concatenated string literal (`"a" "b"`), which S00 stores as one byte
 string.  A layout is the list of these choices, consumed in pre-order
 (`Choice.attrs` per attribute-bearing node, `Choice.frags` per string
-literal), so `∃ L, t.yield L = some (ts, [])` is the grammar derivation of
+literal, `Choice.layoutFirst` for a contract with both `layout at` and `is`),
+so `∃ L, t.yield L = some (ts, [])` is the grammar derivation of
 `ts` from `t`.  Every other spelling difference is below the tokens (`uint`
 and `uint256` are one token, G08).
 
