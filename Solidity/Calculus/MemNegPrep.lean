@@ -122,24 +122,69 @@ structure MxNegativePrep (C : Contract) (Γ : Ctx) (φ : Fml C Γ) where
 
 def MxNegativePrep.id (φ : Fml C Γ) : MxNegativePrep C Γ φ := ⟨φ, false, fun _ => Iff.rfl⟩
 
+/-- A value-binder view retains its original intrinsic syntax equality. -/
+structure MxAllView (φ : Fml C Γ) where
+  x : Var
+  p : PrimTy
+  body : Fml C (.val p :: Γ)
+  eq : φ = .all x p body
+
+def mxAllView (φ : Fml C Γ) : Option (MxAllView φ) := by
+  apply @Fml.casesOn C (fun Γ φ => Option (MxAllView φ)) Γ φ
+  case all => exact fun x p b => some ⟨x, p, b, rfl⟩
+  all_goals intros; exact none
+
+private def mxNegativeAlloc (k : Nat) (s : Var) (R : RefTy) :
+    (b : Fml C (.mem R :: Γ)) → MxNegativePrep C Γ (.allocAll s R b) :=
+  match R with
+  | .array (.prim q) => fun b =>
+    let result : Option (MxNegativePrep C Γ (.allocAll s (.array (.prim q)) b)) := do
+      let ⟨left, right, himp⟩ ← mxImpView b
+      let ⟨x, p, body, hall⟩ ← mxAllView left
+      if hp : p = .uint then
+        let ⟨rq, array, value, hrange⟩ ← mxRangeBody? (hp ▸ body)
+        if hq : rq = q then
+          if hi : hq ▸ array = .here then
+            let ⟨a, hg⟩ ← MxExterior.ofFml? right
+            let v : q.Denote := hq ▸ value
+            pure ⟨mxNegativeBody k s x v a, true, fun σ => by
+              have hr := hrange
+              cases hp
+              cases hq
+              simp only [hi] at hr
+              rw [himp, hall, hr, hg]
+              exact mxNegativeBody_holds k s x v a σ⟩
+          else none
+        else none
+      else none
+    result.getD (MxNegativePrep.id _)
+  | _ => fun _ => MxNegativePrep.id _
+
 /-- Only the supported fresh primitive range block is rewritten. The
 literal-index exterior recognizer supplies the exact stable read footprint.
 Positive prefix value binders are preserved capture-safely. -/
-def mxNegativePrepareAt (k : Nat) : {Γ : Ctx} → (φ : Fml C Γ) → MxNegativePrep C Γ φ
-  | _, .allocAll s (.array (.prim q)) (.imp (.all x .uint b) g) =>
-    match mxRangeBody? b with
-    | some ⟨_, .here, v, hb⟩ =>
-      match MxExterior.ofFml? g with
-      | some ⟨a, hg⟩ =>
-        ⟨mxNegativeBody k s x v a, true, fun σ => by
-          rw [hb, hg]
-          exact mxNegativeBody_holds k s x v a σ⟩
-      | none => MxNegativePrep.id _
-    | _ => MxNegativePrep.id _
-  | _, .all x p b =>
-    let r := mxNegativePrepareAt k b
-    ⟨.all x p r.body, r.changed, fun σ => forall_congr' fun v => r.exact (σ.push (t := .val p) v)⟩
-  | _, φ => MxNegativePrep.id φ
+def mxNegativePrepareAt (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : MxNegativePrep C Γ φ :=
+  @Fml.casesOn C (fun Γ φ => MxNegativePrep C Γ φ) Γ φ
+    (MxNegativePrep.id _) (fun _ _ => MxNegativePrep.id _) (fun _ => MxNegativePrep.id _)
+    (fun _ => MxNegativePrep.id _) (fun _ _ => MxNegativePrep.id _)
+    (fun _ _ => MxNegativePrep.id _) (fun _ _ _ => MxNegativePrep.id _)
+    (fun _ _ _ _ => MxNegativePrep.id _) (fun _ => MxNegativePrep.id _)
+    (fun x p b =>
+      let r := mxNegativePrepareAt k b
+      ⟨.all x p r.body, r.changed, fun σ => forall_congr' fun v => r.exact (σ.push (t := .val p) v)⟩)
+    (fun _ _ _ _ => MxNegativePrep.id _) (fun _ _ => MxNegativePrep.id _)
+    (fun s R b => mxNegativeAlloc k s R b) (fun _ => MxNegativePrep.id _)
+  termination_by structural φ
+
+/-- Explicit prefix equation; do not unfold the recursive recursor with `simp`. -/
+theorem mxNegativePrepareAt_all (k : Nat) (x : Var) (p : PrimTy) (b : Fml C (.val p :: Γ)) :
+    mxNegativePrepareAt k (.all x p b) =
+      let r := mxNegativePrepareAt k b
+      ⟨.all x p r.body, r.changed, fun σ => forall_congr' fun v => r.exact (σ.push (t := .val p) v)⟩ := rfl
+
+theorem mxNegativePrepareAt_allocAll (k : Nat) (s : Var) (R : RefTy)
+    (b : Fml C (.mem R :: Γ)) :
+    mxNegativePrepareAt k (.allocAll s R b) = mxNegativeAlloc k s R b := rfl
 
 /-- Reserve the length atom above every binder and named root of the whole
 input before descending through its prefix. Existing intrinsic indices remain

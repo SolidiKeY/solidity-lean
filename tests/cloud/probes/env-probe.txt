@@ -1,0 +1,51 @@
+## free -g
+               total        used        free      shared  buff/cache   available
+Mem:              15           0          11           0           3          15
+Swap:              0           0           0
+[exit 0]
+
+## nproc
+4
+[exit 0]
+
+## df -h ~ /tmp
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   12G   28G  30% /
+/dev/vda        252G   12G   28G  30% /
+[exit 0]
+
+## ls ~/.elan/bin
+elan
+lake
+lean
+leanc
+leanchecker
+leanmake
+leanpkg
+[exit 0]
+
+## ~/.elan/bin/elan show
+leanprover/lean4:v4.24.0 (overridden by '/home/user/solidity-lean/lean-toolchain')
+Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)
+[exit 0]
+
+## ~/.elan/bin/lake --version
+Lake version 5.0.0-src+797c613 (Lean version 4.24.0)
+[exit 0]
+
+## echo $PATH
+/nix/var/nix/profiles/default/bin:/root/.local/bin:/root/.cargo/bin:/usr/local/go/bin:/opt/node22/bin:/opt/maven/bin:/opt/gradle/bin:/opt/rbenv/bin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+[exit 0]
+
+## git --version
+git version 2.43.0
+[exit 0]
+
+## mcp__lean-lsp__* tools
+Present, but only as deferred tools (names listed, schemas need ToolSearch): lean_build, lean_code_actions, lean_completions, lean_declaration_file, lean_diagnostic_messages, lean_file_outline, lean_goal, lean_hover_info, lean_local_search, lean_minimal_hypotheses, lean_multi_attempt, lean_profile_proof, lean_references, lean_run_code, lean_term_goal, lean_verify. Not called (assignment says server unavailable; untested).
+
+## mcp__claude-code-remote__* tools
+add_repo, archive_session, confirm_repository_trust, create_session, create_trigger, delete_trigger, fire_trigger, get_event, get_session, get_trigger, interrupt_session, list_computer_folders, list_environments, list_events, list_repos, list_sessions, list_triggers, read_documentation, register_repo_root, request_computer_folder, send_later, send_message, set_session_tags, set_session_title, subscribe_pr_activity, unsubscribe_pr_activity, unwatch_url, unarchive_session, update_trigger, watch_url, set_session_title
+
+## push to branch
+See CLOUD-RESULT; recorded after push attempt.

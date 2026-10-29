@@ -841,3 +841,54 @@ repair changes no Lean source, gate or proof budget. Independent review was
 attempted but the agent service returned a thread-store error. The retained
 Gate G0 source-review finding is outside this documentation regression and
 remains open; this repair does not claim to resolve it.
+
+## Combined-integration G0 repair (2026-10-29)
+
+The retained source finding is repaired in the integration working files.
+`MxObs.parse` and `mxNegativePrepareAt` now eliminate `Tm` and `Fml` with
+`casesOn` motives generalized over their indices. The exterior Boolean-shell
+parser generalizes its context and accepts a typed term reader at that context.
+Its result still certifies equality with the original intrinsic formula.
+Constructor equations expose the parser and preparation reductions explicitly.
+These are structural `casesOn` definitions, not new `implemented_by` twins;
+no twin/link obligation or measured exemption is claimed.
+
+The helper review also replaced indexed matching in observation reification,
+read-key extraction, range-body/guard recognition, and address/local extraction
+on this path. Shared shallow views retain typed operands and their syntax
+equalities. Matching on sorts, reference types, contexts, options and records
+remains; those are parameter-only families. Unsupported binders, other array
+identities, fixed arrays and nonliteral exterior indices retain their fallbacks.
+The object reconstruction and exactness theorems are unchanged.
+
+The fixture-specific `gap_prepared` reduction lemma is removed.
+`gap_memCovered` now asks `decide +kernel` to reduce the actual production
+preparation and parser. The original gap definitions, target certificates,
+observations, given-heap/struct fallbacks and proof budgets are unchanged.
+The fully qualified decision-module documentation references above are kept.
+
+Per-file MCP diagnostics (`interactive=false`) pass for
+`Solidity/Calculus/MemInst.lean`, `Solidity/Calculus/MemObserve.lean` and
+`Solidity/Calculus/MemNegPrep.lean`, without errors or warnings. Their
+existing printed axiom audits remain subsets of `propext`, `Classical.choice`
+and `Quot.sound`. Intermediate diagnostics exposed and then resolved implicit
+recursor binder ordering, result-family motives and dependent rewrite failures;
+no source `sorry` or new axiom was added. All four requested example files also
+pass complete all-severity MCP diagnostics: `Solidity/Examples/MemoryNegativeDecision.lean`,
+`Solidity/Examples/DecisionMemory.lean`, `Solidity/Examples/MemoryInstantiation.lean`
+and `Solidity/Examples/MemoryFloor.lean`. This includes direct production-parser
+kernel coverage, the original refutation/returned-countermodel theorems,
+compiled verdict pins, unsupported-scope refusals, and floor/overflow controls.
+Their printed axiom audits contain only the standard axioms above (or none).
+Earlier partial timeouts awaited import preparation and are retained as such.
+Final diagnostics are saved in `/tmp/memory-negative-block-g0-final-diagnostics.json`;
+`/tmp/memory-negative-block-g0-diagnostics.json` retains intermediate failure
+summaries and the earlier pending diagnostic snapshot. Layer, orphan and
+whitespace checks pass. The coordinator owns final combined validation;
+no competing full build was started by the repair agent.
+
+Local read-only finder and skeptic passes checked supported shapes, exactness,
+recursor motives and fallbacks. No confirmed semantic finding remains.
+Independent review was attempted but the agent service returned a thread-store
+error before an agent could start. No index staging, commit, push, source-VM,
+skill or monitor change is part of this repair.

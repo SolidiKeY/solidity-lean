@@ -16,22 +16,12 @@ open Solidity.Examples.MemoryNegativeCountermodel
 
 set_option Elab.async false
 
+/-- Coverage reduces the actual production preparation and parser in the kernel. -/
+theorem gap_memCovered : gapMemInnerNeg.memCovered = true := by
+  decide +kernel
+
 private abbrev exterior : MxExterior .uint :=
   .eq (.read (uintOfNat 0)) (.lit .uint (uintOfNat 0))
-
-private abbrev prepared : Fml Gaps [] :=
-  mxNegativeBody gapMemInnerNeg.fresh (.user "s") (.user "i") (uintOfNat 0) exterior
-
-/-- Factor only the supported recognizer's proved unfolding equation. Its
-well-founded exterior parser is irreducible to bare `decide`. -/
-theorem gap_prepared : (mxNegativePrepare gapMemInnerNeg).body = prepared := by
-  simp only [gapMemInnerNeg, mxNegativePrepare, mxNegativePrepareAt, MxExterior.ofFml?]
-  rfl
-
-theorem gap_memCovered : gapMemInnerNeg.memCovered = true := by
-  unfold Fml.memCovered
-  rw [gap_prepared]
-  decide +kernel
 
 theorem gap_covered : gapMemInnerNeg.Covered = true := by
   simp only [Fml.Covered, gap_memCovered, Bool.or_true, Bool.true_or]
@@ -136,7 +126,6 @@ def nestedExterior : Fml Gaps [] := .allocAll (.user "s") UA
 
 #guard !(mxNegativePrepare nestedExterior).changed
 
-#print axioms gap_prepared
 #print axioms gap_memCovered
 #print axioms gap_decision
 #print axioms gap_returned_countermodel

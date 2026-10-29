@@ -199,19 +199,144 @@ theorem mxRangeBody_inst (x : Var) {q : PrimTy}
     (i : Idx Γ (.mem (.array (.prim q)))) (v : q.Denote) (t : Tm C Γ (.val .uint)) :
     Fml.instTm x .uint (mxRangeBody i v) t = some (mxRangeInstance i v t) := rfl
 
+/-- Shallow formula views retain the original intrinsic syntax equality. -/
+structure MxImpView (φ : Fml C Γ) where
+  left : Fml C Γ
+  right : Fml C Γ
+  eq : φ = .imp left right
+
+def mxImpView (φ : Fml C Γ) : Option (MxImpView φ) := by
+  apply @Fml.casesOn C (fun Γ φ => Option (MxImpView φ)) Γ φ
+  case imp => exact fun a b => some ⟨a, b, rfl⟩
+  all_goals intros; exact none
+
+structure MxEqView (φ : Fml C Γ) where
+  p : PrimTy
+  left : Tm C Γ (.val p)
+  right : Tm C Γ (.val p)
+  eq : φ = .eq left right
+
+def mxEqView (φ : Fml C Γ) : Option (MxEqView φ) := by
+  apply @Fml.casesOn C (fun Γ φ => Option (MxEqView φ)) Γ φ
+  case eq => exact fun {_} {p} a b => some ⟨p, a, b, rfl⟩
+  all_goals intros; exact none
+
+/-- The result family inspects the sort, never the indexed term. -/
+private def MxLiteralResult {s : Srt} (t : Tm C Γ s) : Type :=
+  (match (motive := (s : Srt) → Tm C Γ s → Type) s with
+  | .val p => fun t => Option {v : p.Denote // t = Tm.app0 (.lit v)}
+  | _ => fun _ => PUnit) t
+
+private def mxLiteralNone {s : Srt} (t : Tm C Γ s) : MxLiteralResult t := by
+  cases s <;> first | exact none | exact PUnit.unit
+
+private def mxLiteralOp {s : Srt} (o : Op0 C s) : MxLiteralResult (Tm.app0 (Γ := Γ) o) := by
+  apply @Op0.casesOn C (fun s o => MxLiteralResult (Tm.app0 (Γ := Γ) o)) s o
+  case lit => exact fun v => some ⟨v, rfl⟩
+  all_goals intros; exact mxLiteralNone _
+
+def mxLiteralView {s : Srt} (t : Tm C Γ s) : MxLiteralResult t :=
+  @Tm.casesOn C Γ (fun _ t => MxLiteralResult t) s t
+    (fun _ => mxLiteralNone _) (fun _ => mxLiteralNone _) (fun _ => mxLiteralNone _)
+    (fun _ => mxLiteralNone _) (fun _ _ => mxLiteralNone _) (fun o => mxLiteralOp o)
+    (fun _ _ => mxLiteralNone _) (fun _ _ _ => mxLiteralNone _)
+    (fun _ _ _ _ => mxLiteralNone _) (fun _ => mxLiteralNone _)
+
+structure MxReadView {p : PrimTy} (t : Tm C Γ (.val p)) where
+  addr : Tm C Γ (.addr (.prim p))
+  eq : t = .app2 .read (.app0 .memory) addr
+
+private def MxReadResult {s : Srt} (t : Tm C Γ s) : Type :=
+  (match (motive := (s : Srt) → Tm C Γ s → Type) s with
+  | .val _ => fun t => Option (MxReadView t)
+  | _ => fun _ => PUnit) t
+
+private def mxReadNone {s : Srt} (t : Tm C Γ s) : MxReadResult t := by
+  cases s <;> first | exact none | exact PUnit.unit
+
+private def mxReadOp {a b s : Srt} (o : Op2 C a b s) :
+    (x : Tm C Γ a) → (y : Tm C Γ b) → MxReadResult (Tm.app2 o x y) := by
+  apply @Op2.casesOn C (fun a b _ o =>
+    (x : Tm C Γ a) → (y : Tm C Γ b) → MxReadResult (Tm.app2 o x y)) a b s o
+  case read =>
+    exact fun x y => if hx : x.beqR (.app0 .memory) = true then
+      some ⟨y, by rw [Tm.eq_of_beqR hx]⟩ else none
+  all_goals intros; exact mxReadNone _
+
+def mxReadView {s : Srt} (t : Tm C Γ s) : MxReadResult t :=
+  @Tm.casesOn C Γ (fun _ t => MxReadResult t) s t
+    (fun _ => mxReadNone _) (fun _ => mxReadNone _) (fun _ => mxReadNone _)
+    (fun _ => mxReadNone _) (fun _ _ => mxReadNone _) (fun _ => mxReadNone _)
+    (fun _ _ => mxReadNone _) (fun o x y => mxReadOp o x y)
+    (fun _ _ _ _ => mxReadNone _) (fun _ => mxReadNone _)
+
+private def MxLocalResult {s : Srt} (t : Tm C Γ s) : Type :=
+  (match (motive := (s : Srt) → Tm C Γ s → Type) s with
+  | .ident R => fun t => Option {i : Idx Γ (.mem R) // t = Tm.pvI i}
+  | _ => fun _ => PUnit) t
+
+private def mxLocalNone {s : Srt} (t : Tm C Γ s) : MxLocalResult t := by
+  cases s <;> first | exact none | exact PUnit.unit
+
+private def mxLocalView {s : Srt} (t : Tm C Γ s) : MxLocalResult t :=
+  @Tm.casesOn C Γ (fun _ t => MxLocalResult t) s t
+    (fun _ => mxLocalNone _) (fun _ => mxLocalNone _) (fun _ => mxLocalNone _)
+    (fun i => some ⟨i, rfl⟩) (fun _ _ => mxLocalNone _) (fun _ => mxLocalNone _)
+    (fun _ _ => mxLocalNone _) (fun _ _ _ => mxLocalNone _)
+    (fun _ _ _ _ => mxLocalNone _) (fun _ => mxLocalNone _)
+
+private def MxAddressResult {s : Srt} (t : Tm C Γ s) : Type :=
+  (match (motive := (s : Srt) → Tm C Γ s → Type) s with
+  | .addr T => fun t => Option ((R : RefTy) ×
+      (r : ArrTy R T × Idx Γ (.mem R) × Tm C Γ (.val .uint)) ×'
+      t = Tm.app2 (.mat r.1) (.pvI r.2.1) r.2.2)
+  | _ => fun _ => PUnit) t
+
+private def mxAddressNone {s : Srt} (t : Tm C Γ s) : MxAddressResult t := by
+  cases s <;> first | exact none | exact PUnit.unit
+
+private def mxAddressOp {a b s : Srt} (o : Op2 C a b s) :
+    (x : Tm C Γ a) → (y : Tm C Γ b) → MxAddressResult (Tm.app2 o x y) := by
+  apply @Op2.casesOn C (fun a b _ o =>
+    (x : Tm C Γ a) → (y : Tm C Γ b) → MxAddressResult (Tm.app2 o x y)) a b s o
+  case mat =>
+    exact fun a x e => (mxLocalView x).map fun ⟨i, hi⟩ => ⟨_, (a, i, e), by rw [hi]⟩
+  all_goals intros; exact mxAddressNone _
+
+/-- Element-address recognition with both term and operator indices generalized. -/
+def mxAddressView {s : Srt} (t : Tm C Γ s) : MxAddressResult t :=
+  @Tm.casesOn C Γ (fun _ t => MxAddressResult t) s t
+    (fun _ => mxAddressNone _) (fun _ => mxAddressNone _) (fun _ => mxAddressNone _)
+    (fun _ => mxAddressNone _) (fun _ _ => mxAddressNone _) (fun _ => mxAddressNone _)
+    (fun _ _ => mxAddressNone _) (fun o x y => mxAddressOp o x y)
+    (fun _ _ _ _ => mxAddressNone _) (fun _ => mxAddressNone _)
+
+/-- Remove one context entry with a motive generalized over both indices. -/
+def mxIdxTail {Γ : Ctx} {t : LTy} (i : Idx Γ t) :
+    (match (motive := (Γ : Ctx) → Idx Γ t → Type) Γ with
+    | _ :: Δ => fun i => Option {j : Idx Δ t // i = Idx.there j}
+    | [] => fun _ => PUnit) i :=
+  @Idx.casesOn (fun Γ t i => (match (motive := (Γ : Ctx) → Idx Γ t → Type) Γ with
+    | _ :: Δ => fun i => Option {j : Idx Δ t // i = Idx.there j}
+    | [] => fun _ => PUnit) i) Γ t i
+    none (fun i => some ⟨i, rfl⟩)
+
 /-- Exact guard recognition; both terms are checked at their intrinsic
 sort, so another array length or another index is refused. -/
-def mxRangeGuard? {q : PrimTy} (i : Idx Γ (.mem (.array (.prim q)))) :
-    (g : Fml C (.val .uint :: Γ)) →
-      Option (PLift (g = .eq (.app2 (.binop .gt rfl) (MxOrig.len (.there i)).tm (.pvV .here))
-        (.app0 (.lit true))))
-  | .eq (p := .bool) a b =>
-    if ha : a.beqR (.app2 (.binop .gt rfl) (MxOrig.len (.there i)).tm (.pvV .here)) = true then
-      if hb : b.beqR (.app0 (.lit (p := .bool) true)) = true then
-        some ⟨by rw [Tm.eq_of_beqR ha, Tm.eq_of_beqR hb]⟩
+def mxRangeGuard? {q : PrimTy} (i : Idx Γ (.mem (.array (.prim q))))
+    (g : Fml C (.val .uint :: Γ)) :
+    Option (PLift (g = .eq (.app2 (.binop .gt rfl) (MxOrig.len (.there i)).tm (.pvV .here))
+      (.app0 (.lit true)))) := do
+  let ⟨p, a, b, hg⟩ ← mxEqView g
+  if hp : p = .bool then
+    if ha : (hp ▸ a).beqR (.app2 (.binop .gt rfl) (MxOrig.len (.there i)).tm (.pvV .here)) = true then
+      if hb : (hp ▸ b).beqR (.app0 (.lit (p := .bool) true)) = true then
+        some ⟨by
+          cases hp
+          exact hg.trans (congr (congrArg Fml.eq (Tm.eq_of_beqR ha)) (Tm.eq_of_beqR hb))⟩
       else none
     else none
-  | _ => none
+  else none
 
 /-- A successfully recognized range body, with its actual context and a
 proof of the original syntax. No named example is inspected. -/
@@ -224,16 +349,25 @@ structure MxRangeView (C : Contract) (Γ : Ctx) (φ : Fml C (.val .uint :: Γ)) 
 /-- Only a length-guarded primitive read at the removed uint local is
 accepted. Nested binders, reference members, fixed arrays and unrelated
 array identities fail closed. -/
-def mxRangeBody? : (φ : Fml C (.val .uint :: Γ)) → Option (MxRangeView C Γ φ)
-  | .imp g (.eq (p := q) (.app2 .read (.app0 .memory) addr) (.app0 (.lit v))) =>
-    match mxAt? addr with
-    | some ⟨_, (.dyn, .there i, e), haddr⟩ =>
-      if he : e.beqR (.pvV .here) = true then
-        (mxRangeGuard? i g).map fun hg =>
-          ⟨q, i, v, by rw [hg.down, haddr, Tm.eq_of_beqR he]; rfl⟩
-      else none
-    | _ => none
-  | _ => none
+def mxRangeBody? (φ : Fml C (.val .uint :: Γ)) : Option (MxRangeView C Γ φ) := do
+  let ⟨g, c, hφ⟩ ← mxImpView φ
+  let ⟨q, lhs, rhs, hc⟩ ← mxEqView c
+  let ⟨v, hv⟩ ← mxLiteralView rhs
+  let ⟨addr, hread⟩ ← mxReadView lhs
+  let ⟨R, (a, i, e), haddr⟩ ← mxAddressView addr
+  if hR : R = .array (.prim q) then
+    let parentI : Idx (.val .uint :: Γ) (.mem (.array (.prim q))) := hR ▸ i
+    let ⟨j, hi⟩ ← mxIdxTail parentI
+    if he : e.beqR (.pvV .here) = true then
+      (mxRangeGuard? j g).map fun hg =>
+        ⟨q, j, v, by
+          cases hR
+          have ha : a = .dyn := by cases a; rfl
+          change i = .there j at hi
+          rw [hφ, hc, hread, hv, haddr, ha, hi, Tm.eq_of_beqR he, hg.down]
+          rfl⟩
+    else none
+  else none
 
 /-- The checked output for a recognized range body. The same typed points
 are used in the output and in its interpretation certificate. -/
