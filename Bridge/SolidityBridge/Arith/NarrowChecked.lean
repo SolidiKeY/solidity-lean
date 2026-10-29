@@ -42,7 +42,7 @@ theorem check_uint_guard {C : Contract} {Γ : NCtx} (e : RawExpr) (v : Val C Γ.
     (hv : Solidity.check C Γ .uint e = .ok v) :
     Solidity.check C Γ .bool (inTyCond .uint n e) = .ok (uintGuard n hn v) := by
   rw [inTyCond, if_neg (by decide)]
-  exact check_bin_literal .uint e v .le (2 ^ n - 1) rfl (uint_max_range n hn) hc hl hs hv
+  exact check_bin_literal .uint e v .le (2 ^ n - 1) rfl (uint_max_range n hn) hc hl hs hv (by intro h; cases h)
 
 theorem uintGuard_eval {C : Contract} {Γ : Ctx} (σ : State C Γ)
     (n : Nat) (hn : n ≤ 256) (v : Val C Γ .uint) :
@@ -139,11 +139,11 @@ theorem synth_int_lower {C : Contract} {Γ : NCtx} (e : RawExpr) (v : Val C Γ.c
     (hv : Solidity.check C Γ .int e = .ok v) :
     Solidity.synth C Γ (.binop .le (.unop .neg (.num k)) e) =
       .ok (.val .bool (.binop .le rfl rfl (.simple (.lit (-(k : Int)) hk)) v)) := by
-  rw [Solidity.synth.eq_6]
+  unfold Solidity.synth
   simp only [RawExpr.constRat?, hc, bind, Option.bind, RawExpr.isLit, if_true,
     pure, Except.pure, Except.bind]
   rw [hs]
-  simp only [TExpr.toVal?]
+  simp only [TExpr.toVal?, Bool.false_eq_true]
   rw [check_neg_literal k hk, hv]
   rfl
 
@@ -177,11 +177,11 @@ theorem check_int_guard {C : Contract} {Γ : NCtx} (e : RawExpr) (v : Val C Γ.c
   have hva : Solidity.check C Γ .bool a = .ok va :=
     check_int_lower e v _ (int_half_range n hn).1 hc hs hv
   have hvb : Solidity.check C Γ .bool b = .ok vb :=
-    check_bin_literal .int e v .le _ rfl (int_half_range n hn).2 hc hl hs hv
+    check_bin_literal .int e v .le _ rfl (int_half_range n hn).2 hc hl hs hv (by intro _ h; cases h)
   have hca : a.constRat? = none := by
     simp only [a, RawExpr.constRat?, hc, bind, Option.bind]
   rw [inTyCond, if_pos rfl]
-  exact check_binary .bool a b va vb .and rfl hca rfl hsa hva hvb
+  exact check_binary .bool a b va vb .and rfl hca rfl hsa hva hvb (by intro h; cases h)
 
 /-- Observation after the primitive evaluator and the core's unsigned width guard.
 `failure` is panic for explicit checked mode and revert for the default narrow guard. -/
