@@ -111,7 +111,7 @@ theorem empty_wrong_shape :
 /-- A representation with the wrong scalar word is rejected. -/
 theorem wrong_scalar : ¬ ValueRep (.prim seven) .word (.root 0) (fun _ => nine) := by
   intro h
-  have e := scalar_read h
+  have e : nine = PrimTy.toWord seven := scalar_read h
   have bad : (9 : Int) = 7 := congrArg Subtype.val e
   omega
 

@@ -934,3 +934,9 @@ At the root, the notation's own tests:
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
 | `Storage/Representation/Model.lean` | Intrinsic value-independent layout shapes and represented scalar, struct, mapping, fixed/dynamic-array values including retained shadows. |
 | `Storage/Representation/Controls.lean` | Inhabited representation witnesses, source reads, negative scalar control and exact axiom pins. |
+| `Storage/Representation/Reads.lean` | Exact source scalar/mapping/array reads, failures and source frames. |
+| `Storage/Representation/Frames.lean` | Representation locality over existing Occ footprints and nested frames. |
+| `Storage/Representation/Words.lean` | Supported full-word key bounds, normalization and injectivity. |
+| `Storage/Representation/Updates.lean` | Abstract symbolic replacement and nested mapping source saves. |
+| `Storage/Representation/Members.lean` | Source member reads/replacement with whole intrinsic field-store preservation. |
+| `Storage/Representation/UpdateControls.lean` | Inhabited member/nested mapping combinations, defaults, alias controls and axiom pins. |

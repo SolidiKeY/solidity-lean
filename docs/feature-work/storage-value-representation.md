@@ -52,12 +52,13 @@ doc-path checker exits 1 with exactly the same 46 missing references on the
 exact base archive and this head; zero new findings. The inherited gate is
 not marked passed. Original-interface-only `tests/storage-values/Gap.lean` passed with explicit
 -j1 and a 145059840-byte cgroup peak. Checkpoint 1 is ready for its committed
-handoff; whole-assignment validation remains open. Checkpoint 2: scalar/member,
-nested mapping writes/defaults and other-member frames pending. Checkpoint 3:
+handoff; whole-assignment validation remains open. Checkpoint 2: scalar/member and nested mapping source saves/defaults and
+symbolic other-member frames proved, reviewed and checked; physical finite-run
+transport remains checkpoint 4. Checkpoint 3:
 array reads/writes/headers/bounds/nested paths pending. Checkpoint 4: explicit
 finite touched-set transport through `Loc.word` pending. Backfill A: recursive
-typed path/graph composition pending. Backfill B: full-word normalization and
-stronger alias/frame/finite-run controls pending. No queue item is waived.
+typed path/graph composition pending. Backfill B: supported full-word normalization and nested alias controls
+proved; stronger finite-run controls remain pending. No queue item is waived.
 
 Manifest IDs: `structTypes`, `mappings`, `fixedArrays`, `dynamicArrays`,
 `storageLocation`, `storageAliasing`, `deleteMappingTails`, `storageLayout`.
@@ -104,3 +105,60 @@ axiom pins initially guessed axiom-free were rejected by Lean; the actual
 standard three-axiom sets are now enforced and the final check passes.
 Short-check RSS sampling produced no valid samples; JSON records null, not
 a zero-memory claim. Cgroup peaks above are actual measured values.
+
+## Checkpoint 2 — symbolic reads, saves and frames
+
+The implemented layer is symbolic: finite physical transport under the
+existing per-run region premise is checkpoint 4, not a global injectivity
+claim for all mapping entries. `ValueRep.congr`, `FieldsRep.congr` and
+`ElementsRep.congr` prove locality to the committed `Occ` footprints.
+`scalar_save`, `scalar_frame`, `mapping_read`, `FieldsRep.get`,
+`struct_member_read`, `FieldsRep.set`, `struct_source_save`, `struct_save`,
+`member_patch_frame`, `mapping_save` and `mapping_path_save` connect the
+source operations and whole-value symbolic representation. The last theorem
+composes an arbitrary typed inner path given its source-save proof and
+represented changed subtree; this is not yet the full graph/path theorem.
+`source_frame` reuses the existing source divergence/frame law.
+
+`patch` is a classical abstract subtree update, preserving everything outside
+its `Occ` footprint. It is not generated code, allocation or a runtime copy.
+Each source equation is proved from the committed source implementation,
+separately from representation. Same-type `keyWord_inj` is a full-word
+value-encoding fact, including negative signed keys, not hash injectivity.
+`word_normalized` and `keyWord_lt` discharge the supported full-word portion
+of backfill B without internal packing. New lanes are not dependencies.
+
+Independent controls include a zero mapping default, a scalar save/frame,
+a two-level mapping save with written-path read and untouched inner/outer
+default reads, and an inhabited Wallet owner update to zero preserving its distinct nine-valued
+mapping member. Same-address scalar and nested mapping/array aliases reject the
+frame conclusion. `negative_key_word` proves -1 normalizes to 2^256-1;
+it uses algebraic normalization after an initial direct decision reached
+the unchanged recursion budget. No budget was raised.
+
+Finder/skeptic CP2 reviews found no false theorem or circular semantics.
+Both required an inhabited member-save/frame combination and exact axiom
+pins; skeptic also requested untouched nested defaults. All are implemented;
+both read-only rechecks accepted fixes. Finder additionally requested distinct
+post-update member values; the Wallet now writes owner zero while preserving
+stash nine. Focused kernel gates and layer/orphan/trust gates pass; doc-path
+checks retain the exact-base 46 failures and zero new findings. The typed setter now also
+exports `TypeRep` of its replacement layout, avoiding a vacuous/unusable
+unknown-layout client obligation. Every pinned CP2 headline has the exact
+standard axiom set `[propext, Classical.choice, Quot.sound]`; whitespace in
+messages is ignored, axiom content is not.
+
+Resource sampler correction: Docker top requires a PID column; prior
+samples were null and are preserved as such. The corrected PID/RSS sampler
+measured 743911424 bytes aggregate RSS on the passing CP2 control run;
+cgroup peak was 265105408 bytes (shared mappings make these different).
+Full final/import closure remains pending. Checkpoint 3 array writes/nested
+paths, checkpoint 4 finite numeric transport, and backfill A graph composition
+remain open. These symbolic results alone are not full G27 completion.
+
+CP2 final focused gate: `lake -f lakefile.storage-values.toml build
+Solidity.Storage.Representation.UpdateControls` passed (29 jobs), 3.139982675 s,
+758833152-byte sampled aggregate RSS, 277999616-byte cgroup peak. Exact log
+and JSON: `cp2-reviewed-final.log` / `cp2-reviewed-final.json` in evidence.
+Checkpoint 1 committed head: `76b1acf4d4204f7bd437fd291f29bb7809825410`.
+No full/import-closure pass or final assignment completion is claimed.

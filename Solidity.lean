@@ -668,3 +668,9 @@ import Solidity.Examples.SolCases
 
 import Solidity.Storage.Representation.Model
 import Solidity.Storage.Representation.Controls
+import Solidity.Storage.Representation.Reads
+import Solidity.Storage.Representation.Frames
+import Solidity.Storage.Representation.Words
+import Solidity.Storage.Representation.Updates
+import Solidity.Storage.Representation.Members
+import Solidity.Storage.Representation.UpdateControls

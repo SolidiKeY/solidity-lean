@@ -32,9 +32,9 @@ peak_rss = 0
 with (evidence/(label+'.log')).open('w') as log:
     process = subprocess.Popen(args, env=env, stdout=log, stderr=subprocess.STDOUT)
     while process.poll() is None:
-        top = subprocess.run(docker+['top',name,'-eo','rss'],env=env,capture_output=True,text=True)
+        top = subprocess.run(docker+['top',name,'-eo','pid,rss'],env=env,capture_output=True,text=True)
         if top.returncode == 0:
-            peak_rss = max(peak_rss,sum(int(x) for x in top.stdout.splitlines()[1:] if x.strip().isdigit())*1024)
+            peak_rss = max(peak_rss,sum(int(x.split()[1]) for x in top.stdout.splitlines()[1:] if len(x.split()) == 2 and x.split()[1].isdigit())*1024)
         time.sleep(0.5)
     code = process.wait()
 record = dict(command=command, exit=code, seconds=time.monotonic()-started,

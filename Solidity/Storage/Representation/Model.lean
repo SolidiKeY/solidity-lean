@@ -78,6 +78,22 @@ inductive ElementsRep : {E : Ty} → List (SVal E) → STy → Loc → Store →
       ElementsRep (v :: rest) t l w
 end
 
+/-- Every represented value has a value-independent layout shape. -/
+theorem ValueRep.type {T : Ty} {v : SVal T} {t : STy} {l : Loc} {w : Store}
+    (h : ValueRep v t l w) : TypeRep T t :=
+  ValueRep.rec (motive_1 := fun {T} _ t _ _ _ => TypeRep T t)
+    (motive_2 := fun {fs} _ ts _ _ _ => FieldTypesRep fs ts)
+    (motive_3 := fun _ _ _ _ _ => True)
+    (fun {p} _ _ _ _ => TypeRep.scalar p)
+    (fun {s} _ ts _ _ _ ih => TypeRep.strct s ts ih)
+    (fun {_ n} _ _ _ _ shape _ _ => TypeRep.fixed n shape)
+    (fun {_ _} _ _ _ _ _ _ shape _ _ _ _ _ => TypeRep.array shape)
+    (fun {K _} _ _ _ _ _ shape _ _ => TypeRep.mapping K shape)
+    (fun _ _ => FieldTypesRep.nil)
+    (fun {_ _ _} _ _ _ _ _ _ _ _ ih it => FieldTypesRep.cons ih it)
+    (fun {_} _ _ _ => True.intro)
+    (fun {_} _ _ _ _ _ _ _ _ _ => True.intro) h
+
 /-- The existing contract store is its intrinsic field family, not an erased map. -/
 abbrev StoreRep {C : Contract} (st : Solidity.Storage C) (ts : List STy)
     (l : Loc) (w : Store) : Prop := FieldsRep st ts l w
