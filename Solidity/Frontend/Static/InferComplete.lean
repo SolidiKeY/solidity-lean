@@ -698,3 +698,12 @@ theorem slots_complete {Γ : Ctx} : {s : Syn (.list (.opt .expr))} → {τs : Li
 end
 
 end Solidity.Frontend.Static
+
+namespace Solidity.Frontend.Static
+
+/-- **The checker decides S01's expression typing.** -/
+theorem hasType_iff {Γ : Solidity.Source.Ctx} {e : Solidity.Source.Syn .expr} {τ : Solidity.Source.STy} :
+    Solidity.Source.HasType Γ e τ ↔ τ ∈ inferTys Γ e :=
+  ⟨fun ⟨d⟩ => typed_complete d, fun h => (exists_expr h).elim fun d _ => ⟨d⟩⟩
+
+end Solidity.Frontend.Static

@@ -1,5 +1,7 @@
 import Solidity.Roadmap.Frontend
 import Solidity.Frontend.Static.Units
+import Solidity.Frontend.Static.Consts
+import Solidity.Frontend.Static.UserOps
 
 /-!
 # The static checkers as G05 `Checker` values
@@ -18,8 +20,13 @@ is G15's (`docs/feature-work/frontend-static.md`, Handoff).
 - `Program.libraries`: the `(unit name, library name)` pairs G05's
   `LinksResolved` reads.
 
-G13's typing checker and G14's inheritance checker add their instances in
-their own modules.
+- `metadataChecker` (G13): a resolved unit is S01-`WellFormed` (every
+  body and initializer typed by `infer`/`inferS`) and in the syntax profile,
+  decided exactly (`metadataChecker_complete`): the syntax and typing
+  component of G05's metadata stage (the settings and links obligations of
+  `FrontendSpec.SettingsRespected` stay G15's).  `strictMetadataChecker`
+  adds G13's checks S01's `WellFormed` lacks (`StaticOK`): compile-time
+  constant initializers, no cyclic constant, well-formed operator bindings.
 -/
 
 namespace Solidity.Frontend.Static
@@ -43,4 +50,37 @@ def _root_.Solidity.Source.Program.libraries (P : Program) : List (String × Str
   P.units.flatMap fun (u, s) =>
     (s.decls.filter fun d => d.kind == .library && d.scope == Option.none).map fun d => (u, d.name)
 
+/-- **G13's metadata checker**: well-formedness (with all body typing) and
+the syntax profile, sound and complete. -/
+def metadataChecker : Checker Resolution Unit (fun r _ => WellFormed r ∧ InProfileSyntax r) where
+  Cert := Unit
+  check r _ _ := wellFormedB r && inProfileSyntaxB r
+  sound r _ _ h := by
+    simp only [Bool.and_eq_true] at h
+    exact ⟨wellFormed_iff.mp h.1, inProfileSyntaxB_iff.mp h.2⟩
+
+theorem metadataChecker_complete (r : Resolution) (h : WellFormed r ∧ InProfileSyntax r) :
+    metadataChecker.check r () () = true := by
+  show (wellFormedB r && inProfileSyntaxB r) = true
+  rw [wellFormed_iff.mpr h.1, inProfileSyntaxB_iff.mpr h.2]
+  rfl
+
+/-- G13's checks beyond S01's well-formedness: compile-time constant
+initializers, no cyclic constant, well-formed operator bindings. -/
+def StaticOK (r : Resolution) : Prop :=
+  ConstInitsPure r ∧ ConstsAcyclic r.env ∧ UsingOpsOK r.env r.unit
+
+/-- The metadata checker with G13's checks. -/
+def strictMetadataChecker :
+    Checker Resolution Unit (fun r _ => (WellFormed r ∧ InProfileSyntax r) ∧ StaticOK r) where
+  Cert := Unit
+  check r _ _ := wellFormedB r && inProfileSyntaxB r && constInitsB r && acyclicB r.env &&
+    usingOpsB r.env r.unit
+  sound r _ _ h := by
+    simp only [Bool.and_eq_true] at h
+    exact ⟨⟨wellFormed_iff.mp h.1.1.1.1, inProfileSyntaxB_iff.mp h.1.1.1.2⟩,
+      constInitsB_iff.mp h.1.1.2, acyclic_iff.mp h.1.2, usingOpsB_iff.mp h.2⟩
+
 end Solidity.Frontend.Static
+/-- info: 'Solidity.Frontend.Static.metadataChecker_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.metadataChecker_complete

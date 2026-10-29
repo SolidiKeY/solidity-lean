@@ -595,6 +595,8 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
 | `Source/Units.lean` | G12: source units of a compilation input (`Program`), solc's import path resolution and remappings (`Path.absolute`, `Remapping.apply`), declaration identities (`DeclId`), the file-level scope across imports (`Sees`) and G12's judgment `UnitsOK`. |
 | `Source/Overloads.lean` | G12: overload sets across a contract's bases (`InheritedFn`: hidden only by a more derived function with the same parameter types). |
+| `Source/ConstCheck.lean` | G13: compile-time constants: purity of constant initializers (`PureS`, `ConstInitsPure`, solc error 8349), solc's typed constant evaluation (`TEval`, `NamedConst`, `ConstVal`), array lengths through it (`ArrayLenOK`) and acyclic constants (`ConstsAcyclic`). |
+| `Source/UserOps.lean` | G13: user-defined value types: operator bindings of global `using {f as op} for T` directives (`opBindings`, well formed: `UsingOpsOK`), and the typing of operators, `wrap` and `unwrap` (`UdvtTyped`). |
 | `Source/StateExamples.lean` | S04.01–S04.03 controls: nested memory aliasing, an independent memory copy, storage round trips, distinct panic outcomes, transfers, a reverted call undoing its writes. |
 
 ## Precompiles
@@ -649,7 +651,15 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/Static/Units.lean` | G12: the import resolver `Program.globals` (sound and complete for `Sees`, through cycles), the program check `Program.unitsOK` (`unitsOK_iff`), identities (`Sees.decl_exists`) and agreement with S01's lookup (`globals_lookup`). |
 | `Frontend/Static/Overloads.lean` | G12: the inherited overload set `Env.inheritedFns` (`mem_inheritedFns`, extends S01's lookup) and overload selection (`selectOverload`). |
 | `Frontend/Static/UnitsExamples.lean` | G12 controls: an import cycle, a diamond (one identity), a clash, aliases, a missing unit, remappings, shadowing, an ambiguous overload and overloads across bases. |
-| `Frontend/Static/Certificates.lean` | The static checkers as G05 `Checker` instances (`unitsChecker`) and the program's library declarations. |
+| `Frontend/Static/Infer.lean` | G13: type inference `infer` over every category, returning S01 derivations (`Typed`, `LVal`, `TypedArgs`, `TypedSlots`): sound by construction. |
+| `Frontend/Static/InferComplete.lean` | G13: completeness of `infer` for every S01 expression rule (`typed_complete`, `lval_complete`, `args_complete`, `slots_complete`). |
+| `Frontend/Static/InferStmt.lean` | G13: statement and block checking `inferS`, returning `StmtD`/`ItemsD` derivations. |
+| `Frontend/Static/InferStmtComplete.lean` | G13: completeness of `inferS` (`stmt_complete`, `items_complete`); `stmtOK_iff`, `itemsOK_iff`. |
+| `Frontend/Static/WellFormedCheck.lean` | G13: `wellFormedB` decides S01's `WellFormed` (`wellFormed_iff`), every body and initializer typed by the checkers. |
+| `Frontend/Static/Consts.lean` | G13: purity checker (`pureB_iff`, `constInitsB_iff`), typed constant evaluation (`tevalP`, `nconstP`; `teval_complete`, `nconst_complete`), `evalConst`, `arrayLenB`, the cycle check (`acyclic_iff`). |
+| `Frontend/Static/UserOps.lean` | G13: the user-defined value type checker `udvtTys` (`udvt_iff`) and the binding check (`usingOpsB_iff`). |
+| `Frontend/Static/InferExamples.lean` | G13 controls: S01's examples checked by computation, ill-typed and ill-formed refusals, named constants, a cyclic constant, a non-compile-time constant, UDVT operators and conversions. |
+| `Frontend/Static/Certificates.lean` | The static checkers as G05 `Checker` values (`unitsChecker`, `metadataChecker`, `strictMetadataChecker`) and the program's library declarations. |
 | `Frontend/Source.lean` | Compiler/pragma/settings validation, derived compilation-mode observations, static compiler-code artifacts and an admission result certifying its extracted feature list. |
 | `Frontend/SolcJson/Admission.lean` | Bounded AST scope classification and declaration-header closure over resolved execution roots; structured policy, upstream and implementation diagnostics. |
 | `Examples/Tactics/SourceUnitsImport.lean` | Both pinned compilers and pipelines: module calls, lexical error aliases, exact entry error bytes, receiver/condition effects and nonvacuity controls. |

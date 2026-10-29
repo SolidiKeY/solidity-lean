@@ -14,7 +14,14 @@ modules:
 | `Solidity/Frontend/Static/Units.lean` | G12 checker: the import resolver and the program check |
 | `Solidity/Frontend/Static/Overloads.lean` | G12 checker: `Env.inheritedFns`, `selectOverload` |
 | `Solidity/Frontend/Static/UnitsExamples.lean` | G12 controls |
-| `Solidity/Frontend/Static/Certificates.lean` | G05 `Checker` instances |
+| `Solidity/Source/ConstCheck.lean` | G13 relations: compile-time constant initializers (`PureS`, `ConstInitsPure`), named constants (`NamedConst`, `ConstVal`), array lengths (`ArrayLenOK`) |
+| `Solidity/Source/UserOps.lean` | G13 relations: user-defined value type operators, `wrap`, `unwrap` (`UdvtTyped`) |
+| `Solidity/Frontend/Static/Infer.lean`, `InferComplete.lean` | G13: expression inference over S01's `Typed`/`LVal`, sound by construction and complete |
+| `Solidity/Frontend/Static/InferStmt.lean`, `InferStmtComplete.lean` | G13: statement and block checking over `StmtD`/`ItemsD`, sound and complete |
+| `Solidity/Frontend/Static/WellFormedCheck.lean` | G13: S01's `WellFormed` decided |
+| `Solidity/Frontend/Static/Consts.lean`, `Solidity/Frontend/Static/UserOps.lean` | G13 checkers for the new relations |
+| `Solidity/Frontend/Static/InferExamples.lean` | G13 controls |
+| `Solidity/Frontend/Static/Certificates.lean` | G05 `Checker` values |
 
 New relations live under `Solidity/Source/` and import only `Solidity.Source.*`
 (the non-circularity whitelist); checkers live under
@@ -238,3 +245,273 @@ full `./run-lean.sh` gate runs at the end of the lane.
 (checked by `unitsChecker`) and `libraries := Program.libraries`; relate
 `Program.target` to the `absolutePath`s solc records
 (`Frontend/SourceUnits.lean`, `checkTree`) for imported fixtures.
+
+## G13: type inference, constants, user-defined value types
+
+### Expression inference (`Solidity/Frontend/Static/Infer.lean`, `InferComplete.lean`)
+
+S01's typing `Typed Γ e τ` is a relation: one expression can have several
+types (a hexadecimal zero is its constant and every `bytesN`), and several
+rules can apply. `infer Γ s` returns **every derivation shape**: a list of
+results `Res Γ c s`, which for an expression are S01 derivations
+`Typed Γ e τ` and lvalue derivations `LVal Γ e τ`, and for argument lists,
+tuple slots and positional arguments their `TypedArgs`/`TypedSlots`
+derivations. `Res Γ c s` is indexed by the tree, so the checker is **sound
+by construction**: every result is a derivation of that very expression,
+ready for S01's `Typed.toR` into the resolved layer.
+
+`infer` walks every syntactic category (a function over the fixed index
+`Syn .expr` alone would not be structural; S00's `Syn.collect` does the
+same), with one result family for all of them. Every one of S01's
+41 `Typed` and 6 `LVal` rules is generated at the syntax it names: constants
+(`constRes`, at every expression), literals, locals, state variables and
+`this` (`identRes`), parentheses and tuples (`tupleOne`), unary operators,
+the seven binary families (`binPair`, one per `BinKind`) and the comparison
+of two constants, `? :`, assignments, indexing, `length`, `balance`, magic
+members, conversions, `payable`, internal calls with S01's unique-overload
+filter, and builtin calls.
+
+**Completeness** (`typed_complete`, `lval_complete`, `args_complete`,
+`slots_complete`): for every derivation of S01's `Typed`/`LVal`/`TypedArgs`/
+`TypedSlots`, its type is among the types `infer` returns
+(`inferTys Γ e`), by mutual structural recursion on the derivation, one
+membership lemma per rule. `hasType_iff`: `HasType Γ e τ ↔ τ ∈ inferTys Γ e`.
+
+### Statement checking (`InferStmt.lean`, `InferStmtComplete.lean`)
+
+`inferS C s L` returns every S01 statement derivation `StmtD C L s L'` and
+block derivation `ItemsD`, with the locals as an argument (a declaration
+extends them for the rest of its block). It covers every `StmtD` rule:
+expression statements, `_`, declarations with and without initializer
+(solc's location rule `locOK`), blocks, `unchecked` blocks, `if`, the three
+loops (a `for` initializer is checked as the statement `simpleStmt i`),
+`break`/`continue`, the three `return` forms, `emit`, `revert E(…)` and the
+canonical rethrow (its local is searched among the locals).
+`stmt_complete`/`items_complete` prove completeness; `stmtOK_iff`,
+`itemsOK_iff` state the decision.
+
+### Well-formedness decided (`WellFormedCheck.lean`)
+
+`wellFormedB r` checks every field of S01's `WellFormed` (its own structure,
+`Solidity/Source/WellFormed.lean`): bases and linearization, clashes,
+pragmas, declared types, placement, constants with initializers, every
+initializer's type by `infer`, every body's frame, distinct names and
+statements by `inferS`. `wellFormed_iff` proves it decides `WellFormed`
+exactly; `inProfileSyntaxB_iff` decides S00's syntax verdict. So S01's
+well-formedness of a unit is computed, not written by hand:
+`counter_checked` re-proves S01's `counter_wellFormed` by `decide`.
+
+### Compile-time constants (`Solidity/Source/ConstCheck.lean`, `Solidity/Frontend/Static/Consts.lean`)
+
+- **Compile-time initializers.** `PureS Γ .expr e` is solc's purity
+  (`TypeChecker`, error 8349, "Initial value for constant variable has to
+  be compile-time constant"): literals, constants, operators, `? :`,
+  tuples, conversions and the pure builtins (`keccak256`, `sha256`,
+  `ripemd160`, `ecrecover`, `addmod`, `mulmod`, `erc7201`).
+  `ConstInitsPure r` requires it of every constant. `pureP` returns the
+  purity proof (sound by construction); `pureB_iff` and `constInitsB_iff`
+  decide them. S01's `WellFormed` accepts `uint256 constant T =
+  block.timestamp;` (`timestamp_wellFormed`); G13 refuses it
+  (`timestamp_refused`).
+- **Named constants, typed.** `TEval`/`NamedConst` are solc 0.8's
+  `ConstantEvaluator`: a literal-only expression folds exactly by S01's
+  `Syn.const` (so its bounds and refusals apply); a named integer constant
+  has its declared type, its initializer's value converted to it
+  (`Q.toIntTy?`, solc's `convertType`: out of range is no value, a fraction
+  is truncated toward zero); an operation with a typed operand takes solc's
+  result type (`ConstOp.resultTy`: the wider of two integer types, an integer
+  type and a constant that fits it; the left type for `**` and shifts),
+  folds exactly and converts. So `uint256 constant A = 7;` gives
+  `A / 2 * 2 = 6` (`typed_division`), and with `uint8 constant C = 255;`,
+  `C + 1` has no value (`overflow_length`). `ArrayLenOK` reads array lengths
+  through it. `tevalP`/`nconstP` compute the derivations (sound by
+  construction); `teval_complete`/`nconst_complete` prove every value is
+  found with enough levels; `arrayLenB_sound`.
+- **Cycles.** `ConstsAcyclic E`: no constant depends on itself through the
+  constants its initializer names (solc: "The value of the constant … has
+  a cyclic dependency"). `acyclicB` decides it with `Closure.lean`'s
+  saturation (`acyclic_iff`); `cyclic_refused` refuses `A = B + 1;
+  B = A + 1`, and `cyclic_noValue` proves, on the relation, that `A` has no
+  value at all.
+
+### Conversions and overload selection
+
+Implicit and explicit conversions are S01's (`STy.implicit`,
+`STy.explicit`, the fixed-point rows of the second round); `infer` applies
+them exactly where S01's rules do, and its completeness covers every
+conversion S01 types (`convElem`, `convUser`, `payable`, the implicit
+conversions of arithmetic, assignment, return, call and event arguments).
+Overload selection is S01's: `Typed.callInternal`, `emit` and `revert E(…)`
+require exactly one candidate accepting the argument types **of one
+argument typing**. That differs from solc, which refuses a call when two
+overloads accept the arguments under any of their typings:
+`hexCall_typed` shows `f(0x01)` with `f(uint8)` and `f(bytes1)` getting two
+derivations, one per callee, where solc reports "No unique declaration
+found after argument-dependent lookup". The checker decides S01's relation
+faithfully, deviation included (Handoff). With a decimal `1`, which has no
+`bytesN` typing, the call is refused (G12's `ambiguous_refused`).
+
+### User-defined value types (`Solidity/Source/UserOps.lean`, `Solidity/Frontend/Static/UserOps.lean`)
+
+S01 types no operation on a value type. `UdvtTyped Γ u e τ` adds solc's:
+
+- an operator on two operands of type `T` (one for `-`, `~`) calls the
+  unique function bound to it by a global file-level `using {f as op} for
+  T global;` (`Syn.usingOps`), whose signature is `(T, T) → T` (or `bool`
+  for comparisons): `opBindings`;
+- `T.wrap(x)` from the underlying type (implicitly converted) to `T`;
+  `T.unwrap(x)` back.
+
+`UsingOpsOK` refuses a unit with an ill-formed binding (wrong signature,
+not `pure`, not global, not at file level; `usingOpsB_iff`,
+`badBinding_refused`), as solc does, so `opBindings`' signature filter
+hides no binding of an accepted unit. `udvtRes` returns each type with its
+derivation (sound by construction); `udvt_complete` proves completeness
+(`udvt_iff`).
+
+### The G05 metadata stage, and which compiler trust it removes
+
+`metadataChecker : Checker Resolution Unit (fun r _ => WellFormed r ∧
+InProfileSyntax r)` has the shape of G05's `Chain.metadata`, decided
+exactly (`metadataChecker_complete`). It is the syntax and typing component
+of G05's metadata stage: the settings and link obligations of
+`FrontendSpec.SettingsRespected` (`i.Ok`, `LinksResolved`) stay G15's.
+`strictMetadataChecker` adds `StaticOK` (compile-time initializers, acyclic
+constants, well-formed operator bindings), which S01's `WellFormed` lacks.
+
+The solc-JSON route reads solc's type metadata and trusts it: each
+expression's type (`typeDescriptions.typeString`/`typeIdentifier`,
+`Solidity/Frontend/SolcJson/Body.lean:199-206`), each identifier's
+declaration (`referencedDeclaration`, `Body.lean:195`), and the common type
+of binary operations (`commonType`, `Solidity/Frontend/SolcJson/Admission.lean:274,309,388`).
+For a unit given as S00 syntax and inside S01's typed fragment, the
+checkers compute all three from source: `infer` derives each expression's
+type and resolution (a local by position, a state variable or callee by
+declaration, the unique overload), and the binary rules derive the common
+type (`STy.common?`). The trust is **removable, not yet removed**: the
+solc-JSON route still reads the annotations, nothing in the pipeline calls
+`metadataChecker` yet, and units using S01's untyped forms (structs,
+`abi.*`, external calls) cannot take the S00 route. Once G15 routes the
+frontend through S00 syntax and these checkers, the trusted base for typing
+becomes S01's rules (and the parse, G08–G11).
+
+### Controls (`InferExamples.lean`, all by `decide` unless noted)
+
+| Theorem | Statement |
+|---|---|
+| `counter_checked` | S00's counter is `WellFormed` and in the syntax profile, computed |
+| `clashing_checked`, `sameSig_checked`, `ifaceBody_checked`, `twoCtors_checked`, `noVisibility_checked` | S01's five ill-formed units refused by `wellFormedB` |
+| `tooBig_checked`, `fits_checked` | `uint8 x = 300;` has no statement derivation; `uint8 x = 255;` has one |
+| `shl18_checked`, `gasleft_checked`, `msgValue_checked` | `1 << 8` has only its folded type; `gasleft()` and `msg.value` in a non-payable public body have none |
+| `zero_types`, `addLit_types`, `cond_types`, `require_checked` | `0x00` has 33 types; `a + 1` and `b ? a : a` one each; `require(b, "no");` is a statement |
+| `named_value`, `named_length` | `N = 3; M = N * 2 + 1` gives `M = 7`; the length expression `M` gives 7 |
+| `typed_division`, `overflow_length` | `A = 7`: `A / 2 * 2` is 6; `uint8 C = 255`: `C + 1` is no length |
+| `cyclic_refused`, `cyclic_noValue` (by the mutual recursor), `named_acyclic` | `A = B + 1; B = A + 1` refused, and `A` has no value; `N`, `M` acyclic |
+| `timestamp_wellFormed`, `timestamp_refused`, `keccak_pure` | `block.timestamp` as a constant passes S01, is refused here; `keccak256("x")` is compile-time |
+| `udvt_add`, `udvt_noBinding`, `udvt_wrap`, `udvt_unwrap`, `udvt_bindings_ok`, `badBinding_refused` | `a + b` on `Fixed` with a binding; `a - b` without one has no type; `Fixed.wrap(1)`, `Fixed.unwrap(a)`; the bindings are well formed; binding `add` (returning `Fixed`) to `<` is refused |
+| `hexCall_typed` | the recorded overload deviation: `f(0x01)` has two derivations |
+
+### What G13 does not do
+
+- **S01 itself.** The checkers decide S01's relations as they stand,
+  including their recorded gaps ("What S01 does not do": data locations of
+  parameters, `abi.*`, structs, external calls, named arguments, a second
+  declaration of a name in one block) and the overload deviation above.
+  New rules lane-semantics adds to `Typed`/`StmtD` need matching cases in
+  `infer`/`inferS`; their completeness proofs then fail to elaborate until
+  the cases are added, which is the intended signal.
+- **Integration into S01.** `ConstInitsPure`, `ConstsAcyclic`,
+  `ArrayLenOK`, `UdvtTyped` and `UsingOpsOK` are separate relations: S01's
+  `WellFormed`, `Syn.tys` and `Typed` do not read them (Handoff). So S01
+  still refuses `uint256[M] a;`, and a value-type operation is typed only by
+  `UdvtTyped`, not inside larger S01 expressions.
+- **UDVT composition.** `UdvtTyped`'s operands are typed by S01's
+  `HasType`, so `a + b + c`, `-(a + b)` and `Fixed.unwrap(Fixed.wrap(1))`
+  have no type here (solc accepts them); it composes once S01's `Typed`
+  reads `UdvtTyped` (Handoff). `T` defined in the same file and the
+  function's purity are checked by `UsingOpsOK`; the same-file rule is not.
+- **Constants.** A rational base with a typed exponent or shift amount
+  (`2 ** A`) and non-integer named constants have no value here; solc gives
+  the former the base's mobile type. Purity of member and index accesses
+  (`type(T).max`, `"abc".length`) is not modelled. That
+  `E.decls.length + 1` levels of named constants suffice for every acyclic
+  definition is not proved (completeness is with enough levels), and
+  `arrayLenB` has soundness only.
+- **Speed.** `infer` enumerates every derivation: an expression's result
+  list is the product of its operands' type lists filtered by the rules. A
+  literal has up to 33 types, so a call with several `0x00` arguments
+  enumerates up to 33 to the power of their number. The checker is never
+  kernel hot code; elaboration times are in the Handoff.
+
+### Gates (G13)
+
+Recorded in [Handoff (G13)](#handoff-g13).
+
+### Review (G13)
+
+A read-only finder and a separate skeptic (neither using the Lean server)
+reviewed the first G13 revision.
+
+Fixed:
+
+| Finding | Fix |
+|---|---|
+| named constants folded over rationals, ignoring declared types: `A / 2 * 2` gave 7, `uint8 C = 255; C + 1` accepted (both) | `TEval`/`NamedConst` follow solc's `ConstantEvaluator` (types, `convertType`); `typed_division`, `overflow_length` |
+| cyclic constants accepted by every check (finder) | `ConstsAcyclic`, `acyclic_iff`, `cyclic_refused`; in `strictMetadataChecker` |
+| `cyclic_none` showed only the checker's verdict at one level bound (both) | `cyclic_noValue` on the relation, by the mutual recursor |
+| "an ambiguous call has no type" false: `f(0x01)` with `f(uint8)`/`f(bytes1)` (skeptic) | the claim corrected; `hexCall_typed` records S01's per-typing uniqueness as a deviation (two derivations, two callees); Handoff to lane-semantics |
+| wrong-signature, non-global bindings silently filtered (finder) | `UsingOpsOK`, `usingOpsB_iff`, `badBinding_refused` |
+| `erc7201` missing from the pure builtins (finder, unconfirmed against solc) | added, following `docs/solidity-scope.md`'s compile-time folding of `erc7201` |
+| trust removal read as done; `InProfileSyntax` weaker than G05's `InProfile` (skeptic) | the trust paragraph and `Certificates.lean` say "removable", and name the metadata checker the syntax and typing component |
+| `HasType ↔ τ ∈ inferTys` cited but not stated (finder) | `hasType_iff` |
+| array lengths "closed", no completeness (both); `named_length` docstring named a contract that was not there (finder) | wording: a relation and a sound checker, S01 not yet reading it; the docstring fixed |
+| UDVT non-compositional, unrecorded (both) | recorded under What G13 does not do |
+
+Recorded, not fixed: S01 integration of the new relations, UDVT
+composition, `2 ** A`, purity of member and index accesses, the level
+bound, `arrayLenB` completeness, enumeration cost (all above).
+
+### Handoff (G13)
+
+**Revision**: the G13 commit on `cloud/roadmap-l2-20261029/lane-static`.
+
+**Theorems**: `typed_complete`, `lval_complete`, `args_complete`,
+`slots_complete`, `hasType_iff` (InferComplete); `stmt_complete`,
+`items_complete`, `stmtOK_iff`, `itemsOK_iff` (InferStmtComplete);
+`wellFormed_iff`, `inProfileSyntaxB_iff` (WellFormedCheck); `pureB_iff`,
+`constInitsB_iff`, `teval_complete`, `nconst_complete`, `evalConst_sound`,
+`arrayLenB_sound`, `acyclic_iff` (Consts); `udvt_iff`, `usingOpsB_iff`
+(UserOps); `metadataChecker_complete` (Certificates); controls as above.
+All on the standard axioms (`pureB_iff` on none), pinned in
+`InferExamples.lean`/`Certificates.lean` and listed in `TrustAudit.lean`'s
+G13 block.
+
+**Premises**: none; no `sorry`, axiom, `native_decide`, `implemented_by`
+or heartbeat option.
+
+**Checks**: `lean_diagnostic_messages` clean on every new file;
+`node scripts/check-g07.mjs`: 0 new failures. The full build runs at the
+end of the lane.
+
+**For lane-semantics (existing `Solidity/Source/` files)**:
+
+- `Typing.lean`, overloads: S01's per-typing uniqueness gives `f(0x01)`
+  two derivations with different callees (`hexCall_typed`); solc requires a
+  unique overload across all argument typings. Either `callInternal`
+  (and `emit`, `revertError`) should require the candidate set over every
+  typing of the arguments to be a singleton, or derivations need a
+  canonical choice; S02's meaning depends on it.
+- `Typing.lean`: read `UdvtTyped` (operators, `wrap`, `unwrap`) as
+  `Typed` rules so they compose; `Syn.tys`'s `arrayLen` should read
+  `ArrayLenOK` (named constants, solc's typed evaluation).
+- `WellFormed.lean`: add `ConstInitsPure`, `ConstsAcyclic` and
+  `UsingOpsOK` (`StaticOK`) as fields.
+- Any new `Typed`/`StmtD` rule needs a case in `infer`/`inferS`
+  (`Solidity/Frontend/Static/Infer.lean`, `InferStmt.lean`) and in their
+  completeness proofs.
+
+**For G15**: `metadataChecker`/`strictMetadataChecker` are the typing part
+of `Chain.metadata`; the settings and links part (`SettingsRespected`)
+remains. Relating solc's `typeDescriptions`/`referencedDeclaration` to
+`infer`'s derivations for an imported unit is the check that would retire
+that trust on the solc-JSON route.

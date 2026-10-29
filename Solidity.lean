@@ -421,6 +421,8 @@ import Solidity.Source.World
 import Solidity.Source.StateExamples
 import Solidity.Source.Units
 import Solidity.Source.Overloads
+import Solidity.Source.ConstCheck
+import Solidity.Source.UserOps
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic
@@ -604,6 +606,14 @@ import Solidity.Frontend.Static.Closure
 import Solidity.Frontend.Static.Units
 import Solidity.Frontend.Static.Overloads
 import Solidity.Frontend.Static.UnitsExamples
+import Solidity.Frontend.Static.Infer
+import Solidity.Frontend.Static.InferComplete
+import Solidity.Frontend.Static.InferStmt
+import Solidity.Frontend.Static.InferStmtComplete
+import Solidity.Frontend.Static.WellFormedCheck
+import Solidity.Frontend.Static.Consts
+import Solidity.Frontend.Static.UserOps
+import Solidity.Frontend.Static.InferExamples
 import Solidity.Frontend.Static.Certificates
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.ScopedFlip
