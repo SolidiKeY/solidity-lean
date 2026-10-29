@@ -527,88 +527,123 @@ S01 linearizes contracts (`Env.linearize`, C3) and checks none of solc's
 contract-level rules ("What S01 does not do"). `InheritanceOK r` states
 them for one unit, each field named by the solc error it is:
 
+- **Linearization** (`linearizes`): every contract linearizes. Every other
+  relation reads `Env.chain`, which falls back to `[c]` when C3 fails, so
+  without this field an inconsistent hierarchy would pass vacuously.
 - **Base functions.** `Env.baseFns E c d`: for each direct base `B` of the
   contract `c` declaring `d`, the most derived function of `B`'s
-  linearization with `d`'s name and parameter types (not `private`), one
-  per declaring contract (`dedupScope`), so a function inherited along two
-  routes from one contract counts once.
-- **Overrides** (`FnOverrideOK`, `OverridesOK`): `override` iff there are
-  base functions (9456, 7792); every base function `virtual`, interface
-  functions implicitly (4334); with two or more base contracts the
-  `override(…)` list names each (4327), and a list names only them (2353);
-  visibility kept or `external` to `public` (9098); mutability only
-  stricter (6959, `mutOK`); return types kept (4822).
+  linearization with `d`'s name and parameter types up to data locations
+  (`Decl.sameSig`, `STy.sameUpToLoc`: a `memory` parameter overrides a
+  `calldata` one), not `private`, one per declaring contract
+  (`dedupScope`).
+- **Overrides** (`FnOverrideOK`, `OverridesOK`): `override` when there
+  are base functions, unless the only one is an interface function (9456,
+  solc 0.8.8's exemption, `Env.singleIface`), and not without (7792);
+  every base function `virtual`, interface functions implicitly (4334);
+  with two or more base contracts the `override(…)` list names each
+  (4327), names only them (2353) and names none twice (4520); visibility
+  kept or `external` to `public` (9098); mutability only stricter (6959,
+  `mutOK`); return types kept up to locations (4822); an implemented base
+  function is not overridden by an unimplemented one (4593).
 - **Required overrides** (`MustOverride`, 6480): if the direct bases'
   most derived versions of one signature come from two or more contracts,
-  the contract declares it; a version shared through a common base is one.
+  the contract declares it.
 - **Implementations** (`ImplOK`): a function without body outside an
   interface is `virtual` (5424); a non-abstract contract's most derived
   version of each function it has is implemented (3656).
+- **`virtual` declarations** (`VirtualDeclOK`): not `private` (3942), not
+  in a library (7801).
 - **Base constructors** (`CtorArgsOK`): for each base in the linearization
   whose constructor has parameters, arguments are given at most once along
   the linearization, in `is` specifiers or constructor modifier lists
   (3364), exactly once unless the contract is abstract (3415), and with the
   constructor's parameter count where the contract gives them (7927, 2973).
-- **Modifier invocations** (`ModInvOK`, 4659, 2973): an invocation names a
-  modifier visible from the declaration (S01's lookup) with matching
-  argument count, or, in a constructor, a base contract.
-- **`using L for T`** (`UsingLibOK`, 4357): `L` names a library.
+- **Modifier invocation resolution** (`ModInvOK`, 4659, 2973, 1563): an
+  invocation names a modifier visible from the declaration (S01's lookup)
+  with matching argument count (none without parentheses, `invCount`), or,
+  in a constructor, a base contract, with parentheses (1563). Binding a
+  `virtual` modifier to its most derived override is not done.
+- **`using L for T`** (`UsingLibOK`, 4357): `L` names a library. Attached
+  functions (`using {f, g} for T`, `for *`) are not resolved.
 - **Constructor order** (`Env.ctorOrder`): the linearization reversed.
 - **Callable identity** (`CallableId`): a function is identified by its
-  contract, name and parameter types.
+  contract, name and parameter types (S01's location-sensitive
+  `sameParams`).
+- **C3** (`C3Lin`): see below.
+
+Except for `C3Lin`, the relations are stated over the same computed helpers
+their checkers use (`Env.baseFns`, `Env.inheritedVersion`, `dedupScope`,
+`Env.argsFor`, `Env.chain`). The `*_iff` theorems therefore prove that the
+checkers decide them, not agreement with an independent specification; the
+relations' fidelity to solc rests on their text (each field cites its solc
+error) and on the solc samples below.
 
 ### The checkers (`Solidity/Frontend/Static/Inheritance.lean`, `Solidity/Frontend/Static/C3.lean`)
 
 Each relation has a Boolean checker proved to decide it exactly:
 `fnOverrideB_iff`, `overridesB_iff`, `mustOverrideB_iff`, `implB_iff`,
-`ctorArgsB_iff`, `modInvsB_iff`, `usingLibB_iff`, and `inheritance_iff` for
-the whole judgment. `inheritanceChecker` is the G05 `Checker` value
-(`Certificates.lean`).
+`virtualDeclB_iff`, `ctorArgsB_iff`, `modInvsB_iff`, `usingLibB_iff`, and
+`inheritance_iff` for the whole judgment. `inheritanceChecker` is the G05
+`Checker` value, with `inheritanceChecker_complete` (`Certificates.lean`).
 
 **Callable identity** (`callable_unique`): in an S01-`WellFormed` unit, two
-functions with one identity are one declaration (same position); the proof
-uses S01's no-clash field, so identities are a sound key for G20's callable
-lowering.
+named functions (`d.name ≠ ""`, which excludes S01's unnamed declarations)
+with one identity are one declaration (same position). The proof restates
+S01's no-clash field for this key; identity across contracts (an inherited
+function's identity in the inheriting contract), which G20's lowering will
+need, is not stated.
 
 **C3.** `C3Lin E c L` specifies a C3-consistent linearization
-declaratively: `L = c :: M`, `M` duplicate-free, every base's linearization
-(itself `C3Lin`) and the direct bases (most derived first) ordered
-sublists of `M` (monotonicity and local precedence), and nothing else in
-`M`. `linearize_sound`: S01's `Env.linearize` returns only such
+declaratively: `L = c :: M`, `M` duplicate-free, holding *some*
+C3-consistent linearization of each base (an existential witness, not
+`Env.chain b`) and the direct bases (most derived first) as ordered
+sublists, and nothing else. It omits C3's leftmost-head choice, so several
+`L` can satisfy it (`X is P, Q`, `P is A`, `Q is B` admits `X, Q, P, A, B`
+as well as C3's `X, Q, B, P, A`), and it does not state `c ∉ M`.
+`linearize_sound`: S01's `Env.linearize` returns only such
 linearizations; behind it, the merge laws `merge_sub`, `merge_nodup`,
-`merge_sublist` (the chosen head is never in a tail, so removing it keeps
-every list's order). `ctorOrder_spec`: the constructor order is the
-reversed linearization, ends with the contract, and runs every direct base
-before it.
+`merge_sublist`. `ctorOrder_spec`: the constructor order is the reversed
+linearization (by definition), ends with the contract, and runs every
+direct base before it; it says nothing about indirect bases' relative
+order.
 
 ### Cross-check with solc (`Solidity/Frontend/Static/InheritanceExamples.lean`, all by `decide`)
 
 Each control transcribes a test of the pinned solc 0.8.38 test tree
 (`tests/upstream/solidity-0.8.38.tar.gz`, under
-`test/libsolidity/syntaxTests/`) as S00 syntax (bodies emptied; they do not
-bear on these checks), and the checker's verdict equals the test's
-expectation block:
+`test/libsolidity/syntaxTests/`) as S00 syntax (bodies emptied, state
+variables dropped; they do not bear on these checks), and the checker's
+verdict equals the test's expectation block. Paths below are under
+`inheritance/` unless they start with `nameAndTypeResolution/`.
 
-| Theorem | Upstream test | solc's verdict |
+| Theorem | Upstream test (dropped parts) | solc's verdict |
 |---|---|---|
-| `missingVirtual_refused` | `inheritance/override/override_missing_virtual.sol` | 9456 (`test`), 4334 (`test2`): both functions fail |
-| `override_ok` | `inheritance/override/override.sol` | accepted |
-| `lessStrict_refused` | `inheritance/override/override_less_strict_mutability.sol` (`A`, `C`) | 6959 |
-| `stricter_ok` | `inheritance/override/override_stricter_mutability.sol` (`A`, `B`) | accepted |
-| `noCommonBase_refused` | `inheritance/override/no_common_base_and_unique_implementation.sol` | 6480 |
-| `sharedBase_ok` | `inheritance/override/override_shared_base_simple.sol` | accepted |
-| `sharedBase_override_ok` | `inheritance/override/override_shared_base.sol` | accepted |
-| `sharedBase_unlisted_refused` | the same with `override` and no list | 4327 |
-| `externalPublic_ok` | `inheritance/override/external_turns_public_no_params.sol` | accepted |
-| `unimplementedNonVirtual_refused` | `inheritance/unimplemented_without_virtual.sol` | 5424 |
-| `abstractNeeded_refused` | `nameAndTypeResolution/029_create_abstract_contract.sol` (`base`) | 3656 |
-| `argsTwice_refused` | `inheritance/duplicatedConstructorCall/` (`B is A(2) { constructor() A(3) }`) | 3364 |
+| `missingVirtual_refused` | `override/override_missing_virtual.sol` | 9456 (`test`), 4334 (`test2`): both functions fail |
+| `override_ok` | `override/override.sol` | accepted |
+| `lessStrict_refused` | `override/override_less_strict_mutability.sol` | 6959 on `C`, `D`, `F`; `B`, `E` pass |
+| `stricter_ok` | `override/override_stricter_mutability.sol` (`A`, `B` only) | accepted |
+| `noCommonBase_refused` | `override/no_common_base_and_unique_implementation.sol` | 6480 |
+| `sharedBase_ok` | `override/override_shared_base_simple.sol` | accepted |
+| `sharedBase_override_ok` | `override/override_shared_base.sol` | accepted |
+| `sharedBase_unlisted_refused` | not upstream: the previous test with `override` and no list | 4327 (solc's rule) |
+| `externalPublic_ok` | `override/external_turns_public_no_params.sol` | accepted |
+| `dupList_refused`, `dupListFixed_ok` | `override/override_multiple_duplicated.sol`; the same deduplicated | 4520 on both functions; accepted |
+| `calldataMemory_ok` | `override/calldata_memory.sol` (`dummy` dropped); negative: `uint8[]` in `B` | accepted; 7792 |
+| `overridesSingle_ok` | `interface/overrides_single.sol`; negative: the bases as abstract contracts | accepted; 9456 |
+| `implThenUnimpl_refused` | `override/override_implemented_with_unimplemented_then_implemented.sol` | 4593 on `B`, `C` passes |
+| `virtualDecl_refused` | `override/virtual_private.sol`, `virtual/library_err.sol`; the library without `virtual` | 3942, 7801; accepted |
+| `unimplementedNonVirtual_refused` | `unimplemented_without_virtual.sol` | 5424 |
+| `abstractNeeded_refused` | `nameAndTypeResolution/029_create_abstract_contract.sol` (`base` only) | 3656 |
+| `argsTwice_refused` | `duplicatedConstructorCall/base.sol` | 3364 |
+| `argsTwice_paths_refused` | `duplicatedConstructorCall/{ancestor,base_multi,base_multi_no_constructor,base_multi_no_constructor_modifier_style}.sol` | 3364 (each) |
 | `argsMissing_refused` | `nameAndTypeResolution/061_missing_base_constructor_arguments.sol` | 3415 |
-| `argsCount_refused` | `inheritance/too_few_base_arguments.sol` (`Derived`) | 7927 |
-| `nonBaseCtor_refused` | `inheritance/reference_non_base_ctor.sol` | 4659 |
-| `ctorModifiers_ok` | `inheritance/modifiers_in_constructor_context.sol` | accepted |
+| `argsCount_refused` | `too_few_base_arguments.sol` | 7927 (`Derived`), 2973 (`Derived2`) |
+| `nonBaseCtor_refused` | `reference_non_base_ctor.sol` | 4659 |
+| `modStyleBare_refused` | `disallow_modifier_style_without_parentheses.sol`; with `A()` | 1563; accepted |
+| `modArgs_count` | not upstream: `modifier m(uint)` invoked as `m`, `m(1, 2)`, `m(1)` | 2973, 2973, accepted (solc's rule) |
+| `ctorModifiers_ok` | `modifiers_in_constructor_context.sol` | accepted |
 | `usingNotLibrary_refused` | `nameAndTypeResolution/252_using_for_not_library.sol` | 4357 |
-| `diamond_c3`, `diamond_ctorOrder` | S01's diamond `D is B, C` | `D, C, B, A`, C3-consistent; constructors `A, B, C, D` |
+| `diamond_c3`, `diamond_ctorOrder` | not upstream: S01's diamond `D is B, C` | `D, C, B, A`, C3-consistent; constructors `A, B, C, D` |
 
 The transcriptions are by hand: no parser connects these files to S00
 syntax yet (G08–G11), so the cross-check covers the cases listed, not the
@@ -616,17 +651,42 @@ directories.
 
 ### What G14 does not do
 
+- **solc's override-graph pruning for 6480.** `checkAmbiguousOverridesInternal`
+  removes, at each cut vertex of the override graph, the functions it
+  overrides and an unimplemented cut-vertex function before requiring a
+  declaration. `MustOverride` does not, so it refuses programs solc
+  accepts: `override/triangle_no_impl.sol`,
+  `override/common_base_and_unique_mention.sol`,
+  `override/nonintermediate_common_base_and_unique_implementation.sol` (and
+  its `_unimplemented` variant), `override/correct_choice_for_base_function.sol`.
+  The rule is conservative (it refuses more), not unsound for S02.
+- **Every base function reachable through a base.** `baseFns` keeps the
+  most derived function of each direct base's linearization; solc keeps
+  every not-yet-overridden function reachable through it. So
+  `override/interface_and_base_override_fine.sol` (`override(IBase, Base)`
+  where `Base` implements `IBase`) is refused (2353), and
+  `override/interface_and_base_override_err.sol` is refused through 9456
+  rather than solc's 4327.
+- **Base-constructor arguments in detail.** `CtorArgsOK.once` considers
+  only bases whose constructor has parameters; solc also reports 3364 for
+  duplicate modifier-style calls of a parameterless constructor. `is A()`
+  with empty parentheses counts as given here; solc ignores it.
 - **Several units.** The relations read one unit's environment, like S01;
   a base imported from another unit is resolved by G12 but not linearized
   here (Handoff).
 - **Public state variables** that implement or override functions
   (`implement_*_by_public_variable.sol`, `override_public_vars.sol`):
   getters are not functions here, so they neither override nor hide.
+- **Fallback and receive** are not override-checked (`Env.ownFns` keeps
+  only functions): `fallbackReceive/fallback_without_override.sol` (9456)
+  is accepted.
 - **Modifiers.** Modifier overriding (`virtual`/`override` on modifiers,
-  `modifier_ambiguous*.sol`) is not checked; only their invocations.
-- **Interfaces in override lists** (`interfaceException/`), `super` calls,
-  and diagnostics' order and multiplicity: a refusal is one verdict, not
-  solc's list of errors.
+  `modifier_ambiguous*.sol`) and binding a `virtual` modifier to its most
+  derived override are not checked; only invocations are resolved.
+- **Override lists** are matched by each path's last component, so two
+  qualified names with one last component are not told apart; the
+  `interfaceException/` cases, `super` calls, and diagnostics' order and
+  multiplicity are not modelled (a refusal is one verdict).
 - **C3 completeness**: `linearize_sound` shows S01's result is consistent;
   that C3 fails only when solc reports "Linearization of inheritance graph
   impossible" is solc's definition, not a theorem here.
@@ -641,9 +701,69 @@ Recorded in [Handoff (G14)](#handoff-g14).
 
 ### Review (G14)
 
-Recorded after the finder and skeptic reviews.
+Finder and skeptic reviews, read-only and without the Lean server, over
+the pre-review commit. Confirmed and fixed:
+
+| Finding | Source | Fix |
+|---|---|---|
+| Modifier with parameters invoked without parentheses, and modifier-style base call without parentheses, accepted (2973, 1563) | both | `invCount`; base disjunct requires parentheses; `modArgs_count`, `modStyleBare_refused` |
+| Duplicate `override(…)` entries accepted (4520) | both | `FnOverrideOK.distinct`; `dupList_refused` |
+| `InheritanceOK` passes non-linearizable hierarchies vacuously | skeptic | `linearizes` field |
+| `calldata`/`memory` parameters do not override each other | finder | `Decl.sameSig` (`STy.sameUpToLoc`); `calldataMemory_ok` |
+| solc 0.8.8's single-interface exemption from `override` missing | finder | `Env.singleIface`; `overridesSingle_ok` |
+| 4593, 3942, 7801 have no field | finder | `keepsBody`, `VirtualDeclOK`; `implThenUnimpl_refused`, `virtualDecl_refused` |
+| `C3Lin` (a relation) in a Frontend file | skeptic | moved to `Solidity/Source/Inheritance.lean` |
+| No `inheritanceChecker_complete` | skeptic | added and pinned |
+| `*_iff` theorems decide relations stated over the same helpers; not said | skeptic | stated in the module docstring and above |
+| Modifier binding, `using for` and callable identity over-claimed; `C3Lin` existential witnesses, non-uniqueness and `c ∉ M`; `ctorOrder_spec`'s content; `callable_unique`'s `d.name ≠ ""` | both | wording above |
+| Imprecise citations (`duplicatedConstructorCall/`, dropped contracts) and uncovered 3364/2973 cases | both | exact files, dropped parts listed; `argsTwice_paths_refused`, `Derived2`, full `lessStrict` |
+| Fallback/receive, 6480 pruning, reachable base functions, `CtorArgsOK` details, last-component override matching unlisted | both | listed under "What G14 does not do" |
 
 ### Handoff (G14)
 
-Recorded at the push.
+**Revision**: the G14 commit on `cloud/roadmap-l2-20261029/lane-static`.
 
+**Theorems**: `fnOverrideB_iff`, `overridesB_iff`, `mustOverrideB_iff`,
+`implB_iff`, `virtualDeclB_iff`, `ctorArgsB_iff`, `modInvsB_iff`,
+`usingLibB_iff`, `inheritance_iff`, `callable_unique` (Inheritance);
+`merge_sub`, `merge_nodup`, `merge_sublist`, `linearize_sound`,
+`ctorOrder_spec` (C3); `inheritanceChecker_complete` (Certificates); the
+controls above. All on the standard axioms, pinned in
+`InheritanceExamples.lean`/`Certificates.lean` and listed in
+`TrustAudit.lean`'s two G14 blocks.
+
+**Premises**: none; no `sorry`, axiom, `native_decide`, `implemented_by`
+or heartbeat option.
+
+**Checks**: `lean_diagnostic_messages` clean on every new file;
+`node scripts/check-g07.mjs`: 0 new failures. Elaboration (full build of the pre-review
+commit): `InheritanceExamples.lean` 8.4 s, `Certificates.lean` 4.0 s.
+
+**For lane-semantics (existing `Solidity/Source/` files)**:
+
+- `WellFormed.lean`: S01 accepts every program `InheritanceOK` refuses;
+  adding `InheritanceOK` (or its fields) to `WellFormed` would let S02
+  assume overrides, implementations and constructor arguments are
+  consistent. Nothing in S01/S02 reads it yet.
+- `Typing.lean`: a call through `super`, a call of an inherited function
+  and a library call `x.f()` need typing rules; their callee should be the
+  `Env.baseFns`/`finalVersion` choice here, so the meaning dispatches as
+  solc does.
+- Modifiers: S01 has no modifier semantics; binding a `virtual` modifier
+  to its most derived override (`finalVersion` over modifiers) is the
+  missing piece.
+
+**For later groups**:
+
+- Several units: linearize over G12's `Program` (identities `DeclId`)
+  instead of one unit's `Env`, so a base imported from another unit is
+  checked.
+- Getters: a public state variable should count as an external function
+  for `baseFns`/`MustOverride` (`override_public_vars.sol`).
+- G20 (callable lowering) needs identity across contracts: an inherited
+  function's identity in each inheriting contract and its dispatch target.
+
+**For G15**: `inheritanceChecker` is the contract-level part of the
+admission check; on the solc-JSON route, solc's `linearizedBaseContracts`,
+`baseFunctions` and `overrides` annotations can be compared with
+`Env.chain` and `Env.baseFns` instead of trusted.

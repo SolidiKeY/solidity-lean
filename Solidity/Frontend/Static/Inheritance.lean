@@ -20,7 +20,7 @@ open Solidity.Source
 /-- The override check of one function. -/
 def fnOverrideB (E : Env) (c : String) (d : Decl) : Bool :=
   let bs := E.baseFns c d
-  (bs.isEmpty || d.overrideList.isSome) &&
+  (bs.isEmpty || E.singleIface bs || d.overrideList.isSome) &&
   (!bs.isEmpty || d.overrideList.isNone) &&
   bs.all (·.isVirtual E) &&
   (decide (bs.length < 2) || bs.all fun f =>
@@ -32,16 +32,22 @@ def fnOverrideB (E : Env) (c : String) (d : Decl) : Bool :=
    | Option.none => true) &&
   bs.all (fun f => visOK f.fnVis d.fnVis) &&
   bs.all (fun f => mutOK f.mutability d.mutability) &&
-  bs.all (fun f => f.sameRets E d)
+  bs.all (fun f => f.sameRets E d) &&
+  (match d.overrideList with
+   | Option.some ps => decide (overrideNames ps).Nodup
+   | Option.none => true) &&
+  bs.all (fun f => !f.hasBody || d.hasBody)
 
 theorem fnOverrideB_iff {E : Env} {c : String} {d : Decl} : fnOverrideB E c d = true ↔ FnOverrideOK E c d := by
   simp only [fnOverrideB, Bool.and_eq_true, Bool.or_eq_true, List.all_eq_true, List.isEmpty_iff,
     Bool.not_eq_true', Option.isSome_iff_exists, Option.isNone_iff_eq_none, decide_eq_true_eq]
   constructor
-  · intro ⟨⟨⟨⟨⟨⟨⟨hm, hn⟩, hv⟩, hl⟩, hval⟩, hvis⟩, hmu⟩, hr⟩
-    refine ⟨fun h => ?_, fun h => ?_, hv, fun h2 f hf => ?_, fun ps hps n hn' => ?_, hvis, hmu, hr⟩
-    · rcases hm with h' | h'
+  · intro ⟨⟨⟨⟨⟨⟨⟨⟨⟨hm, hn⟩, hv⟩, hl⟩, hval⟩, hvis⟩, hmu⟩, hr⟩, hd⟩, hb⟩
+    refine ⟨fun h hs => ?_, fun h => ?_, hv, fun h2 f hf => ?_, fun ps hps n hn' => ?_, hvis, hmu, hr,
+      fun ps hps => ?_, fun f hf hfb => ?_⟩
+    · rcases hm with (h' | h') | h'
       · exact absurd h' h
+      · rw [hs] at h'; cases h'
       · obtain ⟨ps, hps⟩ := h'; rw [hps]; rfl
     · rcases hn with h' | h'
       · rw [h] at h'; cases h'
@@ -57,13 +63,21 @@ theorem fnOverrideB_iff {E : Env} {c : String} {d : Decl} : fnOverrideB E c d = 
     · rw [hps] at hval
       simp only [List.all_eq_true, List.any_eq_true, beq_iff_eq] at hval
       exact hval n hn'
+    · rw [hps] at hd
+      exact of_decide_eq_true hd
+    · rcases hb f hf with h' | h'
+      · rw [hfb] at h'; cases h'
+      · exact h'
   · intro w
-    refine ⟨⟨⟨⟨⟨⟨⟨?_, ?_⟩, w.virtual⟩, ?_⟩, ?_⟩, w.vis⟩, w.mutab⟩, w.rets⟩
+    refine ⟨⟨⟨⟨⟨⟨⟨⟨⟨?_, ?_⟩, w.virtual⟩, ?_⟩, ?_⟩, w.vis⟩, w.mutab⟩, w.rets⟩, ?_⟩, fun f hf => ?_⟩
     · by_cases h : E.baseFns c d = []
-      · exact .inl h
-      · right
-        have := w.missing h
-        exact Option.isSome_iff_exists.mp this
+      · exact .inl (.inl h)
+      · cases hs : E.singleIface (E.baseFns c d) with
+        | true => exact .inl (.inr rfl)
+        | false =>
+          right
+          have := w.missing h hs
+          exact Option.isSome_iff_exists.mp this
     · by_cases h : E.baseFns c d = []
       · exact .inr (w.nothing h)
       · left
@@ -82,6 +96,12 @@ theorem fnOverrideB_iff {E : Env} {c : String} {d : Decl} : fnOverrideB E c d = 
       | some ps =>
         simp only [List.all_eq_true, List.any_eq_true, beq_iff_eq]
         exact w.valid ps ho
+    · cases ho : d.overrideList with
+      | none => trivial
+      | some ps => exact decide_eq_true (w.distinct ps ho)
+    · cases hfb : f.hasBody with
+      | false => exact .inl rfl
+      | true => exact .inr (w.keepsBody f hf hfb)
 
 /-- The override check of a unit. -/
 def overridesB (E : Env) : Bool := E.contractNames.all fun c => (E.ownFns c).all (fnOverrideB E c)
@@ -189,15 +209,34 @@ theorem ctorArgsB_iff {E : Env} {c : String} : ctorArgsB E c = true ↔ CtorArgs
         · exact .inl (.inr hp)
         · exact .inr (w.given hab B hB (by omega))
 
+/-- The `virtual` declaration check. -/
+def virtualDeclB (E : Env) : Bool :=
+  E.decls.all fun d => d.kind != .function || !d.saysVirtual ||
+    (!d.isPrivate && E.scopeKind d.scope != Option.some .library)
+
+theorem virtualDeclB_iff {E : Env} : virtualDeclB E = true ↔ VirtualDeclOK E := by
+  unfold virtualDeclB VirtualDeclOK
+  simp only [List.all_eq_true, Bool.or_eq_true, Bool.and_eq_true, Bool.not_eq_true', bne_iff_ne, ne_eq]
+  apply forall_congr'; intro d; apply forall_congr'; intro _
+  constructor
+  · intro h hk hv
+    rcases h with (h | h) | h
+    · exact absurd hk h
+    · rw [hv] at h; cases h
+    · exact h
+  · intro h
+    by_cases hk : d.kind = .function
+    · cases hv : d.saysVirtual with
+      | false => exact .inl (.inr rfl)
+      | true => exact .inr (h hk hv)
+    · exact .inl (.inl hk)
+
 /-- One modifier invocation resolves. -/
 def modInvB (E : Env) (d : Decl) (inv : IdPath × Option (Syn .callArgs)) : Bool :=
   (match (E.lookupPath d.scope inv.1).filter (·.kind == .modifier) with
-   | [m] =>
-     match inv.2 with
-     | Option.some a => a.argCount == Option.some m.modParams
-     | Option.none => true
+   | [m] => invCount inv.2 == Option.some m.modParams
    | _ => false) ||
-  (d.kind == .constructor &&
+  (d.kind == .constructor && inv.2.isSome &&
     match d.scope with
     | Option.some c => ((E.chain c).drop 1).contains inv.1.last
     | Option.none => false)
@@ -214,23 +253,19 @@ theorem modInvsB_iff {E : Env} : modInvsB E = true ↔ ModInvOK E := by
     · intro h
       split at h
       · rename_i m hm
-        refine ⟨m, hm, fun a ha => ?_⟩
-        rw [ha] at h
-        simpa only [beq_iff_eq] using h
+        exact ⟨m, hm, by simpa only [beq_iff_eq] using h⟩
       · cases h
     · intro ⟨m, hm, ha⟩
       rw [hm]
-      cases h2 : inv.2 with
-      | none => rfl
-      | some a => simpa only [beq_iff_eq] using ha a h2
+      simpa only [beq_iff_eq] using ha
   · constructor
-    · intro ⟨hk, hs⟩
+    · intro ⟨⟨hk, hi⟩, hs⟩
       split at hs
       · rename_i c hc
-        exact ⟨hk, c, hc, List.contains_iff_mem.mp hs⟩
+        exact ⟨hk, hi, c, hc, List.contains_iff_mem.mp hs⟩
       · cases hs
-    · intro ⟨hk, c, hc, hm⟩
-      refine ⟨hk, ?_⟩
+    · intro ⟨hk, hi, c, hc, hm⟩
+      refine ⟨⟨hk, hi⟩, ?_⟩
       rw [hc]
       exact List.contains_iff_mem.mpr hm
 
@@ -258,22 +293,24 @@ theorem usingLibB_iff {E : Env} {u : Syn .unit} : usingLibB E u = true ↔ Using
 
 /-- **G14's inheritance check.** -/
 def inheritanceB (r : Resolution) : Bool :=
-  overridesB r.env && mustOverrideB r.env && implB r.env &&
+  r.env.contractNames.all (fun c => (r.env.linearize c).isSome) &&
+  overridesB r.env && mustOverrideB r.env && implB r.env && virtualDeclB r.env &&
     r.env.contractNames.all (fun c => !r.env.isContract c || ctorArgsB r.env c) &&
     modInvsB r.env && usingLibB r.env r.unit
 
 /-- **The check decides `InheritanceOK`.** -/
 theorem inheritance_iff {r : Resolution} : inheritanceB r = true ↔ InheritanceOK r := by
   simp only [inheritanceB, Bool.and_eq_true, List.all_eq_true, Bool.or_eq_true, Bool.not_eq_true',
-    overridesB_iff, mustOverrideB_iff, implB_iff, modInvsB_iff, usingLibB_iff, ctorArgsB_iff]
+    overridesB_iff, mustOverrideB_iff, implB_iff, virtualDeclB_iff, modInvsB_iff, usingLibB_iff, ctorArgsB_iff]
   constructor
-  · intro ⟨⟨⟨⟨⟨ho, hm⟩, hi⟩, hc⟩, hmi⟩, hu⟩
-    refine ⟨ho, hm, hi, fun c hcn hco => ?_, hmi, hu⟩
+  · intro ⟨⟨⟨⟨⟨⟨⟨hl, ho⟩, hm⟩, hi⟩, hvd⟩, hc⟩, hmi⟩, hu⟩
+    refine ⟨hl, ho, hm, hi, hvd, fun c hcn hco => ?_, hmi, hu⟩
     rcases hc c hcn with h | h
     · rw [hco] at h; cases h
     · exact h
   · intro w
-    refine ⟨⟨⟨⟨⟨w.overrides, w.mustOverride⟩, w.impl⟩, fun c hcn => ?_⟩, w.modInvs⟩, w.usingLibs⟩
+    refine ⟨⟨⟨⟨⟨⟨⟨w.linearizes, w.overrides⟩, w.mustOverride⟩, w.impl⟩, w.virtualDecls⟩, fun c hcn => ?_⟩,
+      w.modInvs⟩, w.usingLibs⟩
     cases hco : r.env.isContract c with
     | false => exact .inl rfl
     | true => exact .inr (w.ctorArgs c hcn hco)

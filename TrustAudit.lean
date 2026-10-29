@@ -859,3 +859,27 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} G14 inheritance theorems use only the standard axioms"
+
+/-! Roadmap G14 review fixes: `virtual` declarations, the checker's
+completeness and the controls added after the finder and skeptic reviews. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.virtualDeclB_iff,
+    ``Solidity.Frontend.Static.inheritanceChecker_complete,
+    ``Solidity.Frontend.Static.InheritanceExamples.dupList_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.dupListFixed_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.argsTwice_paths_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.modStyleBare_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.modArgs_count,
+    ``Solidity.Frontend.Static.InheritanceExamples.calldataMemory_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.overridesSingle_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.implThenUnimpl_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.virtualDecl_refused]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} G14 review-fix theorems use only the standard axioms"

@@ -5,7 +5,8 @@ import Solidity.Source.Inheritance
 
 S01 computes solc's C3 linearization (`Env.linearize`, `Env.merge`) but
 states nothing about its result.  `C3Lin E c L` is the declarative
-specification of a C3-consistent linearization of contract `c`:
+specification of a C3-consistent linearization of contract `c`
+(`Solidity/Source/Inheritance.lean`):
 
 - `L = c :: M` with `M` duplicate-free;
 - every base's linearization (itself `C3Lin`) is an ordered sublist of `M`
@@ -20,21 +21,6 @@ list's order (`merge_sublist`) and has no duplicates (`merge_nodup`).
 Completeness (C3 finds a linearization whenever one exists) is not claimed:
 C3 is a particular choice, and solc refuses exactly when C3 fails.
 -/
-
-namespace Solidity.Source
-
-/-- **A C3-consistent linearization** of a contract. -/
-inductive C3Lin (E : Env) : String → List String → Prop where
-  | mk {c : String} {Ls : List (List String)} {M : List String} :
-      Ls.length = (E.bases c).reverse.length →
-      (∀ (i : Nat) (b : String) (Lb : List String), (E.bases c).reverse[i]? = Option.some b →
-        Ls[i]? = Option.some Lb → C3Lin E b Lb) →
-      M.Nodup →
-      (∀ l, l ∈ Ls ++ [(E.bases c).reverse] → l.Sublist M) →
-      (∀ x, x ∈ M → ∃ l, l ∈ Ls ++ [(E.bases c).reverse] ∧ x ∈ l) →
-      C3Lin E c (c :: M)
-
-end Solidity.Source
 
 namespace Solidity.Frontend.Static
 

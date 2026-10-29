@@ -278,6 +278,8 @@ G12 status (2026-10-29, lane-static): [frontend-static.md](feature-work/frontend
 
 G13 status (2026-10-29, lane-static): [frontend-static.md](feature-work/frontend-static.md#g13-type-inference-constants-user-defined-value-types). Type inference returning S01's own derivations (sound by construction) and complete for every `Typed`/`LVal`/`StmtD`/`ItemsD` rule (`typed_complete`, `stmt_complete`, `hasType_iff`); S01's `WellFormed` decided (`wellFormed_iff`), the typing component of G05's metadata stage (`metadataChecker`); new relations with checkers for compile-time constant initializers, solc's typed constant evaluation with named array lengths, acyclic constants and user-defined value type operators. S01's per-typing overload uniqueness is recorded as a deviation from solc; S01's reading of the new relations is a handoff to lane-semantics.
 
+G14 status (2026-10-29, lane-static): [frontend-static.md](feature-work/frontend-static.md#g14-inheritance-overrides-constructors-modifiers-using-for). New relations `InheritanceOK` (linearization, overrides, required overrides, implementations, `virtual` declarations, base-constructor arguments, modifier invocation resolution, `using L for`) each naming solc's error, decided by checkers (`inheritance_iff`, G05's `inheritanceChecker`); a declarative C3-consistency relation met by S01's `Env.linearize` (`linearize_sound`); constructor order and callable identity (`callable_unique`). Cross-checked on 26 transcribed solc syntax tests; solc's override-graph pruning for 6480, getters, fallback/receive, modifier overriding and several units are recorded gaps.
+
 G11 may link against G08–G10 certificate interfaces during parallel development;
 its integrated whole-parser check runs after their implementations merge. The
 same rule applies to later composition groups: an interface is not a completed
@@ -520,7 +522,7 @@ several groups (noted per row); a lane starts by reading those results.
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
 | V04 | S02, S03, S04.04, S05 | V03 | — |
 | V05 | G08, G09, G10, G11 | V04 | — |
-| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). lane-static: G12, G13 done. |
+| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). lane-static: G12, G13, G14 done. |
 | V07 | G16, G17, G18, G19 | V06 | — |
 | V08 | G20, G21, G22, G23 | V07 | — |
 | V09 | G24, G25, G26, G31 | V08 | G24's foundation children come from G03; G31's precompile and stipend parts are prepared (`Solidity/Precompiles/`, `Solidity/Stipend/Rule.lean`). |

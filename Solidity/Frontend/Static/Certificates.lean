@@ -75,6 +75,10 @@ def inheritanceChecker : Checker Resolution Unit (fun r _ => InheritanceOK r) wh
   check r _ _ := inheritanceB r
   sound _ _ _ h := inheritance_iff.mp h
 
+theorem inheritanceChecker_complete (r : Resolution) (h : InheritanceOK r) :
+    inheritanceChecker.check r () () = true :=
+  inheritance_iff.mpr h
+
 /-- G13's checks beyond S01's well-formedness: compile-time constant
 initializers, no cyclic constant, well-formed operator bindings. -/
 def StaticOK (r : Resolution) : Prop :=
@@ -94,3 +98,5 @@ def strictMetadataChecker :
 end Solidity.Frontend.Static
 /-- info: 'Solidity.Frontend.Static.metadataChecker_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.metadataChecker_complete
+/-- info: 'Solidity.Frontend.Static.inheritanceChecker_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.inheritanceChecker_complete

@@ -89,12 +89,23 @@ def overrideOk : Syn .unit := mkUnit [
 
 theorem override_ok : InheritanceOK (res overrideOk) := inheritance_iff.mp (by decide)
 
-/-- `override_less_strict_mutability.sol`, contracts `A` and `C`. -/
+/-- `override_less_strict_mutability.sol`. -/
 def lessStrict : Syn .unit := mkUnit [
   con false "A" [] [fn "foo" .external (Option.some .pure) true Option.none rU true],
-  con false "C" ["A"] [fn "foo" .external (Option.some .view) true (Option.some []) rU true]]
+  con false "B" ["A"] [fn "foo" .external (Option.some .pure) true (Option.some []) rU true],
+  con false "C" ["A"] [fn "foo" .external (Option.some .view) true (Option.some []) rU true],
+  con false "D" ["B", "C"] [fn "foo" .external Option.none true (Option.some [B, ⟨"C", []⟩]) rU true],
+  con false "E" ["C", "B"] [fn "foo" .external (Option.some .pure) true (Option.some [B, ⟨"C", []⟩]) rU true],
+  con false "F" ["C", "B"] [fn "foo" .external (Option.some .payable) true (Option.some [B, ⟨"C", []⟩]) rU true]]
 
-theorem lessStrict_refused : ¬ OverridesOK (res lessStrict).env := fun h => by
+/-- 6959 on `C`, `D` and `F`; `B` and `E` (`pure` over `view` and `pure`)
+pass, as in solc. -/
+theorem lessStrict_refused :
+    (["B", "C", "D", "E", "F"].map fun c =>
+      ((res lessStrict).env.ownFns c).all (fnOverrideB (res lessStrict).env c)) =
+      [true, false, false, true, false] ∧
+    ¬ OverridesOK (res lessStrict).env := by
+  refine ⟨by decide, fun h => ?_⟩
   have e := overridesB_iff.mpr h
   revert e
   decide
@@ -149,6 +160,114 @@ def externalPublic : Syn .unit := mkUnit [
 
 theorem externalPublic_ok : InheritanceOK (res externalPublic) := inheritance_iff.mp (by decide)
 
+/-- `function n(ps) internal virtual? override(…)? returns (uint256);` -/
+def fnP (n : String) (ps : Syn (.list .param)) (virt : Bool) (ov : Option (List IdPath)) : Syn (.part false) :=
+  .function (.ident n) ps (Option.some .internal) Option.none .nil virt ov rU .none
+
+/-- `override_multiple_duplicated.sol`. -/
+def dupList : Syn .unit := mkUnit [
+  con true "A" [] [fnP "foo" .nil true Option.none, fnP "test" (.cons (p u8T) .nil) true Option.none],
+  con true "B" [] [fnP "foo" .nil true Option.none, fnP "test" .nil true Option.none],
+  con true "C" [] [fnP "foo" .nil true Option.none],
+  con true "D" [] [fnP "foo" .nil true Option.none, fnP "test" .nil true Option.none],
+  con true "X" ["A", "B", "C", "D"] [
+    fnP "test" .nil true (Option.some [B, ⟨"D", []⟩, ⟨"D", []⟩]),
+    fnP "foo" .nil true (Option.some [A, ⟨"C", []⟩, B, B, B, ⟨"D", []⟩, ⟨"D", []⟩])]]
+
+/-- **4520** on both functions of `X`; without the duplicates both pass. -/
+theorem dupList_refused :
+    ((res dupList).env.ownFns "X").map (fnOverrideB (res dupList).env "X") = [false, false] ∧
+    ¬ OverridesOK (res dupList).env := by
+  refine ⟨by decide, fun h => ?_⟩
+  have e := overridesB_iff.mpr h
+  revert e
+  decide
+
+/-- The same unit with each list deduplicated. -/
+def dupListFixed : Syn .unit := mkUnit [
+  con true "A" [] [fnP "foo" .nil true Option.none, fnP "test" (.cons (p u8T) .nil) true Option.none],
+  con true "B" [] [fnP "foo" .nil true Option.none, fnP "test" .nil true Option.none],
+  con true "C" [] [fnP "foo" .nil true Option.none],
+  con true "D" [] [fnP "foo" .nil true Option.none, fnP "test" .nil true Option.none],
+  con true "X" ["A", "B", "C", "D"] [
+    fnP "test" .nil true (Option.some [B, ⟨"D", []⟩]),
+    fnP "foo" .nil true (Option.some [A, ⟨"C", []⟩, B, ⟨"D", []⟩])]]
+
+theorem dupListFixed_ok : InheritanceOK (res dupListFixed) := inheritance_iff.mp (by decide)
+
+/-- `uint[] loc` (or `uint8[] loc`) as a parameter list. -/
+def arrP (t : Syn .typeName) (loc : DataLoc) : Syn (.list .param) :=
+  .cons (.param (.array t .none) (Option.some loc) Option.none) .nil
+
+/-- `override/calldata_memory.sol` (bodies dropped); with `elem` `u8T` in
+`B`, the parameter types differ. -/
+def calldataMemory (t : Syn .typeName) : Syn .unit := mkUnit [
+  con false "A" [] (([("f", Option.some Mutability.pure), ("g", Option.some .view), ("h", Option.none),
+    ("i", Option.some .payable)]).map fun (n, mu) =>
+      .function (.ident n) (arrP u256T .calldata) (Option.some .external) mu .nil true Option.none .nil body),
+  con false "B" ["A"] (([("f", Option.some Mutability.pure), ("g", Option.some .view), ("h", Option.none),
+    ("i", Option.some .payable)]).map fun (n, mu) =>
+      .function (.ident n) (arrP t .memory) (Option.some .pub) mu .nil false (Option.some []) .nil body)]
+
+/-- A `memory` parameter overrides a `calldata` one (solc accepts); with
+`uint8[]` for `uint[]` nothing is overridden (7792). -/
+theorem calldataMemory_ok : InheritanceOK (res (calldataMemory u256T)) ∧
+    ¬ OverridesOK (res (calldataMemory u8T)).env := by
+  refine ⟨inheritance_iff.mp (by decide), fun h => ?_⟩
+  have e := overridesB_iff.mpr h
+  revert e
+  decide
+
+/-- `interface/overrides_single.sol`. -/
+def overridesSingle : Syn .unit := mkUnit [
+  .interface "Super" .nil (["test1", "test2", "test3"].foldr
+    (fun n acc => .cons (fn n .external Option.none false Option.none rU false) acc) .nil),
+  .interface "Sub" (is_ ["Super"]) (.cons (fn "test1" .external Option.none false Option.none rU false)
+    (.cons (fn "test2" .external Option.none false (Option.some []) rU false)
+    (.cons (fn "test3" .external Option.none false (Option.some [⟨"Super", []⟩]) rU false) .nil)))]
+
+/-- Overriding a single interface function needs no `override` (solc 0.8.8);
+over a `virtual` contract function it does (9456). -/
+theorem overridesSingle_ok : InheritanceOK (res overridesSingle) ∧
+    ¬ OverridesOK (res (mkUnit [con true "Super" [] [fn "test1" .external Option.none true Option.none rU false],
+      con true "Sub" ["Super"] [fn "test1" .external Option.none true Option.none rU false]])).env := by
+  refine ⟨inheritance_iff.mp (by decide), fun h => ?_⟩
+  have e := overridesB_iff.mpr h
+  revert e
+  decide
+
+/-- `override/override_implemented_with_unimplemented_then_implemented.sol`. -/
+def implThenUnimpl : Syn .unit := mkUnit [
+  con false "A" [] [fn "f" .pub Option.none true Option.none .nil true],
+  con true "B" ["A"] [fn "f" .pub Option.none true (Option.some []) .nil false],
+  con false "C" ["B"] [fn "f" .pub Option.none true (Option.some []) .nil true]]
+
+/-- **4593** on `B` only. -/
+theorem implThenUnimpl_refused :
+    (["B", "C"].map fun c => ((res implThenUnimpl).env.ownFns c).all (fnOverrideB (res implThenUnimpl).env c)) =
+      [false, true] ∧ ¬ OverridesOK (res implThenUnimpl).env := by
+  refine ⟨by decide, fun h => ?_⟩
+  have e := overridesB_iff.mpr h
+  revert e
+  decide
+
+/-- `override/virtual_private.sol`. -/
+def virtualPrivate : Syn .unit := mkUnit [
+  con true "A" [] [fn "test" .priv Option.none true Option.none rU false],
+  con true "X" ["A"] [fn "test" .priv Option.none false (Option.some []) rU true]]
+
+/-- `virtual/library_err.sol`, or without `virtual`. -/
+def libVirtual (v : Bool) : Syn .unit := mkUnit [
+  .library "L" (.cons (fn "f" .internal (Option.some .pure) v Option.none rU true) .nil)]
+
+/-- **3942** and **7801**; the library function without `virtual` passes. -/
+theorem virtualDecl_refused : ¬ VirtualDeclOK (res virtualPrivate).env ∧
+    ¬ VirtualDeclOK (res (libVirtual true)).env ∧ VirtualDeclOK (res (libVirtual false)).env := by
+  refine ⟨fun h => ?_, fun h => ?_, virtualDeclB_iff.mp (by decide)⟩ <;>
+  · have e := virtualDeclB_iff.mpr h
+    revert e
+    decide
+
 /-! ## Implementations -/
 
 /-- `unimplemented_without_virtual.sol`. -/
@@ -198,15 +317,56 @@ theorem argsMissing_refused : ¬ CtorArgsOK (res argsMissing).env "B" := fun h =
   revert e
   decide
 
-/-- `too_few_base_arguments.sol`, contract `Derived`: `is Base(2)` for
-`constructor(uint, uint)`. -/
+/-- `too_few_base_arguments.sol`: `Derived is Base(2)` and `Derived2 is
+Base { constructor() Base(2) { } }` for `constructor(uint, uint)`. -/
 def argsCount : Syn .unit := .unit (.cons (con false "Base" [] [ctor2])
-  (.cons (.contract false "Derived" .none (.cons (.inherit ⟨"Base", []⟩ (args [num 2])) .nil) .nil) .nil))
+  (.cons (.contract false "Derived" .none (.cons (.inherit ⟨"Base", []⟩ (args [num 2])) .nil) .nil)
+  (.cons (.contract false "Derived2" .none (.cons (.inherit ⟨"Base", []⟩ .none) .nil)
+    (.cons (ctorWith [.modInv ⟨"Base", []⟩ (args [num 2])]) .nil)) .nil)))
 
-theorem argsCount_refused : ¬ CtorArgsOK (res argsCount).env "Derived" := fun h => by
-  have e := ctorArgsB_iff.mpr h
-  revert e
-  decide
+/-- 7927 on `Derived`, 2973 on `Derived2`. -/
+theorem argsCount_refused : ¬ CtorArgsOK (res argsCount).env "Derived" ∧
+    ¬ CtorArgsOK (res argsCount).env "Derived2" := by
+  refine ⟨fun h => ?_, fun h => ?_⟩
+  · have e := ctorArgsB_iff.mpr h
+    revert e
+    decide
+  · have e := ctorArgsB_iff.mpr h
+    revert e
+    decide
+
+def C : IdPath := ⟨"C", []⟩
+
+/-- `duplicatedConstructorCall/ancestor.sol`. -/
+def argsAncestor : Syn .unit := .unit (.cons (con false "A" [] [ctor1])
+  (.cons (.contract false "B" .none (.cons (.inherit A (args [num 2])) .nil) (.cons (ctorWith []) .nil))
+  (.cons (.contract false "C" .none (.cons (.inherit B .none) .nil)
+    (.cons (ctorWith [.modInv A (args [num 3])]) .nil)) .nil)))
+
+/-- `duplicatedConstructorCall/base_multi.sol` (`ctor` true) and
+`base_multi_no_constructor.sol` (false). -/
+def argsMulti (ctor : Bool) : Syn .unit := .unit (.cons (con false "C" [] [ctor1])
+  (.cons (.contract false "A" .none (.cons (.inherit C (args [num 2])) .nil) .nil)
+  (.cons (.contract false "B" .none (.cons (.inherit C (args [num 2])) .nil) .nil)
+  (.cons (.contract false "D" .none (.cons (.inherit A .none) (.cons (.inherit B .none) .nil))
+    (if ctor then .cons (ctorWith [.modInv C (args [num 3])]) .nil else .nil)) .nil))))
+
+/-- `duplicatedConstructorCall/base_multi_no_constructor_modifier_style.sol`. -/
+def argsMultiMod : Syn .unit := .unit (.cons (con false "C" [] [ctor1])
+  (.cons (.contract false "A" .none (.cons (.inherit C .none) .nil) (.cons (ctorWith [.modInv C (args [num 2])]) .nil))
+  (.cons (.contract false "B" .none (.cons (.inherit C .none) .nil) (.cons (ctorWith [.modInv C (args [num 2])]) .nil))
+  (.cons (con false "D" ["A", "B"] []) .nil))))
+
+/-- **3364** on the remaining `duplicatedConstructorCall/` tests: arguments
+given twice along the linearization, through an ancestor, two bases, or
+constructor modifier invocations of two bases. -/
+theorem argsTwice_paths_refused :
+    ¬ CtorArgsOK (res argsAncestor).env "C" ∧ ¬ CtorArgsOK (res (argsMulti true)).env "D" ∧
+    ¬ CtorArgsOK (res (argsMulti false)).env "D" ∧ ¬ CtorArgsOK (res argsMultiMod).env "D" := by
+  refine ⟨fun h => ?_, fun h => ?_, fun h => ?_, fun h => ?_⟩ <;>
+  · have e := ctorArgsB_iff.mpr h
+    revert e
+    decide
 
 /-- `reference_non_base_ctor.sol`: `contract X {} contract D { constructor() X(5) {} }` -/
 def nonBaseCtor : Syn .unit := mkUnit [con false "X" [] [], con false "D" [] [ctorWith [.modInv ⟨"X", []⟩ (args [num 5])]]]
@@ -226,6 +386,42 @@ def ctorModifiers : Syn .unit := mkUnit [
   con false "B" ["A"] [modDecl "m2", ctorWith [.modInv A (args []), .modInv ⟨"m1", []⟩ .none, .modInv ⟨"m2", []⟩ .none]]]
 
 theorem ctorModifiers_ok : InheritanceOK (res ctorModifiers) := inheritance_iff.mp (by decide)
+
+/-- `disallow_modifier_style_without_parentheses.sol`:
+`contract A { constructor() { } } contract B is A { constructor() A { } }` -/
+def modStyleBare : Syn .unit := mkUnit [con false "A" [] [ctorWith []],
+  con false "B" ["A"] [ctorWith [.modInv A .none]]]
+
+/-- **1563**: a base constructor invoked modifier-style needs parentheses;
+with them (`A()`) the unit passes. -/
+theorem modStyleBare_refused : ¬ ModInvOK (res modStyleBare).env ∧
+    ModInvOK (res (mkUnit [con false "A" [] [ctorWith []],
+      con false "B" ["A"] [ctorWith [.modInv A (args [])]]])).env := by
+  refine ⟨fun h => ?_, modInvsB_iff.mp (by decide)⟩
+  have e := modInvsB_iff.mpr h
+  revert e
+  decide
+
+/-- `modifier m(uint) { _; }` -/
+def modDeclP (n : String) : Syn (.part false) :=
+  .modifier n (.some (.cons (p u256T) .nil)) false Option.none
+    (.some (.block (.cons (.stmtItem (.simpleStmt (.exprStmt (.ident "_")))) .nil)))
+
+/-- `function f() public m { }` (or `m(1)`), `m` taking one parameter. -/
+def modArgs (a : Option (List (Syn .expr))) : Syn .unit := mkUnit [con false "X" [] [modDeclP "m",
+  .function (.ident "f") .nil (Option.some .pub) Option.none
+    (.cons (.modInv ⟨"m", []⟩ (match a with | Option.some es => args es | Option.none => .none)) .nil)
+    false Option.none .nil body]]
+
+/-- **2973**: a modifier of one parameter invoked without parentheses (zero
+arguments) or with two is refused; with one it passes. -/
+theorem modArgs_count :
+    ¬ ModInvOK (res (modArgs Option.none)).env ∧ ¬ ModInvOK (res (modArgs (Option.some [num 1, num 2]))).env ∧
+    ModInvOK (res (modArgs (Option.some [num 1]))).env := by
+  refine ⟨fun h => ?_, fun h => ?_, modInvsB_iff.mp (by decide)⟩ <;>
+  · have e := modInvsB_iff.mpr h
+    revert e
+    decide
 
 /-! ## `using for` -/
 
@@ -310,3 +506,33 @@ end Solidity.Frontend.Static.InheritanceExamples
 #guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.usingNotLibrary_refused
 /-- info: 'Solidity.Frontend.Static.InheritanceExamples.diamond_c3' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.diamond_c3
+/-- info: 'Solidity.Frontend.Static.virtualDeclB_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.virtualDeclB_iff
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.dupList_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.dupList_refused
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.dupListFixed_ok' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.dupListFixed_ok
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.argsTwice_paths_refused' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.argsTwice_paths_refused
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.modStyleBare_refused' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.modStyleBare_refused
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.modArgs_count' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.modArgs_count
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.calldataMemory_ok' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.calldataMemory_ok
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.overridesSingle_ok' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.overridesSingle_ok
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.implThenUnimpl_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.implThenUnimpl_refused
+/-- info: 'Solidity.Frontend.Static.InheritanceExamples.virtualDecl_refused' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InheritanceExamples.virtualDecl_refused

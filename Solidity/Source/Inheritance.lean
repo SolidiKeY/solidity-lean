@@ -31,15 +31,31 @@ solc error it is.
   linearization whose constructor has parameters, arguments are given at
   most once along the linearization (3364), exactly once unless the contract
   is abstract (3415), with the right count (7927, 2973).
-- **Modifier invocations** (`ModInvOK`, 4659): each invocation of a
-  function or constructor names a modifier visible in the contract, or (in a
-  constructor) a base contract, with as many arguments as parameters (2973).
-- **`using L for T`** (`UsingLibOK`, 4357): `L` is a library.
+- **Modifier invocation resolution** (`ModInvOK`, 4659): each invocation of
+  a function or constructor names a modifier visible in the contract with
+  as many arguments as parameters (2973; none without parentheses), or (in
+  a constructor) a base contract, with parentheses (1563).  Binding a
+  `virtual` modifier to its most derived override and modifier override
+  rules are not checked.
+- **`using L for T`** (`UsingLibOK`, 4357): `L` is a library.  Attached
+  functions (`using {f, g} for T`, `for *`) are not resolved here.
 - **Constructor order** (`Env.ctorOrder`): the linearization reversed, most
   base first.
 - **Callable identity** (`CallableId`): a function is identified by its
   contract, name and parameter types; in a `WellFormed` unit the identity
   determines the declaration (`Solidity/Frontend/Static/Inheritance.lean`).
+  Identity across contracts (an inherited function's identity in the
+  inheriting contract) is not stated.
+- **C3** (`C3Lin`): a declarative C3-consistent linearization.
+
+Except for `C3Lin`, these relations are stated over the same computed
+helpers their checkers use (`Env.baseFns`, `Env.inheritedVersion`,
+`dedupScope`, `Env.argsFor`, `Env.chain`), so the checkers' `*_iff` theorems
+prove decidability, not agreement with an independent specification; the
+relations' fidelity to solc rests on their text and on the solc test
+samples in `Solidity/Frontend/Static/InheritanceExamples.lean`.  Fallback
+and receive functions are not override-checked (`Env.ownFns` keeps only
+functions).
 -/
 
 namespace Solidity.Source
@@ -81,20 +97,53 @@ def mutOK (base derived : Option Mutability) : Bool :=
 def visOK (base derived : Option Visibility) : Bool :=
   base == derived || (base == Option.some .external && derived == Option.some .pub)
 
-/-- Two functions have the same return types. -/
+mutual
+
+/-- Equality of types up to data locations: solc compares overriding
+signatures with reference parameters at one location (`calldata` and
+`memory` parameters override each other, `override/calldata_memory.sol`). -/
+def STy.sameUpToLoc : STy → STy → Bool
+  | .bytes _, .bytes _ | .string _, .string _ => true
+  | .array _ τ n, .array _ τ' n' => STy.sameUpToLoc τ τ' && n == n'
+  | .struct _ d, .struct _ d' => d == d'
+  | .mapping k v, .mapping k' v' => STy.sameUpToLoc k k' && STy.sameUpToLoc v v'
+  | .tuple ts, .tuple ts' => STy.sameListUpToLoc ts ts'
+  | τ, τ' => STy.same τ τ'
+
+/-- Pointwise `STy.sameUpToLoc`. -/
+def STy.sameListUpToLoc : List STy → List STy → Bool
+  | [], [] => true
+  | τ :: τs, τ' :: τs' => STy.sameUpToLoc τ τ' && STy.sameListUpToLoc τs τs'
+  | _, _ => false
+
+end
+
+/-- Same parameter types up to data locations: the override signature. -/
+def Decl.sameSig (E : Env) (d d' : Decl) : Bool :=
+  match d.fnSig E, d'.fnSig E with
+  | Option.some (ps, _), Option.some (ps', _) => STy.sameListUpToLoc ps ps'
+  | _, _ => false
+
+/-- Same return types up to data locations. -/
 def Decl.sameRets (E : Env) (d d' : Decl) : Bool :=
   match d.fnSig E, d'.fnSig E with
-  | Option.some (_, rs), Option.some (_, rs') => STy.sameList rs rs'
+  | Option.some (_, rs), Option.some (_, rs') => STy.sameListUpToLoc rs rs'
   | _, _ => false
+
+/-- Whether a function says `virtual` explicitly. -/
+def Decl.saysVirtual (d : Decl) : Bool :=
+  match d.fnAttrs with
+  | Option.some (v, _, _) => v
+  | Option.none => false
 
 /-! ## Base functions -/
 
 /-- The most derived function of `B`'s linearization with `d`'s name and
-parameter types, not `private`. -/
+parameter types (up to data locations), not `private`. -/
 def Env.inheritedVersion (E : Env) (B : String) (d : Decl) : Option Decl :=
   (E.chain B).findSome? fun s =>
     (E.declared (Option.some s) d.name).find? fun f =>
-      f.kind == .function && !f.isPrivate && f.sameParams E d
+      f.kind == .function && !f.isPrivate && f.sameSig E d
 
 /-- Keep the first function of each declaring contract. -/
 def dedupScope (l : List Decl) : List Decl :=
@@ -105,13 +154,19 @@ contract, over the direct bases. -/
 def Env.baseFns (E : Env) (c : String) (d : Decl) : List Decl :=
   dedupScope ((E.bases c).filterMap fun B => E.inheritedVersion B d)
 
+/-- solc 0.8.8: a function overriding exactly one interface function needs
+no `override`. -/
+def Env.singleIface (E : Env) : List Decl → Bool
+  | [f] => E.scopeKind f.scope == Option.some .interface
+  | _ => false
+
 /-- The contract names an `override(…)` list gives. -/
 def overrideNames (ps : List IdPath) : List String := ps.map IdPath.last
 
 /-- **Override rules** for a function `d` declared in contract `c`. -/
 structure FnOverrideOK (E : Env) (c : String) (d : Decl) : Prop where
   /-- 9456: "Overriding function is missing 'override' specifier." -/
-  missing : E.baseFns c d ≠ [] → d.overrideList.isSome = true
+  missing : E.baseFns c d ≠ [] → E.singleIface (E.baseFns c d) = false → d.overrideList.isSome = true
   /-- 7792: "Function has override specified but does not override anything." -/
   nothing : E.baseFns c d = [] → d.overrideList = Option.none
   /-- 4334: "Trying to override non-virtual function." -/
@@ -128,6 +183,11 @@ structure FnOverrideOK (E : Env) (c : String) (d : Decl) : Prop where
   mutab : ∀ f ∈ E.baseFns c d, mutOK f.mutability d.mutability = true
   /-- 4822: "Overriding function return types differ." -/
   rets : ∀ f ∈ E.baseFns c d, f.sameRets E d = true
+  /-- 4520: "Duplicate contract … found in override list". -/
+  distinct : ∀ ps, d.overrideList = Option.some ps → (overrideNames ps).Nodup
+  /-- 4593: "Overriding an implemented function with an unimplemented
+  function is not allowed." -/
+  keepsBody : ∀ f ∈ E.baseFns c d, f.hasBody = true → d.hasBody = true
 
 /-- The contracts and interfaces of a unit, by name. -/
 def Env.contractNames (E : Env) : List String :=
@@ -153,7 +213,7 @@ def Env.inheritedFnsAll (E : Env) (c : String) : List Decl :=
 /-- Whether contract `c` declares a function with `f`'s name and parameter
 types. -/
 def Env.declaresSig (E : Env) (c : String) (f : Decl) : Bool :=
-  (E.ownFns c).any fun d => d.name == f.name && d.sameParams E f
+  (E.ownFns c).any fun d => d.name == f.name && d.sameSig E f
 
 /-- **Required overrides** (6480): when two direct bases have different
 most derived versions (by declaring contract) of a signature, the contract
@@ -188,6 +248,13 @@ structure ImplOK (E : Env) : Prop where
     E.scopeKind d.scope ≠ Option.some .interface → d.isVirtual E = true
   implemented : ∀ c ∈ E.contractNames, E.isContract c = true → E.isAbstract c = false →
     ∀ f ∈ E.ownFns c ++ E.inheritedFnsAll c, ∀ g, E.finalVersion c f = Option.some g → g.hasBody = true
+
+/-- **`virtual` declarations**: a `virtual` function is not `private`
+(3942, "\"virtual\" and \"private\" cannot be used together.") and not
+in a library (7801, "Library functions cannot be \"virtual\"."). -/
+def VirtualDeclOK (E : Env) : Prop :=
+  ∀ d ∈ E.decls, d.kind = .function → d.saysVirtual = true →
+    d.isPrivate = false ∧ E.scopeKind d.scope ≠ Option.some .library
 
 /-! ## Base constructor arguments -/
 
@@ -263,13 +330,20 @@ def Decl.modParams (d : Decl) : Nat :=
   | .modifier, _, .modifier _ (.some ps) _ _ _ => ps.paramNames.length
   | _, _, _ => 0
 
-/-- **Modifier invocations** (4659, 2973): every invocation names a
-modifier visible in the contract with as many arguments as parameters, or,
-in a constructor, a base contract (whose arguments `CtorArgsOK` checks). -/
+/-- The argument count an invocation gives: none without parentheses. -/
+def invCount : Option (Syn .callArgs) → Option Nat
+  | Option.some a => a.argCount
+  | Option.none => Option.some 0
+
+/-- **Modifier invocations** (4659, 2973, 1563): every invocation names a
+modifier visible in the contract with as many arguments as parameters
+(without parentheses: none), or, in a constructor, a base contract with
+parentheses (whose arguments `CtorArgsOK` checks; `constructor() A {}` is
+1563, "Modifier-style base constructor call without arguments"). -/
 def ModInvOK (E : Env) : Prop :=
   ∀ d ∈ E.decls, ∀ inv ∈ d.modInvs, (∃ m, (E.lookupPath d.scope inv.1).filter (·.kind == .modifier) = [m] ∧
-      ∀ a, inv.2 = Option.some a → a.argCount = Option.some m.modParams) ∨
-    (d.kind = .constructor ∧ ∃ c, d.scope = Option.some c ∧ inv.1.last ∈ (E.chain c).drop 1)
+      invCount inv.2 = Option.some m.modParams) ∨
+    (d.kind = .constructor ∧ inv.2.isSome = true ∧ ∃ c, d.scope = Option.some c ∧ inv.1.last ∈ (E.chain c).drop 1)
 
 /-! ## `using for` -/
 
@@ -298,11 +372,33 @@ def CallableId (E : Env) (d d' : Decl) : Prop :=
   d.kind = .function ∧ d'.kind = .function ∧ d.scope = d'.scope ∧ d.name = d'.name ∧
     d.sameParams E d' = true ∧ d'.sameParams E d = true
 
-/-- **G14's inheritance judgment** of a unit. -/
+/-! ## C3 linearization -/
+
+/-- **A C3-consistent linearization** of a contract: `c :: M` with `M`
+duplicate-free, holding some C3-consistent linearization of every base and
+the direct bases (most derived first) as ordered sublists, and nothing
+else.  It does not fix C3's leftmost-head choice, so it need not be unique;
+`Solidity/Frontend/Static/C3.lean` proves S01's `Env.linearize` meets it. -/
+inductive C3Lin (E : Env) : String → List String → Prop where
+  | mk {c : String} {Ls : List (List String)} {M : List String} :
+      Ls.length = (E.bases c).reverse.length →
+      (∀ (i : Nat) (b : String) (Lb : List String), (E.bases c).reverse[i]? = Option.some b →
+        Ls[i]? = Option.some Lb → C3Lin E b Lb) →
+      M.Nodup →
+      (∀ l, l ∈ Ls ++ [(E.bases c).reverse] → l.Sublist M) →
+      (∀ x, x ∈ M → ∃ l, l ∈ Ls ++ [(E.bases c).reverse] ∧ x ∈ l) →
+      C3Lin E c (c :: M)
+
+/-- **G14's inheritance judgment** of a unit.  Every relation reads
+`Env.chain`, which falls back to `[c]` when C3 fails, so the judgment
+requires every contract to linearize (`linearizes`, as S01's `WellFormed`
+does) rather than pass such a contract vacuously. -/
 structure InheritanceOK (r : Resolution) : Prop where
+  linearizes : ∀ c ∈ r.env.contractNames, (r.env.linearize c).isSome = true
   overrides : OverridesOK r.env
   mustOverride : MustOverride r.env
   impl : ImplOK r.env
+  virtualDecls : VirtualDeclOK r.env
   ctorArgs : ∀ c ∈ r.env.contractNames, r.env.isContract c = true → CtorArgsOK r.env c
   modInvs : ModInvOK r.env
   usingLibs : UsingLibOK r.env r.unit
