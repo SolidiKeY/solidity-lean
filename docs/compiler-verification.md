@@ -132,7 +132,7 @@ alone reverts. No proof reaches that third case: the typed run checks the
 contract's funds and the recipient's `sendKey` response (`TRun.transfer`,
 `State.canPay`), and `Sim.funds` and `Sim.oracle` make the machine's `CALL`
 agree with it, so `transfer_sim` gives agreement on both success and refusal
-and `StmtOut.refused` is never constructed. The third case, and the
+and `StmtOut.refused` is only propagated from an inner `refused`, never originated. The third case, and the
 refused-payment alternative of the fourth, are a stale weakening of the
 statement ([G04 R32](feature-work/roadmap-g04-restrictions.md#27-payments),
 owned by G43). What the machine does when it succeeds, the run did
@@ -305,7 +305,7 @@ Out, and why:
 | Construct | Why |
 | --- | --- |
 | memory on the core path | The checked entry selects the memory path instead (above). |
-| loops whose body pushes, pays or shrinks | A loop is one structured instruction, `LOOP cond body` (`Instr.loop`, `loopRun`: its turns, a fault where none ends it; an assembler writes the `JUMPDEST` and the `JUMP` back), simulated turn by turn (`loop_sim`, `TurnRel`, by induction on the turns). Its body may not push (the bound `L + Prog.pushes P ≤ 2^64` counts each push once), pay (the turn relation `TurnRel` has no refused-payment case), or shrink (the fragile aliases a turn forgets must be forgotten before every turn). |
+| loops whose body pushes, pays or shrinks | A loop is one structured instruction, `LOOP cond body` (`Instr.loop`, `loopRun`: its turns, a fault where none ends it; an assembler writes the `JUMPDEST` and the `JUMP` back), simulated turn by turn (`loop_sim`, `TurnRel`, by induction on the turns). Its body may not push (the bound `L + Prog.pushes P ≤ 2^64` counts each push once), pay (`StmtOut` keeps the stale `refused` case of the third disjunct, which the turn relation `TurnRel` does not mirror), or shrink (the fragile aliases a turn forgets must be forgotten before every turn). |
 | storage copies of a value holding a dynamic array (`basketA = basketB;`, `matrix = …`) | solc copies element by element and clears the old tail: a loop over a run-time length, which the compiler does not emit. Copies of static values (`staticF`) are in. |
 | `push()` of a struct or an array element | solc does not clear the slot it grows into (a `pop` cleared it), and the interpreter revives the popped value there (`pushSlot`); the representation does not relate slots past the end (relating them would need `delete` and `pop` to clear them, which for a dynamic array is a loop). `push()` of a primitive (solc writes `0`) and `push(e)`/`push(sp)` (every slot written) are in. |
 | a fragile alias used after a `pop` or `delete` | See above: it may name a slot past the end, which the representation does not relate. |
