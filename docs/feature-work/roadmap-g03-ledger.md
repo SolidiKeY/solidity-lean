@@ -2588,23 +2588,16 @@ Schedule findings (each with its resolution):
 
 | package | prerequisite | evidence | resolution |
 |---|---|---|---|
-| G19 | G16 | loop conditions, returns and modifier arguments are expressions | V11 (G19, G20) runs beside V09 (G16, G17): add V09 to V11's prerequisites, or let G19 prepare against the expression-lowering relation and pass its final check after V09 integrates |
-| G19 | G17 | loop conditions, returns and modifier arguments are expressions | V11 runs beside V09: as G19 ← G16 |
-| G20 | G18.06 | getters and signatures of aggregate parameters lower through aggregate lowering | V11 runs beside V10 (G18): add V10 to V11's prerequisites, or prepare against the G18.06 interface with the final check after V10 |
-| G21 | G18.04 | ABI/calldata lowering of nested values uses the calldata aggregate relation | V12 runs beside V10: add V10 to V12's prerequisites, or prepare against the G18.04 relation with the final check after V10 |
 | G31 | G27.05 | hash builtins share the per-run hash premise of the storage representation (D11) | V17 runs beside V15: add V15 to V17's prerequisites so the per-run hash premise (D11) is shared, not duplicated |
-| G38 | G37.01 | local unwind and rollback across internal runtime frames | V21 runs beside V20: add V20 to V21's prerequisites, or prove unwind against the G37.01 frame interface with the final check after V20 |
 | G44.02 | G45.04 | initcode/runtime artifacts and link references are assembled by the assembler | V25 runs beside V26: add V26 to V25's prerequisites, or split artifact layout (G44.02) from relocation (G45.04) with a deferred final check |
-| G44.03 | G43 | `new C{value: v}` and try-new move funds through the payment relation | V25 runs beside V24: add V24 to V25's prerequisites; G43's payment relation must not wait on G44 |
-| G52 | G49.02 | whole-pipeline differential tests need the composed runtime pipeline | V30 depends on V27 only: add V28 to V30's prerequisites for whole-pipeline differential tests |
 
 Resolved by the foundation children (G03 Q1, answered): findings through a module whose interface a G24 child freezes, between packages scheduled after that child.
 
 | child | modules | findings resolved | packages |
 |---|---|---|---|
 | G24.01 | `Solidity.Evm.Machine` | 26 | G24.01 G24.02 G24.03 G24.04 G25 G26 G27.01 G27.02 G27.05 |
-| G24.02 | `Solidity.Evm.Sim`, `Solidity.Evm.SimLemmas`, `Solidity.Evm.Repr`, `Solidity.Evm.StorageLemmas`, `Solidity.Evm.MemorySource`, `Solidity.Evm.MemoryHeap`, `Solidity.Evm.MemoryAlloc`, `Solidity.Evm.MemoryGrowResult` | 122 | G24.02 G24.03 G24.04 G26 G27.01 G27.02 G27.03 G28 G30 G31 G32 G33 G34 G35.01 G36.01 G36.02 G38 G43 |
-| G24.03 | `Solidity.Evm.Stmt`, `Solidity.Evm.Compile`, `Solidity.Evm.Correct`, `Solidity.Evm.Expr`, `Solidity.Evm.Layout`, `Solidity.Evm.Exp`, `Solidity.Evm.Signed`, `Solidity.Evm.MemoryCompile`, `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite`, `Solidity.Evm.MemoryStructCopy` | 153 | G24.02 G24.03 G24.04 G25 G26 G28 G29.01 G30 G32 G33 G34 G35.01 G36.01 G36.02 G37.01 G38 G43 |
+| G24.02 | `Solidity.Evm.Sim`, `Solidity.Evm.SimLemmas`, `Solidity.Evm.Repr`, `Solidity.Evm.StorageLemmas`, `Solidity.Evm.MemorySource`, `Solidity.Evm.MemoryHeap`, `Solidity.Evm.MemoryAlloc`, `Solidity.Evm.MemoryGrowResult` | 120 | G24.02 G24.03 G24.04 G26 G27.01 G27.02 G27.03 G28 G30 G31 G32 G33 G34 G35.01 G36.01 G36.02 G38 G43 |
+| G24.03 | `Solidity.Evm.Stmt`, `Solidity.Evm.Compile`, `Solidity.Evm.Correct`, `Solidity.Evm.Expr`, `Solidity.Evm.Layout`, `Solidity.Evm.Exp`, `Solidity.Evm.Signed`, `Solidity.Evm.MemoryCompile`, `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite`, `Solidity.Evm.MemoryStructCopy` | 152 | G24.02 G24.03 G24.04 G25 G26 G28 G29.01 G30 G32 G33 G34 G35.01 G36.01 G36.02 G37.01 G38 G43 |
 
 Module hot spots: the remaining inversions, parallel imports and shared writes, grouped by the module through which they arise, each with one resolution.
 
@@ -2624,19 +2617,19 @@ Module hot spots: the remaining inversions, parallel imports and shared writes, 
 | `Solidity.Evm.StorageLemmas` | 2 inversion | G06 G24.02 G27.03 | after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures |
 | `Solidity.Frontend.Source` | 3 inversion | G05 G12 G15 | provenance and pins: G05 fixes the certificate interface first; G12/G15 extend it; untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates |
 | `Solidity.Frontend.SourceUnits` | 1 inversion | G05 G12 | untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates |
-| `Solidity.RevertBytes` | 2 inversion, 13 parallel-import | G01 G06 G16 G17 G18.01 G18.02 G18.03 G18.04 G18.05 G19 G21 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.RevertBytes` | 15 inversion | G01 G06 G16 G17 G18.01 G18.02 G18.03 G18.04 G18.05 G19 G21 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.ContractWorldCertificates` | 1 inversion | G22.03 G22.04 | G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.Deploy` | 1 inversion | G22.01 G22.03 | G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
-| `Solidity.Semantics.Heap` | 2 inversion, 1 parallel-import | G01 G06 G16 G18.03 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.Semantics.Heap` | 3 inversion | G01 G06 G16 G18.03 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.RecursiveStorage.Copy` | 1 inversion | G18.01 G18.05 | G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05 |
 | `Solidity.Semantics.RecursiveStorage.Paths` | 1 inversion | G18.01 G18.02 | G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05 |
-| `Solidity.Semantics.RevertData` | 2 inversion, 1 parallel-import | G01 G06 G16 G21 | intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.Semantics.RevertData` | 3 inversion | G01 G06 G16 G21 | intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
 | `Solidity.Semantics.RunFuel` | 1 inversion | G01 G24.04 | None |
-| `Solidity.Semantics.Storage` | 2 inversion, 1 parallel-import | G01 G06 G16 G18.02 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
-| `Solidity.Syntax.Checked` | 2 inversion, 2 parallel-import | G01 G06 G16 G18.01 G18.05 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
-| `Solidity.Syntax.Elab.Context` | 4 parallel-import | G16 G17 G18.04 G19 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
-| `Solidity.Syntax.Elab.Lower` | 1 parallel-import, 1 shared-write | G17 G19 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
-| `Solidity.Syntax.Elab.SliceCopy` | 1 parallel-import | G17 G18.04 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
+| `Solidity.Semantics.Storage` | 3 inversion | G01 G06 G16 G18.02 | intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build |
+| `Solidity.Syntax.Checked` | 2 inversion | G01 G06 G16 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
+| `Solidity.Syntax.Elab.Context` | 3 inversion | G16 G17 G18.04 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
+| `Solidity.Syntax.Elab.Lower` | 2 inversion | G17 G19 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
+| `Solidity.Syntax.Elab.SliceCopy` | 1 inversion | G17 G18.04 | elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11) |
 | `SolidityBridge.ExternalEvm` | 1 inversion | G06 G46.01 | G06 fixes the EVM interface; G46.01 extends it and re-runs G06's checks |
 
 No cycle over the declared (roadmap and G03, non-deferred) edges and the wave order; module-induced edges are the inversions above, not cycle edges.
@@ -2661,36 +2654,36 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | S05 | V04 | 1 | new | 0 | — | — |
 | G08 | V05 | 16 | new | 0 | — | — |
 | G09 | V05 | 32 | new | 0 | — | — |
-| G10 | V06 | 71 | new | 0 | 71 owned cells > 60 | (a) primary and postfix forms: names, member/index/range access, calls, named arguments and call options; (b) operator precedence and associativity, one lemma per binding level; (c) tuples, inline arrays, conditional and `new`; compose into whole-expression parse correspondence |
-| G11 | V06 | 45 | new | 0 | — | — |
-| G12 | V07 | 7 | `Solidity.Frontend.SourceUnits` | 143 | — | — |
-| G13 | V07 | 116 | new | 0 | 116 owned cells > 60 | (a) elementary types, literals, units and exact constants; (b) conversions and implicit widening; (c) aggregate and data-location typing; (d) overload selection and UDVT operators; (e) function/ABI metadata typing; then the static-semantics certificate |
-| G14 | V08 | 21 | new | 0 | — | — |
-| G15 | V08 | 221 | `Solidity.Frontend.SolcJson.Admission`, `Solidity.Frontend.Source`, `Solidity.Frontend.SolcJson.Body` | 3456 | 221 owned cells > 60; modules over 2500 lines: Solidity.Frontend.SolcJson.Body | one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots; the `SolcJson.Body` adapter edit (2,586 lines) is split by AST node class (declarations, expressions, statements) before it starts |
-| G16 | V09 | 39 | `Solidity.Syntax.Elab.Values`, `Solidity.Syntax.Checked`, `Solidity.Semantics.NumericLowering` | 2950 | — | — |
-| G17 | V09 | 17 | `Solidity.Syntax.Elab.Stmt`, `Solidity.Syntax.Elab.Lower` | 2525 | — | — |
-| G19 | V11 | 19 | `Solidity.Syntax.Elab.Lower` | 1698 | — | — |
-| G20 | V11 | 26 | `Solidity.Frontend.SolcJson.Getters`, `Solidity.Frontend.SolcJson.Contract` | 2268 | — | — |
-| G21 | V12 | 28 | `Solidity.Semantics.RevertData`, `Solidity.RevertBytes` | 99 | — | — |
-| G23 | V13 | 31 | `Solidity.Semantics.Transient`, `Solidity.Semantics.TransientWorld` | 485 | — | — |
-| G25 | V14 | 35 | `Solidity.Evm.Layout`, `Solidity.Evm.Signed`, `Solidity.Evm.Exp` | 1163 | — | — |
-| G26 | V14 | 17 | `Solidity.Evm.Expr` | 452 | — | — |
-| G28 | V15 | 13 | `Solidity.Evm.Stmt` | 980 | — | — |
-| G30 | V16 | 11 | `Solidity.Evm.Stmt` | 980 | — | — |
-| G31 | V17 | 24 | `Solidity.Evm.SimLemmas` | 874 | — | — |
-| G32 | V18 | 10 | `Solidity.Evm.MemoryHeap`, `Solidity.Evm.MemorySource` | 359 | — | — |
-| G33 | V18 | 11 | `Solidity.Evm.MemoryAlloc`, `Solidity.Evm.MemoryGrowResult` | 405 | — | — |
-| G34 | V18 | 8 | `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite` | 438 | — | — |
-| G38 | V21 | 18 | `Solidity.Evm.Stmt` | 980 | — | — |
-| G39 | V21 | 5 | new | 0 | — | — |
-| G40 | V22 | 23 | new | 0 | — | — |
-| G41 | V22 | 18 | new | 0 | — | — |
-| G43 | V24 | 21 | `Solidity.Evm.Sim`, `Solidity.Evm.Stmt` | 2137 | — | — |
-| G47 | V27 | 82 | new | 0 | 82 owned cells > 60 | (a) CALL/STATICCALL frames, returndata and the frame-failure rule (D19); (b) CREATE and initcode installation; (c) REVERT and persistent/transient/balance rollback; (d) transactions, sender funds (D21) and gas-exhaustion failures (D20); (e) precompiles (D22); compose under the resource abstraction |
-| G48 | V28 | 176 | new | 0 | 176 owned cells > 60 | (a) admission → resolved graph; (b) resolved → intrinsic per area: declarations, expressions/statements, aggregates, world/calls; (c) whole-unit coverage over compilation units; each a `Cert` composed by `Cert.comp` |
-| G52 | V30 | 0 | `Solidity.Tools.DiffTest` | 358 | — | — |
-| G53 | V30 | 1 | new | 0 | — | — |
-| G55 | V31 | 0 | new | 0 | — | — |
+| G10 | V05 | 71 | new | 0 | 71 owned cells > 60 | (a) primary and postfix forms: names, member/index/range access, calls, named arguments and call options; (b) operator precedence and associativity, one lemma per binding level; (c) tuples, inline arrays, conditional and `new`; compose into whole-expression parse correspondence |
+| G11 | V05 | 45 | new | 0 | — | — |
+| G12 | V06 | 7 | `Solidity.Frontend.SourceUnits` | 143 | — | — |
+| G13 | V06 | 116 | new | 0 | 116 owned cells > 60 | (a) elementary types, literals, units and exact constants; (b) conversions and implicit widening; (c) aggregate and data-location typing; (d) overload selection and UDVT operators; (e) function/ABI metadata typing; then the static-semantics certificate |
+| G14 | V06 | 21 | new | 0 | — | — |
+| G15 | V06 | 221 | `Solidity.Frontend.SolcJson.Admission`, `Solidity.Frontend.Source`, `Solidity.Frontend.SolcJson.Body` | 3456 | 221 owned cells > 60; modules over 2500 lines: Solidity.Frontend.SolcJson.Body | one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots; the `SolcJson.Body` adapter edit (2,586 lines) is split by AST node class (declarations, expressions, statements) before it starts |
+| G16 | V07 | 39 | `Solidity.Syntax.Elab.Values`, `Solidity.Syntax.Checked`, `Solidity.Semantics.NumericLowering` | 2950 | — | — |
+| G17 | V07 | 17 | `Solidity.Syntax.Elab.Stmt`, `Solidity.Syntax.Elab.Lower` | 2525 | — | — |
+| G19 | V07 | 19 | `Solidity.Syntax.Elab.Lower` | 1698 | — | — |
+| G20 | V08 | 26 | `Solidity.Frontend.SolcJson.Getters`, `Solidity.Frontend.SolcJson.Contract` | 2268 | — | — |
+| G21 | V08 | 28 | `Solidity.Semantics.RevertData`, `Solidity.RevertBytes` | 99 | — | — |
+| G23 | V08 | 31 | `Solidity.Semantics.Transient`, `Solidity.Semantics.TransientWorld` | 485 | — | — |
+| G25 | V09 | 35 | `Solidity.Evm.Layout`, `Solidity.Evm.Signed`, `Solidity.Evm.Exp` | 1163 | — | — |
+| G26 | V09 | 17 | `Solidity.Evm.Expr` | 452 | — | — |
+| G28 | V10 | 13 | `Solidity.Evm.Stmt` | 980 | — | — |
+| G30 | V10 | 11 | `Solidity.Evm.Stmt` | 980 | — | — |
+| G31 | V09 | 24 | `Solidity.Evm.SimLemmas` | 874 | — | — |
+| G32 | V11 | 10 | `Solidity.Evm.MemoryHeap`, `Solidity.Evm.MemorySource` | 359 | — | — |
+| G33 | V11 | 11 | `Solidity.Evm.MemoryAlloc`, `Solidity.Evm.MemoryGrowResult` | 405 | — | — |
+| G34 | V11 | 8 | `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite` | 438 | — | — |
+| G38 | V12 | 18 | `Solidity.Evm.Stmt` | 980 | — | — |
+| G39 | V12 | 5 | new | 0 | — | — |
+| G40 | V13 | 23 | new | 0 | — | — |
+| G41 | V13 | 18 | new | 0 | — | — |
+| G43 | V14 | 21 | `Solidity.Evm.Sim`, `Solidity.Evm.Stmt` | 2137 | — | — |
+| G47 | V15 | 82 | new | 0 | 82 owned cells > 60 | (a) CALL/STATICCALL frames, returndata and the frame-failure rule (D19); (b) CREATE and initcode installation; (c) REVERT and persistent/transient/balance rollback; (d) transactions, sender funds (D21) and gas-exhaustion failures (D20); (e) precompiles (D22); compose under the resource abstraction |
+| G48 | V16 | 176 | new | 0 | 176 owned cells > 60 | (a) admission → resolved graph; (b) resolved → intrinsic per area: declarations, expressions/statements, aggregates, world/calls; (c) whole-unit coverage over compilation units; each a `Cert` composed by `Cert.comp` |
+| G52 | V17 | 0 | `Solidity.Tools.DiffTest` | 358 | — | — |
+| G53 | V17 | 1 | new | 0 | — | — |
+| G55 | V17 | 0 | new | 0 | — | — |
 | S03.01 | V04 | 17 | new | 0 | — | — |
 | S03.02 | V04 | 6 | new | 0 | — | — |
 | S03.03 | V04 | 32 | new | 0 | — | — |
@@ -2699,72 +2692,72 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | S04.02 | V03 | 43 | new | 0 | — | — |
 | S04.03 | V03 | 28 | new | 0 | — | — |
 | S04.04 | V04 | 13 | new | 0 | — | — |
-| G18.01 | V10 | 6 | `Solidity.TypeGraph`, `Solidity.Semantics.RecursiveStorage.Admission` | 234 | — | — |
-| G18.02 | V10 | 19 | `Solidity.Semantics.Storage`, `Solidity.Semantics.RecursiveStorage.Paths` | 184 | — | — |
-| G18.03 | V10 | 21 | `Solidity.Semantics.Heap` | 537 | — | — |
-| G18.04 | V10 | 12 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1552 | — | — |
-| G18.05 | V10 | 18 | `Solidity.Semantics.RecursiveStorage.Copy` | 187 | — | — |
-| G18.06 | V10 | 4 | new | 0 | — | — |
-| G22.01 | V13 | 13 | `Solidity.Semantics.ContractWorld` | 461 | — | — |
-| G22.02 | V13 | 10 | `Solidity.Semantics.Callback` | 1611 | — | — |
-| G22.03 | V13 | 11 | `Solidity.Semantics.Deploy`, `Solidity.Frontend.WorldImport` | 476 | — | — |
-| G22.04 | V13 | 8 | `Solidity.Semantics.ContractWorldCertificates` | 174 | — | — |
-| G22.05 | V13 | 15 | new | 0 | — | — |
-| G27.01 | V15 | 7 | `Solidity.Evm.Repr` | 1023 | — | — |
-| G27.02 | V15 | 5 | `Solidity.Evm.Repr` | 1023 | — | — |
-| G27.03 | V15 | 8 | `Solidity.Evm.StorageLemmas` | 214 | — | — |
-| G27.04 | V15 | 4 | new | 0 | — | — |
-| G27.05 | V15 | 8 | `Solidity.Evm.Machine` | 685 | — | — |
-| G29.01 | V16 | 4 | `Solidity.Evm.Compile` | 487 | — | — |
-| G29.02 | V16 | 5 | new | 0 | — | — |
-| G29.03 | V16 | 4 | new | 0 | — | — |
-| G35.01 | V19 | 5 | `Solidity.Evm.MemoryStructCopy` | 128 | — | — |
-| G35.02 | V19 | 6 | new | 0 | — | — |
-| G35.03 | V19 | 9 | new | 0 | — | — |
-| G35.04 | V19 | 7 | new | 0 | — | — |
-| G35.05 | V19 | 5 | new | 0 | — | — |
-| G35.06 | V19 | 3 | new | 0 | — | — |
-| G36.01 | V20 | 12 | `Solidity.Evm.Correct` | 1232 | — | — |
-| G36.02 | V20 | 6 | `Solidity.Evm.MemoryCompile` | 1254 | — | — |
-| G36.03 | V24 | 9 | new | 0 | — | — |
-| G37.01 | V20 | 15 | `Solidity.Evm.Compile` | 487 | — | — |
-| G37.02 | V20 | 9 | new | 0 | — | — |
-| G37.03 | V20 | 10 | new | 0 | — | — |
-| G42.01 | V23 | 4 | new | 0 | — | — |
-| G42.02 | V23 | 16 | new | 0 | — | — |
-| G42.03 | V23 | 7 | new | 0 | — | — |
-| G42.04 | V23 | 6 | new | 0 | — | — |
-| G42.05 | V23 | 9 | new | 0 | — | — |
-| G42.06 | V23 | 4 | new | 0 | — | — |
-| G44.01 | V25 | 9 | new | 0 | — | — |
-| G44.02 | V25 | 11 | new | 0 | — | — |
-| G44.03 | V25 | 8 | new | 0 | — | — |
-| G45.01 | V26 | 2 | new | 0 | — | — |
-| G45.02 | V26 | 4 | new | 0 | — | — |
-| G45.03 | V26 | 3 | new | 0 | — | — |
-| G45.04 | V26 | 2 | new | 0 | — | — |
-| G45.05 | V26 | 2 | new | 0 | — | — |
-| G45.06 | V26 | 3 | new | 0 | — | — |
-| G46.01 | V27 | 80 | `SolidityBridge.ExternalEvm`, `SolidityBridge.ExternalEvm.WordOps` | 354 | 80 owned cells > 60 | (a) arithmetic, comparison and bitwise opcodes (seed: `ExternalEvm.simulation`); (b) signedness, narrow truncation and casts; (c) PUSH constants and control primitives JUMP/JUMPI/JUMPDEST |
-| G46.02 | V27 | 71 | new | 0 | 71 owned cells > 60 | (a) MLOAD/MSTORE/MSTORE8 against the byte-addressed representation; (b) CALLDATALOAD/CALLDATACOPY against the calldata representation; (c) memory expansion and its resource bound; (d) RETURN/REVERT byte ranges |
-| G46.03 | V27 | 38 | new | 0 | — | — |
-| G46.04 | V27 | 16 | `SolidityBridge.ExternalEvm.Environment` | 128 | — | — |
-| G46.05 | V27 | 16 | `SolidityBridge.ExternalEvm.Obstructions` | 82 | — | — |
-| G46.06 | V27 | 15 | `SolidityBridge.ExternalEvm.Dispatch` | 258 | — | — |
-| G49.01 | V28 | 66 | new | 0 | 66 owned cells > 60 | one composition lemma per pass family: expressions, statements/control, calls and frames, aggregates and copies, world and ABI; then their `Cert.comp` with the closure hypotheses |
-| G49.02 | V28 | 170 | new | 0 | 170 owned cells > 60 | (a) runtime refinement per deployed contract; (b) observation mapping incl. return/revert bytes and panics (D13); (c) the `decode` export (D14); (d) threading the per-run hash premise (D11); (e) the quantifier over the two pipelines (D04) |
-| G49.03 | V28 | 116 | `SolidityBridge.CompilerSimulation` | 77 | 116 owned cells > 60 | (a) compiler totality on admitted input; (b) non-vacuity controls (success with data, revert, divergence); (c) failure preservation (no always-revert); (d) resource-indexed progress and finite-prefix families |
-| G50.01 | V29 | 33 | new | 0 | — | — |
-| G50.02 | V29 | 42 | new | 0 | — | — |
-| G51.01 | V29 | 85 | `Solidity.Calculus.Sound` | 45 | 85 owned cells > 60 | one soundness bridge per rule family: storage, memory, control/loops, internal calls, external calls/callbacks, arithmetic/checked guards; each against the composed runtime theorem |
-| G51.02 | V29 | 18 | `Solidity.Calculus.CorrectCallback` | 104 | — | — |
-| G54.01 | V31 | 1 | new | 0 | — | — |
-| G54.02 | V31 | 1 | new | 0 | — | — |
-| G54.03 | V31 | 0 | new | 0 | — | — |
-| G24.01 | V14 | 4 | `Solidity.Evm.Machine` | 685 | — | — |
-| G24.02 | V14 | 5 | `Solidity.Evm.Sim`, `Solidity.Evm.SimLemmas`, `Solidity.Evm.Repr`, `Solidity.Evm.StorageLemmas`, `Solidity.Evm.MemorySource`, `Solidity.Evm.MemoryHeap`, `Solidity.Evm.MemoryAlloc`, `Solidity.Evm.MemoryGrowResult` | 4032 | — | — |
-| G24.03 | V14 | 4 | `Solidity.Evm.Stmt`, `Solidity.Evm.Compile`, `Solidity.Evm.Correct`, `Solidity.Evm.Expr`, `Solidity.Evm.Layout`, `Solidity.Evm.Exp`, `Solidity.Evm.Signed`, `Solidity.Evm.MemoryCompile`, `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite`, `Solidity.Evm.MemoryStructCopy` | 6134 | — | — |
-| G24.04 | V14 | 6 | `Solidity.Evm.Compiler`, `Solidity.Semantics.RunFuel` | 571 | — | — |
+| G18.01 | V07 | 6 | `Solidity.TypeGraph`, `Solidity.Semantics.RecursiveStorage.Admission` | 234 | — | — |
+| G18.02 | V07 | 19 | `Solidity.Semantics.Storage`, `Solidity.Semantics.RecursiveStorage.Paths` | 184 | — | — |
+| G18.03 | V07 | 21 | `Solidity.Semantics.Heap` | 537 | — | — |
+| G18.04 | V07 | 12 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1552 | — | — |
+| G18.05 | V07 | 18 | `Solidity.Semantics.RecursiveStorage.Copy` | 187 | — | — |
+| G18.06 | V07 | 4 | new | 0 | — | — |
+| G22.01 | V08 | 13 | `Solidity.Semantics.ContractWorld` | 461 | — | — |
+| G22.02 | V08 | 10 | `Solidity.Semantics.Callback` | 1611 | — | — |
+| G22.03 | V08 | 11 | `Solidity.Semantics.Deploy`, `Solidity.Frontend.WorldImport` | 476 | — | — |
+| G22.04 | V08 | 8 | `Solidity.Semantics.ContractWorldCertificates` | 174 | — | — |
+| G22.05 | V08 | 15 | new | 0 | — | — |
+| G27.01 | V10 | 7 | `Solidity.Evm.Repr` | 1023 | — | — |
+| G27.02 | V10 | 5 | `Solidity.Evm.Repr` | 1023 | — | — |
+| G27.03 | V10 | 8 | `Solidity.Evm.StorageLemmas` | 214 | — | — |
+| G27.04 | V10 | 4 | new | 0 | — | — |
+| G27.05 | V10 | 8 | `Solidity.Evm.Machine` | 685 | — | — |
+| G29.01 | V10 | 4 | `Solidity.Evm.Compile` | 487 | — | — |
+| G29.02 | V10 | 5 | new | 0 | — | — |
+| G29.03 | V10 | 4 | new | 0 | — | — |
+| G35.01 | V11 | 5 | `Solidity.Evm.MemoryStructCopy` | 128 | — | — |
+| G35.02 | V11 | 6 | new | 0 | — | — |
+| G35.03 | V11 | 9 | new | 0 | — | — |
+| G35.04 | V11 | 7 | new | 0 | — | — |
+| G35.05 | V11 | 5 | new | 0 | — | — |
+| G35.06 | V11 | 3 | new | 0 | — | — |
+| G36.01 | V12 | 12 | `Solidity.Evm.Correct` | 1232 | — | — |
+| G36.02 | V12 | 6 | `Solidity.Evm.MemoryCompile` | 1254 | — | — |
+| G36.03 | V14 | 9 | new | 0 | — | — |
+| G37.01 | V12 | 15 | `Solidity.Evm.Compile` | 487 | — | — |
+| G37.02 | V12 | 9 | new | 0 | — | — |
+| G37.03 | V12 | 10 | new | 0 | — | — |
+| G42.01 | V13 | 4 | new | 0 | — | — |
+| G42.02 | V13 | 16 | new | 0 | — | — |
+| G42.03 | V13 | 7 | new | 0 | — | — |
+| G42.04 | V13 | 6 | new | 0 | — | — |
+| G42.05 | V13 | 9 | new | 0 | — | — |
+| G42.06 | V13 | 4 | new | 0 | — | — |
+| G44.01 | V14 | 9 | new | 0 | — | — |
+| G44.02 | V14 | 11 | new | 0 | — | — |
+| G44.03 | V14 | 8 | new | 0 | — | — |
+| G45.01 | V14 | 2 | new | 0 | — | — |
+| G45.02 | V14 | 4 | new | 0 | — | — |
+| G45.03 | V14 | 3 | new | 0 | — | — |
+| G45.04 | V14 | 2 | new | 0 | — | — |
+| G45.05 | V14 | 2 | new | 0 | — | — |
+| G45.06 | V14 | 3 | new | 0 | — | — |
+| G46.01 | V15 | 80 | `SolidityBridge.ExternalEvm`, `SolidityBridge.ExternalEvm.WordOps` | 354 | 80 owned cells > 60 | (a) arithmetic, comparison and bitwise opcodes (seed: `ExternalEvm.simulation`); (b) signedness, narrow truncation and casts; (c) PUSH constants and control primitives JUMP/JUMPI/JUMPDEST |
+| G46.02 | V15 | 71 | new | 0 | 71 owned cells > 60 | (a) MLOAD/MSTORE/MSTORE8 against the byte-addressed representation; (b) CALLDATALOAD/CALLDATACOPY against the calldata representation; (c) memory expansion and its resource bound; (d) RETURN/REVERT byte ranges |
+| G46.03 | V15 | 38 | new | 0 | — | — |
+| G46.04 | V15 | 16 | `SolidityBridge.ExternalEvm.Environment` | 128 | — | — |
+| G46.05 | V15 | 16 | `SolidityBridge.ExternalEvm.Obstructions` | 82 | — | — |
+| G46.06 | V15 | 15 | `SolidityBridge.ExternalEvm.Dispatch` | 258 | — | — |
+| G49.01 | V16 | 66 | new | 0 | 66 owned cells > 60 | one composition lemma per pass family: expressions, statements/control, calls and frames, aggregates and copies, world and ABI; then their `Cert.comp` with the closure hypotheses |
+| G49.02 | V16 | 170 | new | 0 | 170 owned cells > 60 | (a) runtime refinement per deployed contract; (b) observation mapping incl. return/revert bytes and panics (D13); (c) the `decode` export (D14); (d) threading the per-run hash premise (D11); (e) the quantifier over the two pipelines (D04) |
+| G49.03 | V16 | 116 | `SolidityBridge.CompilerSimulation` | 77 | 116 owned cells > 60 | (a) compiler totality on admitted input; (b) non-vacuity controls (success with data, revert, divergence); (c) failure preservation (no always-revert); (d) resource-indexed progress and finite-prefix families |
+| G50.01 | V16 | 33 | new | 0 | — | — |
+| G50.02 | V16 | 42 | new | 0 | — | — |
+| G51.01 | V16 | 85 | `Solidity.Calculus.Sound` | 45 | 85 owned cells > 60 | one soundness bridge per rule family: storage, memory, control/loops, internal calls, external calls/callbacks, arithmetic/checked guards; each against the composed runtime theorem |
+| G51.02 | V16 | 18 | `Solidity.Calculus.CorrectCallback` | 104 | — | — |
+| G54.01 | V17 | 1 | new | 0 | — | — |
+| G54.02 | V17 | 1 | new | 0 | — | — |
+| G54.03 | V17 | 0 | new | 0 | — | — |
+| G24.01 | V09 | 4 | `Solidity.Evm.Machine` | 685 | — | — |
+| G24.02 | V09 | 5 | `Solidity.Evm.Sim`, `Solidity.Evm.SimLemmas`, `Solidity.Evm.Repr`, `Solidity.Evm.StorageLemmas`, `Solidity.Evm.MemorySource`, `Solidity.Evm.MemoryHeap`, `Solidity.Evm.MemoryAlloc`, `Solidity.Evm.MemoryGrowResult` | 4032 | — | — |
+| G24.03 | V09 | 4 | `Solidity.Evm.Stmt`, `Solidity.Evm.Compile`, `Solidity.Evm.Correct`, `Solidity.Evm.Expr`, `Solidity.Evm.Layout`, `Solidity.Evm.Exp`, `Solidity.Evm.Signed`, `Solidity.Evm.MemoryCompile`, `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite`, `Solidity.Evm.MemoryStructCopy` | 6134 | — | — |
+| G24.04 | V09 | 6 | `Solidity.Evm.Compiler`, `Solidity.Semantics.RunFuel` | 571 | — | — |
 
 No feature cell, by reason: G00: scope freeze (integrated, wave 0); G02: build measurement, no feature obligation; G03: this ledger; G04: restriction audit (integrated, wave 0); G52: differential tests supplement every row; they discharge no stage; G54.03: trust/axiom audit of the composed theorems, not of a row; G55: final audit of the whole ledger.
 <!-- END generated by scripts/roadmap-g03-ledger.py -->
