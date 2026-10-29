@@ -25,7 +25,8 @@ def CollisionFree {α β : Type _} (f : α → β) (xs : List α) : Prop :=
   ∀ x ∈ xs, ∀ y ∈ xs, f x = f y → x = y
 ```
 
-This is the shape the sibling G01 contract revision uses. It is decidable
+This is the shape the batch assigns to the sibling G01 contract revision
+(no file at this module's base uses it yet). It is decidable
 when `α` and `β` have decidable equality (an `instance` beside it). Lemmas, none
 with a premise beyond the hypotheses shown:
 
@@ -37,6 +38,8 @@ with a premise beyond the hypotheses shown:
 | `CollisionFree.append_left`, `.append_right` | both halves of `xs ++ ys` inherit it. |
 | `collisionFree_append` | `xs ++ ys` iff both halves and no cross collision. |
 | `collisionFree_cons` | `x :: xs` iff `xs` and `x` collides with no element of `xs`. |
+| `collisionFree_congr` | equal membership gives equal collision freedom. |
+| `dedup`, `mem_dedup`, `nodup_dedup`, `length_dedup_le`, `collisionFree_dedup` | `CollisionFree f (dedup xs) ↔ CollisionFree f xs`: repetitions do not matter. |
 | `collisionFree_iff_nodup_map` | for `xs.Nodup`: `CollisionFree f xs ↔ (xs.map f).Nodup`. |
 
 The prefix lemma is the one executions need: a premise about a run's whole
@@ -45,8 +48,10 @@ preimage list gives the premise for every prefix of the run.
 ## The birthday bound, by counting
 
 Model (as the assignment fixes it): a uniformly random function into `N`
-values, restricted to `q` distinct inputs, is one of the `N^q` output tuples,
-each equally likely. Tuples are lists:
+values, restricted to `q` distinct inputs, is modelled as one of the `N^q`
+output tuples, each equally likely. That a uniform function on a larger
+domain restricts to this model is not proved; it is the non-adaptive
+instance of `EagerAdaptiveBound` below. Tuples are lists:
 
 - `tuples N q : List (List Nat)` — all length-`q` lists with entries below
   `N`, enumerated explicitly (`length_tuples : (tuples N q).length = N ^ q`,
@@ -88,10 +93,14 @@ entry of `t` (and `0` elsewhere; `DecidableEq α`). Then:
   (¬ CollisionFree (oracleOf xs t) xs ↔ hasDup t = true)`;
 - `keccak_premise_fails_prob_le (hxs : xs.Nodup)`: the 256-bit oracles under
   which the per-run premise fails on `xs` number `bad`, and
-  `2 ^ (256 + 1) * bad ≤ xs.length ^ 2 * 2 ^ (256 * xs.length)`.
+  `2 ^ (256 + 1) * bad ≤ xs.length ^ 2 * 2 ^ (256 * xs.length)`;
+- `keccak_premise_fails_prob_le_dedup (xs : List α)`: the same for a preimage
+  list with repetitions, with `q = (dedup xs).length ≤ xs.length` and the
+  oracle drawn on `dedup xs`.
 
 `#guard_msgs` pins the axioms of `keccak_premise_fails_prob_le`,
-`adaptive_lazy_collision_prob_le` and `collisions_le` to
+`keccak_premise_fails_prob_le_dedup`, `adaptive_lazy_collision_prob_le` and
+`collisions_le` to
 `[propext, Classical.choice, Quot.sound]`. There is no `sorry`, new axiom,
 `native_decide`, `decide` tactic, `implemented_by` or `maxHeartbeats` option.
 
@@ -106,8 +115,16 @@ earlier ones. What is proved and what is not:
   `s (t.take i)`). `adaptive_lazy_collision_prob_le` bounds, over all `N^q`
   answer sequences, those whose queries are distinct yet collide:
   `2 * N * bad ≤ q * (q - 1) * N ^ q`. Under lazy sampling each answer is a
-  fresh uniform value, so this is the adaptive birthday bound with distinct
-  queries.
+  fresh uniform value, so once the queries are distinct the event is
+  `hasDup t`, independent of `s`: the theorem is the non-adaptive count read
+  on an adaptive query list and carries no adaptive content of its own. Its
+  model gives a repeated query a fresh answer, which a real oracle does not,
+  so it covers only strategies that never repeat a query.
+- **Not proved, child obligation (repeats).** A strategy that may repeat a
+  query reduces to one that does not (answer repeats from memory, skip them,
+  pad to `q` distinct queries). The reduction is not stated in Lean; runs
+  also stop after a varying number of queries, which the same padding must
+  handle.
 - **Not proved, child obligation `EagerAdaptiveBound`.** The same bound when
   the oracle is a uniformly random function on a finite domain `dom`, fixed
   before the game (`oracleOf dom g`, `g` one of the `N^|dom|` tuples) and
@@ -121,15 +138,15 @@ earlier ones. What is proved and what is not:
   (query `i` is the `i`-th element of a fixed list) covers it.
 
 A repeated query is not a collision (`CollisionFree` relates equal images of
-*different* preimages), so the bounds count only distinct queries; an
-execution hashing the same preimage twice adds nothing to `q` beyond its
-first hash.
+*different* preimages). For a fixed preimage list, repetitions are removed by
+`collisionFree_dedup` and `keccak_premise_fails_prob_le_dedup`, so `q` counts
+distinct preimages; for adaptive runs this needs the repeat reduction above.
 
 ## How G27.05 and G46.05 will use it
 
 No file under `Solidity/Evm/**` is edited here. The plan for the owners:
 
-1. **Record the preimages.** G46.05's EVM-side execution relation exposes,
+1. **Record the preimages.** G46.05's EVM-side execution relation is to expose,
    for each execution prefix, the list `pre : List (List UInt8)` of
    `KECCAK256` inputs in the order hashed (EVM memory bytes). The list grows
    along the prefix order (`Prefix.Le` in `Solidity/Roadmap/Contracts.lean`),
@@ -145,14 +162,16 @@ No file under `Solidity/Evm/**` is edited here. The plan for the owners:
    `data s off ↦ keccak(⟦s⟧) + off`. Under the premise, two reached
    `hash`/`data` terms with different preimages have different *bases*
    (`collisionFree_iff_nodup_map` turns the premise into distinct images of
-   distinct preimages). Distinct bases still do not give distinct slots: see
-   the open question below on offsets.
-4. **Justification.** `keccak_premise_fails_prob_le` (and
-   `adaptive_lazy_collision_prob_le` for preimages chosen adaptively, as
-   attacker-controlled keys are) bounds the probability that the premise fails
-   for a random oracle by q²/2²⁵⁷, q the number of distinct preimages. This is
-   a statement about a random oracle, not about keccak: the public theorem
-   stays conditional on the premise.
+   distinct preimages). Distinct bases still do not give distinct slots, and
+   distinct slot terms need not give distinct preimages (see below).
+4. **Justification.** `keccak_premise_fails_prob_le_dedup` bounds the
+   probability that the premise fails for a random oracle by q²/2²⁵⁷, q the
+   number of distinct preimages, when the preimages are fixed in advance.
+   Real runs choose preimages adaptively (attacker-controlled keys; nested
+   mappings hash earlier hash outputs), so the bound applies to them only
+   once `EagerAdaptiveBound` and the repeat reduction are proved. Either way
+   it is a statement about a random oracle, not about keccak: the public
+   theorem stays conditional on the premise.
 
 ### Open: offsets and region overlap
 
@@ -161,13 +180,23 @@ denotes `keccak(s) + off` (`Solidity/Evm/Machine.lean`). Two slots with
 different preimages a ≠ b collide numerically if
 `keccak(a) + i = keccak(b) + j (mod 2^256)` for offsets `i ≠ j`, which the
 approved premise does not exclude: it speaks about preimages whose hashes are
-equal, not about hashes that are close. G04's R34 lists this wrap-around and
+equal, not about hashes that are close. Two more cases are open:
+
+- **Root overlap.** `keccak(a) + i ≡ j` for a `root j` slot.
+- **Aliased preimages.** Offsets are unbounded `Nat`s while words wrap
+  modulo 2²⁵⁶, so distinct terms such as `data s 0` and `data s 2^256`
+  denote one word, and a nested `hash`/`data` term over them gives equal
+  preimages from distinct slot terms. Offsets must be bounded (by `Lmax`,
+  `Solidity/Evm/Machine.lean`, for arrays) before slot terms and words can
+  correspond. G04's R34 lists this wrap-around and
 overlap as part of the same structural assumption. With the premise as
 stated, G27.05 can separate the bases but not the regions (array elements,
 struct members) above them. Under a random oracle, the probability that `q`
 regions of length at most `L` overlap is about q²·L/2²⁵⁶, the same counting
-with "equal" replaced by "within distance L". The question is under
-`questions:` in the handoff.
+with "equal" replaced by "within distance L" (about q²/2 pairs, each
+overlapping with probability (2L−1)/2²⁵⁶), plus about q·R·L/2²⁵⁶ for overlap
+with `R` root slots. `L` can reach `Lmax`, so the bound is weak for large
+arrays. The question is under `questions:` in the handoff.
 
 ## Checking cost
 
@@ -179,11 +208,39 @@ corollaries instantiate the general `k`-bit theorem.
 
 ## Remaining child obligations
 
-- `EagerAdaptiveBound`: eager/lazy sampling equivalence (above).
-- Region overlap with offsets, which depends on the open question above.
+- `EagerAdaptiveBound`: eager/lazy sampling equivalence (above), which also
+  covers restricting a uniform function on a larger domain to the `N^q`
+  tuple model.
+- The repeat reduction for adaptive strategies (above).
+- Region overlap with offsets, root overlap and offset aliasing, which
+  depend on the open question above.
 - The G46.05 preimage list per prefix and the G01 `PublicCorrectness`
   premise (owners: G46.05 and the G01 revision).
 
+## Registration
+
+`Solidity.lean` imports the module. It only states and proves, so following
+[parallelism.md](../parallelism.md) it is in `CORE` in
+`scripts/check-layers.mjs` (one added line).
+
 ## Review
 
-<!-- filled in after the finder and skeptic reviews -->
+A read-only finder and a separate skeptic reviewed commit `3a041d5`, without
+the Lean server. Confirmed findings, all fixed in the following commit:
+
+| Finding | Fix |
+|---|---|
+| The doc claimed a repeated hash "adds nothing to `q`", but every theorem required distinct preimages (finder 1, skeptic 1). | `collisionFree_congr`, `dedup` and its lemmas, `collisionFree_dedup`, `keccak_premise_fails_prob_le_dedup`; the adaptive repeat case is a named child obligation. |
+| `adaptive_lazy_collision_prob_le` was called the adaptive birthday bound; it has no adaptive content, and its model gives repeated queries fresh answers (skeptic 2). | The doc, the module docstring and the coverage-plan status line now say so. |
+| The doc cited the lazy bound for adaptively chosen keys (skeptic 4). | "Justification" now says the bound reaches real runs only through the open obligations. |
+| The module docstring stated the tuple model as fact and said adaptive queries were "not covered", which contradicted the lazy theorem (skeptic 1, finder 2). | Docstring rewritten. |
+| Offsets: root overlap and offset aliasing (`data s 0` versus `data s 2^256`) were missing, and the doc wrongly said distinct slots give distinct preimages (skeptic 3). | Added to "Open: offsets and region overlap"; step 3 corrected. |
+| The doc stated as fact that the G01 contracts use the `CollisionFree` shape and that G46.05 "exposes" preimages (finder 4). | Reworded as an assignment and a plan. |
+| Two descriptions of the `2 ^ (256 + 1)` spelling disagreed (finder 5). | Aligned. |
+| The module was not in `CORE` (finder 7). | Added. |
+| Several `have`s had no explicit type (finder 8). | All typed. |
+| `EagerAdaptiveBound` fixed `β : Type` (finder 3). | Universe-polymorphic. |
+
+Not changed: `grind` in `two_mul_collisions_le` (one ring identity; `grind`
+is used 55 times elsewhere in `Solidity/`), noted by both reviewers as a
+doubt only.

@@ -13,8 +13,9 @@ this module states both, dependency-free:
   (`Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`) proves no
   injective numeric encoding of slots exists.
 * **The random-oracle bound.** A random function into `N` values, restricted
-  to `q` distinct inputs, is one of the `N ^ q` output tuples (`tuples N q`),
-  each equally likely. At most `q(q-1)/2 · N^(q-1)` of them collide
+  to `q` distinct inputs, is modelled as one of the `N ^ q` output tuples
+  (`tuples N q`), each equally likely; that a uniform function on a larger
+  domain restricts to this model is part of the child obligation below. At most `q(q-1)/2 · N^(q-1)` of them collide
   (`collisions_le`), so the collision probability is at most
   `q(q-1)/(2N) ≤ q²/(2N)` (`collision_prob_le`, `collision_prob_le_sq`), that is
   `q²/2²⁵⁷` for a 256-bit hash (`keccak_collision_prob_le`).
@@ -25,13 +26,16 @@ The counting is a union bound over pairs, done incrementally: a tuple
 `C(q+1) ≤ N · C(q) + q · N^q` (`collisions_succ_le`). Probabilities are stated
 cross-multiplied over `Nat` (`2 * N * bad ≤ q * (q - 1) * N ^ q` reads
 `bad / N^q ≤ q(q-1)/(2N)`), so no rationals are needed; every proof is by
-induction, with no `decide` over a large type.
+induction, with no `decide` tactic.
 
-**Scope of the bound.** The model fixes the `q` inputs before the oracle is
-sampled (non-adaptive queries). A game in which each query may depend on the
-earlier answers is not covered; that is the child obligation
-`EagerAdaptiveBound` below, stated and not proved
-(`docs/feature-work/hash-collision-bound.md`).
+**Scope of the bound.** The main bound fixes the `q` inputs before the
+oracle is sampled (non-adaptive queries); a run that hashes a preimage twice
+counts it once (`keccak_premise_fails_prob_le_dedup`). Queries that depend on
+earlier answers are covered only under lazy sampling and only for strategies
+that never repeat a query (`adaptive_lazy_collision_prob_le`, where the event
+reduces to the non-adaptive one). An oracle fixed before an adaptive game is
+the child obligation `EagerAdaptiveBound` below, stated and not proved
+(`docs/feature-work/hash-collision-bound.md`, "Adaptive queries").
 -/
 
 namespace Solidity.Hash
@@ -39,8 +43,8 @@ namespace Solidity.Hash
 /-! ## The per-run premise -/
 
 /-- `f` does not collide on the preimages `xs`: equal images on `xs` come from
-equal preimages. This is the shape the G01 contracts use for the per-run hash
-premise. -/
+equal preimages. This is the shape assigned to the G01 contract revision for
+the per-run hash premise. -/
 def CollisionFree {α β : Type _} (f : α → β) (xs : List α) : Prop :=
   ∀ x ∈ xs, ∀ y ∈ xs, f x = f y → x = y
 
@@ -102,7 +106,8 @@ theorem collisionFree_append {xs ys : List α} :
 theorem collisionFree_cons {x : α} {xs : List α} :
     CollisionFree f (x :: xs) ↔
       CollisionFree f xs ∧ ∀ y ∈ xs, f x = f y → x = y := by
-  have h : CollisionFree f ([x] ++ xs) ↔ _ := collisionFree_append
+  have h : CollisionFree f ([x] ++ xs) ↔ CollisionFree f [x] ∧ CollisionFree f xs ∧
+      ∀ a ∈ [x], ∀ y ∈ xs, f a = f y → a = y := collisionFree_append
   simp only [List.singleton_append] at h
   rw [h]
   constructor
@@ -112,6 +117,12 @@ theorem collisionFree_cons {x : α} {xs : List α} :
     refine ⟨CollisionFree.singleton x, hxs, fun a ha y hy => ?_⟩
     rw [List.mem_singleton.mp ha]
     exact hxy y hy
+
+/-- Collision freedom depends only on which preimages occur, not on their
+order or repetitions. -/
+theorem collisionFree_congr {xs ys : List α} (h : ∀ x, x ∈ xs ↔ x ∈ ys) :
+    CollisionFree f xs ↔ CollisionFree f ys :=
+  ⟨fun hx => hx.mono fun x hy => (h x).mpr hy, fun hy => hy.mono fun x hx => (h x).mp hx⟩
 
 /-- On distinct preimages, collision freedom is distinctness of the images. -/
 theorem collisionFree_iff_nodup_map {xs : List α} (hxs : xs.Nodup) :
@@ -255,15 +266,17 @@ theorem countP_contains_le {A : List Nat} (hA : A.Nodup) (t : List Nat) :
       | [_] => exact Nat.le_refl 1
       | b :: c :: r =>
         rw [hf] at hnd hall
-        have hb := hall b (List.mem_cons_self ..)
-        have hc := hall c (List.mem_cons_of_mem _ (List.mem_cons_self ..))
+        have hb : b = x := hall b (List.mem_cons_self ..)
+        have hc : c = x := hall c (List.mem_cons_of_mem _ (List.mem_cons_self ..))
         exact absurd (show b ∈ c :: r by rw [hb, ← hc]; exact List.mem_cons_self ..)
           (List.nodup_cons.mp hnd).1
     have hsplit : A.countP (fun a => (x :: t).contains a) =
         A.countP (fun a => (a == x) || t.contains a) := by
       congr 1
     rw [hsplit, List.length_cons]
-    have := countP_or_le A (fun a => a == x) (fun a => t.contains a)
+    have hor : A.countP (fun a => (a == x) || t.contains a) ≤
+        A.countP (fun a => a == x) + A.countP (fun a => t.contains a) :=
+      countP_or_le A (fun a => a == x) (fun a => t.contains a)
     omega
 
 /-- The incremental union bound: `C(q+1) ≤ N · C(q) + q · N^q`. -/
@@ -292,7 +305,8 @@ theorem two_mul_collisions_le (N q : Nat) :
   | zero => simp only [collisions, tuples, List.countP_singleton, hasDup, Bool.false_eq_true,
       ↓reduceIte, Nat.mul_zero, Nat.zero_le]
   | succ q ih =>
-    have hs := Nat.mul_le_mul_left (2 * N) (collisions_succ_le N q)
+    have hs : 2 * N * collisions N (q + 1) ≤ 2 * N * (N * collisions N q + q * N ^ q) :=
+      Nat.mul_le_mul_left (2 * N) (collisions_succ_le N q)
     have hpow : N ^ (q + 1) = N ^ q * N := by rw [Nat.pow_succ]
     have e1 : 2 * N * (N * collisions N q + q * N ^ q) =
         N * (2 * N * collisions N q) + 2 * q * N ^ (q + 1) := by
@@ -300,7 +314,8 @@ theorem two_mul_collisions_le (N q : Nat) :
     have e2 : N * (q * (q - 1) * N ^ q) + 2 * q * N ^ (q + 1) = (q + 1) * q * N ^ (q + 1) := by
       rw [hpow]
       cases q <;> grind
-    have hih := Nat.mul_le_mul_left N ih
+    have hih : N * (2 * N * collisions N q) ≤ N * (q * (q - 1) * N ^ q) :=
+      Nat.mul_le_mul_left N ih
     rw [Nat.add_sub_cancel, ← e2]
     omega
 
@@ -318,7 +333,8 @@ theorem collisions_le (N q : Nat) :
         simp only [collisions, tuples, List.range_zero, List.flatMap_nil, List.countP_nil]
       rw [this]; exact Nat.zero_le _
     | succ n =>
-      have h := two_mul_collisions_le (n + 1) (k + 1)
+      have h : 2 * (n + 1) * collisions (n + 1) (k + 1) ≤ (k + 1) * (k + 1 - 1) * (n + 1) ^ (k + 1) :=
+        two_mul_collisions_le (n + 1) (k + 1)
       rw [Nat.add_sub_cancel, Nat.pow_succ] at h
       rw [Nat.add_sub_cancel]
       apply Nat.le_of_mul_le_mul_right (c := n + 1) _ (Nat.succ_pos n)
@@ -334,7 +350,7 @@ theorem collision_prob_le (N q : Nat) :
 /-- The `q²/(2N)` form. -/
 theorem collision_prob_le_sq (N q : Nat) :
     2 * N * collisions N q ≤ q ^ 2 * (tuples N q).length := by
-  have h := collision_prob_le N q
+  have h : 2 * N * collisions N q ≤ q * (q - 1) * (tuples N q).length := collision_prob_le N q
   have : q * (q - 1) ≤ q ^ 2 := by
     rw [Nat.pow_two]; exact Nat.mul_le_mul_left q (Nat.sub_le q 1)
   exact Nat.le_trans h (Nat.mul_le_mul_right _ this)
@@ -343,13 +359,14 @@ theorem collision_prob_le_sq (N q : Nat) :
 hashes is at most `q²/2^(k+1)`: `bad / 2^(k q) ≤ q² / 2^(k+1)`. -/
 theorem pow_two_collision_prob_le (k q : Nat) :
     2 ^ (k + 1) * collisions (2 ^ k) q ≤ q ^ 2 * 2 ^ (k * q) := by
-  have h := collision_prob_le_sq (2 ^ k) q
+  have h : 2 * 2 ^ k * collisions (2 ^ k) q ≤ q ^ 2 * (tuples (2 ^ k) q).length :=
+    collision_prob_le_sq (2 ^ k) q
   rw [length_tuples, ← Nat.pow_mul, ← Nat.pow_succ'] at h
   exact h
 
 /-- Keccak-256 (`N = 2^256`): the collision probability among `q` hashes is
-at most `q²/2²⁵⁷` (written `2 ^ (256 + 1)`, which the elaborator does not
-evaluate). -/
+at most `q²/2²⁵⁷` (written `2 ^ (256 + 1)`: the elaborator warns before
+evaluating the literal `2 ^ 257`, above its exponentiation threshold). -/
 theorem keccak_collision_prob_le (q : Nat) :
     2 ^ (256 + 1) * collisions (2 ^ 256) q ≤ q ^ 2 * 2 ^ (256 * q) :=
   pow_two_collision_prob_le 256 q
@@ -385,6 +402,43 @@ theorem map_oracleOf {xs : List α} (hxs : xs.Nodup) {t : List Nat}
       have : y ≠ x := fun h => hxs.1 (h ▸ hy)
       simp only [if_neg this]
 
+/-- The list without repetitions, keeping each element's last occurrence. -/
+def dedup : List α → List α
+  | [] => []
+  | x :: xs => if x ∈ xs then dedup xs else x :: dedup xs
+
+theorem mem_dedup {xs : List α} {y : α} : y ∈ dedup xs ↔ y ∈ xs := by
+  induction xs with
+  | nil => simp only [dedup]
+  | cons x xs ih =>
+    by_cases hx : x ∈ xs
+    · simp only [dedup, if_pos hx, ih, List.mem_cons]
+      exact ⟨Or.inr, fun h => h.elim (fun e => e ▸ hx) id⟩
+    · simp only [dedup, if_neg hx, List.mem_cons, ih]
+
+theorem nodup_dedup (xs : List α) : (dedup xs).Nodup := by
+  induction xs with
+  | nil => exact List.nodup_nil
+  | cons x xs ih =>
+    by_cases hx : x ∈ xs
+    · simp only [dedup, if_pos hx]; exact ih
+    · simp only [dedup, if_neg hx]
+      exact List.nodup_cons.mpr ⟨fun h => hx (mem_dedup.mp h), ih⟩
+
+theorem length_dedup_le (xs : List α) : (dedup xs).length ≤ xs.length := by
+  induction xs with
+  | nil => exact Nat.le_refl 0
+  | cons x xs ih =>
+    by_cases hx : x ∈ xs
+    · simp only [dedup, if_pos hx, List.length_cons]; omega
+    · simp only [dedup, if_neg hx, List.length_cons]; omega
+
+/-- A run may hash the same preimage twice; the premise is that of its
+distinct preimages. -/
+theorem collisionFree_dedup {β : Type _} {f : α → β} (xs : List α) :
+    CollisionFree f (dedup xs) ↔ CollisionFree f xs :=
+  collisionFree_congr fun _ => mem_dedup
+
 /-- For `q` distinct inputs, the tuples whose oracle collides on them are
 exactly the colliding tuples, so `keccak_collision_prob_le` bounds the
 probability that a uniformly random 256-bit oracle breaks the per-run premise
@@ -411,6 +465,23 @@ theorem keccak_premise_fails_prob_le {xs : List α} (hxs : xs.Nodup) :
   rw [hcount]
   exact keccak_collision_prob_le xs.length
 
+/-- The bound for a preimage list with repetitions: `q` is the number of
+distinct preimages, `(dedup xs).length ≤ xs.length` (`length_dedup_le`), and
+the oracle is drawn on those (`oracleOf (dedup xs)`). -/
+theorem keccak_premise_fails_prob_le_dedup (xs : List α) :
+    2 ^ (256 + 1) * (tuples (2 ^ 256) (dedup xs).length).countP
+        (fun t => decide (¬ CollisionFree (oracleOf (dedup xs) t) xs)) ≤
+      (dedup xs).length ^ 2 * 2 ^ (256 * (dedup xs).length) := by
+  have e : (tuples (2 ^ 256) (dedup xs).length).countP
+        (fun t => decide (¬ CollisionFree (oracleOf (dedup xs) t) xs)) =
+      (tuples (2 ^ 256) (dedup xs).length).countP
+        (fun t => decide (¬ CollisionFree (oracleOf (dedup xs) t) (dedup xs))) := by
+    apply List.countP_congr
+    intro t _
+    simp only [decide_eq_true_iff, collisionFree_dedup]
+  rw [e]
+  exact keccak_premise_fails_prob_le (xs := dedup xs) (nodup_dedup xs)
+
 end Oracle
 
 /-! ## Adaptive queries -/
@@ -433,8 +504,8 @@ theorem countP_le_of_imp {γ : Type _} (l : List γ) {p r : γ → Bool}
   induction l with
   | nil => exact Nat.le_refl 0
   | cons a l ih =>
-    have ih' := ih fun b hb => h b (List.mem_cons_of_mem a hb)
-    have ha := h a (List.mem_cons_self ..)
+    have ih' : l.countP p ≤ l.countP r := ih fun b hb => h b (List.mem_cons_of_mem a hb)
+    have ha : p a = true → r a = true := h a (List.mem_cons_self ..)
     simp only [List.countP_cons]
     cases hp : p a with
     | false => cases r a <;> simp only [Bool.false_eq_true, ↓reduceIte] <;> omega
@@ -474,8 +545,8 @@ most a `q(q-1)/(2N)` fraction. It follows from
 agree (the answers to distinct adaptive queries of a uniform function are
 uniform and independent); that equivalence is the missing step
 (`docs/feature-work/hash-collision-bound.md`, "Adaptive queries"). -/
-def EagerAdaptiveBound : Prop :=
-  ∀ (β : Type) [DecidableEq β] (dom : List β), dom.Nodup →
+def EagerAdaptiveBound.{u} : Prop :=
+  ∀ (β : Type u) [DecidableEq β] (dom : List β), dom.Nodup →
     ∀ (s : List Nat → β), (∀ t, s t ∈ dom) → ∀ N q : Nat,
       2 * N * (tuples N dom.length).countP (fun g =>
           decide ((eagerQueries s (oracleOf dom g) q).Nodup ∧
@@ -494,3 +565,6 @@ end Solidity.Hash
 
 /-- info: 'Solidity.Hash.collisions_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.collisions_le
+
+/-- info: 'Solidity.Hash.keccak_premise_fails_prob_le_dedup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.keccak_premise_fails_prob_le_dedup
