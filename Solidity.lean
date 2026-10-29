@@ -421,6 +421,7 @@ import Solidity.Source.World
 import Solidity.Source.StateExamples
 import Solidity.Source.Value
 import Solidity.Source.Elaborated
+import Solidity.Source.Unique
 import Solidity.Source.Machine
 import Solidity.Source.Eval
 import Solidity.Source.Semantics

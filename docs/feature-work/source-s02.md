@@ -38,25 +38,60 @@ The existing `Resolution` and every public S01 name are unchanged;
 
 ### Uniqueness
 
-Typing derivations are not unique, and this checkpoint does not prove
-uniqueness. The assignment allowed a canonical choice instead. The choice
-here is the carried `Program`: the semantics reads only that, so a unit's
-meaning is a function of its elaboration. What is not proved is that two
-different derivations of one body behave the same. Known sources of
-non-uniqueness in S01:
+The original design took a canonical choice instead of proving
+uniqueness: the semantics reads only the carried `Program`, so a unit's
+meaning is a function of its elaboration.
 
-- a hexadecimal literal is a constant (`Typed.const`) or a `bytesN`
-  (`Typed.litBytes`);
-- a zero literal is a `bytesN` of every length (`NumLit.fitsBytes`);
-- a comparison of two literals is `compareConst` or, at `bytesN`,
-  `compare`.
+The reviews then answered Q1: follow solc. A literal is always a
+constant, and it converts implicitly to a compatible `bytesN`. That is now
+the typing (module `Solidity/Source/Unique.lean`):
 
-These alternatives are not always harmless. For example, `0.length` has a
-derivation at every `bytesN` (values 1 to 32), and solc refuses it. The
-fix is solc's literal typing: a literal is always a rational, and the
-rational converts to `bytesN` when compatible. That changes `STy` or
-`Typed` constructors that the sibling lanes read, so it is listed under
-`questions:` (Q1).
+- **`Typed.constShape`.** Every derivation of a constant expression
+  (`Syn.const`) has its rational type, or, for a bare or parenthesized
+  hexadecimal literal, its `hexConst` type, and elaborates to that
+  constant. Supporting lemmas:
+  - `Syn.const_binOp`: a folding operation has constant operands, and
+    comparisons and logical operators never fold;
+  - `STy.common?_const`: two constant types never meet;
+  - `Syn.const_hexLit`.
+- **`zeroLength_illTyped`.** `0.length` has no derivation (before, it had
+  one at every `bytesN`).
+
+Still open: uniqueness for every expression, `Typed.unique` (any two
+derivations have one type and one elaboration). The literal cases above
+were the reason it failed. The remaining work is a per-constructor case
+analysis over the constructors that share a syntax shape:
+
+| Shape | Constructors |
+|---|---|
+| `ident` | `loc`/`state`/`this` (resolution is functional) |
+| `tuple` | `paren`/`tuple` |
+| `unaryPrefix` | `neg`/`negFixed` by type |
+| `member` | `length`/`balance`/`magic`/`member` by the operand's type |
+| `call (ident f)` | `convUser`/`callInternal`/`structNew`/`builtinCall` by what `f` resolves to |
+| `call (member c f)` | `extCall`/`transfer`/`send`/`abiEncode` |
+| `assign` | `assign`/`assignCopy` (`implicit` and `copiesTo` are disjoint) |
+| `index` | by the base's type |
+
+None of these cases involves literals any more.
+
+### Typed rules changed (for G13's checker)
+
+| Rule or definition | Before | Now |
+|---|---|---|
+| `STy` | — | new constructor `hexConst (q : Q) (len : Nat)`: a hexadecimal literal of `2·len` digits |
+| `Typed.const` | premises `e.const = some q`, `e.isAddressLit = false` | adds `e.hexLen? = none` |
+| `Typed.litBytes` | `n.fitsBytes len = true → Typed Γ (lit (num n)) (fixedBytes len h)` | `(Syn.lit (.num n)).hexLen? = some len → Typed Γ (lit (num n)) (hexConst n.value len)` |
+| `Syn.hexLen?` | — | new: `2·len` digits with `1 ≤ len ≤ 32`, through parentheses, not a checksummed 40-digit literal |
+| `Syn.isAddressLit` | bare literal only | also through parentheses (its type is now category-polymorphic) |
+| `Syn.const` | folded checksummed 40-digit literals | a checksummed 40-digit literal is no constant |
+| `STy.implicit` | — | adds `rational q → bytesN` when `q = 0`; `hexConst q n` to integers and fixed point as a rational, and to `bytes{m}` when `m = n` or `q = 0` |
+| `STy.explicit` | — | `hexConst` like `rational` |
+| `STy.mobile`, `isAmount`, `isIndex`, `isZeroConst`, `inBounds`, `abiArg` | — | `hexConst` like `rational` (`mobile` keeps `hexConst` when no integer type holds it) |
+| `RExpr.bytesLit` | — | now `bytesLit (n : NumLit) (len : Nat) : RExpr E Γ (.hexConst n.value len)` |
+| `RVal` | — | gains `hex` |
+
+`NumLit.fitsBytes` is kept but no rule reads it any more.
 
 ### Typing gaps closed
 

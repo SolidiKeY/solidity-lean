@@ -1965,6 +1965,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/Unique.lean:Solidity.Source.Typed.constShape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Unique.lean:Solidity.Source.zeroLength_illTyped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Stipend/Rule.lean:Solidity.Stipend.fits_iff": [
   "Classical.choice",
   "Quot.sound",

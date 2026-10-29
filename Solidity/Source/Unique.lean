@@ -3,18 +3,23 @@ import Solidity.Source.Resolved
 /-!
 # Uniqueness of typing derivations (Q1)
 
-With solc's literal typing (a number literal is always a constant;
-a hexadecimal literal's type `STy.hexConst` records its compatible bytes
-length, `Typed.litBytes`), an expression's derivations agree: any two
-derivations of one expression have the same type and elaborate to the same
-resolved term (`Typed.unique`).  So a unit's meaning does not depend on which
-derivation an elaboration carries.
+With solc's literal typing (a number literal is always a constant; a
+hexadecimal literal's type `STy.hexConst` records its compatible bytes
+length, `Typed.litBytes`; a checksummed address literal folds into no
+constant), literals no longer give an expression several types.
 
-The key lemma is `Typed.constShape`: a constant expression (`Syn.const`)
-has only its constant type, or, for a bare or parenthesized hexadecimal
-literal, its `hexConst` type, and elaborates to that constant.  Operators,
-shifts and comparisons on two constants are folded, never typed as
-operations (`Syn.const_binOp`, `STy.common?_const`).
+`Typed.constShape` proves it for every constant expression (`Syn.const`):
+each derivation has its rational type, or, for a bare or parenthesized
+hexadecimal literal, its `hexConst` type, and elaborates to that constant.
+Operators, shifts and comparisons on two constants fold and are never typed
+as operations (`Syn.const_binOp`, `STy.common?_const`).
+`zeroLength_illTyped` is the negative control: `0.length`, which had 32
+derivations before, has none.
+
+Uniqueness for every expression (`Typed.unique`: any two derivations have one
+type and one elaboration) is the remaining obligation of Q1.  This lemma
+settles the literal cases; the rest is a per-constructor case analysis
+recorded in `docs/feature-work/source-s02.md`, "Uniqueness".
 -/
 
 namespace Solidity.Source
@@ -214,5 +219,33 @@ decreasing_by
   all_goals first
     | (subst_vars; simp only [Syn.tuple.sizeOf_spec, Syn.some.sizeOf_spec, Syn.unaryPrefix.sizeOf_spec]; omega)
     | (subst_vars; omega)
+
+/-- **`0.length` is ill typed** (solc refuses it): `0` is a constant,
+never a `bytesN`, and a constant has no `length`.  Under S01's former
+literal typing it had a derivation at every `bytesN`, with lengths 1 to 32. -/
+theorem zeroLength_illTyped (Γ : Ctx) (τ : STy) :
+    ¬ HasType Γ (.member (.lit (.num (.dec 0 0 0))) "length") τ := by
+  intro ⟨d⟩
+  generalize hx : "length" = x at d
+  cases d
+  all_goals first
+    | (cases ‹(Syn.member _ _).const = _›; done)
+    | (cases ‹(Syn.member _ _).binOp? = _›; done)
+    | skip
+  case length σ da hl =>
+    have hc := (Typed.constShape da rfl).isConstTy
+    cases σ <;> first | (cases hc; done) | (cases hl; done)
+  case balance p da =>
+    cases (Typed.constShape da rfl).isConstTy
+  case member l dn i da _ =>
+    cases (Typed.constShape da rfl).isConstTy
+
+/-- info: 'Solidity.Source.Typed.constShape' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Typed.constShape
+
+/-- info: 'Solidity.Source.zeroLength_illTyped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms zeroLength_illTyped
 
 end Solidity.Source

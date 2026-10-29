@@ -596,6 +596,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/StateExamples.lean` | S04.01–S04.03 controls: nested memory aliasing, an independent memory copy, storage round trips, distinct panic outcomes, transfers, a reverted call undoing its writes. |
 | `Source/Value.lean` | S02: run-time values `RVal`, `Halt`, decidable `STy` equality, wrapping (`wrapBits_mem`), checked/unchecked integer and fixed-point arithmetic, shifts, powers, comparisons, value conversions. |
 | `Source/Elaborated.lean` | S02 prerequisite: resolved bodies, modifier invocations, initializers and base arguments (`Program`), and `Elaborated` (a resolution carrying its program). |
+| `Source/Unique.lean` | Q1: solc's literal typing settled for constant expressions (`Typed.constShape`, `Syn.const_binOp`), `0.length` refused (`zeroLength_illTyped`); full derivation uniqueness open. |
 | `Source/Machine.lean` | S02: the logical storage layout (`Env.cellTy`), `Locals`, the machine state `St`, frames `Fr`, `Glob`, the monad `EM`, storage/memory reads, writes, copies and deletion. |
 | `Source/Eval.lean` | S02/S03: the interpreter of resolved expressions, lvalues, statements, modifiers, internal and external calls, dispatch and environment moves, at a horizon. |
 | `Source/Semantics.lean` | S03.02/S03.04/S04.04/S05: constructor order per pipeline, deployment, transactions, least-horizon completion (`firstDone_mono`), sessions as G01 prefixes (`sessionAt_consistent`, `sourceLang`). |
