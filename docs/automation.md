@@ -655,15 +655,21 @@ fallback does not establish general memory-binder completeness or change
 The [task handoff](feature-work/next10-memory-parameter-witness.md) records exact
 scope, proof/native evidence, resource measurements, review and gate status.
 
-The combined integration keeps the fresh-struct decision branch and the
-given-heap countermodel branch together. Read-only finder and skeptic reviews
-checked that both sides retain their declarations, the struct coverage proof
-still follows its original branch, and a positive witness check cannot produce
-a global proof. The combined memory pin expects `["unknown", "refuted",
-"refuted"]` for the negative array block, hidden parameter and fresh struct.
-Per-file Lean MCP error diagnostics pass for `Calculus/Decision.lean` and
-`Examples/DecisionMemory.lean`; the printed struct theorem axiom sets contain
-only `propext`, `Classical.choice` and `Quot.sound`.
+The combined integration keeps exact negative-array preparation, the
+fresh-struct decision branch and the given-heap countermodel branch together.
+Read-only finder and skeptic reviews confirmed that both sides retain their
+imports and declarations, soundness/refutation transport and coverage branches.
+They found and corrected a stale combined verdict and array-only coverage
+docstrings. The combined memory pin expects `["refuted", "refuted", "refuted"]`
+for the negative array block, hidden parameter and fresh struct. The original
+formulas, target certificates and decision budgets are unchanged.
+
+For this fresh-master resolution, per-file MCP error diagnostics completed
+successfully for `Calculus/Decision.lean`. Diagnostics for
+`Examples/DecisionMemory.lean` and the import root `Solidity.lean` remained
+partial, with no reported errors; they are not passing validation results.
+Conflict-marker and `git diff --check` checks pass. No full build was run;
+the individual lanes' historical build and axiom evidence is separate.
 
 ### What is not proved
 
@@ -684,10 +690,9 @@ only `propext`, `Classical.choice` and `Quot.sound`.
   does better in general (a sorted mapping read at three far keys).
 * **The original gap witnesses**: all six statements and their kernel
   `*_inTarget` certificates are retained. `gapKIntTwoAnchors` and
-  `gapQuantLedger` are now proved, and `gapMemParam` and `gapMemStruct`
-  refuted. The written-memory continuation refutes `gapWrittenMemory`; only
-  `gapMemInnerNeg` still answers *unknown*. The original statements are
-  retained below:
+  `gapQuantLedger` are now proved; `gapMemInnerNeg`, `gapMemParam`,
+  `gapMemStruct` and `gapWrittenMemory` are refuted. All six retained
+  witnesses now have verdicts. The original statements are retained below:
   * `gapKIntTwoAnchors` (`Examples/DecisionKInt.lean`,
     `(∀ int z. ∀ int y. y > z → y > 0) → 0 == 1`): **closed by an exact
     test point**. `∀ y : Int. y > z → y > k`, for an outer KeY-int local
@@ -710,11 +715,20 @@ only `propext`, `Classical.choice` and `Quot.sound`.
     its exact verdict without changing the original formula.
   * `gapMemInnerNeg` (`Examples/DecisionMemory.lean`,
     `(∀ i. i < len(s) → s[i] == 0) → s[0] == 0`): a negative block over a
-    fresh memory array.  Next: in `Calculus/MemSwap.lean`, before `Fml.mx`,
-    instantiate it at the index set of the array's other reads, its length
-    binder and the guards' operands with successors (the `Fml` analogue of
-    `LFml.apfInst`); exactness needs a memory-array floor (feature 32's
-    `arr_rebuild_slot` argument over `MxMap`).
+    fresh memory array. Closed for this exact original leaf: `decideGoal`
+    returns *refuted*, kernel-certified with its returned countermodel in
+    `Examples/MemoryNegativeDecision.lean`. Before hoisting and `mxTop`,
+    `Calculus/MemNegPrep.lean` recognizes a uniform range block with an
+    equality-certified typed exterior, introduces a scoped length atom,
+    and instantiates at zero, retained literal reads, length and checked
+    successors. `MemObserve` proves stable optional exterior observations;
+    `MemFloor`/`MemInst` reconstruct the same fresh object and preserve
+    failed reads, bounds, zero length and local identity. Unsupported
+    terms/binders keep the original formula. Positive prefix value binders
+    are preserved; the length name reserves the whole input's fresh supply.
+    This closes this gap, not all memory or written-hash shapes. The
+    [task handoff](feature-work/memory-negative-block.md) records the exact
+    accepted fragment, additive hashing interface and validation evidence.
   * `gapMemParam`: a hidden memory binder ranges over the given heap's
     objects, which may alias; a refutation needs a heap object holding the
     witness words, which `decideLeafA`'s state does not carry. This pin is now
@@ -775,7 +789,9 @@ completeness proof through the stages.
 5. The array property fragment: done for mappings at any depth, `bool`,
    `uint` and `int` keys, the ledger, dynamic storage arrays at roots
    (features 7, 16–21, 32).  Left: fixed arrays and arrays below keys,
-   memory (`gapMemInnerNeg`), the halting `||` operand.
+   broader memory blocks, the halting `||` operand. The fresh primitive-array
+   uniform negative block (`gapMemInnerNeg`) is now closed by the exact
+   intrinsic preparation above.
 6. Memory and array indices: done for storage arrays of primitives at
    roots and fresh memory arrays of primitives (features 10, 13, 23, 24).
    Left: arrays below fields and keys, of structs and arrays; the memory
@@ -898,20 +914,22 @@ witnesses were in `Fml.inTarget` and answered unknown (M7, "What is not proved")
 `gapKIntTwoAnchors`, `gapQuantLedger`, `gapMemInnerNeg`, `gapMemParam`,
 `gapMemStruct`, `gapWrittenMemory`. The later
 [two-anchor follow-up](feature-work/kint-two-anchors.md) certifies
-`gapKIntTwoAnchors` as proved; feature 33 proves `gapQuantLedger`; the given-heap
-witness above certifies `gapMemParam` as refuted; the fresh-struct schema
-certifies `gapMemStruct` as refuted. The written-memory continuation now
-refutes its original pin. Only `gapMemInnerNeg` remains unknown. All original
-statements and target certificates are retained; the six-gap list above
-records the dated step-1 checkpoint.
+`gapKIntTwoAnchors` as proved; feature 33 proves `gapQuantLedger`; exact
+fresh-array preparation certifies `gapMemInnerNeg` as refuted, and the
+given-heap witness certifies `gapMemParam` as refuted; the fresh-struct
+schema certifies `gapMemStruct` as refuted. The written-memory continuation
+refutes its original pin. All six original definitions and target
+certificates are retained; the six-gap list above records the dated step-1
+checkpoint.
 
 Fresh-master integration review: read-only finder and skeptic passes checked
 these combined statuses and the `Examples/DecisionMemory.lean` and
 `Examples/DecisionWrittenMemory.lean` module-map rows against the retained
 source certificates and verdict pins. The conflict resolution preserves both
-lanes' results and corrects the remaining witness count and stale
-`gapWrittenMemory` status in the `Examples/Decision.lean` row and original-gap
-summary; it changes documentation only.
+lanes' results and records verdicts for all six original witnesses. The
+module map retains both example families, and `Solidity.lean` imports both.
+No formula, target certificate or decision implementation is changed by the
+conflict repair.
 
 Group 07 direct file-backed profiling found its coverage proofs take about
 one second each; the final verdict evaluation is the slow stage, rather than
@@ -945,7 +963,7 @@ pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
    counterexample.  It needs `Fml.inTarget ∧ ¬ Fml.Residue → Fml.Covered`,
    with no `sorry` and no new axioms (only propext, Classical.choice,
    Quot.sound).  `Fml.Residue` is a decidable predicate that names
-   exactly the gaps still open (the three above, plus the unpinned shapes
+   exactly the gaps still open (the remaining unknown pin above, plus the unpinned shapes
    the proof finds it needs), each with a one-line reason.
 2. **The goal is unchanged.** `DecisionTheorem` stays stated as it is;
    later milestones may only shrink `Fml.Residue`.

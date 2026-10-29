@@ -105,15 +105,16 @@ def body? (k : HashKind) (φ : Fml C Γst) :
           · have et : t = writeTerm := Tm.eq_of_beqR ht
             subst t
             cases ψ with
-            | eq a b =>
+            | @eq _ p a b =>
               by_cases ha : a.beqR (hnode k (.there .here)) = true
-              · have ea := Sigma.mk.inj (Tm.sigma_eq_of_beqR ha)
-                have ep := ea.1
+              · have ea : Srt.val p = Srt.val .uint ∧ HEq a (hnode k (.there .here)) :=
+                  Sigma.mk.inj (Tm.sigma_eq_of_beqR ha)
+                have ep : Srt.val p = Srt.val .uint := ea.1
                 cases ep
-                have ea' := eq_of_heq ea.2
+                have ea' : a = hnode k (.there .here) := eq_of_heq ea.2
                 subst a
                 by_cases hb : b.beqR (hnode k .here) = true
-                · have eb := Tm.eq_of_beqR hb
+                · have eb : b = hnode k .here := Tm.eq_of_beqR hb
                   subst b
                   exact some ⟨m, rfl⟩
                 · exact none

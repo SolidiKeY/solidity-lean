@@ -223,7 +223,7 @@ theorem twoAnchorNegative_covered : twoAnchorNegative.Covered = true := by decid
 
 theorem twoAnchorNegative_countermodel (σ : State Gaps []) : ¬ holds σ twoAnchorNegative := by
   intro h
-  have hf := h (twoAnchorGood_valid .box (-3) σ)
+  have hf : holds σ ff := h (twoAnchorGood_valid .box (-3) σ)
   change (some (uintOfNat 0)) = some (uintOfNat 1) at hf
   exact (by decide +kernel : (some (uintOfNat 0)) ≠ some (uintOfNat 1)) hf
 

@@ -128,7 +128,10 @@ private theorem sample_write :
 theorem actual_write_input :
     (⟨List.prefix_refl [UA], sampleWritten, ()⟩ : Grown [UA] (fun _ => Unit)).hashInput UA 0 =
       some [1, 2] := by
-  have hw := hashInput_write_index
+  have hw :
+      (⟨List.prefix_refl [UA], sampleWritten, ()⟩ : Grown [UA] (fun _ => Unit)).hashInput UA 0 =
+        some (((MObj.words UA (sampleHeap.get sampleRef)).map byte).set
+          (uintOfNat 0).val.toNat (byte (uintOfNat 1).val)) := hashInput_write_index
     (⟨List.prefix_refl [UA], sampleHeap, ()⟩ : Grown [UA] (fun _ => Unit)) sample_write
   exact hw
 
@@ -139,7 +142,8 @@ theorem actual_write_hash (k : HashKind) :
       k.apply [1, 2] := by
   change k.apply (MObj.words UA (sampleWritten.get sampleRef)) = _
   apply HashKind.apply_congr
-  have h := (hashInput_ref
+  have h : some ((MObj.words UA (sampleWritten.get sampleRef)).map byte) =
+      some [1, 2] := (hashInput_ref
     (⟨List.prefix_refl [UA], sampleWritten, ()⟩ : Grown [UA] (fun _ => Unit)) sampleRef).symm.trans actual_write_input
   exact Option.some.inj h
 

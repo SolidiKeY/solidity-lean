@@ -173,8 +173,9 @@ theorem refutes_update_input {m : Modality} {U : Upd C Γ Δ}
     (hne : τ.glob.memT.hashInput R a ≠ τ.glob.memT.hashInput S b) :
     ¬ Fml.holdsH σ (.upd m U (.eq (hnode k i) (hnode k j))) := by
   intro h
-  have hp := h (hashFree_update_of_landing hu hl hf)
-  have he := hp.of_lands hl
+  have hp : Fml.holdsS σ (.upd m U (.eq (hnode k i) (hnode k j))) :=
+    h (hashFree_update_of_landing hu hl hf)
+  have he : Fml.holdsS τ (.eq (hnode k i) (hnode k j)) := hp.of_lands hl
   exact hne ((hashEq_iff_input τ k hk i j hi hj hf).1 he)
 
 /-- Minimal scoped realization interface: an actual typed object and a
