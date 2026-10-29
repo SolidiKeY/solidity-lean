@@ -85,18 +85,25 @@ def load_plan(root):
             groups.append(m.group(1))
             wave_of[m.group(1)] = wave
     children = re.findall(r"^\| ([SG]\d\d\.\d\d) —", text, re.M)
+    in_plan = len([g for g in groups if g not in {c.split(".")[0] for c in children}]) + len(children)
+    proposed = [pid for pid, _, _ in D.PROPOSED_PACKAGES]
+    stale = [pid for pid in proposed if pid in children]
+    children = children + [pid for pid in proposed if pid not in children]
     parents = {c.split(".")[0] for c in children}
     for c in children:
         wave_of[c] = wave_of.get(c.split(".")[0])
     packages = [g for g in groups if g not in parents] + children
     m = re.search(r"There are \*\*(\d+) proof work packages\*\*", text)
     stated = int(m.group(1)) if m else None
+    if stated is not None and stated != in_plan:
+        stated = -stated  # reported as a mismatch by build()
     vms = []
     for line in lines:
         m = re.match(r"^\| (V\d\d) \| ([^|]+) \| ([^|]+) \|", line)
         if m:
             vms.append((m.group(1), m.group(2).strip(), m.group(3).strip()))
-    return dict(groups=groups, children=children, parents=parents, packages=packages,
+    return dict(groups=groups, children=children, parents=parents, packages=packages, in_plan=in_plan,
+                proposed=proposed, stale_proposals=stale,
                 stated=stated, wave_of=wave_of, vms=vms)
 
 
@@ -488,8 +495,25 @@ def dependency_ledger(plan, imports, root, errors):
         if tuple(c) not in acked_cycles:
             errors.append(f"unacknowledged dependency cycle: {' '.join(c)}")
     used_mod = collections.defaultdict(set)
+    frozen_by = collections.defaultdict(list)
+    for x, mods in D.FROZEN.items():
+        if x not in pk:
+            errors.append(f"FROZEN: unknown package {x}")
+        for m in mods.split():
+            if m not in graph:
+                errors.append(f"FROZEN {x}: unknown module {m}")
+            if m not in D.MODULES.get(x, "").split():
+                errors.append(f"FROZEN {x}: {m} is not in its module ledger")
+    frozen = {m: x for x, mods in D.FROZEN.items() for m in mods.split()}
+    resolved = []
     for kind, a, b, why, mod in findings:
         if (kind, a, b) in acked:
+            continue
+        c = frozen.get(mod)
+        if c and kind in ("inversion", "parallel-import", "shared-write") \
+                and all(p.split(".")[0] == c.split(".")[0] or before(c, p) for p in (a, b)):
+            frozen_by[c].append((kind, a, b, mod))
+            resolved.append((kind, a, b, mod))
             continue
         if mod in D.ACK_MODULES:
             used_mod[mod] |= {a, b}
@@ -511,7 +535,8 @@ def dependency_ledger(plan, imports, root, errors):
     lines_of = {}
     for m, (rel, _) in graph.items():
         lines_of[m] = sum(1 for _ in (root / rel).open(errors="replace"))
-    return dict(vm_of=vm_of, vm_pre=vm_pre, edges=edges, origin=origin, induced=induced,
+    return dict(frozen_by=frozen_by, resolved=set(resolved),
+                vm_of=vm_of, vm_pre=vm_pre, edges=edges, origin=origin, induced=induced,
                 induced_why=induced_why, findings=findings, cycles=cycles, mod_edit=mod_edit,
                 lines_of=lines_of)
 
@@ -526,8 +551,10 @@ def build(root):
     features = json.loads((root / "docs/solidity-features.json").read_text())["features"]
     byid = {f["id"]: f for f in features}
     plan = load_plan(root)
-    if plan["stated"] != len(plan["packages"]):
-        errors.append(f"coverage-plan.md states {plan['stated']} work packages; parsed {len(plan['packages'])}")
+    if plan["stated"] is None or plan["stated"] < 0:
+        errors.append(f"coverage-plan.md's stated package count does not match its {plan['in_plan']} rows")
+    for pid in plan["stale_proposals"]:
+        errors.append(f"PROPOSED_PACKAGES: {pid} is already in coverage-plan.md; drop the proposal")
     pk = set(plan["packages"])
     imports = load_imports_cached(root)
 
@@ -834,8 +861,14 @@ def anchor_md(a):
 
 
 def resolution(k, a, b, m):
+    frozen = {mm: x for x, mods in D.FROZEN.items() for mm in mods.split()}
     r = {(x, y, z): w for x, y, z, w in D.ACKNOWLEDGED}.get((k, a, b))
+    if r is None and m in frozen and (k, a, b, m) in RESOLVED:
+        return f"interface of {m} frozen by {frozen[m]} (user decision on G03 Q1)"
     return r or (D.ACK_MODULES[m][1] if m in D.ACK_MODULES else None)
+
+
+RESOLVED = set()
 
 
 def to_json(L):
@@ -1033,14 +1066,24 @@ def report(L):
         if k == "schedule":
             emit(f"| {a} | {b} | {w} | {ack.get((k, a, b))} |")
     emit("")
-    emit("Module hot spots: inversions and shared writes grouped by the module through which they arise, "
-         "each with one resolution.")
+    emit("Resolved by the foundation children (G03 Q1, answered): findings through a module whose interface "
+         "a G24 child freezes, between packages scheduled after that child.")
+    emit("")
+    emit("| child | modules | findings resolved | packages |")
+    emit("|---|---|---|---|")
+    for c, mods in D.FROZEN.items():
+        fs = dep["frozen_by"].get(c, [])
+        emit(f"| {c} | {', '.join(f'`{m}`' for m in mods.split())} | {len(fs)} | "
+             f"{' '.join(sorted({x for _, a, b, _ in fs for x in (a, b)}))} |")
+    emit("")
+    emit("Module hot spots: the remaining inversions, parallel imports and shared writes, grouped by the module "
+         "through which they arise, each with one resolution.")
     emit("")
     emit("| module | findings | packages | resolution |")
     emit("|---|---|---|---|")
     bym = collections.defaultdict(list)
     for k, a, b, w, m in dep["findings"]:
-        if k != "schedule":
+        if k != "schedule" and (k, a, b, m) not in dep["resolved"]:
             bym[m].append((k, a, b))
     for m in sorted(bym):
         pk = sorted({x for _, a, b in bym[m] for x in (a, b)})
@@ -1084,6 +1127,7 @@ def main():
     args = ap.parse_args()
     root = Path(args.root)
     L = build(root)
+    RESOLVED.update(L["dep"]["resolved"])
     if L["errors"]:
         print("\n".join(L["errors"]), file=sys.stderr)
         print(f"roadmap-g03: {len(L['errors'])} error(s)", file=sys.stderr)
@@ -1383,7 +1427,8 @@ class D:
     REQUIRED_DECISION_ROWS = {
         "per-run hash premise and bound": "D11", "decode export": "D14", "artifact table": "D06",
         "frame failure semantics": "D19", "transaction failure semantics": "D20",
-        "memory frames for recursion": "D10", "eight EvalOrder combinations": "D04", "fixed point": "D07",
+        "memory frames for recursion": "D10", "EvalOrder settings (revised: two pipelines)": "D04",
+        "fixed point": "D07",
     }
 
     MODULE_LINES_LIMIT = 2500
@@ -1421,17 +1466,19 @@ class D:
           "the code-size idealization (D09) means the reference EVM used for vectors must be configured or "
           "patched to skip EIP-170/EIP-3860, or such vectors kept below the limits"],
          "g06-osaka-repin; g06-evm-interface"),
-        ("D04", "Public theorem over all eight EvalOrder combinations",
+        ("D04", "Public theorem over solc's two pipelines: the legacy and via-IR `EvalOrder` settings "
+                "(revised 2026-10-29: the other six flag combinations are dropped)",
          ["G00 Q4 — settings", "Pins (G00, G05, G06)"],
          {"source": "S02 S03.01 S03.02 S03.03", "admission": "G05 G15", "lowering": "G16 G17 G19",
           "backend": "G26", "theorem": "G49.02 G49.03"},
-         ["six of the eight `EvalOrder` flag combinations have no solc setting; the public theorem's settings "
-          "type must express all eight",
-          "lowering (`hoist`/`captureExpr`) is exercised for the legacy and via-IR orders only",
-          "no source semantics parameterized by `EvalOrder` independently of the elaborator",
-          "solc cannot produce the six combinations without a setting, so G52's differential tests cover only "
-          "two; the other six need source-level controls"],
-         "g05-frontend"),
+         ["the public theorem's settings type must range over exactly the two pipelines and map each to its "
+          "`EvalOrder` (`{}` for legacy, `EvalOrder.viaIR`); admission must refuse the other six flag "
+          "combinations (manual `evalOrder` overrides)",
+          "no source semantics parameterized by the pipeline independently of the elaborator",
+          "lowering (`hoist`/`captureExpr`, `wrapMods`) has regressions but no theorem for either order",
+          "the revision is the coordinator's relay of the user's second-round answer; the binding table at "
+          "this base still reads 'all eight' until the 'Second round (2026-10-29)' section lands"],
+         "g05-frontend; g01-contracts-rev"),
         ("D05", "Frozen profile solc 0.8.38; 0.8.34 fixtures only as SolKey compatibility checks",
          ["G00 Q4 — settings", "Pins (G00, G05, G06)"],
          {"admission": "G05 G15", "theorem": "G48", "validation": "G53 G54.02"},
@@ -1510,7 +1557,7 @@ class D:
          "revert-outcome-specs"),
         ("D14", "`decode : EvmWorld → Option IntrinsicWorld` exported by the public theorem",
          ["G01 Q6 — state transfer", "Contracts (G01)"],
-         {"backend": "G24 G27.05", "evm": "G46.02 G46.03 G47", "theorem": "G49.02 G50.02", "interface": "G01"},
+         {"backend": "G24.02 G27.05", "evm": "G46.02 G46.03 G47", "theorem": "G49.02 G50.02", "interface": "G01"},
          ["`PublicCorrectness` has no `decode` field (g01-contracts-rev)",
           "the core relation `Sim` is a relation, not a computable decoder; memory `StateRepr` likewise",
           "decoding symbolic slots back from numeric EVM storage needs the D11 hash premise"],
@@ -1537,10 +1584,10 @@ class D:
         ("D18", "Payment acceptance: any outcome for untyped recipients, history-dependent; typed recipients "
                 "run their own code",
          ["G04 Q3 — payment acceptance"],
-         {"source": "S04.03", "lowering": "G22.02 G22.05", "backend": "G24 G43", "evm": "G47",
+         {"source": "S04.03", "lowering": "G22.02 G22.05", "backend": "G24.04 G43", "evm": "G47",
           "theorem": "G50.02"},
          ["acceptance is the oracle `Machine.accepts` (G04 R33); recipient code is never run",
-          "the payment disjunct (iii) of `compile_correct` is a stale weakening (G04 R32); G24 owns the "
+          "the payment disjunct (iii) of `compile_correct` is a stale weakening (G04 R32); G24.04 owns the "
           "interim restatement of T1/T12/T13/T15 without it (G04 §3.1), G43 the payment relation"],
          "diamond-payments"),
         ("D19", "Frame failure semantics: any external call frame may fail with a revert its caller sees "
@@ -1659,9 +1706,12 @@ class D:
         ("G22.04", "G22.03", "G-parent children in listed order", "roadmap"),
         ("G22.05", "G22.04", "G-parent children in listed order", "roadmap"),
         ("G23", "G16 G17 G18.06 G19 G20 G21 G22.05", "G23's whole-source composition follows G16–G22", "roadmap"),
-        ("G25", "G24", "G25–G31 follow G24", "roadmap"),
-        ("G26", "G24", "G25–G31 follow G24", "roadmap"),
-        ("G27.01", "G24", "G25–G31 follow G24", "roadmap"),
+        ("G24.02", "G24.01", "G-parent children in listed order (proposed G24 children)", "roadmap"),
+        ("G24.03", "G24.02", "G-parent children in listed order (proposed G24 children)", "roadmap"),
+        ("G24.04", "G24.03", "G-parent children in listed order (proposed G24 children)", "roadmap"),
+        ("G25", "G24.04", "G25–G31 follow G24", "roadmap"),
+        ("G26", "G24.04", "G25–G31 follow G24", "roadmap"),
+        ("G27.01", "G24.04", "G25–G31 follow G24", "roadmap"),
         ("G27.02", "G27.01", "G-parent children in listed order", "roadmap"),
         ("G27.03", "G27.02", "G-parent children in listed order", "roadmap"),
         ("G27.04", "G27.03", "G-parent children in listed order", "roadmap"),
@@ -1671,7 +1721,7 @@ class D:
         ("G29.02", "G29.01", "G-parent children in listed order", "roadmap"),
         ("G29.03", "G29.02", "G-parent children in listed order", "roadmap"),
         ("G30", "G28", "G29/G30 follow G28", "roadmap"),
-        ("G31", "G24", "G25–G31 follow G24", "roadmap"),
+        ("G31", "G24.04", "G25–G31 follow G24", "roadmap"),
         ("G33", "G32", "G33/G34/G38/G39 follow G32", "roadmap"),
         ("G34", "G32", "G33/G34/G38/G39 follow G32", "roadmap"),
         ("G38", "G32", "G33/G34/G38/G39 follow G32", "roadmap"),
@@ -1777,7 +1827,14 @@ class D:
         "G22.04": "Solidity.Semantics.ContractWorldCertificates",
         "G22.05": "new",
         "G23": "Solidity.Semantics.Transient Solidity.Semantics.TransientWorld",
-        "G24": "Solidity.Evm.Compiler Solidity.Semantics.RunFuel",
+        "G24.01": "Solidity.Evm.Machine",
+        "G24.02": "Solidity.Evm.Sim Solidity.Evm.SimLemmas Solidity.Evm.Repr Solidity.Evm.StorageLemmas "
+                  "Solidity.Evm.MemorySource Solidity.Evm.MemoryHeap Solidity.Evm.MemoryAlloc "
+                  "Solidity.Evm.MemoryGrowResult",
+        "G24.03": "Solidity.Evm.Stmt Solidity.Evm.Compile Solidity.Evm.Correct Solidity.Evm.Expr "
+                  "Solidity.Evm.Layout Solidity.Evm.Exp Solidity.Evm.Signed Solidity.Evm.MemoryCompile "
+                  "Solidity.Evm.MemoryPaths Solidity.Evm.MemoryRefWrite Solidity.Evm.MemoryStructCopy",
+        "G24.04": "Solidity.Evm.Compiler Solidity.Semantics.RunFuel",
         "G25": "Solidity.Evm.Layout Solidity.Evm.Signed Solidity.Evm.Exp",
         "G26": "Solidity.Evm.Expr",
         "G27.01": "Solidity.Evm.Repr", "G27.02": "Solidity.Evm.Repr", "G27.03": "Solidity.Evm.StorageLemmas",
@@ -1886,7 +1943,7 @@ class D:
         # --- in-profile combinations (G03) ---
         ("mixed core/memory programs", ["memoryLocation", "storageLocation", "whileStatement", "internalCalls",
                                         "sendTransfer", "assertBuiltin"], [],
-         {"backend": "G24 G36.02 G37.01 G37.02 G37.03 G38 G43", "theorem": "G48 G49.01 G49.03"},
+         {"backend": "G24.01 G24.02 G24.03 G24.04 G36.02 G37.01 G37.02 G37.03 G38 G43", "theorem": "G48 G49.01 G49.03"},
          ["R01", "R02", "R03", "R29"],
          ["one compiler per whole program; a core prefix cannot feed a memory suffix"]),
         ("whole contracts: dispatch, ABI entry, deployment and sessions",
@@ -1896,7 +1953,7 @@ class D:
          ["the compiler theorems relate one program from a represented state; no contract-level statement"]),
         ("loops whose bodies push, pop, delete or pay",
          ["whileStatement", "forStatement", "arrayPush", "arrayPop", "deleteExpression", "sendTransfer"], [],
-         {"lowering": "G19", "backend": "G24 G30 G36.02 G36.03 G43"}, ["R21", "R22", "R24"],
+         {"lowering": "G19", "backend": "G24.01 G24.02 G24.03 G24.04 G30 G36.02 G36.03 G43"}, ["R21", "R22", "R24"],
          ["core loop bodies must not push/pay/shrink; no loops on the memory path"]),
         ("recursion with memory frames and reference results",
          ["recursiveCalls", "memoryLocation", "returnStatement", "internalFunctionTypes"], [],
@@ -1932,7 +1989,7 @@ class D:
          {"backend": "G25 G31", "evm": "G46.05"}, ["R10"],
          ["`valIn` refuses `modular` and `hash` values"]),
         ("own balance and payments", ["addressBalance", "sendTransfer", "msgValue", "nonpayableEntry"], [],
-         {"source": "S04.03 S04.04", "lowering": "G22.05", "backend": "G24 G31 G36.03 G42.03 G43",
+         {"source": "S04.03 S04.04", "lowering": "G22.05", "backend": "G24.04 G31 G36.03 G42.03 G43",
           "evm": "G46.04 G47"},
          ["R11", "R32", "R33"],
          ["`address(this).balance` refused; payment asymmetry; recipient code not run"]),
@@ -3197,6 +3254,31 @@ class D:
     # Integrated wave-0 packages: their modules are rechecked by every build,
     # so later edits below them are ordinary integration checks, not findings.
     INTEGRATED = ("G00", "G04")
+    # Foundation children of G24 (user decision on G03 Q1, relayed by the
+    # coordinator 2026-10-29): proposed manifest rows, applied by the checker
+    # until coverage-plan.md carries them (then `--check` asks to drop them).
+    PROPOSED_PACKAGES = [
+        ("G24.01", "Slot interface", "Freeze an abstract storage-slot interface (root, mapping-key and "
+         "array-element images, offsets) under every compiler proof, so G27.05 replaces the symbolic `Slot` "
+         "behind it without changing its signatures."),
+        ("G24.02", "State interface", "Freeze the typed core/memory state relations (`Sim`, `StateRepr`, the "
+         "allocator input) as one relation interface that every backend pass and the `decode` export use."),
+        ("G24.03", "Statement interface", "Freeze the statement-leaf outcome and pass-certificate signatures "
+         "(`StmtOut`, the per-statement compile entry, `Cert` instances) that G25–G44 extend by new cases only."),
+        ("G24.04", "Unified entry", "Unify the core/memory compiler entry on the frozen interfaces so mixed "
+         "programs compose; restate T1/T12/T13/T15 without the unreachable payment disjunct."),
+    ]
+    # Modules whose interface each foundation child freezes: findings through
+    # them between packages scheduled after the child are resolved by it.
+    FROZEN = {
+        "G24.01": "Solidity.Evm.Machine",
+        "G24.02": "Solidity.Evm.Sim Solidity.Evm.SimLemmas Solidity.Evm.Repr Solidity.Evm.StorageLemmas "
+                  "Solidity.Evm.MemorySource Solidity.Evm.MemoryHeap Solidity.Evm.MemoryAlloc "
+                  "Solidity.Evm.MemoryGrowResult",
+        "G24.03": "Solidity.Evm.Stmt Solidity.Evm.Compile Solidity.Evm.Correct Solidity.Evm.Expr "
+                  "Solidity.Evm.Layout Solidity.Evm.Exp Solidity.Evm.Signed Solidity.Evm.MemoryCompile "
+                  "Solidity.Evm.MemoryPaths Solidity.Evm.MemoryRefWrite Solidity.Evm.MemoryStructCopy",
+    }
     # G04 discharging packages no G03 row citing the restriction owns, and why.
     RESTRICTION_WAIVERS = {}
     # Deferred edges: the VM that runs the package's final check after its
@@ -3204,7 +3286,7 @@ class D:
     # a G03 proposal for V23, after G42.03, for G02 to schedule).
     DEFERRED_CHECKS = {("G36.03", "G43"): "V24", ("G39", "G42.01"): "V23", ("G39", "G42.03"): "V23"}
     ACKNOWLEDGED = [
-        ('inversion', 'G01', 'G24', "the contracts' intrinsic plug `typedRunPrefixes` reads `Prog.runF`, whose "
+        ('inversion', 'G01', 'G24.04', "the contracts' intrinsic plug `typedRunPrefixes` reads `Prog.runF`, whose "
          "consistency G24 proves; the G01 revision (g01-contracts-rev) must keep the contracts abstract over the "
          "intrinsic run and over `Evm.Machine`'s `Slot`, and every build rechecks them"),
         ('schedule', 'G19', 'G16', "V11 (G19, G20) runs beside V09 (G16, G17): add V09 to V11's prerequisites, or let G19 prepare against the expression-lowering relation and pass its final check after V09 integrates"),
@@ -3218,27 +3300,19 @@ class D:
         ('schedule', 'G52', 'G49.02', "V30 depends on V27 only: add V28 to V30's prerequisites for whole-pipeline differential tests"),
     ]
     ACK_MODULES = {
-        'Solidity.Evm.Layout': ('G06 G24 G25', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
-        'Solidity.Evm.Exp': ('G06 G24 G25', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
-        'Solidity.Evm.MemoryHeap': ('G24 G32', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
-        'Solidity.Evm.MemoryGrowResult': ('G24 G33', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
-        'Solidity.Evm.MemoryRefWrite': ('G24 G34', "existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures as the shared interface; later packages add constructors and lemmas without changing them, and each edit re-runs the final checks of the packages above it (G24's unified entry, G06's bridge) before integration"),
+        'Solidity.Evm.Layout': ('G06 G24.03 G25', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Exp': ('G06 G24.03 G25', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Semantics.RevertData': ('G01 G06 G16 G21', 'intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
-        'Solidity.Evm.Signed': ('G06 G24 G25', "signed-operator code: G25 extends it after G06's bridge seed; G06 re-runs its signed-op checks"),
-        'Solidity.Evm.MemorySource': ('G24 G32', "memory state relation: G32 freezes `StateRepr`; G24's unified entry is restated against it, and the edit re-runs G24's checks"),
-        'Solidity.Evm.MemoryPaths': ('G24 G34', "memory path code: G34 extends it behind G24's frozen entry and re-runs G24's checks"),
-        'Solidity.Evm.Machine': ('G01 G06 G24 G25 G26 G27.01 G27.02 G27.05', 'G27.05 replaces the symbolic `Slot` (G04 R34) under every compiler proof: G24 freezes an abstract slot interface and G27.05 changes only its implementation, first in V15 before G28; G45 targets a new assembly layer instead of editing `Machine`'),
-        'Solidity.Evm.Stmt': ('G06 G24 G28 G30 G36.01 G38 G43', 'statement leaf lemmas: G28, G30, G38 and G43 edit it in this order (waves 3, 4, 5); existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.Compile': ('G06 G24 G26 G28 G29.01 G30 G32 G33 G34 G35.01 G37.01', 'the fragment checker `inFrag` that G24 replaces by typed certificates: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.Sim': ('G06 G24 G26 G28 G30 G32 G33 G34 G35.01 G36.01 G36.02 G38 G43', 'the core state relation; G43 adds the joint payment/world relation: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.SimLemmas': ('G06 G24 G26 G28 G30 G31', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.Repr': ('G06 G24 G26 G27.01 G27.02 G31', 'G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.StorageLemmas': ('G06 G24 G26 G27.01 G27.02 G27.03 G31', 'G27 children in listed order within V15: existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.Correct': ('G06 G24 G36.01', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.Expr': ('G06 G24 G26', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.MemoryAlloc': ('G24 G32 G33', 'memory foundation: G32 freezes `StateRepr`/allocator signatures; existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.MemoryCompile': ('G24 G36.02', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
-        'Solidity.Evm.MemoryStructCopy': ('G24 G35.01 G36.02', 'existing compiler foundation edited by several wave-3–5 packages: G24 freezes its signatures (`StmtOut`, `Sim`/`StateRepr`, the compile entry) as the shared interface; later packages add constructors and lemmas without changing frozen signatures, and each edit re-runs the final checks of the packages above it before integration'),
+        'Solidity.Evm.Signed': ('G06 G24.03 G25', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Machine': ('G01 G06 G24.01 G27.05', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Stmt': ('G06 G24.03 G28 G30 G38 G43', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Compile': ('G06 G24.03 G29.01 G37.01', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Sim': ('G06 G24.02 G43', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.SimLemmas': ('G06 G24.02 G31', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Repr': ('G06 G24.02 G27.01 G27.02', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.StorageLemmas': ('G06 G24.02 G27.03', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Correct': ('G06 G24.03 G36.01', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Expr': ('G06 G24.03 G26', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Frontend.Source': ('G05 G12 G15', "provenance and pins: G05 fixes the certificate interface first; G12/G15 extend it; untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates"),
         'Solidity.Frontend.SourceUnits': ('G05 G12', "untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates"),
         'Solidity.RevertBytes': ('G01 G06 G16 G17 G18.01 G18.02 G18.03 G18.04 G18.05 G19 G21', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
@@ -3264,7 +3338,7 @@ class D:
         'G46.01': '(a) arithmetic, comparison and bitwise opcodes (seed: `ExternalEvm.simulation`); (b) signedness, narrow truncation and casts; (c) PUSH constants and control primitives JUMP/JUMPI/JUMPDEST',
         'G46.02': '(a) MLOAD/MSTORE/MSTORE8 against the byte-addressed representation; (b) CALLDATALOAD/CALLDATACOPY against the calldata representation; (c) memory expansion and its resource bound; (d) RETURN/REVERT byte ranges',
         'G49.01': 'one composition lemma per pass family: expressions, statements/control, calls and frames, aggregates and copies, world and ABI; then their `Cert.comp` with the closure hypotheses',
-        'G49.02': '(a) runtime refinement per deployed contract; (b) observation mapping incl. return/revert bytes and panics (D13); (c) the `decode` export (D14); (d) threading the per-run hash premise (D11); (e) the EvalOrder quantifier (D04)',
+        'G49.02': '(a) runtime refinement per deployed contract; (b) observation mapping incl. return/revert bytes and panics (D13); (c) the `decode` export (D14); (d) threading the per-run hash premise (D11); (e) the quantifier over the two pipelines (D04)',
         'G49.03': '(a) compiler totality on admitted input; (b) non-vacuity controls (success with data, revert, divergence); (c) failure preservation (no always-revert); (d) resource-indexed progress and finite-prefix families',
         'G51.01': 'one soundness bridge per rule family: storage, memory, control/loops, internal calls, external calls/callbacks, arithmetic/checked guards; each against the composed runtime theorem',
     }
