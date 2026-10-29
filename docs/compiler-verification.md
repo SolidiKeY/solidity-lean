@@ -87,8 +87,178 @@ other halt can be hidden by the reordering. Reference RHS values are
 evaluated before the parent path; a deletion resolves its parent before
 allocating.
 
-**Out of the memory path**: reference-element arrays, construction of structs
-with reference members, other reference-member default layouts, copies other
+**Dynamic reference-element arrays (nonallocating checkpoint).** The public
+entry falls back to `Memory.ReferenceArrays.compileProg` when the older paths
+refuse a program. `Compilation.isReferenceArray` identifies this path;
+`isMemory` continues to identify the older allocating memory variant.
+`RefArrayStateRepr` supplements the existing state relation with each dynamic
+reference array's bounded header, actual child pointer words, frame separation,
+separation from other reference arrays, primitive arrays and structs. Its
+fallible pointer certificates admit initialized locals, reference fields and
+indexed reference elements with core-fragment indices. The supported statements
+are alias rebinding, reference-element assignment, and primitive dynamic-array
+writes through these paths; sequences preserve the supplementary relation and
+stack. Bounds failures on either a parent or child revert on both runs.
+Redirecting a parent retains old child objects and aliases. This path allocates
+nothing and makes no allocator-preservation claim.
+
+`Evm/MemoryRefArrayExamples.lean` inhabits the public input with two populated
+children and a two-element parent. Indexed rebinding changes an existing local,
+parent redirection leaves its old alias intact, and old/new child writes yield
+matching source/machine observations. Three bounds controls, a corrupt-pointer
+refutation, and explicit allocation/default/fixed-index registration are checked by
+the kernel. The new theorem and witness names are in the enforcing axiom audit.
+Independent read-only finder and skeptic reviews found no soundness defect;
+their requests for observable rebinding, refusal controls and enforced witness
+auditing were incorporated.
+
+**Complete object ownership and fixed-array checkpoint.** A further public
+fallback, `Memory.Objects.compileProg` (`Compilation.isObject`), accepts
+headerless fixed-array indexing as well as dynamic indexing. Its additive
+`Objects.StateRepr` requires positive, pairwise disjoint reservations for every
+actual typed heap object, typed primitive/child-pointer element words, pointer
+locals, primitive struct fields and `RefFieldsRepr`. Existing compiler input
+relations retain their earlier premises. Fixed bounds come from the source type;
+a model bound at least `2^256` is handled without wrapping it into a zero word.
+Indices remain core-fragment values. Primitive value reads compose with existing
+checked operators; linear local assignments/declarations and alias declarations
+are supported alongside indexed writes and rebinding. No loops or calls are
+admitted by this path.
+
+Successful object programs preserve a supplied **complete** allocator, whose live
+intervals include reference arrays, fixed arrays, and even empty objects. The
+public input/output helpers expose these assumptions without reducing a computed
+compiler certificate. Both `Evm/MemoryObjectArrayExamples.lean` and
+`Evm/MemoryFixedChildArrayExamples.lean` inhabit the state and allocator premises,
+instantiate public allocator preservation, and check source/machine observations
+for retained aliases, value reads, alias declarations and three bounds failures.
+An overlapping cursor and a corrupt child pointer are rejected. The generic
+adoption theorem preserves old typed child identities across heap growth.
+`Objects.defaultEmpty_correct` additionally relates the actual source default
+copy to empty-array allocation and complete allocator preservation. A populated
+input instantiates it with source/machine observations `[40,32,24,0,9]` and
+advances the cursor from 40 to 41. These helpers preceded the public construction
+path described below.
+
+`tests/memory-reference-arrays/ReferenceArrays.sol` and
+`scripts/check-memory-reference-arrays.mjs` provide 92 independent solc 0.8.34 /
+EVM executions across legacy/viaIR and optimizer off/on: retained-alias results
+11013/17000/13, empty fixed-child arrays, distinct fixed defaults, and bounds
+panic `0x32`. These are independent behavior observations; the separately
+checked constructor paths are specified below. Reference-bearing struct
+constructor setup remains upstream evidence only. The checked compiler's existing
+coarse revert observation remains unchanged. Run the script with the published
+soljson and an external node_modules directory containing the optional EVM test
+dependencies; these are not Lean dependencies.
+
+**Runtime-length reference-array construction checkpoint.** The additive public
+`Memory.Construction.compileProg` fallback (`Compilation.isConstruction`) carries
+full object state, reserved-frame and reached-capacity premises. It accepts
+empty dynamic defaults, ordinary primitive-array allocation, and
+`new T[][](n)` when the immediate child is a dynamic array (its element may be
+any permitted map-free type). The length is a core-fragment `Simple`, including
+a local runtime value. Literal `new T[](0)` also works at any permitted element
+type, including fixed-array and struct references, since it invokes no child
+constructor. Both declaration and allocating rebinding are checked. These
+constructors compose with the full-object linear statements above; source loops,
+blocks, branches and other statements remain outside this narrow fallback.
+
+For `n` dynamic-array children, capacity is exactly `n + 1 + n`: one parent
+header/element interval and one positive reservation for each distinct empty
+child. The target reserves the parent first; the actual source copy appends
+children first. `Gap`, the actual typed `childrenCopy` fold and final parent
+adoption relate those orders without shared dummy pointers. A finite
+`loopIterN` witness proves target termination in `n+1` condition turns, without
+fuel or budget assumptions. Successful composition extends bases for old
+identities, preserves retained aliases and all unrelated machine fields, and
+threads the complete allocator with exact reached cost. A reverted prefix
+omits unreachable allocation suffixes from its capacity premise.
+
+`Evm/MemoryObjectConstructionExamples.lean` splices actual source syntax and
+inhabits public inputs for empty defaults, local-length construction, primitive
+children, alias mutation, and allocating rebinding. Source and actual target
+runs yield 11013; the target observation follows from kernel simulation rather
+than reducing the noncomputable loop through native execution. Actual default
+children have distinct source identities and distinct represented pointers.
+Separate public zero-length and fixed-child literal-zero inputs, source/machine
+observations, three bounds failures, a `W-1` final-cursor boundary, rejection at
+`cursor+cost=W`, and an inhabited reverting prefix before a uint256-max
+allocation are checked. The last control consumes only five cells and reverts
+before the oversized suffix.
+
+`Evm/MemoryStructArrayInputExamples.lean` supplies a populated fixed parent of
+`Holder { uint[] items; }` objects. Its public input includes genuine reference
+fields; parent redirection and writes through retained/new field aliases yield
+`[48,32,40,40,32,11,13,16,24]` on both runs. Bounds and corrupt-field controls
+are checked. Nonempty reference-bearing struct construction remains refused:
+it requires the separate constructor API, and this input path does not claim to
+implement that API. The source/EVM fixture's constructor setup is independent
+behavior evidence, not checked compiler constructor coverage.
+
+**Nonrecursive reference defaults.** `Memory.ReferenceDefaults.compileDefault`
+now recursively compiles finite fixed-array type structure, using empty dynamic
+objects, headerless primitive fixed objects, and the existing primitive-member
+struct default API as leaves. It refuses structs with reference members. The
+certificate is indexed by the intrinsic `RefTy`, map-free proof and exact cost;
+its result is the actual `Heap.allocDefault`, not a separate arithmetic model.
+No intrinsic representation, SolKey rule or dependency boundary changes.
+
+The public construction fallback accepts nonempty runtime arrays of certified
+reference children and default declarations of certified fixed reference parents.
+Allocating reference-array rebinding is also checked. Child cost `d(R)` is 1 for
+an empty dynamic array, `max 1 n` for a primitive fixed child, the padded member
+count for a primitive-member struct, and `max 1 n + n*d(R)` for a reference
+fixed array. Runtime reference arrays cost exactly `n+1+n*d(R)`. Fixed parents
+are headerless; zero-sized intrinsic fixed objects reserve one positive cell.
+Each default child receives its actual separately allocated source identity.
+Pending parent gaps survive recursively allocated children, old pointer bases
+and positive lower memory cells survive growth, and the target loop has a
+finite turn witness. Primitive struct fields can be written through indexed
+reference paths while retaining the complete allocator and reference fields.
+
+Six additive public fixtures cover `Box[]` defaults, `uint[1][2]`, nonempty
+`uint[1][]`, `uint[1][2][2]`, fixed parents of default dynamic children, and
+allocating rebinding. Inhabited complete state/allocator inputs yield actual
+source and target observations 11013, 13 and 17000 as appropriate. Twelve
+bounds cases check exact source/machine reverts. A further exact-capacity control
+includes child cost and rejects `cursor+cost=W`. Historical default-struct
+fixtures and counterexamples are retained unchanged. The old two fixed-default
+refusal names are explicitly replaced by positive registration controls.
+
+The assignment's independent reference-array layout and construction increment
+is implemented. Reference-bearing struct construction remains the explicit
+other-lane dependency: the populated `Holder` input above proves its meaningful
+array/field path without claiming constructor support. Source blocks, branches,
+loops and unsupported expressions retain the existing narrow fragment refusal.
+No universal source coverage or inventory promotion is claimed.
+
+Validation uses the published Lean 4.24.0 / Lake 5.0.0-src+797c613,
+`LEAN_NUM_THREADS=1`, explicit `-j1`, and verified 12 GiB/no-swap cgroups.
+The first `./run-lean.sh` passed 691 library and 259 TestSuite jobs and the
+377/131 SolKey comparison in 8032.865 seconds. Its whole validation group
+peaked at 12 GiB (reclaim pressure, no OOM/kills). Executor reconnects released
+its external writer-lock holder; no repository edits occurred during that
+build. A protected repeat with the lock held inside the container passed the
+official run in 5.492 seconds; its final full validation group took 97.152 seconds
+and peaked at 3,199,209,472 bytes with zero limit/OOM events. These are observed
+cache states, not a clean-build performance guarantee. The enforcing audit
+passed 546 headlines; the new simulation/agreement axioms are exactly
+`propext`, `Classical.choice`, `Quot.sound`. Source trust scanned 720 sources
+and 240 inventoried sites with zero findings. Orphan, layer, strict automatic
+and trust-script test gates passed. Documentation path checking still exits 1:
+20 missing references in unchanged existing files were verified unresolved at
+base `f4dee4a29c2e208b36db4a4161a4723c735cd775`; no new missing reference was
+found. That gate is not reported as passed.
+
+A single warm paired per-file check of the public compiler measured 0.999 s /
+164,806,656 bytes before and 1.062 s / 164,990,976 bytes after. The indexed
+pointer compiler retains structural recursion over the full endpoint type;
+no speed-driven intrinsic representation decision was reversed. Full commands,
+terminal logs, hashes, measured cgroups and review outcomes are exported with
+the checkpoint handoff.
+
+**Out of the construction fallback**: construction of structs
+with reference members, other uncertified reference-member default layouts, copies other
 than the primitive-member storage-root clause (including memory back to
 storage and runtime-length objects, which need iteration), loops, `assert`,
 calls, payments, and compound storage writes in a mixed memory program.
@@ -327,3 +497,85 @@ they do, so the proof needs no argument about it.
 is the slowest (the `decide +kernel` runs, the unrolled `**` code under a
 raised `maxRecDepth`); `Evm/Correct.lean`'s `stmt_sim` dispatches one lemma
 per family, held to `maxHeartbeats 11000`.
+
+The fixed-array increment checked its two inhabited public fixtures in 10.439 s /
+361,484,288 bytes aggregate peak, generic array adoption in 1.727 s /
+191,942,656 bytes, empty-default simulation in 2.172 s / 197,185,536 bytes,
+and the 32 upstream fixture runs in 2.568 s / 258,355,200 bytes. All used the
+same 12 GiB/no-swap bound with zero limit/OOM events. An initial optional npm
+installation stalled and was stopped (exit -15, **blocked**, not a pass); adding
+the documented proxy CA and explicit proxy routing completed the dependency
+installation in 5.201 s. Independent finder/skeptic reviews requested root/audit
+registration, fixed-child/read/alias witnesses and inhabited allocator
+preservation; those requests were incorporated. Full milestone gate evidence
+is exported separately from the immutable first-checkpoint logs.
+
+The full fixed-array milestone run passed 704 library jobs, 259 TestSuite jobs
+and the SolKey comparison in 129.035 s; its 598-headline axiom audit passed in
+94.160 s. The complete validation group took 231.556 s and peaked at
+2,976,473,088 bytes, with zero limit/OOM events. Orphan, layer, strict automatic,
+source-trust (733 sources, 240 inventoried sites, zero findings) and trust-script
+tests passed. The documentation-path output was byte-for-byte identical to the
+20 historical missing-reference failures recorded above; that gate remains
+failed. Adding the inhabited empty-default witness checked in 3.271 s /
+343,101,440 bytes before final confirmation.
+
+The construction increment's populated scalar/struct and boundary fixtures
+checked in 9.479 s / 316,563,456 bytes; the literal-zero fixed-child public
+fixture checked in 5.277 s / 304,128,000 bytes. The 52 upstream source cases
+passed in 3.084 s / 275,841,024 bytes, all under the same 12 GiB/no-swap bound.
+An initial child-loop proof hit the unchanged 200,000-heartbeat limit and is
+recorded as blocked, not passed. Abstracting loop control from concrete evaluator
+bodies repaired it: that module checked in 1.350 s / 182,513,664 bytes, and the
+strengthened finite simulation in 1.757 s / 198,868,992 bytes. No budget was
+raised. Finder and skeptic read-only reviews found no soundness defect; their
+zero-length, capacity and unreachable-suffix requests were incorporated.
+
+The complete construction milestone passed the official 715-library/259-TestSuite
+build and SolKey comparison in 125.027 s, plus the enforcing 662-headline axiom
+audit in 103.401 s. New loop/construction/public-observation theorems use exactly
+`propext`, `Classical.choice`, `Quot.sound`; no axiom declaration was added.
+Source trust scanned 744 sources and the unchanged 240 inventoried sites with
+zero findings. Orphan, layer, strict automatic and trust-script tests passed.
+The bounded group took 236.179 s / 2,190,204,928 bytes aggregate peak with no
+limit/OOM events. Documentation-path checking still exits 1 with the identical
+20 historical missing references; it is not reported as passed. Both independent
+reviewers confirmed their findings closed after the public zero-length,
+capacity, unreachable-suffix and populated reference-field fixtures were added.
+
+The final nonrecursive-default increment passed `./run-lean.sh` (733 library
+and 259 TestSuite jobs, 377/131 SolKey comparison) in 137.829 s. The enforcing
+747-headline audit passed in 125.779 s; new default/array simulations and target
+observations use exactly `propext`, `Classical.choice`, `Quot.sound`. Source
+trust scanned 762 files and 240 inventoried sites with zero findings. Orphan,
+layer, strict automatic and trust-script tests passed. The full validation
+group took 271.391 s and peaked at 2,199,785,472 bytes under actual
+`memory.max=12884901888`, `memory.swap.max=0`, with zero limit/OOM events.
+The 92 source/EVM fixtures passed in 3.428 s / 299,343,872 bytes. Logs retain
+all failed development attempts as failures; no timeout is counted as a pass.
+The documentation-path gate still exits 1 for the same 20 historical missing
+references, byte-for-byte identical to the previous checkpoint output.
+
+Independent read-only finder and skeptic reviews used no Lean server. Both
+caught an accidental overwrite of the historical struct-default example module;
+it was restored exactly and the new fixture moved to an additive module. The
+reviewed allocator/source proofs had no remaining soundness findings. Broad
+simp cleanup, audit registration and two stale descriptions were corrected.
+Full terminal logs, cgroup measurements, review outcomes, cumulative bundle and
+SHA256 manifests are exported in the task handoff. No master merge or push was
+performed. No source coverage inventory was regenerated or promoted.
+
+### Reference-array integration audit conflict
+
+The merge of `f93e1e981f0eeed1e51b132bea669f92d74955e9` into
+`9b6d1c2990209edbe5220a08f30d04d472dfee03` retained both additive
+`TrustAudit.lean` headline blocks. Read-only local finder checks against both
+index parents found no missing imports, headline entries or axiom prints;
+the combined list has 757 unique entries. A local skeptic comparison confirmed
+that the standard-axiom whitelist, transitive collection and rejection logic
+are identical to both parents. No proof or target predicate changed.
+Independent agent review was unavailable because the service could not load
+the session rollout. Per-file Lean MCP diagnostics remained partial after
+three 30-second polls, with no diagnostics or failed dependencies returned;
+this is pending validation, not a passing Lean audit. `git diff --check` passed.
+The coordinator must complete the combined audit under its resource scope.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run every hand-written scripts/check-*.mjs EVM vector check once per pinned
+# Run the hand-written EVM vector scripts/check-*.mjs (not check-backend-vectors.mjs, run on its own) EVM vector check once per pinned
 # compiler. Optional reference tooling; not a Lean dependency.
 #
 # Usage: scripts/evm-vectors/run.sh SOLJSON_0_8_38 SOLJSON_0_8_34 OUT_DIR [NODE_MODULES]

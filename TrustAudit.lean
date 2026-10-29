@@ -19,6 +19,18 @@ import Solidity.Evm.MemoryStructExamples
 import Solidity.Evm.MemoryStructDefaultExamples
 import Solidity.Evm.MemoryStructCopyExamples
 import Solidity.Evm.MemoryPathExamples
+import Solidity.Evm.MemoryRefArrayExamples
+import Solidity.Evm.MemoryObjectArrayExamples
+import Solidity.Evm.MemoryFixedChildArrayExamples
+import Solidity.Evm.MemoryPrimitiveStructArrayDefaultExamples
+import Solidity.Evm.MemoryFixedDefaultExamples
+import Solidity.Evm.MemoryDynamicFixedDefaultExamples
+import Solidity.Evm.MemoryNestedFixedDefaultExamples
+import Solidity.Evm.MemoryReferenceArrayRebindExamples
+import Solidity.Evm.MemoryFixedDynamicDefaultExamples
+import Solidity.Evm.MemoryObjectConstructionExamples
+import Solidity.Evm.MemoryStructArrayInputExamples
+import Solidity.Evm.MemoryObjectEmpty
 import Solidity.Evm.MemoryAllocExamples
 import Solidity.Evm.MemoryAllocSourceExamples
 import Solidity.Evm.MemoryExamples
@@ -32,6 +44,9 @@ import Solidity.Examples.Tactics.OpenLoops
 import Solidity.Examples.Tactics.ComputedRevert
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.Tactics.Rigid
+import Solidity.Roadmap.Controls
+import Solidity.Source.TypingExamples
+import Solidity.Source.StateExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -56,6 +71,228 @@ run_cmd do
     ``Solidity.Examples.Decision.memoryAlias_equalContents,
     ``Solidity.Examples.Decision.memoryAlias_differentContents,
     ``Solidity.Examples.Decision.memoryParameter_emptyDomains,
+    ``Solidity.Evm.Memory.Objects.DefaultBuilder.empty,
+    ``Solidity.Evm.Memory.Objects.DefaultBuilder.primitiveStruct,
+    ``Solidity.Evm.Memory.Objects.DefaultBuilder.fixedPrimitive,
+    ``Solidity.Evm.Memory.Objects.DefaultBuilder.fixedReference,
+    ``Solidity.Evm.Memory.Objects.defaultChildrenCopy_succ,
+    ``Solidity.Evm.Memory.Objects.defaultChildren_sim,
+    ``Solidity.Evm.Memory.Objects.referenceArrayCopy_source,
+    ``Solidity.Evm.Memory.Objects.referenceFixedCopy_source,
+    ``Solidity.Evm.Memory.Objects.referenceArray_correct,
+    ``Solidity.Evm.Memory.Objects.defaultDeclare_correct,
+    ``Solidity.Evm.Memory.Objects.referenceDeclare_correct,
+    ``Solidity.Evm.Memory.Objects.referenceRebind_correct,
+    ``Solidity.Evm.Memory.Objects.HeapRepr.setStruct,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.setStruct,
+    ``Solidity.Evm.Memory.Objects.PtrFrag.writeField,
+    ``Solidity.Evm.Memory.ReferenceDefaults.compileDefault_correct,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.initial_repr,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.initial_allocator,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.source_cost,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.compiled_input,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.source_result,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.target_result,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.failed_input,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.failed_agrees,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.source_bounds,
+    ``Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.target_bounds,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.initial_repr,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.initial_allocator,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.source_cost,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.compiled_input,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.source_result,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.target_result,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.failed_input,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.failed_agrees,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.source_bounds,
+    ``Solidity.Evm.Memory.FixedDefaultExamples.target_bounds,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.initial_repr,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.initial_allocator,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.source_cost,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.compiled_input,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.source_result,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.target_result,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.failed_input,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.failed_agrees,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.source_bounds,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.target_bounds,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.initial_repr,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.initial_allocator,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.source_cost,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.compiled_input,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.source_result,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.target_result,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.failed_input,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.failed_agrees,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.source_bounds,
+    ``Solidity.Evm.Memory.NestedFixedDefaultExamples.target_bounds,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.initial_repr,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.initial_allocator,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.source_cost,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.compiled_input,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.source_result,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.target_result,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.failed_input,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.failed_agrees,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.source_bounds,
+    ``Solidity.Evm.Memory.ReferenceArrayRebindExamples.target_bounds,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.initial_repr,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.initial_allocator,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.source_cost,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.compiled_input,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.source_result,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.target_result,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.failed_input,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.failed_agrees,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.source_bounds,
+    ``Solidity.Evm.Memory.FixedDynamicDefaultExamples.target_bounds,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.exact_capacity_input,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.exact_capacity_agrees,
+    ``Solidity.Evm.Memory.DynamicFixedDefaultExamples.insufficient_capacity_refuted,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.reserveArray,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.writeGap,
+    ``Solidity.Evm.Memory.Objects.Gap.allocateEmpty,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.adoptReservedArray,
+    ``Solidity.Evm.Memory.Objects.childrenCopy_ids,
+    ``Solidity.Evm.Memory.Objects.children_sim,
+    ``Solidity.Evm.Memory.Objects.nestedCopy_source,
+    ``Solidity.Evm.Memory.Objects.nested_correct,
+    ``Solidity.Evm.Memory.Objects.StateRepr.adopt,
+    ``Solidity.Evm.Memory.Objects.nestedDeclare_correct,
+    ``Solidity.Evm.Memory.Objects.nestedRebind_correct,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.allocatePrimitive,
+    ``Solidity.Evm.Memory.Objects.primitiveDeclare_correct,
+    ``Solidity.Evm.Memory.Objects.primitiveRebind_correct,
+    ``Solidity.Evm.Memory.Objects.newEmpty_correct,
+    ``Solidity.Evm.Memory.Objects.rebindEmpty_correct,
+    ``Solidity.Evm.Memory.Construction.StmtFrag.correct,
+    ``Solidity.Evm.Memory.Construction.ProgFrag.correct,
+    ``Solidity.Evm.Memory.ConstructionExamples.initial_repr,
+    ``Solidity.Evm.Memory.ConstructionExamples.initial_allocator,
+    ``Solidity.Evm.Memory.ConstructionExamples.source_cost,
+    ``Solidity.Evm.Memory.ConstructionExamples.compiled_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.source_result,
+    ``Solidity.Evm.Memory.ConstructionExamples.target_result,
+    ``Solidity.Evm.Memory.ConstructionExamples.failed_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.failed_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.source_bounds,
+    ``Solidity.Evm.Memory.ConstructionExamples.target_bounds,
+    ``Solidity.Evm.Memory.ConstructionExamples.source_default_identities,
+    ``Solidity.Evm.Memory.ConstructionExamples.target_default_identities,
+    ``Solidity.Evm.Memory.ConstructionExamples.exact_capacity_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.exact_capacity_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.insufficient_capacity_refuted,
+    ``Solidity.Evm.Memory.ConstructionExamples.unreachable_cost,
+    ``Solidity.Evm.Memory.ConstructionExamples.unreachable_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.unreachable_source,
+    ``Solidity.Evm.Memory.ConstructionExamples.unreachable_target,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_source_length,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_target_allocation,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_public_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_public_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.zero_public_source,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_zero_input,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_zero_agrees,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_zero_source,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_zero_target,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_child_nonempty_allocation_registered,
+    ``Solidity.Evm.Memory.ConstructionExamples.fixed_parent_default_registered,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.initial_repr,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.compiled_input,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.source_observation,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.target_observation,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.wrong_reference_field_refuted,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.reference_struct_construction_refused,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.failed_input,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.failed_agrees,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.source_bounds,
+    ``Solidity.Evm.Memory.StructArrayInputExamples.target_bounds,
+
+    ``Solidity.Evm.Memory.ObjectArrayExamples.empty_default_simulation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.empty_source_observation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.empty_target_observation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.empty_cursor_advanced,
+
+    ``Solidity.Evm.Memory.Objects.emptyArray_copy,
+    ``Solidity.Evm.Memory.Objects.newEmptyArray_copy,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.allocateEmpty,
+    ``Solidity.Evm.Memory.Objects.defaultEmpty_correct,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.initial_repr,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.initial_allocator,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.allocator_preserved,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.allocator_overlap_refuted,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.compiled_input,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.source_observation,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.target_observation,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.failed_input,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.failed_agrees,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.source_bounds,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.target_bounds,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.read_input,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.read_agrees,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.source_read,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.target_read,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.alias_input,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.alias_agrees,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.source_alias,
+    ``Solidity.Evm.Memory.FixedChildArrayExamples.target_alias,
+
+    ``Solidity.Evm.Memory.Objects.Ownership.base_injective,
+    ``Solidity.Evm.Memory.Objects.ArrayRepr.read,
+    ``Solidity.Evm.Memory.Objects.ArrayRepr.write,
+    ``Solidity.Evm.Memory.Objects.HeapRepr.setArray,
+    ``Solidity.Evm.Memory.Objects.AllocatorRepr.setArray,
+    ``Solidity.Evm.Memory.Objects.HeapRepr.adoptArray,
+    ``Solidity.Evm.Memory.Objects.ProgFrag.correct,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.initial_repr,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.initial_allocator,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.allocator_overlap_refuted,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.allocator_preserved,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.compiled_input,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.source_observation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.target_observation,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.wrong_pointer_refuted,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.failed_input,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.failed_agrees,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.source_bounds,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.target_bounds,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.read_input,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.read_agrees,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.source_read,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.target_read,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.alias_input,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.alias_agrees,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.source_alias,
+    ``Solidity.Evm.Memory.ObjectArrayExamples.target_alias,
+
+    ``Solidity.Evm.Memory.RefArrayRepr.read,
+    ``Solidity.Evm.Memory.RefArrayRepr.write,
+    ``Solidity.Evm.Memory.ReferenceArrays.ProgFrag.correct,
+    ``Solidity.Evm.Memory.RefArrayExamples.initial_repr,
+    ``Solidity.Evm.Memory.RefArrayExamples.compiled_input,
+    ``Solidity.Evm.Memory.RefArrayExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.RefArrayExamples.source_observation,
+    ``Solidity.Evm.Memory.RefArrayExamples.target_observation,
+    ``Solidity.Evm.Memory.RefArrayExamples.retained_stack,
+    ``Solidity.Evm.Memory.RefArrayExamples.wrong_pointer_refuted,
+    ``Solidity.Evm.Memory.RefArrayExamples.failed_input,
+    ``Solidity.Evm.Memory.RefArrayExamples.failed_agrees,
+    ``Solidity.Evm.Memory.RefArrayExamples.source_bounds,
+    ``Solidity.Evm.Memory.RefArrayExamples.target_bounds,
+    ``Solidity.Evm.Memory.RefArrayExamples.allocation_supported,
+    ``Solidity.Evm.Memory.RefArrayExamples.default_declaration_supported,
+    ``Solidity.Evm.Memory.RefArrayExamples.fixed_index_supported,
     ``Solidity.Evm.Memory.copiedFields_copy,
     ``Solidity.Evm.Memory.copiedStruct_alloc,
     ``Solidity.Evm.Memory.copiedFields_get,
@@ -588,3 +825,143 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} headline theorems use only the standard axioms"
+
+#print axioms Solidity.Evm.Memory.RefArrayRepr.read
+#print axioms Solidity.Evm.Memory.RefArrayRepr.write
+#print axioms Solidity.Evm.Memory.ReferenceArrays.ProgFrag.correct
+#print axioms Solidity.Evm.Memory.RefArrayExamples.compiled_agrees
+#print axioms Solidity.Evm.Memory.RefArrayExamples.failed_agrees
+
+#print axioms Solidity.Evm.Memory.Objects.ProgFrag.correct
+#print axioms Solidity.Evm.Memory.Objects.defaultEmpty_correct
+#print axioms Solidity.Evm.Memory.ObjectArrayExamples.allocator_preserved
+#print axioms Solidity.Evm.Memory.FixedChildArrayExamples.compiled_agrees
+
+#print axioms Solidity.Evm.Memory.Objects.nested_correct
+#print axioms Solidity.Evm.Memory.Construction.ProgFrag.correct
+#print axioms Solidity.Evm.Memory.ConstructionExamples.target_result
+#print axioms Solidity.Evm.Memory.ConstructionExamples.unreachable_target
+#print axioms Solidity.Evm.Memory.StructArrayInputExamples.compiled_agrees
+
+#print axioms Solidity.Evm.Memory.Objects.DefaultBuilder.fixedReference
+#print axioms Solidity.Evm.Memory.Objects.referenceArray_correct
+#print axioms Solidity.Evm.Memory.PrimitiveStructArrayDefaultExamples.target_result
+
+/-! Roadmap G07: the inhabited and negative controls of the G01 contracts
+(`Solidity/Roadmap/Controls.lean`, `docs/feature-work/roadmap-g07-gates.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Roadmap.PublicCorrectness.transfer,
+    ``Solidity.Roadmap.PublicCorrectness.not_alwaysRevert,
+    ``Solidity.Roadmap.PublicCorrectness.observes,
+    ``Solidity.Roadmap.PublicCorrectness.rejects,
+    ``Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse,
+    ``Solidity.Roadmap.Admission.rejects,
+    ``Solidity.Roadmap.Controls.toy_publicCorrectness,
+    ``Solidity.Roadmap.Controls.toySource_nonVacuous,
+    ``Solidity.Roadmap.Controls.toySource_approved,
+    ``Solidity.Roadmap.Controls.toyEvm_approved,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler,
+    ``Solidity.Roadmap.Controls.not_admission_sloppy,
+    ``Solidity.Roadmap.Controls.not_nonVacuous_emptySource,
+    ``Solidity.Roadmap.PublicCorrectness.observedBySource,
+    ``Solidity.Roadmap.SourceSpec.NonVacuous.admits,
+    ``Solidity.Roadmap.HashPremise.not_of_rootSlots,
+    ``Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler,
+    ``Solidity.Roadmap.Fixed.Sane.rootSlots_lt,
+    ``Solidity.Roadmap.Controls.toyFixed_keccak]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} roadmap control theorems use only the standard axioms"
+
+/-! Roadmap S00/S01: the source syntax, its rejection and mapping, and static
+typing (`Solidity/Source/`, `docs/feature-work/source-s00-s01.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Ctor.mem_all,
+    ``Solidity.Source.Syn.nodes_eq,
+    ``Solidity.Source.Syn.rejections_of_sub,
+    ``Solidity.Source.Syn.rejections_witnessed,
+    ``Solidity.Source.Syn.excl_ctor,
+    ``Solidity.Source.Excl.mapped,
+    ``Solidity.Source.Ctor.grammar_covers,
+    ``Solidity.Source.Syn.decls_ctor,
+    ``Solidity.Source.Examples.no_break_outside_loop,
+    ``Solidity.Source.Examples.no_nested_unchecked,
+    ``Solidity.Source.implicit_int_range,
+    ``Solidity.Source.FixTy.subsumes_inRange,
+    ``Solidity.Source.Q.toFixedExplicit?_of_toFixed?,
+    ``Solidity.Source.resolve_iff,
+    ``Solidity.Source.Resolves.unique,
+    ``Solidity.Source.StmtD.locals_suffix,
+    ``Solidity.Source.HasType.resolved,
+    ``Solidity.Source.ItemsOK.resolved,
+    ``Solidity.Source.TypingExamples.shl18_folded,
+    ``Solidity.Source.TypingExamples.shlTooBig_illTyped,
+    ``Solidity.Source.TypingExamples.bareReturn_refused,
+    ``Solidity.Source.TypingExamples.twoCtors_illFormed,
+    ``Solidity.Source.TypingExamples.noVisibility_illFormed,
+    ``Solidity.Source.TypingExamples.exprCoverage_total,
+    ``Solidity.Source.TypingExamples.stmtCoverage_total,
+    ``Solidity.Source.TypingExamples.msgValue_refused,
+    ``Solidity.Source.TypingExamples.sameSig_illFormed,
+    ``Solidity.Source.TypingExamples.ifaceBody_illFormed,
+    ``Solidity.Source.TypingExamples.unknownPragma_illFormed,
+    ``Solidity.Source.TypingExamples.exprCoverage_typed,
+    ``Solidity.Source.TypingExamples.counter_wellFormed,
+    ``Solidity.Source.TypingExamples.tooBig_illTyped,
+    ``Solidity.Source.TypingExamples.clashing_illFormed,
+    ``Solidity.Source.TypingExamples.gasleft_untyped]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-definition theorems use only the standard axioms"
+
+/-! Roadmap S04.01–S04.03: source state, observations and world
+(`Solidity/Source/{State,Observe,World}.lean`,
+`docs/feature-work/source-s04-state.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Heap.copy_get,
+    ``Solidity.Source.Heap.copy_independent,
+    ``Solidity.Source.Heap.write_get,
+    ``Solidity.Source.Heap.write_ty,
+    ``Solidity.Source.Storage.write_read,
+    ``Solidity.Source.Storage.set_restore,
+    ``Solidity.Source.wordBytes_value,
+    ``Solidity.Source.Val.word_int,
+    ``Solidity.Source.readInt_reject,
+    ``Solidity.Source.panicData_code,
+    ``Solidity.Source.panic_distinct,
+    ``Solidity.Source.ExecState.undoN_run,
+    ``Solidity.Source.rollback_run,
+    ``Solidity.Source.rollback_inner,
+    ``Solidity.Source.rollback_outer_after_commit,
+    ``Solidity.Source.rollback_transfer,
+    ``Solidity.Source.transfer_none_iff,
+    ``Solidity.Source.StateExamples.alias_seen,
+    ``Solidity.Source.StateExamples.revert_undoes,
+    ``Solidity.Source.StateExamples.transfers]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-state theorems use only the standard axioms"

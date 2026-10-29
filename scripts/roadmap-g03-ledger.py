@@ -1697,7 +1697,7 @@ class D:
         "D08": [('source', "Solidity.recDepth", "Solidity/Syntax/Scoped.lean", "fixed 1024-frame unrolling to remove"),
                 ('source', "Solidity.Prog.runF_approx", "Solidity/Semantics/RunFuel.lean",
                  "fuel approximation of the classical run"),
-                ('theorem', "Solidity.Roadmap.typedRunPrefixes", "Solidity/Roadmap/Contracts.lean",
+                ('theorem', "Solidity.Roadmap.typedRunPrefixes", "Solidity/Roadmap/TypedRun.lean",
                  "intrinsic prefix family plug")],
         "D09": [('theorem', "Solidity.Roadmap.EvmSpec", "Solidity/Roadmap/Contracts.lean",
                  "pinned EVM language with resources"),
@@ -1858,7 +1858,7 @@ class D:
         "S00": "new", "S01": "new", "S02": "new", "S03.01": "new", "S03.02": "new", "S03.03": "new",
         "S03.04": "new", "S04.01": "new", "S04.02": "new", "S04.03": "new", "S04.04": "new",
         "S05": "new",
-        "G00": "new", "G01": "Solidity.Roadmap.Contracts", "G02": "new", "G03": "new", "G04": "new",
+        "G00": "new", "G01": "Solidity.Roadmap.Contracts Solidity.Roadmap.TypedRun", "G02": "new", "G03": "new", "G04": "new",
         "G05": "Solidity.Frontend.Source Solidity.Frontend.SourceUnits",
         "G06": "SolidityBridge.ExternalEvm",
         "G07": "new",
@@ -3341,27 +3341,20 @@ class D:
     # Deferred edges: the VM that runs the package's final check after its
     # prerequisite (G36.03 in V24 after G43; G39's self-call/callback case is
     # a G03 proposal for V23, after G42.03, for G02 to schedule).
-    DEFERRED_CHECKS = {("G36.03", "G43"): "V24", ("G39", "G42.01"): "V23", ("G39", "G42.03"): "V23"}
+    DEFERRED_CHECKS = {("G36.03", "G43"): "V14", ("G39", "G42.01"): "V14", ("G39", "G42.03"): "V14"}
     ACKNOWLEDGED = [
         ('inversion', 'G01', 'G24.04', "the contracts' intrinsic plug `typedRunPrefixes` reads `Prog.runF`, whose "
          "consistency G24 proves; the G01 revision (g01-contracts-rev) must keep the contracts abstract over the "
          "intrinsic run and over `Evm.Machine`'s `Slot`, and every build rechecks them"),
-        ('schedule', 'G19', 'G16', "V11 (G19, G20) runs beside V09 (G16, G17): add V09 to V11's prerequisites, or let G19 prepare against the expression-lowering relation and pass its final check after V09 integrates"),
-        ('schedule', 'G19', 'G17', 'V11 runs beside V09: as G19 ← G16'),
-        ('schedule', 'G20', 'G18.06', "V11 runs beside V10 (G18): add V10 to V11's prerequisites, or prepare against the G18.06 interface with the final check after V10"),
-        ('schedule', 'G21', 'G18.04', "V12 runs beside V10: add V10 to V12's prerequisites, or prepare against the G18.04 relation with the final check after V10"),
         ('schedule', 'G31', 'G27.05', "V17 runs beside V15: add V15 to V17's prerequisites so the per-run hash premise (D11) is shared, not duplicated"),
-        ('schedule', 'G38', 'G37.01', "V21 runs beside V20: add V20 to V21's prerequisites, or prove unwind against the G37.01 frame interface with the final check after V20"),
         ('schedule', 'G44.02', 'G45.04', "V25 runs beside V26: add V26 to V25's prerequisites, or split artifact layout (G44.02) from relocation (G45.04) with a deferred final check"),
-        ('schedule', 'G44.03', 'G43', "V25 runs beside V24: add V24 to V25's prerequisites; G43's payment relation must not wait on G44"),
-        ('schedule', 'G52', 'G49.02', "V30 depends on V27 only: add V28 to V30's prerequisites for whole-pipeline differential tests"),
     ]
     ACK_MODULES = {
         'Solidity.Evm.Layout': ('G06 G24.03 G25', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Evm.Exp': ('G06 G24.03 G25', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Semantics.RevertData': ('G01 G06 G16 G21', 'intrinsic semantics: later edits are conservative extensions; each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
         'Solidity.Evm.Signed': ('G06 G24.03 G25', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
-        'Solidity.Evm.Machine': ('G01 G06 G24.01 G27.05', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
+        'Solidity.Evm.Machine': ('G06 G24.01 G27.05', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Evm.Stmt': ('G06 G24.03 G28 G30 G38 G43', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Evm.Compile': ('G06 G24.03 G29.01 G37.01', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
         'Solidity.Evm.Sim': ('G06 G24.02 G43', "after the G24 foundation freeze (G03 Q1) only the earlier wave-0 interfaces sit below these edits: G06's Bridge seed (and, for `Machine`, G01's contracts) imports the module, so `check-bridge.sh` and the default build recheck them after each freeze child and each later extension; the extensions may not change the frozen signatures"),
@@ -3374,13 +3367,13 @@ class D:
         'Solidity.Frontend.SourceUnits': ('G05 G12', "untrusted solc adapter (G01 frontend boundary): the checked frontend of G08–G15 lives in new modules, so edits here only re-run the adapter's regressions; wave-1 packages may not depend on adapter internals for their certificates"),
         'Solidity.RevertBytes': ('G01 G06 G16 G17 G18.01 G18.02 G18.03 G18.04 G18.05 G19 G21', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
         'Solidity.Semantics.ContractWorldCertificates': ('G22.03 G22.04', 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
-        'Solidity.Semantics.Deploy': ('G01 G22.01 G22.03', 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
+        'Solidity.Semantics.Deploy': ('G22.01 G22.03', 'G22 children in listed order within V13; intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
         'Solidity.Semantics.Heap': ('G01 G06 G16 G18.03', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
         'Solidity.Semantics.RecursiveStorage.Copy': ('G18.01 G18.05', "G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05"),
         'Solidity.Semantics.RecursiveStorage.Paths': ('G18.01 G18.02', "G18 children in listed order within V10; G18.01's admission is rechecked after G18.02/G18.05"),
         'Solidity.Semantics.Storage': ('G01 G06 G16 G18.02', 'intrinsic semantics: later edits are conservative extensions (new constructors or lemmas); each edit re-runs the dependent lowering proofs and the Bridge in the integrated build'),
-        'Solidity.Syntax.Checked': ('G01 G06 G16 G18.01 G18.05', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
-        'Solidity.Syntax.Elab.Context': ('G16 G17 G18.04 G19', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
+        'Solidity.Syntax.Checked': ('G01 G06 G16', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
+        'Solidity.Syntax.Elab.Context': ('G16 G17 G18.04', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
         'Solidity.Syntax.Elab.Lower': ('G17 G19', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
         'Solidity.Syntax.Elab.SliceCopy': ('G17 G18.04', 'elaborator (layer L5 producer): wave-1 static checking must not reach it (G01: L0→L2 does not use L5); wave-2 lowering packages own the edits, serialized in VM order (V09 before V11)'),
         'SolidityBridge.ExternalEvm': ('G06 G46.01', "G06 fixes the EVM interface; G46.01 extends it and re-runs G06's checks"),

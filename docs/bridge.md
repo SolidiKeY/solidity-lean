@@ -195,6 +195,28 @@ success assumption. Two universal claims are false (see "Discrepancies").
 | `Bridge/SolidityBridge/Arith/Signature.lean` | Actual `Op1`/`Op2` signature evaluators call the same primitive operators. Signature `Op1.toInt` widens uint to unbounded KeY `kint`; it is distinguished from signed word cast `UnOp.toInt`. |
 | `Bridge/SolidityBridge/Arith/Lowering.lean` | Exact source equations for wrapping rewrites, signed division's two strategies, unsigned complement/left shift, negative-literal addition/subtraction, and literal power bases. `castCapture_factor` retains the real checker/fresh capture continuation and their errors; `castCapture_typed` selects identity or conversion. `narrowCheck_guard` identifies the emitted statement, including default require, explicit checking, self-call panic data, and ignoring mode; `narrowCheck_full` proves the full-width no-op. |
 
+The generic synthesis/checking helpers in `Arith/Widths.lean` require
+`p = .int → op ≠ .shr`: signed right shift takes its count from an unsigned
+operand. `Bridge/SolidityBridge/Arith/WidthsSignedShift.lean` proves that separate source-checking path;
+`Bridge/SolidityBridge/Arith/WidthsObstructions.lean` retains kernel-checked counterexamples to the old
+generic statement. `Bridge/SolidityBridge/Arith/WidthsSyntax.lean` supplies structural checker facts
+without depending on generated equation numbers.
+
+`narrowCheck_guard` retains panic data when either `selfFrame` or
+`retainFailureData` is set. `Bridge/SolidityBridge/Arith/LoweringObstructions.lean` refutes the earlier
+statement that tested only `selfFrame`; `Bridge/SolidityBridge/Arith/GuardRetentionExamples.lean`
+checks all flag combinations in default, checking and ignoring modes. These
+repairs change Bridge statements and proofs, preserving source execution,
+the concrete width results and proof resource limits.
+
+The shared arithmetic repair (2026-10-29) passed the complete optional Bridge
+build, its pinned axiom checks and the rule checker (seed 42, 1,000 samples
+per case), with explicit `-j1` under a 12 GiB/no-swap scope. Per-file Lean MCP
+diagnostics, trust, import-layer and orphan checks passed. Independent
+read-only finder and skeptic reviews found no confirmed defects. The prose
+path check adds no missing reference; its 46 pre-existing failures are outside
+this change. The separate `Derived17` performance repair is still pending.
+
 `PrimTy` contains uint256/int256/bool; narrow widths are metadata carried by
 `intTyOf` and the cast/cut/guard lowerings. `intTyOf_head` demonstrates any
 width on an ordinary local. Division and comparisons use genuine width-sized
@@ -964,3 +986,17 @@ references remain red and unchanged; they are separate documentation debt.
 Current operational configs are snapshotted before removal/restoration; proof
 caches stay on disk. The cumulative export preserves R1–R4 and includes both
 human approvals, every task commit, full logs, resource reports and reviews.
+
+### Integration merge review (2026-10-29)
+
+The merge of `109ba72ac8cf62f4aa4c13ae5590802244400bd0` into
+`c8fd7b7ce6276497229b3aae8a65c27ef7cc78ed` retains all four arithmetic
+regression imports and `ExternalEvm.StorageSlotExamples` in `Checks.lean`.
+The resolved file is byte-identical to the latter parent. Independent read-only
+finder and skeptic reviews found no lost declarations, audits or import cycle;
+neither used the Lean server. Focused whitespace and conflict-marker checks pass.
+Per-file MCP diagnostics remain blocked: both configured endpoints use the core
+package search path and report `unknown module prefix 'SolidityBridge'`; this
+checkout also lacks `Bridge/.lake`. No Lean pass or combined-build result is
+claimed by this merge repair. The coordinator must validate the Bridge package
+and run the required combined gates before publication.

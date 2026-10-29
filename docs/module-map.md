@@ -85,6 +85,8 @@ commands; it never enters the core import graph.
 | `Bridge/SolidityBridge/WeakestPreLaws.lean` | Lattice laws of the actual wp and of the closer's `Modality.wp` helper (`rawWp`), their relation (`wp_eq_rawWp`), and why box does not preserve top (`wp_box_top_iff`). |
 | `Bridge/SolidityBridge/Arith.lean` | Umbrella of the arithmetic bridges below: every admitted operator at every width against `BitVec`/`ZMod`/`Int`. |
 | `Bridge/SolidityBridge/Arith/Basic.lean`, `Bridge/SolidityBridge/Arith/Checked.lean`, `Bridge/SolidityBridge/Arith/Wrapping.lean`, `Bridge/SolidityBridge/Arith/SignedWrapping.lean`, `Bridge/SolidityBridge/Arith/NarrowWrapping.lean`, `Bridge/SolidityBridge/Arith/Division.lean`, `Bridge/SolidityBridge/Arith/NarrowDivision.lean`, `Bridge/SolidityBridge/Arith/SignedDivision.lean`, `Bridge/SolidityBridge/Arith/Comparison.lean`, `Bridge/SolidityBridge/Arith/Bitwise.lean`, `Bridge/SolidityBridge/Arith/NarrowBitwise.lean`, `Bridge/SolidityBridge/Arith/Shifts.lean`, `Bridge/SolidityBridge/Arith/NarrowShifts.lean`, `Bridge/SolidityBridge/Arith/Casts.lean`, `Bridge/SolidityBridge/Arith/Widths.lean`, `Bridge/SolidityBridge/Arith/NarrowChecked.lean`, `Bridge/SolidityBridge/Arith/OverflowGuards.lean`, `Bridge/SolidityBridge/Arith/CheckedExecution.lean`, `Bridge/SolidityBridge/Arith/Modular.lean`, `Bridge/SolidityBridge/Arith/Signature.lean`, `Bridge/SolidityBridge/Arith/Lowering.lean`, `Bridge/SolidityBridge/Arith/Power.lean` | One operator family each (`docs/bridge.md`, "Arithmetic at every width"); `Arith/Power.lean` holds the checked-power counterexamples. |
+| `Bridge/SolidityBridge/Arith/WidthsSyntax.lean`, `Bridge/SolidityBridge/Arith/WidthsSignedShift.lean`, `Bridge/SolidityBridge/Arith/WidthsObstructions.lean` | Stable structural checker facts, the separate signed-right-shift path, and counterexamples to the old generic helper contracts. |
+| `Bridge/SolidityBridge/Arith/LoweringObstructions.lean`, `Bridge/SolidityBridge/Arith/GuardRetentionExamples.lean` | Counterexample to the old guard-retention statement and checked flag/mode regressions for the corrected statement (`docs/bridge.md`). |
 | `Bridge/SolidityBridge/Evm.lean` | The EVM fragment as a CSLib `LTS` of instruction traces; trace soundness and completeness against the compiler theorem. |
 | `Bridge/SolidityBridge/CompilerSimulation.lean` | CSLib bisimulation, simulation and trace equivalence of successful program boundaries. |
 | `Bridge/SolidityBridge/ExternalEvm.lean` | Numeric stack instructions against EVMYulLean's word operations and `execBinOp`. |
@@ -151,7 +153,12 @@ commands; it never enters the core import graph.
 | `Syntax/Inlined.lean` | A scoped block printed with its calls inlined, for display (`Prog.inlinedStr`, `Prog.inlinedShow`): each call as KeY's `expand_function_body` leaves it, the arguments, return variables, body and result; a `{ … }` block's statements in place. |
 | `Keccak.lean` | Keccak-256 over bytes, computed (`#guard`ed against known digests and SHA3-256's sponge): the selectors the elaborator folds as solc does (`Keccak.selector`); no proof reads it (`docs/semantic-gaps.md`, "Hashing and the ABI"). |
 | `Hashes.lean` | SHA-256 and RIPEMD-160 over bytes, computed as `Keccak.lean` is (`#guard`ed against the standard vectors): `sha256` and `ripemd160` of a program (`sha256Bytes`, `ripemd160Bytes`, `Semantics/Heap.lean`; `docs/semantic-gaps.md`, "Hashing and the ABI"). |
-| `Hash/CollisionBound.lean` | The approved hash premise (G01 Q3 / G04 Q1): per-run `CollisionFree f xs` with sublist/prefix/append lemmas, and the random-oracle birthday bound by counting (`collisions_le`, `keccak_collision_prob_le`, `keccak_premise_fails_prob_le`; adaptive queries under lazy sampling, `adaptive_lazy_collision_prob_le`); the eager adaptive case is the stated child obligation `EagerAdaptiveBound`; the second-round region premise `RegionsDisjoint` (`Near`, `Covers`) and its bound `keccak_region_prob_le`, `keccak_region_premise_fails_prob_le` ([hash-collision-bound.md](feature-work/hash-collision-bound.md)). |
+| `Hash/Adaptive.lean` | Adaptive queries against a fixed random function: `eagerAdaptiveBound` proves `EagerAdaptiveBound`; repeated queries and early stopping (`two_mul_eagerCollides_le`, `two_mul_eager_stopped_le`, `keccak_eager_collision_prob_le`) and the region premise (`two_mul_eagerRegionsFail_le`, `keccak_eager_region_prob_le`), by a union bound over the first bad query ([hash-collision-bound.md](feature-work/hash-collision-bound.md)). |
+| `Hash/CollisionBound.lean` | The approved hash premise (G01 Q3 / G04 Q1): per-run `CollisionFree f xs` with sublist/prefix/append lemmas, and the random-oracle birthday bound by counting (`collisions_le`, `keccak_collision_prob_le`, `keccak_premise_fails_prob_le`; adaptive queries under lazy sampling, `adaptive_lazy_collision_prob_le`); the eager adaptive case is stated as `EagerAdaptiveBound` and proved in `Hash/Adaptive.lean`; the second-round region premise `RegionsDisjoint` (`Near`, `Covers`) and its bound `keccak_region_prob_le`, `keccak_region_premise_fails_prob_le` ([hash-collision-bound.md](feature-work/hash-collision-bound.md)). |
+| `Storage/HashedLayout.lean` | The hashed storage layout at word granularity (G27.05 preparation): slot terms `Loc` (root, mapping entry, array data) read as words through a hash parameter (`Loc.word`), types `STy` and access paths (`STy.locate`) with offsets kept inside their regions (`STy.locate_bounded`), and separation under the region premise (`Loc.word_inj`, `Loc.nodup_map_word`, `located_word_inj`) ([storage-hashed-layout.md](feature-work/storage-hashed-layout.md)). |
+| `Storage/HashedLayoutEvm.lean` | Read-only correspondence of `Storage.Loc` with the EVM model's `Evm.Slot` (`ofSlot`, injective, `ofSlot_add`, `exists_ofSlot` for word keys, `lmax_eq_Lmax`) and separation read on slots (`slot_word_inj`). |
+| `Storage/HashedKeccak.lean` | The hashed layout under keccak-256 (G46.05 preparation): the ABI preimage encoding `encode` (injective on words, `encode_inj`), the hash parameter `keccakH` (`keccakH_lt`), the premises read on the encoded `KECCAK256` inputs (`collisionFree_keccakH_iff`, `regionsDisjoint_keccakH_iff`), `keccak_word_inj`, and `#guard` vectors against solc's mapping/array slot formula. |
+| `Storage/HashedSeparation.lean` | G27.01–G27.03 separation over the hashed layout: occupancy `Occ`, ancestry `Reach` (`occ_reach`, `reach_unique`), disjoint struct members, mapping entries, array elements and array header (`occ_fields_disjoint`, `occ_keys_disjoint`, `occ_sarr_disjoint`, `occ_darr_disjoint`, `occ_darr_len_elem`, `occ_map_slot_entry`), and their word-level reading (`occ_bounded`, `occ_word_ne`, `keys_word_ne`). |
 | `ERC7201.lean` | Namespace formula over bytes with a bounded result and an alignment theorem; runtime/literal lowering uses the same operations. |
 | `Secp256k1.lean` | Bounded modular arithmetic and checked curve points for computed address recovery; no general group-law or EVM-equivalence proof. |
 | `Syntax/Elab.lean` | The elaborator: the raw passes that fix solc's evaluation order and the fresh names (`hoist`, `captureExpr`, `lowerLoops`, `lowerReturns`, `wrapMods`, `renameStmts`, `freshenBlocks`), then `synth`/`check` into the scoped syntax, a local by `NCtx.find`; statements typed where they are elaborated (`SStmt`) and chained into a block (`SProg.chain`, weakened past a flat block's locals); named contexts (`NCtx`, `NCtx.find`).  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
@@ -490,6 +497,54 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/MemoryScope.lean` | Scope exit retains heap objects and older locals at their runtime levels; branch joins weaken the core alias flags by their meet. |
 | `Evm/MemorySource.lean` | The core simulation augmented by pointers at all memory-local reference types, separated struct/array heaps, cross-separation and typed reference-member words; array reads/writes and local assignments preserve the shared state and combined allocator. |
 | `Evm/MemoryRefs.lean` | Typed reference-member words under the shared identity map, preserved across locals, primitive/array writes and non-reference-bearing allocation; exact pointer reads. |
+| `Evm/MemoryRefArray.lean` | Dynamic reference-element words, checked local reads/writes, global interval ownership and parent-pointer framing. |
+| `Evm/MemoryRefArrayState.lean` | Supplementary reference-array state relation; retained locals, primitive child writes and parent redirection. |
+| `Evm/MemoryRefArrayPaths.lean` | Fallible typed reference paths with genuine indexed bounds reverts. |
+| `Evm/MemoryRefArrayStatements.lean` | Source alias rebinding and reference/primitive indexed assignment simulations. |
+| `Evm/MemoryRefArrayCompile.lean` | Narrow certified nonallocating reference-array program compiler and composition theorem. |
+| `Evm/MemoryRefArrayExamples.lean` | Inhabited dynamic alias input/observations, bounds and corrupt-pointer refutation; additive constructor/fixed registration controls. |
+| `Evm/MemoryObjects.lean` | Typed value words and complete positive ownership for dynamic/fixed arrays, structs and reference fields. |
+| `Evm/MemoryObjectAccess.lean` | Headerless fixed bounds and generic primitive/reference indexed read/write simulations. |
+| `Evm/MemoryObjectFrame.lean` | All-object separation, identity injectivity, element/local write framing. |
+| `Evm/MemoryObjectAllocator.lean` | Complete live intervals, projected legacy allocator and cursor/free-tail preservation. |
+| `Evm/MemoryObjectPaths.lean` | Fallible typed local/field/dynamic/fixed pointer paths and primitive reads. |
+| `Evm/MemoryObjectExpr.lean` | Expression composition over full ownership, sharing existing arithmetic tails. |
+| `Evm/MemoryObjectValues.lean` | Certified primitive reads and expressions through either array layout. |
+| `Evm/MemoryObjectStatements.lean` | Generic typed indexed stores and local/alias statements preserving the complete allocator. |
+| `Evm/MemoryObjectCompile.lean` | Narrow full-object certificate compiler and sequence correctness. |
+| `Evm/MemoryObjectGrow.lean` | Typed array adoption and old-child pointer preservation across actual source heap growth. |
+| `Evm/MemoryObjectEmpty.lean` | Actual empty default/literal-zero source copying, scoped declarations/rebinding and complete allocator simulation. |
+| `Evm/MemoryObjectArrayExamples.lean` | Inhabited fixed-parent/dynamic-child public inputs, reads, alias changes, bounds and allocator controls. |
+| `Evm/MemoryFixedChildArrayExamples.lean` | Inhabited headerless primitive children, fixed reference parents, aliases, reads and bounds controls. |
+| `Evm/MemoryObjectReserve.lean` | Parent gaps, raw pointer-write framing and late typed parent adoption. |
+| `Evm/MemoryObjectChildLoop.lean` | Concrete target condition/body steps for distinct default children. |
+| `Evm/MemoryObjectChildrenCopy.lean` | Actual source default-child fold and distinct appended identities. |
+| `Evm/MemoryObjectChildrenSim.lean` | Finite k+1-turn loop simulation, pointer segment, complete allocator and retained memory. |
+| `Evm/MemoryObjectNested.lean` | Actual runtime-length nested-array source copying and parent/child layout simulation. |
+| `Evm/MemoryObjectConstructionSource.lean` | Scoped nested allocation/rebinding and generic grown-state pointer preservation. |
+| `Evm/MemoryObjectPrimitive.lean` | Existing primitive array allocation under complete reference/fixed object ownership. |
+| `Evm/MemoryObjectAllocationCost.lean` | Source-computed reached construction cost and growing results; nonallocating suffix fast path. |
+| `Evm/MemoryObjectConstructionCompile.lean` | Certified linear constructor composition with exact parent/child capacity. |
+| `Evm/MemoryObjectFlatStruct.lean` | Complete ownership and actual primitive-struct source defaults. |
+| `Evm/MemoryObjectFlatFixed.lean` | Actual headerless primitive fixed defaults and allocator layout. |
+| `Evm/MemoryDefaultBuilder.lean` | Type-indexed source default/cost/identity certificates. |
+| `Evm/MemoryDefaultChildren.lean` | Actual typed default-copy fold and generic target child steps. |
+| `Evm/MemoryDefaultChildrenSim.lean` | Finite generic child-loop simulation preserving pending parent gaps. |
+| `Evm/MemoryDefaultArraySource.lean` | Actual dynamic/fixed reference-parent source copy equations. |
+| `Evm/MemoryDefaultParent.lean` | Shared complete ownership for typed default parent adoption. |
+| `Evm/MemoryDefaultFixedBuilder.lean` | Recursively composed fixed reference defaults with exact cost. |
+| `Evm/MemoryDefaultDynamic.lean` | Runtime-length arrays of certified reference child defaults. |
+| `Evm/MemoryDefaultCompile.lean` | Structural type-directed default compilation and reference-struct refusal. |
+| `Evm/MemoryObjectFieldFrame.lean` | Primitive struct updates frame all fixed/dynamic/reference arrays. |
+| `Evm/MemoryReferenceDefaultSource.lean` | Scoped public generic default/allocation/rebinding simulation. |
+| `Evm/MemoryPrimitiveStructArrayDefaultExamples.lean` | Inhabited Box[] alias/default source and target results and bounds. |
+| `Evm/MemoryFixedDefaultExamples.lean` | Fixed-parent/fixed-child default aliases and bounds. |
+| `Evm/MemoryDynamicFixedDefaultExamples.lean` | Nonempty runtime fixed-child arrays and exact capacity controls. |
+| `Evm/MemoryNestedFixedDefaultExamples.lean` | Finite nested fixed reference defaults and retained aliases. |
+| `Evm/MemoryReferenceArrayRebindExamples.lean` | Allocating fixed-child array rebinding preserves old aliases. |
+| `Evm/MemoryFixedDynamicDefaultExamples.lean` | Fixed parent of empty dynamic children with redirected aliases. |
+| `Evm/MemoryObjectConstructionExamples.lean` | Source-spliced inhabited public constructors/rebinding, actual results, distinct defaults, bounds and capacity controls. |
+| `Evm/MemoryStructArrayInputExamples.lean` | Populated reference-bearing struct-array input, actual RefFieldsRepr aliases/writes/bounds and constructor refusal. |
 | `Evm/MemoryPaths.lean` | Structurally compiled typed local/reference-field paths with exact pointer simulation, nested primitive-field/array reads, lengths and writes with exact RHS/bounds failures, and child aliases/rebinding. |
 | `Evm/MemoryRefDelete.lean` | Fresh default primitive-array/primitive-member-struct children installed after resolving a reference-valued parent field; exact source growth, retained old aliases, target stack order, ownership and cursor simulation. |
 | `Evm/MemoryRefWrite.lean` | Reference-valued struct-field assignment updates the actual typed child identity and pointer word, preserving primitive data, mixed heap ownership, local frames and allocator state without allocation/copying. |
@@ -526,6 +581,12 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/Stmt.lean` | One lemma per statement of the fragment over the typed run, a storage write the typed save (`save_repr`): `StmtOut` (with `Keeps`: cells below the frame, array lengths), `assign_sim` … `transfer_sim`. |
 | `Evm/Correct.lean` | `stmt_sim`/`prog_sim` over the scoped syntax and `Prog.run` (within `maxHeartbeats 11000`) (one lemma per family, `ite_sim`, `block_sim`, `callNone_sim`/`callVal_sim`), then `compile_correct`, `compile_exact`, `compile_box`, `compile_net`, `compile_storage`; no `not_stuck` (no stuck outcome). |
 | `Evm/Interpreter.lean` | The compiler's interpreter theorems over `Prog.run` (`setAge_interpreter`, `overflow_interpreter`, `payOwner_interpreter`, `callTwice_interpreter`), from `Evm/Examples.lean`'s machine runs. |
+| `Backend/Opcode.lean` | The backend's target (G45.05, [backend-assembler.md](feature-work/backend-assembler.md)): every Osaka opcode (`Op`, with `CLZ`, `TLOAD`/`TSTORE`, `MCOPY`; `DUP`/`SWAP`/`LOG` indexed by `Fin`), `Instr` with `PUSHn` immediates of exactly `n` bytes, `encode`/`decode` (`decode_encode`, `encode_injective`, `encode_decode`). |
+| `Backend/Jumpdest.lean` | Jump-destination analysis on any bytes (`starts`, `jumpdests`, `validJumpdest`, `InPushData`): valid iff `JUMPDEST` outside push data (`validJumpdest_iff`, `mem_starts`), and on encoded programs iff a `JUMPDEST` instruction sits at that offset (`validJumpdest_encode_iff`, `starts_encode_append`). |
+| `Backend/Assembler.lean` | The assembler (G45.04): solc-style items (`tag`, `pushTag`, `pushTagRel`, `pushLibraryAddress`), big-endian immediates (`toBytesBE`, `ofBytesBE`, `byteWidth`), per-label `PUSH` widths by a terminating fixpoint (`fixWidths`), `assemble` at a base offset with link references; every resolved jump reaches its label's `JUMPDEST` (`assemble_pushTag`), success (`assemble_isSome`), linking (`link_patch`). |
+| `Backend/Control.lean` | G45.03 preparation: structured blocks (`code`, `seq`, `ite`, `loop`) expanded into assembler items with fresh `Nat` labels in solc's legacy shapes; each label defined once and every reference defined (`tags_nodup`, `refs_defined`), so assembly succeeds (`expand_assemble_isSome`); wherever a loop or `if` is placed, its backedge, exit and branch jumps push the offsets of its own labels (`loop_jumps`, `ite_jumps`). |
+| `Backend/EvmVectors.lean` | Generated by `scripts/check-backend-vectors.mjs`: EthereumJS's Osaka opcode table, the vendored EVMYulLean `parseInstr`/`argOnNBytesOfInstr` table, 300 randomized jump-destination scans and 200 randomized encoded programs (EthereumJS's scan and `PUSH` values, transliterations of EVMYulLean's `D_J_aux` and `decode` immediate), each `#guard`ed against `byteName`, `immWidth`, `decode`/`encode` and `jumpdests`. |
+| `Backend/Checks.lean` | Byte-encoding and assembler vectors (`#guard`) and the axiom pins of the encoder, decoder, jump-destination and assembler theorems. |
 
 ## Tools
 
@@ -558,6 +619,46 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Roadmap/Contracts.lean` | Roadmap G01: the six final source-to-bytecode contracts, observations, resourced prefix families and compositional pass certificates as statements only (`Cert.comp`, `PublicCorrectness`); no final theorem is claimed ([roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md)). |
 | `Roadmap/Frontend.lean` | Roadmap G05: checked frontend certificate interfaces as statements only: raw input, parse, resolution and metadata checkers (`Chain.checked`), digests as identity (`Digests.identity`, `Digests.only_invariant`), admitted settings: solc's two pipelines (three order/coder pairs) and the empty link map ([roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md)). |
 | `Roadmap/Evm.lean` | Roadmap G06: the pinned Osaka EVM interface as statements only: the pin and its idealizations (`pinned`), the Osaka precompile table, the shared fixed functions with the per-run hash premise and `CREATE` addresses (`Fixed`), resources as gas schedules, fuel and source failure points (`GasRes`, `FailurePoints`), frame observation (`Halt.observe`) and the core/Bridge `Certificate` ([roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md)). |
+| `Roadmap/TypedRun.lean` | `typedRunPrefixes`: the fuelled typed run (`Prog.runF`) read as a G01 prefix family, kept apart from `Roadmap/Contracts.lean` so that a source semantics importing the contracts does not reach the intrinsic run. |
+| `Roadmap/Controls.lean` | Roadmap G07: inhabited and negative controls for the G01 contracts: a toy source, intrinsic layer, EVM and compiler meeting `PublicCorrectness` (`toy_publicCorrectness`), and refutations of an always-reverting, a byte-altering, a data-erasing and a malformed-source-accepting compiler; `PublicCorrectness.observes`, `PublicCorrectness.rejects`, `SourceSpec.not_nonVacuous_of_no_parse`. |
+
+## Independent source definitions
+
+| Module | What it defines |
+|---|---|
+| `Source/Syntax.lean` | S00: the pinned solc 0.8.38 grammar as intrinsic syntax `Syn : Cat → Type`, indexed by category and by statement context (`SCtx`: loop, `unchecked`), excluded syntax (assembly/Yul, `layout at`, `>>>`, `years`) included. |
+| `Source/Ctor.lean` | S00: the constructor index `Ctor` (`Ctor.mem_all`), `Syn.nodes`/`Syn.children`, the syntax-level exclusions `Excl` and precise rejection (`Syn.rejections_of_sub`). |
+| `Source/Upstream.lean` | S00: the explicit mapping from grammar rules/labels and manifest features to constructors (`grammarCtors`, `featureCtors`; `Ctor.grammar_covers`), checked by `scripts/check-source-grammar.mjs`. |
+| `Source/Decls.lean` | S00: the typed declaration graph (`Decl`, `Syn.decls`, `Decl.refs`, `Syn.decls_ctor`). |
+| `Source/Examples.lean` | S00 controls: an in-profile counter and rejected assembly, `layout at`, `>>>` and `years` programs. |
+| `Source/Const.lean` | S01: compile-time constants: exact rationals `Q`, literal values and units, `Syn.const` (folding `+ - * / % **`, shifts and two's-complement bitwise operations), the implicit and explicit conversions of constants to integer and fixed-point types. |
+| `Source/Types.lean` | S01: static types `STy`, elaboration of elementary types, implicit and explicit conversions (fixed point per the second-round decisions) with `implicit_int_range` and `FixTy.subsumes_inRange`. |
+| `Source/Resolve.lean` | S01: name resolution: C3 linearization, scoped lookup, builtins classified against the profile (`Builtin.status`, member and call-option status), the `Resolves` judgment with `resolve_iff` and `Resolves.unique`. |
+| `Source/Typing.lean` | S01: type-name elaboration (`Syn.tys`), typing contexts, expression typing as data (`Typed`, `HasType`) and statement typing in a fixed body context (`StmtD`/`ItemsD`, `StmtOK`/`ItemsOK`). |
+| `Source/Resolved.lean` | S01: the intrinsic resolved form (`RExpr`/`RStmt` over local types, de Bruijn `Idx`, explicit implicit-conversion evidence) and the elaboration of derivations into it (`Typed.toR`, `StmtD.toR`). |
+| `Source/WellFormed.lean` | S01: settings over solc's two pipelines (`Settings.coder`), resolutions, body frames (`Decl.frame?`), and well-formedness of a resolved unit (bases, clashes and overloads, pragmas, declared types, placement, constants, bodies). |
+| `Source/TypingExamples.lean` | S01 controls: a derivation per typed expression constructor (`exprCoverage_typed`, `exprCoverage_total`, `stmtCoverage_total`), the counter well formed, C3 on a diamond, refuted ill-typed, `msg.value`, clashing, same-signature, interface-body and unknown-pragma programs. |
+| `Source/State.lean` | S04.01: source values `Val` over a declaration `Layout` (ranges, enum bounds and reference locations intrinsic), contents `Data` (recursive aggregates, content-keyed mappings), typed `memory` (`Heap`, copy and alias laws), read-only `Calldata`, `Storage` typed by its layout, defaults. |
+| `Source/Observe.lean` | S04.02: ABI words and bytes of values (`Val.word`, `Val.word_int`), selectors, `Panic`/`Error` revert data (`panicData_code`, `panic_distinct`) and `revertOutcome`. |
+| `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
+| `Source/StateExamples.lean` | S04.01–S04.03 controls: nested memory aliasing, an independent memory copy, storage round trips, distinct panic outcomes, transfers, a reverted call undoing its writes. |
+
+## Precompiles
+
+| Module | What it defines |
+|---|---|
+| `Precompiles/Field.lean` | Shared arithmetic of the computed precompiles: `buffer_read` (`readPad`, `readNat`), big-endian words, `powMod`, `FieldOps` with `Fin p` and `Fp2 p`, affine short Weierstrass curves (`Curve`, `Pt`), `chunks`, `ofHex`, `mapM_eq_none_iff` ([precompiles.md](feature-work/precompiles.md)). |
+| `Precompiles/Pairing.lean` | `Fp12` and the optimal ate pairing check generic over BN254 and BLS12-381 (`PairingCurve.check`). |
+| `Precompiles/Basic.lean` | `ECRECOVER`, `SHA256`, `RIPEMD160`, `IDENTITY` (0x01–0x04) over the approved `Hashes`/`Secp256k1` functions, with Osaka gas, never failing; length-monotonic gas. |
+| `Precompiles/Modexp.lean` | `MODEXP` (0x05) with EIP-7823 bounds and EIP-7883 gas; `modexp_eq_none_iff`, `modexp_length`. |
+| `Precompiles/Bn254.lean` | BN254 `ECADD`, `ECMUL`, pairing check (0x06–0x08); decoding laws (`decodeG1_eq_none_iff`) and failure cases. |
+| `Precompiles/Blake2f.lean` | `BLAKE2F` (0x09), EIP-152's compression on `UInt64`; `blake2f_eq_none_iff`. |
+| `Precompiles/P256.lean` | `P256VERIFY` (0x100), EIP-7951's ECDSA check on secp256r1, never failing. |
+| `Precompiles/Bls12381Iso.lean` | RFC 9380's BLS12-381 isogeny constants and `G2`'s effective cofactor, as data. |
+| `Precompiles/Bls12381.lean` | EIP-2537 (0x0b–0x11): `G1`/`G2` addition and MSM, pairing check, SSWU maps; failure laws and MSM gas monotonicity. |
+| `Precompiles/PointEval.lean` | EIP-4844 point evaluation (0x0a): zcash `G1` decompression, the trusted setup's `[τ]G₂`, the KZG check. |
+| `Precompiles/Osaka.lean` | G06's `Fixed` instantiated (`Osaka.fixed`): dispatch `run`/`gas` over `Precompile`, failure exactly on `Malformed` input (`run_eq_none_iff`), length-monotonic gas (`gas_mono`), the stipend facts. |
+| `Stipend/Rule.lean` | The stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs (`Stipend.rule`, `progCost`, `fits_iff`), its examples and non-examples, and the compiler obligation `Obligation` (G43) ([stipend-cost-rule.md](feature-work/stipend-cost-rule.md)). |
 
 ## The solkey corpus
 
