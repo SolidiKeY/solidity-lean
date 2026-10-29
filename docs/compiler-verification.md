@@ -133,11 +133,12 @@ advances the cursor from 40 to 41. These helpers preceded the public constructio
 path described below.
 
 `tests/memory-reference-arrays/ReferenceArrays.sol` and
-`scripts/check-memory-reference-arrays.mjs` provide 52 independent solc 0.8.34 /
+`scripts/check-memory-reference-arrays.mjs` provide 92 independent solc 0.8.34 /
 EVM executions across legacy/viaIR and optimizer off/on: retained-alias results
-11013, empty fixed-child arrays, distinct fixed defaults, and bounds panic `0x32`. Constructor setup and the
-distinct-default control are upstream observations, not claims that the checked
-compiler already accepts those constructors. The checked compiler's existing
+11013/17000/13, empty fixed-child arrays, distinct fixed defaults, and bounds
+panic `0x32`. These are independent behavior observations; the separately
+checked constructor paths are specified below. Reference-bearing struct
+constructor setup remains upstream evidence only. The checked compiler's existing
 coarse revert observation remains unchanged. Run the script with the published
 soljson and an external node_modules directory containing the optional EVM test
 dependencies; these are not Lean dependencies.
@@ -186,11 +187,42 @@ it requires the separate constructor API, and this input path does not claim to
 implement that API. The source/EVM fixture's constructor setup is independent
 behavior evidence, not checked compiler constructor coverage.
 
-This remains **an incomplete original assignment checkpoint**. Nonempty fixed
-reference-array defaults and nonempty arrays of fixed-array or primitive-member
-struct references remain independent implementation work in this lane; their
-named refusals are retained. Reference-bearing struct construction remains the
-explicit other-lane dependency. No source-coverage inventory row is promoted.
+**Nonrecursive reference defaults.** `Memory.ReferenceDefaults.compileDefault`
+now recursively compiles finite fixed-array type structure, using empty dynamic
+objects, headerless primitive fixed objects, and the existing primitive-member
+struct default API as leaves. It refuses structs with reference members. The
+certificate is indexed by the intrinsic `RefTy`, map-free proof and exact cost;
+its result is the actual `Heap.allocDefault`, not a separate arithmetic model.
+No intrinsic representation, SolKey rule or dependency boundary changes.
+
+The public construction fallback accepts nonempty runtime arrays of certified
+reference children and default declarations of certified fixed reference parents.
+Allocating reference-array rebinding is also checked. Child cost `d(R)` is 1 for
+an empty dynamic array, `max 1 n` for a primitive fixed child, the padded member
+count for a primitive-member struct, and `max 1 n + n*d(R)` for a reference
+fixed array. Runtime reference arrays cost exactly `n+1+n*d(R)`. Fixed parents
+are headerless; zero-sized intrinsic fixed objects reserve one positive cell.
+Each default child receives its actual separately allocated source identity.
+Pending parent gaps survive recursively allocated children, old pointer bases
+and positive lower memory cells survive growth, and the target loop has a
+finite turn witness. Primitive struct fields can be written through indexed
+reference paths while retaining the complete allocator and reference fields.
+
+Six additive public fixtures cover `Box[]` defaults, `uint[1][2]`, nonempty
+`uint[1][]`, `uint[1][2][2]`, fixed parents of default dynamic children, and
+allocating rebinding. Inhabited complete state/allocator inputs yield actual
+source and target observations 11013, 13 and 17000 as appropriate. Twelve
+bounds cases check exact source/machine reverts. A further exact-capacity control
+includes child cost and rejects `cursor+cost=W`. Historical default-struct
+fixtures and counterexamples are retained unchanged. The old two fixed-default
+refusal names are explicitly replaced by positive registration controls.
+
+The assignment's independent reference-array layout and construction increment
+is implemented. Reference-bearing struct construction remains the explicit
+other-lane dependency: the populated `Holder` input above proves its meaningful
+array/field path without claiming constructor support. Source blocks, branches,
+loops and unsupported expressions retain the existing narrow fragment refusal.
+No universal source coverage or inventory promotion is claimed.
 
 Validation uses the published Lean 4.24.0 / Lake 5.0.0-src+797c613,
 `LEAN_NUM_THREADS=1`, explicit `-j1`, and verified 12 GiB/no-swap cgroups.
@@ -217,9 +249,8 @@ no speed-driven intrinsic representation decision was reversed. Full commands,
 terminal logs, hashes, measured cgroups and review outcomes are exported with
 the checkpoint handoff.
 
-**Out of the construction fallback**: nonempty fixed-array/struct child defaults,
-fixed reference-parent defaults, construction of structs
-with reference members, other reference-member default layouts, copies other
+**Out of the construction fallback**: construction of structs
+with reference members, other uncertified reference-member default layouts, copies other
 than the primitive-member storage-root clause (including memory back to
 storage and runtime-length objects, which need iteration), loops, `assert`,
 calls, payments, and compound storage writes in a mixed memory program.
@@ -491,3 +522,25 @@ limit/OOM events. Documentation-path checking still exits 1 with the identical
 20 historical missing references; it is not reported as passed. Both independent
 reviewers confirmed their findings closed after the public zero-length,
 capacity, unreachable-suffix and populated reference-field fixtures were added.
+
+The final nonrecursive-default increment passed `./run-lean.sh` (733 library
+and 259 TestSuite jobs, 377/131 SolKey comparison) in 137.829 s. The enforcing
+747-headline audit passed in 125.779 s; new default/array simulations and target
+observations use exactly `propext`, `Classical.choice`, `Quot.sound`. Source
+trust scanned 762 files and 240 inventoried sites with zero findings. Orphan,
+layer, strict automatic and trust-script tests passed. The full validation
+group took 271.391 s and peaked at 2,199,785,472 bytes under actual
+`memory.max=12884901888`, `memory.swap.max=0`, with zero limit/OOM events.
+The 92 source/EVM fixtures passed in 3.428 s / 299,343,872 bytes. Logs retain
+all failed development attempts as failures; no timeout is counted as a pass.
+The documentation-path gate still exits 1 for the same 20 historical missing
+references, byte-for-byte identical to the previous checkpoint output.
+
+Independent read-only finder and skeptic reviews used no Lean server. Both
+caught an accidental overwrite of the historical struct-default example module;
+it was restored exactly and the new fixture moved to an additive module. The
+reviewed allocator/source proofs had no remaining soundness findings. Broad
+simp cleanup, audit registration and two stale descriptions were corrected.
+Full terminal logs, cgroup measurements, review outcomes, cumulative bundle and
+SHA256 manifests are exported in the task handoff. No master merge or push was
+performed. No source coverage inventory was regenerated or promoted.

@@ -1,4 +1,5 @@
 import Solidity.Evm.MemoryObjectValues
+import Solidity.Evm.MemoryObjectFieldFrame
 
 /-! Generic typed element stores and alias binding, with full allocator framing. -/
 namespace Solidity.Evm.Memory.Objects
@@ -86,6 +87,30 @@ theorem PtrFrag.write {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
           exact .inr ⟨rfl, rfl⟩
       · rw [hiv, run_append_revert hic]
         exact .inr ⟨rfl, rfl⟩
+    · refine .inr ⟨?_, run_append_revert hcr⟩
+      simp only [MLoc.addrT, hr, bind, Except.bind]
+  · rw [hv, run_append_revert hcv]
+    exact .inr ⟨rfl, rfl⟩
+
+theorem PtrFrag.writeField {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
+    {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
+    (h : StateRepr L b frame F σ base m) {s f : Name} {p : PrimTy}
+    {dst : MPath C Γ (.ref (.struct s))} {v : Val C Γ p}
+    {pointer value : List Instr} (hd : PtrFrag b F dst pointer) (hv : ValFrag b F v value)
+    (hf : C.fieldType s f = some (.prim p)) :
+    ResultRepr L b frame F σ base m (TRun.assignMem (.field dst f hf) (.val v) σ)
+      (run (value ++ pointer ++ writeFieldCode (fieldOffset (structDef s) f)) m) := by
+  simp only [ResultRepr, TRun.assignMem, MSrc.mvalT, bind, Except.bind]
+  rw [List.append_assoc]
+  rcases hv.correct h with ⟨v, w, hv, hw, hcv⟩ | ⟨hv, hcv⟩
+  · rw [hv, run_append_ok hcv]
+    rcases hd.correct (h.push w) with ⟨r, hr, hcr⟩ | ⟨hr, hcr⟩
+    · simp only [MLoc.addrT, hr, bind, Except.bind, pure, Except.pure]
+      rw [run_append_ok hcr, (writeField_correct (h.heap.structs r) hf v w hw).2.1]
+      refine .inl ⟨⟨σ.withHeap (σ.heap.setField r hf v), List.prefix_refl _⟩, _, rfl, rfl,
+        h.setStruct r hf v w hw, rfl, ?_⟩
+      intro cursor hb ha
+      exact ha.setStruct r hf v w hw
     · refine .inr ⟨?_, run_append_revert hcr⟩
       simp only [MLoc.addrT, hr, bind, Except.bind]
   · rw [hv, run_append_revert hcv]

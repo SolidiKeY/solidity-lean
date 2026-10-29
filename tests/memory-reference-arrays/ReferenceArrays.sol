@@ -2,6 +2,48 @@
 pragma solidity 0.8.34;
 contract ReferenceArrays {
     struct Holder { uint[] items; }
+    struct Box { uint value; bool flag; }
+    function structDefaultAliases() external pure returns (uint) {
+        uint n = 2; Box[] memory a = new Box[](n);
+        Box memory x = a[0]; a[0] = a[1]; x.value = 11; a[0].value = 13;
+        require(!x.flag && !a[0].flag);
+        return x.value * 1000 + a[0].value;
+    }
+    function fixedDefaultAliases() external pure returns (uint) {
+        uint[1][2] memory a; uint[1] memory x = a[0]; a[0] = a[1];
+        x[0] = 11; a[0][0] = 13; return x[0] * 1000 + a[0][0];
+    }
+    function dynamicFixedDefaultAliases() external pure returns (uint) {
+        uint n = 2; uint[1][] memory a = new uint[1][](n);
+        uint[1] memory x = a[0]; a[0] = a[1]; x[0] = 11; a[0][0] = 13;
+        return x[0] * 1000 + a[0][0];
+    }
+    function nestedFixedDefaultAliases() external pure returns (uint) {
+        uint[1][2][2] memory a; uint[1][2] memory x = a[0]; a[0] = a[1];
+        x[0][0] = 11; a[0][0][0] = 13; return x[0][0] * 1000 + a[0][0][0];
+    }
+    function referenceArrayRebind() external pure returns (uint) {
+        uint n = 2; uint[1][] memory a = new uint[1][](n);
+        uint[1] memory x = a[0]; a[0] = a[1]; x[0] = 11; a[0][0] = 13;
+        a = new uint[1][](n); x[0] = 17;
+        return x[0] * 1000 + a[0][0];
+    }
+    function fixedDynamicDefaultAliases() external pure returns (uint) {
+        uint[][2] memory a; uint[] memory x = a[0]; uint[] memory right = new uint[](1);
+        a[0] = right; right[0] = 13; return x.length * 1000 + a[0][0];
+    }
+    function structDefaultBounds() external pure returns (uint) {
+        uint n = 2; Box[] memory a = new Box[](n); return a[n].value;
+    }
+    function dynamicFixedDefaultBounds() external pure returns (uint) {
+        uint n = 2; uint[1][] memory a = new uint[1][](n); return a[0][n - 1];
+    }
+    function nestedFixedDefaultBounds() external pure returns (uint) {
+        uint n = 2; uint[1][2][2] memory a; return a[0][n][0];
+    }
+    function fixedDynamicDefaultBounds() external pure returns (uint) {
+        uint[][2] memory a; return a[0][0];
+    }
     function dynamicAliases() external pure returns (uint) {
         uint[][] memory a = new uint[][](2);
         a[0] = new uint[](1); a[0][0] = 7; a[1] = a[0];

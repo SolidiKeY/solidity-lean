@@ -20,6 +20,12 @@ inductive StmtFrag (b : Nat) : {Γ Δ : Ctx} → Frag Γ → Frag Δ → Stmt C 
       (i : Val C Γ .uint) (hi : valIn F i = true) :
       StmtFrag b F F (.assignMem (.index a dst i) v)
         (value ++ pointer ++ Evm.compileVal b i ++ writeCode a)
+  | fieldWrite {Γ : Ctx} (F : Frag Γ) {s f : Name} {p : PrimTy}
+      (dst : MPath C Γ (.ref (.struct s))) (v : Val C Γ p)
+      (pointer value : List Instr) (hd : PtrFrag b F dst pointer) (hv : ValFrag b F v value)
+      (hf : C.fieldType s f = some (.prim p)) :
+      StmtFrag b F F (.assignMem (.field dst f hf) (.val v))
+        (value ++ pointer ++ writeFieldCode (fieldOffset (structDef s) f))
   | assign {Γ : Ctx} (F : Frag Γ) {p : PrimTy} (dst : Idx Γ (.val p))
       (v : Val C Γ p) (code : List Instr) (hv : ValFrag b F v code) :
       StmtFrag b F F (.assignLocal dst v) (code ++ [.mstore (cellOf b dst)])
@@ -58,6 +64,10 @@ def compileStmt (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
     let r ← compileSrc b F v
     if hi : valIn F i = true then pure ⟨F, _, .write F a dst v p.code r.code p.cert r.cert i hi⟩
     else none
+  | .assignMem (.field dst _ hf) (.val v) => do
+    let p ← compilePtr b F dst
+    let r ← compileVal b F v
+    pure ⟨F, _, .fieldWrite F dst v p.code r.code p.cert r.cert hf⟩
   | .assignLocal dst v => do
     let r ← compileVal b F v
     pure ⟨F, _, .assign F dst v r.code r.cert⟩
@@ -85,6 +95,7 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
       have he := frameNeedStmt_end (Stmt.declMem _ x (some (.alias src)) rfl hm)
       exact Nat.le_trans (Nat.add_le_add_left he b) hcap)
   | write F a dst v pointer value hd hv i hi => exact hd.write h a hv i hi
+  | fieldWrite F dst v pointer value hd hv hf => exact hd.writeField h hv hf
   | assign F dst v code hv => exact assignValue_correct h dst v code (hv.correct h)
   | declare F x v code hv => exact declareValue_correct h v code (hv.correct h) (by
       have he := frameNeedStmt_end (Stmt.declLocal _ x (some v))

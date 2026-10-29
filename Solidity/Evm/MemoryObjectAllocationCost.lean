@@ -1,4 +1,5 @@
 import Solidity.Evm.MemoryObjectPrimitive
+import Solidity.Evm.MemoryDefaultCompile
 
 /-! Reached capacity and growing certificates for reference-array construction. -/
 namespace Solidity.Evm.Memory.Objects
@@ -27,17 +28,20 @@ namespace Solidity.Evm.Memory.Construction
 variable {C : Contract}
 
 /-- A typed child default contributes its actual separate reservation.
-Other nonempty child constructors are refused by the compiler. -/
+Each certified child retains its separately owned object identity. -/
 def arrayCost (E : Ty) (n : Nat) : Nat :=
-  n + 1 + (match E with | .ref (.array _) => n | _ => 0)
+  n + 1 + (match E with
+    | .prim _ => 0
+    | .ref (.array _) => n
+    | .ref R => n * ReferenceDefaults.defaultCells (.ref R))
 
 theorem arrayCost_zero (E : Ty) : arrayCost E 0 = 1 := by
   cases E with
   | prim p => rfl
-  | ref R => cases R <;> rfl
+  | ref R => cases R <;> simp only [arrayCost, Nat.zero_mul, Nat.add_zero]
 
 def hasAllocationStmt {Γ Δ : Ctx} : Stmt C Γ Δ → Bool
-  | .declMem (.array _) _ none _ _ => true
+  | .declMem _ _ none _ _ => true
   | .declMem _ _ (some (.newArr ..)) _ _ => true
   | .rebindMem _ (.newArr ..) => true
   | _ => false
@@ -48,7 +52,7 @@ def hasAllocation {Γ Δ : Ctx} : Prog C Γ Δ → Bool
 
 def rawAllocationCostStmt {Γ Δ : Ctx} (s : Stmt C Γ Δ) (σ : State C Γ) : Nat :=
   match s with
-  | .declMem (.array _) _ none _ _ => 1
+  | .declMem R _ none _ _ => ReferenceDefaults.defaultCells (.ref R)
   | .declMem (.array E) _ (some (.newArr n _)) _ _ => arrayCost E (n.evalT σ).word.val
   | .rebindMem (R := .array E) _ (.newArr n _) => arrayCost E (n.evalT σ).word.val
   | _ => 0

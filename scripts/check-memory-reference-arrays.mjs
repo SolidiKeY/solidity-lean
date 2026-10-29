@@ -35,18 +35,21 @@ for (const viaIR of [false, true]) for (const optimized of [false, true]) {
   const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Cancun }) });
   const code = hexToBytes('0x' + c.evm.deployedBytecode.object);
   for (const [name, expected] of [['dynamicAliases',11013n],['reallocAliases',11013n],['fixedAliases',11013n],
-      ['fixedChildAliases',11013n],['structInputAliases',11013n],['distinctFixedDefaults',0n],['emptyFixedChildren',0n]]) {
+      ['fixedChildAliases',11013n],['structInputAliases',11013n],['distinctFixedDefaults',0n],['emptyFixedChildren',0n],['structDefaultAliases',11013n],['fixedDefaultAliases',11013n],
+      ['dynamicFixedDefaultAliases',11013n],['nestedFixedDefaultAliases',11013n],
+      ['referenceArrayRebind',17000n],['fixedDynamicDefaultAliases',13n]]) {
     const r = await vm.evm.runCode({ code, data: hexToBytes(iface.encodeFunctionData(name, [])), gasLimit: 30000000n });
     assert.equal(r.exceptionError, undefined, `${label}/${name}`);
     assert.equal(iface.decodeFunctionResult(name, r.returnValue)[0], expected, `${label}/${name}`);
     count++;
   }
-  for (const name of ['parentBounds','fixedParentBounds','childBounds','fixedChildBounds','zeroParentBounds','structParentBounds']) {
+  for (const name of ['parentBounds','fixedParentBounds','childBounds','fixedChildBounds','zeroParentBounds','structParentBounds',
+      'structDefaultBounds','dynamicFixedDefaultBounds','nestedFixedDefaultBounds','fixedDynamicDefaultBounds']) {
     const r = await vm.evm.runCode({ code, data: hexToBytes(iface.encodeFunctionData(name, [])), gasLimit: 30000000n });
     assert.ok(r.exceptionError, `${label}/${name}`);
     assert.equal(bytesToHex(r.returnValue), '0x4e487b71' + '32'.padStart(64,'0'), `${label}/${name}`);
     count++;
   }
-  console.log(`${label}: 7 alias/default results and 6 bounds reverts passed`);
+  console.log(`${label}: 13 alias/default results and 10 bounds reverts passed`);
 }
 console.log(`${count} source fixture executions passed with ${version}`);

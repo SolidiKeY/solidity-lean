@@ -1,4 +1,5 @@
 import Solidity.Evm.MemoryObjectAllocationCost
+import Solidity.Evm.MemoryReferenceDefaultSource
 
 /-! Narrow construction certificates over complete typed object ownership. -/
 namespace Solidity.Evm.Memory.Construction
@@ -39,6 +40,23 @@ inductive StmtFrag (b : Nat) : {Γ Δ : Ctx} → Frag Γ → Frag Δ → Stmt C 
       StmtFrag b F F (.rebindMem dst (.newArr (.lit 0 rfl) hn))
         ([.push w[0]] ++ allocateArrayCode ++ [.mstore (cellOf b dst)])
 
+  | defaultRef {Γ : Ctx} (F : Frag Γ) (R : RefTy) (x : Var) (hd hm) (hb : 0 < b)
+      (builder : DefaultBuilder R hm (ReferenceDefaults.defaultCells (.ref R))) :
+      StmtFrag b F (F.push (.mem R) .ok) (.declMem R x none hd hm)
+        (defaultDeclareCode (Γ := Γ) builder.code b)
+  | reference {Γ : Ctx} (F : Frag Γ) (R : RefTy) (x : Var) (n : Simple C Γ .uint)
+      (hb : 0 < b) (hns : simpleIn n = true) (hn : (RefTy.array (.ref R)).newArrOk = true)
+      (hm : (Ty.ref R).mapFree = true)
+      (builder : DefaultBuilder R hm (ReferenceDefaults.defaultCells (.ref R))) :
+      StmtFrag b F (F.push (.mem (.array (.ref R))) .ok)
+        (.declMem (.array (.ref R)) x (some (.newArr n hn)) rfl
+          (RefTy.mapFree_of_newArrOk hn)) (referenceDeclareCode builder.code b n)
+  | rereference {Γ : Ctx} (F : Frag Γ) (R : RefTy) (dst : Idx Γ (.mem (.array (.ref R))))
+      (n : Simple C Γ .uint) (hb : 0 < b) (hns : simpleIn n = true)
+      (hn : (RefTy.array (.ref R)).newArrOk = true) (hm : (Ty.ref R).mapFree = true)
+      (builder : DefaultBuilder R hm (ReferenceDefaults.defaultCells (.ref R))) :
+      StmtFrag b F F (.rebindMem dst (.newArr n hn)) (referenceRebindCode builder.code b dst n)
+
 inductive ProgFrag (b : Nat) : {Γ Δ : Ctx} → Frag Γ → Frag Δ → Prog C Γ Δ → List Instr → Prop where
   | nil {Γ : Ctx} (F : Frag Γ) : ProgFrag b F F .nil []
   | cons {Γ Δ Ξ : Ctx} {F : Frag Γ} {G : Frag Δ} {K : Frag Ξ}
@@ -78,6 +96,20 @@ def compileStmt (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (s : Stmt C Γ Δ) :
       some ⟨_, _, .newEmpty F E x hn hm hb⟩
     | .rebindMem (R := .array E) dst (.newArr (.lit 0 _) hn) =>
       some ⟨_, _, .reEmpty F E dst hn hb⟩
+    | .declMem R x none hd hm => do
+      let builder ← ReferenceDefaults.compileDefault R hm
+      pure ⟨_, _, .defaultRef F R x hd hm hb builder⟩
+    | .declMem (.array (.ref R)) x (some (.newArr n hn)) _ hm =>
+      if hns : simpleIn n = true then do
+        let builder ← ReferenceDefaults.compileDefault R (by simpa only [Ty.mapFree] using hm)
+        pure ⟨_, _, .reference F R x n hb hns hn _ builder⟩
+      else none
+    | .rebindMem (R := .array (.ref R)) dst (.newArr n hn) =>
+      if hns : simpleIn n = true then do
+        let builder ← ReferenceDefaults.compileDefault R (by
+          simpa only [Ty.mapFree] using RefTy.mapFree_of_newArrOk hn)
+        pure ⟨_, _, .rereference F R dst n hb hns hn _ builder⟩
+      else none
     | _ => none
     else none
 
@@ -97,8 +129,13 @@ private theorem old_cost_zero {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ
     exact allocationCostStmt_zero _ (by cases R <;> rfl) σ
   | rebind => rfl
   | write => rfl
+  | fieldWrite => rfl
   | assign => rfl
   | declare => rfl
+
+private theorem arrayCost_reference (R : RefTy) (n : Nat) :
+    arrayCost (.ref R) n = n + 1 + n * ReferenceDefaults.defaultCells (.ref R) := by
+  cases R <;> simp only [arrayCost, ReferenceDefaults.defaultCells, Nat.mul_one]
 
 theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
     {s : Stmt C Γ Δ} {code : List Instr} (hs : StmtFrag b F G s code)
@@ -226,6 +263,59 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
       have he : c = cursor := Word.val.inj (hc.free.cell.symm.trans hal.free.cell)
       subst c
       exact hr.2.2.2.1
+  | defaultRef F R x hd hm hb builder =>
+    have hcost : allocationCostStmt (.declMem R x none hd hm) σ = ReferenceDefaults.defaultCells (.ref R) := by
+      cases R <;> rfl
+    rw [hcost] at ha ⊢
+    rcases ha with hz | ⟨_, cursor, hal, hspace⟩
+    · have hp := builder.positive
+      omega
+    · have cap : b + (Γ.length + 1) ≤ frame := by
+        change b + max Γ.length (max (Γ.length + 1) 0) ≤ frame at hcap
+        omega
+      obtain ⟨base', m', ho, hc, hm', hal', hex, hst⟩ :=
+        defaultDeclare_correct h hal hb R hm builder hspace cap
+      refine .inl ⟨⟨_, (σ.heap.allocDefault R hm).ext⟩, m', base', ho, hc, hm', hst, hex, ?_⟩
+      intro c _ hc hcspace
+      have he : c = cursor := Word.val.inj (hc.free.cell.symm.trans hal.free.cell)
+      subst c
+      exact hal'
+  | reference F R x n hb hns hn hm builder =>
+    have hcost : allocationCostStmt (.declMem (.array (.ref R)) x (some (.newArr n hn)) rfl
+        (RefTy.mapFree_of_newArrOk hn)) σ =
+        (n.evalT σ).word.val + 1 + (n.evalT σ).word.val * ReferenceDefaults.defaultCells (.ref R) :=
+      arrayCost_reference R _
+    rw [hcost] at ha ⊢
+    rcases ha with hz | ⟨_, cursor, hal, hspace⟩
+    · omega
+    · have hs : n.evalT σ = indexValue (n.evalT σ).word := Subtype.ext (word_val (n.evalT σ)).symm
+      have cap : b + (Γ.length + 1) ≤ frame := by
+        change b + max Γ.length (max (Γ.length + 1) 0) ≤ frame at hcap
+        omega
+      obtain ⟨base', m', ho, hc, hm', hal', hex, hst⟩ :=
+        referenceDeclare_correct h hal hb R n hns hn hm builder (n.evalT σ).word hs hspace cap
+      refine .inl ⟨⟨_, (referenceArrayCopy σ.heap R hm (n.evalT σ).word).ext⟩,
+        m', base', ho, hc, hm', hst, hex, ?_⟩
+      intro c _ hc hcspace
+      have he : c = cursor := Word.val.inj (hc.free.cell.symm.trans hal.free.cell)
+      subst c
+      exact hal'
+  | rereference F R dst n hb hns hn hm builder =>
+    have hcost : allocationCostStmt (.rebindMem dst (.newArr n hn)) σ =
+        (n.evalT σ).word.val + 1 + (n.evalT σ).word.val * ReferenceDefaults.defaultCells (.ref R) :=
+      arrayCost_reference R _
+    rw [hcost] at ha ⊢
+    rcases ha with hz | ⟨_, cursor, hal, hspace⟩
+    · omega
+    · have hs : n.evalT σ = indexValue (n.evalT σ).word := Subtype.ext (word_val (n.evalT σ)).symm
+      obtain ⟨base', m', ho, hc, hm', hal', hex, hst⟩ :=
+        referenceRebind_correct h hal hb R dst n hns hn hm builder (n.evalT σ).word hs hspace
+      refine .inl ⟨⟨_, (referenceArrayCopy σ.heap R hm (n.evalT σ).word).ext⟩,
+        m', base', ho, hc, hm', hst, hex, ?_⟩
+      intro c _ hc hcspace
+      have he : c = cursor := Word.val.inj (hc.free.cell.symm.trans hal.free.cell)
+      subst c
+      exact hal'
 
 private theorem run_cons_revert {Γ Δ Ξ : Ctx} {σ : State C Γ}
     {s : Stmt C Γ Δ} {P : Prog C Δ Ξ} (h : s.run σ = .error .revert) :

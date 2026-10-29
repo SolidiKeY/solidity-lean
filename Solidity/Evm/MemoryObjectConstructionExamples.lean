@@ -322,15 +322,15 @@ private def fixedZeroTarget : Option (List Nat) := do
 theorem fixed_zero_source : fixedZeroSource = some [2,1,0,0] := by decide +kernel
 theorem fixed_zero_target : fixedZeroTarget = some [18,17,0,0,0] := by decide +kernel
 
-/-- Nonempty fixed-child construction remains a named independent implementation gap. -/
-theorem fixed_child_nonempty_allocation_refused :
+/-- Former fixed-child refusal is now an explicit public registration control. -/
+theorem fixed_child_nonempty_allocation_registered :
     (Compiler.compile (C := C) 1 (Frag.init []) (.cons
-      (.declMem fixedParent (.user "fresh") (some (.newArr (.lit 1 rfl) rfl)) rfl rfl) .nil)).isNone = true := by
+      (.declMem fixedParent (.user "fresh") (some (.newArr (.lit 1 rfl) rfl)) rfl rfl) .nil)).isSome = true := by
   decide +kernel
 
-theorem fixed_parent_default_refused :
+theorem fixed_parent_default_registered :
     (Compiler.compile (C := C) 1 (Frag.init []) (.cons
-      (.declMem (.fixed (.ref child) 2) (.user "fresh") none rfl rfl) .nil)).isNone = true := by
+      (.declMem (.fixed (.ref child) 2) (.user "fresh") none rfl rfl) .nil)).isSome = true := by
   decide +kernel
 
 end Solidity.Evm.Memory.ConstructionExamples
