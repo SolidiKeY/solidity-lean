@@ -74,7 +74,7 @@ const newLines = (lines, known) => {
 
 {
   const r = run("python3", ["-I", "scripts/roadmap-g03-ledger.py", "--check"]);
-  const summary = r.out.match(/^roadmap-g03: (\d+) error\(s\)|^roadmap-g03: (ok|OK)/mu);
+  const summary = r.out.match(/^roadmap-g03: (\d+) error\(s\)|^roadmap-g03: (ok|OK)|^roadmap-g03: .*; (\d+) errors?$/mu);
   const errors = r.out.split("\n").filter((l) => l && !l.startsWith("roadmap-g03:")).map(strip);
   const added = newLines(errors, baseline.g03Ledger.errors);
   const sane = (r.code === 0 || r.code === 1) && summary !== null;

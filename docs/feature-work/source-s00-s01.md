@@ -606,10 +606,15 @@ only the canonical rethrow is typed) deferred.
 
   `InProfileSyntax` is S00's verdict, kept separate.
 
-These give G01's `SourceSpec` its S01 fields, with one mismatch to resolve at
-integration: `SourceSpec.Resolves : Syntax → Resolved → Prop` takes no
-settings, while S01's resolution depends on them (the coder). Either
-`Syntax := Settings × Syn .unit`, or the coder moves to `coderOf` alone. G01's
+These give G01's `SourceSpec` its S01 fields, with two mismatches to
+resolve at integration (checked against the final G01 revision, `12088f5`):
+
+- `SourceSpec.Resolves : Syntax → Resolved → Prop` takes no settings, while
+  S01's resolution depends on them (the coder). Either
+  `Syntax := Settings × Syn .unit`, or the coder lives in `coderOf` alone.
+- G01's coder is per source unit (`coder`, `coderOf : … → Nat → AbiCoder`),
+  while S01 resolves one unit, so `Resolution.coder` is the coder at index
+  0 until multi-unit inputs exist. G01's
 `rawReturndata` has no status function in S01. `Parses` (G08–G11),
 `InProfile` beyond syntax and resolution, and `meaning` (S02–S04) do not
 exist yet.

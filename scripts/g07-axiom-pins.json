@@ -1654,6 +1654,15 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Precompiles/Osaka.lean:Solidity.Precompiles.Osaka.ecrecover_exceeds_stipend": [],
+ "Solidity/Precompiles/Osaka.lean:Solidity.Precompiles.Osaka.gas_mono": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Precompiles/Osaka.lean:Solidity.Precompiles.Osaka.run_eq_none_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Roadmap/Contracts.lean:Solidity.Roadmap.Cert.comp": [
   "propext"
  ],
@@ -1893,6 +1902,16 @@
   "propext"
  ],
  "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.twoCtors_illFormed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Stipend/Rule.lean:Solidity.Stipend.fits_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Stipend/Rule.lean:Solidity.Stipend.requires_eleven_not_fits": [
   "Classical.choice",
   "Quot.sound",
   "propext"
