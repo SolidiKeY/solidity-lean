@@ -401,7 +401,7 @@ verified macro lowerings under explicit representation assumptions.
 
 #### Assembly layout and conditional control-flow simulation
 
-`Bridge/SolidityBridge/ExternalEvm/Assembly/Layout.lean` resolves labels in the
+`Bridge/SolidityBridge/ExternalEvm/Assembly/CodeLayout.lean` resolves labels in the
 existing `List Instr`; it introduces no source intermediate language. A label
 is a `Fin (code.length + 1)`, including the continuation. `Relocation` retains
 both `target = origin + 1 + offset` and the exact absolute word address.
@@ -658,8 +658,9 @@ RSS/12 GiB VM-current stops, not a writable 12 GiB cgroup guarantee.
 ### Scanner-consuming success and nested divergence
 
 The continuation after `e9aaa5d34ee257b3564bc24503f1d2957626d28c` closes
-integration gaps found by independent whole-scope review; the unchanged Widths
-failure does not block these independent proofs.
+integration gaps found by independent whole-scope review. At that checkpoint,
+the historical Widths failure did not block these independent proofs; the
+published repair and final combined validation are recorded below.
 
 `Bridge/SolidityBridge/ExternalEvm/Assembly/Termination.lean` checks an
 `ExitLayout`: the actual linked end-label JUMPDEST, a nonwrapping next PC and
@@ -780,15 +781,76 @@ Independent read-only finder and skeptic reviews found no remaining semantic
 integration gap within this accepted numeric fragment, and retained the opaque
 D_J, acceptance-completeness, resource/terminal and unsuccessful-source limits.
 
-The task patch checks cleanly against published master in a temporary index;
-the relevant dependency closure is unchanged there. The later fetch at
-`2abccb7044a4c6eb33a816cee7e862927e499cff` still has the original Widths file.
-The failed umbrella gate is preserved and is not repeated without a changed
-prerequisite. Its shared approved repair remains owned by storage-slots. This
-is the remaining required combined-validation dependency, not a reason to
-leave the independent assembler obligations unfinished. No source-assembly
-admission, feature inventory, intrinsic core representation or upstream pin
-changed.
+The earlier compatibility check against published
+`2abccb7044a4c6eb33a816cee7e862927e499cff` and its unchanged Widths failure
+remain historical evidence. The approved prerequisite
+`040e59d30a6726fa4f9fee831695eeaa4027ede1` was fetched, verified as an ancestor
+and merged into the existing task branch at
+`d011a0dba731756c16db8f390cde5c1dc2bbe6d4`. No assembly source changed in that
+merge; the same-stack JUMP/JUMPI obstruction proofs remain unchanged. The old
+Widths failure is no longer a blocker.
+
+### Final published-prerequisite validation
+
+The original complete `scripts/check-bridge.sh` gate, including all three
+vendor hash sets, passed (exit 0) in 193.879 s at
+3,384,856,576 bytes sampled aggregate RSS. This builds all default
+optional targets and the complete registered assembly regression closure.
+The fresh 18-headline/inhabited-instance axiom audit passed in
+4.741 s at 1,619,939,328 bytes; its actual union remains
+`propext`, `Classical.choice`, `Quot.sound`. Rulecheck passed all 36 cases,
+1,000 samples each, seed 42 (exit 0, 11.132 s,
+1,101,221,888 bytes). Layers, strict automatic, trust and orphan
+checks passed. The documentation-path check retains the exact published
+prerequisite's historical failures; it is not reported as passed.
+
+The first post-merge full attempt stopped at the unchanged 600-second guard
+(exit 75, 600.042 s, 2,189,041,664 bytes), after 64 successful new jobs. A
+bounded syntax/elaboration cache stage passed in 101.987 s at 1,371,729,920
+bytes. The next full attempt also timed out (exit 75, 600.068 s,
+3,832,205,312 bytes), after another 89 successful jobs including the repaired
+Widths/guard closure. Its terminal setup files identified the unfinished
+`Solidity.Calculus.TermAgree` dependency. Staging that dependency passed in
+31.476 s at 1,478,217,728 bytes before the final full run. These are cache and
+scheduling repairs; no proof, source observation, fuel, timing or resource
+budget was raised. Both timeouts and the original 1200.115-second timeout
+remain failed evidence in the cumulative archive.
+
+The first complete post-prerequisite umbrella passed 2,052 jobs in 439.456 s
+at 2,355,208,192 bytes. A fresh comparison with the published documentation
+baseline then found one new basename ambiguity: the added layout module made
+an existing storage note's short citation ambiguous. The repair stays entirely
+within this task: `CodeLayout.lean` has byte-identical contents to the former
+layout file, with three own imports and two owning-document references updated.
+No other batch's storage note was edited. The full post-rename pass is the
+193.879-second result above.
+
+The post-rename standalone axiom probe initially exited 1 because Lake restored
+only the cached module's ILean into its ordinary build directory. Lake's actual
+build had resolved the OLean directly from its artifact cache. Inspection of
+`Module.restoreArtifacts` identified the loader-path distinction. A bounded
+per-file kernel check materialized the unchanged layout OLean in 2.518 s at
+1,066,070,016 bytes; the subsequent ordinary-path axiom audit passed. The failed
+probe remains in the archive; no proof statement, dependency or trust premise
+changed and no cache was deleted.
+
+All heavy operations used the existing writer lock, one Lean thread, explicit
+`-j1`, no Lean server, and the coordinator's measured workload guard: actual
+16 GiB hard VM cgroup with disabled swap, inherited 12 GiB per-process address
+space, sampled 10 GiB aggregate-RSS stop and 12 GiB VM-current stop. No writable
+12 GiB cgroup or `MemorySwapMax=0` was set. Disk caches remain available.
+
+Fresh independent read-only finder and skeptic reviews of the whole original
+automatic layout/scanner/certificate/driver obligation found no remaining
+own-scope gap or integration regression. No source-assembly admission,
+feature inventory, intrinsic core representation or upstream pin changed.
+The optional umbrella pass is build/regression evidence, not an unconditional
+source-language or all-EVM soundness theorem. Explicit layout, numeric
+representation, frame, scanner, fuel/resource and terminal assumptions remain;
+upstream FFI or padding assumptions (including `PaddingCorrect` wherever such
+an external claim requires it) are not discharged by this control-flow work.
+No finite-gas divergence, opaque scanner equivalence, or acceptance-completeness
+claim is added.
 
 To build the independent targets alone, from `Bridge/`:
 

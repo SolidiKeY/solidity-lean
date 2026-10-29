@@ -1,4 +1,4 @@
-import SolidityBridge.ExternalEvm.Assembly.Layout
+import SolidityBridge.ExternalEvm.Assembly.CodeLayout
 namespace Solidity.Evm.External.Assembly
 
 /-- Image data are fixed by the existing emitter/span/target functions;

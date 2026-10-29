@@ -1,4 +1,4 @@
-import SolidityBridge.ExternalEvm.Assembly.Layout
+import SolidityBridge.ExternalEvm.Assembly.CodeLayout
 
 /-! Executable layout controls. These deliberately make no source/target
 execution-simulation claim; the actual core runs below pin branch polarity. -/

@@ -1,4 +1,4 @@
-import SolidityBridge.ExternalEvm.Assembly.Layout
+import SolidityBridge.ExternalEvm.Assembly.CodeLayout
 import EvmYul.EVM.Semantics
 
 /-!
