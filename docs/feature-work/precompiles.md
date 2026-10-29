@@ -225,6 +225,29 @@ needs a Bridge build and, for the crypto outputs, a vendor patch replacing
 the Python and FFI calls with the core definitions (D13's route for
 Keccak).
 
+### Gates (lane end)
+
+`./run-lean.sh`, run alone at `8da2c17`:
+
+- **Layers and build.** `check-layers` passes; the default `lake build`
+  completes ("Build completed successfully (731 jobs)").
+- **SolkeyTestSuite.** The first run killed `Derived17` with code 137, the
+  known baseline OOM. A second run, alone, completed (262 jobs).
+- **`check-solkey.sh`.** It reports the baseline drift of 37 mismatches,
+  owned by a Codex lane.
+- **Elaboration times.** `Solidity.Precompiles.Osaka` takes 4.5 s and
+  `Solidity.Stipend.Rule` 15 s. The other precompile modules were built by
+  the Lean server, so the build log has no times for them. Their vector
+  files are the heaviest: `Bls12381` and `PointEval` evaluate pairings in
+  their `#guard`s.
+- **Proof that nearly evaluated a pairing.** Proofs that reached
+  `PointEval.verifies` by unfolding made elaboration evaluate a pairing;
+  they ran out of memory. `decode` and `verifies` are now
+  `@[irreducible]`, and the laws go through `bind_check_eq_none` and
+  `bind_check_eq_some`.
+- **Other scripts.** `check-orphans`, `check-trust` (0 findings) and
+  `check-doc-paths` (46 missing, the baseline) pass.
+
 ### Handoff (checkpoint 3)
 
 - **Status:** blocked. No Bridge adapter is committed, because no Lean check of one is possible here.
