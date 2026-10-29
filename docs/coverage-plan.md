@@ -182,6 +182,8 @@ G00 status (2026-10-29): pins, exclusion evidence, reconciliation and owners in 
 
 G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which lists the contract revisions they require before G01 counts as frozen.
 
+G03 status (2026-10-29): constructor-to-theorem, combination, decision-row and module/lemma dependency ledger in [roadmap-g03-ledger.md](feature-work/roadmap-g03-ledger.md), checked by `scripts/roadmap-g03-ledger.py --check`; no obligation closed, no feature status changed.
+
 G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
 
 ### Independent source definitions — after G00–G07, before wave 1
