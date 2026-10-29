@@ -49,8 +49,9 @@ leaves the body, as solc compiles it.
 modifiers, outermost first; each `_` runs the rest (`Ph`), any number of
 times.  Under the legacy pipeline every `_` shares the function's
 parameter and return slots; via IR each `_` starts from the parameters at
-entry and the current return values, and its returns are kept (solc's
-`ir-breaking-changes`).  Internal calls dispatch virtually along the C3
+entry and fresh (zero) return slots, and the last invocation's returns are
+the function's (upstream `modifiers/function_modifier_multi_invocation.sol`
+and `…_viair.sol`: `f(true)` is `2` and `1`).  Internal calls dispatch virtually along the C3
 linearization of the instance's contract (`Program.dispatchFn`).  External
 calls to an instance of the system enter a new frame (`Fr`: `this`,
 sender, value, static flag, depth) with fresh memory and a journal mark,
@@ -478,6 +479,13 @@ def reraise {Γ : RCtx} : Outcome → EM E Γ Bytes
   | .success d => pure d
   | .revert d => halt (.revert d)
 
+/-- The `k` innermost locals reset to their defaults (via IR, each `_`
+runs the body in fresh return slots). -/
+def zeroInner {Γ' : RCtx} (n : Nat) : (k : Nat) → {Γ : RCtx} → Locals E.layout Γ → EM E Γ' (Locals E.layout Γ)
+  | 0, _, l => pure l
+  | _ + 1, _, .nil => pure .nil
+  | k + 1, _, .cons (τ := τ) _ r => do pure (.cons (← zeroVal n τ) (← zeroInner n k r))
+
 /-- The binary operator of a compound assignment. -/
 def AssignOp.binOp : AssignOp → BinOp
   | .add => .add | .sub => .sub | .mul => .mul | .div => .div | .mod => .mod
@@ -877,9 +885,9 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
       let ⟨Γf, lf⟩ := (← st).fnLocals
       if h : Γf = ph.body.locals then
         let cur : Locals E.layout ph.body.locals := h ▸ lf
-        let lin := match G.pipeline with
-          | .legacy => cur
-          | .viaIR => Locals.mix ph.body.rs.length cur ph.orig
+        let lin ← match G.pipeline with
+          | .legacy => pure cur
+          | .viaIR => zeroInner n ph.body.rs.length ph.orig
         let lout ← runMods G F n ph.body ph.rest lin
         modSt fun s => { s with fnLocals := ⟨_, lout⟩ }
         pure (.normal l)
