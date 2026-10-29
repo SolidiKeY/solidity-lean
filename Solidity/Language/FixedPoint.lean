@@ -20,8 +20,10 @@ An operation computes the exact scaled result, truncated toward zero where
 digits are dropped, then either range-checks it (`Mode.checked`: a result
 outside the range fails with `Fail.overflow`, solc's `Panic(0x11)`) or wraps
 it modulo `2^M` (`Mode.unchecked`).  A zero divisor fails with
-`Fail.divZero` (`Panic(0x12)`) in either mode, as for integers
-(`docs/solc-alignment.md`).  Where the language specification is silent the
+`Fail.divZero` (`Panic(0x12)`) in either mode, as solc's integer division
+does (its `control-structures.rst`: the check "can not be disabled through
+`unchecked`"); G01 Q5 observes these codes exactly, where the current core
+reads both as a revert (`docs/solc-alignment.md`).  Where the language specification is silent the
 document's proposals are encoded, each named there; both variants are kept
 where a scope question is open (`explicit`, `Mode`).
 
@@ -36,7 +38,8 @@ structure FxTy where
   signed : Bool
   bits : Nat
   digits : Nat
-  valid : (decide (8 ≤ bits) && decide (bits ≤ 256) && bits % 8 == 0 && decide (digits ≤ 80)) = true
+  valid : (decide (8 ≤ bits) && decide (bits ≤ 256) && bits % 8 == 0 &&
+    decide (digits ≤ 80)) = true
   deriving DecidableEq
 
 namespace FxTy
@@ -45,7 +48,8 @@ namespace FxTy
 the ones its scanner reads as a type name (any other spelling is an
 identifier). -/
 def mk? (signed : Bool) (bits digits : Nat) : Option FxTy :=
-  if h : (decide (8 ≤ bits) && decide (bits ≤ 256) && bits % 8 == 0 && decide (digits ≤ 80)) = true
+  if h : (decide (8 ≤ bits) && decide (bits ≤ 256) && bits % 8 == 0 &&
+      decide (digits ≤ 80)) = true
   then some ⟨signed, bits, digits, h⟩ else none
 
 /-- `fixed`, an alias of `fixed128x18`. -/
@@ -244,7 +248,7 @@ def SameValue {t' : FxTy} (a : Fx t) (b : Fx t') : Prop := a.1 * t'.scale = b.1 
 
 /-! ### Laws -/
 
-/-- Checked addition without overflow is the scaled integer addition. -/
+/-- In either mode, addition without overflow is the scaled integer addition. -/
 theorem add_eq (m : Mode) (a b : Fx t) (h : t.inRange (a.1 + b.1) = true) :
     add m a b = .ok ⟨a.1 + b.1, h⟩ := result_of_inRange m h
 
@@ -261,7 +265,8 @@ theorem add_comm (m : Mode) (a b : Fx t) : add m a b = add m b a := by
 theorem mul_comm (m : Mode) (a b : Fx t) : mul m a b = mul m b a := by
   simp only [mul, Int.mul_comm]
 
-/-- Checked subtraction without overflow is the scaled integer subtraction. -/
+/-- In either mode, subtraction without overflow is the scaled integer
+subtraction. -/
 theorem sub_eq (m : Mode) (a b : Fx t) (h : t.inRange (a.1 - b.1) = true) :
     sub m a b = .ok ⟨a.1 - b.1, h⟩ := result_of_inRange m h
 
@@ -318,8 +323,8 @@ theorem mod_eq (m : Mode) (a b : Fx t) (hb : b.1 ≠ 0) :
   simp only [mod, hb, if_false]
   exact result_of_inRange m (mod_inRange a b)
 
-/-- Checked division by a nonzero divisor without overflow is the truncated
-scaled quotient. -/
+/-- In either mode, division by a nonzero divisor without overflow is the
+truncated scaled quotient. -/
 theorem div_eq (m : Mode) (a b : Fx t) (hb : b.1 ≠ 0)
     (h : t.inRange ((a.1 * t.scale).tdiv b.1) = true) :
     div m a b = .ok ⟨(a.1 * t.scale).tdiv b.1, h⟩ := by
@@ -366,7 +371,8 @@ def common? (t t' : FxTy) : Option FxTy :=
 
 /-- solc's implicit integer-to-fixed test (`IntegerType::isImplicitlyConvertibleTo`),
 the integer type given by its bounds. -/
-def intImplicit (t : FxTy) (lo hi : Int) : Bool := decide (t.minInt ≤ lo) && decide (hi ≤ t.maxInt)
+def intImplicit (t : FxTy) (lo hi : Int) : Bool :=
+  decide (t.minInt ≤ lo) && decide (hi ≤ t.maxInt)
 
 end FxTy
 
@@ -449,8 +455,9 @@ theorem ofInteger_inRange {lo hi k : Int} (h : t.intImplicit lo hi = true)
   simp only [FxTy.inRange, Bool.and_eq_true, decide_eq_true_eq]
   exact ⟨hl, hu⟩
 
-/-- An explicit integer-to-fixed conversion (solc admits it at the same
-width and signedness), by value: the integer scaled, ranged by `m` (scope
+/-- An explicit integer-to-fixed conversion (solc admits it where the
+implicit one exists and at the same width and signedness), by value: the
+integer scaled, ranged by `m` (scope
 questions Q7 and Q2 of the document). -/
 def ofIntegerExplicit (m : Mode) (t : FxTy) (k : Int) : Except Fail (Fx t) :=
   result m t (k * t.scale)
@@ -467,8 +474,9 @@ width), by bit pattern: the bytes' unsigned integer `u < 2^M` is the scaled
 integer, two's complement where signed (scope question Q7). -/
 def ofBits (t : FxTy) (u : Int) : Fx t := wrap t u
 
-/-- An explicit conversion to an integer: the integer part, truncated toward
-zero (then the integer type's own explicit conversion). -/
+/-- An explicit conversion to an integer, by value (scope question Q7): the
+integer part, truncated toward zero (then the integer type's own explicit
+conversion). -/
 def toIntTrunc (a : Fx t) : Int := a.1.tdiv t.scale
 
 /-! ### Literals -/
@@ -489,7 +497,8 @@ def literalTrunc (t : FxTy) (num : Int) (den : Nat) : Int := (num * t.scale).tdi
 complement modulo `2^256`. -/
 def toWord (a : Fx t) : Int := a.1 % 2 ^ 256
 
-/-- A word decoded at the type: read as `int256` where signed, then
+/-- A word `0 ≤ w < 2^256` (the premise of every caller) decoded at the
+type: read as `int256` where signed, then
 range-checked, so a word whose high bits are not the sign extension fails
 (`none`), as solc's decoder rejects a dirty `intM`. -/
 def ofWord? (t : FxTy) (w : Int) : Option (Fx t) :=
@@ -497,8 +506,10 @@ def ofWord? (t : FxTy) (w : Int) : Option (Fx t) :=
 
 theorem pow_bits_le (t : FxTy) : (2 : Int) ^ t.bits ≤ 2 ^ 256 := by
   have h := Nat.pow_le_pow_right (by decide : 0 < 2) t.bits_le
-  have e1 : ((2 ^ t.bits : Nat) : Int) = (2 : Int) ^ t.bits := by simp
-  have e2 : ((2 ^ 256 : Nat) : Int) = (2 : Int) ^ 256 := by simp
+  have e1 : ((2 ^ t.bits : Nat) : Int) = (2 : Int) ^ t.bits := by
+    simp only [Int.natCast_pow, Int.cast_ofNat_Int]
+  have e2 : ((2 ^ 256 : Nat) : Int) = (2 : Int) ^ 256 := by
+    simp only [Int.natCast_pow, Int.cast_ofNat_Int]
   omega
 
 theorem toWord_range (a : Fx t) : 0 ≤ toWord a ∧ toWord a < 2 ^ 256 := by
@@ -551,7 +562,8 @@ def ufixed8x4 : FxTy := ⟨false, 8, 4, by decide⟩
 /-- solc's scanner bounds: `fixed8x0` and `ufixed256x80` are types,
 `fixed7x8`, `fixed264x1` and `fixed8x81` are not (they are identifiers). -/
 example : (FxTy.mk? true 8 0).isSome ∧ (FxTy.mk? false 256 80).isSome ∧
-    (FxTy.mk? true 7 8).isNone ∧ (FxTy.mk? true 264 1).isNone ∧ (FxTy.mk? true 8 81).isNone := by
+    (FxTy.mk? true 7 8).isNone ∧ (FxTy.mk? true 264 1).isNone ∧
+    (FxTy.mk? true 8 81).isNone := by
   decide
 
 /-- The upstream literal tests (`types/rational_number_literal_to_fixed_implicit.sol`,
@@ -580,7 +592,8 @@ example : (div .checked (⟨100, by decide⟩ : Fx ufixed16x2) ⟨300, by decide
 
 /-- `-(-12.8)` overflows at `fixed8x1`; unchecked it wraps back to `-12.8`. -/
 example : (neg .checked (⟨-128, by decide⟩ : Fx fixed8x1)).toOption.isNone ∧
-    (neg .unchecked (⟨-128, by decide⟩ : Fx fixed8x1)).toOption.map Subtype.val = some (-128) := by
+    (neg .unchecked (⟨-128, by decide⟩ : Fx fixed8x1)).toOption.map Subtype.val =
+      some (-128) := by
   decide
 
 /-- At `ufixed16x2`, `2.55 * 2.00 = 5.10`; `255.00 * 3.00` overflows, and
