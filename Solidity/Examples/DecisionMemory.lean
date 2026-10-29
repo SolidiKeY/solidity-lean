@@ -1,4 +1,5 @@
 import Solidity.Examples.Decision
+import Solidity.Examples.MemoryStructWitness
 
 /-!
 # Fresh memory arrays and given-heap parameter witnesses (M7)
@@ -169,9 +170,9 @@ def memWriteDia : Fml Gaps [] := .allocAll (.user "s") UA
 
 /-! ### Counterexamples to `DecisionTheorem` left with memory
 
-Each in `Fml.inTarget` (by the kernel). The hidden memory
-parameter pin is now refuted by its given-heap witness; the other two remain unknown
-(`docs/automation.md`, M7, "What is not proved"): a negative-position block
+Each in `Fml.inTarget` (by the kernel). The negative block remains
+`unknown`; the hidden memory parameter and fresh struct pins are refuted
+(`docs/automation.md`, M7): a negative-position block
 over an array's contents (its index bound after the array), a hidden memory
 binder (it ranges over the objects already there, and over none), a fresh
 struct's member (the cut takes arrays of primitives). -/
@@ -205,7 +206,7 @@ theorem gapMemInner_inTarget : gapMemInner.inTarget {} = true := by decide +kern
 theorem gapMemParam_inTarget : gapMemParam.inTarget {} = true := by decide +kernel
 theorem gapMemStruct_inTarget : gapMemStruct.inTarget {} = true := by decide +kernel
 
-/-- info: ["unknown", "refuted", "unknown"] -/
+/-- info: ["unknown", "refuted", "refuted"] -/
 #guard_msgs in
 #eval [verdict gapMemInnerNeg, verdict gapMemParam, verdict gapMemStruct]
 
@@ -238,6 +239,112 @@ theorem gapMemWrite_iff : decideLeaf gapMemWrite = .proved ↔ Fml.Valid gapMemW
 /-- info: 'Solidity.Examples.Decision.gapMemWrite_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms gapMemWrite_iff
 
+/-! ### Fresh structs with realizable reference members
+
+The original Person pin is unchanged. Its countermodel contains constructed
+Token and Account children before the parent binder is evaluated. -/
+
+/-- A fresh Person may have any age: reading the same field twice agrees. -/
+def memStructSame : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
+  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide))
+    (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide)))
+
+/-- The schema is generic over literal words, not tied to zero. -/
+def memStructFive : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
+  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide)) (.app0 (.lit (uintOfNat 5))))
+
+/-- Boolean members use their own typed witness word. -/
+def memStructBool : Fml StandardExample [] := .allocAll (.user "t") (.struct "Toggle")
+  (.eq (MemoryWitness.fieldRead (p := .bool) (f := "on") (by decide)) (.app0 (.lit false)))
+
+/-- A fixed-array child is realized before its containing struct. -/
+def memStructFixed : Fml StandardExample [] := .allocAll (.user "t") (.struct "FixedTriple")
+  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "tag") (by decide)) (.app0 (.lit (uintOfNat 0))))
+
+/-- Mapping-bearing structs retain their scope refusal, even for reflexivity. -/
+def memStructMapping : Fml StandardExample [] := .allocAll (.user "w") (.struct "Wallet")
+  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "owner") (by decide))
+    (MemoryWitness.fieldRead (p := .uint) (f := "owner") (by decide)))
+
+/-- info: ["proved", "refuted", "refuted", "refuted", "unknown"] -/
+#guard_msgs in #eval [verdict memStructSame, verdict memStructFive, verdict memStructBool,
+  verdict memStructFixed, verdict memStructMapping]
+
+/-- A reversed equation is a classifier near miss, not a recognized field/literal schema. -/
+def memStructReversed : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
+  (.eq (.app0 (.lit (uintOfNat 0)))
+    (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide)))
+
+/-- A literal buried inside an operator cannot be mistaken for the whole RHS. -/
+def memStructBuried : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
+  (.eq (MemoryWitness.fieldRead (p := .uint) (f := "age") (by decide))
+    (.app2 (.binop .add rfl) (.app0 (.lit (uintOfNat 0))) (.app0 (.lit (uintOfNat 1)))))
+
+/-- A signed word with a dynamic-array child uses the same typed schema. -/
+def memStructSigned : Fml StandardExample [] := .allocAll (.user "p") (.struct "Packed")
+  (.eq (MemoryWitness.fieldRead (p := .int) (f := "b") (by decide))
+    (.app0 (.lit (p := .int) ⟨-7, by decide⟩)))
+
+/-- info: ["unknown", "unknown", "refuted"] -/
+#guard_msgs in #eval [verdict memStructReversed, verdict memStructBuried, verdict memStructSigned]
+
+/-- Every recognized control has a kernel-checked coverage certificate. -/
+theorem memStruct_controls_covered :
+    ([memStructSame, memStructFive, memStructBool, memStructFixed, memStructSigned].map
+      Fml.Covered).all id = true := by decide +kernel
+
+/-- The original pin belongs to the proved exact decision fragment. -/
+theorem gapMemStruct_covered : gapMemStruct.Covered = true := by decide +kernel
+/-- The original in-target pin receives an answer from the public decider. -/
+theorem gapMemStruct_answers : decideLeaf gapMemStruct ≠ .unknown :=
+  decideLeaf_complete gapMemStruct_covered
+/-- Positive struct controls have exact verdicts as well. -/
+theorem memStructSame_covered : memStructSame.Covered = true := by decide +kernel
+/-- Exactness of the positive struct verdict over every typed state. -/
+theorem memStructSame_iff : decideLeaf memStructSame = .proved ↔ Fml.Valid memStructSame :=
+  decideLeaf_proved_iff memStructSame_covered
+
+/-- The countermodel's children are constructed, not assumed to exist. -/
+def gapMemStruct_state : State StandardExample [] :=
+  ((State.init StandardExample).adopt (MemoryWitness.children Heap.empty "Person"
+    (by decide))).1
+
+/-- The unchanged original pin is false at that explicitly realized heap. -/
+theorem gapMemStruct_countermodel : ¬ holds gapMemStruct_state gapMemStruct :=
+  MemoryWitness.fieldEq_refutes (State.init StandardExample)
+    (MemoryWitness.children Heap.empty "Person" (by decide)) (by decide) (.user "p") (uintOfNat 0)
+
+/-- Inspect the actual returned state: heap size, Token.value,
+Account.balance and Account.token. The parent is chosen by the binder later. -/
+def gapMemStruct_returnedObs : List (Option Nat) :=
+  match decideLeaf gapMemStruct with
+  | .refuted σ =>
+    [some σ.H.length,
+     (HRef.ofId? σ.H (.struct "Token") 0).map fun r =>
+       (σ.heap.field r (f := "value") rfl : PrimTy.uint.Denote).1.toNat,
+     (HRef.ofId? σ.H (.struct "Account") 1).map fun r =>
+       (σ.heap.field r (f := "balance") rfl : PrimTy.uint.Denote).1.toNat,
+     (HRef.ofId? σ.H (.struct "Account") 1).map fun r =>
+       (σ.heap.field r (f := "token") rfl : HRef σ.H (.struct "Token")).id]
+  | _ => []
+
+/-- info: [some 2, some 0, some 0, some 0] -/
+#guard_msgs in #eval gapMemStruct_returnedObs
+
+/-- The returned countermodel contains exactly its constructed children. -/
+theorem gapMemStruct_returned_children :
+    gapMemStruct_returnedObs = [some 2, some 0, some 0, some 0] := by decide +kernel
+
+/-- Empty-heap vacuity is preserved; it is not a countermodel. -/
+theorem gapMemStruct_empty : holds (State.init StandardExample) gapMemStruct := by
+  intro o
+  exact (MemoryStructWitness.no_empty_person ⟨o⟩).elim
+
+#print axioms decideStruct_sound
+#print axioms decideStruct_refutes
+#print axioms gapMemStruct_countermodel
+#print axioms gapMemStruct_answers
+#print axioms memStructSame_iff
 
 /-! ### Given-heap memory parameters
 
