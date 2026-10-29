@@ -28,7 +28,10 @@ as [child obligations](#4-child-obligations-for-g06).
   (`check-self-power-data.mjs`), `tests/upstream/step08-transient-world/report.json:31`
   (`check-transient-world-vectors.mjs`) and `tests/upstream/group01/validation.json:66`
   (`check-modifier-frames.mjs`). Nothing verifies those hashes. They stay records
-  of the base scripts.
+  of the base scripts. Do not re-run the commands recorded in
+  `tests/upstream/revert-power/validation.json` in place. They write
+  `tests/upstream/revert-power/compiler-evm.json`, which would overwrite the
+  Cancun record and falsify `reportSha256`. Write to a scratch path.
 
 ## 1. Setup on the VM
 
@@ -88,25 +91,33 @@ Per invocation, identical on both forks:
 | `check-transient-world-vectors` (0.8.38) | 11 transactions per pipeline | — |
 | `check-abi-hex-call` (0.8.38 + 0.8.34) | 36 | 40 |
 
-**Differing vectors: none.** Every script compares against fixed expected
-values, so a pass on both forks means every vector returned the same
-observation. For the two scripts with a pinned output, the Osaka output
+**Differing vectors: none.** A pass alone does not prove this: several checks
+are loose. Some failure cases assert only that an exception occurred, and some
+positive cases assert only "no exception". The evidence is a frame-level
+trace from the skeptic review. A `--require` hook on `EVM.prototype.runCall`/`runCode`
+recorded every top-level and nested frame (1,048 per run) with its exception
+kind, return bytes (metadata-normalised), `executionGasUsed` and created address.
+Cancun and Osaka at equal gas limits differ in **0** frames. The base run (30M)
+differs from the Osaka run only in the 8 `staticWrite` gas values below. Every
+failing frame is a `revert`, except the 4 `static state change` frames. For the two scripts with a pinned output, the Osaka output
 ([compiler-evm-osaka.json](../../tests/upstream/g06-osaka-repin/compiler-evm-osaka.json),
 [evm-observations-osaka.json](../../tests/upstream/g06-osaka-repin/evm-observations-osaka.json))
 differs from the committed Cancun record only in the `evmVersion` field.
-All 82, and 2 × 11, return bytes and exception kinds are equal. The Cancun runs
+All 82 and 2 × 11 return bytes and failure flags are equal. `compiler-evm.json`
+stores only a boolean `failure`. The frame trace shows that those failures are
+all `revert` on both forks. The Cancun runs
 reproduce both committed records byte for byte.
 
 **Cancun → Osaka changes the scripts had to absorb:**
 
 | Change | EIP / fork | Effect here |
 |---|---|---|
-| Transaction gas cap 2^24 | EIP-7825 (Osaka) | `check-transient-vectors.mjs:55` and `check-transient-world-vectors.mjs:46` built signed legacy transactions with `gasLimit:30000000n`. Under Osaka, `createLegacyTx` throws `Transaction gas limit 30000000 exceeds the maximum allowed by EIP-7825 (16777216)` before any execution (3 invocations). The pin commit sets `16777216n`. With that limit the Cancun run passes and reproduces the committed record, so the change does not depend on the fork. No vector depends on gas: none asserts gas, and none runs out of it. |
-| `runCode`/`runCall` message gas | — | The other 10 scripts call `vm.evm.runCode`/`runCall` with `gasLimit:30000000n`. These are message calls, not transactions, so EIP-7825 does not apply. They are left unchanged. |
+| Transaction gas cap 2^24 | EIP-7825 (Osaka) | `check-transient-vectors.mjs:55` and `check-transient-world-vectors.mjs:46` built signed legacy transactions with `gasLimit:30000000n`. Under Osaka, `createLegacyTx` throws `Transaction gas limit 30000000 exceeds the maximum allowed by EIP-7825 (16777216)` before any execution (3 invocations). The pin commit sets `16777216n`. With that limit the Cancun run passes and reproduces the committed record, so the change does not depend on the fork. No vector's outcome depends on the limit. No script asserts gas. One frame does consume its whole allowance: `staticWrite` in `check-transient-vectors`, whose inner STATICCALL halts with `static state change` and burns all forwarded gas. That is 29,509,787 gas at 30M and 16,493,609 at 2^24, in 8 frames (per pipeline and per compiler). The caller keeps 1/64, about 262k, and needs about 2k, so `ok == false` holds under either limit. The script does not assert the halt kind. |
+| `runCode`/`runCall` message gas | EIP-7825 (Osaka) | The other 10 scripts call `vm.evm.runCode`/`runCall` directly with `gasLimit:30000000n`. EthereumJS enforces the cap only on transactions. On a real Osaka chain, a 30M top-level frame is unreachable. Review re-ran all 10 scripts at 2^24 and found identical frame traces, gas included. The scripts are left at 30M to keep the pin diff minimal. |
 | `CLZ` opcode (0x1e) | EIP-7939 (Osaka) | solc 0.8.38 emits no CLZ in any of the 97 compiled objects (counted at instruction positions, PUSH data skipped). |
 | ModExp repricing / bounds, P-256 precompile | EIP-7883, EIP-7823, EIP-7951 (Osaka) | No script calls ModExp or P-256. Three precompiles are called, and none of them changed in Prague or Osaka: `ecrecover` (`tests/abi-0.8.38/Features.sol:47`, via `check-abi-vectors.mjs:90,96,97`), and `sha256` and `ripemd160` (`tests/solc/SliceCopies.sol:47-48`, via `check-slice-copies.mjs:44`). |
 | BLS12-381 precompiles, EIP-7702 code delegation, calldata floor cost, historical block hashes in state | EIP-2537, EIP-7702, EIP-7623, EIP-2935 (Prague) | Not exercised: no BLS precompile calls, no type-4 transactions and no `blockhash`. Neither script that sends transactions asserts gas. |
-| Contract and initcode size caps | EIP-170, EIP-3860 | Not idealized in these scripts (same as at the base). The largest runtime object is 9,484 bytes (cap 24,576). The largest creation object is 11,971 bytes (cap 49,152). No vector comes near either cap. |
+| Contract and initcode size caps | EIP-170, EIP-3860 | Not idealized in these scripts (same as at the base). 10 of the 12 scripts install code with `putCode`/`runCode`, which never meet the caps. `check-public-getters` deploys code, and `check-transient-world-vectors` runs nested CREATE. The largest deployed runtime is PublicGetters (via-IR, unoptimised from `check-public-getters`) at 11,869 bytes on 0.8.34 and 11,868 bytes on 0.8.38 (cap 24,576). The largest creation object is 11,971 bytes (cap 49,152). No vector comes near either cap. |
 
 **Compiled bytecode.** A `--require` preload intercepted every
 `solidity_compile` call: 43 compiles, 97 `evm.bytecode`/`evm.deployedBytecode`
@@ -216,11 +227,58 @@ diagnostics were needed.
 
 - `scripts/evm-vectors/run.sh` at base pins (Cancun): `16/16 checks passed`.
 - `scripts/evm-vectors/run.sh` with the pin commit (Osaka): `16/16 checks passed`.
-- `node scripts/check-layers.mjs`, `node scripts/check-orphans.mjs`,
-  `bash scripts/check-trust.sh`: see the handoff.
+- `node scripts/check-layers.mjs`: `155 core modules, 0 reach the elaborator`.
+- `node scripts/check-orphans.mjs`: `733 reachable, 0 orphaned, 0 not allowed`.
+- `bash scripts/check-trust.sh`: `trust: 748 sources, 241 inventoried implementation/recovery sites, 0 findings`.
+- `./run-lean.sh` was not run, because no Lean file changed; the assignment
+  requires no Lean build. The `check-solkey.sh` drift count was therefore not
+  re-measured.
 - `bash scripts/check-doc-paths.sh`: 46 missing references, unchanged from the base.
 
 Elapsed time is about 75 s per vector run. Peak memory was not measured
 (`/usr/bin/time` is absent), and nothing was built.
 
 ## Review
+
+A read-only finder and a separate skeptic (subagents, no Lean server) reviewed
+the measurement commit and the stashed pin diff.
+
+**Finder.** It found no defect in the 12 script diffs or in the runner's
+argument order. The following findings were confirmed and fixed:
+
+- The runner resolved relative arguments after `cd`. It also printed `}` as the
+  summary of a JSON report. Both are fixed in `run.sh`, and the evidence lists
+  were re-run.
+- The doc said "no script calls a precompile". In fact `ecrecover`, `sha256`
+  and `ripemd160` are called, and none of them changed in Prague or Osaka.
+- The doc said "51 objects byte-identical". That holds only after trailing
+  metadata is stripped.
+- Two citations were wrong: `@ethereumjs/evm` is not loaded directly, and the
+  doc cited a nonexistent "step 1".
+- EIP-2935 was missing from the Prague row.
+- Historical script hashes in three records were not mentioned. Neither was
+  `compiler-evm-initial.json`.
+- Missing child obligations: the core machine fork
+  (`roadmap-g00-scope.md:784`), `evm-reference` at 10.1.2, and further Cancun
+  wording (`tests/solc/TransientStorage.sol:4`, `calls-exceptions.md:76`,
+  `roadmap-g00-scope.md:336,784`).
+- The §5 placeholders are now filled.
+
+**Skeptic.** It re-ran all 16 invocations four ways (base, Osaka, Osaka with
+every message at 2^24, and Cancun with every message at 2^24) under a
+frame-level trace. The following findings were confirmed and fixed:
+
+- "No vector depends on gas" was wrong. `staticWrite`'s inner STATICCALL burns
+  all forwarded gas. The outcome does not depend on the limit, and the EIP-7825
+  row now says so.
+- The largest-runtime figure was 9,484 bytes. The correct figure is 11,869
+  (PublicGetters deployed runtime, which the 97-object count missed).
+- "A pass means no differing vector" overstated what the scripts assert. The
+  claim now rests on the 0-difference frame trace.
+- EIP-7825 "does not apply" to `runCode`/`runCall` is now worded as unreachable
+  on Osaka and measured to be outcome-neutral.
+- A warning not to re-run `validation.json`'s commands in place was added.
+
+Not adopted: lowering the 10 message-call scripts to 2^24 (measured
+zero-difference, but it would widen the pin diff), and tightening the loose
+asserts (outside the re-pin scope). Both remain options for a later change.
