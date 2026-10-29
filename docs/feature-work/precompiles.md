@@ -198,7 +198,7 @@ Neither proof nor vector can reach a vendored function that:
 
 - runs `python3 EvmYul/EllipticCurvesPy/*.py` through
   `totallySafePerformIO`: `RIP160.lean`, `BN_ADD.lean`, `BN_MUL.lean`,
-  `SNARKV.lean`, `BLAKE2_F.lean` (only its wrapper) and `PointEval.lean`
+  `SNARKV.lean`, `BLAKE2_F.lean` (only its wrapper) and `Solidity/Precompiles/PointEval.lean`
   (the scripts are not vendored);
 - or is an opaque `@[extern]`: `ffi.SHA256`, `ffi.BLAKE2`, `ffi.KEC`,
   `ECDSARECOVER`.
@@ -253,7 +253,7 @@ Keccak).
 - **Status:** blocked. No Bridge adapter is committed, because no Lean check of one is possible here.
 - **Done:** the agreement table above, by reading.
 - **Needed:** network access to a Mathlib cache host (or a multi-hour Mathlib build), then
-  `Bridge/SolidityBridge/Precompiles.lean` proving the gas rows and `IDENTITY` by definition,
+  a future Bridge adapter (planned as `Bridge/SolidityBridge/Precompiles*.lean`, not committed) proving the gas rows and `IDENTITY` by definition,
   and recording the `MODEXP` and 0x0b–0x11/0x100 disagreements as B01's repin obligations.
 
 ## Review

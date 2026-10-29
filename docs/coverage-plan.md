@@ -563,6 +563,11 @@ is empty, unless the item touches files an open Codex lane owns
    `mathlib4.lean-cache.cloud`), add a `Bridge/` adapter that runs the vendored
    EVMYulLean `decode`/`D_J` against `Solidity/Backend`; until then agreement
    rests on the generated vectors in `Solidity/Backend/EvmVectors.lean`.
+   The same applies to the precompiles (lane decision, 2026-10-29): the Bridge
+   adapter checks `Solidity/Precompiles/` against the vendored EVMYulLean gas
+   rows and `IDENTITY` by proof; MODEXP and 0x0b–0x11/0x100 are B01 re-pin
+   obligations; until then the record is the reading-based table in
+   [precompiles.md](feature-work/precompiles.md).
 
 ## Done when
 
