@@ -278,6 +278,13 @@ proof, and their final checks must use the actual implementations.
 | G46 | Prove primitive instruction/byte-memory/storage/environment correspondence with the pinned EVM semantics. Discharge symbolic-slot, word-addressing, truncation and hash-model obstructions or identify an unresolved approved-premise obligation; unresolved means incomplete. |
 | G47 | Prove EVM call/create/return/revert and transaction correspondence, including excluded-resource abstraction and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
 
+**G45 lane status (assembler, 2026-10-29).** G45.05 byte encoding: the
+Osaka instruction datatype, `decode_encode`, `encode_injective` and the
+jump-destination theorems are proved in `Solidity/Backend/`; G45.04, the
+EvmYul decoder agreement and G45.03 preparation follow on the same lane.
+Handoffs per checkpoint are in
+[backend-assembler.md](feature-work/backend-assembler.md).
+
 ### Wave 6 — whole pipeline, verification transfer and release (G48–G55)
 
 | Group | Deliverable and completion evidence |

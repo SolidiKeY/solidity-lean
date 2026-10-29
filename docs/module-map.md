@@ -519,6 +519,9 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/Stmt.lean` | One lemma per statement of the fragment over the typed run, a storage write the typed save (`save_repr`): `StmtOut` (with `Keeps`: cells below the frame, array lengths), `assign_sim` … `transfer_sim`. |
 | `Evm/Correct.lean` | `stmt_sim`/`prog_sim` over the scoped syntax and `Prog.run` (within `maxHeartbeats 11000`) (one lemma per family, `ite_sim`, `block_sim`, `callNone_sim`/`callVal_sim`), then `compile_correct`, `compile_exact`, `compile_box`, `compile_net`, `compile_storage`; no `not_stuck` (no stuck outcome). |
 | `Evm/Interpreter.lean` | The compiler's interpreter theorems over `Prog.run` (`setAge_interpreter`, `overflow_interpreter`, `payOwner_interpreter`, `callTwice_interpreter`), from `Evm/Examples.lean`'s machine runs. |
+| `Backend/Opcode.lean` | The backend's target (G45.05, [backend-assembler.md](feature-work/backend-assembler.md)): every Osaka opcode (`Op`, with `CLZ`, `TLOAD`/`TSTORE`, `MCOPY`; `DUP`/`SWAP`/`LOG` indexed by `Fin`), `Instr` with `PUSHn` immediates of exactly `n` bytes, `encode`/`decode` (`decode_encode`, `encode_injective`, `encode_decode`). |
+| `Backend/Jumpdest.lean` | Jump-destination analysis on any bytes (`starts`, `jumpdests`, `validJumpdest`, `InPushData`): valid iff `JUMPDEST` outside push data (`validJumpdest_iff`, `mem_starts`), and on encoded programs iff a `JUMPDEST` instruction sits at that offset (`validJumpdest_encode_iff`, `starts_encode_append`). |
+| `Backend/Checks.lean` | Byte-encoding vectors (`#guard`) and the axiom pins of the encoder, decoder and jump-destination theorems. |
 
 ## Tools
 
