@@ -3,13 +3,15 @@ import Solidity.Storage.HashedLayout
 /-!
 # Separation of struct members, mapping entries and array elements
 
-The G27.01–G27.03 separation statements over the hashed layout of
+The separation half of G27.01–G27.03 over the hashed layout of
 `Solidity/Storage/HashedLayout.lean`
 (`docs/feature-work/storage-hashed-layout.md`, "Checkpoint 4").
 
 `Occ t l x`: the slot term `x` belongs to a value of type `t` laid out at `l`
-(a word's own slot, a dynamic array's length slot and every element's, every
-entry of a mapping). Two members of a struct, two entries of a mapping at
+(a word's own slot, every struct member's and static array element's terms,
+a dynamic array's length slot and every element's, every entry of a
+mapping; a mapping's own slot is unused). `locate_occ` ties it to the layout
+function: a value reached by `STy.locate` occupies only terms of its parent. Two members of a struct, two entries of a mapping at
 different keys, two elements of an array at different indices, and a
 dynamic array's length and its elements occupy disjoint sets of slot terms
 (`occ_fields_disjoint`, `occ_keys_disjoint`, `occ_sarr_disjoint`,
@@ -21,8 +23,10 @@ by hashing (`occ_reach`), and a term has one ancestor per depth
 
 These are symbolic statements; no hash premise is used. With the region
 premise and bounded offsets (`occ_bounded`) they become statements about
-256-bit words (`occ_word_ne`): writing one member, entry or element does not
-touch the words of another.
+256-bit words (`occ_word_ne`): distinct occupied terms have distinct words,
+the fact a frame proof for storage writes would use (no store semantics is
+modelled here). Keys are `Nat`s; they denote words only below `2^256`
+(`Pre.Words`), which the keccak instantiation requires.
 -/
 
 namespace Solidity.Storage
@@ -79,16 +83,16 @@ theorem reach_unique {b b' x : Loc} (h : Reach b x) (h' : Reach b' x)
     rcases h'.eq_or_lt with e | lt
     · exact e.symm
     · omega
-  | hash k o hs ih =>
+  | @hash k s o hs ih =>
     cases h' with
     | self =>
-      have hle : b.depth ≤ _ := (hs.eq_or_lt).elim (fun e => e ▸ Nat.le_refl _) Nat.le_of_lt
+      have hle : b.depth ≤ s.depth := (hs.eq_or_lt).elim (fun e => e ▸ Nat.le_refl _) Nat.le_of_lt
       simp only [Loc.depth] at hd; omega
     | hash _ _ hs' => exact ih hs'
-  | data o hs ih =>
+  | @data s o hs ih =>
     cases h' with
     | self =>
-      have hle : b.depth ≤ _ := (hs.eq_or_lt).elim (fun e => e ▸ Nat.le_refl _) Nat.le_of_lt
+      have hle : b.depth ≤ s.depth := (hs.eq_or_lt).elim (fun e => e ▸ Nat.le_refl _) Nat.le_of_lt
       simp only [Loc.depth] at hd; omega
     | data _ hs' => exact ih hs'
 
@@ -227,13 +231,55 @@ theorem occ_map_slot_entry {v : STy} {k : Nat} {l : Loc} (h : Occ v (.hash k l 0
     simp only [Loc.add, Loc.depth] at hd; omega
   · simp only [Loc.add, Loc.depth] at lt; omega
 
+/-- **The layout's footprint.** A value reached by an access path occupies
+only terms its parent occupies. -/
+theorem locate_occ : ∀ (t : STy) (l : Loc) (p : List Step) {t' : STy} {l' x : Loc},
+    t.locate l p = some (t', l') → Occ t' l' x → Occ t l x
+  | t, l, [], _, _, _, h, hx => by
+    simp only [STy.locate, Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    exact hx
+  | .strct fs, l, .field i :: p, _, _, _, h, hx => by
+    simp only [STy.locate] at h
+    split at h
+    · rename_i f hf
+      exact .field hf (locate_occ f _ p h hx)
+    · cases h
+  | .sarr e n, l, .index i :: p, _, _, _, h, hx => by
+    simp only [STy.locate] at h
+    split at h
+    · rename_i hi
+      exact .sarr hi (locate_occ e _ p h hx)
+    · cases h
+  | .darr e, l, .index i :: p, _, _, _, h, hx => by
+    simp only [STy.locate] at h
+    split at h
+    · rename_i hi
+      exact .darr hi (locate_occ e _ p h hx)
+    · cases h
+  | .map v, l, .key k :: p, _, _, _, h, hx => by
+    simp only [STy.locate] at h
+    exact .entry (locate_occ v _ p h hx)
+  | .word, _, _ :: _, _, _, _, h, _ => by cases h
+  | .strct _, _, .index _ :: _, _, _, _, h, _ => by cases h
+  | .strct _, _, .key _ :: _, _, _, _, h, _ => by cases h
+  | .sarr _ _, _, .field _ :: _, _, _, _, h, _ => by cases h
+  | .sarr _ _, _, .key _ :: _, _, _, _, h, _ => by cases h
+  | .darr _, _, .field _ :: _, _, _, _, h, _ => by cases h
+  | .darr _, _, .key _ :: _, _, _, _, h, _ => by cases h
+  | .map _, _, .field _ :: _, _, _, _, h, _ => by cases h
+  | .map _, _, .index _ :: _, _, _, _, h, _ => by cases h
+
 /-! ## Words -/
 
 /-- Occupied terms are bounded when the value is placed and its type fits. -/
 theorem occ_bounded {L R : Nat} {t : STy} {l x : Loc} (h : Occ t l x) :
     t.Fits L → Placed L R t l → Loc.Bounded L R x := by
   induction h with
-  | word => intro _ hp; have h0 := hp 0 (by simp only [STy.size]; omega); rwa [Loc.add_zero] at h0
+  | @word l =>
+    intro _ hp
+    have h0 : Loc.Bounded L R (l.add 0) := hp 0 (by simp only [STy.size]; omega)
+    rwa [Loc.add_zero] at h0
   | @field fs i f l x hf _ ih =>
     intro hfit hp
     have hle : STy.sizes (fs.take i) + f.size ≤ STy.sizes fs := STy.sizes_take_add_le hf
@@ -245,7 +291,10 @@ theorem occ_bounded {L R : Nat} {t : STy} {l x : Loc} (h : Occ t l x) :
       rw [← Nat.succ_mul]; exact Nat.mul_le_mul_right _ hi
     refine ih hfit fun j hj => ?_
     rw [Loc.add_add]; exact hp _ (by simp only [STy.size]; omega)
-  | len => intro _ hp; have h0 := hp 0 (by simp only [STy.size]; omega); rwa [Loc.add_zero] at h0
+  | @len e l =>
+    intro _ hp
+    have h0 : Loc.Bounded L R (l.add 0) := hp 0 (by simp only [STy.size]; omega)
+    rwa [Loc.add_zero] at h0
   | @darr e i l x hi _ ih =>
     intro hfit hp
     have hl : Loc.Bounded L R l := by
@@ -268,9 +317,8 @@ theorem occ_bounded {L R : Nat} {t : STy} {l x : Loc} (h : Occ t l x) :
     exact ⟨hl, by omega⟩
 
 /-- Distinct occupied terms denote distinct words under the run's region
-premise: the frame property of one write. With the disjointness theorems
-above, a write to one member, entry or element leaves the words of every
-other one unchanged. -/
+premise: with the disjointness theorems above, the fact a frame proof for a
+write to one member, entry or element would use. -/
 theorem occ_word_ne {N L R : Nat} {H : Pre → Nat} {P : List Pre} (hH : ∀ p, H p < N)
     (hL : L ≤ N) (hR : R ≤ N) (hRD : RegionsDisjoint N L H (List.range R) P)
     {t₁ t₂ : STy} {l₁ l₂ x y : Loc}
@@ -304,3 +352,21 @@ end Solidity.Storage
 
 /-- info: 'Solidity.Storage.occ_word_ne' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Storage.occ_word_ne
+
+/-- info: 'Solidity.Storage.occ_sarr_disjoint' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.occ_sarr_disjoint
+
+/-- info: 'Solidity.Storage.occ_darr_len_elem' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.occ_darr_len_elem
+
+/-- info: 'Solidity.Storage.occ_map_slot_entry' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.occ_map_slot_entry
+
+/-- info: 'Solidity.Storage.locate_occ' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Storage.locate_occ
+
+/-- info: 'Solidity.Storage.occ_bounded' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.occ_bounded
+
+/-- info: 'Solidity.Storage.keys_word_ne' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.keys_word_ne

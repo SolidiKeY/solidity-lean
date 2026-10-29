@@ -272,7 +272,7 @@ Keccak implementation. Confirmed findings, fixed in the following commit:
 | The `STy.locate` vector compared two computed words and pinned no digest (finder 3). | Compared with the literal digest. |
 | `encode_inj` and `regionsDisjoint_keccakH_iff` had no axiom pins (finder 4). | Pinned. |
 
-## Checkpoint 4 — G27.01–G27.03 separation
+## Checkpoint 4 — the separation half of G27.01–G27.03
 
 Module `Solidity/Storage/HashedSeparation.lean` (imports
 `Solidity.Storage.HashedLayout`, in `CORE`). `Occ t l x`: the slot term `x`
@@ -285,8 +285,9 @@ argument follows `Solidity/Evm/Layout.lean`'s for `Evm.Slot`: `occ_reach`
 
 | Name | Statement |
 |---|---|
+| `locate_occ` | `t.locate l p = some (t', l') → Occ t' l' x → Occ t l x`: what a path reaches occupies only its parent's terms (with `Occ.word`, `Occ.len` for a leaf's own slot), so the disjointness below applies to `STy.locate`'s results. |
 | `occ_fields_disjoint` (G27.01) | Members `i ≠ i'` of a struct occupy disjoint slot terms. |
-| `occ_keys_disjoint` (G27.02) | Entries at keys `k ≠ k'` (any word, any value types, nested paths below) occupy disjoint slot terms. |
+| `occ_keys_disjoint` (G27.02) | Entries at keys `k ≠ k'` (any `Nat`, nested paths below) occupy disjoint slot terms; keys denote words only below `2^256` (`Pre.Words`, required by `keccak_word_inj`). |
 | `occ_map_slot_entry` | A mapping's own slot is no entry's. |
 | `occ_sarr_disjoint`, `occ_darr_disjoint` (G27.03) | Elements at indices `i ≠ i'` occupy disjoint slot terms. |
 | `occ_darr_len_elem` (G27.03) | A dynamic array's length slot is no element's. |
@@ -294,15 +295,37 @@ argument follows `Solidity/Evm/Layout.lean`'s for `Evm.Slot`: `occ_reach`
 | `occ_word_ne` | Under the region premise, distinct occupied terms (with preimages in `P`) have distinct words. |
 | `keys_word_ne` | G27.02 on words: entries at different keys of a placed mapping have different words. |
 
-The symbolic statements use no hash premise and no `Classical.choice`
-(pins `[propext, Quot.sound]`); the word-level ones add the region premise
-through `Loc.word_inj`.
+The symbolic statements use no hash premise and no `Classical.choice`: all
+nine are pinned (`locate_occ` at `[propext]`, the others at
+`[propext, Quot.sound]`); the word-level ones add the region premise
+through `Loc.word_inj` (`occ_word_ne`, `keys_word_ne` pinned at
+`[propext, Classical.choice, Quot.sound]`).
 
 Limitations (checkpoint 4): these are separation statements only. The
 *representation* half of G27.01–G27.03 (a source value's reading agrees
 with the words of its occupied terms, and a write to one member, entry or
 element preserves the others' readings) needs the source and EVM store
 semantics, which this dependency-free model does not have; `occ_word_ne` is
-the frame fact such a proof would use. Widths and packing (G27.01 "widths")
-are not modelled. G27.04 (recursive paths) and G27.05 (composition with the
-compiler) remain.
+the frame fact such a proof would use. Also remaining: widths and packing
+(G27.01 "widths"); `string`/`bytes` mapping keys (G27.02 "all in-profile key
+types" covers only one-word keys here); the `bytes`/`string` short/long
+header (G27.03 "headers" covers only the dynamic array length slot);
+G27.04 (recursive paths) and G27.05 (composition with the compiler).
+
+### Review (checkpoint 4)
+
+A read-only finder and a separate skeptic reviewed commit `108b89f` without
+the Lean server. Both found the ancestry argument sound (`Loc` is a free
+term type; each theorem compares in-place words of one base and depth) and
+the `Occ` constructors faithful to solc and `Evm/Layout.lean`. Confirmed
+findings, fixed in the following commit:
+
+| Finding | Fix |
+|---|---|
+| Nothing tied `Occ` to `STy.locate` (finder 1a, skeptic 3). | `locate_occ`, pinned. |
+| The module docstring and `occ_word_ne`'s claimed a write/frame property; no store semantics exists (finder 3b, skeptic 5). | Reworded to "the fact a frame proof would use". |
+| Scope: widths, `string`/`bytes` keys and headers were not listed as remaining; "the G27.01–03 separation statements" read as full (skeptic 1). | "Separation half"; remaining items listed here and in the coverage-plan line. |
+| "Any word" for keys, though keys are `Nat`s (skeptic 4, finder 3a). | Key bound stated (`Pre.Words`). |
+| The module docstring omitted struct members and static elements from `Occ` (finder 3c). | Added. |
+| Two untyped and two partly typed `have`s (finder 4a, 4b). | Typed. |
+| Six headline theorems unpinned, while the doc implied all were (finder 4c, skeptic 6). | All pinned. |
