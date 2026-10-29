@@ -115,10 +115,13 @@ fuel is read. -/
 syntax "below_go" "[" ident,* "]" : tactic
 macro_rules
   | `(tactic| below_go [$ls,*]) => `(tactic| repeat' (first
-      | exact Below.timeout _
+      | (with_reducible exact Below.timeout _)
       | (with_reducible exact Below.refl _)
-      | (first $[| apply $ls:ident]*)
-      | (refine Below.bind ?_ fun _ => ?_)
+      | (first $[| with_reducible apply $ls:ident]*)
+      | (refine Below.attempt_bind ?_ ?_ ?_)
+      | (refine Below.bind ?_ ?_)
+      | (with_reducible intro _)
+      | (with_reducible rfl)
       | split))
 
 mutual
@@ -314,6 +317,11 @@ theorem zeroInner_below {Γ' : RCtx} (n : Nat) : ∀ (k : Nat) {Γ : RCtx} (l : 
   | k + 1, _, .cons _ r => Below.bind (zeroVal_below n _) fun _ =>
       Below.bind (zeroInner_below n k r) fun _ => Below.refl _
 
+theorem copyInto_below {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v : RVal E.layout σ) :
+    Below (copyInto (Γ := Γ) F n τ p v) (copyInto F (n + 1) τ p v) := by
+  unfold copyInto
+  below_go [storeData_below, storeVal_below]
+
 theorem getterPath_below {Γ : RCtx} (F : Fr) (n : Nat) (data : Solidity.Roadmap.Bytes) : ∀ (τ : STy) (p : SPath) (i : Nat),
     Below (getterPath (E := E) (Γ := Γ) F n data τ p i) (getterPath F (n + 1) data τ p i)
   | .mapping k v, p, i => by
@@ -326,5 +334,220 @@ theorem getterPath_below {Γ : RCtx} (F : Fr) (n : Nat) (data : Solidity.Roadmap
   | .udvt _, _, _ | .contract _, _, _ | .bytes _, _, _ | .string _, _, _ | .struct _ _, _, _
   | .fn _ _ _ _, _, _ | .rational _, _, _ | .hexConst _ _, _, _ | .stringLit _, _, _ | .tuple _, _, _ =>
     Below.refl _
+
+
+/-! ### Frames and caught halts -/
+
+theorem run_attempt {Γ : RCtx} {α : Type} (m : EM E Γ α) (x) :
+    (EM.attempt m).run x = (.ok (m.run x).1, (m.run x).2) := by
+  show (match m.run x with | (r, x') => ((.ok r, x') : Except Halt _ × _)) = _
+  rcases m.run x with ⟨r, y⟩
+  rfl
+
+theorem run_sub {Γ Γ' : RCtx} {α : Type} (l' : Locals E.layout Γ') (m : EM E Γ' α) (l : Locals E.layout Γ)
+    (s : St E) : (EM.sub l' m).run (l, s) = match m.run (l', s) with
+      | (.ok a, (l'', s')) => (.ok (a, l''), (l, s'))
+      | (.error h, (_, s')) => (.error h, (l, s')) := rfl
+
+theorem Below.sub {Γ Γ' : RCtx} {α : Type} (l' : Locals E.layout Γ') {m m' : EM E Γ' α}
+    (h : Below m m') : Below (EM.sub (Γ := Γ) l' m) (EM.sub l' m') := by
+  intro x
+  rcases x with ⟨l, s⟩
+  rw [run_sub, run_sub]
+  rcases h (l', s) with ht | he
+  · left
+    rcases hr : m.run (l', s) with ⟨r, l'', s'⟩
+    rw [hr] at ht
+    cases ht
+    rfl
+  · right
+    rw [he]
+
+/-- A halt caught by `attempt`: the continuation re-raises a timeout. -/
+theorem Below.attempt_bind {Γ : RCtx} {α β : Type} {m m' : EM E Γ α} {k k' : Except Halt α → EM E Γ β}
+    (hm : Below m m') (hk : ∀ r, Below (k r) (k' r))
+    (h0 : ∀ x, ((k (.error .timeout)).run x).1 = .error .timeout) :
+    Below (EM.attempt m >>= k) (EM.attempt m' >>= k') := by
+  intro x
+  rw [run_bind, run_bind, run_attempt, run_attempt]
+  rcases hm x with ht | he
+  · left
+    rw [ht]
+    exact h0 _
+  · rw [he]
+    exact hk _ _
+
+
+/-! ### The interpreter -/
+
+/-- Unfold one level of `f` on each side of `Below (f (n + 1) …) (f (n + 2) …)`
+without unfolding the right side's inner calls at `n + 1`. -/
+syntax "below_unfold" ident ident : tactic
+macro_rules
+  | `(tactic| below_unfold $f $n) => `(tactic| (
+      conv => lhs; simp only [$f:ident]
+      generalize hm : $n + 1 = m
+      conv => rhs; simp only [$f:ident]
+      subst hm))
+
+
+section
+variable (G : Glob E)
+
+/-- **The induction hypothesis**: every interpreter function at horizon `n`
+is below itself at `n + 1`. -/
+structure BelowAt (n : Nat) : Prop where
+  evalE : ∀ (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ), Below (evalE G F n e) (evalE G F (n + 1) e)
+  evalPair : ∀ (F : Fr) {Γ : RCtx} {σ τ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ τ),
+    Below (evalPair G F n a b) (evalPair G F (n + 1) a b)
+  evalArgs : ∀ (F : Fr) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs),
+    Below (evalArgs G F n es) (evalArgs G F (n + 1) es)
+  evalConvArgs : ∀ (F : Fr) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs),
+    Below (evalConvArgs G F n es) (evalConvArgs G F (n + 1) es)
+  evalLoc : ∀ (F : Fr) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ), Below (evalLoc G F n l) (evalLoc G F (n + 1) l)
+  evalBuiltin : ∀ (F : Fr) {Γ : RCtx} {σs : List STy} (b : Builtin) (args : RArgs E Γ σs) (τ : STy),
+    Below (evalBuiltin G F n b args τ) (evalBuiltin G F (n + 1) b args τ)
+  evalArgsRev : ∀ (F : Fr) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs),
+    Below (evalArgsRev G F n es) (evalArgsRev G F (n + 1) es)
+  pay : ∀ (F : Fr) {Γ : RCtx} (a : RExpr E Γ (.address true)) (v : RExpr E Γ (.int IntTy.u256)),
+    Below (pay G F n a v) (pay G F (n + 1) a v)
+  execS : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
+    (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ),
+    Below (execS G F n nps ph s l) (execS G F (n + 1) nps ph s l)
+  forIter : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool} {Γ₁ Γ₂ : RCtx}
+    (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂) (l : Locals E.layout Γ₁),
+    Below (forIter G F n nps ph c post body l) (forIter G F (n + 1) nps ph c post body l)
+  execItems : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
+    (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ),
+    Below (execItems G F n nps ph b l) (execItems G F (n + 1) nps ph b l)
+  runMods : ∀ (F : Fr) (b : RBody E) (mods : List (RModInv E b.locals)) (l : Locals E.layout b.locals),
+    Below (runMods G F n b mods l) (runMods G F (n + 1) b mods l)
+  callInternal : ∀ (F : Fr) (d : Decl) {ps : List STy} (vs : Vals E.layout ps) (rs : List STy),
+    Below (callInternal G F n d vs rs) (callInternal G F (n + 1) d vs rs)
+  callAddr : ∀ (F : Fr) (a : Solidity.Roadmap.Address) (v : Solidity.Roadmap.Word) (input : Solidity.Roadmap.Bytes)
+    (static : Bool), Below (callAddr G F n a v input static) (callAddr G F (n + 1) a v input static)
+  enterInstance : ∀ (a sender : Solidity.Roadmap.Address) (v : Solidity.Roadmap.Word) (input : Solidity.Roadmap.Bytes)
+    (static : Bool) (c : String) (depth : Nat) (m : Nat × Nat × Heap E.layout),
+    Below (enterInstance G n a sender v input static c depth m)
+      (enterInstance G (n + 1) a sender v input static c depth m)
+  envLoop : ∀ (depth : Nat) (pstatic : Bool), Below (envLoop G n depth pstatic) (envLoop G (n + 1) depth pstatic)
+  dispatch : ∀ (F : Fr) (input : Solidity.Roadmap.Bytes), Below (dispatch G F n input) (dispatch G F (n + 1) input)
+
+theorem belowAt_zero : BelowAt G 0 where
+  evalE _ _ _ _ := by rw [evalE.eq_1]; exact Below.timeout _
+  evalPair _ _ _ _ _ _ := by rw [evalPair.eq_1]; exact Below.timeout _
+  evalArgs _ _ _ _ := by rw [evalArgs.eq_1]; exact Below.timeout _
+  evalConvArgs _ _ _ _ := by rw [evalConvArgs.eq_1]; exact Below.timeout _
+  evalLoc _ _ _ _ := by rw [evalLoc.eq_1]; exact Below.timeout _
+  evalBuiltin _ _ _ _ _ _ := by rw [evalBuiltin.eq_1]; exact Below.timeout _
+  evalArgsRev _ _ _ _ := by rw [evalArgsRev.eq_1]; exact Below.timeout _
+  pay _ _ _ _ := by rw [pay.eq_1]; exact Below.timeout _
+  execS _ _ _ _ _ _ _ _ _ _ := by rw [execS.eq_1]; exact Below.timeout _
+  forIter _ _ _ _ _ _ _ _ _ _ _ _ := by rw [forIter.eq_1]; exact Below.timeout _
+  execItems _ _ _ _ _ _ _ _ _ _ := by rw [execItems.eq_1]; exact Below.timeout _
+  runMods _ _ _ _ := by rw [runMods.eq_1]; exact Below.timeout _
+  callInternal _ _ _ _ _ := by rw [callInternal.eq_1]; exact Below.timeout _
+  callAddr _ _ _ _ _ := by rw [callAddr.eq_1]; exact Below.timeout _
+  enterInstance _ _ _ _ _ _ _ _ := by rw [enterInstance.eq_1]; exact Below.timeout _
+  envLoop _ _ := by rw [envLoop.eq_1]; exact Below.timeout _
+  dispatch _ _ := by rw [dispatch.eq_1]; exact Below.timeout _
+
+variable {G} {n : Nat}
+
+theorem evalE_step (ih : BelowAt G n) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) :
+    Below (evalE G F (n + 1) e) (evalE G F (n + 1 + 1) e) := by
+  cases e <;> below_unfold evalE n <;> below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem evalPair_step (ih : BelowAt G n) (F : Fr) {Γ : RCtx} {σ τ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ τ) :
+    Below (evalPair G F (n + 1) a b) (evalPair G F (n + 1 + 1) a b) := by
+  below_unfold evalPair n
+  below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem evalArgs_step (ih : BelowAt G n) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) :
+    Below (evalArgs G F (n + 1) es) (evalArgs G F (n + 1 + 1) es) := by
+  cases es <;> below_unfold evalArgs n <;> below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem evalConvArgs_step (ih : BelowAt G n) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs) :
+    Below (evalConvArgs G F (n + 1) es) (evalConvArgs G F (n + 1 + 1) es) := by
+  cases es <;> below_unfold evalConvArgs n <;> below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem evalLoc_step (ih : BelowAt G n) (F : Fr) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) :
+    Below (evalLoc G F (n + 1) l) (evalLoc G F (n + 1 + 1) l) := by
+  cases l <;> below_unfold evalLoc n <;> below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem evalBuiltin_step (ih : BelowAt G n) (F : Fr) {Γ : RCtx} {σs : List STy} (b : Builtin)
+    (args : RArgs E Γ σs) (τ : STy) :
+    Below (evalBuiltin G F (n + 1) b args τ) (evalBuiltin G F (n + 1 + 1) b args τ) := by
+  below_unfold evalBuiltin n
+  below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem evalArgsRev_step (ih : BelowAt G n) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) :
+    Below (evalArgsRev G F (n + 1) es) (evalArgsRev G F (n + 1 + 1) es) := by
+  cases es <;> below_unfold evalArgsRev n <;> below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem pay_step (ih : BelowAt G n) (F : Fr) {Γ : RCtx} (a : RExpr E Γ (.address true))
+    (v : RExpr E Γ (.int IntTy.u256)) : Below (pay G F (n + 1) a v) (pay G F (n + 1 + 1) a v) := by
+  below_unfold pay n
+  below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem execS_step (ih : BelowAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+    {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) :
+    Below (execS G F (n + 1) nps ph s l) (execS G F (n + 1 + 1) nps ph s l) := by
+  cases s <;> below_unfold execS n <;> below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem forIter_step (ih : BelowAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
+    {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂)
+    (l : Locals E.layout Γ₁) :
+    Below (forIter G F (n + 1) nps ph c post body l) (forIter G F (n + 1 + 1) nps ph c post body l) := by
+  cases c <;> below_unfold forIter n <;> below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem execItems_step (ih : BelowAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+    {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) :
+    Below (execItems G F (n + 1) nps ph b l) (execItems G F (n + 1 + 1) nps ph b l) := by
+  cases b <;> below_unfold execItems n <;> below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem runMods_step (ih : BelowAt G n) (F : Fr) (b : RBody E) (mods : List (RModInv E b.locals))
+    (l : Locals E.layout b.locals) : Below (runMods G F (n + 1) b mods l) (runMods G F (n + 1 + 1) b mods l) := by
+  cases mods with
+  | nil => below_unfold runMods n; below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+  | cons md rest =>
+    below_unfold runMods n
+    refine Below.bind (Below.sub _ (ih.evalConvArgs _ _)) fun p => ?_
+    split
+    · exact Below.refl _
+    · split
+      · refine Below.bind (Below.refl _) fun s => ?_
+        refine Below.bind (Below.refl _) fun _ => ?_
+        refine Below.attempt_bind (ih.execItems _ _ _ _ _) (fun r => ?_) (fun x => ?_)
+        · below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+        · rfl
+      · exact Below.refl _
+theorem callInternal_step (ih : BelowAt G n) (F : Fr) (d : Decl) {ps : List STy} (vs : Vals E.layout ps)
+    (rs : List STy) : Below (callInternal G F (n + 1) d vs rs) (callInternal G F (n + 1 + 1) d vs rs) := by
+  below_unfold callInternal n
+  below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem callAddr_step (ih : BelowAt G n) (F : Fr) (a : Solidity.Roadmap.Address) (v : Solidity.Roadmap.Word)
+    (input : Solidity.Roadmap.Bytes) (static : Bool) :
+    Below (callAddr G F (n + 1) a v input static) (callAddr G F (n + 1 + 1) a v input static) := by
+  below_unfold callAddr n
+  below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem enterInstance_step (ih : BelowAt G n) (a sender : Solidity.Roadmap.Address) (v : Solidity.Roadmap.Word)
+    (input : Solidity.Roadmap.Bytes) (static : Bool) (c : String) (depth : Nat) (m : Nat × Nat × Heap E.layout) :
+    Below (enterInstance G (n + 1) a sender v input static c depth m)
+      (enterInstance G (n + 1 + 1) a sender v input static c depth m) := by
+  below_unfold enterInstance n
+  refine Below.bind (Below.refl _) fun _ => ?_
+  refine Below.attempt_bind (ih.dispatch _ _) (fun r => ?_) (fun x => ?_)
+  · exact Below.refl _
+  · rfl
+theorem envLoop_step (ih : BelowAt G n) (depth : Nat) (pstatic : Bool) :
+    Below (envLoop G (n + 1) depth pstatic) (envLoop G (n + 1 + 1) depth pstatic) := by
+  below_unfold envLoop n
+  below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+theorem dispatch_step (ih : BelowAt G n) (F : Fr) (input : Solidity.Roadmap.Bytes) :
+    Below (dispatch G F (n + 1) input) (dispatch G F (n + 1 + 1) input) := by
+  below_unfold dispatch n
+  below_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, convRV_below, convExplicitRV_below, bytesOfRV_below, encodeVals_below, writeLoc_below, deleteLoc_below, keyStep_below, zeroVals_below, zeroInner_below, zeroVal_below, getterPath_below, copyInto_below, Below.sub]
+
+/-- **Every interpreter function is monotone in its horizon.** -/
+theorem belowAt (G : Glob E) : ∀ n, BelowAt G n
+  | 0 => belowAt_zero G
+  | n + 1 =>
+    have ih := belowAt G n
+    ⟨evalE_step ih, evalPair_step ih, evalArgs_step ih, evalConvArgs_step ih, evalLoc_step ih,
+      evalBuiltin_step ih, evalArgsRev_step ih, pay_step ih, execS_step ih, forIter_step ih,
+      execItems_step ih, runMods_step ih, callInternal_step ih, callAddr_step ih, enterInstance_step ih,
+      envLoop_step ih, dispatch_step ih⟩
+
+end
 
 end Solidity.Source

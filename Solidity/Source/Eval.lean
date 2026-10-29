@@ -463,6 +463,20 @@ def Env.exposed (E : Env) (c : String) : List Decl :=
 def Env.special (E : Env) (c : String) (k : DeclKind) : Option Decl :=
   ((E.linearize c).getD [c]).findSome? fun s => E.decls.find? fun d => d.scope == some s && d.kind == k
 
+/-- The bytes of a `bytesN` value (`[]` for any other). -/
+def Val.bytesOf {D : Layout} {τ : STy} : Val D τ → List UInt8
+  | .fixedBytes bs _ => bs
+  | _ => []
+
+/-- A copy into storage at `p` of type `τ`: of a string literal's bytes or of
+a value's contents. -/
+def copyInto {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v : RVal E.layout σ) :
+    EM E Γ Unit :=
+  match v with
+  | .strLit bs => storeData F n τ p (Data.bytes (D := E.layout) (l := .memory) bs)
+  | .val x => storeVal F n τ p x
+  | _ => halt (.stuck "copy source")
+
 /-! ### Public getters -/
 
 /-- A value type: what a getter returns as one word. -/
@@ -765,8 +779,7 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
       | .encode, vs => encodeVals F n false vs
       | .encodePacked, vs => encodeVals F n true vs
       | .encodeWithSelector, .cons s vs => do
-        let sel := match ← getV (← convRV F n (.fixedBytes 4 (by decide)) s) with
-          | .fixedBytes bs _ => bs
+        let sel := (← getV (← convRV F n (.fixedBytes 4 (by decide)) s)).bytesOf
         pure (sel ++ (← encodeVals F n false vs))
       | .encodeWithSignature, .cons s vs => do
         let sig ← bytesOfRV F n s
@@ -777,10 +790,7 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
     let v ← evalE G F n rhs
     match ← evalLoc G F n l with
     | .stor p =>
-      match v with
-      | .strLit bs => storeData F n τ p (Data.bytes (D := E.layout) (l := .memory) bs)
-      | .val x => storeVal F n τ p x
-      | _ => halt (.stuck "copy source")
+      copyInto F n τ p v
       return .val (← storRef τ p)
     | _ => halt (.stuck "copy target")
 termination_by structural n
@@ -872,53 +882,80 @@ def evalBuiltin (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {σs : List STy} (b 
       else evalArgs G F n args
     let res : EM E Γ (RVal E.layout τ) := do
       if h : τ = .tuple [] then return h ▸ RVal.unit else halt (.stuck "builtin result")
-    match b, vs with
-    | .require, .cons c rest => do
-      match ← getV c with
-      | .bool true => res
-      | _ =>
-        match rest with
-        | .cons m _ => halt (.revert (errorData (← bytesOfRV F n m)))
-        | _ => halt (.revert [])
-    | .assert, .cons c _ => do
-      match ← getV c with
-      | .bool true => res
-      | _ => lift (panic .assert)
-    | .revert, .nil => halt (.revert [])
-    | .revert, .cons m _ => halt (.revert (errorData (← bytesOfRV F n m)))
-    | .keccak256, .cons x _ => do
-      let bs ← bytesOfRV F n (← convRV F n (.bytes .memory) x)
-      ret32 τ (wordBytes (G.fixed.hash bs))
-    | .sha256, .cons x _ => do
-      let bs ← bytesOfRV F n (← convRV F n (.bytes .memory) x)
-      ret32 τ ((G.fixed.evm.precompile .sha256 bs).getD [])
-    | .ripemd160, .cons x _ => do
-      let bs ← bytesOfRV F n (← convRV F n (.bytes .memory) x)
-      ret32 τ (((G.fixed.evm.precompile .ripemd160 bs).getD []).drop 12)
-    | .addmod, .cons x (.cons y (.cons k _)) | .mulmod, .cons x (.cons y (.cons k _)) => do
-      let u := fun {σ : STy} (v : RVal E.layout σ) => do
-        match ← getV (← convRV F n (.int IntTy.u256) v) with
-        | .int i _ => pure i
-      let (a, c, m) ← match G.pipeline with
-        | .legacy => do let m ← u k; let c ← u y; let a ← u x; pure (a, c, m)
-        | .viaIR => do let a ← u x; let c ← u y; let m ← u k; pure (a, c, m)
-      if m = 0 then lift (panic .divZero)
-      else
-        let r := if b = .addmod then (a + c) % m else (a * c) % m
+    let none' : EM E Γ (RVal E.layout τ) := halt (.stuck "builtin")
+    let hashArg : EM E Γ Bytes := match vs with
+      | .cons x _ => do bytesOfRV F n (← convRV F n (.bytes .memory) x)
+      | .nil => halt (.stuck "builtin")
+    match b with
+    | .require =>
+      match vs with
+      | .cons c rest => do
+        match ← getV c with
+        | .bool true => res
+        | _ =>
+          match rest with
+          | .cons m _ => halt (.revert (errorData (← bytesOfRV F n m)))
+          | _ => halt (.revert [])
+      | .nil => none'
+    | .assert =>
+      match vs with
+      | .cons c _ => do
+        match ← getV c with
+        | .bool true => res
+        | _ => lift (panic .assert)
+      | .nil => none'
+    | .revert =>
+      match vs with
+      | .nil => halt (.revert [])
+      | .cons m _ => halt (.revert (errorData (← bytesOfRV F n m)))
+    | .keccak256 => do ret32 τ (wordBytes (G.fixed.hash (← hashArg)))
+    | .sha256 => do ret32 τ ((G.fixed.evm.precompile .sha256 (← hashArg)).getD [])
+    | .ripemd160 => do ret32 τ (((G.fixed.evm.precompile .ripemd160 (← hashArg)).getD []).drop 12)
+    | .addmod | .mulmod =>
+      match vs with
+      | .nil => none'
+      | .cons x r1 =>
+      match r1 with
+      | .nil => none'
+      | .cons y r2 =>
+      match r2 with
+      | .nil => none'
+      | .cons k _ => do
+        let u := fun {σ : STy} (v : RVal E.layout σ) => do
+          match ← getV (← convRV F n (.int IntTy.u256) v) with
+          | .int i _ => pure i
+        let (a, c, m) ← match G.pipeline with
+          | .legacy => do let m ← u k; let c ← u y; let a ← u x; pure (a, c, m)
+          | .viaIR => do let a ← u x; let c ← u y; let m ← u k; pure (a, c, m)
+        if m = 0 then lift (panic .divZero)
+        else
+          let r := if b = .addmod then (a + c) % m else (a * c) % m
+          match τ with
+          | .int t => return .val (intWrap t r)
+          | _ => halt (.stuck "addmod type")
+    | .ecrecover =>
+      match vs with
+      | .nil => none'
+      | .cons h r1 =>
+      match r1 with
+      | .nil => none'
+      | .cons v r2 =>
+      match r2 with
+      | .nil => none'
+      | .cons r r3 =>
+      match r3 with
+      | .nil => none'
+      | .cons s _ => do
+        let w := fun {σ : STy} (x : RVal E.layout σ) (ρ : STy) => do
+          match (← getV (← convRV F n ρ x)).word with
+          | some w => pure (wordBytes w)
+          | none => halt (.stuck "ecrecover argument")
+        let input := (← w h STy.bytes32) ++ (← w v (.int IntTy.u8)) ++ (← w r STy.bytes32) ++ (← w s STy.bytes32)
+        let out := (G.fixed.evm.precompile .ecrecover input).getD []
         match τ with
-        | .int t => return .val (intWrap t r)
-        | _ => halt (.stuck "addmod type")
-    | .ecrecover, .cons h (.cons v (.cons r (.cons s _))) => do
-      let w := fun {σ : STy} (x : RVal E.layout σ) (ρ : STy) => do
-        match (← getV (← convRV F n ρ x)).word with
-        | some w => pure (wordBytes w)
-        | none => halt (.stuck "ecrecover argument")
-      let input := (← w h STy.bytes32) ++ (← w v (.int IntTy.u8)) ++ (← w r STy.bytes32) ++ (← w s STy.bytes32)
-      let out := (G.fixed.evm.precompile .ecrecover input).getD []
-      match τ with
-      | .address _ => return .val (.address ⟨beValue out % 2 ^ 160, Nat.mod_lt _ (by decide)⟩)
-      | _ => halt (.stuck "ecrecover type")
-    | _, _ => halt (.stuck "builtin")
+        | .address _ => return .val (.address ⟨beValue out % 2 ^ 160, Nat.mod_lt _ (by decide)⟩)
+        | _ => halt (.stuck "ecrecover type")
+    | _ => none'
 termination_by structural n
 
 /-- Arguments, right to left (values in source order). -/
