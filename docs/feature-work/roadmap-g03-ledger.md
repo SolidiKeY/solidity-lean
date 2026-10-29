@@ -1157,7 +1157,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - lowering: `Solidity.Frontend.tyOf` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:417`) — reads solc resolved types
   - lowering: `Solidity.intTyOf` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1157`) — operand width inference
   - lowering: `Solidity.widenBytes` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1457`) — fixed-bytes widening
-  - source: `Solidity.Bridge.Arith.Widths.unsigned_widen` (SolidityBridge.Arith.Widths, `Bridge/SolidityBridge/Arith/Widths.lean:571`) — unsigned widening preserved
+  - source: `Solidity.Bridge.Arith.Widths.unsigned_widen` (SolidityBridge.Arith.Widths, `Bridge/SolidityBridge/Arith/Widths.lean:580`) — unsigned widening preserved
   - no existing anchor: admission, backend, evm, theorem
   - missing: No theorem that elaborated widths equal solc's resolved type before enclosing operations. Correctness rests on lowering (R13).
   - missing: Implicit fixed-byte narrowing in encodeCall and aggregate contextual coercions (hex arrays) are refused.
