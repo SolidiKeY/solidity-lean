@@ -8,6 +8,7 @@ def vectorPrograms : List (String × List Instr) :=
   [("environment", [EnvKey.msgSender, .msgValue, .timestamp, .selfBalance, .selfAddress].map select),
    ("balance-high", [push256 ⟨2 ^ 160 + 7, by decide⟩, .op .BALANCE]),
    ("selector", [selectorCode ⟨0x12345678, by decide⟩]),
+   ("signed-bound", [typedConstant (p := .int) ⟨-1, rfl⟩]),
    ("selector-abi", [selectorAbiCode ⟨0x12345678, by decide⟩]),
    ("keccak", materialize 7 [0, 255, 0, 97] ++ keccakCode ⟨7, by decide⟩ ⟨4, by decide⟩),
    ("namespace", materialize 7 [0, 255, 0, 97] ++ namespaceCode ⟨7, by decide⟩ ⟨4, by decide⟩ ⟨64, by decide⟩),

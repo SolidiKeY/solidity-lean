@@ -13,12 +13,12 @@ Osaka EVM correspondence. Source denotation remains the existing intrinsic
 - Preserved original checkout: `/workspace/solidity-lean`, branch `work`,
   head `dedb3aee5743025aeb6d8f7219c9b6b9c1e00e5d`.
 - Owned modules: `Solidity/Backend/Environment/`; this document and append-only
-  imports/module-map/document registry rows. No other lane is imported or edited.
+  imports/module-map/document registry rows. No other new/unmerged lane is imported; committed reserved interfaces are reused read-only.
 
 The manifest's actual IDs are `msgSender`, `msgValue`, `thisAddress`,
 `addressBalance`, `blockTimestamp`, `keccakBuiltin` (not keccak256Builtin),
 `erc7201Builtin`, `functionSelector`, `functionAddress`, `errorEventSelector`,
-and the interface-ID metadata row. Decisions are those in
+`interfaceId`, `typeName`, `typeBounds`, `creationCode`, and `runtimeCode`. Decisions are those in
 [solidity-scope.md](../solidity-scope.md), including G00 Q2, sender funding,
 own balance from the ledger, forced credits and fixed cryptographic functions;
 [decision impact](roadmap-decisions-impact.md) distinguishes narrower existing
@@ -191,7 +191,7 @@ exact base, zero new findings. Both independent reviews are closed. Checkpoint
 
 ## Checkpoint 3: intrinsic cryptographic builtins
 
-`Crypto` reuses `Storage.HashedKeccak.keccak256_bytes`/`ofBytes_lt` read-only
+`Crypto` reuses `Solidity.Storage.keccak256_bytes`/`Solidity.Storage.ofBytes_lt` read-only
 for `keccak_bound`. `source_digest` proves the existing intrinsic `keccakBytes`
 agrees with the real computed digest on the exact normalized bytes. It adds no
 hash axiom or injectivity premise. `digest_fixed` agrees with G06's concrete
@@ -209,7 +209,7 @@ response table. `lowerHash_success`, `lowerHash_failure` and
 No source semantics depends on compilation. The surrounding memory compiler
 must establish source-object layout/allocation and the HashInput boundary.
 
-`Namespace.namespace_source` proves the existing `ERC7201.root` on any represented
+`namespace_source` (module `Namespace`) proves the existing `ERC7201.root` on any represented
 byte string. It emits two actual KECCAK256 instructions, SUB with wrapping,
 MSTORE of exactly `Semantics.wordBytes` of the predecessor, and SHR/SHL by 8
 to clear the low byte. `namespace_preimage`, `root_value`, `namespace_result`
@@ -274,7 +274,7 @@ checkpoint 4/backfill remain pending.
 
 ## Checkpoint 4 and backfill A/B
 
-`Composition.sliceStep` independently combines the three target instruction
+`sliceStep` (module `Composition`) independently combines the three target instruction
 slices; `runSlice_append` proves actual code concatenation. Support predicates
 prove the data and crypto slice embeddings; byte materialization and hashing
 therefore compose in one actual instruction stream. `ValueCertificate` and
@@ -343,3 +343,79 @@ without Lean/server/build. No assigned component/backfill proof remains open;
 required final full/import validation is still pending and no goal completion
 is claimed. RUNTIME_GATE_PASS applies only to the previously recorded actual
 versions and passing KeySort output, not to these pending full gates.
+
+Final holistic review clarified the exact metadata-ID accounting: `typeBounds`
+uses `typedConstant`/`typed_constant_correct`/`typed_literal_intrinsic`, preserving
+existing `PrimTy.Denote` and `PrimTy.toWord` including signed two's complement.
+The signed negative control encodes -1 as 32 ff bytes and distinguishes it from
+an incorrect zero/Nat truncation. `creationCode`/`runtimeCode` use the same
+`materialize_correct` payload adapter as other byte constants only after the
+existing whole-input Artifact/importer has supplied validated compiler bytes.
+This lane does not certify artifact provenance, admit deployed raw code reads,
+or change the source's compiler/source/settings validation boundary. The exact
+manifest IDs `interfaceId` and `typeName` are now explicit in the opening list.
+
+
+## Final validation and handoff
+
+All four numbered checkpoints and backfill A/B are implemented and reviewed.
+The authorized backfill-A fallback is the typed sequence/control certificate
+above; a frontend emit-hoisting theorem remains an explicitly separate parent
+integration obligation. Full source/world/EVM/precompile composition is not
+claimed. Final finder and skeptic independently found no new source defect;
+their requested actual-output axiom pin is now guarded and kernel checked.
+
+Final serial closure checked all 780 module targets, including all Derived
+modules and `Solidity`, then all six native dependency targets (the last after
+a runtime-wrapper repair). The initial closure command took 2:40:36 and ended
+nonzero at native compilation because the wrapper bypassed bundled compiler
+headers. Subsequent linker attempts exposed missing bundled library/unwind
+flags. These are retained setup failures, not inherited Lean failures or
+waivers. The corrected serial wrapper invokes the distribution's `leanc` with
+`LEAN_CC` removed for that child, preserving its built-in flags. No repository
+compiler/proof option, toolchain version, budget or expected output changed.
+
+Actual final command `./run-lean.sh` passes (`final-run-lean3.log`):
+`Build completed successfully (762 jobs).`,
+`Build completed successfully (262 jobs).`,
+`solkeycheck: parsed 377 taclets, 131 read-bearing, table covers 131`, and
+`solkeycheck: OK — annotations match` the mounted exact frozen rule fixture.
+Exit 0, warm elapsed 1.63 seconds, aggregate RSS 711048 KiB. No historical
+SolKey mismatch or Derived17 OOM was waived: both actual gates passed.
+
+The first full serial closure's measured aggregate RSS peak is 11275852 KiB; cgroup
+peak 12884901888 bytes equals the fixed 12 GiB cap. Derived17 passed in about
+148 seconds. Saved memory events report `oom 0`, `oom_kill 0`,
+`oom_group_kill 0`; cap reclaim occurred. Swap remained zero. The original
+output handle and a later executor restart were recovered by attaching to the
+same running container, with complete intermediate log snapshots preserved.
+No duplicate full closure was started during recovery; there was no concurrent
+Lean worker or process termination.
+
+`final-focused.log` checks all eleven files with per-file Lean JSON diagnostics
+using each actual Lake setup mapping, then executes the actual `Backend.encode`
+fixture in pinned EthereumJS EVM 10.1.3, Osaka. All diagnostics are clean and
+all 13 exact-name programs pass, including the signed-bound addition. Exit 0,
+18 seconds, aggregate RSS 795532 KiB. Kernel results and external EVM tests
+remain distinct evidence; the latter do not prove a whole EVM correspondence.
+
+The final handoff, original committed diff, gate scripts/logs and checksum
+manifest are saved under `/workspace/scratch/environment-lowering-evidence`.
+That handoff records the final full committed head and measured recovery-work
+elapsed time, avoiding a self-referential commit hash in this document. The
+preserved original worktree is not integrated or modified. No push, merge or
+PR is performed. Final source/ownership/layer/orphan/trust/doc-delta gates are
+recorded in the accompanying `final-static` evidence, with the raw inherited
+documentation-path failure kept distinct from its zero-new-findings gate.
+
+Final static results: task-owned gate passes for 11 modules; global layers
+report 168 core modules and zero elaborator reach; orphans report 777 reachable,
+zero orphaned/not allowed; trust reports 792 sources, 241 inventoried sites,
+zero findings. Raw doc paths exit 1 for the same 46 missing-file references
+plus 24 ambiguous-name diagnostics as the exact base, with zero new findings.
+The first comparison mistakenly asserted 46 total diagnostic lines; comparing
+the complete 70-line diagnostic sets resolves that bookkeeping error. Relative
+links in this owning document resolve. Final handoff finder/skeptic confirmed
+actual gate outputs, axiom pin and component boundaries; their wording findings
+were fixed (cached serial closure is not called cold, and recovery is distinct
+from the documented setup retries). No review used Lean/server/build.

@@ -22,7 +22,7 @@ const first=BigInt(keccak256(input));
 const predecessor=(first+(1n<<256n)-1n)%(1n<<256n);
 const root=BigInt(keccak256(toBeHex(predecessor,32))) & ((1n<<256n)-256n);
 const expected={environment:[9n,11n,13n,41n,7n],'balance-high':[41n],selector:[0x12345678n],
- 'selector-abi':[0x12345678n<<224n],keccak:[BigInt(keccak256(input))],namespace:[root],
+ 'signed-bound':[(1n<<256n)-1n],'selector-abi':[0x12345678n<<224n],keccak:[BigInt(keccak256(input))],namespace:[root],
  sha256:[BigInt(sha256(Uint8Array.from([97,98,99])))],
  ripemd160:[BigInt(ripemd160(Uint8Array.from([97,98,99])))],ecrecover:[0n],'ecrecover-malformed':[0n],'ecrecover-valid':[0x2c7536e3605d9c16a7a3d7b1898e529396a65c23n],
  'utf8-name':[]};

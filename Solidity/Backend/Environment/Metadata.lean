@@ -142,6 +142,31 @@ theorem declaration_correct (d : SourceFunction) (s : Fin (2 ^ 32))
     rfl
   · exact selector_correct s tail
 
+/-- Integer type-bound metadata retains its intrinsic signedness. The target
+word uses the committed ABI two's-complement operation, not a Nat cast of a
+possibly negative source value. -/
+def typedConstant {p : PrimTy} (value : p.Denote) : Instr :=
+  let word := PrimTy.toWord value
+  constant 32 ⟨word.1.toNat, by
+    have h := of_decide_eq_true word.2
+    change word.1.toNat < 2 ^ 256
+    omega⟩
+
+theorem typed_constant_correct {p : PrimTy} (value : p.Denote) (tail : List Word) :
+    pushStep (typedConstant value) tail = some (PrimTy.toWord value :: tail) := by
+  unfold typedConstant
+  rw [constant_correct]
+  congr 2
+  apply Subtype.ext
+  exact Int.toNat_of_nonneg (of_decide_eq_true (PrimTy.toWord value).2).1
+
+theorem typed_literal_intrinsic {C : Contract} {Γ : Ctx} (σ : State C Γ)
+    (p : PrimTy) (n : Int) (inRange : p.inRange n = true) (tail : List Word) :
+    Val.evalT σ (.simple (.lit n inRange) : Val C Γ p) = .ok (PrimTy.ofLit p n inRange) ∧
+    pushStep (typedConstant (PrimTy.ofLit p n inRange)) tail =
+      some (PrimTy.toWord (PrimTy.ofLit p n inRange) :: tail) :=
+  ⟨rfl, typed_constant_correct _ tail⟩
+
 /-- Metadata literals agree with the pre-existing typed literal denotation. -/
 theorem selector_intrinsic {C : Contract} {Γ : Ctx} (σ : State C Γ)
     (s : Fin (2 ^ 32)) (tail : List Word) :

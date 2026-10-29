@@ -62,6 +62,16 @@ theorem byte_store_opcode_control :
     Backend.encode (byteCode ⟨5, by decide⟩ 0xab) =
       [0x60, 0xab, 0x7f] ++ List.replicate 31 0 ++ [5, 0x53] := by decide +kernel
 
+/-- Signed type-bound constants must be encoded in two's complement. -/
+theorem signed_metadata_control :
+    (typedConstant (p := .int) ⟨-1, rfl⟩).encode = [0x7f] ++ List.replicate 32 0xff ∧
+    pushStep (typedConstant (p := .int) ⟨-1, rfl⟩) [] ≠
+      pushStep (typedConstant (p := .uint) ⟨0, rfl⟩) [] := by decide +kernel
+
+/-- info: 'Solidity.Backend.Environment.typed_literal_intrinsic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms typed_literal_intrinsic
+
 /-- info: 'Solidity.Backend.Environment.materialize_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms materialize_correct
