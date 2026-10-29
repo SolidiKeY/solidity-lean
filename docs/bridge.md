@@ -415,6 +415,12 @@ numeric core word with all 32 physical bytes equal to its pure encoding.
 on a 32-bit platform). Symbolic words, cells outside capacity and memory
 expansion remain outside this relation.
 
+`load_state_frame` proves the actual upstream load leaves the full memory-machine
+state unchanged within capacity. `store_lookup_same` and `store_lookup_other`
+state actual upstream readback and distinct-cell read framing directly for
+arbitrary represented memory and every numeric word. These are derived from
+the persistent relation, not assumed read equations.
+
 `lookup_represents` derives actual upstream read agreement from these bytes;
 it does not assume `ReadAgrees`. `load_preserves` and `store_preserves` prove
 the persistent postrelation for the actual upstream memory transformers.
@@ -459,10 +465,10 @@ or gas/bytecode equivalence. No reference Lean definition is replaced. The final
 The active-wrap observation starts from the nonzero unaligned-write state,
 so its expected zero is discriminating.
 
-All 17 new guarded headline axiom audits report only `propext`,
+All 20 new guarded headline axiom audits report only `propext`,
 `Classical.choice` and `Quot.sound`; the original eleven remain. Focused byte
 checking passed in 4 seconds at 297,611,264 bytes peak aggregate cgroup memory;
-focused refinement checking passed in 11 seconds at 318,976,000 bytes. A
+focused refinement checking passed in 12 seconds at 318,484,480 bytes. A
 projection-normalization repair resolved the initial store proof's default
 heartbeat stop without changing budgets or claims. Independent read-only finder/skeptic reviews found no remaining proof defect.
 Their confirmed capacity-wording issue and nondiscriminating native active-wrap
@@ -472,14 +478,51 @@ Orphan/layer/strict automatic/trust gates and the trust regression passed.
 TestSuite's complete 564-row check passed with the repository's existing pinned
 snapshot (552 derived, 11 refuted, one excluded, zero pending; two skip).
 The incomplete setup snapshot first failed for a missing sibling pin file;
-no pin or source was changed to repair it. Documentation paths still fail
-with the same 20 historical findings, not new memory-reference failures.
-Full optional validation remains dependent on the designated Widths repair.
+no pin or source was changed to repair it. Before the master refresh, documentation paths failed
+with the same 20 missing references as the initial baseline, not new memory-reference failures.
+After refreshing only the task branch from published master `127c2ee5`, the
+cold `timeout --signal=TERM --kill-after=15s 7200 bash ./run-lean.sh` reached
+its aggregate 7,200-second limit after 699/703 default jobs. That attempt is
+**BLOCKED**, not passed. There was no theorem error or OOM. The same serialized
+group's optional umbrella failed in `Arith/Widths.lean` at lines 21, 47, 79,
+111 and 501 (438 seconds); all new/existing ExternalEvm targets, native memory
+observations and the rule checker passed. The group took 7,659 seconds, peaked
+at its hard 12 GiB cap, and recorded 51 cgroup limit events but zero OOM events.
+
+The concrete repair for the cold aggregate timeout was to build the remaining
+`Solidity.Examples.DecisionMemory` and `Solidity.Examples.DecisionKInt` targets
+separately using the retained cache (84 seconds), then rerun the **unchanged**
+7,200-second full command. It passed in 1,104 seconds: 703 default jobs, all
+262 TestSuite jobs and the actual SolKey annotation check, with no skip.
+The 28 explicit axiom audits present at that milestone passed in 5 seconds;
+three direct read/frame laws were then added and individually kernel-checked.
+The successful staged group took 1,193 seconds at 11,587,039,232 bytes peak
+aggregate cgroup memory, with no limit or OOM events. No statement, expected
+observation, proof/search budget or timeout was changed to obtain these passes. The final
+optional-memory check then passed the affected targets (12 seconds), all 31
+explicit axiom audits (5 seconds), native observations (4 seconds), complete
+TestSuite/static gates and diff check. Its only failing check was the historical
+documentation-path gate. That group took 29 seconds at 353,624,064 bytes peak
+aggregate memory, with no limit or OOM events. Final independent finder/skeptic
+reviews found no remaining proof obligation within this explicitly conditional,
+preallocated fragment; the conflicting present-tense documentation-debt count
+was corrected.
+
+The refreshed published base has additional historical documentation debt:
+the checker fails with 46 missing and 16 ambiguous references. A read-only
+reconstruction against exactly `127c2ee5` yields the identical finding set;
+this task introduces and resolves none. The earlier 20-missing result belongs
+to the pre-refresh base and remains recorded in its logs.
+
+Full optional acceptance remains **BLOCKED** on the designated storage-slots
+owner's Widths repair. Fresh `origin/master` at `78daf24c` still has the same
+Widths source and synthesis definitions implicated by these errors. No
+unpublished work was imported and this task does not duplicate that repair.
 
 The earlier checkpoint commit `200153d3` and its exports are retained. Its
 full optional gate failed in unchanged `Arith/Widths.lean` source-synthesis
 proofs; the designated storage-slots task owns that narrow prerequisite
-repair. At fresh master `6f267cc7` it was not yet merged. This is a separate
+repair. At fresh master `78daf24c` it was still not merged. This is a separate
 integration dependency, not a passing full gate.
 
 This optional refinement admits no raw-memory/assembly Solidity source shape,

@@ -366,6 +366,41 @@ theorem capacity_load_counterexample :
   rw [ha] at he
   contradiction
 
+/-- Actual upstream load keeps the full memory-machine state inside the
+preallocated active capacity. Its returned word is the actual upstream lookup. -/
+theorem load_state_frame (cells : Nat) (m : Machine) (s : EvmYul.MachineState)
+    (h : Represents cells m s) (i : Nat) (hi : i < cells) :
+    s.mload (address i) = (s.lookupMemory (address i), s) := by
+  unfold EvmYul.MachineState.mload
+  dsimp only []
+  rw [stable_active cells m s h i hi]
+
+/-- Same aligned cell: actual upstream store/readback for arbitrary represented
+memory and every numeric word, derived from the persistent byte relation. -/
+theorem store_lookup_same (bound cells : Nat) (hp : PaddingCorrect bound) (hb : 32 ≤ bound)
+    (m : Machine) (s : EvmYul.MachineState) (h : Represents cells m s)
+    (i : Nat) (hi : i < cells) (v : EvmYul.UInt256) :
+    (s.mstore (address i) v).lookupMemory (address i) = v := by
+  have hpost := store_preserves bound cells hp hb m s h i hi v
+  have hr := lookup_represents bound cells hp hb _ _ hpost i hi
+  dsimp only [] at hr
+  rw [upd_same] at hr
+  exact (canonical_injective v _ (Word.val.inj hr)).symm
+
+/-- Distinct aligned cells: actual upstream reads are preserved across the
+write, using disjoint 32-byte windows rather than a read-agreement premise. -/
+theorem store_lookup_other (bound cells : Nat) (hp : PaddingCorrect bound) (hb : 32 ≤ bound)
+    (m : Machine) (s : EvmYul.MachineState) (h : Represents cells m s)
+    (i k : Nat) (hi : i < cells) (hk : k < cells) (hne : k ≠ i)
+    (v : EvmYul.UInt256) :
+    (s.mstore (address i) v).lookupMemory (address k) = s.lookupMemory (address k) := by
+  have hpost := store_preserves bound cells hp hb m s h i hi v
+  have hr := lookup_represents bound cells hp hb _ _ hpost k hk
+  have hbefore := lookup_represents bound cells hp hb m s h k hk
+  dsimp only [] at hr
+  rw [upd_other m.mem (.val (wmod v.toNat)) hne, hbefore] at hr
+  exact (canonical_injective _ _ (Word.val.inj hr)).symm
+
 end Solidity.Evm.External.Memory
 
 /-- info: 'Solidity.Evm.External.Memory.lookup_represents' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -403,3 +438,12 @@ end Solidity.Evm.External.Memory
 
 /-- info: 'Solidity.Evm.External.Memory.capacity_load_counterexample' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Evm.External.Memory.capacity_load_counterexample
+
+/-- info: 'Solidity.Evm.External.Memory.load_state_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Evm.External.Memory.load_state_frame
+
+/-- info: 'Solidity.Evm.External.Memory.store_lookup_same' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Evm.External.Memory.store_lookup_same
+
+/-- info: 'Solidity.Evm.External.Memory.store_lookup_other' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Evm.External.Memory.store_lookup_other
