@@ -2438,3 +2438,36 @@ documentation findings or component passes substitute for the whole gate.
 The rejected named-value candidate is archived: it misclassified the existing
 clean-tail sharing branch, and production Testing was restored. Feature statuses
 and reference/function-return and broader-dispatch refusals remain unchanged.
+
+
+#### Final bounded proof-performance acceptance (2026-10-29)
+
+The original whole `./run-lean.sh` gate now terminates with exit 0 in
+320.661 seconds under its unchanged 1800-second bound: 685 main jobs, 259
+suite jobs, and all 131 read-bearing sort annotations pass. The original
+complete getter aggregate is rerun after that build and passes in 279.091
+seconds under the unchanged 300-second limit. All sixteen full observations
+match the historical complete report except elapsed times. Peak memory is
+5925699584 bytes for the whole gate and 3165024256 bytes for the aggregate,
+with hard 12 GiB cap, zero swap and zero limit/OOM events.
+
+A fresh 42-certificate/control audit passes in 67.249 seconds. All 257 actual
+imported artifact modules match the passing 62-test and 22-API closures exactly;
+1759 selected source/settings inputs per retained gate differ only in this
+document and its performance report. Compiler/upstream observations are
+refreshed separately in both required pipelines, preserving every result and
+source provenance. Trust, orphan, layer, strict automatic, inventory generation
+and check, and suite static gates pass. The documentation-path gate still
+fails with precisely the same historical 20 missing and six ambiguous paths;
+it is not counted passing. Generated inventory and feature statuses are unchanged.
+
+Later whole rebuild attempts and their component checks remain separately
+recorded: Decision passes in 583.451 seconds, Derived17 in 131.101 seconds.
+Derived17 peaks at 11261718528 bytes; raw VM availability briefly reaches zero,
+but conservative clean-inactive-file headroom stays above 2461335552 bytes.
+The unchanged hard cap and OS reserve remain enforced; no OOM or limit event
+occurs. Whole runs stopped on time or headroom remain blocked evidence.
+Read-only finder and skeptic confirmed actual final performance, kernel proof
+integrity and retained hashes. The report now labels the earlier pending list
+as historical, closing the reviewer's stale-label finding. No unsupported
+reference/function-return or broader-dispatch shape is promoted by this repair.
