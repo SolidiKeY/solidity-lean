@@ -940,3 +940,5 @@ At the root, the notation's own tests:
 | `Storage/Representation/Updates.lean` | Abstract symbolic replacement and nested mapping source saves. |
 | `Storage/Representation/Members.lean` | Source member reads/replacement with whole intrinsic field-store preservation. |
 | `Storage/Representation/UpdateControls.lean` | Inhabited member/nested mapping combinations, defaults, alias controls and axiom pins. |
+| `Storage/Representation/Arrays.lean` | Fixed/dynamic whole-array source saves, live/retained bounds and exact header/element frames. |
+| `Storage/Representation/ArrayControls.lean` | Heterogeneous fixed/dynamic, nested save, defaults, stale aliases, live failures and header controls. |

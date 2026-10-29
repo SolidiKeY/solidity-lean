@@ -54,8 +54,9 @@ not marked passed. Original-interface-only `tests/storage-values/Gap.lean` passe
 -j1 and a 145059840-byte cgroup peak. Checkpoint 1 is ready for its committed
 handoff; whole-assignment validation remains open. Checkpoint 2: scalar/member and nested mapping source saves/defaults and
 symbolic other-member frames proved, reviewed and checked; physical finite-run
-transport remains checkpoint 4. Checkpoint 3:
-array reads/writes/headers/bounds/nested paths pending. Checkpoint 4: explicit
+transport remains checkpoint 4. Checkpoint 3: array reads/writes, header/element frames, exact live/retained
+bounds and local nested-path composition proved, independently reviewed
+and checked. Checkpoint 4: explicit
 finite touched-set transport through `Loc.word` pending. Backfill A: recursive
 typed path/graph composition pending. Backfill B: supported full-word normalization and nested alias controls
 proved; stronger finite-run controls remain pending. No queue item is waived.
@@ -162,3 +163,45 @@ Solidity.Storage.Representation.UpdateControls` passed (29 jobs), 3.139982675 s,
 and JSON: `cp2-reviewed-final.log` / `cp2-reviewed-final.json` in evidence.
 Checkpoint 1 committed head: `76b1acf4d4204f7bd437fd291f29bb7809825410`.
 No full/import-closure pass or final assignment completion is claimed.
+
+## Checkpoint 3 — array representation and source operations
+
+`ElementsRep.set`, `fixed_path_source_save`, `fixed_path_save`,
+`array_path_source_save`, `array_path_save` preserve the represented whole
+fixed/dynamic value after an arbitrary typed inner-path save. Actual source
+reads/saves are the existing implementations. `array_read` includes retained
+slots; `array_live_read` separately proves successful live reads.
+`fixed_missing`, `array_missing`, `fixed_save_missing`, `array_save_missing`,
+`array_live_missing` state exact source failure boundaries: stale aliases
+may access retained shadows, normal live reads may not. No word contents
+can turn an out-of-range source read/write into success.
+
+`array_header`, `array_header_patch_frame`, `array_element_header_frame`,
+`array_other_element_frame` enforce header/element and other-element frames.
+`lengthWord` and `array_repartition` prove changing the live/shadow partition
+of an identical retained list changes only the header. This is NOT ordinary
+`pop`/`delete`: committed source pop may apply defaultOf; no such clearing,
+allocation, runtime copy or liveness theorem is claimed here.
+
+ArrayControls independently checks heterogeneous seven/nine elements,
+fixed and dynamic saves to zero, the unchanged distinct element/shadow,
+header preservation, zero/empty defaults, writes beyond extent, positive live
+reads and live-end failure, an actual dynamic/fixed nested-path save, and a
+shadow-slot write that preserves live seven/header one while findLive still
+fails at the shadow. Exact headline axiom sets are guarded, including the
+smaller `[propext, Quot.sound]` set for beyond_extent. Finder identified the
+positive-live and shadow-write gaps; both are fixed. Skeptic found no false
+source equation or frame assumption and required the explicit repartition
+versus pop/delete boundary above. Neither reviewer used Lean/server/builds.
+General recursive path/graph closure remains backfill A; physical finite-run
+transport remains checkpoint 4.
+
+Passing reviewed control run: 5.280609739 s, sampled aggregate RSS 757862400
+bytes, cgroup peak 282734592 bytes; final default/control check passed in 3.689199329 s with 754999296-byte
+aggregate RSS and 282992640-byte cgroup peak. Both read-only review rechecks
+accepted the source/documentation fixes. Layer/local-import/orphan/trust
+gates passed; doc-path findings remain the exact-base 46 with zero new ones. Only the inherited AST unused-variable warning is replayed.
+
+CP3 local import check: all 10 owned modules have zero forbidden frontend or
+other-new-lane dependencies (`tests/storage-values/check-local-layers.mjs`).
+Base-module membership is checked against the exact assigned commit.
