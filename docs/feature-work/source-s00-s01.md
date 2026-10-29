@@ -481,15 +481,19 @@ the resolved form below. The rules:
   mobile types;
 - unary `-` (signed integers; any fixed-point type), `!`, `~`, `++`/`--`
   on an lvalue, `delete` (not a mapping);
-- `+ - * / %` (numbers meeting at a common type); `& | ^` (integers and
-  `bytesN`); `<<`, `>>` (the left operand's mobile type by an unsigned
-  amount) and `**` (an integer base); order and equality at a common type
-  (`==` excludes internal function types); comparisons of two constants;
+- `+ - * / %` (numbers meeting at a common type; no constant zero
+  divisor, solc error 1211); `& | ^` (integers and `bytesN`); `<<`, `>>`
+  (the left operand's mobile type by an unsigned amount) and `**` (an
+  integer base), never on two constants, which only `const` folds
+  (`shl18_folded`, `shlTooBig_illTyped`); order and equality at a common
+  type (`==` excludes internal function types and contracts); comparisons
+  of two constants;
   `&&`, `||`; `? :` at the branches' mobile types;
 - assignment to an lvalue (`LVal`: a local, a mutable state variable, a
-  `storage`/`memory` array element, a mapping value) and compound assignment;
+  `storage`/`memory` array element or `bytes` byte, a mapping value), never
+  of a whole mapping, and compound assignment (`AssignOp.fits`);
 - array (a constant index within a static length), mapping and `bytes`/`bytesN`
-  indexing; `length`;
+  indexing; `length` (`STy.lengthTy`);
 - explicit conversions to elementary types (`bytes`/`string` keep their
   location), contracts and enums; `payable(…)`;
 - internal calls: exactly one callable overload accepts the arguments (the
@@ -508,26 +512,36 @@ names its location, a `storage` one is initialized, a mapping only in
 `storage`), blocks and `unchecked` blocks, `if`, all three loops (a
 declaration is no loop or `if` body), `break`/`continue` (which exist only
 in loop bodies, by S00's statement contexts), `return` against the
-function's return types, `emit E(…)` and `revert E(…)` (a unique matching
+function's return types (`return;` only without returns, solc error 6777:
+`bareReturn_refused`), `emit E(…)` and `revert E(…)` (a unique matching
 event or error), and the canonical rethrow (completing S00's shape check).
 `StmtD.locals_suffix` proves that a statement only adds locals.
 
 ### The resolved form (`Solidity/Source/Resolved.lean`)
 
-`RExpr B Γ τ` is the intrinsic resolved expression: `Γ : RCtx` is the list
-of local types, a local is an index `Idx Γ τ` (`Idx.ofGet?` from a typed
-position), a state variable or callee is its declaration (`Decl.ref`), and
-every implicit conversion carries its evidence (`Conv`). `B` is the
-inheritance relation it was checked against. `RStmt B Γ Γ'` and `RItems`
-resolve statements and blocks the same way, `declVar`/`declInit` extending
-`Γ`. `Typed.toR : Typed Γ e τ → RExpr Γ.isBase Γ.tys τ` and
-`StmtD.toR : StmtD C L s L' → RStmt C.isBase (tysOf L) (tysOf L')` are total
-and structural; `HasType.resolved` and `StmtOK.resolved` state that every
-well-typed phrase has a resolved form. The mobile-type lemmas
-(`Q.mobileInt?_fits`, `mobile_conv`) supply the conversion evidence for
-tuples, shifts and conditionals. S02's semantics is meant to be given on
-`RExpr`/`RStmt`, never on raw syntax; the `unchecked` and loop contexts are
-kept as `RItems.unchecked` and the loop constructors.
+`RExpr E Γ τ` is the intrinsic resolved expression over environment `E`:
+`Γ : RCtx` is the list of local types, a local is an index `Idx Γ τ`
+(`Idx.ofGet?` from a typed position), and a state variable, callee, event
+or error is its declaration `Decl` — the chosen overload — with the premise
+that fixes the type (`d.varTy E = some τ`, `d.fnSig E = some (ps, rs)`,
+`d.paramTys E = some ps`). No constructor leaves its result type free:
+`length`, `magic` and `builtin` carry `lengthTy`, `memberTy` and `callTy`
+premises, and comparisons have their own constructor at `bool`. Every
+implicit conversion carries its evidence (`Conv`, `RConvArgs` for call,
+event, error and tuple-return arguments, the mapping key in both
+`RExpr.indexMapping` and `RLVal.indexMapping`).
+
+`RStmt E R M k Γ Γ'` and `RItems` resolve statements and blocks in the
+frame of a body with return types `R` and modifier flag `M`, in statement
+context `k`: `break`/`continue` exist only at `⟨true, u⟩`, `unchecked`
+blocks only inside a checked one, `_` only with `M = true`, `return e`
+only when `R = [τ]`, and a tuple return converts to `R`.
+`Typed.toR : Typed Γ e τ → RExpr Γ.env Γ.tys τ` and
+`StmtD.toR : StmtD C L s L' → RStmt C.env C.rets C.inModifier k (tysOf L) (tysOf L')`
+are total and structural (`HasType.resolved`, `ItemsOK.resolved`). The
+mobile-type lemmas (`Q.mobileInt?_fits`, `mobile_conv`) supply the
+conversion evidence for tuples, shifts and conditionals. S02's semantics is
+meant to be given on `RExpr`/`RStmt`, never on raw syntax.
 
 **Coverage.** `exprCoverage` classifies every expression constructor
 explicitly (no wildcard over expression constructors; `none` only for
@@ -562,23 +576,29 @@ only the canonical rethrow is typed) deferred.
   functional (`Resolves'.unique`).
 - **Bodies.** `Decl.frame?` gives the frame of every body: functions,
   modifiers (with `_` admitted), constructors, `fallback` (with or without
-  parameters) and `receive`. A frame's locals are the named parameters and
-  the named returns, which solc puts in scope. `msg.value` is readable in a
+  parameters) and `receive`. A frame's locals are the parameters and the
+  returns, in order (named ones in scope, which solc does; unnamed ones
+  under `""`, which no identifier resolves to, so positions match
+  arguments). `msg.value` is readable in a
   `payable`, `internal` or `private` function, a modifier, a payable
   constructor and `receive`.
 - **Well-formedness.** `WellFormed` requires:
   - every base is an earlier contract or interface (`Env.basesOK`) and every
     contract and interface linearizes;
   - no two declarations clash (`List.Pairwise`, so an exact duplicate
-    clashes too): one name in one scope, except functions or events with
-    different parameter types (`sameSig_illFormed`);
+    clashes too): two constructors, fallback or receive functions of one
+    contract (`twoCtors_illFormed`); one name in one scope, except functions
+    or events with different parameter types (`sameSig_illFormed`);
   - every pragma is a version, an ABI coder or `experimental
     ABIEncoderV2` (`unknownPragma_illFormed`), and at most one coder pragma;
   - every declared type elaborates (variables, signatures, event and error
     parameters, struct members);
-  - placement: a free function has no visibility and a body; an interface
+  - placement: a free function has no visibility and a body; a contract
+    function has a visibility (`noVisibility_illFormed`); an interface
     function is `external` without a body (`ifaceBody_illFormed`); an
-    interface has no modifiers, constructors or state variables;
+    interface has no modifiers, constructors or state variables; a library
+    no constructor, `receive`, `fallback` or non-constant state variable;
+    `receive` is `external payable`; an interface inherits only interfaces;
   - every constant has an initializer, and every initializer converts to its
     variable's type;
   - every body's frame elaborates, its parameter and return names are
@@ -602,6 +622,8 @@ exist yet.
 | `counter_wellFormed` | S00's counter is `WellFormed` and `InProfileSyntax`; its body derivation is `incBody` |
 | `clashing_illFormed`, `sameSig_illFormed`, `ifaceBody_illFormed`, `unknownPragma_illFormed` | four ill-formed units, each refuted by its own field |
 | `tooBig_illTyped`, `fits_wellTyped` | `uint8 x = 300;` is ill typed in every body; `uint8 x = 255;` is well typed |
+| `shl18_folded`, `shlTooBig_illTyped` | `1 << 8` has only its folded type, so `uint8 x = 1 << 8;` is ill typed in every body |
+| `bareReturn_refused`, `twoCtors_illFormed`, `noVisibility_illFormed` | `return;` in a function with returns; two constructors; a contract function without visibility |
 | `Typed.lit_num` | a number literal is a rational, a `bytesN` or an address |
 | `msgValue_refused`, `gasleft_untyped` | `msg.value` in a non-payable public body, and `gasleft()`, have no derivation |
 | `diamond_linearize`, `cycle_rejected` | C3 |
@@ -619,15 +641,34 @@ exist yet.
   contract and its base are not merged.
 - **Data locations.** Copies from `memory` to `storage`, string literals to
   `storage`, and tuple-to-tuple implicit conversion are not typed.
-- **Locals.** A second declaration of a name in the same block is not
-  refused (it shadows).
+- **Locals and parameters.** A second declaration of a name in the same
+  block is not refused (it shadows). Parameter data locations are not
+  checked (a parameter without one defaults to `memory`; `storage`
+  parameters of external functions are not refused). Immutables cannot be
+  assigned in the constructor (no rule admits it yet).
+- **Literals.** A 40-digit hexadecimal literal without a valid checksum is
+  typed as a number, and a checksummed one still folds inside a larger
+  constant expression; solc refuses both. String literals converted to
+  `string` are not checked to be UTF-8.
+- **Declarations.** The `pragma solidity` version range is not checked
+  against 0.8.38; modifier invocations and base-constructor arguments are
+  not resolved or typed; state-variable shadowing across inheritance, a
+  non-abstract contract with an unimplemented function, `fallback`'s
+  signature and visibility, `constant`/`immutable`/`transient`
+  combinations, and overloads equal up to their external types are not
+  refused. A mapping nested in a struct is still assignable.
 - **Constants.** Array lengths take only literal constants, not named ones;
   constant initializers are typed but not checked to be compile-time
   (solc refuses, for example, `block.timestamp`); enum conversions of
   constants are not range checked.
 - **Members and calls.** `abi.*`, `send`/`transfer`, struct construction and
   members, named arguments, external calls, `payable(c)` of a contract without
-  `receive`.
+  `receive`. `delete` of a storage-pointer or calldata local is accepted.
+- **Uniqueness.** Typing derivations are not proved unique, so a
+  `Resolution` (the unit, environment and settings) does not yet carry the
+  resolved bodies; `meaning` must pick a derivation (any two agree on the
+  type, not proved to agree on the term). Carrying `RItems` per body in
+  `Resolution` is the S02 handoff.
 - **Function checks.** View/pure mutability, override, `virtual` and
   visibility of overriding functions, `using for`, operators on user types,
   function-type values.
@@ -639,8 +680,89 @@ Recorded in [Handoff](#handoff-s01).
 
 ### Review (S01)
 
-REVIEW_PLACEHOLDER
+Two read-only reviews (a finder and a skeptic, neither using the Lean
+server) ran on the reworked S01 (commit after `ffa109d`'s rework). Earlier
+review rounds on `ffa109d` drove the rework itself: derivations as data, the
+resolved layer, statement typing in a fixed body context, every body kind,
+named returns in scope, constants with initializers, declared types,
+`basesOK`, overload signatures, distinct parameter names, known pragmas,
+free-function and interface placement, and a coverage proof without a
+wildcard.
+
+Fixed in this round:
+
+| Finding | Fix |
+|---|---|
+| `shift`/`exp` typed two constants at the base's mobile type: `uint8 x = 1 << 8;`, `2**256` accepted, and `1 << 9` had two meanings (both reviews) | both rules require a non-constant operand; `shl18_folded`, `shlTooBig_illTyped` |
+| `HasType.resolved`/`StmtOK.resolved` vacuous: `state`, `binary`, `length`, `call`, `magic`, `builtin` left the type free (both) | every such constructor carries the premise fixing its type; comparisons split off (`compare`); `RExpr` indexed by `Env` |
+| overload identity and conversions dropped by `toR` (both): `emit`/`revertError`/tuple-return arguments, mapping lvalue keys, `retVal` untied to the returns | declarations carried as `Decl`; `RConvArgs` for events, errors, calls and tuple returns; keys converted; `RStmt` indexed by the return types |
+| `RStmt` lost the statement context and modifier flag (skeptic) | `RStmt E R M k`: `break`/`continue` at loop contexts, `_` with `M = true` |
+| duplicate constructor, fallback or receive accepted (both) | `Decl.clash` on `isSpecial` kinds; `twoCtors_illFormed` |
+| contract functions without visibility, library members, `receive` not `external payable` (finder) | `placementOK`; `noVisibility_illFormed` |
+| an interface could inherit a contract (skeptic) | `Env.basesOK` |
+| `return;` accepted in a function with returns (finder; confirmed by the pinned `returnExpressions/single_return_mismatching_number_named.sol`, error 6777) | `ret` requires no returns; `bareReturn_refused` |
+| `x / 0` accepted (both; the pinned `constants/initialization/division_by_zero.sol` shows error 1211) | `arith` refuses a constant zero divisor |
+| contracts had `==` (finder) | removed from `STy.hasEq` |
+| whole mappings assignable (finder) | `assign` refuses a mapping target |
+| `bytes` bytes were not lvalues (both) | `LVal.indexBytes`, `RLVal.indexBytes` |
+| unnamed parameters dropped from a body's locals, so positions differed from arguments (skeptic) | unnamed slots kept under `""` |
+| `bounded` docstring said 4096 bits where the code allows an MSB at 4096; `shl` bound one short (both) | docstring corrected; `shl` uses `maxBits + 1` |
+| `compound`'s operand check and `length`'s result recomputed in `toR` | `AssignOp.fits`, `STy.lengthTy` shared by `Typed` and `RExpr` |
+
+Recorded, not fixed (listed under What S01 does not do): parameter data
+locations, immutables in constructors, 40-digit hex literals and UTF-8,
+the pragma version range, modifier invocations and base-constructor
+arguments, state-variable shadowing across bases, unimplemented functions
+in non-abstract contracts, `fallback`'s signature, `constant`/`immutable`/
+`transient` combinations, overloads equal by external type, nested
+mappings in struct assignment, `delete` of pointers, derivation uniqueness
+and `Resolution` carrying resolved bodies.
+
+Answered, no change:
+
+- `resolve_iff` and `Resolves.unique` are close to restatements of
+  `Env.resolve` (skeptic). They are meant as the interface `SourceSpec.Resolves`
+  reads; the resolution rules themselves are exercised by `diamond_linearize`,
+  `cycle_rejected` and `local_shadows`, and a lookup specification against
+  C3 is future work.
+- `FixTy.subsumes_inRange` holds by construction of `implicitOK` (skeptic):
+  that is the second-round decision (implicit only between range-contained
+  pairs), and the theorem records it.
+- `address payable` to `bytes20` (skeptic) is left as is; not checked
+  against the pinned tests.
+- Gate G0 (skeptic): `Syn.const`, `Syn.tys`, `Decl.clash` and the `toR`
+  functions match on indexed families, but they are static checks and
+  elaboration, never kernel-evaluated hot code; S02's interpreter of
+  `RExpr` must use the recursor form if it is kernel-evaluated.
+- The witness per constructor in `exprCoverage_typed` is one derivation
+  (skeptic, finder): coverage is classification plus one witness, as
+  stated; negative controls cover the refusals that matter most.
 
 ### Handoff (S01)
 
-HANDOFF_PLACEHOLDER
+**Gates** (on the S01 commit): `node scripts/check-g07.mjs --log` over a
+full `./run-lean.sh` — check-trust 0 findings; check-layers 0 reach the
+elaborator; check-orphans 0 orphaned; check-noncircular 0 violations;
+check-axiom-pins 353 pins, 0 errors; check-source-grammar 0 errors;
+`source-ctors --check` 0 stale; script tests pass; check-doc-paths 46 (the
+baseline); G03 ledger 38 (the baseline); the build: "Build completed
+successfully (734 jobs)" and "(262 jobs)", check-solkey 37 mismatches (the
+baseline). `TrustAudit.lean`'s S00/S01 block passes in the Lean server.
+
+**For S02.** Give the semantics on `RExpr`/`RStmt`/`RItems`
+(`Solidity/Source/Resolved.lean`), never on `Syn`. Every node already fixes
+its type and carries its conversion evidence; a local is an `Idx`, a state
+variable, callee, event or error its `Decl`. A body's frame
+(`Decl.frame?`, `Frame.locals`) gives the initial context: parameters then
+returns, in order. Missing pieces S02 needs first: `Resolution` carrying
+the resolved bodies, a uniqueness (or canonical choice) of derivations, and
+the typing gaps listed above (external calls, `abi.*`, structs, data
+locations).
+
+**For G01 integration.** `SourceSpec.Resolves` needs settings
+(`Syntax := Settings × Syn .unit`, or the coder in `coderOf` only); the S01
+fields are `Resolves'`, `WellFormed`, `Settings.coder` (`coder_legacy`,
+`coder_viaIR`) and the empty-link-map conjunct of `Resolves'`.
+
+**For the fixed-point branch.** Identify `FixTy` with `FxTy` (see Types
+and conversions).

@@ -73,11 +73,11 @@ def w_payableConv : Typed Γ (.payableConv (.positional (.cons (.ident "o") .nil
 def w_unaryPrefix : Typed Γ (.unaryPrefix .not (.ident "flag")) .bool := .not ty_flag
 def w_unarySuffix : Typed Γ (.unarySuffix .inc (.ident "count")) (.int IntTy.u256) :=
   .incDecSuffix (.state rfl rfl rfl) rfl
-def w_exp : Typed Γ (.exp a one) (.int IntTy.u256) := .exp rfl ty_a ty_one rfl rfl
+def w_exp : Typed Γ (.exp a one) (.int IntTy.u256) := .exp rfl ty_a ty_one rfl rfl rfl
 def w_mulDivMod : Typed Γ (.mulDivMod .mul a one) (.int IntTy.u256) :=
-  .arith rfl ty_a ty_one rfl rfl
-def w_addSub : Typed Γ (.addSub .add a a) (.int IntTy.u256) := .arith rfl ty_a ty_a rfl rfl
-def w_shift : Typed Γ (.shift .shl a one) (.int IntTy.u256) := .shift rfl ty_a ty_one rfl rfl
+  .arith rfl ty_a ty_one rfl rfl rfl
+def w_addSub : Typed Γ (.addSub .add a a) (.int IntTy.u256) := .arith rfl ty_a ty_a rfl rfl rfl
+def w_shift : Typed Γ (.shift .shl a one) (.int IntTy.u256) := .shift rfl ty_a ty_one rfl rfl rfl
 def w_bitAnd : Typed Γ (.bitAnd a a) (.int IntTy.u256) := .bit rfl ty_a ty_a rfl rfl
 def w_bitXor : Typed Γ (.bitXor a a) (.int IntTy.u256) := .bit rfl ty_a ty_a rfl rfl
 def w_bitOr : Typed Γ (.bitOr a a) (.int IntTy.u256) := .bit rfl ty_a ty_a rfl rfl
@@ -87,10 +87,10 @@ def w_and : Typed Γ (.and (.ident "b") (.ident "flag")) .bool := .logic rfl ty_
 def w_or : Typed Γ (.or (.ident "b") (.ident "flag")) .bool := .logic rfl ty_b ty_flag
 def w_cond : Typed Γ (.cond (.ident "b") a a) (.int IntTy.u256) := .cond ty_b ty_a ty_a rfl
 def w_assign : Typed Γ (.assign .assign (.ident "count") a) (.int IntTy.u256) :=
-  .assign (.state rfl rfl rfl) ty_a rfl
+  .assign (.state rfl rfl rfl) ty_a rfl rfl
 
 /-- The elaborated form of `count = a`: an assignment to a state variable. -/
-def r_assign : RExpr Γ.isBase Γ.tys (.int IntTy.u256) := w_assign.toR
+def r_assign : RExpr Γ.env Γ.tys (.int IntTy.u256) := w_assign.toR
 
 /-! ## Builtins, events and errors -/
 
@@ -131,7 +131,6 @@ theorem msgValue_refused (τ : STy) (h : HasType Γv (.member (.ident "msg") "va
   generalize hm : "value" = m at h
   cases h with
   | length _ _ => exact absurd hm (by decide)
-  | lengthBytesN _ => exact absurd hm (by decide)
   | balance _ => exact absurd hm (by decide)
   | magic hr _ _ hv =>
     have e : Γv.resolve "msg" = some (.builtin .msg) := rfl
@@ -169,7 +168,7 @@ def w_revertError : StmtD (k := .body) CE LE (.revert (.ident "Bad") (.positiona
   .revertError .nil rfl
 
 /-- The elaborated `emit`: the event's declaration and the argument. -/
-def r_emit : RStmt CE.isBase (tysOf LE) (tysOf LE) := w_emit.toR
+def r_emit : RStmt CE.env CE.rets CE.inModifier .body (tysOf LE) (tysOf LE) := w_emit.toR
 
 /-! ## Coverage -/
 
@@ -315,6 +314,54 @@ theorem tooBig_illTyped (C : Ctx) (L L' : List (String × STy)) : ¬ StmtOK C L 
     rcases Typed.lit_num he with rfl | ⟨_, _, rfl⟩ | rfl <;>
       simp only [STy.implicit] at hc <;> revert hc <;> decide
 
+/-- `1 << 8`. -/
+def shl18 : Syn .expr := .shift .shl one (.lit (.num (.dec 8 0 0)))
+
+/-- **Two constant operands are folded, never typed at a mobile type**:
+`1 << 8` has only its exact type `256`. -/
+theorem shl18_folded {Γ : Ctx} {τ : STy} (h : Typed Γ shl18 τ) : τ = .rational (Q.ofInt 256) := by
+  cases h with
+  | const hq _ =>
+    have hv : shl18.const = some (Q.ofInt 256) := rfl
+    rw [hv] at hq
+    cases hq
+    rfl
+  | shift hb _ _ _ _ hc =>
+    cases hb
+    exact absurd hc (by decide)
+  | arith hb => nomatch hb
+  | bit hb => nomatch hb
+  | exp hb => nomatch hb
+  | order hb => nomatch hb
+  | eq hb => nomatch hb
+  | compareConst hb hk =>
+    cases hb
+    rcases hk with h | h <;> cases h
+  | logic hb => nomatch hb
+
+/-- **`uint8 x = 1 << 8;` is ill typed** (solc: `int_const 256` is not
+implicitly convertible to `uint8`), in every body. -/
+theorem shlTooBig_illTyped (C : Ctx) (L L' : List (String × STy)) :
+    ¬ StmtOK (k := .body) C L (.simpleStmt (.declVar (.varDecl (.elem (.int false 8 (by decide))) none "x")
+      (.some shl18))) L' := by
+  intro ⟨h⟩
+  cases h with
+  | declInit ht _ he hc =>
+    simp only [Syn.ty, Syn.tys, Elem.ty] at ht
+    cases ht
+    rw [shl18_folded he] at hc
+    simp only [STy.implicit] at hc
+    revert hc
+    decide
+
+/-- **`return;` needs a function without returns** (solc error 6777):
+refused in `f`'s body, which returns `uint256`. -/
+theorem bareReturn_refused (L L' : List (String × STy)) :
+    ¬ StmtOK (k := .body) Γ L (.returnStmt .none) L' := by
+  intro ⟨h⟩
+  cases h with
+  | ret h => cases h
+
 /-- `uint8 x = 255;` is well typed. -/
 def fits_wellTyped : StmtD (k := .body) Γ Γ.locals (.simpleStmt (.declVar (.varDecl (.elem (.int false 8 (by decide)))
     none "x") (.some (.lit (.num (.dec 255 0 0)))))) (("x", .int IntTy.u8) :: Γ.locals) :=
@@ -411,6 +458,32 @@ theorem ifaceBody_illFormed (s : Settings) : ¬ WellFormed (resolveUnit s ifaceB
   revert e
   decide
 
+/-- `contract K { constructor() {} constructor() {} }`. -/
+def twoCtors : Syn .unit :=
+  .unit (.cons (.contract false "K" .none .nil
+    (.cons (.constructor .nil .nil false none (.block .nil))
+      (.cons (.constructor .nil .nil false none (.block .nil)) .nil))) .nil)
+
+/-- **One constructor per contract.** -/
+theorem twoCtors_illFormed (s : Settings) : ¬ WellFormed (resolveUnit s twoCtors) := by
+  intro h
+  have e : twoCtors.decls.Pairwise fun d d' => d.clash twoCtors.env d' = false := h.noClash
+  revert e
+  decide
+
+/-- `contract V { function f() {} }`: a contract function without a
+visibility. -/
+def noVisibility : Syn .unit :=
+  .unit (.cons (.contract false "V" .none .nil
+    (.cons (.function (.ident "f") .nil none none .nil false none .nil (.some (.block .nil))) .nil)) .nil)
+
+/-- **A contract function has a visibility.** -/
+theorem noVisibility_illFormed (s : Settings) : ¬ WellFormed (resolveUnit s noVisibility) := by
+  intro h
+  have e : ∀ d ∈ noVisibility.decls, d.placementOK noVisibility.env = true := h.placement
+  revert e
+  decide
+
 /-- `pragma solidity ^0.8.0; pragma foo;`: an unknown pragma. -/
 theorem unknownPragma_illFormed (s : Settings) :
     ¬ WellFormed (resolveUnit s (.unit (.cons (.pragma ["solidity", "^0.8.0"]) (.cons (.pragma ["foo"]) .nil)))) := by
@@ -462,5 +535,11 @@ end Solidity.Source.TypingExamples
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.ifaceBody_illFormed
 /-- info: 'Solidity.Source.TypingExamples.exprCoverage_total' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.exprCoverage_total
-/-- info: 'Solidity.Source.StmtOK.resolved' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Source.StmtOK.resolved
+/-- info: 'Solidity.Source.ItemsOK.resolved' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.ItemsOK.resolved
+/-- info: 'Solidity.Source.TypingExamples.shlTooBig_illTyped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.TypingExamples.shlTooBig_illTyped
+/-- info: 'Solidity.Source.TypingExamples.bareReturn_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.TypingExamples.bareReturn_refused
+/-- info: 'Solidity.Source.TypingExamples.twoCtors_illFormed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.TypingExamples.twoCtors_illFormed

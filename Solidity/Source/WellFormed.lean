@@ -147,10 +147,12 @@ def Decl.frame? (E : Env) (d : Decl) : Option Frame :=
     Frame.mk? E d.scope .nil .nil b true false
   | _, _, _ => Option.none
 
-/-- The named locals a body starts with: parameters, then named returns
-(which solc puts in scope), the last innermost. -/
+/-- The locals a body starts with: parameters, then returns (named ones in
+scope, which solc does), the last innermost.  An unnamed one keeps its
+position under the name `""`, which no identifier resolves to, so a
+body's local positions are its arguments' positions. -/
 def Frame.locals (f : Frame) : List (String × STy) :=
-  (((f.names ++ f.rnames).zip (f.ps ++ f.rs)).filterMap fun (n, τ) => n.map (·, τ)).reverse
+  ((f.names ++ f.rnames).zip (f.ps ++ f.rs)).map (fun (n, τ) => (n.getD "", τ)) |>.reverse
 
 /-- The context of a body. -/
 def Frame.ctx (E : Env) (scope : Option String) (f : Frame) : Ctx :=
@@ -162,9 +164,16 @@ def Frame.distinct (f : Frame) : Prop := ((f.names ++ f.rnames).filterMap id).No
 
 /-! ## Declarations -/
 
-/-- Whether two declarations clash: the same name in the same scope, unless
-both are functions, or both events, with different parameter types. -/
+/-- Whether a declaration is a constructor, fallback or receive function:
+one of each per contract. -/
+def Decl.isSpecial (d : Decl) : Bool :=
+  d.kind == .constructor || d.kind == .fallback || d.kind == .receive
+
+/-- Whether two declarations clash: two constructors, fallback or receive
+functions of one contract; or the same name in the same scope, unless both
+are functions, or both events, with different parameter types. -/
 def Decl.clash (E : Env) (d d' : Decl) : Bool :=
+  (d.isSpecial && d.kind == d'.kind && d.scope == d'.scope) ||
   d.name != "" && d.name == d'.name && d.scope == d'.scope &&
     (if d.kind == .function && d'.kind == .function then
       match d.fnSig E, d'.fnSig E with
@@ -208,16 +217,30 @@ def Env.scopeKind (E : Env) : Option String → Option DeclKind
   | Option.some c => (E.decls.find? fun d => d.scope == Option.none && d.name == c &&
       (d.kind == .contract || d.kind == .interface || d.kind == .library)).map (·.kind)
 
-/-- solc's placement rules for functions: a free function has no visibility
-and a body; an interface function is `external` and has no body. -/
+/-- Whether a `receive` function is `external payable`. -/
+def Decl.receiveOK (d : Decl) : Bool :=
+  match d.kind, d.top, d.node with
+  | .receive, _, .receive ext pay _ _ _ _ => ext && pay
+  | _, _, _ => true
+
+/-- solc's placement rules: a free function has no visibility and a body; a
+contract function has a visibility; an interface function is `external`
+and has no body; an interface has no modifiers, constructors or state
+variables; a library no constructor, `receive`, `fallback` or non-constant
+state variable; `receive` is `external payable`. -/
 def Decl.placementOK (E : Env) (d : Decl) : Bool :=
+  let k := E.scopeKind d.scope
   match d.kind with
   | .function =>
     if d.top then d.fnVis.isNone && d.hasBody
-    else if E.scopeKind d.scope == Option.some .interface then
+    else if k == Option.some .interface then
       d.fnVis == Option.some .external && !d.hasBody
-    else true
-  | .modifier | .constructor | .stateVar => E.scopeKind d.scope != Option.some .interface
+    else d.fnVis.isSome
+  | .modifier => k != Option.some .interface
+  | .constructor => k != Option.some .interface && k != Option.some .library
+  | .stateVar => k != Option.some .interface && (k != Option.some .library || d.isConst)
+  | .receive => k != Option.some .library && d.receiveOK
+  | .fallback => k != Option.some .library
   | _ => true
 
 /-! ## Pragmas -/

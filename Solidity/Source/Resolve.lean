@@ -102,13 +102,15 @@ def lookup (E : Env) (scope : Option String) (x : String) : List Decl :=
 
 /-- Whether every base of every contract and interface is a contract or
 interface declared earlier at file level (solc: a base precedes its
-derived contract; a library is no base). -/
+derived contract; a library is no base; an interface inherits only
+interfaces). -/
 def basesOK (E : Env) : Bool :=
   (E.decls.zipIdx).all fun (d, i) =>
     !(d.kind == .contract || d.kind == .interface) ||
       (E.bases d.name).all fun b =>
         ((E.decls.zipIdx).take i).any fun (d', _) =>
-          d'.scope == Option.none && d'.name == b && (d'.kind == .contract || d'.kind == .interface)
+          d'.scope == Option.none && d'.name == b &&
+            (d'.kind == .interface || (d.kind == .contract && d'.kind == .contract))
 
 end Env
 

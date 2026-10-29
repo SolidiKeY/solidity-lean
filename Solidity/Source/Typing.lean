@@ -231,12 +231,15 @@ structure Ctx where
   /-- Whether the body is a modifier's (where `_` is the placeholder). -/
   inModifier : Bool := false
 
+/-- The inheritance relation: `d'` is `d` or one of its bases. -/
+def Env.isBase (E : Env) (d d' : DeclName) : Bool :=
+  d == d' || (d.scope == Option.none && d'.scope == Option.none &&
+    ((E.linearize d.name).getD []).contains d'.name)
+
 namespace Ctx
 
-/-- The inheritance relation: `d'` is `d` or one of its bases. -/
-def isBase (Γ : Ctx) (d d' : DeclName) : Bool :=
-  d == d' || (d.scope == Option.none && d'.scope == Option.none &&
-    ((Γ.env.linearize d.name).getD []).contains d'.name)
+/-- The inheritance relation of the environment. -/
+abbrev isBase (Γ : Ctx) : DeclName → DeclName → Bool := Γ.env.isBase
 
 /-- What a name denotes here. -/
 def resolve (Γ : Ctx) (x : String) : Option Denot :=
@@ -329,9 +332,10 @@ def STy.isOrdered : STy → Bool
   | .int _ | .fixed _ | .fixedBytes _ _ | .address _ | .enum _ => true
   | _ => false
 
-/-- Types with `==`: the value types except internal function types. -/
+/-- Types with `==`: the value types except internal function types and
+contracts (solc: compare `address(c)`). -/
 def STy.hasEq : STy → Bool
-  | .int _ | .fixed _ | .fixedBytes _ _ | .address _ | .enum _ | .bool | .contract _ => true
+  | .int _ | .fixed _ | .fixedBytes _ _ | .address _ | .enum _ | .bool => true
   | .fn ext _ _ _ => ext
   | _ => false
 
@@ -393,6 +397,34 @@ def AssignOp.kind? : AssignOp → Option BinKind
   | .shl | .sar | .shr => Option.some .shift
   | .add | .sub | .mul | .div | .mod => Option.some .arith
 
+/-- Whether a compound assignment's operand `σ` fits the target `τ`: as
+`τ ∘ σ` would for the operator's family. -/
+def AssignOp.fits (isBase : DeclName → DeclName → Bool) (op : AssignOp) (σ τ : STy) : Bool :=
+  match op.kind? with
+  | Option.some .arith => σ.implicit isBase τ && τ.isNumeric
+  | Option.some .bit => σ.implicit isBase τ && τ.isBits
+  | Option.some _ => τ.isBits && σ.isAmount
+  | Option.none => false
+
+/-- The type of `length` on a type: `uint256` on arrays and `bytes`,
+`uint8` on `bytesN`. -/
+def STy.lengthTy : STy → Option STy
+  | .array _ _ _ | .bytes _ => Option.some (.int IntTy.u256)
+  | .fixedBytes _ _ => Option.some (.int IntTy.u8)
+  | _ => Option.none
+
+/-- The value of a call returning `rs`: the single return, or a tuple. -/
+def STy.ret (rs : List STy) : STy :=
+  match rs with
+  | [r] => r
+  | _ => .tuple rs
+
+/-- A division or modulo (solc refuses a constant zero divisor: error
+1211, "Division by zero"). -/
+def Syn.isDivMod : Syn .expr → Bool
+  | .mulDivMod .div _ _ | .mulDivMod .mod _ _ => true
+  | _ => false
+
 /-- A checksummed 40-digit hexadecimal literal: an address, not a number. -/
 def Syn.isAddressLit : Syn .expr → Bool
   | .lit (.num (.hex ds true)) => ds.length == 40
@@ -409,6 +441,12 @@ def Syn.isDecl {k : SCtx} : Syn (.stmt k) → Bool
 /-- Whether arguments convert pointwise to parameters. -/
 def argsFit (isBase : DeclName → DeclName → Bool) (σs ps : List STy) : Bool :=
   σs.length == ps.length && (List.zip σs ps).all (fun p => p.1.implicit isBase p.2)
+
+/-- Whether an event or error accepts arguments of types `σs`. -/
+def Decl.fitsParams (E : Env) (isBase : DeclName → DeclName → Bool) (σs : List STy) (d : Decl) : Bool :=
+  match d.paramTys E with
+  | Option.some ps => argsFit isBase σs ps
+  | Option.none => false
 
 
 mutual
@@ -460,20 +498,22 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   /-- `a ∘ b` for `+ - * / %`: numbers meeting at a common type. -/
   | arith {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.arith, a, b) →
       Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
-      τ.isNumeric = true → Typed Γ e τ
+      τ.isNumeric = true → (e.isDivMod && τb.isZeroConst) = false → Typed Γ e τ
   /-- `a ∘ b` for `& | ^`: integers or `bytesN`. -/
   | bit {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.bit, a, b) →
       Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
       τ.isBits = true → Typed Γ e τ
   /-- `a << b`, `a >> b`: an integer or `bytesN` by an unsigned amount, at
-  `a`'s type (a constant `a` with a non-constant amount: its mobile type). -/
+  `a`'s type (a constant `a` with a non-constant amount: its mobile type).
+  Two constant operands are folded (`const`), never typed here. -/
   | shift {e a b : Syn .expr} {τa τb : STy} : e.binOp? = Option.some (.shift, a, b) →
       Typed Γ a τa → Typed Γ b τb → τa.mobile.isBits = true → τb.isAmount = true →
-      Typed Γ e τa.mobile
-  /-- `a ** b`: an integer to an unsigned power, at `a`'s (mobile) type. -/
+      (a.const.isSome && b.const.isSome) = false → Typed Γ e τa.mobile
+  /-- `a ** b`: an integer to an unsigned power, at `a`'s (mobile) type; two
+  constants are folded. -/
   | exp {e a b : Syn .expr} {τa τb : STy} : e.binOp? = Option.some (.exp, a, b) →
       Typed Γ a τa → Typed Γ b τb → τa.mobile.isInt = true → τb.isAmount = true →
-      Typed Γ e τa.mobile
+      (a.const.isSome && b.const.isSome) = false → Typed Γ e τa.mobile
   | order {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.order, a, b) →
       Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
       τ.isOrdered = true → Typed Γ e .bool
@@ -489,17 +529,13 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   /-- `c ? a : b`: the branches' mobile types meet. -/
   | cond {c a b : Syn .expr} {τa τb τ : STy} : Typed Γ c .bool → Typed Γ a τa → Typed Γ b τb →
       STy.common? Γ.isBase τa.mobile τb.mobile = Option.some τ → Typed Γ (.cond c a b) τ
-  /-- `a = b`: `b` converts implicitly to `a`'s type. -/
+  /-- `a = b`: `b` converts implicitly to `a`'s type; a mapping is never
+  assigned. -/
   | assign {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ →
-      σ.implicit Γ.isBase τ = true → Typed Γ (.assign .assign a b) τ
+      σ.implicit Γ.isBase τ = true → (τ matches .mapping _ _) = false → Typed Γ (.assign .assign a b) τ
   /-- `a ∘= b`: as `a = a ∘ b`. -/
-  | compound {a b : Syn .expr} {op : AssignOp} {k : BinKind} {τ σ : STy} : op.kind? = Option.some k →
-      LVal Γ a τ → Typed Γ b σ →
-      (match k with
-        | .arith => σ.implicit Γ.isBase τ && τ.isNumeric
-        | .bit => σ.implicit Γ.isBase τ && τ.isBits
-        | _ => τ.isBits && σ.isAmount) = true →
-      Typed Γ (.assign op a b) τ
+  | compound {a b : Syn .expr} {op : AssignOp} {τ σ : STy} :
+      LVal Γ a τ → Typed Γ b σ → op.fits Γ.isBase σ τ = true → Typed Γ (.assign op a b) τ
   /-- `a[i]` on an array: its element. -/
   | indexArray {a i : Syn .expr} {l : DataLoc} {τ σ : STy} {n : Option Nat} :
       Typed Γ a (.array l τ n) → Typed Γ i σ → σ.isIndex = true → inBounds σ n = true →
@@ -514,11 +550,8 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       inBounds σ (match τ with | .fixedBytes n _ => Option.some n | _ => Option.none) = true →
       Typed Γ (.index a (.some i)) (.fixedBytes 1 (by decide))
   /-- `x.length` on an array or `bytes` (`uint256`) or a `bytesN` (`uint8`). -/
-  | length {a : Syn .expr} {τ : STy} : Typed Γ a τ →
-      (match τ with | .array _ _ _ => true | .bytes _ => true | _ => false) = true →
-      Typed Γ (.member a "length") (.int IntTy.u256)
-  | lengthBytesN {a : Syn .expr} {n : Nat} {h : 1 ≤ n ∧ n ≤ 32} :
-      Typed Γ a (.fixedBytes n h) → Typed Γ (.member a "length") (.int IntTy.u8)
+  | length {a : Syn .expr} {τ ρ : STy} : Typed Γ a τ → τ.lengthTy = Option.some ρ →
+      Typed Γ (.member a "length") ρ
   /-- `T(e)` for an elementary `T`: an explicit conversion (`bytes`/`string`
   keep the argument's location). -/
   | convElem {x : Syn .expr} {el : Elem} {h : el ≠ .addressPayable} {σ τ : STy} : Typed Γ x σ →
@@ -541,7 +574,7 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
         | Option.some (ps', _) => argsFit Γ.isBase σs ps'
         | Option.none => false) = [d] →
       d.fnSig Γ.env = Option.some (ps, rs) →
-      Typed Γ (.call (.ident f) (.positional args)) (match rs with | [r] => r | _ => .tuple rs)
+      Typed Γ (.call (.ident f) (.positional args)) (STy.ret rs)
   /-- An admitted magic member: `msg.sender`, `msg.value` (where allowed),
   `block.timestamp`. -/
   | magic {g m : String} {b : Builtin} {τ : STy} {feature : String} :
@@ -573,7 +606,7 @@ inductive TypedSlots (Γ : Ctx) : Syn (.list (.opt .expr)) → List STy → Type
 /-- **Lvalues**: a local; a state variable neither `constant` nor
 `immutable`; an element of a `storage` or `memory` array; a mapping value.
 `length`, `balance`, magic members, `bytesN` elements and `calldata`
-elements are not lvalues. -/
+elements are not lvalues; a `bytes` byte is. -/
 inductive LVal (Γ : Ctx) : Syn .expr → STy → Type where
   | loc {x : String} {i : Nat} {τ : STy} : Γ.resolve x = Option.some (.loc i) →
       Γ.tys[i]? = Option.some τ → LVal Γ (.ident x) τ
@@ -585,6 +618,9 @@ inductive LVal (Γ : Ctx) : Syn .expr → STy → Type where
       inBounds σ n = true → LVal Γ (.index a (.some i)) τ
   | indexMapping {a i : Syn .expr} {τk τv σ : STy} : Typed Γ a (.mapping τk τv) → Typed Γ i σ →
       σ.implicit Γ.isBase τk = true → LVal Γ (.index a (.some i)) τv
+  /-- A byte of a `storage` or `memory` `bytes`. -/
+  | indexBytes {a i : Syn .expr} {l : DataLoc} {σ : STy} : Typed Γ a (.bytes l) → l ≠ .calldata →
+      Typed Γ i σ → σ.isIndex = true → LVal Γ (.index a (.some i)) (.fixedBytes 1 (by decide))
 
 end
 
@@ -651,8 +687,9 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       StmtD C (k := ⟨l, u⟩) L (.forStmt (.some i) c post s) L
   | brk {u : Bool} {L : List (String × STy)} : StmtD C (k := ⟨true, u⟩) L .breakStmt L
   | cont {u : Bool} {L : List (String × STy)} : StmtD C (k := ⟨true, u⟩) L .continueStmt L
-  /-- `return;` (the named returns, if any, are returned). -/
-  | ret {k : SCtx} {L : List (String × STy)} : StmtD C (k := k) L (.returnStmt .none) L
+  /-- `return;` in a function without returns (solc error 6777 otherwise,
+  named returns included). -/
+  | ret {k : SCtx} {L : List (String × STy)} : C.rets = [] → StmtD C (k := k) L (.returnStmt .none) L
   /-- `return e;`: `e` converts implicitly to the single return type. -/
   | retVal {k : SCtx} {L : List (String × STy)} {e : Syn .expr} {τ σ : STy} : C.rets = [τ] →
       Typed (C.at L) e σ → σ.implicit C.isBase τ = true → StmtD C (k := k) L (.returnStmt (.some e)) L
@@ -664,16 +701,12 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
   /-- `emit E(args);`: exactly one event accepts the arguments. -/
   | emit {k : SCtx} {L : List (String × STy)} {ev : String} {args : Syn (.list .expr)} {d : Decl}
       {σs : List STy} : TypedArgs (C.at L) args σs →
-      ((C.at L).declsOf .event ev).filter (fun d' => match d'.paramTys C.env with
-        | Option.some ps => argsFit C.isBase σs ps
-        | Option.none => false) = [d] →
+      ((C.at L).declsOf .event ev).filter (·.fitsParams C.env C.isBase σs) = [d] →
       StmtD C (k := k) L (.emit (.ident ev) (.positional args)) L
   /-- `revert E(args);`: exactly one error accepts the arguments. -/
   | revertError {k : SCtx} {L : List (String × STy)} {er : String} {args : Syn (.list .expr)} {d : Decl}
       {σs : List STy} : TypedArgs (C.at L) args σs →
-      ((C.at L).declsOf .error er).filter (fun d' => match d'.paramTys C.env with
-        | Option.some ps => argsFit C.isBase σs ps
-        | Option.none => false) = [d] →
+      ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) = [d] →
       StmtD C (k := k) L (.revert (.ident er) (.positional args)) L
   /-- The canonical rethrow, of a `bytes memory` local. -/
   | rethrow {k : SCtx} {L : List (String × STy)} {fl : List String} {body : Syn (.list .yulStmt)}

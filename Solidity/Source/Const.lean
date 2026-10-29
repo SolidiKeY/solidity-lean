@@ -84,8 +84,9 @@ def reduce (a : Q) : Q :=
     Nat.div_pos (Nat.le_of_dvd a.den_pos (Nat.gcd_dvd_right _ _)) (Nat.gcd_pos_of_pos_right _ a.den_pos)⟩
 
 /-- solc's bound on exact constants: a result whose reduced numerator or
-denominator needs more than 4096 bits is a compile error ("Precision of
-rational constants is limited to 4096 bits"). -/
+denominator has its most significant bit beyond position 4096 (more than
+4097 bits) is a compile error ("Precision of rational constants is limited
+to 4096 bits"). -/
 def maxBits : Nat := 4096
 
 /-- The bound, checked on the reduced result. -/
@@ -187,7 +188,7 @@ def Syn.const : {c : Cat} → Syn c → Option Q
       let x ← (← a.const).int?
       let y ← (← b.const).int?
       if x = 0 ∧ 0 ≤ y then pure (Q.ofInt 0)
-      else if 0 ≤ y ∧ Q.bitLen x.natAbs + y.toNat ≤ Q.maxBits then pure (Q.ofInt (x * 2 ^ y.toNat))
+      else if 0 ≤ y ∧ Q.bitLen x.natAbs + y.toNat ≤ Q.maxBits + 1 then pure (Q.ofInt (x * 2 ^ y.toNat))
       else Option.none
   | _, .shift .sar a b => do
       let x ← (← a.const).int?

@@ -1340,6 +1340,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.ItemsOK.resolved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/TypingExamples.lean:Solidity.Source.Q.toFixedExplicit?_of_toFixed?": [
   "Classical.choice",
   "Quot.sound",
@@ -1356,7 +1361,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Source/TypingExamples.lean:Solidity.Source.StmtOK.resolved": [
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.bareReturn_refused": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -1398,7 +1403,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.shlTooBig_illTyped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.tooBig_illTyped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.twoCtors_illFormed": [
   "Classical.choice",
   "Quot.sound",
   "propext"
