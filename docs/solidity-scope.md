@@ -77,15 +77,19 @@ manifest and the G01 statements.
 | G00 Q5 — `creationCode`/`runtimeCode` | The bytes this compiler produces, read from G01's whole-input `Artifact` table, which the source semantics takes as a parameter. |
 | G00 Q6 — fixed-point types | Full fixed-point support, beyond the acceptance boundary of pinned solc. |
 | G01 Q1 — source resources | Idealized source: unbounded fuel and recursion. |
-| G01 Q2 — fixed EVM limits | Gas, call-depth and stack exhaustion end a finite prefix; internal calls keep their frames in memory, so recursion depth is bounded only by gas. The code-size limits (EIP-170, EIP-3860) are a recorded idealization: the theorem assumes any code size deploys. |
+| G01 Q2 — fixed EVM limits | Resource exhaustion is a failure the source allows (see the follow-up rows below), not an observation; internal calls keep their frames in memory, so recursion depth is bounded only by gas. The code-size limits (EIP-170, EIP-3860) are a recorded idealization: the theorem assumes any code size deploys. |
 | G01 Q3 / G04 Q1 — hash collisions | A per-run premise that the preimages hashed by the execution prefix do not collide, plus a random-oracle lemma bounding the probability of a collision (about q²/2²⁵⁷ for q hashes). Global injectivity stays forbidden. |
-| G01 Q4 — environment | History-dependent callee strategies with unbounded reentrancy; the no-callback reading (`transferSemantics`) is a special case, not a premise; address 0 having no code stays an assumption. Sender funds and precompile addresses are not yet decided. |
+| G01 Q4 — environment | History-dependent callee strategies with unbounded reentrancy; the no-callback reading (`transferSemantics`) is a special case, not a premise; address 0 having no code stays an assumption. Sender funds and precompile addresses: see the follow-up rows below. |
 | G01 Q5 — observation | The full `Event` list with exact ABI and revert bytes, `Panic` codes included. |
 | G01 Q6 — state transfer | The public theorem exports `decode : EvmWorld → Option IntrinsicWorld`. |
-| G01 Q7 — gas and the environment | Over-approximation: callee answers range over all outcomes regardless of forwarded gas; one resource bound per session. |
+| G01 Q7 — gas and the environment | Over-approximation: callee answers range over all outcomes regardless of forwarded gas. |
 | G01 Q8 — system boundary | The whole input, every contract and linked library, is the compiled system. |
 | G04 Q2 — storage aliases after `pop`/`delete` | In profile, with solc's slot behaviour (G28). |
 | G04 Q3 — payment acceptance | Any outcome: an untyped recipient may accept or refuse each payment, depending on history; typed recipients run their own code (G47). |
+| Follow-up — nested-frame failures | Any external call frame may fail with a revert its caller sees, after which the caller continues: this covers the 1024 call-depth limit and our own code running out of forwarded gas inside a callback. |
+| Follow-up — block gas limit | Any transaction may revert from gas exhaustion, and the session continues with the next one. |
+| Follow-up — sender funds | `msg.value` is bounded by the sender's ledger balance; a transaction the sender cannot afford is invalid and never executes. |
+| Follow-up — precompile addresses | Calls to the Osaka precompiles behave as their EVM definitions (the crypto ones through the approved fixed functions), never as environment code. |
 
 Follow-up the decisions require (none is done yet):
 
@@ -104,11 +108,10 @@ Follow-up the decisions require (none is done yet):
 - **Manifest.** `fixedPoint` is still scoped `upstream`. Full support needs
   a manifest change, owners and a reference semantics beyond solc 0.8.38;
   the 174 in-profile count changes with it.
-- **Consistency to settle with the user.** The EVM's 1024 call depth does
-  not grow with gas, so unbounded reentrancy needs either a recorded
-  idealization or a bounded source; the block gas limit is not addressed;
-  our own code running out of forwarded gas inside a callback continues the
-  session on the EVM, which "ends the prefix" does not describe.
+- **Resources in the contracts.** The follow-up rows replace "exhaustion
+  ends a finite prefix" for gas and call depth: the G01 source semantics must
+  let any external frame and any transaction fail, and `Lang.Res` must stop
+  ending a session at gas exhaustion.
 - **Readings.** Opaque hashes are a fixed parameter instantiated by keccak,
   not an environment input; `this` comes from deployment and the own
   balance follows the ledger. "solc's slot behaviour" for dangling aliases
