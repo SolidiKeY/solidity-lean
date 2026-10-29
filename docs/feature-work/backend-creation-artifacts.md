@@ -92,7 +92,8 @@ evidence directory.
    focused target and independent review follow-ups pass.
 4. Typed immutable patches and frame/installation proofs: implemented;
    focused target and independent review follow-ups pass.
-A. Constructor-prefix return/revert composition: pending.
+A. Constructor-prefix return/revert composition: implemented; focused target,
+   inhabited controls and independent review follow-ups pass.
 B. Determinism, commutation, encoding/provenance and external vectors: pending.
 
 All final focused/import/full/TestSuite/static/trust/document gates and inherited
@@ -215,3 +216,28 @@ missing generic readback and cross-table safety. Both follow-up reviews confirm
 those fixes with no remaining concrete correctness finding; no Lean servers or
 builds were used by reviewers. Focused immutable target passes (10 jobs), axiom
 pins use only standard `propext`, `Classical.choice`, `Quot.sound` subsets.
+
+## Backfill A: constructor-prefix composition
+
+`Prefix` certifies actual finite `fetch`/`effect` continuation steps.
+`Prefix.exec` composes those steps with a final byte execution.
+`exit_exec` proves CODECOPY followed by either RETURN or REVERT over arbitrary
+prefix stack/memory. `read_write_zero` proves prior memory cannot contaminate
+returned bytes. `constructor_compose` composes independently checked prefix
+steps with an aligned exit wrapper, returning runtime or reverting the exact
+supplied byte list. No source constructor execution is assumed or derived.
+PUSH omits the EVM's stack cap in this byte-content slice; pinned-EVM agreement
+must handle resources and headroom (the wrapper adds at most three entries).
+Generated standalone wrappers start with an empty stack; arbitrary-stack prefix
+composition is only a component theorem, not unrestricted pinned-EVM agreement.
+
+`copyPrefix_steps` is a real nonempty prefix that copies the first code byte to
+memory offset 32. `copyConstructor` proves its composition with return/revert
+wrappers and nonempty arguments. Negative executions reject RETURN on the revert
+path, truncated revert bytes, and argument-contaminated revert bytes.
+Both independent reviews and their follow-ups pass; confirmed explicit-signature,
+stack-boundary and exact-byte-negative findings were fixed. No Lean server/build
+was used by either reviewer. Focused constructor target passes (9 jobs); its
+headline axiom pins use only standard subsets of `propext`, `Classical.choice`,
+`Quot.sound`. Parent source inheritance/initializer order, world rollback,
+account installation and payment composition remain open exactly as scoped.

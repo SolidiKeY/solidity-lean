@@ -951,3 +951,6 @@ At the root, the notation's own tests:
 
 | `Backend/Creation/Immutables.lean` | Typed bounded immutable words, disjoint table checks, per-patch readback/frame laws and certified link/immutable combination. |
 | `Backend/Creation/ImmutableChecks.lean` | Immutable bounds/overlap/readback/frame/install and combined library/immutable controls with axiom pins. |
+
+| `Backend/Creation/Constructor.lean` | Independently checked byte-prefix steps composed with exact runtime-return or exact-byte revert wrappers, over arbitrary prefix memory. |
+| `Backend/Creation/ConstructorChecks.lean` | Actual copying constructor-prefix witnesses, return/revert separation and nonempty argument controls. |
