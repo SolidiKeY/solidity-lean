@@ -8,6 +8,18 @@ This is a versioned language inventory and a proposed scope contract, with
 an inspection assessment of existing implementation support. It does not
 assert that every target feature already imports, executes, or proves correctly.
 
+## Compiler completion target
+
+The user-requested endpoint is a complete compiler with kernel-checked proofs
+for every feature except explicit user exclusions. The
+[full compiler roadmap](coverage-plan.md) owns implementation groups, source
+semantics, admission/lowering coverage, backend/EVM proofs and composition.
+Existing `partial`/`missing` statuses, shape refusals and proof limits are work
+to finish, not permission to narrow the target. Its initial scope audit must
+reconcile recorded exclusions with user authorization; no new exclusion or
+assumption is introduced by scheduling a group. The former environment/log
+extension proposals do not change the profile without explicit approval.
+
 ## Artifacts and separate lists
 
 | Artifact | Purpose |
