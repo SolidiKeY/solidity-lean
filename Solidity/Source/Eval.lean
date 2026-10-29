@@ -626,6 +626,13 @@ def reraise {Γ : RCtx} : Outcome → EM E Γ Bytes
   | .success d => pure d
   | .revert d => halt (.revert d)
 
+/-- An external call's value from its outcome: a revert re-raised, short
+return data reverted, the returns decoded. -/
+def extReturn {Γ : RCtx} (rs : List STy) (out : Outcome) : EM E Γ (RVal E.layout (STy.ret rs)) := do
+  let data ← reraise out
+  if data.length < 32 * rs.length then halt (.revert [])
+  return mkRet rs ((← lift (decodeVals E.layout data rs 0)).toR)
+
 /-- The `k` innermost locals reset to their defaults (via IR, each `_`
 runs the body in fresh return slots). -/
 def zeroInner {Γ' : RCtx} (n : Nat) : (k : Nat) → {Γ : RCtx} → Locals E.layout Γ → EM E Γ' (Locals E.layout Γ)
@@ -812,11 +819,9 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
     let ps := match d.fnSig E with | some (ps, _) => ps | none => []
     let input := G.selector (sigOf E.layout d.name ps) ++ (← encodeVals F n false vs.toR)
     if (← instanceAt G a).isNone && !G.hasCode (← st).events a then halt (.revert [])
-    let out ← (Prod.fst <$> sub (L0 E) (callAddr G F n a ⟨v.toNat % 2 ^ 256, Nat.mod_lt _ (by decide)⟩ input
-      (d.fnMut == some .view || d.fnMut == some .pure)))
-    let data ← reraise out
-    if data.length < 32 * rs.length then halt (.revert [])
-    return mkRet rs ((← lift (decodeVals E.layout data rs 0)).toR)
+    let (out, _) ← sub (L0 E) (callAddr G F n a ⟨v.toNat % 2 ^ 256, Nat.mod_lt _ (by decide)⟩ input
+      (d.fnMut == some .view || d.fnMut == some .pure))
+    extReturn rs out
   | .transfer a v => do
     match ← pay G F n a v with
     | .success _ => return RVal.unit
