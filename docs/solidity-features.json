@@ -1115,7 +1115,14 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "tupleTypes",
@@ -1870,7 +1877,14 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "catchClauses",
@@ -1938,7 +1952,14 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "assertBuiltin",
@@ -2051,7 +2072,14 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Opaque hash approved; a fixed parameter instantiated by keccak, not an environment input. Collisions: per-run premise plus probability bound (G01 Q3)."
+      }
     },
     {
       "id": "sha256Builtin",
@@ -2071,7 +2099,14 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Opaque hash approved as a fixed function."
+      }
     },
     {
       "id": "ripemd160Builtin",
@@ -2091,7 +2126,14 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Opaque hash approved as a fixed function."
+      }
     },
     {
       "id": "ecrecoverBuiltin",
@@ -2114,7 +2156,14 @@
         "Solidity/Secp256k1.lean",
         "Solidity/Semantics/Heap.lean",
         "Solidity/Examples/Tactics/Recovery.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Opaque ecrecover approved as a fixed function."
+      }
     },
     {
       "id": "erc7201Builtin",
@@ -2217,7 +2266,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/State.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Universally quantified input approved."
+      }
     },
     {
       "id": "msgValue",
@@ -2234,7 +2290,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/State.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Universally quantified input approved; bounded by the sender ledger balance (follow-up: sender funds)."
+      }
     },
     {
       "id": "thisAddress",
@@ -2251,7 +2314,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/State.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Approved; this comes from deployment."
+      }
     },
     {
       "id": "addressBalance",
@@ -2268,7 +2338,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/State.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Approved as a quantified input; the own balance follows the ledger."
+      }
     },
     {
       "id": "blockTimestamp",
@@ -2285,7 +2362,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/State.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "approved",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Universally quantified input approved."
+      }
     },
     {
       "id": "blockCoinbase",
@@ -2300,7 +2384,13 @@
           "line": 4185
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockDifficulty",
@@ -2315,7 +2405,13 @@
           "line": 4188
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockPrevrandao",
@@ -2330,7 +2426,13 @@
           "line": 4189
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockNumber",
@@ -2345,7 +2447,13 @@
           "line": 4190
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockGaslimit",
@@ -2360,7 +2468,13 @@
           "line": 4191
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockChainid",
@@ -2375,7 +2489,13 @@
           "line": 4192
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockBasefee",
@@ -2390,7 +2510,13 @@
           "line": 4193
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockBlobbasefee",
@@ -2405,7 +2531,13 @@
           "line": 4194
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockSlotnum",
@@ -2420,7 +2552,13 @@
           "line": 4195
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "txOrigin",
@@ -2435,7 +2573,13 @@
           "line": 4207
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "txGasprice",
@@ -2450,7 +2594,13 @@
           "line": 4208
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blockhashBuiltin",
@@ -2465,7 +2615,13 @@
           "line": 87
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "blobhashBuiltin",
@@ -2480,7 +2636,13 @@
           "line": 119
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "internalCalls",
@@ -2531,7 +2693,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "externalSelfCalls",
@@ -2616,7 +2785,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "replace",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Payment-acceptance boolean not approved: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G04 Q3, G47)."
+      }
     },
     {
       "id": "emptyDataValueCall",
@@ -2633,7 +2809,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "replace",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Payment-acceptance boolean not approved: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G04 Q3, G47)."
+      }
     },
     {
       "id": "newContract",
@@ -2653,7 +2836,14 @@
         "Solidity/Frontend/WorldImport.lean",
         "Solidity/Examples/Tactics/ContractWorldSource.lean",
         "Solidity/Semantics/ContractWorldCertificates.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "creationTry",
@@ -2673,7 +2863,14 @@
         "Solidity/Frontend/WorldImport.lean",
         "Solidity/Examples/Tactics/ContractWorldSource.lean",
         "Solidity/Semantics/ContractWorldCertificates.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "callbackSemantics",
@@ -2690,7 +2887,14 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "replace",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "The no-callback reading is not a premise: it must become a proved special case of history-dependent callees with unbounded reentrancy (G01 Q4); not yet proved."
+      }
     },
     {
       "id": "externalLibraryCalls",
@@ -2710,7 +2914,14 @@
         "Solidity/Frontend/WorldImport.lean",
         "Solidity/Examples/Tactics/ContractWorldSource.lean",
         "Solidity/Semantics/ContractWorldCertificates.lean"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "abiEncode",
@@ -3317,7 +3528,14 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "constructorLifetime",
@@ -3334,7 +3552,14 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "nonpayableEntry",
@@ -3368,7 +3593,14 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "followsG01",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
+      }
     },
     {
       "id": "termination",
@@ -3402,7 +3634,14 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q2",
+        "outcome": "replace",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Not approved: replace with the G01 Q4 environment (history-dependent callees) or propose again."
+      }
     },
     {
       "id": "typeValidation",
@@ -3462,7 +3701,13 @@
           "line": 520
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "gasleft",
@@ -3477,7 +3722,13 @@
           "line": 90
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "gasOption",
@@ -3492,7 +3743,13 @@
           "line": 83
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "rawCalldata",
@@ -3507,7 +3764,13 @@
           "line": 4202
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "rawReturndata",
@@ -3522,7 +3785,13 @@
           "line": 557
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "lowLevelCall",
@@ -3537,7 +3806,13 @@
           "line": 557
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "delegatecall",
@@ -3552,7 +3827,13 @@
           "line": 559
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "lowLevelStaticcall",
@@ -3567,7 +3848,13 @@
           "line": 560
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "selfdestruct",
@@ -3582,7 +3869,13 @@
           "line": 101
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "create2Salt",
@@ -3597,7 +3890,13 @@
           "line": 257
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "addressCode",
@@ -3612,7 +3911,13 @@
           "line": 555
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "addressCodehash",
@@ -3627,7 +3932,13 @@
           "line": 556
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "creationCode",
@@ -3698,7 +4009,13 @@
           "line": 635
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "memoryLayout",
@@ -3713,7 +4030,13 @@
           "line": 304
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "transientLayout",
@@ -3728,7 +4051,13 @@
           "line": 787
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "eventLog",
@@ -3743,7 +4072,13 @@
           "line": 1276
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "machineResources",
@@ -3758,22 +4093,35 @@
           "line": 61
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q1",
+        "outcome": "approvedExclusion",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+      }
     },
     {
       "id": "fixedPoint",
-      "category": "upstream",
+      "category": "types",
       "syntax": "fixed/ufixed; fixedMxN/ufixedMxN",
-      "scope": "upstream",
-      "current": "notApplicable",
-      "requirement": "Grammar/type placeholders exist but fixed-point code generation is upstream incomplete; do not claim complete Solidity runtime support.",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Full fixed-point support beyond the acceptance boundary of pinned solc 0.8.38, which accepts some declarations such as `type T is fixed;` and reports UnimplementedFeatureError for most other uses: fixed/ufixed and fixedMxN/ufixedMxN declarations, literals, conversions and arithmetic need a reference semantics defined in this repository, since solc gives none. Nothing is implemented.",
       "upstream": [
         {
           "path": "libsolidity/analysis/TypeChecker.cpp",
           "line": 814
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "decision": {
+        "date": "2026-10-29",
+        "question": "G00 Q6",
+        "outcome": "fullSupport",
+        "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
+        "note": "Moved from upstream into the profile; current is missing, not an implementation claim."
+      }
     },
     {
       "id": "removedAliases",

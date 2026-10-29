@@ -191,10 +191,54 @@ def render_report(data):
                 continue
             refs = ', '.join(f"[upstream]({base}{s['path']}#L{s['line']})" for s in r['upstream'])
             refs += ''.join(f'; [local](../{p})' for p in r['localEvidence'])
+            if 'decision' in r:
+                d = r['decision']
+                refs += f"; [decision {d['question']}, {d['date']}](../{d['record']}): {d['outcome']}"
+                refs += f" — {d['note']}" if 'note' in d else ''
             safe = lambda s: s.replace('|', '&#124;').replace('\n', ' ')
             out += [f"| `{r['id']}`<br><code>{safe(html.escape(r['syntax']))}</code> | {r['scope']} | {r['current']} | {safe(r['requirement'])} | {refs} |"]
         out += ['']
     return '\n'.join(out)
+
+
+# A scope decision cites an attributable user decision: the record's anchor
+# must hold the repository's "**User decision (date):**" marker. Decisions are
+# provenance only; the Lean catalog does not carry them.
+DECISION_OUTCOMES = {
+    'G00 Q1': ({'exclude'}, {'approvedExclusion'}),
+    'G00 Q2': ({'abstract'}, {'approved', 'replace', 'followsG01'}),
+    'G00 Q6': ({'model'}, {'fullSupport'}),
+}
+DECIDED_SCOPES = {'exclude': 'G00 Q1', 'abstract': 'G00 Q2'}
+
+
+def decision_marker(record, date):
+    path, anchor = record.split('#')
+    text = (ROOT / path).read_text()
+    slug = lambda h: re.sub(r'[^a-z0-9 -]', '', h.lower()).replace(' ', '-')
+    lines = text.splitlines()
+    heads = [i for i, line in enumerate(lines) if line.startswith('#') and slug(line.lstrip('#').strip()) == anchor]
+    assert len(heads) == 1, record
+    section = []
+    for line in lines[heads[0] + 1:]:
+        if line.startswith('#'):
+            break
+        section.append(line)
+    return '\n'.join(section), f'**User decision ({date}):**'
+
+
+def validate_decision(r):
+    d = r.get('decision')
+    if r['scope'] in DECIDED_SCOPES:
+        assert d and d['question'] == DECIDED_SCOPES[r['scope']], ('scope without its decision', r['id'])
+    if d is None:
+        return
+    assert set(d) <= {'date', 'question', 'outcome', 'record', 'note'}, d
+    assert re.fullmatch(r'\d{4}-\d{2}-\d{2}', d['date']), d
+    scopes, outcomes = DECISION_OUTCOMES[d['question']]
+    assert r['scope'] in scopes and d['outcome'] in outcomes, (r['id'], d)
+    section, marker = decision_marker(d['record'], d['date'])
+    assert marker in section and f"| {d['question']} " in section, ('decision not in record', r['id'], d)
 
 
 def validate(data, ledger, upstream=None):
@@ -213,6 +257,7 @@ def validate(data, ledger, upstream=None):
             assert r['localEvidence'], r
         for path in r['localEvidence']:
             assert (ROOT / path).is_file(), path
+        validate_decision(r)
     source_paths = {s['path'] for s in data['upstream']['sources']}
     assert len(source_paths) == len(data['upstream']['sources']), 'duplicate source paths'
     for source in data['upstream']['sources']:

@@ -1486,9 +1486,9 @@ def Feature.info : Feature → FeatureInfo
       requirement := r#"Mathematical execution/fuel bounds are not real gas or stack accounting; exact resource-sensitive outcomes need an EVM semantics."#,
       upstream := [{ path := "docs/control-structures.rst", line := 61 }], localEvidence := [] }
   | .fixedPoint =>
-    { category := "upstream", spelling := "fixed/ufixed; fixedMxN/ufixedMxN",
-      scope := .upstream, current := .notApplicable,
-      requirement := r#"Grammar/type placeholders exist but fixed-point code generation is upstream incomplete; do not claim complete Solidity runtime support."#,
+    { category := "types", spelling := "fixed/ufixed; fixedMxN/ufixedMxN",
+      scope := .model, current := .missing,
+      requirement := r#"Full fixed-point support beyond the acceptance boundary of pinned solc 0.8.38, which accepts some declarations such as `type T is fixed;` and reports UnimplementedFeatureError for most other uses: fixed/ufixed and fixedMxN/ufixedMxN declarations, literals, conversions and arithmetic need a reference semantics defined in this repository, since solc gives none. Nothing is implemented."#,
       upstream := [{ path := "libsolidity/analysis/TypeChecker.cpp", line := 814 }], localEvidence := [] }
   | .removedAliases =>
     { category := "upstream", spelling := "now; sha3; suicide; throw; msg.gas; block.blockhash; callcode; legacy f.gas()/value()",
