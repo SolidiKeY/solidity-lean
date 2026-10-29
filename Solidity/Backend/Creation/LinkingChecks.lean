@@ -68,14 +68,34 @@ theorem actual_assembly_combination :
   exact ⟨out, h, fits, ⟨tableOfAssembly h _ fits⟩,
     assembler_link_package h libraryAddress [0xaa, 0xbb] fits⟩
 
+/-- info: 'Solidity.Backend.Creation.assembler_regions' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms assembler_regions
+/-- info: 'Solidity.Backend.Creation.tableOfAssembly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms tableOfAssembly
+/-- info: 'Solidity.Backend.Creation.assembler_link_package' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms assembler_link_package
+/-- info: 'Solidity.Backend.Creation.actual_assembly_combination' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms actual_assembly_combination
+/-- info: 'Solidity.Backend.Creation.assembler_link_wrapper' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms assembler_link_wrapper
+/-- info: 'Solidity.Backend.Creation.linkSites_length' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms linkSites_length
+/-- info: 'Solidity.Backend.Creation.two_links_commute' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms two_links_commute
+/-- info: 'Solidity.Backend.Creation.linked_installs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms linked_installs
+/-- info: 'Solidity.Backend.Creation.unresolved_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms unresolved_refused
+/-- info: 'Solidity.Backend.Creation.truncated_arguments_refused' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms truncated_arguments_refused
 end Solidity.Backend.Creation

@@ -1,4 +1,4 @@
-import Solidity.Backend.Creation.Laws
+import Solidity.Backend.Creation.ArtifactLaws
 
 /-! Bounded section/source-map records. Source anchors are supplied metadata;
 these laws certify byte ranges, not frontend source-map fidelity or source

@@ -1,5 +1,5 @@
 import Solidity.Backend.Creation.Execution
-import Solidity.Backend.Creation.Checks
+import Solidity.Backend.Creation.ArtifactChecks
 
 /-! Inhabited installation witnesses and independent byte-range controls. -/
 namespace Solidity.Backend.Creation
@@ -56,7 +56,13 @@ example : ¬ Exec sample.payload sample.payload [] [] (.returned []) := by
   have hn : Outcome.returned sample.runtime ≠ .returned [] := by decide
   exact hn he
 
+/-- info: 'Solidity.Backend.Creation.wrapper_exec' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms wrapper_exec
+/-- info: 'Solidity.Backend.Creation.installs_runtime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms installs_runtime
+/-- info: 'Solidity.Backend.Creation.Exec.deterministic' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms Exec.deterministic
 end Solidity.Backend.Creation

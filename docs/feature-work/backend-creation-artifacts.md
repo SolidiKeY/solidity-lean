@@ -82,7 +82,7 @@ assembly origin, explicit local proof signatures and a supplemental import-closu
 check. Neither reviewer used a Lean server. Review details are saved in the
 evidence directory.
 
-## Remaining queue
+## Component queue status
 
 1. Artifact layout: implemented; focused target and controls pass; two reviews complete.
    Final global gates remain lane-wide obligations.
@@ -97,8 +97,8 @@ A. Constructor-prefix return/revert composition: implemented; focused target,
 B. Determinism, commutation, encoding/provenance and external vectors: implemented;
    kernel checks, 16 external vectors and independent review follow-ups pass.
 
-All final focused/import/full/TestSuite/static/trust/document gates and inherited
-failure comparisons remain pending. No completion claim is made for the lane.
+Component work is complete. Final gate outcomes and exact-base comparisons are
+recorded below; the inherited global documentation-path failure remains open.
 
 Checkpoint 1 focused build: `Build completed successfully (6 jobs).`
 Axiom output for `Immediate.read`, `wrapper_size`, `Artifact.runtime_slice`,
@@ -245,7 +245,7 @@ account installation and payment composition remain open exactly as scoped.
 
 ## Backfill B: laws, provenance and external creation vectors
 
-`Laws.link_permutation` proves arbitrary permutations of pairwise-disjoint typed
+`link_permutation` proves arbitrary permutations of pairwise-disjoint typed
 library sites yield identical bytes. Its proof folds over length-certified byte
 states and uses the existing assembler overwrite. `Exec.deterministic` already
 proves unique slice outcomes. `Artifact.payload_deterministic` fixes runtime/args;
@@ -264,7 +264,7 @@ location. Focused laws/provenance target passes (13 jobs); axiom pins contain on
 standard subsets of `propext`, `Classical.choice`, `Quot.sound`.
 
 `tests/creation-artifacts/Export.lean` exports actual artifact functions into
-`vectors.jsonl`. Its SHA256 is
+`vectors.jsonl`. The SHA256 of `vectors.jsonl` is
 `d8453e2544375fd911a2077491e8dc40b2bc9c4fb506d77c4d37926c69d5b9fc`.
 `node scripts/check-creation-artifacts-vectors.mjs` passed 16/16 actual Osaka CREATE
 transactions under EthereumJS 10.1.3, checking installed account code or exact
@@ -282,11 +282,86 @@ rows and the exact 16/16 output without Lean servers or builds. Their follow-ups
 confirm no remaining concrete finding; the distinct-record uniqueness control
 and explicit executable-prefix/suffix-entry distinction address their notes.
 
-## Final gate status
+## Final validation and committed handoff
 
-All component source queues 1–4 and backfill A–B have implementation, kernel
-proofs, inhabited positive/negative/combination controls and two independent
-read-only reviews. This is not whole-assignment completion: final full/import
-closure, TestSuite, strict/static/document gates, exact-base failure comparison
-and committed handoff/export remain required below. No parent roadmap group is
-claimed complete, and no source/world/pinned-EVM composition premise is hidden.
+All component queues 1–4 and backfill A–B are implemented, with kernel proofs,
+inhabited positive/negative/combination controls and independent finder/skeptic
+reviews. Six source checkpoints are committed individually. Final cleanup only
+renames the owned modules to `ArtifactChecks` and `ArtifactLaws`, updates their
+imports, and guards all 36 headline axiom outputs with exact `#guard_msgs` pins.
+The outputs contain only standard subsets of `propext`, `Classical.choice`,
+`Quot.sound`; the cleanup changes no theorem, premise or proof budget. Independent
+finder and skeptic checked the cleanup and recorded no remaining concrete finding.
+
+The final source checks run serially inside the single measured 12 GiB/no-swap
+container, under the documented writer lease. Lake uses a private disk cache
+keyed by toolchain/source inputs and `--rehash`; every actual Lean invocation has
+`-j1` and `LEAN_NUM_THREADS=1`. Per-file CLI checks use Lake-generated `--setup`
+import mappings when present. Cached artifacts need not materialize named local
+`.olean` files. Earlier direct checks with missing renamed import artifacts, and
+one check requesting a nonexistent fetched-module setup file, remain failed
+records; subsequent fresh checks correctly resolve the actual artifact mapping.
+No Lean MCP diagnostics tool was available. No concurrent Lean/LSP ran.
+
+| Gate command (inside bounded container) | Actual outcome / decisive output |
+|---|---|
+| `lake build Solidity.KeySort` with the task's alternate `-j1` configuration | PASS: built 1.7s; completed 2 jobs; RUNTIME_GATE_PASS |
+| `lake build Solidity.TestSuite.Derived17` | PASS: 228 jobs; module 131s; full closure 29:46.57 |
+| Per-file `lake env lean -j1 --tstack=131072` for all 17 owned files, with generated setup mappings where present | PASS: fresh diagnostics, including 36 guarded headline axiom reports |
+| `./run-lean.sh` | PASS: 768 default/import jobs, 262 TestSuite jobs; parsed 377 taclets, 131 read-bearing, annotations match the real pinned rules |
+| Exact-base `./run-lean.sh` in an immutable source snapshot with private Git metadata | PASS at the exact assigned base; no historical mismatch waiver used |
+| Exporter plus exact `cmp` against committed JSONL | PASS: actual artifact functions reproduce every committed vector |
+| `node scripts/check-creation-artifacts-vectors.mjs` | PASS: 16/16 actual Osaka CREATE transactions, EthereumJS 10.1.3 |
+| `node scripts/check-layers.mjs` | PASS: 168 core modules, 0 reach the elaborator |
+| `node scripts/check-creation-artifacts.mjs` | PASS: task-owned import closure restricted to existing assembler/opcode/jumpdest and this lane |
+| `node scripts/check-orphans.mjs` | PASS: 783 reachable, 0 orphaned, 0 not allowed |
+| `bash scripts/check-trust.sh` | PASS: 798 sources, 241 inventoried sites, 0 findings |
+| `node scripts/check-automatic.mjs --strict` | PASS: 491 automatic, 61 with step budget, 0 manual; 11 refuted; 0 pending |
+| `bash scripts/check-testsuite.sh --complete --solkey "$PWD/tests/migration/solkey/keyext.solidity.examples"` | PASS: 564 = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip; pinned snapshot and rules checksums agree |
+| `bash scripts/check-doc-paths.sh` | FAIL: 46 inherited missing references; exact-base and final head finding lists are identical, including ambiguity records; no new finding |
+
+The complete cold default/TestSuite/SolKey run took 2:08:52 and reported peak
+RSS 8863664 KiB. The earlier Derived17 closure reported peak RSS 11429108 KiB;
+the child cgroup peaked at exactly 12884901888 bytes, with 337 hard-limit events
+and zero OOM/OOM-kill events. These are measured resource results, not increased
+proof/test budgets. Per-file final logs also record time/RSS. Initial runtime and
+failed configuration probes remain historical evidence and are not passed gates.
+KeySort's measured successful timestamp is 2026-10-29T19:01:29Z; final validation
+and export timestamps in the external handoff bound the measured work interval.
+
+The global documentation-path failure is not marked green. Its 46 missing
+references are outside owned files and already occur at the exact base; the
+lane adds no finding. Repairing those inherited references is outside this
+assignment's authorized write set. This required failing global gate prevents
+marking the entire persistent goal complete, despite completed component work
+and all Lean/build/TestSuite gates passing. No semantic scope question is needed.
+
+Current source integration anchors (read-only) are `Language/Features.lean`
+constructors `libraries`, `inheritance`, `constructors`, `immutables`,
+`newContract`, `constructorLifetime`, `creationCode`, `runtimeCode`, and their
+existing requirement clauses; `Frontend/SolcJson/Contract.lean`'s
+`SolcFun.ctorMember`, `contractLineage` and immutable initializer processing;
+`Semantics/Deploy.lean`'s `State.deploy` and `Contract.deployT`; and
+`Roadmap/Contracts.lean`'s `CodeUnit`, `Artifact`, `Artifact.initcode`,
+`Artifact.PrefixFree`, `createsOf`, `PublicCorrectness.creates_table`.
+Manifest IDs and local-evidence paths are listed above. The coordinator must
+connect these exact producers/consumers; no manifest status or global ledger was
+changed by this lane.
+
+Remaining parent integration requirements are source constructor/inheritance/
+initializer order and ABI argument decoding; immutable declaration identity,
+initializer values, repeated-reference agreement and later-write exclusion;
+whole-input artifact-table prefix freedom and creation-event binding; library
+session identity/internal addressing and refusal of externally supplied link
+maps; source-map producer fidelity; and full source/lowering/pinned-EVM/Bridge
+step agreement with gas, stack headroom, account/address/nonce/payment/rollback
+and code-deposit behavior. Resource/code-size abstraction remains as approved,
+with explicit 256-bit operand bounds. No CREATE2, fresh world implementation or
+raw source code-observation feature is introduced. These composition obligations
+are outside the preparation lane and are not assumed proved by its theorems.
+
+Final artifacts are exported outside the checkout to preserve the original
+committed patch and evidence. The external handoff records the full final HEAD,
+base, branch, actual checkout, every checkpoint commit, exact commands/exits,
+review findings/fixes, elapsed interval, checksums and this remaining gate blocker.
+The original work checkout is preserved. No push, merge or PR was performed.

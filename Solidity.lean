@@ -668,7 +668,7 @@ import Solidity.Examples.SolCases
 
 import Solidity.Backend.Creation.Artifact
 
-import Solidity.Backend.Creation.Checks
+import Solidity.Backend.Creation.ArtifactChecks
 
 import Solidity.Backend.Creation.Execution
 import Solidity.Backend.Creation.ExecutionChecks
@@ -688,6 +688,6 @@ import Solidity.Backend.Creation.ImmutableChecks
 import Solidity.Backend.Creation.Constructor
 import Solidity.Backend.Creation.ConstructorChecks
 
-import Solidity.Backend.Creation.Laws
+import Solidity.Backend.Creation.ArtifactLaws
 import Solidity.Backend.Creation.Provenance
 import Solidity.Backend.Creation.LawChecks

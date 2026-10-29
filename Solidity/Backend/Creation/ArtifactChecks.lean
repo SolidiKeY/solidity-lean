@@ -31,8 +31,16 @@ example (r : Assembled String) (h : (encode r.code).length < 256 ^ 32) :
       (fromAssembly 0 r [0xaa, 0xbb] h).argsStart = [0xaa, 0xbb] :=
   Artifact.args_slice _
 
+/-- info: 'Solidity.Backend.Creation.Immediate.read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms Immediate.read
+/-- info: 'Solidity.Backend.Creation.wrapper_size' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms wrapper_size
+/-- info: 'Solidity.Backend.Creation.Artifact.runtime_slice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms Artifact.runtime_slice
+/-- info: 'Solidity.Backend.Creation.Artifact.args_slice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms Artifact.args_slice
 end Solidity.Backend.Creation

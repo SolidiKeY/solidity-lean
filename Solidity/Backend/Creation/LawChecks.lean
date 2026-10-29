@@ -1,5 +1,5 @@
 import Solidity.Backend.Creation.Provenance
-import Solidity.Backend.Creation.Checks
+import Solidity.Backend.Creation.ArtifactChecks
 
 namespace Solidity.Backend.Creation
 
@@ -42,10 +42,22 @@ example : ¬ Nonempty (Location 3 4) := by
   have hb : location.offset + 4 ≤ 3 := location.bounds
   omega
 
+/-- info: 'Solidity.Backend.Creation.link_permutation' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms link_permutation
+/-- info: 'Solidity.Backend.Creation.Artifact.payload_deterministic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms Artifact.payload_deterministic
+/-- info: 'Solidity.Backend.Creation.Artifact.sections_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms Artifact.sections_unique
+/-- info: 'Solidity.Backend.Creation.wrapper_decode' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms wrapper_decode
+/-- info: 'Solidity.Backend.Creation.Provenance.global_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms Provenance.global_bounds
+/-- info: 'Solidity.Backend.Creation.Provenance.bytes_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms Provenance.bytes_exact
 end Solidity.Backend.Creation

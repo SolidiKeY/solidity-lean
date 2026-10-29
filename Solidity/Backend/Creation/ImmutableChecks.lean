@@ -62,11 +62,25 @@ example : Exec (combinedArtifact mixedArtifact mixedLinks mixedTable (fun _ => V
     (.returned (combinedArtifact mixedArtifact mixedLinks mixedTable (fun _ => Vector.replicate 20 0x55) (by decide)).runtime) :=
   combined_installs _ _ _ _ _
 
+/-- info: 'Solidity.Backend.Creation.ImmutableTable.read' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms ImmutableTable.read
+/-- info: 'Solidity.Backend.Creation.compatible_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms compatible_iff
+/-- info: 'Solidity.Backend.Creation.combined_installs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms combined_installs
+/-- info: 'Solidity.Backend.Creation.patchImmutables_length' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms patchImmutables_length
+/-- info: 'Solidity.Backend.Creation.patchImmutables_frame' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms patchImmutables_frame
+/-- info: 'Solidity.Backend.Creation.patched_installs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms patched_installs
+/-- info: 'Solidity.Backend.Creation.immutable_link_commute' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms immutable_link_commute
 end Solidity.Backend.Creation

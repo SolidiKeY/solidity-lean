@@ -36,6 +36,10 @@ example : Exec (List.replicate 246 0 ++ encode (placedWrapper placement257.lengt
     (encode (placedWrapper placement257.lengthWord placement257.offsetWord) ++ [0x60, 0x2a, 0] ++ [0xbb])
     [] [] (.returned [0x60, 0x2a, 0]) := placement257.installs [0xbb]
 
+/-- info: 'Solidity.Backend.Creation.fetch_encode' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms fetch_encode
+/-- info: 'Solidity.Backend.Creation.Placement.installs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms Placement.installs
 end Solidity.Backend.Creation

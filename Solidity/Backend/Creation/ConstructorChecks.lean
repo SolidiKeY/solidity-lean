@@ -75,8 +75,16 @@ example : let p := copyPlacement [0xde, 0xad, 0xbe] rfl
   have hn : Outcome.reverted [0xde, 0xad, 0xbe] ≠ .reverted [0xde, 0xad, 0xbe, 0xaa] := by decide
   exact hn he
 
+/-- info: 'Solidity.Backend.Creation.Prefix.exec' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms Prefix.exec
+/-- info: 'Solidity.Backend.Creation.exit_exec' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms exit_exec
+/-- info: 'Solidity.Backend.Creation.constructor_compose' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms constructor_compose
+/-- info: 'Solidity.Backend.Creation.copyConstructor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms copyConstructor
 end Solidity.Backend.Creation
