@@ -323,3 +323,24 @@ no stale task-local links, and this semantic-completion/historical-debt
 boundary. They used no Lean server or checks. There is no remaining blocker
 to the named `gapQuantLedger` assignment. Whole-tree documentation hygiene
 continues to fail at baseline and is not reported green.
+
+## Combined integration proof repair (2026-10-29)
+
+The retained attempt-4 combined build failed in
+`DecisionKInt.twoAnchorNegative_refuted`: its old `change` step assumed
+`decideLeaf` reduced directly to `decideKEnc`. The added final ledger fallback
+wraps that result in a match. The proof now unfolds `decideLeaf`, rewrites with
+the existing KEnc refutation hypothesis, and closes by reflexivity. The exact
+theorem signature and shared typed countermodel across KEnc, Leaf and Goal
+remain unchanged; dispatch, target predicates and proof budgets are unchanged.
+
+Per-file Lean MCP diagnostics for `Solidity/Examples/DecisionKInt.lean` completed
+with no errors or warnings. Its existing axiom report for the repaired theorem
+contains only `propext`, `Classical.choice`, and `Quot.sound`. No full build was
+run for this repair; the coordinator must rerun the combined validation gates.
+
+Read-only finder review checked the failed-log location against the current
+dispatcher and focused diff, finding no other content conflict in the repaired
+file. Read-only skeptic review checked that the rewrite returns the same
+refuted state, retains the unknown-only ledger fallback, and introduces no
+axiom, weakened claim or gate change. These reviews used no Lean server.

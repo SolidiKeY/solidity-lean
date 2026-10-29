@@ -238,8 +238,9 @@ theorem twoAnchorNegative_refuted :
       ((decideKEnc_sound h) (State.init Gaps)))
   | refuted σ =>
     have hl : decideLeaf twoAnchorNegative = .refuted σ := by
-      change decideKEnc twoAnchorNegative = .refuted σ
-      exact h
+      unfold decideLeaf
+      rw [h]
+      rfl
     have hg : decideGoal twoAnchorNegative = .refuted σ := by
       change decideLeaf twoAnchorNegative = .refuted σ
       exact hl
