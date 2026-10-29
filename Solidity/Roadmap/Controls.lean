@@ -73,16 +73,14 @@ theorem _root_.Solidity.Roadmap.PublicCorrectness.observes
   (h.refines i r adm w p art hc e he).2.completes hrs hf hg ho
 
 /-- **What the bytes observe, the source allows**: a completion of the
-compiled bytes at an allowed environment and an admissible bound, up to
-whose observations the source does not collide, is a completion of the
-source meaning at an admissible bound, with the same outcome. -/
+compiled bytes at an allowed environment and an admissible bound meeting the
+EVM's own hash premise (on the preimages that run hashed) is a completion of
+the source meaning at an admissible bound, with the same outcome. -/
 theorem _root_.Solidity.Roadmap.PublicCorrectness.observedBySource
     (h : PublicCorrectness S V compiler envAbs X) {i : S.Input} {r : S.Resolved}
     (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r) {art : Artifact}
     (hc : compiler i = some art) {e : V.lang.Env} (he : V.lang.Allowed e) {rt : V.lang.Res}
-    (hrt : V.lang.Admissible rt)
-    (hg : NoCollisionUpTo S.lang.Admissible (S.lang.Guard (S.meaning r w p art) (envAbs e))
-      (S.lang.sem (S.meaning r w p art) (envAbs e)) (V.lang.sem (V.load art) e rt)) {o : Outcome}
+    (hrt : V.lang.Admissible rt) (hg : V.lang.Guard (V.load art) e rt) {o : Outcome}
     (ho : (V.lang.sem (V.load art) e rt).final = some o) :
     ∃ rs, S.lang.Admissible rs ∧ (S.lang.sem (S.meaning r w p art) (envAbs e) rs).final = some o := by
   obtain ⟨rs, hrs, hfin, _⟩ := (h.refines i r adm w p art hc e he).2.sound hrt hg ho
@@ -445,15 +443,13 @@ def idPass : Pass toyLang toyLang where
   run := fun p _ => p
   envAbs := id
 
-/-- Its certificate: every bound maps to itself; a target collision is the
-source's. -/
+/-- Its certificate: every bound maps to itself, the premise with it. -/
 def idCert : Cert idPass where
   envSound := fun _ he => he
   envOnto := fun e he => ⟨e, he, rfl⟩
   need := fun _ _ _ r => r
   need_ok := fun _ _ _ _ _ _ hf hg => ⟨trivial, hf, hg, Prefix.Le.refl _⟩
-  back := fun _ _ _ r _ _ => ⟨r, trivial, .inl (Prefix.Le.refl _)⟩
-  reflect := fun _ _ _ r _ _ hng => ⟨r, trivial, hng, List.prefix_refl _⟩
+  back := fun _ _ _ r _ _ hg => ⟨r, trivial, hg, Prefix.Le.refl _⟩
 
 /-- The lowering: the resolved program, unchanged. -/
 def toyLowering : Lowering toySource toyIntrinsic where
@@ -475,8 +471,8 @@ def artOf (code : Bytes) : Artifact := ⟨[{ initcode := [], runtime := code }],
 theorem mainRuntime_artOf (code : Bytes) : mainRuntime (artOf code) = code := rfl
 
 /-- The toy EVM language: it runs the selected unit's decoded bytes,
-whatever the gas schedule; as a target, it has no premise or forward
-restriction of its own. -/
+whatever the gas schedule; as a target it has no forward restriction, and
+its premise is the hash premise on what its own run hashes. -/
 def toyEvmLang : Lang Event Outcome where
   Prog := Artifact
   Env := SessionEnv
@@ -486,6 +482,7 @@ def toyEvmLang : Lang Event Outcome where
   Admissible := fun _ => True
   sem := fun art _ _ => (decode (mainRuntime art)).run false
   consistent := fun _ _ _ _ _ => Prefix.Le.refl _
+  Guard := fun art _ _ => HashPremise toyFixed (Toy.hashes (decode (mainRuntime art))) []
 
 /-- The toy EVM: the Osaka pin; it hashes what the decoded program hashes
 (`KECCAK256` of a `succeed`'s data). -/
@@ -503,6 +500,8 @@ def toyEvm : EvmSpec where
   withGas := fun r g => { r with gas := g }
   gas_with := fun _ _ => rfl
   hashed := fun art _ _ => Toy.hashes (decode (mainRuntime art))
+  slotHashed := fun _ _ _ => []
+  guard_iff := fun _ _ _ => Iff.rfl
   created := fun _ _ _ => []
   World := Unit
   worlds := fun _ _ _ => []
@@ -515,7 +514,7 @@ theorem toyEvm_no_event {art : Artifact} {x : Event}
   cases hm
 
 theorem toyEvm_approved : toyEvm.Approved := by
-  refine ⟨rfl, toyFixed_sane, fun _ => trivial, fun _ _ _ => ⟨trivial, trivial⟩,
+  refine ⟨rfl, toyFixed_sane, fun _ => trivial, fun _ _ _ => trivial,
     fun art _ _ _ _ _ _ hm _ => toyEvm_no_event hm, fun art _ _ _ _ _ _ _ hm => (toyEvm_no_event hm).elim,
     fun art _ _ h _ _ _ _ _ _ hm => ?_⟩
   have hm' : h ++ _ <+: ((decode (mainRuntime art)).run false).events := hm
@@ -591,10 +590,11 @@ theorem publicCorrectness_of_faithful (f : Toy → Toy) (hf : Faithful f) :
       show [] = (createsOf ((decode (mainRuntime _)).run false).events).map _
       rw [Toy.run_events]
       rfl
-  hashes_source := fun i r adm _ _ art hc _ _ _ _ x hx => by
+  hashes_source := fun i r adm _ _ art hc _ _ _ _ => by
     have ha := (admitted_iff i r).1 adm
     simp only [compilerWith, ha, Option.map_some, Option.some.injEq] at hc
     subst hc
+    refine ⟨fun x hx => ?_, fun _ hx => nomatch hx⟩
     have hx' : x ∈ (decode (mainRuntime (artOf (f r.prog).text))).hashes := hx
     rw [mainRuntime_artOf, decode_text] at hx'
     exact ⟨⟨0, false⟩, trivial, (hf r.prog).2.2 x hx'⟩
@@ -604,7 +604,7 @@ theorem publicCorrectness_of_faithful (f : Toy → Toy) (hf : Faithful f) :
     subst hc
     obtain ⟨hfw, ⟨b, hbw⟩, _⟩ := hf r.prog
     refine ⟨he, fun rs _ hfr _ => ⟨⟨rs.horizon, fun _ => 0⟩, trivial, ?_⟩,
-      fun rt _ => ⟨⟨rt.horizon, b⟩, trivial, .inl ?_⟩⟩
+      fun rt _ _ => ⟨⟨rt.horizon, b⟩, trivial, ?_⟩⟩
     · show (r.prog.run rs.exhausted).Le ((decode (mainRuntime (artOf (f r.prog).text))).run false)
       have hx : rs.exhausted = false := hfr.1
       rw [hx, mainRuntime_artOf, decode_text]
@@ -746,7 +746,7 @@ def loopToSucceed : Toy → Toy
   | t => t
 
 /-- **The backward (soundness) control**: a success the source never
-produces, here from a loop (which hashes nothing, so never collides), fails
+produces, here from a loop, at an EVM run meeting its own premise, fails
 the public contract. -/
 theorem not_publicCorrectness_loopToSucceed (X : StateExport toySource I toyEvm) :
     ¬ PublicCorrectness toySource toyEvm (compilerWith loopToSucceed) envAbs X := by
@@ -754,7 +754,7 @@ theorem not_publicCorrectness_loopToSucceed (X : StateExport toySource I toyEvm)
   have adm : toySource.Admitted ({ text := [2] } : ToyInput) ⟨.loop, .legacy, .v2⟩ :=
     (admitted_iff _ _).2 rfl
   obtain ⟨rs, _, hfin⟩ := h.observedBySource adm trivial trivial rfl quietEnv_allowed
-    (rt := ⟨0, fun _ => 0⟩) trivial (fun _ _ _ => HashPremise.nil _) (o := .success []) rfl
+    (rt := ⟨0, fun _ => 0⟩) trivial (toy_premise _) (o := .success []) rfl
   have hfin' : (Toy.run .loop rs.exhausted).final = some (.success []) := hfin
   cases hx : rs.exhausted <;> rw [hx] at hfin' <;> cases hfin'
 

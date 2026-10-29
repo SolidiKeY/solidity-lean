@@ -9,7 +9,7 @@ planned contracts."). It is the first checkpoint of lane V03.
 Base: `ceb0d54` with the roadmap-w1 branches `g00-manifest-rev`,
 `g02-measure`, `g03-ledger`, `g05-frontend`, `g06-evm-interface` and
 `g01-contracts-rev` merged (the G01 revision's document has a filled
-`Handoff`). Restated against the final G01 revision (`12088f5`, after three
+`Handoff`). Restated against the final G01 revision (`914bc36`, after five
 integration holds; see §6).
 
 ## 1. Contract controls (`Solidity/Roadmap/Controls.lean`)
@@ -57,8 +57,8 @@ directions of refinement, divergence against exhaustion, and the
 - gas and horizons: the EVM semantics ignores its bound, and every prefix is
   complete at horizon 0;
 - the hash premise: the toy hashes at most one preimage and no slot
-  preimage, so the premise always holds, and the `Collided` branches of
-  `RefinesUnder`, `Cert.back` and `Cert.reflect` are never taken;
+  preimage, so neither layer's premise ever fails and the guarded backward
+  direction is always in force;
   `HashPremise.not_of_rootSlots` shows the case where the premise cannot
   hold.
 
@@ -91,9 +91,9 @@ The six new generic lemmas hold of every source, EVM and compiler:
   distinct preimages) and under the source's hash premise into an EVM
   completion with the same outcome and events, assuming nothing of the
   bytes' hashes.
-- `PublicCorrectness.observedBySource` turns any EVM completion up to whose
-  observations the source does not collide (`NoCollisionUpTo`) into a source
-  completion at an admissible bound.
+- `PublicCorrectness.observedBySource` turns any EVM completion whose run
+  meets the EVM's own hash premise into a source completion at an
+  admissible bound.
 - `PublicCorrectness.rejects` refuses non-admitted input, and
   `Admission.rejects` does the same for a sound frontend.
 - `SourceSpec.NonVacuous.admits` and `SourceSpec.not_nonVacuous_of_no_parse`
@@ -142,8 +142,9 @@ rule out. They are recorded for the G01 owners and are not changed here:
    though documented as fixed: `toyFixed_keccak` holds with every
    precompile halting, zero precompile gas and a ledger ignoring events, and
    `Affordable` reads the ledger. This is for G01/G03/G06.
-6. **No control exercises a collision.** The toy never violates the
-   premise, so the excusing branch of the backward direction is untested.
+6. **No control exercises a premise violation.** The toy never violates
+   either premise, so no control shows a target run excused by a real
+   collision of its own preimages.
 
 ## 2. Gates
 
@@ -389,7 +390,7 @@ Restated:
 - **The toy.** It now hashes a success's data, so `NonVacuous`'s hashing
   success is exercised.
 - **Generic lemmas.** `observes` takes the source's forward bound and
-  premise, and `observedBySource` takes `NoCollisionUpTo`.
+  premise, and `observedBySource` takes the EVM's own premise.
 - **New control.** `not_publicCorrectness_hashRevertCompiler` refutes a
   compiler that reverts whenever the source hashes.
 - **Gap 1.** The degenerate layout is now excluded by `Fixed.Sane`, and the
@@ -404,3 +405,16 @@ Restated:
 The non-circularity gate allows `Solidity.Hash.CollisionBound` and
 `Solidity.Roadmap.Evm`, both statements-only modules that the contracts now
 import (`CONTRACT_DEPS`).
+
+**Round 6 (`914bc36`).** Each layer's premise now reads its own run, and
+the backward direction is guarded by the target's premise
+(`RefinesUnder AS AT FS GS GT`). `Collided`, `NoCollisionUpTo`,
+`Cert.reflect` and `Matched` are gone, `EvmSpec` gains `slotHashed` and
+`guard_iff`, and `hashes_source` also covers slot preimages. The changes
+here:
+
+- The toy EVM's premise is the hash premise on what its decoded program
+  hashes.
+- `idCert.back` carries the premise up.
+- `observedBySource` takes the EVM premise.
+- `hashes_source` is proved for both lists.
