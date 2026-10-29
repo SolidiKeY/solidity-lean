@@ -516,12 +516,15 @@ dependency-free.
 | Explicit constant with no mobile type, e.g. `ufixed256x0(2**256 - 0.5)` | Refused (`isExplicitlyConvertibleTo` needs a mobile type) | `2^256 − 1` (in range after truncation) | Intended (P1: exact folding at the target) |
 | Common type `x op c` where `c` is not exact at the mobile type, e.g. `ufixed8x77 y; y + 1/3` | Common type `ufixed256x77`, `c` truncated | Refused | Intended (Q1: lossy conversions are explicit) |
 | `c op x` with a fractional `c`, e.g. `0.5 * x` | Refused ("Fractional literals not supported.") | Refused, as solc | Follows solc; question QL1 below asks whether full support should admit it |
-| A standalone fractional constant that is inexact at its mobile type, e.g. `abi.encode(1/3)` | Typed `ufixed256x77`, truncated | `mobileFx?` gives solc's type; the model does not decide whether the truncation is admitted | Open: question QL2 below |
+| A standalone fractional constant that is inexact at its mobile type, e.g. the inline array `[1/3]` | Element type `ufixed256x77`, truncated | `mobileFx?` gives solc's type; the model does not decide whether the truncation is admitted | Open: question QL2 below |
+| A fractional constant as an ABI argument, e.g. `abi.encode(0.1)` | Refused ("Fractional numbers cannot yet be encoded.", TypeError 6090) | Refused, as solc, until QL2 is answered | Follows solc; QL2 |
 | Constant expressions with bit operators, shifts or over-large literals | Folded (integers) or refused | Not in `CExpr` | Not modelled; integer constants belong to the integer typing |
 
 **Handoff.** S01/G13 can type constant subexpressions with `CExpr.eval`
 and give fixed-point types with `Fx.ofRat?` (implicit), `Fx.explicitRat?`
-(explicit), `mobileFx?` (standalone constants, e.g. `abi.encode(1.5)`) and
+(explicit), `mobileFx?` (standalone constants such as inline-array
+elements; `abi.encode` of a fractional constant is refused as in solc
+until QL2) and
 `litCommon?`/`litCommonRev?` (mixed operands). Not done:
 - comparisons between two constants. solc compares them at run time
   through their mobile types and refuses a pair whose mobile types have no
@@ -539,9 +542,13 @@ does not depend on them):
   types `x op c`. Should full support admit `c op x` like `x op c`? The
   model follows solc (`litCommonRev?`).
 - **QL2 [MobileTrunc]** — a fractional constant that needs a type of its
-  own, e.g. `abi.encode(1/3)`, gets solc's mobile type `ufixed256x77`, and
-  its value is truncated there. Q1 makes lossy implicit conversions
-  explicit. Should such a constant be refused, or truncated as in solc?
+  own gets solc's mobile type. In an inline array, e.g. `[1/3]`, solc
+  types it `ufixed256x77` and truncates it. As an ABI argument, e.g.
+  `abi.encode(0.1)`, solc refuses it ("Fractional numbers cannot yet be
+  encoded."). Q1 makes lossy implicit conversions explicit. Should such
+  constants be refused everywhere, admitted at the mobile type only when
+  exact there (`abi.encode(0.1)` then compiles), or admitted and truncated
+  as solc does for arrays?
 
 **Review.** A read-only finder and a separate read-only skeptic reviewed
 `28cbc41`. Both checked the mobile type, the folding, the precision bounds
@@ -555,7 +562,7 @@ Confirmed findings and their fixes:
 | `litCommon?_exact` proved safety only, with no link to solc | skeptic | `solcLitCommon`, `litCommon?_solc` |
 | `mobileFx?_exact` was near-tautological and one-directional | both | now an iff, plus `digitsGo_exact`/`mobileFx?_exact_of_digits` (the loop stops when exact) |
 | P1 edge stated only for positive constants; the no-mobile-type case was missing | both | deviation rows rewritten; `2^256 − 1/2` example |
-| `abi.encode(1/3)` truncates silently, unaddressed under Q1 | skeptic | QL2 |
+| `abi.encode(1/3)` truncates silently, unaddressed under Q1 | skeptic | QL2 (its premise corrected in checkpoint 5: solc refuses fractional ABI arguments; the truncating case is the inline array) |
 | Constant comparisons: solc's rejection of mobile pairs without a common type | skeptic | "Not done" note corrected |
 | `CExpr` omissions (bit operators, shifts, literal size) unrecorded | finder | deviation row |
 | `mobileFx?` described as the mobile type of every constant | finder | the bullet names fractional constants only |
@@ -768,11 +775,14 @@ Not changed: the generic names `field`, `setField` and `place` stay in
 unpacked outside the repository. Every `.sol` file under
 `test/libsolidity/{syntaxTests,semanticTests,smtCheckerTests}` matching
 `\bu?fixed(\d+x\d+)?\b` was taken: 87 files in all, of which 81 are in
-syntax or semantic tests. A file counts as a real fixed-point use when the
+syntax or semantic tests. The C++ unit tests (`SolidityTypes.cpp`, type
+identifiers) and the Yul tests are outside the sweep. A file counts as a real fixed-point use when the
 token occurs in code (outside strings and comments) or a fixed-point type
 appears in its expected diagnostics. That leaves 68 files: 64 with code
 uses and 4 whose messages name a mobile type. The 19 false positives:
-- "fixed bytes" in messages: the 6 `bytes_concat_wrong_type_*` tests,
+- "fixed bytes" in messages: the four `array/concat/bytes_concat_wrong_type_*`
+  tests, `errors/error_bytes_concat_wrong_type.sol`,
+  `events/event_bytes_concat_wrong_type.sol`,
   `bytesNN_index_assign/delete` and `288_conditional_with_all_types.sol`;
 - identifiers and strings: `FixedFeeRegistrar`, `mapping_string_key`,
   `create_random`, `memory_bytes_delete_element_neighbor`;
@@ -780,7 +790,12 @@ uses and 4 whose messages name a mobile type. The 19 false positives:
   `smtCheckerTests/userTypes/fixedpoint.sol`, and the three PRBMath files;
 - `smtCheckerTests/typecast/downcast.sol`.
 
-None of these uses a fixed-point type. solc's verdict is the test's
+None of these uses a fixed-point type. The regex cannot find tests about
+fractional constants whose diagnostics never name a fixed type. A second
+pass over the diagnostics "Fractional", "fractional" and `rational_const`
+added 11 such files (rows marked † below). Every other fractional-literal
+test is about integer typing (array indices, enum conversions, `addmod`
+arguments), which fixed point does not change. solc's verdict is the test's
 expectation: a test whose only error is `UnimplementedFeatureError 1834`
 passes solc's type checker. The decided rules' verdict is computed where a
 function decides it: `Solidity/Language/FixedPoint/Conformance.lean`
@@ -794,45 +809,59 @@ rules (G00 Q6, full support); "reject" means a compile error.
 |---|---|---|---|---|
 | `constants/mod_div_rational.sol` | accept | accept | `CExpr.eval`, `Fx.ofRat?` (Conformance) | agrees |
 | `denominations/fixed_point_division.sol` | reject (the `uint` line); `ufixed(4 ether / 3 hours)` accepted, suggests `ufixed256x62` | same | `Fx.explicitRat?`, `mobileFx?` (Conformance) | agrees |
-| `inlineArrays/inline_array_fixed_types.sol`, `inline_array_rationals.sol` | accept | accept | explicit and implicit constants (Conformance) | agrees |
-| `nameAndTypeResolution/303_…`, `343_integer_and_fixed_interaction.sol`, `smtCheckerTests/operators/fixed_point_add.sol`, `smtCheckerTests/file_level/free_function_4.sol` | accept | accept | `FxTy.intImplicit`, `Fx.ofInteger_inRange` (Conformance) | agrees |
-| `304`, `305`, `307`, `312`, `314`, `324_fixed_points_inside_structs.sol`, `parsing/lexer_numbers_with_underscores_fixed.sol`, `types/rational_number_literal_to_fixed_implicit.sol`, `smtCheckerTests/operators/fixed_point_compound_add.sol` | accept | accept | `Fx.ofRat?` (Conformance) | agrees |
+| `inlineArrays/inline_array_fixed_types.sol`, `inline_array_rationals.sol` | accept | accept | explicit constants and `litCommon?` for the element type (Conformance) | agrees |
+| `nameAndTypeResolution/303_…`, `343_integer_and_fixed_interaction.sol`, `smtCheckerTests/operators/fixed_point_add.sol`, `smtCheckerTests/file_level/free_function_4.sol` | accept | accept | `FxTy.intImplicit` (Conformance); the result type `ufixed128x18` of `uint64 + ufixed` is P7, argued | agrees |
+| `304`, `305`, `307`, `312`, `314`, `324_fixed_points_inside_structs.sol`, `parsing/lexer_numbers_with_underscores_fixed.sol`, `types/rational_number_literal_to_fixed_implicit.sol` | accept | accept | `Fx.ofRat?` (Conformance) | agrees |
+| `smtCheckerTests/operators/fixed_point_compound_add.sol` (`b[0] += 1`) | accept | accept | `litCommon?` (Conformance) | agrees |
 | `323_mapping_with_fixed_literal.sol` | accept | accept | `Fx.ofRat?`, `Fx.keyWord` | agrees |
-| `328_rational_to_fixed_literal_expression.sol` | accept (all seven lines) | reject: lines `e` and `f`, `ufixed256x80(9.445)` and `ufixed256x80(1.2)`, are out of range at 80 digits; the other five are accepted | `Fx.explicitConst?_eq_none_iff` (Conformance) | intended deviation (Q2: an out-of-range constant is a compile error) |
+| `328_rational_to_fixed_literal_expression.sol` | accept (all seven lines) | reject: lines `e` and `f`, `ufixed256x80(9.445)` and `ufixed256x80(1.2)`, are out of range at 80 digits; the other five are accepted | `Fx.explicitRat?` (Conformance), which is `Fx.explicitConst?` on the normalized rational; `Fx.explicitConst?_eq_none_iff` characterizes the refusal | intended deviation (Q2: an out-of-range constant is a compile error) |
 | `317_fixed_type_valid_explicit_conversions.sol` | accept | reject: `ufixed256x80(1/3)` and `ufixed248x80(1/3)` are out of range; `ufixed8x1(1/3) = 0.3` is accepted | `Fx.explicitConst?_eq_none_iff` (Conformance) | intended deviation (Q2) |
 | `parsing/declaring_fixed_and_ufixed_variables.sol` | accept | accept | `FxTy.mk?` (Conformance) | agrees |
 | `userDefinedValueType/all_value_types.sol` (`type MyFixed is fixed`) | accept | accept | P8 (identity wrap/unwrap) | agrees |
 | `313_fixed_type_size_capabilities.sol` | reject (`b`, `e`) | reject (`b`, `e`); the other four accepted | `Fx.ofRat?` (Conformance) | agrees |
 | `315_fixed_type_invalid_implicit_conversion_size.sol` | reject | reject | `FxTy.implicitOK_iff` (Conformance) | agrees |
-| `316_…_lost_data.sol`, `344_one_divided_by_three_integer_conversion.sol`, `321_rational_to_bytes_implicit_conversion.sol`, `327_rational_index_access.sol`, `parsing/declaring_fixed_literal_variables.sol` | reject, suggesting `ufixed256x77`, `ufixed8x1`, `ufixed8x1`, `ufixed16x2` | reject; `mobileFx?` gives each suggested type | `Fx.ofRat?`, `mobileFx?` (Conformance) | agrees |
+| `316_…_lost_data.sol`, `parsing/declaring_fixed_literal_variables.sol` | reject, suggesting `ufixed256x77`, `ufixed16x2` | reject; `mobileFx?` gives each suggested type | `Fx.ofRat?`, `mobileFx?` (Conformance) | agrees |
+| `344_one_divided_by_three_integer_conversion.sol`, `321_rational_to_bytes_implicit_conversion.sol`, `327_rational_index_access.sol` (fractional constant at `uint256`/`bytes32`) | reject, suggesting `ufixed256x77`, `ufixed8x1`, `ufixed8x1` | reject; `mobileFx?` gives each suggested type | rejection by the integer/bytes typing, argued; the suggestion by `mobileFx?` (Conformance) | agrees |
+| † `types/encoding_fractional.sol`, `encoding_fractional_abiencoderv2.sol`, `encoding_packed_fractional.sol`, `encoding_packed_fractional_abiencoderv2.sol` (`abi.encode(0.1, 1)`, packed) | reject (TypeError 6090; packed also 7279 for the integer literal) | reject, as solc, until QL2 is answered | QL2 (§6.2) | agrees for now; QL2 may turn it into an intended deviation |
 | `306_invalid_int_implicit_conversion_from_fixed.sol`, `322_fixed_to_bytes_implicit_conversion.sol` | reject | reject | no implicit fixed→integer or fixed→`bytesM` conversion (§1; Q7 is explicit only) | agrees |
 | `329_…_signed.sol`, `330_…_unsigned.sol` (fractional exponent of a constant) | reject | reject | `CExpr.eval` (Conformance) | agrees |
 | `333_…_15.sol`, `334_…_neg.sol` (`**` with a fixed exponent) | reject | reject | P8 (no `**` on `Fx`) | agrees |
 | `338`–`341` (`~ \| ^ &` on fixed) | reject | reject | P8 (no bit operators on `Fx`) | agrees |
-| `operators/signed_rational_modulus.sol` (`.5 % a`) | reject ("Fractional literals not supported.") | reject | `litCommonRev?_eq_solc` (Conformance) | agrees (QL1 asks whether to extend) |
+| `operators/signed_rational_modulus.sol` (`.5 % a`; `a` and `c = a % b` accepted by both) | reject ("Fractional literals not supported.") | reject | `litCommonRev?_eq_solc` (Conformance) | agrees (QL1 asks whether to extend) |
 | `types/too_small_negative_numbers.sol` | reject (not implicit; explicit possible) | reject; explicit gives `0` | `Fx.ofRat?`, `Fx.explicitRat?` (Conformance) | agrees |
-| `types/rational_number_div_limit.sol` | reject (4096 bits), suggests `ufixed8x80` | reject; `mobileFx?` gives `ufixed8x80` | `fitsPrecision`, `mobileFx?` (Conformance) | agrees |
-| `array/length/const_cannot_be_fractional.sol`, `319`, `320` (fixed array lengths) | reject | reject | array lengths are integer constants (G13), unchanged by fixed point | agrees |
-| `298`, `299`, `300`, `302`, `types/weird_sized_types.sol` | identifiers (DeclarationError, or accepted as variable names) | the same | `FxTy.mk?` bounds (Conformance); spelling rule of the scanner (G08) | agrees |
-| `smtCheckerTests/operators/shifts/shr_unused.sol` (`x >>> 6` at `fixed`) | type checker accepts; code generation fails | reject | Q4 (shifts rejected, as solc's code generator does) | agrees with solc's compiler; deviates from its type checker, as Q4 decides |
+| `types/rational_number_div_limit.sol` | reject (4096 bits), suggests `ufixed8x80` | reject; `mobileFx?` gives `ufixed8x80` | `fitsPrecision`, `mobileFx?` (Conformance, with `2<<4094` written by hand: shifts are not in `CExpr`) | agrees |
+| `array/length/const_cannot_be_fractional.sol`, `319`, `320` (fixed array lengths), † `318_invalid_array_declaration_with_rational.sol`, † `array_length_fractional_computed.sol` | reject | reject | array lengths are integer constants (G13), unchanged by fixed point; argued | agrees |
+| † `indexing/array_multidim_rational.sol`, † `literalOperations/exponent.sol` (`a ** (1/2)`), † `constants/initialization/addmod_mulmod_rational_arg.sol`, † `enums/literal_conversion_error.sol`, † `storageLayoutSpecifier/layout_fractional_number.sol` | reject | reject | integer typing, unchanged by fixed point; argued | agrees |
+| `298`, `299`, `300`, `302`, `types/weird_sized_types.sol` | identifiers (DeclarationError, or accepted as variable names) | the same | `FxTy.mk?` bounds (Conformance); the leading-zero spellings by the scanner's spelling rule (G08), argued | agrees |
+| `smtCheckerTests/operators/shifts/shr_unused.sol` (`x >>> 6` at `fixed`) | accept (type checker) | reject | Q4 (shifts rejected) | intended deviation (Q4) |
 | `inlineAssembly/unimplemented_fixed_type_variable.sol`, `unimplemented_ufixed_type_variable.sol` | UnimplementedFeatureError 5016 (no compile) | reject | assembly/Yul exclusion (G00 Q1, P8) | agrees |
 | `inlineAssembly/solidity_keywords.sol` (`let fixed := 1` in Yul) | accept | outside the model (Yul) | assembly/Yul exclusion | not applicable |
 | The nine `elementary_non_address_state_mutability_*.sol` tests (`errors/`, `events/`, `modifiers/`, `parsing/` ×5, `tryCatch/`) | ParserError 9106 | the same | parser (S00/G08), unchanged | agrees |
 | `parsing/fixed_literal_with_double_radix.sol`, `invalid_fixed_conversion_leading_zeroes_check.sol`, `lexer_numbers_with_underscores_fixed_fail.sol`, `308_rational_unary_plus_operation.sol` | ParserError/SyntaxError | the same | lexer and parser, unchanged | agrees |
 | `types/address/type_type_to_address.sol` (`address(fixed)`) | reject | reject | no conversion from a type expression | agrees |
 
-**Result.** Of the 68 real uses:
-- 3 deviate from solc's type checker, each intended. Two are by Q2
-  (`317` and `328`: out-of-range explicit constants). One is by Q4
-  (`shr_unused`, which agrees with solc's compiler but not its type
-  checker).
+**Result.** Counted in files: 68 found by the regex and 11 by the second
+pass (†), 79 in all.
+- 3 files deviate from solc's type checker, in 5 lines, each intended:
+  `317` lines `a` and `b`, and `328` lines `e` and `f`, by Q2 (out-of-range
+  explicit constants); `shr_unused` by Q4.
 - `inlineAssembly/solidity_keywords.sol` is outside the model.
+- The four `encoding_*fractional*` files agree until QL2 is answered.
 - All others agree.
 
-No defect was found. Two deviations recorded earlier have no upstream
-test; adding tests for them would be a G15/G51 task:
-- QL2's truncation of standalone constants;
-- the `ufixed8x77 y; y + 1/3` refusal (§6.2).
+No defect was found. This is weak evidence for most decisions, because the
+upstream tests do not exercise them. Gaps for G15/G51:
+- Q1's narrowing of solc's lossy fixed→fixed conversions (F1; `315` is a
+  case solc rejects itself);
+- Q2's run-time wrapping;
+- Q3's run-time rounding;
+- Q5's unary minus at `ufixed` (the negations in `307` and `312` are
+  constants);
+- Q6's `++` at a type without `1`;
+- Q8's exact `*`/`/`;
+- P1's rounding witness and the no-mobile-type row (§6.2);
+- the `ufixed8x77 y; y + 1/3` refusal;
+- QL2's inline-array truncation.
 
 **Handoff.** G15 can take the table as the fixed-point slice of its
 in-profile classification;
@@ -840,3 +869,21 @@ in-profile classification;
 change to the rules must keep passing. G51
 (differential testing) has no solc execution to compare against for any of
 these tests: every accepted one stops in solc's code generation.
+
+**Review.** A read-only finder and a separate read-only skeptic reviewed
+`c836970`. Both confirmed the counts (87/81/68/64/4/19), every solc verdict
+against its test's expectation, and the mobile-type suggestions. Confirmed
+findings and their fixes:
+
+| Finding | Source | Fix |
+|---|---|---|
+| `abi.encode(0.1)`/`encodePacked(0.1)` tests (TypeError 6090) were missed by the regex, and QL2's premise (that solc truncates `abi.encode(1/3)`) was wrong | finder | second pass (†); rows added; QL2 and the §6.2 rows and handoff corrected |
+| Other fractional-literal tests were swept inconsistently | finder | added (†) with the scope stated |
+| "68 uses" counted files; deviations were not given per line | skeptic | counts in files and lines |
+| Basis cells overstated what is computed (inline array element type, `b[0] += 1`, `343`'s result type, `div_limit`'s shift, `328`'s function) | skeptic | `litCommon?` examples added; argued rows marked |
+| `shr_unused` "agrees with solc's compiler" was meaningless (solc's compiler rejects every fixed program) | skeptic | now "intended deviation (Q4)" |
+| Untested decisions were under-listed | skeptic | gap list above |
+| Name rows (`299`, leading zeros) argued, not computed | both | `299`'s width added to the example; leading zeros marked argued |
+| `344`/`321`/`327` rejections cited `Fx.ofRat?` though they target `uint256`/`bytes32` | finder | split row; rejection argued |
+| `315`'s accepted `ufixed a = 11/4` not checked | finder | added |
+| "6 `bytes_concat_wrong_type_*` tests" | finder | named exactly |

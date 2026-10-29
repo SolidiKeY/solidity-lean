@@ -61,6 +61,16 @@ example : explicitOK .fixed 3.5 = true ∧ explicitOK .fixed (-4.25) = true ∧
     implicitOK (ty false 128 3 (by decide)) 4.0 = true := by
   decide +kernel
 
+/-- The common type with a constant operand: `inline_array_rationals.sol`
+(`[ufixed128x3(3.5), 4.125, 2.5, 4.0]` has element type `ufixed128x3`) and
+`smtCheckerTests/operators/fixed_point_compound_add.sol` (`b[0] += 1` at
+`fixed`). -/
+example : (litCommon? (ty false 128 3 (by decide)) 4.125).map (·.digits) = some 3 ∧
+    (litCommon? (ty false 128 3 (by decide)) 2.5).map (·.digits) = some 3 ∧
+    (litCommon? (ty false 128 3 (by decide)) 4.0).map (·.digits) = some 3 ∧
+    (litCommon? .fixed 1).map (·.bits) = some 128 := by
+  decide +kernel
+
 /-- `nameAndTypeResolution/303_fixed_type_int_conversion.sol` (and `343`,
 `smtCheckerTests/operators/fixed_point_add.sol`, `file_level/free_function_4.sol`):
 `int64 → fixed` and `uint64 → ufixed` are implicit. -/
@@ -145,14 +155,16 @@ example :
       true := by
   decide +kernel
 
-/-- `315_fixed_type_invalid_implicit_conversion_size.sol`: `ufixed128x18 →
-ufixed248x8` drops digits. -/
-example : FxTy.ufixed.implicitOK (ty false 248 8 (by decide)) = false := by
+/-- `315_fixed_type_invalid_implicit_conversion_size.sol`: `ufixed a = 11/4`
+is accepted; `ufixed128x18 → ufixed248x8` drops digits. -/
+example : implicitOK .ufixed (mkRat 11 4) = true ∧
+    FxTy.ufixed.implicitOK (ty false 248 8 (by decide)) = false := by
   decide +kernel
 
-/-- `316_…_lost_data.sol`, `344_one_divided_by_three_integer_conversion.sol`:
-`1/3` is not exact at `ufixed256x1`; solc suggests its mobile type
-`ufixed256x77`. -/
+/-- `316_…_lost_data.sol`: `1/3` is not exact at `ufixed256x1`; solc
+suggests its mobile type `ufixed256x77`, as in
+`344_one_divided_by_three_integer_conversion.sol` (whose rejection, at
+`uint256`, belongs to the integer typing). -/
 example : implicitOK (ty false 256 1 (by decide)) (mkRat 1 3) = false ∧
     sig (mobileFx? (mkRat 1 3)) = some (false, 256, 77) := by
   decide +kernel
@@ -187,14 +199,18 @@ example : implicitOK (ty true 8 80 (by decide)) (mkRat (-1) (10 ^ 100)) = false 
 
 /-- `types/rational_number_div_limit.sol`: `1/(2<<4094)/(2<<4094)` exceeds
 4096 bits; the first quotient's mobile type is `ufixed8x80` (its value
-truncates to `0`), as solc's message suggests. -/
+truncates to `0`), as solc's message suggests.  Shifts are not in `CExpr`,
+so `2<<4094` is written `2^4095` by hand. -/
 example : CExpr.eval (.div (.lit (mkRat 1 (2 ^ 4095))) (.lit (2 ^ 4095))) = none ∧
     sig (mobileFx? (mkRat 1 (2 ^ 4095))) = some (false, 8, 80) := by
   decide +kernel
 
-/-- `298`, `300`, `302`, `types/weird_sized_types.sol`: these (M, N) are not
-in the scanner's bounds, so the names are identifiers. -/
-example : (FxTy.mk? true 0 7).isNone ∧ (FxTy.mk? true 7 8).isNone ∧ (FxTy.mk? true 0 0).isNone ∧
+/-- `298`, `299`, `300`, `302`, `types/weird_sized_types.sol`: these (M, N)
+are not in the scanner's bounds, so the names are identifiers (the
+leading-zero spellings of `weird_sized_types.sol` are the scanner's
+spelling rule, G08, not checked here). -/
+example : (FxTy.mk? true 99999999999999999999999999999999999999 7).isNone ∧
+    (FxTy.mk? true 0 7).isNone ∧ (FxTy.mk? true 7 8).isNone ∧ (FxTy.mk? true 0 0).isNone ∧
     (FxTy.mk? true 8 888888888888888888888888888888888888888888888888888).isNone ∧
     (FxTy.mk? false 1 1).isNone ∧ (FxTy.mk? true 99000 1).isNone := by
   decide
