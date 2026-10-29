@@ -854,3 +854,58 @@ lake exe rulecheck --seed 42 --samples 1000
   bridge does not propose silently changing that policy to force a lattice
   theorem. The closer helper and actual modality should continue to be
   distinguished in any public wp API.
+
+
+### Current cumulative storage validation follow-up (2026-10-29)
+
+The four approved Widths helper contracts and separate signed-SHR laws are
+committed in `c7a45cd0e3660dbbea2e541251419d59b5629d28`. The earlier Widths
+decision and TestSuite 17 resource blocker are resolved as described above.
+The separately kernel-refuted `narrowCheck_guard` contract still requires its
+own human decision; the signed-SHR approval does not authorize changing it.
+Its original statement remains unchanged, and the exact old-schema negation
+and inhabited counterexample remain in
+`Bridge/SolidityBridge/Arith/LoweringObstructions.lean`.
+
+Library prerequisite 4 timed out at 600.005 s (exit 75), after kernel-building
+DecisionHashes in 324 s. It is a blocked group, not a pass. Its completed cache
+was retained. The fresh original, unmodified `./run-lean.sh` passed:
+exit 0 (underlying 0), 741.357 s, sampled aggregate peak RSS 5,530,206,208 bytes
+and charged cgroup peak 4,188,057,600 bytes. The timeout remains the original 1800 s. The command
+selects only the temporary explicit `-j1` Lake configuration and existing frozen
+SolKey rule snapshot. It completed 685 core jobs, 259 TestSuite jobs, and
+matched all 131 read-bearing sort annotations. No source fixture, expected observation, proof/search
+budget, toolchain or dependency pin changed.
+
+The fresh full Bridge check after the final statement-preserving intTyOf_head
+proof repair reports exit 1 (underlying 1), 7.060 s, sampled aggregate peak RSS 1,703,419,904 bytes
+and charged cgroup peak 321,679,360 bytes. The unchanged guard contract
+is its semantic blocker. Full Bridge and original-assignment completion are
+not claimed. The affected storage/Widths/countercontrol targets and fixed-seed
+rulecheck (36 cases × 1,000 samples, seed 42) pass in the terminal logs recorded above.
+
+The current static orphan, layer, strict automatic, trust, trust-test, complete
+TestSuite parity and diff checks pass. Documentation-path checking remains red
+at the same 20 historical missing references; its corrected output is byte-for-byte
+identical to the earlier debt log. An initial carrier docs command had raw exit 0
+while reporting missing awk; that result is INVALID, not a passed gate. The
+operational repair read-only mounts this same VM's existing /etc/alternatives,
+resolving /usr/bin/awk without installing another runtime or changing source.
+
+All current heavyweight checks use the verified primary hard 12 GiB workload
+cgroup with `swap.max=0` and actual disabled swap, `LEAN_NUM_THREADS=1` and explicit
+Lean `-j1`, one group under the checkout writer lock. The resumed allocator trial
+restored shipped collect 10000 and purge delay 10 defaults; it establishes no
+individual-flag speedup. Exact launches, reports, zero OOM event deltas where
+applicable, invalid/blocked historical runs and actual configs are preserved.
+Temporary configs and tracked manifest changes are removed after snapshotting;
+all proof caches remain on disk.
+
+Independent read-only finder and skeptic reviews found no new source defect
+and confirmed the exact four approved header changes, unchanged other public
+headers, explicit storage representation limits and separate guard decision.
+Neither used Lean/server/builds or wrote files. Their export review identified
+and corrected snapshot races, task-identity drift and overly broad completion
+logic before creating the successor cumulative export. R1–R3 remain preserved;
+the new handoff includes all task commits from the original base, full logs,
+resource reports, human approval, reviews and checksummed patch/bundle/archive.
