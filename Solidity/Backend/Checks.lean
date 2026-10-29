@@ -1,10 +1,10 @@
-import Solidity.Backend.Jumpdest
+import Solidity.Backend.Assembler
 
 /-!
-# Byte-encoding regressions (G45.05)
+# Byte-encoding and assembler regressions (G45.05, G45.04)
 
-Fixed vectors for `Backend/Opcode.lean` and `Backend/Jumpdest.lean`, and the
-axiom pins of their headline theorems. The opcode table itself is proved
+Fixed vectors for `Backend/Opcode.lean`, `Backend/Jumpdest.lean` and
+`Backend/Assembler.lean`, and the axiom pins of their headline theorems. The opcode table itself is proved
 over all 256 bytes there; these vectors pin concrete Osaka encodings against
 the published opcode numbers.
 -/
@@ -52,6 +52,55 @@ def osakaBytes : List Nat := [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x
 #guard jumpdests [0x5b, 0x0c, 0x5b] = [0, 2]
 #guard starts [0x60, 0x01, 0x61, 0x02, 0x03, 0x00] = [0, 2, 5]
 
+/-! ## The assembler -/
+
+/-- `if (x) goto end; x := 1; end:` in solc's shape. -/
+def branch : List (Item String String) :=
+  [.instr (.push 1 #v[0]), .instr (.op .CALLDATALOAD), .pushTag "end", .instr (.op .JUMPI),
+   .instr (.push 1 #v[1]), .instr (.push 0 #v[]), .instr (.op .SSTORE), .tag "end",
+   .instr (.op .STOP)]
+
+#guard (assemble 0 (fun _ => none) branch).map (encode ·.code) =
+  some [0x60, 0x00, 0x35, 0x60, 0x0a, 0x57, 0x60, 0x01, 0x5f, 0x55, 0x5b, 0x00]
+-- Relocated behind a 0x20-byte prefix, the absolute push moves.
+#guard (assemble 0x20 (fun _ => none) branch).map (encode ·.code) =
+  some [0x60, 0x00, 0x35, 0x60, 0x2a, 0x57, 0x60, 0x01, 0x5f, 0x55, 0x5b, 0x00]
+-- A section-relative push does not move.
+#guard (assemble 0x20 (fun _ => none) ([.pushTagRel "a", .tag "a"] : List (Item String String))).map (encode ·.code) =
+  some [0x60, 0x02, 0x5b]
+-- A tag at offset 0 of a section at 0 is reached by PUSH0.
+#guard (assemble 0 (fun _ => none)
+    ([.tag "a", .pushTag "a", .instr (.op .JUMP)] : List (Item String String))).map
+  (encode ·.code) = some [0x5b, 0x5f, 0x56]
+
+/-- The target is at 255 under `PUSH0`, at 256 under `PUSH1` (too far) and
+at 257 under `PUSH2`: the fixpoint needs three rounds. -/
+def crossing : List (Item String String) :=
+  .pushTag "a" :: List.replicate 254 (.instr (.op .STOP)) ++ [.tag "a"]
+
+#guard (assemble 0 (fun _ => none) crossing).map (fun o => (encode o.code).take 3) =
+  some [0x61, 0x01, 0x01]
+#guard (asmWidths 0 crossing "a").val = 2
+
+-- Missing or duplicate tags are refused.
+#guard (assemble 0 (fun _ => none) [.pushTag "a"] : Option (Assembled String)).isNone
+#guard (assemble 0 (fun _ => none) [.tag "a", .tag "a"] : Option (Assembled String)).isNone
+
+/-- A library call: the address is a placeholder until linked. -/
+def libCall : List (Item String String) :=
+  [.pushLibraryAddress "L", .pushTag "ret", .instr (.op .JUMP), .tag "ret"]
+
+#guard (assemble 0 (fun _ => none) libCall).map (·.linkRefs) = some [(1, "L")]
+-- Link references are offsets into the whole code: behind a 0x10-byte prefix they move.
+#guard (assemble 0x10 (fun _ => none) libCall).map (·.linkRefs) = some [(0x11, "L")]
+#guard (assemble 0 (fun _ => none) libCall).map (fun o =>
+    linkBytes (encode o.code) o.linkRefs (fun _ => Vector.replicate 20 0xaa)) =
+  (assemble 0 (fun _ => some (Vector.replicate 20 0xaa)) libCall).map (encode ·.code)
+#guard (assemble 0 (fun _ => some (Vector.replicate 20 0xaa)) libCall).map (·.linkRefs) = some []
+
+#guard ofBytesBE (toBytesBE 2 0x1234).toList = 0x1234
+#guard byteWidth 0 = 0 ∧ byteWidth 255 = 1 ∧ byteWidth 256 = 2
+
 /-- info: 'Solidity.Backend.decode_encode' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms decode_encode
 
@@ -81,5 +130,26 @@ def osakaBytes : List Nat := [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x
 
 /-- info: 'Solidity.Backend.validJumpdest_encode_prefix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms validJumpdest_encode_prefix
+
+/-- info: 'Solidity.Backend.assemble_pushTag' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms assemble_pushTag
+
+/-- info: 'Solidity.Backend.assemble_pushTagRel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms assemble_pushTagRel
+
+/-- info: 'Solidity.Backend.assemble_isSome' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms assemble_isSome
+
+/-- info: 'Solidity.Backend.link_patch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms link_patch
+
+/-- info: 'Solidity.Backend.assemble_layout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms assemble_layout
+
+/-- info: 'Solidity.Backend.tagIndex_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms tagIndex_unique
+
+/-- info: 'Solidity.Backend.fixWidths_stable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms fixWidths_stable
 
 end Solidity.Backend.Checks

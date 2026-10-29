@@ -521,7 +521,8 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/Interpreter.lean` | The compiler's interpreter theorems over `Prog.run` (`setAge_interpreter`, `overflow_interpreter`, `payOwner_interpreter`, `callTwice_interpreter`), from `Evm/Examples.lean`'s machine runs. |
 | `Backend/Opcode.lean` | The backend's target (G45.05, [backend-assembler.md](feature-work/backend-assembler.md)): every Osaka opcode (`Op`, with `CLZ`, `TLOAD`/`TSTORE`, `MCOPY`; `DUP`/`SWAP`/`LOG` indexed by `Fin`), `Instr` with `PUSHn` immediates of exactly `n` bytes, `encode`/`decode` (`decode_encode`, `encode_injective`, `encode_decode`). |
 | `Backend/Jumpdest.lean` | Jump-destination analysis on any bytes (`starts`, `jumpdests`, `validJumpdest`, `InPushData`): valid iff `JUMPDEST` outside push data (`validJumpdest_iff`, `mem_starts`), and on encoded programs iff a `JUMPDEST` instruction sits at that offset (`validJumpdest_encode_iff`, `starts_encode_append`). |
-| `Backend/Checks.lean` | Byte-encoding vectors (`#guard`) and the axiom pins of the encoder, decoder and jump-destination theorems. |
+| `Backend/Assembler.lean` | The assembler (G45.04): solc-style items (`tag`, `pushTag`, `pushTagRel`, `pushLibraryAddress`), big-endian immediates (`toBytesBE`, `ofBytesBE`, `byteWidth`), per-label `PUSH` widths by a terminating fixpoint (`fixWidths`), `assemble` at a base offset with link references; every resolved jump reaches its label's `JUMPDEST` (`assemble_pushTag`), success (`assemble_isSome`), linking (`link_patch`). |
+| `Backend/Checks.lean` | Byte-encoding and assembler vectors (`#guard`) and the axiom pins of the encoder, decoder, jump-destination and assembler theorems. |
 
 ## Tools
 

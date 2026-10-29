@@ -166,3 +166,157 @@ Judgment calls kept as they are, with reasons:
   `D_J_aux` divergence above); the modules are not listed in
   `scripts/check-layers.mjs`'s `CORE` (that script is outside this lane's
   files), though they reach no elaborator module.
+
+## Checkpoint 2 — G45.04 assembler
+
+Module: [Assembler.lean](../../Solidity/Backend/Assembler.lean), vectors in
+[Checks.lean](../../Solidity/Backend/Checks.lean). Checkpoint 1's revision
+is `add105250de969fa432db3a246ec74e5dccb58d5`.
+
+### Items
+
+In solc's vocabulary (`libevmasm`'s `AssemblyItem`), over any label type
+`L` with decidable equality and any library-name type `Lib`:
+
+| Item | Assembles to |
+|---|---|
+| `instr i` | `i` |
+| `tag l` | `JUMPDEST`, defining `l` |
+| `pushTag l` | `PUSHw` of `base + off(l)`: absolute, relocated by the section's base |
+| `pushTagRel l` | `PUSHw` of `off(l)`: section-relative; `base` plus it is a valid destination of the whole code |
+| `pushLibraryAddress x` | `PUSH20` of `x`'s address, or 20 zero bytes and a link reference |
+
+A jump is `pushTag l` followed by `instr (op JUMP)` or `JUMPI`; the theorem
+below is about every `pushTag`, so it covers every jump written that way.
+A jump through a raw `instr (push …)` or a computed address is not a
+resolved jump and is not covered. `assemble base link items` returns the
+program (one instruction per item) and the link references
+`(byte offset, library)` of the placeholders `link` leaves open; the
+offsets are into the whole code (the section's first byte is `base`), as
+solc's `linkReferences` are. Per [G05 Q1](../solidity-scope.md#second-round-2026-10-29) the
+session deploys and links every library itself, so in the pipeline `link`
+is empty and every library push becomes a reference that `linkBytes`
+fills once the address is known.
+
+### Width selection
+
+Each label gets one width `W l : Fin 33` for all its pushes. `fixWidths`
+starts at 0 everywhere and repeats `widen`: each width becomes
+`min 32 (max (W l) (byteWidth (base + tagOffset W l)))`. Widths never
+shrink and are capped at 32, so `Σ (32 - W l)` over the referenced labels
+drops whenever a round changes something: that is the `termination_by`
+measure, and `fixWidths_stable` states the fixpoint. A single pass is not
+enough, because widening one push moves every later tag
+(`Checks.crossing`: the target is at 255 under `PUSH0`, at 256 under
+`PUSH1`, too far for one byte, and at 257 under `PUSH2`; three rounds).
+Starting from 0 lets a tag at absolute offset 0 be reached by `PUSH0`.
+
+`assemble` then checks the layout explicitly (`layoutOk`: distinct tags,
+every referenced tag defined, every absolute target below `256 ^ W l`), so
+soundness does not depend on the fixpoint argument; `assemble_isSome`
+shows the check passes whenever it can.
+
+### Theorems
+
+| Theorem | Statement |
+|---|---|
+| `assemble_pushTag` | `items[k] = pushTag l` ⇒ `out.code[k]` is `push (W l) imm` with `ofBytesBE imm = base + offset out.code j = base + tagOffset W items l`, where `tagIndex items l = some j` and `out.code[j] = JUMPDEST`; and for every encoded prefix `pre` with `size pre = base` and every trailing `X`, `validJumpdest (encode pre ++ encode out.code ++ X) (ofBytesBE imm)` |
+| `tagIndex_unique` | with distinct tags, `items[j] = tag l` ⇒ `tagIndex items l = some j`: the destination is *the* tag of `l` |
+| `assemble_pushTagRel` | `items[k] = pushTagRel l` ⇒ it pushes `offset out.code j` of that tag, and `base` plus that value is a valid destination of the whole code |
+| `assemble_layout` | one instruction per item, `offset out.code k = itemOffset W items k`, and `size out.code` is the layout's total: where a next section starts |
+| `assemble_isSome` | distinct tags, referenced tags defined, and every target under the all-32-byte layout below `256^32` ⇒ assembly succeeds |
+| `link_patch` | in the whole code (`encode pre ++ encode out.code ++ X`, `size pre = base`), `linkBytes … out.linkRefs addr` is `encode pre ++ encode out'.code ++ X` for the code `out'` assembled with the link map completed by `addr`; `out'` has no references left, the same offsets, and the same instruction at every non-library item, so the jump theorem holds after linking |
+| `fixWidths_stable`, `fixWidths_le` | the iteration ends at a fixpoint, above its start |
+| `ofBytesBE_toBytesBE`, `lt_pow_byteWidth`, `byteWidth_le` | big-endian immediates round-trip; `byteWidth` is the least sufficient width |
+
+The prefix condition `size pre = base` with `pre` an *encoded program* is
+what relocation needs: arbitrary prefix bytes could end in a truncated
+`PUSH` whose immediate swallows the section's first bytes. The trailing
+bytes are arbitrary (data, CBOR metadata, another section). The output
+also decodes: `decode_encode` applies to `out.code`, and
+`validJumpdest_encode_iff` gives the converse of the jump theorem for a
+section alone.
+
+### Deviations from solc's `libevmasm`
+
+The output is correct by the theorems above but is not byte-identical to
+solc's:
+
+- solc gives every tag push one shared width (`bytesPerTag`, at least one
+  byte); here each label has its own width, and a tag at absolute offset 0
+  is pushed by `PUSH0`, which solc never does for a tag.
+- solc assembles each sub-assembly from offset 0 (runtime code runs at
+  0). Here a section may sit at any `base`; `base = 0` is solc's case.
+  `pushTagRel` is a section-relative offset, as solc's `PushTag` inside a
+  sub-assembly placed elsewhere would be, not a relative jump (the EVM
+  before EOF has only absolute jumps).
+- A label used only by `pushTagRel` is still sized and checked for its
+  absolute offset, which can make its push wider than needed.
+
+### Out of scope here
+
+Several sections in one image (creation code embedding the runtime as
+data), solc's `PushSub`, `PushSubSize`, `PushProgramSize` and `PushData`,
+and tags of a sub-assembly referenced from its parent belong to the
+artifact layout (G44.02) and its composition (G45.06). The theorems here
+are local to one section; `assemble_layout` gives the section's size, from
+which a caller computes the next `base`.
+
+### Checks
+
+`Checks.lean` assembles a solc-shaped branch at base 0 and at base `0x20`
+(the absolute push moves from `0x0a` to `0x2a`, the relative one does
+not), a tag at offset 0 reached by `PUSH0`, the width-crossing case, refusal
+of a missing and of a duplicate tag, and a library call whose placeholder
+`linkBytes` fills to exactly the bytes assembled with the address. The
+five assembler theorems are pinned at Lean's three axioms.
+
+### Review (checkpoint 2)
+
+Read-only finder and skeptic subagents, no Lean server. Confirmed findings,
+all fixed:
+
+- Skeptic: the jump theorem did not tie its index to *the* tag, and fixed
+  neither the push width nor uniqueness. `assemble_pushTag` now names
+  `tagIndex items l = some j`, the width `W l` and the value as
+  `base + tagOffset W items l`; `tagIndex_unique` (through
+  `filterMap_nodup_index`) gives uniqueness from distinct tags.
+- Skeptic and finder: link references were section-relative and
+  `link_patch` covered the section alone. References now start at `base`,
+  and `link_patch` is stated over the whole code, prefix and suffix
+  included (`linkBytes_from` takes both).
+- Skeptic: nothing said linking keeps offsets and jumps. `link_patch` now
+  states equal offsets and unchanged non-library instructions.
+- Skeptic: no export of the section size. Added `assemble_layout`.
+- Skeptic: `pushTagRel`'s theorem said nothing about the whole code. It
+  now proves `base` plus the value is a valid destination; the document
+  no longer calls it a relocated jump.
+- Finder: the deviations from `libevmasm` were unrecorded (section above),
+  the crossing example's arithmetic was misdescribed, a `Checks` comment
+  named a relative push the vector did not contain, and several `have`s
+  had no type (now annotated).
+- Skeptic: "covers every jump" overclaimed; reworded to jumps written as
+  `pushTag` plus `JUMP`/`JUMPI`, and the out-of-scope section added.
+
+Judgment calls kept: per-label widths (correct, smaller code, recorded as
+a deviation); soundness through the explicit `layoutOk` check instead of
+the fixpoint, with `assemble_isSome` showing the check passes when it can;
+no minimality proof of the chosen widths.
+
+### Handoff (checkpoint 2)
+
+- **Branch:** `cloud/roadmap-l1-20261029/lane-assembler`; checkpoint 1 at
+  `add105250de969fa432db3a246ec74e5dccb58d5`, this checkpoint in the commit
+  that adds this section.
+- **Theorems:** `assemble_pushTag`, `tagIndex_unique`,
+  `assemble_pushTagRel`, `assemble_layout`, `assemble_isSome`,
+  `link_patch`, `fixWidths_stable`; axioms pinned in `Checks.lean` (Lean's
+  three).
+- **Premises:** none beyond the statements: `size pre = base` with `pre`
+  encoded, distinct tags (checked by `assemble`), the 32-byte bound of
+  `assemble_isSome`.
+- **Checks:** `lean_diagnostic_messages` clean on `Solidity/Backend/Assembler.lean`
+  and `Solidity/Backend/Checks.lean` (all `#guard` vectors pass); layer, orphan, trust and
+  doc-path scripts as in checkpoint 1.
+- **Remaining:** multi-section images and solc's sub-assembly items
+  (G44.02/G45.06); byte-identical solc output is not a goal.

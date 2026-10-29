@@ -280,8 +280,11 @@ proof, and their final checks must use the actual implementations.
 
 **G45 lane status (assembler, 2026-10-29).** G45.05 byte encoding: the
 Osaka instruction datatype, `decode_encode`, `encode_injective` and the
-jump-destination theorems are proved in `Solidity/Backend/`; G45.04, the
-EvmYul decoder agreement and G45.03 preparation follow on the same lane.
+jump-destination theorems are proved in `Solidity/Backend/`. G45.04: the
+assembler with labels, relocation, per-label push widths by a terminating
+fixpoint and library placeholders, with `assemble_pushTag` (every resolved
+jump reaches its label's `JUMPDEST`) and `link_patch`. The EvmYul decoder
+agreement and G45.03 preparation follow on the same lane.
 Handoffs per checkpoint are in
 [backend-assembler.md](feature-work/backend-assembler.md).
 
