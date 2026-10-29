@@ -20,14 +20,16 @@ compiler could meet it), or too weak (a wrong compiler meets it). The module
 checks both on one small instance, kernel-checked, with `#guard_msgs` axiom
 pins.
 
-**Inhabited control.** `toySource` reads source bytes as one of three
-programs: `0 d…` succeeds with data `d`, `1 d…` reverts with `d`, `2` loops.
+**Inhabited control.** `toySource` reads source bytes as one of four
+programs: `0 d…` succeeds with data `d` after hashing it, `3 d…` succeeds
+with `d` without hashing, `1 d…` reverts with `d`, `2` loops.
 Every other text is malformed. Inputs carry both pipelines, the pragma's ABI
 coder and a link map, which must be empty. An exhausted source transaction
 (its resource failure) reverts with empty data. A success hashes its data
 (`Toy.hashes`), with G06's Keccak-256 (`Evm.withKeccak`) and sane one-slot
 regions (`Fixed.Sane`). `toyEvm` decodes the selected unit's runtime bytes
-the same way, whatever the gas, and hashes nothing. The intrinsic layer is
+the same way, whatever the gas, and hashes what the decoded program hashes,
+so `hashes_source` is proved, not vacuous. The intrinsic layer is
 the source language, with an identity pass and its certificate (`idCert`).
 `compilerWith f` writes the text of `f p` for the admitted program `p`.
 `publicCorrectness_of_faithful` proves the public contract for every `f` that
@@ -37,7 +39,7 @@ refines in both directions (`Faithful`). Proved:
 |---|---|
 | `toy_publicCorrectness` | `PublicCorrectness toySource toyEvm toyCompiler id toyExport` (`f = id`) |
 | `toy_publicCorrectness_loopReverts` | the same for the compiler that turns the loop into `revert []`: accepted by design, see below |
-| `toySource_nonVacuous` | `SourceSpec.NonVacuous`: success with data `[1]` (hashing `[1]`), revert with `[7]`, divergence, at every artifact table, in the forward bounds and under the hash premise |
+| `toySource_nonVacuous` | `SourceSpec.NonVacuous`: success with data `[1]` without hashing (`3 1`) and after hashing `[1]` (`0 1`), revert with `[7]`, divergence, at every artifact table, in the forward bounds and under the hash premise |
 | `toySource_approved`, `toyEvm_approved`, `toyFixed_keccak` | `SourceSpec.Approved`, `EvmSpec.Approved` (the Osaka pin `Evm.pinned`, sane regions, every bound admissible, precompiles fixed, `this` from deployment, values affordable) and `Fixed.Keccak` |
 | `toyAdmission` | a sound and complete `Admission toySource` (a definition) |
 
@@ -55,8 +57,10 @@ directions of refinement, divergence against exhaustion, and the
 - gas and horizons: the EVM semantics ignores its bound, and every prefix is
   complete at horizon 0;
 - the hash premise: the toy hashes at most one preimage and no slot
-  preimage, so the premise always holds; `HashPremise.not_of_rootSlots`
-  shows the case where it cannot.
+  preimage, so the premise always holds, and the `Collided` branches of
+  `RefinesUnder`, `Cert.back` and `Cert.reflect` are never taken;
+  `HashPremise.not_of_rootSlots` shows the case where the premise cannot
+  hold.
 
 These need real programs and the concrete pipeline (G49.03). The toy is not a
 correspondence claim about Solidity.
@@ -67,7 +71,7 @@ state export and environment map `envAbs`:
 | Theorem | Refuted | Through |
 |---|---|---|
 | `not_publicCorrectness_revertCompiler` | output that always reverts | `PublicCorrectness.not_alwaysRevert` (G01), forward direction |
-| `not_publicCorrectness_hashRevertCompiler` | output that reverts whenever the source hashes (every toy success hashes) | `PublicCorrectness.not_alwaysRevert`, through the hashing success that `NonVacuous` demands |
+| `not_publicCorrectness_hashRevertCompiler` | output that reverts whenever the source hashes, but still succeeds elsewhere (`hashRevert_succeeds`), so it is no always-revert compiler | `NonVacuous`'s hashing success (its second conjunct) with `refines` |
 | `not_publicCorrectness_alteredCompiler` | correct bytes with one byte appended (`0 1` succeeds with `[1, 0]`) | `PublicCorrectness.observes` (new), forward |
 | `not_publicCorrectness_erasingCompiler` | revert data erased | `PublicCorrectness.observes`, forward |
 | `not_publicCorrectness_loopToSucceed` | a loop compiled to a success the source never produces | `PublicCorrectness.observedBySource` (new), backward |
@@ -109,25 +113,37 @@ when a loop runs out of gas. A loop compiled to a *success* is refuted.
 `Solidity/Roadmap/Contracts.lean` that no control on these contracts can
 rule out. They are recorded for the G01 owners and are not changed here:
 
-1. **The hash-premise layout was unbounded (closed by the final G01
-   revision).** `HashPremise.not_of_rootSlots` proves that with
-   `regionLen ≥ 1` and `rootSlots ≥ 2^256`, no run with a slot preimage
-   meets the premise, so `refines` would constrain nothing after it. The
-   final revision adds `Fixed.Sane` to both `SourceSpec.Approved` and
-   `EvmSpec.Approved`, which excludes this (`Fixed.Sane.rootSlots_lt`); the
-   premise is now the source's, so a compiler cannot make it fail either.
+1. **The hash-premise layout.** `HashPremise.not_of_rootSlots` proves that
+   with `regionLen ≥ 1` and `rootSlots ≥ 2^256`, no run with a slot
+   preimage meets the premise, so `refines` would constrain nothing after
+   it. The final revision adds `Fixed.Sane` to both `SourceSpec.Approved`
+   and `EvmSpec.Approved`, which excludes this degenerate layout
+   (`Fixed.Sane.rootSlots_lt`), and the premise is now the source's, so a
+   compiler cannot make it fail. Still open: nothing shows that sane
+   parameters let some run with a slot preimage meet the premise, since
+   `NonVacuous`'s hashing witness may have no slot preimage (the toy's has
+   none). Requiring `slotHashed ≠ []` there would close it, at the cost of
+   one concrete Keccak value in every inhabitant.
 2. **The resource-failure semantics is unconstrained.** "A failing frame
    reverts with empty data and its caller continues" is a comment, not a
    field: `Failures`/`NoFail` say which bounds fail, not what a failure
    observes. A source whose failing runs may end in any outcome makes the
    backward direction vacuous. This is an S03.04 obligation.
-3. **The EVM's observation fields are unconstrained.** `EvmSpec.created`,
-   `worlds`, `balances` and `resume` are free fields (`hashed` is now
-   constrained by `hashes_source`): `worlds := []`
+3. **The EVM's observation fields are unconstrained.** `EvmSpec.hashed`,
+   `created`, `worlds`, `balances` and `resume` are free fields
+   (`hashes_source` binds `hashed` only to the source; `hashed := []`
+   makes it vacuous): `worlds := []`
    makes `decode_reach`/`decode_commutes` vacuous, as in the toy. These are
    pinning obligations of G06/G49.
 4. **The table is read only as bytes** (G01 non-circularity part 4) is not
    checked mechanically. The toy's `meaning` ignores the table.
+5. **`Fixed.Keccak` pins only the hash and `Sane`.** The precompiles, their
+   gas (`Evm.Fixed.precompile`, `precompileGas`) and the ledger are free
+   though documented as fixed: `toyFixed_keccak` holds with every
+   precompile halting, zero precompile gas and a ledger ignoring events, and
+   `Affordable` reads the ledger. This is for G01/G03/G06.
+6. **No control exercises a collision.** The toy never violates the
+   premise, so the excusing branch of the backward direction is untested.
 
 ## 2. Gates
 
@@ -376,8 +392,14 @@ Restated:
   premise, and `observedBySource` takes `NoCollisionUpTo`.
 - **New control.** `not_publicCorrectness_hashRevertCompiler` refutes a
   compiler that reverts whenever the source hashes.
-- **Gap 1.** It is now closed by `Fixed.Sane`, and the lemma is restated
-  over slot preimages.
+- **Gap 1.** The degenerate layout is now excluded by `Fixed.Sane`, and the
+  lemma is restated over slot preimages; sufficiency remains open.
+- **Review of the restatement** (read-only skeptic): `hashRevertCompiler`
+  was at first another always-revert compiler (every toy success hashed)
+  and `hashes_source` was vacuous (the toy EVM hashed nothing). Both are
+  fixed: the non-hashing success `quiet` and a proof through `NonVacuous`'s
+  hashing witness, and a toy EVM hashing what it runs. Gaps 5 and 6 and the
+  reworded gaps 1 and 3 come from the same review.
 
 The non-circularity gate allows `Solidity.Hash.CollisionBound` and
 `Solidity.Roadmap.Evm`, both statements-only modules that the contracts now

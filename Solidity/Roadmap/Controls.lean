@@ -124,9 +124,12 @@ theorem _root_.Solidity.Roadmap.Admission.rejects {S : SourceSpec} (A : Admissio
 
 /-! ## The toy programs and their bounds -/
 
-/-- The three toy programs. -/
+/-- The toy programs. -/
 inductive Toy where
+  /-- Succeed with `d`, hashing `d` first. -/
   | succeed (d : Bytes)
+  /-- Succeed with `d`, hashing nothing. -/
+  | quiet (d : Bytes)
   | fail (d : Bytes)
   | loop
   deriving DecidableEq, Repr
@@ -151,13 +154,14 @@ never completes.  No program emits events. -/
 def Toy.run : Toy → Bool → Prefix Event Outcome
   | _, true => ⟨[], some (.revert [])⟩
   | .succeed d, false => ⟨[], some (.success d)⟩
+  | .quiet d, false => ⟨[], some (.success d)⟩
   | .fail d, false => ⟨[], some (.revert d)⟩
   | .loop, false => ⟨[], none⟩
 
 theorem Toy.run_events (t : Toy) (b : Bool) : (t.run b).events = [] := by
   cases b <;> cases t <;> rfl
 
-/-- The preimages a toy program hashes: a success hashes its data (as a
+/-- The preimages a toy program hashes: `succeed` hashes its data (as a
 `keccak256` of the return value would), the others nothing. -/
 def Toy.hashes : Toy → List Bytes
   | .succeed d => [d]
@@ -168,13 +172,15 @@ def Toy.text : Toy → Bytes
   | .succeed d => 0 :: d
   | .fail d => 1 :: d
   | .loop => [2]
+  | .quiet d => 3 :: d
 
-/-- The toy grammar: `0 d…` succeeds with `d`, `1 d…` reverts with `d`, `2`
-loops; every other text is malformed. -/
+/-- The toy grammar: `0 d…` succeeds with `d` after hashing it, `3 d…`
+succeeds with `d`, `1 d…` reverts with `d`, `2` loops; every other text is
+malformed. -/
 def parse : Bytes → Option Toy
   | [] => none
   | b :: d => if b = 0 then some (.succeed d) else if b = 1 then some (.fail d)
-      else if b = 2 ∧ d = [] then some .loop else none
+      else if b = 2 ∧ d = [] then some .loop else if b = 3 then some (.quiet d) else none
 
 theorem parse_text (t : Toy) : parse t.text = some t := by
   cases t <;> rfl
@@ -182,7 +188,8 @@ theorem parse_text (t : Toy) : parse t.text = some t := by
 /-- The toy bytecode: the same tags, anything else runs forever. -/
 def decode : Bytes → Toy
   | [] => .loop
-  | b :: d => if b = 0 then .succeed d else if b = 1 then .fail d else .loop
+  | b :: d => if b = 0 then .succeed d else if b = 1 then .fail d else if b = 3 then .quiet d
+      else .loop
 
 theorem decode_text (t : Toy) : decode t.text = t := by
   cases t <;> rfl
@@ -221,6 +228,7 @@ preimages. -/
 theorem toy_premise (t : Toy) : HashPremise toyFixed t.hashes [] := by
   cases t with
   | succeed d => exact ⟨Solidity.Hash.CollisionFree.singleton d, Solidity.Hash.RegionsDisjoint.nil⟩
+  | quiet d => exact HashPremise.nil _
   | fail d => exact HashPremise.nil _
   | loop => exact HashPremise.nil _
 
@@ -340,10 +348,11 @@ theorem toy_forward (t : Toy) (e : SessionEnv) (h : Nat) :
     toySource.lang.Forward t e ⟨h, false⟩ ∧ toySource.lang.Guard t e ⟨h, false⟩ :=
   ⟨⟨rfl, toy_count t⟩, toy_premise t⟩
 
-/-- **The toy source is non-vacuous**: `0 1` succeeds with `[1]`, hashing
-`[1]`; `1 7` reverts with `[7]`; `2` diverges. -/
+/-- **The toy source is non-vacuous**: `3 1` succeeds with `[1]` without
+hashing, `0 1` succeeds with `[1]` after hashing `[1]`, `1 7` reverts with
+`[7]`, `2` diverges. -/
 theorem toySource_nonVacuous : toySource.NonVacuous := by
-  refine ⟨⟨{ text := [0, 1] }, ⟨.succeed [1], .legacy, .v2⟩, trivial, trivial, quietEnv, ⟨0, false⟩, [1],
+  refine ⟨⟨{ text := [3, 1] }, ⟨.quiet [1], .legacy, .v2⟩, trivial, trivial, quietEnv, ⟨0, false⟩, [1],
       (admitted_iff _ _).2 rfl, quietEnv_allowed, trivial, List.cons_ne_nil _ _,
       fun _ => ⟨(toy_forward _ _ _).1, (toy_forward _ _ _).2, rfl⟩⟩,
     ⟨{ text := [0, 1] }, ⟨.succeed [1], .legacy, .v2⟩, trivial, trivial, quietEnv, ⟨0, false⟩, [1],
@@ -395,7 +404,7 @@ theorem malformed_not_admitted : ¬ ∃ r, toySource.Admitted (⟨[], .legacy, .
   cases (admitted_iff _ _).1 h
 
 /-- Malformed: an unknown tag. -/
-theorem badTag_not_admitted : ¬ ∃ r, toySource.Admitted ({ text := [3] } : ToyInput) r := by
+theorem badTag_not_admitted : ¬ ∃ r, toySource.Admitted ({ text := [4] } : ToyInput) r := by
   rintro ⟨r, h⟩
   cases (admitted_iff _ _).1 h
 
@@ -478,8 +487,8 @@ def toyEvmLang : Lang Event Outcome where
   sem := fun art _ _ => (decode (mainRuntime art)).run false
   consistent := fun _ _ _ _ _ => Prefix.Le.refl _
 
-/-- The toy EVM: the Osaka pin, and no `KECCAK256` (its successes return
-their data without hashing it). -/
+/-- The toy EVM: the Osaka pin; it hashes what the decoded program hashes
+(`KECCAK256` of a `succeed`'s data). -/
 def toyEvm : EvmSpec where
   lang := toyEvmLang
   load := id
@@ -493,7 +502,7 @@ def toyEvm : EvmSpec where
   gas := EvmBound.gas
   withGas := fun r g => { r with gas := g }
   gas_with := fun _ _ => rfl
-  hashed := fun _ _ _ => []
+  hashed := fun art _ _ => Toy.hashes (decode (mainRuntime art))
   created := fun _ _ _ => []
   World := Unit
   worlds := fun _ _ _ => []
@@ -534,11 +543,13 @@ theorem PrefixFree_artOf (code : Bytes) : (artOf code).PrefixFree := by
   have hk' : k < 1 := hk
   exact absurd (by omega : j = k) hne
 
-/-- A translation of toy programs that refines in both directions: the
+/-- A translation of toy programs that refines in both directions (the
 unexhausted source prefix is below the target's, and the target's is below
-the source prefix at some exhaustion choice. -/
+the source prefix at some exhaustion choice) and hashes only what the source
+hashes. -/
 def Faithful (f : Toy → Toy) : Prop :=
-  ∀ t, (t.run false).Le ((f t).run false) ∧ ∃ b, ((f t).run false).Le (t.run b)
+  ∀ t, (t.run false).Le ((f t).run false) ∧ (∃ b, ((f t).run false).Le (t.run b)) ∧
+    ∀ x ∈ (f t).hashes, x ∈ t.hashes
 
 /-- A faithful translation meets the public contract. -/
 theorem publicCorrectness_of_faithful (f : Toy → Toy) (hf : Faithful f) :
@@ -580,12 +591,18 @@ theorem publicCorrectness_of_faithful (f : Toy → Toy) (hf : Faithful f) :
       show [] = (createsOf ((decode (mainRuntime _)).run false).events).map _
       rw [Toy.run_events]
       rfl
-  hashes_source := fun _ _ _ _ _ _ _ _ _ _ _ _ hb => nomatch hb
+  hashes_source := fun i r adm _ _ art hc _ _ _ _ x hx => by
+    have ha := (admitted_iff i r).1 adm
+    simp only [compilerWith, ha, Option.map_some, Option.some.injEq] at hc
+    subst hc
+    have hx' : x ∈ (decode (mainRuntime (artOf (f r.prog).text))).hashes := hx
+    rw [mainRuntime_artOf, decode_text] at hx'
+    exact ⟨⟨0, false⟩, trivial, (hf r.prog).2.2 x hx'⟩
   refines := fun i r adm _ _ art hc e he => by
     have ha := (admitted_iff i r).1 adm
     simp only [compilerWith, ha, Option.map_some, Option.some.injEq] at hc
     subst hc
-    obtain ⟨hfw, b, hbw⟩ := hf r.prog
+    obtain ⟨hfw, ⟨b, hbw⟩, _⟩ := hf r.prog
     refine ⟨he, fun rs _ hfr _ => ⟨⟨rs.horizon, fun _ => 0⟩, trivial, ?_⟩,
       fun rt _ => ⟨⟨rt.horizon, b⟩, trivial, .inl ?_⟩⟩
     · show (r.prog.run rs.exhausted).Le ((decode (mainRuntime (artOf (f r.prog).text))).run false)
@@ -602,7 +619,7 @@ theorem publicCorrectness_of_faithful (f : Toy → Toy) (hf : Faithful f) :
 for the toy source and EVM. -/
 theorem toy_publicCorrectness :
     PublicCorrectness toySource toyEvm toyCompiler id toyExport :=
-  publicCorrectness_of_faithful id fun _ => ⟨Prefix.Le.refl _, false, Prefix.Le.refl _⟩
+  publicCorrectness_of_faithful id fun _ => ⟨Prefix.Le.refl _, ⟨false, Prefix.Le.refl _⟩, fun _ h => h⟩
 
 /-- A loop compiled to a revert with empty data. -/
 def loopToRevert : Toy → Toy
@@ -617,9 +634,10 @@ theorem toy_publicCorrectness_loopReverts :
     PublicCorrectness toySource toyEvm (compilerWith loopToRevert) id toyExport :=
   publicCorrectness_of_faithful loopToRevert fun t => by
     cases t with
-    | loop => exact ⟨⟨List.prefix_refl _, .inl rfl⟩, true, Prefix.Le.refl _⟩
-    | succeed d => exact ⟨Prefix.Le.refl _, false, Prefix.Le.refl _⟩
-    | fail d => exact ⟨Prefix.Le.refl _, false, Prefix.Le.refl _⟩
+    | loop => exact ⟨⟨List.prefix_refl _, .inl rfl⟩, ⟨true, Prefix.Le.refl _⟩, fun _ h => nomatch h⟩
+    | succeed d => exact ⟨Prefix.Le.refl _, ⟨false, Prefix.Le.refl _⟩, fun _ h => h⟩
+    | quiet d => exact ⟨Prefix.Le.refl _, ⟨false, Prefix.Le.refl _⟩, fun _ h => h⟩
+    | fail d => exact ⟨Prefix.Le.refl _, ⟨false, Prefix.Le.refl _⟩, fun _ h => h⟩
 
 /-! ## Negative controls
 
@@ -652,24 +670,42 @@ theorem not_publicCorrectness_revertCompiler (X : StateExport toySource I toyEvm
   intro hf
   cases hf
 
-/-- A compiler that reverts exactly where the source hashes: a success
-(which hashes its data) becomes a revert. -/
+/-- A compiler that reverts exactly where the source hashes: a hashing
+success becomes a revert; the non-hashing success `quiet` is kept, so its
+output does succeed. -/
 def hashRevert : Toy → Toy
   | .succeed _ => .fail []
   | t => t
 
+/-- The output of `compilerWith hashRevert` sometimes succeeds: it is no
+always-revert compiler, so `not_alwaysRevert` does not refute it. -/
+theorem hashRevert_succeeds :
+    ((decode (mainRuntime (artOf (hashRevert (.quiet [1])).text))).run false).final =
+      some (.success [1]) := rfl
+
 /-- **The revert-on-hashing control**: the non-vacuity witness that hashes
-and succeeds forces a success of the bytes, so a compiler reverting on every
-hashing run fails the public contract, whatever the EVM hashes and without
-any fact about Keccak's values (`PublicCorrectness.succeeds_hashing`). -/
+and succeeds (`NonVacuous`'s second conjunct) forces a success of the bytes
+at that hashing run, so a compiler reverting on every hashing run fails the
+public contract, without any fact about Keccak's values. -/
 theorem not_publicCorrectness_hashRevertCompiler (X : StateExport toySource I toyEvm) :
     ¬ PublicCorrectness toySource toyEvm (compilerWith hashRevert) envAbs X := by
   intro h
-  refine h.not_alwaysRevert toySource_nonVacuous (fun i art e rt d hc _ _ => ?_)
-  obtain ⟨r, _, rfl⟩ := compilerWith_run hc
-  show ((decode (mainRuntime (artOf (hashRevert r.prog).text))).run false).final ≠ _
-  rw [mainRuntime_artOf, decode_text]
-  cases r.prog <;> intro hf <;> cases hf
+  obtain ⟨i, r, w, p, e, rs, d, adm, hal, hrs, hw⟩ := toySource_nonVacuous.2.1
+  have hs := (h.coverage i).1 ⟨r, adm⟩
+  cases hc : compilerWith hashRevert i with
+  | none => rw [hc] at hs; cases hs
+  | some art =>
+    obtain ⟨e', he', rfl⟩ := h.envOnto e hal
+    obtain ⟨hne, hf, hg, hfin⟩ := hw art
+    obtain ⟨rt, _, ht, _⟩ := (h.refines i r adm w p art hc e' he').2.completes hrs hf hg hfin
+    obtain ⟨r', ha, rfl⟩ := compilerWith_run hc
+    rw [(admitted_iff i r).1 adm, Option.some.injEq] at ha
+    subst ha
+    have hne' : Toy.hashes r.prog ≠ [] := hne
+    have ht' : ((decode (mainRuntime (artOf (hashRevert r.prog).text))).run false).final =
+        some (.success d) := ht
+    rw [mainRuntime_artOf, decode_text] at ht'
+    cases hq : r.prog <;> rw [hq] at hne' ht' <;> first | exact hne' rfl | cases ht' 
 
 /-- Altered bytecode: the correct output with one byte appended. -/
 def alteredCompiler (i : ToyInput) : Option Artifact :=
@@ -778,7 +814,10 @@ With at least one slot per region and `2^256` root slots, no run with a
 slot preimage meets the hash premise, which would leave `refines` with no
 constraint after it; `Fixed.Sane` (a conjunct of both `SourceSpec.Approved`
 and `EvmSpec.Approved`) rules such parameters out (`Fixed.Sane.rootSlots_lt`).
-This was G07's first contract gap, closed by the final G01 revision. -/
+This was G07's first contract gap; the final G01 revision excludes the
+degenerate layout.  That sane parameters let *some* run with a slot preimage
+meet the premise is not shown (`NonVacuous`'s hashing witness may have no
+slot preimage); `docs/feature-work/roadmap-g07-gates.md` records it. -/
 
 theorem _root_.Solidity.Roadmap.HashPremise.not_of_rootSlots {F : Fixed} (hl : 1 ≤ F.regionLen)
     (hr : 2 ^ 256 ≤ F.rootSlots) (xs : List Bytes) (y : Bytes) (ys : List Bytes) :
@@ -790,7 +829,8 @@ theorem _root_.Solidity.Roadmap.HashPremise.not_of_rootSlots {F : Fixed} (hl : 1
   show (F.hash y).val < (F.hash y).val + F.regionLen
   omega
 
-/-- Sane parameters have fewer root slots than words. -/
+/-- Sane parameters have fewer root slots than words: the degenerate layout
+above is excluded. -/
 theorem _root_.Solidity.Roadmap.Fixed.Sane.rootSlots_lt {F : Fixed} (h : F.Sane) :
     F.rootSlots < 2 ^ 256 :=
   Nat.lt_of_le_of_lt h.2.2 (Nat.pow_lt_pow_right (by decide) (by decide))
@@ -839,3 +879,7 @@ end Solidity.Roadmap.Controls
 #guard_msgs in #print axioms Solidity.Roadmap.HashPremise.not_of_rootSlots
 /-- info: 'Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler
+/-- info: 'Solidity.Roadmap.Fixed.Sane.rootSlots_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Roadmap.Fixed.Sane.rootSlots_lt
+/-- info: 'Solidity.Roadmap.Controls.toyFixed_keccak' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Roadmap.Controls.toyFixed_keccak

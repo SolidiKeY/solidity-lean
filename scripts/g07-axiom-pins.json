@@ -1707,11 +1707,19 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toyFixed_keccak": [
+  "propext"
+ ],
  "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toySource_approved": [
   "Quot.sound",
   "propext"
  ],
  "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toySource_nonVacuous": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Fixed.Sane.rootSlots_lt": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
  "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.HashPremise.not_of_rootSlots": [
