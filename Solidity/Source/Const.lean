@@ -167,8 +167,12 @@ def maxShift : Nat := 4097
 (on decimal literals only: solc rejects a unit on a hexadecimal number),
 parentheses, unary `-`/`~`, `+ - * / % **`, shifts and bitwise operations,
 folded exactly and bounded as solc bounds them; anything else is not a
-compile-time number. -/
+compile-time number.  A checksummed 40-digit hexadecimal literal is an
+address, not a number, so it folds into no constant (solc refuses
+`0xAbC…+1`). -/
 def Syn.const : {c : Cat} → Syn c → Option Q
+  | _, .lit (.num (.hex ds true)) =>
+    if ds.length = 40 then Option.none else Option.some (NumLit.hex ds true).value
   | _, .lit (.num n) => Option.some n.value
   | _, .litUnit (.dec m f e) u => Option.some ((NumLit.dec m f e).value.mul (Q.ofInt u.factor))
   | _, .tuple (.some e) .nil => e.const
