@@ -88,7 +88,8 @@ evidence directory.
    Final global gates remain lane-wide obligations.
 2. Independent slice execution and installed-runtime theorem: implemented,
    kernel checks/controls and independent finder/skeptic follow-ups pass.
-3. Certified assembler linking, disjointness, exact widths and refusal: pending.
+3. Certified assembler linking, disjointness, exact widths and refusal: implemented;
+   focused target and independent review follow-ups pass.
 4. Typed immutable patches and frame/installation proofs: pending.
 A. Constructor-prefix return/revert composition: pending.
 B. Determinism, commutation, encoding/provenance and external vectors: pending.
@@ -149,3 +150,36 @@ Neither review used a Lean server or build. Placement is a suffix-entry theorem,
 not execution of its prefix (backfill A). `fetch` refuses truncated PUSH data,
 unlike full EVM zero-padding; generated wrappers contain complete immediates,
 and this refusal is an explicit slice boundary.
+
+## Checkpoint 3: linking and certified regions
+
+`Regions.patchAt_length`, `patchAt_get`, `patchAt_frame`, and `patchAt_commute`
+prove exact bounds, byte replacement, untouched bytes and disjoint order
+independence for the existing assembler overwrite. `LinkSite` fixes address width
+at 20; `LinkTable` certifies exact metadata origin and pairwise region separation.
+`assembler_regions` derives bounds and separation from every actual successful
+assembler output, not from a caller-supplied separation premise.
+`tableOfAssembly` constructs a typed table from actual base-zero runtime assembly.
+`assembler_link_package` uses the committed `link_patch` theorem to link that
+runtime, retain its jump-coordinate base zero, keep wrapper and arguments intact,
+and derive exact installation by the independent runner. `assembler_link_wrapper`
+is separately only a whole-code embedding equality; it is not an installed-runtime
+jump relocation theorem. No assembler algorithm or fixpoint is duplicated.
+
+`deployable` refuses unresolved metadata; raw artifact bytes remain representable
+and executable as data, so this optional gate is not a global impossibility claim.
+`resolve_missing` refuses a missing address before any patching; total addresses
+are typed vectors of exactly 20 bytes. `linked_args`, `link_payload_bounds` and
+`truncated_arguments_refused` preserve/validate the separate argument section.
+Argument validation checks byte length, not ABI decoding. The public compiler's
+refusal of externally preassigned link maps remains unchanged.
+
+The actual two-library `actual_assembly_combination` is inhabited, constructs a
+certified table and proves base-zero assembler/link/package/install composition
+with nonempty arguments. Controls also reject wrong relocation by actual byte
+inequality, missing/unresolved addresses, overlap/out-of-bounds intervals and
+truncated arguments; an inhabited two-site control exercises disjoint commutation.
+Both independent finder/skeptic reviews found the missing actual-assembly and
+origin composition controls. Those were fixed as above; both follow-up reviews
+report no new correctness finding, without Lean servers or builds.
+Headline axiom pins contain only `propext`, `Classical.choice`, `Quot.sound` subsets.

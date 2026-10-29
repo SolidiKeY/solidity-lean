@@ -942,3 +942,9 @@ At the root, the notation's own tests:
 
 | `Backend/Creation/Placement.lean` | Relocated runtime-return slice with arithmetic alignment certificate and minimal offset PUSH width. |
 | `Backend/Creation/PlacementChecks.lean` | Inhabited PUSH1/PUSH2 offset transition controls with nonempty runtime and arguments. |
+
+| `Backend/Creation/Regions.lean` | Bounded typed patch regions, assembler overwrite length/frame laws and disjoint commutation. |
+| `Backend/Creation/Linking.lean` | Certified absolute/local link metadata, exact 20-byte addresses, unresolved refusal and existing assembler linking through wrapper/arguments. |
+
+| `Backend/Creation/LinkLayout.lean` | Bounds and pairwise disjointness derived from actual assembler link metadata for every successful assembly. |
+| `Backend/Creation/LinkingChecks.lean` | Inhabited library-link/install controls, unresolved/missing/wrong-origin/truncated-argument negatives and axiom pins. |

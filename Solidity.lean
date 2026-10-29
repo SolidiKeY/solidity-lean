@@ -675,3 +675,9 @@ import Solidity.Backend.Creation.ExecutionChecks
 
 import Solidity.Backend.Creation.Placement
 import Solidity.Backend.Creation.PlacementChecks
+
+import Solidity.Backend.Creation.Regions
+import Solidity.Backend.Creation.Linking
+
+import Solidity.Backend.Creation.LinkLayout
+import Solidity.Backend.Creation.LinkingChecks
