@@ -224,3 +224,37 @@ activate the saved setup, override `LEAN_NUM_THREADS=1`, and use the retained
 bounded runners; explicit `-j1` belongs to Lean, not Lake build flags. No
 tracked setup/user configuration is changed. No push, merge or cherry-pick
 is performed.
+
+## Complete-delivery fact-type follow-up (2026-10-29)
+
+The retained whole-delivery finder finding names eight missing fact types:
+`hp` and `he` in `HashWrittenInput`, `ea`, `ep`, `ea'` and `eb` in
+`HashWrittenRealize`, and `hw` and `h` in `DecisionWrittenMemory`.
+All eight annotations are already present in integration snapshot `67576ad8`;
+this follow-up preserves them rather than replaying the source assignment.
+
+Auditing the complete candidate against delivery base
+`f4dee4a29c2e208b36db4a4161a4723c735cd775` found one additional newly added
+untyped fact, `hIu` in `Calculus/TermSize.lean`. It now spells out the exact
+inequality supplied by `invFml_size`, before the existing simplification.
+The proof term and all subsequent proof steps are unchanged. The final
+comment-aware audit covers 165 newly added `have` facts across 67 changed
+Lean files and finds no remaining missing fact types. Its result is retained
+in `/tmp/written-memory-hash-type-audit.json`.
+
+Complete per-file MCP diagnostics (`interactive=false`) for the only Lean
+file edited in this follow-up, `TermSize`, report no errors or warnings,
+no failed dependencies and no pending elaboration. The results are retained
+in `/tmp/written-memory-hash-type-diagnostics.json`. These focused results
+do not complete earlier pending diagnostics or replace the coordinator's
+combined validation. The existing pending `DecisionKInt` check recorded in
+the memory-negative-block milestone remains pending here.
+
+Local read-only finder and skeptic passes checked the cumulative fact-type
+audit and the annotation against its helper's signature. No further finding
+or semantic decision remains in this repair. Whitespace and actual
+conflict-marker checks pass. This follow-up changes only a fact annotation
+and this record; semantics, observations, target predicates, invariants and
+budgets are preserved. No full build, index write, commit, push, source VM,
+skill or monitor modification is performed. Independent review and combined
+gates remain with the coordinator.

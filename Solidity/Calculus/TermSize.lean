@@ -1429,7 +1429,10 @@ theorem loopStep_bounded_two (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c 
         · simp only [LoopAnn.size]; omega
       · rename_i d
         have hd := Val.lower_size d
-        have hIu := invFml_size (I.up (t := .val .uint)) (qs.map LoopQ.up)
+        have hIu : (invFml (I.up (t := .val .uint)) (qs.map LoopQ.up)).tmSize ≤
+            3 * (I.up (t := .val .uint)).size + 2 +
+              6 * ((qs.map LoopQ.up).map LoopQ.size).sum :=
+          invFml_size (I.up (t := .val .uint)) (qs.map LoopQ.up)
         simp only [List.map_map, Function.comp_def, LoopQ.size_up, Val.size_up] at hIu
         change (invFml I.up (qs.map LoopQ.up)).tmSize ≤
           3 * I.size + 2 + 6 * (qs.map LoopQ.size).sum at hIu
