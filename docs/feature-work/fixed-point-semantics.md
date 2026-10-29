@@ -416,10 +416,11 @@ is `[propext, Classical.choice, Quot.sound]`.
   multiply-divide.
 
 Not proved:
-- associativity (it fails under truncation);
+- associativity, which fails under truncation (witness in §6.6);
 - how far an explicit conversion lands from the value when the value is not
   representable (it wraps, by decision Q2);
-- order preservation of explicit conversions.
+- order preservation of explicit conversions (proved for unwrapped values
+  in §6.6: `Fx.explicit_le`).
 
 **Review.** A read-only finder and a separate read-only skeptic reviewed
 `aa4bb50`. Neither found a blocking defect. The confirmed findings were
@@ -512,7 +513,7 @@ dependency-free.
 | Case | solc 0.8.38 (source reading) | Here | Status |
 |---|---|---|---|
 | Out-of-range explicit constant, e.g. `ufixed8x1(100.5)`, `ufixed256x80(1/3)` | Accepted through the mobile type | Compile error | Intended (Q2) |
-| Explicit constant value | Rounded at the mobile type's digits, then converted | Truncated once, at the target's digits | Intended (P1). By the argument below (not proved), the value differs only when the target has more digits than the mobile type and the loop stopped on the magnitude bound (`2^256 − 1`, or `2^255` when negative). Witness: `ufixed256x1((2**257 - 1) / 20)` is `2^256 − 1` here and `2^256 − 6` through solc's route. Fewer target digits agree, because truncations compose. |
+| Explicit constant value | Rounded at the mobile type's digits, then converted | Truncated once, at the target's digits | Intended (P1). The value differs only when the target has more digits than the mobile type (proved for fewer or equal digits: `Fx.explicitRat?_mobile_route`, §6.6) and the loop stopped on the magnitude bound (`2^256 − 1`, or `2^255` when negative). Witness: `ufixed256x1((2**257 - 1) / 20)` is `2^256 − 1` here and `2^256 − 6` through solc's route. |
 | Explicit constant with no mobile type, e.g. `ufixed256x0(2**256 - 0.5)` | Refused (`isExplicitlyConvertibleTo` needs a mobile type) | `2^256 − 1` (in range after truncation) | Intended (P1: exact folding at the target) |
 | Common type `x op c` where `c` is not exact at the mobile type, e.g. `ufixed8x77 y; y + 1/3` | Common type `ufixed256x77`, `c` truncated | Refused | Intended (Q1: lossy conversions are explicit) |
 | `c op x` with a fractional `c`, e.g. `0.5 * x` | Refused ("Fractional literals not supported.") | Refused, as solc | Follows solc; question QL1 below asks whether full support should admit it |
@@ -532,7 +533,8 @@ until QL2) and
   rejection and the comparison itself are not modelled;
 - constants of other categories (integer `mobileType`, `bytesM`,
   addresses), which belong to the integer typing;
-- a proof that the two routes agree when the target has fewer digits.
+- a proof that the two routes agree when the target has fewer digits (done
+  in §6.6: `Fx.explicitRat?_mobile_route`).
 
 **Scope questions** (raised here, not answered; the rest of the checkpoint
 does not depend on them):
@@ -890,3 +892,28 @@ findings and their fixes:
 | `344`/`321`/`327` rejections cited `Fx.ofRat?` though they target `uint256`/`bytes32` | finder | split row; rejection argued |
 | `315`'s accepted `ufixed a = 11/4` not checked | finder | added |
 | "6 `bytes_concat_wrong_type_*` tests" | finder | named exactly |
+
+### 6.6 Backfill — remaining laws (roadmap backfill item 2)
+
+The work queue was done, so the lane took backfill item 2 of
+`docs/coverage-plan.md`: complete the fixed-point module and prove the
+remaining laws. Items 1, 3 and 4 belong to other lanes or wait for the
+Codex lanes. Item 5 (the stipend cost rule) is outside this lane's files.
+
+- `tdiv_trunc`'s companion `tdiv_tdiv`: truncations compose
+  (`(x tdiv a) tdiv b = x tdiv (a·b)` for `a > 0`).
+- `Fx.rescale_rescale_down`: dropping digits in two steps is dropping them
+  at once. `Fx.rescale_mono`: rescaling is monotone.
+- `Fx.explicit_le`: an explicit conversion keeps the order of the values it
+  does not wrap.
+- `literalTrunc_rescale` and `Fx.explicitRat?_mobile_route`
+  (`Solidity/Language/FixedPoint/Literals.lean`): when the target has no
+  more digits than the mobile type, solc's route through the mobile type
+  gives the exactly folded value. P1 changes the value only when the target
+  has more digits, which turns the §6.2 argument into a theorem.
+- A witness that `*` is not associative (`Laws.lean`, `example`):
+  `(0.01 · 0.50) · 2.00 = 0.00` but `0.01 · (0.50 · 2.00) = 0.01` at
+  `ufixed16x2`.
+
+Pins: `tdiv_tdiv` and `Fx.explicitRat?_mobile_route` use
+`[propext, Classical.choice, Quot.sound]`.

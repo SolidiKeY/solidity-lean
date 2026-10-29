@@ -61,6 +61,23 @@ theorem pow_ten_ne (n : Nat) : (10 : Int) ^ n ≠ 0 := by
   have h : (0 : Int) < 10 ^ n := Int.pow_pos (by decide)
   omega
 
+/-- Truncations compose: truncating by `a`, then by `b`, is truncating by
+`a·b`. -/
+theorem tdiv_tdiv (x : Int) {a : Int} (b : Int) (ha : 0 < a) :
+    (x.tdiv a).tdiv b = x.tdiv (a * b) := by
+  have hab : 0 ≤ a := Int.le_of_lt ha
+  by_cases hx : 0 ≤ x
+  · have h1 : 0 ≤ x / a := Int.ediv_nonneg hx hab
+    rw [Int.tdiv_eq_ediv_of_nonneg hx, Int.tdiv_eq_ediv_of_nonneg h1,
+      Int.tdiv_eq_ediv_of_nonneg hx, Int.ediv_ediv hab]
+  · have hx' : 0 ≤ -x := by omega
+    have h1 : 0 ≤ (-x) / a := Int.ediv_nonneg hx' hab
+    have e1 : x.tdiv a = -((-x) / a) := by
+      rw [← Int.neg_neg x, Int.neg_tdiv, Int.neg_neg, Int.tdiv_eq_ediv_of_nonneg hx']
+    have e2 : x.tdiv (a * b) = -((-x) / (a * b)) := by
+      rw [← Int.neg_neg x, Int.neg_tdiv, Int.neg_neg, Int.tdiv_eq_ediv_of_nonneg hx']
+    rw [e1, e2, Int.neg_tdiv, Int.tdiv_eq_ediv_of_nonneg h1, Int.ediv_ediv hab]
+
 namespace Fx
 
 variable {t t' : FxTy}
@@ -290,6 +307,32 @@ theorem rescale_down_exact (n n' : Nat) (v : Int) (hd : n' < n → 10 ^ (n - n')
     simp only [rescale, hle, if_false, hle', if_true]
     exact Int.tdiv_mul_cancel (hd hlt)
 
+/-- Dropping digits in two steps is dropping them at once. -/
+theorem rescale_rescale_down (n m k : Nat) (h1 : k ≤ m) (h2 : m ≤ n) (v : Int) :
+    rescale m k (rescale n m v) = rescale n k v := by
+  have hp : ∀ e : Nat, (0 : Int) < 10 ^ e := fun e => Int.pow_pos (by decide)
+  by_cases hmn : n ≤ m
+  · have he : n = m := Nat.le_antisymm hmn h2
+    subst he
+    simp only [rescale, Nat.le_refl, if_true, Nat.sub_self, Int.pow_zero, Int.mul_one]
+  · by_cases hkm : m ≤ k
+    · have he : k = m := Nat.le_antisymm h1 hkm
+      subst he
+      simp only [rescale, Nat.le_refl, if_true, Nat.sub_self, Int.pow_zero, Int.mul_one]
+    · have hnk : ¬ n ≤ k := by omega
+      simp only [rescale, hmn, hkm, hnk, if_false]
+      rw [tdiv_tdiv v _ (hp _), ← Int.pow_add]
+      have he : n - m + (m - k) = n - k := by omega
+      rw [he]
+
+/-- Rescaling is monotone. -/
+theorem rescale_mono (n n' : Nat) {v w : Int} (h : v ≤ w) : rescale n n' v ≤ rescale n n' w := by
+  have hp : ∀ e : Nat, (0 : Int) < 10 ^ e := fun e => Int.pow_pos (by decide)
+  unfold rescale
+  split
+  · exact Int.mul_le_mul_of_nonneg_right h (Int.le_of_lt (hp _))
+  · exact Int.tdiv_le_tdiv (hp _) h
+
 /-- Rescaling up and back down is the identity. -/
 theorem rescale_up_down (n n' : Nat) (h : n ≤ n') (v : Int) :
     rescale n' n (rescale n n' v) = v :=
@@ -377,6 +420,16 @@ theorem ofBits_toBits (a : Fx t) : ofBits t (toBits a) = a := by
     unfold wrapInt
     simp only [Int.emod_emod]
   simp only [ofBits, toBits, wrap, he, wrapInt_of_inRange a.2]
+
+/-- An explicit conversion keeps the order of the values it does not
+wrap. -/
+theorem explicit_le {a b : Fx t} (h : le a b = true)
+    (ha : t'.inRange (rescale t.digits t'.digits a.1) = true)
+    (hb : t'.inRange (rescale t.digits t'.digits b.1) = true) :
+    le (explicit t' a) (explicit t' b) = true := by
+  simp only [le, decide_eq_true_eq] at h ⊢
+  simp only [explicit, wrap, wrapInt_of_inRange ha, wrapInt_of_inRange hb]
+  exact rescale_mono _ _ h
 
 /-! ### Implicit conversions keep value and order -/
 
@@ -582,6 +635,15 @@ theorem common?_preserves {u : FxTy} (h : FxTy.common? t t' = some u) (a : Fx t)
 
 end Fx
 
+/-- `*` is not associative under truncation: at `ufixed16x2`,
+`(0.01 · 0.50) · 2.00 = 0.00` but `0.01 · (0.50 · 2.00) = 0.01`. -/
+example :
+    ((Fx.mul .checked (⟨1, by decide⟩ : Fx Fx.ufixed16x2) ⟨50, by decide⟩).toOption.bind
+        fun r => (Fx.mul .checked r ⟨200, by decide⟩).toOption).map Subtype.val = some 0 ∧
+    ((Fx.mul .checked (⟨50, by decide⟩ : Fx Fx.ufixed16x2) ⟨200, by decide⟩).toOption.bind
+        fun r => (Fx.mul .checked ⟨1, by decide⟩ r).toOption).map Subtype.val = some 1 := by
+  decide
+
 /-! ### Axiom pins -/
 
 /--
@@ -631,5 +693,11 @@ info: 'Solidity.Language.FixedPoint.Fx.neg_unsigned' depends on axioms: [propext
 -/
 #guard_msgs in
 #print axioms Fx.neg_unsigned
+
+/--
+info: 'Solidity.Language.FixedPoint.tdiv_tdiv' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms tdiv_tdiv
 
 end Solidity.Language.FixedPoint

@@ -583,6 +583,40 @@ theorem mobileFx?_exact_of_digits {q : Rat} {t : FxTy} (h : mobileFx? q = some t
     rw [ha]
     exact hn
 
+/-! ### solc's route through the mobile type -/
+
+/-- The truncated constant at fewer digits is the truncated constant at
+more digits, truncated again. -/
+theorem literalTrunc_rescale {t t' : FxTy} (num : Int) {den : Nat} (hd : den ≠ 0)
+    (h : t.digits ≤ t'.digits) :
+    rescale t'.digits t.digits (literalTrunc t' num den) = literalTrunc t num den := by
+  have hp : (0 : Int) < den := Int.natCast_pos.mpr (Nat.pos_of_ne_zero hd)
+  have hP : (0 : Int) < 10 ^ (t'.digits - t.digits) := Int.pow_pos (by decide)
+  by_cases he : t'.digits ≤ t.digits
+  · have hq : t.digits = t'.digits := Nat.le_antisymm h he
+    have hs : t.scale = t'.scale := by simp only [FxTy.scale, hq]
+    have hz : t.digits - t'.digits = 0 := by omega
+    simp only [rescale, he, if_true, hz, Int.pow_zero, Int.mul_one, literalTrunc, hs]
+  · simp only [rescale, he, if_false, literalTrunc]
+    rw [tdiv_tdiv _ _ hp, ← Int.mul_tdiv_mul_of_pos_left (num * t.scale) (den : Int) hP]
+    have hs : num * t.scale * 10 ^ (t'.digits - t.digits) = num * t'.scale := by
+      simp only [FxTy.scale]
+      rw [Int.mul_assoc, ← Int.pow_add, Nat.add_sub_cancel' h]
+    rw [hs]
+
+/-- When the target has no more digits than the mobile type, solc's route
+(the constant typed at its mobile type, then converted) gives the exactly
+folded value: P1 changes no such conversion. -/
+theorem explicitRat?_mobile_route {q : Rat} {m t : FxTy} (hm : mobileFx? q = some m)
+    (hd : t.digits ≤ m.digits) {a : Fx t} (ha : explicitRat? t q = some a) :
+    explicit t (⟨literalTrunc m q.num q.den, mobileFx?_inRange hm⟩ : Fx m) = a := by
+  have hv : a.1 = literalTrunc t q.num q.den := (explicitConst?_eq_some_iff q.den_nz).mp ha
+  have hr : rescale m.digits t.digits (literalTrunc m q.num q.den) = literalTrunc t q.num q.den :=
+    literalTrunc_rescale q.num q.den_nz hd
+  have hin : t.inRange (literalTrunc t q.num q.den) = true := by rw [← hv]; exact a.2
+  apply Subtype.ext
+  simp only [explicit, wrap, hr, wrapInt_of_inRange hin, hv]
+
 /-! ### The common type with a constant operand -/
 
 /-- The type `x op c` runs at, for `x : t` and a constant `c` (solc's
@@ -806,6 +840,12 @@ info: 'Solidity.Language.FixedPoint.Fx.litCommon?_solc' depends on axioms: [prop
 -/
 #guard_msgs in
 #print axioms Fx.litCommon?_solc
+
+/--
+info: 'Solidity.Language.FixedPoint.Fx.explicitRat?_mobile_route' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Fx.explicitRat?_mobile_route
 
 /--
 info: 'Solidity.Language.FixedPoint.Fx.mobileFx?_exact_of_digits' depends on axioms: [propext, Classical.choice, Quot.sound]
