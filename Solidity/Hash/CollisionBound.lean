@@ -20,6 +20,14 @@ this module states both, dependency-free:
   `q(q-1)/(2N) ≤ q²/(2N)` (`collision_prob_le`, `collision_prob_le_sq`), that is
   `q²/2²⁵⁷` for a 256-bit hash (`keccak_collision_prob_le`).
 
+* **The region premise.** The second-round decision extends the premise to
+  the regions above hashed slots: `RegionsDisjoint N L f roots xs` says the
+  length-`L` regions at the hashes of `xs` pairwise do not overlap modulo `N`
+  and cover no root slot (`Near`, `Covers`, read by `near_of_overlap` and
+  `covers_of_hit`). It implies `CollisionFree` for `L > 0`. Its bound,
+  `q(q-1)(2L-1)/(2N) + q·|roots|·L/N`, is `keccak_region_prob_le`, about
+  `q²L/2²⁵⁶ + q·R·L/2²⁵⁶` for keccak.
+
 The counting is a union bound over pairs, done incrementally: a tuple
 `a :: t` collides if `t` already does (a pair among the first `q` outputs) or if
 `a` equals one of the `q` outputs of `t` (the `q` pairs with the new index), so
@@ -144,6 +152,116 @@ instance {xs : List α} [DecidableEq α] [DecidableEq β] : Decidable (Collision
 
 end Premise
 
+/-! ## The region premise
+
+The second-round decision extends the per-run premise from preimages to the
+regions above hashed slots: an array's elements or a struct's members sit at
+`keccak(p) + i`, `i < L`, modulo the word size `N`. Words are values below
+`N`; a region is `[a, a + L)` read modulo `N`. -/
+
+/-- The length-`L` regions at words `a, b < N` overlap modulo `N`
+(`near_of_overlap`): their distance, read around the circle, is below `L`. -/
+def Near (N L a b : Nat) : Prop :=
+  (a < b + L ∧ b < a + L) ∨ a + N < b + L ∨ b + N < a + L
+
+/-- The length-`L` region at word `a < N` covers the word `r < N` modulo `N`
+(`covers_of_hit`). -/
+def Covers (N L a r : Nat) : Prop :=
+  (a ≤ r ∧ r < a + L) ∨ r + N < a + L
+
+instance {N L a b : Nat} : Decidable (Near N L a b) :=
+  inferInstanceAs (Decidable (_ ∨ _ ∨ _))
+
+instance {N L a r : Nat} : Decidable (Covers N L a r) :=
+  inferInstanceAs (Decidable (_ ∨ _))
+
+theorem Near.symm {N L a b : Nat} (h : Near N L a b) : Near N L b a := by
+  unfold Near at h ⊢; omega
+
+/-- Overlapping regions are `Near`. -/
+theorem near_of_overlap {N L a b i j : Nat} (ha : a < N) (hb : b < N) (hL : L ≤ N)
+    (hi : i < L) (hj : j < L) (h : (a + i) % N = (b + j) % N) : Near N L a b := by
+  have hu : (a + i) / N < 2 := Nat.div_lt_of_lt_mul (by omega)
+  have hv : (b + j) / N < 2 := Nat.div_lt_of_lt_mul (by omega)
+  have eu : N * ((a + i) / N) + (a + i) % N = a + i := Nat.div_add_mod (a + i) N
+  have ev : N * ((b + j) / N) + (b + j) % N = b + j := Nat.div_add_mod (b + j) N
+  generalize (a + i) / N = u at hu eu
+  generalize (b + j) / N = v at hv ev
+  generalize (a + i) % N = m at eu h
+  generalize (b + j) % N = n at ev h
+  unfold Near
+  rcases (by omega : u = 0 ∨ u = 1) with rfl | rfl <;>
+    rcases (by omega : v = 0 ∨ v = 1) with rfl | rfl <;> omega
+
+/-- A region that reaches a word covers it (the word is below `N`, as
+`(a + i) % N` is). -/
+theorem covers_of_hit {N L a r i : Nat} (ha : a < N) (hL : L ≤ N)
+    (hi : i < L) (h : (a + i) % N = r) : Covers N L a r := by
+  have hu : (a + i) / N < 2 := Nat.div_lt_of_lt_mul (by omega)
+  have eu : N * ((a + i) / N) + (a + i) % N = a + i := Nat.div_add_mod (a + i) N
+  generalize (a + i) / N = u at hu eu
+  generalize (a + i) % N = m at eu h
+  unfold Covers
+  rcases (by omega : u = 0 ∨ u = 1) with rfl | rfl <;> omega
+
+section Regions
+variable {α : Type _}
+
+/-- The region premise on the preimages `xs` hashed by a run: the length-`L`
+regions at their hashes `f x` pairwise do not overlap, and none covers a
+root slot in `roots`. -/
+def RegionsDisjoint (N L : Nat) (f : α → Nat) (roots : List Nat) (xs : List α) : Prop :=
+  (∀ x ∈ xs, ∀ y ∈ xs, x ≠ y → ¬ Near N L (f x) (f y)) ∧
+    ∀ x ∈ xs, ∀ r ∈ roots, ¬ Covers N L (f x) r
+
+variable {N L : Nat} {f : α → Nat} {roots : List Nat}
+
+instance {xs : List α} [DecidableEq α] : Decidable (RegionsDisjoint N L f roots xs) :=
+  inferInstanceAs (Decidable (_ ∧ _))
+
+theorem RegionsDisjoint.nil : RegionsDisjoint N L f roots [] :=
+  ⟨fun _ hx => (by cases hx), fun _ hx => (by cases hx)⟩
+
+theorem RegionsDisjoint.mono {xs ys : List α} (h : RegionsDisjoint N L f roots ys)
+    (hsub : ∀ x ∈ xs, x ∈ ys) : RegionsDisjoint N L f roots xs :=
+  ⟨fun x hx y hy => h.1 x (hsub x hx) y (hsub y hy), fun x hx => h.2 x (hsub x hx)⟩
+
+theorem RegionsDisjoint.of_prefix {xs ys : List α} (h : RegionsDisjoint N L f roots ys)
+    (hp : xs <+: ys) : RegionsDisjoint N L f roots xs :=
+  h.mono fun _ hx => hp.sublist.subset hx
+
+/-- Disjoint nonempty regions have distinct bases: the region premise implies
+the preimage premise. -/
+theorem RegionsDisjoint.collisionFree {xs : List α} (hL : 0 < L)
+    (h : RegionsDisjoint N L f roots xs) : CollisionFree f xs := by
+  intro x hx y hy hxy
+  apply Classical.byContradiction
+  intro hne
+  apply h.1 x hx y hy hne
+  rw [hxy]; unfold Near; omega
+
+theorem regionsDisjoint_cons {x : α} {xs : List α} (hx : x ∉ xs) :
+    RegionsDisjoint N L f roots (x :: xs) ↔
+      RegionsDisjoint N L f roots xs ∧ (∀ y ∈ xs, ¬ Near N L (f x) (f y)) ∧
+        ∀ r ∈ roots, ¬ Covers N L (f x) r := by
+  constructor
+  · intro h
+    refine ⟨h.mono fun _ hy => List.mem_cons_of_mem x hy, fun y hy => ?_,
+      h.2 x (List.mem_cons_self ..)⟩
+    exact h.1 x (List.mem_cons_self ..) y (List.mem_cons_of_mem x hy) (fun e => hx (e ▸ hy))
+  · intro ⟨h, hn, hc⟩
+    refine ⟨fun a ha b hb hab => ?_, fun a ha => ?_⟩
+    · rcases List.mem_cons.mp ha with ea | ha' <;> rcases List.mem_cons.mp hb with eb | hb'
+      · exact absurd (ea.trans eb.symm) hab
+      · rw [ea]; exact hn b hb'
+      · rw [eb]; exact fun hn' => hn a ha' hn'.symm
+      · exact h.1 a ha' b hb' hab
+    · rcases List.mem_cons.mp ha with ea | ha'
+      · rw [ea]; exact hc
+      · exact h.2 a ha'
+
+end Regions
+
 /-! ## Output tuples of a random function -/
 
 /-- All `q`-tuples (as lists) of outputs below `N`: the `N ^ q` equally likely
@@ -230,6 +348,18 @@ theorem countP_or_le {γ : Type _} (l : List γ) (p r : γ → Bool) :
     simp only [List.countP_cons]
     cases p a <;> cases r a <;> simp only [Bool.or_self, Bool.or_true, Bool.or_false,
       if_true] <;> omega
+
+theorem countP_le_of_imp {γ : Type _} (l : List γ) {p r : γ → Bool}
+    (h : ∀ a ∈ l, p a = true → r a = true) : l.countP p ≤ l.countP r := by
+  induction l with
+  | nil => exact Nat.le_refl 0
+  | cons a l ih =>
+    have ih' : l.countP p ≤ l.countP r := ih fun b hb => h b (List.mem_cons_of_mem a hb)
+    have ha : p a = true → r a = true := h a (List.mem_cons_self ..)
+    simp only [List.countP_cons]
+    cases hp : p a with
+    | false => cases r a <;> simp only [Bool.false_eq_true, ↓reduceIte] <;> omega
+    | true => simp only [ha hp, ↓reduceIte]; omega
 
 theorem length_tuples (N q : Nat) : (tuples N q).length = N ^ q := by
   induction q with
@@ -484,6 +614,245 @@ theorem keccak_premise_fails_prob_le_dedup (xs : List α) :
 
 end Oracle
 
+/-! ## The region bound
+
+The same counting with "equal" replaced by `Near`: a tuple `a :: t` is bad if
+`t` is, if `a`'s region overlaps one of the `q` regions of `t` (at most
+`2L - 1` values of `a` each, `countP_near_le`), or if it covers one of the
+roots (at most `L` values each, `countP_covers_le`). -/
+
+section RegionCounting
+
+/-- Whether a tuple of hash words breaks the region premise. -/
+def regionBad (N L : Nat) (roots : List Nat) : List Nat → Bool
+  | [] => false
+  | a :: t => t.any (fun b => decide (Near N L a b)) || roots.any (fun r => decide (Covers N L a r)) ||
+      regionBad N L roots t
+
+/-- The number of `q`-tuples below `N` that break the region premise. -/
+def regionCollisions (N L : Nat) (roots : List Nat) (q : Nat) : Nat :=
+  (tuples N q).countP (regionBad N L roots)
+
+theorem countP_range_interval (N lo hi : Nat) :
+    (List.range N).countP (fun a => decide (lo ≤ a ∧ a < hi)) = min hi N - lo := by
+  induction N with
+  | zero => simp only [List.range_zero, List.countP_nil]; omega
+  | succ N ih =>
+    rw [List.range_succ, List.countP_append, ih]
+    simp only [List.countP_cons, List.countP_nil, decide_eq_true_eq]
+    by_cases h : lo ≤ N ∧ N < hi
+    · simp only [h, and_self, ↓reduceIte]; omega
+    · simp only [h, ↓reduceIte]; omega
+
+theorem countP_near_le {N L b : Nat} (hb : b < N) :
+    (List.range N).countP (fun a => decide (Near N L a b)) ≤ 2 * L - 1 := by
+  have himp : (List.range N).countP (fun a => decide (Near N L a b)) ≤
+      (List.range N).countP (fun a => decide (b + 1 - L ≤ a ∧ a < b + L) ||
+        decide (0 ≤ a ∧ a < b + L - N) || decide (b + N + 1 - L ≤ a ∧ a < N)) := by
+    apply countP_le_of_imp
+    intro a ha hn
+    have ha' : a < N := List.mem_range.mp ha
+    simp only [decide_eq_true_eq, Near] at hn
+    simp only [Bool.or_eq_true, decide_eq_true_eq]
+    omega
+  have h1 := countP_or_le (List.range N)
+    (fun a => decide (b + 1 - L ≤ a ∧ a < b + L) || decide (0 ≤ a ∧ a < b + L - N))
+    (fun a => decide (b + N + 1 - L ≤ a ∧ a < N))
+  have h2 := countP_or_le (List.range N) (fun a => decide (b + 1 - L ≤ a ∧ a < b + L))
+    (fun a => decide (0 ≤ a ∧ a < b + L - N))
+  rw [countP_range_interval] at h1
+  rw [countP_range_interval, countP_range_interval] at h2
+  omega
+
+theorem countP_covers_le {N L r : Nat} (hr : r < N) :
+    (List.range N).countP (fun a => decide (Covers N L a r)) ≤ L := by
+  have himp : (List.range N).countP (fun a => decide (Covers N L a r)) ≤
+      (List.range N).countP (fun a => decide (r + 1 - L ≤ a ∧ a < r + 1) ||
+        decide (r + N + 1 - L ≤ a ∧ a < N)) := by
+    apply countP_le_of_imp
+    intro a ha hn
+    have ha' : a < N := List.mem_range.mp ha
+    simp only [decide_eq_true_eq, Covers] at hn
+    simp only [Bool.or_eq_true, decide_eq_true_eq]
+    omega
+  have h1 := countP_or_le (List.range N) (fun a => decide (r + 1 - L ≤ a ∧ a < r + 1))
+    (fun a => decide (r + N + 1 - L ≤ a ∧ a < N))
+  rw [countP_range_interval, countP_range_interval] at h1
+  omega
+
+/-- The union bound over a list: an `any` is counted at most once per
+witness. -/
+theorem countP_any_le {γ δ : Type _} (A : List γ) (t : List δ) (P : γ → δ → Bool) :
+    A.countP (fun a => t.any (P a)) ≤ sumOver t (fun b => A.countP (P · b)) := by
+  induction t with
+  | nil => simp only [List.any_nil, List.countP_false, sumOver_nil]; exact Nat.le_refl 0
+  | cons b t ih =>
+    simp only [List.any_cons, sumOver_cons]
+    have h : A.countP (fun a => P a b || t.any (P a)) ≤
+        A.countP (P · b) + A.countP (fun a => t.any (P a)) := countP_or_le A _ _
+    omega
+
+theorem lt_of_mem_tuples {N q : Nat} {t : List Nat} (h : t ∈ tuples N q) :
+    ∀ b ∈ t, b < N := by
+  induction q generalizing t with
+  | zero =>
+    simp only [tuples, List.mem_singleton] at h
+    rw [h]; intro b hb; cases hb
+  | succ q ih =>
+    simp only [tuples, List.mem_flatMap, List.mem_map] at h
+    obtain ⟨a, ha, u, hu, rfl⟩ := h
+    intro b hb
+    rcases List.mem_cons.mp hb with e | hb'
+    · rw [e]; exact List.mem_range.mp ha
+    · exact ih hu b hb'
+
+/-- The incremental bound: `B(q+1) ≤ N · B(q) + (q (2L-1) + |roots| L) · N^q`. -/
+theorem regionCollisions_succ_le {N L : Nat} {roots : List Nat} (hroots : ∀ r ∈ roots, r < N)
+    (q : Nat) :
+    regionCollisions N L roots (q + 1) ≤
+      N * regionCollisions N L roots q + (q * (2 * L - 1) + roots.length * L) * N ^ q := by
+  simp only [regionCollisions, tuples, countP_flatMap, List.countP_map]
+  have hT : (tuples N q).countP (regionBad N L roots) = regionCollisions N L roots q := rfl
+  have step : sumOver (List.range N)
+        (fun a => (tuples N q).countP (regionBad N L roots ∘ (a :: ·))) ≤
+      sumOver (List.range N) (fun a =>
+        (tuples N q).countP (fun t => t.any (fun b => decide (Near N L a b))) +
+        (tuples N q).countP (fun t => roots.any (fun r => decide (Covers N L a r))) +
+        (tuples N q).countP (regionBad N L roots)) := by
+    apply sumOver_le
+    intro a _
+    have h1 := countP_or_le (tuples N q)
+      (fun t => t.any (fun b => decide (Near N L a b)) || roots.any (fun r => decide (Covers N L a r)))
+      (regionBad N L roots)
+    have h2 := countP_or_le (tuples N q) (fun t => t.any (fun b => decide (Near N L a b)))
+      (fun t => roots.any (fun r => decide (Covers N L a r)))
+    exact Nat.le_trans h1 (Nat.add_le_add_right h2 _)
+  rw [sumOver_add, sumOver_add, sumOver_const (List.range N), List.length_range,
+    sumOver_swap (List.range N) (tuples N q) (fun a t => t.any (fun b => decide (Near N L a b))),
+    sumOver_swap (List.range N) (tuples N q)
+      (fun a t => roots.any (fun r => decide (Covers N L a r)))] at step
+  have hnear : sumOver (tuples N q) (fun t => (List.range N).countP
+        (fun a => t.any (fun b => decide (Near N L a b)))) ≤
+      sumOver (tuples N q) (fun _ => q * (2 * L - 1)) := by
+    apply sumOver_le
+    intro t ht
+    have hu := countP_any_le (List.range N) t (fun a b => decide (Near N L a b))
+    have hv : sumOver t (fun b => (List.range N).countP (fun a => decide (Near N L a b))) ≤
+        sumOver t (fun _ => 2 * L - 1) :=
+      sumOver_le t fun b hb => countP_near_le (lt_of_mem_tuples ht b hb)
+    rw [sumOver_const, length_of_mem_tuples ht] at hv
+    exact Nat.le_trans hu hv
+  have hcov : sumOver (tuples N q) (fun t => (List.range N).countP
+        (fun a => roots.any (fun r => decide (Covers N L a r)))) ≤
+      sumOver (tuples N q) (fun _ => roots.length * L) := by
+    apply sumOver_le
+    intro t _
+    have hu := countP_any_le (List.range N) roots (fun a r => decide (Covers N L a r))
+    have hv : sumOver roots (fun r => (List.range N).countP (fun a => decide (Covers N L a r))) ≤
+        sumOver roots (fun _ => L) :=
+      sumOver_le roots fun r hr => countP_covers_le (hroots r hr)
+    rw [sumOver_const] at hv
+    exact Nat.le_trans hu hv
+  rw [sumOver_const (tuples N q) (q * (2 * L - 1)), length_tuples] at hnear
+  rw [sumOver_const (tuples N q) (roots.length * L), length_tuples] at hcov
+  simp only [hT] at step ⊢
+  rw [Nat.add_mul, Nat.mul_comm (q * (2 * L - 1)), Nat.mul_comm (roots.length * L)]
+  omega
+
+/-- The region bound, cross-multiplied:
+`2 · N · B(q) ≤ (q(q-1)(2L-1) + 2 q |roots| L) · N^q`, that is, a probability
+of at most `q(q-1)(2L-1)/(2N) + q |roots| L / N`. -/
+theorem two_mul_regionCollisions_le {N L : Nat} {roots : List Nat}
+    (hroots : ∀ r ∈ roots, r < N) (q : Nat) :
+    2 * N * regionCollisions N L roots q ≤
+      (q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * N ^ q := by
+  induction q with
+  | zero =>
+    simp only [regionCollisions, tuples, List.countP_singleton, regionBad, Bool.false_eq_true,
+      ↓reduceIte, Nat.mul_zero, Nat.zero_le]
+  | succ q ih =>
+    have hs : 2 * N * regionCollisions N L roots (q + 1) ≤
+        2 * N * (N * regionCollisions N L roots q +
+          (q * (2 * L - 1) + roots.length * L) * N ^ q) :=
+      Nat.mul_le_mul_left (2 * N) (regionCollisions_succ_le hroots q)
+    have hih : N * (2 * N * regionCollisions N L roots q) ≤
+        N * ((q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * N ^ q) :=
+      Nat.mul_le_mul_left N ih
+    have hpow : N ^ (q + 1) = N ^ q * N := by rw [Nat.pow_succ]
+    have e1 : 2 * N * (N * regionCollisions N L roots q +
+          (q * (2 * L - 1) + roots.length * L) * N ^ q) =
+        N * (2 * N * regionCollisions N L roots q) +
+          (2 * q * (2 * L - 1) + 2 * roots.length * L) * N ^ (q + 1) := by
+      rw [hpow]; grind
+    have e2 : N * ((q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * N ^ q) +
+          (2 * q * (2 * L - 1) + 2 * roots.length * L) * N ^ (q + 1) =
+        ((q + 1) * (q + 1 - 1) * (2 * L - 1) + 2 * (q + 1) * roots.length * L) * N ^ (q + 1) := by
+      rw [hpow]
+      cases q <;> grind
+    omega
+
+/-- A `k`-bit hash (`N = 2^k`). -/
+theorem pow_two_region_prob_le {k L : Nat} {roots : List Nat} (hroots : ∀ r ∈ roots, r < 2 ^ k)
+    (q : Nat) :
+    2 ^ (k + 1) * regionCollisions (2 ^ k) L roots q ≤
+      (q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * 2 ^ (k * q) := by
+  have h : 2 * 2 ^ k * regionCollisions (2 ^ k) L roots q ≤
+      (q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * (2 ^ k) ^ q :=
+    two_mul_regionCollisions_le hroots q
+  rw [← Nat.pow_mul, ← Nat.pow_succ'] at h
+  exact h
+
+/-- Keccak-256 (`N = 2^256`): regions of length `L` at `q` hashed slots
+overlap each other or one of the `roots` with probability at most
+`q(q-1)(2L-1)/2²⁵⁷ + q |roots| L / 2²⁵⁶ ≤ (q² L + q |roots| L) / 2²⁵⁶`. -/
+theorem keccak_region_prob_le {L : Nat} {roots : List Nat} (hroots : ∀ r ∈ roots, r < 2 ^ 256)
+    (q : Nat) :
+    2 ^ (256 + 1) * regionCollisions (2 ^ 256) L roots q ≤
+      (q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * 2 ^ (256 * q) :=
+  @pow_two_region_prob_le 256 L roots hroots q
+
+end RegionCounting
+
+section RegionOracle
+variable {α : Type _} {N L : Nat} {roots : List Nat}
+
+theorem regionsDisjoint_iff_regionBad {f : α → Nat} {xs : List α} (hxs : xs.Nodup) :
+    RegionsDisjoint N L f roots xs ↔ regionBad N L roots (xs.map f) = false := by
+  induction xs with
+  | nil => simp only [List.map_nil, regionBad, iff_true]; exact RegionsDisjoint.nil
+  | cons x xs ih =>
+    rw [List.nodup_cons] at hxs
+    rw [regionsDisjoint_cons hxs.1, ih hxs.2, List.map_cons, regionBad]
+    simp only [Bool.or_eq_false_iff, List.any_eq_false, decide_eq_true_eq, List.mem_map,
+      forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
+    constructor
+    · intro ⟨h, hn, hc⟩; exact ⟨⟨hn, hc⟩, h⟩
+    · intro ⟨⟨hn, hc⟩, h⟩; exact ⟨h, hn, hc⟩
+
+variable [DecidableEq α]
+
+/-- The region bound read on the premise: among all `2^(256 q)` oracles on
+`q` fixed distinct preimages `xs`, those under which `RegionsDisjoint` fails
+number `bad`, and
+`2^257 · bad ≤ (q(q-1)(2L-1) + 2 q |roots| L) · 2^(256 q)`. -/
+theorem keccak_region_premise_fails_prob_le {xs : List α} (hxs : xs.Nodup)
+    (hroots : ∀ r ∈ roots, r < 2 ^ 256) :
+    2 ^ (256 + 1) * (tuples (2 ^ 256) xs.length).countP
+        (fun t => decide (¬ RegionsDisjoint (2 ^ 256) L (oracleOf xs t) roots xs)) ≤
+      (xs.length * (xs.length - 1) * (2 * L - 1) + 2 * xs.length * roots.length * L) *
+        2 ^ (256 * xs.length) := by
+  have hcount : (tuples (2 ^ 256) xs.length).countP
+      (fun t => decide (¬ RegionsDisjoint (2 ^ 256) L (oracleOf xs t) roots xs)) =
+      regionCollisions (2 ^ 256) L roots xs.length := by
+    apply List.countP_congr
+    intro t ht
+    rw [decide_eq_true_iff, regionsDisjoint_iff_regionBad hxs,
+      map_oracleOf hxs (length_of_mem_tuples ht), Bool.not_eq_false]
+  rw [hcount]
+  exact @keccak_region_prob_le L roots hroots xs.length
+
+end RegionOracle
+
 /-! ## Adaptive queries -/
 
 section Adaptive
@@ -498,18 +867,6 @@ omit [DecidableEq α] in
 theorem length_lazyQueries (s : List Nat → α) (t : List Nat) :
     (lazyQueries s t).length = t.length := by
   simp only [lazyQueries, List.length_map, List.length_range]
-
-theorem countP_le_of_imp {γ : Type _} (l : List γ) {p r : γ → Bool}
-    (h : ∀ a ∈ l, p a = true → r a = true) : l.countP p ≤ l.countP r := by
-  induction l with
-  | nil => exact Nat.le_refl 0
-  | cons a l ih =>
-    have ih' : l.countP p ≤ l.countP r := ih fun b hb => h b (List.mem_cons_of_mem a hb)
-    have ha : p a = true → r a = true := h a (List.mem_cons_self ..)
-    simp only [List.countP_cons]
-    cases hp : p a with
-    | false => cases r a <;> simp only [Bool.false_eq_true, ↓reduceIte] <;> omega
-    | true => simp only [ha hp, ↓reduceIte]; omega
 
 /-- The bound for adaptive queries under lazy sampling: each answer is a
 fresh uniform value, drawn when the query is made, and the `i`-th query may
@@ -568,3 +925,9 @@ end Solidity.Hash
 
 /-- info: 'Solidity.Hash.keccak_premise_fails_prob_le_dedup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.keccak_premise_fails_prob_le_dedup
+
+/-- info: 'Solidity.Hash.keccak_region_premise_fails_prob_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.keccak_region_premise_fails_prob_le
+
+/-- info: 'Solidity.Hash.near_of_overlap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.near_of_overlap

@@ -163,7 +163,9 @@ No file under `Solidity/Evm/**` is edited here. The plan for the owners:
    `hash`/`data` terms with different preimages have different *bases*
    (`collisionFree_iff_nodup_map` turns the premise into distinct images of
    distinct preimages). Distinct bases still do not give distinct slots, and
-   distinct slot terms need not give distinct preimages (see below).
+   distinct slot terms need not give distinct preimages. The second-round
+   region premise `RegionsDisjoint` (below) separates the regions, provided
+   every reached offset stays below the region length.
 4. **Justification.** `keccak_premise_fails_prob_le_dedup` bounds the
    probability that the premise fails for a random oracle by q²/2²⁵⁷, q the
    number of distinct preimages, when the preimages are fixed in advance.
@@ -173,36 +175,77 @@ No file under `Solidity/Evm/**` is edited here. The plan for the owners:
    it is a statement about a random oracle, not about keccak: the public
    theorem stays conditional on the premise.
 
-### Open: offsets and region overlap
+### Offsets and the region premise
 
 `Slot.hash k s off` denotes `keccak(k ‖ s) + off` and `Slot.data s off`
 denotes `keccak(s) + off` (`Solidity/Evm/Machine.lean`). Two slots with
 different preimages a ≠ b collide numerically if
-`keccak(a) + i = keccak(b) + j (mod 2^256)` for offsets `i ≠ j`, which the
-approved premise does not exclude: it speaks about preimages whose hashes are
-equal, not about hashes that are close. Two more cases are open:
+`keccak(a) + i = keccak(b) + j (mod 2^256)` for offsets `i ≠ j`. Preimage
+collision freedom does not exclude that: it speaks about preimages whose
+hashes are equal, not about hashes that are close. Nor does it exclude
+**root overlap** (`keccak(a) + i ≡ j` for a `root j` slot). G04's R34 lists
+this wrap-around and overlap as part of the same structural assumption.
 
-- **Root overlap.** `keccak(a) + i ≡ j` for a `root j` slot.
-- **Aliased preimages.** Offsets are unbounded `Nat`s while words wrap
-  modulo 2²⁵⁶, so distinct terms such as `data s 0` and `data s 2^256`
-  denote one word, and a nested `hash`/`data` term over them gives equal
-  preimages from distinct slot terms. Offsets must be bounded (by `Lmax`,
-  `Solidity/Evm/Machine.lean`, for arrays) before slot terms and words can
-  correspond. G04's R34 lists this wrap-around and
-overlap as part of the same structural assumption. With the premise as
-stated, G27.05 can separate the bases but not the regions (array elements,
-struct members) above them. Under a random oracle, the probability that `q`
-regions of length at most `L` overlap is about q²·L/2²⁵⁶, the same counting
-with "equal" replaced by "within distance L" (about q²/2 pairs, each
-overlapping with probability (2L−1)/2²⁵⁶), plus about q·R·L/2²⁵⁶ for overlap
-with `R` root slots. `L` can reach `Lmax`, so the bound is weak for large
-arrays. The question is under `questions:` in the handoff.
+**Second-round decision.** As relayed by the batch coordinator during this
+task, the user extended the per-run premise to hashed regions: no two
+regions of length at most `L` based at hashed slots overlap, and none
+overlaps a root slot. This comes with a probability lemma of about
+q²·L/2²⁵⁶ plus a q·R·L/2²⁵⁶ root term. The coordinator records it in
+`docs/solidity-scope.md`, section "Second round (2026-10-29)". That section
+is not at this task's base revision, so this document cites it by name only.
+
+Proved here, in the same style as the preimage bound:
+
+| Name | Statement |
+|---|---|
+| `Near N L a b` | `(a < b + L ∧ b < a + L) ∨ a + N < b + L ∨ b + N < a + L`: the regions `[a, a+L)` and `[b, b+L)` mod `N` are within reach. |
+| `Covers N L a r` | `(a ≤ r ∧ r < a + L) ∨ r + N < a + L`: the region at `a` covers word `r`. |
+| `near_of_overlap` | `a < N → b < N → L ≤ N → i < L → j < L → (a + i) % N = (b + j) % N → Near N L a b`. |
+| `covers_of_hit` | `a < N → L ≤ N → i < L → (a + i) % N = r → Covers N L a r`. |
+| `RegionsDisjoint N L f roots xs` | `(∀ x ∈ xs, ∀ y ∈ xs, x ≠ y → ¬ Near N L (f x) (f y)) ∧ ∀ x ∈ xs, ∀ r ∈ roots, ¬ Covers N L (f x) r`. |
+| `RegionsDisjoint.nil`, `.mono`, `.of_prefix`, `regionsDisjoint_cons` | The same algebra as `CollisionFree`. |
+| `RegionsDisjoint.collisionFree` | `0 < L → RegionsDisjoint N L f roots xs → CollisionFree f xs`. |
+| `regionBad`, `regionCollisions N L roots q` | The bad tuples and their count. |
+| `countP_near_le`, `countP_covers_le` | For `b, r < N`, at most `2L - 1` (resp. `L`) bases `a < N` are near `b` (resp. cover `r`). |
+| `regionCollisions_succ_le` | `(∀ r ∈ roots, r < N) →` `B(q+1) ≤ N · B(q) + (q(2L-1) + \|roots\| L) · N^q`. |
+| `two_mul_regionCollisions_le` | `2 * N * regionCollisions N L roots q ≤ (q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * N ^ q`. |
+| `pow_two_region_prob_le`, `keccak_region_prob_le` | The same at `N = 2^k` and `N = 2^256`, with `2 ^ (256 + 1)` on the left. |
+| `regionsDisjoint_iff_regionBad` | `xs.Nodup → (RegionsDisjoint N L f roots xs ↔ regionBad N L roots (xs.map f) = false)`. |
+| `keccak_region_premise_fails_prob_le` | For `xs.Nodup` and roots below `2^256`: `2 ^ (256 + 1) * bad ≤ (q(q-1)(2L-1) + 2q·\|roots\|·L) · 2^(256 q)` with `q = xs.length`. |
+
+Read as a probability, the bound is
+`q(q-1)(2L-1)/2²⁵⁷ + q·|roots|·L/2²⁵⁶ ≤ (q²·L + q·R·L)/2²⁵⁶`, which is the
+decided figure. `L` can reach `Lmax` (2⁶⁴, `Solidity/Evm/Machine.lean`), so
+for large arrays the bound is much weaker than q²/2²⁵⁷ but stays below
+q²/2¹⁹² for q hashes.
+
+Left to the users of the premise (G27.05):
+
+- **Offsets below `L`.** The premise reads each slot as base plus an offset
+  `i < L`. Offsets in `Slot` are unbounded `Nat`s, so distinct terms such as
+  `data s 0` and `data s 2^256` denote one word. A nested `hash`/`data` term
+  over them then gives equal preimages from distinct slot terms. G27.05 must
+  show that every reached offset is below the region length it assumes (for
+  arrays, by `Lmax`).
+- **Words below `N`.** `near_of_overlap` reads hashes and roots as words below
+  `N` and needs `L ≤ N`. The roots' hypothesis `r < 2^256` is part of the
+  stated bound.
+- **Adaptive and repeated preimages.** As for the preimage bound: the
+  `RegionsDisjoint` counterpart of `EagerAdaptiveBound` and of the repeat
+  reduction is also open. `RegionsDisjoint` depends only on membership, as
+  `CollisionFree` does, but no `dedup` lemma is stated for it yet.
 
 ## Checking cost
 
-The module's diagnostics are clean. With `set_option profiler true` (removed
-afterwards) only two steps exceed the profiler's 100 ms threshold: a `simp`
-in `map_oracleOf` (378 ms) and the axiom check at the end of the file (548 ms).
+The module's diagnostics are clean. Profiled with `set_option profiler true`
+(removed afterwards) on the final file, with the language server's parallel
+elaboration on a 4-core VM: the slowest single tactic runs took 1.0–1.9 s
+(`simp only` in `nodup_dedup` and `length_dedup_le`, `omega` in
+`countP_near_le`); everything else was below about 1 s. The `#print axioms`
+block at the end took 3.7 s. Before the region section was added, only two
+steps passed the 100 ms threshold (378 ms and 548 ms). The later figures
+include time spent waiting on parallel tasks ("blocked"), so they are upper
+bounds.
 No proof uses the `decide` tactic or evaluates a large `Fin` or `Nat` value; the 2²⁵⁶
 corollaries instantiate the general `k`-bit theorem.
 
@@ -212,8 +255,9 @@ corollaries instantiate the general `k`-bit theorem.
   covers restricting a uniform function on a larger domain to the `N^q`
   tuple model.
 - The repeat reduction for adaptive strategies (above).
-- Region overlap with offsets, root overlap and offset aliasing, which
-  depend on the open question above.
+- For regions: the eager/adaptive and repeat counterparts, a `dedup` lemma
+  for `RegionsDisjoint`, and G27.05's proof that reached offsets stay below
+  `L` (above).
 - The G46.05 preimage list per prefix and the G01 `PublicCorrectness`
   premise (owners: G46.05 and the G01 revision).
 
@@ -240,6 +284,7 @@ the Lean server. Confirmed findings, all fixed in the following commit:
 | The module was not in `CORE` (finder 7). | Added. |
 | Several `have`s had no explicit type (finder 8). | All typed. |
 | `EagerAdaptiveBound` fixed `β : Type` (finder 3). | Universe-polymorphic. |
+| The offsets question (skeptic 3) needed a user decision. | Decided in the second round (relayed by the coordinator); `RegionsDisjoint` and its bound added after the review, see "Offsets and the region premise". |
 
 Not changed: `grind` in `two_mul_collisions_le` (one ring identity; `grind`
 is used 55 times elsewhere in `Solidity/`), noted by both reviewers as a
