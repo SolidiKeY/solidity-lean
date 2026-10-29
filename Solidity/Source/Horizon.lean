@@ -3,14 +3,29 @@ import Solidity.Source.Semantics
 /-!
 # Horizons: the interpreter is monotone in its fuel (S05 item 2)
 
-`Approx m m'`: `m` is `m'` at a smaller horizon.  Both only append events
-(`Grow`), and on every state either `m` times out with events that `m'`
-extends, or the two runs are equal.
+`Below m m'`: on every state, `m` times out or runs exactly as `m'`.  Every
+function of the interpreter at horizon `n` is `Below` itself at `n + 1`
+(`belowAt`, by induction on `n`, one step theorem per function so each stays
+within the default heartbeats), and so are deployments and transactions
+(`deploy_below`, `runTx_below`).  Hence **horizon independence**: a result
+that completes at some horizon is the result at every larger one
+(`runTx_stable`, `deploy_stable`), what `firstDone` finds is not a choice
+(`firstDone_runTx`), and a `stuck` run stays stuck (`runTx_stuck_stable`),
+so it is not a lack of horizon.
+
+`Approx`/`Grow` additionally track that events only grow; they are the
+start of the events of non-completing transactions, not yet used.
+
+The tactic `below_go` walks two copies of a body that differ only in the
+horizon: through binds, `attempt`s, `match`es and `if`s, closing calls by the
+given lemmas and the rest by reflexivity.  `below_unfold f n` unfolds one
+level of `f` on each side without unfolding the right side's inner calls.
 -/
 
 namespace Solidity.Source
 
 open EM
+open Solidity.Roadmap (Address Word Bytes Request Outcome)
 
 variable {E : Env}
 
@@ -118,11 +133,12 @@ macro_rules
       | (with_reducible exact Below.timeout _)
       | (with_reducible exact Below.refl _)
       | (first $[| with_reducible apply $ls:ident]*)
-      | (refine Below.attempt_bind ?_ ?_ ?_)
+      | (apply Below.attempt_bind)
       | (refine Below.bind ?_ ?_)
       | (with_reducible intro _)
       | (with_reducible rfl)
-      | split))
+      | split
+      | (dsimp only)))
 
 mutual
 theorem zeroData_below {Γ : RCtx} : ∀ (n : Nat) (τ : STy), Below (zeroData (E := E) (Γ := Γ) n τ) (zeroData (n + 1) τ)
@@ -549,5 +565,194 @@ theorem belowAt (G : Glob E) : ∀ n, BelowAt G n
       envLoop_step ih, dispatch_step ih⟩
 
 end
+
+
+/-! ### Transactions -/
+
+theorem Below.forIn {Γ : RCtx} {α β : Type} (l : List α) (b : β) {f f' : α → β → EM E Γ (ForInStep β)}
+    (h : ∀ a b, Below (f a b) (f' a b)) : Below (forIn l b f) (forIn l b f') := by
+  induction l generalizing b with
+  | nil => exact Below.refl _
+  | cons a as ih =>
+    simp only [List.forIn_cons]
+    refine Below.bind (h a b) fun r => ?_
+    cases r with
+    | done _ => exact Below.refl _
+    | yield b' => exact ih b'
+
+theorem storeRV_below {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v : RVal E.layout σ) :
+    Below (storeRV (Γ := Γ) F n τ p v) (storeRV F (n + 1) τ p v) := by
+  unfold storeRV
+  below_go [storeVal_below, storeData_below]
+
+theorem runInits_below (G : Glob E) (F : Fr) (n : Nat) : ∀ (l : List (RInit E)),
+    Below (runInits G F n l) (runInits G F (n + 1) l)
+  | [] => Below.refl _
+  | ri :: rest => Below.bind (Below.sub _ ((belowAt G n).evalE F _)) fun _ =>
+      Below.bind (storeRV_below F n _ _ _) fun _ => runInits_below G F n rest
+
+theorem giveArgs_below (G : Glob E) (F : Fr) (n : Nat) (X : String) (lX : Locals E.layout (G.prog.ctorLocals X)) :
+    ∀ (bs : List (RBaseArg E (G.prog.ctorLocals X))) (acc : CtorLocals G),
+      Below (giveArgs G F n X lX bs acc) (giveArgs G F (n + 1) X lX bs acc)
+  | [], _ => Below.refl _
+  | ba :: rest, acc => by
+    simp only [giveArgs]
+    split
+    · exact giveArgs_below G F n X lX rest acc
+    · refine Below.bind (Below.sub _ ((belowAt G n).evalConvArgs F _)) fun _ => ?_
+      split
+      · exact giveArgs_below G F n X lX rest _
+      · exact Below.refl _
+
+theorem collectArgs_below (G : Glob E) (F : Fr) (n : Nat) : ∀ (Xs : List String) (acc : CtorLocals G),
+    Below (collectArgs G F n Xs acc) (collectArgs G F (n + 1) Xs acc)
+  | [], _ => Below.refl _
+  | X :: Xs, acc => Below.bind (Below.refl _) fun lX =>
+      Below.bind (giveArgs_below G F n X lX _ acc) fun acc' => collectArgs_below G F n Xs acc'
+
+theorem runCtorBody_below (G : Glob E) (F : Fr) (n : Nat) (acc : CtorLocals G) (X : String) :
+    Below (runCtorBody G F n acc X) (runCtorBody G F (n + 1) acc X) := by
+  have ih := belowAt G n
+  unfold runCtorBody
+  below_go [ih.evalE, ih.evalConvArgs, ih.runMods, ih.dispatch, storeRV_below, runInits_below, giveArgs_below, collectArgs_below, runCtorBody_below, construct_below, Below.sub]
+
+theorem construct_below (G : Glob E) (F : Fr) (n : Nat) (c : String) (lc : Locals E.layout (G.prog.ctorLocals c)) :
+    Below (construct G F n c lc) (construct G F (n + 1) c lc) := by
+  unfold construct
+  split
+  · refine Below.bind (Below.forIn _ _ fun X _ => Below.bind (runInits_below G F n _) fun _ => Below.refl _)
+      fun _ => ?_
+    refine Below.bind (collectArgs_below G F n _ _) fun acc => ?_
+    exact Below.bind (Below.forIn _ _ fun X _ => Below.bind (runCtorBody_below G F n acc X) fun _ => Below.refl _)
+      fun _ => Below.refl _
+  · refine Below.bind (collectArgs_below G F n _ _) fun acc => ?_
+    exact Below.bind (Below.forIn _ _ fun X _ => Below.bind (runInits_below G F n _) fun _ =>
+      Below.bind (runCtorBody_below G F n acc X) fun _ => Below.refl _) fun _ => Below.refl _
+
+theorem deploy_below (G : Glob E) (n : Nat) (c : String) (addr sender : Address) (value : Word) (args : Bytes) :
+    Below (deploy G n c addr sender value args) (deploy G (n + 1) c addr sender value args) := by
+  unfold deploy
+  dsimp only
+  refine Below.bind (Below.refl _) fun m => ?_
+  refine Below.bind (Below.refl _) fun s => ?_
+  split <;> refine Below.bind (Below.refl _) fun _ => ?_ <;>
+    refine Below.attempt_bind ?_ (fun _ => Below.refl _) (fun _ => rfl) <;>
+    split <;> refine Below.bind (Below.refl _) fun _ => ?_ <;> refine Below.bind (Below.refl _) fun _ => ?_ <;>
+    split <;> first | exact construct_below G _ n c _ | exact Below.refl _
+
+theorem runTx_below (G : Glob E) (n : Nat) (q : Request) :
+    Below (runTx G n q) (runTx G (n + 1) q) := by
+  have ih := belowAt { G with timestamp := q.timestamp } n
+  unfold runTx
+  dsimp only
+  refine Below.bind (Below.refl _) fun m => ?_
+  refine Below.bind (Below.refl _) fun oc => ?_
+  split
+  · exact Below.refl _
+  · refine Below.attempt_bind ?_ (fun _ => Below.refl _) (fun _ => rfl)
+    exact Below.bind (Below.refl _) fun _ => ih.dispatch _ _
+
+/-! ## Horizon independence -/
+
+theorem Below.trans {Γ : RCtx} {α : Type} {a b c : EM E Γ α} (h₁ : Below a b) (h₂ : Below b c) : Below a c := by
+  intro x
+  rcases h₁ x with ht | he
+  · exact .inl ht
+  · rw [he]
+    rcases h₂ x with ht | he'
+    · exact .inl (he ▸ ht)
+    · exact .inr he'
+
+/-- A family monotone at each step is monotone. -/
+theorem Below.mono {Γ : RCtx} {α : Type} {f : Nat → EM E Γ α} (h : ∀ n, Below (f n) (f (n + 1)))
+    {n m : Nat} (hnm : n ≤ m) : Below (f n) (f m) := by
+  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hnm
+  induction d with
+  | zero => exact Below.refl _
+  | succ d ih => exact (ih (by omega)).trans (h _)
+
+/-- A run that does not time out is the run at every larger horizon. -/
+theorem Below.eq_of_done {Γ : RCtx} {α : Type} {m m' : EM E Γ α} (h : Below m m') (x)
+    (hd : (m.run x).1 ≠ .error .timeout) : m'.run x = m.run x :=
+  match h x with
+  | .inl ht => absurd ht hd
+  | .inr he => he.symm
+
+theorem done_iff {α σ : Type} (r : Except Halt α × σ) : Done r = true ↔ r.1 ≠ .error .timeout := by
+  rcases r with ⟨r, s⟩
+  cases r with
+  | ok a => exact ⟨(fun _ h => nomatch h), (fun _ => rfl)⟩
+  | error h =>
+    cases h with
+    | timeout => exact ⟨(fun h => nomatch h), (fun h => absurd rfl h)⟩
+    | revert _ => exact ⟨(fun _ h => nomatch h), (fun _ => rfl)⟩
+    | stuck _ => exact ⟨(fun _ h => nomatch h), (fun _ => rfl)⟩
+
+/-- **Horizon independence** of a monotone family: a result that
+completes at horizon `k` is the result at every horizon `k' ≥ k`. -/
+theorem runAt_stable {α : Type} {m : Nat → EM E [] α} (hm : ∀ n, Below (m n) (m (n + 1))) (s : St E)
+    {k k' : Nat} (hk : k ≤ k') (hd : Done (runAt m s k) = true) : runAt m s k' = runAt m s k := by
+  have hb := Below.mono hm hk
+  have hd' : ((m k).run (L0 E, s)).1 ≠ .error .timeout := by
+    have := (done_iff _).mp hd
+    simp only [runAt] at this
+    rcases hr : (m k).run (L0 E, s) with ⟨r, l, s'⟩
+    rw [hr] at this
+    exact this
+  simp only [runAt]
+  rw [hb.eq_of_done _ hd']
+
+/-- **A transaction's result does not depend on its horizon** once it
+completes. -/
+theorem runTx_stable (G : Glob E) (q : Request) (s : St E) {k k' : Nat} (hk : k ≤ k')
+    (hd : Done (runAt (fun f => runTx G f q) s k) = true) :
+    runAt (fun f => runTx G f q) s k' = runAt (fun f => runTx G f q) s k :=
+  runAt_stable (fun n => runTx_below G n q) s hk hd
+
+/-- So does a deployment's. -/
+theorem deploy_stable (G : Glob E) (c : String) (addr sender : Address) (value : Word) (args : Bytes)
+    (s : St E) {k k' : Nat} (hk : k ≤ k')
+    (hd : Done (runAt (fun f => deploy G f c addr sender value args) s k) = true) :
+    runAt (fun f => deploy G f c addr sender value args) s k' =
+      runAt (fun f => deploy G f c addr sender value args) s k :=
+  runAt_stable (fun n => deploy_below G n c addr sender value args) s hk hd
+
+/-- **The least completing horizon is not a choice**: what `firstDone`
+finds is the run at every horizon from there on, so a transaction's
+meaning in a session is its result at any completing horizon. -/
+theorem firstDone_runTx (G : Glob E) (q : Request) (s : St E) {n k k' : Nat}
+    {r : Except Halt Outcome × St E} (h : firstDone (runAt (fun f => runTx G f q) s) n = some (k, r))
+    (hk : k ≤ k') : runAt (fun f => runTx G f q) s k' = r := by
+  obtain ⟨_, rfl, hd⟩ := firstDone_spec h
+  exact runTx_stable G q s hk hd
+
+/-- A stuck transaction is stuck at every larger horizon: being stuck is
+not a lack of horizon. -/
+theorem runTx_stuck_stable (G : Glob E) (q : Request) (s : St E) {k k' : Nat} (hk : k ≤ k') {msg : String}
+    (h : (runAt (fun f => runTx G f q) s k).1 = .error (.stuck msg)) :
+    (runAt (fun f => runTx G f q) s k').1 = .error (.stuck msg) := by
+  have hd : Done (runAt (fun f => runTx G f q) s k) = true := by
+    rw [done_iff, h]; exact fun h' => nomatch h'
+  rw [runTx_stable G q s hk hd, h]
+
+/-- info: 'Solidity.Source.belowAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms belowAt
+
+/-- info: 'Solidity.Source.runTx_stable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms runTx_stable
+
+/-- info: 'Solidity.Source.deploy_stable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms deploy_stable
+
+/-- info: 'Solidity.Source.firstDone_runTx' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms firstDone_runTx
+
+/-- info: 'Solidity.Source.runTx_stuck_stable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms runTx_stuck_stable
 
 end Solidity.Source

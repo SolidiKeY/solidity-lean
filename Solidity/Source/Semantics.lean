@@ -38,7 +38,8 @@ The source semantics composed into G01's interface
   the stipend rule and sender-funds validity are not modelled, a `stuck`
   run shows as an unfinished prefix (like divergence), and the events of a
   transaction that never completes are not shown.  Horizon independence of
-  a completed result is checked on controls, not proved.
+  a completed result is proved in `Solidity/Source/Horizon.lean`
+  (`runTx_stable`, `firstDone_runTx`).
 -/
 
 namespace Solidity.Source
