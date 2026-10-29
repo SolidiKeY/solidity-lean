@@ -101,7 +101,8 @@ Follow-up the decisions require:
   resources, and the "open question" wording removed.
 - **Pins (G00, G05, G06).** Re-pin the bridge (the hand-written vector scripts
   are re-pinned: [roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md)) from
-  Cancun to Osaka, modulo EIP-170/EIP-3860 as recorded above; resolve G00's
+  Cancun to Osaka, modulo EIP-170/EIP-3860, EIP-7825 and the block gas limit
+  as recorded; resolve G00's
   disagreements 5 (reference-EVM versions) and 6 (`validateSettings` rejects
   `libraries`, while G01 Q8 puts linked libraries in the system; settled
   below as an empty link map).
@@ -130,8 +131,8 @@ documents as each is integrated.
 | G00 Q4 (revised) / G05 Q2 — settings | solc's two pipelines only: the legacy order with the pragma's ABI coder (v1 or v2), and the via-IR order with coder v2. The other six `EvalOrder` flag combinations are not in the profile. |
 | G06 Q2 — Osaka gas caps | EIP-7825's per-transaction cap and the block gas limit are a recorded idealization, like EIP-170/EIP-3860; this refines "Follow-up — gas exhaustion" above, which still holds for a gas limit chosen too low. |
 | G06 Q1 — forced ether | The environment may credit the system's balance (block beneficiary, a foreign `SELFDESTRUCT`, withdrawals) between transactions and during environment frames; the ledger records these credits and the source lets the own balance grow. |
-| G06 Q3 — stipend payments to our own instances | A compiler-independent source cost rule decides which `receive`/fallback bodies fit the 2300-gas stipend; the source fails the payment otherwise, and the compiler is proved to fit every body the rule admits. This is a carve-out: gas stays an unobserved quantity (G00 Q1), and for these payments the rule, not "Follow-up — nested-frame failures", decides the outcome; G01 Q7 concerns environment callees only. |
-| Hash regions | The per-run premise extends to hashed regions: no two regions of length at most L based at hashed slots (or at root slots) overlap, with a probability lemma of about q²·L/2²⁵⁶. |
+| G06 Q3 — stipend payments to our own instances | A compiler-independent source cost rule decides which `receive`/fallback bodies fit the 2300-gas stipend; the source fails the payment otherwise, and the compiler is proved to fit every body the rule admits. The rule assumes cold (EIP-2929) access costs, and for a body it does not admit the compiled payment must fail too (compiler-enforced), so the two sides agree. This is a carve-out: gas stays an unobserved quantity (G00 Q1), and for these payments the rule, not "Follow-up — nested-frame failures", decides the outcome; G01 Q7 concerns environment callees only. |
+| Hash regions | The per-run premise extends to hashed regions: no region of length at most L based at a hashed slot overlaps another such region or any root region, with a probability lemma of about q²·L/2²⁵⁶. |
 | G03 Q1 — shared compiler foundation | Shared-foundation child packages ahead of wave 3 (frozen slot, state and statement interfaces under G24); the work-package manifest and the VM table grow accordingly. |
 | G05 Q1 — library addresses | Only an empty link map is admitted: the session deploys and links every library itself; a pre-assigned map is refused. |
 | Fixed point — `*` and `/` | The exact product or quotient, truncated. |
@@ -142,6 +143,18 @@ documents as each is integrated.
 | Fixed point — unary minus on `ufixed` | Accepted as solc's type checker does: `Panic(0x11)` unless the operand is 0; wraps in `unchecked`. |
 | Fixed point — `++`/`--` | Add or subtract the value 1. |
 | Fixed point — explicit fixed/integer and `bytesM` conversions | Integers by value; `bytesM` by bit pattern. |
+
+Follow-up the second round requires:
+
+- **Contracts (G01).** Settings over the two pipelines only; the gas-cap
+  idealization; environment credits in the ledger; the stipend rule; the
+  hash-region premise next to the per-run hash premise in `PublicCorrectness`.
+- **Frontend (G05).** `validateSettings` admits only an empty link map; the
+  session deploys and links libraries (resolves G00 disagreement 6).
+- **Hash bound.** The region predicate and its counting bound.
+- **Roadmap (G03).** The shared-foundation child packages under G24, added to
+  the work-package manifest and the VM table.
+- **Fixed point.** The reference semantics encode the answers above.
 
 ## What belongs in the model
 

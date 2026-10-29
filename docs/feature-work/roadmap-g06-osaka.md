@@ -112,7 +112,7 @@ reproduce both committed records byte for byte.
 
 | Change | EIP / fork | Effect here |
 |---|---|---|
-| Transaction gas cap 2^24 | EIP-7825 (Osaka) | `check-transient-vectors.mjs:55` and `check-transient-world-vectors.mjs:46` built signed legacy transactions with `gasLimit:30000000n`. Under Osaka, `createLegacyTx` throws `Transaction gas limit 30000000 exceeds the maximum allowed by EIP-7825 (16777216)` before any execution (3 invocations). The pin commit sets `16777216n`. With that limit the Cancun run passes and reproduces the committed record, so the change does not depend on the fork. No vector's outcome depends on the limit. No script asserts gas. One frame does consume its whole allowance: `staticWrite` in `check-transient-vectors`, whose inner STATICCALL halts with `static state change` and burns all forwarded gas. That is 29,509,787 gas at 30M and 16,493,609 at 2^24, in 8 frames (per pipeline and per compiler). The caller keeps 1/64, about 262k, and needs about 2k, so `ok == false` holds under either limit. The script does not assert the halt kind. |
+| Transaction gas cap 2^24 | EIP-7825 (Osaka) | `check-transient-vectors.mjs:55` and `check-transient-world-vectors.mjs:46` built signed legacy transactions with `gasLimit:30000000n`. Under Osaka, `createLegacyTx` throws `Transaction gas limit 30000000 exceeds the maximum allowed by EIP-7825 (16777216)` before any execution (3 invocations). The pin commit sets `16777216n`. With that limit the Cancun run passes and reproduces the committed record, so the change does not depend on the fork. No vector's outcome depends on the limit. No script asserts gas. One frame does consume its whole allowance: `staticWrite` in `check-transient-vectors`, whose inner STATICCALL halts with `static state change` and burns all forwarded gas. That is 29,509,787 gas at 30M and 16,493,609 at 2^24, in 8 frames (the 4 halting inner frames and their 4 callers, one pair per pipeline and compiler). The caller keeps 1/64, about 262k, and needs about 2k, so `ok == false` holds under either limit. The script does not assert the halt kind. |
 | `runCode`/`runCall` message gas | EIP-7825 (Osaka) | The other 10 scripts call `vm.evm.runCode`/`runCall` directly with `gasLimit:30000000n`. EthereumJS enforces the cap only on transactions. On a real Osaka chain, a 30M top-level frame is unreachable. Review re-ran all 10 scripts at 2^24 and found identical frame traces, gas included. The scripts are left at 30M to keep the pin diff minimal. |
 | `CLZ` opcode (0x1e) | EIP-7939 (Osaka) | solc 0.8.38 emits no CLZ in any of the 97 compiled objects (counted at instruction positions, PUSH data skipped). |
 | ModExp repricing / bounds, P-256 precompile | EIP-7883, EIP-7823, EIP-7951 (Osaka) | No script calls ModExp or P-256. Three precompiles are called, and none of them changed in Prague or Osaka: `ecrecover` (`tests/abi-0.8.38/Features.sol:47`, via `check-abi-vectors.mjs:90,96,97`), and `sha256` and `ripemd160` (`tests/solc/SliceCopies.sol:47-48`, via `check-slice-copies.mjs:44`). |
@@ -222,7 +222,8 @@ These are Lean-side or other-owner pins that this task may not edit:
    user decided to idealize EIP-7825 and the block gas limit as well
    (second-round decisions, 2026-10-29), the scripts' 2^24 transaction limit
    is a property of EthereumJS, not of the decided semantics; no vector needs
-   more.
+   more. The vectors measure the real Osaka limits; the idealization belongs
+   to the theorem only.
 
 ## 5. Gates
 
