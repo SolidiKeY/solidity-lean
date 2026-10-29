@@ -3,7 +3,7 @@
  "stages": ["source", "admission", "lowering", "backend", "evm", "theorem"],
  "workPackages": ["G00", "G01", "G02", "G03", "G04", "G05", "G06", "G07", "S00", "S01", "S02", "S05", "G08", "G09", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G19", "G20", "G21", "G23", "G25", "G26", "G28", "G30", "G31", "G32", "G33", "G34", "G38", "G39", "G40", "G41", "G43", "G47", "G48", "G52", "G53", "G55", "S03.01", "S03.02", "S03.03", "S03.04", "S04.01", "S04.02", "S04.03", "S04.04", "G18.01", "G18.02", "G18.03", "G18.04", "G18.05", "G18.06", "G22.01", "G22.02", "G22.03", "G22.04", "G22.05", "G27.01", "G27.02", "G27.03", "G27.04", "G27.05", "G29.01", "G29.02", "G29.03", "G35.01", "G35.02", "G35.03", "G35.04", "G35.05", "G35.06", "G36.01", "G36.02", "G36.03", "G37.01", "G37.02", "G37.03", "G42.01", "G42.02", "G42.03", "G42.04", "G42.05", "G42.06", "G44.01", "G44.02", "G44.03", "G45.01", "G45.02", "G45.03", "G45.04", "G45.05", "G45.06", "G46.01", "G46.02", "G46.03", "G46.04", "G46.05", "G46.06", "G49.01", "G49.02", "G49.03", "G50.01", "G50.02", "G51.01", "G51.02", "G54.01", "G54.02", "G54.03", "G24.01", "G24.02", "G24.03", "G24.04"],
  "features": [
-  {"category": "lexical", "contracts": ["Admission", "Lowering"], "cover": [{"decl": "Solidity.Frontend.Admission.scan", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 418, "module": "Solidity.Frontend.SolcJson.Admission", "note": "admission walk; declarations keyed by compiler IDs", "stage": "admission"}, {"decl": "Solidity.Frontend.identText", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 22, "module": "Solidity.Frontend.SolcJson.Body", "note": "quotes raw source names, including $ names and keywords", "stage": "lowering"}, {"decl": "Solidity.freshenStmt", "file": "Solidity/Syntax/Elab/Context.lean", "line": 1229, "module": "Solidity.Syntax.Elab.Context", "note": "renames locals so shadowed names stay apart", "stage": "lowering"}, {"decl": "Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution", "file": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "line": 12, "module": "Solidity.Examples.Tactics.SourceIdentifiersImport", "note": "imported shadowing runs correctly", "stage": "regression"}], "current": "partial", "decision": null, "id": "identifiers", "missing": ["No general theorem that lowering keeps declaration identity or scope; only regressions", "Qualified names across modules rely on import adapters with no proof (see sourceUnits)"], "owners": {"admission": ["G08", "G12", "G15"], "backend": ["G26"], "evm": [], "lowering": ["G16", "G17"], "source": ["S00", "S01"], "theorem": ["G48"]}, "reasons": {"evm": "names are resolved before code generation"}, "restrictions": [], "scope": "model", "uncovered": ["source", "backend", "theorem"]},
+  {"category": "lexical", "contracts": ["Admission", "Lowering"], "cover": [{"decl": "Solidity.Frontend.Admission.scan", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 425, "module": "Solidity.Frontend.SolcJson.Admission", "note": "admission walk; declarations keyed by compiler IDs", "stage": "admission"}, {"decl": "Solidity.Frontend.identText", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 22, "module": "Solidity.Frontend.SolcJson.Body", "note": "quotes raw source names, including $ names and keywords", "stage": "lowering"}, {"decl": "Solidity.freshenStmt", "file": "Solidity/Syntax/Elab/Context.lean", "line": 1229, "module": "Solidity.Syntax.Elab.Context", "note": "renames locals so shadowed names stay apart", "stage": "lowering"}, {"decl": "Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution", "file": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "line": 12, "module": "Solidity.Examples.Tactics.SourceIdentifiersImport", "note": "imported shadowing runs correctly", "stage": "regression"}], "current": "partial", "decision": null, "id": "identifiers", "missing": ["No general theorem that lowering keeps declaration identity or scope; only regressions", "Qualified names across modules rely on import adapters with no proof (see sourceUnits)"], "owners": {"admission": ["G08", "G12", "G15"], "backend": ["G26"], "evm": [], "lowering": ["G16", "G17"], "source": ["S00", "S01"], "theorem": ["G48"]}, "reasons": {"evm": "names are resolved before code generation"}, "restrictions": [], "scope": "model", "uncovered": ["source", "backend", "theorem"]},
   {"category": "lexical", "contracts": ["Admission"], "cover": [{"decl": "Solidity.Frontend.scanSpecifications", "file": "Solidity/Frontend/Import.lean", "line": 493, "module": "Solidity.Frontend.Import", "note": "scans NatSpec spec annotations by lexical binders", "stage": "admission"}, {"decl": "Solidity.Frontend.specCommentTokens", "file": "Solidity/Frontend/Import.lean", "line": 264, "module": "Solidity.Frontend.Import", "note": "tokenizes spec comments; ordinary comments stay data", "stage": "lowering"}, {"decl": "Solidity.Frontend.docText", "file": "Solidity/Frontend/SolcJson/Contract.lean", "line": 21, "module": "Solidity.Frontend.SolcJson.Contract", "note": "reads documentation nodes for clauses", "stage": "lowering"}, {"decl": "Solidity.Examples.Tactics.SourceIdentifiersImport.escaped_spec_valid", "file": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "line": 21, "module": "Solidity.Examples.Tactics.SourceIdentifiersImport", "note": "spec with escaped identifiers is valid", "stage": "regression"}], "current": "partial", "decision": null, "id": "comments", "missing": ["Multi-source NatSpec @custom:key and loopSpec refused (compilationUnitSpecifications)", "No end-to-end proof that comments carry no meaning or that spans are kept"], "owners": {"admission": ["G08", "G15"], "backend": [], "evm": [], "lowering": [], "source": ["S00"], "theorem": ["G48"]}, "reasons": {"backend": "erased before lowering", "evm": "erased before lowering", "lowering": "no behaviour beyond token separation (G08 owns the lexer)"}, "restrictions": [], "scope": "model", "uncovered": ["source", "theorem"]},
   {"category": "lexical", "contracts": ["Admission", "Lowering"], "cover": [{"decl": "Solidity.Frontend.parseRational", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 900, "module": "Solidity.Frontend.SolcJson.Body", "note": "exact rational parse of solc literal", "stage": "lowering"}, {"decl": "Solidity.Frontend.constVal", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 955, "module": "Solidity.Frontend.SolcJson.Body", "note": "folds rational constant expressions before typing", "stage": "lowering"}, {"decl": "Solidity.Evm.val_sim", "file": "Solidity/Evm/Expr.lean", "line": 255, "module": "Solidity.Evm.Expr", "note": "compiled values, literals included, simulate source", "stage": "backend"}, {"decl": "Solidity.Evm.External.push_agrees", "file": "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean", "line": 195, "module": "SolidityBridge.ExternalEvm.Dispatch", "note": "PUSH constant agrees with upstream EVM", "stage": "evm"}], "current": "partial", "decision": null, "id": "numericLiterals", "missing": ["Contextual literal promotion and nested numeric positions not done (numeric-operators.md Left)", "Narrow widths reach compiler as uint (R13); width correctness rests on unproved lowering", "No theorem that folding matches solc's arbitrary-precision semantics"], "owners": {"admission": ["G08", "G15"], "backend": ["G25"], "evm": ["G46.01"], "lowering": ["G16"], "source": ["S00"], "theorem": ["G48", "G49.03"]}, "reasons": {}, "restrictions": ["R13"], "scope": "model", "uncovered": ["source", "admission", "theorem"]},
   {"category": "lexical", "contracts": ["Admission", "Lowering"], "cover": [{"decl": "Solidity.Frontend.expr", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1522, "module": "Solidity.Frontend.SolcJson.Body", "note": "renders bool Literal nodes", "stage": "lowering"}, {"decl": "Solidity.Evm.compileVal", "file": "Solidity/Evm/Compile.lean", "line": 351, "module": "Solidity.Evm.Compile", "note": "compiles bool values as words", "stage": "backend"}, {"decl": "Solidity.Evm.External.decode_bool", "file": "Bridge/SolidityBridge/ExternalEvm/WordOps.lean", "line": 6, "module": "SolidityBridge.ExternalEvm.WordOps", "note": "bool word decoding agrees with EVM", "stage": "evm"}, {"decl": "Solidity.Corpus.TestSuite.requireTrueLiteral", "file": "Solidity/Corpus/TestSuite.lean", "line": 165, "module": "Solidity.Corpus.TestSuite", "note": "require(true) obligation proved", "stage": "regression"}], "current": "present", "decision": null, "id": "booleanLiterals", "missing": ["No stated theorem that numeric-to-bool coercion is impossible (rests on typing)"], "owners": {"admission": ["G08", "G15"], "backend": ["G25"], "evm": ["G46.01"], "lowering": ["G16"], "source": ["S00"], "theorem": ["G48", "G49.03"]}, "reasons": {}, "restrictions": [], "scope": "model", "uncovered": ["source", "admission", "theorem"]},
@@ -145,7 +145,7 @@
   {"category": "metadata", "contracts": ["Admission", "Lowering", "Compilation", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.Admission.nodeFeatures", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 116, "module": "Solidity.Frontend.SolcJson.Admission", "note": "type(C).name maps to typeName", "stage": "admission"}, {"decl": "Solidity.Frontend.declarationMetadata", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1059, "module": "Solidity.Frontend.SolcJson.Body", "note": "folds name to UTF-8 literal", "stage": "lowering"}], "current": "present", "decision": null, "id": "typeName", "missing": ["No dedicated theorem; resulting bytes hit bytes/string backend limits (R10/R17)"], "owners": {"admission": ["G13", "G15"], "backend": ["G31"], "evm": ["G46.01"], "lowering": ["G23"], "source": ["S01"], "theorem": ["G48", "G49.02"]}, "reasons": {}, "restrictions": ["R10", "R17"], "scope": "model", "uncovered": ["source", "backend", "evm", "theorem"]},
   {"category": "metadata", "contracts": ["Admission", "Lowering", "Compilation", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.declarationMetadata", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1059, "module": "Solidity.Frontend.SolcJson.Body", "note": "XOR of own external selectors", "stage": "lowering"}, {"decl": "Solidity.Keccak.selector", "file": "Solidity/Keccak.lean", "line": 109, "module": "Solidity.Keccak", "note": "4-byte selector", "stage": "source"}, {"decl": "Solidity.Examples.Tactics.DeclarationMetadata.ownInterface", "file": "Solidity/Examples/Tactics/DeclarationMetadata.lean", "line": 23, "module": "Solidity.Examples.Tactics.DeclarationMetadata", "note": "interfaceId value", "stage": "regression"}], "current": "present", "decision": null, "id": "interfaceId", "missing": ["Abstract-contract interfaceId refused", "No general XOR theorem"], "owners": {"admission": ["G13", "G15"], "backend": ["G31"], "evm": ["G46.01"], "lowering": ["G23"], "source": ["S01"], "theorem": ["G48", "G49.02"]}, "reasons": {}, "restrictions": [], "scope": "model", "uncovered": ["admission", "backend", "evm", "theorem"]},
   {"category": "metadata", "contracts": ["Admission", "Lowering", "Compilation", "PublicCorrectness"], "cover": [{"decl": "Solidity.fnSelector?", "file": "Solidity/Syntax/Elab/Values.lean", "line": 967, "module": "Solidity.Syntax.Elab.Values", "note": "selector of external function value", "stage": "lowering"}, {"decl": "Solidity.Frontend.declarationSelector", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1031, "module": "Solidity.Frontend.SolcJson.Body", "note": "static declaration selectors fold", "stage": "lowering"}, {"decl": "Solidity.Frontend.storedFunctionMemberType?", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 312, "module": "Solidity.Frontend.SolcJson.Body", "note": ".selector typed bytes4", "stage": "lowering"}, {"decl": "Solidity.Examples.Tactics.FunctionTypes.selectorOfValue", "file": "Solidity/Examples/Tactics/FunctionTypes.lean", "line": 236, "module": "Solidity.Examples.Tactics.FunctionTypes", "note": "selector of function value", "stage": "regression"}], "current": "partial", "decision": null, "id": "functionSelector", "missing": ["Effectful stored-member receivers refused (read twice)", "Not all declaration contexts validated; no uniqueness (by design)"], "owners": {"admission": ["G13", "G15"], "backend": ["G31", "G40"], "evm": ["G46.01"], "lowering": ["G23"], "source": ["S01", "S04.02"], "theorem": ["G48", "G49.02"]}, "reasons": {}, "restrictions": [], "scope": "model", "uncovered": ["source", "admission", "backend", "evm", "theorem"]},
-  {"category": "metadata", "contracts": ["Admission", "Lowering", "Compilation", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.storedFunctionMemberType?", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 312, "module": "Solidity.Frontend.SolcJson.Body", "note": ".address typed address", "stage": "lowering"}, {"decl": "Solidity.Examples.Tactics.FunctionTypes.addressOfValue", "file": "Solidity/Examples/Tactics/FunctionTypes.lean", "line": 228, "module": "Solidity.Examples.Tactics.FunctionTypes", "note": "address of function value", "stage": "regression"}, {"decl": "Solidity.Examples.Tactics.SourceAdmissionImport.boundSelf_iff", "file": "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "line": 242, "module": "Solidity.Examples.Tactics.SourceAdmissionImport", "note": "bound self receiver projection", "stage": "regression"}], "current": "partial", "decision": null, "id": "functionAddress", "missing": ["Effectful C(receiver()).f.address refused", "Not all declaration contexts validated"], "owners": {"admission": ["G13", "G15"], "backend": ["G42.05"], "evm": ["G46.01", "G47"], "lowering": ["G22.04"], "source": ["S04.03"], "theorem": ["G48", "G49.02"]}, "reasons": {}, "restrictions": [], "scope": "model", "uncovered": ["source", "admission", "backend", "evm", "theorem"]},
+  {"category": "metadata", "contracts": ["Admission", "Lowering", "Compilation", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.storedFunctionMemberType?", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 312, "module": "Solidity.Frontend.SolcJson.Body", "note": ".address typed address", "stage": "lowering"}, {"decl": "Solidity.Examples.Tactics.FunctionTypes.addressOfValue", "file": "Solidity/Examples/Tactics/FunctionTypes.lean", "line": 228, "module": "Solidity.Examples.Tactics.FunctionTypes", "note": "address of function value", "stage": "regression"}, {"decl": "Solidity.Examples.Tactics.SourceAdmissionImport.boundSelf_iff", "file": "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "line": 248, "module": "Solidity.Examples.Tactics.SourceAdmissionImport", "note": "bound self receiver projection", "stage": "regression"}], "current": "partial", "decision": null, "id": "functionAddress", "missing": ["Effectful C(receiver()).f.address refused", "Not all declaration contexts validated"], "owners": {"admission": ["G13", "G15"], "backend": ["G42.05"], "evm": ["G46.01", "G47"], "lowering": ["G22.04"], "source": ["S04.03"], "theorem": ["G48", "G49.02"]}, "reasons": {}, "restrictions": [], "scope": "model", "uncovered": ["source", "admission", "backend", "evm", "theorem"]},
   {"category": "metadata", "contracts": ["Admission", "Lowering", "Compilation", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.declarationMetadata", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1059, "module": "Solidity.Frontend.SolcJson.Body", "note": "error bytes4 / event bytes32; anonymous refused", "stage": "lowering"}, {"decl": "Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors", "file": "Solidity/Examples/Tactics/DeclarationMetadata.lean", "line": 27, "module": "Solidity.Examples.Tactics.DeclarationMetadata", "note": "error selectors", "stage": "regression"}, {"decl": "Solidity.Examples.Tactics.DeclarationMetadata.eventSelector", "file": "Solidity/Examples/Tactics/DeclarationMetadata.lean", "line": 31, "module": "Solidity.Examples.Tactics.DeclarationMetadata", "note": "event selector", "stage": "regression"}], "current": "present", "decision": null, "id": "errorEventSelector", "missing": ["Selectors come from solc ABI metadata, not recomputed in Lean", "bytes32 hash values excluded from backend (R10)"], "owners": {"admission": ["G13", "G15"], "backend": ["G31"], "evm": ["G46.01"], "lowering": ["G23"], "source": ["S01", "S04.02"], "theorem": ["G48", "G49.02"]}, "reasons": {}, "restrictions": ["R10"], "scope": "model", "uncovered": ["source", "admission", "backend", "evm", "theorem"]},
   {"category": "storage", "contracts": ["Lowering", "Compilation", "Execution", "PublicCorrectness", "SpecTransfer"], "cover": [{"decl": "Solidity.Storage.len", "file": "Solidity/Semantics/Storage/Ops.lean", "line": 908, "module": "Solidity.Semantics.Storage.Ops", "note": "exact storage array length", "stage": "source"}, {"decl": "Solidity.Heap.len", "file": "Solidity/Semantics/Heap.lean", "line": 242, "module": "Solidity.Semantics.Heap", "note": "memory array length", "stage": "source"}, {"decl": "Solidity.Evm.Sto.len_eq", "file": "Solidity/Evm/StorageLemmas.lean", "line": 188, "module": "Solidity.Evm.StorageLemmas", "note": "compiled length read agrees", "stage": "backend"}, {"decl": "Solidity.Frontend.solcArrayLength?", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 332, "module": "Solidity.Frontend.SolcJson.Body", "note": "static lengths from solc metadata", "stage": "admission"}], "current": "partial", "decision": null, "id": "arrayLength", "missing": ["Length bound 2^256 instead of 2^64 (R24)", "Calldata .length only through lowered slice views"], "owners": {"admission": ["G10", "G13", "G15"], "backend": ["G28", "G34"], "evm": ["G46.03"], "lowering": ["G18.02", "G18.03", "G18.04"], "source": ["S04.01"], "theorem": ["G48", "G49.01", "G49.02", "G51.01"]}, "reasons": {}, "restrictions": ["R24"], "scope": "model", "uncovered": ["lowering", "evm", "theorem"]},
   {"category": "storage", "contracts": ["Lowering", "Compilation", "Execution", "PublicCorrectness", "SpecTransfer"], "cover": [{"decl": "Solidity.Storage.push", "file": "Solidity/Semantics/Storage/Ops.lean", "line": 923, "module": "Solidity.Semantics.Storage.Ops", "note": "grow length and initialize the new element", "stage": "source"}, {"decl": "Solidity.Evm.push_sim", "file": "Solidity/Evm/Stmt.lean", "line": 641, "module": "Solidity.Evm.Stmt", "note": "compiled push simulates the source", "stage": "backend"}, {"decl": "Solidity.pushStep_sound", "file": "Solidity/Calculus/SoundStore.lean", "line": 504, "module": "Solidity.Calculus.SoundStore", "note": "calculus push rule sound", "stage": "theorem"}], "current": "partial", "decision": null, "id": "arrayPush", "missing": ["Compiler admits push() only of primitives, push(v) of static elems (R18)", "Pushes of dynamic/memory values and pushes inside loops refused (R18/R21)", "push of a struct over a recycled slot drops shadow data (solc-alignment)"], "owners": {"admission": ["G10", "G13", "G15"], "backend": ["G30"], "evm": ["G46.03"], "lowering": ["G18.02"], "source": ["S04.01"], "theorem": ["G48", "G49.01", "G49.02", "G51.01"]}, "reasons": {}, "restrictions": ["R18", "R21"], "scope": "model", "uncovered": ["admission", "lowering", "evm"]},
@@ -173,11 +173,11 @@
   {"category": "semantics", "contracts": ["Compilation", "Execution", "PublicCorrectness", "SpecTransfer"], "cover": [{"decl": "Solidity.Stmt.loop_terminates_of_wellFounded", "file": "Solidity/Semantics/Termination.lean", "line": 82, "module": "Solidity.Semantics.Termination", "note": "loop termination from well-founded measure", "stage": "source"}, {"decl": "Solidity.Prog.runF_approx", "file": "Solidity/Semantics/RunFuel.lean", "line": 449, "module": "Solidity.Semantics.RunFuel", "note": "fuel evaluator approximates semantic run", "stage": "source"}, {"decl": "Solidity.Evm.compile_terminates_iff", "file": "Bridge/SolidityBridge/Evm.lean", "line": 171, "module": "SolidityBridge.Evm", "note": "compiled code terminates iff source does", "stage": "backend"}, {"decl": "Solidity.TLoop.run_correct_of_wellFounded_on", "file": "Bridge/SolidityBridge/LoopFixpoint.lean", "line": 65, "module": "SolidityBridge.LoopFixpoint", "note": "loop fixpoint correctness under well-foundedness", "stage": "theorem"}], "current": "partial", "decision": null, "id": "termination", "missing": ["Divergence matched classically to .fault; no gas-indexed prefixes (R38)", "Recursion depth fixed fuel 1024 (R08); exhausted never in compiler theorem (R39)"], "owners": {"admission": ["G13", "G15"], "backend": ["G36.03", "G37.02"], "evm": ["G46.06", "G47"], "lowering": ["G19"], "source": ["S03.04"], "theorem": ["G49.02", "G49.03", "G50.02", "G51.02"]}, "reasons": {}, "restrictions": ["R08", "R38", "R39"], "scope": "model", "uncovered": ["admission", "lowering", "evm"]},
   {"category": "semantics", "contracts": ["Execution", "PublicCorrectness", "SpecTransfer"], "cover": [{"decl": "Solidity.Bridge.Adversary.holdsC_iff_all_callees", "file": "Bridge/SolidityBridge/Adversary.lean", "line": 250, "module": "SolidityBridge.Adversary", "note": "properties hold for all callee interpretations", "stage": "theorem"}, {"decl": "Solidity.Main.callback_soundness", "file": "Solidity/Theorems.lean", "line": 226, "module": "Solidity.Theorems", "note": "soundness under explicit callback invariant", "stage": "theorem"}, {"decl": "Solidity.ContractWorld.reachable_invariant", "file": "Solidity/Semantics/ContractWorld.lean", "line": 452, "module": "Solidity.Semantics.ContractWorld", "note": "multi-contract world invariant over reachable states", "stage": "source"}], "current": "partial", "decision": null, "id": "worldAssumptions", "missing": ["Not approved (G00 Q2): the premise must be replaced by the callee semantics of D02/D12, not discharged as stated", "Compiler world is balances only; recipient code not run (R33)", "msg.sender != this premise not imposed (solc-alignment)"], "owners": {"admission": ["G13", "G15"], "backend": ["G42.02", "G43"], "evm": ["G47"], "lowering": ["G22.02", "G22.05"], "source": ["S04.03"], "theorem": ["G49.02", "G50.02", "G51.02"]}, "reasons": {}, "restrictions": ["R33"], "scope": "abstract", "uncovered": ["admission", "lowering", "backend", "evm"]},
   {"category": "semantics", "contracts": ["Admission"], "cover": [{"decl": "Solidity.Frontend.Source.validateSettings", "file": "Solidity/Frontend/Source.lean", "line": 169, "module": "Solidity.Frontend.Source", "note": "pinned compiler/settings validation", "stage": "admission"}, {"decl": "Solidity.Frontend.Source.read", "file": "Solidity/Frontend/Source.lean", "line": 203, "module": "Solidity.Frontend.Source", "note": "reads validated compiler output with provenance", "stage": "admission"}, {"decl": "Solidity.Frontend.Source.checkTree", "file": "Solidity/Frontend/SourceUnits.lean", "line": 31, "module": "Solidity.Frontend.SourceUnits", "note": "checks compilation unit tree shape", "stage": "admission"}, {"decl": "Solidity.Frontend.Source.ScopeScan.certify", "file": "Solidity/Frontend/Source.lean", "line": 313, "module": "Solidity.Frontend.Source", "note": "certifies scan against compiler code", "stage": "admission"}], "current": "partial", "decision": null, "id": "typeValidation", "missing": ["Provenance records solc analysis but does not authenticate it (source-admission.md)", "No theorem that admission implies layout side conditions (R15/R16)"], "owners": {"admission": ["G13", "G15"], "backend": [], "evm": [], "lowering": [], "source": ["S01"], "theorem": ["G48"]}, "reasons": {"backend": "static checking only", "evm": "static checking only", "lowering": "static checking, carried by G13/G15"}, "restrictions": ["R15", "R16"], "scope": "model", "uncovered": ["source", "theorem"]},
-  {"category": "semantics", "contracts": ["Admission", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.Admission.scan", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 418, "module": "Solidity.Frontend.SolcJson.Admission", "note": "whole-AST feature scan", "stage": "admission"}, {"decl": "Solidity.Frontend.Admission.declarationClosure", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 396, "module": "Solidity.Frontend.SolcJson.Admission", "note": "features from reachable declarations", "stage": "admission"}, {"decl": "Solidity.Frontend.Admission.nodeFeatures", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 116, "module": "Solidity.Frontend.SolcJson.Admission", "note": "per-node feature table, unknown nodes rejected", "stage": "admission"}, {"decl": "Solidity.Frontend.Admission.builtinFeatures", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 87, "module": "Solidity.Frontend.SolcJson.Admission", "note": "features of builtin uses", "stage": "admission"}], "current": "partial", "decision": null, "id": "featureDetection", "missing": ["No theorem that scan covers initializers/modifiers/inherited bodies/specs", "Payment dispatch via inherited receive/fallback still refused"], "owners": {"admission": ["G15"], "backend": [], "evm": [], "lowering": [], "source": ["S05"], "theorem": ["G48", "G49.03"]}, "reasons": {"backend": "admission classification only", "evm": "admission classification only", "lowering": "admission classification only (G15)"}, "restrictions": [], "scope": "model", "uncovered": ["source", "theorem"]},
+  {"category": "semantics", "contracts": ["Admission", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.Admission.scan", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 425, "module": "Solidity.Frontend.SolcJson.Admission", "note": "whole-AST feature scan", "stage": "admission"}, {"decl": "Solidity.Frontend.Admission.declarationClosure", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 403, "module": "Solidity.Frontend.SolcJson.Admission", "note": "features from reachable declarations", "stage": "admission"}, {"decl": "Solidity.Frontend.Admission.nodeFeatures", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 116, "module": "Solidity.Frontend.SolcJson.Admission", "note": "per-node feature table, unknown nodes rejected", "stage": "admission"}, {"decl": "Solidity.Frontend.Admission.builtinFeatures", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 87, "module": "Solidity.Frontend.SolcJson.Admission", "note": "features of builtin uses", "stage": "admission"}], "current": "partial", "decision": null, "id": "featureDetection", "missing": ["No theorem that scan covers initializers/modifiers/inherited bodies/specs", "Payment dispatch via inherited receive/fallback still refused"], "owners": {"admission": ["G15"], "backend": [], "evm": [], "lowering": [], "source": ["S05"], "theorem": ["G48", "G49.03"]}, "reasons": {"backend": "admission classification only", "evm": "admission classification only", "lowering": "admission classification only (G15)"}, "restrictions": [], "scope": "model", "uncovered": ["source", "theorem"]},
   {"category": "metadata", "contracts": ["Admission", "Lowering", "Compilation", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.Source.readCompilerCode", "file": "Solidity/Frontend/Source.lean", "line": 360, "module": "Solidity.Frontend.Source", "note": "reads bound, linked code artifacts with provenance", "stage": "admission"}, {"decl": "Solidity.Frontend.Source.ScopeScan.requireCompilerCode", "file": "Solidity/Frontend/Source.lean", "line": 287, "module": "Solidity.Frontend.Source", "note": "requires matching artifact", "stage": "admission"}, {"decl": "Solidity.Frontend.staticCompilerBytes?", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1203, "module": "Solidity.Frontend.SolcJson.Body", "note": "static creationCode bytes", "stage": "lowering"}, {"decl": "Solidity.Frontend.staticCompilerLength_agrees", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1197, "module": "Solidity.Frontend.SolcJson.Body", "note": "folded length matches emitted bytes", "stage": "lowering"}], "current": "partial", "decision": null, "id": "creationCode", "missing": ["Deployed account code, unresolved linking, oversized materialization unsupported", "Schema-2 artifact inputs unfinished; no compiler-correctness link (R05)"], "owners": {"admission": ["G13", "G15"], "backend": ["G44.02"], "evm": ["G46.02", "G47"], "lowering": ["G23"], "source": ["S04.02"], "theorem": ["G48", "G49.02", "G50.01"]}, "reasons": {}, "restrictions": ["R05"], "scope": "model", "uncovered": ["source", "backend", "evm", "theorem"]},
   {"category": "metadata", "contracts": ["Admission", "Lowering", "Compilation", "PublicCorrectness"], "cover": [{"decl": "Solidity.Frontend.Source.readCompilerCode", "file": "Solidity/Frontend/Source.lean", "line": 360, "module": "Solidity.Frontend.Source", "note": "runtime artifact with provenance", "stage": "admission"}, {"decl": "Solidity.Frontend.staticCompilerBytes?", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1203, "module": "Solidity.Frontend.SolcJson.Body", "note": "static runtimeCode bytes", "stage": "lowering"}, {"decl": "Solidity.Frontend.staticCompilerLength_agrees", "file": "Solidity/Frontend/SolcJson/Body.lean", "line": 1197, "module": "Solidity.Frontend.SolcJson.Body", "note": "length agreement", "stage": "lowering"}], "current": "partial", "decision": null, "id": "runtimeCode", "missing": ["Same gaps as creationCode; immutables are not reflected in runtime bytes", "No link between the artifact and the verified machine (R05)"], "owners": {"admission": ["G13", "G15"], "backend": ["G44.02"], "evm": ["G46.02", "G47"], "lowering": ["G23"], "source": ["S04.02"], "theorem": ["G48", "G49.02", "G50.01"]}, "reasons": {}, "restrictions": ["R05"], "scope": "model", "uncovered": ["source", "backend", "evm", "theorem"]},
   {"category": "storage", "contracts": ["Lowering", "Compilation", "Execution", "PublicCorrectness", "SpecTransfer"], "cover": [{"decl": "Solidity.Frontend.Admission.validateNode", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 264, "module": "Solidity.Frontend.SolcJson.Admission", "note": "validates StorageLayoutSpecifier base expressions", "stage": "admission"}, {"decl": "Solidity.Frontend.Admission.nodeFeatures", "file": "Solidity/Frontend/SolcJson/Admission.lean", "line": 116, "module": "Solidity.Frontend.SolcJson.Admission", "note": "maps layout specifier to logicalStorageBase feature", "stage": "admission"}, {"decl": "Solidity.Storage.RegionRoot.persistent_write", "file": "Solidity/Semantics/Storage/Anon.lean", "line": 425, "module": "Solidity.Semantics.Storage.Anon", "note": "persistent writes leave the transient region", "stage": "source"}, {"decl": "Solidity.ERC7201.root_aligned", "file": "Solidity/ERC7201.lean", "line": 31, "module": "Solidity.ERC7201", "note": "ERC-7201 namespace root alignment", "stage": "source"}], "current": "partial", "decision": null, "id": "logicalStorageBase", "missing": ["Base has no numeric slot effect; raw slots, offsets, packing excluded", "No compiler theorem relating a base to EVM slot numbers (R34)"], "owners": {"admission": ["G09", "G13", "G15"], "backend": ["G27.05"], "evm": ["G46.03"], "lowering": ["G18.02"], "source": ["S04.01"], "theorem": ["G48", "G49.01", "G49.02", "G51.01"]}, "reasons": {}, "restrictions": ["R34"], "scope": "model", "uncovered": ["lowering", "backend", "evm", "theorem"]},
-  {"category": "upstream", "contracts": ["Admission", "Lowering", "Compilation", "Execution", "PublicCorrectness"], "cover": [], "current": "notApplicable", "decision": "G00 Q6 (full fixed-point support beyond pinned solc); the manifest still scopes it `upstream` until the g00-manifest-rev change lands", "id": "fixedPoint", "missing": ["no lexer, type, semantics, lowering or compiler support (decision D07)", "until the manifest change lands, G15 must still refuse it as `upstream`", "no reference semantics beyond solc 0.8.38's acceptance boundary", "manifest scope is still `upstream`"], "owners": {"admission": ["G08", "G09", "G13", "G15"], "backend": ["G25", "G27.01", "G35.03", "G40", "G41"], "evm": ["G46.01", "G46.02", "G46.03"], "lowering": ["G16", "G18.02", "G21"], "source": ["S00", "S01", "S02", "S04.01", "S04.02"], "theorem": ["G48", "G49.02", "G49.03"]}, "reasons": {}, "restrictions": [], "scope": "upstream", "uncovered": ["source", "admission", "lowering", "backend", "evm", "theorem"]}
+  {"category": "types", "contracts": ["Admission", "Lowering", "Compilation", "Execution", "PublicCorrectness"], "cover": [], "current": "missing", "decision": "G00 Q6 (full fixed-point support beyond pinned solc); the manifest still scopes it `upstream` until the g00-manifest-rev change lands", "id": "fixedPoint", "missing": ["no lexer, type, semantics, lowering or compiler support (decision D07)", "until the manifest change lands, G15 must still refuse it as `upstream`", "no reference semantics beyond solc 0.8.38's acceptance boundary", "manifest scope is still `upstream`"], "owners": {"admission": ["G08", "G09", "G10", "G11", "G12", "G13", "G14", "G15"], "backend": ["G24.01", "G24.02", "G24.03", "G24.04", "G25", "G26", "G27.01", "G27.02", "G27.03", "G27.04", "G27.05", "G28", "G29.01", "G29.02", "G29.03", "G30", "G31", "G32", "G33", "G34", "G35.01", "G35.02", "G35.03", "G35.04", "G35.05", "G35.06", "G36.01", "G36.02", "G36.03", "G37.01", "G37.02", "G37.03", "G38", "G39", "G40", "G41", "G42.01", "G42.02", "G42.03", "G42.04", "G42.05", "G42.06", "G43", "G44.01", "G44.02", "G44.03", "G45.01", "G45.02", "G45.03", "G45.04", "G45.05", "G45.06"], "evm": ["G46.01", "G46.02", "G46.03", "G46.04", "G46.05", "G46.06", "G47"], "lowering": ["G16", "G17", "G18.01", "G18.02", "G18.03", "G18.04", "G18.05", "G18.06", "G19", "G20", "G21", "G22.01", "G22.02", "G22.03", "G22.04", "G22.05", "G23"], "source": ["S00", "S01", "S02"], "theorem": ["G48", "G49.02", "G49.03"]}, "reasons": {}, "restrictions": [], "scope": "model", "uncovered": ["source", "admission", "lowering", "backend", "evm", "theorem"]}
  ],
  "combinations": [
   {"cover": [], "derivedOwners": {"evm": ["G47"], "theorem": ["G48", "G49.02", "G50.02", "G51.02"]}, "in": ["callOptions", "valueOption"], "key": "`f{value:v,gas:g}(…)`", "missing": ["refuse exactly the `gas` part while `{value:}` on typed calls is admitted; `ExtCall` has no value field"], "out": ["gasOption"], "owners": {"admission": ["G10", "G15"], "backend": ["G43"], "lowering": ["G22.01"], "source": ["S00"]}, "restrictions": ["R06"], "source": "G00"},
@@ -223,31 +223,28 @@
   {"cover": [], "derivedOwners": {}, "in": ["newContract", "creationTry", "valueOption", "constructorLifetime", "rollback"], "key": "payable creation and failed-constructor rollback", "missing": ["creation through ContractWorld fragments only; no compiled initcode"], "out": [], "owners": {"admission": ["G15"], "backend": ["G43", "G44.03"], "evm": ["G47"], "lowering": ["G22.03"], "source": ["S04.04"], "theorem": ["G50.01"]}, "restrictions": [], "source": "G03"}
  ],
  "symbolCombinations": [
-  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "assemblyFlags"},
-  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "assemblyStatement"},
+  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "assemblyFlags"},
+  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "assemblyStatement"},
   {"in": ["assignment", "compoundAssignment"], "kind": "parserRules", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "assignOp"},
-  {"in": ["contracts", "inheritance", "logicalStorageBase"], "kind": "parserRules", "other": ["storageLayout"], "owners": ["G15", "G09", "G11", "G13", "G14"], "status": "combination-unresolved", "symbol": "contractDefinition"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "parserRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "elementaryTypeName"},
-  {"in": ["eventDeclarations"], "kind": "parserRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-unresolved", "symbol": "eventDefinition"},
-  {"in": ["eventDeclarations"], "kind": "parserRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-unresolved", "symbol": "eventParameter"},
-  {"in": ["fallbackFunction"], "kind": "parserRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G14"], "status": "combination-unresolved", "symbol": "fallbackFunctionDefinition"},
+  {"in": ["contracts", "inheritance", "logicalStorageBase"], "kind": "parserRules", "other": ["storageLayout"], "owners": ["G15", "G09", "G11", "G13", "G14"], "status": "combination-excluded", "symbol": "contractDefinition"},
+  {"in": ["eventDeclarations"], "kind": "parserRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-excluded", "symbol": "eventDefinition"},
+  {"in": ["eventDeclarations"], "kind": "parserRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-excluded", "symbol": "eventParameter"},
+  {"in": ["fallbackFunction"], "kind": "parserRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G14"], "status": "combination-excluded", "symbol": "fallbackFunctionDefinition"},
   {"in": ["etherUnits", "timeUnits"], "kind": "parserRules", "other": ["removedUnits"], "owners": ["G15", "G08"], "status": "combination-upstream", "symbol": "literalWithSubDenomination"},
   {"in": ["modifierPlaceholder", "modifiers"], "kind": "parserRules", "other": ["invalidModifierBody"], "owners": ["G15", "G11", "G14"], "status": "combination-upstream", "symbol": "modifierDefinition"},
-  {"in": ["addressTypes", "dynamicArrays", "dynamicBytesType", "enumTypes", "externalFunctionTypes", "fixedArrays", "fixedBytesTypes", "integerTypes", "internalFunctionTypes", "mappings", "stringType", "structTypes", "valueTypes"], "kind": "parserRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "typeName"},
-  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "yulBlock"},
-  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "yulExpression"},
-  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "yulFunctionCall"},
-  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "yulLiteral"},
-  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "yulPath"},
-  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "yulStatement"},
-  {"in": ["callOptions", "valueOption"], "kind": "expressionAlternatives", "other": ["create2Salt", "gasOption"], "owners": ["G15", "G10", "G13"], "status": "combination-unresolved", "symbol": "FunctionCallOptions"},
-  {"in": ["newContract", "newMemory"], "kind": "expressionAlternatives", "other": ["create2Salt"], "owners": ["G15", "G10", "G13"], "status": "combination-unresolved", "symbol": "NewExpr"},
+  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "yulBlock"},
+  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "yulExpression"},
+  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "yulFunctionCall"},
+  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "yulLiteral"},
+  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "yulPath"},
+  {"in": ["canonicalRethrow"], "kind": "parserRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "yulStatement"},
+  {"in": ["callOptions", "valueOption"], "kind": "expressionAlternatives", "other": ["create2Salt", "gasOption"], "owners": ["G15", "G10", "G13"], "status": "combination-excluded", "symbol": "FunctionCallOptions"},
+  {"in": ["newContract", "newMemory"], "kind": "expressionAlternatives", "other": ["create2Salt"], "owners": ["G15", "G10", "G13"], "status": "combination-excluded", "symbol": "NewExpr"},
   {"in": ["shifts"], "kind": "expressionAlternatives", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "ShiftOperation"},
-  {"in": ["contracts", "inheritance"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G11", "G14"], "status": "combination-unresolved", "symbol": "Abstract"},
-  {"in": ["addressTypes", "arithmetic", "assignment", "boolType", "conditional", "dynamicBytesType", "fixedBytesTypes", "functionCalls", "integerTypes", "shortCircuit", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G10", "G13"], "status": "combination-upstream", "symbol": "Address"},
-  {"in": ["eventDeclarations"], "kind": "lexerRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-unresolved", "symbol": "Anonymous"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "Assembly"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "AssemblyLBrace"},
+  {"in": ["contracts", "inheritance"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G11", "G14"], "status": "combination-excluded", "symbol": "Abstract"},
+  {"in": ["eventDeclarations"], "kind": "lexerRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-excluded", "symbol": "Anonymous"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "Assembly"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "AssemblyLBrace"},
   {"in": ["assignment", "compoundAssignment", "constants", "immutables", "stateVariables", "transientState", "tupleExpressions", "variableDeclarations"], "kind": "lexerRules", "other": ["unsignedRightShift"], "owners": ["G15", "G09", "G10", "G11", "G13"], "status": "combination-upstream", "symbol": "Assign"},
   {"in": ["assignment", "compoundAssignment"], "kind": "lexerRules", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignAdd"},
   {"in": ["assignment", "compoundAssignment"], "kind": "lexerRules", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignBitAnd"},
@@ -257,62 +254,48 @@
   {"in": ["assignment", "compoundAssignment"], "kind": "lexerRules", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignMod"},
   {"in": ["assignment", "compoundAssignment"], "kind": "lexerRules", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignMul"},
   {"in": ["assignment", "compoundAssignment"], "kind": "lexerRules", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignSub"},
-  {"in": ["contracts", "identifiers", "inheritance", "logicalStorageBase", "names"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G08", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "At"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "Bool"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "Bytes"},
-  {"in": ["arithmetic", "assignment", "calldataLocation", "conditional", "constructors", "enumDeclarations", "errorDeclarations", "eventDeclarations", "functionCalls", "functions", "imports", "inheritance", "inlineArrays", "memoryLocation", "namedArguments", "operatorAliases", "overrideDeclarations", "shortCircuit", "storageLocation", "tupleExpressions", "tupleTypes", "usingFor", "variableDeclarations"], "kind": "lexerRules", "other": ["eventLog"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Comma"},
-  {"in": ["contracts", "inheritance"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G11", "G14"], "status": "combination-unresolved", "symbol": "Contract"},
-  {"in": ["eventDeclarations"], "kind": "lexerRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-unresolved", "symbol": "Event"},
-  {"in": ["fallbackFunction", "receiveFunction", "visibility"], "kind": "lexerRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G14"], "status": "combination-unresolved", "symbol": "External"},
-  {"in": ["fallbackFunction", "freeFunctions", "functions"], "kind": "lexerRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Fallback"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "Fixed"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "FixedBytes"},
-  {"in": ["eventDeclarations"], "kind": "lexerRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-unresolved", "symbol": "Indexed"},
-  {"in": ["arithmetic", "assignment", "blocks", "conditional", "contracts", "enumDeclarations", "functionCalls", "imports", "inheritance", "interfaces", "libraries", "namedArguments", "operatorAliases", "shortCircuit", "structDeclarations", "usingFor"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "LBrace"},
-  {"in": ["addressTypes", "arithmetic", "assignment", "conditional", "dynamicArrays", "dynamicBytesType", "enumTypes", "externalFunctionTypes", "fixedArrays", "fixedBytesTypes", "functionCalls", "inlineArrays", "integerTypes", "internalFunctionTypes", "mappings", "shortCircuit", "stringType", "structTypes", "valueTypes"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G10", "G13"], "status": "combination-upstream", "symbol": "LBrack"},
-  {"in": ["arithmetic", "assignment", "catchClauses", "conditional", "constructors", "creationTry", "doWhileStatement", "errorDeclarations", "eventDeclarations", "externalFunctionTypes", "fallbackFunction", "forStatement", "freeFunctions", "functionCalls", "functions", "ifStatement", "internalFunctionTypes", "mappings", "modifierPlaceholder", "modifiers", "namedArguments", "overrideDeclarations", "receiveFunction", "shortCircuit", "tryStatement", "tupleExpressions", "variableDeclarations", "whileStatement"], "kind": "lexerRules", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "LParen"},
-  {"in": ["contracts", "identifiers", "inheritance", "logicalStorageBase", "names"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G08", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Layout"},
-  {"in": ["addressTypes", "arithmetic", "assignment", "boolType", "conditional", "constructors", "dynamicBytesType", "fixedBytesTypes", "functionCalls", "integerTypes", "receiveFunction", "shortCircuit", "stateMutability", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G10", "G11", "G13", "G14"], "status": "combination-upstream", "symbol": "Payable"},
-  {"in": ["arithmetic", "assignment", "blocks", "conditional", "contracts", "enumDeclarations", "functionCalls", "imports", "inheritance", "interfaces", "libraries", "namedArguments", "operatorAliases", "shortCircuit", "structDeclarations", "usingFor"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "RBrace"},
-  {"in": ["addressTypes", "arithmetic", "assignment", "conditional", "dynamicArrays", "dynamicBytesType", "enumTypes", "externalFunctionTypes", "fixedArrays", "fixedBytesTypes", "functionCalls", "inlineArrays", "integerTypes", "internalFunctionTypes", "mappings", "shortCircuit", "stringType", "structTypes", "valueTypes"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G10", "G13"], "status": "combination-upstream", "symbol": "RBrack"},
-  {"in": ["arithmetic", "assignment", "catchClauses", "conditional", "constructors", "creationTry", "doWhileStatement", "errorDeclarations", "eventDeclarations", "externalFunctionTypes", "fallbackFunction", "forStatement", "freeFunctions", "functionCalls", "functions", "ifStatement", "internalFunctionTypes", "mappings", "modifierPlaceholder", "modifiers", "namedArguments", "overrideDeclarations", "receiveFunction", "shortCircuit", "tryStatement", "tupleExpressions", "variableDeclarations", "whileStatement"], "kind": "lexerRules", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "RParen"},
-  {"in": ["creationTry", "externalFunctionTypes", "fallbackFunction", "freeFunctions", "functions", "internalFunctionTypes", "tryStatement"], "kind": "lexerRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Returns"},
-  {"in": ["breakStatement", "constants", "continueStatement", "doWhileStatement", "emitStatement", "errorDeclarations", "eventDeclarations", "expressionStatements", "fallbackFunction", "forStatement", "freeFunctions", "functions", "immutables", "imports", "modifierPlaceholder", "modifiers", "operatorAliases", "receiveFunction", "returnStatement", "revertStatement", "stateVariables", "structDeclarations", "transientState", "tupleExpressions", "usingFor", "valueTypeDeclarations", "variableDeclarations"], "kind": "lexerRules", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Semicolon"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "SignedIntegerType"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "String"},
+  {"in": ["contracts", "identifiers", "inheritance", "logicalStorageBase", "names"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G08", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "At"},
+  {"in": ["arithmetic", "assignment", "calldataLocation", "conditional", "constructors", "enumDeclarations", "errorDeclarations", "eventDeclarations", "functionCalls", "functions", "imports", "inheritance", "inlineArrays", "memoryLocation", "namedArguments", "operatorAliases", "overrideDeclarations", "shortCircuit", "storageLocation", "tupleExpressions", "tupleTypes", "usingFor", "variableDeclarations"], "kind": "lexerRules", "other": ["eventLog"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Comma"},
+  {"in": ["contracts", "inheritance"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G11", "G14"], "status": "combination-excluded", "symbol": "Contract"},
+  {"in": ["eventDeclarations"], "kind": "lexerRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-excluded", "symbol": "Event"},
+  {"in": ["fallbackFunction", "receiveFunction", "visibility"], "kind": "lexerRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G14"], "status": "combination-excluded", "symbol": "External"},
+  {"in": ["fallbackFunction", "freeFunctions", "functions"], "kind": "lexerRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Fallback"},
+  {"in": ["eventDeclarations"], "kind": "lexerRules", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-excluded", "symbol": "Indexed"},
+  {"in": ["arithmetic", "assignment", "blocks", "conditional", "contracts", "enumDeclarations", "functionCalls", "imports", "inheritance", "interfaces", "libraries", "namedArguments", "operatorAliases", "shortCircuit", "structDeclarations", "usingFor"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "LBrace"},
+  {"in": ["arithmetic", "assignment", "catchClauses", "conditional", "constructors", "creationTry", "doWhileStatement", "errorDeclarations", "eventDeclarations", "externalFunctionTypes", "fallbackFunction", "forStatement", "freeFunctions", "functionCalls", "functions", "ifStatement", "internalFunctionTypes", "mappings", "modifierPlaceholder", "modifiers", "namedArguments", "overrideDeclarations", "receiveFunction", "shortCircuit", "tryStatement", "tupleExpressions", "variableDeclarations", "whileStatement"], "kind": "lexerRules", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "LParen"},
+  {"in": ["contracts", "identifiers", "inheritance", "logicalStorageBase", "names"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G08", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Layout"},
+  {"in": ["arithmetic", "assignment", "blocks", "conditional", "contracts", "enumDeclarations", "functionCalls", "imports", "inheritance", "interfaces", "libraries", "namedArguments", "operatorAliases", "shortCircuit", "structDeclarations", "usingFor"], "kind": "lexerRules", "other": ["storageLayout"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "RBrace"},
+  {"in": ["arithmetic", "assignment", "catchClauses", "conditional", "constructors", "creationTry", "doWhileStatement", "errorDeclarations", "eventDeclarations", "externalFunctionTypes", "fallbackFunction", "forStatement", "freeFunctions", "functionCalls", "functions", "ifStatement", "internalFunctionTypes", "mappings", "modifierPlaceholder", "modifiers", "namedArguments", "overrideDeclarations", "receiveFunction", "shortCircuit", "tryStatement", "tupleExpressions", "variableDeclarations", "whileStatement"], "kind": "lexerRules", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "RParen"},
+  {"in": ["creationTry", "externalFunctionTypes", "fallbackFunction", "freeFunctions", "functions", "internalFunctionTypes", "tryStatement"], "kind": "lexerRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Returns"},
+  {"in": ["breakStatement", "constants", "continueStatement", "doWhileStatement", "emitStatement", "errorDeclarations", "eventDeclarations", "expressionStatements", "fallbackFunction", "forStatement", "freeFunctions", "functions", "immutables", "imports", "modifierPlaceholder", "modifiers", "operatorAliases", "receiveFunction", "returnStatement", "revertStatement", "stateVariables", "structDeclarations", "transientState", "tupleExpressions", "usingFor", "valueTypeDeclarations", "variableDeclarations"], "kind": "lexerRules", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Semicolon"},
   {"in": ["etherUnits", "timeUnits"], "kind": "lexerRules", "other": ["removedUnits"], "owners": ["G15", "G08"], "status": "combination-upstream", "symbol": "SubDenomination"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "Ufixed"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "lexerRules", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "UnsignedIntegerType"},
-  {"in": ["fallbackFunction", "freeFunctions", "functions", "modifierPlaceholder", "modifiers", "receiveFunction"], "kind": "lexerRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Virtual"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "YulComma"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "YulDecimalNumber"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "YulEVMBuiltin"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "YulIdentifier"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "YulLParen"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "YulRBrace"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "YulRParen"},
-  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "YulWS"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "astClasses", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "ElementaryTypeName"},
-  {"in": ["callOptions", "valueOption"], "kind": "astClasses", "other": ["create2Salt", "gasOption"], "owners": ["G15", "G10", "G13"], "status": "combination-unresolved", "symbol": "FunctionCallOptions"},
-  {"in": ["canonicalRethrow"], "kind": "astClasses", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "InlineAssembly"},
+  {"in": ["fallbackFunction", "freeFunctions", "functions", "modifierPlaceholder", "modifiers", "receiveFunction"], "kind": "lexerRules", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Virtual"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "YulComma"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "YulDecimalNumber"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "YulEVMBuiltin"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "YulIdentifier"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "YulLParen"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "YulRBrace"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "YulRParen"},
+  {"in": ["canonicalRethrow"], "kind": "lexerRules", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "YulWS"},
+  {"in": ["callOptions", "valueOption"], "kind": "astClasses", "other": ["create2Salt", "gasOption"], "owners": ["G15", "G10", "G13"], "status": "combination-excluded", "symbol": "FunctionCallOptions"},
+  {"in": ["canonicalRethrow"], "kind": "astClasses", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "InlineAssembly"},
   {"in": ["addressLiterals", "booleanLiterals", "etherUnits", "hexLiterals", "numericLiterals", "stringLiterals", "timeUnits", "unicodeLiterals"], "kind": "astClasses", "other": ["removedUnits"], "owners": ["G15", "G08"], "status": "combination-upstream", "symbol": "Literal"},
   {"in": ["modifiers"], "kind": "astClasses", "other": ["invalidModifierBody"], "owners": ["G15", "G11", "G14"], "status": "combination-upstream", "symbol": "ModifierDefinition"},
   {"in": ["modifierPlaceholder"], "kind": "astClasses", "other": ["invalidModifierBody"], "owners": ["G15", "G11"], "status": "combination-upstream", "symbol": "PlaceholderStatement"},
-  {"in": ["logicalStorageBase"], "kind": "astClasses", "other": ["storageLayout"], "owners": ["G15", "G09", "G13"], "status": "combination-unresolved", "symbol": "StorageLayoutSpecifier"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "astClasses", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "TypeName"},
-  {"in": ["emptyDataValueCall"], "kind": "functionKinds", "other": ["lowLevelCall"], "owners": ["G15", "G10", "G13"], "status": "combination-unresolved", "symbol": "BareCall"},
-  {"in": ["creationTry", "newContract"], "kind": "functionKinds", "other": ["create2Salt"], "owners": ["G15", "G10", "G11", "G13"], "status": "combination-unresolved", "symbol": "Creation"},
-  {"in": ["emitStatement"], "kind": "functionKinds", "other": ["eventLog"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "Event"},
+  {"in": ["logicalStorageBase"], "kind": "astClasses", "other": ["storageLayout"], "owners": ["G15", "G09", "G13"], "status": "combination-excluded", "symbol": "StorageLayoutSpecifier"},
+  {"in": ["emptyDataValueCall"], "kind": "functionKinds", "other": ["lowLevelCall"], "owners": ["G15", "G10", "G13"], "status": "combination-excluded", "symbol": "BareCall"},
+  {"in": ["creationTry", "newContract"], "kind": "functionKinds", "other": ["create2Salt"], "owners": ["G15", "G10", "G11", "G13"], "status": "combination-excluded", "symbol": "Creation"},
+  {"in": ["emitStatement"], "kind": "functionKinds", "other": ["eventLog"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "Event"},
   {"in": ["valueOption"], "kind": "functionKinds", "other": ["removedAliases"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "SetValue"},
-  {"in": ["blockTimestamp"], "kind": "globalNames", "other": ["blockBasefee", "blockBlobbasefee", "blockChainid", "blockCoinbase", "blockDifficulty", "blockGaslimit", "blockNumber", "blockPrevrandao", "blockSlotnum"], "owners": ["G15", "G10", "G13"], "status": "combination-unresolved", "symbol": "block"},
-  {"in": ["msgSender", "msgValue"], "kind": "globalNames", "other": ["rawCalldata"], "owners": ["G15", "G10", "G13"], "status": "combination-unresolved", "symbol": "msg"},
-  {"in": ["canonicalRethrow"], "kind": "yulBuiltins", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "add"},
-  {"in": ["canonicalRethrow"], "kind": "yulBuiltins", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "mload"},
-  {"in": ["canonicalRethrow"], "kind": "yulBuiltins", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "revert"},
-  {"in": ["contracts", "inheritance"], "kind": "compilerTokens", "other": ["storageLayout"], "owners": ["G15", "G11", "G14"], "status": "combination-unresolved", "symbol": "Abstract"},
-  {"in": ["addressTypes", "arithmetic", "assignment", "boolType", "conditional", "dynamicBytesType", "fixedBytesTypes", "functionCalls", "integerTypes", "shortCircuit", "stringType"], "kind": "compilerTokens", "other": ["fixedPoint"], "owners": ["G15", "G09", "G10", "G13"], "status": "combination-upstream", "symbol": "Address"},
-  {"in": ["eventDeclarations"], "kind": "compilerTokens", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-unresolved", "symbol": "Anonymous"},
-  {"in": ["canonicalRethrow"], "kind": "compilerTokens", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-unresolved", "symbol": "Assembly"},
+  {"in": ["blockTimestamp"], "kind": "globalNames", "other": ["blockBasefee", "blockBlobbasefee", "blockChainid", "blockCoinbase", "blockDifficulty", "blockGaslimit", "blockNumber", "blockPrevrandao", "blockSlotnum"], "owners": ["G15", "G10", "G13"], "status": "combination-excluded", "symbol": "block"},
+  {"in": ["msgSender", "msgValue"], "kind": "globalNames", "other": ["rawCalldata"], "owners": ["G15", "G10", "G13"], "status": "combination-excluded", "symbol": "msg"},
+  {"in": ["canonicalRethrow"], "kind": "yulBuiltins", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "add"},
+  {"in": ["canonicalRethrow"], "kind": "yulBuiltins", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "mload"},
+  {"in": ["canonicalRethrow"], "kind": "yulBuiltins", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "revert"},
+  {"in": ["contracts", "inheritance"], "kind": "compilerTokens", "other": ["storageLayout"], "owners": ["G15", "G11", "G14"], "status": "combination-excluded", "symbol": "Abstract"},
+  {"in": ["eventDeclarations"], "kind": "compilerTokens", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-excluded", "symbol": "Anonymous"},
+  {"in": ["canonicalRethrow"], "kind": "compilerTokens", "other": ["inlineAssembly"], "owners": ["G15", "G11"], "status": "combination-excluded", "symbol": "Assembly"},
   {"in": ["assignment", "compoundAssignment", "constants", "immutables", "stateVariables", "transientState", "tupleExpressions", "variableDeclarations"], "kind": "compilerTokens", "other": ["unsignedRightShift"], "owners": ["G15", "G09", "G10", "G11", "G13"], "status": "combination-upstream", "symbol": "Assign"},
   {"in": ["assignment", "compoundAssignment"], "kind": "compilerTokens", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignAdd"},
   {"in": ["assignment", "compoundAssignment"], "kind": "compilerTokens", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignBitAnd"},
@@ -322,28 +305,21 @@
   {"in": ["assignment", "compoundAssignment"], "kind": "compilerTokens", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignMod"},
   {"in": ["assignment", "compoundAssignment"], "kind": "compilerTokens", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignMul"},
   {"in": ["assignment", "compoundAssignment"], "kind": "compilerTokens", "other": ["unsignedRightShift"], "owners": ["G15", "G10", "G13"], "status": "combination-upstream", "symbol": "AssignSub"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "compilerTokens", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "Bool"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "compilerTokens", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "Bytes"},
-  {"in": ["arithmetic", "assignment", "calldataLocation", "conditional", "constructors", "enumDeclarations", "errorDeclarations", "eventDeclarations", "functionCalls", "functions", "imports", "inheritance", "inlineArrays", "memoryLocation", "namedArguments", "operatorAliases", "overrideDeclarations", "shortCircuit", "storageLocation", "tupleExpressions", "tupleTypes", "usingFor", "variableDeclarations"], "kind": "compilerTokens", "other": ["eventLog"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Comma"},
-  {"in": ["contracts", "inheritance"], "kind": "compilerTokens", "other": ["storageLayout"], "owners": ["G15", "G11", "G14"], "status": "combination-unresolved", "symbol": "Contract"},
-  {"in": ["eventDeclarations"], "kind": "compilerTokens", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-unresolved", "symbol": "Event"},
-  {"in": ["fallbackFunction", "receiveFunction", "visibility"], "kind": "compilerTokens", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G14"], "status": "combination-unresolved", "symbol": "External"},
-  {"in": ["fallbackFunction", "freeFunctions", "functions"], "kind": "compilerTokens", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Fallback"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "compilerTokens", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "Fixed"},
-  {"in": ["eventDeclarations"], "kind": "compilerTokens", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-unresolved", "symbol": "Indexed"},
-  {"in": ["arithmetic", "assignment", "blocks", "conditional", "contracts", "enumDeclarations", "functionCalls", "imports", "inheritance", "interfaces", "libraries", "namedArguments", "operatorAliases", "shortCircuit", "structDeclarations", "usingFor"], "kind": "compilerTokens", "other": ["storageLayout"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "LBrace"},
-  {"in": ["addressTypes", "arithmetic", "assignment", "conditional", "dynamicArrays", "dynamicBytesType", "enumTypes", "externalFunctionTypes", "fixedArrays", "fixedBytesTypes", "functionCalls", "inlineArrays", "integerTypes", "internalFunctionTypes", "mappings", "shortCircuit", "stringType", "structTypes", "valueTypes"], "kind": "compilerTokens", "other": ["fixedPoint"], "owners": ["G15", "G09", "G10", "G13"], "status": "combination-upstream", "symbol": "LBrack"},
-  {"in": ["arithmetic", "assignment", "catchClauses", "conditional", "constructors", "creationTry", "doWhileStatement", "errorDeclarations", "eventDeclarations", "externalFunctionTypes", "fallbackFunction", "forStatement", "freeFunctions", "functionCalls", "functions", "ifStatement", "internalFunctionTypes", "mappings", "modifierPlaceholder", "modifiers", "namedArguments", "overrideDeclarations", "receiveFunction", "shortCircuit", "tryStatement", "tupleExpressions", "variableDeclarations", "whileStatement"], "kind": "compilerTokens", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "LParen"},
-  {"in": ["addressTypes", "arithmetic", "assignment", "boolType", "conditional", "constructors", "dynamicBytesType", "fixedBytesTypes", "functionCalls", "integerTypes", "receiveFunction", "shortCircuit", "stateMutability", "stringType"], "kind": "compilerTokens", "other": ["fixedPoint"], "owners": ["G15", "G09", "G10", "G11", "G13", "G14"], "status": "combination-upstream", "symbol": "Payable"},
-  {"in": ["arithmetic", "assignment", "blocks", "conditional", "contracts", "enumDeclarations", "functionCalls", "imports", "inheritance", "interfaces", "libraries", "namedArguments", "operatorAliases", "shortCircuit", "structDeclarations", "usingFor"], "kind": "compilerTokens", "other": ["storageLayout"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "RBrace"},
-  {"in": ["addressTypes", "arithmetic", "assignment", "conditional", "dynamicArrays", "dynamicBytesType", "enumTypes", "externalFunctionTypes", "fixedArrays", "fixedBytesTypes", "functionCalls", "inlineArrays", "integerTypes", "internalFunctionTypes", "mappings", "shortCircuit", "stringType", "structTypes", "valueTypes"], "kind": "compilerTokens", "other": ["fixedPoint"], "owners": ["G15", "G09", "G10", "G13"], "status": "combination-upstream", "symbol": "RBrack"},
-  {"in": ["arithmetic", "assignment", "catchClauses", "conditional", "constructors", "creationTry", "doWhileStatement", "errorDeclarations", "eventDeclarations", "externalFunctionTypes", "fallbackFunction", "forStatement", "freeFunctions", "functionCalls", "functions", "ifStatement", "internalFunctionTypes", "mappings", "modifierPlaceholder", "modifiers", "namedArguments", "overrideDeclarations", "receiveFunction", "shortCircuit", "tryStatement", "tupleExpressions", "variableDeclarations", "whileStatement"], "kind": "compilerTokens", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "RParen"},
-  {"in": ["creationTry", "externalFunctionTypes", "fallbackFunction", "freeFunctions", "functions", "internalFunctionTypes", "tryStatement"], "kind": "compilerTokens", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Returns"},
-  {"in": ["breakStatement", "constants", "continueStatement", "doWhileStatement", "emitStatement", "errorDeclarations", "eventDeclarations", "expressionStatements", "fallbackFunction", "forStatement", "freeFunctions", "functions", "immutables", "imports", "modifierPlaceholder", "modifiers", "operatorAliases", "receiveFunction", "returnStatement", "revertStatement", "stateVariables", "structDeclarations", "transientState", "tupleExpressions", "usingFor", "valueTypeDeclarations", "variableDeclarations"], "kind": "compilerTokens", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Semicolon"},
-  {"in": ["addressTypes", "boolType", "dynamicBytesType", "fixedBytesTypes", "integerTypes", "stringType"], "kind": "compilerTokens", "other": ["fixedPoint"], "owners": ["G15", "G09", "G13"], "status": "combination-upstream", "symbol": "String"},
-  {"in": ["fallbackFunction", "freeFunctions", "functions", "modifierPlaceholder", "modifiers", "receiveFunction"], "kind": "compilerTokens", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G12", "G13", "G14"], "status": "combination-unresolved", "symbol": "Virtual"},
-  {"in": ["emptyDataValueCall"], "kind": "AddressTypeMembers", "other": ["lowLevelCall"], "owners": ["G15", "G10", "G13"], "status": "combination-unresolved", "symbol": "call"},
-  {"in": ["addressBalance", "sendTransfer"], "kind": "nativeMemberOwners", "other": ["addressCode", "addressCodehash", "lowLevelCall", "delegatecall", "lowLevelStaticcall"], "owners": ["G15", "G10", "G13"], "status": "combination-unresolved", "symbol": "AddressType"},
+  {"in": ["arithmetic", "assignment", "calldataLocation", "conditional", "constructors", "enumDeclarations", "errorDeclarations", "eventDeclarations", "functionCalls", "functions", "imports", "inheritance", "inlineArrays", "memoryLocation", "namedArguments", "operatorAliases", "overrideDeclarations", "shortCircuit", "storageLocation", "tupleExpressions", "tupleTypes", "usingFor", "variableDeclarations"], "kind": "compilerTokens", "other": ["eventLog"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Comma"},
+  {"in": ["contracts", "inheritance"], "kind": "compilerTokens", "other": ["storageLayout"], "owners": ["G15", "G11", "G14"], "status": "combination-excluded", "symbol": "Contract"},
+  {"in": ["eventDeclarations"], "kind": "compilerTokens", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-excluded", "symbol": "Event"},
+  {"in": ["fallbackFunction", "receiveFunction", "visibility"], "kind": "compilerTokens", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G14"], "status": "combination-excluded", "symbol": "External"},
+  {"in": ["fallbackFunction", "freeFunctions", "functions"], "kind": "compilerTokens", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Fallback"},
+  {"in": ["eventDeclarations"], "kind": "compilerTokens", "other": ["eventLog"], "owners": ["G15", "G09", "G11"], "status": "combination-excluded", "symbol": "Indexed"},
+  {"in": ["arithmetic", "assignment", "blocks", "conditional", "contracts", "enumDeclarations", "functionCalls", "imports", "inheritance", "interfaces", "libraries", "namedArguments", "operatorAliases", "shortCircuit", "structDeclarations", "usingFor"], "kind": "compilerTokens", "other": ["storageLayout"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "LBrace"},
+  {"in": ["arithmetic", "assignment", "catchClauses", "conditional", "constructors", "creationTry", "doWhileStatement", "errorDeclarations", "eventDeclarations", "externalFunctionTypes", "fallbackFunction", "forStatement", "freeFunctions", "functionCalls", "functions", "ifStatement", "internalFunctionTypes", "mappings", "modifierPlaceholder", "modifiers", "namedArguments", "overrideDeclarations", "receiveFunction", "shortCircuit", "tryStatement", "tupleExpressions", "variableDeclarations", "whileStatement"], "kind": "compilerTokens", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "LParen"},
+  {"in": ["arithmetic", "assignment", "blocks", "conditional", "contracts", "enumDeclarations", "functionCalls", "imports", "inheritance", "interfaces", "libraries", "namedArguments", "operatorAliases", "shortCircuit", "structDeclarations", "usingFor"], "kind": "compilerTokens", "other": ["storageLayout"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "RBrace"},
+  {"in": ["arithmetic", "assignment", "catchClauses", "conditional", "constructors", "creationTry", "doWhileStatement", "errorDeclarations", "eventDeclarations", "externalFunctionTypes", "fallbackFunction", "forStatement", "freeFunctions", "functionCalls", "functions", "ifStatement", "internalFunctionTypes", "mappings", "modifierPlaceholder", "modifiers", "namedArguments", "overrideDeclarations", "receiveFunction", "shortCircuit", "tryStatement", "tupleExpressions", "variableDeclarations", "whileStatement"], "kind": "compilerTokens", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "RParen"},
+  {"in": ["creationTry", "externalFunctionTypes", "fallbackFunction", "freeFunctions", "functions", "internalFunctionTypes", "tryStatement"], "kind": "compilerTokens", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Returns"},
+  {"in": ["breakStatement", "constants", "continueStatement", "doWhileStatement", "emitStatement", "errorDeclarations", "eventDeclarations", "expressionStatements", "fallbackFunction", "forStatement", "freeFunctions", "functions", "immutables", "imports", "modifierPlaceholder", "modifiers", "operatorAliases", "receiveFunction", "returnStatement", "revertStatement", "stateVariables", "structDeclarations", "transientState", "tupleExpressions", "usingFor", "valueTypeDeclarations", "variableDeclarations"], "kind": "compilerTokens", "other": ["eventLog", "rawCalldata", "rawReturndata"], "owners": ["G15", "G09", "G10", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Semicolon"},
+  {"in": ["fallbackFunction", "freeFunctions", "functions", "modifierPlaceholder", "modifiers", "receiveFunction"], "kind": "compilerTokens", "other": ["rawCalldata", "rawReturndata"], "owners": ["G15", "G11", "G12", "G13", "G14"], "status": "combination-excluded", "symbol": "Virtual"},
+  {"in": ["emptyDataValueCall"], "kind": "AddressTypeMembers", "other": ["lowLevelCall"], "owners": ["G15", "G10", "G13"], "status": "combination-excluded", "symbol": "call"},
+  {"in": ["addressBalance", "sendTransfer"], "kind": "nativeMemberOwners", "other": ["addressCode", "addressCodehash", "lowLevelCall", "delegatecall", "lowLevelStaticcall"], "owners": ["G15", "G10", "G13"], "status": "combination-excluded", "symbol": "AddressType"},
   {"in": ["functionSelector", "functionAddress", "errorEventSelector"], "kind": "nativeMemberOwners", "other": ["removedAliases"], "owners": ["G15", "G13"], "status": "combination-upstream", "symbol": "FunctionType"}
  ],
  "decisions": [
@@ -353,7 +329,7 @@
   {"cover": [{"decl": "Solidity.EvalOrder", "file": "Solidity/Syntax/Raw.lean", "line": 392, "module": "Solidity.Syntax.Raw", "note": "the three evaluation-order flags", "stage": "lowering"}, {"decl": "Solidity.EvalOrder.viaIR", "file": "Solidity/Syntax/Raw.lean", "line": 400, "module": "Solidity.Syntax.Raw", "note": "the via-IR combination", "stage": "lowering"}], "decisions": ["G00 Q4 — settings", "G00 Q4 (revised) / G05 Q2 — settings", "Pins (G00, G05, G06)"], "id": "D04", "lanes": "g05-frontend; g01-contracts-rev", "missing": ["the public theorem's settings type must range over exactly the two pipelines and map each to its `EvalOrder` (`{}` for legacy, `EvalOrder.viaIR`); admission must refuse the other six flag combinations (manual `evalOrder` overrides)", "no source semantics parameterized by the pipeline independently of the elaborator", "lowering (`hoist`/`captureExpr`, `wrapMods`) has regressions but no theorem for either order", "each pipeline fixes its ABI coder: legacy with the pragma's coder (v1 or v2), via-IR with v2; legacy ABI-v1 decoding is today an implementation diagnostic (`pragmaAbicoder`)"], "owners": {"admission": ["G05", "G15"], "backend": ["G26"], "lowering": ["G16", "G17", "G19"], "source": ["S02", "S03.01", "S03.02", "S03.03", "S04.02"], "theorem": ["G49.02", "G49.03"]}, "title": "Public theorem over solc's two pipelines: the legacy and via-IR `EvalOrder` settings (revised 2026-10-29: the other six flag combinations are dropped)"},
   {"cover": [], "decisions": ["G00 Q4 — settings", "Pins (G00, G05, G06)"], "id": "D05", "lanes": "g05-frontend", "missing": ["CI downloads only solc 0.8.34 (G00 pins); the frozen 0.8.38 pin must reach `Source.Provenance`", "the 0.8.34 fixture boundary is not recorded per fixture (G05)"], "owners": {"admission": ["G05", "G15"], "theorem": ["G48"], "validation": ["G53", "G54.02"]}, "title": "Frozen profile solc 0.8.38; 0.8.34 fixtures only as SolKey compatibility checks"},
   {"cover": [{"decl": "Solidity.Roadmap.Artifact", "file": "Solidity/Roadmap/Contracts.lean", "line": 373, "module": "Solidity.Roadmap.Contracts", "note": "whole-input table of code units", "stage": "theorem"}, {"decl": "Solidity.Roadmap.CodeUnit", "file": "Solidity/Roadmap/Contracts.lean", "line": 364, "module": "Solidity.Roadmap.Contracts", "note": "initcode, runtime and link sites", "stage": "theorem"}], "decisions": ["G00 Q5 — `creationCode`/`runtimeCode`", "Contracts (G01)"], "id": "D06", "lanes": "g01-contracts-rev", "missing": ["`SourceSpec` does not yet take the `Artifact` table as a parameter (g01-contracts-rev)", "the G07 non-circularity whitelist must admit exactly this compiler-output parameter", "no compiled artifact exists for any contract: `type(C).creationCode` has no producer"], "owners": {"backend": ["G44.02"], "evm": ["G47"], "interface": ["G01", "G07"], "lowering": ["G23"], "source": ["S04.02"], "theorem": ["G49.02", "G50.01"]}, "title": "Artifact table: `creationCode`/`runtimeCode` read from G01's whole-input `Artifact` table, a source-semantics parameter"},
-  {"cover": [], "decisions": ["G00 Q6 — fixed-point types", "Manifest", "Fixed point — `*` and `/`", "Fixed point — implicit conversions", "Fixed point — explicit conversions out of range", "Fixed point — rounding", "Fixed point — shifts", "Fixed point — unary minus on `ufixed`", "Fixed point — `++`/`--`", "Fixed point — explicit fixed/integer and `bytesM` conversions", "Fixed point"], "id": "D07", "lanes": "g00-manifest-rev; fixed-point-semantics", "missing": ["the manifest scopes `fixedPoint` as `upstream` (g00-manifest-rev moves it into the profile)", "no reference semantics for fixed-point arithmetic/rounding/conversions beyond solc 0.8.38 (fixed-point-semantics)", "no lexer, type, lowering or compiler support at all", "the reference semantics must encode the second-round answers: exact product/quotient truncated toward zero, range-contained implicit conversions only, explicit out-of-range conversions wrap (constants are compile errors), `++`/`--` by 1, unary minus on `ufixed` panics `0x11` unless 0, integer/`bytesM` conversions by value/bit pattern", "shifts are rejected as solc's checker reaches an internal assertion: G15 must refuse them (narrows G00 Q6)"], "owners": {"admission": ["G08", "G09", "G13", "G15"], "backend": ["G25"], "evm": ["G46.01"], "lowering": ["G16"], "source": ["S00", "S01", "S02"], "theorem": ["G49.02", "G49.03"]}, "title": "Full fixed-point types beyond pinned solc's acceptance boundary"},
+  {"cover": [], "decisions": ["G00 Q6 — fixed-point types", "Manifest", "Fixed point — `*` and `/`", "Fixed point — implicit conversions", "Fixed point — explicit conversions out of range", "Fixed point — rounding", "Fixed point — shifts", "Fixed point — unary minus on `ufixed`", "Fixed point — `++`/`--`", "Fixed point — explicit fixed/integer and `bytesM` conversions", "Fixed point — fractional constant on the left (`0.5 * x`)", "Fixed point — standalone fractional constants", "Fixed point"], "id": "D07", "lanes": "g00-manifest-rev; fixed-point-semantics", "missing": ["the manifest row is `model`/`missing` since the G00 follow-up; no implementation yet", "no reference semantics for fixed-point arithmetic/rounding/conversions beyond solc 0.8.38 (fixed-point-semantics)", "no lexer, type, lowering or compiler support at all", "the reference semantics must encode the second-round answers: exact product/quotient truncated toward zero, range-contained implicit conversions only, explicit out-of-range conversions wrap (constants are compile errors), `++`/`--` by 1, unary minus on `ufixed` panics `0x11` unless 0, integer/`bytesM` conversions by value/bit pattern", "shifts are rejected as solc's checker reaches an internal assertion: G15 must refuse them (narrows G00 Q6)"], "owners": {"admission": ["G08", "G09", "G13", "G15"], "backend": ["G25"], "evm": ["G46.01"], "lowering": ["G16"], "source": ["S00", "S01", "S02"], "theorem": ["G49.02", "G49.03"]}, "title": "Full fixed-point types beyond pinned solc's acceptance boundary"},
   {"cover": [{"decl": "Solidity.recDepth", "file": "Solidity/Syntax/Scoped.lean", "line": 469, "module": "Solidity.Syntax.Scoped", "note": "fixed 1024-frame unrolling to remove", "stage": "source"}, {"decl": "Solidity.Prog.runF_approx", "file": "Solidity/Semantics/RunFuel.lean", "line": 449, "module": "Solidity.Semantics.RunFuel", "note": "fuel approximation of the classical run", "stage": "source"}, {"decl": "Solidity.Roadmap.typedRunPrefixes", "file": "Solidity/Roadmap/Contracts.lean", "line": 455, "module": "Solidity.Roadmap.Contracts", "note": "intrinsic prefix family plug", "stage": "theorem"}], "decisions": ["G01 Q1 — source resources"], "id": "D08", "lanes": null, "missing": ["intrinsic recursion is unrolled to `recDepth = 1024` with an `exhausted` bottom (G04 R08)", "`SourceSpec.Idealized` has no instance; `Prefixes.Consistent` of `Prog.runF` is unproved"], "owners": {"backend": ["G37.02"], "lowering": ["G20"], "source": ["S03.03", "S03.04"], "theorem": ["G49.03"]}, "title": "Idealized source resources: unbounded fuel and recursion"},
   {"cover": [{"decl": "Solidity.Roadmap.EvmSpec", "file": "Solidity/Roadmap/Contracts.lean", "line": 382, "module": "Solidity.Roadmap.Contracts", "note": "pinned EVM language with resources", "stage": "theorem"}, {"decl": "Solidity.Roadmap.Prefixes.Consistent", "file": "Solidity/Roadmap/Contracts.lean", "line": 85, "module": "Solidity.Roadmap.Contracts", "note": "consistency of resourced prefix families", "stage": "theorem"}], "decisions": ["G01 Q2 — fixed EVM limits", "G06 Q2 — Osaka gas caps", "Resources in the contracts", "Contracts (G01)"], "id": "D09", "lanes": "g01-contracts-rev", "missing": ["`EvmSpec` resources still list code size (g01-contracts-rev drops it)", "`Lang.Res` ends a session at gas exhaustion; the decision requires the session to continue", "machine `.fault` conflates divergence with malformed code (G04 R38)"], "owners": {"backend": ["G44.02"], "evm": ["G06", "G46.06", "G47"], "interface": ["G01"], "source": ["S03.04", "S04.04"], "theorem": ["G49.03", "G50.02"]}, "title": "Resource exhaustion as an allowed failure; code-size limits (EIP-170/3860) idealized"},
   {"cover": [{"decl": "Solidity.Evm.Memory.frameNeedProg", "file": "Solidity/Evm/MemoryCompile.lean", "line": 51, "module": "Solidity.Evm.MemoryCompile", "note": "peak frame need: a static frame, not a call stack", "stage": "backend"}], "decisions": ["G01 Q2 — fixed EVM limits"], "id": "D10", "lanes": "memory-internal-calls", "missing": ["internal calls are compiled inline (G04 R09); there is no runtime frame", "the 1024-slot EVM stack is not separated from call depth: frames must live in memory so that only gas bounds recursion", "no frame-allocation resource bound (`need`) for recursive calls"], "owners": {"backend": ["G32", "G37.01", "G37.02", "G45.02"], "evm": ["G46.02", "G46.06"], "theorem": ["G49.03"]}, "title": "Memory frames for recursion: internal calls keep their frames in memory, depth bounded by gas only"},
@@ -1130,21 +1106,21 @@
     "split": null
    },
    "G10": {
-    "cells": 70,
+    "cells": 71,
     "modules": [],
     "lines": 0,
-    "oversized": ["70 owned cells > 60"],
+    "oversized": ["71 owned cells > 60"],
     "split": "(a) primary and postfix forms: names, member/index/range access, calls, named arguments and call options; (b) operator precedence and associativity, one lemma per binding level; (c) tuples, inline arrays, conditional and `new`; compose into whole-expression parse correspondence"
    },
    "G11": {
-    "cells": 44,
+    "cells": 45,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "G12": {
-    "cells": 6,
+    "cells": 7,
     "modules": ["Solidity.Frontend.SourceUnits"],
     "lines": 143,
     "oversized": [],
@@ -1158,7 +1134,7 @@
     "split": "(a) elementary types, literals, units and exact constants; (b) conversions and implicit widening; (c) aggregate and data-location typing; (d) overload selection and UDVT operators; (e) function/ABI metadata typing; then the static-semantics certificate"
    },
    "G14": {
-    "cells": 20,
+    "cells": 21,
     "modules": [],
     "lines": 0,
     "oversized": [],
@@ -1167,7 +1143,7 @@
    "G15": {
     "cells": 221,
     "modules": ["Solidity.Frontend.SolcJson.Admission", "Solidity.Frontend.Source", "Solidity.Frontend.SolcJson.Body"],
-    "lines": 3449,
+    "lines": 3456,
     "oversized": ["221 owned cells > 60", "modules over 2500 lines: Solidity.Frontend.SolcJson.Body"],
     "split": "one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots; the `SolcJson.Body` adapter edit (2,586 lines) is split by AST node class (declarations, expressions, statements) before it starts"
    },
@@ -1179,21 +1155,21 @@
     "split": null
    },
    "G17": {
-    "cells": 16,
+    "cells": 17,
     "modules": ["Solidity.Syntax.Elab.Stmt", "Solidity.Syntax.Elab.Lower"],
     "lines": 2525,
     "oversized": [],
     "split": null
    },
    "G19": {
-    "cells": 18,
+    "cells": 19,
     "modules": ["Solidity.Syntax.Elab.Lower"],
     "lines": 1698,
     "oversized": [],
     "split": null
    },
    "G20": {
-    "cells": 25,
+    "cells": 26,
     "modules": ["Solidity.Frontend.SolcJson.Getters", "Solidity.Frontend.SolcJson.Contract"],
     "lines": 2268,
     "oversized": [],
@@ -1207,7 +1183,7 @@
     "split": null
    },
    "G23": {
-    "cells": 30,
+    "cells": 31,
     "modules": ["Solidity.Semantics.Transient", "Solidity.Semantics.TransientWorld"],
     "lines": 485,
     "oversized": [],
@@ -1221,63 +1197,63 @@
     "split": null
    },
    "G26": {
-    "cells": 16,
+    "cells": 17,
     "modules": ["Solidity.Evm.Expr"],
     "lines": 452,
     "oversized": [],
     "split": null
    },
    "G28": {
-    "cells": 12,
+    "cells": 13,
     "modules": ["Solidity.Evm.Stmt"],
     "lines": 980,
     "oversized": [],
     "split": null
    },
    "G30": {
-    "cells": 10,
+    "cells": 11,
     "modules": ["Solidity.Evm.Stmt"],
     "lines": 980,
     "oversized": [],
     "split": null
    },
    "G31": {
-    "cells": 23,
+    "cells": 24,
     "modules": ["Solidity.Evm.SimLemmas"],
     "lines": 874,
     "oversized": [],
     "split": null
    },
    "G32": {
-    "cells": 9,
+    "cells": 10,
     "modules": ["Solidity.Evm.MemoryHeap", "Solidity.Evm.MemorySource"],
     "lines": 359,
     "oversized": [],
     "split": null
    },
    "G33": {
-    "cells": 10,
+    "cells": 11,
     "modules": ["Solidity.Evm.MemoryAlloc", "Solidity.Evm.MemoryGrowResult"],
     "lines": 405,
     "oversized": [],
     "split": null
    },
    "G34": {
-    "cells": 7,
+    "cells": 8,
     "modules": ["Solidity.Evm.MemoryPaths", "Solidity.Evm.MemoryRefWrite"],
     "lines": 438,
     "oversized": [],
     "split": null
    },
    "G38": {
-    "cells": 17,
+    "cells": 18,
     "modules": ["Solidity.Evm.Stmt"],
     "lines": 980,
     "oversized": [],
     "split": null
    },
    "G39": {
-    "cells": 4,
+    "cells": 5,
     "modules": [],
     "lines": 0,
     "oversized": [],
@@ -1298,17 +1274,17 @@
     "split": null
    },
    "G43": {
-    "cells": 20,
+    "cells": 21,
     "modules": ["Solidity.Evm.Sim", "Solidity.Evm.Stmt"],
     "lines": 2137,
     "oversized": [],
     "split": null
    },
    "G47": {
-    "cells": 81,
+    "cells": 82,
     "modules": [],
     "lines": 0,
-    "oversized": ["81 owned cells > 60"],
+    "oversized": ["82 owned cells > 60"],
     "split": "(a) CALL/STATICCALL frames, returndata and the frame-failure rule (D19); (b) CREATE and initcode installation; (c) REVERT and persistent/transient/balance rollback; (d) transactions, sender funds (D21) and gas-exhaustion failures (D20); (e) precompiles (D22); compose under the resource abstraction"
    },
    "G48": {
@@ -1368,14 +1344,14 @@
     "split": null
    },
    "S04.01": {
-    "cells": 32,
+    "cells": 31,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "S04.02": {
-    "cells": 44,
+    "cells": 43,
     "modules": [],
     "lines": 0,
     "oversized": [],
@@ -1396,7 +1372,7 @@
     "split": null
    },
    "G18.01": {
-    "cells": 5,
+    "cells": 6,
     "modules": ["Solidity.TypeGraph", "Solidity.Semantics.RecursiveStorage.Admission"],
     "lines": 234,
     "oversized": [],
@@ -1410,63 +1386,63 @@
     "split": null
    },
    "G18.03": {
-    "cells": 20,
+    "cells": 21,
     "modules": ["Solidity.Semantics.Heap"],
     "lines": 537,
     "oversized": [],
     "split": null
    },
    "G18.04": {
-    "cells": 11,
+    "cells": 12,
     "modules": ["Solidity.Syntax.Elab.Context", "Solidity.Syntax.Elab.SliceCopy"],
     "lines": 1552,
     "oversized": [],
     "split": null
    },
    "G18.05": {
-    "cells": 17,
+    "cells": 18,
     "modules": ["Solidity.Semantics.RecursiveStorage.Copy"],
     "lines": 187,
     "oversized": [],
     "split": null
    },
    "G18.06": {
-    "cells": 3,
+    "cells": 4,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "G22.01": {
-    "cells": 12,
+    "cells": 13,
     "modules": ["Solidity.Semantics.ContractWorld"],
     "lines": 461,
     "oversized": [],
     "split": null
    },
    "G22.02": {
-    "cells": 9,
+    "cells": 10,
     "modules": ["Solidity.Semantics.Callback"],
     "lines": 1611,
     "oversized": [],
     "split": null
    },
    "G22.03": {
-    "cells": 10,
+    "cells": 11,
     "modules": ["Solidity.Semantics.Deploy", "Solidity.Frontend.WorldImport"],
     "lines": 476,
     "oversized": [],
     "split": null
    },
    "G22.04": {
-    "cells": 7,
+    "cells": 8,
     "modules": ["Solidity.Semantics.ContractWorldCertificates"],
     "lines": 174,
     "oversized": [],
     "split": null
    },
    "G22.05": {
-    "cells": 14,
+    "cells": 15,
     "modules": [],
     "lines": 0,
     "oversized": [],
@@ -1480,63 +1456,63 @@
     "split": null
    },
    "G27.02": {
-    "cells": 4,
+    "cells": 5,
     "modules": ["Solidity.Evm.Repr"],
     "lines": 1023,
     "oversized": [],
     "split": null
    },
    "G27.03": {
-    "cells": 7,
+    "cells": 8,
     "modules": ["Solidity.Evm.StorageLemmas"],
     "lines": 214,
     "oversized": [],
     "split": null
    },
    "G27.04": {
-    "cells": 3,
+    "cells": 4,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "G27.05": {
-    "cells": 7,
+    "cells": 8,
     "modules": ["Solidity.Evm.Machine"],
     "lines": 685,
     "oversized": [],
     "split": null
    },
    "G29.01": {
-    "cells": 3,
+    "cells": 4,
     "modules": ["Solidity.Evm.Compile"],
     "lines": 487,
     "oversized": [],
     "split": null
    },
    "G29.02": {
-    "cells": 4,
+    "cells": 5,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "G29.03": {
-    "cells": 3,
+    "cells": 4,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "G35.01": {
-    "cells": 4,
+    "cells": 5,
     "modules": ["Solidity.Evm.MemoryStructCopy"],
     "lines": 128,
     "oversized": [],
     "split": null
    },
    "G35.02": {
-    "cells": 5,
+    "cells": 6,
     "modules": [],
     "lines": 0,
     "oversized": [],
@@ -1550,168 +1526,168 @@
     "split": null
    },
    "G35.04": {
-    "cells": 6,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G35.05": {
-    "cells": 4,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G35.06": {
-    "cells": 2,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G36.01": {
-    "cells": 11,
-    "modules": ["Solidity.Evm.Correct"],
-    "lines": 1232,
-    "oversized": [],
-    "split": null
-   },
-   "G36.02": {
-    "cells": 5,
-    "modules": ["Solidity.Evm.MemoryCompile"],
-    "lines": 1254,
-    "oversized": [],
-    "split": null
-   },
-   "G36.03": {
-    "cells": 8,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G37.01": {
-    "cells": 14,
-    "modules": ["Solidity.Evm.Compile"],
-    "lines": 487,
-    "oversized": [],
-    "split": null
-   },
-   "G37.02": {
-    "cells": 8,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G37.03": {
-    "cells": 9,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G42.01": {
-    "cells": 3,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G42.02": {
-    "cells": 15,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G42.03": {
-    "cells": 6,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G42.04": {
-    "cells": 5,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G42.05": {
-    "cells": 8,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G42.06": {
-    "cells": 3,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G44.01": {
-    "cells": 8,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G44.02": {
-    "cells": 10,
-    "modules": [],
-    "lines": 0,
-    "oversized": [],
-    "split": null
-   },
-   "G44.03": {
     "cells": 7,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
-   "G45.01": {
-    "cells": 1,
+   "G35.05": {
+    "cells": 5,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
-   "G45.02": {
+   "G35.06": {
     "cells": 3,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
-   "G45.03": {
+   "G36.01": {
+    "cells": 12,
+    "modules": ["Solidity.Evm.Correct"],
+    "lines": 1232,
+    "oversized": [],
+    "split": null
+   },
+   "G36.02": {
+    "cells": 6,
+    "modules": ["Solidity.Evm.MemoryCompile"],
+    "lines": 1254,
+    "oversized": [],
+    "split": null
+   },
+   "G36.03": {
+    "cells": 9,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G37.01": {
+    "cells": 15,
+    "modules": ["Solidity.Evm.Compile"],
+    "lines": 487,
+    "oversized": [],
+    "split": null
+   },
+   "G37.02": {
+    "cells": 9,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G37.03": {
+    "cells": 10,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G42.01": {
+    "cells": 4,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G42.02": {
+    "cells": 16,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G42.03": {
+    "cells": 7,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G42.04": {
+    "cells": 6,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G42.05": {
+    "cells": 9,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G42.06": {
+    "cells": 4,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G44.01": {
+    "cells": 9,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G44.02": {
+    "cells": 11,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G44.03": {
+    "cells": 8,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G45.01": {
     "cells": 2,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G45.02": {
+    "cells": 4,
+    "modules": [],
+    "lines": 0,
+    "oversized": [],
+    "split": null
+   },
+   "G45.03": {
+    "cells": 3,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "G45.04": {
-    "cells": 1,
+    "cells": 2,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "G45.05": {
-    "cells": 1,
+    "cells": 2,
     "modules": [],
     "lines": 0,
     "oversized": [],
     "split": null
    },
    "G45.06": {
-    "cells": 2,
+    "cells": 3,
     "modules": [],
     "lines": 0,
     "oversized": [],
@@ -1739,21 +1715,21 @@
     "split": null
    },
    "G46.04": {
-    "cells": 15,
+    "cells": 16,
     "modules": ["SolidityBridge.ExternalEvm.Environment"],
     "lines": 128,
     "oversized": [],
     "split": null
    },
    "G46.05": {
-    "cells": 15,
+    "cells": 16,
     "modules": ["SolidityBridge.ExternalEvm.Obstructions"],
     "lines": 82,
     "oversized": [],
     "split": null
    },
    "G46.06": {
-    "cells": 14,
+    "cells": 15,
     "modules": ["SolidityBridge.ExternalEvm.Dispatch"],
     "lines": 258,
     "oversized": [],
@@ -1830,28 +1806,28 @@
     "split": null
    },
    "G24.01": {
-    "cells": 3,
+    "cells": 4,
     "modules": ["Solidity.Evm.Machine"],
     "lines": 685,
     "oversized": [],
     "split": null
    },
    "G24.02": {
-    "cells": 4,
+    "cells": 5,
     "modules": ["Solidity.Evm.Sim", "Solidity.Evm.SimLemmas", "Solidity.Evm.Repr", "Solidity.Evm.StorageLemmas", "Solidity.Evm.MemorySource", "Solidity.Evm.MemoryHeap", "Solidity.Evm.MemoryAlloc", "Solidity.Evm.MemoryGrowResult"],
     "lines": 4032,
     "oversized": [],
     "split": null
    },
    "G24.03": {
-    "cells": 3,
+    "cells": 4,
     "modules": ["Solidity.Evm.Stmt", "Solidity.Evm.Compile", "Solidity.Evm.Correct", "Solidity.Evm.Expr", "Solidity.Evm.Layout", "Solidity.Evm.Exp", "Solidity.Evm.Signed", "Solidity.Evm.MemoryCompile", "Solidity.Evm.MemoryPaths", "Solidity.Evm.MemoryRefWrite", "Solidity.Evm.MemoryStructCopy"],
     "lines": 6134,
     "oversized": [],
     "split": null
    },
    "G24.04": {
-    "cells": 5,
+    "cells": 6,
     "modules": ["Solidity.Evm.Compiler", "Solidity.Semantics.RunFuel"],
     "lines": 571,
     "oversized": [],

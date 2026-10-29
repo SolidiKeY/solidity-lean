@@ -241,6 +241,17 @@ def refine(fid, stage, cell, plan, errors):
     return out
 
 
+def expand_g00_cell(cell, g00, plan):
+    """G00 writes some owners as ranges (`G08–G15` = every group in it); expand
+    them, a split parent inside a range standing for all its children."""
+    if "–" not in cell:
+        return cell
+    out = []
+    for t in g00.expand(cell):
+        out += [c for c in plan["children"] if c.startswith(t + ".")] if t in plan["parents"] else [t]
+    return " ".join(out)
+
+
 def is_evm(t):
     return t.startswith("G46") or t == "G47"
 
@@ -253,6 +264,8 @@ def feature_owners(f, g00, plan, errors):
     """The six stage owner lists of one in-profile row."""
     fid, cat = f["id"], f["category"]
     o = g00.owners(f) if f["scope"] in ("model", "abstract") else None
+    if o is not None:
+        o = tuple(expand_g00_cell(c, g00, plan) for c in o)
     extra = D.FEATURE_EXTRA.get(fid)
     if o is None:
         o = extra["g00"] if extra and "g00" in extra else None
@@ -605,7 +618,7 @@ def build(root):
                 errors.append(f"{fid} {st}: reason recorded but owners present")
         # G00's owners must survive refinement
         if f["scope"] in ("model", "abstract"):
-            o = g00.owners(f)
+            o = tuple(expand_g00_cell(c, g00, plan) for c in g00.owners(f))
             for si, st in enumerate(('source', "admission", "lowering", "backend")):
                 have = cols[st] + (cols["evm"] + cols["theorem"] if st == "backend" else [])
                 for t in tokens(o[si]):
@@ -710,15 +723,16 @@ def build(root):
     # ledger symbol combinations (shared punctuation): owned through G15 and
     # the owners of their in-profile rows
     ledger = json.loads((root / "docs/solidity-upstream-inventory.json").read_text())
-    scope = {f["id"]: f["scope"] for f in features}
+    # G00's own row statuses (in-profile, excluded, unresolved, upstream-rejected)
+    status = {f["id"]: g00.g00_status(f["scope"], g00.decision_tier(root, f) == "A") for f in features}
     owned = {r["id"] for r in ledger_rows}
     symbol_combos = []
     for kind, table in ledger["symbols"].items():
         for name, targets in sorted(table.items()):
             targets = g00.targets_of(kind, name, targets)
-            st = g00.symbol_status(targets, scope)
+            st = g00.symbol_status(targets, status)
             if st.startswith("combination"):
-                ins = [t for t in targets if scope[t] in ("model", "abstract")]
+                ins = [t for t in targets if status[t] == "in-profile"]
                 for t in ins:
                     if t not in owned:
                         errors.append(f"symbol combination {kind}.{name}: in-profile {t} unowned")
@@ -1498,10 +1512,12 @@ class D:
          ["G00 Q6 — fixed-point types", "Manifest", "Fixed point — `*` and `/`", "Fixed point — implicit conversions",
           "Fixed point — explicit conversions out of range", "Fixed point — rounding", "Fixed point — shifts",
           "Fixed point — unary minus on `ufixed`", "Fixed point — `++`/`--`",
-          "Fixed point — explicit fixed/integer and `bytesM` conversions", "Fixed point"],
+          "Fixed point — explicit fixed/integer and `bytesM` conversions",
+          "Fixed point — fractional constant on the left (`0.5 * x`)",
+          "Fixed point — standalone fractional constants", "Fixed point"],
          {"source": "S00 S01 S02", "admission": "G08 G09 G13 G15", "lowering": "G16", "backend": "G25",
           "evm": "G46.01", "theorem": "G49.02 G49.03"},
-         ["the manifest scopes `fixedPoint` as `upstream` (g00-manifest-rev moves it into the profile)",
+         ["the manifest row is `model`/`missing` since the G00 follow-up; no implementation yet",
           "no reference semantics for fixed-point arithmetic/rounding/conversions beyond solc 0.8.38 "
           "(fixed-point-semantics)",
           "no lexer, type, lowering or compiler support at all",

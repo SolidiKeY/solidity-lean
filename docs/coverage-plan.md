@@ -203,7 +203,11 @@ Decision impact (2026-10-29): [roadmap-decisions-impact.md](feature-work/roadmap
 
 Integration notes (2026-10-29):
 
-- **G01 revision held back.** Integration review found that its
+- **G01 revision held back (second time, 2026-10-29).** Its rework fixed both
+  defects below, but `refines` is still unmeetable through `Collided`, which
+  requires the source to be failure-free (a real collision after any gas
+  failure has no source match).
+- **Original hold-back.** Integration review found that its
   `PublicCorrectness.refines` cannot be met for long sessions (the
   2^128-hash bound restricts only the target) and that unconstrained
   `Fixed.regionLen`/`rootSlots` can make the hash premise false on every
@@ -529,7 +533,11 @@ is empty, unless the item touches files an open Codex lane owns
    change that drops the never-constructed `refused` case of `StmtOut`. It
    waits for the Codex memory/evm lanes, because it edits
    `Solidity/Evm/**`.
-5. **Source cost rule for stipend payments** (decision G06 Q3, S02/G43
+5. **Fixed-point mobile constants** (S01): encode the decision that a
+   standalone fractional constant takes solc's mobile type with truncation,
+   also as an ABI argument, in `Solidity/Language/FixedPoint/Literals.lean`
+   (the merged model still refuses `abi.encode(0.1)` as solc does).
+6. **Source cost rule for stipend payments** (decision G06 Q3, S02/G43
    preparation): define the compiler-independent rule and its examples.
 
 ## Done when
