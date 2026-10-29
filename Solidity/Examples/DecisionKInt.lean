@@ -14,11 +14,13 @@ proved and refuted; a binder compared with a ledger entry (`kintNet`) and
 two binders compared under a negation (`kintNested`) are decided past
 their anchors.  Coverage is the kernel's (`*_covered`), so each is
 answered and exactly (`*_answers`, `*_iff`); the verdicts are recorded
-below. The original `gapKIntTwoAnchors` statement is retained and now has
-an exact kernel-certified proved verdict: the test point `y = k` reduces
-`∀ y. y > z → y > k` to `z >= k`, including under negation. The other
-original gap, a negative quantifier in a leaf reading the ledger,
-remains (`gapQuantLedger`, `(∀ uint y. y > 0) → net(0) > 0`).
+below, not evaluated in the build. The original `gapKIntTwoAnchors`
+statement now has an exact kernel-certified proved verdict: the test point
+`y = k` reduces `∀ y. y > z → y > k` to `z >= k`, including under negation.
+The original negative-quantifier ledger statement `gapQuantLedger`,
+`(∀ uint y. y > 0) → net(0) > 0`, is retained below and now proved by
+`Examples/DecisionQuantLedger.lean`, through the ledger cut before
+abstraction (`Calculus/QuantLedger.lean`).
 -/
 
 namespace Solidity.Examples.DecisionKInt
@@ -69,9 +71,10 @@ def kintNestedBad : Fml Gaps [] :=
   .imp (bindZ "z" (bindZ "y" (.imp (zcmp .gt rfl zv (.pvZ (.there .here)))
     (zcmp .ge rfl zv (.pvZ (.there .here)))))) ff
 
-/-- The two original gap statements, retained unchanged: two integer
-thresholds, and a negative quantifier in a leaf reading the ledger.
-The test-point certificates below settle only the former. -/
+/-- Original gap statements, retained unchanged with their target
+certificates: the test-point certificates below settle the two-anchor binder;
+`Examples/DecisionQuantLedger.lean` decides the negative scalar quantifier
+beside a ledger read exactly. -/
 def gapKIntTwoAnchors : Fml Gaps [] :=
   .imp (bindZ "z" (bindZ "y" (.imp (zcmp .gt rfl zv (.pvZ (.there .here))) (zcmp .gt rfl zv (zlit 0))))) ff
 def gapQuantLedger : Fml Gaps [] :=
@@ -120,10 +123,11 @@ evaluation overflowed the language server's stack and did not end within
 half an hour in `lake build`.  Evaluated: `gapKIntNeg`, `kintNetElse`,
 `kintNegWord`, `kintNet`, `kintNested` proved; `kintNegBad`,
 `kintNetElseBad`, `kintNetBad`, `kintNestedBad` refuted;
-`gapKIntTwoAnchors`, `gapQuantLedger` unknown.  The theorems above are the
-pins: coverage by the kernel, so `decideLeaf` answers, and exactly.
-The later test-point certificates below supersede only the recorded
-`gapKIntTwoAnchors` unknown verdict. -/
+`gapKIntTwoAnchors`, `gapQuantLedger` unknown at that checkpoint. The later
+test-point certificates below supersede the former unknown verdict; the latter
+now has kernel-proved exact Leaf and Goal verdicts in
+`Examples/DecisionQuantLedger.lean` (2026-10-28). The theorems above are the
+pins: coverage by the kernel, so `decideLeaf` answers, and exactly. -/
 
 theorem kintNegBad_answers : decideLeaf kintNegBad ≠ .unknown := decideLeaf_complete kintNegBad_covered
 theorem kintNetElseBad_answers : decideLeaf kintNetElseBad ≠ .unknown :=
@@ -234,8 +238,9 @@ theorem twoAnchorNegative_refuted :
       ((decideKEnc_sound h) (State.init Gaps)))
   | refuted σ =>
     have hl : decideLeaf twoAnchorNegative = .refuted σ := by
-      change decideKEnc twoAnchorNegative = .refuted σ
-      exact h
+      unfold decideLeaf
+      rw [h]
+      rfl
     have hg : decideGoal twoAnchorNegative = .refuted σ := by
       change decideLeaf twoAnchorNegative = .refuted σ
       exact hl
