@@ -309,9 +309,19 @@ theorem Typed.lit_num {Γ : Ctx} {n : NumLit} {σ : STy} (h : Typed Γ (.lit (.n
     σ = .rational n.value ∨ (∃ len, σ = .hexConst n.value len) ∨ σ = .address false := by
   cases h with
   | const hq =>
-    have hv : (Syn.lit (.num n) : Syn .expr).const = some n.value := rfl
-    rw [hv] at hq
-    cases hq
+    have hv : ∀ {q : Q}, (Syn.lit (.num n) : Syn .expr).const = some q → q = n.value := by
+      intro q h
+      cases n with
+      | dec m f x => cases h; rfl
+      | hex ds cs =>
+        cases cs
+        · cases h; rfl
+        · by_cases h40 : ds.length = 40
+          · change (if ds.length = 40 then Option.none else Option.some _) = _ at h
+            rw [if_pos h40] at h; cases h
+          · change (if ds.length = 40 then Option.none else Option.some _) = _ at h
+            rw [if_neg h40] at h; cases h; rfl
+    rw [hv hq]
     exact Or.inl rfl
   | litBytes _ => exact Or.inr (Or.inl ⟨_, rfl⟩)
   | litAddress _ => exact Or.inr (Or.inr rfl)
