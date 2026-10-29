@@ -50,8 +50,9 @@ preimage list gives the premise for every prefix of the run.
 Model (as the assignment fixes it): a uniformly random function into `N`
 values, restricted to `q` distinct inputs, is modelled as one of the `N^q`
 output tuples, each equally likely. That a uniform function on a larger
-domain restricts to this model is not proved; it is the non-adaptive
-instance of `EagerAdaptiveBound` below. Tuples are lists:
+domain gives the same bound is the non-adaptive instance of the eager
+theorems below (a strategy that ignores its answers), proved in
+`Solidity/Hash/Adaptive.lean`. Tuples are lists:
 
 - `tuples N q : List (List Nat)` — all length-`q` lists with entries below
   `N`, enumerated explicitly (`length_tuples : (tuples N q).length = N ^ q`,
@@ -100,9 +101,13 @@ entry of `t` (and `0` elsewhere; `DecidableEq α`). Then:
 
 `#guard_msgs` pins the axioms of `keccak_premise_fails_prob_le`,
 `keccak_premise_fails_prob_le_dedup`, `adaptive_lazy_collision_prob_le` and
-`collisions_le` to
-`[propext, Classical.choice, Quot.sound]`. There is no `sorry`, new axiom,
-`native_decide`, `decide` tactic, `implemented_by` or `maxHeartbeats` option.
+`collisions_le`, `keccak_region_premise_fails_prob_le` and its `_dedup`
+variant, `near_of_overlap`, and in `Solidity/Hash/Adaptive.lean`
+`keccak_eager_collision_prob_le`, `keccak_eager_region_prob_le`,
+`two_mul_eager_stopped_le` and `eagerAdaptiveBound` to
+`[propext, Classical.choice, Quot.sound]`. Neither module has a `sorry`, new
+axiom, `native_decide`, `decide` tactic, `implemented_by` or `maxHeartbeats`
+option.
 
 ## Adaptive queries
 
@@ -144,13 +149,29 @@ earlier ones. What is proved and what is not:
   one whose region is `Near` an earlier answer's or `Covers` a root word
   (`regionBadValue`, at most `k(2L-1) + |roots| L` bad values,
   `countP_regionBadValue_le`), giving the non-adaptive region bound
-  `(q(q-1)(2L-1) + 2q·|roots|·L) · N^|dom|` for adaptive runs.
+  `2N · bad ≤ (q(q-1)(2L-1) + 2q·|roots|·L) · N^|dom|` for adaptive runs.
+
+The step event `stepHit` does not ask the earlier steps to be clean: the
+union bound needs only that every failing run has some bad step. `dom` may
+contain duplicates: `oracleOf` and `upd` read and write the first
+occurrence, so each function on the distinct points has the same number of
+tuples behind it and the counted ratio is still the uniform probability
+(`EagerAdaptiveBound` keeps its `dom.Nodup` premise; the proof does not use
+it).
+
+**What `q` counts.** The strategy `s` is the whole adversary together with
+the run: everything that chooses a preimage (calldata, keys, the
+environment) must be a function of earlier oracle answers only, and `q` must
+bound every oracle query that influenced the run, including those an
+attacker made offline before choosing its inputs, not only the run's own
+`KECCAK256` steps. `q` is a worst-case bound, not an expected count.
 
 What remains between these theorems and a real run is the modelling step
 that keccak behaves as a uniformly random function on the (finite) set of
 byte strings a run can hash: `dom` is any finite list containing every
-preimage the strategy can produce (`hs : ∀ t, s t ∈ dom`). The bound does not
-depend on `|dom|`. That keccak is not a random function is the reason the
+preimage the strategy can produce (`hs : ∀ t, s t ∈ dom`); gas and memory
+bound a preimage's length, so such a finite set exists. Read as a
+probability (count / `N^|dom|`), the bound does not depend on `|dom|`. That keccak is not a random function is the reason the
 public theorem stays conditional on the premise.
 
 A repeated query is not a collision (`CollisionFree` relates equal images of
@@ -188,8 +209,9 @@ No file under `Solidity/Evm/**` is edited here. The plan for the owners:
    number of distinct preimages, when the preimages are fixed in advance.
    Real runs choose preimages adaptively (attacker-controlled keys; nested
    mappings hash earlier hash outputs); `keccak_eager_collision_prob_le` and
-   `keccak_eager_region_prob_le` (`Solidity/Hash/Adaptive.lean`) cover them,
-   with `q` the number of hash queries. Either way
+   `keccak_eager_region_prob_le` (`Solidity/Hash/Adaptive.lean`) cover them
+   in the random-oracle model, with `q` counting every oracle query of the
+   run *and* of whoever chose its inputs (see "What `q` counts"). Either way
    it is a statement about a random oracle, not about keccak: the public
    theorem stays conditional on the premise.
 
@@ -281,12 +303,13 @@ corollaries instantiate the general `k`-bit theorem.
 
 (`EagerAdaptiveBound`, the repeat reduction, the region `dedup` lemma and the
 region adaptive bound were closed in lane-hashing checkpoint 1; see
-"Adaptive queries" and the checkpoint's handoff below.)
+"Adaptive queries" and "Handoff — lane-hashing checkpoint 1" below.)
 
 ## Handoff and gates
 
 Base `caf52ecd4dde5d37cbc0098d47de1a01aa218285`; Lean checked at commit
-`4eb6d3a` (later commits change only this document).
+`4eb6d3a`. This section records that first task; lane-hashing checkpoint 1
+changed the module afterwards (its own handoff is below).
 
 - `lean_diagnostic_messages` on `Solidity/Hash/CollisionBound.lean`: no
   messages. No `sorry`, new axiom, `native_decide`, `implemented_by` or
@@ -333,3 +356,55 @@ the Lean server. Confirmed findings, all fixed in the following commit:
 Not changed: `grind` in `two_mul_collisions_le` (one ring identity; `grind`
 is used 55 times elsewhere in `Solidity/`), noted by both reviewers as a
 doubt only.
+
+## Handoff — lane-hashing checkpoint 1
+
+Batch `roadmap-l1-20261029`, lane `lane-hashing`, branch
+`cloud/roadmap-l1-20261029/lane-hashing`, base `ceb0d54`; this document and
+`Solidity/Hash/CollisionBound.lean` were merged in from
+`cloud/roadmap-w1-20261029/hash-collision-bound` and are owned by the lane.
+Work queue item 1 ("Region premise and bound"):
+
+- The region predicate and its counting bound were already in the merged
+  module (above). Added: `regionsDisjoint_congr`, `regionsDisjoint_dedup`,
+  `keccak_region_premise_fails_prob_le_dedup` (the dedup lemmas the reviews
+  asked for; `collisionFree_dedup` already existed).
+- The eager/lazy adaptive step is **closed**, not just stated: the new
+  module `Solidity/Hash/Adaptive.lean` proves `eagerAdaptiveBound :
+  EagerAdaptiveBound`, the repeat reduction (`two_mul_eagerCollides_le`
+  allows repeated queries), early stopping (`two_mul_eager_stopped_le`) and
+  the region counterpart (`two_mul_eagerRegionsFail_le`,
+  `keccak_eager_region_prob_le`). The modelling gap that remains is stated
+  in "Adaptive queries" ("What `q` counts").
+
+Gates (on the checkpoint's final commit):
+
+- `lean_diagnostic_messages`: no messages on `Solidity/Hash/CollisionBound.lean`
+  and `Solidity/Hash/Adaptive.lean`; the `#guard_msgs` pins listed above
+  hold. Both files elaborate in a few seconds in the language server; no
+  step was slow enough to profile.
+- `node scripts/check-layers.mjs`: 157 core modules, 0 reach the elaborator
+  (`Solidity.Hash.Adaptive` added to `CORE`).
+  `node scripts/check-orphans.mjs`: 735 reachable, 0 orphaned.
+  `bash scripts/check-trust.sh`: 0 findings.
+  `bash scripts/check-doc-paths.sh`: 46 missing references, the base count.
+- `./run-lean.sh` runs once at the end of the lane (recorded in
+  `docs/feature-work/storage-hashed-layout.md`).
+
+### Review (checkpoint 1)
+
+A read-only finder and a separate skeptic reviewed commit `668f1f9` without
+the Lean server. Neither found a false or vacuous statement. Confirmed
+findings, fixed in the following commit:
+
+| Finding | Fix |
+|---|---|
+| The doc said the eager theorems cover real runs "with `q` the number of hash queries"; an attacker who hashes offline is modelled only if those queries are part of `s` (finder 1, skeptic 6). | "What `q` counts" added; step 4 of "How G27.05 and G46.05 will use it" and the coverage-plan line reworded. |
+| Stale "not proved" sentences on restricting a larger-domain function to tuples, in this document and the module docstring (finder 2, skeptic 7). | Now point to `eagerAdaptiveBound`. |
+| The previous handoff claimed later commits changed only this document; no checkpoint handoff existed (finder 3). | This section; the old handoff is scoped to its task. |
+| The pin list and the "no `sorry`" claim covered only the first module (finder 4). | Extended to both modules. |
+| The adaptive region bound was written without its `2N ·` factor (finder 5). | Fixed. |
+| Ten `have`s without explicit types (finder 6). | All typed. |
+| A new `grind` for a ring identity (finder 7). | Replaced by `simp only [Nat.mul_assoc, Nat.add_mul, …]` and `omega`. |
+| `firstHit` is not the first bad step (finder, naming nit). | Renamed `stepHit`; docs say any bad step. |
+| Duplicates in `dom` were undocumented (skeptic 2). | Documented in "Adaptive queries"; `EagerAdaptiveBound` keeps its unused `Nodup` premise. |

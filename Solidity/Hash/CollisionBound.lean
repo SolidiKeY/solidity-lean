@@ -15,7 +15,9 @@ this module states both, dependency-free:
 * **The random-oracle bound.** A random function into `N` values, restricted
   to `q` distinct inputs, is modelled as one of the `N ^ q` output tuples
   (`tuples N q`), each equally likely; that a uniform function on a larger
-  domain restricts to this model is part of the child obligation below. At most `q(q-1)/2 · N^(q-1)` of them collide
+  domain gives the same bound is the non-adaptive case of
+  `eagerAdaptiveBound` (`Solidity/Hash/Adaptive.lean`). At most
+  `q(q-1)/2 · N^(q-1)` of them collide
   (`collisions_le`), so the collision probability is at most
   `q(q-1)/(2N) ≤ q²/(2N)` (`collision_prob_le`, `collision_prob_le_sq`), that is
   `q²/2²⁵⁷` for a 256-bit hash (`keccak_collision_prob_le`).

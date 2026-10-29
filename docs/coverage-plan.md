@@ -278,7 +278,7 @@ proof, and their final checks must use the actual implementations.
 | G46 | Prove primitive instruction/byte-memory/storage/environment correspondence with the pinned EVM semantics. Discharge symbolic-slot, word-addressing, truncation and hash-model obstructions or identify an unresolved approved-premise obligation; unresolved means incomplete. |
 | G47 | Prove EVM call/create/return/revert and transaction correspondence, including excluded-resource abstraction and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
 
-G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`, and for adaptive runs (eager sampling, repeated queries, early stopping, regions) in `Solidity/Hash/Adaptive.lean`; bounded slot offsets and the connection to executions are open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
+G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`, and for adaptive runs (eager sampling, repeated queries, early stopping, regions) in `Solidity/Hash/Adaptive.lean` (random-oracle model; `q` counts every oracle query of the run and of whoever chose its inputs); bounded slot offsets and the connection to executions are open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
 
 ### Wave 6 — whole pipeline, verification transfer and release (G48–G55)
 

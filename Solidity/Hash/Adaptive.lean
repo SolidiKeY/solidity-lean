@@ -12,17 +12,17 @@ so it is no collision) and the run may stop early (`two_mul_eager_stopped_le`);
 and the same holds for the region premise `RegionsDisjoint`
 (`two_mul_eagerRegionsFail_le`, `keccak_eager_region_prob_le`).
 
-The proof is a union bound over the first query that goes wrong, counted
-over functions rather than answer sequences. `firstHit bad k g` holds when
+The proof is a union bound over the queries that go wrong, counted
+over functions rather than answer sequences. `stepHit bad k g` holds when
 query `k + 1` under `g` is at a new point `x` and its answer is a bad value
 given the first `k` answers: equal to one of them (`repeatBad`), or near one
 of them or over a root word (`regionBadValue`). A failing run has such a
-step (`collides_succ_imp`, `regionsFail_succ_imp`). For one step, group the
+step (not necessarily the first) (`collides_succ_imp`, `regionsFail_succ_imp`). For one step, group the
 functions by their values off `x`: changing `g` at `x` changes none of the
 first `k` answers, so the first `k + 1` queries and `x` itself stay the same
 (`eagerQueries_upd`). Each group has `N` members (`le_countP_group`) and at
 most `c` of them go wrong when at most `c` values are bad
-(`countP_firstHit_group_le`), so `N · |firstHit| ≤ c · N^|dom|`
+(`countP_stepHit_group_le`), so `N · |stepHit| ≤ c · N^|dom|`
 (`eager_step_le`); the double count over groups is `sumOver_swap`. With
 `c = k` (resp. `k(2L-1) + |roots| L`) and summing over `k < q` gives the
 bounds of `CollisionBound.lean` for adaptive runs. No probability monad or
@@ -252,7 +252,7 @@ def answers (g : List Nat) (k : Nat) : List Nat :=
 `bad A b` given the earlier answers `A`. For the preimage premise a bad value
 repeats an earlier answer (`repeatBad`); for the region premise it lies near
 an earlier answer or covers a root (`regionBadValue`). -/
-def firstHit (bad : List Nat → Nat → Bool) (k : Nat) (g : List Nat) : Bool :=
+def stepHit (bad : List Nat → Nat → Bool) (k : Nat) (g : List Nat) : Bool :=
   decide (nextQuery s dom g k ∉ eagerQueries s (oracleOf dom g) k) &&
     bad (answers s dom g k) (oracleOf dom g (nextQuery s dom g k))
 
@@ -291,9 +291,9 @@ theorem eagerQueries_upd {h : List Nat} {k : Nat}
 /-- The first `q + 1` queries collide only if the first `q` do or query
 `q + 1` is new and repeats an earlier answer. -/
 theorem collides_succ_imp (q : Nat) (g : List Nat) (hg : eagerCollides s dom (q + 1) g = true) :
-    (eagerCollides s dom q g || firstHit s dom repeatBad q g) = true := by
+    (eagerCollides s dom q g || stepHit s dom repeatBad q g) = true := by
   simp only [eagerCollides, decide_eq_true_eq] at hg
-  simp only [Bool.or_eq_true, eagerCollides, firstHit, repeatBad, answers, Bool.and_eq_true,
+  simp only [Bool.or_eq_true, eagerCollides, stepHit, repeatBad, answers, Bool.and_eq_true,
     decide_eq_true_eq, List.contains_iff_mem]
   by_cases hq : CollisionFree (oracleOf dom g) (eagerQueries s (oracleOf dom g) q)
   · rw [eagerQueries_succ] at hg
@@ -325,10 +325,10 @@ first `q` or query `q + 1` is new and its region is near an earlier one or
 covers a root. -/
 theorem regionsFail_succ_imp (N L : Nat) (roots : List Nat) (q : Nat) (g : List Nat)
     (hg : eagerRegionsFail s dom N L roots (q + 1) g = true) :
-    (eagerRegionsFail s dom N L roots q g || firstHit s dom (regionBadValue N L roots) q g) =
+    (eagerRegionsFail s dom N L roots q g || stepHit s dom (regionBadValue N L roots) q g) =
       true := by
   simp only [eagerRegionsFail, decide_eq_true_eq] at hg
-  simp only [Bool.or_eq_true, eagerRegionsFail, firstHit, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [Bool.or_eq_true, eagerRegionsFail, stepHit, Bool.and_eq_true, decide_eq_true_eq]
   by_cases hq : RegionsDisjoint N L (oracleOf dom g) roots (eagerQueries s (oracleOf dom g) q)
   · rw [eagerQueries_succ] at hg
     by_cases hx : nextQuery s dom g q ∈ eagerQueries s (oracleOf dom g) q
@@ -357,13 +357,20 @@ theorem countP_regionBadValue_le {N L : Nat} {roots : List Nat} (hroots : ∀ r 
     (A : List Nat) (hA : ∀ a ∈ A, a < N) :
     (List.range N).countP (regionBadValue N L roots A) ≤
       A.length * (2 * L - 1) + roots.length * L := by
-  have h1 := countP_or_le (List.range N) (fun b => A.any (fun a => decide (Near N L b a)))
-    (fun b => roots.any (fun r => decide (Covers N L b r)))
-  have hu := countP_any_le (List.range N) A (fun b a => decide (Near N L b a))
+  have h1 : (List.range N).countP (regionBadValue N L roots A) ≤
+      (List.range N).countP (fun b => A.any (fun a => decide (Near N L b a))) +
+        (List.range N).countP (fun b => roots.any (fun r => decide (Covers N L b r))) :=
+    countP_or_le (List.range N) (fun b => A.any (fun a => decide (Near N L b a)))
+      (fun b => roots.any (fun r => decide (Covers N L b r)))
+  have hu : (List.range N).countP (fun b => A.any (fun a => decide (Near N L b a))) ≤
+      sumOver A (fun a => (List.range N).countP (fun b => decide (Near N L b a))) :=
+    countP_any_le (List.range N) A (fun b a => decide (Near N L b a))
   have hv : sumOver A (fun a => (List.range N).countP (fun b => decide (Near N L b a))) ≤
       sumOver A (fun _ => 2 * L - 1) :=
     sumOver_le A fun a ha => countP_near_le (hA a ha)
-  have hu' := countP_any_le (List.range N) roots (fun b r => decide (Covers N L b r))
+  have hu' : (List.range N).countP (fun b => roots.any (fun r => decide (Covers N L b r))) ≤
+      sumOver roots (fun r => (List.range N).countP (fun b => decide (Covers N L b r))) :=
+    countP_any_le (List.range N) roots (fun b r => decide (Covers N L b r))
   have hv' : sumOver roots (fun r => (List.range N).countP (fun b => decide (Covers N L b r))) ≤
       sumOver roots (fun _ => L) :=
     sumOver_le roots fun r hr => countP_covers_le (hroots r hr)
@@ -383,7 +390,9 @@ theorem le_countP_group (hs : ∀ t, s t ∈ dom) {N k : Nat} {h : List Nat}
   have hx : nextQuery s dom h k ∈ dom := hs _
   have hnd : (group (s := s) (dom := dom) N k h).Nodup := by
     refine List.pairwise_map.mpr ((List.nodup_range (n := N)).imp fun hab e => hab ?_)
-    have e' := congrArg (fun g => oracleOf dom g (nextQuery s dom h k)) e
+    have e' : oracleOf dom (upd dom h (nextQuery s dom h k) _) (nextQuery s dom h k) =
+        oracleOf dom (upd dom h (nextQuery s dom h k) _) (nextQuery s dom h k) :=
+      congrArg (fun g => oracleOf dom g (nextQuery s dom h k)) e
     simp only [oracleOf_upd_self hx hl] at e'
     exact e'
   have hsub : ∀ g ∈ group (s := s) (dom := dom) N k h,
@@ -394,28 +403,31 @@ theorem le_countP_group (hs : ∀ t, s t ∈ dom) {N k : Nat} {h : List Nat}
     exact upd_mem_tuples hh (List.mem_range.mp hb)
   have hlen : (group (s := s) (dom := dom) N k h).length = N := by
     simp only [group, List.length_map, List.length_range]
-  have hle := length_le_of_nodup_subset hnd hsub
+  have hle : (group (s := s) (dom := dom) N k h).length ≤
+      ((tuples N dom.length).filter
+        (fun g => decide (g ∈ group (s := s) (dom := dom) N k h))).length :=
+    length_le_of_nodup_subset hnd hsub
   rw [hlen] at hle
   rw [List.countP_eq_length_filter]
   exact hle
 
 /-- At most `c` members of a group go wrong at query `k + 1`, when at most `c`
 values are bad. -/
-theorem countP_firstHit_group_le (hs : ∀ t, s t ∈ dom) {bad : List Nat → Nat → Bool}
+theorem countP_stepHit_group_le (hs : ∀ t, s t ∈ dom) {bad : List Nat → Nat → Bool}
     {N k c : Nat}
     (hbad : ∀ A : List Nat, A.length = k → (∀ a ∈ A, a < N) → (List.range N).countP (bad A) ≤ c)
     {g : List Nat} (hgT : g ∈ tuples N dom.length) :
     (tuples N dom.length).countP (fun h =>
-        firstHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h)) ≤ c := by
+        stepHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h)) ≤ c := by
   have hndF : ((tuples N dom.length).filter (fun h =>
-      firstHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))).Nodup :=
+      stepHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))).Nodup :=
     (nodup_tuples N dom.length).filter _
   have hsub : ∀ h ∈ (tuples N dom.length).filter (fun h =>
-        firstHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h)),
+        stepHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h)),
       h ∈ ((List.range N).filter (bad (answers s dom g k))).map
         (upd dom g (nextQuery s dom g k)) := by
     intro h hh
-    simp only [List.mem_filter, Bool.and_eq_true, firstHit, decide_eq_true_eq] at hh
+    simp only [List.mem_filter, Bool.and_eq_true, stepHit, decide_eq_true_eq] at hh
     obtain ⟨hhT, ⟨hnd, hhit⟩, hg⟩ := hh
     obtain ⟨b, _, rfl⟩ := List.mem_map.mp hg
     have hq : eagerQueries s (oracleOf dom (upd dom h (nextQuery s dom h k) b)) k =
@@ -447,24 +459,28 @@ theorem countP_firstHit_group_le (hs : ∀ t, s t ∈ dom) {bad : List Nat → N
 values are bad. -/
 theorem eager_step_le (hs : ∀ t, s t ∈ dom) {bad : List Nat → Nat → Bool} {N k c : Nat}
     (hbad : ∀ A : List Nat, A.length = k → (∀ a ∈ A, a < N) → (List.range N).countP (bad A) ≤ c) :
-    N * (tuples N dom.length).countP (firstHit s dom bad k) ≤ c * N ^ dom.length := by
+    N * (tuples N dom.length).countP (stepHit s dom bad k) ≤ c * N ^ dom.length := by
   have hlo : sumOver (tuples N dom.length)
-        (fun h => if firstHit s dom bad k h = true then N else 0) ≤
+        (fun h => if stepHit s dom bad k h = true then N else 0) ≤
       sumOver (tuples N dom.length) (fun h => (tuples N dom.length).countP (fun g =>
-        firstHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))) := by
+        stepHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))) := by
     apply sumOver_le
     intro h hh
-    cases hf : firstHit s dom bad k h with
+    cases hf : stepHit s dom bad k h with
     | false => exact Nat.zero_le _
     | true =>
       simp only [↓reduceIte, Bool.true_and]
       exact le_countP_group hs hh
-  have hswap := sumOver_swap (tuples N dom.length) (tuples N dom.length)
-    (fun h g => firstHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))
+  have hswap : sumOver (tuples N dom.length) (fun h => (tuples N dom.length).countP (fun g =>
+        stepHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))) =
+      sumOver (tuples N dom.length) (fun g => (tuples N dom.length).countP (fun h =>
+        stepHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))) :=
+    sumOver_swap (tuples N dom.length) (tuples N dom.length)
+      (fun h g => stepHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))
   have hhi : sumOver (tuples N dom.length) (fun g => (tuples N dom.length).countP (fun h =>
-        firstHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))) ≤
+        stepHit s dom bad k h && decide (g ∈ group (s := s) (dom := dom) N k h))) ≤
       sumOver (tuples N dom.length) (fun _ => c) :=
-    sumOver_le _ fun _ hg => countP_firstHit_group_le hs hbad hg
+    sumOver_le _ fun _ hg => countP_stepHit_group_le hs hbad hg
   rw [sumOver_ite_const] at hlo
   rw [sumOver_const, length_tuples] at hhi
   rw [Nat.mul_comm c]
@@ -487,22 +503,25 @@ theorem two_mul_eagerCollides_le (hs : ∀ t, s t ∈ dom) (N : Nat) :
   | q + 1 => by
     have ih : 2 * N * (tuples N dom.length).countP (eagerCollides s dom q) ≤
         q * (q - 1) * N ^ dom.length := two_mul_eagerCollides_le hs N q
-    have hstep : N * (tuples N dom.length).countP (firstHit s dom repeatBad q) ≤
+    have hstep : N * (tuples N dom.length).countP (stepHit s dom repeatBad q) ≤
         q * N ^ dom.length :=
       eager_step_le hs fun A hA _ =>
         Nat.le_trans (countP_contains_le List.nodup_range A) (Nat.le_of_eq hA)
     have hsplit : (tuples N dom.length).countP (eagerCollides s dom (q + 1)) ≤
         (tuples N dom.length).countP (eagerCollides s dom q) +
-          (tuples N dom.length).countP (firstHit s dom repeatBad q) :=
+          (tuples N dom.length).countP (stepHit s dom repeatBad q) :=
       Nat.le_trans (countP_le_of_imp _ fun g _ hg => collides_succ_imp s dom q g hg)
         (countP_or_le _ _ _)
     have hmul : 2 * N * (tuples N dom.length).countP (eagerCollides s dom (q + 1)) ≤
         2 * N * (tuples N dom.length).countP (eagerCollides s dom q) +
-          2 * N * (tuples N dom.length).countP (firstHit s dom repeatBad q) := by
-      have hm := Nat.mul_le_mul_left (2 * N) hsplit
+          2 * N * (tuples N dom.length).countP (stepHit s dom repeatBad q) := by
+      have hm : 2 * N * (tuples N dom.length).countP (eagerCollides s dom (q + 1)) ≤
+          2 * N * ((tuples N dom.length).countP (eagerCollides s dom q) +
+            (tuples N dom.length).countP (stepHit s dom repeatBad q)) :=
+        Nat.mul_le_mul_left (2 * N) hsplit
       rw [Nat.mul_add] at hm
       exact hm
-    have h2 : 2 * N * (tuples N dom.length).countP (firstHit s dom repeatBad q) ≤
+    have h2 : 2 * N * (tuples N dom.length).countP (stepHit s dom repeatBad q) ≤
         2 * (q * N ^ dom.length) := by
       rw [Nat.mul_assoc]; exact Nat.mul_le_mul_left 2 hstep
     have hid : (q + 1) * (q + 1 - 1) * N ^ dom.length =
@@ -538,7 +557,8 @@ theorem two_mul_eager_stopped_le (hs : ∀ t, s t ∈ dom) (N q : Nat) (τ : Lis
 theorem pow_two_eager_collision_prob_le (hs : ∀ t, s t ∈ dom) (k q : Nat) :
     2 ^ (k + 1) * (tuples (2 ^ k) dom.length).countP (eagerCollides s dom q) ≤
       q * (q - 1) * 2 ^ (k * dom.length) := by
-  have h := two_mul_eagerCollides_le hs (2 ^ k) q
+  have h : 2 * 2 ^ k * (tuples (2 ^ k) dom.length).countP (eagerCollides s dom q) ≤
+      q * (q - 1) * (2 ^ k) ^ dom.length := two_mul_eagerCollides_le hs (2 ^ k) q
   rw [← Nat.pow_mul, ← Nat.pow_succ'] at h
   exact h
 
@@ -569,22 +589,25 @@ theorem two_mul_eagerRegionsFail_le (hs : ∀ t, s t ∈ dom) (N L : Nat) {roots
     have ih : 2 * N * (tuples N dom.length).countP (eagerRegionsFail s dom N L roots q) ≤
         (q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * N ^ dom.length :=
       two_mul_eagerRegionsFail_le hs N L hroots q
-    have hstep : N * (tuples N dom.length).countP (firstHit s dom (regionBadValue N L roots) q) ≤
+    have hstep : N * (tuples N dom.length).countP (stepHit s dom (regionBadValue N L roots) q) ≤
         (q * (2 * L - 1) + roots.length * L) * N ^ dom.length :=
       eager_step_le hs fun A hA hlt => by
         rw [← hA]; exact countP_regionBadValue_le hroots A hlt
     have hsplit : (tuples N dom.length).countP (eagerRegionsFail s dom N L roots (q + 1)) ≤
         (tuples N dom.length).countP (eagerRegionsFail s dom N L roots q) +
-          (tuples N dom.length).countP (firstHit s dom (regionBadValue N L roots) q) :=
+          (tuples N dom.length).countP (stepHit s dom (regionBadValue N L roots) q) :=
       Nat.le_trans (countP_le_of_imp _ fun g _ hg => regionsFail_succ_imp s dom N L roots q g hg)
         (countP_or_le _ _ _)
     have hmul : 2 * N * (tuples N dom.length).countP (eagerRegionsFail s dom N L roots (q + 1)) ≤
         2 * N * (tuples N dom.length).countP (eagerRegionsFail s dom N L roots q) +
-          2 * N * (tuples N dom.length).countP (firstHit s dom (regionBadValue N L roots) q) := by
-      have hm := Nat.mul_le_mul_left (2 * N) hsplit
+          2 * N * (tuples N dom.length).countP (stepHit s dom (regionBadValue N L roots) q) := by
+      have hm : 2 * N * (tuples N dom.length).countP (eagerRegionsFail s dom N L roots (q + 1)) ≤
+          2 * N * ((tuples N dom.length).countP (eagerRegionsFail s dom N L roots q) +
+            (tuples N dom.length).countP (stepHit s dom (regionBadValue N L roots) q)) :=
+        Nat.mul_le_mul_left (2 * N) hsplit
       rw [Nat.mul_add] at hm
       exact hm
-    have h2 : 2 * N * (tuples N dom.length).countP (firstHit s dom (regionBadValue N L roots) q) ≤
+    have h2 : 2 * N * (tuples N dom.length).countP (stepHit s dom (regionBadValue N L roots) q) ≤
         2 * ((q * (2 * L - 1) + roots.length * L) * N ^ dom.length) := by
       rw [Nat.mul_assoc]; exact Nat.mul_le_mul_left 2 hstep
     have hid : (q + 1) * (q + 1 - 1) * (2 * L - 1) + 2 * (q + 1) * roots.length * L =
@@ -593,7 +616,10 @@ theorem two_mul_eagerRegionsFail_le (hs : ∀ t, s t ∈ dom) (N L : Nat) {roots
       cases q with
       | zero => simp only [Nat.zero_add, Nat.sub_self, Nat.mul_zero, Nat.zero_mul, Nat.zero_sub,
           Nat.mul_one, Nat.add_zero, Nat.mul_assoc]
-      | succ m => simp only [Nat.add_sub_cancel]; grind
+      | succ m =>
+        simp only [Nat.add_sub_cancel, Nat.mul_assoc, Nat.add_mul, Nat.mul_add, Nat.one_mul,
+          Nat.mul_one]
+        omega
     rw [hid, Nat.add_mul, Nat.mul_assoc 2 _ (N ^ dom.length)]
     omega
 
@@ -604,7 +630,10 @@ theorem pow_two_eager_region_prob_le (hs : ∀ t, s t ∈ dom) (k L : Nat) {root
     2 ^ (k + 1) * (tuples (2 ^ k) dom.length).countP
         (eagerRegionsFail s dom (2 ^ k) L roots q) ≤
       (q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * 2 ^ (k * dom.length) := by
-  have h := two_mul_eagerRegionsFail_le hs (2 ^ k) L hroots q
+  have h : 2 * 2 ^ k * (tuples (2 ^ k) dom.length).countP
+        (eagerRegionsFail s dom (2 ^ k) L roots q) ≤
+      (q * (q - 1) * (2 * L - 1) + 2 * q * roots.length * L) * (2 ^ k) ^ dom.length :=
+    two_mul_eagerRegionsFail_le hs (2 ^ k) L hroots q
   rw [← Nat.pow_mul, ← Nat.pow_succ'] at h
   exact h
 
