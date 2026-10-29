@@ -162,6 +162,34 @@ def STy.isValue : STy → Bool
 
 /-! ## Conversions -/
 
+mutual
+
+/-- Structural equality of types. -/
+def STy.same : STy → STy → Bool
+  | .int t, .int t' => t == t'
+  | .bool, .bool => true
+  | .address p, .address p' => p == p'
+  | .fixedBytes n _, .fixedBytes m _ => n == m
+  | .fixed f, .fixed f' => f == f'
+  | .enum d, .enum d' | .udvt d, .udvt d' | .contract d, .contract d' => d == d'
+  | .bytes l, .bytes l' | .string l, .string l' => l == l'
+  | .array l τ n, .array l' τ' n' => l == l' && STy.same τ τ' && n == n'
+  | .struct l d, .struct l' d' => l == l' && d == d'
+  | .mapping k v, .mapping k' v' => STy.same k k' && STy.same v v'
+  | .fn e ps rs m, .fn e' ps' rs' m' => e == e' && STy.sameList ps ps' && STy.sameList rs rs' && m == m'
+  | .rational q, .rational q' => q == q'
+  | .stringLit s, .stringLit s' => s == s'
+  | .tuple ts, .tuple ts' => STy.sameList ts ts'
+  | _, _ => false
+
+/-- Pointwise structural equality of type lists. -/
+def STy.sameList : List STy → List STy → Bool
+  | [], [] => true
+  | τ :: τs, τ' :: τs' => STy.same τ τ' && STy.sameList τs τs'
+  | _, _ => false
+
+end
+
 /-- solc's location rule for an implicit reference conversion: a copy to
 `memory`, or the same location (a pointer). -/
 def DataLoc.implicit (l l' : DataLoc) : Bool := l' == .memory || l == l'
@@ -178,9 +206,12 @@ def STy.implicit (isBase : DeclName → DeclName → Bool) : STy → STy → Boo
   | .enum d, .enum d' | .udvt d, .udvt d' => d == d'
   | .contract d, .contract d' => isBase d d'
   | .bytes l, .bytes l' | .string l, .string l' => l.implicit l'
+  | .array l τ n, .array l' τ' n' => τ.same τ' && n == n' && l.implicit l'
+  | .struct l d, .struct l' d' => d == d' && l.implicit l'
+  | .mapping k v, .mapping k' v' => k.same k' && v.same v'
+  | .fn e ps rs m, .fn e' ps' rs' m' => e == e' && STy.sameList ps ps' && STy.sameList rs rs' && m == m'
   | .rational q, .int t => decide (q.FitsInt t)
   | .rational q, .fixed f => (q.toFixed? f).isSome
-  | .rational q, .address false => decide (q.FitsInt IntTy.u160) && q.num == 0
   | .stringLit _, .bytes .memory | .stringLit _, .string .memory => true
   | .stringLit s, .fixedBytes n _ => decide (s.length ≤ n)
   | _, _ => false
@@ -199,10 +230,11 @@ def STy.explicit (isBase : DeclName → DeclName → Bool) (s t : STy) : Bool :=
   | .address _, .address false => true
   | .contract _, .address false | .address _, .contract _ => true
   | .int _, .enum _ | .enum _, .int _ => true
-  | .fixed _, .fixed _ | .fixed _, .int _ | .int _, .fixed _ => true
+  | .fixed _, .fixed _ | .fixed _, .int _ => true
+  | .int a, .fixed f => a.signed == f.signed && a.bits == f.bits
   | .fixed f, .fixedBytes n _ | .fixedBytes n _, .fixed f => f.bits == 8 * n
   | .bytes l, .string l' | .string l, .bytes l' => l == l'
-  | .bytes l, .fixedBytes _ _ => l != .storage
+  | .bytes _, .fixedBytes _ _ => true
   | .rational q, .int a => (q.toIntExplicit? a).isSome
   | .rational q, .fixed f => (q.toFixedExplicit? f).isSome
   | .rational q, .address false => decide (q.FitsInt IntTy.u160)

@@ -407,6 +407,7 @@ import Solidity.Source.Types
 import Solidity.Source.Resolve
 import Solidity.Source.Typing
 import Solidity.Source.WellFormed
+import Solidity.Source.Resolved
 import Solidity.Source.TypingExamples
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples

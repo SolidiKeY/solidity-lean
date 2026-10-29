@@ -376,8 +376,9 @@ A read-only finder and a separate skeptic reviewed the first push
 | `Solidity/Source/Const.lean` | Exact rationals `Q`; literal values and units; `Syn.const`, the constant a literal expression denotes; the conversions of constants |
 | `Solidity/Source/Types.lean` | Static types `STy`; elementary types; implicit and explicit conversions; range theorems |
 | `Solidity/Source/Resolve.lean` | C3 linearization, scoped lookup, builtins with their profile status, the `Resolves` judgment |
-| `Solidity/Source/Typing.lean` | Type-name elaboration, typing contexts, `HasType`, `StmtOK`/`ItemsOK` |
-| `Solidity/Source/WellFormed.lean` | Settings (two pipelines, empty link map), resolutions, `WellFormed` |
+| `Solidity/Source/Typing.lean` | Type-name elaboration, typing contexts, `Typed`/`HasType`, `StmtD`/`ItemsD` (`StmtOK`/`ItemsOK`) |
+| `Solidity/Source/Resolved.lean` | The intrinsic resolved form `RExpr`/`RStmt` and the elaboration `Typed.toR`, `StmtD.toR` |
+| `Solidity/Source/WellFormed.lean` | Settings (two pipelines, empty link map), resolutions, body frames, `WellFormed` |
 | `Solidity/Source/TypingExamples.lean` | Derivations, coverage, controls |
 
 ### Compile-time constants
@@ -438,10 +439,10 @@ integration obligation (a correspondence lemma, or replacing `FixTy`); once
 | implicit only between range-contained pairs | `FixTy.implicitOK` = solc's test ∧ `subsumes`; `FixTy.subsumes_inRange` |
 | explicit out of range: wrap at run time; constant out of range: compile error | any fixed↔fixed explicit conversion is typed (S02 wraps); `Q.toFixedExplicit?` refuses an out-of-range constant |
 | rounding toward zero | `Q.toFixedExplicit?` truncates (`Int.tdiv`) |
-| shifts rejected | no `shift` rule at a fixed-point type (`HasType.shift` needs an integer) |
-| unary minus on `ufixed` accepted | `HasType.negFixed` at any signedness (`HasType.neg` stays signed-only for integers) |
-| `++`/`--` add or subtract 1 | `HasType.incDec` at any numeric type (S02 gives the value) |
-| fixed/integer by value, `bytesM` by bit pattern | `STy.explicit`: fixed↔int any, fixed↔`bytesM` of equal width |
+| shifts rejected | no `shift` rule at a fixed-point type (`Typed.shift` needs an integer or `bytesN`) |
+| unary minus on `ufixed` accepted | `Typed.negFixed` at any signedness (`Typed.neg` stays signed-only for integers) |
+| `++`/`--` add or subtract 1 | `Typed.incDec` at any numeric type (S02 gives the value) |
+| fixed/integer by value, `bytesM` by bit pattern | `STy.explicit`: fixed→int and fixed↔fixed any; int→fixed of the same sign and width (one change at a time); fixed↔`bytesM` of equal width |
 | `*` and `/` exact, truncated | typing only; the value is S02's |
 
 ### Name resolution
@@ -467,38 +468,73 @@ yet.
 
 ### Typing
 
-`HasType Γ e τ` types expressions. It has these rules:
+Typing derivations are data. `Typed Γ e τ : Type` is the expression
+judgment; `HasType Γ e τ := Nonempty (Typed Γ e τ)` is its proposition. A
+derivation fixes every choice a semantics needs (which local, which state
+variable, which overload, which builtin), and `Typed.toR` elaborates it into
+the resolved form below. The rules:
 
-- constants at their exact rational (`const`);
-- literals, variables (locals, state variables, constants, `this`),
-  parentheses and tuples;
-- unary operators, increments and `delete`;
-- `+ - * / %` (numbers meeting at a common type); `& | ^` (integers); `<<`,
-  `>>` and `**` (an integer by an unsigned amount); order and equality,
-  comparisons of constants; `&&`, `||`; `? :`;
-- assignment and compound assignment to an lvalue, the right side
-  converting implicitly;
-- array, mapping and `bytes` indexing; `length`;
-- explicit conversions to elementary types and to contracts and enums;
-  `payable(…)`;
-- internal function calls, the arguments converting to the parameters;
-- the admitted magic members (`msg.sender`, `msg.value`, `block.timestamp`)
-  and `balance`;
+- constants at their exact rational (`const`; not a checksummed address
+  literal, which is `litAddress`), hex literals at `bytesN` (`litBytes`);
+- literals; locals by position (`loc`) and state variables and constants by
+  declaration (`state`); `this`; parentheses; tuples at their components'
+  mobile types;
+- unary `-` (signed integers; any fixed-point type), `!`, `~`, `++`/`--`
+  on an lvalue, `delete` (not a mapping);
+- `+ - * / %` (numbers meeting at a common type); `& | ^` (integers and
+  `bytesN`); `<<`, `>>` (the left operand's mobile type by an unsigned
+  amount) and `**` (an integer base); order and equality at a common type
+  (`==` excludes internal function types); comparisons of two constants;
+  `&&`, `||`; `? :` at the branches' mobile types;
+- assignment to an lvalue (`LVal`: a local, a mutable state variable, a
+  `storage`/`memory` array element, a mapping value) and compound assignment;
+- array (a constant index within a static length), mapping and `bytes`/`bytesN`
+  indexing; `length`;
+- explicit conversions to elementary types (`bytes`/`string` keep their
+  location), contracts and enums; `payable(…)`;
+- internal calls: exactly one callable overload accepts the arguments (the
+  filter is `[d]`, so the call is unambiguous by construction);
+- the admitted magic members, `msg.value` only where `Ctx.msgValue` allows
+  it (`msgValue_refused`), and `balance`;
 - the admitted builtin functions (`require`, `assert`, `revert`, the
-  hashes, `addmod`/`mulmod`, `ecrecover`).
+  hashes, `addmod`/`mulmod` with a non-zero constant modulus, `ecrecover`).
 
-`StmtOK Γ s Γ'` types statements, with `ItemsOK` for blocks. It covers
-expression statements, declarations with and without an initializer, blocks
-and `unchecked` blocks, `if`, all three loops, `break`/`continue`, `return`
-(with or without a value, against the function's return types), `emit E(…)`,
-`revert E(…)`, and the canonical rethrow (`D` a `bytes memory` variable,
-completing S00's shape check). `StmtOK.locals_suffix` proves that a
-statement only adds locals.
+`StmtD C L s L'` types statements in a fixed body context `C` (environment,
+contract, return types, the `msg.value` and modifier flags) with the locals
+varying: `s` is typed with locals `L` and leaves `L'`. `ItemsD` types blocks.
+They cover expression statements, `_` in a modifier, declarations with and
+without an initializer (with solc's location rule `locOK`: a reference type
+names its location, a `storage` one is initialized, a mapping only in
+`storage`), blocks and `unchecked` blocks, `if`, all three loops (a
+declaration is no loop or `if` body), `break`/`continue` (which exist only
+in loop bodies, by S00's statement contexts), `return` against the
+function's return types, `emit E(…)` and `revert E(…)` (a unique matching
+event or error), and the canonical rethrow (completing S00's shape check).
+`StmtD.locals_suffix` proves that a statement only adds locals.
 
-**Coverage (`exprCoverage`, `exprCoverage_typed`).** Each of the 29
-expression constructors is classified. 23 are typed, and
-`exprCoverage_typed` gives each a derivation whose root is that constructor.
-6 are deferred with a stage and a reason:
+### The resolved form (`Solidity/Source/Resolved.lean`)
+
+`RExpr B Γ τ` is the intrinsic resolved expression: `Γ : RCtx` is the list
+of local types, a local is an index `Idx Γ τ` (`Idx.ofGet?` from a typed
+position), a state variable or callee is its declaration (`Decl.ref`), and
+every implicit conversion carries its evidence (`Conv`). `B` is the
+inheritance relation it was checked against. `RStmt B Γ Γ'` and `RItems`
+resolve statements and blocks the same way, `declVar`/`declInit` extending
+`Γ`. `Typed.toR : Typed Γ e τ → RExpr Γ.isBase Γ.tys τ` and
+`StmtD.toR : StmtD C L s L' → RStmt C.isBase (tysOf L) (tysOf L')` are total
+and structural; `HasType.resolved` and `StmtOK.resolved` state that every
+well-typed phrase has a resolved form. The mobile-type lemmas
+(`Q.mobileInt?_fits`, `mobile_conv`) supply the conversion evidence for
+tuples, shifts and conditionals. S02's semantics is meant to be given on
+`RExpr`/`RStmt`, never on raw syntax; the `unchecked` and loop contexts are
+kept as `RItems.unchecked` and the loop constructors.
+
+**Coverage.** `exprCoverage` classifies every expression constructor
+explicitly (no wildcard over expression constructors; `none` only for
+constructors of other categories), and `exprCoverage_total` proves by cases
+on `Syn .expr` that every expression's constructor is classified.
+`exprCoverage_typed` gives each of the 23 typed constructors a derivation
+rooted at it. 6 are deferred with a stage and a reason:
 
 | Constructor | Stage | Reason |
 |---|---|---|
@@ -507,64 +543,94 @@ expression constructors is classified. 23 are typed, and
 | `metaType` | S04.02 | `type(T)` members read the artifact table and ABI identities |
 | `new` | S03 | creation and memory allocation |
 | `inlineArray` | S02 | the mobile type of its elements |
-| `elemType` | S01 | a type name is typed only as a conversion callee (`convElem`) |
+| `elemType` | S02 | a type name as a value (`abi.decode`, `type(T)`); S01 types it only as a conversion callee (`convElem`) |
 
-Statement forms without a rule yet: `try`/`catch`, external calls, struct
-construction, named arguments, `abi.*` and the members of
-contract/struct/enum values beyond `length` and `balance`. A body using them
-is not yet `WellFormed`. They are listed under Remaining for S02.
+`stmtCoverage` does the same for statements (`stmtCoverage_total`,
+`simpleCoverage_total`): 13 typed; `declTuple` (S02, tuple destructuring of
+call results), `try` (S03, external calls) and `assembly` (excluded by S00;
+only the canonical rethrow is typed) deferred.
 
 ### Settings, resolutions, well-formedness
 
 - **Settings.** `Settings` holds a pipeline and a link map.
   `Settings.coder` gives the pragma's coder (`Syn.pragmaCoder`; v2 by
-  default) under legacy and v2 under via-IR (`coder_legacy`,
-  `coder_viaIR`), as the G01 contract's `coder_legacy`/`coder_viaIR`
-  require.
+  default) under legacy and v2 under via-IR (`coder_legacy`, `coder_viaIR`).
+  The pinned solc agrees: under via-IR, `pragma abicoder v1` is ignored with
+  warning 2066 (`test/cmdlineTests/viair_abicoder_v1`).
 - **Resolutions.** `resolveUnit` records the pipeline and coder;
   `Resolves'` additionally requires the empty link map (G05 Q1) and is
   functional (`Resolves'.unique`).
+- **Bodies.** `Decl.frame?` gives the frame of every body: functions,
+  modifiers (with `_` admitted), constructors, `fallback` (with or without
+  parameters) and `receive`. A frame's locals are the named parameters and
+  the named returns, which solc puts in scope. `msg.value` is readable in a
+  `payable`, `internal` or `private` function, a modifier, a payable
+  constructor and `receive`.
 - **Well-formedness.** `WellFormed` requires:
-  - every contract linearizes;
-  - no name is declared twice in a scope, except overloaded functions and
-    events;
-  - at most one `abicoder` pragma;
-  - every initializer converts to its variable's type;
-  - every function body is `ItemsOK` in its parameters' context.
+  - every base is an earlier contract or interface (`Env.basesOK`) and every
+    contract and interface linearizes;
+  - no two declarations clash (`List.Pairwise`, so an exact duplicate
+    clashes too): one name in one scope, except functions or events with
+    different parameter types (`sameSig_illFormed`);
+  - every pragma is a version, an ABI coder or `experimental
+    ABIEncoderV2` (`unknownPragma_illFormed`), and at most one coder pragma;
+  - every declared type elaborates (variables, signatures, event and error
+    parameters, struct members);
+  - placement: a free function has no visibility and a body; an interface
+    function is `external` without a body (`ifaceBody_illFormed`); an
+    interface has no modifiers, constructors or state variables;
+  - every constant has an initializer, and every initializer converts to its
+    variable's type;
+  - every body's frame elaborates, its parameter and return names are
+    distinct, and its statements are `ItemsOK`.
 
   `InProfileSyntax` is S00's verdict, kept separate.
 
-These give G01's `SourceSpec` its S01 fields. `Resolves` is `Resolves'`
-over a unit and settings; `WellFormed`, `pipelineOf`, `coderOf` and
-`NoLinkMap` follow. `Parses` (G08–G11), `InProfile` beyond syntax and
-resolution, and `meaning` (S02–S04) do not exist yet.
+These give G01's `SourceSpec` its S01 fields, with one mismatch to resolve at
+integration: `SourceSpec.Resolves : Syntax → Resolved → Prop` takes no
+settings, while S01's resolution depends on them (the coder). Either
+`Syntax := Settings × Syn .unit`, or the coder moves to `coderOf` alone. G01's
+`rawReturndata` has no status function in S01. `Parses` (G08–G11),
+`InProfile` beyond syntax and resolution, and `meaning` (S02–S04) do not
+exist yet.
 
 ### Controls (`Solidity/Source/TypingExamples.lean`)
 
 | Theorem | Statement |
 |---|---|
-| `exprCoverage_typed` | a derivation for each of the 23 typed expression constructors |
-| `counter_wellFormed` | S00's counter is `WellFormed` and `InProfileSyntax` |
-| `clashing_illFormed` | `uint256 x; function x()` in one contract is not well formed |
-| `tooBig_illTyped`, `fits_wellTyped` | `uint8 x = 300;` is ill typed in every context; `uint8 x = 255;` is well typed |
-| `HasType.lit_num` | a number literal has only its exact type |
+| `exprCoverage_total`, `exprCoverage_typed`, `stmtCoverage_total`, `simpleCoverage_total` | coverage, as above |
+| `counter_wellFormed` | S00's counter is `WellFormed` and `InProfileSyntax`; its body derivation is `incBody` |
+| `clashing_illFormed`, `sameSig_illFormed`, `ifaceBody_illFormed`, `unknownPragma_illFormed` | four ill-formed units, each refuted by its own field |
+| `tooBig_illTyped`, `fits_wellTyped` | `uint8 x = 300;` is ill typed in every body; `uint8 x = 255;` is well typed |
+| `Typed.lit_num` | a number literal is a rational, a `bytesN` or an address |
+| `msgValue_refused`, `gasleft_untyped` | `msg.value` in a non-payable public body, and `gasleft()`, have no derivation |
 | `diamond_linearize`, `cycle_rejected` | C3 |
-| `local_shadows`, `gasleft_excluded`, `blockNumber_excluded`, `gasleft_untyped` | resolution |
-| `w_msgSender`, `w_require`, `w_emit`, `w_revertError` | builtins, events and errors |
+| `local_shadows`, `gasleft_excluded`, `blockNumber_excluded` | resolution |
+| `w_msgSender`, `w_require`, `w_emit`, `w_revertError`, `r_assign`, `r_emit` | builtins, events and errors, and their resolved forms |
 | `counter_pipelines`, `abicoderV1` | both pipelines and their coders |
 
 ### What S01 does not do
 
-- **Overloads.** `callInternal` accepts any overload whose parameters
-  accept the arguments; solc requires a unique best match, and uniqueness is
-  not proved.
-- **Typing is a relation, not a checker.** Membership is shown by
-  derivation; no decision procedure is proved. A checker sound for
-  `HasType` is the natural next step for G15's admission.
-- **Not modelled yet:** the mobile types of non-integral constants, data
-  location rules beyond the copy/pointer distinction, `using for`
-  attachments and operator overloading, function-type values, and override,
-  visibility and mutability checks.
+- **A checker.** Typing is a relation given by derivations; no decision
+  procedure is proved. A checker sound for `Typed` is the natural next step
+  for G15's admission.
+- **Overloads across bases.** `Env.lookup` takes the first scope of the
+  linearization that declares the name, so overloads split between a
+  contract and its base are not merged.
+- **Data locations.** Copies from `memory` to `storage`, string literals to
+  `storage`, and tuple-to-tuple implicit conversion are not typed.
+- **Locals.** A second declaration of a name in the same block is not
+  refused (it shadows).
+- **Constants.** Array lengths take only literal constants, not named ones;
+  constant initializers are typed but not checked to be compile-time
+  (solc refuses, for example, `block.timestamp`); enum conversions of
+  constants are not range checked.
+- **Members and calls.** `abi.*`, `send`/`transfer`, struct construction and
+  members, named arguments, external calls, `payable(c)` of a contract without
+  `receive`.
+- **Function checks.** View/pure mutability, override, `virtual` and
+  visibility of overriding functions, `using for`, operators on user types,
+  function-type values.
 - `FixTy` versus the fixed-point branch's `FxTy` (see above).
 
 ### Gates (S01)
@@ -573,8 +639,8 @@ Recorded in [Handoff](#handoff-s01).
 
 ### Review (S01)
 
-To be filled.
+REVIEW_PLACEHOLDER
 
 ### Handoff (S01)
 
-To be filled.
+HANDOFF_PLACEHOLDER

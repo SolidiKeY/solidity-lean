@@ -25,6 +25,13 @@ over S00's declaration graph (`Solidity/Source/Decls.lean`):
 
 namespace Solidity.Source
 
+/-- Whether a declaration is `private` (a state variable or function). -/
+def Decl.isPrivate (d : Decl) : Bool :=
+  match d.kind, d.top, d.node with
+  | .stateVar, _, .stateVar _ (some .priv) _ _ _ _ _ => true
+  | .function, _, .function _ _ (some .priv) _ _ _ _ _ _ => true
+  | _, _, _ => false
+
 /-- The resolution environment of a source unit: its declarations. -/
 structure Env where
   decls : List Decl
@@ -75,16 +82,33 @@ def linearize (E : Env) (c : String) : Option (List String) := E.linearizeF (E.d
 def declared (E : Env) (s : Option String) (x : String) : List Decl :=
   E.decls.filter fun d => d.scope == s && d.name == x && x != ""
 
+/-- The declarations named `x` in scope `s` visible from `scope`: a base's
+`private` members are not. -/
+def visible (E : Env) (scope s : Option String) (x : String) : List Decl :=
+  (E.declared s x).filter fun d => s == scope || !d.isPrivate
+
 /-- **Lookup** of a name in a contract: the first scope of its
-linearization that declares it, else file level. -/
+linearization that declares it visibly, else file level.  (Overloads
+inherited from several bases are not merged: the first scope's set is the
+overload set.) -/
 def lookup (E : Env) (scope : Option String) (x : String) : List Decl :=
   let chain : List (Option String) :=
     match scope with
     | Option.none => []
     | Option.some c => ((E.linearize c).getD [c]).map Option.some
-  match chain.find? (fun s => !(E.declared s x).isEmpty) with
-  | Option.some s => E.declared s x
+  match chain.find? (fun s => !(E.visible scope s x).isEmpty) with
+  | Option.some s => E.visible scope s x
   | Option.none => E.declared Option.none x
+
+/-- Whether every base of every contract and interface is a contract or
+interface declared earlier at file level (solc: a base precedes its
+derived contract; a library is no base). -/
+def basesOK (E : Env) : Bool :=
+  (E.decls.zipIdx).all fun (d, i) =>
+    !(d.kind == .contract || d.kind == .interface) ||
+      (E.bases d.name).all fun b =>
+        ((E.decls.zipIdx).take i).any fun (d', _) =>
+          d'.scope == Option.none && d'.name == b && (d'.kind == .contract || d'.kind == .interface)
 
 end Env
 

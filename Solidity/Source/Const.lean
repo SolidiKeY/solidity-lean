@@ -70,19 +70,40 @@ def trunc (a : Q) : Int := a.num.tdiv a.den
 `b` is zero. -/
 def mod (a b : Q) : Option Q := (a.div b).map fun q => a.sub (b.mul (ofInt q.trunc))
 
-/-- The bits of the integer part's magnitude (solc bounds results by them). -/
-def bits (a : Q) : Nat := Nat.log2 a.num.natAbs + 1
+/-- The number of bits of `n`, capped at 4200 (beyond solc's bound):
+structural, so it reduces in proofs. -/
+def bitLen (n : Nat) : Nat := go 4200 n
+where
+  go : Nat → Nat → Nat
+    | 0, _ => 0
+    | fuel + 1, n => if n = 0 then 0 else 1 + go fuel (n / 2)
 
-/-- solc's bound on exact constants: results whose numerator or denominator
-needs more than 4096 bits are rejected. -/
+/-- The reduced form: numerator and denominator divided by their gcd. -/
+def reduce (a : Q) : Q :=
+  ⟨a.num / (Nat.gcd a.num.natAbs a.den : Int), a.den / Nat.gcd a.num.natAbs a.den,
+    Nat.div_pos (Nat.le_of_dvd a.den_pos (Nat.gcd_dvd_right _ _)) (Nat.gcd_pos_of_pos_right _ a.den_pos)⟩
+
+/-- solc's bound on exact constants: a result whose reduced numerator or
+denominator needs more than 4096 bits is a compile error ("Precision of
+rational constants is limited to 4096 bits"). -/
 def maxBits : Nat := 4096
 
-/-- `a ** k` for an integer exponent: `none` when the result would exceed
-`maxBits` (solc's "exponent too large"). -/
+/-- The bound, checked on the reduced result. -/
+def bounded (a : Q) : Option Q :=
+  let r := a.reduce
+  if bitLen r.num.natAbs ≤ maxBits + 1 ∧ bitLen r.den ≤ maxBits + 1 then Option.some r else none
+
+/-- `a ** k` for an integer exponent: bases `0` and `±1` always fold (a
+zero base with a negative exponent divides by zero); otherwise `none` when
+the result would exceed `maxBits` (solc's `fitsPrecisionExp`). -/
 def pow (a : Q) (k : Int) : Option Q :=
-  if a.bits * k.natAbs > maxBits ∨ (Nat.log2 a.den + 1) * k.natAbs > maxBits then none
-  else if 0 ≤ k then Option.some ⟨a.num ^ k.toNat, a.den ^ k.toNat, Nat.pow_pos a.den_pos⟩
-  else (ofInt 1).div ⟨a.num ^ k.natAbs, a.den ^ k.natAbs, Nat.pow_pos a.den_pos⟩
+  let r := a.reduce
+  if r.den = 1 ∧ r.num.natAbs ≤ 1 then
+    if 0 ≤ k then Option.some ⟨r.num ^ k.toNat, 1, by decide⟩
+    else if r.num = 0 then none else Option.some ⟨r.num ^ k.natAbs, 1, by decide⟩
+  else if bitLen r.num.natAbs * k.natAbs > maxBits ∨ bitLen r.den * k.natAbs > maxBits then none
+  else if 0 ≤ k then bounded ⟨r.num ^ k.toNat, r.den ^ k.toNat, Nat.pow_pos r.den_pos⟩
+  else ((ofInt 1).div ⟨r.num ^ k.natAbs, r.den ^ k.natAbs, Nat.pow_pos r.den_pos⟩).bind bounded
 
 end Q
 
@@ -137,36 +158,42 @@ def Denom.factor : Denom → Nat
 /-- An integral constant, or `none`. -/
 def Q.int? (a : Q) : Option Int := if a.isInt then Option.some a.toInt else none
 
-/-- The bound on shift amounts solc folds. -/
-def maxShift : Nat := 4096
+/-- Beyond this right shift, a constant is `0` or `-1` (avoiding the
+computation of a huge power). -/
+def maxShift : Nat := 4097
 
-/-- **The constant a literal expression denotes**: number literals, units,
+/-- **The constant a literal expression denotes**: number literals, units
+(on decimal literals only: solc rejects a unit on a hexadecimal number),
 parentheses, unary `-`/`~`, `+ - * / % **`, shifts and bitwise operations,
-folded exactly; anything else is not a compile-time number. -/
+folded exactly and bounded as solc bounds them; anything else is not a
+compile-time number. -/
 def Syn.const : {c : Cat} → Syn c → Option Q
   | _, .lit (.num n) => Option.some n.value
-  | _, .litUnit n u => Option.some (n.value.mul (Q.ofInt u.factor))
+  | _, .litUnit (.dec m f e) u => Option.some ((NumLit.dec m f e).value.mul (Q.ofInt u.factor))
   | _, .tuple (.some e) .nil => e.const
   | _, .unaryPrefix .neg e => e.const.map Q.neg
   | _, .unaryPrefix .bitNot e => do
       let k ← (← e.const).int?
       pure (Q.ofInt (Int.bitNot k))
-  | _, .addSub .add a b => do pure ((← a.const).add (← b.const))
-  | _, .addSub .sub a b => do pure ((← a.const).sub (← b.const))
-  | _, .mulDivMod .mul a b => do pure ((← a.const).mul (← b.const))
-  | _, .mulDivMod .div a b => do (← a.const).div (← b.const)
-  | _, .mulDivMod .mod a b => do (← a.const).mod (← b.const)
+  | _, .addSub .add a b => do ((← a.const).add (← b.const)).bounded
+  | _, .addSub .sub a b => do ((← a.const).sub (← b.const)).bounded
+  | _, .mulDivMod .mul a b => do ((← a.const).mul (← b.const)).bounded
+  | _, .mulDivMod .div a b => do (← (← a.const).div (← b.const)).bounded
+  | _, .mulDivMod .mod a b => do (← (← a.const).mod (← b.const)).bounded
   | _, .exp a b => do
       let k ← (← b.const).int?
       (← a.const).pow k
   | _, .shift .shl a b => do
       let x ← (← a.const).int?
       let y ← (← b.const).int?
-      if 0 ≤ y ∧ y.toNat ≤ maxShift then pure (Q.ofInt (x * 2 ^ y.toNat)) else Option.none
+      if x = 0 ∧ 0 ≤ y then pure (Q.ofInt 0)
+      else if 0 ≤ y ∧ Q.bitLen x.natAbs + y.toNat ≤ Q.maxBits then pure (Q.ofInt (x * 2 ^ y.toNat))
+      else Option.none
   | _, .shift .sar a b => do
       let x ← (← a.const).int?
       let y ← (← b.const).int?
-      if 0 ≤ y ∧ y.toNat ≤ maxShift then pure (Q.ofInt (x.fdiv (2 ^ y.toNat))) else Option.none
+      if 0 ≤ y then pure (Q.ofInt (if y.toNat ≤ maxShift then x.fdiv (2 ^ y.toNat) else if x < 0 then -1 else 0))
+      else Option.none
   | _, .bitAnd a b => do
       pure (Q.ofInt (Int.bitAnd (← (← a.const).int?) (← (← b.const).int?)))
   | _, .bitOr a b => do

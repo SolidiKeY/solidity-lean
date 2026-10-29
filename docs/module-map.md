@@ -566,9 +566,10 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/Const.lean` | S01: compile-time constants: exact rationals `Q`, literal values and units, `Syn.const` (folding `+ - * / % **`, shifts and two's-complement bitwise operations), the implicit and explicit conversions of constants to integer and fixed-point types. |
 | `Source/Types.lean` | S01: static types `STy`, elaboration of elementary types, implicit and explicit conversions (fixed point per the second-round decisions) with `implicit_int_range` and `FixTy.subsumes_inRange`. |
 | `Source/Resolve.lean` | S01: name resolution: C3 linearization, scoped lookup, builtins classified against the profile (`Builtin.status`, member and call-option status), the `Resolves` judgment with `resolve_iff` and `Resolves.unique`. |
-| `Source/Typing.lean` | S01: type-name elaboration (`Syn.tys`), typing contexts, expression typing `HasType` and statement typing `StmtOK`/`ItemsOK`. |
-| `Source/WellFormed.lean` | S01: settings over solc's two pipelines (`Settings.coder`), resolutions, and well-formedness of a resolved unit. |
-| `Source/TypingExamples.lean` | S01 controls: a derivation per typed expression constructor (`exprCoverage_typed`), the counter well formed, C3 on a diamond, refuted ill-typed and clashing programs. |
+| `Source/Typing.lean` | S01: type-name elaboration (`Syn.tys`), typing contexts, expression typing as data (`Typed`, `HasType`) and statement typing in a fixed body context (`StmtD`/`ItemsD`, `StmtOK`/`ItemsOK`). |
+| `Source/Resolved.lean` | S01: the intrinsic resolved form (`RExpr`/`RStmt` over local types, de Bruijn `Idx`, explicit implicit-conversion evidence) and the elaboration of derivations into it (`Typed.toR`, `StmtD.toR`). |
+| `Source/WellFormed.lean` | S01: settings over solc's two pipelines (`Settings.coder`), resolutions, body frames (`Decl.frame?`), and well-formedness of a resolved unit (bases, clashes and overloads, pragmas, declared types, placement, constants, bodies). |
+| `Source/TypingExamples.lean` | S01 controls: a derivation per typed expression constructor (`exprCoverage_typed`, `exprCoverage_total`, `stmtCoverage_total`), the counter well formed, C3 on a diamond, refuted ill-typed, `msg.value`, clashing, same-signature, interface-body and unknown-pragma programs. |
 
 ## The solkey corpus
 

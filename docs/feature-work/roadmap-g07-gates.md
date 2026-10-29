@@ -75,14 +75,15 @@ The malformed inputs proved refused are the empty text, an unknown tag
 (`badTag_not_admitted`), data after the loop tag (`trailing_not_admitted`)
 and a non-empty link map (`linked_not_admitted`).
 
-The five new generic lemmas hold of every source, EVM and compiler:
+The six new generic lemmas hold of every source, EVM and compiler:
 
 - `PublicCorrectness.observes` turns any completion of an admitted source
   meaning without exhaustion into an EVM completion with the same outcome and
   events, under the per-run premise.
 - `PublicCorrectness.observedBySource` turns any EVM completion under the
   premise into a source completion at an admissible bound.
-- `PublicCorrectness.rejects` refuses non-admitted input.
+- `PublicCorrectness.rejects` refuses non-admitted input, and
+  `Admission.rejects` does the same for a sound frontend.
 - `SourceSpec.NonVacuous.admits` and `SourceSpec.not_nonVacuous_of_no_parse`
   show that a source admitting nothing fails `NonVacuous`.
 
@@ -138,9 +139,9 @@ node scripts/check-g07.mjs [--log RUN_LEAN_LOG]
 | Build log | `--log` on a `./run-lean.sh` log | no Lean error line except a baselined module's out-of-memory kill (`137`/`Killed`); at least one completed build; a SolKey mismatch count present and at most the baseline (by count only) |
 
 The transitive Lean axiom audit stays `TrustAudit.lean`. G07 appended one
-`run_cmd` block for 23 contract and control theorems: the G01 lemmas
-`PublicCorrectness.transfer` and `not_alwaysRevert`, the five new generic
-lemmas, `HashPremise.not_of_rootSlots` and the 15 control theorems.
+`run_cmd` block for 22 contract and control theorems: the G01 lemmas
+`PublicCorrectness.transfer` and `not_alwaysRevert`, the six new generic
+lemmas, `HashPremise.not_of_rootSlots` and 13 control theorems.
 
 The mechanical checks that a malformed-source, altered-bytecode or
 always-revert compiler fails are the Lean refutations of §1, checked by the
@@ -308,10 +309,10 @@ skeptic; `HashPremise.not_of_rootSlots` makes gap 1 a lemma). Others:
     covering always-revert, altered bytes, erased data, a loop compiled to a
     success, malformed text, an ignored link map, and sloppy admission, with
     four malformed-input refusals;
-  - lemmas: five generic contract lemmas and the hash-layout gap lemma;
+  - lemmas: six generic contract lemmas and the hash-layout gap lemma;
   - gates: the non-circularity gate, the axiom-pin inventory, and the
     baselined regression runner with existing failures recorded separately;
-  - TrustAudit: an appended block of 23 theorems.
+  - TrustAudit: an appended block of 22 theorems.
 - **New theorems:** `PublicCorrectness.observes`,
   `PublicCorrectness.observedBySource`, `PublicCorrectness.rejects`,
   `SourceSpec.NonVacuous.admits`, `SourceSpec.not_nonVacuous_of_no_parse`,
@@ -336,7 +337,8 @@ skeptic; `HashPremise.not_of_rootSlots` makes gap 1 a lemma). Others:
     `check-solkey.sh` "37 mismatch(es)", the baseline, so the script exits
     1 as at the base. 8 min 18 s. The cold build before it (40 min 46 s)
     failed only at the root `Solidity.lean`, which was edited mid-build.
-  - `TrustAudit.lean`: its appended blocks are checked in the lane's final
-    gate (S01 handoff).
+  - `TrustAudit.lean` in the Lean server: "trust: 22 roadmap control
+    theorems use only the standard axioms" (and the first block's 544
+    headlines pass).
 - **Remaining:** see [Remaining obligations](#remaining-obligations); the
   four contract gaps of §1 go to G01's owners.
