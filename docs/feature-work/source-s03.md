@@ -126,6 +126,7 @@ ledger is in [source-s05.md](source-s05.md).
 | Public getters | `dispatch` answers the getter of a `public` state variable or constant (`Env.getters`, `getterSig`): one parameter per mapping key or array index, a value-type result read from storage (`getterPath`, an index past the end panics with `0x32`) or a constant's value; struct, `bytes` and `string` getters and non-value keys are not modelled | after `set(2)`: `x()` is 3, `m(2)` is 5, `m(3)` is 0 |
 | `emit` in a static frame | reverts with no data, as `LOG` does | `e()` entered static reverts, non-static succeeds |
 | Value to a non-payable constructor | the deployment reverts (`Env.ctorPayable`; a contract without a constructor has solc's non-payable default) | `D` deployed with value 1 reverts, with 0 succeeds |
+| Dynamic ABI arguments | `dispatch` and `deploy` decode arguments with `decodeArgs`: a value type from its word; `bytes`, `string` and a dynamic array of value types (in `memory`) from their tail into a new memory object; an offset or length past the data reverts. Nested dynamic types, static arrays, structs and `calldata` parameters are not decoded (`stuck`); return data of external calls is still decoded statically | `len(0x010203)` is 3, `sum2([5, 7])` is 12, an offset past the data reverts |
 
 The controls run elaborated units (item 1b) and are checked by `#guard`.
 

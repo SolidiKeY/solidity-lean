@@ -208,6 +208,42 @@ def decodeVals (D : Layout) (data : Bytes) : (τs : List STy) → Nat → R (Val
   | [], _ => pure .nil
   | τ :: τs, i => do pure (.cons (← decodeWord D (wordAt data i) τ) (← decodeVals D data τs (i + 1)))
 
+/-- A value type: one ABI word (a getter's result, a dynamic array's element). -/
+def STy.isValueTy : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
+  | _ => false
+
+/-- The contents of a dynamic argument whose head is the `i`-th word: its
+offset, then its length and bytes there; out of bounds reverts. -/
+def tailBytes {Γ : RCtx} (data : Bytes) (i : Nat) : EM E Γ Bytes := do
+  let off := wordAt data i
+  let len := wordAt (data.drop off) 0
+  if off + 32 + len ≤ data.length then pure ((data.drop (off + 32)).take len) else halt (.revert [])
+
+/-- **Decoding one argument** at head word `i`: a static value from its
+word; `bytes`, `string` and a dynamic array of value types (in memory) from
+their tail, into a new memory object. -/
+def decodeArg {Γ : RCtx} (data : Bytes) (i : Nat) (τ : STy) : EM E Γ (Val E.layout τ) :=
+  match τ with
+  | .bytes .memory => do allocRef (Data.bytes (D := E.layout) (l := .memory) (← tailBytes data i))
+  | .string .memory => do allocRef (Data.string (D := E.layout) (l := .memory) (← tailBytes data i))
+  | .array .memory σ none =>
+    if σ.isValueTy then do
+      let off := wordAt data i
+      let len := wordAt (data.drop off) 0
+      if off + 32 + 32 * len ≤ data.length then
+        let xs ← (List.range len).mapM fun j => lift (decodeWord E.layout (wordAt (data.drop (off + 32)) j) σ)
+        allocRef (Data.array (D := E.layout) (l := .memory) (n := none) xs.length (fun _ h => nomatch h)
+          (fun k => .val (xs.get k)))
+      else halt (.revert [])
+    else halt (.stuck "dynamic ABI decoding of this type is not modelled")
+  | τ => lift (decodeWord E.layout (wordAt data i) τ)
+
+/-- Decoding arguments from ABI data, from the `i`-th head word. -/
+def decodeArgs {Γ : RCtx} (data : Bytes) : (τs : List STy) → Nat → EM E Γ (Vals E.layout τs)
+  | [], _ => pure .nil
+  | τ :: τs, i => do pure (.cons (← decodeArg data i τ) (← decodeArgs data τs (i + 1)))
+
 /-- The value of a call returning `rs` from the values of its returns. -/
 def mkRet {D : Layout} : (rs : List STy) → RVals D rs → RVal D (STy.ret rs)
   | [_], .cons v .nil => v
@@ -478,11 +514,6 @@ def copyInto {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v
   | _ => halt (.stuck "copy source")
 
 /-! ### Public getters -/
-
-/-- A value type: what a getter returns as one word. -/
-def STy.isValueTy : STy → Bool
-  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
-  | _ => false
 
 /-- A public state variable's getter: one parameter per mapping key or array
 index, outermost first, and the type it returns; `none` unless the keys and
@@ -1279,7 +1310,7 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
       | some (ps, rs) =>
         if F.value.val ≠ 0 && d.fnMut != some .payable then halt (.revert [])
         if input.length < 4 + 32 * ps.length then halt (.revert [])
-        let vs ← lift (decodeVals E.layout (input.drop 4) ps 0)
+        let vs ← decodeArgs (input.drop 4) ps 0
         let (r, _) ← sub (L0 E) (callInternal G F n d vs rs)
         encodeVals F n false (← lift (unRet rs r))
       | none => halt (.stuck "signature")

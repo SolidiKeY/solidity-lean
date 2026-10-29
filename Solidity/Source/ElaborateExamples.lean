@@ -182,4 +182,51 @@ def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=
 #guard (elabD.bind fun el => emitIn el true) == some (.revert [])
 #guard (elabD.bind fun el => emitIn el false) == some (.success [])
 
+/-! ## Dynamic arguments
+
+```solidity
+contract L {
+  function len(bytes memory b) public returns (uint256) { return b.length; }
+  function sum2(uint256[] memory xs) public returns (uint256) { return xs[0] + xs[1]; }
+}
+```
+-/
+
+def unitL : Syn .unit :=
+  .unit (.cons (.contract false "L" .none .nil
+      (.cons (.function (.ident "len") (.cons (.param (.elem .bytes) (some .memory) (some "b")) .nil)
+          (some .pub) none .nil false none pRet (.some (.block
+          (.cons (.stmtItem (.returnStmt (.some (.member (.ident "b") "length")))) .nil))))
+      (.cons (.function (.ident "sum2") (.cons (.param (.array u256 .none) (some .memory) (some "xs")) .nil)
+          (some .pub) none .nil false none pRet (.some (.block
+          (.cons (.stmtItem (.returnStmt (.some (.addSub .add (.index (.ident "xs") (.some (num 0)))
+            (.index (.ident "xs") (.some (num 1))))))) .nil))))
+      .nil)))
+    .nil)
+
+def elabL : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitL)
+
+#guard elabL.isSome
+
+/-- Deploy `L`, then run one call: its outcome. -/
+def callL (el : Elaborated) (input : Bytes) : Option Outcome :=
+  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
+    fun _ => .answer (.success []), word 0⟩
+  match (runAt (fun n => do
+    let _ ← deploy G n "L" thisC user (word 0) []
+    runTx G n ⟨user, thisC, word 0, word 0, input⟩) (s0 : St el.res.env) 40).1 with
+  | .ok o => some o
+  | _ => none
+
+-- **`bytes` decoded from its tail**: `len(0x010203)` is `3`.
+#guard (elabL.bind fun el => callL el (selOf "len(bytes)" ++ arg 32 ++ arg 3 ++ pad32 [1, 2, 3])) ==
+  some (.success (arg 3))
+
+-- **A dynamic array**: `sum2([5, 7])` is `12`.
+#guard (elabL.bind fun el => callL el (selOf "sum2(uint256[])" ++ arg 32 ++ arg 2 ++ arg 5 ++ arg 7)) ==
+  some (.success (arg 12))
+
+-- An offset past the data reverts, as solc's decoder does.
+#guard (elabL.bind fun el => callL el (selOf "len(bytes)" ++ arg 4096 ++ arg 3)) == some (.revert [])
+
 end Solidity.Source.ElaborateExamples
