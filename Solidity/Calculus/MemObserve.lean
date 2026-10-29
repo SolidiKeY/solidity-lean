@@ -194,8 +194,8 @@ theorem MxObs.rebuild {H : HTy} (o : MObj H (.array (.prim q))) (B : List Int)
   | _, .read k, hr => by
     change (MObj.elems .dyn (mxFloorRebuild .dyn (by trivial) o B))[k.1.toNat]? = _
     apply mxFloorRebuild_at .dyn (by trivial) o B hn
-    have h0 := mxUint_nonneg k
-    have hk := hr k (List.mem_singleton_self k)
+    have h0 : 0 ≤ k.1 := mxUint_nonneg k
+    have hk : k.1 ∈ B := hr k (List.mem_singleton_self k)
     have he : (k.1.toNat : Int) = k.1 := by omega
     rw [he]
     exact hk

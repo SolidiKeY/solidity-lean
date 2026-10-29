@@ -921,3 +921,27 @@ confirmed issue. Both independent reviewer launches failed with the retained
 thread-store error, so independent review and full combined validation remain
 with the coordinator. No index, commit, push, source VM, skill or monitor was
 modified, and no genuine semantic decision is required.
+
+### Explicit proof-fact types (2026-10-29)
+
+The retained source-convention finding is repaired: all seven newly added
+untyped `have` facts now have concrete types (`hp`, both `hg` facts and
+`hr` in `MemNegPrep`, `h0` and `hk` in `MemObserve`, and `hu` in
+`MemoryNegativeDecision`). Inspection of the complete original assignment
+diff and the subsequent G0 repair found no further added untyped facts.
+Pre-existing untyped facts in `MemInst` are untouched. This repair adds only
+type annotations; all proof terms, generalized recursors, exactness
+certificates, scope checks, observations and budgets are preserved.
+
+Fresh per-file MCP error diagnostics complete successfully for `MemObserve`
+and `MemNegPrep`. The decision example's diagnostics are pending import
+elaboration; partial timeouts report no errors or failed dependencies and are
+not counted as passing checks. Prior successful kernel/native agreement and
+unchanged-budget timing evidence remains in the G0 sections above.
+
+Local read-only finder and skeptic checks found no additional indexed
+elimination or proof-fact typing issue in this scope. Both independent
+review launches failed before starting with the retained thread-store
+`no rollout found` error. Independent review and full combined validation
+remain with the coordinator. Whitespace checks pass; no actual conflict
+markers remain in the affected files. No staging or commit was performed.

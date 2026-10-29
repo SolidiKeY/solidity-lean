@@ -95,8 +95,10 @@ theorem mxNegativeBody_holds (k : Nat) (s x : Var) (v : q.Denote) (a : MxExterio
     have hb' : holds ((σ.push (t := .val .uint) n).allocPush o)
         (.all x .uint (mxRangeBody .here v)) :=
       (mxRangeBlock_holds (σ.push (t := .val .uint) n) o x v).2 ((mxRangeBlock_holds σ o x v).1 hb)
-    have hp := (mxLengthPrep x v a.reads).sound ((σ.push (t := .val .uint) n).allocPush o) hb'
-    have hg := h n o ((mxLengthEq_holds σ n o).2 rfl) hp
+    have hp : holds ((σ.push (t := .val .uint) n).allocPush o) (mxLengthPrep x v a.reads).body :=
+      (mxLengthPrep x v a.reads).sound ((σ.push (t := .val .uint) n).allocPush o) hb'
+    have hg : holds ((σ.push (t := .val .uint) n).allocPush o) a.fml :=
+      h n o ((mxLengthEq_holds σ n o).2 rfl) hp
     exact (a.holds_alloc σ o).2 ((a.holds_alloc (σ.push (t := .val .uint) n) o).1 hg)
   · intro h n o _ hp
     let p := mxLengthPrep (C := C) (Γ := Γ) x v a.reads
@@ -108,7 +110,7 @@ theorem mxNegativeBody_holds (k : Nat) (s x : Var) (v : q.Denote) (a : MxExterio
         (mxLengthPrep_zero σ n o x v a.reads) hp
     have hb : holds (σ.allocPush o') (.all x .uint (mxRangeBody .here v)) :=
       (mxRangeBlock_holds σ o' x v).2 ((mxRangeBlock_holds (σ.push (t := .val .uint) n) o' x v).1 hb')
-    have hg := h o' hb
+    have hg : holds (σ.allocPush o') a.fml := h o' hb
     apply (a.holds_alloc (σ.push (t := .val .uint) n) o).2
     apply (a.rebuild o B List.mem_cons_self
       (fun k hk => mxLengthPrep_read_break σ n o x v a.reads hk)).1
@@ -148,7 +150,7 @@ private def mxNegativeAlloc (k : Nat) (s : Var) (R : RefTy) :
             let ⟨a, hg⟩ ← MxExterior.ofFml? right
             let v : q.Denote := hq ▸ value
             pure ⟨mxNegativeBody k s x v a, true, fun σ => by
-              have hr := hrange
+              have hr : (hp ▸ body) = mxRangeBody array value := hrange
               cases hp
               cases hq
               simp only [hi] at hr

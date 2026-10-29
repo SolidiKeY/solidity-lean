@@ -32,7 +32,7 @@ theorem gap_covered : gapMemInnerNeg.Covered = true := by
 /-- This is about the actual original decision function and its returned
 state, not the separately constructed empty-array witness. -/
 theorem gap_decision : ∃ σ, decideGoal gapMemInnerNeg = .refuted σ := by
-  have hu := decideLeaf_complete gap_covered
+  have hu : decideLeaf gapMemInnerNeg ≠ .unknown := decideLeaf_complete gap_covered
   cases he : decideLeaf gapMemInnerNeg with
   | proved => exact False.elim (gapMemInnerNeg_notValid (decideLeaf_sound he))
   | unknown => exact False.elim (hu he)
