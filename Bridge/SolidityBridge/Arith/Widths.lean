@@ -1,4 +1,5 @@
 import SolidityBridge.Arith.SignedWrapping
+import SolidityBridge.Arith.WidthsSyntax
 import Solidity.Syntax.Elab
 import Solidity.Semantics.Run
 
@@ -19,8 +20,7 @@ theorem check_word {C : Contract} :
 theorem synth_word {C : Contract} :
     Solidity.synth C wordContext (.name "x") =
       .ok (TExpr.val .uint (Val.simple (Simple.local (.here : Idx [.val .uint] (.val .uint))))) := by
-  simp only [wordContext, List.map_cons, List.map_nil, synth.eq_3, NCtx.lookupTy,
-    if_true, NCtx.idx, Except.map, NCtx.find, dite_true, pure, Except.pure, bind, Except.bind]
+  exact WidthsSyntax.synth_head .uint "x" []
 
 /-- The exact modulo expression used by lowBits at a narrow width. -/
 def lowVal {C : Contract} (n : Nat) (h : PrimTy.uint.inRange (2 ^ n : Nat) = true) :
@@ -108,13 +108,7 @@ theorem synth_unary {C : Contract} {Γ : NCtx} (p : PrimTy) (e : RawExpr)
     (hs : Solidity.synth C Γ e = .ok (.val p v)) :
     Solidity.synth C Γ (.unop op e) =
       .ok (.val (op.ret p) (.unop op ha rfl v)) := by
-  rw [synth.eq_8, hs]
-  simp only [bind, Except.bind, TExpr.toVal?]
-  split
-  · rfl
-  · rename_i hf
-    rw [ha] at hf
-    cases hf
+  exact WidthsSyntax.synth_unary p e v op ha hs
 
 theorem check_unary {C : Contract} {Γ : NCtx} (p : PrimTy) (e : RawExpr)
     (v : Val C Γ.ctx p) (op : UnOp) (ha : op.accepts p = true)
@@ -499,8 +493,7 @@ abbrev headContext (p : PrimTy) (name : String) (Γ : NCtx) : NCtx :=
 theorem synth_head {C : Contract} (p : PrimTy) (name : String) (Γ : NCtx) :
     Solidity.synth C (headContext p name Γ) (.name name) =
       .ok (.val p (.simple (.local (.here : Idx (.val p :: Γ.ctx) (.val p))))) := by
-  simp only [headContext, List.map_cons, synth.eq_3, NCtx.lookupTy, if_true, NCtx.idx,
-    Except.map, NCtx.find, dite_true, pure, Except.pure, bind, Except.bind]
+  exact WidthsSyntax.synth_head p name Γ
 
 theorem check_head {C : Contract} (p : PrimTy) (name : String) (Γ : NCtx) :
     Solidity.check C (headContext p name Γ) p (.name name) =
@@ -603,3 +596,10 @@ end Solidity.Bridge.Arith.Widths
 #print axioms Solidity.Bridge.Arith.Widths.unsigned_to_int_width
 #print axioms Solidity.Bridge.Arith.Widths.unsigned_widen
 #print axioms Solidity.Bridge.Arith.Widths.signed_widen
+
+/-- info: 'Solidity.Bridge.Arith.Widths.synth_word' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.synth_word
+/-- info: 'Solidity.Bridge.Arith.Widths.synth_head' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.synth_head
+/-- info: 'Solidity.Bridge.Arith.Widths.synth_unary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Bridge.Arith.Widths.synth_unary

@@ -516,7 +516,8 @@ rule checker passed 36 rule cases × 1000 samples (seed 42; exit 0; 72.85 s;
 1,113,563,136 bytes peak). Orphan, layer, strict automation, core trust, trust
 script tests and a separate trust scan of all eight task modules passed.
 
-**Full validation remains blocked by an unchanged dependency.** The first
+**Historical checkpoint 658fe793 (superseded by the resumed diagnosis below).**
+Full validation was blocked by an unchanged dependency. The first
 completed default-package run failed (exit 1; 1228.59 s; 4,158,939,136 bytes
 peak): Arith/Widths proof errors and a TermSize thread-creation abort (134).
 An isolated core TermSize run with MALLOC_ARENA_MAX=2 passed under the same
@@ -526,7 +527,8 @@ An isolated Widths target reproduced its five errors (exit 1; 7.97 s;
 1,810,821,120 bytes). Its generated synth.eq_N anchors are stale at lines
 21, 47, 79, 111 and 501. Both independent reviewers verified that Widths is
 unchanged from the recorded base and imports none of the storage-task modules;
-repair belongs to the separate source/arithmetic work. Its failed recovery
+at that checkpoint, repair was outside the storage assignment. The continuation
+below explicitly authorizes narrow Widths maintenance. Its failed recovery
 audits containing sorryAx are not accepted certificates. A freshly fetched
 master at 638c9b68b37d8a6a15630eac9885e2d873040eb1 still has the identical
 Widths file. No unrelated proof repair or upstream branch was imported here.
@@ -546,6 +548,116 @@ lake build SolidityBridge.ExternalEvm.StorageSlotExamples \
 
 The task's exact guarded commands and temporary single-thread configurations
 are retained in its evidence.
+
+
+### Resumed Widths prerequisite (2026-10-29)
+
+The continuation authorizes narrow shared proof maintenance in
+`Bridge/SolidityBridge/Arith/Widths.lean`. The initial resumed fetch was
+`638c9b68b37d8a6a15630eac9885e2d873040eb1`. A final fetch reached
+`c30efa3d8786cede97a8d4f1e9b90629724e5cd4`; the Widths blob is still
+`339457565926f36fb8af144bc5957280d8f387f2`. No upstream changes were imported.
+
+`Bridge/SolidityBridge/Arith/WidthsSyntax.lean` supplies stable structural name/unary facts.
+`synth_word`, `synth_head` and `synth_unary` retain their original
+statements and now use those named facts. Negative-numeric-literal overlap is
+excluded from the generic unary clause using the existing premises: numeric
+synthesis returns uint, while negation requires int. Abstracting the monadic
+literal result and transporting inequality avoids kernel deep recursion
+without changing any limit. The new module passed under its default recursion
+limit (exit 0; 3.33 s; 1,126,162,432 bytes peak RSS). All three repaired
+headline audits report only `[propext, Quot.sound]`. All 38 existing public
+theorem headers and the existing `maxRecDepth 4096` option are unchanged.
+
+**A semantic decision is required for the two binary helper contracts.**
+This is not merely historical anchor debt. `Bridge/SolidityBridge/Arith/WidthsObstructions.lean`
+kernel-checks negations of the exact original generic schemas:
+
+- With the concrete empty contract and local `x : int`, every original
+  `synth_binary` premise holds for `x >> x`. Current synthesis checks the
+  right operand as uint and refuses the expression, contradicting the claimed
+  successful intrinsic syntax.
+- For `x : int >> 257`, every original literal-helper premise holds.
+  Synthesis produces the saturated intrinsic count 256; the original
+  `synth_bin_literal` conclusion contains 257. The theorem asserts syntax
+  equality, even if the resulting shifts may evaluate alike.
+
+`OldSynthBinary` and `OldSynthBinLiteral` reproduce those original contracts
+without importing the failing Widths module. Their negations, jointly inhabited
+premises and concrete evaluator observations have pinned audits with only
+`[propext, Quot.sound]`. Positive controls retain unsigned count 257,
+8-bit modulo reduction, the full-word signed cast, and the negative-literal
+clause. No operator semantics, expected observation, theorem statement,
+fixture, exclusion or proof/search budget has changed.
+
+The combined obstruction/storage/counterexample target passed (exit 0;
+5.44 s; 1,141,514,240 bytes peak). The focused check including signed wrapping,
+casts and the unchanged ExternalEvm Obstructions also passed (exit 0; 7.26 s;
+1,162,199,040 bytes peak). The independent positive-control target passed
+(exit 0; 6.76 s; 1,153,908,736 bytes peak). The isolated Widths target remains
+failed at only the two binary proof sites (exit 1; 6.95 s;
+1,765,376,000 bytes peak); the three statement-preserving repairs and their
+guards no longer fail.
+
+The requested decision is whether to correct the generic binary/check-helper
+contracts to exclude or describe the signed-right-shift special case, while
+preserving the current source/operator semantics and all width/cast result
+statements. For example, an explicit exclusion `p = .int → op ≠ .shr`
+would retain the cases used by the unsigned width proofs. No such premise has
+been added. The request is pending; elapsed time is not authorization.
+
+Original-assignment completion and a passing full Bridge gate are **not**
+claimed. The full gate cannot be made sound with both refuted contracts
+unchanged. The original storage commits/export remain intact; the cumulative
+resumed handoff retains the exact counterexamples and all failed/successful
+proof and resource reports. The unchanged documentation-path debt remains red.
+
+The fresh final full Bridge gate failed only Widths (exit 1; 9.17 s;
+1,669,246,976 bytes peak group RSS). Independent storage, unchanged global
+Obstructions, the new syntax/obstruction modules, signed wrapping and casts
+passed (exit 0; 1.21 s; 395,571,200 bytes). The actual fixed-seed executable
+passed 36 cases × 1000 samples, seed 42 (exit 0; 2.22 s;
+463,720,448 bytes peak group RSS). An invalid nonexistent Counter target
+and an executable invocation from the wrong package failed first; their logs
+are retained, and only the corrected commands are passes.
+
+**The full core TestSuite also remains resource blocked.** Its static complete
+parity/trust check passed against the existing repository pin (564 cases:
+552 derived, 11 refuted, 1 excluded; no repin). The first guarded build stopped
+at the whole-VM limit. Allocator collection/segment reuse then allowed Derived7
+to pass (177.11 s; 2,955,022,336 bytes peak); a subsequent full run passed
+Derived15 but failed Derived17 and Derived21 (exit 1; 523.49 s;
+5,866,684,416 bytes peak). Enabling small arenas allowed Derived21 to pass
+individually (126 s), but the combined run was stopped during Derived17
+(exit 75; 251.54 s; 7,523,086,336 bytes peak group RSS).
+
+The installed allocator parses `MIMALLOC_ARENA_RESERVE=65536` as **64 KiB**,
+not the initially intended 64 MiB. Verbose logs verify the actual setting.
+Small initial arenas and experimental segment targets are not hard caps.
+Clean file-cache advice retained every cache file on disk but did not complete
+Derived17: its isolated retry stopped at the whole-VM limit (exit 75;
+109.76 s; 8,138,121,216 bytes peak). Disabling large/transparent huge pages
+for the process then reached the aggregate RSS stop (exit 75; 132.84 s;
+10,744,573,952 bytes peak). Restoring the published default asynchronous
+elaboration schedule under `-j1` instead failed with `bad_alloc` (underlying
+Lean 134, Lake 1; 104.42 s; 8,904,433,664 bytes peak). Profiling and all
+terminal resource reports are retained. No identical failed configuration was
+rerun as a purported repair. None of these stopped runs is a pass.
+
+The tested allocator combination uses `MALLOC_ARENA_MAX=2`,
+`MIMALLOC_PURGE_DELAY=0`, `MIMALLOC_TARGET_SEGMENTS_PER_THREAD=16`,
+`MIMALLOC_MAX_SEGMENT_RECLAIM=100` and `MIMALLOC_GENERIC_COLLECT=100`;
+arena/large-page variants and synchronous/default-schedule configurations
+are preserved verbatim in evidence. Individual flag causality is not proved.
+All runs retain the installed per-process AS bound of 12 GiB, sampled group
+RSS stop of 10 GiB, whole-VM-current stop of 12 GiB, actual 16 GiB VM cgroup
+and disabled swap. This is not a 12 GiB cgroup guarantee.
+
+No core loop/closer proof, fixture, expected observation or proof budget was
+changed. The next proposed investigation is source-level profiling of Derived17
+by its loop/closer owner under these bounds; this storage task does not take over the
+excluded loop work. The semantic Widths decision is independently necessary.
+The original-assignment completion decision remains **blocked**, not complete.
 
 To build the independent targets alone, from `Bridge/`:
 

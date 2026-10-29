@@ -1,3 +1,4 @@
+import SolidityBridge.Arith.WidthsObstructions
 import SolidityBridge.ExternalEvm.StorageSlotExamples
 import SolidityBridge.Arith
 import SolidityBridge.WeakestPre
