@@ -2,6 +2,7 @@ import Solidity.Frontend.Static.WellFormedCheck
 import Solidity.Source.TypingExamples
 import Solidity.Frontend.Static.Consts
 import Solidity.Frontend.Static.UserOps
+import Solidity.Frontend.Static.Standalone
 
 /-!
 # G13 controls: the checkers on S01's own examples
@@ -26,7 +27,7 @@ in the kernel (`decide`), independently of those proofs:
 
 namespace Solidity.Frontend.Static.InferExamples
 
-open Solidity.Source Solidity.Source.TypingExamples Solidity.Frontend.Static
+open Solidity.Source Solidity.Source.TypingExamples Solidity.Frontend.Static Solidity.Language.FixedPoint
 
 /-- **The counter, checked**: well formed and in the syntax profile. -/
 theorem counter_checked : WellFormed counterRes ∧ InProfileSyntax counterRes :=
@@ -282,6 +283,42 @@ theorem hexCall_typed :
     (inferTys Γh (.call (.ident "f") (.positional (.cons (.lit (.num (.hex [0, 1] false))) .nil)))).length = 2 := by
   decide
 
+/-! ## Standalone constants (backfill item 5) -/
+
+/-- The fields of a fixed-point type, else `none`. -/
+def fixedFields : STy → Option (Bool × Nat × Nat)
+  | .fixed f => Option.some (f.signed, f.bits, f.digits)
+  | _ => Option.none
+
+/-- `1 / 3` -/
+def oneThird : Syn .expr := .mulDivMod .div (num 1) (num 3)
+
+/-- `2**256 + 1/2`: fractional, beyond 256 bits. -/
+def tooBigFrac : Syn .expr := .addSub .add (num (2 ^ 256)) (.mulDivMod .div (num 1) (num 2))
+
+/-- **`1 / 3` stands alone at `ufixed256x77`** (solc's mobile type) and is
+an ABI argument there; S01's own `STy.mobile` leaves it rational. -/
+theorem oneThird_standalone :
+    (standaloneTys Γ oneThird).map fixedFields = [Option.some (false, 256, 77)] ∧
+    (abiArgTys Γ oneThird).length = 1 ∧
+    (inferTys Γ oneThird).map (fun τ => τ.mobile.isConstTy) = [true] := by
+  decide +kernel
+
+/-- **Negative controls**: a fractional constant without a mobile type has
+no standalone fixed-point type and is no ABI argument; `5` stands alone at
+`uint8`, not at a fixed-point type. -/
+theorem tooBigFrac_refused :
+    (standaloneTys Γ tooBigFrac).map fixedFields = [Option.none] ∧ (abiArgTys Γ tooBigFrac).isEmpty = true ∧
+    (standaloneTys Γ (num 5)).map fixedFields = [Option.none] ∧ (abiArgTys Γ (num 5)).length = 1 := by
+  decide +kernel
+
+/-- The value of `1 / 3` standing alone: 77 threes, truncated (`3 · v ≠
+10^77`). -/
+theorem oneThird_value :
+    (Fx.mobileConst? (Q.toRat ⟨1, 3, by decide⟩)).map (fun x => x.2.1) = Option.some ((10 ^ 77 - 1) / 3) ∧
+    (Fx.mobileConst? (Q.toRat ⟨1, 3, by decide⟩)).map (fun x => 3 * x.2.1) ≠ Option.some (10 ^ 77) := by
+  decide +kernel
+
 end Solidity.Frontend.Static.InferExamples
 /-- info: 'Solidity.Frontend.Static.typed_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.typed_complete
@@ -353,3 +390,15 @@ end Solidity.Frontend.Static.InferExamples
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.badBinding_refused
 /-- info: 'Solidity.Frontend.Static.InferExamples.hexCall_typed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.hexCall_typed
+/-- info: 'Solidity.Frontend.Static.standalone_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.standalone_iff
+/-- info: 'Solidity.Frontend.Static.abiArg_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.abiArg_iff
+/-- info: 'Solidity.Frontend.Static.standalone_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.standalone_value
+/-- info: 'Solidity.Frontend.Static.InferExamples.oneThird_standalone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.oneThird_standalone
+/-- info: 'Solidity.Frontend.Static.InferExamples.tooBigFrac_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.tooBigFrac_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.oneThird_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.oneThird_value

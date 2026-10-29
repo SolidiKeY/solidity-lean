@@ -1466,6 +1466,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.abiArg_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.acyclic_iff": [
   "Classical.choice",
   "Quot.sound",
@@ -1540,6 +1545,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.oneThird_standalone": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.oneThird_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.overflow_length": [
   "Classical.choice",
   "Quot.sound",
@@ -1550,6 +1565,11 @@
   "propext"
  ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.tooBig_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.tooBigFrac_refused": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -1594,6 +1614,16 @@
  ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.pureB_iff": [],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.slots_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.standalone_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.standalone_value": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -2005,6 +2035,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.abiConst?_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.abiConst?_eq_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.explicitConst?_eq_none_iff": [
   "propext"
  ],
@@ -2019,6 +2059,21 @@
   "propext"
  ],
  "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.litCommon?_solc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_trunc": [
   "Classical.choice",
   "Quot.sound",
   "propext"

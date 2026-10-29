@@ -883,3 +883,28 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} G14 review-fix theorems use only the standard axioms"
+
+/-! Backfill item 5: standalone fractional constants at their mobile
+fixed-point types, also as ABI arguments (`Solidity/Language/FixedPoint/Literals.lean`,
+`Solidity/Frontend/Static/Standalone.lean`, `docs/feature-work/frontend-static.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Language.FixedPoint.Fx.mobileConst?_eq,
+    ``Solidity.Language.FixedPoint.Fx.mobileConst?_trunc,
+    ``Solidity.Language.FixedPoint.Fx.mobileConst?_exact,
+    ``Solidity.Language.FixedPoint.Fx.abiConst?_decode,
+    ``Solidity.Language.FixedPoint.Fx.abiConst?_eq_none,
+    ``Solidity.Frontend.Static.standalone_iff,
+    ``Solidity.Frontend.Static.abiArg_iff,
+    ``Solidity.Frontend.Static.standalone_value,
+    ``Solidity.Frontend.Static.InferExamples.oneThird_standalone,
+    ``Solidity.Frontend.Static.InferExamples.tooBigFrac_refused,
+    ``Solidity.Frontend.Static.InferExamples.oneThird_value]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} standalone-constant theorems use only the standard axioms"

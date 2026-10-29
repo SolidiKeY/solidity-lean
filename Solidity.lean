@@ -619,6 +619,7 @@ import Solidity.Frontend.Static.Inheritance
 import Solidity.Frontend.Static.C3
 import Solidity.Frontend.Static.InheritanceExamples
 import Solidity.Frontend.Static.Certificates
+import Solidity.Frontend.Static.Standalone
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.ScopedFlip
 import Solidity.Tools.LatexTerm

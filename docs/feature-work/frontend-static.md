@@ -767,3 +767,80 @@ commit): `InheritanceExamples.lean` 8.4 s, `Certificates.lean` 4.0 s.
 admission check; on the solc-JSON route, solc's `linearizedBaseContracts`,
 `baseFunctions` and `overrides` annotations can be compared with
 `Env.chain` and `Env.baseFns` instead of trusted.
+
+## Backfill item 5: fixed-point mobile constants
+
+The decision (`docs/coverage-plan.md`, backfill queue, item 5; question QL2
+of `docs/feature-work/fixed-point-semantics.md`): a standalone fractional
+constant takes solc's mobile type with truncation, also as an ABI argument.
+
+### The reference semantics (`Solidity/Language/FixedPoint/Literals.lean`)
+
+- `Fx.mobileConst? q`: the mobile type `mobileFx? q` (solc's
+  `RationalNumberType::fixedPointType`) and the constant truncated toward
+  zero at its digits; `none` without a mobile type.
+  - `Fx.mobileConst?_eq`, `Fx.mobileConst?_eq_none`: its two cases.
+  - `Fx.mobileConst?_explicit`: the value is the explicit conversion to the
+    mobile type; `Fx.mobileConst?_trunc`: toward zero, within one unit of
+    the last digit.
+  - `Fx.mobileConst?_exact`: where the constant converts implicitly to its
+    mobile type (its digits suffice), the value is that conversion.
+- `Fx.abiConst? q`: a fractional ABI argument is the word encoding of that
+  value (`abi.encode(0.1)` is `abi.encode(ufixed8x1(0.1))`). solc 0.8.38
+  refuses it (6090, `types/encoding_fractional.sol`); this is an intended
+  deviation, recorded in the fixed-point document's conformance table.
+  `Fx.abiConst?_decode`: one word, decoding at the mobile type to the
+  value; `Fx.abiConst?_eq_none`: no mobile type, no encoding.
+- Worked values (by `decide +kernel`): `1/3` at `ufixed256x77` holds
+  `(10^77 − 1)/3`; `0.1` at `ufixed8x1` holds `1`; `-0.5` at `fixed8x1`
+  holds `-5`; `2^256 + 0.5` has none. Encodings: `0.1` is the word `1`,
+  `-0.5` the word `2^256 − 5` (31 bytes `0xff`, then `0xfb`), `2^256 + 0.5`
+  is refused. Negative: `3 · v ≠ 10^77` for `1/3`; `0.1` is not the zero
+  word.
+
+### The G13 rule (`Solidity/Frontend/Static/Standalone.lean`)
+
+S01 types a constant by its exact rational, and its `STy.mobile` leaves a
+fractional one rational (a type no value has).
+
+- `STy.standalone`: S01's mobile type, except that a fractional constant
+  with a mobile fixed-point type takes it (`FxTy.toFixTy`: S01's `FixTy`
+  has `FxTy`'s fields; `Q.toRat` reads S01's rational as a `Rat`).
+- Relations over S01's `HasType`: `StandaloneTyped Γ e τ` (`e : σ` and
+  `σ.standalone = τ`) and `AbiArgTyped` (additionally not a constant-only
+  type, `STy.isConstTy`).
+- Checkers over G13's inference: `standaloneTys`, `abiArgTys`;
+  `standalone_iff`, `abiArg_iff` show they decide the relations (from
+  `hasType_iff`, so sound and complete on S01's fragment).
+- `standalone_value`: a constant standing at `.fixed f` is fractional and
+  has `Fx.mobileConst?`'s value at a type with `f`'s fields.
+- Controls (`InferExamples.lean`): `oneThird_standalone` (`1 / 3` stands at
+  `ufixed256x77`, is an ABI argument, and S01's own `STy.mobile` leaves it
+  rational); `tooBigFrac_refused` (`2**256 + 1/2` has no standalone
+  fixed-point type and is no ABI argument; `5` stands at an integer type);
+  `oneThird_value`.
+
+### What backfill item 5 does not do
+
+- **Positions inside S01's types.** The rule applies to a whole
+  expression (an ABI argument, an inline-array element). S01's tuple and
+  conditional rules still take `STy.mobile`, so `(1/3, 2)` keeps a rational
+  component and `c ? 0.5 : 0.25` meets at a rational common type, if any.
+- **Inline arrays, `abi.encode` calls.** S01 types neither; the rule is
+  stated for their arguments, not for the calls (lane-semantics is adding
+  `abi.*`).
+- **Packed encoding** (`abi.encodePacked(0.1)`): not stated; the reference
+  semantics has `Fx.encodePacked` at a type, so it is `Fx.encodePacked` at
+  the mobile type when wanted.
+
+### Gates (backfill item 5)
+
+Recorded in [Handoff (backfill item 5)](#handoff-backfill-item-5).
+
+### Review (backfill item 5)
+
+Recorded after the finder and skeptic reviews.
+
+### Handoff (backfill item 5)
+
+Recorded at the push.
