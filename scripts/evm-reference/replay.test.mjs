@@ -124,3 +124,37 @@ for(const viaIR of [false,true]) test(`raw ABI outputs and uncaught revert bytes
   const wrong=await replayBytecode(c,[{...vectors[1],expectedBytes:[]}]);assert.equal(wrong.status,'broken');
   const malformed=await replayBytecode(c,[{...vectors[0],calldata:[256]}]);assert.equal(malformed.status,'blocked');
 });
+
+const creationSource = `contract Reverts { constructor(uint) { revert("test message."); } }
+contract Succeeds { constructor(uint) {} }
+contract C {
+ function f() public returns(bool created,string memory txt) {
+  uint i=3; try new Reverts(i) returns(Reverts r) { created=(address(r)!=address(0));txt="success"; }
+  catch Error(string memory s) {txt=s;}
+ }
+ function g() public returns(bool created,string memory txt) {
+  uint i=8; try new Succeeds(i) returns(Succeeds r) { created=(address(r)!=address(0));txt="success"; }
+  catch Error(string memory s) {txt=s;}
+ }
+}`;
+const creationExpected=(b,text)=>{
+ const word=n=>Buffer.from(BigInt(n).toString(16).padStart(64,'0'),'hex');
+ const bytes=Buffer.from(text);return [...Buffer.concat([word(b),word(64),word(bytes.length),bytes,Buffer.alloc(32-bytes.length)])];
+};
+for(const viaIR of [false,true])test(`creation source receipts preserve failure bytes, address order and wrong-output refusal (viaIR=${viaIR})`,async()=>{
+ const code=artifact(viaIR,creationSource);
+ const context={kind:'creation-try-source',selfAddress:SELF_TRY_ADDRESS};
+ const vectors=[{signature:'f()',calldata:[],expectedBytes:creationExpected(0,'test message.'),failure:false},
+  {signature:'g()',calldata:[],expectedBytes:creationExpected(1,'success'),failure:false}];
+ const actual=await replayBytecode(code,vectors,undefined,context);
+ assert.equal(actual.status,'working',JSON.stringify(actual));
+ assert.equal(actual.observed.length,2);
+ const [failed]=actual.observed[0].creations,[created]=actual.observed[1].creations;
+ assert.equal(failed.address,'0x4b02e501f6a0a60f173a94ce8f79d7dd9a75acb1');
+ assert.equal(failed.failed,true);assert.equal(failed.halt,'revert');
+ assert.equal(failed.returnData,'0x08c379a0'+'20'.padStart(64,'0')+'0d'.padStart(64,'0')+Buffer.from('test message.').toString('hex').padEnd(64,'0'));
+ assert.equal(created.address,'0x86269761d7fb90e36b87a269aa03cf98b7ab92c4');
+ assert.equal(created.failed,false);assert.ok(created.runtimeCodeBytes>0);
+ const wrong=structuredClone(vectors[0]);wrong.expectedBytes[31]=1;
+ assert.equal((await replayBytecode(code,[wrong],undefined,context)).status,'broken');
+});

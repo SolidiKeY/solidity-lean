@@ -1198,5 +1198,10 @@
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
     "code": "let v \u2190 unsafe evalExpr EvalOrder (mkConst ``EvalOrder) t"
+  },
+  {
+    "file": "Solidity/Tools/CreationTryReplay.lean",
+    "kind": "unsafe",
+    "code": "unsafe evalExpr Json (mkConst ``Json) expression"
   }
 ]

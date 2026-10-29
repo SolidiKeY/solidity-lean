@@ -616,3 +616,9 @@ import Solidity.Examples.Tactics.EntryReturnFlow
 import Solidity.Examples.Tactics.EntryReturnFlowIR
 import Solidity.Examples.Tactics.EntryReturnMetadata
 import Solidity.Examples.Tactics.EntryReturnFunction
+
+import Solidity.Semantics.CreationTryFrame
+import Solidity.Frontend.CreationTryImport
+import Solidity.Tools.CreationTryReplay
+import Solidity.Examples.Tactics.CreationTrySource
+import Solidity.Examples.Tactics.CreationTrySourceIR

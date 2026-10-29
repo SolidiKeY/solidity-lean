@@ -441,3 +441,7 @@ decoder metadata gaps. New results and validation use separate
 `tests/upstream/group10-aggregate-validation.json`; every earlier report and
 export is preserved. Selected fresh replay never certifies retained unrun
 import/profile/host/configuration/resource cases against a changed model.
+
+
+The narrow creation-try continuation and its source/kernel/reference evidence are
+recorded in [the owning feature account](feature-work/diamond-try.md#creation-try-source-continuation-after-e7921de5). It admits the complete original create.sol only through the checked unpaid, stateless shape; unsupported creation, linking and callback judgments are unchanged.

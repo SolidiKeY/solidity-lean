@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {creationTryContext} from '../creation-try-adapter.mjs';
 import {directSelfTryContext} from '../self-try-adapter.mjs';
 /** Optional machine reference, deliberately separate from Lean coverage. */
 import {readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync} from 'node:fs';
@@ -47,7 +48,7 @@ export function creationObservation(exec, signature, metrics) {
   return {...actual, runtimeCodeSha256:sha(exec.returnValue), runtimeCodeBytes:exec.returnValue.length};
 }
 
-export async function machine(stepLimit = STEP_LIMIT) {
+export async function machine(stepLimit = STEP_LIMIT, captureCreations = false) {
   if (!Number.isSafeInteger(stepLimit) || stepLimit <= 0 || stepLimit > STEP_LIMIT) throw new HostLimit("invalid reference step budget");
   const evm = await createEVM({common:new Common({chain:Mainnet, hardfork:Hardfork.Osaka}),
     // Pinned test/EVMHost.cpp:418-441 deposits returned code without an
@@ -55,6 +56,13 @@ export async function machine(stepLimit = STEP_LIMIT) {
     allowUnlimitedContractSize:true, allowUnlimitedInitCodeSize:true});
   await evm.stateManager.putAccount(caller, new Account(0n, 10n**30n));
   let metrics;
+  let creations;
+  if (captureCreations) evm.events.on('afterMessage', result => {
+    if (result.createdAddress) creations.push({address:result.createdAddress.toString(),
+      failed:!!result.execResult.exceptionError,
+      ...(result.execResult.exceptionError ? {halt:result.execResult.exceptionError.error,returnData:bytesToHex(result.execResult.returnValue)} :
+        {runtimeCodeSha256:sha(result.execResult.returnValue),runtimeCodeBytes:result.execResult.returnValue.length})});
+  });
   evm.events.on('step', step => {
     metrics.steps++;
     metrics.maxStack = Math.max(metrics.maxStack, step.stack.length);
@@ -69,13 +77,14 @@ export async function machine(stepLimit = STEP_LIMIT) {
     evm.journal.addAlwaysWarmAddress(caller.toString().slice(2));
     if (options.to) evm.journal.addAlwaysWarmAddress(options.to.toString().slice(2));
     metrics = {steps:0, maxStack:0};
+    creations = [];
     const result = await evm.runCall({caller, origin:caller, gasLimit:INITIAL_GAS, ...options});
-    return {result, metrics:{...metrics}};
+    return {result, metrics:{...metrics,...(captureCreations ? {creations} : {})}};
   }};
 }
 
 export async function replayBytecode(artifact, vectors, stepLimit = STEP_LIMIT, hostContext = null) {
-  const vm = await machine(stepLimit);
+  const vm = await machine(stepLimit, hostContext?.kind === 'creation-try-source');
   const observed = [];
   let address;
   let deployment;
@@ -154,7 +163,7 @@ export async function runFixture(path, directory, compile) {
     if (errors.length) { result.variants.push({pipeline,status:'blocked',reason:'reference compiler error',errors}); continue; }
     const ast = out.sources[fixture.mainSource].ast;
     const definition = ast.nodes.filter(n=>n.nodeType === 'ContractDefinition' && n.contractKind === 'contract' && !n.abstract).at(-1);
-    const hostContext = directSelfTryContext(ast, definition, {referenceOnly:true});
+    const hostContext = directSelfTryContext(ast, definition, {referenceOnly:true}) ?? creationTryContext(ast, definition);
     if (hasHost(ast) && !hostContext) throw new HostLimit('host-dependent behavior not adapted');
     const contract = definition?.name;
     if (!contract) throw new HostLimit('no concrete deployment contract');
@@ -198,6 +207,7 @@ async function main(args) {
     archiveSha256:manifest.archiveSha256,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
     adapterSha256:sha(readFileSync(new URL('../solidity-upstream.mjs',import.meta.url))),
     selfTryAdapterSha256:sha(readFileSync(new URL('../self-try-adapter.mjs',import.meta.url))),
+    creationTryAdapterSha256:sha(readFileSync(new URL('../creation-try-adapter.mjs',import.meta.url))),
     dependencyLockSha256:sha(readFileSync(new URL('package-lock.json',import.meta.url))),
     engine:'@ethereumjs/evm 10.1.3',hardfork:'osaka',
     allowUnlimitedContractSize:true,allowUnlimitedInitCodeSize:true,codeSizeRule:'pinned test/EVMHost.cpp:418-441 (code-deposit gas, no EIP-170 cap)',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,

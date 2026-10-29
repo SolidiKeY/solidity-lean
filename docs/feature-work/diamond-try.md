@@ -6,8 +6,9 @@ for this assignment. That resolves the earlier request for a profile decision;
 no stronger global admissibility premise is introduced. The conditional account
 provides exact typed conditions for all external/catch-data outcomes, ordinary
 formula transport, and conditions for the existing creation-try interface. The
-latest continuation adds a native entry return bridge over existing typed calls.
-Ten original fixtures now pass native replay in both pipelines; sixteen pass
+latest continuation adds a narrow creation-try source continuation over the
+existing typed World operations, following the entry return bridge. Eleven
+original fixtures now pass native replay in both pipelines; seventeen pass
 separate compiler/EVM replay. Neither replay establishes universal source
 validity. The remaining native dependencies are enumerated below.
 
@@ -931,3 +932,155 @@ baseline invocation exit 127 was a wrapper/mount error and supplies no baseline
 evidence. Final current confirmation peaked at 3,474,202,624 cgroup bytes,
 3,841,672 KiB sampled aggregate RSS, no OOM/swap, in 186 seconds. A script driver's
 exit 0 does not replace the individual retained nonzero gate exits in its table.
+
+
+## Creation-try source continuation after e7921de5
+
+The task-specific source adapter now executes the complete unchanged original
+`tryCatch/create.sol` through both compiler pipelines. It recognizes whole source
+declarations and exact declaration references, rather than replacing creation by
+an oracle outcome. The original source SHA256 is
+`574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058`.
+The compiler is the existing pinned 0.8.38 artifact; neither profile nor decoder
+changes are enabled. All original callback counterexamples remain negative.
+
+`Solidity/Semantics/CreationTryFrame.lean` composes the existing `World.tryCreate`
+with intrinsic caller programs and their actual heap extensions. Its conditional
+laws cover argument failure before creation, actual returned handles, completed
+caught constructor halts, uncaught divergence/exhaustion, handler scope, caller
+tails and atomic rollback. Data-binding Error handlers use existing `decode` and
+`litBytesT`, retaining actual bytes. An argument failure cannot enter constructor
+handlers. A handler/tail failure cannot re-enter those handlers. `constructorArg`
+binds the actual evaluated argument once before the actual imported constructor
+call. These laws do not establish a new global source or callback judgment.
+
+`Solidity/Frontend/CreationTryImport.lean` checks a closed source shape: stateless
+noninheriting contracts, a single uint256 argument constructor with empty body or
+literal Error revert, no payment or modifiers, and no-argument nonpayable methods
+with named bool/string returns. Exact local declaration identities connect the
+prefix argument, constructor target, returned handle, address comparison and
+Error payload assignment. Numeric subdenominations, wrong references, unknown
+contracts, constructor effects, extra tails and unsupported shapes are refused.
+All source contracts are accounted for. The source command has no box annotation.
+The existing ordinary source obligation representation is unchanged.
+
+The adapter lowers admitted bodies to existing intrinsic programs, exact scoped
+frames, real constructor calls and the existing ABI encoder. Temporary captures
+are dropped using their typed extensions; the encoded output object is retained
+outside that scope and read directly, without a second ABI envelope. Constructor
+imports retain failure data and preserve the default self flag. The pending
+caller frame is committed once. This composition is restricted to unpaid local
+caller code and the explicitly checked constructors: it is not a general paid
+world-call refinement. In particular, stale caller funds must not be used to
+model arbitrary constructor payments. No global world semantics is changed.
+
+The published prerequisite inspection is retained in
+[/workspace/next10-diamond-try-evidence/creation-source/published-prerequisites.log](/workspace/next10-diamond-try-evidence/creation-source/published-prerequisites.log).
+Published origin/master was `dedb3aee5743025aeb6d8f7219c9b6b9c1e00e5d`;
+its ContractWorld blob was `9f22396da6266fa083413689a5c2e4141e545a95` and
+WorldImport blob `8c5f0e05c9c5a4976612b05112a357e4e4d333ef`.
+The first 390 ContractWorld lines containing the used primitives are identical
+locally and published (SHA256
+`de956c31582b2dcf2809326a440a866aee9b413b329603f66c0d33f0e4d696a9`).
+No prerequisite commit was imported; the retained original branch/base survives.
+Published later payment/certificate APIs are not required or copied here.
+
+The legacy and via-IR AST fixtures come from the same unchanged full source,
+using the existing compiler world-metadata option. Kernel examples prove both
+complete ordered output vectors, actual arguments 3 and 8, successful installation
+and failed-constructor rollback, collision refusal and a wrong-reason-byte
+negative. Generated `run_approx` theorems quantify over this adapter's typed
+world/context inputs; successful bounded executions agree with ordinary
+execution. They are not universal Solidity/compiler refinement theorems or
+`ValidT`/`holdsC` claims. Script recognizer checks and finite compiled-bytecode
+replays remain separate evidence.
+
+The replay context fixes the actual funded sender, deployed caller, zero value,
+zero caller funds, timestamp and starting nonce. The task-specific standard RLP
+address calculation supplies fresh addresses; it does not add a nonce primitive
+to World. Actual EVM nested-creation receipts independently record failed creation
+at nonce 1 with the original Error bytes and successful creation at nonce 2 with
+runtime code. Targets match the native execution. Empty vectors, zero/wrong
+context, unknown methods and altered expected bytes are explicit controls.
+
+An initial recognizer review found that a numeric subdenomination could be lost;
+both host and Lean admission now refuse it, with a negative test. Review also
+required nonempty vectors and exact runtime context. Both were fixed. The new
+runtime-only `evalExpr Json` site is explicitly inventoried; no new proof axiom
+or trust exemption is introduced. The affected scripts have 110 passing tests.
+
+Remaining native rows retain the six physical-assembly/nonprimitive-ABI cases,
+linked-library composition and two historical pre-Byzantium profiles. The
+malformed_panic_2/_3 256-byte payload versus 36-byte kernel decoder counterexample
+and historical profile proposal remain human-review items, not enabled changes.
+The complete assignment remains open at those boundaries.
+
+
+### Creation continuation validation
+
+Fresh complete-family replay is **11 working / 9 blocked / 0 broken** natively;
+the native strict command retains exit 1 because those nine are unresolved.
+Seventeen original fixtures complete both reference pipelines, with three
+historical excluded reports retained as blocked, not counted as fresh passes.
+All **58** native/reference ordered observations and **132** reference/frozen
+ordered observations match signatures, failure flags and every return/revert
+byte. The creation row also matches actual target addresses, creation nonces,
+installation flags and full failed-constructor Error bytes. Its legacy and IR
+kernel certificates independently compute the same original ordered outputs.
+
+The full row-by-row before/after account and complete byte evidence are retained
+at [/workspace/next10-diamond-try-evidence/creation-source/fixture-account.md](/workspace/next10-diamond-try-evidence/creation-source/fixture-account.md)
+and [/workspace/next10-diamond-try-evidence/creation-source/fixture-parity.json](/workspace/next10-diamond-try-evidence/creation-source/fixture-parity.json).
+Actual transitive audits cover **151 distinct declarations**: 28 new creation
+statements/generated correspondences and all 123 retained task declarations.
+Only `propext`, `Classical.choice` and `Quot.sound` occur; no new proof axiom is
+introduced. Eight owning-file MCP checks report structured success, no partial
+results and no failed dependencies. Script controls pass 110/110 and the existing
+exception-vector regression passes all 88 controls.
+
+Full library plus SolkeyTestSuite, Corpus, complete frozen TestSuite, source
+admission, orphan/layer checks, strict automatic/trust checks and regenerated
+inventory checks have actual successful exits. Documentation-path checking
+retains exit 1 with exactly the same 20 baseline missing references and zero new
+findings. The earlier optional audit invocation against the fixture-only archive
+failed because that archive lacks upstream Changelog.md; its log is retained.
+The documented default inventory regeneration and freshness check succeed; no
+generated file was hand-edited. The original fixture sources and expected
+verdicts/observations are unchanged.
+
+The interrupted validation driver and surviving Corpus container were recovered
+without replacement. Its actual successful run took 1,249 seconds, with
+11,426,820,096 cgroup peak bytes and 11,570,276 KiB sampled aggregate RSS; no
+OOM, max-limit or swap events occurred. A subsequent uninterrupted serialized
+Corpus confirmation is separately recorded. The final bounded commands enforce
+12 GiB memory and zero swap, one Lean thread and explicit Lean -j1. Disk caches
+remain on disk. Timing footers describe command execution; driver wall times
+also include writer-lock queue time. Interrupted/nonfinal rows remain recorded
+rather than being relabeled as final passes.
+
+| Final command | Exit | Actual command seconds | Cgroup peak bytes |
+|---|---:|---:|---:|
+| final-automatic.log | 0 | 1 | 21127168 |
+| final-axioms-conditional.log | 0 | 2 | 159350784 |
+| final-axioms-continuation.log | 0 | 4 | 155869184 |
+| final-axioms-original.log | 0 | 4 | 154894336 |
+| final-axioms-return.log | 0 | 4 | 176492544 |
+| final-axioms-universal.log | 0 | 3 | 187637760 |
+| final-axioms.log | 0 | 3 | 172756992 |
+| final-doc-paths.log | 1 | 3 | 8622080 |
+| final-frozen.log | 0 | 1 | 41648128 |
+| final-full-confirm.log | 0 | 1172 | 9611038720 |
+| final-inventory-check.log | 0 | 1 | 10723328 |
+| final-layers.log | 0 | 1 | 77082624 |
+| final-native-family.log | 1 | 61 | 484532224 |
+| final-orphans.log | 0 | 1 | 63262720 |
+| final-script-tests.log | 0 | 5 | 568836096 |
+| final-source-admission.log | 0 | 2 | 242360320 |
+| final-trust.log | 0 | 5 | 169148416 |
+| final-vectors88.log | 0 | 4 | 372088832 |
+| final-whitespace.log | 0 | 1 | 4685824 |
+| corpus-recovered.log | 0 | 1249 | 11426820096 |
+| corpus-final-serialized.log | 0 | 12 | 1118474240 |
+| inventory-recovered.log | 0 | 1 | 10862592 |
+
+Detailed gate, diagnostics and axiom accounts are in the linked creation-source evidence directory. Finder and skeptic independently reviewed code and owning claims read-only, with no Lean server or check execution. Confirmed denomination, vacuous-vector, runtime-context and stale-overview findings were repaired. The full assignment is still incomplete at the nine remaining native rows and the unchanged callback/profile/decoder boundaries described above.

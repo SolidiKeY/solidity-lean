@@ -3,6 +3,7 @@ import Solidity.Tools.Run
 import Solidity.Semantics.RunFuel
 import Solidity.Semantics.RevertMemory
 import Solidity.Tools.EntryReturn
+import Solidity.Tools.CreationTryReplay
 
 /-!
 # Replay upstream typed ABI semantic vectors
@@ -467,6 +468,8 @@ def elabUpstreamBatch : CommandElab := fun stx => do
     let path ← ofExcept (entry.getObjValAs? String "path")
     let outcome ← (do
       try
+      if ((entry.getObjVal? "hostContext").toOption.bind (fun h => (h.getObjValAs? String "kind").toOption)) == some "creation-try-source" then
+        return ← CreationTryReplay.elaborate entry
       let fixture ← ofExcept (entry.getObjValAs? String "fixture")
       let contract ← ofExcept (entry.getObjValAs? String "contract")
       let name := Lean.Name.str `Upstream contract

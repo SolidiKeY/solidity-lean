@@ -1178,8 +1178,8 @@ def Feature.info : Feature → FeatureInfo
   | .creationTry =>
     { category := "calls", spelling := "try new C(args) returns(C c)",
       scope := .abstract, current := .limited,
-      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
+      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported. The narrow stateless unpaid Error(string) source continuation now compiles actual local arguments, constructor/handle and caller branches; its conditional kernel correspondence and original creation fixture replay do not establish general world/source or callback validity."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/CreationTryFrame.lean", "Solidity/Frontend/CreationTryImport.lean", "Solidity/Examples/Tactics/CreationTrySource.lean", "Solidity/Examples/Tactics/CreationTrySourceIR.lean"] }
   | .callbackSemantics =>
     { category := "calls", spelling := "reentrancy during modeled external calls",
       scope := .abstract, current := .limited,

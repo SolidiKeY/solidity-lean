@@ -59,3 +59,9 @@ instruction, settings and expectation policies are unchanged. The
 [conditional try/catch record](../../docs/feature-work/diamond-try.md#human-approved-conditional-account-and-native-adapter-repair)
 separates sixteen original reference passes from four native passes and records
 the remaining blocked pipelines and model decoder boundary.
+
+
+The creation-try source context additionally records actual nested CREATE receipts
+(address, actual failed halt/revert bytes or runtime code hash/size). This is
+compiled-bytecode evidence, separate from kernel proofs and native source
+admission. It does not enable a historical profile or alter panic decoding.

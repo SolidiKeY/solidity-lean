@@ -891,3 +891,13 @@ At the root, the notation's own tests:
 | `Examples/Tactics/EntryReturnFlowIR.lean` | The same controls under existing viaIR modifier frames, with safe kernel declaration factoring for the large quotation. |
 | `Examples/Tactics/EntryReturnMetadata.lean` | Signed narrow and fixed-byte return metadata, exact order and empty memory kernel control. |
 | `Examples/Tactics/EntryReturnFunction.lean` | Output-only external-function address/selector, bytes24 padding, order and once-only kernel witnesses in both evaluation modes; function-input refusals remain. |
+
+### Creation-try caller continuations
+
+| Module | Defines |
+|---|---|
+| `Semantics/CreationTryFrame.lean` | Typed pending caller/creation/handler/tail composition over existing World operations, exact failure and allocation laws, universal bounded-to-ordinary approximation. |
+| `Frontend/CreationTryImport.lean` | Complete-declaration, identity-resolved stateless unpaid creation-try source compiler with actual constructor, local argument, returned handle and Error payload branches. |
+| `Tools/CreationTryReplay.lean` | Bounded native creation source observations with explicit checked runtime context, actual typed world threading and refusal controls. |
+| `Examples/Tactics/CreationTrySource.lean` | Complete original creation source outputs, ordinary transport, argument/rollback/installation/wrong-byte kernel controls and malformed replay controls. |
+| `Examples/Tactics/CreationTrySourceIR.lean` | Separately compiled viaIR original creation source with both ordered output kernel witnesses. |
