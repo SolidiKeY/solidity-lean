@@ -856,7 +856,7 @@ lake exe rulecheck --seed 42 --samples 1000
   distinguished in any public wp API.
 
 
-### Current cumulative storage validation follow-up (2026-10-29)
+### Historical cumulative validation checkpoint ce54e121 (2026-10-29)
 
 The four approved Widths helper contracts and separate signed-SHR laws are
 committed in `c7a45cd0e3660dbbea2e541251419d59b5629d28`. The earlier Widths
@@ -909,3 +909,58 @@ and corrected snapshot races, task-identity drift and overly broad completion
 logic before creating the successor cumulative export. R1–R3 remain preserved;
 the new handoff includes all task commits from the original base, full logs,
 resource reports, human approval, reviews and checksummed patch/bundle/archive.
+
+
+### Approved guard correction and final finite-storage validation (2026-10-29)
+
+The human separately approved exactly both RHS flag tests of
+`Solidity.Bridge.Arith.narrowCheck_guard` to use
+`scope.selfFrame || scope.retainFailureData`. Commit
+`d6c67b075dcd53ccc0c3381ec40955c4e90a46c5` applies only that conclusion correction;
+all premises, other theorem statements, public width/cast results, actual source
+behavior, source/compiled observations, exclusions and budgets are unchanged.
+The preceding pending-decision checkpoints are historical and resolved.
+
+The corrected public contract kernel-checks. Additive
+`Bridge/SolidityBridge/Arith/GuardRetentionExamples.lean` applies it to an inhabited
+uint8 local for all 12 combinations of self/retain flags and ordinary/checking/
+ignoring overflow modes. In particular retained failure data without a self-call
+selects the panic guard. Pinned audits for the helper, matrix and retained-panic
+control use only `propext` and `Quot.sound`. Both `retained_data_counterexample`
+and `not_old_narrow_guard` remain byte-identical and kernel-checked, refuting the
+old conclusion. The global symbolic-slot injection obstruction is unchanged.
+
+| Final check | Exit | Seconds | Sampled aggregate peak RSS (bytes) | Kernel cgroup peak (bytes) |
+|---|---:|---:|---:|---:|
+| Focused guard/storage/countercontrols | 0 | 10.198 | 1,714,331,648 | 335,499,264 |
+| Full Bridge umbrella (2023 jobs) | 0 | 8.362 | 2,287,788,032 | 547,061,760 |
+| Rulecheck (36 × 1000, seed 42) | 0 | 2.315 | 467,128,320 | 107,278,336 |
+| Original full core/TestSuite/sort script (warm cache) | 0 | 2.118 | 216,403,968 | 375,488,512 |
+| Original combined script with Bridge and vendor checks (warm cache) | 0 | 2.518 | 406,814,720 | 375,627,776 |
+
+These are actual terminal results, not inferred cache or environment readiness.
+Warm-cache confirmations do not replace the preserved 741.357-second core run or
+establish a cold-build speedup. The original combined script checks 685 core jobs,
+259 TestSuite jobs, all three vendor checksum manifests, 2023 optional Bridge
+jobs and all 131 read-bearing sort annotations. Every final heavy check uses the
+same saved VM, published Lean/Lake runtime, hard 12 GiB workload cgroup,
+`swap.max=0`, actual disabled swap, `LEAN_NUM_THREADS=1` and explicit Lean `-j1`.
+There are no OOM-event deltas. Timeouts, earlier failures and the invalid
+missing-awk docs run remain preserved and are not promoted to passes.
+
+The result remains an optional compiler refinement of the existing finite
+storage model under the stated setup, finite-alias compatibility and actual
+upstream-evaluator representation assumptions. It makes no hash-injectivity,
+collision-freedom or unbounded physical-layout claim and does not enable excluded
+source assembly/layout semantics. Existing source-run/compiled-run observations,
+positive controls, collision refusals and kernel simulations remain checked by
+the full Bridge umbrella. No source-coverage inventory promotion is warranted.
+
+Independent read-only finder and skeptic reviews found no defect and confirmed
+the exact approval boundary, inhabited controls and retained obstructions. Neither
+used a Lean server/build or wrote files. The final static gates and their exact
+HEAD are retained in the successor handoff. The historical 20 missing doc-path
+references remain red and unchanged; they are separate documentation debt.
+Current operational configs are snapshotted before removal/restoration; proof
+caches stay on disk. The cumulative export preserves R1–R4 and includes both
+human approvals, every task commit, full logs, resource reports and reviews.
