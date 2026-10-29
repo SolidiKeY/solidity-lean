@@ -326,8 +326,10 @@ answers: explicit conversions wrap and take no `Mode`
 assertion that stops every fixed shift.
 
 Not changed: the finder's suggestion to drop `FxTy.solcImplicit` from
-`FxTy.implicitOK` (the implication is unproved; §5), and P1's
-double-rounding claim, which both reviewers confirmed.
+`FxTy.implicitOK`, and P1's double-rounding claim, which both reviewers
+confirmed. The implication was unproved then; it is now
+`FxTy.solcImplicit_of_subsumes` (§6.1), and the conjunction stays because it
+states the decision's form ("the range-contained subset of solc's pairs").
 
 ## 6. Lane `lane-fixed` (roadmap-l1, 2026-10-29)
 
@@ -339,43 +341,99 @@ checkpoint below has its handoff and review.
 
 ### 6.1 Checkpoint 1 — the decisions and their laws
 
-The second-round decisions were already encoded (§3; `Mode` keeps only
-`checked`/`unchecked`, no obsolete variant is left: explicit conversions
-took their mode out in `fb5c81a`). The new module
+The second-round decisions were already encoded (§3). `Mode` keeps only
+`checked`/`unchecked`; no obsolete variant is left, because explicit
+conversions lost their mode in `fb5c81a`. The new module
 `Solidity/Language/FixedPoint/Laws.lean` proves the laws the reviews asked
-for:
+for. A checked `*` or `/` range-checks only the truncated exact result, and
+the exact product or quotient is an unbounded intermediate. This is the
+intended reading of Q8: no intermediate overflow is observable, and a
+lowering (G16/G25) must not revert on one.
 
-- **Checked/unchecked agreement.** `Fx.result_unchecked_of_checked`,
-  `Fx.result_agree`; per operation `Fx.add_agree`, `Fx.sub_agree`,
-  `Fx.neg_agree`, `Fx.mul_agree`, `Fx.div_agree`, `Fx.mod_agree`,
-  `Fx.inc_agree`, `Fx.dec_agree`: where the checked operation succeeds, the
-  unchecked one gives the same value. `Fx.result_val` (every result is the
-  wrapped exact integer), `Fx.result_checked_val` (a checked one is the
-  exact integer).
-- **`*`/`/` exactness and truncation (Q3, Q8).** `tdiv_trunc`, `tdiv_rem`
-  (truncating division on `Int`); `Fx.mul_trunc` (`r·10^N` is within one
-  `10^N` of `a·b`, toward zero), `Fx.mul_exact` (exact when `10^N ∣ a·b`);
-  `Fx.div_trunc` (`a·10^N = r·b + e`, `|e| < |b|`, `e` of the sign of `a`),
-  `Fx.div_exact`; `Fx.inc_val`, `Fx.dec_val` (`++`/`--` move by the value 1,
-  Q6).
-- **Lossless round trips.** `Fx.rescale_up_down`, `Fx.explicit_implicit`
-  (implicit then explicit back), `Fx.toIntTrunc_ofIntegerExplicit` (integer
-  → fixed → integer, in range), `Fx.toBits_ofBits` and `Fx.ofBits_toBits`
-  (`bytesM` bit patterns, Q7; `Fx.toBits` is the `M`-bit pattern).
-- **Implicit ⇒ value-preserving (Q1).** `FxTy.solcImplicit_of_subsumes`
-  and `FxTy.implicitOK_iff` (`implicitOK = subsumes`), `FxTy.subsumes_refl`,
-  `FxTy.common?_subsumes` (both operands convert to the common type),
-  `Fx.implicit_preserves` (value and order), `Fx.common?_preserves`.
+- **Checked/unchecked agreement where nothing overflows.**
+  `Fx.add_agree_of_inRange`, `Fx.sub_agree_of_inRange`,
+  `Fx.neg_agree_of_inRange`, `Fx.mul_agree_of_inRange`,
+  `Fx.inc_agree_of_inRange`, `Fx.dec_agree_of_inRange` and
+  `Fx.div_agree_of_inRange` each take the no-overflow premise on the exact
+  integer. `Fx.mod_agree'` needs no premise. The same facts read from a
+  checked success are `Fx.add_agree` … `Fx.mod_agree`, from
+  `Fx.result_unchecked_of_checked` and `Fx.result_agree`. `Fx.result_val`
+  says every result, unchecked included, is the wrap of the exact integer;
+  `Fx.result_checked_val` says a checked one is that integer.
+- **Unary minus at `ufixed` (Q5).** `Fx.neg_unsigned`: checked, `.ok a` if
+  `a = 0`, else `overflow`.
+- **`*`/`/` exactness and truncation (Q3, Q8).**
+  - `tdiv_trunc` and `tdiv_rem` give truncating division on `Int`.
+  - `Fx.mul_trunc`: `r·10^N` lies between `0` and `a·b`, within one `10^N`.
+  - `Fx.mul_exact`: exact when `10^N ∣ a·b`.
+  - `Fx.div_trunc`: `a·10^N = r·b + e` with `|e| < |b|` and `e` of the sign
+    of `a`, which determines `r`.
+  - `Fx.div_exact`.
+  - `Fx.inc_val`, `Fx.dec_val`: checked `++`/`--` move by the value 1 (Q6).
 
-`#print axioms` pins (`#guard_msgs`) at the end of the module:
-`FxTy.implicitOK_iff`, `Fx.result_unchecked_of_checked`, `Fx.mul_trunc`,
-`Fx.div_trunc`, `Fx.explicit_implicit`, `Fx.implicit_preserves`, each
-`[propext, Classical.choice, Quot.sound]`.
+  These are stated for checked results. The unchecked ones are the wrap of
+  the same integer (`Fx.result_val`).
+- **Conversion truncation and lossless round trips.**
+  - `Fx.rescale_down_trunc` and `Fx.toIntTrunc_trunc`: dropping digits and
+    converting to an integer truncate toward zero.
+  - `Fx.rescale_down_exact`, `Fx.rescale_up_down`.
+  - `Fx.explicit_sameValue` and `Fx.explicit_explicit`: an explicit
+    conversion keeps the value, and converting back returns it, whenever
+    the value is representable at the target (no nonzero digit dropped,
+    rescaled integer in range). This covers narrower widths, the other
+    signedness and fewer digits, value by value.
+  - `Fx.explicit_implicit`.
+  - `Fx.toIntTrunc_ofIntegerExplicit`: integer → fixed → integer.
+  - `Fx.ofIntegerExplicit_toIntTrunc`: fixed → integer → fixed, with no
+    fractional part.
+  - `Fx.toBits_ofBits`, `Fx.ofBits_toBits` (Q7). `Fx.toBits`, in the core
+    module, only witnesses that `ofBits` is a bijection on `[0, 2^M)`. solc
+    has no fixed→`bytesM` conversion.
+- **Implicit ⇒ value-preserving (Q1).**
+  - `FxTy.solcImplicit_of_subsumes` and `FxTy.implicitOK_iff`:
+    `implicitOK = subsumes`.
+  - `FxTy.subsumes_iff`: `subsumes` holds exactly when every value of `t`
+    has a same-valued value of `t'`.
+  - `FxTy.subsumes_refl`, `FxTy.common?_subsumes`.
+  - `Fx.implicit_preserves`: value, `<`, `<=` and distinctness, through
+    `Fx.implicit_le` and `Fx.implicit_injective`.
+  - `Fx.common?_preserves`.
 
-**Handoff.** S01/S02 can take `implicitOK` as `subsumes` and cite
-`Fx.common?_preserves` for mixed operands; G16/G25 lowering proofs can
-target `Fx.result_val` (unchecked = wrap of the exact integer) and
-`Fx.mul_trunc`/`Fx.div_trunc` for the 512-bit multiply-divide. Not proved:
-the bounds for unchecked `*`/`/` beyond `Fx.result_val`, and value
-preservation of digit-dropping explicit conversions beyond
-`Fx.explicit_implicit`.
+`#print axioms` pins (`#guard_msgs`) at the end of the module cover
+`FxTy.implicitOK_iff`, `FxTy.subsumes_iff`,
+`Fx.result_unchecked_of_checked`, `Fx.mul_trunc`, `Fx.div_trunc`,
+`Fx.explicit_explicit`, `Fx.implicit_preserves` and `Fx.neg_unsigned`. Each
+is `[propext, Classical.choice, Quot.sound]`.
+
+**Handoff.**
+- S01/S02 can take `implicitOK` as `subsumes` and cite
+  `Fx.common?_preserves` for mixed operands.
+- G16/G25 lowering proofs can target `Fx.result_val` (unchecked is the wrap
+  of the exact integer) and `Fx.mul_trunc`/`Fx.div_trunc` for the 512-bit
+  multiply-divide.
+
+Not proved:
+- associativity (it fails under truncation);
+- how far an explicit conversion lands from the value when the value is not
+  representable (it wraps, by decision Q2);
+- order preservation of explicit conversions.
+
+**Review.** A read-only finder and a separate read-only skeptic reviewed
+`aa4bb50`. Neither found a blocking defect. The confirmed findings were
+fixed in the next commit:
+
+| Finding | Source | Fix |
+|---|---|---|
+| Agreement was only stated from a checked success | skeptic | `…_agree_of_inRange` per operation, `Fx.mod_agree'` |
+| No truncation law for conversions | skeptic | `Fx.rescale_down_trunc`, `Fx.toIntTrunc_trunc`, `Fx.rescale_down_exact` |
+| Lossless round trips covered only subsumed pairs | both | `Fx.explicit_sameValue`, `Fx.explicit_explicit`, `Fx.ofIntegerExplicit_toIntTrunc` |
+| `subsumes` was a range test only by its docstring | skeptic | `FxTy.subsumes_iff` (both directions) |
+| Order preservation was only `<` | both | `Fx.implicit_le`, `Fx.implicit_injective` in `Fx.implicit_preserves` |
+| "between `0` and `x`" was not stated | finder | sign conjuncts in `tdiv_trunc`, `Fx.mul_trunc` |
+| Checked-only laws were unqualified | finder | docstrings and the bullet above name the mode |
+| No general law for unary minus at `ufixed` | finder | `Fx.neg_unsigned` |
+| `Fx.toBits` was new semantics in the laws module | both | moved next to `Fx.ofBits` in the core, with its status |
+| `FxTy.lo_le_zero`/`hi_nonneg` duplicated core proofs | finder | moved to the core; `Fx.mod_inRange` uses them |
+| Untyped `have`s | finder | typed throughout `Laws.lean` |
+| Stale review note on `solcImplicit` (§Review) | finder | reworded |
+| Intermediate overflow of `*` was unstated | skeptic | stated as intended, above and in the module docstring |

@@ -103,6 +103,15 @@ theorem pow_bits (t : FxTy) : (2 : Int) ^ t.bits = 2 * 2 ^ (t.bits - 1) := by
 
 theorem half_pos (t : FxTy) : (0 : Int) < 2 ^ (t.bits - 1) := Int.pow_pos (by decide)
 
+theorem lo_le_zero (t : FxTy) : t.lo ≤ 0 := by
+  have h : (0 : Int) < 2 ^ (t.bits - 1) := t.half_pos
+  simp only [lo]; split <;> omega
+
+theorem hi_nonneg (t : FxTy) : 0 ≤ t.hi := by
+  have h : (0 : Int) < 2 ^ (t.bits - 1) := t.half_pos
+  have hp : (2 : Int) ^ t.bits = 2 * 2 ^ (t.bits - 1) := t.pow_bits
+  simp only [hi]; split <;> omega
+
 end FxTy
 
 /-- A value of type `t`: its scaled integer, in range. -/
@@ -307,13 +316,8 @@ theorem mod_inRange (a b : Fx t) : t.inRange (a.1.tmod b.1) = true := by
   have ha := a.2
   have hb := tmod_between a.1 b.1
   simp only [FxTy.inRange, Bool.and_eq_true, decide_eq_true_eq] at ha ⊢
-  have hl : t.lo ≤ 0 := by
-    have := t.half_pos
-    simp only [FxTy.lo]; split <;> omega
-  have hu : 0 ≤ t.hi := by
-    have := t.half_pos
-    have := t.pow_bits
-    simp only [FxTy.hi]; split <;> omega
+  have hl : t.lo ≤ 0 := t.lo_le_zero
+  have hu : 0 ≤ t.hi := t.hi_nonneg
   by_cases h : 0 ≤ a.1
   · have := hb.1 h; omega
   · have := hb.2 (by omega); omega
@@ -472,6 +476,12 @@ theorem ofIntegerExplicit_of_implicit {lo hi k : Int} (h : t.intImplicit lo hi =
 width), by bit pattern: the bytes' unsigned integer `u < 2^M` is the scaled
 integer, two's complement where signed (Q7). -/
 def ofBits (t : FxTy) (u : Int) : Fx t := wrap t u
+
+/-- The `M`-bit pattern of a value, `0 ≤ · < 2^M`: the inverse of `ofBits`
+(`Fx.ofBits_toBits`, `Fx.toBits_ofBits` in `FixedPoint/Laws.lean`).  It
+witnesses that `ofBits` is a bijection; solc has no fixed-to-`bytesM`
+conversion, so it is not a modelled conversion. -/
+def toBits (a : Fx t) : Int := a.1 % 2 ^ t.bits
 
 /-- An explicit conversion to an integer, by value (Q7): the
 integer part, truncated toward zero (then the integer type's own explicit
