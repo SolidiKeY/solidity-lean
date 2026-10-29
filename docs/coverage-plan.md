@@ -553,6 +553,11 @@ is empty, unless the item touches files an open Codex lane owns
    (the merged model still refuses `abi.encode(0.1)` as solc does).
 6. **Source cost rule for stipend payments** (decision G06 Q3, S02/G43
    preparation): define the compiler-independent rule and its examples.
+7. **Bridge decoder agreement** (G45.05, decision 2026-10-29): once the Lean
+   environment allows the Mathlib cache hosts (`lakecache.blob.core.windows.net`,
+   `mathlib4.lean-cache.cloud`), add a `Bridge/` adapter that runs the vendored
+   EVMYulLean `decode`/`D_J` against `Solidity/Backend`; until then agreement
+   rests on the generated vectors in `Solidity/Backend/EvmVectors.lean`.
 
 ## Done when
 
