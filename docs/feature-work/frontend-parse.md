@@ -7,10 +7,13 @@ pinned to solc 0.8.38 and its ANTLR grammar
 (`tests/upstream/grammar-0.8.38/SolidityLexer.g4`, `SolidityParser.g4`).
 S00 is read-only here; what it lacks is recorded under each Handoff.
 
-All modules are under `Solidity/Frontend/Checked/` and import only
-`Solidity.Source.Syntax` (and `Solidity.Keccak` for EIP-55), so the frontend
-core reaches no elaborator, printer of `dl{}` or tactic front end. Every
-stage is an executable checker: an untrusted function proposes, a decidable
+All modules are under `Solidity/Frontend/Checked/`. The lexer, yield,
+precedence predicate, parser and check import only S00
+(`Solidity/Source/Syntax.lean`, `Ctor.lean`; `Decls.lean` in the
+witnesses) and `Solidity.Keccak` (for EIP-55); `Certificate.lean` adds G05's
+interface (`Solidity/Roadmap/Frontend.lean`). None reaches an elaborator, a
+printer of `dl{}` or a tactic front end. Every stage is an executable
+checker: an untrusted function proposes, a decidable
 certificate decides, and the soundness theorem holds by the check.
 
 | Module | Content |
@@ -22,7 +25,11 @@ certificate decides, and the soundness theorem holds by the check.
 | `Solidity/Frontend/Checked/Print.lean` | the yield `Syn.yield` under a layout; `Syn.toks`, `Syn.Derives` |
 | `Solidity/Frontend/Checked/Prec.lean` | `Syn.level`, `Syn.precNode`, `Syn.prec` |
 | `Solidity/Frontend/Checked/Parser.lean` | the untrusted parser `parseTokens` |
-| `Solidity/Frontend/Checked/Check.lean` | `parse`, `parseWithLayout`; `parse_sound`, `parse_derives` |
+| `Solidity/Frontend/Checked/Check.lean` | `parse`, `parseWithLayout`, `parseInProfile`, `parseCat`; `parse_sound`, `parse_derives`, `parseInProfile_sound` |
+| `Solidity/Frontend/Checked/Render.lean` | canonical token spellings, `Syn.print` |
+| `Solidity/Frontend/Checked/Certificate.lean` | G05's parse stage: `Parses`, `parseChecker`, `produce` |
+| `Solidity/Frontend/Checked/TypeExamples.lean`, `ExprExamples.lean`, `UnitExamples.lean` | G09, G10, G11 controls and coverage |
+| `scripts/parse-corpus.mjs`, `scripts/ParseCorpus.lean`, `tests/parse-corpus/baseline.json` | the corpus regression (G11) and the round-trip backfill |
 
 `scripts/check-checked-frontend.mjs` checks the lexer-rule table against
 `SolidityLexer.g4` and the generated tables against their generator.
@@ -633,5 +640,6 @@ blockers (10). Recorded: completeness and uniqueness (1).
 
 ## Reviews
 
-Each checkpoint ends with a read-only finder and a separate skeptic review
-(no Lean server); confirmed findings are fixed and listed here.
+Each checkpoint ended with a read-only finder and a separate skeptic review
+(no Lean server); the confirmed findings and their fixes are recorded in the
+checkpoint's Review section above.
