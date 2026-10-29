@@ -1456,6 +1456,462 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/Certificates.lean:Solidity.Frontend.Static.inheritanceChecker_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/Certificates.lean:Solidity.Frontend.Static.metadataChecker_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.abiArg_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.acyclic_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.args_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.arrayLenB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.constInitsB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.evalConst_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.evalConst_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.hasType_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.badBinding_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.clashing_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.counter_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.cyclic_noValue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.cyclic_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.gasleft_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.hexCall_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.named_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.oneThird_standalone": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.oneThird_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.overflow_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.timestamp_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.tooBig_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.tooBigFrac_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.typed_division": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.udvt_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.udvt_noBinding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.unreduced_standalone": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.inProfileSyntaxB_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.items_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.itemsOK_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.lval_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.nconst_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.pureB_iff": [],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.slots_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.standalone_abi": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.standalone_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.standalone_toFixedExplicit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.standalone_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.stmt_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.stmtOK_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.teval_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.typed_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.udvt_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.usingOpsB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.wellFormed_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.callable_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.ctorArgsB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.ctorOrder_spec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.fnOverrideB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.implB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.inheritance_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.abstractNeeded_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.argsCount_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.argsMissing_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.argsTwice_paths_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.argsTwice_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.calldataMemory_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.diamond_c3": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.dupList_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.dupListFixed_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.implThenUnimpl_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.lessStrict_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.missingVirtual_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.modArgs_count": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.modStyleBare_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.noCommonBase_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.nonBaseCtor_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.override_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.overridesSingle_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.sharedBase_unlisted_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.usingNotLibrary_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.virtualDecl_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.linearize_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.merge_nodup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.merge_sub": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.merge_sublist": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.modInvsB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.mustOverrideB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.overridesB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.usingLibB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.virtualDeclB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.globals_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.globals_lookup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.globals_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.iter_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.lookup_sub_globals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.lookup_sub_inheritedFns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.mem_inheritedFns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.ambiguous_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.clash_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.crossBase_merged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.cycle_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.fnEvent_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.UnitsExamples.missingSym_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.unitsOK_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Hash/Adaptive.lean:Solidity.Hash.eagerAdaptiveBound": [
   "Classical.choice",
   "Quot.sound",
@@ -1594,6 +2050,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.abiConst?_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.abiConst?_eq_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.explicitConst?_eq_none_iff": [
   "propext"
  ],
@@ -1608,6 +2074,21 @@
   "propext"
  ],
  "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.litCommon?_solc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_trunc": [
   "Classical.choice",
   "Quot.sound",
   "propext"

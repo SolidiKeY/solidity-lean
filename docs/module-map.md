@@ -641,6 +641,11 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/State.lean` | S04.01: source values `Val` over a declaration `Layout` (ranges, enum bounds and reference locations intrinsic), contents `Data` (recursive aggregates, content-keyed mappings), typed `memory` (`Heap`, copy and alias laws), read-only `Calldata`, `Storage` typed by its layout, defaults. |
 | `Source/Observe.lean` | S04.02: ABI words and bytes of values (`Val.word`, `Val.word_int`), selectors, `Panic`/`Error` revert data (`panicData_code`, `panic_distinct`) and `revertOutcome`. |
 | `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
+| `Source/Units.lean` | G12: source units of a compilation input (`Program`), solc's import path resolution and remappings (`Path.absolute`, `Remapping.apply`), declaration identities (`DeclId`), the file-level scope across imports (`Sees`) and G12's judgment `UnitsOK`. |
+| `Source/Overloads.lean` | G12: overload sets across a contract's bases (`InheritedFn`: hidden only by a more derived function with the same parameter types). |
+| `Source/ConstCheck.lean` | G13: compile-time constants: purity of constant initializers (`PureS`, `ConstInitsPure`, solc error 8349), solc's typed constant evaluation (`TEval`, `NamedConst`, `ConstVal`), array lengths through it (`ArrayLenOK`) and acyclic constants (`ConstsAcyclic`). |
+| `Source/UserOps.lean` | G13: user-defined value types: operator bindings of global `using {f as op} for T` directives (`opBindings`, well formed: `UsingOpsOK`), and the typing of operators, `wrap` and `unwrap` (`UdvtTyped`). |
+| `Source/Inheritance.lean` | G14: solc's contract-level checks as relations: overrides (`FnOverrideOK`, `OverridesOK`), required overrides (`MustOverride`), implementations (`ImplOK`), base-constructor arguments (`CtorArgsOK`), modifier invocations (`ModInvOK`), `using for` libraries (`UsingLibOK`), constructor order and callable identity; `InheritanceOK`. |
 | `Source/StateExamples.lean` | S04.01–S04.03 controls: nested memory aliasing, an independent memory copy, storage round trips, distinct panic outcomes, transfers, a reverted call undoing its writes. |
 
 ## Precompiles
@@ -691,6 +696,23 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/SolcJson/Contract.lean` | A contract read off the JSON; callable-only source/native finite-dispatch signatures; inherited constructor initialization follows verified legacy/viaIR provenance. |
 | `Frontend/SolcJson/Getters.lean` | Source ABI identities and record-paired, nonempty getter plans, lowered through ordinary function members; primitive/UDVT values, enum mapping keys, reference-result refusal and empty-data array bounds. |
 | `Frontend/SourceUnits.lean` | Original compilation-unit ASTs, per-source provenance and checked compiler import identities; explicit specification/mixed-legacy-ABI refusals. |
+| `Frontend/Static/Closure.lean` | G12–G14: reachability by saturation over a finite graph (`iter_sound`, `iter_complete`), shared by the static checkers. |
+| `Frontend/Static/Units.lean` | G12: the import resolver `Program.globals` (sound and complete for `Sees`, through cycles), the program check `Program.unitsOK` (`unitsOK_iff`), identities (`Sees.decl_exists`) and agreement with S01's lookup (`globals_lookup`). |
+| `Frontend/Static/Overloads.lean` | G12: the inherited overload set `Env.inheritedFns` (`mem_inheritedFns`, extends S01's lookup) and overload selection (`selectOverload`). |
+| `Frontend/Static/UnitsExamples.lean` | G12 controls: an import cycle, a diamond (one identity), a clash, aliases, a missing unit, remappings, shadowing, an ambiguous overload and overloads across bases. |
+| `Frontend/Static/Infer.lean` | G13: type inference `infer` over every category, returning S01 derivations (`Typed`, `LVal`, `TypedArgs`, `TypedSlots`): sound by construction. |
+| `Frontend/Static/InferComplete.lean` | G13: completeness of `infer` for every S01 expression rule (`typed_complete`, `lval_complete`, `args_complete`, `slots_complete`). |
+| `Frontend/Static/InferStmt.lean` | G13: statement and block checking `inferS`, returning `StmtD`/`ItemsD` derivations. |
+| `Frontend/Static/InferStmtComplete.lean` | G13: completeness of `inferS` (`stmt_complete`, `items_complete`); `stmtOK_iff`, `itemsOK_iff`. |
+| `Frontend/Static/WellFormedCheck.lean` | G13: `wellFormedB` decides S01's `WellFormed` (`wellFormed_iff`), every body and initializer typed by the checkers. |
+| `Frontend/Static/Consts.lean` | G13: purity checker (`pureB_iff`, `constInitsB_iff`), typed constant evaluation (`tevalP`, `nconstP`; `teval_complete`, `nconst_complete`), `evalConst`, `arrayLenB`, the cycle check (`acyclic_iff`). |
+| `Frontend/Static/UserOps.lean` | G13: the user-defined value type checker `udvtTys` (`udvt_iff`) and the binding check (`usingOpsB_iff`). |
+| `Frontend/Static/Standalone.lean` | G13, backfill item 5: the type a constant stands alone at (`STy.standalone`: a fractional constant at its mobile fixed-point type), the relations `StandaloneTyped`/`AbiArgTyped` decided by `standaloneTys` (`standalone_iff`, `abiArg_iff`), and the value from `Fx.mobileConst?`/`Fx.abiConst?` in `Language/FixedPoint/Literals.lean` (`standalone_value`). |
+| `Frontend/Static/InferExamples.lean` | G13 controls: S01's examples checked by computation, ill-typed and ill-formed refusals, named constants, a cyclic constant, a non-compile-time constant, UDVT operators and conversions. |
+| `Frontend/Static/Inheritance.lean` | G14: checkers deciding each inheritance relation (`fnOverrideB_iff` … `usingLibB_iff`, `inheritance_iff`) and callable identity (`callable_unique`). |
+| `Frontend/Static/C3.lean` | G14: the C3 specification `C3Lin`, the merge laws and soundness of S01's `Env.linearize` (`linearize_sound`); constructor order (`ctorOrder_spec`). |
+| `Frontend/Static/InheritanceExamples.lean` | G14 controls transcribing solc 0.8.38's `inheritance/` and `nameAndTypeResolution/` syntax tests, with their verdicts. |
+| `Frontend/Static/Certificates.lean` | The static checkers as G05 `Checker` values (`unitsChecker`, `metadataChecker`, `strictMetadataChecker`, `inheritanceChecker`) and the program's library declarations. |
 | `Frontend/Source.lean` | Compiler/pragma/settings validation, derived compilation-mode observations, static compiler-code artifacts and an admission result certifying its extracted feature list. |
 | `Frontend/SolcJson/Admission.lean` | Bounded AST scope classification and declaration-header closure over resolved execution roots; structured policy, upstream and implementation diagnostics. |
 | `Examples/Tactics/SourceUnitsImport.lean` | Both pinned compilers and pipelines: module calls, lexical error aliases, exact entry error bytes, receiver/condition effects and nonvacuity controls. |

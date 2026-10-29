@@ -46,6 +46,10 @@ import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.Tactics.Rigid
 import Solidity.Roadmap.Controls
 import Solidity.Source.TypingExamples
+import Solidity.Frontend.Static.UnitsExamples
+import Solidity.Frontend.Static.Certificates
+import Solidity.Frontend.Static.InferExamples
+import Solidity.Frontend.Static.InheritanceExamples
 import Solidity.Source.StateExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
@@ -965,3 +969,213 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} source-state theorems use only the standard axioms"
+
+/-! Roadmap G12: the import resolver, declaration identities and overloads
+across bases (`Solidity/Frontend/Static/`, `docs/feature-work/frontend-static.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.iter_sound,
+    ``Solidity.Frontend.Static.iter_complete,
+    ``Solidity.Frontend.Static.globals_sound,
+    ``Solidity.Frontend.Static.globals_complete,
+    ``Solidity.Frontend.Static.unitsOK_iff,
+    ``Solidity.Frontend.Static.globals_lookup,
+    ``Solidity.Source.Sees.decl_exists,
+    ``Solidity.Frontend.Static.mem_inheritedFns,
+    ``Solidity.Frontend.Static.lookup_sub_inheritedFns,
+    ``Solidity.Frontend.Static.selectOverload_unique,
+    ``Solidity.Frontend.Static.unitsChecker_complete,
+    ``Solidity.Frontend.Static.UnitsExamples.cycle_resolves,
+    ``Solidity.Frontend.Static.UnitsExamples.cycle_ok,
+    ``Solidity.Frontend.Static.UnitsExamples.diamond_one_identity,
+    ``Solidity.Frontend.Static.UnitsExamples.clash_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.missing_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.alias_hides_original,
+    ``Solidity.Frontend.Static.UnitsExamples.shadowed_member,
+    ``Solidity.Frontend.Static.UnitsExamples.ambiguous_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.exact_selected,
+    ``Solidity.Frontend.Static.UnitsExamples.crossBase_merged,
+    ``Solidity.Frontend.Static.UnitsExamples.override_hides,
+    ``Solidity.Frontend.Static.lookup_sub_globals,
+    ``Solidity.Frontend.Static.UnitsExamples.missingSym_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.aliasCycle_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.fnEvent_refused,
+    ``Solidity.Frontend.Static.UnitsExamples.freeOverloads_ok,
+    ``Solidity.Frontend.Static.UnitsExamples.namespace_binds]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} G12 resolver theorems use only the standard axioms"
+
+/-! Roadmap G13: type inference and statement checking for S01, its
+well-formedness decided, compile-time constants and user-defined value type
+operations (`Solidity/Frontend/Static/`, `docs/feature-work/frontend-static.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.typed_complete,
+    ``Solidity.Frontend.Static.lval_complete,
+    ``Solidity.Frontend.Static.args_complete,
+    ``Solidity.Frontend.Static.slots_complete,
+    ``Solidity.Frontend.Static.stmt_complete,
+    ``Solidity.Frontend.Static.items_complete,
+    ``Solidity.Frontend.Static.stmtOK_iff,
+    ``Solidity.Frontend.Static.itemsOK_iff,
+    ``Solidity.Frontend.Static.wellFormed_iff,
+    ``Solidity.Frontend.Static.inProfileSyntaxB_iff,
+    ``Solidity.Frontend.Static.pureB_iff,
+    ``Solidity.Frontend.Static.constInitsB_iff,
+    ``Solidity.Frontend.Static.teval_complete,
+    ``Solidity.Frontend.Static.nconst_complete,
+    ``Solidity.Frontend.Static.acyclic_iff,
+    ``Solidity.Frontend.Static.usingOpsB_iff,
+    ``Solidity.Frontend.Static.hasType_iff,
+    ``Solidity.Frontend.Static.evalConst_sound,
+    
+    ``Solidity.Frontend.Static.arrayLenB_sound,
+    ``Solidity.Frontend.Static.udvt_iff,
+    ``Solidity.Frontend.Static.metadataChecker_complete,
+    ``Solidity.Frontend.Static.InferExamples.counter_checked,
+    ``Solidity.Frontend.Static.InferExamples.clashing_checked,
+    ``Solidity.Frontend.Static.InferExamples.sameSig_checked,
+    ``Solidity.Frontend.Static.InferExamples.twoCtors_checked,
+    ``Solidity.Frontend.Static.InferExamples.tooBig_checked,
+    ``Solidity.Frontend.Static.InferExamples.gasleft_checked,
+    ``Solidity.Frontend.Static.InferExamples.msgValue_checked,
+    ``Solidity.Frontend.Static.InferExamples.zero_types,
+    ``Solidity.Frontend.Static.InferExamples.named_length,
+    ``Solidity.Frontend.Static.InferExamples.cyclic_refused,
+    ``Solidity.Frontend.Static.InferExamples.cyclic_noValue,
+    ``Solidity.Frontend.Static.InferExamples.typed_division,
+    ``Solidity.Frontend.Static.InferExamples.overflow_length,
+    ``Solidity.Frontend.Static.InferExamples.badBinding_refused,
+    ``Solidity.Frontend.Static.InferExamples.hexCall_typed,
+    ``Solidity.Frontend.Static.InferExamples.timestamp_refused,
+    ``Solidity.Frontend.Static.InferExamples.keccak_pure,
+    ``Solidity.Frontend.Static.InferExamples.udvt_add,
+    ``Solidity.Frontend.Static.InferExamples.udvt_noBinding,
+    ``Solidity.Frontend.Static.InferExamples.udvt_wrap,
+    ``Solidity.Frontend.Static.InferExamples.udvt_unwrap]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} G13 checker theorems use only the standard axioms"
+
+/-! Roadmap G14: inheritance checks (overrides, implementations, base
+constructors, modifiers, `using for`), C3 linearization soundness and
+callable identity (`Solidity/Frontend/Static/`, `docs/feature-work/frontend-static.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.fnOverrideB_iff,
+    ``Solidity.Frontend.Static.overridesB_iff,
+    ``Solidity.Frontend.Static.mustOverrideB_iff,
+    ``Solidity.Frontend.Static.implB_iff,
+    ``Solidity.Frontend.Static.ctorArgsB_iff,
+    ``Solidity.Frontend.Static.modInvsB_iff,
+    ``Solidity.Frontend.Static.usingLibB_iff,
+    ``Solidity.Frontend.Static.inheritance_iff,
+    ``Solidity.Frontend.Static.callable_unique,
+    ``Solidity.Frontend.Static.merge_sub,
+    ``Solidity.Frontend.Static.merge_nodup,
+    ``Solidity.Frontend.Static.merge_sublist,
+    ``Solidity.Frontend.Static.linearize_sound,
+    ``Solidity.Frontend.Static.ctorOrder_spec,
+    ``Solidity.Frontend.Static.InheritanceExamples.missingVirtual_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.override_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.lessStrict_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.stricter_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.noCommonBase_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.sharedBase_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.sharedBase_override_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.sharedBase_unlisted_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.externalPublic_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.unimplementedNonVirtual_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.abstractNeeded_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.argsTwice_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.argsMissing_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.argsCount_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.nonBaseCtor_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.ctorModifiers_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.usingNotLibrary_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.diamond_c3,
+    ``Solidity.Frontend.Static.InheritanceExamples.diamond_ctorOrder]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} G14 inheritance theorems use only the standard axioms"
+
+/-! Roadmap G14 review fixes: `virtual` declarations, the checker's
+completeness and the controls added after the finder and skeptic reviews. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.virtualDeclB_iff,
+    ``Solidity.Frontend.Static.inheritanceChecker_complete,
+    ``Solidity.Frontend.Static.InheritanceExamples.dupList_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.dupListFixed_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.argsTwice_paths_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.modStyleBare_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.modArgs_count,
+    ``Solidity.Frontend.Static.InheritanceExamples.calldataMemory_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.overridesSingle_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.implThenUnimpl_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.virtualDecl_refused]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} G14 review-fix theorems use only the standard axioms"
+
+/-! Backfill item 5: standalone fractional constants at their mobile
+fixed-point types, also as ABI arguments (`Solidity/Language/FixedPoint/Literals.lean`,
+`Solidity/Frontend/Static/Standalone.lean`, `docs/feature-work/frontend-static.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Language.FixedPoint.Fx.mobileConst?_eq,
+    ``Solidity.Language.FixedPoint.Fx.mobileConst?_trunc,
+    ``Solidity.Language.FixedPoint.Fx.mobileConst?_exact,
+    ``Solidity.Language.FixedPoint.Fx.abiConst?_decode,
+    ``Solidity.Language.FixedPoint.Fx.abiConst?_eq_none,
+    ``Solidity.Frontend.Static.standalone_iff,
+    ``Solidity.Frontend.Static.abiArg_iff,
+    ``Solidity.Frontend.Static.standalone_value,
+    ``Solidity.Frontend.Static.InferExamples.oneThird_standalone,
+    ``Solidity.Frontend.Static.InferExamples.tooBigFrac_refused,
+    ``Solidity.Frontend.Static.InferExamples.oneThird_value]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} standalone-constant theorems use only the standard axioms"
+
+/-! Backfill item 5 review fixes: S01's explicit value and the ABI word of a
+standalone constant, and the unreduced-constant control. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.standalone_toFixedExplicit,
+    ``Solidity.Frontend.Static.standalone_abi,
+    ``Solidity.Frontend.Static.InferExamples.unreduced_standalone]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} standalone-constant review theorems use only the standard axioms"
