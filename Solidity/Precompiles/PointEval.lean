@@ -14,8 +14,8 @@ commitment and a proof (48 each, compressed `G1` points in the zcash format).
   `0x01 ‖ sha256(commitment)[1:]`, `z` or `y` at or above `r`, a commitment
   or proof that does not decompress to a point of the order-`r` subgroup
   (the infinity encoding `0xc0 0…0` aside), or a proof that does not verify
-  (`pointEval_length`; `check` makes the rest, in the specification's
-  order).
+  (`pointEval_eq_none_iff`: `decode` fails, or `verifies` does not hold;
+  `pointEval_length`).
 - **Result**: `FIELD_ELEMENTS_PER_BLOB` and `r` as two 32-byte words
   (`pointEval_result`).
 - **Gas**: 50000.
@@ -85,42 +85,86 @@ def gas (_ : Bytes) : Nat := 50000
 
 def fieldElementsPerBlob : Nat := 4096
 
-/-- The checks of `POINT_EVALUATION`, in the specification's order. -/
-def check (d : Bytes) : Option Unit := do
+/-- A well-formed input: `z`, `y` below `r`, the commitment `C` and the
+proof `π` decompressed. -/
+structure Inputs where
+  z : Nat
+  y : Nat
+  C : Pt Fp
+  π : Pt Fp
+
+/-- The decoding checks of `POINT_EVALUATION`: length, versioned hash, `z`
+and `y`, the two compressed points.  The specification checks the
+commitment before `z` and `y`; every failure is the same `none`, so the
+order is unobservable.  Irreducible, as `verifies` is, so that
+elaboration never evaluates a pairing while checking a proof. -/
+@[irreducible] def decode (d : Bytes) : Option Inputs := do
   if d.length ≠ 192 then none
   let b := d.map UInt8.toNat
-  let commitment := (b.drop 96).take 48
   let hash := (sha256 ((d.drop 96).take 48)).getD []
   if b.take 32 ≠ 1 :: (hash.drop 1).map UInt8.toNat then none
   let z := ofBE ((b.drop 32).take 32)
   let y := ofBE ((b.drop 64).take 32)
   if r ≤ z ∨ r ≤ y then none
-  let C ← decompress commitment
+  let C ← decompress ((b.drop 96).take 48)
   let π ← decompress ((b.drop 144).take 48)
-  let xMinusZ := curve2.add setupG2 (curve2.mul ((r - z) % r) g2Gen)
-  let pMinusY := curve1.add C (curve1.mul ((r - y) % r) g1Gen)
-  if Bls12381.pairingCurve.check [(pMinusY, Curve.neg g2Gen), (π, xMinusZ)] then some () else none
+  some ⟨z, y, C, π⟩
+
+/-- The KZG proof check: `e(C - y·G₁, -G₂) · e(π, [τ]G₂ - z·G₂) = 1`. -/
+@[irreducible] def verifies (i : Inputs) : Bool :=
+  let xMinusZ := curve2.add setupG2 (curve2.mul ((r - i.z) % r) g2Gen)
+  let pMinusY := curve1.add i.C (curve1.mul ((r - i.y) % r) g1Gen)
+  Bls12381.pairingCurve.check [(pMinusY, Curve.neg g2Gen), (i.π, xMinusZ)]
 
 /-- `POINT_EVALUATION` (0x0a). -/
-def pointEval (d : Bytes) : Option Bytes :=
-  (check d).map fun _ => word fieldElementsPerBlob ++ word r
+def pointEval (d : Bytes) : Option Bytes := do
+  let i ← decode d
+  if verifies i then some (word fieldElementsPerBlob ++ word r) else none
 
-theorem pointEval_eq_none_iff (d : Bytes) : pointEval d = none ↔ check d = none := by
-  unfold pointEval
-  cases check d <;> simp only [Option.map_none, Option.map_some, reduceCtorEq]
+/-- A decoding followed by a check fails exactly when the decoding fails
+or the check does. -/
+theorem bind_check_eq_none {α β : Type} (o : Option α) (f : α → Bool) (v : β) :
+    (o >>= fun i => if f i = true then some v else none) = none ↔
+      o = none ∨ ∃ i, o = some i ∧ f i = false := by
+  cases o with
+  | none => exact ⟨fun _ => Or.inl rfl, fun _ => rfl⟩
+  | some i =>
+    cases h : f i
+    · simp only [Option.bind_eq_bind, Option.bind_some, h, Bool.false_eq_true, ↓reduceIte,
+        reduceCtorEq, false_or, Option.some.injEq, exists_eq_left']
+    · simp only [Option.bind_eq_bind, Option.bind_some, h, ↓reduceIte, reduceCtorEq, false_or,
+        Option.some.injEq, exists_eq_left', Bool.true_eq_false]
 
-theorem pointEval_length {d : Bytes} (h : d.length ≠ 192) : pointEval d = none := by
-  rw [pointEval_eq_none_iff]
-  simp only [check, h, ne_eq, not_false_eq_true, if_true]
-  exact rfl
+theorem bind_check_eq_some {α β : Type} {o : Option α} {f : α → Bool} {v w : β}
+    (h : (o >>= fun i => if f i = true then some v else none) = some w) : w = v := by
+  cases o with
+  | none => exact Option.noConfusion h
+  | some i =>
+    cases hf : f i
+    · simp only [Option.bind_eq_bind, Option.bind_some, hf, Bool.false_eq_true, ↓reduceIte,
+        reduceCtorEq] at h
+    · simp only [Option.bind_eq_bind, Option.bind_some, hf, ↓reduceIte, Option.some.injEq] at h
+      exact h.symm
+
+/-- Point evaluation fails exactly on an input that does not decode, or
+whose proof does not verify: the one precompile whose failure is not only
+a decoding failure. -/
+theorem pointEval_eq_none_iff (d : Bytes) :
+    pointEval d = none ↔ decode d = none ∨ ∃ i, decode d = some i ∧ verifies i = false :=
+  bind_check_eq_none (decode d) verifies _
+
+theorem decode_length {d : Bytes} (h : d.length ≠ 192) : decode d = none := by
+  unfold decode
+  rw [if_pos h]
+  rfl
+
+theorem pointEval_length {d : Bytes} (h : d.length ≠ 192) : pointEval d = none :=
+  (pointEval_eq_none_iff d).2 (Or.inl (decode_length h))
 
 /-- A successful call returns the two constants. -/
 theorem pointEval_result {d o : Bytes} (h : pointEval d = some o) :
-    o = word fieldElementsPerBlob ++ word r := by
-  unfold pointEval at h
-  cases hc : check d <;> simp only [hc, Option.map_none, Option.map_some, reduceCtorEq,
-    Option.some.injEq] at h
-  exact h.symm
+    o = word fieldElementsPerBlob ++ word r :=
+  bind_check_eq_some h
 
 /-! ## Vectors (proofs by c-kzg-4844, run by Osaka's execution specification) -/
 

@@ -22,7 +22,8 @@ that `#guard` evaluates each precompile on the EIPs' vectors.
   the textbook affine formulas, total on every input.  An *input* point is
   validated when it is decoded (each precompile's `decode*` returns the
   point with its curve equation, or fails), so the precompiles' failure
-  cases are exactly the decoding failures; results are computed totally.
+  cases are the decoding failures (and, for point evaluation, a proof that
+  does not verify); results are computed totally.
 -/
 
 namespace Solidity.Precompiles

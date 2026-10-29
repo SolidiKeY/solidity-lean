@@ -189,6 +189,8 @@ G06 Osaka re-pin (2026-10-29): the hand-written `scripts/check-*.mjs` EVM vector
 
 G06 status (2026-10-29): machine inventory (23 disagreements with pinned Osaka), the pinned semantics and observation interfaces, the core/Bridge certificate boundary and bridge lemmas B01–B28 with owners in [roadmap-g06-evm.md](feature-work/roadmap-g06-evm.md) and `Solidity/Roadmap/Evm.lean` (statements only); no obligation closed; its questions Q1–Q3 are answered (second round, 2026-10-29) and encoded.
 
+Precompiles lane (2026-10-29, `lane-precompiles`): all 18 Osaka precompiles are computed core definitions with Osaka gas, checked by vectors from Osaka's execution specification; `Precompiles.Osaka.fixed` instantiates G06's `Fixed`, with failure exactly on malformed input (`run_eq_none_iff`) and length-monotonic gas (`gas_mono`) ([precompiles.md](feature-work/precompiles.md)). The stipend cost rule (G06 Q3; backfill item 5) is `Stipend.rule` with the G43 obligation `Stipend.Obligation` ([stipend-cost-rule.md](feature-work/stipend-cost-rule.md)). Bridge agreement (B16) is blocked: the Bridge's Mathlib cache hosts are unreachable from the lane's VM, and the vendored crypto outputs are Python/FFI calls; the agreement table is recorded by reading.
+
 ### Independent source definitions — after G00–G07, before wave 1
 
 These six source-definition workstreams implement the source side of G01's interfaces. They

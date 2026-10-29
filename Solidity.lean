@@ -405,6 +405,7 @@ import Solidity.Precompiles.Bls12381Iso
 import Solidity.Precompiles.Bls12381
 import Solidity.Precompiles.PointEval
 import Solidity.Precompiles.Osaka
+import Solidity.Stipend.Rule
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples

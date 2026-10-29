@@ -20,7 +20,8 @@ with the pinned EVM's.
 The laws G06 asks of the table:
 
 - **Failure exactly on malformed input** (`run_eq_none_iff`): `Malformed`
-  states, per precompile, the decoding failures of its EIP; five
+  states, per precompile, the decoding failures of its EIP, and for point
+  evaluation also a proof that does not verify (`PointEval.verifies`); five
   precompiles never fail (`ECRECOVER`, the hashes, `IDENTITY` and
   `P256VERIFY` answer a bad input with empty output instead).
 - **Gas monotonic in the input length** where the EIP prices by length
@@ -90,7 +91,8 @@ theorem fixed_precompileGas : fixed.precompileGas = gas := rfl
 
 /-! ## Failure exactly on malformed input -/
 
-/-- The malformed inputs of each precompile, as its EIP states them. -/
+/-- The malformed inputs of each precompile, as its EIP states them (for
+point evaluation, also a well-formed proof that does not verify). -/
 def Malformed : Precompile → Bytes → Prop
   | .ecrecover, _ | .sha256, _ | .ripemd160, _ | .identity, _ | .p256Verify, _ => False
   | .modexp, d => Modexp.Malformed d
@@ -100,7 +102,8 @@ def Malformed : Precompile → Bytes → Prop
   | .bnPairing, d =>
     d.length % 192 ≠ 0 ∨ ∃ b ∈ chunks 192 (d.map UInt8.toNat), Bn254.decodePair b = none
   | .blake2f, d => d.length ≠ 213 ∨ 1 < Blake2f.flag d
-  | .pointEvaluation, d => PointEval.check d = none
+  | .pointEvaluation, d =>
+    PointEval.decode d = none ∨ ∃ i, PointEval.decode d = some i ∧ PointEval.verifies i = false
   | .blsG1Add, d =>
     d.length ≠ 256 ∨ Bls12381.decodeG1 ((d.map UInt8.toNat).take 128) = none ∨
       Bls12381.decodeG1 ((d.map UInt8.toNat).drop 128) = none

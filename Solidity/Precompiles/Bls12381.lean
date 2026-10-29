@@ -243,6 +243,8 @@ def sswu {α : Type} [FieldOps α] [DecidableEq α] (A B Z : α) (sqrt : α → 
     | some y => (x₁, y)
     | none =>
       let x₂ := Z * (u * u) * x₁
+      -- One of `g x₁`, `g x₂` is a square (RFC 9380, section 6.6.2): the
+      -- default is unreachable, by that theorem, which is not proved here.
       (x₂, (sqrt (g x₂)).getD FieldOps.zero)
   (x, if sgn0 u = sgn0 y then y else -y)
 

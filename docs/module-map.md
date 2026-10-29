@@ -566,6 +566,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Precompiles/Bls12381.lean` | EIP-2537 (0x0b–0x11): `G1`/`G2` addition and MSM, pairing check, SSWU maps; failure laws and MSM gas monotonicity. |
 | `Precompiles/PointEval.lean` | EIP-4844 point evaluation (0x0a): zcash `G1` decompression, the trusted setup's `[τ]G₂`, the KZG check. |
 | `Precompiles/Osaka.lean` | G06's `Fixed` instantiated (`Osaka.fixed`): dispatch `run`/`gas` over `Precompile`, failure exactly on `Malformed` input (`run_eq_none_iff`), length-monotonic gas (`gas_mono`), the stipend facts. |
+| `Stipend/Rule.lean` | The stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs (`Stipend.rule`, `progCost`, `fits_iff`), its examples and non-examples, and the compiler obligation `Obligation` (G43) ([stipend-cost-rule.md](feature-work/stipend-cost-rule.md)). |
 
 ## The solkey corpus
 

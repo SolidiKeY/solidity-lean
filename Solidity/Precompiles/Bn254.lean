@@ -18,7 +18,7 @@ specification (`alt_bn128.py`) runs them:
   or outside the order-`r` subgroup; it returns the word `1` when the
   pairings multiply to one, else `0`; `45000 + 34000·k` gas.
 
-`run_*_none_iff` state the failure cases exactly; the `#guard`s are
+`add_eq_none_iff`, `mul_eq_none_iff` and `pairing_eq_none_iff` state the failure cases exactly; the `#guard`s are
 vectors computed by the execution specification (Osaka) itself.
 -/
 

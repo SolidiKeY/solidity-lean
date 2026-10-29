@@ -13,7 +13,7 @@ then `base` (`Lb` bytes), `exp` (`Le`) and `mod` (`Lm`), all zero-padded.
   (`modexp_length`).
 - **Gas**: `max 500 (complexity · iterations)`, where `complexity` is `16`
   up to 32-byte operands and `2·⌈max(Lb, Lm)/8⌉²` above, and `iterations`
-  is the exponent's bit length minus one, `16` per exponent byte past 32
+  is the bit length minus one of the exponent's first 32 bytes, `16` per exponent byte past 32
   (EIP-7883's doubled factor), at least `1`.  It does not depend on the
   input's length; a malformed input charges nothing here, since an
   exceptional halt consumes the frame's gas whatever the formula says.

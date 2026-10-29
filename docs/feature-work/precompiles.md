@@ -3,8 +3,11 @@
 Lane `lane-precompiles` of batch `roadmap-l1-20261029`. It instantiates the
 `Fixed` parameter of roadmap G06 (`Solidity/Roadmap/Evm.lean`, merged from
 `cloud/roadmap-w1-20261029/g06-evm-interface`) with computed definitions of
-all 18 Osaka precompiles, and checks them against the external EVM of
-`Bridge/`. The stipend cost rule of the same lane is in
+all 18 Osaka precompiles, checked against vectors that Osaka's execution
+specification computed. Their agreement with the external EVM of `Bridge/`
+is recorded by reading in checkpoint 3; it is not yet checked by Lean,
+because the Bridge cannot be built in this lane's environment. The stipend
+cost rule of the same lane is in
 [stipend-cost-rule.md](stipend-cost-rule.md).
 
 Decisions in force ([solidity-scope.md](../solidity-scope.md#user-decisions-2026-10-29)):
@@ -21,11 +24,14 @@ fixed functions (`Solidity/Keccak.lean`, `Solidity/Hashes.lean`,
   and `UInt64` (BLAKE2b); every recursion is structural or fuelled by a
   bit count, so `#guard` evaluates each precompile.
 - **Intrinsic inputs, total computation.** A decoded point carries its
-  curve equation (and, where the EIP checks it, membership of the
-  order-`r` subgroup) as a subtype (`Bn254.G1`, `Bn254.G2`, `Bls12381.G1`,
-  `P256.Key`, …). The group operations are the textbook affine formulas,
-  total on every input. So a precompile fails exactly when decoding fails,
-  and that is provable without field laws. No field or group law is proved
+  curve equation as a subtype (`Bn254.G1`, `Bls12381.G1`, `Bls12381.G2`,
+  `P256.Key`); `Bn254.G2` also carries membership of the order-`r`
+  subgroup. The other subgroup checks (`Bls12381.decodeG1Sub`,
+  `decodeG2Sub`, BN254's `G1` check in `decodePair`) are runtime tests that
+  the type does not record. The group operations are the textbook affine formulas,
+  total on every input. So a precompile fails exactly when decoding fails
+  (for point evaluation: or the proof does not verify), and that is
+  provable without field laws. No field or group law is proved
   or assumed; the vectors are the evidence that the formulas compute the
   groups.
 - **Failure is `none`**, as `Fixed.precompile` reads it: an exceptional
@@ -34,6 +40,14 @@ fixed functions (`Solidity/Keccak.lean`, `Solidity/Hashes.lean`,
 - **Gas** is `Fixed.precompileGas`, fixed to Osaka's. On a malformed input
   the frame's whole gas is consumed whatever the formula says; `MODEXP`'s
   formula returns `0` there, so that it never reads an over-long length.
+  `precompileGas` is therefore meaningful only where `precompile` succeeds:
+  a stipend argument must read both (as `Osaka.stipendFits` does), never
+  `gas ≤ 2300` alone.
+- **Not drawn from approved functions.** The hashes and `ecrecover` reuse
+  the approved fixed functions unchanged. The BN254, BLS12-381, KZG and
+  P-256 definitions are new. This is acceptable because they serve as an
+  *instance*: the public theorem quantifies over `Fixed.precompile`, so it
+  does not depend on them.
 
 ## Checkpoint 1: the precompile functions
 
@@ -106,7 +120,9 @@ vectors in the files are the record.
   `fixed_precompileGas : fixed.precompileGas = gas`.
 - `Osaka.Malformed p d`: the decoding failures of each EIP, in the terms of
   each module (`Bn254.decodeG1`, `Bls12381.decodeG1Sub`,
-  `Modexp.Malformed`, …).
+  `Modexp.Malformed`, …). Point evaluation is the exception: its
+  `Malformed` is `PointEval.decode d = none` or a decoded input whose proof
+  does not verify (`PointEval.verifies`), because the EIP halts on both.
 - **`run_eq_none_iff`** (and `fixed_precompile_eq_none_iff`): a precompile
   halts exceptionally exactly on malformed input. It is assembled from
   per-module laws: `Modexp.modexp_eq_none_iff`, `Bn254.add_eq_none_iff`,
@@ -125,7 +141,8 @@ vectors in the files are the record.
   `BLAKE2F`, whose gas reads the header). The non-trivial cases are
   `sha256Gas_mono`, `ripemd160Gas_mono`, `identityGas_mono`, BN254's
   pairing, and `Bls12381.g1MsmGas_mono`, `g2MsmGas_mono` and
-  `pairingGas_mono`. The MSM lemma `msmGas_mono` holds for any discount
+  `pairingGas_mono`. Ten of the sixteen `LengthPriced` cases are constant
+  gas, where the law is trivial. The MSM lemma `msmGas_mono` holds for any discount
   table on which `k·discount(k)` does not decrease, which `decide` checks
   for EIP-2537's two tables.
 - **Further laws**: `Modexp.modexp_length` (the output has `Lm` bytes),
@@ -153,9 +170,108 @@ Axiom pins (`#guard_msgs`): `run_eq_none_iff` and `gas_mono` use
   `check-layers`, `check-orphans` and `check-trust` pass.
 - **Remaining:**
   - no proof that the affine formulas compute the group law, or that
-    `PairingCurve.check` is the pairing: vectors only;
+    `PairingCurve.check` is the pairing: vectors only. Fermat inversion
+    assumes `p` prime, which is unproved. The SSWU square-root default
+    (`Bls12381.sswu`) is unreachable only by RFC 9380's theorem, also
+    unproved;
   - the source's `sha256`/`ripemd160`/`ecrecover` builtins
     (`Semantics/Heap.lean`) are not yet stated equal to `Osaka.run` at
     0x01–0x03; that is S05's correspondence, made easy by sharing the
     definitions;
   - B16's identification with the pinned EVM is checkpoint 3.
+
+## Checkpoint 3: agreement with the vendored EVM (blocked)
+
+The assignment asks for a `Bridge/` adapter that checks the core functions
+against EVMYulLean's vendored ones: by proof where feasible, otherwise by
+`#guard` vectors. Neither can run in this lane, for two reasons.
+
+**The Bridge cannot be built here.** `Bridge/` needs Mathlib. `lake exe
+cache get` reaches neither Mathlib cache host:
+`lakecache.blob.core.windows.net` (CONNECT 403) and
+`mathlib4.lean-cache.cloud`. Building Mathlib from source is a multi-hour
+build. The Lean server serves the core only. An adapter written here could
+not be checked, so none is committed.
+
+**Most vendored functions cannot be evaluated or reasoned about anyway.**
+Running a `#guard` vector at elaboration would execute the subprocess.
+Neither proof nor vector can reach a vendored function that:
+
+- runs `python3 EvmYul/EllipticCurvesPy/*.py` through
+  `totallySafePerformIO`: `RIP160.lean`, `BN_ADD.lean`, `BN_MUL.lean`,
+  `SNARKV.lean`, `BLAKE2_F.lean` (only its wrapper) and `PointEval.lean`
+  (the scripts are not vendored);
+- or is an opaque `@[extern]`: `ffi.SHA256`, `ffi.BLAKE2`, `ffi.KEC`,
+  `ECDSARECOVER`.
+
+What reading `Bridge/vendor/EvmYul/EVM/PrecompiledContracts.lean` and
+`EVM/Semantics.lean` (`:785`–`:796`; `π = {1..10}`, `State/Account.lean:15`) establishes, for the adapter to prove
+once the Bridge builds:
+
+| Precompile | Vendored (Cancun, M5) | Agreement with `Osaka.run`/`Osaka.gas` |
+|---|---|---|
+| 0x01 `Ξ_ECREC` | gas 3000; the same `v`, `r`, `s` validity checks; empty output on failure | gas: by definition. Output: opaque (`ECDSARECOVER`, `ffi.KEC`). |
+| 0x02 `Ξ_SHA256` | `60 + 12·⌈l/32⌉` | gas: by definition. Output: opaque `ffi.SHA256`. |
+| 0x03 `Ξ_RIP160` | `600 + 120·⌈l/32⌉` | gas: by definition. Output: Python. |
+| 0x04 `Ξ_ID` | `15 + 3·⌈l/32⌉`, output the calldata | gas and output: by definition (the provable case). |
+| 0x05 `Ξ_EXPMOD` | EIP-2565 (Berlin) gas: `max 200 (⌈max(Lb,Lm)/8⌉²·it/3)`, `8·(Le-32)`; no length bound | **Disagrees.** Osaka has EIP-7883 gas (`max 500`, complexity 16 or `2·words²`, `16·(Le-32)`) and EIP-7823's 1024-byte bound. The output also **disagrees** for a base of 2²⁵⁶ or more: `expMod modulus (.ofNat base) exp` truncates the base to a `UInt256` (e.g. `Lb = 33`, base `0x01‖00×32`, `Le = 1`, `exp = 1`, `Lm = 33`, `mod = 2²⁶⁴−1`: Osaka returns 2²⁵⁶, the vendored function 0). |
+| 0x06/0x07 `Ξ_BN_ADD`/`Ξ_BN_MUL` | gas 150 / 6000 | gas: by definition. Output: Python. |
+| 0x08 `Ξ_SNARKV` | `34000·⌊l/192⌋ + 45000`, no length test before Python | gas: by definition. Output and the length test: Python. |
+| 0x09 `Ξ_BLAKE2_F` | gas = the first four bytes, read before the length test | gas: by definition on a 213-byte input. Output: opaque `ffi.BLAKE2`. |
+| 0x0a `Ξ_PointEval` | gas 50000 | gas: by definition. Output: Python. |
+| 0x0b–0x11, 0x100 | absent: a call reaches an empty account and succeeds with no output | **Disagrees** (G06 D9; repin B01). |
+
+This is G06's B16 (instances) and B01 (Osaka repin) for the precompiles. It
+needs a Bridge build and, for the crypto outputs, a vendor patch replacing
+the Python and FFI calls with the core definitions (D13's route for
+Keccak).
+
+## Review
+
+Read-only finder and skeptic subagents reviewed checkpoints 1–2, without
+the Lean server. They checked against Osaka's execution specification and
+the repository's constraints. The skeptic's confirmed findings, all fixed:
+
+1. A broken link to `stipend-cost-rule.md`: the document was not yet
+   written. It is now.
+2. An overclaim that the functions are "checked against the Bridge": the
+   wording is corrected and checkpoint 3 is marked blocked.
+3. Point evaluation's `Malformed` was `check d = none`, which is
+   tautological and called a decoding failure. It is now split into
+   `PointEval.decode` and `PointEval.verifies`; `pointEval_eq_none_iff`
+   states the failure as a decoding failure or a failed proof, and
+   `Osaka.lean`'s docstrings say so.
+4. An overclaim that subgroup membership is intrinsic: corrected above.
+5. `gas_mono` is mostly trivial, and `MODEXP`'s malformed-input gas is
+   `0`: both are disclosed above.
+6. The SSWU default: a comment at `Bls12381.sswu` names the invariant.
+
+Checked and found fine: the core stays dependency-free; the imports are
+registered; there is no `sorry`, `native_decide`, `implemented_by` or bare
+`simp`; the axiom pins hold; BLAKE2F's huge rounds and MODEXP's huge
+lengths are handled; P-256's `h ≥ n`, range and key checks are right; the
+extra `x = 0` rejection in `PointEval.decompress` is equivalent, since
+`(0, ±2)` has order 3; the BLS12-381 `≥ p` test covers the 16 zero bytes;
+`G1ADD` correctly has no subgroup check; the `stipendFits` list is right.
+
+The finder review was cut off by a container restart and resumed after
+these fixes, covering checkpoints 1–4. It found no behavioural discrepancy
+of any precompile with the execution specification; it also re-checked the
+isogeny constants, the MSM discount tables and the Miller loop's bit range
+against py_ecc by script. Its confirmed findings, all fixed:
+
+1. The stipend rule charged `**` one unit, while `EXP` costs 50 gas per
+   exponent byte: `**` is now rejected (`pow_not_fits`).
+2. The stipend rule ignored an internal call's return, though a memory
+   return allocates an object of any size: only no return or one value
+   return is admitted (`retOk`).
+3. The Bridge table claimed `MODEXP`'s vendored output agrees on bounded
+   inputs; it truncates the base to 256 bits. The row now records the
+   disagreement with a counterexample.
+4. Stale docstrings: `Field.lean` (failure cases), `Bn254.lean` (theorem
+   names), `PointEval.decode` (check order), `Modexp.lean` (head bit
+   length); the stipend docs now say compound assignments on locals are
+   rejected too.
+
+Not covered by a vector: SSWU's exceptional case `tv = 0`, which can occur
+for `G1` with `u ≠ 0`; its formula is the RFC's and py_ecc's.
