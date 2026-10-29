@@ -21,6 +21,9 @@ modules:
 | `Solidity/Frontend/Static/WellFormedCheck.lean` | G13: S01's `WellFormed` decided |
 | `Solidity/Frontend/Static/Consts.lean`, `Solidity/Frontend/Static/UserOps.lean` | G13 checkers for the new relations |
 | `Solidity/Frontend/Static/InferExamples.lean` | G13 controls |
+| `Solidity/Source/Inheritance.lean` | G14 relations: overrides, required overrides, implementations, base constructors, modifier invocations, `using for`, constructor order, callable identity |
+| `Solidity/Frontend/Static/Inheritance.lean`, `Solidity/Frontend/Static/C3.lean` | G14 checkers; the C3 specification and S01's linearization proved against it |
+| `Solidity/Frontend/Static/InheritanceExamples.lean` | G14 controls from solc's syntax tests |
 | `Solidity/Frontend/Static/Certificates.lean` | G05 `Checker` values |
 
 New relations live under `Solidity/Source/` and import only `Solidity.Source.*`
@@ -515,3 +518,132 @@ of `Chain.metadata`; the settings and links part (`SettingsRespected`)
 remains. Relating solc's `typeDescriptions`/`referencedDeclaration` to
 `infer`'s derivations for an imported unit is the check that would retire
 that trust on the solc-JSON route.
+
+## G14: inheritance, overrides, constructors, modifiers, `using for`
+
+### The relations (`Solidity/Source/Inheritance.lean`)
+
+S01 linearizes contracts (`Env.linearize`, C3) and checks none of solc's
+contract-level rules ("What S01 does not do"). `InheritanceOK r` states
+them for one unit, each field named by the solc error it is:
+
+- **Base functions.** `Env.baseFns E c d`: for each direct base `B` of the
+  contract `c` declaring `d`, the most derived function of `B`'s
+  linearization with `d`'s name and parameter types (not `private`), one
+  per declaring contract (`dedupScope`), so a function inherited along two
+  routes from one contract counts once.
+- **Overrides** (`FnOverrideOK`, `OverridesOK`): `override` iff there are
+  base functions (9456, 7792); every base function `virtual`, interface
+  functions implicitly (4334); with two or more base contracts the
+  `override(…)` list names each (4327), and a list names only them (2353);
+  visibility kept or `external` to `public` (9098); mutability only
+  stricter (6959, `mutOK`); return types kept (4822).
+- **Required overrides** (`MustOverride`, 6480): if the direct bases'
+  most derived versions of one signature come from two or more contracts,
+  the contract declares it; a version shared through a common base is one.
+- **Implementations** (`ImplOK`): a function without body outside an
+  interface is `virtual` (5424); a non-abstract contract's most derived
+  version of each function it has is implemented (3656).
+- **Base constructors** (`CtorArgsOK`): for each base in the linearization
+  whose constructor has parameters, arguments are given at most once along
+  the linearization, in `is` specifiers or constructor modifier lists
+  (3364), exactly once unless the contract is abstract (3415), and with the
+  constructor's parameter count where the contract gives them (7927, 2973).
+- **Modifier invocations** (`ModInvOK`, 4659, 2973): an invocation names a
+  modifier visible from the declaration (S01's lookup) with matching
+  argument count, or, in a constructor, a base contract.
+- **`using L for T`** (`UsingLibOK`, 4357): `L` names a library.
+- **Constructor order** (`Env.ctorOrder`): the linearization reversed.
+- **Callable identity** (`CallableId`): a function is identified by its
+  contract, name and parameter types.
+
+### The checkers (`Solidity/Frontend/Static/Inheritance.lean`, `Solidity/Frontend/Static/C3.lean`)
+
+Each relation has a Boolean checker proved to decide it exactly:
+`fnOverrideB_iff`, `overridesB_iff`, `mustOverrideB_iff`, `implB_iff`,
+`ctorArgsB_iff`, `modInvsB_iff`, `usingLibB_iff`, and `inheritance_iff` for
+the whole judgment. `inheritanceChecker` is the G05 `Checker` value
+(`Certificates.lean`).
+
+**Callable identity** (`callable_unique`): in an S01-`WellFormed` unit, two
+functions with one identity are one declaration (same position); the proof
+uses S01's no-clash field, so identities are a sound key for G20's callable
+lowering.
+
+**C3.** `C3Lin E c L` specifies a C3-consistent linearization
+declaratively: `L = c :: M`, `M` duplicate-free, every base's linearization
+(itself `C3Lin`) and the direct bases (most derived first) ordered
+sublists of `M` (monotonicity and local precedence), and nothing else in
+`M`. `linearize_sound`: S01's `Env.linearize` returns only such
+linearizations; behind it, the merge laws `merge_sub`, `merge_nodup`,
+`merge_sublist` (the chosen head is never in a tail, so removing it keeps
+every list's order). `ctorOrder_spec`: the constructor order is the
+reversed linearization, ends with the contract, and runs every direct base
+before it.
+
+### Cross-check with solc (`Solidity/Frontend/Static/InheritanceExamples.lean`, all by `decide`)
+
+Each control transcribes a test of the pinned solc 0.8.38 test tree
+(`tests/upstream/solidity-0.8.38.tar.gz`, under
+`test/libsolidity/syntaxTests/`) as S00 syntax (bodies emptied; they do not
+bear on these checks), and the checker's verdict equals the test's
+expectation block:
+
+| Theorem | Upstream test | solc's verdict |
+|---|---|---|
+| `missingVirtual_refused` | `inheritance/override/override_missing_virtual.sol` | 9456 (`test`), 4334 (`test2`): both functions fail |
+| `override_ok` | `inheritance/override/override.sol` | accepted |
+| `lessStrict_refused` | `inheritance/override/override_less_strict_mutability.sol` (`A`, `C`) | 6959 |
+| `stricter_ok` | `inheritance/override/override_stricter_mutability.sol` (`A`, `B`) | accepted |
+| `noCommonBase_refused` | `inheritance/override/no_common_base_and_unique_implementation.sol` | 6480 |
+| `sharedBase_ok` | `inheritance/override/override_shared_base_simple.sol` | accepted |
+| `sharedBase_override_ok` | `inheritance/override/override_shared_base.sol` | accepted |
+| `sharedBase_unlisted_refused` | the same with `override` and no list | 4327 |
+| `externalPublic_ok` | `inheritance/override/external_turns_public_no_params.sol` | accepted |
+| `unimplementedNonVirtual_refused` | `inheritance/unimplemented_without_virtual.sol` | 5424 |
+| `abstractNeeded_refused` | `nameAndTypeResolution/029_create_abstract_contract.sol` (`base`) | 3656 |
+| `argsTwice_refused` | `inheritance/duplicatedConstructorCall/` (`B is A(2) { constructor() A(3) }`) | 3364 |
+| `argsMissing_refused` | `nameAndTypeResolution/061_missing_base_constructor_arguments.sol` | 3415 |
+| `argsCount_refused` | `inheritance/too_few_base_arguments.sol` (`Derived`) | 7927 |
+| `nonBaseCtor_refused` | `inheritance/reference_non_base_ctor.sol` | 4659 |
+| `ctorModifiers_ok` | `inheritance/modifiers_in_constructor_context.sol` | accepted |
+| `usingNotLibrary_refused` | `nameAndTypeResolution/252_using_for_not_library.sol` | 4357 |
+| `diamond_c3`, `diamond_ctorOrder` | S01's diamond `D is B, C` | `D, C, B, A`, C3-consistent; constructors `A, B, C, D` |
+
+The transcriptions are by hand: no parser connects these files to S00
+syntax yet (G08–G11), so the cross-check covers the cases listed, not the
+directories.
+
+### What G14 does not do
+
+- **Several units.** The relations read one unit's environment, like S01;
+  a base imported from another unit is resolved by G12 but not linearized
+  here (Handoff).
+- **Public state variables** that implement or override functions
+  (`implement_*_by_public_variable.sol`, `override_public_vars.sol`):
+  getters are not functions here, so they neither override nor hide.
+- **Modifiers.** Modifier overriding (`virtual`/`override` on modifiers,
+  `modifier_ambiguous*.sol`) is not checked; only their invocations.
+- **Interfaces in override lists** (`interfaceException/`), `super` calls,
+  and diagnostics' order and multiplicity: a refusal is one verdict, not
+  solc's list of errors.
+- **C3 completeness**: `linearize_sound` shows S01's result is consistent;
+  that C3 fails only when solc reports "Linearization of inheritance graph
+  impossible" is solc's definition, not a theorem here.
+- **Library calls.** `UsingLibOK` checks that attached names are
+  libraries; resolving `x.f()` to a library function (by its first
+  parameter type) is not typed by S01 and is left with external calls
+  (lane-semantics).
+
+### Gates (G14)
+
+Recorded in [Handoff (G14)](#handoff-g14).
+
+### Review (G14)
+
+Recorded after the finder and skeptic reviews.
+
+### Handoff (G14)
+
+Recorded at the push.
+

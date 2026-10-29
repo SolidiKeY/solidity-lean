@@ -423,6 +423,7 @@ import Solidity.Source.Units
 import Solidity.Source.Overloads
 import Solidity.Source.ConstCheck
 import Solidity.Source.UserOps
+import Solidity.Source.Inheritance
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic
@@ -614,6 +615,9 @@ import Solidity.Frontend.Static.WellFormedCheck
 import Solidity.Frontend.Static.Consts
 import Solidity.Frontend.Static.UserOps
 import Solidity.Frontend.Static.InferExamples
+import Solidity.Frontend.Static.Inheritance
+import Solidity.Frontend.Static.C3
+import Solidity.Frontend.Static.InheritanceExamples
 import Solidity.Frontend.Static.Certificates
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.ScopedFlip

@@ -2,6 +2,7 @@ import Solidity.Roadmap.Frontend
 import Solidity.Frontend.Static.Units
 import Solidity.Frontend.Static.Consts
 import Solidity.Frontend.Static.UserOps
+import Solidity.Frontend.Static.Inheritance
 
 /-!
 # The static checkers as G05 `Checker` values
@@ -27,6 +28,9 @@ is G15's (`docs/feature-work/frontend-static.md`, Handoff).
   `FrontendSpec.SettingsRespected` stay G15's).  `strictMetadataChecker`
   adds G13's checks S01's `WellFormed` lacks (`StaticOK`): compile-time
   constant initializers, no cyclic constant, well-formed operator bindings.
+- `inheritanceChecker` (G14): `InheritanceOK` (overrides, required
+  overrides, implementations, base-constructor arguments, modifier
+  invocations, `using for`), decided exactly.
 -/
 
 namespace Solidity.Frontend.Static
@@ -64,6 +68,12 @@ theorem metadataChecker_complete (r : Resolution) (h : WellFormed r ∧ InProfil
   show (wellFormedB r && inProfileSyntaxB r) = true
   rw [wellFormed_iff.mpr h.1, inProfileSyntaxB_iff.mpr h.2]
   rfl
+
+/-- **G14's inheritance checker**, sound and complete. -/
+def inheritanceChecker : Checker Resolution Unit (fun r _ => InheritanceOK r) where
+  Cert := Unit
+  check r _ _ := inheritanceB r
+  sound _ _ _ h := inheritance_iff.mp h
 
 /-- G13's checks beyond S01's well-formedness: compile-time constant
 initializers, no cyclic constant, well-formed operator bindings. -/

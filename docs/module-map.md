@@ -597,6 +597,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/Overloads.lean` | G12: overload sets across a contract's bases (`InheritedFn`: hidden only by a more derived function with the same parameter types). |
 | `Source/ConstCheck.lean` | G13: compile-time constants: purity of constant initializers (`PureS`, `ConstInitsPure`, solc error 8349), solc's typed constant evaluation (`TEval`, `NamedConst`, `ConstVal`), array lengths through it (`ArrayLenOK`) and acyclic constants (`ConstsAcyclic`). |
 | `Source/UserOps.lean` | G13: user-defined value types: operator bindings of global `using {f as op} for T` directives (`opBindings`, well formed: `UsingOpsOK`), and the typing of operators, `wrap` and `unwrap` (`UdvtTyped`). |
+| `Source/Inheritance.lean` | G14: solc's contract-level checks as relations: overrides (`FnOverrideOK`, `OverridesOK`), required overrides (`MustOverride`), implementations (`ImplOK`), base-constructor arguments (`CtorArgsOK`), modifier invocations (`ModInvOK`), `using for` libraries (`UsingLibOK`), constructor order and callable identity; `InheritanceOK`. |
 | `Source/StateExamples.lean` | S04.01–S04.03 controls: nested memory aliasing, an independent memory copy, storage round trips, distinct panic outcomes, transfers, a reverted call undoing its writes. |
 
 ## Precompiles
@@ -659,7 +660,10 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/Static/Consts.lean` | G13: purity checker (`pureB_iff`, `constInitsB_iff`), typed constant evaluation (`tevalP`, `nconstP`; `teval_complete`, `nconst_complete`), `evalConst`, `arrayLenB`, the cycle check (`acyclic_iff`). |
 | `Frontend/Static/UserOps.lean` | G13: the user-defined value type checker `udvtTys` (`udvt_iff`) and the binding check (`usingOpsB_iff`). |
 | `Frontend/Static/InferExamples.lean` | G13 controls: S01's examples checked by computation, ill-typed and ill-formed refusals, named constants, a cyclic constant, a non-compile-time constant, UDVT operators and conversions. |
-| `Frontend/Static/Certificates.lean` | The static checkers as G05 `Checker` values (`unitsChecker`, `metadataChecker`, `strictMetadataChecker`) and the program's library declarations. |
+| `Frontend/Static/Inheritance.lean` | G14: checkers deciding each inheritance relation (`fnOverrideB_iff` … `usingLibB_iff`, `inheritance_iff`) and callable identity (`callable_unique`). |
+| `Frontend/Static/C3.lean` | G14: the C3 specification `C3Lin`, the merge laws and soundness of S01's `Env.linearize` (`linearize_sound`); constructor order (`ctorOrder_spec`). |
+| `Frontend/Static/InheritanceExamples.lean` | G14 controls transcribing solc 0.8.38's `inheritance/` and `nameAndTypeResolution/` syntax tests, with their verdicts. |
+| `Frontend/Static/Certificates.lean` | The static checkers as G05 `Checker` values (`unitsChecker`, `metadataChecker`, `strictMetadataChecker`, `inheritanceChecker`) and the program's library declarations. |
 | `Frontend/Source.lean` | Compiler/pragma/settings validation, derived compilation-mode observations, static compiler-code artifacts and an admission result certifying its extracted feature list. |
 | `Frontend/SolcJson/Admission.lean` | Bounded AST scope classification and declaration-header closure over resolved execution roots; structured policy, upstream and implementation diagnostics. |
 | `Examples/Tactics/SourceUnitsImport.lean` | Both pinned compilers and pipelines: module calls, lexical error aliases, exact entry error bytes, receiver/condition effects and nonvacuity controls. |

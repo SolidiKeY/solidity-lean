@@ -37,6 +37,7 @@ import Solidity.Source.TypingExamples
 import Solidity.Frontend.Static.UnitsExamples
 import Solidity.Frontend.Static.Certificates
 import Solidity.Frontend.Static.InferExamples
+import Solidity.Frontend.Static.InheritanceExamples
 import Solidity.Source.StateExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
@@ -811,3 +812,50 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} G13 checker theorems use only the standard axioms"
+
+/-! Roadmap G14: inheritance checks (overrides, implementations, base
+constructors, modifiers, `using for`), C3 linearization soundness and
+callable identity (`Solidity/Frontend/Static/`, `docs/feature-work/frontend-static.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.fnOverrideB_iff,
+    ``Solidity.Frontend.Static.overridesB_iff,
+    ``Solidity.Frontend.Static.mustOverrideB_iff,
+    ``Solidity.Frontend.Static.implB_iff,
+    ``Solidity.Frontend.Static.ctorArgsB_iff,
+    ``Solidity.Frontend.Static.modInvsB_iff,
+    ``Solidity.Frontend.Static.usingLibB_iff,
+    ``Solidity.Frontend.Static.inheritance_iff,
+    ``Solidity.Frontend.Static.callable_unique,
+    ``Solidity.Frontend.Static.merge_sub,
+    ``Solidity.Frontend.Static.merge_nodup,
+    ``Solidity.Frontend.Static.merge_sublist,
+    ``Solidity.Frontend.Static.linearize_sound,
+    ``Solidity.Frontend.Static.ctorOrder_spec,
+    ``Solidity.Frontend.Static.InheritanceExamples.missingVirtual_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.override_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.lessStrict_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.stricter_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.noCommonBase_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.sharedBase_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.sharedBase_override_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.sharedBase_unlisted_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.externalPublic_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.unimplementedNonVirtual_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.abstractNeeded_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.argsTwice_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.argsMissing_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.argsCount_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.nonBaseCtor_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.ctorModifiers_ok,
+    ``Solidity.Frontend.Static.InheritanceExamples.usingNotLibrary_refused,
+    ``Solidity.Frontend.Static.InheritanceExamples.diamond_c3,
+    ``Solidity.Frontend.Static.InheritanceExamples.diamond_ctorOrder]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} G14 inheritance theorems use only the standard axioms"

@@ -1628,6 +1628,126 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.callable_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.ctorArgsB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.ctorOrder_spec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.fnOverrideB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.implB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.inheritance_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.abstractNeeded_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.argsCount_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.argsMissing_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.argsTwice_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.diamond_c3": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.lessStrict_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.missingVirtual_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.noCommonBase_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.nonBaseCtor_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.override_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.sharedBase_unlisted_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.InheritanceExamples.usingNotLibrary_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.linearize_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.merge_nodup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.merge_sub": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.merge_sublist": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.modInvsB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.mustOverrideB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.overridesB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InheritanceExamples.lean:Solidity.Frontend.Static.usingLibB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Static/UnitsExamples.lean:Solidity.Frontend.Static.globals_complete": [
   "Classical.choice",
   "Quot.sound",
