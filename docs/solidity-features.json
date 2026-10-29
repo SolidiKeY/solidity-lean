@@ -2791,7 +2791,22 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Semantics.lean"
+        "Solidity/Semantics.lean",
+        "Solidity/Calculus/PaymentWitness.lean",
+        "Solidity/Examples/Tactics/PaymentWitness.lean",
+        "Solidity/Calculus/CallbackSound/Payments.lean",
+        "Solidity/Examples/Tactics/PaymentRules.lean",
+        "Solidity/Examples/Tactics/PaymentCorpus.lean",
+        "Solidity/Calculus/PaymentConditions.lean",
+        "Solidity/Examples/Tactics/PaymentConditions.lean",
+        "scripts/payment-reference.test.mjs",
+        "docs/feature-work/diamond-payments.md",
+        "Solidity/Semantics/PaymentWorld.lean",
+        "Solidity/Frontend/PaymentPlan.lean",
+        "Solidity/Frontend/PaymentImport.lean",
+        "Solidity/Tools/PaymentReplay.lean",
+        "Solidity/Examples/Tactics/PaymentSource.lean",
+        "scripts/payment-source.test.mjs"
       ],
       "decision": {
         "date": "2026-10-29",
@@ -2893,7 +2908,16 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Semantics.lean"
+        "Solidity/Semantics.lean",
+        "Solidity/Calculus/PaymentWitness.lean",
+        "Solidity/Examples/Tactics/PaymentWitness.lean",
+        "Solidity/Calculus/CallbackSound/Payments.lean",
+        "Solidity/Examples/Tactics/PaymentRules.lean",
+        "Solidity/Examples/Tactics/PaymentCorpus.lean",
+        "Solidity/Calculus/PaymentConditions.lean",
+        "Solidity/Examples/Tactics/PaymentConditions.lean",
+        "scripts/payment-reference.test.mjs",
+        "docs/feature-work/diamond-payments.md"
       ],
       "decision": {
         "date": "2026-10-29",

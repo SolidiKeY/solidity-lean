@@ -1,4 +1,4 @@
-import Solidity.Calculus.CallbackSound.Rules
+import Solidity.Calculus.CallbackSound.Payments
 
 /-!
 # Callback soundness: calls, loops, the theorem
@@ -901,6 +901,14 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
     cases d
     exact fun σ => Hyps.wrapC_and _ (fun τ a b => holdsC_transferCb hI hT _ _ a b) σ
       (ihx σ) (ihr σ)
+  | transferD _ _ _ ihx ihr =>
+    intro σ
+    refine Hyps.wrapC_and _ ?_ σ (ihx σ) (ihr σ)
+    exact fun τ a b hn => holdsC_transferCbDiamond hI hT _ _ hn a b
+  | transferDetD hp _ ihr =>
+    intro σ
+    refine Hyps.wrapC_mono _ ?_ σ (ihr σ)
+    exact fun τ rest hn => holdsC_transferDetDiamond hp _ _ hn rest
   | send d _ _ _ ihx iho ihf =>
     cases d
     intro σ

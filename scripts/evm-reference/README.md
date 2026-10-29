@@ -67,3 +67,30 @@ retained, without claiming cause-preserving minimization. Reports preserve
 sources, bytecode, layout, full adapted observations and hashes. Unknown syntax,
 layout, exceptions or logs are blocked. No JavaScript arithmetic model supplies
 expected results. See [scope and evidence](../../docs/feature-work/generated-differential.md).
+
+Payment-specific replay is additive: `payment-replay.mjs --compiler FILE --filter
+EXACT_PINNED_PATH --out FILE` uses the same pinned compiler/snapshot and unchanged
+100-million gas / five-million instruction ceilings. It retains constructor or
+empty-calldata funding, actual CREATE and receive frames, ordered return/revert
+bytes, and every original gas row across required and named optimized profiles.
+Gas follows the pinned EVMHost and ExecutionFramework accounting; failed creation
+with nonempty output is blocked because its deposit accounting differs from this
+engine. Unknown settings/observations and host limits stay blocked. It records
+executed frame steps, runtime hashes, compiler inputs and dependency provenance.
+
+This tool supplies independent compiled-bytecode observations, never Lean source
+coverage, a callback theorem or a compiler correctness proof. It does not modify
+the existing `replay.mjs` host policy or the core payment/callback semantics.
+Run `node --test --test-concurrency=1 scripts/evm-reference/{replay,payment-replay}.test.mjs`
+with `SOLC_REFERENCE` pointing to the pinned compiler. Keep caches and `TMPDIR`
+on disk and run under the documented writer lock and aggregate resource cap.
+
+
+The upstream source runner uses the payment adapter only after complete-shape
+validation in Lean. Whole payment-fixture success requires fresh provenance-
+matched reference evidence for both pipelines, every functional observation and
+any gas rows; an unmetered typed source match alone stays pending. The SDK is
+therefore needed to finish those payment rows, while the Lean core remains
+independent of it. Install from this package's lockfile with npm ci --ignore-scripts.
+The source witnesses reproduce with scripts/payment-source-fixtures.mjs --check
+and SOLC_REFERENCE pointing to the pinned0.8.38 compiler.

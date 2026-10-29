@@ -159,6 +159,10 @@ import Solidity.Calculus.ProofTree
 import Solidity.Calculus.CallbackRules
 import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
+import Solidity.Calculus.CallbackSound.Payments
+import Solidity.Calculus.PaymentWitness
+import Solidity.Calculus.PaymentConditions
+import Solidity.Calculus.PaymentClose
 import Solidity.Calculus.CallbackSound
 import Solidity.Calculus.CapturePayments
 import Solidity.Calculus.CallbackDerive
@@ -248,6 +252,10 @@ import Solidity.Examples.Tactics.Memory
 import Solidity.Examples.Tactics.CrossDomain
 import Solidity.Examples.Tactics.Net
 import Solidity.Examples.Tactics.Payment
+import Solidity.Examples.Tactics.PaymentWitness
+import Solidity.Examples.Tactics.PaymentConditions
+import Solidity.Examples.Tactics.PaymentRules
+import Solidity.Examples.Tactics.PaymentCorpus
 import Solidity.Examples.Tactics.Theory
 import Solidity.Examples.Tactics.TermTaclets
 import Solidity.Examples.Tactics.Branch
@@ -706,3 +714,9 @@ import Solidity.Solkey.QuantifiedDiamond
 
 import Solidity.Tools.SolCases
 import Solidity.Examples.SolCases
+
+import Solidity.Semantics.PaymentWorld
+import Solidity.Frontend.PaymentPlan
+import Solidity.Frontend.PaymentImport
+import Solidity.Tools.PaymentReplay
+import Solidity.Examples.Tactics.PaymentSource
