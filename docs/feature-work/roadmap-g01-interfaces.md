@@ -44,7 +44,12 @@ the statements; G01's interfaces are frozen at this revision. The
 
 Each row is a decision of
 [solidity-scope.md](../solidity-scope.md#user-decisions-2026-10-29) or an
-item of its follow-up list, and where `Contracts.lean` implements it.
+item of its follow-up list, and where `Contracts.lean` implements it. Rows
+marked *second round* are the user's second-round decisions of 2026-10-29,
+relayed to this task by the batch coordinator and to be recorded in
+`docs/solidity-scope.md`, section "Second round (2026-10-29)"; they revise
+G00 Q4 (two pipelines, not eight orders) and settle the gas cap and forced
+ether.
 
 | Decision | Implemented by |
 |---|---|
@@ -53,7 +58,12 @@ item of its follow-up list, and where `Contracts.lean` implements it.
 | G00 Q5: `creationCode`/`runtimeCode` from the whole-input `Artifact` table, a parameter of the source semantics | `SourceSpec.meaning : … → Artifact → lang.Prog`; `Lowering.lower` takes the table; `PublicCorrectness.refines` instantiates it with the compiler's output. The [gate](#non-circularity-as-a-checkable-gate) explains why this parameter is not circular. |
 | G01 Q2 and the follow-up rows on nested frames and the block gas limit | `Lang.Res` is a horizon with resource choices; running out of gas is a revert and the session continues. `SourceSpec.Exhaust`/`never`/`exhaust`/`withExhaust` (every frame and transaction may fail); `EvmSpec.gas`/`withGas` (a gas schedule per frame); code size, stack and memory are not EVM resources (`EvmSpec` docstring). |
 | G01 Q4, G04 Q3 and the follow-up rows on sender funds and precompiles | `SessionEnv` (requests and a history-dependent `Strategy` of `Move`s, with `Event.reenter`/`reentered` for unbounded reentrancy); `SessionEnv.Allowed` (`Affordable` against the `Ledger`, `ZeroHasNoCode`); `SessionEnv.NoCallback` and `SessionEnv.Allowed.withoutCallbacks` (the no-callback reading is a special case); `Lang.PrecompilesFixed`; `PublicCorrectness.session` (source and EVM read one environment). |
-| G00 Q4: all eight `EvalOrder` combinations | `SourceSpec.order`/`setOrder`/`order_set`; `SourceSpec.AllOrders` as the field `PublicCorrectness.orders`; `evalOrders` and `mem_evalOrders`; `PublicCorrectness.allOrders`. |
+| G00 Q4, revised in the second round: solc's two pipelines, legacy with the pragma's ABI coder (v1 or v2) and via-IR with v2, not all eight `EvalOrder` combinations | `Pipeline` (`legacy`, `viaIR`), `Pipeline.order`, `AbiCoder`; `SourceSpec.pipeline`/`setPipeline`/`pipeline_set`, `pragmaCoder`, `coder` with `coder_legacy` and `coder_viaIR`; `SourceSpec.order`; `SourceSpec.AllPipelines` as the field `PublicCorrectness.bothPipelines`; `pipelines`, `mem_pipelines`, `PublicCorrectness.allPipelines`. |
+| *Second round:* the per-transaction gas cap (EIP-7825) and the block gas limit are a recorded idealization | `EvmSpec.Approved` admits every gas schedule (`EvmSpec` docstring). |
+| *Second round:* forced ether: the environment may credit the own balance (block beneficiary, foreign `SELFDESTRUCT`, withdrawals), and the ledger records it | `Event.credit`; `Move.credit` (during a pending call); `Action.credit` (between transactions, with `Action.request`); the `Ledger` reads the history, credits included. |
+| *Second round:* stipend payments to our own instances: a compiler-independent source cost rule decides which `receive`/fallback bodies fit 2300 gas | `SourceSpec.stipendFits`, a field of the compiler-independent source. |
+| *Second round:* the per-run premise extends to hashed regions of length at most L that overlap neither each other nor root slots | `Region`, `RegionsDisjoint`, `HashPremise` (with `HashPremise.nil`); `Fixed.regionLen` (L) and `Fixed.rootSlots`; `EvmSpec.RunCollisionFree` and `EvmSpec.guard` are now `HashPremise`. |
+| *Second round:* empty library link map only | `SourceSpec.linkMap`, `SourceSpec.NoLinkMap`, part of `SourceSpec.Approved`. |
 | G01 Q1: idealized source | `SourceSpec.Idealized`, part of `SourceSpec.Approved`. |
 | G01 Q5: the full event list with exact bytes | `Outcome`, `Event` (unchanged observations, plus the callback events and the target of `Event.tx`). |
 | G01 Q7: callee answers regardless of forwarded gas | `Strategy` takes the history only, not the gas. |
@@ -86,7 +96,7 @@ representation, which follows [intrinsic.md](../intrinsic.md). The
 
 | # | Layer | Type | Owner |
 |---|---|---|---|
-| L0 | Raw compilation input: named source units, the selected unit and the settings, its `EvalOrder` among them | `SourceSpec.Input`, `SourceSpec.order`, `setOrder` | G00 (pins), G12 (units) |
+| L0 | Raw compilation input: named source units, the selected unit and the settings, its pipeline, ABI coder and (empty) link map among them | `SourceSpec.Input`, `pipeline`, `setPipeline`, `coder`, `linkMap` | G00 (pins), G12 (units) |
 | L1 | Source syntax under the pinned grammar | `SourceSpec.Syntax`, judgment `Parses : Input → Syntax → Prop` | S00 |
 | L2 | Resolved, typed declaration graph | `SourceSpec.Resolved`, judgments `Resolves`, `WellFormed` | S01 |
 | L3 | Approved profile | `SourceSpec.InProfile : Resolved → Prop` | G00, G15 |
@@ -174,10 +184,15 @@ recorded idealization, so the theorem assumes any code size deploys. Nor are
 stack and memory: internal calls keep their frames in memory, so internal
 recursion is bounded only by gas, and that compiled code stays within the
 1024-word stack is a compiler obligation (G32, G37, G45). `EvmSpec.Approved`
-makes every horizon and gas schedule admissible; the per-transaction gas cap
-and the block gas limit restrict real runs, which the soundness half covers,
-and are lifted only in the adequacy half (a recorded reading; see the
-[handoff](#handoff)).
+makes every horizon and gas schedule admissible: the per-transaction gas cap
+(EIP-7825) and the block gas limit are a recorded idealization (second
+round). Real, capped runs are among the admissible ones, so the soundness
+half covers them; the adequacy half may use more gas than the caps.
+
+A `transfer` or `send` to an instance of the system forwards the 2300-gas
+stipend. Whether the receiving `receive` or fallback body fits it is decided
+by a compiler-independent source cost rule, `SourceSpec.stipendFits` (second
+round); the compiled body must agree with it (G43, G47).
 
 ### The per-run hash premise
 
@@ -190,11 +205,24 @@ holds of every function on one preimage, so it never asks for injectivity.
 
 The EVM exposes the `KECCAK256` preimages a prefix hashes, in order
 (`EvmSpec.hashed`, consistent along the bounds by `hashed_consistent`). The
-premise is `EvmSpec.RunCollisionFree V p e r := CollisionFree V.fixed.hash
-(V.hashed p e r)`: the preimages hashed by this execution prefix do not
-collide ([G01 Q3](#q3-hash-collisions)). That is the name the
-hash-collision-bound task bounds the probability of (about q²/2²⁵⁷ for q
-hashes). It is the EVM language's `Guard` (`EvmSpec.guard`).
+premise is `EvmSpec.RunCollisionFree V p e r := HashPremise V.fixed (V.hashed
+p e r)` ([G01 Q3](#q3-hash-collisions)), the conjunction of:
+
+- `CollisionFree V.fixed.hash xs`: the preimages hashed by this execution
+  prefix do not collide;
+- `RegionsDisjoint L R (xs.map hash)` (second round): the storage regions of
+  `L = Fixed.regionLen` slots their hashes start (`Region`: slots `h + k`
+  modulo `2^256` for `k < L`, an array's elements or a struct's fields)
+  overlap neither each other nor the root slots `0, …, R - 1` with
+  `R = Fixed.rootSlots`.
+
+`HashPremise.nil` shows a run that hashes nothing meets it. `RunCollisionFree`
+is the name the hash-collision-bound task bounds the probability of failure
+of (about q²/2²⁵⁷ for q hashes for the first conjunct; the regions add terms
+in `q·L` and `R`). It is the EVM language's `Guard` (`EvmSpec.guard`).
+`L` and `R` are fixed parameters, not the compiler's: a compiler cannot make
+the premise false by declaring a large layout, and that its static layout
+fits below `R` and its regions within `L` is a compiler obligation (G27).
 
 The hash is a **fixed parameter**, not an environment input: `Fixed.hash`,
 read by both sides (`SourceSpec.fixed`, `EvmSpec.fixed`,
@@ -251,15 +279,21 @@ Every layer reads one environment type, `SessionEnv`
 - `balance`, the opening balances. The system's own balance is the ledger's
   (`Ledger`, G03's fixed definition, `Fixed.ledger`), from these balances and
   the history;
-- `requests : List Event → Option Request`, the next transaction request
-  after a history (`none` ends the session);
+- `requests : List Event → Option Action`, the next action after a history:
+  a transaction `request` or a `credit` (`none` ends the session);
 - `callee : Strategy`, where `Strategy := List Event → Move`: while a call
   of the system is pending, the environment answers it (`Move.answer`) or
-  calls back into the system (`Move.reenter`). The strategy depends on the
+  calls back into the system (`Move.reenter`) or credits an account
+  (`Move.credit`, a foreign `SELFDESTRUCT`). The strategy depends on the
   whole history, may call back at any depth, and answers regardless of the
   gas the system forwards ([G01 Q7](#q7-gas-dependent-environment-behaviour)).
   A payment to an untyped recipient is a call the strategy may accept or
   refuse ([G04 Q3](../solidity-scope.md#user-decisions-2026-10-29)).
+- **Forced ether** (second round): the environment may credit any account,
+  the system's own included, without running its code: between transactions
+  (`Action.credit`: a block beneficiary's fee, a withdrawal) and during a
+  pending call (`Move.credit`: a foreign `SELFDESTRUCT`). Each credit is an
+  `Event.credit`, so the ledger, which reads the history, records it.
 
 `SessionEnv.Allowed F e` is the conjunction of:
 
@@ -321,7 +355,8 @@ weaker observation ([G01 Q5](#q5-observation-granularity)).
   - a session's completed transactions (`tx`, with sender, target, value,
     timestamp, input and outcome);
   - callbacks (`reenter`, with target, sender, value and input) and their
-    outcomes (`reentered`).
+    outcomes (`reentered`);
+  - credits without a call (`credit`).
 
   The **compiled system** is every contract and linked library of the
   compilation input ([G01 Q8](#q8-system-boundary-libraries-and-created-contracts)).
@@ -376,7 +411,7 @@ public one through the lowering's own map.
 `SourceSpec` bundles the independent source side: `Input`, `Syntax`,
 `Resolved`, the judgments `Parses`, `Resolves`, `WellFormed`, `InProfile`,
 the session language `lang`, `meaning : (r : Resolved) → WellFormed r →
-InProfile r → Artifact → lang.Prog`, the settings (`order`, `setOrder`), the
+InProfile r → Artifact → lang.Prog`, the settings (`pipeline`, `coder`, `linkMap`), the stipend cost rule, the
 fixed parameters, the session environment and the exhaustion choices.
 `meaning` is total on admitted input because its proofs are arguments, and
 it takes the artifact table as a parameter (G00 Q5).
@@ -498,11 +533,11 @@ these fields:
 
 1. `coverage`: the compiler returns an artifact exactly when the input is
    admitted.
-2. `orders`: `S.AllOrders`, every admitted input stays admitted under each
-   of the eight `EvalOrder` combinations (`evalOrders`, `mem_evalOrders`).
-   With `coverage`, every admitted input compiles under each of them
-   (`PublicCorrectness.allOrders`). Six of the eight have no solc setting;
-   `Input` carries the order itself.
+2. `bothPipelines`: `S.AllPipelines`, every admitted input stays admitted
+   under both pipelines (`pipelines`, `mem_pipelines`), legacy with its
+   pragma's ABI coder and via-IR with v2, each with its `EvalOrder`
+   (`Pipeline.order`). With `coverage`, every admitted input compiles under
+   both (`PublicCorrectness.allPipelines`).
 3. `envOnto`: every allowed source environment is the abstraction of an
    allowed EVM environment.
 4. `fixed` and `session`: both sides read the same hash and ledger, and the
@@ -521,7 +556,8 @@ The final public statement is the conjunction of:
 - `PublicCorrectness` with `compiler` the concrete pipeline definition, the
   composition of the frontend and of contracts 2–4, computable and run on
   G07's controls, and `X` its lowering and decoding;
-- `SourceSpec.Approved` (idealized source, precompiles fixed) and
+- `SourceSpec.Approved` (idealized source, precompiles fixed, empty link
+  map) and
   `EvmSpec.Approved` (Keccak-256, every horizon and gas schedule admissible,
   precompiles fixed);
 - `SourceSpec.NonVacuous`: admitted inputs whose meanings, at allowed
@@ -844,7 +880,10 @@ Every field of the contracts has an owner.
 | `SourceSpec.Parses`, `Unambiguous` (parse) | The pinned grammar as a relation; unambiguity | S00 |
 | `Resolves`, `WellFormed`, `Unambiguous` (resolution) | Static semantics as relations; functionality | S01 |
 | `InProfile` | Profile and combination predicate, with exclusion evidence | G00, G15 |
-| `order`, `setOrder`, `AllOrders` | Settings carrying any of the eight `EvalOrder` combinations, each admitted | G00, S01, G12 |
+| `pipeline`, `setPipeline`, `coder`, `AllPipelines` | Settings for the two pipelines and their ABI coders, both admitted | G00, S01, G12 |
+| `linkMap`, `NoLinkMap` | Only the empty library link map; `load` links the input's libraries | G00, G44 |
+| `stipendFits` | The compiler-independent stipend cost rule, and compiled `receive`/fallback bodies that agree with it | S04, G43, G47 |
+| `Fixed.regionLen`, `Fixed.rootSlots` | Static layout below `rootSlots`, hashed regions within `regionLen` | G27 |
 | `lang`, `meaning`, `inhabited` | Session semantics with events and outcomes, parametric in the artifact table, consistent prefix families, nontrivial allowed environments | S02–S04, S05 |
 | `Exhaust`, `never`, `exhaust`, `withExhaust` | Exhaustion choices at event granularity: every frame of the system (a transaction, a callback, a call between instances) may fail with `revert []` before its next event, its caller continuing; `never` is the unexhausted meaning | S03.04 |
 | `fixed`, `session`, `allowed_iff` (both specs) | The shared environment and fixed parameters; the `Ledger` | S03, G03, G06 |
@@ -879,25 +918,17 @@ theorem is restated against them.
   table as a parameter of the source semantics with the extended gate, the
   resource reading (no code size, frames and transactions may fail, no
   session end at gas exhaustion, recursion bounded by gas), the session
-  environment, the eight evaluation orders, bounded words and addresses,
+  environment, the two pipelines, bounded words and addresses,
   dropped imports, `Solidity.Roadmap.*` in `CORE`, and the "open question"
-  wording removed. `typedRunPrefixes` moved to
-  `Solidity/Roadmap/TypedRun.lean`.
+  wording removed; and the six second-round decisions (two pipelines, gas
+  caps idealized, forced ether, the stipend cost rule, hashed regions, empty
+  link map). `typedRunPrefixes` moved to `Solidity/Roadmap/TypedRun.lean`.
 - **New lemmas:** `CollisionFree.nil`, `of_prefix`, `singleton`;
   `Refines.under`; `RefinesUnder.refines`, `completes`, `sound`, `diverges`,
   `safety`; `SessionEnv.withoutCallbacks_noCallback`,
-  `SessionEnv.Allowed.withoutCallbacks`; `mem_evalOrders`;
-  `PublicCorrectness.allOrders`, `compiles`, `succeeds`, `not_alwaysRevert`,
-  `allowed_iff`.
-- **Recorded readings** (consequences of the decisions, for the user to
-  confirm; see the batch handoff's questions):
-  - the adequacy half lifts the per-transaction gas cap (EIP-7825) and the
-    block gas limit: `EvmSpec.Approved` admits every gas schedule; without
-    that, no compiler satisfies adequacy for a transaction that needs more
-    gas than the cap;
-  - the own balance follows the ledger; balance the system receives without
-    running (as a `SELFDESTRUCT` beneficiary under EIP-6780, a withdrawal or
-    a priority fee) has no `Move` and is not modelled.
+  `SessionEnv.Allowed.withoutCallbacks`; `mem_pipelines`; `HashPremise.nil`;
+  `PublicCorrectness.allPipelines`, `compiles`, `succeeds`,
+  `not_alwaysRevert`, `allowed_iff`.
 
 ### First version
 

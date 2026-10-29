@@ -182,7 +182,7 @@ G00 status (2026-10-29): pins, exclusion evidence, reconciliation and owners in 
 
 G01 status (2026-10-29): contracts and pass certificates specified in [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) and `Solidity/Roadmap/Contracts.lean` (statements only); its questions Q1–Q8 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29), which lists the contract revisions they require before G01 counts as frozen.
 
-G01 revision (2026-10-29): `Solidity/Roadmap/Contracts.lean` and [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md#decisions-applied) now implement every G01 follow-up of the decisions (per-run hash premise, `decode` export, artifact-table parameter, resources, session environment, eight evaluation orders); G01's interfaces are frozen at this revision, statements only.
+G01 revision (2026-10-29): `Solidity/Roadmap/Contracts.lean` and [roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md#decisions-applied) now implement every G01 follow-up of the decisions (per-run hash premise, `decode` export, artifact-table parameter, resources, session environment, the two pipelines and the other second-round decisions); G01's interfaces are frozen at this revision, statements only.
 
 G04 status (2026-10-29): base-revision audit in [roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) (theorem inventory, restriction ledger and owners); no obligation closed; its questions Q1–Q3 are answered in [solidity-scope.md](solidity-scope.md#user-decisions-2026-10-29).
 

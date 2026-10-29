@@ -91,6 +91,17 @@ theorem CollisionFree.singleton {α β : Type} (f : α → β) (a : α) : Collis
   rw [List.mem_singleton] at hx hy
   rw [hx, hy]
 
+/-- The storage region of `len` slots a hashed slot `w` starts contains `s`
+(slot arithmetic is modulo `2^256`). -/
+def Region (len : Nat) (w : Word) (s : Nat) : Prop :=
+  ∃ k, k < len ∧ (w.val + k) % 2 ^ 256 = s
+
+/-- The regions of length `len` that the distinct hashed slots `ws` start
+overlap neither each other nor the root slots `0, …, roots - 1`. -/
+def RegionsDisjoint (len roots : Nat) (ws : List Word) : Prop :=
+  (∀ a, a ∈ ws → ∀ b, b ∈ ws → a ≠ b → ∀ s, Region len a s → ¬ Region len b s) ∧
+  (∀ a, a ∈ ws → ∀ s, Region len a s → roots ≤ s)
+
 /-! ## Finite prefixes and their order -/
 
 /-- What a finite prefix of an execution shows: the events so far and, if it
@@ -383,6 +394,9 @@ inductive Event where
   | reenter (target sender : Address) (value : Word) (input : Bytes)
   /-- The outcome of the newest callback, as the environment sees it. -/
   | reentered (outcome : Outcome)
+  /-- Ether credited to an account without running its code: a block
+  beneficiary's fee, a foreign `SELFDESTRUCT`, a withdrawal. -/
+  | credit (target : Address) (value : Word)
   deriving DecidableEq, Repr
 
 /-! ## The session environment
@@ -408,6 +422,16 @@ inductive Move where
   | answer (outcome : Outcome)
   /-- A callback into the system. -/
   | reenter (target sender : Address) (value : Word) (input : Bytes)
+  /-- A credit without a call (a foreign `SELFDESTRUCT`); the strategy is
+  asked again after it. -/
+  | credit (target : Address) (value : Word)
+  deriving DecidableEq, Repr
+
+/-- What the environment does between transactions. -/
+inductive Action where
+  | request (q : Request)
+  /-- A credit without a call (a block beneficiary's fee, a withdrawal). -/
+  | credit (target : Address) (value : Word)
   deriving DecidableEq, Repr
 
 /-- A history-dependent callee strategy. -/
@@ -419,28 +443,33 @@ abbrev Ledger := (Address → Word) → List Event → Address → Nat
 
 /-- The environment of a session.  `this` is the address the deployment
 produces from `deployer` and `deployNonce`; the system's own balance is the
-ledger's, from `balance`. -/
+ledger's, from `balance` and the history, credits included. -/
 structure SessionEnv where
   deployer : Address
   deployNonce : Nat
   deployValue : Word
   deployArgs : Bytes
   balance : Address → Word
-  /-- The next transaction request after a history; `none` ends the session. -/
-  requests : List Event → Option Request
+  /-- The next action after a history, a request or a credit; `none` ends
+  the session. -/
+  requests : List Event → Option Action
   callee : Strategy
 
 /-- The fixed parameters both sides read, none of them an environment input:
-the hash and the ledger. -/
+the hash, the ledger, the length `regionLen` of the storage region a hashed
+slot starts (an array's elements, a struct's fields) and the number
+`rootSlots` of root slots `0, …, rootSlots - 1` of the static layout. -/
 structure Fixed where
   hash : Bytes → Word
   ledger : Ledger
+  regionLen : Nat
+  rootSlots : Nat
 
 /-- Every request is affordable: its value is at most the sender's ledger
 balance.  A request the sender cannot afford is invalid and never runs. -/
 def SessionEnv.Affordable (ledger : Ledger) (e : SessionEnv) : Prop :=
   e.deployValue.val ≤ ledger e.balance [] e.deployer ∧
-    ∀ h q, e.requests h = some q → q.value.val ≤ ledger e.balance h q.sender
+    ∀ h q, e.requests h = some (.request q) → q.value.val ≤ ledger e.balance h q.sender
 
 /-- Address 0 has no code: a call to it succeeds at once with no data. -/
 def SessionEnv.ZeroHasNoCode (e : SessionEnv) : Prop :=
@@ -482,14 +511,29 @@ def Lang.PrecompilesFixed (L : Lang Event Outcome) : Prop :=
 
 /-! ## Settings -/
 
-/-- The eight `EvalOrder` flag combinations. -/
-def evalOrders : List EvalOrder :=
-  [⟨false, false, false⟩, ⟨false, false, true⟩, ⟨false, true, false⟩, ⟨false, true, true⟩,
-   ⟨true, false, false⟩, ⟨true, false, true⟩, ⟨true, true, false⟩, ⟨true, true, true⟩]
+/-- solc's ABI coders. -/
+inductive AbiCoder where
+  | v1
+  | v2
+  deriving DecidableEq, Repr
 
-theorem mem_evalOrders (o : EvalOrder) : o ∈ evalOrders := by
-  obtain ⟨a, b, c⟩ := o
-  cases a <;> cases b <;> cases c <;> simp [evalOrders]
+/-- solc's two code-generation pipelines: legacy, with the ABI coder its
+pragma selects, and via-IR, with ABI coder v2. -/
+inductive Pipeline where
+  | legacy
+  | viaIR
+  deriving DecidableEq, Repr
+
+/-- The evaluation order of a pipeline. -/
+def Pipeline.order : Pipeline → EvalOrder
+  | .legacy => {}
+  | .viaIR => EvalOrder.viaIR
+
+/-- The two pipelines. -/
+def pipelines : List Pipeline := [.legacy, .viaIR]
+
+theorem mem_pipelines (q : Pipeline) : q ∈ pipelines := by
+  cases q <;> simp [pipelines]
 
 /-! ## Artifacts -/
 
@@ -501,6 +545,16 @@ structure CodeUnit where
   /-- Byte offsets in `runtime` and the library (its position in
   `Artifact.contracts`) each must be linked to. -/
   links : List (Nat × Nat) := []
+
+/-- **The hash premise over a list of preimages** (G01 Q3, second round): the
+hash does not collide on them, and the regions of `regionLen` slots their
+hashes start overlap neither each other nor the root slots. -/
+def HashPremise (F : Fixed) (xs : List Bytes) : Prop :=
+  CollisionFree F.hash xs ∧ RegionsDisjoint F.regionLen F.rootSlots (xs.map F.hash)
+
+/-- A run that hashes nothing meets the premise. -/
+theorem HashPremise.nil (F : Fixed) : HashPremise F [] :=
+  ⟨CollisionFree.nil _, fun _ ha => by simp at ha, fun _ ha => by simp at ha⟩
 
 /-- The bytecode artifacts of one compilation: a unit per contract and
 library of the input, by position, and the selected one.  The source
@@ -515,8 +569,8 @@ structure Artifact where
 /-- The source side, all independent of the compiler (S00–S05): raw input,
 syntax, the resolved typed declaration graph, its judgments and the
 transaction-sequence semantics.  `Input` is a whole compilation input (named
-source units, the selected unit and the settings, the evaluation order among
-them).  `meaning` reads the artifact table only for `creationCode` and
+source units, the selected unit and the settings, its pipeline and an empty
+library link map among them).  `meaning` reads the artifact table only for `creationCode` and
 `runtimeCode`, as bytes. -/
 structure SourceSpec where
   Input : Type
@@ -534,10 +588,22 @@ structure SourceSpec where
   meaning : (r : Resolved) → WellFormed r → InProfile r → Artifact → lang.Prog
   /-- Some environment is allowed (G07 supplies nontrivial ones). -/
   inhabited : ∃ e, lang.Allowed e
-  /-- The evaluation order an input selects, and the input with another one. -/
-  order : Input → EvalOrder
-  setOrder : Input → EvalOrder → Input
-  order_set : ∀ i o, order (setOrder i o) = o
+  /-- The pipeline an input selects, and the input with the other one. -/
+  pipeline : Input → Pipeline
+  setPipeline : Input → Pipeline → Input
+  pipeline_set : ∀ i q, pipeline (setPipeline i q) = q
+  /-- The ABI coder the input's pragma selects, and the one it compiles with:
+  the pragma's under legacy, v2 under via-IR. -/
+  pragmaCoder : Input → AbiCoder
+  coder : Input → AbiCoder
+  coder_legacy : ∀ i, pipeline i = .legacy → coder i = pragmaCoder i
+  coder_viaIR : ∀ i, pipeline i = .viaIR → coder i = .v2
+  /-- The settings' library link map (library name, address). -/
+  linkMap : Input → List (String × Address)
+  /-- The source cost rule (compiler-independent): whether the `receive` or
+  fallback body of the contract at a position of the input fits the 2300-gas
+  stipend of a `transfer` or `send` to an instance of it. -/
+  stipendFits : Resolved → Nat → Bool
   /-- The fixed hash and ledger. -/
   fixed : Fixed
   /-- The environment is the session environment. -/
@@ -571,14 +637,22 @@ def SourceSpec.Unambiguous (S : SourceSpec) : Prop :=
 def SourceSpec.Admitted (S : SourceSpec) (i : S.Input) (r : S.Resolved) : Prop :=
   ∃ s, S.Parses i s ∧ S.Resolves s r ∧ S.WellFormed r ∧ S.InProfile r
 
-/-- Every evaluation order is a setting: an admitted input stays admitted
-under each of the eight combinations (G00 Q4). -/
-def SourceSpec.AllOrders (S : SourceSpec) : Prop :=
-  ∀ i o, (∃ r, S.Admitted i r) → ∃ r, S.Admitted (S.setOrder i o) r
+/-- The evaluation order of an input: its pipeline's. -/
+def SourceSpec.order (S : SourceSpec) (i : S.Input) : EvalOrder := (S.pipeline i).order
 
-/-- The source's approved readings: idealized, and precompiles fixed. -/
+/-- Both pipelines are settings: an admitted input stays admitted under
+each (G00 Q4, second round). -/
+def SourceSpec.AllPipelines (S : SourceSpec) : Prop :=
+  ∀ i q, (∃ r, S.Admitted i r) → ∃ r, S.Admitted (S.setPipeline i q) r
+
+/-- Only the empty library link map is admitted. -/
+def SourceSpec.NoLinkMap (S : SourceSpec) : Prop :=
+  ∀ i r, S.Admitted i r → S.linkMap i = []
+
+/-- The source's approved readings: idealized, precompiles fixed, and only
+the empty link map. -/
 def SourceSpec.Approved (S : SourceSpec) : Prop :=
-  S.Idealized ∧ S.lang.PrecompilesFixed
+  S.Idealized ∧ S.lang.PrecompilesFixed ∧ S.NoLinkMap
 
 /-- **Non-vacuity of a source definition** (G07, S05): inputs the source
 admits whose meanings, at allowed environments and without exhaustion,
@@ -640,8 +714,10 @@ from bytes, with every account outside the system played by the session
 environment's strategy.  A bound is a horizon and a gas schedule (`gas`: the
 gas of the frame the system starts after a history, a transaction's limit or
 what the environment forwards into a callback); a frame out of gas reverts
-and the session continues.  Code size is not a resource (the EIP-170 and
-EIP-3860 limits are a recorded idealization), nor are stack and memory:
+and the session continues.  Every gas schedule is admissible: the
+per-transaction cap (EIP-7825) and the block gas limit are a recorded
+idealization, as are the code-size limits (EIP-170, EIP-3860), so code size
+is not a resource; nor are stack and memory:
 internal calls keep their frames in memory, so recursion is bounded only by
 gas.  `Guard` is collision freedom of the preimages the run hashes. -/
 structure EvmSpec where
@@ -659,7 +735,7 @@ structure EvmSpec where
   /-- The `KECCAK256` preimages a prefix hashes, in order. -/
   hashed : lang.Prog → lang.Env → lang.Res → List Bytes
   hashed_consistent : ∀ p e r r', lang.resLE.le r r' → hashed p e r <+: hashed p e r'
-  guard : ∀ p e r, lang.Guard p e r ↔ CollisionFree fixed.hash (hashed p e r)
+  guard : ∀ p e r, lang.Guard p e r ↔ HashPremise fixed (hashed p e r)
   /-- EVM worlds (accounts, code, storage, balances) at transaction
   boundaries, and the sessions from one. -/
   World : Type
@@ -667,11 +743,12 @@ structure EvmSpec where
   resume : World → lang.Prog
 
 /-- **The per-run hash premise** (G01 Q3): the preimages this execution
-prefix hashes do not collide.  The hash-collision-bound task bounds the
-probability of its failure. -/
+prefix hashes do not collide, and the storage regions their hashes start
+overlap neither each other nor the root slots.  The hash-collision-bound task
+bounds the probability of its failure. -/
 def EvmSpec.RunCollisionFree (V : EvmSpec) (p : V.lang.Prog) (e : V.lang.Env)
     (r : V.lang.Res) : Prop :=
-  CollisionFree V.fixed.hash (V.hashed p e r)
+  HashPremise V.fixed (V.hashed p e r)
 
 /-- The EVM's approved readings: its hash is Keccak-256, every horizon and
 gas schedule is admissible, and precompiles are fixed functions. -/
@@ -706,7 +783,7 @@ structure StateExport (S : SourceSpec) (I : IntrinsicSpec) (V : EvmSpec) where
   envAbs : V.lang.Env → I.lang.Env
 
 /-- **Contract 5, composition: the public theorem.**  For every admitted
-input, under every evaluation order, the compiler produces bytes; the source
+input, under both pipelines, the compiler produces bytes; the source
 reads the EVM's own session environment, hash and ledger (Keccak-256, by
 `EvmSpec.Approved`); for every allowed
 EVM environment the source meaning, at the artifact table the compiler
@@ -718,7 +795,7 @@ structure PublicCorrectness {I : IntrinsicSpec} (S : SourceSpec) (V : EvmSpec)
     (compiler : S.Input → Option Artifact) (envAbs : V.lang.Env → S.lang.Env)
     (X : StateExport S I V) : Prop where
   coverage : ∀ i, (∃ r, S.Admitted i r) ↔ (compiler i).isSome
-  orders : S.AllOrders
+  bothPipelines : S.AllPipelines
   envOnto : ∀ e, S.lang.Allowed e → ∃ e', V.lang.Allowed e' ∧ envAbs e' = e
   fixed : S.fixed = V.fixed
   session : ∀ e, S.session (envAbs e) = V.session e
@@ -773,12 +850,11 @@ theorem PublicCorrectness.transfer (h : PublicCorrectness S V compiler envAbs X)
   obtain ⟨rt, hrt, hfin⟩ := href.completes hrs ho
   exact ⟨rt, hrt, fun g => (hfin g).1⟩
 
-/-- Every admitted input compiles, under each of the eight evaluation
-orders. -/
-theorem PublicCorrectness.allOrders (h : PublicCorrectness S V compiler envAbs X)
+/-- Every admitted input compiles under both pipelines. -/
+theorem PublicCorrectness.allPipelines (h : PublicCorrectness S V compiler envAbs X)
     {i : S.Input} (hi : ∃ r, S.Admitted i r) :
-    ∀ o, o ∈ evalOrders → (compiler (S.setOrder i o)).isSome :=
-  fun o _ => (h.coverage _).1 (h.orders i o hi)
+    ∀ q : Pipeline, q ∈ pipelines → (compiler (S.setPipeline i q)).isSome :=
+  fun q _ => (h.coverage _).1 (h.bothPipelines i q hi)
 
 /-- **A never-compiling compiler fails**: given a non-vacuous source, the
 public contract makes the compiler produce an artifact. -/
@@ -807,7 +883,7 @@ theorem PublicCorrectness.succeeds (h : PublicCorrectness S V compiler envAbs X)
     exact ⟨i, art, e', rt, d, hc, he', hrt, hd, fun g => (ht g).1⟩
 
 /-- **An always-reverting compiler fails**: bytes that never complete with a
-success, on runs that hash without collision (say, that hash nothing),
+success, on runs that meet the hash premise (say, that hash nothing),
 satisfy the public contract for no non-vacuous source. -/
 theorem PublicCorrectness.not_alwaysRevert (h : PublicCorrectness S V compiler envAbs X)
     (hv : S.NonVacuous) (hcf : ∀ art e rt, V.RunCollisionFree (V.load art) e rt)
