@@ -32,13 +32,13 @@ let executed = 0;
 for (const viaIR of [false, true]) {
   const out = JSON.parse(compile(JSON.stringify({ language: 'Solidity',
     sources: { 'OperatorAliases.sol': { content: source } }, settings: {
-      viaIR, evmVersion: 'cancun', optimizer: { enabled: true },
+      viaIR, evmVersion: 'osaka', optimizer: { enabled: true },
       outputSelection: { '*': { '*': ['abi', 'evm.deployedBytecode.object'] } }
     } }), 0, 0));
   assert.deepEqual(errors(out), []);
   const c = out.contracts['OperatorAliases.sol'].OperatorAliases;
   const iface = new Interface(c.abi);
-  const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Cancun }) });
+  const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Osaka }) });
   const code = hexToBytes('0x' + c.evm.deployedBytecode.object);
   for (const name of positive) {
     const r = await vm.evm.runCode({ code, data: hexToBytes(iface.encodeFunctionData(name, [])), gasLimit: 30000000n });

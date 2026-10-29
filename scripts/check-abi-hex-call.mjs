@@ -2,7 +2,7 @@
 /** Source-level ABI hex boundary regression. Optional reference dependencies:
  * @ethereumjs/{vm,common,util} 10.1.3 and ethers 6.17.0, outside this package.
  * Usage: node scripts/check-abi-hex-call.mjs EXTERNAL_NODE_MODULES SOLJSON_FILE [SOLJSON_FILE...]
- * Both pinned compilers are exercised with legacy and via-IR Cancun codegen.
+ * Both pinned compilers are exercised with legacy and via-IR Osaka codegen.
  * This is a concrete conformance test, not a frontend-equivalence proof.
  */
 import assert from 'node:assert/strict';
@@ -46,7 +46,7 @@ for (const compiler of compilers) {
   assert.ok(solc.cwrap('solidity_version', 'string', [])().startsWith(version));
   const compile = solc.cwrap('solidity_compile', 'string', ['string', 'number', 'number']);
   const build = (content, viaIR) => JSON.parse(compile(JSON.stringify({ language: 'Solidity',
-    sources: { 'HexCall.sol': { content } }, settings: { viaIR, evmVersion: 'cancun',
+    sources: { 'HexCall.sol': { content } }, settings: { viaIR, evmVersion: 'osaka',
       optimizer: { enabled: true }, outputSelection: { '*': { '*': ['abi', 'evm.deployedBytecode.object'] } }
     } }), 0, 0));
   for (const viaIR of [false, true]) {
@@ -61,7 +61,7 @@ for (const compiler of compilers) {
     const contract = out.contracts['HexCall.sol'].AbiHexCall;
     const iface = new Interface(contract.abi);
     const code = hexToBytes('0x' + contract.evm.deployedBytecode.object);
-    const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Cancun }) });
+    const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Osaka }) });
     for (const name of [...positive, 'falseHex']) {
       const result = await vm.evm.runCode({ code,
         data: hexToBytes(iface.encodeFunctionData(name)), gasLimit: 30000000n });

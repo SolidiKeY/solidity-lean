@@ -32,7 +32,7 @@ const source = readFileSync(fileURLToPath(new URL('../tests/solc/TransientStorag
 const errors = out => (out.errors ?? []).filter(e => e.severity === 'error');
 function output(content, viaIR) {
   return JSON.parse(compile(JSON.stringify({language:'Solidity', sources:{'T.sol':{content}},
-    settings:{viaIR, evmVersion:'cancun', optimizer:{enabled:true},
+    settings:{viaIR, evmVersion:'osaka', optimizer:{enabled:true},
       outputSelection:{'*':{'*':['abi','evm.deployedBytecode.object']}}}}), 0, 0));
 }
 let executions = 0;
@@ -41,7 +41,7 @@ for (const viaIR of [false, true]) {
   assert.deepEqual(errors(out), []);
   const c = out.contracts['T.sol'].TransientStorage;
   const iface = new Interface(c.abi);
-  const common = new Common({chain:Mainnet, hardfork:Hardfork.Cancun});
+  const common = new Common({chain:Mainnet, hardfork:Hardfork.Osaka});
   const vm = await createVM({common});
   const to = createAddressFromString('0x0000000000000000000000000000000000001234');
   // Public deterministic fixture key, funded only in this in-memory VM.
@@ -52,7 +52,8 @@ for (const viaIR of [false, true]) {
   await vm.stateManager.putCode(to, hexToBytes('0x' + c.evm.deployedBytecode.object));
   let nonce = 0n;
   async function transaction(name, args = [], expected = [], panic = false) {
-    const tx = createLegacyTx({nonce:nonce++, gasPrice:1000000000n, gasLimit:30000000n,
+    // Osaka EIP-7825 caps a transaction at 2^24 gas.
+    const tx = createLegacyTx({nonce:nonce++, gasPrice:1000000000n, gasLimit:16777216n,
       to, value:0n, data:hexToBytes(iface.encodeFunctionData(name, args))}, {common}).sign(key);
     // Real top-level transactions exercise EIP-1153 reset. Do not manually
     // clear transient storage, replace the VM, or reinstall code between calls.

@@ -24,14 +24,14 @@ let count = 0;
 for (const viaIR of [false, true]) {
   const result = JSON.parse(compile(JSON.stringify({language:'Solidity',
     sources:{'ModifierFrames.sol':{content:source}}, settings:{viaIR,
-      optimizer:{enabled:true}, evmVersion:'cancun',
+      optimizer:{enabled:true}, evmVersion:'osaka',
       outputSelection:{'*':{'*':['abi','evm.deployedBytecode.object']}}}}), 0, 0));
   assert.deepEqual((result.errors ?? []).filter(e => e.severity === 'error'), []);
   const c = result.contracts['ModifierFrames.sol'].ModifierFrames;
   const iface = new Interface(c.abi);
   const to = createAddressFromString('0x0000000000000000000000000000000000001000');
   async function check(name, args, expected, total, fail=false) {
-    const vm = await createVM({common:new Common({chain:Mainnet, hardfork:Hardfork.Cancun})});
+    const vm = await createVM({common:new Common({chain:Mainnet, hardfork:Hardfork.Osaka})});
     await vm.stateManager.putCode(to, hexToBytes('0x'+c.evm.deployedBytecode.object));
     async function call(fn, xs) {
       return (await vm.evm.runCall({to, data:hexToBytes(iface.encodeFunctionData(fn,xs)),
