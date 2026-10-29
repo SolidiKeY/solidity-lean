@@ -296,20 +296,35 @@ def oneThird : Syn .expr := .mulDivMod .div (num 1) (num 3)
 /-- `2**256 + 1/2`: fractional, beyond 256 bits. -/
 def tooBigFrac : Syn .expr := .addSub .add (num (2 ^ 256)) (.mulDivMod .div (num 1) (num 2))
 
-/-- **`1 / 3` stands alone at `ufixed256x77`** (solc's mobile type) and is
-an ABI argument there; S01's own `STy.mobile` leaves it rational. -/
+/-- **`1 / 3` stands alone at `ufixed256x77`** (solc's mobile type; not
+`ufixed256x76` or a signed type, by the exact list) and is an ABI argument
+there; S01's own `STy.mobile` leaves it rational. -/
 theorem oneThird_standalone :
     (standaloneTys Γ oneThird).map fixedFields = [Option.some (false, 256, 77)] ∧
     (abiArgTys Γ oneThird).length = 1 ∧
     (inferTys Γ oneThird).map (fun τ => τ.mobile.isConstTy) = [true] := by
   decide +kernel
 
+/-- The integer fields of a type, else `none`. -/
+def intFields : STy → Option (Bool × Nat)
+  | .int t => Option.some (t.signed, t.bits)
+  | _ => Option.none
+
 /-- **Negative controls**: a fractional constant without a mobile type has
-no standalone fixed-point type and is no ABI argument; `5` stands alone at
-`uint8`, not at a fixed-point type. -/
+no standalone fixed-point type and is no ABI argument; `2**256` (integral,
+beyond 256 bits) is no ABI argument either; `5` stands alone at `uint8`. -/
 theorem tooBigFrac_refused :
-    (standaloneTys Γ tooBigFrac).map fixedFields = [Option.none] ∧ (abiArgTys Γ tooBigFrac).isEmpty = true ∧
-    (standaloneTys Γ (num 5)).map fixedFields = [Option.none] ∧ (abiArgTys Γ (num 5)).length = 1 := by
+    (standaloneTys Γ tooBigFrac).map fixedFields = [Option.none] ∧
+    (abiArgTys Γ tooBigFrac).isEmpty = true ∧ (abiArgTys Γ (num (2 ^ 256))).isEmpty = true ∧
+    (standaloneTys Γ (num 5)).map intFields = [Option.some (false, 8)] ∧
+    (abiArgTys Γ (num 5)).length = 1 := by
+  decide +kernel
+
+/-- Unreduced constants: `4 / 2` stands alone at `uint8` (S01's rational
+`4/2` is integral), `2 / 6` at `ufixed256x77`, as `1 / 3`. -/
+theorem unreduced_standalone :
+    (standaloneTys Γ (.mulDivMod .div (num 4) (num 2))).map intFields = [Option.some (false, 8)] ∧
+    (standaloneTys Γ (.mulDivMod .div (num 2) (num 6))).map fixedFields = [Option.some (false, 256, 77)] := by
   decide +kernel
 
 /-- The value of `1 / 3` standing alone: 77 threes, truncated (`3 · v ≠
@@ -402,3 +417,9 @@ end Solidity.Frontend.Static.InferExamples
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.tooBigFrac_refused
 /-- info: 'Solidity.Frontend.Static.InferExamples.oneThird_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.oneThird_value
+/-- info: 'Solidity.Frontend.Static.InferExamples.unreduced_standalone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.unreduced_standalone
+/-- info: 'Solidity.Frontend.Static.standalone_toFixedExplicit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.standalone_toFixedExplicit
+/-- info: 'Solidity.Frontend.Static.standalone_abi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.standalone_abi

@@ -8,7 +8,7 @@ Rational constants fold exactly, as solc's `ConstantEvaluator` does: a
 constant expression evaluates to a `Rat` (Lean core's normalized rationals),
 with solc's compile errors (a zero divisor, a non-integer exponent, the
 4096-bit precision bound) as `none` (`CExpr.eval`).  A constant meets a
-fixed-point type in four ways (`docs/feature-work/fixed-point-semantics.md`,
+fixed-point type in five ways (`docs/feature-work/fixed-point-semantics.md`,
 §6.2):
 
 * an implicit conversion, exact and in range or a compile error
@@ -20,9 +20,9 @@ fixed-point type in four ways (`docs/feature-work/fixed-point-semantics.md`,
   holds the constant truncated toward zero (`mobileFx?_inRange`) and holds
   it exactly if and only if its digits suffice (`mobileFx?_exact`);
 * a standalone fractional constant (no type to convert to: an
-  inline-array element, a tuple component, a conditional branch, an ABI
-  argument) takes that mobile type, truncated toward zero there, as solc
-  does (`mobileConst?`, `mobileConst?_trunc`, `mobileConst?_exact`); as an
+  inline-array element or an ABI argument here; solc also treats tuple
+  components and conditional branches so, where S01 does not yet) takes
+  that mobile type, truncated toward zero there, as solc does (`mobileConst?`, `mobileConst?_trunc`, `mobileConst?_exact`); as an
   ABI argument it is encoded at that type (`abiConst?`, `abiConst?_decode`),
   where solc 0.8.38 refuses ("Fractional numbers cannot yet be encoded.",
   6090);
@@ -741,8 +741,9 @@ theorem litCommonRev?_exact {t u : FxTy} {q : Rat} (h : litCommonRev? q t = some
 
 /-! ### Standalone fractional constants -/
 
-/-- **A standalone fractional constant**: solc's mobile type and the
-constant truncated toward zero at its digits (QL2: the truncation is
+/-- **A standalone fractional constant** (`q` fractional; an integral
+constant's mobile type is an integer type, `Solidity/Frontend/Static/Standalone.lean`):
+solc's mobile type and the constant truncated toward zero at its digits (QL2: the truncation is
 admitted, as in solc); `none` without a mobile type (a compile error). -/
 def mobileConst? (q : Rat) : Option ((t : FxTy) × Fx t) :=
   match h : mobileFx? q with
@@ -920,9 +921,12 @@ example : (mobileConst? (mkRat 1 3)).map (fun x => (x.1.signed, x.1.bits, x.1.di
   decide +kernel
 
 /-- A wrong value must fail: `1/3` is not stored exactly (`3 · v ≠ 10^77`),
-and `0.1`'s encoding is not the word `0`. -/
+and `0.1`'s encoding is neither the word `10` (scaled twice) nor its
+`ufixed256x77` word `10^76`. -/
 example : (mobileConst? (mkRat 1 3)).map (fun x => 3 * x.2.1) ≠ some (10 ^ 77) ∧
-    abiConst? (mkRat 1 10) ≠ some (List.replicate 32 0) := by
+    abiConst? (mkRat 1 10) ≠ some (List.replicate 31 0 ++ [10]) ∧
+    abiConst? (mkRat 1 10) ≠
+      some (abiEncode (⟨10 ^ 76, by decide +kernel⟩ : Fx ⟨false, 256, 77, by decide⟩)) := by
   decide +kernel
 
 end Examples

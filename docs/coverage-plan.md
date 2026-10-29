@@ -566,7 +566,7 @@ is empty, unless the item touches files an open Codex lane owns
    change that drops the never-constructed `refused` case of `StmtOut`. It
    waits for the Codex memory/evm lanes, because it edits
    `Solidity/Evm/**`.
-5. **Fixed-point mobile constants** (S01): encode the decision that a
+5. **Fixed-point mobile constants** — done (lane-static, 2026-10-29). (S01): encode the decision that a
    standalone fractional constant takes solc's mobile type with truncation,
    also as an ABI argument, in `Solidity/Language/FixedPoint/Literals.lean`
    (the merged model still refuses `abi.encode(0.1)` as solc does).

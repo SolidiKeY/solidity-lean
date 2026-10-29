@@ -517,7 +517,7 @@ dependency-free.
 | Explicit constant with no mobile type, e.g. `ufixed256x0(2**256 - 0.5)` | Refused (`isExplicitlyConvertibleTo` needs a mobile type) | `2^256 − 1` (in range after truncation) | Intended (P1: exact folding at the target) |
 | Common type `x op c` where `c` is not exact at the mobile type, e.g. `ufixed8x77 y; y + 1/3` | Common type `ufixed256x77`, `c` truncated | Refused | Intended (Q1: lossy conversions are explicit) |
 | `c op x` with a fractional `c`, e.g. `0.5 * x` | Refused ("Fractional literals not supported.") | Refused, as solc | Follows solc; question QL1 below asks whether full support should admit it |
-| A standalone fractional constant that is inexact at its mobile type, e.g. the inline array `[1/3]` | Element type `ufixed256x77`, truncated | The same: `Fx.mobileConst?` (mobile type, truncated toward zero; `Fx.mobileConst?_trunc`, exact when the digits suffice `Fx.mobileConst?_exact`) | Follows solc (QL2 decided, backfill item 5) |
+| A standalone fractional constant that is inexact at its mobile type, e.g. the inline array `[1/3]` | Element type `ufixed256x77`, truncated | The reference semantics the same: `Fx.mobileConst?` (mobile type, truncated toward zero; `Fx.mobileConst?_trunc`, exact when the digits suffice `Fx.mobileConst?_exact`) | Follows solc (QL2 decided, backfill item 5); S01 does not type inline arrays yet |
 | A fractional constant as an ABI argument, e.g. `abi.encode(0.1)` | Refused ("Fractional numbers cannot yet be encoded.", TypeError 6090) | Encoded at the mobile type, truncated: `Fx.abiConst?` (`abi.encode(0.1)` is `abi.encode(ufixed8x1(0.1))`, `Fx.abiConst?_decode`) | Intended (QL2 decided, backfill item 5) |
 | Constant expressions with bit operators, shifts or over-large literals | Folded (integers) or refused | Not in `CExpr` | Not modelled; integer constants belong to the integer typing |
 
@@ -829,7 +829,7 @@ rules (G00 Q6, full support); "reject" means a compile error.
 | `315_fixed_type_invalid_implicit_conversion_size.sol` | reject | reject | `FxTy.implicitOK_iff` (Conformance) | agrees |
 | `316_…_lost_data.sol`, `parsing/declaring_fixed_literal_variables.sol` | reject, suggesting `ufixed256x77`, `ufixed16x2` | reject; `mobileFx?` gives each suggested type | `Fx.ofRat?`, `mobileFx?` (Conformance) | agrees |
 | `344_one_divided_by_three_integer_conversion.sol`, `321_rational_to_bytes_implicit_conversion.sol`, `327_rational_index_access.sol` (fractional constant at `uint256`/`bytes32`) | reject, suggesting `ufixed256x77`, `ufixed8x1`, `ufixed8x1` | reject; `mobileFx?` gives each suggested type | rejection by the integer/bytes typing, argued; the suggestion by `mobileFx?` (Conformance) | agrees |
-| † `types/encoding_fractional.sol`, `encoding_fractional_abiencoderv2.sol`, `encoding_packed_fractional.sol`, `encoding_packed_fractional_abiencoderv2.sol` (`abi.encode(0.1, 1)`, packed) | reject (TypeError 6090; packed also 7279 for the integer literal) | `abi.encode` accepted at the mobile type (`Fx.abiConst?`); the packed encoding of a constant (`Fx.encodePacked` at the mobile type) is not stated | QL2 (§6.2) | intended deviation (QL2 decided, backfill item 5) |
+| † `types/encoding_fractional.sol`, `encoding_fractional_abiencoderv2.sol`, `encoding_packed_fractional.sol`, `encoding_packed_fractional_abiencoderv2.sol` (`abi.encode(0.1, 1)`, packed) | reject (TypeError 6090; packed also 7279 for the integer literal) | `abi.encode` accepted at the mobile type (`Fx.abiConst?`); the packed files are not stated (no packed constant encoding; solc's 7279 on the integer literal is not modelled) | QL2 (§6.2) | intended deviation for the two `abi.encode` files (QL2 decided, backfill item 5); not decided for the two packed files |
 | `306_invalid_int_implicit_conversion_from_fixed.sol`, `322_fixed_to_bytes_implicit_conversion.sol` | reject | reject | no implicit fixed→integer or fixed→`bytesM` conversion (§1; Q7 is explicit only) | agrees |
 | `329_…_signed.sol`, `330_…_unsigned.sol`, † `331_rational_as_exponent_half.sol`, † `332_rational_as_exponent_value_neg_quarter.sol` (fractional exponent of a constant) | reject | reject | `CExpr.eval` (Conformance) | agrees |
 | † `372_shift_constant_right_fractional.sol` (`0x42 >> (1 / 2)`) | reject | reject | shifts are not folded on fractional constants (`CExpr`), and Q4 rejects fixed shifts; argued | agrees |
@@ -850,11 +850,15 @@ rules (G00 Q6, full support); "reject" means a compile error.
 
 **Result.** Counted in files: 68 found by the regex and 14 by the second
 pass (†), 82 in all.
-- 3 files deviate from solc's type checker, in 5 lines, each intended:
-  `317` lines `a` and `b`, and `328` lines `e` and `f`, by Q2 (out-of-range
-  explicit constants); `shr_unused` by Q4.
+- 5 files deviate from solc's type checker, each intended: `317` lines
+  `a` and `b`, and `328` lines `e` and `f`, by Q2 (out-of-range explicit
+  constants); `shr_unused` by Q4; `types/encoding_fractional.sol` and
+  `encoding_fractional_abiencoderv2.sol` by QL2's decision (backfill item
+  5: `abi.encode(0.1, 1)` is encoded, `0.1` at `ufixed8x1`).
 - `inlineAssembly/solidity_keywords.sol` is outside the model.
-- The four `encoding_*fractional*` files deviate by QL2's decision (backfill item 5): `abi.encode(0.1)` is encoded at `ufixed8x1`; for the two packed files no constant encoding is stated yet.
+- The two `encoding_packed_fractional*` files are not decided: solc also
+  refuses their integer literal (7279), and no packed encoding of a
+  constant is stated here.
 - All others agree.
 
 No defect was found. This is weak evidence for most decisions, because the

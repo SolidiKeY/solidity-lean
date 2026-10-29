@@ -807,25 +807,35 @@ fractional one rational (a type no value has).
   with a mobile fixed-point type takes it (`FxTy.toFixTy`: S01's `FixTy`
   has `FxTy`'s fields; `Q.toRat` reads S01's rational as a `Rat`).
 - Relations over S01's `HasType`: `StandaloneTyped Γ e τ` (`e : σ` and
-  `σ.standalone = τ`) and `AbiArgTyped` (additionally not a constant-only
-  type, `STy.isConstTy`).
+  `σ.standalone = τ`) and `AbiArgTyped`, only the constant-type restriction
+  on ABI arguments (not a constant-only type, `STy.isConstTy`); solc's other
+  restrictions on `abi.encode` arguments (mappings, internal function
+  types, storage references, tuples) are not in it.
 - Checkers over G13's inference: `standaloneTys`, `abiArgTys`;
-  `standalone_iff`, `abiArg_iff` show they decide the relations (from
-  `hasType_iff`, so sound and complete on S01's fragment).
-- `standalone_value`: a constant standing at `.fixed f` is fractional and
-  has `Fx.mobileConst?`'s value at a type with `f`'s fields.
+  `standalone_iff`, `abiArg_iff` show they decide these relations (from
+  `hasType_iff`). The rule is a map over inferred types: no S01 rule
+  consumes it yet.
+- Values: `standalone_value` (a constant standing at `.fixed f` is
+  fractional, and `Fx.mobileConst?` gives its value at a type `m` with
+  `f`'s fields; it unfolds `STy.standalone`); `standalone_toFixedExplicit`
+  (S01's own explicit conversion `Q.toFixedExplicit?` to `f` is that value,
+  for S01's unreduced rational); `standalone_abi` (end to end: S01's value
+  at `f` and the ABI word `Fx.abiConst?`).
 - Controls (`InferExamples.lean`): `oneThird_standalone` (`1 / 3` stands at
-  `ufixed256x77`, is an ABI argument, and S01's own `STy.mobile` leaves it
-  rational); `tooBigFrac_refused` (`2**256 + 1/2` has no standalone
-  fixed-point type and is no ABI argument; `5` stands at an integer type);
-  `oneThird_value`.
+  `ufixed256x77` exactly, is an ABI argument, and S01's own `STy.mobile`
+  leaves it rational); `tooBigFrac_refused` (`2**256 + 1/2` has no
+  standalone fixed-point type and is no ABI argument, nor is `2**256`; `5`
+  stands at `uint8`); `unreduced_standalone` (`4 / 2` at `uint8`, `2 / 6`
+  at `ufixed256x77`); `oneThird_value`. In Literals: wrong words for `0.1`
+  (`10`, and its `ufixed256x77` word) are refused.
 
 ### What backfill item 5 does not do
 
 - **Positions inside S01's types.** The rule applies to a whole
   expression (an ABI argument, an inline-array element). S01's tuple and
   conditional rules still take `STy.mobile`, so `(1/3, 2)` keeps a rational
-  component and `c ? 0.5 : 0.25` meets at a rational common type, if any.
+  component and `c ? 0.5 : 0.25` meets at a rational common type, if any;
+  `STy.standalone` does not recurse into tuples.
 - **Inline arrays, `abi.encode` calls.** S01 types neither; the rule is
   stated for their arguments, not for the calls (lane-semantics is adding
   `abi.*`).
@@ -839,8 +849,51 @@ Recorded in [Handoff (backfill item 5)](#handoff-backfill-item-5).
 
 ### Review (backfill item 5)
 
-Recorded after the finder and skeptic reviews.
+Finder and skeptic reviews, read-only and without the Lean server, over
+the pre-review commit. Checked and confirmed: `STy.standalone` agrees with
+solc's `mobileType` (integral constants through S01's `Q.mobileInt?`, `Q.isInt`
+correct on unreduced rationals, `Q.toRat` normalizes); the `-0.5` word;
+the 6090 deviation stated consistently. Fixed:
+
+| Finding | Source | Fix |
+|---|---|---|
+| `standalone_value` only restates `Fx.mobileConst?_eq`; no link to S01's value | skeptic | `standalone_toFixedExplicit` (S01's `Q.toFixedExplicit?`), `standalone_abi` |
+| No theorem from an ABI argument's type to its bytes | finder | `standalone_abi` |
+| Literals header names tuple components and conditional branches as positions, which S01 does not adopt; "four ways" over five bullets | both | header qualified, "five ways" |
+| `AbiArgTyped` read as full ABI-argument typing | both | docstrings and the text above: the constant-type restriction only |
+| `mobileConst?` silent on integral input | finder | docstring: `q` fractional |
+| Conformance summary: count not updated; the packed files called deviations though solc also refuses them with 7279 | skeptic | 5 deviating files; the packed files "not decided" |
+| `[1/3]` row said "The same" though S01 has no inline arrays | skeptic | qualified |
+| Controls: `5` checked only "not fixed"; no unreduced constants; a weak wrong-word control; no `2**256` ABI refusal | both | `tooBigFrac_refused` (`uint8`, `2**256`), `unreduced_standalone`, wrong words `10` and the `ufixed256x77` word |
+| Queue entry not marked done | skeptic | marked |
+
+Recorded, not changed: `docs/coverage-plan.md`'s precompiles paragraph
+calls the stipend cost rule "backfill item 5", but the queue numbers it 6
+(another lane's line).
 
 ### Handoff (backfill item 5)
 
-Recorded at the push.
+**Revision**: the backfill commit on `cloud/roadmap-l2-20261029/lane-static`.
+
+**Theorems**: `Fx.mobileConst?_eq`, `Fx.mobileConst?_eq_none`,
+`Fx.mobileConst?_explicit`, `Fx.mobileConst?_trunc`,
+`Fx.mobileConst?_exact`, `Fx.abiConst?_eq`, `Fx.abiConst?_decode`,
+`Fx.abiConst?_eq_none` (Literals); `standalone_iff`, `abiArg_iff`,
+`standalone_value`, `standalone_toFixedExplicit`, `standalone_abi`
+(Standalone); `oneThird_standalone`, `tooBigFrac_refused`,
+`unreduced_standalone`, `oneThird_value` (InferExamples). All on the
+standard axioms, pinned, listed in `TrustAudit.lean`'s two backfill blocks.
+
+**Premises**: none; no `sorry`, axiom, `native_decide`, `implemented_by`
+or heartbeat option. `decide +kernel` evaluates the 77-digit values.
+
+**For lane-semantics**: S01's tuple and conditional rules (`Typing.lean`)
+should take `STy.standalone` instead of `STy.mobile`, inline arrays and
+`abi.encode` should type their elements and arguments by it (`AbiArgTyped`
+plus solc's other argument restrictions), and S02's meaning of a
+standalone constant is `Fx.mobileConst?`'s value
+(`standalone_toFixedExplicit`: S01's explicit conversion to that type).
+
+**For G15**: a fractional `abi.encode` argument compiles here but not with
+solc 0.8.38 (6090), so the solc-JSON route cannot certify such a program;
+G15's classification should mark it as outside solc's accepted set.

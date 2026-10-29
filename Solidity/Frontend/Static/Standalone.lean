@@ -19,11 +19,17 @@ an ABI argument (`Fx.abiConst?`; solc 0.8.38 refuses that one, 6090).
 - `STy.standalone`: the type an expression stands alone at: S01's mobile
   type, and for a fractional constant with a mobile fixed-point type, that
   type (`FxTy.toFixTy`; S01's `FixTy` has `FxTy`'s fields).
-- `StandaloneTyped`, `AbiArgTyped`: the relations, over S01's `HasType`.
+- `StandaloneTyped`, `AbiArgTyped`: the relations, over S01's `HasType`
+  (`AbiArgTyped` is only the constant-type restriction on ABI arguments).
 - `standaloneTys`: the checker, over G13's inference; `standalone_iff`,
   `abiArg_iff`: it decides them (by `hasType_iff`).
-- `standalone_value`: a fractional constant standing at `.fixed f` has the
-  value `Fx.mobileConst?` gives, at a type with `f`'s fields.
+- `standalone_value`: a constant standing at `.fixed f` is fractional and
+  `Fx.mobileConst?` gives its value at a type with `f`'s fields;
+  `standalone_toFixedExplicit`: S01's own explicit conversion
+  (`Q.toFixedExplicit?`) to `f` is that value, for S01's unreduced
+  rational; `standalone_abi`: and its ABI word is `Fx.abiConst?`'s.
+- `STy.standalone` does not recurse into tuples: a tuple's components keep
+  S01's `STy.mobile`.
 
 S01's own rules still use `STy.mobile`; reading `STy.standalone` there (and
 in S02's meaning) is a handoff to lane-semantics.
@@ -64,9 +70,11 @@ def _root_.Solidity.Source.STy.isConstTy : STy → Bool
   | .rational _ | .stringLit _ => true
   | _ => false
 
-/-- **ABI argument typing**: a standalone type that values have (a
-fractional constant without a mobile type, or an integral one beyond 256
-bits, has none). -/
+/-- **The constant-type restriction on ABI arguments**: the standalone type
+is not a constant-only type (a fractional constant without a mobile type,
+or an integral one beyond 256 bits, has none).  solc's other restrictions
+on `abi.encode` arguments (mappings, internal function types, storage
+references, tuples) are not part of this relation. -/
 def AbiArgTyped (Γ : Ctx) (e : Syn .expr) (τ : STy) : Prop :=
   StandaloneTyped Γ e τ ∧ τ.isConstTy = false
 
@@ -95,7 +103,9 @@ theorem abiArg_iff {Γ : Ctx} {e : Syn .expr} {τ : STy} :
 
 /-- **The value of a standalone fractional constant**: at `.fixed f`, the
 reference semantics' `Fx.mobileConst?` gives a value at a type with `f`'s
-fields, the constant truncated toward zero there (`Fx.mobileConst?_trunc`). -/
+fields, the constant truncated toward zero there (`Fx.mobileConst?_trunc`).
+This unfolds `STy.standalone`; `standalone_toFixedExplicit` relates the
+value to S01's. -/
 theorem standalone_value {q : Q} {f : FixTy} (h : (STy.rational q).standalone = .fixed f) :
     q.isInt = false ∧ ∃ m : FxTy, m.toFixTy = f ∧ Fx.mobileFx? q.toRat = Option.some m ∧
       ∃ hr, Fx.mobileConst? q.toRat =
@@ -121,5 +131,57 @@ theorem standalone_value {q : Q} {f : FixTy} (h : (STy.rational q).standalone = 
     · rename_i m hm
       exact ⟨m, STy.fixed.inj h, hm, Fx.mobileFx?_inRange hm, Fx.mobileConst?_eq hm⟩
     · exact nomatch h
+
+theorem toFixTy_scale (m : FxTy) : m.toFixTy.scale = m.scale := by
+  simp only [FixTy.scale, FxTy.scale, FxTy.toFixTy, Int.natCast_pow]
+  rfl
+
+theorem toFixTy_lo (m : FxTy) : m.toFixTy.lo = m.lo := by
+  simp only [FixTy.lo, FxTy.lo, FxTy.toFixTy, Int.natCast_pow]
+  rfl
+
+theorem toFixTy_hi (m : FxTy) : m.toFixTy.hi = m.hi := by
+  have h1 : 1 ≤ 2 ^ (m.bits - 1) := Nat.one_le_two_pow
+  have h2 : 1 ≤ 2 ^ m.bits := Nat.one_le_two_pow
+  simp only [FixTy.hi, FxTy.hi, FxTy.toFixTy]
+  cases m.signed
+  · simp only [Bool.false_eq_true, if_false, Int.natCast_sub h2, Int.natCast_pow]
+    rfl
+  · simp only [if_true, Int.natCast_sub h1, Int.natCast_pow]
+    rfl
+
+/-- **S01's explicit value agrees**: at the standalone type, S01's own
+explicit conversion of the constant (`Q.toFixedExplicit?`, truncation at
+`N` digits) is the reference semantics' standalone value
+(`Fx.mobileConst?`), for S01's unreduced rational and its normal form
+alike. -/
+theorem standalone_toFixedExplicit {q : Q} {m : FxTy} (hm : Fx.mobileFx? q.toRat = Option.some m) :
+    q.toFixedExplicit? m.toFixTy = Option.some (Fx.literalTrunc m q.toRat.num q.toRat.den) := by
+  have hq : q.den ≠ 0 := Nat.pos_iff_ne_zero.mp q.den_pos
+  have he : q.toRat.num * (q.den : Int) = q.num * (q.toRat.den : Int) := by
+    have h := Rat.mkRat_self q.toRat
+    have h2 : mkRat q.toRat.num q.toRat.den = mkRat q.num q.den := h
+    exact (Rat.mkRat_eq_iff q.toRat.den_nz hq).mp h2
+  have hc : Fx.literalTrunc m q.toRat.num q.toRat.den = Fx.literalTrunc m q.num q.den :=
+    Fx.literalTrunc_congr q.toRat.den_nz hq he
+  have hr : m.inRange (Fx.literalTrunc m q.toRat.num q.toRat.den) = true := Fx.mobileFx?_inRange hm
+  rw [hc] at hr ⊢
+  simp only [FxTy.inRange, Bool.and_eq_true, decide_eq_true_eq] at hr
+  unfold Q.toFixedExplicit?
+  rw [toFixTy_scale, toFixTy_lo, toFixTy_hi]
+  have hv : (q.num * m.scale).tdiv q.den = Fx.literalTrunc m q.num q.den := rfl
+  rw [hv]
+  simp only [hr, and_self, if_true]
+
+/-- **End to end**: a constant standing alone at `.fixed f` has S01's
+explicit value at `f`, and as an ABI argument the word encoding of that
+value at the mobile type `m` (`m.toFixTy = f`). -/
+theorem standalone_abi {q : Q} {f : FixTy} (h : (STy.rational q).standalone = .fixed f) :
+    ∃ m : FxTy, m.toFixTy = f ∧ ∃ hr,
+      q.toFixedExplicit? f = Option.some (Fx.literalTrunc m q.toRat.num q.toRat.den) ∧
+      Fx.abiConst? q.toRat = Option.some (Fx.abiEncode (⟨Fx.literalTrunc m q.toRat.num q.toRat.den, hr⟩ : Fx m)) := by
+  obtain ⟨_, m, hf, hm, _, _⟩ := standalone_value h
+  subst hf
+  exact ⟨m, rfl, Fx.mobileFx?_inRange hm, standalone_toFixedExplicit hm, Fx.abiConst?_eq hm⟩
 
 end Solidity.Frontend.Static

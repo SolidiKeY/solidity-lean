@@ -908,3 +908,19 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} standalone-constant theorems use only the standard axioms"
+
+/-! Backfill item 5 review fixes: S01's explicit value and the ABI word of a
+standalone constant, and the unreduced-constant control. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.standalone_toFixedExplicit,
+    ``Solidity.Frontend.Static.standalone_abi,
+    ``Solidity.Frontend.Static.InferExamples.unreduced_standalone]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} standalone-constant review theorems use only the standard axioms"
