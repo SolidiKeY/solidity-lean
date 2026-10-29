@@ -513,7 +513,7 @@ dependency-free.
 | Case | solc 0.8.38 (source reading) | Here | Status |
 |---|---|---|---|
 | Out-of-range explicit constant, e.g. `ufixed8x1(100.5)`, `ufixed256x80(1/3)` | Accepted through the mobile type | Compile error | Intended (Q2) |
-| Explicit constant value | Rounded at the mobile type's digits, then converted | Truncated once, at the target's digits | Intended (P1). The value differs only when the target has more digits than the mobile type (proved for fewer or equal digits: `Fx.explicitRat?_mobile_route`, §6.6) and the loop stopped on the magnitude bound (`2^256 − 1`, or `2^255` when negative). Witness: `ufixed256x1((2**257 - 1) / 20)` is `2^256 − 1` here and `2^256 − 6` through solc's route. |
+| Explicit constant value | Truncated at the mobile type's digits, then converted | Truncated once, at the target's digits | Intended (P1). Where the exact fold fits the target, the value can differ only when the target has more digits than the mobile type (proved: `Fx.explicitRat?_mobile_route`, §6.6); and then, by argument (not proved), only when the loop stopped on the magnitude bound (`2^256 − 1`, or `2^255` when negative). Witness: `ufixed256x1((2**257 - 1) / 20)` is `2^256 − 1` here and `2^256 − 6` through solc's route. |
 | Explicit constant with no mobile type, e.g. `ufixed256x0(2**256 - 0.5)` | Refused (`isExplicitlyConvertibleTo` needs a mobile type) | `2^256 − 1` (in range after truncation) | Intended (P1: exact folding at the target) |
 | Common type `x op c` where `c` is not exact at the mobile type, e.g. `ufixed8x77 y; y + 1/3` | Common type `ufixed256x77`, `c` truncated | Refused | Intended (Q1: lossy conversions are explicit) |
 | `c op x` with a fractional `c`, e.g. `0.5 * x` | Refused ("Fractional literals not supported.") | Refused, as solc | Follows solc; question QL1 below asks whether full support should admit it |
@@ -906,14 +906,44 @@ Codex lanes. Item 5 (the stipend cost rule) is outside this lane's files.
   at once. `Fx.rescale_mono`: rescaling is monotone.
 - `Fx.explicit_le`: an explicit conversion keeps the order of the values it
   does not wrap.
-- `literalTrunc_rescale` and `Fx.explicitRat?_mobile_route`
-  (`Solidity/Language/FixedPoint/Literals.lean`): when the target has no
-  more digits than the mobile type, solc's route through the mobile type
-  gives the exactly folded value. P1 changes the value only when the target
-  has more digits, which turns the §6.2 argument into a theorem.
+- `Fx.literalTrunc_rescale`, `Fx.explicit_mobile_route` and
+  `Fx.explicitRat?_mobile_route` (`Solidity/Language/FixedPoint/Literals.lean`)
+  compare two routes when the target has no more digits than the mobile
+  type. The first route types the constant at its mobile type, then
+  converts it with this model's run-time conversion (Q2, Q3); solc
+  type-checks this route but generates no code. That route is the wrap of
+  the exactly folded value. Where the exact fold fits the target, the two
+  routes give the same value. Out of range, solc accepts and this model
+  refuses (Q2).
+- `Fx.add_assoc`: `+` is associative wherever the checked sums exist.
 - A witness that `*` is not associative (`Laws.lean`, `example`):
   `(0.01 · 0.50) · 2.00 = 0.00` but `0.01 · (0.50 · 2.00) = 0.01` at
   `ufixed16x2`.
 
-Pins: `tdiv_tdiv` and `Fx.explicitRat?_mobile_route` use
+Pins: `tdiv_tdiv`, `Fx.explicitRat?_mobile_route`, `Fx.explicit_le`,
+`Fx.rescale_mono`, `Fx.rescale_rescale_down` and `Fx.add_assoc` use
 `[propext, Classical.choice, Quot.sound]`.
+
+This covers the laws of backfill item 2. The module is not complete. Still
+open:
+- the more-digits half of the P1 comparison (argument only);
+- the distance of a wrapped explicit conversion (Q2);
+- constant comparisons, and integer and `bytesM` constants (§6.2);
+- QL1 and QL2;
+- ABI dynamic aggregates, calldata heads, topics, UDVTs and the empty v2
+  revert data (§6.3);
+- storage slot starts for structs and arrays, packed array elements, a
+  typed `place` over all value types, and wiring `Store` to the typed
+  storage (§6.4).
+
+**Review.** A read-only finder and a separate read-only skeptic reviewed
+`030a48d`. Both found the proofs sound. Confirmed findings and their fixes:
+
+| Finding | Source | Fix |
+|---|---|---|
+| The route theorem compares the model with itself (solc generates no code) and hid the out-of-range case behind its premise | both | `Fx.explicit_mobile_route` (premise-free, with wrap); docstrings and this section say "this model's run-time conversion" and name the out-of-range case |
+| The more-digits half was presented as proved; "the §6.2 argument" pointed at nothing | both | the §6.2 row marks it as an argument, not proved |
+| "Completes backfill item 2" overclaimed | skeptic | "Still open" list above |
+| `+` associativity neither stated nor proved | skeptic | `Fx.add_assoc` |
+| solc "Rounded" at the mobile digits; it truncates | both | corrected |
+| Pins for the new laws missing; the `Laws.lean` docstring not updated; `literalTrunc_rescale` named without `Fx.` | both | added, updated, renamed in the doc |
