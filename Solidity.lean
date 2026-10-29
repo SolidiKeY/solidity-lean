@@ -522,6 +522,7 @@ import Solidity.Hash.CollisionBound
 import Solidity.Hash.Adaptive
 import Solidity.Storage.HashedLayout
 import Solidity.Storage.HashedLayoutEvm
+import Solidity.Storage.HashedKeccak
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction

@@ -1,4 +1,4 @@
-# Storage: the hashed layout and its separation
+# Storage: the hashed layout, its separation and the keccak instantiation
 
 Lane `lane-hashing` of batch `roadmap-l1-20261029` (branch
 `cloud/roadmap-l1-20261029/lane-hashing`, base `ceb0d54`). Preparation for
@@ -181,3 +181,36 @@ following commit:
 | The `Evm.Slot` reading suggested a refinement of the machine, whose store is symbolic (skeptic 7). | Reworded here and in the module docstring. |
 | `no_injective_slot_encoding` cited without its `Bridge/` location; `Loc.` names cited bare (finder 2, 3). | Location added; names qualified. |
 | `STy.locate_bounded` and `Loc.nodup_map_word` had no axiom pins (finder 4). | Pinned. |
+
+## Checkpoint 3 — the keccak instantiation
+
+Module `Solidity/Storage/HashedKeccak.lean` (imports `Solidity.Keccak` and
+`Solidity.Storage.HashedLayout`, in `CORE`).
+
+| Name | Statement |
+|---|---|
+| `bytesBE`, `ofBytes_bytesBE`, `bytesBE_inj` | The `m` low bytes big-endian; `ofBytes (bytesBE m n) = n % 256^m`; injective on words for `m = 32`. |
+| `encode` | `entry k w ↦ bytesBE 32 k ++ bytesBE 32 w` (`abi.encode(k, w)`, 64 bytes), `data w ↦ bytesBE 32 w` (32 bytes). |
+| `encode_inj` | Injective on preimages whose parts are words (`Pre.Words`); `entry` and `data` differ in length. |
+| `keccakH` | `keccak256Nat ∘ encode`, the hash parameter. |
+| `keccak256_bytes`, `keccakH_lt` | The digest has at most 32 bytes, each below 256, so `keccakH p < 2^256` (the `hH` hypothesis of `Loc.word_inj`). |
+| `keccakH_eq_iff` | On word preimages, `keccakH` collides iff keccak-256 collides on the encoded inputs. |
+| `collisionFree_keccakH_iff`, `regionsDisjoint_keccakH_iff` | `CollisionFree keccakH ps ↔ CollisionFree keccak256Nat (ps.map encode)`, and the same for `RegionsDisjoint`: the premise on the run's byte-string `KECCAK256` inputs is exactly what the layout needs. |
+| `keccak_word_inj` | `Loc.word_inj` at `N = 2^256`, `H = keccakH`, with the region premise stated on `P.map encode`. |
+
+`#guard` vectors check `Loc.word (2^256) keccakH` against solc's formula
+(`keccak256(abi.encode(k, p))` for a mapping entry, `keccak256(abi.encode(p))
++ i·s` for an array element): `uint256[]` at slots 0 and 1, a two-word struct
+array element, `uint`/`bool` keys, a negative `int` key (two's complement),
+an `address` key (left-padded), a nested mapping, an array inside a mapping,
+and one vector through `STy.locate`. The digests were computed independently
+with pycryptodome's keccak-256 (`pip install pycryptodome` in a scratch
+directory); `keccak256(uint256(0))` and `keccak256(0 ‖ 0)` are also the
+values solc's documentation and common tooling quote. `#guard` evaluates;
+no proof depends on it.
+
+Limitations: keys are value types (one word); `string`/`bytes` keys hash
+their unpadded bytes and are outside `Pre` (see checkpoint 2). The premise is
+about keccak's actual outputs on the run's inputs; it is not implied by
+anything proved here, and its probability is bounded only in the random
+oracle model ([hash-collision-bound.md](hash-collision-bound.md)).

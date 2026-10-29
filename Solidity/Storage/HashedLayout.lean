@@ -14,8 +14,8 @@ slot terms of one run denote distinct words under the per-run hash premises
   term, as the EVM hashes it.
 * **Words** (`Loc.word N H`) read a term with `N` words and a hash parameter
   `H : Pre → Nat`; no property of `H` is assumed beyond `H p < N` and the
-  run's premises. Work queue item 3 instantiates `H` with keccak-256 over
-  the ABI encoding.
+  run's premises. `Solidity/Storage/HashedKeccak.lean` instantiates `H` with
+  keccak-256 over the ABI encoding.
 * **Layout** (`STy`, `STy.locate`): a word, a struct, a static array, a
   dynamic array of length below `lmax = 2^64`, or a mapping, laid out as
   solc does without packing: members consecutively, element `i` at
