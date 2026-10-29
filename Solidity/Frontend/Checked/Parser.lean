@@ -868,7 +868,12 @@ def modInv : Nat → P (Syn .modInv)
   | 0 => P.fail "nesting too deep"
   | n + 1 => do
     let p ← idPath
-    if ← isP .lparen then return .modInv p (.some (← callArgs n)) else return .modInv p .none
+    if ← isP .lparen then
+      -- solc's parser takes positional arguments only here.
+      match ← callArgs n with
+      | .named _ => P.fail "expected a primary expression"
+      | args => return .modInv p (.some args)
+    else return .modInv p .none
 
 /-- The body of a function-like definition: `;` or a block. -/
 def bodyOpt : Nat → P (Syn (.opt (.block .body)))
@@ -1168,7 +1173,10 @@ def inheritList : Nat → P (Syn (.list .inherit))
   | n + 1 => do
     let is ← sepBy1 do
       let p ← idPath
-      if ← isP .lparen then pure (Syn.inherit p (.some (← callArgs n)))
+      if ← isP .lparen then
+        match ← callArgs n with
+        | .named _ => P.fail "expected a primary expression"
+        | args => pure (Syn.inherit p (.some args))
       else pure (Syn.inherit p .none)
     return toSynList is
 

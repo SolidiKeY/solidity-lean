@@ -285,6 +285,8 @@ G09 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g09-
 
 G10 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g10-expressions). Expressions by solc's precedence climbing, the selected tree fixed by `Syn.prec` (levels and associativity of the grammar, refusal where the grammar and solc disagree); level lemmas for every binary constructor (`binary_levels`), every operator parsed (`every_operator`), every expression constructor covered (`exprCtors_covered`), `>>>`/`years` rejected precisely (`expr_out_of_profile`). Translation validated; unambiguity is open.
 
+G11 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g11-statements-definitions-and-whole-units). Whole-source parsing to `Syn .unit` from G08–G10 (`parse_sound`, translation validation; completeness and uniqueness open), syntax-level admission (`parseInProfile`), every one of S00's 112 constructors produced by an accepted program (`allCtors_covered`; in-profile ones by admitted programs, `profileCtors_covered`), G05's parse-stage checker (`parseChecker`, `checkUnits_sound`, `produce_accepted`), and the corpus regression over solc 0.8.38's 3542 syntax tests and the repository's `.sol` files (`scripts/parse-corpus.mjs`, baseline `tests/parse-corpus/baseline.json`: 3126 of 3208 expected-accepted tests accepted, 289 of 334 expected-refused refused, every disagreement with its reason; print/parse round trip without failure).
+
 ### Wave 2 — lowering and complete source semantics (G16–G23)
 
 | Group | Deliverable and completion evidence |
@@ -521,7 +523,7 @@ several groups (noted per row); a lane starts by reading those results.
 | V02 | G03, G05, G06 | V00, V01 | Integrated (with the G06 Osaka re-pin). |
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
 | V04 | S02, S03, S04.04, S05 | V03 | — |
-| V05 | G08, G09, G10, G11 | V04 | Lane `roadmap-l2-20261029/lane-parse`: G08 done. |
+| V05 | G08, G09, G10, G11 | V04 | Lane `roadmap-l2-20261029/lane-parse`: G08–G11 done (translation-validated parse; completeness and uniqueness open), round-trip backfill done. |
 | V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). |
 | V07 | G16, G17, G18, G19 | V06 | — |
 | V08 | G20, G21, G22, G23 | V07 | — |

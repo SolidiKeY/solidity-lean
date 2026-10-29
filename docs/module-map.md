@@ -605,6 +605,8 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Frontend/Checked/Render.lean` | G09: canonical token spellings and the source printer `Syn.print`. |
 | `Frontend/Checked/TypeExamples.lean` | G09 controls: type-name trees, attribute layouts, recursive declaration references, printing round trips, type and declaration constructor coverage (`declCtors_covered`), refusals. |
 | `Frontend/Checked/ExprExamples.lean` | G10 controls: precedence and associativity lemmas over `Syn.precNode`, every operator, expression trees, refused ambiguous forms, expression constructor coverage (`exprCtors_covered`). |
+| `Frontend/Checked/Certificate.lean` | G11: G05's parse-stage instance: `Units`, `Parses`, `parseChecker` (`checkUnits_sound`), the producer (`produce_accepted`), `FrontendSpec.ofParse`. |
+| `Frontend/Checked/UnitExamples.lean` | G11 controls: statements, definitions and units, every S00 constructor covered (`allCtors_covered`, `profileCtors_covered`), out-of-profile refusals, the G05 checker on a two-unit input. |
 
 ## Precompiles
 

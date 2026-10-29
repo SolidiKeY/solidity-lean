@@ -430,6 +430,8 @@ import Solidity.Frontend.Checked.Check
 import Solidity.Frontend.Checked.Render
 import Solidity.Frontend.Checked.TypeExamples
 import Solidity.Frontend.Checked.ExprExamples
+import Solidity.Frontend.Checked.Certificate
+import Solidity.Frontend.Checked.UnitExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic

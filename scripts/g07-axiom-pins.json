@@ -1456,6 +1456,14 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Checked/Certificate.lean:Solidity.Frontend.Checked.checkUnits_sound": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/Certificate.lean:Solidity.Frontend.Checked.produce_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Checked/ExprExamples.lean:Solidity.Frontend.Checked.every_operator": [
   "propext"
  ],
@@ -1479,6 +1487,12 @@
   "propext"
  ],
  "Solidity/Frontend/Checked/TypeExamples.lean:Solidity.Frontend.Checked.parseType_derives": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/UnitExamples.lean:Solidity.Frontend.Checked.allCtors_covered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/UnitExamples.lean:Solidity.Frontend.Checked.profileCtors_covered": [
   "propext"
  ],
  "Solidity/Hash/Adaptive.lean:Solidity.Hash.eagerAdaptiveBound": [

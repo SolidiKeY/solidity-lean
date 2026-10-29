@@ -260,13 +260,19 @@ def Syn.yield : {c : Cat} → Syn c → Pr (List (List Tok))
     pure [tk .function ++ nameT ++ parens (commaSep p) ++ a ++
       (if r.isEmpty then [] else tk .returns ++ parens (commaSep r)) ++
       (match b with | [x] => x | _ => pu .semi)]
-  | _, .modifier name ps virt over body => do
+  | _, .modifier name .none virt over body => do
+    let o ← popAttrs
+    let a ← attrsP (single .virt (if virt then tk .virtual else []) ++
+      single .over (overrideToks over)) [] o
+    let b ← body.yield
+    pure [tk .modifier ++ idt name ++ a ++ (match b with | [x] => x | _ => pu .semi)]
+  | _, .modifier name (.some ps) virt over body => do
     let o ← popAttrs
     let p ← ps.yield
     let a ← attrsP (single .virt (if virt then tk .virtual else []) ++
       single .over (overrideToks over)) [] o
     let b ← body.yield
-    pure [tk .modifier ++ idt name ++ (match p with | [x] => parens x | _ => []) ++ a ++
+    pure [tk .modifier ++ idt name ++ parens (commaSep p) ++ a ++
       (match b with | [x] => x | _ => pu .semi)]
   | _, .fallback sig ext mu mods virt over body => do
     let o ← popAttrs

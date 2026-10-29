@@ -150,7 +150,7 @@ Other recorded choices:
   is the same.
 * `1._2` lexes as `1`, `.`, `_2` (a member access on a literal); solc reads
   one malformed number. The parse accepts the member access; S01's typing
-  refuses it (`docs/feature-work/frontend-parse.md` G11 Handoff).
+  refuses it (G11 Handoff, "For S01").
 * `DoubleQuote`, `SingleQuote`, `OctalNumber`,
   `DecimalNumberFollowedByIdentifier`, `ReservedKeywords` and `YulHex` are
   refused, as no parser rule uses them.
@@ -450,6 +450,186 @@ both directions (`binary_levels`, `bit_levels`) (3); out-of-profile
 expressions refused precisely (`expr_out_of_profile`, `parseInProfile`,
 `exprCorpus_in_profile`) (4); literal operator spellings and completeness of
 the operator lists (5); repeated call options noted (7).
+
+## G11: statements, definitions and whole units
+
+### Design
+
+Statements are parsed in their context `SCtx` (S00's intrinsic `loop` and
+`unchecked` flags): `break`/`continue` exist only inside a loop, an
+`unchecked` block only as a block item outside another, so "break outside a
+loop" and nested `unchecked` are parse refusals, located. The parser reads a
+statement beginning with a type name followed by a data location or an
+identifier as a declaration (`a.b c;`), a leading `(` as a tuple declaration
+when one parses (`(uint a, , bool b) = f();`), `revert` followed by an
+identifier as a revert statement, `emit`/`revert` targets as paths, call
+options only before `identifier :` (so `try e {` opens the block), and the
+`else` of `if (a) if (b) x; else y;` as the inner `if`'s (`Syn.prec`'s
+`openIf` refuses the other tree). Definitions: functions (including
+`fallback`/`receive` as names), modifiers with and without parameters,
+constructors, `fallback`/`receive` definitions, state variables, structs,
+enums, UDVTs, events, errors, `using`; contracts (`abstract`, `layout at`,
+`is` with arguments, either order), interfaces, libraries; pragmas (S00's
+word lists), the three import forms; assembly with dialect, flags and a Yul
+body (all of S00's Yul constructors).
+
+**Admission at the syntax level.** `parseInProfile` admits a parsed unit
+only when S00's precise rejection `Syn.rejections` is empty, and refuses
+with the manifest ids of the excluded constructs (assembly other than the
+canonical rethrow, `layout at` with a non-literal base, `>>>`, `years`,
+`pragma experimental solidity`, invalid modifier bodies).
+
+**The G05 parse stage** (`Solidity/Frontend/Checked/Certificate.lean`):
+`Units` (one tree per source unit, named), `UnitParses`/`Parses` (each
+unit's bytes lex and its tree derives the tokens under some layout and
+satisfies `Syn.prec`), `parseChecker : Checker Input Units Parses` (the
+certificate is the layouts; `check` re-lexes the bytes and compares the
+yields; `sound` by `checkUnits_sound`), the untrusted `produce` with
+`produce_accepted`, and `FrontendSpec.ofParse` / `FrontendSpec.ofParse_checker`
+fixing a `FrontendSpec`'s syntax and parse relation for the later stages.
+The checker reads bytes, never a digest.
+
+### Theorems
+
+| Name | Statement |
+|---|---|
+| `parse_sound`, `parse_derives` | whole-source parsing (from G09): an accepted unit derives its tokens and satisfies `Syn.prec` |
+| `parseInProfile_sound` | an admitted unit is a parse with no syntax-level rejection |
+| `checkUnits_sound`, `parseChecker` | G05's parse-stage `Checker`: acceptance implies `Parses` |
+| `produce_accepted` | the producer's output is accepted by the checker |
+| `allCtors_covered` | **every one of S00's 112 constructors** occurs in an accepted program of the lane's corpora |
+| `profileCtors_covered` | every constructor except the 11 Yul constructors outside the canonical rethrow occurs in an accepted, in-profile program |
+| `unitCorpus_in_profile`, `yul_rejected`, `unit_out_of_profile` | the statement corpus is admitted; assembly (not the rethrow), `layout at f()` and `years` are refused with their features |
+| `dangling_else`, `decl_or_expr` | the `else` binds to the nearest `if`; declaration versus expression statements; `revert E();` versus `revert("x");` |
+| `demo_parses`, `demo_wrong`, `demo_named_base` | a two-unit input is produced and accepted by the G05 checker; the units' trees swapped under the right names are refused by the yield comparison; a hand-made tree with named base arguments (which the parser never returns) is refused by `Syn.prec`'s node conditions |
+
+Negative controls (`unit_refused`): `break` outside a loop, a function
+definition inside a block, nested `unchecked`, `unchecked` as an `if` body,
+`try` without `catch`, a `virtual` constructor, `fallback()` with returns,
+a repeated `receive` attribute, an empty `is`, an unterminated pragma, a
+malformed Yul `let`, `() = g();` and `(,) = g();`, each with its offset.
+
+### Corpus regression
+
+`scripts/parse-corpus.mjs prepare` extracts solc 0.8.38's
+`test/libsolidity/syntaxTests` from `tests/upstream/solidity-0.8.38.tar.gz`,
+splits multi-source tests at `==== Source: … ====`, and adds every `.sol`
+file under `tests/` (those under `illegal/` or `nocompile/` expected
+refused); elaborating `scripts/ParseCorpus.lean` from the repository root
+(open it in the Lean server, or `lake env lean scripts/ParseCorpus.lean`)
+parses every unit, prints each accepted one and parses it again; `node
+scripts/parse-corpus.mjs report` counts against solc's expectation and
+compares with the baseline `tests/parse-corpus/baseline.json` (`--write`
+records it). A syntax test is expected refused exactly when its
+expectations list a `ParserError` other than 6275 (an import source not
+found, the import resolver's). Every disagreement is listed in the
+baseline with a reason; the report fails when one has none.
+
+Results (4056 units; the interpreted run takes about five minutes):
+
+| Corpus | Expected | Accepted | Refused |
+|---|---|---|---|
+| solc syntax tests (3542) | accepted (3208) | 3126 | 82 |
+| | refused (334) | 45 | 289 |
+| repository `.sol` (236) | accepted (222) | 221 | 1 |
+| | refused (14) | 13 | 1 |
+
+Round trip (print each accepted unit, parse it again, compare nodes and
+tokens): 0 failures over the 3405 accepted tests.
+
+The 141 disagreements, by reason (the reasons of
+`scripts/parse-corpus.mjs`, each applied only in its direction):
+
+| Count | Reason |
+|---|---|
+| 19 | pragma: version and pragma words are S01's settings check; S00 keeps the words |
+| 18 | Yul analysis (builtin and reserved names): assembly is outside the profile (parseInProfile) |
+| 15 | fallback/receive form without an S00 tree (solc refuses it later) |
+| 13 | repository negative example: refused by solc's later stages, not its parser |
+| 10 | parameter attribute other than a data location: grammar refuses (solc later) |
+| 9 | constructor attributes without an S00 tree (solc refuses them later) |
+| 9 | UDVT over a non-elementary type: grammar refuses (solc later) |
+| 7 | Yul dotted names in declarations: grammar refuses (solc later) |
+| 7 | SPDX license comment: trivia here, checked by solc's parser |
+| 6 | file-level constant without value or non-constant: S00's constant needs `constant … = e` |
+| 6 | `type(…)` of an expression: S00's metaType takes a type name |
+| 6 | solc's syntax checker, a later stage: intrinsic in S00 (SCtx) or the grammar |
+| 4 | abstract interface/library or library inheritance: no S00 tree (grammar refuses) |
+| 3 | grammar/solc disagreement refused by Syn.prec |
+| 3 | misplaced `_` in a number: solc's syntax checker, refused by the lexer |
+| 2 | `[]`: grammar refuses (solc later) |
+| 2 | `catch Name()` with no parameters: no S00 tree |
+| 1 | Yul multi-variable assignment from a non-call: grammar refuses (solc later) |
+| 1 | solc's nesting-depth limit |
+
+No disagreement is a refusal by this parser of a program that solc
+compiles: every "expected accepted, refused" test fails in a later solc
+stage, except the three `Syn.prec` refusals of grammar/solc disagreements
+and the S00-representation gaps listed.
+
+### G11 Handoff
+
+* **Theorems**: `parse_sound`, `parse_derives`, `parseInProfile_sound`,
+  `checkUnits_sound`, `produce_accepted`, `allCtors_covered`,
+  `profileCtors_covered`.
+* **Premises**: none.
+* **G05**: the parse stage of `Chain` is `parseChecker` (or
+  `FrontendSpec.ofParse_checker`); the raw-input check (`Input.Ok`), the
+  resolution and metadata stages are S01/G12–G15's.
+* **The parse stage provides** G05's `Checker.sound` and the producer's
+  `accepted` (`produce_accepted`, `produceOpt_accepted`); `Checked.complete`
+  (every admitted input produced) is not provided, since the parser's
+  completeness is open and `Parses` is not proved functional.
+  `FrontendSpec.ofParse` only packages the syntax and parse relation.
+* **For G15** (admission, the solc-JSON adapter): the checked trees are
+  S00's, so the adapter's equivalence is between `Syn .unit` (per unit,
+  `Units`) and the imported program. G15 needs from this lane: `parse`
+  /`parseWithLayout` per unit, `Parses` as the parse relation, the
+  classified disagreements of the corpus regression above (each with its
+  reason in `tests/parse-corpus/baseline.json`), and `parseInProfile` for
+  the syntax-level profile. **Blockers for G15**, not provided here: a
+  located yield (`tokens` gives each token's byte range, but the tree
+  carries none, so solc's `src` fields cannot yet be related to nodes) and
+  the uniqueness of the precedence tree (without it `Parses` may relate an
+  input to more than one tree).
+* **For S00**: solc's parser accepts, and a later stage refuses, forms S00
+  has no tree for, so this parser refuses them: `fallback() … returns (…)`,
+  `receive` with parameters or returns, a non-`external` `fallback`,
+  `abstract interface`/`abstract library` and library inheritance,
+  `constant`/`immutable`/mutabilities on parameters, constructor attributes
+  beyond `payable` and visibility, UDVTs over non-elementary types,
+  file-level constants without a value, `catch Name()` with no parameters,
+  an empty struct, `[]`, `type(expression)`.
+* **For S01**: `1._2` (a member `_2` of the literal `1`, G08) and
+  `x.address` on a non-address are accepted syntax; their refusal is
+  typing.
+* **Remaining**: completeness and unambiguity (G09, G10); the statement
+  disagreements of the corpus.
+
+### G11 Review
+
+Finder: layout order and the producer/checker agreement confirmed; corpus
+extraction (`// ----`, `==== Source:`, latin1 bytes, 6275) confirmed.
+Fixed: the parser-only refusals (named modifier and base arguments, empty
+import paths, statement-start empty tuples, `type(…)` of non-expression
+types) moved into `Syn.precNode`, so `Parses` and the checker refuse them on
+hand-made trees too (1: `demo_named_base`); a stronger `demo_wrong` (2);
+Yul expression statements, multi-variable right sides and empty `switch` as
+node conditions (3); corpus reasons apply only in their direction and,
+where possible, to the parser's message (4); stale script comments (5); the
+S00 and S01 handoff lists (7); `() + 1;` (9, by the same node condition).
+Recorded: refusal locations are not compared with solc's (6).
+
+Skeptic: "partially met". Fixed: `UnitParses` carries the lexer's
+certificate `Lexed`, which the checker checks (2); the parse stage's `sound`
+and `accepted` stated, `complete` recorded as not provided, `produceOpt` for
+`Chain.frontend` (3); `FrontendSpec.ofParse` described as packaging (4);
+the expectation rule's exceptions and per-disagreement reasons, `illegal/`
+and `nocompile/` files expected refused (5, 6); the baseline regenerated,
+the counts filled in, the rule stated exactly (7); one canonical Lean step
+without a duplicate `main` (8); `profileCtors_covered` over
+`parseInProfile` (9); the G15 blockers (located yield, uniqueness) stated as
+blockers (10). Recorded: completeness and uniqueness (1).
 
 ## Reviews
 

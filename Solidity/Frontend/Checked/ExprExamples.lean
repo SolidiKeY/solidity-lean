@@ -200,10 +200,10 @@ def exprErr (s : String) : Option String :=
 
 /-- Ambiguous between the grammar and solc, refused; malformed, refused. -/
 theorem expr_refused :
-    exprErr "-a++" = some "ambiguous expression or statement (precedence, dangling else): parenthesize" ∧
-    exprErr "a ? b : c = d" = some "ambiguous expression or statement (precedence, dangling else): parenthesize" ∧
-    exprErr "a++.f" = some "ambiguous expression or statement (precedence, dangling else): parenthesize" ∧
-    exprErr "a++ ++" = some "ambiguous expression or statement (precedence, dangling else): parenthesize" ∧
+    exprErr "-a++" = some "refused by Syn.prec (precedence, dangling else or a solc node condition)" ∧
+    exprErr "a ? b : c = d" = some "refused by Syn.prec (precedence, dangling else or a solc node condition)" ∧
+    exprErr "a++.f" = some "refused by Syn.prec (precedence, dangling else or a solc node condition)" ∧
+    exprErr "a++ ++" = some "refused by Syn.prec (precedence, dangling else or a solc node condition)" ∧
     exprErr "(a" = some "expected ')'" ∧
     exprErr "f(a,)" = some "expected an expression" ∧
     exprErr "a +" = some "expected an expression" ∧

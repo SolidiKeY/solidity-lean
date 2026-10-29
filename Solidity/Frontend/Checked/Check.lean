@@ -43,7 +43,7 @@ def parseLocated (eof : Nat) (ls : List Located) : Except Error (Syn .unit × Li
   | .ok (u, L) =>
     if u.toks L ≠ some (ls.map Located.tok) then .error ⟨0, "parser check failed: yield mismatch"⟩
     else if u.prec = false then
-      .error ⟨0, "ambiguous expression or statement (precedence, dangling else): parenthesize"⟩
+      .error ⟨0, "refused by Syn.prec (precedence, dangling else or a solc node condition)"⟩
     else .ok (u, L)
 
 /-- **The checked parser** of a source unit, with its layout. -/
@@ -156,7 +156,7 @@ def parseCatLocated {c : Cat} (p : Nat → P (Syn c)) (eof : Nat) (ls : List Loc
     else if t.toks s.ch.reverse ≠ some (ls.map Located.tok) then
       .error ⟨0, "parser check failed: yield mismatch"⟩
     else if t.prec = false then
-      .error ⟨0, "ambiguous expression or statement (precedence, dangling else): parenthesize"⟩
+      .error ⟨0, "refused by Syn.prec (precedence, dangling else or a solc node condition)"⟩
     else .ok (t, s.ch.reverse)
 
 def parseCat {c : Cat} (p : Nat → P (Syn c)) (src : Bytes) : Except Error (Syn c × List Choice) :=

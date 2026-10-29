@@ -27,6 +27,14 @@ member, call options and calls 15, primaries 16.
 * an assignment as the false branch of a conditional (`a ? b : c = d`): the
   grammar reads `(a ? b : c) = d`, solc `a ? b : (c = d)`.
 
+**Node conditions of the grammar and solc** that S00's types do not carry:
+positional arguments only for modifier invocations and inheritance
+specifiers, no `address payable`, mapping or function type in `type(…)`,
+non-empty import paths, no statement beginning with a tuple without an
+expression (`() = f();`), and Yul's call-only expression statements and
+multi-variable right sides and a case or default in every `switch` (S00's
+recorded over-approximations).
+
 **Greedy readings** where the grammar is ambiguous and solc reads one way:
 `new T[](n)` and `new a.b(…)` keep `[]` and `.b` in the type name (an index
 or member never has a `new` base); `emit`/`revert` targets are paths
@@ -73,6 +81,26 @@ def Syn.openIf : {c : Cat} → Syn c → Bool
   | _, .whileStmt _ b => b.openIf
   | _, _ => false
 
+/-- A list of absent options (a tuple's empty components). -/
+def Syn.allNone : {c : Cat} → Syn c → Bool
+  | _, .nil => true
+  | _, .cons .none r => r.allNone
+  | _, _ => false
+
+/-- An expression whose first token begins a tuple without an expression
+component (`() = …`, `(,)[0]`). -/
+def Syn.leftEmptyTuple : {c : Cat} → Syn c → Bool
+  | _, .tuple .none rest => rest.allNone
+  | _, .index e _ | _, .slice e _ _ | _, .member e _ | _, .callOptions e _ _ | _, .call e _
+  | _, .unarySuffix _ e | _, .exp e _ | _, .mulDivMod _ e _ | _, .addSub _ e _ | _, .shift _ e _
+  | _, .bitAnd e _ | _, .bitXor e _ | _, .bitOr e _ | _, .order _ e _ | _, .equality _ e _
+  | _, .and e _ | _, .or e _ | _, .cond e _ _ | _, .assign _ e _ => e.leftEmptyTuple
+  | _, _ => false
+
+def Syn.isYulCall : {c : Cat} → Syn c → Bool
+  | _, .yulCall .. => true
+  | _, _ => false
+
 /-- A left-associative binary operator at level `p`. -/
 def binOk {c c' : Cat} (p : Nat) (a : Syn c) (b : Syn c') : Bool := p ≤ a.level && p + 1 ≤ b.level
 
@@ -101,6 +129,21 @@ def Syn.precNode : {c : Cat} → Syn c → Bool
   | _, .ifStmt _ t (.some _) => !t.openIf
   | _, .emit e _ => e.isPathExpr
   | _, .revert e _ => e.isPathExpr
+  -- solc's parser: positional arguments only for modifiers and bases.
+  | _, .modInv _ (.some (.named _)) => false
+  | _, .inherit _ (.some (.named _)) => false
+  -- `type(…)` reads an expression: no `address payable`, mapping or function type.
+  | _, .metaType (.elem .addressPayable) | _, .metaType (.mapping ..) | _, .metaType (.fnType ..) => false
+  -- `path: NonEmptyStringLiteral`.
+  | _, .importPath p _ => p != "" | _, .importSymbols _ _ p => p != "" | _, .importStar _ p => p != ""
+  -- A statement does not begin with a tuple without an expression.
+  | _, .exprStmt e => !e.leftEmptyTuple
+  -- Yul: an expression statement is a call; a multi-variable `let` or
+  -- assignment takes a call; a `switch` has a case or a default.
+  | _, .yulExprStmt e => e.isYulCall
+  | _, .yulLet _ (_ :: _) (.some e) => e.isYulCall
+  | _, .yulAssign _ (_ :: _) e => e.isYulCall
+  | _, .yulSwitch _ .nil .none => false
   | _, _ => true
 
 -- Generated from `Syn.nodes` (`Solidity/Source/Ctor.lean`): every node.
