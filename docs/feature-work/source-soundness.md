@@ -95,8 +95,39 @@ typing and are unaffected; they build in the full gate.
   `InferComplete.lean`, `InferStmt.lean`, `InferStmtComplete.lean`,
   `InferExamples.lean`, `Standalone.lean`, `UserOps.lean`,
   `WellFormedCheck.lean`, `Consts.lean`.
-- Full gate `./run-lean.sh`: see the Handoff for the run on the
-  checkpoint's head.
+- Full gate `./run-lean.sh` (build9, on `0a6a408` plus the axiom
+  `#print`s, 16m37s): `lake build` 903 jobs and `lake build
+  SolkeyTestSuite` 262 jobs completed successfully (`Derived17` built, no
+  out-of-memory kill); `check-solkey` 37 mismatches (baseline 37). The
+  earlier runs (build3–build5) lost `Frontend/Checked/UnitExamples`,
+  `Source/Horizon` and `Examples/Tactics/OpenLoops` to out-of-memory kills
+  when they ran beside each other (`OpenLoops` takes about 8 GB); they
+  build alone.
+- The root module did not build after the lane-semantics merge:
+  `Solidity.Source.Program` was declared twice (G12's units in
+  `Units.lean`, S02's elaborated program in `Elaborated.lean`). Renamed
+  G12's to `UnitSet`; a duplicate-name scan then found Horizon's
+  `execS_step`/`execItems_step`/`forIter_step` against this lane's
+  (renamed `*_nsStep`) and `Inheritance.lean`'s `Env.ctorParams`/
+  `Decl.modInvs` against `Elaborated.lean`'s (renamed `Env.ctorArity`/
+  `Decl.modInvList`). Four duplicates between Calculus/Semantics modules
+  of the base (`Out.eq_of_st`, `Op1.eval_none`, `BinOp.shortT_of_lazyB`,
+  `Op2.eval_none_of_strictB`) do not break the root build and were left.
+- `node scripts/check-g07.mjs --log` on build9: every check passes but
+  two: `check-axiom-pins` reports 86 unrecorded pins of other lanes
+  (`Backend/Creation`, `Backend/Failure`, `Bridge/…/ExternalEvm`), left
+  unrecorded; this lane's 54 are recorded; and
+  `roadmap-g03-ledger --check` reports stale generated output, already
+  stale at the base `8445c3f` (`Evm/Compiler.lean` line numbers).
+  `check-doc-paths` 46 (baseline), required control pins 23/23, 0 error
+  lines.
+- Axioms: 45 `#guard_msgs` pins at the end of `SoundnessExamples.lean`,
+  `ptrCopy_refused`/`ptrDelete_refused` in `InferExamples.lean`,
+  `static_value_call_halts` in `SemanticsExamples.lean` (only `propext`,
+  `Classical.choice`, `Quot.sound`); `TrustAudit.lean` checks 43
+  checkpoint 2-3 headlines and the 10 checkpoint-1 ones (language server,
+  no errors). The pins were turned from `#print`s into `#guard_msgs` after
+  build9 and checked with the language server.
 
 ### Review (checkpoint 1)
 
@@ -126,6 +157,30 @@ Answered (not defects): the auxiliary results `recv`, `named`,
 completeness covers every new constructor, none vacuously (finder);
 `f(0x01)` is refused by solc too (skeptic); `extCallValue`'s shape matches
 `callRes` exactly (skeptic).
+
+### Integration review (coordinator, master + checkpoint 1)
+
+Skeptic, confirmed and fixed: the root-import clash (Gates); EIP-214 in
+`callAddr` (Checkpoint 3); statuses of S02/S03/S04.04 and V04 in
+`coverage-plan.md` now say partial and list what is open; stale text in
+`source-s02.md` (dynamic ABI decoding), `source-s05.md` (its stuck list,
+with the storage assignment of arrays of mappings) and the G13 status;
+Panic 0x41 and user-defined value type decoding cross-listed in
+`solc-alignment.md`. Not confirmed: that `s1 = s2` for a storage struct
+with a nested mapping is `stuck`: the struct's memory layout is empty
+(`Decl.structFields` at `memory` fails for a mapping member), so the
+copy silently does nothing; an array of mappings is `stuck`. Both are
+recorded as typing gaps (`source-s02.md`), not fixed.
+
+Finder, fixed: `Value.lean`'s non-`only` `simp`s; the six checkpoint-1
+pins recorded in `scripts/g07-axiom-pins.json`; `abiEncode_checked`
+presented as a known S01 gap (`source-s02.md`); `zero_types` states the
+type `hexConst 0 1`; the `InferExamples` section header and the
+`Unique.lean` docstring.
+
+Speed: `Horizon.lean` (about 2200 lines, minutes to check) re-checks on
+any change to `Eval.lean`'s mutual block; `SemanticsExamples.lean` has 13
+kernel evaluations.
 
 ## Checkpoint 2: preservation (partial)
 
@@ -173,9 +228,9 @@ Two facts the invariant must handle, found while setting it up:
   caller's modifier locals: the invariant on `fnLocals` must hold only
   for the frame that runs modifiers, not across frames;
 - `bytes(s)` of a `string memory` keeps the pointer, so a `bytes memory`
-  reference may name a string object: `RefOK` must treat `bytes` and
-  `string` objects of one location as compatible (the census, item
-  "bug" below, fixed in the semantics).
+  reference may name a string object: `RefOK` treats `bytes` and
+  `string` objects of one location as compatible (`STy.memShape`;
+  `refOK_heap` shows both).
 
 ## Checkpoint 3: gap-relative progress (partial)
 
@@ -282,14 +337,15 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   `stuck` at entry although solc accepts it.
 
 **Typing gaps** (S01 types them, solc refuses them, the semantics is
-`stuck`); the fix to S01's rules and G13's checker is being applied
-(not yet committed):
+`stuck`), fixed in S01's rules and G13's checker:
 
 - `p = S(1)` (a copy into storage) with `p` a local `storage` pointer
-  (solc 7407): `Typed.assignCopy` will require `Γ.namesLocal a = false`;
+  (solc 7407): `Typed.assignCopy` requires `Γ.namesLocal a = false`
+  (`ptrCopy_refused`, which also shows `s = P(x)` and `p = s` typed);
 - `delete p` with `p` a local `storage` pointer (solc: "delete cannot be
   applied to storage pointers"): `Typed.delete` requires
-  `(τ.loc? == some .storage && Γ.namesLocal e) = false`.
+  `(τ.storageRef && Γ.namesLocal e) = false` (`ptrDelete_refused`, which
+  also shows `delete s` and `delete m` typed).
 
 Recorded, not fixed: storage-to-storage assignment of types containing
 mappings (`mapping(uint => uint)[2] a; … a = b;`, which solc refuses,
@@ -302,8 +358,16 @@ environment) in `Typed.assign`.
 **Bug fixed**: `bytes(s)[i] = b` on a `string memory s` was `stuck`
 ("not bytes"): `convExplicitRV` keeps the pointer, so the object is a
 string, and the byte write accepted only `bytes` objects. The write now
-should update a string object in place (`Eval.lean` `writeLoc`), as solc
-does; the fix is being applied (not yet in this commit).
+updates a string object in place (`Eval.lean` `writeLoc`), as solc does
+(`stringByte_write`: `b` reads back `0x78`).
+
+**EIP-214 fixed** (integration review): `callAddr` answered a call with
+value from a static frame with `.revert []`, which only failed the call,
+so `send` returned `false` and a static frame could continue; it now
+halts the calling frame (`static_value_call_halts`, against the same call
+from a frame that is not static, which only fails). A callback with value
+from the environment's static frame still fails without halting it: the
+environment's strategy moves next.
 
 **Other findings recorded** (not `stuck` sites): `string s = "x";` and
 `string constant S = "x";` at contract level do not elaborate (a string
@@ -324,9 +388,9 @@ Kept current at every checkpoint.
 
 | Checkpoint | Status | Theorems |
 |---|---|---|
-| 1 Integration | done | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
+| 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
 | 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; no preservation theorem for the walk |
-| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers) and a semantic bug fix (`bytes(s)[i] = b` on a string) pending |
+| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
 | 4 Close gaps | not started | |
 | 5 `Failures`, `SourceSpec` | not started | |
 

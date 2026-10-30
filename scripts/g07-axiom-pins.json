@@ -1544,6 +1544,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.abiEncode_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.badBinding_refused": [
   "Classical.choice",
   "Quot.sound",
@@ -1569,12 +1574,27 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.extCall_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.extCallValue_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.gasleft_checked": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.hexCall_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.member_checked": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -1595,6 +1615,26 @@
   "propext"
  ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.overflow_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.pay_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.ptrCopy_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.ptrDelete_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.structNew_checked": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -2382,6 +2422,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SemanticsExamples.lean:Solidity.Source.SemanticsExamples.static_value_call_halts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SemanticsExamples.lean:Solidity.Source.sessionAt_consistent": [
   "Classical.choice",
   "Quot.sound",
@@ -2403,6 +2448,221 @@
   "propext"
  ],
  "Solidity/Source/Session.lean:Solidity.Source.stuck_not_diverges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.alloc_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.allocRef_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.amount_ok": [],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.binVal_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.cmpVal_ok": [],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.constVal_ok": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.convRV_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.convVal_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.body_opsOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.inits_opsOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.evalE_valFrag_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.exprNSAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.heapAt_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.heapObj_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.HeapOK.alloc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.HeapOK.write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.heapPut_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.incDecVal_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.ItemsD.toR_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.itemsNS": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.keyStep_nsp": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.readAt_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.shiftVal_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.add_bool_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.add_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.badBinary_not_opsOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.badBinary_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.cb_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.cb_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.cond_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.loop_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.loop_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.refOK_heap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.refOK_wrong_heap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.ret_framed_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.ret_unframed_no_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.ret_unframed_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.stringByte_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.StmtD.toR_opsOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.stmtNS": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.stmtNSAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.storRef_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Typed.toR_opsOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.unaryVal_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.writeAt_ns": [
   "Classical.choice",
   "Quot.sound",
   "propext"

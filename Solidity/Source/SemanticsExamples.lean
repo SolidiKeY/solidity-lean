@@ -516,3 +516,7 @@ end Solidity.Source.SemanticsExamples
 /-- info: 'Solidity.Source.SemanticsExamples.order_legacy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Source.SemanticsExamples.order_legacy
+
+/-- info: 'Solidity.Source.SemanticsExamples.static_value_call_halts' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Source.SemanticsExamples.static_value_call_halts

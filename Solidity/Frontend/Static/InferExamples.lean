@@ -539,3 +539,7 @@ end Solidity.Frontend.Static.InferExamples
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.pay_checked
 /-- info: 'Solidity.Frontend.Static.InferExamples.abiEncode_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.abiEncode_checked
+/-- info: 'Solidity.Frontend.Static.InferExamples.ptrCopy_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrCopy_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.ptrDelete_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrDelete_refused

@@ -228,50 +228,95 @@ theorem stringByte_write :
 
 /-! ## Axioms -/
 
-#print axioms Solidity.Source.binVal_ok
-#print axioms Solidity.Source.cmpVal_ok
-#print axioms Solidity.Source.shiftVal_ok
-#print axioms Solidity.Source.unaryVal_ok
-#print axioms Solidity.Source.incDecVal_ok
-#print axioms Solidity.Source.amount_ok
-#print axioms Solidity.Source.convVal_ok
-#print axioms Solidity.Source.constVal_ok
-#print axioms Solidity.Source.Typed.toR_opsOK
-#print axioms Solidity.Source.StmtD.toR_opsOK
-#print axioms Solidity.Source.Elaborated.body_opsOK
-#print axioms Solidity.Source.Elaborated.inits_opsOK
-#print axioms Solidity.Source.convRV_ns
-#print axioms Solidity.Source.readAt_ns
-#print axioms Solidity.Source.writeAt_ns
-#print axioms Solidity.Source.keyStep_nsp
-#print axioms Solidity.Source.exprNSAt
-#print axioms Solidity.Source.evalE_valFrag_ns
-#print axioms Solidity.Source.stmtNSAt
-#print axioms Solidity.Source.stmtNS
-#print axioms Solidity.Source.itemsNS
-#print axioms Solidity.Source.ItemsD.toR_ns
-#print axioms Solidity.Source.alloc_ok
-#print axioms Solidity.Source.allocRef_ok
-#print axioms Solidity.Source.heapPut_ok
-#print axioms Solidity.Source.heapObj_ok
-#print axioms Solidity.Source.heapAt_ok
-#print axioms Solidity.Source.storRef_ok
-#print axioms Solidity.Source.HeapOK.alloc
-#print axioms Solidity.Source.HeapOK.write
-#print axioms Solidity.Source.SoundnessExamples.add_value
-#print axioms Solidity.Source.SoundnessExamples.add_bool_stuck
-#print axioms Solidity.Source.SoundnessExamples.badBinary_not_opsOK
-#print axioms Solidity.Source.SoundnessExamples.badBinary_stuck
-#print axioms Solidity.Source.SoundnessExamples.refOK_wrong_heap
-#print axioms Solidity.Source.SoundnessExamples.refOK_heap
-#print axioms Solidity.Source.SoundnessExamples.cond_value
-#print axioms Solidity.Source.SoundnessExamples.loop_ns
-#print axioms Solidity.Source.SoundnessExamples.loop_value
-#print axioms Solidity.Source.SoundnessExamples.cb_ns
-#print axioms Solidity.Source.SoundnessExamples.cb_value
-#print axioms Solidity.Source.SoundnessExamples.ret_unframed_stuck
-#print axioms Solidity.Source.SoundnessExamples.ret_unframed_no_frame
-#print axioms Solidity.Source.SoundnessExamples.ret_framed_ns
-#print axioms Solidity.Source.SoundnessExamples.stringByte_write
+/-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.binVal_ok
+/-- info: 'Solidity.Source.cmpVal_ok' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Source.cmpVal_ok
+/-- info: 'Solidity.Source.shiftVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.shiftVal_ok
+/-- info: 'Solidity.Source.unaryVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.unaryVal_ok
+/-- info: 'Solidity.Source.incDecVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.incDecVal_ok
+/-- info: 'Solidity.Source.amount_ok' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Source.amount_ok
+/-- info: 'Solidity.Source.convVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.convVal_ok
+/-- info: 'Solidity.Source.constVal_ok' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.constVal_ok
+/-- info: 'Solidity.Source.Typed.toR_opsOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Typed.toR_opsOK
+/-- info: 'Solidity.Source.StmtD.toR_opsOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.StmtD.toR_opsOK
+/-- info: 'Solidity.Source.Elaborated.body_opsOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.body_opsOK
+/-- info: 'Solidity.Source.Elaborated.inits_opsOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.inits_opsOK
+/-- info: 'Solidity.Source.convRV_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.convRV_ns
+/-- info: 'Solidity.Source.readAt_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readAt_ns
+/-- info: 'Solidity.Source.writeAt_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeAt_ns
+/-- info: 'Solidity.Source.keyStep_nsp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.keyStep_nsp
+/-- info: 'Solidity.Source.exprNSAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.exprNSAt
+/-- info: 'Solidity.Source.evalE_valFrag_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.evalE_valFrag_ns
+/-- info: 'Solidity.Source.stmtNSAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.stmtNSAt
+/-- info: 'Solidity.Source.stmtNS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.stmtNS
+/-- info: 'Solidity.Source.itemsNS' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.itemsNS
+/-- info: 'Solidity.Source.ItemsD.toR_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.ItemsD.toR_ns
+/-- info: 'Solidity.Source.alloc_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.alloc_ok
+/-- info: 'Solidity.Source.allocRef_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.allocRef_ok
+/-- info: 'Solidity.Source.heapPut_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapPut_ok
+/-- info: 'Solidity.Source.heapObj_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapObj_ok
+/-- info: 'Solidity.Source.heapAt_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapAt_ok
+/-- info: 'Solidity.Source.storRef_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.storRef_ok
+/-- info: 'Solidity.Source.HeapOK.alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.HeapOK.alloc
+/-- info: 'Solidity.Source.HeapOK.write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.HeapOK.write
+/-- info: 'Solidity.Source.SoundnessExamples.add_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.add_value
+/-- info: 'Solidity.Source.SoundnessExamples.add_bool_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.add_bool_stuck
+/-- info: 'Solidity.Source.SoundnessExamples.badBinary_not_opsOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.badBinary_not_opsOK
+/-- info: 'Solidity.Source.SoundnessExamples.badBinary_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.badBinary_stuck
+/-- info: 'Solidity.Source.SoundnessExamples.refOK_wrong_heap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.refOK_wrong_heap
+/-- info: 'Solidity.Source.SoundnessExamples.refOK_heap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.refOK_heap
+/-- info: 'Solidity.Source.SoundnessExamples.cond_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.cond_value
+/-- info: 'Solidity.Source.SoundnessExamples.loop_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.loop_ns
+/-- info: 'Solidity.Source.SoundnessExamples.loop_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.loop_value
+/-- info: 'Solidity.Source.SoundnessExamples.cb_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.cb_ns
+/-- info: 'Solidity.Source.SoundnessExamples.cb_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.cb_value
+/-- info: 'Solidity.Source.SoundnessExamples.ret_unframed_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ret_unframed_stuck
+/-- info: 'Solidity.Source.SoundnessExamples.ret_unframed_no_frame' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ret_unframed_no_frame
+/-- info: 'Solidity.Source.SoundnessExamples.ret_framed_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ret_framed_ns
+/-- info: 'Solidity.Source.SoundnessExamples.stringByte_write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.stringByte_write
 
 end Solidity.Source.SoundnessExamples
