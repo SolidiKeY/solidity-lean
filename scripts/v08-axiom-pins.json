@@ -1326,6 +1326,46 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.indexed_collision": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.indexed_commit": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.indexed_complete_vectors": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.indexed_observed_error": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.indexed_observed_read": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.indexed_paid_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.indexed_read": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.middle_locality": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.observed_complete": [
     "Classical.choice",
     "Quot.sound",
@@ -1337,6 +1377,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.occupied_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.out_of_range_locality": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1356,6 +1401,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.shifted_success": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.third_input": [
     "Classical.choice",
     "Quot.sound",
@@ -1371,12 +1421,22 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_index": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.wrong_rollback_snapshot": [
     "Classical.choice",
     "Quot.sound",
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.wrong_status_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_suffix_order": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1661,11 +1721,31 @@
   "Solidity.Lowering.V08.transact_prefix_cons": [
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_prefix_drop_history": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_prefix_failure_snoc": [
     "Quot.sound",
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_failure_suffix": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_index": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_index_bound": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_index_failure": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_index_observe": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_index_success": [
     "Quot.sound",
     "propext"
   ],
@@ -1692,6 +1772,13 @@
   ],
   "Solidity.Lowering.V08.transact_prefix_snoc": [
     "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_take_drop": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_take_history": [
     "propext"
   ],
   "Solidity.Lowering.V08.transact_repeat": [

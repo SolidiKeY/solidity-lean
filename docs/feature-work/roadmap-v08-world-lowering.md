@@ -1697,3 +1697,63 @@ This section records the second checkpoint's committed handoff; current final
 script gates, exact statuses, both checkpoint heads and sealed artifacts are
 also recorded in the final owning handoff. No further independent work is
 claimed exhausted or goal complete.
+
+
+### Indexed finite-history locality checkpoint
+
+Starting committed d3dd46928f7bd1e84eff82ec77e3a8a53bdddde7, the missing
+Backfill B indexed clause is now proved over the ACTUAL existing transaction
+fold. transact_prefix_index_bound derives every history bound from the exact
+frame-list length. transact_prefix_index identifies the full TRes at any valid
+index with World.transact applied to that frame at the world reached by take i.
+The success/failure clauses require only the actual indexed frame equation at
+that reached reset input, retain the full typed value or exact THalt, and prove
+the immediately following boundary world. They do not assert that later frames
+leave that world unchanged. take_history and drop_history preserve complete
+ordered earlier results and run the suffix at the actually reached world.
+Take/drop are total beyond length; indexed access requires a proof of validity.
+Empty prefixes retain dirty input. No evaluator, Source relation, cutoff or
+whole-trace preservation assumption was added. Indexed observation extension
+maps success values at the same index and retains exact errors.
+
+Controls instantiate positions0/1/2/3 of the actual funded constructor/library
+commit, post-commit paid binary-reason failure, occupied candidate failure and
+real reads. indexed_complete_vectors retains EVERY previous listed balance,
+store, transient, installation/kind/role/lookup observation at boundaries0..4
+and all exact typed result/status values. The vector is not every World field.
+Middle and outofrange locality and wrong-index, shifted-success, wrong-suffix-
+order controls discriminate the actual runs. Existing dirty/snapshot/error
+controls and all401 prior axiom sets are preserved. Twenty new theorems give
+421 standard exact pins. Finder and skeptic independently read the actual
+proofs/controls without Lean/server/builds and reported no substantive findings.
+
+Gate738526-2cf27af0 passes117 jobs in34.9364s; fresh RSS1022394368,
+reported reused cgroup peak371789824 (conservatively possibly cumulative).
+It reuses only the exact inspected stopped d07aa75f runtime, without allocating
+another VFS root, changing commands/guards or deleting any file/cache/container.
+48MiB conservative incremental budget at282943488 available bytes; actual
+remaining space before sealing will be recorded. The inner max12GiB/swap0,
+CPU1, cacheempty/false and serial-j1 checks remain unchanged. Initial list proof
+failure733295 and concrete unification/heartbeat failure735448 exit1 are retained;
+explicit list rewriting fixed them without budget increases. Failed-build
+printed sorryAx comes from Lean error recovery only: no authored sorry/axiom
+and none in the successful421 sets. Per-file MCP/get_goal remain unavailable.
+
+Every original G20,G21,G22.01-.05,G23 and BackfillA/B source/application parent
+remains PARTIAL, with Source/V07/type/layout/ABI/body/linkage/runtime-frame/
+bytecode/admission/reserved-owner applications open. Mandatory full496841 and
+task/baseDecision413142/433573 failed125 remain; no unchanged retry or waiver.
+Literal run-lean wrapper remains pending. Raw global docs/pins exits1 are
+retained separately from complete exact-base NEW0 comparisons. No other
+independent obligation is claimed exhausted and the existing goal stays blocked.
+This section is the committed checkpoint handoff; additive exports record
+all exact heads, complete queues, gates, reviews and checksum evidence.
+
+Checkpoint final script gates:421 exactpins/60coreclosure;19 evidence corruptions
+and14 runtime profile corruptions rejected after positive controls; trust911/
+241sites/0findings;strict491automatic/61step-budget/11refuted/0pending;
+layers169/0elaborator;orphans896/0orphan/0disallowed. Raw task/base docs exits1
+have identical complete72 findings; raw globalpin exits1 have identical14 notes.
+Separate NEW0 comparisons pass, without waiving either rawfailure. Both final
+independent read-only proof/control/inventory reviews pass. Remaining disk before
+commit271130624bytes, within the measured48MiB incremental envelope.

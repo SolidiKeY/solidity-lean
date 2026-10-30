@@ -165,6 +165,113 @@ theorem transact_prefix_observe {β : Type} (w : World contracts)
       transact_observe w frame observation
     simp only [List.map_cons, transact_prefix_cons, one, ih]
 
+/-- Splitting a history uses the world reached by the actual preceding fold. -/
+theorem transact_prefix_take_drop (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) :
+    transactPrefix w frames =
+      ((transactPrefix (transactPrefix w (frames.take i)).1 (frames.drop i)).1,
+        (transactPrefix w (frames.take i)).2 ++
+          (transactPrefix (transactPrefix w (frames.take i)).1 (frames.drop i)).2) := by
+  have split := transact_prefix_append w (frames.take i) (frames.drop i)
+  rw [List.take_append_drop] at split
+  exact split
+
+/-- Results before the split are independent of all later frames, including
+later failures. For out-of-range i, both sides simply retain the whole history. -/
+theorem transact_prefix_take_history (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) :
+    (transactPrefix w frames).2.take i = (transactPrefix w (frames.take i)).2 := by
+  induction frames generalizing w i with
+  | nil => simp only [List.take_nil, List.drop_nil, transact_prefix_nil]
+  | cons frame rest ih =>
+    cases i with
+    | zero => rfl
+    | succ i =>
+      simp only [transact_prefix_cons, List.take_succ_cons]
+      exact congrArg (List.cons (w.transact frame).2) (ih (w.transact frame).1 i)
+
+/-- The history suffix is precisely the suffix's execution at the reached world. -/
+theorem transact_prefix_drop_history (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) :
+    (transactPrefix w frames).2.drop i =
+      (transactPrefix (transactPrefix w (frames.take i)).1 (frames.drop i)).2 := by
+  induction frames generalizing w i with
+  | nil => simp only [List.take_nil, List.drop_nil, transact_prefix_nil]
+  | cons frame rest ih =>
+    cases i with
+    | zero => rfl
+    | succ i =>
+      simp only [transact_prefix_cons, List.take_succ_cons, List.drop_succ_cons]
+      exact ih (w.transact frame).1 i
+
+/-- Every valid frame index is also a valid index of the complete result history. -/
+theorem transact_prefix_index_bound (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) (valid : i < frames.length) :
+    i < (transactPrefix w frames).2.length := by
+  rw [transact_prefix_length]
+  exact valid
+
+/-- Exact indexed result from the published transaction boundary at the actual
+world reached by the earlier frames. No assumed trace preservation premise. -/
+theorem transact_prefix_index (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) (valid : i < frames.length) :
+    (transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid) =
+      ((transactPrefix w (frames.take i)).1.transact frames[i]).2 := by
+  induction frames generalizing w i with
+  | nil => exact False.elim (Nat.not_lt_zero i valid)
+  | cons frame rest ih =>
+    cases i with
+    | zero => simp only [transact_prefix_cons, List.take_zero, transact_prefix_nil, List.getElem_cons_zero]
+    | succ i =>
+      simpa only [transact_prefix_cons, List.getElem_cons_succ, List.take_succ_cons] using
+        (ih (w.transact frame).1 i (Nat.lt_of_succ_lt_succ valid))
+
+/-- The indexed successful value remains typed and complete. -/
+theorem transact_prefix_index_success (w next : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) (valid : i < frames.length)
+    (value : α)
+    (ran : frames[i] (transactPrefix w (frames.take i)).1.resetTransient = .ok (next, value)) :
+    (transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid) = .ok value ∧
+      (transactPrefix w (frames.take (i + 1))).1 = next.resetTransient := by
+  constructor
+  · rw [transact_prefix_index w frames i valid, World.transact_commit _ _ _ _ ran]
+  · rw [List.take_succ_eq_append_getElem valid,
+      transact_prefix_commit_snoc w next (frames.take i) frames[i] value ran]
+
+/-- An indexed error keeps its exact halt and rolls back only this transaction,
+to the actual preceding reset snapshot; later transactions still execute. -/
+theorem transact_prefix_index_failure (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) (valid : i < frames.length)
+    (halt : THalt)
+    (failed : frames[i] (transactPrefix w (frames.take i)).1.resetTransient = .error halt) :
+    (transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid) = .error halt ∧
+      (transactPrefix w (frames.take (i + 1))).1 =
+        (transactPrefix w (frames.take i)).1.resetTransient := by
+  constructor
+  · rw [transact_prefix_index w frames i valid, World.transact_failure _ _ _ failed]
+  · rw [List.take_succ_eq_append_getElem valid,
+      transact_prefix_failure_snoc w (frames.take i) frames[i] halt failed]
+
+/-- Indexed observation extension retains success mapping and exact errors at
+the same position, with a bound proved for both actual histories. -/
+theorem transact_prefix_index_observe {β : Type} (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (observation : α → β)
+    (i : Nat) (valid : i < frames.length) :
+    (transactPrefix w (frames.map (fun frame => observeTransactionFrame frame observation))).2[i]'(by
+      rw [transact_prefix_length, List.length_map]; exact valid) =
+      ((transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid)).map observation := by
+  simp only [transact_prefix_observe, List.getElem_map]
+
+#print axioms transact_prefix_index_observe
+
+#print axioms transact_prefix_take_drop
+#print axioms transact_prefix_take_history
+#print axioms transact_prefix_drop_history
+#print axioms transact_prefix_index_bound
+#print axioms transact_prefix_index
+#print axioms transact_prefix_index_success
+#print axioms transact_prefix_index_failure
+
 #print axioms transact_step_history
 #print axioms transact_prefix_nil
 #print axioms transact_prefix_cons

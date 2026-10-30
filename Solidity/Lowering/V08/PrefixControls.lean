@@ -599,6 +599,105 @@ theorem observed_recovery :
 #print axioms Solidity.Lowering.V08.wordBytes_transport
 #print axioms Solidity.Lowering.V08.wordSequence_transport
 
+/-- Instantiate exact indexed commit at the dirty initial world; World.transact
+performs its entry reset, not the empty fold. -/
+theorem indexed_commit :
+    (transactPrefix base frames).2[0]'(by rw [transact_prefix_length]; decide) = .ok commitValue ∧
+    (transactPrefix base (frames.take 1)).1 = linked.resetTransient := by
+  have ran : frames[0] (transactPrefix base (frames.take 0)).1.resetTransient = .ok (linked, commitValue) := by
+    simpa only [frames, List.take_zero, transact_prefix_nil, List.getElem_cons_zero] using commit_reached
+  exact transact_prefix_index_success base linked frames 0 (by decide) commitValue ran
+
+theorem indexed_paid_failure :
+    (transactPrefix base frames).2[1]'(by rw [transact_prefix_length]; decide) = .error laterHalt ∧
+    (transactPrefix base (frames.take 2)).1 = (transactPrefix base (frames.take 1)).1.resetTransient := by
+  apply transact_prefix_index_failure base frames 1 (by decide) laterHalt
+  simpa only [frames, List.take_succ_cons, List.take_zero, List.getElem_cons_succ,
+    List.getElem_cons_zero] using second_input
+
+theorem indexed_collision :
+    (transactPrefix base frames).2[2]'(by rw [transact_prefix_length]; decide) = .error .revert ∧
+    (transactPrefix base (frames.take 3)).1 = (transactPrefix base (frames.take 2)).1.resetTransient := by
+  apply transact_prefix_index_failure base frames 2 (by decide) .revert
+  simpa only [frames, List.take_succ_cons, List.take_zero, List.getElem_cons_succ,
+    List.getElem_cons_zero] using third_input
+
+theorem indexed_read :
+    (transactPrefix base frames).2[3]'(by rw [transact_prefix_length]; decide) = .ok readValue ∧
+    (transactPrefix base (frames.take 4)).1 = readWorld.resetTransient := by
+  have ran : frames[3] (transactPrefix base (frames.take 3)).1.resetTransient = .ok (readWorld, readValue) := by
+    simpa only [frames, List.take_succ_cons, List.take_zero, List.getElem_cons_succ,
+      List.getElem_cons_zero] using fourth_input
+  exact transact_prefix_index_success base readWorld frames 3 (by decide) readValue ran
+
+/-- Locality at a middle split preserves the full typed ordered history. -/
+theorem middle_locality :
+    (transactPrefix base frames).2.take 2 = h2 ∧
+    (transactPrefix base frames).2.drop 2 =
+      (transactPrefix (transactPrefix base (frames.take 2)).1 (frames.drop 2)).2 := by
+  constructor
+  · rw [transact_prefix_take_history]; exact congrArg Prod.snd boundary2
+  · exact transact_prefix_drop_history base frames 2
+
+/-- Complete prior vector is retained at ALL boundaries, together with the
+indexed full values/statuses; no vector is claimed to observe every World field. -/
+theorem indexed_complete_vectors :
+    (observeBoundary [] =
+      ((([95, 0, 0, 5, 0], [some [0, 0], some [19, 29], some []], flags), none, false), []) ∧
+    observeBoundary [commit] = (committedVector, h1) ∧
+    observeBoundary [commit, failing] = (committedVector, h2) ∧
+    observeBoundary [commit, failing, occupied] = (committedVector, h3) ∧
+    observeBoundary frames = (committedVector, h4)) ∧
+    ((transactPrefix base frames).2[0]'(by rw [transact_prefix_length]; decide) = .ok commitValue ∧
+     (transactPrefix base frames).2[1]'(by rw [transact_prefix_length]; decide) = .error laterHalt ∧
+     (transactPrefix base frames).2[2]'(by rw [transact_prefix_length]; decide) = .error .revert ∧
+     (transactPrefix base frames).2[3]'(by rw [transact_prefix_length]; decide) = .ok readValue) :=
+  ⟨complete_boundaries, indexed_commit.1, indexed_paid_failure.1, indexed_collision.1, indexed_read.1⟩
+
+theorem indexed_observed_read :
+    (transactPrefix base observedFrames).2[3]'(by
+      rw [transact_prefix_length]; decide) = .ok (readValue, 6) := by
+  unfold observedFrames
+  rw [transact_prefix_index_observe base frames extendOutput 3 (by decide), indexed_read.1]
+  rfl
+
+theorem indexed_observed_error :
+    (transactPrefix base observedFrames).2[1]'(by
+      rw [transact_prefix_length]; decide) = .error laterHalt := by
+  unfold observedFrames
+  rw [transact_prefix_index_observe base frames extendOutput 1 (by decide), indexed_paid_failure.1]
+  rfl
+
+theorem out_of_range_locality :
+    (transactPrefix base frames).2.take 7 = h4 ∧
+    (transactPrefix base frames).2.drop 7 = [] := by
+  rw [boundary4]; decide +kernel
+
+theorem wrong_index :
+    (transactPrefix base frames).2[2]'(by rw [transact_prefix_length]; decide) ≠ .error laterHalt := by
+  rw [indexed_collision.1]; decide +kernel
+
+theorem shifted_success :
+    (transactPrefix base frames).2[0]'(by rw [transact_prefix_length]; decide) ≠ .ok readValue := by
+  rw [indexed_commit.1]; decide +kernel
+
+theorem wrong_suffix_order : (transactPrefix base frames).2.drop 1 ≠
+    [.error .revert, .error laterHalt, .ok readValue] := by
+  rw [boundary4]; decide +kernel
+
+#print axioms indexed_commit
+#print axioms indexed_paid_failure
+#print axioms indexed_collision
+#print axioms indexed_read
+#print axioms middle_locality
+#print axioms indexed_complete_vectors
+#print axioms indexed_observed_read
+#print axioms indexed_observed_error
+#print axioms out_of_range_locality
+#print axioms wrong_index
+#print axioms shifted_success
+#print axioms wrong_suffix_order
+
 #print axioms observed_complete
 #print axioms observed_recovery
 end Solidity.Lowering.V08.PrefixControls
