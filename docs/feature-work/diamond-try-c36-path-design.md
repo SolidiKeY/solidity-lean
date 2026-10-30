@@ -317,3 +317,5 @@ Lean/strict/trust/runtime gates. Accepted prior receipts are acknowledged in
 [Exact check/resource results](diamond-try-c36-path/validation.json) include all five
 source-only groups: largest cgrouppeak31,014,912bytes and sampled aggregate
 RSS28,600KiB; writerlease/hard12GiB/swap0 verified with no max/OOM event.
+
+Post-carrier source-construction frontier (design only): [generic original f and local36 derivation](diamond-try-source-construction-design.md). Carrier/Args/call/catch proofs are now completed; original P4/P5b/P8 remain open.

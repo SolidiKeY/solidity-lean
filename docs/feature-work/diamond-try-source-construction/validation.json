@@ -1,0 +1,37 @@
+{
+  "checks": [
+    {
+      "label": "static",
+      "exit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 27316224,
+      "sampledAggregateRSSKiB": 17868,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "doc-paths",
+      "exit": 1,
+      "seconds": 3,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 8499200,
+      "sampledAggregateRSSKiB": 23376,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "whitespace",
+      "exit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 4485120,
+      "sampledAggregateRSSKiB": 15244,
+      "maxOOMEvents": 0
+    }
+  ],
+  "newKernelOrFixtureValidation": false,
+  "nativeStrictStillExit1": true,
+  "completeAssignment": false
+}

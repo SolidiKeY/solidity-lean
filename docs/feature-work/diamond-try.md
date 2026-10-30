@@ -1487,3 +1487,5 @@ Original c()->f(36) static path/source milestone: [reviewable design](diamond-tr
 Cancun execution approval is recorded, but the mandatory pre-attempt envelope remains absent: [exact existing API/pins and minimal tooling proposal](diamond-try-cancun-envelope.md). Both groups remain unrun; no permission question is repeated.
 
 Constructed closed carrier proofs and the approved modern5M pre-attempt facility: [actual kernel/runner validation](diamond-try-carrier-budget.md). Two Cancun groups now pass under enforced bounds; original native12/8 strictEXIT1 and P4/P5b/P8 stay open.
+
+Post-carrier source-construction frontier (design only): [generic original f and local36 derivation](diamond-try-source-construction-design.md). Carrier/Args/call/catch proofs are now completed; original P4/P5b/P8 remain open.

@@ -395,3 +395,5 @@ here. P4 and P8 stay independently gated. This is a design checkpoint, not an
 original-assignment completion or an integration delivery.
 
 Callsite-specific static c()->this.f(36) refinement: [exact PCs, frame/source obligations and held Cancun plan](diamond-try-c36-path-design.md). No P4/P5b/P8 implementation or status improvement.
+
+Post-carrier source-construction frontier (design only): [generic original f and local36 derivation](diamond-try-source-construction-design.md). Carrier/Args/call/catch proofs are now completed; original P4/P5b/P8 remain open.
