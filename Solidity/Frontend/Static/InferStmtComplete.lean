@@ -84,9 +84,11 @@ mutual
 found. -/
 theorem stmt_complete {C : Ctx} : {k : SCtx} → {L : Locals} → {s : Syn (.stmt k)} → {L' : Locals} →
     StmtD C L s L' → L' ∈ stmtLocals C s L
-  | _, _, _, _, .expr d => by
+  | _, _, _, _, .expr d hu => by
     obtain ⟨d', h⟩ := expr_exists d
-    exact mem_stmts (d := .expr d') (simple_sub (List.mem_append_left _ (List.mem_map.mpr ⟨_, mem_tysOf' h, rfl⟩)))
+    refine mem_stmts (d := .expr d' hu) (simple_sub (List.mem_append_left _ ?_))
+    rw [dif_pos hu]
+    exact List.mem_map.mpr ⟨_, mem_tysOf' h, rfl⟩
   | _, _, _, _, .placeholder h => by
     refine mem_stmts (d := .placeholder h) (simple_sub (List.mem_append_right _ ?_))
     simp only
@@ -183,12 +185,14 @@ theorem stmt_complete {C : Ctx} : {k : SCtx} → {L : Locals} → {s : Syn (.stm
       refine List.mem_filterMap.mpr ⟨_, mem_tysOf' h, ?_⟩
       simp only [dif_pos hc]
     · rename_i hn; exact absurd hr (hn _)
-  | _, _, _, _, .retTuple d ds hf => by
+  | _, _, _, _, .retTuple d ds hne hf => by
     obtain ⟨d', h⟩ := expr_exists d
     obtain ⟨ds', hs⟩ := exists_slots (slots_complete ds)
-    refine mem_stmts (d := .retTuple d' ds' hf) (List.mem_append_right _ ?_)
+    refine mem_stmts (d := .retTuple d' ds' hne hf) (List.mem_append_right _ ?_)
     refine List.mem_flatMap.mpr ⟨_, mem_tysOf' h, List.mem_filterMap.mpr ⟨_, hs, ?_⟩⟩
-    simp only [dif_pos hf]
+    cases ds' with
+    | nil => exact absurd rfl hne
+    | cons _ _ => simp only [dif_pos hf]
   | _, _, _, _, .emit ds hf => by
     obtain ⟨ds', h⟩ := exists_args (args_complete ds)
     refine mem_stmts (d := .emit ds' hf) (List.mem_flatMap.mpr ⟨_, h, ?_⟩)

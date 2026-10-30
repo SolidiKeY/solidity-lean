@@ -641,7 +641,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/State.lean` | S04.01: source values `Val` over a declaration `Layout` (ranges, enum bounds and reference locations intrinsic), contents `Data` (recursive aggregates, content-keyed mappings), typed `memory` (`Heap`, copy and alias laws), read-only `Calldata`, `Storage` typed by its layout, defaults. |
 | `Source/Observe.lean` | S04.02: ABI words and bytes of values (`Val.word`, `Val.word_int`), selectors, `Panic`/`Error` revert data (`panicData_code`, `panic_distinct`) and `revertOutcome`. |
 | `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
-| `Source/Units.lean` | G12: source units of a compilation input (`Program`), solc's import path resolution and remappings (`Path.absolute`, `Remapping.apply`), declaration identities (`DeclId`), the file-level scope across imports (`Sees`) and G12's judgment `UnitsOK`. |
+| `Source/Units.lean` | G12: source units of a compilation input (`UnitSet`), solc's import path resolution and remappings (`Path.absolute`, `Remapping.apply`), declaration identities (`DeclId`), the file-level scope across imports (`Sees`) and G12's judgment `UnitsOK`. |
 | `Source/Overloads.lean` | G12: overload sets across a contract's bases (`InheritedFn`: hidden only by a more derived function with the same parameter types). |
 | `Source/ConstCheck.lean` | G13: compile-time constants: purity of constant initializers (`PureS`, `ConstInitsPure`, solc error 8349), solc's typed constant evaluation (`TEval`, `NamedConst`, `ConstVal`), array lengths through it (`ArrayLenOK`) and acyclic constants (`ConstsAcyclic`). |
 | `Source/UserOps.lean` | G13: user-defined value types: operator bindings of global `using {f as op} for T` directives (`opBindings`, well formed: `UsingOpsOK`), and the typing of operators, `wrap` and `unwrap` (`UdvtTyped`). |
@@ -660,6 +660,26 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Frontend/Checked/ExprExamples.lean` | G10 controls: precedence and associativity lemmas over `Syn.precNode`, every operator, expression trees, refused ambiguous forms, expression constructor coverage (`exprCtors_covered`). |
 | `Frontend/Checked/Certificate.lean` | G11: G05's parse-stage instance: `Units`, `Parses`, `parseChecker` (`checkUnits_sound`), the producer (`produce_accepted`), `FrontendSpec.ofParse`. |
 | `Frontend/Checked/UnitExamples.lean` | G11 controls: statements, definitions and units, every S00 constructor covered (`allCtors_covered`, `profileCtors_covered`), out-of-profile refusals, the G05 checker on a two-unit input. |
+| `Source/Value.lean` | S02: run-time values `RVal`, `Halt`, decidable `STy` equality, wrapping (`wrapBits_mem`), checked/unchecked integer and fixed-point arithmetic, shifts, powers, comparisons, value conversions. |
+| `Source/Elaborated.lean` | S02 prerequisite: resolved bodies, modifier invocations, initializers and base arguments (`Program`), and `Elaborated` (a resolution carrying its program, every part tied to a derivation). |
+| `Source/Unique.lean` | Q1: uniqueness of meaning (`Typed.unique`, `StmtD.unique`, `ItemsD.unique`, `RBody.ofDerivation_unique`), solc's literal typing (`Typed.constShape`), `0.length` refused, literal-gap controls. |
+| `Source/Machine.lean` | S02: the logical storage layout (`Env.cellTy`), `Locals`, the machine state `St`, frames `Fr`, `Glob`, the monad `EM`, storage/memory reads, writes, copies and deletion. |
+| `Source/Eval.lean` | S02/S03: the interpreter of resolved expressions, lvalues, statements, modifiers, internal and external calls, dispatch and environment moves, at a horizon. |
+| `Source/Semantics.lean` | S03.02/S03.04/S04.04/S05: constructor order per pipeline, deployment, transactions, least-horizon completion (`firstDone_mono`), sessions as G01 prefixes (`sessionAt_consistent`, `sourceLang`). |
+| `Source/Ledger.lean` | S05: the semantic status of every expression and statement constructor against S01's coverage (`semExprCoverage_of_typed`, `semExprGaps_spec`). |
+| `Source/SemanticsExamples.lean` | S02–S05 controls: overflow, division by zero, evaluation order per pipeline, short circuit, two placeholders, constructor order, revert rollback of storage and transient storage, a reentrant callback. |
+| `Source/Infer.lean` | S02 item 1b: type inference computing derivations (`Typed.infer`, `StmtD.infer`, `ItemsD.infer`), sound by construction. |
+| `Source/Elaborate.lean` | S02 item 1b: the elaborator `elaborate : Resolution → Option Elaborated` (bodies, modifiers, initializers, constants, base arguments), coherent by construction. |
+| `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
+| `Source/Horizon.lean` | S05 item 2: the interpreter is monotone in its horizon (`belowAt`, horizon independence `runTx_stable`, `firstDone_runTx`), only appends events (`growAt`), and a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
+| `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
+| `Source/Session.lean`, `SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
+| `Source/Hoare.lean` | V04b: Hoare triples over the interpreter monad `EM` (`Hoare`, `NotStuck`), with a rule per combinator (`bind`, `sub'`, `attempt'`, `lift'`, …). |
+| `Source/WellTyped.lean` | V04b preservation: references agree with the heap typing and the layout (`Val.RefOK`, `DataOK`, `RValOK`, `LocalsOK`, `HeapOK`, `StOK`, `EMOK`); memory operations keep it (`alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapAt_ok`). |
+| `Source/ValueProgress.lean` | V04b progress, value layer: `binVal`/`cmpVal`/`shiftVal`/`unaryVal`/`incDecVal`/`convVal`/`constVal` are never stuck in their domains (`NotStuckR`); every elaborated term is in them (`RExpr.OpsOK`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`). |
+| `Source/ExprProgress.lean` | V04b progress, expressions: `NS`/`NSP`; the value fragment (`RExpr.ValFrag`, `RExpr.MapRef`, `RLVal.IsSimple`: locals, value-type state variables, mappings) is never stuck (`exprNSAt`, `evalE_valFrag_ns`; `readAt_ns`, `writeAt_ns`, `keyStep_nsp`, `convRV_ns`). |
+| `Source/StmtProgress.lean` | V04b progress, statements: the statement value fragment in a body frame is never stuck (`stmtNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`; `RStmt.ext`, `Locals.restore_ok`, `BodyFrame`). |
+| `Source/SoundnessExamples.lean` | V04b controls: value-layer witnesses and stuck negative controls; fragment witnesses evaluated in the kernel (a loop, a storage update), an unframed `return` stuck. |
 
 ## Precompiles
 
@@ -710,7 +730,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/SolcJson/Getters.lean` | Source ABI identities and record-paired, nonempty getter plans, lowered through ordinary function members; primitive/UDVT values, enum mapping keys, reference-result refusal and empty-data array bounds. |
 | `Frontend/SourceUnits.lean` | Original compilation-unit ASTs, per-source provenance and checked compiler import identities; explicit specification/mixed-legacy-ABI refusals. |
 | `Frontend/Static/Closure.lean` | G12–G14: reachability by saturation over a finite graph (`iter_sound`, `iter_complete`), shared by the static checkers. |
-| `Frontend/Static/Units.lean` | G12: the import resolver `Program.globals` (sound and complete for `Sees`, through cycles), the program check `Program.unitsOK` (`unitsOK_iff`), identities (`Sees.decl_exists`) and agreement with S01's lookup (`globals_lookup`). |
+| `Frontend/Static/Units.lean` | G12: the import resolver `UnitSet.globals` (sound and complete for `Sees`, through cycles), the program check `UnitSet.unitsOK` (`unitsOK_iff`), identities (`Sees.decl_exists`) and agreement with S01's lookup (`globals_lookup`). |
 | `Frontend/Static/Overloads.lean` | G12: the inherited overload set `Env.inheritedFns` (`mem_inheritedFns`, extends S01's lookup) and overload selection (`selectOverload`). |
 | `Frontend/Static/UnitsExamples.lean` | G12 controls: an import cycle, a diamond (one identity), a clash, aliases, a missing unit, remappings, shadowing, an ambiguous overload and overloads across bases. |
 | `Frontend/Static/Infer.lean` | G13: type inference `infer` over every category, returning S01 derivations (`Typed`, `LVal`, `TypedArgs`, `TypedSlots`): sound by construction. |

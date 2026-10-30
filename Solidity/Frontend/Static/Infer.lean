@@ -48,20 +48,28 @@ inductive Res : (c : Cat) → Syn c → Type where
   | slot {e : Syn .expr} {τ : STy} : Typed Γ e τ → Res (.opt .expr) (.some e)
   | slotL {e : Syn .expr} {τ : STy} : LVal Γ e τ → Res (.opt .expr) (.some e)
   | pos {es : Syn (.list .expr)} {τs : List STy} : TypedArgs Γ es τs → Res .callArgs (.positional es)
+  /-- A typed receiver of a member access, for the call rules (`extCall`,
+  `transfer`, `send`); never a derivation of the member itself. -/
+  | recv {c : Syn .expr} {m : String} {τ : STy} : Typed Γ c τ → Res .expr (.member c m)
+  /-- A named call option's typed value. -/
+  | named {x : String} {v : Syn .expr} {σ : STy} : Typed Γ v σ → Res .namedArg (.namedArg x v)
+  /-- A typed receiver and one typed call option, for `extCallValue`. -/
+  | withValue {c v : Syn .expr} {m x : String} {ns : Syn (.list .namedArg)} {τ σ : STy} :
+      Typed Γ c τ → Typed Γ v σ → Res .expr (.callOptions (.member c m) (.namedArg x v) ns)
 
 /-- The typing derivations among an expression's results. -/
 def tysOf {e : Syn .expr} : List (Res Γ .expr e) → List (Σ τ, Typed Γ e τ) :=
   List.filterMap fun r =>
     match r with
     | .expr d => Option.some ⟨_, d⟩
-    | .lval _ => Option.none
+    | _ => Option.none
 
 /-- The lvalue derivations among an expression's results. -/
 def lvsOf {e : Syn .expr} : List (Res Γ .expr e) → List (Σ τ, LVal Γ e τ) :=
   List.filterMap fun r =>
     match r with
-    | .expr _ => Option.none
     | .lval d => Option.some ⟨_, d⟩
+    | _ => Option.none
 
 /-- The argument-list derivations. -/
 def argsOf {es : Syn (.list .expr)} : List (Res Γ (.list .expr) es) → List (Σ τs, TypedArgs Γ es τs) :=
@@ -119,12 +127,9 @@ def convLoc (σ : STy) : DataLoc :=
 
 /-- `const`: a constant expression at its exact value. -/
 def constRes (e : Syn .expr) : List (Res Γ .expr e) :=
-  match hq : e.const, ha : e.isAddressLit with
-  | Option.some _, false => [.expr (.const hq ha)]
-  | _, _ => []
-
-/-- The lengths `1 … 32`. -/
-def lens : List Nat := (List.range 32).map (· + 1)
+  match hq : e.const, ha : e.isAddressLit, hx : e.hexLen? with
+  | Option.some _, false, Option.none => [.expr (.const hq ha hx)]
+  | _, _, _ => []
 
 /-- Literals. -/
 def litRes : (l : Lit) → List (Res Γ .expr (.lit l))
@@ -133,10 +138,9 @@ def litRes : (l : Lit) → List (Res Γ .expr (.lit l))
   | .hexStr bs => [.expr (.hexStr bs)]
   | .unicodeStr bs => [.expr (.unicodeStr bs)]
   | .num n =>
-    (lens.filterMap fun len =>
-      if h : 1 ≤ len ∧ len ≤ 32 then
-        if hf : n.fitsBytes len = true then Option.some (.expr (.litBytes (h := h) hf)) else Option.none
-      else Option.none) ++
+    (match hx : (Syn.lit (.num n)).hexLen? with
+     | Option.some _ => [.expr (.litBytes hx)]
+     | Option.none => []) ++
     (match n with
      | .hex ds true => if h : ds.length = 40 then [.expr (.litAddress h)] else []
      | _ => [])
@@ -194,13 +198,17 @@ def prefixOne (op : PrefixOp) {x : Syn .expr} : Res Γ .expr x → List (Res Γ 
     match op with
     | .inc => if h : τ.isNumeric = true then [.expr (.incDec (.inl rfl) d h)] else []
     | .dec => if h : τ.isNumeric = true then [.expr (.incDec (.inr rfl) d h)] else []
-    | .delete => if h : isMappingTy τ = false then [.expr (.delete d h)] else []
+    | .delete =>
+      if h : isMappingTy τ = false then
+        if hp : (τ.storageRef && Γ.namesLocal x) = false then [.expr (.delete d h hp)] else []
+      else []
     | _ => []
+  | _ => []
 
 /-- Suffix `++`/`--`. -/
 def suffixOne (op : SuffixOp) {x : Syn .expr} : Res Γ .expr x → List (Res Γ .expr (.unarySuffix op x))
   | .lval (τ := τ) d => if h : τ.isNumeric = true then [.expr (.incDecSuffix d h)] else []
-  | .expr _ => []
+  | _ => []
 
 /-- A binary rule on one pair of operand derivations. -/
 def binPair (e a b : Syn .expr) : (k : BinKind) → e.binOp? = Option.some (k, a, b) →
@@ -217,14 +225,14 @@ def binPair (e a b : Syn .expr) : (k : BinKind) → e.binOp? = Option.some (k, a
     | Option.some τ => if hn : τ.isBits = true then [.expr (.bit hk da db hc hn)] else []
     | Option.none => []
   | .shift, hk, τa, da, τb, db =>
-    if h1 : τa.mobile.isBits = true then
+    if h1 : τa.shiftTy.isBits = true then
       if h2 : τb.isAmount = true then
         if h3 : (a.const.isSome && b.const.isSome) = false then [.expr (.shift hk da db h1 h2 h3)]
         else []
       else []
     else []
   | .exp, hk, τa, da, τb, db =>
-    if h1 : τa.mobile.isInt = true then
+    if h1 : τa.shiftTy.isInt = true then
       if h2 : τb.isAmount = true then
         if h3 : (a.const.isSome && b.const.isSome) = false then [.expr (.exp hk da db h1 h2 h3)]
         else []
@@ -284,6 +292,12 @@ def assignRes (op : AssignOp) {a b : Syn .expr} (ra : List (Res Γ .expr a)) (rb
          if h2 : isMappingTy pa.1 = false then [.expr (.assign pa.2 pb.2 h1 h2)] else []
        else []
      | _ => []) ++
+    (match op with
+     | .assign =>
+       if h : pb.1.copiesTo pa.1 = true then
+         if hl : Γ.namesLocal a = false then [.expr (.assignCopy pa.2 pb.2 h hl)] else []
+       else []
+     | _ => []) ++
     (if h : op.fits Γ.isBase pb.1 pa.1 = true then [.expr (.compound pa.2 pb.2 h)] else [])
 
 /-- `a[i]` for one derivation of `a` and of `i`. -/
@@ -337,6 +351,32 @@ def memberRes {a : Syn .expr} (m : String) (ra : List (Res Γ .expr a)) : List (
       | _ => []
   | _ => []
 
+/-- `a.x` on a struct: its member, an lvalue outside `calldata`. -/
+def structMemberRes {a : Syn .expr} (x : String) (ra : List (Res Γ .expr a)) :
+    List (Res Γ .expr (.member a x)) :=
+  (tysOf Γ ra).flatMap fun pa =>
+    match pa with
+    | ⟨.struct l dn, da⟩ =>
+      match hf : Γ.env.fieldAt dn l x with
+      | Option.some _ =>
+        .expr (.member da hf) :: (if hl : l ≠ .calldata then [.lval (.member da hl hf)] else [])
+      | Option.none => []
+    | _ => []
+
+/-- The receivers of a member access, kept for the call rules. -/
+def recvRes {a : Syn .expr} (m : String) (ra : List (Res Γ .expr a)) : List (Res Γ .expr (.member a m)) :=
+  (tysOf Γ ra).map fun pa => .recv pa.2
+
+/-- A call option's value. -/
+def namedRes {x : String} {v : Syn .expr} (rv : List (Res Γ .expr v)) : List (Res Γ .namedArg (.namedArg x v)) :=
+  (tysOf Γ rv).map fun pv => .named pv.2
+
+/-- A receiver with one call option. -/
+def optsOne {f : Syn .expr} {n : Syn .namedArg} (ns : Syn (.list .namedArg)) :
+    Res Γ .expr f → Res Γ .namedArg n → List (Res Γ .expr (.callOptions f n ns))
+  | .recv dc, .named dv => [.withValue dc dv]
+  | _, _ => []
+
 /-- `g.m` for a magic `g`. -/
 def magicRes (g m : String) : List (Res Γ .expr (.member (.ident g) m)) :=
   match hr : Γ.resolve g with
@@ -382,7 +422,77 @@ def callIdentRes (f : String) {es : Syn (.list .expr)} (σs : List STy) (ds : Ty
        | Option.some _ => [.expr (.builtinCall hr hst ds hc)]
        | Option.none => []
      | _ => []
-   | _ => [])
+   | _ => []) ++
+  (match hs : Γ.structOf f with
+   | Option.some dn =>
+     match hf : Γ.env.structFields dn .memory with
+     | Option.some fs =>
+       if ha : argsFit Γ.isBase σs (fs.map Prod.snd) = true then [.expr (.structNew hs hf ds ha)] else []
+     | Option.none => []
+   | Option.none => [])
+
+/-- `abi.encode…(args)`. -/
+def abiRes : (c : Syn .expr) → (m : String) → {es : Syn (.list .expr)} → (σs : List STy) →
+    TypedArgs Γ es σs → List (Res Γ .expr (.call (.member c m) (.positional es)))
+  | .ident g, m, _, σs, ds =>
+    match hr : Γ.resolve g with
+    | Option.some (.builtin .abi) =>
+      match hk : AbiKind.ofMember m with
+      | Option.some k => if h : k.argsOK Γ.isBase σs = true then [.expr (.abiEncode hr hk ds h)] else []
+      | Option.none => []
+    | _ => []
+  | _, _, _, _, _ => []
+
+/-- `a.transfer(v)`, `a.send(v)` on an `address payable`, one argument. -/
+def payOne : (m : String) → {a v : Syn .expr} → Typed Γ a (.address true) → (σ : STy) → Typed Γ v σ →
+    List (Res Γ .expr (.call (.member a m) (.positional (.cons v .nil))))
+  | "transfer", _, _, da, σ, dv =>
+    if h : σ.implicit Γ.isBase (.int IntTy.u256) = true then [.expr (.transfer da dv h)] else []
+  | "send", _, _, da, σ, dv =>
+    if h : σ.implicit Γ.isBase (.int IntTy.u256) = true then [.expr (.send da dv h)] else []
+  | _, _, _, _, _, _ => []
+
+/-- `a.transfer(v)`, `a.send(v)` on an `address payable`. -/
+def payRes (m : String) {a : Syn .expr} (da : Typed Γ a (.address true)) {es : Syn (.list .expr)}
+    (σs : List STy) (ds : TypedArgs Γ es σs) : List (Res Γ .expr (.call (.member a m) (.positional es))) :=
+  match es, σs, ds with
+  | .cons _ .nil, [σ], .cons dv .nil => payOne Γ m da σ dv
+  | _, _, _ => []
+
+/-- `c.f(args)` on one receiver: an external call, `transfer`, `send`. -/
+def memberCallOne {c : Syn .expr} {m : String} {es : Syn (.list .expr)} (σs : List STy)
+    (ds : TypedArgs Γ es σs) : Res Γ .expr (.member c m) → List (Res Γ .expr (.call (.member c m) (.positional es)))
+  | .recv (τ := τ) dc =>
+    match τ, dc with
+    | .contract dn, dc =>
+      match hx : extOverloads Γ.env Γ.isBase dn m σs with
+      | [d] =>
+        match hs : d.fnSig Γ.env with
+        | Option.some _ => [.expr (.extCall dc ds hx hs)]
+        | Option.none => []
+      | _ => []
+    | .address true, dc => payRes Γ m dc σs ds
+    | _, _ => []
+  | _ => []
+
+/-- `c.f{value: v}(args)` on one receiver and value. -/
+def valueCallOne {c v : Syn .expr} {m : String} {es : Syn (.list .expr)} (σs : List STy)
+    (ds : TypedArgs Γ es σs) : Res Γ .expr (.callOptions (.member c m) (.namedArg "value" v) .nil) →
+    List (Res Γ .expr (.call (.callOptions (.member c m) (.namedArg "value" v) .nil) (.positional es)))
+  | .withValue (τ := τ) (σ := σ) dc dv =>
+    match τ, dc with
+    | .contract dn, dc =>
+      if hv : σ.implicit Γ.isBase (.int IntTy.u256) = true then
+        match hx : extOverloads Γ.env Γ.isBase dn m σs with
+        | [d] =>
+          match hs : d.fnSig Γ.env with
+          | Option.some _ =>
+            if hm : d.fnMut = Option.some .payable then [.expr (.extCallValue dc dv hv ds hx hs hm)] else []
+          | Option.none => []
+        | _ => []
+      else []
+    | _, _ => []
+  | _ => []
 
 /-- `T(e)` for an elementary `T`. -/
 def convElemRes (el : Elem) (h : el ≠ .addressPayable) {es : Syn (.list .expr)} (σs : List STy)
@@ -402,11 +512,14 @@ def payableRes {es : Syn (.list .expr)} (σs : List STy) (ds : TypedArgs Γ es �
       [.expr (.payable dx h)] else []
   | _, _, _ => []
 
-/-- Calls, by the callee's syntax. -/
-def callRes : (f : Syn .expr) → {a : Syn .callArgs} → Res Γ .callArgs a → List (Res Γ .expr (.call f a))
-  | .ident n, _, .pos ds => callIdentRes Γ n _ ds
-  | .elemType el h, _, .pos ds => convElemRes Γ el h _ ds
-  | _, _, _ => []
+/-- Calls, by the callee's syntax, with the callee's results `rf`. -/
+def callRes : (f : Syn .expr) → List (Res Γ .expr f) → {a : Syn .callArgs} → Res Γ .callArgs a →
+    List (Res Γ .expr (.call f a))
+  | .ident n, _, _, .pos ds => callIdentRes Γ n _ ds
+  | .elemType el h, _, _, .pos ds => convElemRes Γ el h _ ds
+  | .member c m, rf, _, .pos ds => abiRes Γ c m _ ds ++ rf.flatMap (memberCallOne Γ _ ds)
+  | .callOptions (.member _ _) (.namedArg "value" _) .nil, rf, _, .pos ds => rf.flatMap (valueCallOne Γ _ ds)
+  | _, _, _, _ => []
 
 /-- `payable(…)`. -/
 def payableConvRes {a : Syn .callArgs} : Res Γ .callArgs a → List (Res Γ .expr (.payableConv a))
@@ -441,11 +554,16 @@ def infer : {c : Cat} → (s : Syn c) → List (Res Γ c s)
   | _, .cond c a b => constRes Γ _ ++ condRes Γ (infer c) (infer a) (infer b)
   | _, .assign op a b => constRes Γ _ ++ assignRes Γ op (infer a) (infer b)
   | _, .index a o => constRes Γ _ ++ (infer o).flatMap (indexRes Γ (infer a))
-  | _, .member a m => constRes Γ _ ++ memberRes Γ m (infer a) ++ magicFor Γ a m
-  | _, .call f a => constRes Γ _ ++ (infer a).flatMap (callRes Γ f)
+  | _, .member a m =>
+    let ra := infer a
+    constRes Γ _ ++ memberRes Γ m ra ++ magicFor Γ a m ++ structMemberRes Γ m ra ++ recvRes Γ m ra
+  | _, .call f a => constRes Γ _ ++ (infer a).flatMap (callRes Γ f (infer f))
   | _, .payableConv a => constRes Γ _ ++ (infer a).flatMap (payableConvRes Γ)
   | _, .slice a o o' => constRes Γ (.slice a o o')
-  | _, .callOptions f n ns => constRes Γ (.callOptions f n ns)
+  | _, .callOptions f n ns =>
+    let rn := infer n
+    constRes Γ (.callOptions f n ns) ++ (infer f).flatMap fun r => rn.flatMap fun r' => optsOne Γ ns r r'
+  | _, .namedArg _ v => namedRes Γ (infer v)
   | _, .metaType t => constRes Γ (.metaType t)
   | _, .new t => constRes Γ (.new t)
   | _, .inlineArray x xs => constRes Γ (.inlineArray x xs)

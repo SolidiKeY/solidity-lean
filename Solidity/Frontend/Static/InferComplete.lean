@@ -20,7 +20,7 @@ theorem exists_expr {Γ : Ctx} {e : Syn .expr} {L : List (Res Γ .expr e)} {τ :
   obtain ⟨r, hr, hs⟩ := List.mem_filterMap.mp hm
   cases r with
   | expr d' => cases hs; exact ⟨_, hr⟩
-  | lval _ => cases hs
+  | _ => cases hs
 
 theorem exists_lval {Γ : Ctx} {e : Syn .expr} {L : List (Res Γ .expr e)} {τ : STy}
     (h : τ ∈ (lvsOf Γ L).map Sigma.fst) : ∃ d : LVal Γ e τ, Res.lval d ∈ L := by
@@ -29,8 +29,8 @@ theorem exists_lval {Γ : Ctx} {e : Syn .expr} {L : List (Res Γ .expr e)} {τ :
   subst e'
   obtain ⟨r, hr, hs⟩ := List.mem_filterMap.mp hm
   cases r with
-  | expr _ => cases hs
   | lval d' => cases hs; exact ⟨_, hr⟩
+  | _ => cases hs
 
 theorem exists_args {Γ : Ctx} {es : Syn (.list .expr)} {L : List (Res Γ (.list .expr) es)} {τs : List STy}
     (h : τs ∈ (argsOf Γ L).map Sigma.fst) : ∃ d : TypedArgs Γ es τs, ⟨τs, d⟩ ∈ argsOf Γ L := by
@@ -59,19 +59,22 @@ theorem constRes_sub {Γ : Ctx} : ∀ (e : Syn .expr) (r : Res Γ .expr e), r �
   cases e <;>
     first
     | exact h
+    | exact List.mem_append_left _ (List.mem_append_left _ (List.mem_append_left _
+        (List.mem_append_left _ h)))
     | exact List.mem_append_left _ (List.mem_append_left _ h)
     | exact List.mem_append_left _ h
 
 theorem const_mem {Γ : Ctx} {e : Syn .expr} {q : Q} (hq : e.const = Option.some q)
-    (ha : e.isAddressLit = false) : Res.expr (Typed.const (Γ := Γ) hq ha) ∈ constRes Γ e := by
+    (ha : e.isAddressLit = false) (hx : e.hexLen? = Option.none) :
+    Res.expr (Typed.const (Γ := Γ) hq ha hx) ∈ constRes Γ e := by
   unfold constRes
   split
-  · rename_i q' hq' ha'
+  · rename_i q' hq' ha' hx'
     have e' : q' = q := by rw [hq] at hq'; exact (Option.some.inj hq').symm
     subst e'
     exact List.mem_singleton.mpr rfl
   · rename_i hn
-    exact absurd ha (hn q hq)
+    exact absurd hx (hn q hq ha)
 
 theorem loc_mem {Γ : Ctx} {x : String} {i : Nat} {τ : STy} (hr : Γ.resolve x = Option.some (.loc i))
     (ht : Γ.tys[i]? = Option.some τ) :
@@ -140,12 +143,15 @@ theorem this_mem {Γ : Ctx} {c : String} (hr : Γ.resolve "this" = Option.some (
 theorem lit_sub {Γ : Ctx} {l : Lit} {r : Res Γ .expr (.lit l)} (h : r ∈ litRes Γ l) :
     r ∈ infer Γ (.lit l) := List.mem_append_right _ h
 
-theorem litBytes_mem {Γ : Ctx} {n : NumLit} {len : Nat} {h : 1 ≤ len ∧ len ≤ 32}
-    (hf : n.fitsBytes len = true) :
-    Res.expr (Typed.litBytes (Γ := Γ) (h := h) hf) ∈ infer Γ (.lit (.num n)) := by
-  refine lit_sub (List.mem_append_left _ (List.mem_filterMap.mpr ⟨len, ?_, ?_⟩))
-  · exact List.mem_map.mpr ⟨len - 1, List.mem_range.mpr (by omega), by omega⟩
-  · rw [dif_pos h, dif_pos hf]
+theorem litBytes_mem {Γ : Ctx} {n : NumLit} {len : Nat}
+    (hx : (Syn.lit (.num n)).hexLen? = Option.some len) :
+    Res.expr (Typed.litBytes (Γ := Γ) hx) ∈ infer Γ (.lit (.num n)) := by
+  refine lit_sub (List.mem_append_left _ ?_)
+  split
+  · rename_i len' hx'
+    rw [hx] at hx'; cases hx'
+    exact List.mem_singleton.mpr rfl
+  · rename_i hx'; rw [hx] at hx'; cases hx'
 
 theorem litAddress_mem {Γ : Ctx} {ds : List (Fin 16)} (h : ds.length = 40) :
     Res.expr (Typed.litAddress (Γ := Γ) h) ∈ infer Γ (.lit (.num (.hex ds true))) := by
@@ -242,13 +248,13 @@ theorem eq_pair (hk : e.binOp? = Option.some (.eq, a, b)) (hc : STy.common? Γ.i
     rw [dif_pos hn]; exact List.mem_singleton.mpr rfl
   · rename_i hc'; rw [hc] at hc'; cases hc'
 
-theorem shift_pair (hk : e.binOp? = Option.some (.shift, a, b)) (h1 : τa.mobile.isBits = true)
+theorem shift_pair (hk : e.binOp? = Option.some (.shift, a, b)) (h1 : τa.shiftTy.isBits = true)
     (h2 : τb.isAmount = true) (h3 : (a.const.isSome && b.const.isSome) = false) :
     Res.expr (Typed.shift hk da db h1 h2 h3) ∈ binPair Γ e a b .shift hk τa da τb db := by
   simp only [binPair]
   rw [dif_pos h1, dif_pos h2, dif_pos h3]; exact List.mem_singleton.mpr rfl
 
-theorem exp_pair (hk : e.binOp? = Option.some (.exp, a, b)) (h1 : τa.mobile.isInt = true)
+theorem exp_pair (hk : e.binOp? = Option.some (.exp, a, b)) (h1 : τa.shiftTy.isInt = true)
     (h2 : τb.isAmount = true) (h3 : (a.const.isSome && b.const.isSome) = false) :
     Res.expr (Typed.exp hk da db h1 h2 h3) ∈ binPair Γ e a b .exp hk τa da τb db := by
   simp only [binPair]
@@ -288,9 +294,10 @@ theorem incDec_res {op : PrefixOp} (hop : op = .inc ∨ op = .dec) (d : LVal Γ 
   rcases hop with e' | e' <;> subst e' <;> simp only [prefixOne] <;> rw [dif_pos h] <;>
     exact List.mem_singleton.mpr rfl
 
-theorem delete_res (d : LVal Γ a τ) (h : isMappingTy τ = false) :
-    Res.expr (Typed.delete d h) ∈ prefixOne Γ .delete (.lval d) := by
-  simp only [prefixOne]; rw [dif_pos h]; exact List.mem_singleton.mpr rfl
+theorem delete_res (d : LVal Γ a τ) (h : isMappingTy τ = false)
+    (hp : (τ.storageRef && Γ.namesLocal a) = false) :
+    Res.expr (Typed.delete d h hp) ∈ prefixOne Γ .delete (.lval d) := by
+  simp only [prefixOne]; rw [dif_pos h, dif_pos hp]; exact List.mem_singleton.mpr rfl
 
 theorem suffix_res {op : SuffixOp} (d : LVal Γ a τ) (h : τ.isNumeric = true) :
     Res.expr (Typed.incDecSuffix (op := op) d h) ∈ suffixOne Γ op (.lval d) := by
@@ -320,9 +327,18 @@ theorem assign_mem {dl : LVal Γ a τ} {db : Typed Γ b σ} (hl : Res.lval dl �
     (h2 : isMappingTy τ = false) :
     Res.expr (Typed.assign dl db h1 h2) ∈ infer Γ (.assign .assign a b) := by
   refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨⟨τ, dl⟩, mem_lvsOf' hl,
-    List.mem_flatMap.mpr ⟨⟨σ, db⟩, mem_tysOf' hb, List.mem_append_left _ ?_⟩⟩)
+    List.mem_flatMap.mpr ⟨⟨σ, db⟩, mem_tysOf' hb, List.mem_append_left _ (List.mem_append_left _ ?_)⟩⟩)
   dsimp only
   rw [dif_pos h1, dif_pos h2]
+  exact List.mem_singleton.mpr rfl
+
+theorem assignCopy_mem {dl : LVal Γ a τ} {db : Typed Γ b σ} (hl : Res.lval dl ∈ infer Γ a)
+    (hb : Res.expr db ∈ infer Γ b) (h : σ.copiesTo τ = true) (hn : Γ.namesLocal a = false) :
+    Res.expr (Typed.assignCopy dl db h hn) ∈ infer Γ (.assign .assign a b) := by
+  refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨⟨τ, dl⟩, mem_lvsOf' hl,
+    List.mem_flatMap.mpr ⟨⟨σ, db⟩, mem_tysOf' hb, List.mem_append_left _ (List.mem_append_right _ ?_)⟩⟩)
+  dsimp only
+  rw [dif_pos h, dif_pos hn]
   exact List.mem_singleton.mpr rfl
 
 theorem compound_mem {op : AssignOp} {dl : LVal Γ a τ} {db : Typed Γ b σ} (hl : Res.lval dl ∈ infer Γ a)
@@ -376,7 +392,8 @@ theorem indexBytesL_res {l : DataLoc} (da : Typed Γ a (.bytes l)) (hl : l ≠ .
 
 theorem length_mem {ρ : STy} {da : Typed Γ a τ} (ha : Res.expr da ∈ infer Γ a) (h : τ.lengthTy = Option.some ρ) :
     Res.expr (Typed.length da h) ∈ infer Γ (.member a "length") := by
-  refine List.mem_append_left _ (List.mem_append_right _ ?_)
+  refine List.mem_append_left _ (List.mem_append_left _ (List.mem_append_left _
+    (List.mem_append_right _ ?_)))
   simp only [memberRes]
   refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, ?_⟩
   split
@@ -387,7 +404,8 @@ theorem length_mem {ρ : STy} {da : Typed Γ a τ} (ha : Res.expr da ∈ infer �
 
 theorem balance_mem {p : Bool} {da : Typed Γ a (.address p)} (ha : Res.expr da ∈ infer Γ a) :
     Res.expr (Typed.balance da) ∈ infer Γ (.member a "balance") := by
-  refine List.mem_append_left _ (List.mem_append_right _ ?_)
+  refine List.mem_append_left _ (List.mem_append_left _ (List.mem_append_left _
+    (List.mem_append_right _ ?_)))
   simp only [memberRes]
   exact List.mem_flatMap.mpr ⟨⟨_, da⟩, mem_tysOf' ha, List.mem_singleton.mpr rfl⟩
 
@@ -395,7 +413,7 @@ theorem magic_mem {g m feature : String} {bi : Builtin} (hr : Γ.resolve g = Opt
     (hs : bi.memberStatus m = Option.some (.admitted feature)) (ht : bi.memberTy m = Option.some τ)
     (hv : (bi == .msg && m == "value" && !Γ.msgValue) = false) :
     Res.expr (Typed.magic hr hs ht hv) ∈ infer Γ (.member (.ident g) m) := by
-  refine List.mem_append_right _ ?_
+  refine List.mem_append_left _ (List.mem_append_left _ (List.mem_append_right _ ?_))
   show _ ∈ magicRes Γ g m
   unfold magicRes
   split
@@ -425,7 +443,7 @@ theorem callInternal_res {f : String} {es : Syn (.list .expr)} {σs ps rs : List
         | Option.none => false) = [d])
     (hs : d.fnSig Γ.env = Option.some (ps, rs)) :
     Res.expr (Typed.callInternal ds hf hs) ∈ callIdentRes Γ f σs ds := by
-  refine List.mem_append_left _ (List.mem_append_right _ ?_)
+  refine List.mem_append_left _ (List.mem_append_left _ (List.mem_append_right _ ?_))
   split
   · rename_i d' hf'
     have e' : [d] = [d'] := hf.symm.trans hf'
@@ -440,7 +458,7 @@ theorem callInternal_res {f : String} {es : Syn (.list .expr)} {σs ps rs : List
 theorem convUser_res {n : String} {x : Syn .expr} (dx : Typed Γ x σ) (ht : Γ.convTarget n = Option.some τ)
     (h : σ.explicit Γ.isBase τ = true) :
     Res.expr (Typed.convUser ht dx h) ∈ callIdentRes Γ n [σ] (.cons dx .nil) := by
-  refine List.mem_append_left _ (List.mem_append_left _ ?_)
+  refine List.mem_append_left _ (List.mem_append_left _ (List.mem_append_left _ ?_))
   show _ ∈ (match ht : Γ.convTarget n with
      | Option.some τ => if h : σ.explicit Γ.isBase τ = true then [Res.expr (Typed.convUser ht dx h)] else []
      | Option.none => [])
@@ -454,7 +472,7 @@ theorem builtin_res {f feature : String} {es : Syn (.list .expr)} {σs : List ST
     (hr : Γ.resolve f = Option.some (.builtin bi)) (hst : bi.status = .admitted feature)
     (ds : TypedArgs Γ es σs) (hc : bi.callTy Γ.isBase σs = Option.some τ) :
     Res.expr (Typed.builtinCall hr hst ds hc) ∈ callIdentRes Γ f σs ds := by
-  refine List.mem_append_right _ ?_
+  refine List.mem_append_left _ (List.mem_append_right _ ?_)
   split
   · rename_i b' hr'
     rw [hr] at hr'; cases hr'
@@ -468,6 +486,131 @@ theorem builtin_res {f feature : String} {es : Syn (.list .expr)} {σs : List ST
       · rename_i hc'; rw [hc] at hc'; cases hc'
     · rename_i hn; exact absurd hst (hn feature)
   · rename_i hn; exact absurd hr (hn bi)
+
+theorem structNew_res {S : String} {es : Syn (.list .expr)} {σs : List STy} {dn : DeclName}
+    {fs : List (String × STy)} (hs : Γ.structOf S = Option.some dn)
+    (hf : Γ.env.structFields dn .memory = Option.some fs) (ds : TypedArgs Γ es σs)
+    (ha : argsFit Γ.isBase σs (fs.map Prod.snd) = true) :
+    Res.expr (Typed.structNew hs hf ds ha) ∈ callIdentRes Γ S σs ds := by
+  refine List.mem_append_right _ ?_
+  split
+  · rename_i dn' hs'
+    rw [hs] at hs'; cases hs'
+    split
+    · rename_i fs' hf'
+      rw [hf] at hf'; cases hf'
+      rw [dif_pos ha]; exact List.mem_singleton.mpr rfl
+    · rename_i hf'; rw [hf] at hf'; cases hf'
+  · rename_i hs'; rw [hs] at hs'; cases hs'
+
+theorem structMember_mem {l : DataLoc} {dn : DeclName} {x : String} {i : Nat}
+    {da : Typed Γ a (.struct l dn)} (ha : Res.expr da ∈ infer Γ a)
+    (hf : Γ.env.fieldAt dn l x = Option.some (i, τ)) :
+    Res.expr (Typed.member da hf) ∈ infer Γ (.member a x) ∧
+      ∀ hl : l ≠ .calldata, Res.lval (LVal.member da hl hf) ∈ infer Γ (.member a x) := by
+  have key : ∀ r, r ∈ (Res.expr (Typed.member da hf) ::
+      (if hl : l ≠ .calldata then [Res.lval (LVal.member da hl hf)] else [])) →
+      r ∈ infer Γ (.member a x) := by
+    intro r hr
+    refine List.mem_append_left _ (List.mem_append_right _ ?_)
+    refine List.mem_flatMap.mpr ⟨⟨_, da⟩, mem_tysOf' ha, ?_⟩
+    dsimp only
+    split
+    · rename_i p hf'
+      rw [hf] at hf'; cases hf'; exact hr
+    · rename_i hf'; rw [hf] at hf'; cases hf'
+  refine ⟨key _ List.mem_cons_self, fun hl => key _ (List.mem_cons_of_mem _ ?_)⟩
+  rw [dif_pos hl]; exact List.mem_singleton.mpr rfl
+
+theorem recv_mem {m : String} {da : Typed Γ a τ} (ha : Res.expr da ∈ infer Γ a) :
+    Res.recv (m := m) da ∈ infer Γ (.member a m) :=
+  List.mem_append_right _ (List.mem_map.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, rfl⟩)
+
+theorem callMember_sub {c : Syn .expr} {m : String} {es : Syn (.list .expr)} {σs : List STy}
+    {ds : TypedArgs Γ es σs} (h : ⟨σs, ds⟩ ∈ argsOf Γ (infer Γ es))
+    {r : Res Γ .expr (.call (.member c m) (.positional es))}
+    (hr : r ∈ abiRes Γ c m σs ds ++ (infer Γ (.member c m)).flatMap (memberCallOne Γ σs ds)) :
+    r ∈ infer Γ (.call (.member c m) (.positional es)) :=
+  List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, pos_mem h, hr⟩)
+
+theorem extCall_mem {c : Syn .expr} {f : String} {es : Syn (.list .expr)} {σs ps rs : List STy}
+    {dn : DeclName} {d : Decl} {dc : Typed Γ c (.contract dn)} (hc : Res.expr dc ∈ infer Γ c)
+    {ds : TypedArgs Γ es σs} (h : ⟨σs, ds⟩ ∈ argsOf Γ (infer Γ es))
+    (hx : extOverloads Γ.env Γ.isBase dn f σs = [d]) (hs : d.fnSig Γ.env = Option.some (ps, rs)) :
+    Res.expr (Typed.extCall dc ds hx hs) ∈ infer Γ (.call (.member c f) (.positional es)) := by
+  refine callMember_sub h (List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, recv_mem hc, ?_⟩))
+  simp only [memberCallOne]
+  split
+  · rename_i d' hx'
+    have e' : [d] = [d'] := hx.symm.trans hx'
+    cases e'
+    split
+    · rename_i p' hs'
+      rw [hs] at hs'; cases hs'
+      exact List.mem_singleton.mpr rfl
+    · rename_i hs'; rw [hs] at hs'; cases hs'
+  · rename_i hn; exact absurd hx (hn d)
+
+theorem transfer_mem {c v : Syn .expr} {dc : Typed Γ c (.address true)} (hc : Res.expr dc ∈ infer Γ c)
+    {dv : Typed Γ v σ} (hv : Res.expr dv ∈ infer Γ v) (h : σ.implicit Γ.isBase (.int IntTy.u256) = true) :
+    Res.expr (Typed.transfer dc dv h) ∈
+      infer Γ (.call (.member c "transfer") (.positional (.cons v .nil))) := by
+  refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, args1_mem hv,
+    List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, recv_mem hc, ?_⟩)⟩)
+  simp only [memberCallOne, payRes, payOne]
+  rw [dif_pos h]; exact List.mem_singleton.mpr rfl
+
+theorem send_mem {c v : Syn .expr} {dc : Typed Γ c (.address true)} (hc : Res.expr dc ∈ infer Γ c)
+    {dv : Typed Γ v σ} (hv : Res.expr dv ∈ infer Γ v) (h : σ.implicit Γ.isBase (.int IntTy.u256) = true) :
+    Res.expr (Typed.send dc dv h) ∈
+      infer Γ (.call (.member c "send") (.positional (.cons v .nil))) := by
+  refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, args1_mem hv,
+    List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, recv_mem hc, ?_⟩)⟩)
+  show _ ∈ (if h : σ.implicit Γ.isBase (.int IntTy.u256) = true then [Res.expr (Typed.send dc dv h)] else [])
+  rw [dif_pos h]; exact List.mem_singleton.mpr rfl
+
+theorem abiEncode_mem {g m : String} {es : Syn (.list .expr)} {σs : List STy} {k : AbiKind}
+    {ds : TypedArgs Γ es σs} (h : ⟨σs, ds⟩ ∈ argsOf Γ (infer Γ es))
+    (hr : Γ.resolve g = Option.some (.builtin .abi)) (hk : AbiKind.ofMember m = Option.some k)
+    (ha : k.argsOK Γ.isBase σs = true) :
+    Res.expr (Typed.abiEncode hr hk ds ha) ∈ infer Γ (.call (.member (.ident g) m) (.positional es)) := by
+  refine callMember_sub h (List.mem_append_left _ ?_)
+  simp only [abiRes]
+  split
+  · rename_i hr'
+    split
+    · rename_i k' hk'
+      rw [hk] at hk'; cases hk'
+      rw [dif_pos ha]; exact List.mem_singleton.mpr rfl
+    · rename_i hk'; rw [hk] at hk'; cases hk'
+  · rename_i hn; exact absurd hr hn
+
+theorem extCallValue_mem {c v : Syn .expr} {f : String} {es : Syn (.list .expr)} {σs ps rs : List STy}
+    {dn : DeclName} {d : Decl} {dc : Typed Γ c (.contract dn)} (hc : Res.expr dc ∈ infer Γ c)
+    {dv : Typed Γ v σ} (hv' : Res.expr dv ∈ infer Γ v)
+    (hv : σ.implicit Γ.isBase (.int IntTy.u256) = true)
+    {ds : TypedArgs Γ es σs} (h : ⟨σs, ds⟩ ∈ argsOf Γ (infer Γ es))
+    (hx : extOverloads Γ.env Γ.isBase dn f σs = [d]) (hs : d.fnSig Γ.env = Option.some (ps, rs))
+    (hm : d.fnMut = Option.some .payable) :
+    Res.expr (Typed.extCallValue dc dv hv ds hx hs hm) ∈
+      infer Γ (.call (.callOptions (.member c f) (.namedArg "value" v) .nil) (.positional es)) := by
+  have hw : Res.withValue (ns := .nil) dc dv ∈
+      infer Γ (.callOptions (.member c f) (.namedArg "value" v) .nil) :=
+    List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, recv_mem hc, List.mem_flatMap.mpr
+      ⟨_, List.mem_map.mpr ⟨⟨σ, dv⟩, mem_tysOf' hv', rfl⟩, List.mem_singleton.mpr rfl⟩⟩)
+  refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, pos_mem h, List.mem_flatMap.mpr ⟨_, hw, ?_⟩⟩)
+  simp only [valueCallOne]
+  rw [dif_pos hv]
+  split
+  · rename_i d' hx'
+    have e' : [d] = [d'] := hx.symm.trans hx'
+    cases e'
+    split
+    · rename_i p' hs'
+      rw [hs] at hs'; cases hs'
+      rw [dif_pos hm]; exact List.mem_singleton.mpr rfl
+    · rename_i hs'; rw [hs] at hs'; cases hs'
+  · rename_i hn; exact absurd hx (hn d)
 
 theorem convElem_mem {el : Elem} {h : el ≠ .addressPayable} {x : Syn .expr} {dx : Typed Γ x σ}
     (hx' : Res.expr dx ∈ infer Γ x) (hx : σ.explicit Γ.isBase (el.ty (convLoc σ)) = true) :
@@ -540,7 +683,7 @@ mutual
 /-- **Completeness for expressions**: every type S01 derives for an
 expression is one `infer` finds. -/
 theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ e τ → τ ∈ inferTys Γ e
-  | _, _, .const hq ha => mem_tysOf (constRes_sub _ _ (const_mem hq ha))
+  | _, _, .const hq ha hx => mem_tysOf (constRes_sub _ _ (const_mem hq ha hx))
   | _, _, .litBytes hf => mem_tysOf (litBytes_mem hf)
   | _, _, .litAddress h => mem_tysOf (litAddress_mem h)
   | _, _, .bool _ => mem_tysOf (lit_sub (List.mem_singleton.mpr rfl))
@@ -575,9 +718,9 @@ theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ 
   | _, _, .incDecSuffix dl hn => by
     obtain ⟨d', h⟩ := exists_lval (lval_complete dl)
     exact mem_tysOf (suffix_sub h (suffix_res d' hn))
-  | _, _, .delete dl hm => by
+  | _, _, .delete dl hm hp => by
     obtain ⟨d', h⟩ := exists_lval (lval_complete dl)
-    exact mem_tysOf (prefix_sub h (delete_res d' hm))
+    exact mem_tysOf (prefix_sub h (delete_res d' hm hp))
   | _, _, .arith hk da db hc hn hz => by
     obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
     obtain ⟨db', hb⟩ := exists_expr (typed_complete db)
@@ -655,6 +798,36 @@ theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ 
   | _, _, .builtinCall hr hst ds hc => by
     obtain ⟨ds', h⟩ := exists_args (args_complete ds)
     exact mem_tysOf (callIdent_sub h (builtin_res hr hst ds' hc))
+  | _, _, .member da hf => by
+    obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
+    exact mem_tysOf (structMember_mem ha hf).1
+  | _, _, .structNew hs hf ds ha => by
+    obtain ⟨ds', h⟩ := exists_args (args_complete ds)
+    exact mem_tysOf (callIdent_sub h (structNew_res hs hf ds' ha))
+  | _, _, .extCall dc ds hx hs => by
+    obtain ⟨dc', hc⟩ := exists_expr (typed_complete dc)
+    obtain ⟨ds', h⟩ := exists_args (args_complete ds)
+    exact mem_tysOf (extCall_mem hc h hx hs)
+  | _, _, .extCallValue dc dv hv ds hx hs hm => by
+    obtain ⟨dc', hc⟩ := exists_expr (typed_complete dc)
+    obtain ⟨dv', hv'⟩ := exists_expr (typed_complete dv)
+    obtain ⟨ds', h⟩ := exists_args (args_complete ds)
+    exact mem_tysOf (extCallValue_mem hc hv' hv h hx hs hm)
+  | _, _, .transfer dc dv h => by
+    obtain ⟨dc', hc⟩ := exists_expr (typed_complete dc)
+    obtain ⟨dv', hv⟩ := exists_expr (typed_complete dv)
+    exact mem_tysOf (transfer_mem hc hv h)
+  | _, _, .send dc dv h => by
+    obtain ⟨dc', hc⟩ := exists_expr (typed_complete dc)
+    obtain ⟨dv', hv⟩ := exists_expr (typed_complete dv)
+    exact mem_tysOf (send_mem hc hv h)
+  | _, _, .abiEncode hr hk ds ha => by
+    obtain ⟨ds', h⟩ := exists_args (args_complete ds)
+    exact mem_tysOf (abiEncode_mem h hr hk ha)
+  | _, _, .assignCopy dl db h hn => by
+    obtain ⟨dl', hl⟩ := exists_lval (lval_complete dl)
+    obtain ⟨db', hb⟩ := exists_expr (typed_complete db)
+    exact mem_tysOf (assignCopy_mem hl hb h hn)
 
 /-- **Completeness for lvalues.** -/
 theorem lval_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → LVal Γ e τ →
@@ -676,6 +849,9 @@ theorem lval_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → LVal Γ e 
     obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
     obtain ⟨di', hi⟩ := exists_expr (typed_complete di)
     exact mem_lvsOf (index_sub ha hi (indexBytesL_res da' hl di' h1))
+  | _, _, .member da hl hf => by
+    obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
+    exact mem_lvsOf ((structMember_mem ha hf).2 hl)
 
 /-- **Completeness for argument lists.** -/
 theorem args_complete {Γ : Ctx} : {es : Syn (.list .expr)} → {τs : List STy} → TypedArgs Γ es τs →
