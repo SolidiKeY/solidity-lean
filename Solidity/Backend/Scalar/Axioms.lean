@@ -1,3 +1,14 @@
+import Solidity.Backend.Scalar.SignedPower
+import Solidity.Backend.Scalar.SignedPowerPost
+import Solidity.Backend.Scalar.SignedPowerPrefix
+import Solidity.Backend.Scalar.ArithmeticWidths
+import Solidity.Backend.Scalar.Capacity
+import Solidity.Backend.Scalar.CastChains
+import Solidity.Backend.Scalar.Combinations
+import Solidity.Backend.Scalar.Composition
+import Solidity.Backend.Scalar.FixedBytes
+import Solidity.Backend.Scalar.Select
+import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.Bitwise
 import Solidity.Backend.Scalar.Casts
 import Solidity.Backend.Scalar.Checked
@@ -181,5 +192,225 @@ namespace Solidity.Backend.Scalar
 
 /-- info: 'Solidity.Backend.Scalar.wrappingPow' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms wrappingPow
+
+/-- info: 'Solidity.Backend.Scalar.unsigned_addAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsigned_addAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.unsigned_subAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsigned_subAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.unsigned_mulAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsigned_mulAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.signed_addAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signed_addAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.signed_subAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signed_subAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.signed_mulAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signed_mulAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.unsigned_divAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsigned_divAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.unsigned_modAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsigned_modAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.signed_divAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signed_divAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.signed_modAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signed_modAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.unsigned_powAt_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsigned_powAt_correct
+
+/-- info: 'Solidity.Backend.Scalar.ofInt_low' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms ofInt_low
+
+/-- info: 'Solidity.Backend.Scalar.ClosedInvocation.prefix_safe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms ClosedInvocation.prefix_safe
+
+/-- info: 'Solidity.Backend.Scalar.BinaryInvocation.correct' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms BinaryInvocation.correct
+
+/-- info: 'Solidity.Backend.Scalar.BinaryInvocation.prefix_safe' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms BinaryInvocation.prefix_safe
+
+/-- info: 'Solidity.Backend.Scalar.CheckedInvocation.correct' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms CheckedInvocation.correct
+
+/-- info: 'Solidity.Backend.Scalar.CheckedInvocation.testPrefix_safe' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms CheckedInvocation.testPrefix_safe
+
+/-- info: 'Solidity.Backend.Scalar.checkedAdditionWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms checkedAdditionWitness
+
+/-- info: 'Solidity.Backend.Scalar.signed_chain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signed_chain
+
+/-- info: 'Solidity.Backend.Scalar.unsigned_after_signed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsigned_after_signed
+
+/-- info: 'Solidity.Backend.Scalar.signedAt_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedAt_word
+
+/-- info: 'Solidity.Backend.Scalar.signedExpansion_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedExpansion_correct
+
+/-- info: 'Solidity.Backend.Scalar.mixedWidthCertificate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms mixedWidthCertificate
+
+/-- info: 'Solidity.Backend.Scalar.mixedWidthInvocation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms mixedWidthInvocation
+
+/-- info: 'Solidity.Backend.Scalar.mixedWidth_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms mixedWidth_source
+
+/-- info: 'Solidity.Backend.Scalar.mixedWidth_target' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms mixedWidth_target
+
+/-- info: 'Solidity.Backend.Scalar.BinaryCertificate.unsignedWidth_correct' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms BinaryCertificate.unsignedWidth_correct
+
+/-- info: 'Solidity.Backend.Scalar.BinaryCertificate.signedWidth_correct' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms BinaryCertificate.signedWidth_correct
+
+/-- info: 'Solidity.Backend.Scalar.UnaryCertificate.unsignedWidth_correct' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms UnaryCertificate.unsignedWidth_correct
+
+/-- info: 'Solidity.Backend.Scalar.UnaryCertificate.signedWidth_correct' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms UnaryCertificate.signedWidth_correct
+
+/-- info: 'Solidity.Backend.Scalar.bytesWiden_intrinsic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms bytesWiden_intrinsic
+
+/-- info: 'Solidity.Backend.Scalar.bytesNarrow_intrinsic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms bytesNarrow_intrinsic
+
+/-- info: 'Solidity.Backend.Scalar.bytesResize_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms bytesResize_correct
+
+/-- info: 'Solidity.Backend.Scalar.bytesResize_range' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms bytesResize_range
+
+/-- info: 'Solidity.Backend.Scalar.selectModular' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms selectModular
+
+/-- info: 'Solidity.Backend.Scalar.selectUnary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms selectUnary
+
+/-- info: 'Solidity.Backend.Scalar.selectBinary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms selectBinary
+
+/-- info: 'Solidity.Backend.Scalar.selectChecked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms selectChecked
+
+/-- info: 'Solidity.Backend.Scalar.selectCheckedUnary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms selectCheckedUnary
+
+/-- info: 'Solidity.Backend.Scalar.binary_selection_coverage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms binary_selection_coverage
+
+/-- info: 'Solidity.Backend.Scalar.unary_selection_coverage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unary_selection_coverage
+
+/-- info: 'Solidity.Backend.Scalar.checkedIntNeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms checkedIntNeg
+
+/-- info: 'Solidity.Backend.Scalar.unsignedWidth_guarded' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsignedWidth_guarded
+
+/-- info: 'Solidity.Backend.Scalar.signedWidth_guarded' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedWidth_guarded
+
+/-- info: 'Solidity.Backend.Scalar.unsignedWidthTest_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms unsignedWidthTest_correct
+
+/-- info: 'Solidity.Backend.Scalar.signedWidthTest_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedWidthTest_correct
+
+/-- info: 'Solidity.Backend.Scalar.bytesResize_roundtrip' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms bytesResize_roundtrip
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_negative_three_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedPower_negative_three_source
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_minimum_one_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedPower_minimum_one_source
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_positive_boundary_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms signedPower_positive_boundary_source
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_unsigned_overflow_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms signedPower_unsigned_overflow_source
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_negative_three_target' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedPower_negative_three_target
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_minimum_one_target' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedPower_minimum_one_target
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_positive_boundary_target' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms signedPower_positive_boundary_target
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_unsigned_overflow_target' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms signedPower_unsigned_overflow_target
+
+/-- info: 'Solidity.Backend.Scalar.signedPowerWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedPowerWitness
+
+/-- info: 'Solidity.Backend.Scalar.SignedPowerInvocation.correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms SignedPowerInvocation.correct
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedPower_correct
+
+/-- info: 'Solidity.Backend.Scalar.powerSourceResult_map' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms powerSourceResult_map
+
+/-- info: 'Solidity.Backend.Scalar.signedPower_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms signedPower_source
+
+/-- info: 'Solidity.Backend.Scalar.powerPostTest_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms powerPostTest_correct
+
+/-- info: 'Solidity.Backend.Scalar.powerSignBody_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms powerSignBody_correct
+
+/-- info: 'Solidity.Backend.Scalar.powerPost_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms powerPost_correct
+
+/-- info: 'Solidity.Backend.Scalar.powerPost_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms powerPost_source
+
+/-- info: 'Solidity.Backend.Scalar.parity_word' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms parity_word
+
+/-- info: 'Solidity.Backend.Scalar.powerNegativePrefix_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms powerNegativePrefix_correct
+
+/-- info: 'Solidity.Backend.Scalar.powerAbsPrefix_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms powerAbsPrefix_correct
+
+/-- info: 'Solidity.Backend.Scalar.powerPrepare_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms powerPrepare_correct
 
 end Solidity.Backend.Scalar

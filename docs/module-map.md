@@ -963,3 +963,14 @@ At the root, the notation's own tests:
 | `Backend/Scalar/SignedShift.lean` | Scalar instruction-slice SignedShift contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
 | `Backend/Scalar/UnsignedMul.lean` | Scalar instruction-slice UnsignedMul contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
 | `Backend/Scalar/Axioms.lean` | Scalar instruction-slice Axioms contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/ArithmeticWidths.lean` | Scalar ArithmeticWidths contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Capacity.lean` | Scalar Capacity contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/CastChains.lean` | Scalar CastChains contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Combinations.lean` | Scalar Combinations contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Composition.lean` | Scalar Composition contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/FixedBytes.lean` | Scalar FixedBytes contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Select.lean` | Scalar Select contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/WidthGuards.lean` | Scalar WidthGuards contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPower.lean` | Intrinsic signed-power SignedPower slice/source/capacity contracts; see backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPowerPost.lean` | Intrinsic signed-power SignedPowerPost slice/source/capacity contracts; see backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPowerPrefix.lean` | Intrinsic signed-power SignedPowerPrefix slice/source/capacity contracts; see backend-scalar-lowering.md. |

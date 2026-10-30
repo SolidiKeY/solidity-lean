@@ -693,3 +693,16 @@ import Solidity.Backend.Scalar.SignedMul
 import Solidity.Backend.Scalar.SignedShift
 import Solidity.Backend.Scalar.UnsignedMul
 import Solidity.Backend.Scalar.Axioms
+
+import Solidity.Backend.Scalar.ArithmeticWidths
+import Solidity.Backend.Scalar.Capacity
+import Solidity.Backend.Scalar.CastChains
+import Solidity.Backend.Scalar.Combinations
+import Solidity.Backend.Scalar.Composition
+import Solidity.Backend.Scalar.FixedBytes
+import Solidity.Backend.Scalar.Select
+import Solidity.Backend.Scalar.WidthGuards
+
+import Solidity.Backend.Scalar.SignedPower
+import Solidity.Backend.Scalar.SignedPowerPost
+import Solidity.Backend.Scalar.SignedPowerPrefix
