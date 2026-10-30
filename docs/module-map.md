@@ -1077,3 +1077,20 @@ At the root, the notation's own tests:
 | `Backend/Failure/UnwindChecks.lean` | Inhabited distinct snapshots, nested emitted failures, caller-memory restoration and wrong-snapshot negatives. |
 | `Backend/Failure/Composition.lean` | Arbitrary two-write-block byte noninterference, immutable input preservation and checked emitter concatenation/terminal distinction. |
 | `Backend/Failure/CompositionChecks.lean` | Inhabited both-executed writes, overlap negative, overlapping ignored suffix and same-bytes terminal controls. |
+| `Storage/Representation/Model.lean` | Intrinsic value-independent layout shapes and represented scalar, struct, mapping, fixed/dynamic-array values including retained shadows. |
+| `Storage/Representation/Controls.lean` | Inhabited representation witnesses, source reads, negative scalar control and exact axiom pins. |
+| `Storage/Representation/Reads.lean` | Exact source scalar/mapping/array reads, failures and source frames. |
+| `Storage/Representation/Frames.lean` | Representation locality over existing Occ footprints and nested frames. |
+| `Storage/Representation/Words.lean` | Supported full-word key bounds, normalization and injectivity. |
+| `Storage/Representation/Updates.lean` | Abstract symbolic replacement and nested mapping source saves. |
+| `Storage/Representation/Members.lean` | Source member reads/replacement with whole intrinsic field-store preservation. |
+| `Storage/Representation/UpdateControls.lean` | Inhabited member/nested mapping combinations, defaults, alias controls and axiom pins. |
+| `Storage/Representation/Arrays.lean` | Fixed/dynamic whole-array source saves, live/retained bounds and exact header/element frames. |
+| `Storage/Representation/ArrayControls.lean` | Heterogeneous fixed/dynamic, nested save, defaults, stale aliases, live failures and header controls. |
+| `Storage/Representation/Transport.lean` | Finite per-run numeric realization, covered writes/sequences, frames and existing exact source observations. |
+| `Storage/Representation/TransportControls.lean` | Inhabited root/hash/data run, source read/save/header combinations and collision/bound/coverage/failure controls. |
+| `Storage/Representation/GraphLayout.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphFrames.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphRepresentation.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphCompatibility.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphControls.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |

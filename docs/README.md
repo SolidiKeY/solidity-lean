@@ -90,3 +90,4 @@ history is in git.
 
 | [feature-work/backend-creation-artifacts.md](feature-work/backend-creation-artifacts.md) | G44.02 creation artifact component proofs, runtime installation scope and remaining composition obligations. |
 | [feature-work/backend-failure-emission.md](feature-work/backend-failure-emission.md) | G38 component: executable failure and return bytes, exact local slice proofs and remaining integration obligations. |
+| [feature-work/storage-value-representation.md](feature-work/storage-value-representation.md) | G27 typed storage representation, bounded validation, reviews and remaining composition obligations. |

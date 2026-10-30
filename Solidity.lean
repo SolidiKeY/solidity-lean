@@ -781,3 +781,21 @@ import Solidity.Backend.Failure.Unwind
 import Solidity.Backend.Failure.UnwindChecks
 import Solidity.Backend.Failure.Composition
 import Solidity.Backend.Failure.CompositionChecks
+
+import Solidity.Storage.Representation.Model
+import Solidity.Storage.Representation.Controls
+import Solidity.Storage.Representation.Reads
+import Solidity.Storage.Representation.Frames
+import Solidity.Storage.Representation.Words
+import Solidity.Storage.Representation.Updates
+import Solidity.Storage.Representation.Members
+import Solidity.Storage.Representation.UpdateControls
+import Solidity.Storage.Representation.Arrays
+import Solidity.Storage.Representation.ArrayControls
+import Solidity.Storage.Representation.Transport
+import Solidity.Storage.Representation.TransportControls
+import Solidity.Storage.Representation.GraphLayout
+import Solidity.Storage.Representation.GraphFrames
+import Solidity.Storage.Representation.GraphRepresentation
+import Solidity.Storage.Representation.GraphCompatibility
+import Solidity.Storage.Representation.GraphControls
