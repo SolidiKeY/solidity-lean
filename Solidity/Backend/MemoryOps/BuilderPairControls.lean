@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.BuilderComposition
+import Solidity.Backend.MemoryOps.CopyMirrorSchedule
 
 /-! Two real builder generations: nonzero published structs and arbitrary-length
 nested fixed/dynamic arrays. Boundaries are element indices, not byte encoding. -/
@@ -299,6 +300,29 @@ theorem descendant_mutation_negative (n : Nat) :
   rw [values] at badread
   cases badread
 
+/-- Both real generations and existing element32 recapture are executed as
+schedules, with an arbitrary runtime exact-end tail. Both recursive mirrors,
+including nonzero structs and all nested default children, are derived anew. -/
+theorem scheduled_person_default (n copies : Nat) :
+    let v := SVal.dflt (.ref (A n))
+    let later := g2 person pm v rfl
+    let final := out person pm v rfl
+    runCaptures (g1 person pm).heap (old1 person pm) .dyn [(0,1,32)]=some (mid person pm) ∧
+    runCaptures later.heap (old2 person pm v rfl) .dyn ((32,33,33)::List.replicate copies (34,34,34))=some final ∧
+    person.Mirrors final H.length ((g1 person pm).val.wk later.ext) ∧
+    v.Mirrors final (g1 person pm).H'.length later.val := by
+  dsimp only
+  have hfirst : runCaptures (g1 person pm).heap (old1 person pm) .dyn [(0,1,32)]=some (mid person pm) := by
+    rw [runCaptures_singleton]; exact first_some person pm
+  have htail : runCaptures (g2 person pm (SVal.dflt (.ref (A n))) rfl).heap
+      (old2 person pm (SVal.dflt (.ref (A n))) rfl) .dyn
+      ((32,33,33)::List.replicate copies (34,34,34))=some (out person pm (SVal.dflt (.ref (A n))) rfl) := by
+    rw [runCaptures,second_some,Option.bind_some]
+    exact runCaptures_end_replicate _ _ .dyn 34 copies (ol person pm _ rfl)
+  have hh := two_builder_schedules_mirrors hp person pm r .dyn [(0,1,32)] (mid person pm) hfirst
+    (SVal.dflt (.ref (A n))) rfl _ _ htail
+  exact ⟨hfirst,htail,hh⟩
+
 /-- info: 'Solidity.Backend.MemoryOps.BuilderPairControls.person_fields' depends on axioms: [propext,
  Classical.choice,
  Quot.sound] -/
@@ -329,4 +353,8 @@ theorem descendant_mutation_negative (n : Nat) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms isolated_failures
+/-- info: 'Solidity.Backend.MemoryOps.BuilderPairControls.scheduled_person_default' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms scheduled_person_default
 end Solidity.Backend.MemoryOps.BuilderPairControls

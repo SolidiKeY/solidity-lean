@@ -801,3 +801,5 @@ import Solidity.Backend.MemoryOps.MixedChildFootprint
 import Solidity.Backend.MemoryOps.MixedNestedControls
 
 import Solidity.Backend.MemoryOps.MixedNestedGrowth
+
+import Solidity.Backend.MemoryOps.CopyMirrorSchedule

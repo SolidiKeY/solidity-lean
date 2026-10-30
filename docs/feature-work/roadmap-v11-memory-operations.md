@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-nine. Earlier checkpoint
+Current cumulative accounting through checkpoint thirty. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -2533,3 +2533,83 @@ accepted proofs/controls and requested cumulative heading twenty-nine, corrected
 Full sampled Lean/Lake RSS1460752KiB,cumulative sessionpeak2160848896bytes,zeroOOM;
 188416byte full increment within16MiB envelope. Source/target/physical/general
 recursive and reserved-owner obligations remain as above, goal unchanged.
+
+
+### Checkpoint30: recursive mirrors through arbitrary actual schedules
+
+Parentedb60d4d04830dc9f7c6e30b96ffe63b2bdc7461; exact frozen base unchanged.
+CopyMirrorSchedule derives recursive fresh-node frames from runCaptures_frame,
+old destination id_lt and original H.length freshness. runCaptures_mirrors uses
+an independently established INITIAL mirror and explicit destination-below-bound;
+copy_schedule_mirrors/default_schedule_mirrors discharge those premises using
+published mirrors_copyStToM and actual copyStToM/allocDefault, with mapFree kept.
+No desired final mirror, whole-heap equality or fixed depth/shape/schedule cutoff.
+copy_schedule_transport lifts an actual successful OLD run through the REAL
+builder via published Keeps, and proves complete recursive mirror and all fresh
+object frames at reached output. copy_schedule_none_first exposes the actual
+successful prefix, first failing reached call and mirror ONLY at that prefix;
+Option failure is not Source rollback/halt. two_builder_schedules_mirrors composes
+two actual recursive builders with arbitrary successful old-root schedules between
+and after them, using existing Mirrors.wk and derived frames, no new traversal.
+
+Controls REUSE existing fixtures. Real checked prefix changes TFFF to TTFF before
+nested fixed/dynamic copy/default construction. Nonempty reached tail changes old
+array to TTTF, followed by arbitrary runtime exact-end empty operations; complete
+initial/changed/copied/final vectors and old/fresh root identity/structural frame
+proved. Nonzero Person/Account/Token fields11/9/7 survive. Existing two-builder
+Person/default operation outputs are directly recovered through the NEW schedule
+composition, with arbitrary runtime empty suffix, preserving existing element32,
+zero/nonzero family/descendant reads, identity and field fixtures.
+
+Finder requested direct use of the NEW failure iff: late_failure now applies
+copy_schedule_none_first to real nonempty changed prefix then invalid(0,5,0)
+(overruns BOTH source and destination capacity4, not an isolated-source claim).
+Skeptic requested TWO material post-builder writes: reached_changed_source executes
+actualSome1,2,2 then actualSome2,3,3, giving complete TTFF→TTTF→TTTT vectors and
+final mirror. Initial builder source2=false but actual final destination3=true;
+this concrete negative distinguishes frozen initialization from actual recapture.
+Existing descendant_mutation_negative still executes a write INTO a copied leaf,
+keeps parent identity yet falsifies recursive mirror. Old-destination separation
+is derived from freshness; this is a local theorem case, never profile exclusion.
+
+Thirteen new exact standard-only guards. Focused core PASS86, pair PASS88;
+controls01..08 failures retained (endpoint reflexivity, opaque/dependent context
+reductions and explicit Keeps/list proof arguments), controls09 PASS87 after
+repairs without changing expected vectors/bounds. Failed elaboration sorryAx is
+not accepted: final guards require exact standard-only sets. No proof/fuel/node/
+stack/time/TestSuite budget changes, no reserved source edit or new semantics.
+
+Preflight559394816bytes;16MiB small keyed warm-route forecast leaves542617600,
+above unchanged512MiB reserve. Same idle capped runtime child12GiB/no swap under
+16GiB parent with OS headroom, serial Lean-j1/LEAN_NUM_THREADS1, artifact cacheOFF
+in runtimeTOML AND actualexec emptyLAKE_CACHE_DIR/LAKE_ARTIFACT_CACHE=false. All old
+files/caches/seals/failures retained. Per-file MCP/get_goal unavailable; existing
+blocked goal unchanged. All original G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B
+PARTIAL, G35.02/.06 BLOCKED. Physical byte representation, all-profile constructors/
+target failures, general paths/rebinding/delete, ABI/reference/storage, fresh
+memory deep-copy/emitted loops, recursive Source graphs and reserved memory-storage/
+final V10-Source-target composition remain open. No exhaustion or compiler/EVM claim.
+
+C30 final independent finder/skeptic source/doc reviews ACCEPTED after requested
+failure-iff application and two-material changed-source control were added. No
+remaining source/ownership finding. Guarded closures PASS87/88, full935default/
+262TestSuite/SolKey377/131 exit0; actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs
+PASS. Strict/trust/layer/orphan/completefixture/script/corruption controls PASS;
+665owned standard pins84modules. Raw docsFAIL1 complete exact-base byte equality
+separately PASS, SHAea1a09c222d52d1d17953f653c087443e34e6282497f0b02cdc09aad15b7dd48.
+Raw global inventory FAIL1,679unrecorded=14inherited+665owned,zero unsafe errors;
+additive coordinator proposals exported, reserved records untouched.
+Full sampled aggregate Lean/Lake RSS1520240KiB,cumulative sessionpeak2160848896bytes,
+zeroOOMevents;188416byte fullincrement within16MiB forecast. No guard/budget change.
+
+Full original queue reassessment: G32 physical-byte representation/target frames
+remain missing; G33 all-profile constructors/defaults/target failure/stack-tail
+execution remain open; G34 general path/rebinding/delete/stale-alias compilation
+open; G35.01 now includes arbitrary old-root schedule transport of published
+map-free recursive Mirrors, but independent Source/target/liveness realization
+still open. G35.02 reserved memory-to-storage blocked; G35.03 general families/
+reference/ABI/calldata-storage/Source open; G35.04 fresh memory deep-copy/emitted
+loops open; G35.05 general recursive Source graphs/maps/shadows/cycles/emitted
+traversal open; G35.06 reserved-copy/V10/Source/target composition blocked.
+Backfill A/B advanced, not complete/exhausted. No new admission shape or profile
+restriction, no external compiler/EVM validation or whole-assignment claim.
