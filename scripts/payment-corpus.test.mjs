@@ -7,7 +7,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-test('KeY proof mappings connect custom and legacy evidence to the corpus build', { timeout: 120000 }, () => {
+test('KeY mappings preserve frozen classifications and separate payment evidence', { timeout: 120000 }, () => {
   const out = mkdtempSync(join(tmpdir(), 'payment-corpus-'));
   try {
     execFileSync(process.execPath, ['scripts/solkey-port.mjs', '--out', out], {
@@ -19,14 +19,17 @@ test('KeY proof mappings connect custom and legacy evidence to the corpus build'
     const corpus = readFileSync(join(out, 'SolidityCorpus.lean'), 'utf8');
     const oldRows = readFileSync(join(root, 'tests/solkey/expected.tsv'), 'utf8')
       .trim().split('\n').map(line => line.split('\t'));
-    const otherRows = rows => rows.filter(row => !(row[0] === 'net' &&
-      row[2] === 'piggybank_breakPiggyBank_withcallback'));
-    assert.deepEqual(otherRows(rows), otherRows(oldRows));
+    assert.deepEqual(rows, oldRows);
+    assert.equal(readFileSync(join(out, 'tests/solkey/expected.tsv'), 'utf8'),
+      readFileSync(join(root, 'tests/solkey/expected.tsv'), 'utf8'));
     const piggy = rows.find(row => row[0] === 'net' && row[2] === 'piggybank_breakPiggyBank_withcallback');
-    assert.equal(piggy[3], 'proved');
-    assert.match(piggy[5], /Examples\/Tactics\/PaymentCorpus\.lean/);
-    assert.match(corpus, /^import Solidity\.Examples\.Tactics\.PaymentCorpus$/m);
-    assert.match(corpus, /^#check Solidity\.Examples\.Tactics\.PaymentCorpus\.breakPiggyBank_callback$/m);
+    assert.deepEqual(piggy, ['net', 'Net', 'piggybank_breakPiggyBank_withcallback',
+      'unsupported', 'solkey net/piggybank-breakPiggyBank-withcallback.key',
+      'the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), ' +
+        'but the problem\'s invariant `CInv` reads the ledger `net`, which no term reads']);
+    assert.doesNotMatch(corpus, /PaymentCorpus/);
+    assert.match(readFileSync(join(root, 'Solidity.lean'), 'utf8'),
+      /^import Solidity\.Examples\.Tactics\.PaymentCorpus$/m);
     const legacy = rows.find(row => row[0] === 'net' && row[2] === 'net_transfer_simple');
     assert.equal(legacy[3], 'proved');
     assert.match(legacy[5], /Examples\/Tactics\/Net\.lean/);

@@ -45,9 +45,9 @@ The language and calculus gaps, callbacks included, are listed in
 
 - **Diamond calls.** A diamond `try` closes to `false` (`tryCallDiamond`),
   and so does a diamond payment (`transferDiamond`): solkey's diamond
-  transfer rules are not ported. Other callback `.key` cases remain unsupported
-  (`docs/corpus-parity.md`); the original PiggyBank kernel case now has a
-  handwritten proof and corpus mapping. The additive
+  transfer rules are not ported. The frozen callback `.key` cases remain unsupported
+  (`docs/corpus-parity.md`); PiggyBank has a separate handwritten typed proof,
+  without a corpus mapping. The additive
   `Calculus/PaymentWitness.lean` proves deterministic payment exactness,
   callback transfer exactness and callback send sufficiency. Conditional
   `ProvesC.transferD`/`transferDetD` formula rules now use the existing
@@ -55,8 +55,9 @@ The language and calculus gaps, callbacks included, are listed in
   the applicable booking, exit and resumption premises. The original bare
   transfer diamond omits acceptance and is false for unfunded/refused payments.
   `Examples/Tactics/PaymentCorpus.lean` proves the original PiggyBank box
-  callback obligation, including zero-value entry booking, by typed bounded
-  auxiliary proofs. This is kernel evidence; only its handwritten `.key` pin improves;
+  callback body and invariant, including zero-value entry booking, by typed bounded
+  auxiliary proofs. This is separate kernel evidence; the frozen `.key` pin and
+  exact source mapping stay unchanged;
   the two world-dependent payment fixtures now use a narrow typed bridge;
   all three original fixtures have typed source and independent bytecode/gas
   validation. Broader compiler

@@ -10,11 +10,9 @@ import Solidity.Corpus.SolcMemory
 import Solidity.Corpus.SolcMappings
 import Solidity.Corpus.SolcControlFlow
 import Solidity.Examples.Tactics.Net
-import Solidity.Examples.Tactics.PaymentCorpus
 
 -- Handwritten .key proof mappings are checked by this library too.
 #check Solidity.Examples.Tactics.Net.netSendSimple
 #check Solidity.Examples.Tactics.Net.netTransferCapturedAmount
 #check Solidity.Examples.Tactics.Net.netTransferStorageReceiver
 #check Solidity.Examples.Tactics.Net.netTransferSimple
-#check Solidity.Examples.Tactics.PaymentCorpus.breakPiggyBank_callback

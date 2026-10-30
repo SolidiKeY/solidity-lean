@@ -1,5 +1,34 @@
 # Diamond payments: guarded rules and the original PiggyBank callback proof
 
+## Integration boundary (2026-10-29)
+
+The combined candidate `cec7507b` failed the frozen verdict/scope guard: it
+registered `PaymentCorpus.breakPiggyBank_callback` as the original `.key` case,
+changing both its verdict and source mapping. The integration base is
+`204eb154`. The repair removes that registration and restores
+`tests/solkey/expected.tsv` byte-for-byte from that base. PiggyBank remains
+`unsupported`, with source `solkey net/piggybank-breakPiggyBank-withcallback.key`;
+the generated totals are again 72 proved / 35 unsupported / 101 unported.
+The frozen reason describes the corpus adapter, not the capabilities of the
+separate typed term language. No source/snapshot pin or guard is changed.
+
+The retained snapshot's `net/PiggyBankNet.sol` and
+`net/piggybank-breakPiggyBank-withcallback.key` supply the correspondence:
+the typed theorem transcribes the eight fields, payment-last body, invariant,
+zero-value entry update and owner-not-self assumption. It uses `ValidC piggyInv`,
+which assumes invariant-preserving callback resumptions and omits the other
+source functions. It does not prove an import/translation equivalence for the
+original corpus obligation or the omitted functions' invariant preservation.
+Keep it as separate kernel evidence, reachable through `Solidity.lean`, with
+the guarded rules and their soundness proofs. `SolidityCorpus.lean` retains the
+four existing Net proof references and no PaymentCorpus registration.
+
+Earlier source-branch validation below is retained as historical evidence.
+Its accepted PiggyBank pin improvement and associated review conclusions are
+superseded by this frozen integration boundary. The failed guard remains in
+the coordinator's integration ledger; it was not a passing combined check.
+The coordinator owns the full combined gates after this focused repair.
+
 Current scope after the explicit human decision on 2026-10-29: keep existing
 semantics and prove exact conditional success and certified failure conditions.
 For this assignment only, that replaces the unconditional transfer-success
@@ -222,14 +251,15 @@ creation site uses checked `.thmDecl`/`addDecl`, with no skip-kernel option,
 new axiom or recovery escape; the trust scan and actual axiom audit are required.
 This optional explicit leaf proof is manual evidence, not automatic completeness.
 
-`Examples/Tactics/PaymentCorpus.lean` proves the full ORIGINAL PiggyBank callback
-case: all eight fields, original guards/order/captures, state write, payout,
+`Examples/Tactics/PaymentCorpus.lean` proves a typed transcription of the PiggyBank callback
+body and invariant: all eight fields, original guards/order/captures, state write, payout,
 zero-msg.value parallel entry booking, owner-not-self premise and both invariant
 branches. The entry update is proved under both modalities. The body and full
 box theorem pass per-file MCP with only propext, Classical.choice and Quot.sound
 (`resume-extracted-corpus.log`). Omitted unrelated helpers do not establish
 whole-contract reentrancy safety. The typed transcription is kernel evidence,
-not automated source translation, compiler or EVM correspondence; the remaining original pins stay. The PiggyBank row alone improves after its full proof checks.
+not automated source translation, compiler or EVM correspondence. All frozen
+corpus pins, including PiggyBank, stay unchanged at integration.
 
 `Calculus/CallbackSound/Payments.lean` proves existing modal normality
 `¬ [r.transfer(a);] false` implies runtime acceptance. `ProvesC.transferD` and
@@ -257,20 +287,19 @@ Continuation shared edits: `Solidity.lean`, `Calculus/Callback.lean`, `CallbackD
 example modules; module-map, kernel-port, options, rule-map and this owning handoff;
 two partial feature rows and audit-generated inventory/Features outputs. No
 runtime, compiler, source runner, target certificates or exclusions change. The
-PiggyBank callback `.key` pin alone improves with its exact proof; other pins stay. All earlier evidence above describes the earlier checkpoint, not this
+PiggyBank callback theorem remains separate from its frozen `.key` pin. All earlier evidence above describes the earlier checkpoint, not this
 continuation. New final commands/results are appended after they actually run.
 
 
-The `.key` integration follows the existing `KEY_SUITES.Net.ported` convention.
-The generator accepts an explicit evidence path for the PiggyBank theorem,
-preserves legacy defaults, and emits evidence imports and checked theorem
-references in `SolidityCorpus.lean`. Independent finder and skeptic approved
-this single proof-backed improvement: no further source adapter is needed for
-this handwritten `.key` obligation. The generator's scoreboard distinguishes
-these abstract kernel proofs from translated initial-state runs and EVM results.
-The new script regression compares every other corpus row in all six columns,
-checks legacy/custom proof reachability, and retains callback countercontrols.
-These checks must pass before the new pin is accepted as final evidence.
+The integrated `KEY_SUITES.Net.ported` retains its four original mappings.
+The generator emits their evidence imports and checked theorem references in
+`SolidityCorpus.lean`. The source branch's proposal to register the PiggyBank
+theorem was rejected by the frozen integration guard, despite its earlier
+reviews. The generator's scoreboard distinguishes abstract kernel proofs from
+translated initial-state runs and EVM results. The repaired script regression
+compares every corpus row in all six columns and exact TSV bytes, checks the
+original PiggyBank source mapping, retains legacy proof reachability and
+callback countercontrols, and keeps PaymentCorpus reachable separately.
 Additional shared edits are `scripts/solkey-port.mjs`, its payment-corpus test,
 and generated `SolidityCorpus.lean`, `tests/solkey/expected.tsv`,
 `docs/corpus-parity.md`. No snapshot or upstream-source re-pin occurs.

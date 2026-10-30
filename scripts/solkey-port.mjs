@@ -238,10 +238,6 @@ const KEY_SUITES = [
       "net-transfer-capture-receiver":
         ["net_transfer_capture_receiver", "Net.netTransferStorageReceiver"],
       "net-send-simple": ["net_send_simple", "Net.netSendSimple"],
-      "piggybank-breakPiggyBank-withcallback": [
-        "piggybank_breakPiggyBank_withcallback", "PaymentCorpus.breakPiggyBank_callback",
-        "Examples/Tactics/PaymentCorpus.lean",
-      ],
     },
     unported: {},
     reason: (name) =>

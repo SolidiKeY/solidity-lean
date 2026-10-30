@@ -83,10 +83,10 @@ their verdicts:
 | SolcMemory | 11 | 0 | 0 | 0 | 0 |
 | SolcMappings | 9 | 0 | 0 | 0 | 0 |
 | SolcControlFlow | 8 | 0 | 0 | 2 | 0 |
-| Net | 5 | 0 | 0 | 22 | 0 |
+| Net | 4 | 0 | 0 | 23 | 0 |
 | Rules | 0 | 0 | 0 | 7 | 36 |
 | Proofs | 0 | 0 | 0 | 0 | 65 |
-| **all** | **73** | **0** | **0** | **34** | **101** |
+| **all** | **72** | **0** | **0** | **35** | **101** |
 
 ### Open
 
@@ -98,7 +98,7 @@ None.
 |---|---:|---|
 | assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.* | 15 | Net 15 |
 | KeY loader/taclet smoke fixture with a trivial active problem; its custom-rule parsing and matching checks are outside the Lean program corpus | 7 | Rules 7 |
-| the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads | 5 | Net 5 |
+| the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads | 6 | Net 6 |
 | a loop: the translator emits no `/// @custom:key` clauses (the solc front end, `solc_import`, reads them) | 2 | SolcControlFlow 2 |
 | field-name overloading: Depth0.recursive and Depth1.recursive have different types, and Semantics.structDef is one global name->fields table | 1 | SolcStructs 1 |
 | field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint) | 1 | SolcStructs 1 |
