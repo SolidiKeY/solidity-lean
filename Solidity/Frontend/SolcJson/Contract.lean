@@ -394,7 +394,7 @@ def candidate (structs : Structs) (id : Int) (modelName : String) (declaration :
 kinds. A getter is usable only after its plan, identity and header scope all
 succeed. An unknown/unsupported plan remains a candidate with unknown shape,
 so an external dispatch cannot silently drop it. -/
-def getterCandidate (id : Int) (f : SolcFun) : Candidate :=
+def getterCandidate (id : Int) (f : SolcFun) (nominalResult : Bool := false) : Candidate :=
   let valid := f.body.isOk && f.sourceDecl.any fun identity =>
     identity.declaration == some id && (match identity.callable with
       | .getter _ => true
@@ -407,7 +407,7 @@ def getterCandidate (id : Int) (f : SolcFun) : Candidate :=
     else none
   { id, sourceName := f.sourceName, kind := "getter", modelName := f.name,
     visibility := "external", getter := true, reference := false,
-    source := signature, native := signature }
+    source := if nominalResult then none else signature, native := signature }
 
 /-- Finite, conservative dependencies. A failure retains the original call
 node for the ordinary fail-closed admission diagnostic. -/
@@ -472,8 +472,7 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
         return { result with unresolved := result.unresolved ++ [call] }
       if target.source != some expected then
         return { result with unresolved := result.unresolved ++ [call] }
-      if external && (!(["public", "external"].contains target.visibility) ||
-          (!target.getter && target.modelName != target.sourceName)) then
+      if external && !(["public", "external"].contains target.visibility) then
         return { result with unresolved := result.unresolved ++ [call] }
       let alias := (lookupBy target.id aliases).getD target.id
       let some resolved := candidates.find? (·.id == alias) |
@@ -481,8 +480,7 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
       if resolved.native.map (·.native external) != some expectedNative ||
           resolved.source != some expected then
         return { result with unresolved := result.unresolved ++ [call] }
-      if external && (!(["public", "external"].contains resolved.visibility) ||
-          (!resolved.getter && resolved.modelName != resolved.sourceName)) then
+      if external && !(["public", "external"].contains resolved.visibility) then
         return { result with unresolved := result.unresolved ++ [call] }
       -- An overridden abstract declaration retains its identity in the
       -- source closure, but has no body to execute. Keep every concrete
@@ -511,6 +509,65 @@ end FiniteDispatch
 def nativePayment (root : Json) : Bool := (J.nodes root).any fun node =>
   (valueCall? node).isSome || (J.kind node == "MemberAccess" && nativeMember node &&
     ["send", "transfer"].contains ((J.str? node "memberName").getD ""))
+
+/-- Empty-data calls select receive across the entire C3 order before fallback. -/
+private def selectedPaymentEntry (nodes : List Json) : Option Json :=
+  (nodes.find? fun node => J.kind node == "FunctionDefinition" &&
+    J.str? node "kind" == some "receive").orElse fun _ =>
+      nodes.find? fun node => J.kind node == "FunctionDefinition" &&
+        J.str? node "kind" == some "fallback"
+
+/-- The existing receive frame has no calldata/result/modifier or callee frame. -/
+private def supportedPaymentBody (node : Json) : Bool :=
+  (J.id? node).isSome && J.str? node "stateMutability" == some "payable" && (J.arrD node "modifiers").isEmpty &&
+  ((J.opt node "parameters").bind (J.arr? · "parameters")).any Array.isEmpty &&
+  ((J.opt node "returnParameters").bind (J.arr? · "parameters")).any Array.isEmpty &&
+  !(J.nodes node).any (fun call => J.kind call == "FunctionCall" &&
+    ((J.opt call "expression").bind J.ref?).any (0 < ·))
+
+/-- New handler registration needs an identity even when a historical fixture
+bypasses the optional source-admission scan. -/
+private def paymentIdentity (ownReceive entry : Option Json) : Except String Unit :=
+  if ownReceive.isNone && entry.any (fun node => (J.id? node).isNone) then
+    .error "solidity.selfPayment: selected payment entry has no declaration identity"
+  else .ok ()
+
+private def paymentSelection (ownReceive : Option Json) (nodes : List Json) :
+    Except String (Option Json × Option Json) := do
+  let entry := selectedPaymentEntry nodes
+  let _ ← paymentIdentity ownReceive entry
+  pure (entry, ownReceive.orElse fun _ => entry.filter supportedPaymentBody)
+
+private def paymentDiagnostics (ownReceive entry body : Option Json) (root : Json) :
+    List Source.Diagnostic :=
+  if !nativePayment root then [] else
+    let stipend := (J.nodes root).any fun node => J.kind node == "MemberAccess" &&
+      nativeMember node && ["send", "transfer"].contains ((J.str? node "memberName").getD "")
+    -- New handler registration is bounded to source-payable receiver values.
+    -- This is an importer profile, not a Solidity restriction on `.call`.
+    -- Historical own-receive execution keeps its existing admission policy.
+    let unprofiledReceiver := (J.nodes root).any fun node =>
+      (valueCall? node).any fun (_, receiver, _) =>
+        J.tyStr receiver != "address payable" ||
+        !((J.opt receiver "typeDescriptions").bind
+          (fun types => (types.getObjVal? "typeIdentifier").toOption)).all
+          (· == Json.str "t_address_payable")
+    let unsupported := match ownReceive with
+      | some receive => !(J.arrD receive "modifiers").isEmpty
+      | none => entry.isSome && (body.isNone || stipend || unprofiledReceiver)
+    if unsupported then [{
+      kind := .missingImplementation
+      name := `solidity.selfPayment
+      reason := "self-payment has an unsupported receiver, stipend, nonpayable handler, byte-oriented fallback, helper call or modifier"
+      line := J.line root
+      feature := some .emptyDataValueCall }] else []
+
+private def getterDispatchCandidate (declarations variables : List Json)
+    (id : Int) (getter : SolcFun) : FiniteDispatch.Candidate :=
+  let nominal := (variables.findSome? fun node => do
+    guard (J.id? node == some id)
+    pure (getterNominalSignature declarations (declarations.length + 1) (← J.opt node "typeName"))).getD true
+  FiniteDispatch.getterCandidate id getter nominal
 
 def callees (ids : List Int) (f : Json) (freeFunctions : List Int := [])
     (aliases : List (Int × Int) := []) (contracts : List Int := [])
@@ -831,18 +888,16 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let c3Nodes := lineage.flatMap membersOf
   let ownReceive := ownNodes.find? fun node => J.kind node == "FunctionDefinition" &&
     J.str? node "kind" == some "receive"
-  let paymentIssues (root : Json) : List Source.Diagnostic :=
-    if !nativePayment root then [] else
-      let unsupported := match ownReceive with
-        | some receive => !(J.arrD receive "modifiers").isEmpty
-        | none => c3Nodes.any fun node => J.kind node == "FunctionDefinition" &&
-            ["receive", "fallback"].contains ((J.str? node "kind").getD "")
-      if unsupported then [{
-        kind := .missingImplementation
-        name := `solidity.selfPayment
-        reason := "self-payment needs inherited receive, fallback or modifier dispatch"
-        line := J.line root
-        feature := some .emptyDataValueCall }] else []
+  let (paymentEntry, paymentBody) ← paymentSelection ownReceive c3Nodes
+  let paymentIssues := paymentDiagnostics ownReceive paymentEntry paymentBody
+  -- Newly registered handlers cannot bypass their implementation boundary
+  -- through a historical input that disables the optional source scan.
+  let scanPayment (request : Source.AdmissionRequest) : Source.ScopeScan :=
+    let scan := scanSource request
+    if ownReceive.isSome then scan else
+      request.diagnostics.foldl (fun result issue =>
+        if issue.name == `solidity.selfPayment then result.append (.rejected [] issue)
+        else result) scan
   let baseContracts := lineage.filterMap J.id?
   let functionAliases ← if lineage.length == 1 then pure [] else
     overrideAliases c3Nodes (c3Nodes.filter fun node =>
@@ -1130,6 +1185,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       (renames stateVars d).map (·.2)
   let internalName (f : Json) : String := Id.run do
     let n := nameOfFun f
+    if (J.id? f).isSome && J.id? f == paymentBody.bind J.id? then return "receive"
     if (J.id? f).any helperIds.contains then
       return freshSourceName generatedTaken s!"solcFunction{(J.id? f).getD 0}"
     if (funNames.filter (· == n)).length < 2 then return n
@@ -1220,7 +1276,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         valueTypes }
       unless rootState.pre.isEmpty do
         throw (.unsupported "a public getter root requires deferred initialization" (J.line declarationNode))
-      publicGetterPlan S declarations (generatedTaken ++ entryNames.map (·.2)) declarationNode root
+      publicGetterPlan S declarations (generatedTaken ++ entryNames.map (·.2)) declarationNode root enumNativeNames
     let identity := plan.bind (publicGetterIdentity declarationNode)
     let body := do
       let p ← plan
@@ -1243,7 +1299,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- signatures must enter the same typed candidate/dependency closure;
   -- VariableDeclaration headers are not executable initializer roots.
   let dispatchCandidates := dispatchCandidates ++ getterReads.map fun (id, getter, _) =>
-    FiniteDispatch.getterCandidate id getter
+    getterDispatchCandidate declarations getterVariables id getter
   let dispatchMissingIds := dispatchMissingIds || getterVariables.any (fun v => (J.id? v).isNone)
   let dispatchOf (root : Json) : FiniteDispatch.Result :=
     if dispatchMissingIds then { unresolved := unresolvedValueCalls declarations root }
@@ -1477,7 +1533,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let contractClauses := cspec.filterMap fun clause =>
       if ["requires", "ensures", "invariant", "assignable"].contains clause.kind then
         some (clause.lexicalNames, s!"{clause.kind} {clause.text};") else none
-    let sourceScope := scanSource {
+    let sourceScope := scanPayment {
       entry := f
       evaluatedRoots := f :: modifierRoots
       declarationRoots := [c]
@@ -1591,7 +1647,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       !(J.id? v).any fixedIds.contains && (J.opt v "value").isSome &&
       !(kept.any fun (_, _, declaration) => declaration == v)
   let deploymentRoots := kept.map (·.2.2) ++ omittedInitializers
-  let initScope := scanSource {
+  let initScope := scanPayment {
     entry := c, evaluatedRoots := deploymentRoots, declarationRoots := [c]
     constantIds := constants.map Prod.fst
     unresolvedDispatch := deploymentRoots.flatMap fun node => (dispatchOf node).unresolved
@@ -1611,10 +1667,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- an initializer's calls are the constructor's, declared or implicit
   let initCalls : List Int := ((kept.filterMap fun (_, _, v) => (J.opt v "value").map (fun e => callees ids e freeFunctions functionAliases baseContracts (supersOf v) (getterNames.map (·.1))))
     |>.flatten) ++ (kept.flatMap fun (_, _, node) => (dispatchOf node).targets) ++
-    (if kept.any (nativePayment ∘ (·.2.2)) then ownReceive.toList.filterMap J.id? else []) |>.eraseDups
+    (if kept.any (nativePayment ∘ (·.2.2)) then paymentBody.toList.filterMap J.id? else []) |>.eraseDups
   let ctorId : Option Int := (funs.find? (kindOf · == "constructor")).bind J.id?
-  let receiveId := (ownNodes.find? fun n =>
-    J.kind n == "FunctionDefinition" && kindOf n == "receive").bind J.id?
+  let receiveId := paymentBody.bind J.id?
   let pays := nativePayment
   let callsOf : List (Int × List Int) := funs.filterMap fun f => (J.id? f).map fun i =>
     let modCalls := (modifierInvocations f).flatMap fun invocation =>
@@ -1789,7 +1844,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let compositeScope := (compositeReach.foldl (fun scan id =>
       match lookupBy id byId with
       | some f => scan.append f.sourceScope
-      | none => scan) (initScope.append (scanSource {
+      | none => scan) (initScope.append (scanPayment {
         entry := c, evaluatedRoots := compositeRoots, declarationRoots := [c]
         constantIds := constants.map Prod.fst
         unresolvedDispatch := compositeRoots.flatMap fun root => (dispatchOf root).unresolved

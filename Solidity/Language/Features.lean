@@ -563,8 +563,8 @@ def Feature.info : Feature → FeatureInfo
   | .overrideDeclarations =>
     { category := "declarations", spelling := "virtual; override; override(A,B)",
       scope := .model, current := .limited,
-      requirement := r#"Validate overrides in solc and retain distinct base bodies and the selected implementation."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 159 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      requirement := r#"Validate overrides in solc, retain distinct base bodies and the selected implementation, and use retained source ABI identities for renamed inherited/overloaded external function values. Native/source type-erasure collisions remain refused."#,
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 159 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/EntryPointsLeft.sol", "tests/upstream/EntryPointsLeft.lean", "tests/upstream/EntryPointsAdmission.lean", "scripts/entry-points-left.test.mjs", "docs/feature-work/declarations-metadata.md"] }
   | .functions =>
     { category := "declarations", spelling := "function f(...) returns (...)",
       scope := .model, current := .limited,
@@ -593,13 +593,13 @@ def Feature.info : Feature → FeatureInfo
   | .receiveFunction =>
     { category := "declarations", spelling := "receive() external payable",
       scope := .model, current := .limited,
-      requirement := r#"Run the receive body for the modeled empty-data payment entry; preserve payable checks and callback behavior."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 97 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      requirement := r#"Own receive behavior is retained. Selected inherited receive bodies are registered for empty-data self value calls in C3 order, with sender/value framing and failure rollback. Newly registered stipend, modifier and helper-frame paths remain explicitly refused."#,
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 97 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/EntryPointsLeft.sol", "tests/upstream/EntryPointsLeft.lean", "tests/upstream/EntryPointsAdmission.lean", "scripts/entry-points-left.test.mjs", "docs/feature-work/declarations-metadata.md"] }
   | .fallbackFunction =>
     { category := "declarations", spelling := "fallback(); fallback(bytes calldata) returns(bytes memory)",
       scope := .model, current := .limited,
-      requirement := r#"Model the no-argument body only under explicit entry assumptions; the byte-oriented overload also uses excluded raw call data/return data."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 96 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      requirement := r#"A selected no-argument payable fallback supplies modeled empty-data self value calls only when the entire C3 lineage has no receive. Nonpayable, byte-oriented, modifier/helper-frame and stipend paths retain explicit refusals; arbitrary raw calldata dispatch is not modeled."#,
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 96 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/EntryPointsLeft.sol", "tests/upstream/EntryPointsLeft.lean", "tests/upstream/EntryPointsAdmission.lean", "scripts/entry-points-left.test.mjs", "docs/feature-work/declarations-metadata.md"] }
   | .visibility =>
     { category := "declarations", spelling := "public; external; internal; private",
       scope := .model, current := .limited,
@@ -628,8 +628,8 @@ def Feature.info : Feature → FeatureInfo
   | .publicGetters =>
     { category := "declarations", spelling := "synthesized getters; public override variable",
       scope := .model, current := .limited,
-      requirement := r#"Primitive/UDVT getters, enum mapping keys, interface overrides and struct array/mapping omissions are implemented. Reference returns, enum-valued results, contract/function values and unsupported aggregate shapes remain refused."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 2865 }], localEvidence := ["Solidity/Frontend/SolcJson/Getters.lean", "Solidity/Examples/Tactics/PublicGetters.lean", "scripts/public-getters.test.mjs"] }
+      requirement := r#"Primitive/UDVT, enum and contract-valued getter results, nominal mapping keys, interface overrides and exact struct array/mapping omissions are executable. Reference/function results and general reference-valued external return frames remain refused; nominal getter function-value signatures stay conservative refusals."#,
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 2865 }], localEvidence := ["Solidity/Frontend/SolcJson/Getters.lean", "Solidity/Examples/Tactics/PublicGetters.lean", "scripts/public-getters.test.mjs", "tests/solc/EntryPointsLeft.sol", "tests/upstream/EntryPointsLeft.lean", "tests/upstream/EntryPointsAdmission.lean", "scripts/entry-points-left.test.mjs", "docs/feature-work/declarations-metadata.md"] }
   | .structDeclarations =>
     { category := "declarations", spelling := "struct S { T f; ... }",
       scope := .model, current := .limited,

@@ -69,8 +69,8 @@ refused until recursive cardinality checks exist.
 
 Function-value calls follow [finite dispatch](finite-dispatch.md), including
 [getter candidates](finite-dispatch.md#getter-targets) and the restricted
-zero-argument internal memory-byte return. Other reference signatures and
-renamed inherited external values retain their explicit refusal boundaries.
+zero-argument internal memory-byte return. Other reference and nominal getter signatures retain explicit refusal boundaries.
+Renamed inherited external values use retained source ABI identities.
 
 ## Refused, and why
 
@@ -79,8 +79,10 @@ renamed inherited external values retain their explicit refusal boundaries.
 - Unknown node kinds, literal/operator/location shapes, missing type or prefix
   metadata, and duplicate or missing declaration identities. The declaration
   index is finite, and depth and traversal are bounded.
-- Payment dispatch that needs an inherited receive or fallback, or receive
-  modifiers, until that dispatch is implemented.
+- Newly registered inherited/fallback payment dispatch needing stipend behavior,
+  modifiers, user-helper frames or nonpayable/byte-oriented fallback. No-argument
+  payable handlers execute on the existing empty-data self-value-call path;
+  arbitrary raw calldata/transaction dispatch remains outside that path.
 - An effectful receiver of a stored function member (a call, an assignment, an
   increment, a compound index): the native selector lowering reads its receiver
   twice, which would duplicate effects or callbacks.
@@ -428,3 +430,15 @@ and model evidence, historical profile polling wording is qualified, and every
 retained failed-candidate input/wrapper/log has an export hash in the
 [artifact manifest](../../tests/upstream/step2-source-units-proof-performance-artifacts.json).
 Neither review ran Lean or the server. No confirmed proof defect remained.
+
+### Registered payment handler source profile (2026-10-29)
+
+The [declarations continuation](declarations-metadata.md) records preservation
+of the original inherited/fallback self-payment refusals. Newly registered
+handlers admit only canonical `address payable` value-call receivers, with a
+consistent optional identifier; this is importer scope, not Solidity legality.
+Nonpayable address projections remain `solidity.selfPayment`, including when
+the historical optional source scanner is bypassed. Existing own-receive
+behavior and earlier diagnostic priority are unchanged. Both required compiler
+pipelines and scanner modes pass paired receiver and malformed-metadata
+controls in [the regression check](../../tests/upstream/EntryPointsReceiverProfile.lean).

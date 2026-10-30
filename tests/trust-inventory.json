@@ -55,6 +55,11 @@
     "code": "@[implemented_by Facts.returnsM]"
   },
   {
+    "file": "Solidity/Calculus/Closer/Facts.lean",
+    "kind": "override",
+    "code": "@[implemented_by Facts.rwWithM]"
+  },
+  {
     "file": "Solidity/Calculus/Closer/Bytes.lean",
     "kind": "override",
     "code": "@[implemented_by Facts.nfM]"
@@ -238,6 +243,11 @@
     "file": "Solidity/Calculus/DeclarationStaticReduction.lean",
     "kind": "unsafe",
     "code": "unless \u2190 withCurrHeartbeats (unsafe evalExpr Bool (mkConst ``Bool) some) do"
+  },
+  {
+    "file": "Solidity/Calculus/ElimFacts.lean",
+    "kind": "override",
+    "code": "@[implemented_by ElimM.rwFM]"
   },
   {
     "file": "Solidity/Calculus/ElimFacts.lean",
@@ -1192,7 +1202,27 @@
   {
     "file": "Solidity/Calculus/CallbackDerive.lean",
     "kind": "unsafe",
-    "code": "let refuted \u2190 unsafe evalExpr Bool (mkConst ``Bool) probe"
+    "code": "let (refuted, depth?) \u2190 unsafe evalExpr (Bool \u00d7 Option Nat) pairTy probePair"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "let form \u2190 unsafe evalExpr Expr (mkConst ``Expr)"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "let plan \u2190 unsafe evalExpr (Option (List PrefixProposal \u00d7 Expr \u00d7 Expr)) planTy"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "let quoted \u2190 unsafe evalExpr (Option Expr) (mkApp (mkConst ``Option [0]) (mkConst ``Expr))"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "unsafe evalExpr Expr (mkConst ``Expr)"
   },
   {
     "file": "Solidity/Tools/Upstream.lean",

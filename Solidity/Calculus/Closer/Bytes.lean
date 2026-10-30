@@ -1064,20 +1064,20 @@ guards that return dropped, keys compared, what a premise rewrites
 rewritten.  By the recursor. -/
 @[implemented_by Facts.nfM]
 def Facts.nf (F : Facts C) {s : Srt} (t : LTm C s) : LTm C s :=
-  @LTm.rec C (fun s _ => LTm C s)
-    (@fun _ k => F.rw (.var k))
-    (@fun _ o => F.rw (.app0 o))
-    (@fun _ _ o _ ihx => F.rw (F.fold1 o ihx))
-    (@fun _ _ _ o _ _ ihx ihy => F.rw (F.fold2 o ihx ihy))
-    (@fun _ _ _ _ o _ _ _ ihx ihy ihz => F.rw (F.fold3 o ihx ihy ihz))
-    (@fun _ _ _ it _ _ ihq ihi => .index it ihq ihi)
-    (@fun _ _ ih => F.rw (.obsW ih))
-    (@fun _ _ ih => F.rw (.obsL ih))
-    (@fun _ _ ih => F.rw (F.hasRange (hasN (.obsH ih))))
-    (@fun _ _ _ _ ihd iha => F.seqN ihd iha)
-    (@fun _ _ _ iha ihb => F.orElseN iha ihb)
-    (@fun _ _ _ _ _ _ iha ihb iht ihe => F.rw (F.kiteN iha ihb iht ihe))
-    (@fun _ => .err) s t
+  (@LTm.rec C (fun s _ => Facts C → LTm C s)
+    (@fun _ k F => F.rw (.var k))
+    (@fun _ o F => F.rw (.app0 o))
+    (@fun _ _ o _ ihx F => F.rw (F.fold1 o (ihx F)))
+    (@fun _ _ _ o _ _ ihx ihy F => F.rw (F.fold2 o (ihx F) (ihy F)))
+    (@fun _ _ _ _ o _ _ _ ihx ihy ihz F => F.rw (F.fold3 o (ihx F) (ihy F) (ihz F)))
+    (@fun _ _ _ it _ _ ihq ihi F => .index it (ihq F) (ihi F))
+    (@fun _ _ ih F => F.rw (.obsW (ih F)))
+    (@fun _ _ ih F => F.rw (.obsL (ih F)))
+    (@fun _ _ ih F => F.rw (F.hasRange (hasN (.obsH (ih F)))))
+    (@fun _ _ _ _ ihd iha F => F.seqN (ihd F) (iha F))
+    (@fun _ _ _ iha ihb F => F.orElseN (iha F) (ihb F))
+    (@fun _ _ _ _ _ _ iha ihb iht ihe F => F.rw (F.kiteN (iha F) (ihb F) (iht F) (ihe F)))
+    (@fun _ _ => .err) s t) F
 
 theorem Facts.nf_eq_nfM (F : Facts C) {s : Srt} (t : LTm C s) : F.nf t = F.nfM t := by
   induction t with
