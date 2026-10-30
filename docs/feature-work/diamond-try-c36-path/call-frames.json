@@ -1,0 +1,366 @@
+{
+  "scope": "Manually correlated assembler/Yul/debug-data call occurrences; destination/return PCs are static labels, NOT evaluated stack or proved reachability. Return targets require this intact calling frame. No universal target inferred for a shared JUMP.",
+  "frames": {
+    "legacy": [
+      {
+        "jumpPC": 214,
+        "calleeEntryPC": 879,
+        "callerContinuationPC": 215,
+        "occurrence": "c entry",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 937,
+        "calleeEntryPC": 1648,
+        "callerContinuationPC": 938,
+        "occurrence": "argumenttuple",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1666,
+        "calleeEntryPC": 1633,
+        "callerContinuationPC": 1667,
+        "occurrence": "argumentword",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1641,
+        "calleeEntryPC": 1600,
+        "callerContinuationPC": 1642,
+        "occurrence": "argumentconvert",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1615,
+        "calleeEntryPC": 1591,
+        "callerContinuationPC": 1616,
+        "occurrence": "literalcleanup",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1620,
+        "calleeEntryPC": 1227,
+        "callerContinuationPC": 1621,
+        "occurrence": "literalidentity",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1625,
+        "calleeEntryPC": 1080,
+        "callerContinuationPC": 1626,
+        "occurrence": "literaluintcleanup",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 199,
+        "calleeEntryPC": 1175,
+        "callerContinuationPC": 200,
+        "occurrence": "fABI",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1208,
+        "calleeEntryPC": 1155,
+        "callerContinuationPC": 1209,
+        "occurrence": "fword",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1168,
+        "calleeEntryPC": 1133,
+        "callerContinuationPC": 1169,
+        "occurrence": "fvalidate",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1141,
+        "calleeEntryPC": 1080,
+        "callerContinuationPC": 1142,
+        "occurrence": "fuintcleanup",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 204,
+        "calleeEntryPC": 835,
+        "callerContinuationPC": null,
+        "occurrence": "fterminal",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 988,
+        "calleeEntryPC": 1321,
+        "callerContinuationPC": 989,
+        "occurrence": "catchselector",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1345,
+        "calleeEntryPC": 1309,
+        "callerContinuationPC": 1346,
+        "occurrence": "catchshift",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1006,
+        "calleeEntryPC": 1352,
+        "callerContinuationPC": 1007,
+        "occurrence": "panicdecode",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 227,
+        "calleeEntryPC": 1104,
+        "callerContinuationPC": 228,
+        "occurrence": "resulttuple",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1122,
+        "calleeEntryPC": 1089,
+        "callerContinuationPC": 1123,
+        "occurrence": "resultword",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1097,
+        "calleeEntryPC": 1080,
+        "callerContinuationPC": 1098,
+        "occurrence": "resultuintcleanup",
+        "dynamicFrameIntegrityProved": false
+      }
+    ],
+    "viaIR": [
+      {
+        "jumpPC": 27,
+        "calleeEntryPC": 107,
+        "callerContinuationPC": 28,
+        "occurrence": "dispatchshift",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 86,
+        "calleeEntryPC": 429,
+        "callerContinuationPC": null,
+        "occurrence": "externalc",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 444,
+        "calleeEntryPC": 127,
+        "callerContinuationPC": 445,
+        "occurrence": "emptyargs",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 455,
+        "calleeEntryPC": 1732,
+        "callerContinuationPC": 456,
+        "occurrence": "cbody",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1739,
+        "calleeEntryPC": 486,
+        "callerContinuationPC": 1740,
+        "occurrence": "cdefault",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1749,
+        "calleeEntryPC": 544,
+        "callerContinuationPC": 1750,
+        "occurrence": "actualself",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 552,
+        "calleeEntryPC": 532,
+        "callerContinuationPC": 553,
+        "occurrence": "selfcastouter",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 540,
+        "calleeEntryPC": 504,
+        "callerContinuationPC": 541,
+        "occurrence": "selfcastinner",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 518,
+        "calleeEntryPC": 490,
+        "callerContinuationPC": 519,
+        "occurrence": "selfmaskfirst",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 523,
+        "calleeEntryPC": 501,
+        "callerContinuationPC": 524,
+        "occurrence": "selfidentity",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 528,
+        "calleeEntryPC": 490,
+        "callerContinuationPC": 529,
+        "occurrence": "selfmasklast",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1780,
+        "calleeEntryPC": 113,
+        "callerContinuationPC": 1781,
+        "occurrence": "argumentallocread",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1792,
+        "calleeEntryPC": 631,
+        "callerContinuationPC": 1793,
+        "occurrence": "selectorshift",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1803,
+        "calleeEntryPC": 1711,
+        "callerContinuationPC": 1804,
+        "occurrence": "argumenttuple",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1729,
+        "calleeEntryPC": 1698,
+        "callerContinuationPC": 1730,
+        "occurrence": "argumentword",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1706,
+        "calleeEntryPC": 1670,
+        "callerContinuationPC": 1707,
+        "occurrence": "argumentconvert",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1684,
+        "calleeEntryPC": 1667,
+        "callerContinuationPC": 1685,
+        "occurrence": "literalcleanup",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1689,
+        "calleeEntryPC": 501,
+        "callerContinuationPC": 1690,
+        "occurrence": "literalidentity",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1694,
+        "calleeEntryPC": 142,
+        "callerContinuationPC": 1695,
+        "occurrence": "literaluintcleanup",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 91,
+        "calleeEntryPC": 403,
+        "callerContinuationPC": null,
+        "occurrence": "externalf",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 418,
+        "calleeEntryPC": 373,
+        "callerContinuationPC": 419,
+        "occurrence": "fABI",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 394,
+        "calleeEntryPC": 358,
+        "callerContinuationPC": 395,
+        "occurrence": "fword",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 370,
+        "calleeEntryPC": 338,
+        "callerContinuationPC": 371,
+        "occurrence": "fvalidate",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 346,
+        "calleeEntryPC": 142,
+        "callerContinuationPC": 347,
+        "occurrence": "fuintcleanup",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 423,
+        "calleeEntryPC": 1649,
+        "callerContinuationPC": null,
+        "occurrence": "fterminal",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1832,
+        "calleeEntryPC": 749,
+        "callerContinuationPC": 1833,
+        "occurrence": "catchselector",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 778,
+        "calleeEntryPC": 107,
+        "callerContinuationPC": 779,
+        "occurrence": "catchshift",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1873,
+        "calleeEntryPC": 785,
+        "callerContinuationPC": 1874,
+        "occurrence": "panicdecode",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 1898,
+        "calleeEntryPC": 737,
+        "callerContinuationPC": 1899,
+        "occurrence": "asserttrue",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 463,
+        "calleeEntryPC": 113,
+        "callerContinuationPC": 464,
+        "occurrence": "resultallocread",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 472,
+        "calleeEntryPC": 158,
+        "callerContinuationPC": 473,
+        "occurrence": "resulttuple",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 176,
+        "calleeEntryPC": 145,
+        "callerContinuationPC": 177,
+        "occurrence": "resultword",
+        "dynamicFrameIntegrityProved": false
+      },
+      {
+        "jumpPC": 153,
+        "calleeEntryPC": 142,
+        "callerContinuationPC": 154,
+        "occurrence": "resultuintcleanup",
+        "dynamicFrameIntegrityProved": false
+      }
+    ]
+  }
+}

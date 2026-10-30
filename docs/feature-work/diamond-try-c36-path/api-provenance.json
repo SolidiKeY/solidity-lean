@@ -1,0 +1,50 @@
+[
+  {
+    "publishedCommit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Semantics/Run.lean",
+    "gitBlob": "330d8cb7aa1414d0824248c0d87ec291db08f600",
+    "sha256": "3e97c693c2bea3ea2578cda59bc9e259a3950ded6c6dd6dea8d1b0c718cab3b9",
+    "sourceSnapshot": "post-m1-design/published-Solidity__Semantics__Run.lean",
+    "newFetchOrImport": false
+  },
+  {
+    "publishedCommit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Semantics/AllocBytes.lean",
+    "gitBlob": "66ea08593722ceed120d420967e7a997da5f9338",
+    "sha256": "29033ca8c2fbb8449ee616ae36fc719fa77c606438b8340f3abe40a25b240257",
+    "sourceSnapshot": "post-m1-design/published-Solidity__Semantics__AllocBytes.lean",
+    "newFetchOrImport": false
+  },
+  {
+    "publishedCommit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Semantics/RevertMemory.lean",
+    "gitBlob": "de59a637ea1d6f70dc8515ec5338f57fa86d6b4f",
+    "sha256": "f9f8570ed679b830d5eaab6ab16d8dd3a9383307ea4a7579aeae4aa448a16e93",
+    "sourceSnapshot": "post-m1-design/published-Solidity__Semantics__RevertMemory.lean",
+    "newFetchOrImport": false
+  },
+  {
+    "publishedCommit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Frontend/SolcJson/Body.lean",
+    "gitBlob": "dcfd0f1ca0ceffac54db47bb16bc37733b734b07",
+    "sha256": "e35ded0dc707043c7e4db126fac448925fe5aa81a3de0632cf959791cdbeab69",
+    "sourceSnapshot": "post-m1-design/published-Solidity__Frontend__SolcJson__Body.lean",
+    "newFetchOrImport": false
+  },
+  {
+    "publishedCommit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Slice.lean",
+    "gitBlob": "14bc22005f23be84cb69506d3f0b2fd04ac00384",
+    "sha256": "9d1158c792b99054bf55ab6d11096a85163bef7826e5d6f7bdae25cda1a40241",
+    "sourceSnapshot": "post-m1-design/published-Solidity__Backend__Failure__Slice.lean",
+    "newFetchOrImport": false
+  },
+  {
+    "publishedCommit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Correct.lean",
+    "gitBlob": "c43d9ed6f3643907fd8592c9afabce6fe63bf194",
+    "sha256": "52e4f2d3776a7f72ff3a4645d3fff9794b279f007a669ea3863fccbe70bc76ca",
+    "sourceSnapshot": "post-m1-design/published-Solidity__Backend__Failure__Correct.lean",
+    "newFetchOrImport": false
+  }
+]

@@ -1481,3 +1481,5 @@ Human-approved bounded [M1 computed producer/capture](diamond-try-m1.md) impleme
 [Post-M1 published-interface/readiness design](diamond-try-post-m1-design.md) updates P4/P5b/P8 only from current published source and actual M1; all execution permission and implementation boundaries remain in force.
 
 Compatible Osaka validation after M1: [actual results and held groups](diamond-try-osaka-validation.md). Original native family remains exit1; no source-admission or P4/P5b/P8 change.
+
+Original c()->f(36) static path/source milestone: [reviewable design](diamond-try-c36-path-design.md); held Cancun groups remain plan-only.

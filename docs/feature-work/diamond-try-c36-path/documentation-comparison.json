@@ -1,0 +1,9 @@
+{
+  "currentExit": 1,
+  "baselineExit": 1,
+  "current": "c36-path-design/doc-paths.log",
+  "baseline": "osaka-validation/doc-paths.log",
+  "completePreFooterOutputIdentical": true,
+  "missing": 20,
+  "newFindings": 0
+}
