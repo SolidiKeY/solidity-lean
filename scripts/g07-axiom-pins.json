@@ -2927,6 +2927,9 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.STy.memShape_bytes": [
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Typed.toR_opsOK": [
   "Classical.choice",
   "Quot.sound",
