@@ -9,6 +9,7 @@ import {execFileSync} from 'node:child_process';
 import {preparePaymentSource,certifyPaymentEvidence} from './payment-source.mjs';
 import {parseFixture,withPreamble,runtimePipelines,semanticVectors,evmCompatible,verifySnapshot,COMPILER_SHA} from './solidity-upstream.mjs';
 import {referenceCompiler} from './test-compiler.mjs';
+import {lakeCommand} from './lake-command.mjs';
 const compiler=referenceCompiler();
 assert.equal(createHash('sha256').update(readFileSync(compiler)).digest('hex'),COMPILER_SHA);
 const c=createRequire(import.meta.url)(compiler).cwrap('solidity_compile','string',['string','number','number']);
@@ -24,7 +25,7 @@ function execute(cases,work){
  const input=join(work,'cases.json'),out=join(work,'out.json'),wrapper=join(work,'Run.lean');
  writeFileSync(input,JSON.stringify(cases));writeFileSync(out,'[]');
  writeFileSync(wrapper,`import Solidity.Tools.PaymentReplay\n#payment_batch ${JSON.stringify(input)} to ${JSON.stringify(out)}\n`);
- execFileSync('lake',['--quiet','--no-build','lean',wrapper,'--','--tstack=131072'],{timeout:120000,stdio:'pipe'});
+ execFileSync(lakeCommand(),['--quiet','--no-build','lean',wrapper,'--','--tstack=131072','-j1'],{timeout:120000,stdio:'pipe'});
  return JSON.parse(readFileSync(out));
 }
 function scratch(f){const work=mkdtempSync(join(tmpdir(),'payment-source-'));try{return f(work);}finally{rmSync(work,{recursive:true,force:true});}}

@@ -357,6 +357,39 @@ pending with the coordinator. Local read-only inspection confirms the probe
 replays the unchanged caller, and the final diff contains only this equality
 annotation and its milestone record. No semantic decision is required.
 
+### Remaining Lake resolution routes (2026-10-30)
+
+Attempt 29's checksum-verified payment-source log reports six `spawn lake
+ENOENT` failures. The direct source test and both upstream runner Lake calls
+now use the existing `lakeCommand` resolver, preserving PATH wrappers and the
+Elan fallback. The upstream calls resolve relative PATH entries against their
+actual tool working directory. Both replay commands explicitly pass `-j1`.
+No observations, verdicts, proof budgets or Lean sources change. The retained
+PaymentWitness/PaymentConditions layer finding is already fixed in `CORE`.
+
+All six payment-source tests pass with Elan absent from PATH, including actual
+typed replay, independent gas countercontrols and saved-report resumption.
+The local Elan fallback wrapper adds `--no-build`, so stale artifacts fail
+instead of starting a build. A temporary TOML matches the coordinator's existing
+single-threaded artifacts; the tracked Lake configuration is unchanged.
+Sandbox probes failed with child-process `EPERM`; the same bounded test outside
+the sandbox passes in 20.27 seconds. The inherited cgroup reports a 12 GiB cap
+and zero swap allowance; sampled host available memory remains about 32 GiB.
+Resolver tests, the layer check (172 core modules, zero violations) and diff
+whitespace checks pass. No full combined gate is claimed.
+
+The pinned supplemental retrieval, seven artifacts, 177 archive members and
+175 original checksum records were reverified, as were the separate coordinator
+context manifest and all eleven context files. Source/base Git trees and
+executor identity agree. The frozen prompt distinguishes source-VM headroom
+from the LOCAL host's 12 GiB reserve. Both documentation comparison exits
+remain 1, with the same 26 findings; this adds no original checksum coverage
+or historical execution evidence. Fresh independent read-only finder and skeptic
+launches both failed with `invalid thread-store request: no rollout found`.
+Local read-only inspection found no further repair defect; independent review
+remains pending with the coordinator, who also owns combined gates, staging
+and delivery. No commit or publication is made here.
+
 Current scope after the explicit human decision on 2026-10-29: keep existing
 semantics and prove exact conditional success and certified failure conditions.
 For this assignment only, that replaces the unconditional transfer-success

@@ -10,6 +10,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {execFileSync, spawnSync} from 'node:child_process';
 import {runTool} from './test-solidity.mjs';
+import {lakeCommand} from './lake-command.mjs';
 import {compilerCode} from './solc-code.mjs';
 import {compilationUnitFixture,COMPILERS} from './solc-unit.mjs';
 
@@ -588,7 +589,7 @@ async function main(args) {
     if (i%100===0) {writeReports(output,metadata,results,files.length,manifest.files);console.log(`Prepared ${i+1}/${files.length}; ${jobs.length} Lean replay jobs`);}
   }
   writeReports(output,metadata,results,files.length,manifest.files);
-  runTool('lake',['build',jobs.some(j=>j.paymentSource)?'Solidity.Tools.PaymentReplay':'Solidity.Tools.Upstream'],Math.max(options.timeoutMs,300000));
+  runTool(lakeCommand(process.env, ROOT),['build',jobs.some(j=>j.paymentSource)?'Solidity.Tools.PaymentReplay':'Solidity.Tools.Upstream'],Math.max(options.timeoutMs,300000));
   for (let first=0;first<jobs.length;first+=options.batchSize) {
     const batch=jobs.slice(first,first+options.batchSize);
     const input=join(work,'batch.json'), checkpoint=join(work,'checkpoint.json'), wrapper=join(work,'Batch.lean');
@@ -596,7 +597,7 @@ async function main(args) {
     const payment=batch.some(job=>job.paymentSource);
     writeFileSync(wrapper,`import Solidity.Tools.${payment?'PaymentReplay':'Upstream'}\n#${payment?'payment':'upstream'}_batch ${JSON.stringify(input)} to ${JSON.stringify(checkpoint)}\n`);
     let failure;
-    try {runTool('lake',['--quiet','--no-build','lean',wrapper,'--','--tstack=131072'],options.timeoutMs);}
+    try {runTool(lakeCommand(process.env, ROOT),['--quiet','--no-build','lean',wrapper,'--','--tstack=131072','-j1'],options.timeoutMs);}
     catch(e) {failure=e;}
     const retained=json(checkpoint);
     for (const job of batch) {
