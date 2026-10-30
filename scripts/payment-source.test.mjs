@@ -1,14 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,mkdtempSync,rmSync} from 'node:fs';
-import {join,resolve} from 'node:path';
+import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {preparePaymentSource,certifyPaymentEvidence} from './payment-source.mjs';
 import {parseFixture,withPreamble,runtimePipelines,semanticVectors,evmCompatible,verifySnapshot,COMPILER_SHA} from './solidity-upstream.mjs';
-const compiler=resolve(process.env.SOLC_REFERENCE??'/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js');
+import {referenceCompiler} from './test-compiler.mjs';
+const compiler=referenceCompiler();
 assert.equal(createHash('sha256').update(readFileSync(compiler)).digest('hex'),COMPILER_SHA);
 const c=createRequire(import.meta.url)(compiler).cwrap('solidity_compile','string',['string','number','number']);
 const compile=input=>JSON.parse(c(JSON.stringify(input),0,0));

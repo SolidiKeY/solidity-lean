@@ -15,6 +15,11 @@ node scripts/evm-reference/replay.mjs \
   --out .lake/upstream/recursive-reference.json
 ```
 
+The replay and payment regression tests also accept the repository-local
+`.lake/soljson/` cache or `SOLJSON_DIR`; `SOLC_REFERENCE` takes precedence.
+See [payment test setup](../../docs/solidity-upstream-tests.md#reproduce) for
+the exact compiler filenames, unchanged hashes and source-test prerequisites.
+
 `--filter` requires one exact pinned semantic-fixture path. The archive and all
 11,622 source files are verified before execution. The compiler bytes and full
 version are checked. Each required legacy/viaIR pipeline compiles independently

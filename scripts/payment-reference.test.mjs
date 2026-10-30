@@ -2,6 +2,8 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {discardedSelfPaymentReference} from './solidity-upstream.mjs';
 import {runSolidityTests} from './test-solidity.mjs';
+import {solkeyTestOptions} from './test-compiler.mjs';
+const compilerOptions=solkeyTestOptions();
 const self={nodeType:'Identifier',name:'this'};
 const receiver={nodeType:'FunctionCall',kind:'typeConversion',
   expression:{nodeType:'ElementaryTypeNameExpression',typeName:{name:'address'}},arguments:[self]};
@@ -22,7 +24,7 @@ test('host exemption is only a discarded native reference with total self receiv
   assert.equal(discardedSelfPaymentReference(unknown),false);
 });
 test('source member discard retains receiver writes, reverts, and state frame',()=>{
-  const report=runSolidityTests(['tests/solc/PaymentReferences.sol'],{build:false,contract:'PaymentReferences'});
+  const report=runSolidityTests(['tests/solc/PaymentReferences.sol'],{...compilerOptions,build:false,contract:'PaymentReferences'});
   assert.deepEqual(report.errors,[]);
   for(const name of ['discardedEffects','discardedFailure','discardedSelf']) {
     const row=report.results.find(r=>r.function===name);
@@ -31,7 +33,7 @@ test('source member discard retains receiver writes, reverts, and state frame',(
 });
 test('actual unsupported self transfer retains dispatch refusal',()=>{
   const report=runSolidityTests(['tests/solc/PaymentReferences.sol'],{
-    build:false,contract:'ActualPaymentDispatch',list:true});
+    ...compilerOptions,build:false,contract:'ActualPaymentDispatch',list:true});
   assert.deepEqual(report.errors,[]);
   for (const name of ['actual','parenthesized','conditional']) {
     const row=report.results.find(r=>r.function===name);
@@ -41,7 +43,7 @@ test('actual unsupported self transfer retains dispatch refusal',()=>{
 });
 
 test('native payment members do not become mobile conditional function values',()=>{
-  const report=runSolidityTests(['tests/solc/PaymentInvalidCallee.sol'],{build:false});
+  const report=runSolidityTests(['tests/solc/PaymentInvalidCallee.sol'],{...compilerOptions,build:false});
   assert.equal(report.results.length,0);
   assert.equal(report.errors.length,1);
   assert.equal(report.errors[0].stage,'compile');

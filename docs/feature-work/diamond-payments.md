@@ -1,5 +1,61 @@
 # Diamond payments: guarded rules and the original PiggyBank callback proof
 
+## Portable payment regression setup repair (2026-10-30)
+
+Attempt 27's required `payment-reference.test.mjs` gate failed three checks
+before compilation because it assumed a sibling SolKey checkout. The focused
+repair uses the verified repository snapshot and its unchanged 0.8.34 Gradle
+pin. The payment source/fixture and reference replay checks now locate the
+unchanged 0.8.38 compiler through `scripts/test-compiler.mjs`, using
+`.lake/soljson/`, `SOLJSON_DIR` or `SOLC_REFERENCE`. Missing or mismatched
+compilers still fail; no guard, observation, assertion or budget was removed.
+[Setup instructions](../solidity-upstream-tests.md#reproduce) document both
+exact compiler files, their hashes, overrides and prerequisite artifacts.
+
+Focused results, with compilers copied locally only after hash verification:
+
+| Check | Result |
+| --- | --- |
+| `node --test scripts/payment-reference.test.mjs` | Exit 0; all 4 tests, 5.50 s. |
+| `node --test scripts/evm-reference/payment-replay.test.mjs` | Exit 0; all 7 tests, 1.00 s. |
+| `node --test scripts/evm-reference/replay.test.mjs` | Exit 0; all 14 tests, 1.00 s. |
+| `node scripts/payment-source-fixtures.mjs --check` | Exit 0; exact existing AST bytes, 0.50 s. |
+| Source-world test invocation | Exit 1; 5 checks pass, resume check refuses the runner's explicit prerequisite build. |
+| Compiler negative controls | Wrong SHA and missing locations rejected. |
+| Layer check and diff whitespace check | Exit 0; 172 core modules, none reaches the elaborator. |
+
+The source-world invocation included a negative-lookahead name filter intended
+to select five checks, but the runner also executed the resume test. Its full
+exit remains failed; no subset pass substitutes for the required full gate.
+The coordinator owns that prerequisite build, the resume recheck and combined
+gates. This repair's local wrapper permits only no-build Lean probes and adds
+`-j1`. One check ran at a time under the inherited 12 GiB/no-swap cgroup and
+12 GiB host reserve monitor, with `LEAN_NUM_THREADS=1`. The focused sequence
+sampled at most 1,380,044,800 bytes of cgroup usage and at least 34,488,840,192
+bytes of available host memory. Logs and samples are in
+`.lake/payment-portability/` and `.lake/payment-portability-replay/`.
+Earlier sandbox process-control failures and an accidentally removed path
+import caught by replay tests are retained separately; the import was restored
+before the final 14-test pass. Optional EVM dependencies were installed from
+the existing lock with offline `npm ci --ignore-scripts`.
+
+The supplied retrieval and coordinator manifest hashes, seven artifact hashes
+and eleven coordinator file hashes were reverified. The original checksum
+manifest still verifies exactly 175 source records. Source/base commits,
+bundle head, executor/thread identity and provenance agree. Coordinator
+baseline evidence remains separate from original checksum coverage; the
+documentation scans remain failed with 26 identical findings and zero new
+findings. Source-VM OS headroom and the LOCAL host reserve remain distinct.
+No historical gate or new combined validation pass is inferred.
+
+Independent read-only finder and skeptic reviews used no Lean server. Neither
+found a pin, observation or semantic weakening; the finder requested the setup
+documentation added above. Both final read-only refreshes found no remaining
+defect or code/documentation mismatch. No Lean source was edited, so no Lean MCP document
+was opened. The existing registration repair below is already in the candidate.
+No index, commit, remote branch, source VM, skill or monitor is changed, and
+there is no pending semantic decision.
+
 ## Core layer registration repair (2026-10-30)
 
 The retained review of candidate `e6fb7d45` correctly found that

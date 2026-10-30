@@ -3,10 +3,11 @@
 import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
-import {join,resolve} from 'node:path';
+import {join} from 'node:path';
 import {preparePaymentSource} from './payment-source.mjs';
 import {parseFixture,withPreamble,runtimePipelines,semanticVectors,evmCompatible,verifySnapshot,COMPILER_SHA} from './solidity-upstream.mjs';
-const compiler=resolve(process.env.SOLC_REFERENCE??'/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js');
+import {referenceCompiler} from './test-compiler.mjs';
+const compiler=referenceCompiler();
 const check=process.argv.includes('--check'),sha=x=>createHash('sha256').update(x).digest('hex');
 if(sha(readFileSync(compiler))!==COMPILER_SHA)throw Error('pinned compiler SHA mismatch');
 const c=createRequire(import.meta.url)(compiler).cwrap('solidity_compile','string',['string','number','number']);
