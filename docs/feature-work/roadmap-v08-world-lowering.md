@@ -6,6 +6,14 @@ recovers the pinned checkout, traces published evidence and adds independent
 intrinsic adapters plus source/intrinsic byte observation proofs and inhabited
 controls. It adds no axiom, exclusion or replacement source semantics.
 
+Current continuation inventory: **170** exact lane theorem/control pins in22
+owned Lean modules. Source callable metadata, request/environment/transient
+projections, selector/Keccak byte observations, emit-effect controls, payment
+and declaration-role clauses are implemented below. Every G20–G23 parent remains
+incomplete. The initial tables and counts are historical; continuation sections
+record subsequent checked progress. Largest retained sampled aggregate RSS is
+3553173504 bytes from the historical full timeout64122, not a passing full gate.
+
 ## Reproduction and setup
 
 Base: `fb379ae20f10e2c92113453ddd9d40d8f2efbe09`.
@@ -37,7 +45,7 @@ a session-specific alternate TOML: Built Solidity.KeySort (1.9s), Build
 completed successfully (2 jobs), exit 0. Cgroup peak is 139890688 bytes.
 RUNTIME_GATE_PASS is established for this recovered setup; the passing owned 59-module closure (60 Lake jobs) subsequently records 851103744 bytes
 sampled aggregate RSS and 255733760 bytes cgroup peak. Failed development
-checks are retained; the largest sampled RSS so far is 2399289344 bytes during
+checks are retained; at this historical initial checkpoint the largest sampled RSS was 2399289344 bytes during
 a failed conversion-heavy control proof. No proof budget was raised. The
 word-stream proof now transports encoder equality through function
 extensionality; delegated controls group observation fields and use an empty
@@ -131,7 +139,7 @@ Neither review certifies future implementation.
 
 ## Independent proof checkpoint
 
-The owned modules are registered append-only. All 50 current named theorems
+The owned modules are registered append-only. All 50 initial-checkpoint named theorems
 have exact lane-local axiom sets in scripts/v08-axiom-pins.json; Audit prints
 all headline laws and controls print their inhabited witnesses. The allowed
 sets contain only propext, Classical.choice and Quot.sound. These are kernel
@@ -164,7 +172,7 @@ These finite witnesses impose no semantic call-expansion bound. The additional
 callback witness below supplies a published invariant/havoc callback outcome;
 arbitrary source callback/reentrancy execution remains open.
 
-## Queue status after the independent proofs
+## Historical initial-checkpoint queue status
 
 All parent groups remain incomplete. The earlier queue table lists the full
 frozen requirements; the following records only checked progress.
@@ -663,3 +671,57 @@ serially, then run the same full layer/default/TestSuite/sort gates under the
 existing600-second bound. Investigate Lake's supported buildDir setting for a
 fresh absent SolKey output directory, retaining the existing executable and
 all generated evidence. No removal/reset or guard/budget relaxation is allowed.
+
+
+## Continuation checkpoint: serial runtime and fresh executable validation
+
+Parent041d313147ad8de5eae7447e954757f060772fac. No Lean theorem or budget
+changes. The runtime runner now resolves actual package/library srcDir, including
+all8 local LeanTeX modules, and orders local dependencies before each Lake job.
+Native executable c.o facets are prebuilt serially. Current full closure891
+modules. Header discovery stops at the first non-import command and ignores
+nested comments; ambiguous/missing explicit targets fail closed.
+
+Every container carries a unique run token. Finally cleanup verifies that token
+before stop/kill, masks repeated termination signals, confirms stopped/absent,
+and any intervention/unknown status forces125. Next-run preflight refuses an
+active/uninspectable V08 container without touching it. Sanitized Docker env,
+12GiB/no-swap, CPU1, LEAN_NUM_THREADS1, explicit Lean-j1, OS headroom and600s
+cap are unchanged. Runtime config/source/toolchain hashes and actual versions
+are bound to logs. Two generated untracked helper pycs are preserved under the
+no-delete instruction, validated by exact hashes and excluded from commits;
+future imports disable bytecode generation. The original untracked root TOML
+is likewise preserved. No other-owner source is changed.
+
+Refreshed Audit156811-ff29f154 passes106 named modules/107 Lake jobs,170 exact
+axiom sets. Nine external evidence-corruption controls reject stale config,
+wrong toolchain, unconfirmed cleanup and the prior six corruptions. Additional
+external software controls cover actual vendored ordering, nested header
+comments, missing target, foreign ownership, timeout/stop/kill, absent container
+and repeated interrupt handling. These tests are not kernel or EVM evidence.
+
+Fresh output158030-65d242d6 passes: supported Lake buildDir is the only config
+change, unique output initially absent, source/toolchain cache reused, new
+executable exists and old binary SHA remains
+11eb6e37ff937d79901cb0072027ff3f9382552d7f65b421078934dadb6d216b.
+Actual377 taclets/131read-bearing/131covered, annotations match. No file removal
+or observation change. Literal run-lean.sh remains unexecuted because its
+check-solkey.sh removes the old executable; the fresh output validates that
+refresh operation independently, not an unreached full-build suffix.
+
+Published closure158385-d132aac7 passes ProvesSound/Evm.Correct/TypingExamples/
+Static.Standalone. Serial warm-up165162-a34945e8 passes Symex/Derived6, including
+actual Derived6 build31s, final228Lakejobs; cgrouppeak3314925568bytes. This
+cache progress justifies a new unchanged bounded full attempt; historical
+baseline/task600-second exit125 logs remain failed gates, not baseline proof
+errors. Full default/TestSuite/sort remains pending until actually reached.
+
+Separate read-only finder/skeptic reviews used no Lean/server/builds. Fixed
+findings: skipped vendor srcDir; cleanup could abort on repeated interrupt;
+preserved generated pycs needed explicit accounting; old50-theorem/RSS text
+needed historical labels. Both confirmed fixes and no new false-pass defect.
+The full170-declaration implementation reviews found no new proof/nonvacuity/
+ownership issue, while retaining all actual source/representation/decoder/
+reserved-owner/composition prerequisites. No claim that every independent
+conceivable clause is exhausted. Checkpoint exact head/patch and raw gate logs
+are retained with the artifact handoff; the final full gate remains separate.

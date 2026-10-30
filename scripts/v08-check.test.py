@@ -19,4 +19,7 @@ for name,key,value in [('guard-stop','resource_or_time_guard_stopped',True),('ze
  result=copy.deepcopy(original);result[key]=value;check(name,result,False)
 result=copy.deepcopy(original);key=next(iter(result['source_sha256']));result['source_sha256'][key]='0'*64;check('changed-source',result,False)
 result=copy.deepcopy(original);result['source_sha256'].pop(next(iter(result['source_sha256'])));check('missing-source',result,False)
-print('PASS: current evidence accepted; six corrupted/guarded evidence controls rejected')
+result=copy.deepcopy(original);result['runtime_configuration']['sha256']='0'*64;check('changed-config',result,False)
+result=copy.deepcopy(original);result['tool_versions'][0]='wrong toolchain';check('wrong-toolchain',result,False)
+result=copy.deepcopy(original);result['container_cleanup_verified']=False;check('unconfirmed-container-stop',result,False)
+print('PASS: current evidence accepted; nine corrupted/guarded evidence controls rejected')
