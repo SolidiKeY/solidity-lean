@@ -460,3 +460,40 @@ links in this owning document resolve. Final handoff finder/skeptic confirmed
 actual gate outputs, axiom pin and component boundaries; their wording findings
 were fixed (cached serial closure is not called cold, and recovery is distinct
 from the documented setup retries). No review used Lean/server/build.
+
+## Integration ownership repair (2026-10-30)
+
+Retained review P2 on candidate `22580806957a553479e473f1e07cf7a2137781f3`
+found that the normal ownership gate audited only the frozen original lane.
+Committed integration repairs escaped that interval, including deletions in
+the shared documentation registries relative to integration base `8445c3fc`.
+The gate now defaults to that integration base through the current worktree,
+while preserving the original lane audit and frozen dependency availability
+at `50658f41`. Existing scalar contribution files are exempted only when they
+match the pinned scalar head `2a267e4f`; other unowned writes still fail.
+Index and worktree checks remain separate so an unstaged restoration cannot
+hide a staged violation. Explicit ownership-range options remain available.
+
+The registries retain their complete integration-base contents and append the
+new lane entries. Base-to-worktree numstat reports 5 additions/0 deletions for
+`docs/README.md` and 56 additions/0 deletions for `docs/module-map.md`.
+The existing Creation entries and blank lines keep their original positions.
+
+Focused verification passes: `node scripts/check-backend-environment.mjs`
+reports all 11 owned modules passing, and
+`node tests/backend-environment/ownership.mjs` passes. The latter exercises
+normal invocation against clean committed unowned edits and deletions in all
+three shared registries, accepts committed appends, and rejects changes to a
+pinned scalar file. It retains staged/unstaged, rename, frozen-import, closure
+and proof-budget controls. Clean-status assertions prevent live edits from
+accidentally providing the coverage intended for committed candidates.
+Sandbox attempts stopped at Node/Git `EPERM`; the actual checks above passed
+outside the sandbox. No Lean file, theorem, observation or budget changed;
+the coordinator retains ownership of full combined validation.
+
+Read-only finder review confirmed the base registry contents are preserved;
+skeptic review found the committed fixtures retained an untracked allowed
+file. That file is now removed before those cases, and explicit clean-status
+assertions pass. Both review passes were performed by the repair worker:
+attempts to start independent reviewers failed with a thread-store
+`no rollout found` error. No review used Lean, the server or a build.

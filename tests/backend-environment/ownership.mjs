@@ -2,7 +2,7 @@
 // Exercise the real gate and Git ranges in an isolated fixture; no Lean is run.
 import assert from 'node:assert/strict';
 import {execFileSync,spawnSync} from 'node:child_process';
-import {copyFileSync,mkdirSync,mkdtempSync,rmSync,writeFileSync} from 'node:fs';
+import {copyFileSync,mkdirSync,mkdtempSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -19,6 +19,10 @@ function gate(expected,...args){
  if(expected===null)assert.equal(result.status,0,result.stderr);
  else{assert.notEqual(result.status,0);assert.match(result.stderr,expected);}
 }
+function cleanGate(expected){
+ assert.equal(git(['status','--porcelain']),'','committed regression fixture must be clean');
+ gate(expected);
+}
 try{
  git(['init','-q']);
  // Reuse only read-only objects, including the pinned contribution/dependency base.
@@ -30,7 +34,17 @@ try{
  for(const file of ['Solidity.lean','docs/README.md','docs/module-map.md'])write(file,'-- retained registry entry\n');
  write('outside.txt','retained\n');
  git(['add','.']);commit();
- gate(null); // Original lane range passes despite a different integrated HEAD.
+ // Give this isolated history its own integration boundary; keep real frozen
+ // dependency/source/scalar pins. Exercise the normal invocation, with no flags.
+ const boundary=git(['rev-parse','HEAD']);
+ const gateFile=join(fixture,'scripts/check-backend-environment.mjs');
+ const gateSource=readFileSync(gateFile,'utf8');
+ assert.ok(gateSource.includes("const integrationBase='8445c3fc203144251b9d1fc9181f7f61a8189522';"));
+ write('scripts/check-backend-environment.mjs',gateSource.replace(
+  "const integrationBase='8445c3fc203144251b9d1fc9181f7f61a8189522';",
+  `const integrationBase='${boundary}';`));
+ git(['add','.']);commit();
+ gate(null);
  write('tests/backend-environment/owned.txt','allowed repair\n');gate(null);
  write('unowned.txt','unowned repair\n');gate(/unowned write unowned.txt/);
  rmSync(join(fixture,'unowned.txt'));
@@ -46,11 +60,25 @@ try{
  git(['reset','-q','HEAD','--','docs/README.md']);
  write('docs/README.md','-- retained registry entry\n-- appended entry\n');gate(null);
  git(['restore','docs/README.md']);
- // A committed ownership violation is still rejected in an explicit review range.
+ rmSync(join(fixture,'tests/backend-environment/owned.txt'));
+ // Clean committed violations must fail under the normal gate invocation.
  const before=git(['rev-parse','HEAD']);
  write('outside.txt','committed violation\n');git(['add','outside.txt']);commit();
  const after=git(['rev-parse','HEAD']);
+ cleanGate(/unowned write outside.txt/);
  gate(/unowned write outside.txt/,'--ownership-base',before,'--ownership-head',after);
+ git(['reset','--hard',before]);
+ for(const file of ['Solidity.lean','docs/README.md','docs/module-map.md']){
+  write(file,'');git(['add',file]);commit();
+  cleanGate(/shared registry is not append-only/);
+  git(['reset','--hard',before]);
+ }
+ write('docs/README.md','-- retained registry entry\n-- committed append\n');
+ git(['add','docs/README.md']);commit();cleanGate(null);
+ git(['reset','--hard',before]);
+ // A committed change to a pinned other-lane file cannot use the exemption.
+ write('Solidity/Backend/Scalar/Slice.lean','-- changed scalar contribution\n');
+ git(['add','.']);commit();cleanGate(/integrated scalar file changed/);
  git(['reset','--hard',before]);
  gate(/supply both/,'--ownership-base',before);
  // Re-selecting the ownership range must never refresh the dependency base.
@@ -70,5 +98,5 @@ try{
  git(['restore','Solidity/Backend/Environment/Fixture0.lean']);
  write('Solidity/Backend/Environment/Fixture0.lean','axiom unsound : False\n');
  gate(/proof shortcut\/budget/);
- console.log('ownership regressions pass: contribution range, live repairs, unowned writes/renames, registry deletion, committed range, frozen imports, closure, proof gate');
+ console.log('ownership regressions pass: contribution range, live repairs, unowned writes/renames, registry deletion, default committed violations/appends, pinned scalar files, explicit range, frozen imports, closure, proof gate');
 }finally{rmSync(fixture,{recursive:true,force:true});}

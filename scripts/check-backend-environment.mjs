@@ -8,11 +8,15 @@ import {loadGraph,reach} from './import-fanout.mjs';
 // Dependency availability is frozen even when the reviewed ownership range changes.
 const dependencyBase='50658f41061b366d6e503d1e8a3a324a281e9fca';
 const sourceHead='93e97b28e61f1466eafeb6163baed9da1f9e8240';
+const integrationBase='8445c3fc203144251b9d1fc9181f7f61a8189522';
+// Already integrated scalar files are read-only, pinned by exact blob and mode.
+const scalarHead='2a267e4f5f43b87d7e49ae14685082559706a03d';
 const {values}=parseArgs({options:{'ownership-base':{type:'string'},'ownership-head':{type:'string'}}});
 assert.equal(Boolean(values['ownership-base']),Boolean(values['ownership-head']),
  'supply both --ownership-base and --ownership-head');
-const ownershipBase=values['ownership-base']??dependencyBase;
-const ownershipHead=values['ownership-head']??sourceHead;
+const ownershipBase=values['ownership-base']??integrationBase;
+// An omitted head audits the current candidate, including uncommitted repairs.
+const ownershipHead=values['ownership-head'];
 const prefix='Solidity.Backend.Environment.';
 const {graph}=loadGraph();
 const owned=[...graph.keys()].filter(m=>m.startsWith(prefix));
@@ -34,22 +38,33 @@ function checkOwned(file){
  assert.ok(file.startsWith('Solidity/Backend/Environment/')||file==='docs/feature-work/backend-environment-lowering.md'||
   file==='scripts/check-backend-environment.mjs'||file.startsWith('tests/backend-environment/')||shared.has(file),`unowned write ${file}`);
 }
-function checkOwnership(range){
+const scalarPaths=new Set(paths(git(['diff','--no-renames','--name-only','-z',integrationBase,scalarHead,'--',
+ 'Solidity/Backend/Scalar/','docs/feature-work/backend-scalar-lowering.md',
+ 'scripts/backend-scalar-thresholds.py','scripts/check-backend-scalar.mjs',
+ 'scripts/check-backend-scalar-evm.mjs','scripts/fixtures/backend-scalar-export.lean'])));
+function checkOwnership(range,{integrated=false,registryRange=range}={}){
  const changed=paths(git(['diff','--no-renames','--name-only','-z',...range,'--']));
  for(const file of changed){
+  if(integrated&&scalarPaths.has(file)){
+   const endpoint=ownershipHead?[ownershipHead]:[];
+   assert.equal(git(['diff','--no-ext-diff','--no-renames',scalarHead,...endpoint,'--',file]),'',
+    `integrated scalar file changed: ${file}`);
+   continue;
+  }
   checkOwned(file);
   if(shared.has(file)){
-   const stat=git(['diff','--no-renames','--numstat',...range,'--',file]).trim().split('\t');
+   const stat=git(['diff','--no-renames','--numstat',...registryRange,'--',file]).trim().split('\t');
    assert.equal(stat[1],'0',`shared registry is not append-only: ${file}`);
   }
  }
 }
-// Audit the complete contribution, rather than attributing other integrated lanes
-// to this worker. Audit the index and worktree independently against HEAD, so
-// an unstaged restoration cannot hide a staged ownership/registry violation.
-checkOwnership([ownershipBase,ownershipHead]);
-checkOwnership(['--cached','HEAD']);
-checkOwnership(['HEAD']);
+// Preserve the original lane audit, then include all committed integration repairs.
+// The only other-lane exemption is the exact pinned scalar contribution above.
+checkOwnership([dependencyBase,sourceHead]);
+checkOwnership([ownershipBase,...(ownershipHead?[ownershipHead]:[])],{integrated:true});
+// Also reject staged violations concealed by an unstaged restoration.
+checkOwnership(['--cached','HEAD'],{registryRange:['--cached',integrationBase]});
+checkOwnership(['HEAD'],{registryRange:[integrationBase]});
 for(const file of paths(git(['ls-files','--others','--exclude-standard','-z'])))
  checkOwned(file);
 for(const file of readdirSync('Solidity/Backend/Environment').filter(n=>n.endsWith('.lean'))){
@@ -57,4 +72,4 @@ for(const file of readdirSync('Solidity/Backend/Environment').filter(n=>n.endsWi
  assert.ok(!/\bset_option\s+(maxHeartbeats|maxRecDepth)|\b(?:sorry|native_decide|implemented_by|axiom)\b/.test(
   text.replace(/\/-[\s\S]*?-\//g,'').replace(/--[^\n]*/g,'')),`proof shortcut/budget in ${file}`);
 }
-console.log(`${owned.length} owned modules: core closure, frozen-base imports, ownership ${ownershipBase}..${ownershipHead}, working repairs and append-only registries pass`);
+console.log(`${owned.length} owned modules: core closure, frozen-base imports, ownership ${ownershipBase}..${ownershipHead??'worktree'}, working repairs and append-only registries pass`);
