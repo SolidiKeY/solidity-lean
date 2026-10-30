@@ -55,6 +55,10 @@ import Solidity.Frontend.Checked.LexExamples
 import Solidity.Frontend.Checked.TypeExamples
 import Solidity.Frontend.Checked.ExprExamples
 import Solidity.Frontend.Checked.UnitExamples
+import Solidity.Source.SemanticsExamples
+import Solidity.Source.Unique
+import Solidity.Source.Horizon
+import Solidity.Source.Session
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -1262,3 +1266,46 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} checked-unit (G11) theorems use only the standard axioms"
+
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.wrapBits_mem,
+    ``Solidity.Source.Env.fieldTy?_of_fieldAt,
+    ``Solidity.Source.firstDone_mono,
+    ``Solidity.Source.firstDone_none_iff,
+    ``Solidity.Source.sessionAt_consistent,
+    ``Solidity.Source.Ledger.semExprCoverage_of_typed,
+    ``Solidity.Source.Ledger.semStmtCoverage_of_typed,
+    ``Solidity.Source.Ledger.semExprGaps_spec,
+    ``Solidity.Source.SemanticsExamples.add_overflow_checked,
+    ``Solidity.Source.SemanticsExamples.order_legacy,
+    ``Solidity.Source.SemanticsExamples.order_viaIR,
+    ``Solidity.Source.SemanticsExamples.modifier_twice_legacy,
+    ``Solidity.Source.SemanticsExamples.modifier_twice_viaIR,
+    ``Solidity.Source.SemanticsExamples.revert_rolls_back,
+    ``Solidity.Source.SemanticsExamples.transient_cleared,
+    ``Solidity.Source.SemanticsExamples.reentrant_callback,
+    ``Solidity.Source.SemanticsExamples.ctor_order_legacy,
+    ``Solidity.Source.SemanticsExamples.ctor_order_viaIR,
+    ``Solidity.Source.SemanticsExamples.outside_revert_rolls_back,
+    ``Solidity.Source.SemanticsExamples.static_callback_refused,
+    ``Solidity.Source.SemanticsExamples.session_runs,
+    ``Solidity.Source.Typed.constShape,
+    ``Solidity.Source.Syn.const_binOp,
+    ``Solidity.Source.zeroLength_illTyped, ``Solidity.Source.Typed.unique,
+    ``Solidity.Source.StmtD.unique, ``Solidity.Source.ItemsD.unique,
+    ``Solidity.Source.RBody.ofDerivation_unique,
+    ``Solidity.Source.belowAt, ``Solidity.Source.runTx_stable, ``Solidity.Source.deploy_stable,
+    ``Solidity.Source.firstDone_runTx, ``Solidity.Source.runTx_stuck_stable,
+    ``Solidity.Source.growAt, ``Solidity.Source.approxAt, ``Solidity.Source.runTx_events_mono,
+    ``Solidity.Source.sessionAtEvents_consistent, ``Solidity.Source.stuck_not_diverges,
+    ``Solidity.Source.stuck_stable, ``Solidity.Source.txFate_mono,
+    ``Solidity.Source.stuck_eventually, ``Solidity.Source.deploy_events_mono]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-semantics theorems use only the standard axioms"

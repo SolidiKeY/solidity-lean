@@ -660,6 +660,20 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Frontend/Checked/ExprExamples.lean` | G10 controls: precedence and associativity lemmas over `Syn.precNode`, every operator, expression trees, refused ambiguous forms, expression constructor coverage (`exprCtors_covered`). |
 | `Frontend/Checked/Certificate.lean` | G11: G05's parse-stage instance: `Units`, `Parses`, `parseChecker` (`checkUnits_sound`), the producer (`produce_accepted`), `FrontendSpec.ofParse`. |
 | `Frontend/Checked/UnitExamples.lean` | G11 controls: statements, definitions and units, every S00 constructor covered (`allCtors_covered`, `profileCtors_covered`), out-of-profile refusals, the G05 checker on a two-unit input. |
+| `Source/Value.lean` | S02: run-time values `RVal`, `Halt`, decidable `STy` equality, wrapping (`wrapBits_mem`), checked/unchecked integer and fixed-point arithmetic, shifts, powers, comparisons, value conversions. |
+| `Source/Elaborated.lean` | S02 prerequisite: resolved bodies, modifier invocations, initializers and base arguments (`Program`), and `Elaborated` (a resolution carrying its program, every part tied to a derivation). |
+| `Source/Unique.lean` | Q1: uniqueness of meaning (`Typed.unique`, `StmtD.unique`, `ItemsD.unique`, `RBody.ofDerivation_unique`), solc's literal typing (`Typed.constShape`), `0.length` refused, literal-gap controls. |
+| `Source/Machine.lean` | S02: the logical storage layout (`Env.cellTy`), `Locals`, the machine state `St`, frames `Fr`, `Glob`, the monad `EM`, storage/memory reads, writes, copies and deletion. |
+| `Source/Eval.lean` | S02/S03: the interpreter of resolved expressions, lvalues, statements, modifiers, internal and external calls, dispatch and environment moves, at a horizon. |
+| `Source/Semantics.lean` | S03.02/S03.04/S04.04/S05: constructor order per pipeline, deployment, transactions, least-horizon completion (`firstDone_mono`), sessions as G01 prefixes (`sessionAt_consistent`, `sourceLang`). |
+| `Source/Ledger.lean` | S05: the semantic status of every expression and statement constructor against S01's coverage (`semExprCoverage_of_typed`, `semExprGaps_spec`). |
+| `Source/SemanticsExamples.lean` | S02–S05 controls: overflow, division by zero, evaluation order per pipeline, short circuit, two placeholders, constructor order, revert rollback of storage and transient storage, a reentrant callback. |
+| `Source/Infer.lean` | S02 item 1b: type inference computing derivations (`Typed.infer`, `StmtD.infer`, `ItemsD.infer`), sound by construction. |
+| `Source/Elaborate.lean` | S02 item 1b: the elaborator `elaborate : Resolution → Option Elaborated` (bodies, modifiers, initializers, constants, base arguments), coherent by construction. |
+| `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
+| `Source/Horizon.lean` | S05 item 2: the interpreter is monotone in its horizon (`belowAt`, horizon independence `runTx_stable`, `firstDone_runTx`), only appends events (`growAt`), and a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
+| `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
+| `Source/Session.lean`, `SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
 
 ## Precompiles
 

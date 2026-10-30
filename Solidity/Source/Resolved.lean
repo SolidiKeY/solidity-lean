@@ -72,24 +72,6 @@ def Syn.binOpName : Syn .expr → BinOp
 /-- A conversion where two operand types meet: implicit, or none. -/
 def Conv (B : DeclName → DeclName → Bool) (σ τ : STy) : Prop := σ.implicit B τ = true ∨ σ = τ
 
-theorem common?_left {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
-    Conv B a c := by
-  simp only [STy.common?] at h
-  split at h
-  · cases h; exact .inl (by assumption)
-  · split at h
-    · cases h; exact .inr rfl
-    · cases h
-
-theorem common?_right {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
-    Conv B b c := by
-  simp only [STy.common?] at h
-  split at h
-  · cases h; exact .inr rfl
-  · split at h
-    · cases h; exact .inl (by assumption)
-    · cases h
-
 /-- A constant's mobile integer type holds it. -/
 theorem Q.mobileInt?_fits {q : Q} {t : IntTy} (h : q.mobileInt? = some t) : q.FitsInt t := by
   simp only [Q.mobileInt?] at h
@@ -114,19 +96,81 @@ theorem mobile_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ 
     cases hm : q.mobileInt? with
     | none => exact .inr rfl
     | some t =>
-      left
-      simp only [STy.implicit, decide_eq_true_eq]
-      exact Q.mobileInt?_fits hm
+      exact .inl (decide_eq_true (Q.mobileInt?_fits hm))
+  | hexConst q n =>
+    simp only [Conv, STy.mobile]
+    cases hm : q.mobileInt? with
+    | none => exact .inr rfl
+    | some t =>
+      exact .inl (decide_eq_true (Q.mobileInt?_fits hm))
   | stringLit bs => exact .inl rfl
   | _ => exact .inr rfl
+
+theorem common?_left {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
+    Conv B a c := by
+  simp only [STy.common?] at h
+  split at h
+  · cases h
+  · split at h
+    · cases h; exact mobile_conv
+    · split at h
+      · cases h; exact .inl (by assumption)
+      · cases h
+
+theorem common?_right {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
+    Conv B b c := by
+  simp only [STy.common?] at h
+  split at h
+  · cases h
+  · split at h
+    · cases h; exact .inl (by assumption)
+    · split at h
+      · cases h; exact mobile_conv
+      · cases h
+
+/-- A shift's or power's left operand converts to its operand type. -/
+theorem shiftTy_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ τ.shiftTy := by
+  cases τ with
+  | rational q =>
+    simp only [Conv, STy.shiftTy]
+    split
+    · exact .inl (decide_eq_true (by assumption))
+    · split
+      · exact .inl (decide_eq_true (by assumption))
+      · exact .inr rfl
+  | hexConst q n =>
+    simp only [Conv, STy.shiftTy]
+    split
+    · exact .inl (decide_eq_true (by assumption))
+    · split
+      · exact .inl (decide_eq_true (by assumption))
+      · exact .inr rfl
+  | _ => exact .inr rfl
+
+/-- A member found by name has its type at its position. -/
+theorem Env.fieldTy?_of_fieldAt {E : Env} {dn : DeclName} {l : DataLoc} {x : String} {i : Nat}
+    {τ : STy} (h : E.fieldAt dn l x = some (i, τ)) : E.fieldTy? dn l i = some τ := by
+  simp only [Env.fieldAt, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+  obtain ⟨fs, hfs, ⟨p, j⟩, hf, he⟩ := h
+  cases he
+  have hm := List.mem_of_find?_eq_some hf
+  rw [List.mem_zipIdx_iff_getElem?] at hm
+  simp only [Env.fieldTy?, hfs, Option.bind_some] at hm ⊢
+  rw [hm]
+  rfl
+
+/-- The constant `0` converts to `uint256` (an external call's default value). -/
+theorem zero_u256 (B : DeclName → DeclName → Bool) :
+    STy.implicit B (.rational (Q.ofInt 0)) (.int IntTy.u256) = true :=
+  decide_eq_true (p := (Q.ofInt 0).FitsInt IntTy.u256) (by decide)
 
 mutual
 
 /-- **Resolved expressions** over environment `E`, intrinsically typed. -/
 inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | const (q : Q) : RExpr E Γ (.rational q)
-  | bytesLit {len : Nat} {h : 1 ≤ len ∧ len ≤ 32} (n : NumLit) (hn : n.fitsBytes len = true) :
-      RExpr E Γ (.fixedBytes len h)
+  /-- A hexadecimal literal: its value, convertible to `bytes{len}`. -/
+  | bytesLit (n : NumLit) (len : Nat) : RExpr E Γ (.hexConst n.value len)
   | addressLit (ds : List (Fin 16)) : RExpr E Γ (.address false)
   | bool (b : Bool) : RExpr E Γ .bool
   | str (bs : List UInt8) : RExpr E Γ (.stringLit bs)
@@ -169,6 +213,23 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | balance {p : Bool} (a : RExpr E Γ (.address p)) : RExpr E Γ (.int IntTy.u256)
   | builtin {σs : List STy} {τ : STy} (b : Builtin) (args : RArgs E Γ σs)
       (h : b.callTy E.isBase σs = some τ) : RExpr E Γ τ
+  /-- The `i`-th member of a struct. -/
+  | member {l : DataLoc} {dn : DeclName} {τ : STy} (a : RExpr E Γ (.struct l dn)) (i : Nat)
+      (h : E.fieldTy? dn l i = some τ) : RExpr E Γ τ
+  /-- A new struct in memory from its members' values. -/
+  | structNew {dn : DeclName} {ps : List STy}
+      (h : (E.structFields dn .memory).map (·.map Prod.snd) = some ps) (args : RConvArgs E Γ ps) :
+      RExpr E Γ (.struct .memory dn)
+  /-- An external call of function `d` of the contract at `target`, with
+  `value` (zero without the option). -/
+  | extCall {dn : DeclName} {ps rs : List STy} (target : RExpr E Γ (.contract dn)) (d : Decl)
+      (h : d.fnSig E = some (ps, rs)) (value : RExpr E Γ (.int IntTy.u256)) (args : RConvArgs E Γ ps) :
+      RExpr E Γ (STy.ret rs)
+  | transfer (a : RExpr E Γ (.address true)) (v : RExpr E Γ (.int IntTy.u256)) : RExpr E Γ (.tuple [])
+  | send (a : RExpr E Γ (.address true)) (v : RExpr E Γ (.int IntTy.u256)) : RExpr E Γ .bool
+  | abiEncode {σs : List STy} (k : AbiKind) (args : RArgs E Γ σs) : RExpr E Γ (.bytes .memory)
+  /-- A copy into storage. -/
+  | assignCopy {τ σ : STy} (l : RLVal E Γ τ) (e : RExpr E Γ σ) (h : σ.copiesTo τ = true) : RExpr E Γ τ
 
 /-- Resolved argument lists. -/
 inductive RArgs (E : Env) (Γ : RCtx) : List STy → Type where
@@ -190,6 +251,8 @@ inductive RLVal (E : Env) (Γ : RCtx) : STy → Type where
   | indexMapping {τk τv : STy} (a : RExpr E Γ (.mapping τk τv)) (k : RExpr E Γ τk) : RLVal E Γ τv
   | indexBytes {l : DataLoc} {σ : STy} (a : RExpr E Γ (.bytes l)) (hl : l ≠ .calldata) (i : RExpr E Γ σ)
       (h : σ.isIndex = true) : RLVal E Γ (.fixedBytes 1 (by decide))
+  | member {l : DataLoc} {dn : DeclName} {τ : STy} (a : RExpr E Γ (.struct l dn)) (hl : l ≠ .calldata)
+      (i : Nat) (h : E.fieldTy? dn l i = some τ) : RLVal E Γ τ
 
 end
 
@@ -222,8 +285,8 @@ mutual
 
 /-- **Elaboration**: a typing derivation as a resolved expression. -/
 def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ.env Γ.tys τ
-  | .const (q := q) _ _ => .const q
-  | .litBytes (n := n) h => .bytesLit n h
+  | .const (q := q) _ _ _ => .const q
+  | .litBytes (n := n) (len := len) _ => .bytesLit n len
   | .litAddress (ds := ds) _ => .addressLit ds
   | .bool b => .bool b
   | .str bs => .str bs
@@ -243,8 +306,8 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .delete l _ => .delete l.toR
   | .arith (e := e) _ da db h _ _ => .binary e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
   | .bit (e := e) _ da db h _ => .binary e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
-  | .shift (e := e) _ da db _ h _ => .shiftLike e.binOpName (.conv da.toR mobile_conv) db.toR h
-  | .exp _ da db _ h _ => .shiftLike .exp (.conv da.toR mobile_conv) db.toR h
+  | .shift (e := e) _ da db _ h _ => .shiftLike e.binOpName (.conv da.toR shiftTy_conv) db.toR h
+  | .exp _ da db _ h _ => .shiftLike .exp (.conv da.toR shiftTy_conv) db.toR h
   | .order (e := e) _ da db h _ => .compare e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
   | .eq (e := e) _ da db h _ => .compare e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
   | .compareConst (e := e) (qa := qa) (qb := qb) _ _ _ _ => .compareConst e.binOpName qa qb
@@ -267,6 +330,22 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .magic (b := b) (m := m) _ _ h _ => .magic b m h
   | .balance da => .balance da.toR
   | .builtinCall (b := b) _ _ da h => .builtin b da.toR h
+  | .member (i := i) da h => .member da.toR i (Env.fieldTy?_of_fieldAt h)
+  | .structNew _ hf da h => .structNew (by simp only [hf, Option.map_some]) (RArgs.convert _ da.toR h)
+  | .extCall (d := d) (ps := ps) dc da hf hs =>
+    .extCall dc.toR d hs (.conv (.const (Q.ofInt 0)) (.inl (zero_u256 _))) (RArgs.convert ps da.toR (by
+      have hp := mem_of_filter_eq hf
+      simp only [hs] at hp
+      exact hp))
+  | .extCallValue (d := d) (ps := ps) dc dv hv da hf hs _ =>
+    .extCall dc.toR d hs (.conv dv.toR (.inl hv)) (RArgs.convert ps da.toR (by
+      have hp := mem_of_filter_eq hf
+      simp only [hs] at hp
+      exact hp))
+  | .transfer da dv h => .transfer da.toR (.conv dv.toR (.inl h))
+  | .send da dv h => .send da.toR (.conv dv.toR (.inl h))
+  | .abiEncode (k := k) _ _ da _ => .abiEncode k da.toR
+  | .assignCopy l db h => .assignCopy l.toR db.toR h
 
 /-- Elaboration of argument lists. -/
 def TypedArgs.toR {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} :
@@ -294,6 +373,7 @@ def LVal.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : LVal Γ e τ → RLVal Γ.e
   | .indexArray da hl di h _ => .indexArray da.toR hl di.toR h
   | .indexMapping da di h => .indexMapping da.toR (.conv di.toR (.inl h))
   | .indexBytes da hl di h => .indexBytes da.toR hl di.toR h
+  | .member (i := i) da hl h => .member da.toR hl i (Env.fieldTy?_of_fieldAt h)
 
 end
 
@@ -372,7 +452,7 @@ mutual
 /-- **Elaboration of statements.** -/
 def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt k)} :
     StmtD C L s L' → RStmt C.env C.rets C.inModifier k (tysOf L) (tysOf L')
-  | .expr d => .expr d.toR
+  | .expr d _ => .expr d.toR
   | .placeholder h => .placeholder h
   | .declVar (τ := τ) _ _ => .declVar τ
   | .declInit _ _ d h => .declInit d.toR h
@@ -387,7 +467,7 @@ def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt
   | .cont => .cont
   | .ret h => .ret h
   | .retVal hR d h => .retVal hR d.toR h
-  | .retTuple d ds h => .retTuple (RArgs.convert C.rets (.cons d.toR (TypedArgs.ofSlots ds)) h)
+  | .retTuple d ds _ h => .retTuple (RArgs.convert C.rets (.cons d.toR (TypedArgs.ofSlots ds)) h)
   | .emit (d := d) da hf =>
     let p := paramsOf C.env C.isBase _ d (mem_of_filter_eq hf)
     .emit d p.2.1 (RArgs.convert p.1 da.toR p.2.2)
