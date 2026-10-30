@@ -1,0 +1,226 @@
+[
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Slice.lean",
+    "blob": "14bc22005f23be84cb69506d3f0b2fd04ac00384",
+    "sha256": "9d1158c792b99054bf55ab6d11096a85163bef7826e5d6f7bdae25cda1a40241",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Backend__Failure__Slice.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Emit.lean",
+    "blob": "8c74d7e7263ed86680e73b0a64a68e73ef10da3f",
+    "sha256": "5b32a1d20200713327d72e9f2bbe87b24ea9c5b2cfe11f8636db16a875abe178",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Backend__Failure__Emit.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Composition.lean",
+    "blob": "30bd4b09a62414fcbfd78eeba27f84c1b5109075",
+    "sha256": "509abe32afd75622f4ca02ee63f1afde4b55836d3629cc021fc17b5efe69b0b0",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Backend__Failure__Composition.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Unwind.lean",
+    "blob": "abec01d18265f02c38b73c62a67d30b15fd68923",
+    "sha256": "b2c7b603c3b381a689971d27db0c1ba55ab54bb10462bc6abf0abf1ae123d580",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Backend__Failure__Unwind.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Correct.lean",
+    "blob": "c43d9ed6f3643907fd8592c9afabce6fe63bf194",
+    "sha256": "52e4f2d3776a7f72ff3a4645d3fff9794b279f007a669ea3863fccbe70bc76ca",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Backend__Failure__Correct.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Gap.lean",
+    "blob": "0026a673e7f3bb7e8c7c3b13e191262d3b0014a2",
+    "sha256": "e92a32172461995e37a59adb253ab6403bdbb2e2d4f59f97799161ac91c969a7",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Backend__Failure__Gap.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Immediate.lean",
+    "blob": "24daa3024fad14d152b284deb09084a15932f9f2",
+    "sha256": "6dc688194c21604bd8ee05fa3262047d99f94741ca6a3a30cb5937e0223615b0",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Backend__Failure__Immediate.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Evm/Machine.lean",
+    "blob": "b116e3cb2cb989530d7e8a253bddfeb1141cd815",
+    "sha256": "a8a13b4c5b2c32bf5f83c9903ee5f7436e797fe4b70496aeb5fdf5aaa550ebd6",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Evm__Machine.lean",
+    "sameAsLocal": true
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Roadmap/Evm.lean",
+    "blob": "b0e946aef1d5157c30b11acc15ff385ceedb09a1",
+    "sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Roadmap__Evm.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Frontend/SolcJson/Body.lean",
+    "blob": "dcfd0f1ca0ceffac54db47bb16bc37733b734b07",
+    "sha256": "e35ded0dc707043c7e4db126fac448925fe5aa81a3de0632cf959791cdbeab69",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Frontend__SolcJson__Body.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Frontend/SolcJson/Admission.lean",
+    "blob": "be714503a78c33a0660cdc9940035e227c757f35",
+    "sha256": "59bd4ae2f9b91ef4023ed0164df9727a92d83fc55c6e202b166a1d0216e88d99",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Frontend__SolcJson__Admission.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Semantics/Run.lean",
+    "blob": "330d8cb7aa1414d0824248c0d87ec291db08f600",
+    "sha256": "3e97c693c2bea3ea2578cda59bc9e259a3950ded6c6dd6dea8d1b0c718cab3b9",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Semantics__Run.lean",
+    "sameAsLocal": true
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Semantics/RevertMemory.lean",
+    "blob": "de59a637ea1d6f70dc8515ec5338f57fa86d6b4f",
+    "sha256": "f9f8570ed679b830d5eaab6ab16d8dd3a9383307ea4a7579aeae4aa448a16e93",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Semantics__RevertMemory.lean",
+    "sameAsLocal": true
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Semantics/RevertOnly.lean",
+    "blob": "aa04354f2cd894fe086424f1b8627706cd143f15",
+    "sha256": "9d7a4c70fb1613a1df82d515004c39ac347d8c88e0b66395137aea81d665a73c",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Semantics__RevertOnly.lean",
+    "sameAsLocal": true
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "docs/feature-work/roadmap-g06-evm.md",
+    "blob": "921fd90140886d842472f63ce7a2465318c89153",
+    "sha256": "58c024ea427f439605be425b35514b219349666971f40800e773dbf0fcc3d958",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-docs__feature-work__roadmap-g06-evm.md",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "docs/feature-work/roadmap-g04-restrictions.md",
+    "blob": "e6db228cb97550d56ce348810bf37a75e7414696",
+    "sha256": "05f80f0984ddd3bbc384f56a9968359be441bbd08a1fa43fd4059a44228a1063",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-docs__feature-work__roadmap-g04-restrictions.md",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "docs/feature-work/roadmap-g03-ledger.json",
+    "blob": "d126f2ce892aba996a9c04e9155b6108818ade86",
+    "sha256": "a98f813f3ef05c5960b08a9ecb35c0077cedb437d61552d13171d0bf7f461de6",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-docs__feature-work__roadmap-g03-ledger.json",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "docs/feature-work/backend-creation-artifacts.md",
+    "blob": "538e27ef045053be42487a71987b8a19227e5fee",
+    "sha256": "cac138004266fb9ec07873eb5b053ceeb089b544b830bbff78f7b1b2a31ccdae",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-docs__feature-work__backend-creation-artifacts.md",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "docs/feature-work/backend-failure-emission.md",
+    "blob": "0d5d3a8c1121220c282a506c111efcb4de3374fd",
+    "sha256": "32a921447e82ee97eb9136cb08ffa05edc9bbc059b4633f03f4b4baadda9c425",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-docs__feature-work__backend-failure-emission.md",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Syntax/Scoped.lean",
+    "blob": "d853908512e7cdfe7a600379661e77204963f41b",
+    "sha256": "b1fa2db12fc79ad445a32658f9231b0e09ce4b34c717bc00e46d0470d9c1e098",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Syntax__Scoped.lean",
+    "sameAsLocal": true
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Syntax/Elab/Lower.lean",
+    "blob": "de3a73bf6e93e830153d365350cf6301ffa8b7a9",
+    "sha256": "bef38769296f500457a9984abd6f62ad5f7eb2c622d85058e158f9960f0f7054",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Syntax__Elab__Lower.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Syntax/Elab/Stmt.lean",
+    "blob": "0ac2d82e575c39d7964feaec1d9b3777e8cf6ea5",
+    "sha256": "8b5bd53b615f32e3abfd85f9ed2a506a843f3cf8ca480cdcc2df7d473e922867",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Syntax__Elab__Stmt.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Frontend/SolcJson/Contract.lean",
+    "blob": "21e9610feb3d9a5749b95f543c187c3825af717c",
+    "sha256": "831cbdb0ad12704a0baa3fc4d390da2377be8cf5899b9317004ae964252f5638",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Frontend__SolcJson__Contract.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Semantics/AllocBytes.lean",
+    "blob": "66ea08593722ceed120d420967e7a997da5f9338",
+    "sha256": "29033ca8c2fbb8449ee616ae36fc719fa77c606438b8340f3abe40a25b240257",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Semantics__AllocBytes.lean",
+    "sameAsLocal": true
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Backend/Failure/Checkpoint.lean",
+    "blob": "99cab0a534152cdc74252f5edc57bb77562557ef",
+    "sha256": "7533e75520bf7206942bff11daa62418cb81db4788ddbb83bd262267574cd32a",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Backend__Failure__Checkpoint.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Roadmap/Contracts.lean",
+    "blob": "b7cbc5cc7531bdaa8d4e061587c02d29608cc183",
+    "sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Roadmap__Contracts.lean",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Syntax/Raw.lean",
+    "blob": "2513fcf1aa048415193e2651f7991c8856753ace",
+    "sha256": "d2fe8be8e0613c8f80b92210f965fdbb7aa067d3bf72548b204909f3f92a28f2",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Syntax__Raw.lean",
+    "sameAsLocal": true
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "Solidity/Frontend/SolcJson/Getters.lean",
+    "blob": "8e4f24b87971a67af6e516626d6b725afa9bcaaf",
+    "sha256": "9d9741fb343eb4db5e214a7ecd270e0eea62b306238b3699f149bb529d026424",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/published-Solidity__Frontend__SolcJson__Getters.lean",
+    "sameAsLocal": true
+  }
+]

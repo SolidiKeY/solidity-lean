@@ -1,0 +1,8 @@
+[
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "path": "scripts/self-try-adapter.mjs",
+    "exit": 128,
+    "stderr": "fatal: path 'scripts/self-try-adapter.mjs' exists on disk, but not in '8445c3fc203144251b9d1fc9181f7f61a8189522'\n"
+  }
+]

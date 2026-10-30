@@ -1,0 +1,192 @@
+[
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Slice.lean",
+    "name": "step",
+    "line": 37,
+    "declarationHeader": "def step (i : Instr) (s : Machine) : Option (Machine \u00d7 Option Roadmap.Outcome) :=",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.Slice.step",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Slice.lean",
+    "name": "putBytes_frame",
+    "line": 76,
+    "declarationHeader": "theorem putBytes_frame (m : Memory) (a x : Nat) (bs : List UInt8)\n    (h : x < a \u2228 a + bs.length \u2264 x) : putBytes m a bs x = m x := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.Slice.putBytes_frame",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Slice.lean",
+    "name": "getBytes_putBytes",
+    "line": 86,
+    "declarationHeader": "theorem getBytes_putBytes (m : Memory) (a : Nat) (bs : List UInt8) :\n    getBytes (putBytes m a bs) a bs.length = bs := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.Slice.getBytes_putBytes",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Slice.lean",
+    "name": "getBytes_congr",
+    "line": 103,
+    "declarationHeader": "theorem getBytes_congr (m n : Memory) (a len : Nat)\n    (h : \u2200 x, a \u2264 x \u2192 x < a + len \u2192 m x = n x) :\n    getBytes m a len = getBytes n a len := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.Slice.getBytes_congr",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Slice.lean",
+    "name": "getBytes_suffix_write",
+    "line": 115,
+    "declarationHeader": "theorem getBytes_suffix_write (m : Memory) (a len : Nat) (padding : List UInt8) :\n    getBytes (putBytes m (a + len) padding) a len = getBytes m a len := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.Slice.getBytes_suffix_write",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Correct.lean",
+    "name": "run_writes",
+    "line": 40,
+    "declarationHeader": "theorem run_writes (a : Nat) (bs : List UInt8) (p : Program) (s : Machine)\n    (h : a + bs.length \u2264 wordLimit) :\n    run (writes a bs ++ p) s =\n      run p { s with memory := putBytes s.memory a bs } := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.run_writes",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Correct.lean",
+    "name": "run_emit_suffix",
+    "line": 57,
+    "declarationHeader": "theorem run_emit_suffix (a : Nat) (i : Input) (p : Program) (s : Machine)\n    (h : Fits a i.bytes) :\n    run (emit a i ++ p) s =\n      some ({ s with memory := putBytes s.memory a i.bytes }, some i.observation) := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.run_emit_suffix",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Correct.lean",
+    "name": "checkedRun_emit_suffix",
+    "line": 121,
+    "declarationHeader": "theorem checkedRun_emit_suffix (a : Nat) (i : Input) (p : Program) (s : Machine)\n    (h : Fits a i.bytes) (hs : s.stack.length + 2 \u2264 1024) :\n    checkedRun (emit a i ++ p) s =\n      some ({ s with memory := putBytes s.memory a i.bytes }, some i.observation) := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.checkedRun_emit_suffix",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Correct.lean",
+    "name": "tail_untouched",
+    "line": 140,
+    "declarationHeader": "theorem tail_untouched (a k : Nat) (bs : List UInt8) (m : Memory) :\n    putBytes m a bs (a + bs.length + k) = m (a + bs.length + k) := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.tail_untouched",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Unwind.lean",
+    "name": "execute_failure",
+    "line": 39,
+    "declarationHeader": "theorem execute_failure (c : Checkpoint P T) (a : Nat) (d : List UInt8) (live : Journal P T)\n    (hf : Fits a d) (hs : live.machine.stack.length + 2 \u2264 1024) :\n    execute c a (.custom d) live = some (restore c, .revert d) :=",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.Local.execute_failure",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Backend/Failure/Unwind.lean",
+    "name": "execute_checkpoint",
+    "line": 31,
+    "declarationHeader": "theorem execute_checkpoint (c : Checkpoint P T) (a : Nat) (i : Input) (live : Journal P T)\n    (hf : Fits a i.bytes) (hs : live.machine.stack.length + 2 \u2264 1024) :\n    let emitted := { live with machine :=",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Backend.Failure.Local.execute_checkpoint",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Semantics/Run.lean",
+    "name": "Args.evalT",
+    "line": 457,
+    "declarationHeader": "def Args.evalT (\u03c3 : State C \u0393) : {ps : Ctx} \u2192 Args C \u0393 ps \u2192 TRes (TEnv C \u03c3.H ps)\n  | _, as => Args.casesOn (motive := fun ps _ => TRes (TEnv C \u03c3.H ps)) as (pure ())",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Args.evalT",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Semantics/Run.lean",
+    "name": "CallRet.enterT",
+    "line": 506,
+    "declarationHeader": "def CallRet.enterT {\u0393 : Ctx} {rs \u0393' : Ctx} (ret : CallRet \u0393 rs \u0393') {ps : Ctx}\n    (\u03c4 : State C ps) : Out C \u03c4.H (rs ++ ps) :=",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.CallRet.enterT",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Semantics/Run.lean",
+    "name": "call",
+    "line": 810,
+    "declarationHeader": "def call {\u0393' ps rs \u0393f : Ctx} (args : Args C \u0393 ps) (ret : CallRet \u0393 rs \u0393')\n    (hb : Ext (rs ++ ps) \u0393f) (body : TStep C (rs ++ ps) \u0393f) : TStep C \u0393 \u0393' := fun \u03c3 => do",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.TRun.call",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Semantics/Run.lean",
+    "name": "Prog.run_litBytes",
+    "line": 1226,
+    "declarationHeader": "theorem Prog.run_litBytes {\u0393 \u0393\u2081 : Ctx} (x : Var) (bs : List UInt8)\n    (k : Prog C (.mem bytesR :: \u0393) \u0393\u2081) (\u03c3 : State C \u0393) :\n    Prog.run \u03c3 (litBytes x bs k) = TRun.litBytesT bs k.runR \u03c3 := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.Prog.run_litBytes",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Semantics/AllocBytes.lean",
+    "name": "TRun.litBytesT_alloc",
+    "line": 254,
+    "declarationHeader": "theorem TRun.litBytesT_alloc {\u0393\u2081 : Ctx} (\u03c3 : State C \u0393) (bs : List UInt8)\n    (hn : bs.length < 2 ^ 256) (k : TStep C (.mem bytesR :: \u0393) \u0393\u2081) :\n    (TRun.litBytesT bs k \u03c3).map (\u00b7.st) = (k (\u03c3.allocPush (bytesObj \u03c3.H bs hn))).map (\u00b7.st) := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.TRun.litBytesT_alloc",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Semantics/RevertMemory.lean",
+    "name": "TRun.revertData_mem",
+    "line": 35,
+    "declarationHeader": "theorem TRun.revertData_mem (\u03c3 : State C \u0393) (kind : CatchKind)\n    (src : Idx \u0393 (.mem bytesR)) (r : HRef \u03c3.H bytesR)\n    (h : TEnv.get src \u03c3.env = some r) :\n    TRun.revertData [.mem kind src] \u03c3 = .error\n      (THalt.ofData (let bs := (\u03c3.heap.get r).1.map (fun v => UInt8.ofNat v.val.toNat)",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.TRun.revertData_mem",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Semantics/RevertMemory.lean",
+    "name": "TRun.catchBytes_self_data",
+    "line": 67,
+    "declarationHeader": "theorem TRun.catchBytes_self_data {\u03c1 ps \u0393f : Ctx} (c : ExtCall C \u0393)\n    (rets : Binders \u03c1) (sargs : Args C \u0393 ps) (hs : Ext (\u03c1 ++ ps) \u0393f)\n    (sbody : TStep C (\u03c1 ++ ps) \u0393f) (\u03c3 : State C \u0393) (d : List UInt8)\n    (hnz : (c.addr.evalT \u03c3).1 \u2260 0)\n    (hself : (c.addr.evalT \u03c3).1 = \u03c3.tx.selfAddress.1)\n    (hcall : TRun.call sargs (.rets rets) hs sbody \u03c3 = .error (THalt.ofData d)) :\n    TRun.catchBytes c rets sargs hs sbody true \u03c3 = .ok d := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.TRun.catchBytes_self_data",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  },
+  {
+    "commit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+    "file": "Solidity/Semantics/RevertMemory.lean",
+    "name": "TRun.catchData_self_data",
+    "line": 83,
+    "declarationHeader": "theorem TRun.catchData_self_data {\u03c1 ps \u0393f \u0393\u2081 : Ctx} (c : ExtCall C \u0393)\n    (rets : Binders \u03c1) (sargs : Args C \u0393 ps) (hs : Ext (\u03c1 ++ ps) \u0393f)\n    (sbody : TStep C (\u03c1 ++ ps) \u0393f) (kind : CatchKind)\n    (h\u2081 : Ext (.mem bytesR :: \u0393) \u0393\u2081) (body : TStep C (.mem bytesR :: \u0393) \u0393\u2081)\n    (\u03c3 : State C \u0393) (d bs : List UInt8)\n    (hnz : (c.addr.evalT \u03c3).1 \u2260 0)\n    (hself : (c.addr.evalT \u03c3).1 = \u03c3.tx.selfAddress.1)\n    (hcall : TRun.call sargs (.rets rets) hs sbody \u03c3 = .error (THalt.ofData d))\n    (hdecode : kind.decode d = some bs) :\n    TRun.catchData c rets sargs hs sbody true kind h\u2081 body \u03c3 =\n      (TRun.litBytesT bs body \u03c3).map\n        (fun o => \u27e8o.st.drop ((Ext.push .refl).trans h\u2081), o.ext\u27e9) := by",
+    "scope": "exact source header, no elaboration/build/runtime assertion",
+    "qualifiedName": "Solidity.TRun.catchData_self_data",
+    "implicitContext": "Preserved in full module blob/section; header not independently re-elaborated in this source-only increment."
+  }
+]

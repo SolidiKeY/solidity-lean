@@ -1,0 +1,9 @@
+{
+  "currentExit": 1,
+  "baselineExit": 1,
+  "identicalCompleteOutputBeforeResourceFooter": true,
+  "missing": 20,
+  "newFindings": 0,
+  "baseline": "m1-producer/final-doc-paths.log",
+  "current": "post-m1-design/doc-paths.log"
+}

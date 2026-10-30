@@ -1,5 +1,10 @@
 # Proof dependency and implementation-decision plan
 
+Historical design status at7ec3983c is retained below. After actual M1 at3ee3855c,
+use the [post-M1 readiness addendum](../diamond-try-post-m1-design.md) for current
+P4/P5b/P8 dependencies and exact published8445c3fc interfaces. The original
+obligations/outcome ledger are preserved; this link grants no new implementation.
+
 All new items are obligations/design, not axioms or installed semantics.
 
 | Layer | Must prove constructively / nonvacuity gate | Existing API or exact missing prerequisite |
