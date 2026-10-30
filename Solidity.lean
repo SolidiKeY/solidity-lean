@@ -775,3 +775,5 @@ import Solidity.Backend.MemoryOps.CalldataUintControls
 import Solidity.Backend.MemoryOps.MixedCalldataSequenceControls
 
 import Solidity.Backend.MemoryOps.CalldataSequenceChildControls
+
+import Solidity.Backend.MemoryOps.CalldataAgreementControls

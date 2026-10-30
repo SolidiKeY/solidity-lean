@@ -1096,3 +1096,6 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/MixedCalldataSequenceControls.lean` | Mixed maximum-value/full-output reads, actual allocation/growth and fresh parent frames, fixed overlap and arbitrary runtime families. |
 | `Backend/MemoryOps/CalldataSequenceChildren.lean` | Actual success-derived distinct-or-empty frames and existing child-table correspondence at mixed sequence output heaps, with type-derived root separation. |
 | `Backend/MemoryOps/CalldataSequenceChildControls.lean` | Runtime-sized repeated initial child aliases, typed reads and changed other objects; empty-alias success, nonempty alias-mutation failure and explicit empty-root case. |
+| `Backend/MemoryOps/OverwriteAgreement.lean` | Initial pointwise list/typed-heap overwrite identity, actual decoded Boolean agreement, child self-table agreement and preserving-prefix transport. |
+| `Backend/MemoryOps/CalldataAgreementChildren.lean` | Nonempty content-agreeing alias frames and actual final child correspondence; reverse execution reuses existing whole-heap mixed commutation with derived bounds. |
+| `Backend/MemoryOps/CalldataAgreementControls.lean` | Runtime repeated aliases with actual nonempty same-content write and materially changing uint, reverse/neighbor/root/typed reads, reference identity, one-value disagreement and published allocation. |

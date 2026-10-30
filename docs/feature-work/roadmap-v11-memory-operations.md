@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint sixteen. Earlier checkpoint
+Current cumulative accounting through checkpoint seventeen. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -1493,3 +1493,99 @@ follows commit/export. Original full queue accounting remains partial/blocked;
 further independent refinements are not asserted exhausted. The blocked goal is
 not recreated/reset/reactivated/completed, and unavailable goal RPC is not used
 as authorization to replace its original frozen assignment.
+
+
+## Checkpoint seventeen: initial agreement permits nonempty aliased writes
+
+Investigated the original Backfill A/B footprint gap: C16 permits distinct IDs or
+empty intervals. No existing pointwise nonempty overwrite identity law was found
+in owned modules (only empty identity). New OverwriteAgreement proves list identity
+from captured payload reads equal to the INITIAL destination interval under actual
+capacity, using replaceSlice_read_cases. Existing memoryOps_heap_ext and intrinsic
+typed array/Subtype extensionality lift this to actual whole-heap equality for
+primitive/reference arrays; a one-read disagreement refutes identity. No desired
+final heap equality or child relation is a premise, no alternate heap/state layer.
+
+BoolTransferAgrees computes its payload from actual calldataBools lookup, comparing
+only INITIAL target reads. It is not a supplied payload or conversion certificate.
+Successful existing checkedCalldataBools supplies real payload, source bounds and
+capacity through boolTransfer_result_lookup; agreement then DERIVES heap identity.
+Agreement alone need not validate bounds: every identity/frame result separately
+requires actualSome. BoolChildRepr.self_agrees derives same-offset agreement from
+its existing immutable decoded child table and initial contents, not a desired
+postcondition. Nonempty alias preservation is now a sufficient local case beside
+the unchanged distinct/empty cases; changed-payload aliases remain supported.
+
+CalldataAgreementChildren transports BoolChildRepr and RefChildRepr to the ACTUAL
+mixed output with per-selected-leaf distinct OR empty OR initial agreement. Uint/
+Boolean and primitive/root separation remain intrinsic. Reverse success supplies
+its real reached heaps and lengths; checkedReverse_as_forward derives capacities
+and invokes EXISTING checkedBoolUintSequence_comm, then reuses the forward result.
+There is no second operation interpreter or duplicate commutation implementation.
+The existing two-level relation is not generalized to arbitrary recursive graphs,
+and no Source/refusal/profile/target predicate or invariant is changed.
+
+Inhabited controls use an OLD child table whose contents are false,true,false.
+An ACTUAL nonempty decoded slice1..2 writes the same true value back to its ALIASED
+child at offset1. Initial agreement comes from that child table; first heap identity
+is proved, not supplied. A second actual uint transfer changes0 to max2^256-1 while
+retaining neighbors7,1,0. Complete child/neighbor/root logical IDs and uint outputs,
+all valid typed repeated-child indices, and concrete selected index0/32 at n33 are
+observed in both actual execution orders. Runtime n has only intrinsic n<2^256,
+no new payload/depth cutoff. A reference-valued root overwrite also instantiates
+the generic whole-heap identity. One changed Boolean value produces actualSome,
+false initial agreement and failed child correspondence for n>0; the old n0 empty-
+footprint distinction remains explicit and all earlier counterexamples/pins stay.
+These are element observations, not byte encoding or compiler/EVM execution.
+
+Continued independent original allocator/noninterference backfill: agreement is
+transported through published Heap.Keeps, then instantiated by actual Heap.alloc
+with a supplied reference object. The extended nonempty Boolean step is whole-
+heap identity including the new object, the mixed uint step still changes its
+old target, and fresh fields retain old IDs. The existing Source table explicitly
+has NO entry for that fresh root. No Source entry, fresh address injectivity,
+reference constructor or default/allocation-failure compiler is manufactured.
+
+Initial preflight measured640868352bytes free, parent16GiB, idle same supported
+child12GiB/swap0, no active Lean workers and ample OS RAM. Conservative checkpoint
+growth estimate8MiB (warm outputs/cache3MiB, logs/root/commit2MiB, cumulative export
+3MiB) leaves over600MiB; actual growth is checked throughout. No new VFS image,
+container/VM/thread, deletion/cache relocation or resource guard/budget expansion.
+Per-file diagnostics/get_goal remain unavailable; focused serial-j1 closures use
+the same retained runtime. Failed proof attempts and one harmless unknown-session
+read poll are separately retained, never inferred successful or repeated unchanged.
+
+Every original queue remains partial/blocked. G32 physical-byte representation,
+G33 all-profile constructors/exact target allocation failures, G34 general path/
+rebinding/delete/stale-alias execution, G35.01 source/target copying, G35.02 reserved
+memory-storage copy, G35.03 general decoded/reference/ABI/Source/storage transport,
+G35.04 fresh deep-copy execution, G35.05 full graph/traversal and G35.06 final
+V10/Source/target composition remain as previously audited. Backfill A/B get this
+additional precise footprint/allocation clause, not full closure or an exhaustion
+claim. No new axiom, trust shortcut, exclusion or proof/test budget increase.
+Final exact guards, independent reviews/gates and additive artifacts follow.
+
+Checkpoint17 final source reviews: independent read-only finder and skeptic both
+pass with no confirmed defects, no Lean/server/builds. Exact guarded focused
+closure passes68jobs; final run-lean.sh passes911default/262TestSuite and final
+SolKey377taclets/131read-bearing, wrapper exit0. Sampled aggregate Lean/Lake
+RSS1516184KiB; cumulative-session cgroup peak454889472bytes is NOT per-exec RSS;
+per-exec OOM deltas0, child12GiB/swap0 unchanged. Layers/orphans/trust/strict
+automatic/complete fixture/script syntax/corruption tests and whitespace pass.
+Owned exact allowlist443pins/60modules passes; proposed additive registrations
+remain coordinator-only. Global inventory FAILS exit1,0unsafeerrors457unrecorded
+=14inherited+443owned. Global strict docs FAILS exit1; raw74line output is
+byte-identical to exact-base evidence (SHA256
+ea1a09c222d52d1d17953f653c087443e34e6282497f0b02cdc09aad15b7dd48), separately
+zero-new findings PASS. Neither global failure is relabeled green. Final full
+gate receipt and raw commands are checkpoint17-checks.json and
+v11-checkpoint17-full-01.json in the external evidence directory.
+
+Original queue re-audit after these proofs: G32/G33/G34/G35.01/.03/.04/.05 and
+BackfillA/B remain PARTIAL for the specific missing physical-byte, full constructor/
+allocation-failure, general paths/rebinding/delete/stale aliases, general decoded/
+reference/ABI/Source/storage transport, fresh deep-copy and full graph execution
+clauses above. G35.02 remains BLOCKED on reserved memory-to-storage results and
+G35.06 on reserved copy plus V10/Source/target composition. The new local interval
+agreement and actual allocation application supply additional footprint precision;
+they do not close any original parent or prove independent work exhausted.
