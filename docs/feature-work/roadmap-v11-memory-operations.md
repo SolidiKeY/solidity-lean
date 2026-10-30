@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-three. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-four. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -2055,3 +2055,64 @@ close recursive Source graphs/maps/shadows/cycles/emitted traversal. G35.06
 reserved-copy/V10/Source/target composition stays blocked. Backfill A/B advanced,
 not complete or exhausted. Further owned primitive-family or preserving-context
 applications may remain; this checkpoint makes no independent-exhaustion claim.
+
+
+## Checkpoint twenty-four: decoded schedules in actual allocated contexts
+
+After checkpoint23, source inspection confirmed its new decoded-initialized
+schedule had no preserving-context/interstage-allocator application. Existing
+finite schedule growth and decoded-write Keeps were separate. Owned new
+`CalldataScheduleGrowth` composes those EXISTING laws at the actual reached mid.
+`checkedBoolCaptures_keeps` transports actual decoded Some and arbitrary finite
+actual recaptures through explicit independent INITIAL Keeps, deriving final
+Keeps. `checkedBoolCaptures_none_keeps` proves identical rejection through that
+context, with an explicit existing DecodedArrayAt certificate; it does NOT claim
+to handle missing/unsupported source objects under that certificate. Original
+missing-object adapter rejection remains covered by checkpoint23. No final
+preservation, payload conversion, representation or address-injectivity premise
+is smuggled into either statement.
+
+`checkedBoolCaptures_interstage_alloc` needs only actual composition Some and a
+supplied intrinsic MObj. It extracts the REAL decoded output, invokes published
+Heap.alloc on that output, transports the arbitrary reached-heap tail through
+Heap.keeps_alloc and derives final Keeps/fresh own-field framing. No allocator,
+reference constructor, Source table entry or second copy semantics is defined.
+
+Inhabited arbitrary n/copies controls execute initial TFF runtime-tail heap ->
+decodedTTF with false old child representation ->actual allocation of parent
+[r,r] on that changed mid ->recapture TFF and arbitrary restoring cycles. They
+observe complete child/neighbor vectors, fresh parent IDs[0,0] and old/fresh root
+inequality. A separate actual INITIAL allocation directly exercises the new
+positive composition Keeps theorem, with final Keeps, complete vectors and fresh
+own fields. Rejection control exposes actual allocated decoded Some, nonempty
+repair-prefix Some, reached invalid-step None and full None. These were required
+by BOTH independent source reviewers and added before final review. New exact
+standard-only guards cover all six public laws/controls. Earlier failed map/
+weakening diagnostics remain retained; no failed elaboration is a deliverable.
+
+Fresh parent fields retaining old child identities do not establish deep child
+liveness. No Source/ABI/compiler/EVM behavior, physical bytes, all-profile default
+construction or target allocation failure follows. Original G32/G33/G34/G35.01-
+.06/Backfill A-B remain PARTIAL/BLOCKED; upstream/reserved proofs and raw mandatory
+global failures remain open. Original queue reassessment in checkpoint23 remains
+applicable; this is another actual context application, not an exhaustion claim.
+
+Preflight measured581980160 available bytes;32MiB allowance uses prior24182784-
+byte gate plus8MiB modules/logs/export, residual above512MiB. Same existing capped
+runtime, optional artifact cache OFF, child12GiB/no-swap, serial Lean-j1 and
+LEAN_NUM_THREADS1; all files/caches/seals/proof/test/time budgets preserved.
+
+Final independent read-only finder and skeptic both accepted the refined source
+and document: initial-allocation positive uses the NEW composition theorem;
+allocated rejection exposes all reached stages; no outstanding source finding.
+Actual guarded closure80jobs and full wrapper924default/262TestSuite/SolKey377
+and131read-bearing PASS exit0. Strict/layers/orphans/trust/complete fixtures/
+script syntax/corruption controls PASS;564standard-only pins across73modules.
+Raw global docs FAIL1 with complete exact-base byte equality (separate noNEW
+PASS); raw global inventory FAIL1,578unrecorded=14inherited+564owned,0unsafeerrors.
+Proposals remain additive for coordinator reconciliation, reserved records intact.
+Actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs PASS. Full sampled aggregate
+Lean/Lake RSS1599592KiB, cumulative session cgroup peak2160848896bytes,0OOMevents;
+full disk increment192512bytes, safely within32MiB allowance. All original queues
+remain partial/blocked with the exact prerequisites enumerated above, no claim
+that all independent work is exhausted or the frozen assignment is completed.

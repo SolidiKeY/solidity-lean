@@ -1111,3 +1111,4 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/SnapshotScheduleGrowth.lean` | Finite actual snapshot success/failure through published Keeps; actual interstage allocation, fresh-field frames and nonprimitive weakening controls |
 | `Backend/MemoryOps/CalldataSchedule.lean` | Actual decoded Boolean transfer then arbitrary reached-heap snapshots; exact lookup/rejection, source reads, frames and INITIAL-content restoration criterion |
 | `Backend/MemoryOps/CalldataScheduleControls.lean` | Runtime decoded-break/recapture-repair controls, independently computed initial criterion, exact source reads, frozen/ignored-repair negatives and isolated bounds |
+| `Backend/MemoryOps/CalldataScheduleGrowth.lean` | Actual decoded-initialized finite schedules through Keeps, actual interstage allocation and positive/ordered-failure context witnesses |

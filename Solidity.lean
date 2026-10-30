@@ -789,3 +789,5 @@ import Solidity.Backend.MemoryOps.SnapshotReferenceSchedules
 import Solidity.Backend.MemoryOps.SnapshotScheduleGrowth
 
 import Solidity.Backend.MemoryOps.CalldataScheduleControls
+
+import Solidity.Backend.MemoryOps.CalldataScheduleGrowth
