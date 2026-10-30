@@ -12,8 +12,8 @@ projections, selector/Keccak byte observations, emit-effect controls, payment
 and declaration-role clauses are implemented below. Every G20–G23 parent remains
 incomplete. The initial tables and counts are historical; continuation sections
 record subsequent checked progress. Largest retained sampled aggregate RSS is
-9175519232 bytes from the passing isolated OpenLoops check299349-1fb8f9fa;
-its cgroup peak is9296244736bytes. This is not a passing full gate.
+11715137536 bytes from passing focused TestSuite warm-up474104-a5109491;
+its cgroup peak is11363561472bytes. This is not a passing full gate.
 
 ## Reproduction and setup
 
@@ -519,7 +519,7 @@ EmitControls consumes the actual solEmit/RawStmt.eval elaboration and existing
 withPanics wrapper in typed Entry bodies. Source event E with two parameters
 and E3 with three have actual source-unit membership witnesses, and resolved
 RStmt.emit/RConvArgs fixtures retain assignment/read expressions explicitly.
-The target entries retain the elaborator's actual capture contexts (two uint
+The target entries declare the statement bodies' typed local slots (two uint
 locals or one), rather than erasing them to force an empty context.
 
 Noncommuting arguments saved=saved+1 then saved=saved*10 yield10 in an actual
@@ -783,3 +783,113 @@ and absent bodies, while the target returns bytes. No source body/result/
 dispatch/readonly preservation follows. Static checks and raw-doc/no-new logs
 are inherited-*. Exact committed head/patch is saved in inherited-checkpoint.md
 and .patch under the artifact root. Parents/groups/lane remain incomplete.
+
+
+## Terminal validation and committed handoff
+
+Code checkpoint8230f88cf703841f1e12b4755a350d95289ee604, frozen base
+fb379ae20f10e2c92113453ddd9d40d8f2efbe09, actual worktree
+/workspace/v08-world-lowering-pinned. Entire frozen assignment remains PARTIAL;
+source composition and full validation BLOCKED. No G parent or lane is complete.
+The existing blocked persistent goal is unchanged. No goal creation/reset/
+reactivation/completion, push/merge/PR or other-owner source edit occurred.
+
+The final unchanged python3 scripts/v08-bounded.py --full command496841-193e914c
+exits125 at the600-second guard after721 successful named invocations, during
+Examples.Decision. Default-build/TestSuite/sort suffixes are UNREACHED. Sources/
+config unchanged, actual Lean/Lake versions recorded and owned cleanup confirmed.
+Decision isolated413142-e923f94d likewise exits125; exact-base isolated433573-
+d4f1306f at the full frozen SHA also exits125 under IDENTICAL source/config/
+toolchain/caps. Decision source byte equality and pristine baseline source are
+recorded in decision-exact-base-binding.log. This establishes a validation
+limit at both revisions, not a proof error, passing baseline or waiver. The
+known generated baseline runtime config differed only in trailing whitespace;
+old bytes were preserved before normalization. No proof/test/time budget rose.
+
+Independent mandatory TestSuite command492734-76b30c10 PASSES260named modules/
+262Lakejobs, including the actual aggregate SolkeyTestSuite pinned report.
+Earlier cold suite453807-d2c2346a remains FAILED125 at Derived15. Focused
+Derived15–21 warm-up474104-a5109491 PASSES in561.95seconds, with actual builds
+88/6.4/146/8.5/57/144/73seconds. Largest sampled aggregate RSS11715137536bytes,
+measured cgroup peak11363561472bytes, within enforced12GiB/no-swap. Sampled
+RSS sums shared mappings and differs from cgroup accounting; both are retained.
+Lean -j1, LEAN_NUM_THREADS1, CPU1 and OS headroom remain; no competing build/LSP.
+
+Current full-inventory fresh executable496611-9f4df211 PASSES in3.09seconds:
+unique initially absent supported buildDir output; new binary exists, old binary
+SHA unchanged11eb6e37ff937d79901cb0072027ff3f9382552d7f65b421078934dadb6d216b;
+377taclets/131read-bearing/131covered, annotations match. Only buildDir differs
+in supported effective config; source/config/toolchain bindings retained.
+Literal run-lean.sh remains unexecuted because its check-solkey.sh removes the
+old executable under the explicit no-delete restriction. The fresh-output
+refresh operation passes independently; unreached full suffixes are NOT claimed
+passed. No compiler/EVM differential run or whole-source preservation follows.
+
+The183 kernel-pinned component laws/controls,24owned modules and all conditional
+premises remain as described in the continuation sections. G20 now includes
+resolved signature/name/order/result metadata, payable/receive/fallback/role
+clauses and real inherited payment metadata; source selection/body/type/layout/
+getter/function-reference/readonly applications are still open. G21 remains
+word/selector/panic/reason/existing-decoder observation coverage, with nested/
+reference/slice/custom-error source applications blocked by the named missing
+source/type/decoder interfaces. All G22.01–.05 source/runtime-frame/creation/
+callback/library/function-value composition applications remain open. G23
+projects actual source account/request/endTx fields and actual Keccak pin,
+with target erased-emit effects and mixed rollback controls; source evaluation,
+transient/layout, remaining reserved crypto and G16–G22 composition remain open.
+Backfill A/B components are strengthened, not source applications discharged.
+No arbitrary input exclusion, replacement source semantics or desired
+preservation premise is introduced. Frozen V04/V05/V06/G15/V07 dependencies and
+all existing owner reservations remain. No claim of exhaustive conceivable
+independent lemmas is made; exact remaining prerequisites are preserved.
+
+Final artifact finder/skeptic reviews verified actual base..8230diff,183pins,
+24modules, patch bytes, copied feature, bundle head, proof/source bindings and
+all checkpoint checksum entries, without Lean/server/builds. Reporting finding
+fixed: emit controls use typed Entry.locals, not a capture/closure transport
+certificate. Source capture/closure transport is not asserted. The previous
+wording meant local slots and is now narrowed. Independent implementation
+reviews found no new semantic/nonvacuity/ownership defect. Final artifact review
+and static refresh are retained in reviews.md and final-* logs.
+
+Process deviation: one early runtime-helper/checker edit was made without
+acquiring the writer lock after an idle-build inspection. No unexpected change
+or discarded work was observed; subsequent repository edits, bounded builds
+and checkpoints were serialized. No locking claim is made for that early edit.
+All three known generated untracked artifacts remain preserved and narrowly
+validated; none is committed or removed. Original work/bridge branches and
+same-VM caches remain. get_goal/Lean MCP are unavailable; the prior goal-tool
+trusted-context limitation remains recorded and was not reset/retried.
+
+Coordinator reconciliation proposal is EVIDENCE ONLY: add the owned adapter/
+control theorem references as local component evidence for the exact feature IDs
+in /workspace/v08-world-lowering-evidence/feature-ids.json. G20 evidence maps to
+Callable/CallableMetadata/PayableMetadata/DeclarationRoles/InheritedMetadata;
+G21 to AbiObservations/SelectorObservations; G22.01 to Callable/Controls,
+G22.02 to Transactions/CallbackControls/ProjectionControls, G22.03 to
+LibraryCreation/LibraryControls/Controls, G22.04 to LibraryCreation/DeclarationRoles/
+RoleControls, G22.05 to funded/mixed/atomic controls, G23 to Transactions/
+EnvironmentProjection/CryptoObservations/EmitControls. This does NOT mark every
+listed feature covered, in particular reserved fixedPoint/precompile/reference/
+getter/decoder applications. No global status, manifest, G03 ledger or reserved
+TrustAudit pin was edited. Exact feature-ID lists are copied into final handoff.
+
+Final original patch, incremental bundle, copied committed feature, handoff,
+full evidence archive and SHA256SUMS are at /workspace/v08-world-lowering-artifacts.
+Exact final committed head is recorded in handoff.md and repository-state.json,
+with base/branch/absolute paths. Patch applicability against the exact base,
+bundle verification and checksums are required and retained as separate gates.
+All raw historical failures remain archived; final no-new-findings comparisons
+do not turn raw documentation/axiom-pin failures green. No RUNTIME_GATE_PASS is
+claimed beyond the actual recorded KeySort runtime pass with Lean4.24.0 and
+Lake5.0.0-src+797c613. The full assignment remains unfinished.
+
+Final static/axiom-binding handoff: refreshed519008-04a49e64 PASS110named modules/
+111Lakejobs,183exact axiom sets, source/config unchanged and cleanup confirmed.
+Final lane checker,9corruption controls, runtime controls, layers/orphans/trust
+all PASS (final-* logs). Raw docs task/base exits1/1,46findings; raw global axiom
+pins task/base exits1/1,14StorageSlots notes/613pins/0errors. Explicit separate
+exact-base no-new comparisons PASS0; raw failures remain failures. Final code
+proof binding is8230f88cf703841f1e12b4755a350d95289ee604; only this owned document
+changes in the terminal handoff commit. Exact final head is saved externally
+with verified patch/bundle/evidence/checksum artifacts. No goal completion.
