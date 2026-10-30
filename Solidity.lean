@@ -783,3 +783,5 @@ import Solidity.Backend.MemoryOps.OverwriteAgreementExact
 import Solidity.Backend.MemoryOps.RestorationControls
 
 import Solidity.Backend.MemoryOps.RecaptureRestoration
+
+import Solidity.Backend.MemoryOps.SnapshotReferenceSchedules

@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-one. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -1796,3 +1796,96 @@ general path/delete/rebinding execution, general decoded/reference/ABI/Source/st
 transport, fresh deep-copy, arbitrary Source graph/emitted traversal and full final
 composition remain open. Further original independent clauses are not declared
 exhausted. Existing persistent goal remains unchanged and unfinished; no integration.
+
+## Checkpoint21: finite runtime snapshot schedules and provenance (partial)
+
+Original G35.04/BackfillA-B investigation confirmed existing captureTwice and
+checkedCaptureSequence cover exactly two calls. New owned SnapshotSchedule uses
+List/Option composition of EXISTING checkedCaptureOverwrite at each ACTUAL reached
+heap, on one existing intrinsically typed array/ref. SnapshotArgs abbreviates the
+existing Nat(start,stop,destination) tuple only: no AST/opcode/IR, value, state,
+copy evaluator or Source semantics is added. No public schedule length cap or
+fresh/deep-copy assumption. CapturesValid checks every original source/destination
+bound, independent of run/restoration. All actual typed array lengths survive, so
+those bounds derive success at each intermediate; success iff the input bounds.
+Exact None identifies the FIRST invalid reached call after a real successful
+prefix; an equivalent original-bounds prefix theorem derives that actual heap.
+No suffix heap or halt/rollback behavior is invented. Actual arbitrary reached
+steps, all-other-object frames, append/Option associativity and singleton laws
+are proved. runCaptures_two recovers existing checkedCaptureSequence exactly,
+including failures, rather than replacing/weakening the old two-step APIs.
+
+SnapshotProvenance defines observation-only backwards index data: map the last
+destination cell to its prior source, then recursively through earlier calls;
+exterior indices stay unchanged. It does not evaluate values/heaps. The actual
+successful run reads INITIAL elements at this computed index, for every Nat
+index, with valid-index preservation and out-of-bounds exterior identity. Target
+and wholeheap restoration iff computed INITIAL reads agree, NOT provenance-index
+identity or supplied final equality/relation. BoolChildRepr final correspondence
+has the same iff from its independently inhabited initial immutable child table,
+with no stagewise representation or payload equality assumption.
+
+Runtime restoreCycles constructs input lists of length2*copies for every Nat
+copies; bounds and provenance derive actual success/restoration. Object tail n
+has only intrinsic total length n+3<2^256. C20 actual first-step witnesses are
+reused: [true,false,false]++nfalse -> [true,true,false]++nfalse (initial child
+representation false), actual recapture repairs it. Whole initial heap and old
+child table are restored for arbitrarily many cycles; this is not an assumed
+run relation. cycle_origin maps1to2, demonstrating restored CONTENTS do not require
+identity provenance. Three material writes additionally produce ordered vectors
+[T,F,F] -> [T,T,F] -> [T,F,F] -> [F,F,F], with runtime tails/neighbors retained.
+Reversed order and frozen-initial-source alternatives give complete wrong vectors;
+the frozen negative is recovered from the existing checked two-step instance.
+Empty/singleton, exact-end empty and touching destinations execute. A successful
+three-step changed prefix reaches a genuine heap before an invalid destination
+and supplied suffix; None exposes no suffix heap. Earlier failed proofs retained.
+
+Dynamic AND fixed reference-valued arrays run the SAME schedule adapter at every
+copy count. Initial old refs [left,right,right] become [left,left,right] before
+actual recapture restores them. Complete old-ID vectors and distinct child content
+vectors are observed at intermediate/final heaps; both children framed. Fixed
+length3 witnesses close generic ArrTy coverage without implementing a constructor.
+Runtime dynamic tails and concrete n33/index32 selections retain old identities;
+these are element indices, not byte encoding. Repeated old aliases are supported,
+with no address/hash-injectivity, fresh Source table or full graph-copy claim.
+
+Separate independent read-only finder/skeptic preliminary/refined source reviews
+found no mathematical/ownership defect. Planned nonprimitive/fixed validation was
+supplied and accepted. Focused refinements fixed empty-proof syntax, capacity
+projection arithmetic, membership/tuple normalization, endpoint reflexivity and
+fixed-length reduction; raw exit1 attempts remain. Refined combined closure76jobs
+passes with43 standard public theorem/control axiom outputs, now exactly guarded.
+Per-file Lean MCP/get_goal unavailable; existing blocked persistent goal unchanged.
+Writer lock, existing retained12GiB/no-child-swap runtime under16GiBparent/hostswap0,
+serial-j1/LEAN_NUM_THREADS1, proof/fuel/node/TestSuite/time guards and keyed warm
+outputs stay unchanged. No new runtime/image/cachecopy/cleanup/capacity change.
+Conservative measured12MiB output/log/export forecast is checked throughout.
+
+All original G32-G35 and Backfill parents remain partial/blocked: finite intrinsic
+operation composition is NOT recursive Source graph traversal, emitted loops,
+fresh/deep-copy execution, physical bytes, all-profile defaults/target failures,
+general path/delete/rebinding or general ABI/reference/storage/Source transport.
+Reserved memory-to-storage and V10/Source/target composition stay open. No parent
+or goal completion or exhaustion of independent original clauses is claimed.
+
+Checkpoint21 final separate independent source/doc reviews PASS. Guarded focused76
+and unchanged full run-lean.sh920default/262TestSuite/SolKey377/131 exit0. Fresh
+actual Lean4.24.0(797c613)/Lake5.0.0-src+797c613 and KeySort2jobs PASS. Sampled
+aggregate Lean/Lake RSS1458972KiB,0OOMevent deltas; cumulative session cgroup
+peak458653696bytes is NOT per-exec worker RSS. Same12GiB/no childswap,16GiBparent/
+hostswap0, serial-j1 and original guards persist. Layers/orphans/trust/strict
+automatic/complete fixtures/script syntax/corruption/diff PASS. Owned529standard
+pins69modules PASS. Raw global inventory FAIL exit1,0unsafeerrors543unrecorded
+=14inherited+529owned. Raw strict docs FAIL exit1, complete output byte-identical
+to exactbase ea1a09c222d52d1d17953f653c087443e34e6282497f0b02cdc09aad15b7dd48;
+zeroNEWcomparison separately PASS. Exact additive owned proposals are external
+evidence only; no reserved global inventory/ledger/manifest changed.
+
+Original queue re-audit: G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B remain PARTIAL;
+G35.02/.06 BLOCKED on reserved copy/final V10-Source-target prerequisites. Arbitrary
+finite same-object intrinsic schedules now have full provenance, bounds and local
+restoration laws; this does not supply physical bytes/all-profile default/target
+failures/general paths/delete/rebinding/general ABI-reference-storage-Source/fresh
+deep-copy/recursive Source graph or emitted-loop correctness. Further original
+operation/growth/application clauses are not declared exhausted. Persistent goal
+unchanged/unfinished; no integration.
