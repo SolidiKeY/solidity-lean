@@ -1094,3 +1094,5 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/CalldataSequenceFixtures.lean` | Typed immutable primitive fixture tables and derived finite extraction identities; no ABI decoder. |
 | `Backend/MemoryOps/CalldataSequenceControls.lean` | Executed nonuniform overlapping/disjoint/touching sequences, stale/order/ignored-write negatives, stage failures, parent frames and element boundaries. |
 | `Backend/MemoryOps/MixedCalldataSequenceControls.lean` | Mixed maximum-value/full-output reads, actual allocation/growth and fresh parent frames, fixed overlap and arbitrary runtime families. |
+| `Backend/MemoryOps/CalldataSequenceChildren.lean` | Actual success-derived distinct-or-empty frames and existing child-table correspondence at mixed sequence output heaps, with type-derived root separation. |
+| `Backend/MemoryOps/CalldataSequenceChildControls.lean` | Runtime-sized repeated initial child aliases, typed reads and changed other objects; empty-alias success, nonempty alias-mutation failure and explicit empty-root case. |

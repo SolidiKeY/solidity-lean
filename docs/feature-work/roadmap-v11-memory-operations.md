@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint fifteen. Earlier checkpoint
+Current cumulative accounting through checkpoint sixteen. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -1415,3 +1415,81 @@ Both independent final source reviews found no confirmed defect; neither ran
 Lean/server/builds. The new sequence is actual operation composition, not full
 Source/target correctness. All original queues remain partial/blocked. Subsequent
 independent child-frame transport is still worth investigating, not presumed done.
+
+
+## Checkpoint sixteen: existing child correspondence after actual mixed transfers
+
+Returned to original Backfill B/G35.03/.05 after checkpoint15 was committed,
+reviewed and sealed. The existing BoolChildRepr/RefChildRepr describe actual
+immutable decoded child-table entries and heap contents, but were not connected
+to the new actual decoded-transfer sequence. CalldataSequenceChildren consumes
+those EXISTING relations; no fresh Source entries or alternative relation/state
+is introduced. ActualSome reconstructs both operations, then derives typed
+object frames. Distinct ID OR an empty source interval suffices: the latter
+follows from real empty overwrite identity, not a final-content premise.
+
+BoolChildRepr.mixedSequence derives the relation at the FINAL heap. The uint
+write cannot alias a Boolean child by intrinsic types. RefChildRepr.mixedSequence
+frames its root by primitive/reference-array type separation and frames every
+original selected Boolean leaf. Leaves may repeat/alias one another; each must
+be distinct from the Boolean destination OR the first source interval empty.
+This is a local sufficient frame theorem, not a new source exclusion or claim
+that all supported alias writes preserve correspondence. Only Bool→uint order
+and the existing two-level reference/Boolean relation are covered; arbitrary
+Source graphs/deep-copy realization still remain. No reverse address injectivity,
+physical bytes, compiler preservation or fresh-root Source representation is
+assumed. Initial relation premises are explicit, independently inhabited, and
+no desired output relation or supplied conversion proof is a premise.
+
+Controls construct only OLD initial root/leaf Source table entries and the real
+typed heap. A runtime family for every intrinsic-valid n (n<2^256, no added cap)
+has n repeated aliases to one old child. Actual decoded mixed writes change a
+separate Boolean object and uint object (including max2^256-1), while final root/
+child correspondence and typed index observations preserve every repeated ID.
+The concrete n33 index32 observation is an ELEMENT boundary, not byte encoding.
+An actual aliased Boolean transfer at its empty exact end succeeds and retains
+correspondence without leaf-ID separation. An actual nonempty aliased transfer
+changes the represented child's contents and invalidates the initial immutable
+relation whenever the root selects at least one child. A separate n0 witness
+shows the root relation does not constrain an unselected child; vacuity is
+explicitly confined to that empty case. No alias shape was removed from Source.
+
+Both preliminary independent read-only reviewers found no circularity, ownership
+or mathematical defect. The generic clause and nonempty witnesses avoid a mere
+conditional certificate result. Neither reviewer used Lean/server/builds. The
+first focused controls failure was kernel decide encountering still-folded heap
+fields with runtime n; explicit fixed-field reduction fixes it without changing
+any statement, bound or budget. Raw failures remain retained. Current refined
+closure and exact guards precede final full checks/reviews below.
+
+The renewed preflight retained over645MB free and reused the same capped idle
+container/cache; focused outputs leave over643MB. No deletion/image creation/RAM
+cache relocation or resource/proof/test budget change. All original G32/G33/G34/
+G35.01/.03/.04/.05 and Backfill A/B remain partial; G35.02/.06 remain blocked.
+The prior full queue audit still applies, including physical representation,
+all-profile constructors/target allocation failure, general path/rebinding/delete,
+general decoded/reference conversions, fresh deep copy, reserved location copies
+and final V10/Source/target composition. No independent-refinement exhaustion or
+whole-lane/parent completion is asserted. Exact manifest/pin proposals remain
+coordinator-only reconciliation, with no reserved ledger/inventory edits.
+
+
+Checkpoint-sixteen final v11-checkpoint16-full-01 exits0:908default jobs,
+262TestSuite jobs, final SolKey377/131annotations OK. Actual checkpoint15 runtime
+version/KeySort output remains unchanged and retained: Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613, KeySort2jobsPASS. Same supported runtime/config/toolchain.
+Final aggregate Lean/Lake RSS1585504KiB, cumulative session peak454889472bytes
+(separate from exec RSS), all per-exec OOM deltas0. Final full disk643043328before/
+642490368after bytes, enforced12GiB/no-swap/parent16GiB bounds unchanged.
+Layers/orphans/trust/strict automatic/complete TestSuite parity/script/diff and
+owned421standard pins57modules pass. Global inventory remains FAILexit1 with
+0unsafeerrors435unrecorded=14inherited+421owned; additive pin proposals only,
+reserved registry untouched. Strict docs still FAILexit1 with exact-base identical
+74line72missing/ambiguous raw output; separate no-new comparison PASS. No raw
+failure relabeled green, no compiler/EVM execution inferred from kernel checks.
+Both final independent source reviewers accepted actual hypotheses, nonvacuity,
+controls, scope/ownership and doc without confirmed defects. Artifact review
+follows commit/export. Original full queue accounting remains partial/blocked;
+further independent refinements are not asserted exhausted. The blocked goal is
+not recreated/reset/reactivated/completed, and unavailable goal RPC is not used
+as authorization to replace its original frozen assignment.
