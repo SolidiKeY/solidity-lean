@@ -141,8 +141,9 @@ Review (finder, read-only). Fixed:
 - `deploy` reverts on constructor arguments shorter than their heads, as
   `dispatch` does.
 
-Recorded, not fixed: a dynamic length of `2^64` or more reverts with no data
-where solc panics with `0x41` (its allocation check comes first);
+Fixed by lane V04b: a dynamic length of `2^64` or more in a decoded
+argument panics with `0x41`, as solc's (its allocation check comes before
+the bounds check; `tailBytes`, `decodeArg`, the `elabB` control);
 user-defined value types are decoded as their underlying type (lane V04b,
 `decodeWord`); the controls do not cover array or constant
 getters, value sent to a getter, payable constructors, or invalid dynamic

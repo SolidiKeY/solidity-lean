@@ -438,6 +438,12 @@ the frame order against `callInternal`, `evalConvArgs_ns`,
   `7` and reverts on `300` (it was `stuck`), and `g(V v)` with
   `type V is int8` runs on `-1` (a sign-extended word) and reverts on
   `200`.
+- Panic `0x41` in the ABI decoder: a `bytes`/`string` or dynamic-array
+  argument whose length is `2^64` or more panics with `0x41` before the
+  bounds check, as solc's decoder does (it reverted with no data):
+  `elabB` (`g(bytes)` with length `2^64` panics, `2^64 - 1` reverts, `"ab"`
+  runs); `Horizon.lean`'s `tailBytes`/`decodeArg` lemmas gained the
+  branch.
 
 Attempted and reverted: getters of `bytes`/`string` state variables
 (`dispatch` encoding a storage reference; the control returned `"ab"`):
@@ -468,7 +474,7 @@ Kept current at every checkpoint.
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
 | 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; no preservation theorem for the walk |
 | 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types (`Elaborated.callInternal_call_ns`); internal calls inside expressions under `CallsOK` (`evalE_callFrag_ns`, joint induction `fragAt`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
-| 4 Close gaps | partial | UDVT argument decoding (`elabW`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
+| 4 Close gaps | partial | UDVT argument decoding (`elabW`); Panic `0x41` in the decoder (`elabB`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
 
 **Not done** (also under `limitations:`):

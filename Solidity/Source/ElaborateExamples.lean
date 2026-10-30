@@ -201,6 +201,27 @@ def elabW : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 #guard (elabW.map fun el => runD el 0 [selOf "g(int8)" ++ arg 200, selOf "x()"]) ==
   some [some (.success []), some (.revert []), some (.success (arg 0))]
 
+/-- `contract D { function g(bytes memory b) public {} }` -/
+def unitB : Syn .unit :=
+  .unit (.cons (.contract false "D" .none .nil
+      (.cons (.function (.ident "g") (.cons (.param (.elem .bytes) (some .memory) (some "b")) .nil)
+          (some .pub) none .nil false none .nil (.some (.block .nil)))
+      .nil))
+    .nil)
+
+def elabB : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitB)
+
+#guard elabB.isSome
+
+-- **Panic 0x41 in the decoder** (lane V04b): a `bytes` argument whose
+-- length is `2^64` panics with `0x41` (solc's allocation check comes before
+-- its bounds check); one of length `2^64 - 1` is out of bounds and reverts
+-- with no data; `b = "ab"` runs.
+#guard (elabB.map fun el => runD el 0 [selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 64),
+    selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 64 - 1),
+    selOf "g(bytes)" ++ arg 32 ++ arg 2 ++ ([97, 98] ++ List.replicate 30 0)]) ==
+  some [some (.success []), some (.revert (panicData .alloc)), some (.revert []), some (.success [])]
+
 /-- `e()` entered in a static frame or not, after deploying `D`. -/
 def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,

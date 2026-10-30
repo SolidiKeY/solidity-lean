@@ -555,7 +555,8 @@ stronger obligation, not an additional assumption available to its proofs.
   above). The compiled code has no panic: there a failing `assert` reverts
   (`compile_correct`).
 - **Source semantics (S02–S05, `Solidity/Source/`).** A memory
-  allocation too large for solc (Panic 0x41) is not modelled, and the ABI
+  allocation too large for solc (Panic 0x41) is modelled only in the ABI
+  decoder (a dynamic length of `2^64` or more, lane V04b), and the ABI
   decoder does not decode static arrays, structs or external function
   types: such an argument is `stuck` (user-defined value types are decoded
   as their underlying type since lane V04b)
