@@ -346,15 +346,18 @@ conversion S01 types (`convElem`, `convUser`, `payable`, the implicit
 conversions of arithmetic, assignment, return, call and event arguments).
 Overload selection is S01's: `Typed.callInternal`, `emit` and `revert E(…)`
 require exactly one candidate accepting the argument types **of one
-argument typing**. That differs from solc, which refuses a call when two
-overloads accept the arguments under any of their typings:
-`hexCall_typed` showed `f(0x01)` with `f(uint8)` and `f(bytes1)` getting two
+argument typing**. Before S02's literal typing that differed from solc,
+which refuses a call when two overloads accept the arguments under any of
+their typings: `hexCall_typed` showed `f(0x01)` with `f(uint8)` and `f(bytes1)` getting two
 derivations, one per callee, where solc reports "No unique declaration
 found after argument-dependent lookup". Since solc's literal typing (Q1,
 lane-semantics) gives `0x01` the single type `hexConst 1 1`, which both
 overloads accept, the call is now refused as solc refuses it, and
-`hexCall_typed` states that (length 0; lane-soundness checkpoint 1). With a decimal `1`, which has no
-`bytesN` typing, the call is refused (G12's `ambiguous_refused`).
+`hexCall_typed` states that (length 0; lane-soundness checkpoint 1). Every
+expression now has at most one type (`Typed.unique`, lane-semantics), so a
+per-typing selection is a selection over all typings. With a decimal `1`
+the call selects `f(uint8)`, as solc does; G12's `ambiguous_refused` is
+about `f(uint8)`/`f(uint16)`.
 
 ### User-defined value types (`Solidity/Source/UserOps.lean`, `Solidity/Frontend/Static/UserOps.lean`)
 
@@ -420,8 +423,9 @@ becomes S01's rules (and the parse, G08–G11).
 
 - **S01 itself.** The checkers decide S01's relations as they stand,
   including their recorded gaps ("What S01 does not do": data locations of
-  parameters, `abi.*`, structs, external calls, named arguments, a second
-  declaration of a name in one block) and the overload deviation above.
+  parameters, named arguments, a second declaration of a name in one
+  block; `abi.*`, structs and external calls are typed since S02 and
+  checked since lane-soundness checkpoint 1).
   New rules lane-semantics adds to `Typed`/`StmtD` need matching cases in
   `infer`/`inferS`; their completeness proofs then fail to elaborate until
   the cases are added, which is the intended signal.
@@ -443,9 +447,11 @@ becomes S01's rules (and the parse, G08–G11).
   definition is not proved (completeness is with enough levels), and
   `arrayLenB` has soundness only.
 - **Speed.** `infer` enumerates every derivation: an expression's result
-  list is the product of its operands' type lists filtered by the rules. A
-  literal has up to 33 types, so a call with several `0x00` arguments
-  enumerates up to 33 to the power of their number. The checker is never
+  list is the product of its operands' type lists filtered by the rules.
+  Since S02's literal typing every expression has at most one type
+  (`Typed.unique`), so these products are small. The call arms of
+  lane-soundness evaluate the callee's `infer` (for receivers), so a
+  member chain `s.a.b` is inferred once per level. The checker is never
   kernel hot code; elaboration times are in the Handoff.
 
 ### Gates (G13)
@@ -500,12 +506,10 @@ end of the lane.
 
 **For lane-semantics (existing `Solidity/Source/` files)**:
 
-- `Typing.lean`, overloads: S01's per-typing uniqueness gives `f(0x01)`
-  two derivations with different callees (`hexCall_typed`); solc requires a
-  unique overload across all argument typings. Either `callInternal`
-  (and `emit`, `revertError`) should require the candidate set over every
-  typing of the arguments to be a singleton, or derivations need a
-  canonical choice; S02's meaning depends on it.
+- Done (lane-semantics Q1, checked in lane-soundness checkpoint 1):
+  `Typing.lean`, overloads. With solc's literal typing every expression
+  has one type (`Typed.unique`), and `f(0x01)` with `f(uint8)`/`f(bytes1)`
+  is refused (`hexCall_typed`).
 - `Typing.lean`: read `UdvtTyped` (operators, `wrap`, `unwrap`) as
   `Typed` rules so they compose; `Syn.tys`'s `arrayLen` should read
   `ArrayLenOK` (named constants, solc's typed evaluation).

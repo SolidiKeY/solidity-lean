@@ -548,13 +548,15 @@ def infer : {c : Cat} → (s : Syn c) → List (Res Γ c s)
   | _, .cond c a b => constRes Γ _ ++ condRes Γ (infer c) (infer a) (infer b)
   | _, .assign op a b => constRes Γ _ ++ assignRes Γ op (infer a) (infer b)
   | _, .index a o => constRes Γ _ ++ (infer o).flatMap (indexRes Γ (infer a))
-  | _, .member a m => constRes Γ _ ++ memberRes Γ m (infer a) ++ magicFor Γ a m ++
-      structMemberRes Γ m (infer a) ++ recvRes Γ m (infer a)
+  | _, .member a m =>
+    let ra := infer a
+    constRes Γ _ ++ memberRes Γ m ra ++ magicFor Γ a m ++ structMemberRes Γ m ra ++ recvRes Γ m ra
   | _, .call f a => constRes Γ _ ++ (infer a).flatMap (callRes Γ f (infer f))
   | _, .payableConv a => constRes Γ _ ++ (infer a).flatMap (payableConvRes Γ)
   | _, .slice a o o' => constRes Γ (.slice a o o')
-  | _, .callOptions f n ns => constRes Γ (.callOptions f n ns) ++
-      (infer f).flatMap fun r => (infer n).flatMap fun r' => optsOne Γ ns r r'
+  | _, .callOptions f n ns =>
+    let rn := infer n
+    constRes Γ (.callOptions f n ns) ++ (infer f).flatMap fun r => rn.flatMap fun r' => optsOne Γ ns r r'
   | _, .namedArg _ v => namedRes Γ (infer v)
   | _, .metaType t => constRes Γ (.metaType t)
   | _, .new t => constRes Γ (.new t)

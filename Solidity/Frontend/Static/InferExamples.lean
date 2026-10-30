@@ -276,7 +276,8 @@ def hexUnit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
 
 def Γh : Ctx := { env := Syn.env hexUnit, scope := Option.some "C", locals := [] }
 
-/-- **Former deviation, now aligned**: `f(0x01)` with `f(uint8)` and
+/-- **Former deviation, now aligned** (the name is kept for the pins; the
+call is now refused): `f(0x01)` with `f(uint8)` and
 `f(bytes1)` is refused as ambiguous, as solc does.  Under the earlier S01
 typing `0x01` had a rational and a `bytes1` typing, each selecting one
 overload, so the call had two derivations; with solc's literal typing
@@ -304,10 +305,13 @@ def Γc : Ctx := { env := Syn.env callUnit, scope := Option.some "K", locals :=
 
 def x1 : Syn (.list .expr) := .cons (.ident "x") .nil
 
-/-- `p.a` is a `uint256`, readable and assignable; `p.b` has no type. -/
+/-- `p.a` is a `uint256`, an lvalue, and `p.a = x` is typed; `p.b` has no
+type. -/
 theorem member_checked :
     (inferTys Γc (.member (.ident "p") "a")).map (STy.same (.int IntTy.u256)) = [true] ∧
     (lvsOf Γc (infer Γc (.member (.ident "p") "a"))).length = 1 ∧
+    (inferTys Γc (.assign .assign (.member (.ident "p") "a") (.ident "x"))).map
+      (STy.same (.int IntTy.u256)) = [true] ∧
     (inferTys Γc (.member (.ident "p") "b")).isEmpty = true := by decide
 
 /-- `P(x)` is a `P memory`; `P()` (too few members) has no type. -/
@@ -323,7 +327,8 @@ theorem extCall_checked :
     (inferTys Γc (.call (.member (.ident "k") "z") (.positional x1))).isEmpty = true := by decide
 
 /-- `k.g{value: x}(x)` is typed (`g` is `payable`); `k.h{value: x}(x)` is
-not (`h` is not), nor is `k.g{gas: x}(x)`. -/
+not (`h` is not), as in solc.  `k.g{gas: x}(x)`, which solc accepts, is not
+typed: call options other than `value` are a recorded S02 gap. -/
 theorem extCallValue_checked :
     (inferTys Γc (.call (.callOptions (.member (.ident "k") "g") (.namedArg "value" (.ident "x")) .nil)
       (.positional x1))).map (STy.same (.tuple [])) = [true] ∧
@@ -340,8 +345,11 @@ theorem pay_checked :
     (inferTys Γc (.call (.member (.ident "r") "transfer") (.positional x1))).isEmpty = true ∧
     (inferTys Γc (.call (.member (.ident "r") "send") (.positional x1))).isEmpty = true := by decide
 
-/-- `abi.encode(x)` is `bytes memory`; `abi.encode(p)` (a struct) is not
-an admitted argument. -/
+/-- `abi.encode(x)` is `bytes memory`.  `abi.encode(p)` (a struct) is not
+typed: S01's `STy.abiArg` admits value types and memory `bytes`/`string`
+only, where solc (ABI coder v2) also encodes structs and arrays — a
+recorded deviation (`docs/feature-work/source-soundness.md`), not a
+refusal solc makes. -/
 theorem abiEncode_checked :
     (inferTys Γc (.call (.member (.ident "abi") "encode") (.positional x1))).map (STy.same (.bytes .memory)) = [true] ∧
     (inferTys Γc (.call (.member (.ident "abi") "encode")
