@@ -748,7 +748,7 @@ run_cmd do
     ``Solidity.Source.growAt, ``Solidity.Source.approxAt, ``Solidity.Source.runTx_events_mono,
     ``Solidity.Source.sessionAtEvents_consistent, ``Solidity.Source.stuck_not_diverges,
     ``Solidity.Source.stuck_stable, ``Solidity.Source.txFate_mono,
-    ``Solidity.Source.stuck_eventually]
+    ``Solidity.Source.stuck_eventually, ``Solidity.Source.deploy_events_mono]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

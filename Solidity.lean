@@ -428,6 +428,7 @@ import Solidity.Source.Semantics
 import Solidity.Source.Ledger
 import Solidity.Source.SemanticsExamples
 import Solidity.Source.Horizon
+import Solidity.Source.HorizonDeploy
 import Solidity.Source.Infer
 import Solidity.Source.Elaborate
 import Solidity.Source.ElaborateExamples

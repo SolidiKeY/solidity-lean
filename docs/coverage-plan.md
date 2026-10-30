@@ -267,7 +267,7 @@ S03 status (2026-10-29, lane V04): [source-s03.md](feature-work/source-s03.md). 
 
 S04.04 status (2026-10-29, lane V04): [source-s04-state.md](feature-work/source-s04-state.md#s0404-transactions). Deployment, transactions, the frame stack, static guards, logs, transient reset and the projection to G01 events, with kernel-checked rollback and reentrancy controls. Sender-funds validity is not checked.
 
-S05 status (2026-10-29, lane V04): [source-s05.md](feature-work/source-s05.md). The composition has the type of G01's `Lang Event Outcome` with consistent sessions, now also showing the events of unfinished transactions (`sourceLangEvents`, from `runTx_events_mono`); horizon independence and stuck-is-stable are proved; the ledger and nontrivial controls as before. `SourceSpec`, failure points and a progress theorem remain.
+S05 status (2026-10-29, lane V04): [source-s05.md](feature-work/source-s05.md). The composition has the type of G01's `Lang Event Outcome` with consistent sessions, now also showing the events of unfinished transactions and deployments (`sourceLangEvents`, from `runTx_events_mono`, `deploy_events_mono`); horizon independence is proved, and a stuck transaction is told apart from a divergent one (`txFate`, `stuck_not_diverges`); a callback from depth 1024 fails; the ledger and nontrivial controls as before. `SourceSpec`, failure points and a progress theorem (for a modelled fragment: unmodelled features are `stuck`) remain.
 
 ### Wave 1 — source syntax and checked admission (G08–G15)
 

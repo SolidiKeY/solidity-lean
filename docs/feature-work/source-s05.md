@@ -68,7 +68,8 @@ What `sourceLang` does not give G01 (also under `limitations:`):
   `sourceLangEvents` (`sessionAtEvents`, `Solidity/Source/Session.lean`)
   shows them and is consistent; see
   [Events of unfinished transactions](#events-of-unfinished-transactions).
-  An unfinished *deployment* still shows no events.
+  An unfinished deployment shows its run's events too (`deploy_events_mono`,
+  `HorizonDeploy.lean`).
 - **Request validity.** `Lang.Affordable` (unaffordable requests are
   dropped) and `Lang.PrecompilesFixed` (precompile addresses are not
   environment accounts) are not met.
@@ -159,6 +160,14 @@ bodies are split across declarations to stay within the default heartbeats
 `dispatch_apart_*` by what the call data selects); two interpreter pieces
 were named for this with the same meaning (`Glob.pickFn`,
 `Glob.pickGetter`, `extReturn`), and `fieldsOf` and `decodeArg` were rewritten as single-level exhaustive matches.
+
+`HorizonDeploy.lean` proves the same for deployments
+(`deploy_events_mono`, from `construct_approx` and the `_grow`/`_approx`
+lemmas of initializers, base arguments and constructor bodies), and
+`sessionFromEvents` shows an unfinished deployment's events at `n` (a
+stuck one's when stuck) instead of none. The control (`SessionExamples.lean`)
+deploys a constructor that loops calling out: events at horizon 30, more at
+60, no final observation.
 
 The prefix of an unfinished transaction holds its `.call`, `.answer` and `.reenter` events but no `.tx` event (`runTx` emits it when it ends). That `sessionAtEvents` agrees with `sessionAt` when every transaction completes holds by the definition, not by a theorem.
 
@@ -371,7 +380,6 @@ default heartbeats.
   including `StmtD.rethrow`'s premise `rethrowVar? body = some d`.
 - G15's `SourceSpec.meaning` can use `elaborate`.
 - G46 can read `sourceLangEvents`; it still needs failure points.
-- Sessions: an unfinished *deployment* still shows no events.
 
 **G13 checker on master (`fb379ae`, `Solidity/Frontend/Static/Infer*.lean`).**
 It is written against S01's typing before this lane's changes (master's

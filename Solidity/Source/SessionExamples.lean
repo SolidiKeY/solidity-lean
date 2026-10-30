@@ -140,4 +140,38 @@ def callbackAt (el : Elaborated) (depth : Nat) : Option Outcome :=
 #guard (elabD.bind fun el => callbackAt el 1024) == some (.revert [])
 #guard (elabD.bind fun el => callbackAt el 3) == some (.success (ElaborateExamples.arg 3))
 
+/-! ## An unfinished deployment
+
+```solidity
+contract K { constructor(address a) { while (true) { I(a).ping(); } } }
+```
+
+The deployment never completes: `sessionFromEvents` shows its calls and
+answers (`deploy_events_mono`), more at a larger horizon, and no final
+observation.
+-/
+
+def unitK : Syn .unit :=
+  .unit (.cons (.contract false "K" .none .nil
+      (.cons (.constructor pAddr .nil false none (.block
+        (.cons (.stmtItem (.whileStmt (.lit (.bool true))
+          (.blockStmt (.block (.cons (.stmtItem (.simpleStmt (.exprStmt pingCall))) .nil))))) .nil))) .nil))
+    (.cons (.interface "I" .nil (.cons (.function (.ident "ping") .nil (some .external) none .nil false none .nil .none)
+      .nil)) .nil))
+
+def elabK : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitK)
+
+#guard elabK.isSome
+
+def envK : SessionEnv := { envSpin with deployArgs := ElaborateExamples.arg 9, requests := fun _ _ => none }
+
+/-- The number of events of the session at horizon `n`. -/
+def countsK (n : Nat) : Option Nat :=
+  elabK.map fun el => (sessionFromEvents ⟨el.prog, .legacy, toyFixed, "K"⟩ envK (addr 0) n).events.length
+
+#guard ((countsK 30).map fun c => decide (c > 0)) == some true
+#guard ((countsK 30).bind fun c => (countsK 60).map fun d => decide (c < d)) == some true
+#guard (elabK.map fun el => (sessionFromEvents ⟨el.prog, .legacy, toyFixed, "K"⟩ envK (addr 0) 60).final.isNone) ==
+  some true
+
 end Solidity.Source.SessionExamples

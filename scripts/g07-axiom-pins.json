@@ -1816,6 +1816,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/HorizonDeploy.lean:Solidity.Source.deploy_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SemanticsExamples.lean:Solidity.Source.Env.fieldTy?_of_fieldAt": [
   "Classical.choice",
   "Quot.sound",

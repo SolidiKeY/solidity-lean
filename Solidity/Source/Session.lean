@@ -1,4 +1,4 @@
-import Solidity.Source.Horizon
+import Solidity.Source.HorizonDeploy
 
 /-!
 # Sessions that show the events of unfinished transactions (S05 item 2)
@@ -14,8 +14,8 @@ when it is stuck.  The family is still consistent
 (`runTx_events_mono`, `Solidity/Source/Horizon.lean`), so
 `sourceLangEvents` has the type of G01's `Lang Event Outcome`.
 
-The deployment is as in `sessionAt`: an unfinished deployment shows no
-events (its monotonicity of events is not proved).
+An unfinished deployment shows its run's events at `n` as well
+(`deploy_events_mono`, `Solidity/Source/HorizonDeploy.lean`).
 -/
 
 namespace Solidity.Source
@@ -135,18 +135,42 @@ theorem sessionGoEvents_mono (P : SrcProg E) (env : SessionEnv) :
           exact hm
         · exact runTx_events_mono (P.glob env) q s hn hdn
 
+/-- The deployment as a session runs it: its outcome recorded as an event. -/
+def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat) : EM E [] Outcome := do
+  let o ← deploy (P.glob env) f P.main addr env.deployer env.deployValue env.deployArgs
+  emitEvent (.deploy env.deployer env.deployValue env.deployArgs o
+    (match o with | .success _ => some addr | .revert _ => none))
+  pure o
+
+theorem deployRun_grow (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat) :
+    Grow (deployRun P env addr f) := by
+  unfold deployRun
+  exact Grow.bind (deploy_grow _ _ _ _ _ _ _) fun _ => Grow.bind (emitEvent_grow _) fun _ => Grow.pure _
+
+theorem deployRun_approx (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat) :
+    Approx (deployRun P env addr f) (deployRun P env addr (f + 1)) := by
+  unfold deployRun
+  exact Approx.bind (deploy_approx _ _ _ _ _ _ _) fun _ =>
+    Approx.refl (Grow.bind (emitEvent_grow _) fun _ => Grow.pure _)
+
+theorem deployRun_events_mono (P : SrcProg E) (env : SessionEnv) (addr : Address) (s : St E) {k k' : Nat}
+    (hk : k ≤ k') :
+    (runAt (deployRun P env addr) s k).2.events <+: (runAt (deployRun P env addr) s k').2.events := by
+  have ha := Approx.mono (f := deployRun P env addr) (deployRun_approx P env addr)
+    (deployRun_grow P env addr) hk
+  simp only [runAt]
+  rcases ha.2.2 (L0 E, s) with ⟨_, he⟩ | he
+  · exact he
+  · rw [he]; exact List.prefix_refl _
+
 /-- **A session with unfinished transactions' events**, from the
-deployment at `addr`. -/
+deployment at `addr`; an unfinished deployment shows its run's events at
+`n`, and a stuck one its events when stuck. -/
 def sessionFromEvents (P : SrcProg E) (env : SessionEnv) (addr : Address) (n : Nat) : Prefix Event Outcome :=
-  let G := P.glob env
-  let dep := fun f => do
-    let o ← deploy G f P.main addr env.deployer env.deployValue env.deployArgs
-    emitEvent (.deploy env.deployer env.deployValue env.deployArgs o
-      (match o with | .success _ => some addr | .revert _ => none))
-    pure o
-  match firstDone (runAt dep (St.init E)) n with
+  match firstDone (runAt (deployRun P env addr) (St.init E)) n with
   | some (_, (.ok o, s)) => sessionGoEvents P env n n 0 s o
-  | _ => ⟨[], none⟩
+  | some (_, (.error _, s)) => ⟨s.events, none⟩
+  | none => ⟨(runAt (deployRun P env addr) (St.init E) n).2.events, none⟩
 
 /-- The session at the deployment's creation address. -/
 def sessionAtEvents (P : SrcProg E) (env : SessionEnv) (n : Nat) : Prefix Event Outcome :=
@@ -160,7 +184,32 @@ theorem sessionFromEvents_consistent (P : SrcProg E) (env : SessionEnv) (addr : 
   · rename_i j o s hf
     rw [firstDone_mono _ hnm hf]
     exact sessionGoEvents_mono P env n m n m 0 s o hnm hnm
-  · exact ⟨List.nil_prefix, .inl rfl⟩
+  · rename_i j h s hf
+    rw [firstDone_mono _ hnm hf]
+    exact Prefix.Le.refl _
+  · rename_i hf
+    refine ⟨?_, .inl rfl⟩
+    show (runAt (deployRun P env addr) (St.init E) n).2.events <+: _
+    split
+    · rename_i j o s' hf'
+      obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
+      have hnj : n ≤ j := by
+        by_cases h' : j ≤ n
+        · rw [firstDone_none_le hf j h'] at hd; cases hd
+        · omega
+      have hm := deployRun_events_mono P env addr (St.init E) hnj
+      rw [← hr] at hm
+      exact hm.trans (sessionGoEvents_extends P env m m 0 s' o)
+    · rename_i j h s' hf'
+      obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
+      have hnj : n ≤ j := by
+        by_cases h' : j ≤ n
+        · rw [firstDone_none_le hf j h'] at hd; cases hd
+        · omega
+      have hm := deployRun_events_mono P env addr (St.init E) hnj
+      rw [← hr] at hm
+      exact hm
+    · exact deployRun_events_mono P env addr (St.init E) hnm
 
 /-- **Consistent** (G01 `Prefixes.Consistent`). -/
 theorem sessionAtEvents_consistent (P : SrcProg E) (env : SessionEnv) :
