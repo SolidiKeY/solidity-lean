@@ -2498,7 +2498,22 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Decl.frame?_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.body_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.body_opsOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.callInternal_ns": [
   "Classical.choice",
   "Quot.sound",
   "propext"
