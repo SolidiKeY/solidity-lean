@@ -1058,3 +1058,5 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/CalldataArrayControls.lean` | Actual cdRef identities, nested Data.array contents, wrong-offset and empty/bounds controls; Boolean observation coherence. |
 | `Backend/MemoryOps/CalldataTransport.lean` | Initial typed element correspondence derives immutable decoded-read/actual heap overwrite transport; no converter/emitter. |
 | `Backend/MemoryOps/CalldataTransportControls.lean` | Nonprimitive initial child table/heap correspondences discharged, actual parent redirection and wrong/missing-child negatives. |
+| `Backend/MemoryOps/CheckedSnapshot.lean` | Exact runtime bounds/success observations around actual heap captureOverwrite, empty identity and successful/failed preserving-growth transport. |
+| `Backend/MemoryOps/CheckedSnapshotControls.lean` | Actual reference-heap overlaps, streaming/bounds negatives, empty endpoint, allocator noninterference and nonempty element-boundary witnesses. |

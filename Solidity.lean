@@ -749,3 +749,4 @@ import Solidity.Backend.MemoryOps.DisjointGrowthControls
 import Solidity.Backend.MemoryOps.ObjectFrameControls
 import Solidity.Backend.MemoryOps.CalldataArrayControls
 import Solidity.Backend.MemoryOps.CalldataTransportControls
+import Solidity.Backend.MemoryOps.CheckedSnapshotControls

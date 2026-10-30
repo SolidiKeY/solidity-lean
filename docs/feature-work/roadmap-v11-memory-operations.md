@@ -478,3 +478,83 @@ fails with zero errors and104 unrecorded changes:14 inherited plus90owned.
 All90owned pins pass the standard allowlist. Final independent finder/skeptic
 reviews found no further defect after precise relation-boundary wording. No
 all-type correspondence, recursive-child traversal or lane completion follows.
+
+## Checked actual-heap snapshot checkpoint
+
+`checkedCaptureOverwrite` checks runtime source ordering/length and destination
+capacity before the existing `captureOverwrite`. It returns `Option (Heap H)`;
+None is this adapter's result, not a newly defined Source/target halt semantics.
+`checkedCaptureOverwrite_none_iff` proves rejection exactly for reversed source
+bounds, source-end overrun or destination overrun. `some_iff` identifies every
+successful heap with the actual captured operation. `read` observes the original
+source even for overlaps; `frame` preserves every different typed object;
+`empty` proves actual whole-heap identity at valid endpoints.
+
+`captureOverwrite_keeps` derives source capture and destination overwrite
+naturality together under an initial preserving extension. The checked version
+`checkedCaptureOverwrite_keeps` derives a grown successful result and output
+Keeps; `checkedCaptureOverwrite_none_keeps` preserves exact rejection. Both
+grown capacities and source bounds are derived. They do not assume the desired
+output preservation. Payloads retain existing typed values/references and no
+fresh deep copy is claimed. There is no new loop, code emitter, heap semantics,
+public payload cap or recursive-depth bound.
+
+Controls use an actual fixed parent with shared typed child references. Right
+and left same-object overlaps yield identities[0,0,1,0] and[1,0,0,0]; the right
+case refutes a streaming result[0,0,0,0]. Both child objects remain unchanged.
+Reversed/source/destination failures and empty exact-end identity are observed
+on that same heap. Actual allocation supplies initial Keeps; successful copy
+transports old output objects and frames the fresh reference-containing object,
+while the same invalid copy still fails. A 33-element nonempty same-object
+Boolean overlap crosses element index32 and reads the expected captured true.
+This is not physical byte-word memory or target capacity-failure compilation.
+
+Focused closure passes47jobs;21new headline/control axiom sets are guarded after
+final confirmation. Independent finder/skeptic reviews inspect actual statements,
+non-vacuity, controls and scope. This advances Backfill A and G34/G35.04 operation
+adapters; all original parent/Backfill statuses remain partial or blocked.
+Source/target bounds failures, emitted copy loops, recursive child traversal,
+all-type correspondence/constructors and final chain remain unclosed.
+
+Checkpoint-six handoff directory is
+`/workspace/v11-memory-operations-evidence/checkpoint6`; exact resulting head/base,
+cumulative patch, named-ref bundle, raw logs, proposed pins and checksum manifest
+are exported after commit. Parent is `887c818f3624c4757cc62c611b94d816b23ff5cd`.
+Checkpoint-five independent artifact reviews both passed all33checksums, base/
+head/branch/patch/bundle/links and honest premise/queue/failure boundaries.
+Runtime TOML and every older source/artifact/cache/failure receipt are preserved.
+
+Checkpoint-six review repairs: finder identified that the original source-failure
+control also overran destination, so it would not discriminate a missing source
+guard. Replaced by source[3,5) into offset0 of length4, with valid ordering and
+destination capacity proved separately. Skeptic requested a real zero-length
+dynamic heap object: new control succeeds unchanged at(0,0,0), rejects source
+endpoint(1,1) despite an empty payload, and rejects destination offset1 despite
+valid source(0,0). These fixes strengthen controls without changing any theorem
+statement, operation guard or approved profile. Initial full confirmation passed
+before these control refinements; final gate is rerun on the refined tree.
+
+Checkpoint-six refined final gates: `run-lean.sh` exits0,872 default jobs,
+262 TestSuite jobs, final SolKey377/131 OK. Aggregate sampled Lean/Lake peak
+1,612,440 KiB; cgroup peak380,317,696 bytes. Strict automatic, committed-snapshot
+complete TestSuite trust/parity, layers/orphans/trust/lane/script/diff all pass.
+Global docs still fails with byte-identical frozen-base raw output; separate
+no-new passes. Global pin inventory still fails:0errors,125unrecorded changes,
+14inherited plus111owned. Owned allowlist/boundary check passes111pins21modules;
+reserved inventory is not edited. Final independent finder/skeptic reviews
+confirmed both control fixes and found no remaining source/document defect.
+
+Coordinator reconciliation proposals are additive evidence only for exact
+feature IDs `memoryLocation`, `newMemory`, `memoryAliasing`, `rangeAccess` and
+`calldataLocation`, mapped respectively to G32/G33/G34/G35 operation adapters.
+No global feature status, G03 ledger, manifest, TrustAudit or pin inventory was
+rewritten. The handoff lists all111owned pins for proposed registration, not a
+global inventory pass. All original Work G32,G33,G34,G35.01-.06 and Backfill A/B
+remain individually accounted above and unfinished at lane level.
+
+The available tool catalog still has no `get_goal` or per-file Lean diagnostic
+RPC; only a goal-stop tool is advertised. The prior trusted-context limitation
+is preserved, no new/reset/reactivated goal is created, and no completion is
+reported. Full assignment remains partial. Published byte-memory/source/type/
+traversal/owner-copy/V10 prerequisites are required for full closure; this does
+not assert every future independent refinement is unavailable.
