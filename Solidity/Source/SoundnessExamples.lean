@@ -593,6 +593,15 @@ theorem zeroArr_alloc :
     | _ => none) = some (0, 1, [some false, some false]) := by
   rfl
 
+/-- **Witness** (`deleteLoc_mem`): `delete xs[0]` on the `bool[]` of
+`arrHeap` succeeds and leaves one object in the heap. -/
+theorem arrHeap_delete :
+    (match ((deleteLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 3 (τ := .bool) (.mem 0 0)).run
+      (.nil, { SemanticsExamples.s0 with heap := arrHeap })) with
+    | (.ok (), y) => some y.2.heap.next
+    | _ => none) = some 1 := by
+  rfl
+
 /-! ## Axioms -/
 
 /-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -765,6 +774,24 @@ theorem zeroArr_alloc :
 #guard_msgs in #print axioms Solidity.Source.zeroOK
 /-- info: 'Solidity.Source.SoundnessExamples.zeroArr_alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.zeroArr_alloc
+/-- info: 'Solidity.Source.Hoare.and' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Hoare.and
+/-- info: 'Solidity.Source.heapPut_top' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapPut_top
+/-- info: 'Solidity.Source.memSet_top' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.memSet_top
+/-- info: 'Solidity.Source.writeLoc_memByte_top' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_top
+/-- info: 'Solidity.Source.writeLoc_local_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_local_mem
+/-- info: 'Solidity.Source.writeLoc_mem_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_mem_mem
+/-- info: 'Solidity.Source.writeLoc_memByte_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_mem
+/-- info: 'Solidity.Source.deleteLoc_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.deleteLoc_mem
+/-- info: 'Solidity.Source.SoundnessExamples.arrHeap_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_delete
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
