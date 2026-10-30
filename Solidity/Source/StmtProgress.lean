@@ -753,8 +753,11 @@ theorem Elaborated.body_locals (el : Elaborated) {d : Decl} {b : RBody el.res.en
   rw [hl, Frame.tysOf_locals h1 h2, hps, hrs]
 
 /-- **Internal calls in elaborated programs**: the frame hypotheses of
-`callInternal_ns` reduce to the body dispatch finds having the call's
-parameter and return types (dispatch coherence). -/
+`callInternal_ns` (`hloc`, `hps` as a length) reduce to the body dispatch
+finds having the call's parameter and return types (`hps`, `hrs`: dispatch
+coherence), given that the program is the elaborated one (`hG`) and the
+dispatched declaration is one of the unit's (`hdec`); `hmods`, `hz`, `hf`
+and `ho` are `callInternal_ns`'s, kept. -/
 theorem Elaborated.callInternal_ns (el : Elaborated) (G : Glob el.res.env) (hG : G.prog = el.prog) (F : Fr)
     (n : Nat) (d : Decl) {ps : List STy} (vs : Vals el.res.env.layout ps) (rs : List STy) (b : RBody el.res.env)
     (hdec : G.dispatchFn F.contract d ∈ el.res.unit.decls) (hb : G.prog.body (G.dispatchFn F.contract d) = some b)

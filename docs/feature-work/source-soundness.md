@@ -478,8 +478,11 @@ Kept current at every checkpoint.
   `callInternal_ns`'s frame hypotheses are derived from the elaboration
   (`Elaborated.callInternal_call_ns`) except two: the dispatched override's
   return types are the call's, and the dispatched declaration is one of
-  the unit's ("Deriving the frame" below); no concrete elaborated program
-  witnesses them;
+  the unit's (`hdec`; "Deriving the frame" below); the program run is the
+  elaborated one (`hG : G.prog = el.prog`), and the body conditions of
+  `callInternal_ns` (no modifiers, the fragment, `OpsOK`, return types
+  with defaults: `hmods`, `hf`, `ho`, `hz`) are kept as hypotheses; no
+  concrete elaborated program witnesses them;
 - the storage side conditions of the fragment (`E.cellTy d.path = τ`,
   `E.pathTy d.path = some τ`) are checked per expression, not derived
   from the elaboration;
