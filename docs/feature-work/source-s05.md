@@ -104,7 +104,8 @@ some inputs:
 - calldata references;
 - `fallback` with parameters;
 - nested-array copies;
-- the ABI of user-defined value types and external function types;
+- the ABI of external function types (user-defined value types are
+  decoded as their underlying type since lane V04b);
 - function-typed defaults.
 
 These are recorded in [source-s02.md](source-s02.md#what-s02-does-not-do)
@@ -445,4 +446,4 @@ divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame fail
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
 rule); calldata references, `abi.decode`, `new`, slices, inline arrays,
 `try`, tuple declarations, `fallback` with parameters; dynamic-length
-`Panic(0x41)`; user-defined value types in the decoder.
+`Panic(0x41)`.

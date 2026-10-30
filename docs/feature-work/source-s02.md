@@ -441,7 +441,8 @@ These items are also listed under `limitations:`.
 - **Uniqueness of derivations.** Not true (`(1)`); uniqueness of meaning is proved, see "Uniqueness".
 - **Calldata.** `cdRef` values are never produced. External arguments
   are decoded into values: `bytes`, `string` and dynamic arrays of value
-  types are decoded, but static arrays, structs, user-defined value types,
+  types are decoded, and user-defined value types as their underlying type
+  (lane V04b), but static arrays, structs,
   external function types and arrays of non-value types are not
   (`decodeArgs` is `stuck` on them).
 - **Call options other than `value`.** Not modelled, and neither are

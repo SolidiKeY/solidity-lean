@@ -327,9 +327,9 @@ program:
 **Gaps reachable by well-typed programs** (none is on the per-constructor
 ledger `semExprGaps`, which lists only constructors S01 does not type):
 
-- dynamic ABI decoding of `calldata` parameters, static arrays, structs,
-  user-defined value types and external function types (`Eval.lean`
-  `decodeArgs`), and of memory arrays of non-value elements;
+- dynamic ABI decoding of `calldata` parameters, static arrays, structs
+  and external function types (`Eval.lean` `decodeArgs`), and of memory
+  arrays of non-value elements (user-defined value types: closed, below);
 - ABI encoding of memory arrays and structs (returns, external-call
   arguments, `emit`/error arguments) and of external function values;
 - `calldata` references (six sites by the census, two of which name
@@ -379,6 +379,20 @@ from a frame that is not static, which only fails). A callback with value
 from the environment's static frame still fails without halting it: the
 environment's strategy moves next.
 
+**Run-time gaps closed** (checkpoint 4, partial):
+
+- ABI decoding of a user-defined value type argument, as its underlying
+  type (`decodeWord`, a wrapper over `decodeElemWord`): `elabW` in
+  `ElaborateExamples.lean`, where `f(W w)` with `type W is uint8` runs on
+  `7` and reverts on `300` (it was `stuck`).
+
+Attempted and reverted: getters of `bytes`/`string` state variables
+(`dispatch` encoding a storage reference; the control returned `"ab"`):
+the extra branch in `dispatch` makes `Horizon.lean`'s `dispatch_apart`
+proofs exceed the heartbeat limit (build13), and raising it is not
+allowed; it needs the branch moved into a helper with its own `_grow`,
+`_const` and `_below` lemmas in Horizon's lists.
+
 **Other findings recorded** (not `stuck` sites): `string s = "x";` and
 `string constant S = "x";` at contract level do not elaborate (a string
 literal does not convert implicitly to `string storage`), so the
@@ -401,7 +415,7 @@ Kept current at every checkpoint.
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
 | 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; no preservation theorem for the walk |
 | 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
-| 4 Close gaps | not started | |
+| 4 Close gaps | partial | UDVT argument decoding (`elabW`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
 
 **Not done** (also under `limitations:`):
