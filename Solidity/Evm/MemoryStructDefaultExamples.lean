@@ -344,7 +344,8 @@ private theorem failure_cost : ∀ k : Fin 7, allocationCostProg (failure k).2 i
 
 /-- All seven checked field failures have inhabited public input premises. -/
 theorem failure_inputs (k : Fin 7) : (failureCompilation k).Input 1 64 bases initial machine := by
-  apply ((failureCompilation k).memory_input (failure_memory k) 1 64 bases initial machine).mpr
+  have hcopy : ∀ k : Fin 7, hasArrayCopy (failure k).2 = false := by decide +kernel
+  apply ((failureCompilation k).memory_input (hcopy := hcopy k) (failure_memory k) 1 64 bases initial machine).mpr
   refine ⟨initial_repr.1, failure_frame k, .inr ⟨by decide, wmod 128, initial_repr.2, ?_⟩⟩
   rw [failure_cost k]
   decide +kernel

@@ -1077,3 +1077,21 @@ At the root, the notation's own tests:
 | `Backend/Failure/UnwindChecks.lean` | Inhabited distinct snapshots, nested emitted failures, caller-memory restoration and wrong-snapshot negatives. |
 | `Backend/Failure/Composition.lean` | Arbitrary two-write-block byte noninterference, immutable input preservation and checked emitter concatenation/terminal distinction. |
 | `Backend/Failure/CompositionChecks.lean` | Inhabited both-executed writes, overlap negative, overlapping ignored suffix and same-bytes terminal controls. |
+| `Evm/MemoryStorageCopyLoop.lean` | Runtime counter loops: exact primitive payload writes, explicit zero cleanup, finite termination and slot/frame laws. |
+| `Evm/MemoryStorageCopyCode.lean` | Runtime-length memory-array copy code: payload loop, old live tail clearing and final length replacement, with exact execution equation. |
+| `Evm/MemoryStorageCopyLaws.lean` | Typed heap snapshot/overlay representation, live/tail reads and destination frames for the iterative array copy. |
+| `Evm/MemoryStorageCopySource.lean` | Source assignment simulation through supported pointer/storage paths, destination reversion and fragile-alias invalidation for resizing arrays. |
+| `Evm/MemoryStorageStructCopy.lean` | Primitive-member physical offset laws, finite struct copy loop and full typed memory-to-storage assignment simulation. |
+| `Evm/MemoryFixedStorageCopy.lean` | Additive typed fixed-array payload refinement, actual inline copy loop, snapshot/frame laws and same-size source simulation; legacy inputs unchanged. |
+| `Evm/MemoryFixedShapeCode.lean` | Actual iterative fixed-source conversions: inline padding or dynamic payload/tail cleanup and final header replacement. |
+| `Evm/MemoryFixedShapeLaws.lean` | Exact fixed-source snapshot, primitive padding, live/tail and frame representation laws. |
+| `Evm/MemoryFixedShapeSource.lean` | Typed fixed-to-dynamic/padded-fixed source assignment simulations with source-before-destination evaluation and failure preservation. |
+| `Evm/MemoryFixedMixedCopy.lean` | Dynamic-array/primitive-struct simulations that retain the fixed payload refinement and exact source heap/target memory preservation. |
+| `Evm/MemoryFixedCompile.lean` | Intrinsic read-only compiler certificates and admission for fixed copies, mixed copy families, guards, scopes and branches; no unproved heap ownership for mutations/allocations. |
+| `Evm/MemoryFixedCopyExamples.lean` | Inhabited public fixed-copy correctness inputs, root/member/mapping and shape observations, deep-copy, failed-destination zero-demand, tail cleanup and reference-element/mutation refusal controls. |
+| `Evm/MemoryFixedMixedExamples.lean` | Inhabited fixed-memory compiler input with fixed-array, dynamic-array and primitive-struct source objects; combined source/compiled observations and correctness. |
+| `Evm/MemoryStorageObjectCopy.lean` | Typed projection from full object ownership to fixed payloads; source-execution-derived heap/memory preservation restores full ownership and allocator after copies. |
+| `Evm/MemoryStorageConstructionCompile.lean` | Sequential composition of published construction/mutation and copy certificates, with exact capacity, base extension, allocator growth and reached-copy bounds. |
+| `Evm/MemoryStorageLifecycleExamples.lean` | Inhabited public allocation-initialization-copy-mutation lifecycle for fixed/dynamic/struct sources; live/shadow/tail observations, invalid bound and failed destination controls. |
+| `Evm/MemoryCopyBound.lean` | Recursor-based reached successful copy demand for the existing storage representation bound; zero on failed destinations and unreachable suffixes. |
+| `Evm/MemoryStorageCopyExamples.lean` | Inhabited public correctness inputs and source/compiled independence, replacement, cleanup, signed/Boolean, invalid-bound, failed/unreachable and refusal controls. |

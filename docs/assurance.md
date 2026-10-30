@@ -159,9 +159,38 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 
 | Area | Still due |
 |---|---|
-| Memory compiler | Other storage paths and copies (memory-to-storage, runtime-length arrays, reference-bearing structs), reference-bearing construction and defaults, fixed and reference-element arrays and paths, loops on the memory path, remaining mixed operations. The core path compiles loops (`Instr.loop`, `loop_sim`). |
+| Memory compiler | Copies outside the nonrecursive primitive fragment below (reference-element arrays, reference-bearing structs and recursive layouts), construction/default and array/path cases beyond their published owning APIs, general memory-source loops, mixed construction/copy blocks or branches, and remaining mixed operations. The core path compiles loops (`Instr.loop`, `loop_sim`). |
 | Loop automation | Two `SolcLoopsOpen` functions (`docs/semantic-gaps.md`, `docs/loops.md`). Support sound invariant use where missing; keep a missing invariant distinct from a false specification. |
 | Quantifier instantiation | Broaden ground terms and larger loops only with bounded, checked instances. |
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |
 | Revert semantics | Exact symbolic catch relationships; literal data outside self-call frames; broader panic-code alignment (self-calls already fail with solc's `Panic` codes, `Prog.withPanics`). |
 | Exact verification | `docs/automation.md`, M7 "What is not proved". |
+
+
+## Memory-to-storage copy recovery
+
+The checked compiler admits runtime-length primitive-array and primitive-member
+struct copies through represented finite paths. Actual loops copy the heap
+snapshot, clear the discarded live destination tail and replace dynamic length
+last. Source memory remains independent. Fixed primitive sources additionally
+support same-size, padded-fixed and dynamic destinations. The public
+`Compilation.memory_copy_input`, `fixed_input` and `copyConstruction_input`
+helpers expose the existing representation bound and reached copy demand;
+failed destinations and unreachable suffixes demand zero. Copy-free memory
+inputs retain their original premises.
+
+The additive lifecycle route reuses published construction/mutation certificates
+and preserves complete object ownership, allocator growth and reached capacity.
+It composes construction and copies in a top-level sequence; mixed
+construction/copy blocks or branches, reference-element copies, whole
+reference-bearing structs and recursive-copy layouts remain refused.
+These are compiler refinements, not universal source coverage or bytecode
+refinement. The source semantics, expected observations and proof budgets are
+unchanged; no Bridge import or new axiom is added.
+
+Recovery validation: the four concrete copy/example targets kernel-built
+successfully on the pinned new base in 518 seconds under a verified hard
+12 GiB cgroup with zero swap. The peak cgroup usage was 1,153,257,472 bytes.
+Task-only axiom checks, per-file diagnostics, static gates, sort alignment and all four external modes now pass. Full/import, combined trust and TestSuite/corpus kernel gates remain pending;
+this checkpoint does not complete the assignment. See the
+[owning record](compiler-verification.md#memory-storage-copy-recovery-checkpoint).

@@ -579,3 +579,452 @@ the session rollout. Per-file Lean MCP diagnostics remained partial after
 three 30-second polls, with no diagnostics or failed dependencies returned;
 this is pending validation, not a passing Lean audit. `git diff --check` passed.
 The coordinator must complete the combined audit under its resource scope.
+
+
+## Memory-storage-copy recovery checkpoint
+
+The recovery base is `8445c3fc203144251b9d1fc9181f7f61a8189522`, branch
+`codex/solidity-copy-recovery-20261030/memory-storage-copy`. The isolated
+predecessor at `/workspace/memory-storage-copy-preserved` reproduces the exact
+original HEAD and porcelain-v1 NUL-delimited index/worktree status. Recovery
+archive SHA256 is `5d4432ab8541e9b1669a464c9e1d350921f769a8e996308614971843f51a6f9e`;
+all five member size/hash pairs, four untracked files and 381 evidence files
+were verified, with safe paths and no links. Original ready inputs and extracted
+recovery members are read-only. Other owners' broad staging remains isolated.
+
+Only this task's algorithms, proof/admission changes, controls and additive
+root/trust/docs integration were reconciled onto the pinned base. The complete
+source and artifact hash inventory is
+`/workspace/memory-storage-copy-evidence/restored-source-sha256.json`. Historical
+`/workspace/memorycopy-*` log references below map to preserved basenames under
+`/workspace/memory-storage-copy-recovery/evidence`; they are not fresh passes.
+
+Fresh runtime: Lean 4.24.0 (797c613), Lake 5.0.0-src+797c613;
+`lake -f lakefile.memorycopy-recovery.toml build Solidity.KeySort` exited 0.
+The task-only alternate config preserves all proof/search budgets and supplies
+explicit Lean `-j1`, with `LEAN_NUM_THREADS=1`. A network-disabled local Docker
+container enforces `memory.max=12884901888`, `memory.swap.max=0`; no new VM or
+worker is created. The source-host systemd user bus is unavailable, and its
+16 GiB cgroup alone is not claimed as the required build cap.
+
+`lake -f lakefile.memorycopy-recovery.toml build
+Solidity.Evm.MemoryStorageCopyExamples Solidity.Evm.MemoryFixedCopyExamples
+Solidity.Evm.MemoryFixedMixedExamples Solidity.Evm.MemoryStorageLifecycleExamples`
+exited 0 (165 jobs, 518 seconds). Peak cgroup memory: 1,153,257,472 bytes;
+sampled aggregate RSS: 1,227,550,720 bytes (shared pages may be counted twice).
+The headroom monitor observed no reserve stop. Full logs and monitor JSON live
+under `/workspace/memory-storage-copy-evidence`. Lean MCP diagnostics are not
+available; installed per-file Lean checks are used instead.
+
+Independent read-only finder and skeptic verified recovery bytes/status and
+selective task ownership, and found no copy-semantic defect. Both found four
+TrustAudit imports appended after commands; they were moved into the import
+header before the audit. Current assurance/module-map summaries were corrected.
+Neither reviewer used Lean or a server. Fresh audit, per-file, full/import,
+TestSuite/corpus/sort, strict/trust/layers/orphans, external modes and exact-base
+doc-debt checks remain pending. This is a partial checkpoint, not completion.
+
+### Recovery checkpoint terminal checks
+
+The local recovery/source checkpoint is reviewable and kernel-proved. All
+edited/new source files have successful installed Lean diagnostics: the first
+batch stopped only because `MemoryCompileExamples.olean` had not been produced;
+building the five affected legacy examples repaired that dependency, and the
+remaining three diagnostics passed (65.05 s, 2,204,811,264-byte cgroup peak).
+The failed batch is retained. The five legacy targets passed in 77.36 s.
+
+The independent reference test passed all four legacy/viaIR × optimizer modes,
+with exact observations and deliberately wrong-observation rejection saved in
+`/workspace/memory-storage-copy-evidence/external-observations.json` (5.54 s,
+343,310,336-byte cgroup peak). The task-only transitive audit checks 90 theorem
+heads; its printed main axioms are exactly `propext`, `Classical.choice`,
+`Quot.sound` (14.33 s). This does not replace the pending combined TrustAudit.
+
+Orphans (915 reachable, 0 orphaned), layers (169 core, 0 elaborator reach),
+strict automation (491 automatic, 61 replay budgets, 0 manual, 0 pending),
+source trust (930 sources, 0 findings), trust-script tests (2/2), and the
+TestSuite inventory all pass. The inventory's first attempt used an activation
+snapshot whose sibling pin file was absent; selecting the existing repository
+snapshot repaired setup without changing its pin. The unchanged 274-file
+snapshot verifies at `473da8944ca7329e6b76819863591407db26e7ec`.
+
+Sort alignment passes: 377 taclets parsed, 131 read-bearing, 131 covered;
+annotations match the pinned rules (4.29 s). Exact-base doc checks both fail
+with the identical 72 missing/ambiguous findings; zero new or removed findings
+(`docs-comparison.json`). These failing historical gates remain failures.
+
+Finder and skeptic re-reviewed the import, documentation, immutable-input and
+checkpoint-accuracy fixes and found no remaining confirmed local finding.
+Full `./run-lean.sh`, direct full/import/combined audit, TestSuite kernel build
+and corpus validation remain mandatory and pending. The entire assignment
+remains incomplete.
+
+## Preserved memory-storage-copy recovery history
+
+The following ledger is preserved historical task evidence from original HEAD `0f1039dac4e032c4e2c4030ee0d35b38c8393f80` and its recovered WIP. Its passes and failures describe that predecessor, not validation of the recovery base. Current recovery evidence is recorded separately.
+
+## Certified memory-to-storage copies (2026-10-28)
+
+`MemoryStorageCopyLoop` proves the actual `Instr.loop` traversals for arbitrary
+runtime lengths. `MemoryStorageCopyCode.memoryArrayCopy_run` proves their exact
+store effect: copy `[0,newLength)`, clear `[newLength,oldLength)`, then replace
+the length. `MemoryStorageCopyLaws` connects that effect to the actual
+`MVal.copyMToSt` heap snapshot and `Storage.write` overlay, including destination
+frames. `MemoryStorageCopySource.assignMemoryArray_correct` and
+`MemoryStorageStructCopy.assignMemoryStruct_correct` give the typed statement
+simulations used by the checked compiler. No equality between unrelated heaps
+or sampled-equivalence premise replaces execution. Neither traversal uses
+scratch memory, changes the caller stack, or moves the allocator cursor.
+
+The existing storage representation has a strict length bound `L ≤ 2^64`.
+`Compilation.memory_copy_input` exposes `copyBoundProg P σ ≤ L`, separately
+from allocation capacity: every reached successful array copy needs
+`sourceLength + 1 ≤ L`. Demand is zero after a reverting prefix or failed source
+or destination resolution. This is an explicit representation premise; the code
+does not emit a new runtime length check. `Compilation.memory_input` retains
+the old premise shape for programs with no array copies. Its optional copy-free
+proof is explicit in the existing parameterized failure fixtures. Output claims,
+halt policies and the source semantics are unchanged. The demand traversals use
+generalized `casesOn`, structural recursion and named equations (Gate G0).
+
+The source/target regressions exercise growing, shrinking, empty and recycled
+array destinations, primitive signed/Boolean payloads, independent memory
+mutation after copying, struct roots/nested fields/mapping entries, destination
+bounds reversion, invalid representation bounds, unreachable copies,
+reference-element refusal and retained storage outside the copied region.
+`tests/solc/MemoryStorageCopies.sol` is also executed by
+`scripts/evm-reference/memory-storage-copy.test.mjs` with the unchanged SHA-pinned
+0.8.34 compiler in legacy/viaIR × optimizer off/on. All four modes pass; an
+intentionally wrong observation fails the adapter. Its exact `Panic(0x32)` check
+is independent reference evidence; the typed compiler theorem claims ordinary
+reversion, not bytecode/panic-payload equivalence. No source coverage inventory
+status is promoted by these compiler refinements.
+
+Read-only finder and skeptic reviews independently found an overly eager
+failed-destination length demand and indexed matching in the initial demand
+traversal. Both were fixed and re-reviewed; the length-3/L=1 failing-destination
+input is inhabited. Neither reviewer used the Lean server. No blocking semantic finding
+remained; mandatory global validation remains blocked as recorded below. All proof/search budgets are unchanged. Keeping loop evaluation opaque
+to proof unification repaired an intermediate heartbeat timeout; the complete
+array-code proof then built in 1.41 seconds at 0.73 GiB aggregate RSS.
+
+Validation uses the installed measured VM guard: inherited per-process
+`RLIMIT_AS=12 GiB`, sampled process-group RSS stop at 10 GiB (100 ms), and
+whole-VM `memory.current` stop at 12 GiB, inside the existing hard 16 GiB VM
+cgroup with actual swap disabled. This is not a 12 GiB cgroup guarantee or a
+claim that `MemorySwapMax=0` was set. Final validation commands source the published activation,
+then export `LEAN_NUM_THREADS=1`; the untracked task Lake configuration supplies
+explicit Lean `-j1`. Logs and resource JSON are exported with the handoff.
+
+| Check | Exit | Elapsed | Peak aggregate RSS | Guard stop |
+|---|---:|---:|---:|---|
+| KeySort runtime | 0 | 0.30 s | 0.045 GiB | none |
+| Baseline compiler dependencies | 0 | 172.70 s | 3.075 GiB | none |
+| Compiler after copy integration | 0 | 30.85 s | 1.124 GiB | none |
+| New Lean source/target witnesses | 0 | 6.37 s | 0.932 GiB | none |
+| Four-mode Solidity reference | 0 | 3.43 s | 0.342 GiB | none |
+| First full run (repaired failures below) | 1 | 1931.55 s | 7.141 GiB | none |
+
+The first full run failed on unchanged `Calculus.LinearDecision` and
+`Calculus.TermSize` with thread-creation errors, and on legacy fixture input
+proof plumbing after the public memory input gained its copy bound. The two
+unchanged modules passed with a smaller temporary stack (65536) and
+`MALLOC_ARENA_MAX=2`, under the same guard: 33.03 s, 1.278 GiB. Affected legacy
+fixtures and new controls then built together in 68.10 s at 1.300 GiB. Their
+programs, capacity premises and expected observations did not change. The final
+finder caught three further direct input tuples and one overbroad post-rewrite
+tuple edit; their repairs passed both the default build and direct per-file
+kernel diagnostics.
+
+Two tool-session terminations orphaned intermediate full runs; their task-owned
+groups were stopped and are not passing evidence. Another confirmation was
+explicitly interrupted for the reviewed fixture repair. Persistent `setsid`
+guards and the writer lock were used thereafter. One full attempt stopped at
+the 12 GiB whole-VM threshold (exit 75, 2695.41 s, 7.394 GiB peak workload RSS)
+during unchanged `Examples/Tactics/OpenLoops.lean`. Reclaimable file cache was
+released using per-file `POSIX_FADV_DONTNEED` advice: whole-VM current fell from
+4.34 GiB to 0.15 GiB. Disk caches were retained, all limits/budgets stayed the
+same, and the isolated target then passed.
+
+The next full attempt passed all 692 default jobs, then unchanged
+`TestSuite/Derived7.lean`, `TestSuite/Derived15.lean` and
+`TestSuite/Derived17.lean` exited 134 with `std::bad_alloc`. Their 226-file local
+import closure has zero changes against the recorded base. A temporary smaller
+stack (65536) and `MALLOC_ARENA_MAX=1`, `MALLOC_MMAP_THRESHOLD_=131072`,
+`MALLOC_TRIM_THRESHOLD_=131072` made Derived7 and Derived15 pass. Derived17
+still failed. A process snapshot showed 44 Lean task threads despite `-j1`,
+with the actual inherited 12 GiB address-space limit. A further temporary
+32768 stack and `-DElab.async=false` serialized theorem elaboration and kernel
+checking. Installed Lean sources and the independent finder confirm this is a
+scheduling change, not a trust or search-limit change. It reached the whole-VM
+stop; after a second non-destructive cache reclamation (4.11 GiB to 0.16 GiB),
+it reached the 10 GiB aggregate-RSS stop instead. No TestSuite source changed.
+
+**Completion decision: the copy implementation and its targeted validation are
+proved; original mandatory validation is BLOCKED.** The final unchanged
+Derived17/TestSuite attempt stopped at the required aggregate-RSS ceiling.
+The full script is not called passed. The next step is an owner-reviewed
+performance decomposition/profile of that existing TestSuite replay under the
+same limits, rather than raising budgets or changing its claim. This assignment
+does not take over corpus work. Default/core build, SolKey rule check, all 15
+edited-file kernel diagnostics, explicit axioms and the trust audit passed
+independently. Both final read-only reviewers found no new semantic blocker or
+scope drift; the skeptic required precisely this blocked validation decision.
+Neither reviewer used the Lean server.
+
+| Terminal check/attempt | Exit | Elapsed | Peak aggregate RSS | Guard stop |
+|---|---:|---:|---:|---|
+| Default/core `lake build` | 0 | 0.61 s | 0.058 GiB | none |
+| SolKey rule check | 0 | 0.61 s | 0.211 GiB | none |
+| Direct per-file diagnostics (15 edited files) | 0 | 116.26 s | 2.634 GiB | none |
+| `TrustAudit.lean` (554 headline theorems) | 0 | 89.37 s | 1.392 GiB | none |
+| Explicit `#print axioms` for copy laws/witnesses | 0 | 2.22 s | 0.759 GiB | none |
+| Unchanged open-loop target after cache-headroom repair | 0 | 503.53 s | 8.523 GiB | none |
+| Full `./run-lean.sh`: default passed; TestSuite failed | 1 | 3023.99 s | 9.046 GiB | none |
+| TestSuite: smaller stack/allocator; Derived7/15 passed,17 failed | 1 | 322.34 s | 9.578 GiB | none |
+| TestSuite: 32 MiB stack and synchronous elaboration | 75 | 73.66 s | 8.539 GiB | 12GiB-whole-VM-current-guard |
+| Same TestSuite after reclaiming file cache | 75 | 87.87 s | 10.011 GiB | 10GiB-aggregate-RSS-guard |
+
+The explicit axiom report gives `[propext, Classical.choice, Quot.sound]` for
+the loop, array representation/source correctness, struct source correctness
+and inhabited public compiler witnesses; `primitiveStruct_copy_repr` uses
+`[propext, Quot.sound]`. There are no added axioms. The four Solidity reference
+modes and negative observation control passed as recorded above.
+
+Orphan, import-layer, strict automatic, source trust, trust-script regression
+and TestSuite inventory checks pass. The published environment omitted the
+sibling snapshot pin; restoring the byte-identical existing tracked pin repaired
+inventory validation without changing its revision. The documentation-path
+check exits 1 on 20 historical references in unchanged `Solidity/Eqns.lean`,
+`tests/upstream/group03-validation.json` and `tests/upstream/group10-validation.json`.
+No tracked file was deleted and no new citation is among those failures. This
+is retained documentation debt, not a passing gate. Full command logs, resource
+JSON, independent reviews and hashes accompany the cumulative committed export.
+
+Resumed prerequisite check (2026-10-29): a successful fresh fetch found
+`origin/master` at `127c2ee59de16971e45b08a2def54f4e5fae8e2a`. The shared Derived17
+performance repair is owned by `memory-loops`; it is not yet a validated merged
+prerequisite at this head. The source blob is still
+`e05598503e3aa2700d5e250c47f390da6dfc4743`, identical to this task's blocked
+version, and its last source change remains `1f02521bc4be2275f3cc659e3a17ad047dad48bf`.
+The only Derived17-named upstream history records the resource stop. No new
+Lean retry was run against that unchanged failure. The existing successful
+Lean/Lake/KeySort runtime evidence and all independent copy checks remain
+preserved. Resume full acceptance after consuming the owner's validated repair
+from `origin/master`; do not duplicate the shared repair, import an unmerged
+branch, or mark the current full gate passed. The task is not integrated at
+this upstream head and the worker has not pushed or merged master.
+
+
+### Whole-assignment continuation (2026-10-29)
+
+The first checkpoint omitted primitive fixed arrays. The resumed whole-scope
+finder/skeptic audit identified that omission and missing meaningful padding and
+mixed-family controls; these are now implemented and kernel checked. The earlier
+tables are historical checkpoint evidence, not acceptance results for this head.
+
+`MemoryFixedStorageCopy` adds `FixedArrayRepr`, `FixedHeapRepr` and the separate
+`FixedStateRepr` refinement. A fixed source has exactly its typed `n` primitive
+words at `base..base+n`, no header, a no-wrap extent, and lies above the reserved
+frame. Existing `StateRepr` fields and all old memory-input equivalences stay
+unchanged. No cross-layout ownership is assumed. Consequently the new route is
+memory preserving: initialized local/reference-field source paths, supported
+finite storage destinations, copies, guards, branches and scopes are admitted;
+fixed allocation, heap mutation, unset sources, array-element reference paths,
+reference-element layouts and recursive types remain refused. General memory
+loops remain separately owned. This is a copy refinement over represented
+inputs, not universal source-program coverage or bytecode refinement.
+
+`MemoryFixedShapeCode` emits actual structured copying/cleanup loops for
+same-size fixed copies, fixed-to-larger-fixed padding and fixed-to-dynamic
+replacement. `MemoryFixedShapeLaws` and `MemoryFixedShapeSource` connect their
+exact stores to `MVal.copyMToSt`, `FixedCopy.apply` and the actual storage overlay.
+Fixed destinations clear every padding word and retain slots outside their
+inline extent. Dynamic destinations clear the discarded old live tail and
+replace the length last. Source pointers precede destination bounds checks;
+failed destinations perform no copy and have zero length demand. Successful
+fixed-to-dynamic copies require `n+1 <= L`, using the same strict representation
+bound as dynamic sources. No emitted length check or weaker premise is invented.
+
+`MemoryFixedMixedCopy` proves that the existing dynamic-array and primitive-struct
+copy algorithms preserve the fixed refinement too. `MemoryFixedCompile` composes
+all copy families with intrinsic statement/program certificates. Its `FixedResult`
+derives successful source heap equality and target memory preservation from
+actual executions; neither is an input shortcut. `Compilation.fixed_input`
+exposes the additional representation and reached demand. `isMemory` retains
+its old legacy-route meaning; `isFixedMemory` identifies the refinement and
+`usesMemory` includes both routes. No old input theorem is weakened.
+
+`MemoryStorageCopyExamples.RuntimeLength` runs one compiled program at input
+lengths 0, 1 and 3, and a guard failure at 4, including root and mapping copies
+and independent later memory mutation. `MemoryFixedCopyExamples` supplies
+inhabited public fixed inputs, both branches, root/member/mapping endpoints,
+shape conversions, successful-bound refusal, failed-destination demand zero at
+L=1, and explicit mutation/reference-element refusals. Padding starts with an
+old word 88, so observing zero detects missing cleanup. Dynamic cleanup starts
+with a nonzero discarded tail. `MemoryFixedMixedExamples` initializes fixed,
+dynamic and primitive-struct objects at 128, 160 and 192, proves the public
+fixed-route input/agreement, and observes source `[31,47,2,91,92,77]` together
+with the actual compiled copy values and retained memory cells.
+
+The four-mode reference script really deploys and invokes compiled solc bytecode;
+it is not compilation-only evidence. The final extended run executes dynamic,
+runtime-length, fixed, padded and mixed cases in legacy/viaIR with optimizer
+both off/on, with every earlier expected value retained. It also checks bounds
+revert data and deliberately wrong replay observations. These executions
+supplement the kernel simulations rather than replace them.
+
+The skeptic found indexed matching on `FixedCopy` in the first shape admission
+and demand helpers. Generalized `FixedCopy.casesOn` with destination-index motives
+repaired it; the remaining kind tests inspect only ordinary types. Both final
+read-only reviewers confirmed the nonzero-padding and inhabited mixed-input
+repairs and found no remaining confirmed own-scope semantic/admission/control
+issue. Neither reviewer ran Lean, a build or a server.
+
+Published compatibility was integrated only into the existing feature branch,
+from `cc155f36dc163e221b1f8279c56fb2006113ee7d`, preserving the original
+`f4dee4a29c2e208b36db4a4161a4723c735cd775` base and task commits. A further
+fresh fetch found `040e59d30a6726fa4f9fee831695eeaa4027ede1`: it changes no
+EVM compiler/source semantics or Derived17 file relative to that compatibility
+base, so no further compatibility edit is required. No sibling branch, push or
+master merge was used. The shared Derived17 performance repair remains owned
+by memory-loops. Its unchanged failed full validation was not rerun to fill time.
+
+The original resource guard and all proof/search/test budgets remain unchanged.
+One resumed core confirmation was deliberately interrupted after reviewers
+required the mixed/padding controls (exit75, reason `interrupted`); its log is
+retained and is not a pass. Twelve final edited-file kernel diagnostics all
+exited0. The following initial trust-audit attempt failed because the newly
+published `Calculus.MemoryWitness.olean` had not yet been built; it is retained
+and requires a real prerequisite build before retry, not a false pass.
+
+| Resumed check | Exit | Elapsed | Peak aggregate RSS |
+|---|---:|---:|---:|
+| Actual Lean/Lake/KeySort runtime | 0 | 0.30 s | 0.045 GiB |
+| Published compatibility baseline (117 jobs) | 0 | 237.32 s | 1.096 GiB |
+| Fixed payload/source simulation | 0 | 1.71 s | 0.741 GiB |
+| Fixed shape loops | 0 | 1.51 s | 0.731 GiB |
+| Fixed snapshot/padding laws | 0 | 1.42 s | 0.744 GiB |
+| Fixed shape source and demand | 0 | 7.97 s | 0.865 GiB |
+| Compiler shape/mixed admission | 0 | 4.13 s | 0.802 GiB |
+| G0 repair and source witnesses | 0 | 42.22 s | 1.132 GiB |
+| Inhabited mixed and nonzero-padding controls | 0 | 3.43 s | 0.845 GiB |
+| Final actual four-mode execution | 0 | 5.44 s | 0.375 GiB |
+
+Final core/trust/gate terminal evidence and the explicit completion decision are recorded below and in the cumulative handoff; a pending or failed gate is never a pass.
+
+
+#### Terminal checkpoint before the published reference-array integration
+
+Current copy implementation and kernel/source controls pass on compatibility
+base `cc155f36`. Fixed copy and padding loop extents must be strictly below
+`W = 2^256`; fixed payloads also have the explicit no-wrap/frame assumptions
+above. These are represented-input compiler claims, not general fixed-array
+allocation/mutation or universal source/bytecode coverage claims.
+
+The first resumed full core attempt stopped at the whole-VM guard during the
+unchanged OpenLoops fixture: exit75, 5258.26s, 8428961792-byte aggregate RSS.
+It is not a pass. Under the writer lock, `fsync` and `POSIX_FADV_DONTNEED` on
+5961 regular generated checkout build files retained every disk artifact and
+reduced VM current from4305002496 to2293972992 bytes (zero errors). The same
+OpenLoops target then passed under its unchanged600s limit, in577.94s with
+9174196224-byte peak RSS. No source, proof/search/test limit or resource ceiling
+changed. The recovered default build passed737 jobs, exit0 in2438.42s at
+6900506624-byte peak RSS. Its temporary configuration preserves all published
+library/executable declarations, including the unaffected optional solcases
+runner; default targets are identical. One trailing-space cleanup changed no
+terms or expected observations and was kernel rechecked by that full build.
+
+Final diagnostics: twelve edited-file checks exited0; the final trust audit
+exited0 in106.70s and checked616 headline theorems. Explicit copy, shape, mixed
+and inhabited agreement axioms are only `propext`, `Classical.choice`,
+`Quot.sound` (fixed/padded snapshot representation uses just `propext` and
+`Quot.sound`). The final audit/axiom/static group exited0 in121.04s with
+1816711168-byte peak RSS. Orphans752/0 disallowed, layers156/0 elaborator paths,
+strict automatic491/61 budgeted/0 manual/0 pending, source trust767 sources and
+241 inventoried sites/0 findings, trust-script regressions, TestSuite inventory
+and frozen SolKey377/131 checks all pass. Documentation paths explicitly fail
+exit1 with46 missing references, all in the five published files listed in the
+handoff; none changed from the compatibility base. Ambiguous citations are also
+retained. This is published documentation debt, not a passing path gate.
+
+Fresh fetch now finds `109ba72ac8cf62f4aa4c13ae5590802244400bd0`, whose published
+reference-array/object compiler routes change the common entry API. This
+checkpoint preserves the proved copy work; integration and its required checks
+continue on this same branch. It is not original-assignment completion.
+
+The strict shared-blocker audit also corrects the older closure statement:
+current compatibility closure is227 files,26 changed from original base; the
+historical226-unchanged figure applies only to the earlier checkpoint.
+Derived17 itself remains blob `e05598503e3aa2700d5e250c47f390da6dfc4743`, last
+source commit `1f02521bc4be2275f3cc659e3a17ad047dad48bf`. Published recovery
+`b7801b00` reports a successful full run, but its11022848000-byte RSS exceeds
+this worker's10737418240-byte stop. It is not a validated repair under this
+worker policy; its cache-reclamation mechanism was already tried here before
+the actual10GiB group-RSS stop. No unchanged failed full replay is run merely
+to wait, and memory-loops retains ownership of the needed performance repair.
+
+
+Published reference-array compatibility integration is in progress on this same feature branch; checkpoint figures above retain their exact baseline.
+
+
+### Published object ownership and copy lifecycle integration (2026-10-29)
+
+The compatibility union consumes published `109ba72ac8cf62f4aa4c13ae5590802244400bd0`
+without importing an unpublished sibling branch. It preserves core, legacy
+memory, reference-array, owned-object and construction route priority and every
+published discriminated input/output helper. The legacy memory route retains
+its necessary reached-copy bound and copy-free helper. The existing read-only
+`fixedMemory` route follows the published routes; the new `copyConstruction`
+route follows it. Thus earlier initialized-object route observations are stable.
+
+The new owning APIs make a complete fixed lifecycle available. The earlier
+checkpoint's allocation/mutation refusal applies specifically to its weaker
+read-only route; it is not a global limitation after this integration.
+`MemoryStorageObjectCopy.Objects.StateRepr.fixedCopy` derives fixed payloads
+from the actual typed full-object array words. `FixedResult.objects` uses
+execution-derived unchanged source heap and target memory to restore complete
+object ownership and preserve any supplied allocator (`HeapRepr.mem_eq`,
+`AllocatorRepr.mem_eq`). Neither equality is assumed as an input. The complete
+object relation is retained, not discarded after projecting the old relation.
+
+`MemoryStorageConstructionCompile` composes published construction/mutation
+certificates with the copy certificates. Its common `Objects.GrowingResult`
+keeps exact source-computed construction cost, allocation capacity, base-map
+extension, allocator growth and reached successful-copy bounds. Owner default,
+allocation and mutation algorithms are reused unchanged. Public
+`Compilation.copyConstruction_input` exposes all these premises; existing route
+claims are unchanged. Source/machine run and storage representations remain the
+same intrinsic, dependency-free definitions, with no new axioms or proof budgets.
+
+Admission boundary: this new route composes construction and copying in a
+top-level sequence. A block/branch containing both construction/mutation and
+copies internally remains refused; existing read-only copy blocks/branches
+remain supported. Reference-element storage copies, whole reference-bearing
+struct copies, recursive-copy layouts and general memory-source loops are not
+added. The former fixed-mutation refusal control now explicitly targets
+`Fixed.compileProg`, preserving the weaker route's refusal while separately
+proving the stronger public lifecycle admission. No earlier source/machine
+expected value is changed.
+
+`MemoryStorageLifecycleExamples` supplies an inhabited public owned allocator
+input: fixed array default allocation and zero-copy, initialization31/47,
+fixed/padded copies, dynamic3 copy followed by fixed2 replacement (discarded88
+becomes shadow/tail0), independent source fixed mutation99, primitive struct
+copy77 followed by source mutation88. Kernel source observation is
+`[31,47,31,47,0,2,31,47,0,77,99,88]`; actual machine observation also checks
+free cursor135, sentinel99 and caller stack77. Source allocation cost is7 and
+copy demand4. Insufficient storage boundL=3 is refused; a failed destination
+still has demand0 and inhabited L=1 input after actual fixed allocation.
+The corresponding Solidity lifecycle executes in all four pinned legacy/viaIR
+optimizer modes, returning `[31,47,0,2,31,47,77,99,88]`. The complete reference
+run passes exit0 in6.55s at401051648-byte peak RSS, retaining all previous
+expected values, bounds/revert data and deliberately wrong-observation control.
+
+Finder and skeptic reviewed the ownership projection/restoration, actual-prefix
+cost/bound composition and lifecycle inputs read-only, without Lean/server/builds.
+Neither found a confirmed semantic bug; both required root/trust registration
+and precise documentation of the sequential composition boundary. Those modules
+and theorem heads are registered. The source-level kernel checks pass under the
+unchanged guard; final integrated global checks and original completion remain
+pending until their actual terminal evidence is recorded.

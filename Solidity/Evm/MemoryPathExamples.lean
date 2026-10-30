@@ -388,7 +388,8 @@ theorem failure_inputs (k : Fin 3) : (failureCompilation k).Input 1 16 base stat
   have hd : ∀ k : Fin 3, (failureCompilation k).isMemory = true := by decide +kernel
   have hc : ∀ k : Fin 3, 1 + frameNeedProg (failure k) ≤ 16 := by decide +kernel
   have hz : ∀ k : Fin 3, allocationCostProg (failure k) state = 0 := by decide +kernel
-  apply ((failureCompilation k).memory_input (hd k) 1 16 base state machine).mpr
+  have hcopy : ∀ k : Fin 3, hasArrayCopy (failure k) = false := by decide +kernel
+  apply ((failureCompilation k).memory_input (hcopy := hcopy k) (hd k) 1 16 base state machine).mpr
   exact ⟨fixture.1, hc k, .inl (hz k)⟩
 
 theorem failure_agrees (k : Fin 3) : (failureCompilation k).Agrees 1 16 base state machine :=

@@ -140,7 +140,8 @@ def compiled : CompiledProg 0 (Frag.init Γ) writeAndRead :=
 /-- The actual compiler result is accepted by the source simulation theorem. -/
 theorem compiled_simulates : GrowingResult 1 0 4 (compiled.cert.cost σ) compiled.frag σ base machine
     (writeAndRead.run σ) (run compiled.code machine) :=
-  compile_correct rfl fixture_repr (by decide +kernel) (.inl (by decide +kernel))
+  compile_correct (P := writeAndRead) (result := compiled) rfl fixture_repr
+    (by decide +kernel) (.inl (by decide +kernel)) (by decide +kernel)
 
 private def sourceValue (out : TRes (Solidity.Out C H Γ)) : Option Int :=
   match out with
@@ -217,7 +218,8 @@ theorem fixture_six_cells : StateRepr 1 0 6 (Frag.init Γ) σ base machine := by
 
 theorem locals_simulate : GrowingResult 1 0 6 (compiledLocals.cert.cost σ) compiledLocals.frag σ base machine
     (declareAndRebind.run σ) (run compiledLocals.code machine) :=
-  compile_correct rfl fixture_six_cells (by decide +kernel) (.inl (by decide +kernel))
+  compile_correct (P := declareAndRebind) (result := compiledLocals) rfl fixture_six_cells
+    (by decide +kernel) (.inl (by decide +kernel)) (by decide +kernel)
 
 private def sourceAt {Ξ : Ctx} (i : Idx Ξ (.val .uint))
     (out : TRes (Solidity.Out C H Ξ)) : Option Int :=
@@ -247,7 +249,7 @@ def checkedLocals : Compiler.Compilation 0 (Frag.init Γ) declareAndRebind :=
 example : checkedLocals.isMemory = true := by decide +kernel
 
 theorem checked_locals_simulate : checkedLocals.Agrees 1 6 base σ machine :=
-  checkedLocals.correct ⟨fixture_six_cells, by decide +kernel, .inl (by decide +kernel)⟩
+  checkedLocals.correct ⟨fixture_six_cells, by decide +kernel, .inl (by decide +kernel), by decide +kernel⟩
 
 def coreAssignment : Prog C Γ Γ := .cons (.assignLocal .here (.simple (.lit 8 rfl))) .nil
 def checkedCore : Compiler.Compilation 0 (Frag.init Γ) coreAssignment :=

@@ -781,3 +781,7 @@ import Solidity.Backend.Failure.Unwind
 import Solidity.Backend.Failure.UnwindChecks
 import Solidity.Backend.Failure.Composition
 import Solidity.Backend.Failure.CompositionChecks
+import Solidity.Evm.MemoryStorageCopyExamples
+import Solidity.Evm.MemoryFixedCopyExamples
+import Solidity.Evm.MemoryFixedMixedExamples
+import Solidity.Evm.MemoryStorageLifecycleExamples
