@@ -12,7 +12,7 @@ are separate obligations, not additional constructors of `STy`.
 -/
 namespace Solidity.Storage.Representation
 
-abbrev Store := Loc → Semantics.Word
+abbrev Store : Type := Loc → Semantics.Word
 
 mutual
 /-- A layout shape is fixed independently of the particular stored value. -/

@@ -8,7 +8,7 @@ namespace Solidity.Storage.Representation
 
 open Solidity.Hash
 
-abbrev WordStore := Nat → Semantics.Word
+abbrev WordStore : Type := Nat → Semantics.Word
 
 /-- A bundle of existing conditions, not a new cryptographic premise. -/
 structure FiniteRun (N L R : Nat) (H : Pre → Nat) (P : List Pre) (touched : List Loc) : Prop where

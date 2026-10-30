@@ -413,3 +413,16 @@ clarification and stricter diagnostic checker; no confirmed source, runner,
 pin or documentation finding remains. Final source code is unchanged since
 the successful full/import-closure run. Only the final handoff and diagnostic
 runner documentation/strictness were updated afterward.
+
+## Combined integration repair (2026-10-30)
+
+Retained review found missing explicit result types on `Store` and `WordStore`.
+Both abbreviations now declare `: Type`; their bodies, all proofs and budgets
+are unchanged. Sequential per-file Lean MCP diagnostics for Model and Transport
+completed with no diagnostics. Independent read-only finder and skeptic reviews
+used no Lean server and cleared the focused repair.
+
+The earlier backend-failure documentation ambiguity is already repaired by
+the qualified `Solidity/Backend/Failure/Gap.lean` reference. The strict doc-path
+check still exits 1 with exactly the retained baseline output: 46 missing
+references and no new findings. Combined gates remain the coordinator's check.
