@@ -1170,3 +1170,17 @@ At the root, the notation's own tests:
 | `Backend/Scalar/SignedPower.lean` | Intrinsic signed-power SignedPower slice/source/capacity contracts; see backend-scalar-lowering.md. |
 | `Backend/Scalar/SignedPowerPost.lean` | Intrinsic signed-power SignedPowerPost slice/source/capacity contracts; see backend-scalar-lowering.md. |
 | `Backend/Scalar/SignedPowerPrefix.lean` | Intrinsic signed-power SignedPowerPrefix slice/source/capacity contracts; see backend-scalar-lowering.md. |
+
+| G31 preparation module | Purpose |
+|---|---|
+| `Backend/Environment/Observations.lean` | Actual environment opcode selection, local stack semantics, address truncation and intrinsic expression/world observation certificates. |
+| `Backend/Environment/ObservationsChecks.lean` | Inhabited environment witnesses, distinguishing negative controls and headline axiom pins. |
+| `Backend/Environment/Metadata.lean` | Typed metadata PUSH encoding, source declaration selection, selector numeric/ABI alignment, truncation and function/address projections. |
+| `Backend/Environment/ByteConstants.lean` | Byte-valued resolved metadata materialization through PUSH/MSTORE8, exact byte order and memory-frame laws. |
+| `Backend/Environment/MetadataChecks.lean` | Metadata byte regressions, UTF-8 witness, missing metadata refusals and axiom pins. |
+| `Backend/Environment/Crypto.lean` | Executable memory Keccak slices, existing intrinsic hash denotation, exact normalized bytes, argument failure/success, and read-only precompile invocation selection. |
+| `Backend/Environment/Namespace.lean` | ERC-7201's actual two-hash instruction slice, wrapping predecessor, exact ABI-word second preimage and low-byte clearing. |
+| `Backend/Environment/CryptoChecks.lean` | Inhabited typed heap/path hash controls, ecrecover positive/fallback, exact opcode bytes, namespace witness and axiom pins. |
+| `Backend/Environment/Composition.lean` | Constructed intrinsic Val certificates, exact target concatenation/stack order, materialization/hash adapters and typed source-sequence fallback. |
+| `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
+| `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
