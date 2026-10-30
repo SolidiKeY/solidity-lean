@@ -1842,3 +1842,62 @@ Rawtask/base docs/pins exits1 retained, complete72/14 findings identical and
 separateNEW0 passes. Both finalindependent reviews PASS/no findings. Remaining
 space247001088bytes beforecommit, within40MiBcontinuation envelope. Wholelane
 and mandatoryvalidation remainunfinished; nextmiddle-segment clause continues.
+
+
+### Arbitrary middle-segment history and snapshot checkpoint
+
+Following0a593f0e856e65e29304984054e548d52ab41249, six further general laws
+prove exact middle history, endpoint, completepair, localindexbounds and local
+success/error iff. Segment execution is ONLY existing transactPrefix of
+(frames.drop start).take count at the ACTUAL world reached by frames.take start.
+The endpoint equals the actual fullprefix(start+count)world; the complete ordered
+middlehistory is history.drop start.take count. Arbitrary Nat start/count permit
+natural truncation and emptysegments, with no publiccap. Localindices require a
+proof against actualtruncatedsegmentlength, yielding a proved historyslicebound.
+The two-sided local success/error observations reconstruct actualframes at
+actual localprefix reset worlds; only rawsuccess.reset equals immediateboundary,
+and exact THalt/rollback are preserved. No wholetrace preservation assumption,
+extra reset, evaluator, raw=normalized/laterfinalworld or Source claim.
+
+Nine populated controls run the genuinely reached post-constructor/library
+middle segment: paidbinaryreasonfailure,occupiedcandidate plainrevert,then real
+read. Both exacterrors/fulltypedread stay ordered. middle_complete_vectors
+retains EVERY previous listed observation and orderedhistory at all0..4 original
+boundaries plus the complete middleendpoint vector/history. Emptyatdirtybase is
+not reset; emptyatreachedcommit stays there; start7/count12 truncates naturally.
+Wrongorder and wrongbase snapshot distinguish actual runs; existing wrongsuccess
+bytes/rawreset/shiftedindex/dirtycontrols and all432 earlier pins remain intact.
+These reconstruct supplied intrinsicframe executions, never Source execution.
+
+Gate775603-bac38803 passes117jobs/34.2515s,freshRSS1047134208,reportedreusedpeak
+399007744(possiblycumulative). Fifteennewtheorems give447standardexactsets,
+all425 starting sets unchanged. Initial771685 failed1 at unchanged200000HB in
+concreteproof unification;774087 failed1 on dependentindex rewrite. Explicit
+history factoring/dependent-safe simp and emptylistsimplification fixed these
+without changing statements or proof/time/resource budgets. Rawfailures retained;
+no authoredsorry/newaxiom and no sorryAx in successful447sets. Finder/skeptic
+independently reviewed actual general/local laws and inhabited/fullvector/negative
+controls read-only,withoutLean/builds,with no substantivefindings.
+
+Sameexistingboundedruntime/config/image/CMD/token/mount/cache/cgroupchecks,
+noVFSallocation/deletion/capacitychange. Initialfree254799872,40MiBconservative
+entirecontinuation budget; actualfinalgrowth measured in additive seal.
+AlloriginalWork/Backfillsourceapplicationparents stayPARTIAL,goalblocked/untouched,
+no independentqueue exhaustion claimed. Missing Source/V07/type/layout/ABI/body/
+linkage/runtimeframe/bytecode/admission/reservedowner applications remain explicit.
+Mandatoryfull/Decision FAILED125 and literalwrapperpending remain; none waived.
+Actualforensics and current wrappers were reinspected: no Decisionoutput/trace,
+most exactbaseisolatedbudget aftersetup; cache/startup reuse does not demonstrate
+a repair ofdominantelaboration. No unchangedretry/owneredit/async/target/guard/
+budgetchange. Current run-lean requires defaultbuild first; check-solkey refresh
+removes generatedbinary, so historical isolatedfreshsort is not a literalwrapper
+pass. Operationalmechanism repairs do not imply completedmandatoryvalidation.
+
+Middlecheckpoint final scopedgates PASS447exactpins/60coreclosure,19sourcebound
+evidencecorruptions and14runtimeprofilecorruptions afterpositivecontrols;
+trust911/241/0findings,strict491automatic/61budget/11refuted/0pending,
+layers169/0elaborator,orphans896/0orphan. Rawtask/base docs/pins exit1 stayfailed;
+complete72/14 findingrows identical and separatelynamedNEW0 pass. Both final
+independentproof/control/sourcebinding reviews pass with nofindings. Remaining
+space235712512bytes precommit, inside40MiBcontinuationenvelope. Alloriginal
+source/applicationqueues and mandatoryvalidation remainunfinished.

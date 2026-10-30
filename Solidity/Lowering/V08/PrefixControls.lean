@@ -738,6 +738,101 @@ it cannot be substituted for the committed boundary world. -/
 theorem wrong_raw_reset_world : extended linked ≠ extended (transactPrefix base [commit]).1 := by
   rw [boundary1]; decide +kernel
 
+/-- Actual middle segment after constructor/library commit: both exact errors
+and the subsequent full read survive in order, from the reached snapshot. -/
+theorem middle_segment_reached :
+    transactPrefix linked.resetTransient ((frames.drop 1).take 3) =
+      (readWorld.resetTransient, [.error laterHalt, .error .revert, .ok readValue]) := by
+  have segment := transact_prefix_segment_complete base frames 1 3
+  have preceding : transactPrefix base (frames.take 1) = (linked.resetTransient, h1) := boundary1
+  have endpoint : frames.take (1 + 3) = frames := rfl
+  rw [preceding, endpoint, boundary4] at segment
+  exact segment
+
+/-- Middle segment error reconstruction at its first actual local frame. -/
+theorem middle_paid_reconstruction :
+    ((frames.drop 1).take 3)[0]
+      (transactPrefix (transactPrefix base (frames.take 1)).1
+        (((frames.drop 1).take 3).take 0)).1.resetTransient = .error laterHalt ∧
+    (transactPrefix (transactPrefix base (frames.take 1)).1
+      (((frames.drop 1).take 3).take 1)).1 =
+      (transactPrefix (transactPrefix base (frames.take 1)).1
+        (((frames.drop 1).take 3).take 0)).1.resetTransient := by
+  apply (transact_prefix_segment_error_iff base frames 1 3 0 (by decide) laterHalt).mp
+  have history : (transactPrefix base frames).2 = h4 := congrArg Prod.snd boundary4
+  simpa only [history] using (show ((h4.drop 1).take 3)[0] = .error laterHalt from rfl)
+
+/-- Middle segment success reconstructs an actual raw read world after BOTH
+failures, rather than applying a base-world read equation. -/
+theorem middle_read_reconstruction :
+    ∃ next : World Catalog,
+      ((frames.drop 1).take 3)[2]
+        (transactPrefix (transactPrefix base (frames.take 1)).1
+          (((frames.drop 1).take 3).take 2)).1.resetTransient = .ok (next, readValue) ∧
+      (transactPrefix (transactPrefix base (frames.take 1)).1
+        (((frames.drop 1).take 3).take 3)).1 = next.resetTransient := by
+  apply (transact_prefix_segment_ok_iff base frames 1 3 2 (by decide) readValue).mp
+  have history : (transactPrefix base frames).2 = h4 := congrArg Prod.snd boundary4
+  simpa only [history] using (show ((h4.drop 1).take 3)[2] = .ok readValue from rfl)
+
+/-- Entire old boundary vector and ordered histories remain alongside the
+complete reached middle-segment observation. -/
+theorem middle_complete_vectors :
+    (observeBoundary [] =
+      ((([95, 0, 0, 5, 0], [some [0, 0], some [19, 29], some []], flags), none, false), []) ∧
+    observeBoundary [commit] = (committedVector, h1) ∧
+    observeBoundary [commit, failing] = (committedVector, h2) ∧
+    observeBoundary [commit, failing, occupied] = (committedVector, h3) ∧
+    observeBoundary frames = (committedVector, h4)) ∧
+    (extended (transactPrefix linked.resetTransient ((frames.drop 1).take 3)).1,
+      (transactPrefix linked.resetTransient ((frames.drop 1).take 3)).2) =
+      (committedVector, [.error laterHalt, .error .revert, .ok readValue]) := by
+  constructor
+  · exact complete_boundaries
+  · rw [middle_segment_reached, read_vector_value]
+
+/-- Count-zero preserves its genuinely reached starting world, including dirty
+initial state at start0. An empty segment is never an extra reset operation. -/
+theorem empty_segment_dirty :
+    transactPrefix (transactPrefix base (frames.take 0)).1 ((frames.drop 0).take 0) = (base, []) ∧
+    extended (transactPrefix (transactPrefix base (frames.take 0)).1
+      ((frames.drop 0).take 0)).1 ≠ extended base.resetTransient := by
+  simp only [List.take_zero, transact_prefix_nil]
+  decide +kernel
+
+theorem empty_segment_reached :
+    transactPrefix (transactPrefix base (frames.take 1)).1 ((frames.drop 1).take 0) =
+      (linked.resetTransient, []) := by
+  have preceding : transactPrefix base (frames.take 1) = (linked.resetTransient, h1) := boundary1
+  rw [preceding]; rfl
+
+theorem truncated_segment :
+    transactPrefix (transactPrefix base (frames.take 7)).1 ((frames.drop 7).take 12) =
+      (readWorld.resetTransient, []) := by
+  have preceding : transactPrefix base (frames.take 7) = (readWorld.resetTransient, h4) := boundary4
+  rw [preceding]; rfl
+
+theorem wrong_middle_order : (transactPrefix linked.resetTransient ((frames.drop 1).take 3)).2 ≠
+    [.error .revert, .error laterHalt, .ok readValue] := by
+  rw [middle_segment_reached]; decide +kernel
+
+/-- Guessed original-base snapshot differs on the full listed vector, even
+though both transactions may eventually read successfully. -/
+theorem wrong_middle_snapshot : extended (transactPrefix base (frames.take 1)).1 ≠
+    extended base.resetTransient := by
+  have preceding : transactPrefix base (frames.take 1) = (linked.resetTransient, h1) := boundary1
+  rw [preceding]; decide +kernel
+
+#print axioms middle_segment_reached
+#print axioms middle_paid_reconstruction
+#print axioms middle_read_reconstruction
+#print axioms middle_complete_vectors
+#print axioms empty_segment_dirty
+#print axioms empty_segment_reached
+#print axioms truncated_segment
+#print axioms wrong_middle_order
+#print axioms wrong_middle_snapshot
+
 #print axioms commit_history_reconstruction
 #print axioms read_history_reconstruction
 #print axioms reconstructed_complete_boundaries

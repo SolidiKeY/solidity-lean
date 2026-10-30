@@ -1306,6 +1306,16 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.empty_segment_dirty": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.empty_segment_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.every_nonempty_boundary_normalized": [
     "Classical.choice",
     "Quot.sound",
@@ -1371,7 +1381,27 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.middle_complete_vectors": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.middle_locality": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.middle_paid_reconstruction": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.middle_read_reconstruction": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.middle_segment_reached": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1436,6 +1466,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.truncated_segment": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.wrong_dirty_input": [
     "Classical.choice",
     "Quot.sound",
@@ -1452,6 +1487,16 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.wrong_library_success_value": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_middle_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_middle_snapshot": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1811,6 +1856,30 @@
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_observe": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_boundary": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_error_iff": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_history": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_index_bound": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_ok_iff": [
+    "Quot.sound",
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_singleton": [

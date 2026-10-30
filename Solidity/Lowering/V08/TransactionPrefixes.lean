@@ -334,6 +334,91 @@ theorem transact_prefix_index_ok_iff (w : World contracts)
   · rintro ⟨next, ran, _⟩
     exact (transact_prefix_index_success w next frames i valid value ran).1
 
+/-- Complete ordered middle history from the genuinely reached prefix world.
+No index/length cutoff: take/drop truncate naturally, including empty segments. -/
+theorem transact_prefix_segment_history (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count : Nat) :
+    ((transactPrefix w frames).2.drop start).take count =
+      (transactPrefix (transactPrefix w (frames.take start)).1
+        ((frames.drop start).take count)).2 := by
+  rw [transact_prefix_drop_history, transact_prefix_take_history]
+
+/-- The actual segment endpoint is the corresponding whole-prefix endpoint,
+not the initial world or an arbitrary normalized guess. -/
+theorem transact_prefix_segment_boundary (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count : Nat) :
+    (transactPrefix (transactPrefix w (frames.take start)).1
+      ((frames.drop start).take count)).1 =
+      (transactPrefix w (frames.take (start + count))).1 := by
+  have split := congrArg Prod.fst
+    (transact_prefix_append w (frames.take start) ((frames.drop start).take count))
+  rw [← List.take_add] at split
+  exact split.symm
+
+/-- World AND entire result history of every finite middle segment. -/
+theorem transact_prefix_segment_complete (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count : Nat) :
+    transactPrefix (transactPrefix w (frames.take start)).1 ((frames.drop start).take count) =
+      ((transactPrefix w (frames.take (start + count))).1,
+        ((transactPrefix w frames).2.drop start).take count) :=
+  Prod.ext (transact_prefix_segment_boundary w frames start count)
+    (transact_prefix_segment_history w frames start count).symm
+
+/-- Valid local frame indices have proved bounds in the corresponding history
+slice, irrespective of out-of-range/truncated global segment endpoints. -/
+theorem transact_prefix_segment_index_bound (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count i : Nat)
+    (valid : i < ((frames.drop start).take count).length) :
+    i < (((transactPrefix w frames).2.drop start).take count).length := by
+  rw [transact_prefix_segment_history, transact_prefix_length]
+  exact valid
+
+/-- Two-sided successful observation at any valid local segment index, with
+actual raw return and ONLY its normalized immediate local boundary. -/
+theorem transact_prefix_segment_ok_iff (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count i : Nat)
+    (valid : i < ((frames.drop start).take count).length) (value : α) :
+    (((transactPrefix w frames).2.drop start).take count)[i]'(transact_prefix_segment_index_bound w frames start count i valid) = .ok value ↔
+      ∃ next : World contracts,
+        ((frames.drop start).take count)[i]
+          (transactPrefix (transactPrefix w (frames.take start)).1
+            (((frames.drop start).take count).take i)).1.resetTransient = .ok (next, value) ∧
+        (transactPrefix (transactPrefix w (frames.take start)).1
+          (((frames.drop start).take count).take (i + 1))).1 = next.resetTransient := by
+  simpa only [transact_prefix_segment_history] using
+    (transact_prefix_index_ok_iff (transactPrefix w (frames.take start)).1
+      ((frames.drop start).take count) i valid value)
+
+/-- Two-sided exact failure at a local segment index; earlier/later statuses
+remain untouched and the immediate rollback uses the actual local prefix. -/
+theorem transact_prefix_segment_error_iff (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count i : Nat)
+    (valid : i < ((frames.drop start).take count).length) (halt : THalt) :
+    (((transactPrefix w frames).2.drop start).take count)[i]'(transact_prefix_segment_index_bound w frames start count i valid) = .error halt ↔
+      ((frames.drop start).take count)[i]
+        (transactPrefix (transactPrefix w (frames.take start)).1
+          (((frames.drop start).take count).take i)).1.resetTransient = .error halt ∧
+      (transactPrefix (transactPrefix w (frames.take start)).1
+        (((frames.drop start).take count).take (i + 1))).1 =
+        (transactPrefix (transactPrefix w (frames.take start)).1
+          (((frames.drop start).take count).take i)).1.resetTransient := by
+  constructor
+  · intro observed
+    have localError : (transactPrefix (transactPrefix w (frames.take start)).1
+        ((frames.drop start).take count)).2[i]'(transact_prefix_index_bound _ _ i valid) = .error halt := by
+      simpa only [transact_prefix_segment_history] using observed
+    exact transact_prefix_failure_of_index _ _ i valid halt localError
+  · rintro ⟨failed, _⟩
+    have localError := (transact_prefix_index_failure _ _ i valid halt failed).1
+    simpa only [transact_prefix_segment_history] using localError
+
+#print axioms transact_prefix_segment_history
+#print axioms transact_prefix_segment_boundary
+#print axioms transact_prefix_segment_complete
+#print axioms transact_prefix_segment_index_bound
+#print axioms transact_prefix_segment_ok_iff
+#print axioms transact_prefix_segment_error_iff
+
 #print axioms transact_prefix_success_of_index
 #print axioms transact_prefix_index_ok_iff
 
