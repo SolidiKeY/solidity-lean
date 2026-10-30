@@ -1066,9 +1066,9 @@ theorem MemOK.le {H : HeapTy} {y : EMState E Γ} (h : MemOK E H y) : H.Le y.2.he
 theorem MemOK.weaken {H H' : HeapTy} {y : EMState E Γ} (h : MemOK E H' y) (hle : H.Le H') : MemOK E H y :=
   ⟨⟨h.1.1.weaken hle, h.1.2⟩, h.2⟩
 
-/-- **Growing the heap typing**: a step that keeps `MemOK` at the typing
-of the state it starts in keeps it at any weaker `H`, and a fact `R`
-about the starting typing survives (`R` monotone use: `∃ H'`). -/
+/-- **Growing the heap typing**: a step that keeps `MemOK` at every heap
+typing `H'` keeps it at `H`, and a fact `R` of the starting state's typing
+is returned for some `H'` below the final typing (`∃ H', R H' ∧ H'.Le …`). -/
 theorem Hoare.memGrow {m : EM E Γ α} {Q : α → EMState E Γ → Prop} {H : HeapTy} {R : HeapTy → Prop}
     (h : ∀ H', Hoare (MemOK E H') m (fun a y => MemOK E H' y ∧ Q a y) (fun _ y => MemOK E H' y)) :
     Hoare (fun y => MemOK E H y ∧ R y.2.heap.ty) m
@@ -1178,8 +1178,8 @@ theorem zeroOK_step {n : Nat} (ih : ZeroOK E Γ n) : ZeroOK E Γ (n + 1) where
 
 /-- **Zeroed objects keep the memory invariant** (`MemOK`: well typed,
 shaped, bare-value elements) at every fuel, halts included; the value of
-`zeroVal` agrees, so a declaration without an initializer or a `delete`
-of a `memory` variable allocates only well-formed objects. -/
+`zeroVal` agrees. This covers the `zeroVal` step of a declaration without
+an initializer and of `delete`, not the write or locals update after it. -/
 theorem zeroOK : ∀ n, ZeroOK E Γ n
   | 0 => zeroOK_zero
   | n + 1 => zeroOK_step (zeroOK n)

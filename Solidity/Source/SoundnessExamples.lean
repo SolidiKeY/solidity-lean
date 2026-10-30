@@ -579,12 +579,18 @@ theorem inlineHeap_read_stuck :
   ⟨HeapOK.empty.alloc (.array fun _ => .bytes _), HeapShaped.empty.alloc trivial, rfl⟩
 
 /-- **Witness** (`zeroOK`): zeroing a `bool[2] memory` allocates one object,
-at `0`, whose elements are bare values (`false`). -/
+at `0`, and its two elements are the bare value `false`. -/
 theorem zeroArr_alloc :
     (match ((zeroVal (E := SemanticsExamples.E0) (Γ := []) 6 (.array .memory .bool (some 2))).run
       (.nil, SemanticsExamples.s0)) with
-    | (.ok (.memRef _ a), y) => some (a, y.2.heap.next)
-    | _ => none) = some (0, 1) := by
+    | (.ok (.memRef _ a), y) =>
+      match y.2.heap.get 0 with
+      | some ⟨_, .array 2 _ xs⟩ =>
+        some (a, y.2.heap.next, (List.finRange 2).map fun j => match xs j with
+          | .val (.bool b) => some b
+          | _ => none)
+      | _ => none
+    | _ => none) = some (0, 1, [some false, some false]) := by
   rfl
 
 /-! ## Axioms -/
