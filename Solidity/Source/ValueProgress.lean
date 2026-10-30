@@ -737,4 +737,43 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
       exact NotStuckR.pure _
     · cases x <;> exact convVal_self_ok _ rfl
 
+/-- A constant's exact value at a fixed-point type is in its range. -/
+theorem Q.toFixed?_mem {q : Q} {f : FixTy} {v : Int} (h : q.toFixed? f = some v) : f.lo ≤ v ∧ v ≤ f.hi := by
+  unfold Q.toFixed? at h
+  split at h
+  · simp only at h
+    split at h
+    · rename_i hr; cases h; exact hr
+    · cases h
+  · cases h
+
+/-- **`constVal` is never stuck on an implicit conversion of a constant**
+(to an integer type it fits, a fixed-point type that holds it exactly, or
+`bytesN` from zero). -/
+theorem constVal_ok (B : DeclName → DeclName → Bool) {q : Q} {τ : STy}
+    (h : (STy.rational q).implicit B τ = true) : NotStuckR (constVal (D := D) q τ) := by
+  cases τ <;> (try (cases h <;> done))
+  · rename_i t
+    have hf : q.FitsInt t := by
+      rw [show STy.implicit B (.rational q) (.int t) = decide (q.FitsInt t) from rfl] at h
+      exact of_decide_eq_true h
+    rw [show constVal (D := D) q (.int t) = (if q.isInt then mkInt t q.toInt
+      else stuck "fractional constant at an integer type") from rfl, if_pos hf.1]
+    exact mkInt_ok _ hf.2
+  · rename_i n hn
+    have h0 : q.num = 0 := by
+      rw [show STy.implicit B (.rational q) (.fixedBytes n hn) = (q.num == 0) from rfl] at h
+      exact beq_iff_eq.mp h
+    rw [show constVal (D := D) q (.fixedBytes n hn) = (if q.num = 0 then pure (mkBytes (n := n) (h := hn) [])
+      else stuck "constant at bytes") from rfl, if_pos h0]
+    exact NotStuckR.pure _
+  · rename_i f
+    rw [show STy.implicit B (.rational q) (.fixed f) = (q.toFixed? f).isSome from rfl] at h
+    rcases hv : q.toFixed? f with _ | v
+    · rw [hv] at h; cases h
+    · rw [show constVal (D := D) q (.fixed f) = (match q.toFixed? f with
+        | some v => mkFix f v
+        | none => stuck "constant not exact at a fixed-point type") from rfl, hv]
+      exact mkFix_ok _ (Q.toFixed?_mem hv)
+
 end Solidity.Source
