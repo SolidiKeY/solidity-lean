@@ -322,8 +322,44 @@ Kept current at every checkpoint.
 
 | Checkpoint | Status | Theorems |
 |---|---|---|
-| 1 Integration | in progress | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff`; controls above |
-| 2 Preservation | not started | |
-| 3 Gap-relative progress | not started | |
+| 1 Integration | done | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
+| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok`, `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; for the value fragment, preservation is by construction (no reference is created) |
+| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; the `stuck` census; typing gaps fixed in S01 and G13 (`assignCopy`, `delete` of local storage pointers) and a semantic bug fixed (`bytes(s)[i] = b` on a string) |
 | 4 Close gaps | not started | |
 | 5 `Failures`, `SourceSpec` | not started | |
+
+**Not done** (also under `limitations:`):
+
+- the whole-program progress theorem (every `stuck` of a well-typed
+  elaborated program's transaction or deployment is a ledger gap that
+  occurs in it), `noGaps` and its corollary, and the token-like witness:
+  the interpreter walk covers the value fragment of expressions and
+  statements (with storage, mappings and `return`), not memory, arrays and
+  structs, internal and external calls, modifiers, builtins, `emit`, or
+  the transaction layer (dispatch, ABI decoding, deployment, callbacks);
+- preservation for every interpreter step: proved for the memory
+  operations and by construction for the fragment, not for the walk;
+- the storage side conditions of the fragment (`E.cellTy d.path = τ`,
+  `E.pathTy d.path = some τ`) are checked per expression, not derived
+  from the elaboration;
+- the remaining typing gaps of the census (storage assignment of types
+  containing mappings) and the run-time gaps not on the ledger
+  (storage-pointer and calldata return slots, function-typed defaults,
+  getters of non-value types, `fallback` with parameters, dynamic ABI
+  decoding and encoding of aggregates, calldata references).
+
+**How to continue the walk.** Add a field per interpreter function to the
+induction hypotheses (`ExprNSAt`, `StmtNSAt`, as `Horizon.lean`'s
+`BelowAt`), with a postcondition that carries what the caller needs
+(`RPost`, `LocOK`, the frame). `simp only [evalE]` unfolds one arm; the
+heavy matchers (`convRV`, `convVal`, `keyStep`) are handled by `split` on
+the general match or by per-case `rfl` equations, never by
+`simp only [convVal]` (whnf timeouts). Memory needs `WellTyped.lean`'s
+`EMOK` in the pre- and postconditions (the heap typing grows); frames
+need `BodyFrame` from `callInternal` (the `if h : … = b.locals` check
+and `Elaborated.bodies_typed`) and a dispatch lemma (the body virtual
+dispatch finds has the parameters and returns of the called signature).
+
+**Elaboration.** `ExprProgress.lean` and `StmtProgress.lean` each check
+in under a minute with the language server; `SoundnessExamples.lean`
+evaluates the loop and storage witnesses in the kernel in seconds.
