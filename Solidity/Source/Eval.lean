@@ -377,6 +377,9 @@ def writeLoc {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ
     match ← heapObj a with
     | ⟨_, .bytes (l := l') bs⟩ =>
       if i < bs.length then heapPut a ⟨.bytes l', .bytes (bs.set i b)⟩ else lift (panic .index)
+    -- `bytes(s)` of a `string memory` keeps the pointer: the object stays a string.
+    | ⟨_, .string (l := l') bs⟩ =>
+      if i < bs.length then heapPut a ⟨.string l', .string (bs.set i b)⟩ else lift (panic .index)
     | _ => halt (.stuck "not bytes")
 
 /-- **Deleting a location**: the default value, a fresh zeroed memory
@@ -1245,14 +1248,17 @@ termination_by structural n
 
 /-- **A call to an address** with value and input data, as its caller
 sees it: an instance of the system runs in a new frame; another account is
-the environment's (G01 events). -/
+the environment's (G01 events). At depth 1024 the call fails; with value
+from a static frame the calling frame halts (EIP-214), so `send` cannot
+observe `false` there. -/
 def callAddr (G : Glob E) (F : Fr) (n : Nat) (a : Address) (v : Word) (input : Bytes) (static : Bool) :
     EM E [] Outcome :=
   match n with
   | 0 => halt .timeout
   | n + 1 => do
     if F.depth ≥ 1024 then return .revert []
-    if F.static && v.val ≠ 0 then return .revert []
+    -- EIP-214: a call with value from a static frame halts the frame.
+    if F.static && v.val ≠ 0 then halt (.revert [])
     match ← instanceAt G a with
     | some c =>
       let m ← mark
@@ -1294,8 +1300,9 @@ termination_by structural n
 /-- **The environment's moves** while a call of the system is pending:
 answers end it; credits and callbacks (into any instance) are recorded and
 the strategy is asked again.  `depth` is the environment frame's; a
-callback from depth 1024, or with value from a static frame, fails as a
-call from there does (`callAddr`'s two checks). -/
+callback from depth 1024, or with value from a static frame, fails
+(`callAddr`'s two checks; the second halts an EVM caller, here the
+environment's strategy moves next). -/
 def envLoop (G : Glob E) (n : Nat) (depth : Nat) (pstatic : Bool) : EM E [] Outcome :=
   match n with
   | 0 => halt .timeout

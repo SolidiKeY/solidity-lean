@@ -197,7 +197,10 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     if h : τ.isNumeric = true then pure ⟨τ, .incDec (Or.inr rfl) l h⟩ else Option.none
   | .unaryPrefix .delete a => do
     let ⟨τ, l⟩ ← LVal.inferN n Γ a
-    if h : τ.isMapping = false then pure ⟨_, .delete l h⟩ else Option.none
+    if h : τ.isMapping = false then
+      if hp : (τ.loc? == Option.some .storage && Γ.namesLocal a) = false then pure ⟨_, .delete l h hp⟩
+      else Option.none
+    else Option.none
   | .unarySuffix _ a => do
     let ⟨τ, l⟩ ← LVal.inferN n Γ a
     if h : τ.isNumeric = true then pure ⟨τ, .incDecSuffix l h⟩ else Option.none
@@ -226,7 +229,8 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     let ⟨σ, d⟩ ← Typed.inferN n Γ b
     if h : σ.implicit Γ.isBase τ = true then
       if hm : τ.isMapping = false then pure ⟨τ, .assign l d h hm⟩ else Option.none
-    else if hc : σ.copiesTo τ = true then pure ⟨τ, .assignCopy l d hc⟩
+    else if hc : σ.copiesTo τ = true then
+      if hl : Γ.namesLocal a = false then pure ⟨τ, .assignCopy l d hc hl⟩ else Option.none
     else Option.none
   | .assign op a b => do
     let ⟨τ, l⟩ ← LVal.inferN n Γ a

@@ -57,8 +57,8 @@ theorem STy.eq_of_sameList : (a b : List STy) → STy.sameList a b = true → a 
   | x :: xs, y :: ys, h => by
     simp only [STy.sameList, Bool.and_eq_true] at h
     rw [STy.eq_of_same x y h.1, STy.eq_of_sameList xs ys h.2]
-  | [], _ :: _, h => by simp [STy.sameList] at h
-  | _ :: _, [], h => by simp [STy.sameList] at h
+  | [], _ :: _, h => by simp only [STy.sameList, Bool.false_eq_true] at h
+  | _ :: _, [], h => by simp only [STy.sameList, Bool.false_eq_true] at h
 
 end
 

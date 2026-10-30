@@ -473,6 +473,17 @@ def Syn.hexLen? : {c : Cat} → Syn c → Option Nat
   | _, .tuple (.some e) .nil => e.hexLen?
   | _, _ => Option.none
 
+/-- Whether an lvalue names a local variable (through parentheses): a
+local `storage` pointer is rebound by `=`, never copied into, and is not
+deleted (solc 7407, "delete cannot be applied to storage pointers"). -/
+def Ctx.namesLocal (Γ : Ctx) : {c : Cat} → Syn c → Bool
+  | _, .ident x =>
+    match Γ.resolve x with
+    | Option.some (.loc _) => true
+    | _ => false
+  | _, .tuple (.some e) .nil => Γ.namesLocal e
+  | _, _ => false
+
 /-- The buffer the canonical rethrow `revert(add(D, 32), mload(D))` names
 (`isRethrow`'s shape with both `D` equal). `Syn.paths` collects no Yul
 names, so this is what determines the rethrown local. -/
@@ -662,8 +673,10 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       τ.isNumeric = true → Typed Γ (.unaryPrefix op e) τ
   | incDecSuffix {e : Syn .expr} {op : SuffixOp} {τ : STy} : LVal Γ e τ → τ.isNumeric = true →
       Typed Γ (.unarySuffix op e) τ
-  /-- `delete e` on an assignable non-mapping. -/
+  /-- `delete e` on an assignable non-mapping, not a local `storage`
+  pointer. -/
   | delete {e : Syn .expr} {τ : STy} : LVal Γ e τ → (τ matches .mapping _ _) = false →
+      (τ.loc? == Option.some .storage && Γ.namesLocal e) = false →
       Typed Γ (.unaryPrefix .delete e) (.tuple [])
   /-- `a ∘ b` for `+ - * / %`: numbers meeting at a common type. -/
   | arith {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.arith, a, b) →
@@ -798,9 +811,9 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       TypedArgs Γ args σs → k.argsOK Γ.isBase σs = true →
       Typed Γ (.call (.member (.ident g) m) (.positional args)) (.bytes .memory)
   /-- `s = e` copying into storage: from `memory`, `calldata`, or a string
-  literal. -/
+  literal; the target is a storage location, not a local `storage` pointer. -/
   | assignCopy {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ → σ.copiesTo τ = true →
-      Typed Γ (.assign .assign a b) τ
+      Γ.namesLocal a = false → Typed Γ (.assign .assign a b) τ
 
 /-- Typing of an argument list. -/
 inductive TypedArgs (Γ : Ctx) : Syn (.list .expr) → List STy → Type where

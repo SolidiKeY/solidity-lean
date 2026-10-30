@@ -294,9 +294,10 @@ theorem incDec_res {op : PrefixOp} (hop : op = .inc ∨ op = .dec) (d : LVal Γ 
   rcases hop with e' | e' <;> subst e' <;> simp only [prefixOne] <;> rw [dif_pos h] <;>
     exact List.mem_singleton.mpr rfl
 
-theorem delete_res (d : LVal Γ a τ) (h : isMappingTy τ = false) :
-    Res.expr (Typed.delete d h) ∈ prefixOne Γ .delete (.lval d) := by
-  simp only [prefixOne]; rw [dif_pos h]; exact List.mem_singleton.mpr rfl
+theorem delete_res (d : LVal Γ a τ) (h : isMappingTy τ = false)
+    (hp : (τ.loc? == Option.some .storage && Γ.namesLocal a) = false) :
+    Res.expr (Typed.delete d h hp) ∈ prefixOne Γ .delete (.lval d) := by
+  simp only [prefixOne]; rw [dif_pos h, dif_pos hp]; exact List.mem_singleton.mpr rfl
 
 theorem suffix_res {op : SuffixOp} (d : LVal Γ a τ) (h : τ.isNumeric = true) :
     Res.expr (Typed.incDecSuffix (op := op) d h) ∈ suffixOne Γ op (.lval d) := by
@@ -332,12 +333,12 @@ theorem assign_mem {dl : LVal Γ a τ} {db : Typed Γ b σ} (hl : Res.lval dl �
   exact List.mem_singleton.mpr rfl
 
 theorem assignCopy_mem {dl : LVal Γ a τ} {db : Typed Γ b σ} (hl : Res.lval dl ∈ infer Γ a)
-    (hb : Res.expr db ∈ infer Γ b) (h : σ.copiesTo τ = true) :
-    Res.expr (Typed.assignCopy dl db h) ∈ infer Γ (.assign .assign a b) := by
+    (hb : Res.expr db ∈ infer Γ b) (h : σ.copiesTo τ = true) (hn : Γ.namesLocal a = false) :
+    Res.expr (Typed.assignCopy dl db h hn) ∈ infer Γ (.assign .assign a b) := by
   refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨⟨τ, dl⟩, mem_lvsOf' hl,
     List.mem_flatMap.mpr ⟨⟨σ, db⟩, mem_tysOf' hb, List.mem_append_left _ (List.mem_append_right _ ?_)⟩⟩)
   dsimp only
-  rw [dif_pos h]
+  rw [dif_pos h, dif_pos hn]
   exact List.mem_singleton.mpr rfl
 
 theorem compound_mem {op : AssignOp} {dl : LVal Γ a τ} {db : Typed Γ b σ} (hl : Res.lval dl ∈ infer Γ a)
@@ -717,9 +718,9 @@ theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ 
   | _, _, .incDecSuffix dl hn => by
     obtain ⟨d', h⟩ := exists_lval (lval_complete dl)
     exact mem_tysOf (suffix_sub h (suffix_res d' hn))
-  | _, _, .delete dl hm => by
+  | _, _, .delete dl hm hp => by
     obtain ⟨d', h⟩ := exists_lval (lval_complete dl)
-    exact mem_tysOf (prefix_sub h (delete_res d' hm))
+    exact mem_tysOf (prefix_sub h (delete_res d' hm hp))
   | _, _, .arith hk da db hc hn hz => by
     obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
     obtain ⟨db', hb⟩ := exists_expr (typed_complete db)
@@ -823,10 +824,10 @@ theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ 
   | _, _, .abiEncode hr hk ds ha => by
     obtain ⟨ds', h⟩ := exists_args (args_complete ds)
     exact mem_tysOf (abiEncode_mem h hr hk ha)
-  | _, _, .assignCopy dl db h => by
+  | _, _, .assignCopy dl db h hn => by
     obtain ⟨dl', hl⟩ := exists_lval (lval_complete dl)
     obtain ⟨db', hb⟩ := exists_expr (typed_complete db)
-    exact mem_tysOf (assignCopy_mem hl hb h)
+    exact mem_tysOf (assignCopy_mem hl hb h hn)
 
 /-- **Completeness for lvalues.** -/
 theorem lval_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → LVal Γ e τ →

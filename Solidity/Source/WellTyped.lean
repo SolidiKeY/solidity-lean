@@ -23,8 +23,9 @@ against the heap's own typing.
 
 The machine's memory operations keep it (`alloc_ok`, `heapPut_ok`) and
 return values that satisfy it (`allocRef_ok`, `heapAt_ok`), and the typed
-reads succeed on it (`heapAt_progress`, `heapObj_progress`): a read at the
-type the reference was made for is never `stuck`.
+reads succeed on it (`heapObj_ok`, `heapAt_ok`; `heapAt` has no caller in
+the interpreter): a read at the type the reference was made for is never
+`stuck`.
 -/
 
 namespace Solidity.Source

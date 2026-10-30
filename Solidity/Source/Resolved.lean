@@ -303,7 +303,7 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .bitNot d _ => .unary .bitNot d.toR
   | .incDec (op := op) _ l _ => .incDec (op == .inc) true l.toR
   | .incDecSuffix (op := op) l _ => .incDec (op == .inc) false l.toR
-  | .delete l _ => .delete l.toR
+  | .delete l _ _ => .delete l.toR
   | .arith (e := e) _ da db h _ _ => .binary e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
   | .bit (e := e) _ da db h _ => .binary e.binOpName (.conv da.toR (common?_left h)) (.conv db.toR (common?_right h))
   | .shift (e := e) _ da db _ h _ => .shiftLike e.binOpName (.conv da.toR shiftTy_conv) db.toR h
@@ -345,7 +345,7 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .transfer da dv h => .transfer da.toR (.conv dv.toR (.inl h))
   | .send da dv h => .send da.toR (.conv dv.toR (.inl h))
   | .abiEncode (k := k) _ _ da _ => .abiEncode k da.toR
-  | .assignCopy l db h => .assignCopy l.toR db.toR h
+  | .assignCopy l db h _ => .assignCopy l.toR db.toR h
 
 /-- Elaboration of argument lists. -/
 def TypedArgs.toR {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} :

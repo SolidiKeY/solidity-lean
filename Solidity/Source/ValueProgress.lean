@@ -391,7 +391,7 @@ theorem Typed.toR_opsOK {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → (d : Typ
   | _, _, .bitNot d h => And.intro (.inr (.inr ⟨rfl, h⟩)) (Typed.toR_opsOK d)
   | _, _, .incDec _ l hn => And.intro hn (LVal.toR_opsOK l)
   | _, _, .incDecSuffix l hn => And.intro hn (LVal.toR_opsOK l)
-  | _, _, .delete l _ => LVal.toR_opsOK l
+  | _, _, .delete l _ _ => LVal.toR_opsOK l
   | _, _, .arith hk da db _ hn _ =>
     And.intro (.inl ⟨binOpName_admits _ hk, hn⟩) (And.intro (Typed.toR_opsOK da) (Typed.toR_opsOK db))
   | _, _, .bit hk da db _ hn =>
@@ -432,7 +432,7 @@ theorem Typed.toR_opsOK {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → (d : Typ
   | _, _, .transfer da dv _ => And.intro (Typed.toR_opsOK da) (Typed.toR_opsOK dv)
   | _, _, .send da dv _ => And.intro (Typed.toR_opsOK da) (Typed.toR_opsOK dv)
   | _, _, .abiEncode _ _ da _ => TypedArgs.toR_opsOK da
-  | _, _, .assignCopy l db _ => And.intro (LVal.toR_opsOK l) (Typed.toR_opsOK db)
+  | _, _, .assignCopy l db _ _ => And.intro (LVal.toR_opsOK l) (Typed.toR_opsOK db)
 
 theorem TypedArgs.toR_opsOK {Γ : Ctx} : {es : Syn (.list .expr)} → {τs : List STy} →
     (d : TypedArgs Γ es τs) → RArgs.OpsOK d.toR

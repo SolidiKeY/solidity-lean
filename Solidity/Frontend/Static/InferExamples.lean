@@ -74,7 +74,9 @@ theorem msgValue_checked : (inferTys Γv (.member (.ident "msg") "value")).isEmp
 
 /-- `0x00`: one type, the hexadecimal constant `hexConst 0 1`, which
 converts to every `bytesN` (solc's literal typing, Q1). -/
-theorem zero_types : (inferTys Γ (.lit (.num (.hex [0, 0] false)))).length = 1 := by decide
+theorem zero_types :
+    (inferTys Γ (.lit (.num (.hex [0, 0] false)))).map (STy.same (.hexConst (Q.ofInt 0) 1)) = [true] := by
+  decide
 
 theorem addLit_types : (inferTys Γ (.addSub .add a one)).length = 1 := by decide
 
@@ -259,7 +261,7 @@ theorem badBinding_refused : ¬ UsingOpsOK (Syn.env badBindingUnit) badBindingUn
   revert e
   decide
 
-/-! ## Overload uniqueness, per argument typing (an S01 deviation) -/
+/-! ## Overload uniqueness (formerly an S01 deviation, now aligned with solc) -/
 
 /-- A parameter of type `t`. -/
 def paramOf (t : Syn .typeName) : Syn .param := .param t Option.none (Option.some "v")
@@ -354,6 +356,36 @@ theorem abiEncode_checked :
     (inferTys Γc (.call (.member (.ident "abi") "encode") (.positional x1))).map (STy.same (.bytes .memory)) = [true] ∧
     (inferTys Γc (.call (.member (.ident "abi") "encode")
       (.positional (.cons (.ident "p") .nil)))).isEmpty = true := by decide
+
+/-! ## Local storage pointers (lane-soundness typing fixes) -/
+
+/-- `contract K { struct P { uint256 a; } P s; }` -/
+def ptrUnit : Syn .unit := .unit (.cons (.contract false "K" .none .nil
+  (.cons (.struct "P" (.structMember u256T "a") .nil)
+  (.cons (.stateVar (.userType ⟨"P", []⟩) none none none false "s" .none) .nil))) .nil)
+
+/-- Locals `P storage p`, `P memory m`, `uint256 x`. -/
+def Γp : Ctx := { env := Syn.env ptrUnit, scope := Option.some "K", locals :=
+  [("p", .struct .storage ⟨Option.some "K", "P"⟩), ("m", .struct .memory ⟨Option.some "K", "P"⟩),
+   ("x", .int IntTy.u256)] }
+
+/-- **Typing fix**: `p = P(x)` with `p` a local storage pointer has no type
+(solc 7407: a memory struct is not a storage pointer); `s = P(x)`, a copy
+into the state variable, and `p = s`, rebinding the pointer, are typed. -/
+theorem ptrCopy_refused :
+    (inferTys Γp (.assign .assign (.ident "p") (.call (.ident "P") (.positional x1)))).isEmpty = true ∧
+    (inferTys Γp (.assign .assign (.ident "s") (.call (.ident "P") (.positional x1)))).length = 1 ∧
+    (inferTys Γp (.assign .assign (.ident "p") (.ident "s"))).length = 1 := by
+  decide
+
+/-- **Typing fix**: `delete p` with `p` a local storage pointer has no type
+(solc: delete cannot be applied to storage pointers); `delete s` and
+`delete m` (a memory local) are typed. -/
+theorem ptrDelete_refused :
+    (inferTys Γp (.unaryPrefix .delete (.ident "p"))).isEmpty = true ∧
+    (inferTys Γp (.unaryPrefix .delete (.ident "s"))).length = 1 ∧
+    (inferTys Γp (.unaryPrefix .delete (.ident "m"))).length = 1 := by
+  decide
 
 /-! ## Standalone constants (backfill item 5) -/
 

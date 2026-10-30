@@ -362,6 +362,22 @@ theorem static_callback_refused :
     let r := runAt (fun n => callAddr (GB reenterOnce) FC n ext (word 0) (selOf "ping()") true) sB 30
     readX r.2 = some 3 ∧ (r.2.events.contains (.reentered (.revert []))) = true := by decide +kernel
 
+/-- The revert data a run halts with, if it halts with a revert. -/
+def revertHalt (r : Except Halt Outcome × St EB) : Option Bytes :=
+  match r.1 with
+  | .error (.revert d) => some d
+  | _ => none
+
+/-- **EIP-214**: a call with value from a static frame halts the calling
+frame (as `send` would otherwise read `false` and continue); from a frame
+that is not static the same call, short of funds, only fails. -/
+theorem static_value_call_halts :
+    revertHalt (runAt (fun n => callAddr (GB answerOnly) { FC with static := true } n ext (word 1) [] false)
+      sB 30) = some [] ∧
+    outcomeOf (runAt (fun n => callAddr (GB answerOnly) FC n ext (word 1) [] false) sB 30) =
+      some (.revert []) := by
+  decide +kernel
+
 /-! ## S03.02: constructor order -/
 
 /-- ```

@@ -201,4 +201,25 @@ theorem ret_framed_ns (n : Nat) (l : Locals SemanticsExamples.E0.layout [.int In
         rfl (.const (Q.ofInt 1)) (by decide)) l) :=
   stmtNS _ _ n 0 none _ l ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩ trivial ⟨[], [], rfl, rfl⟩
 
+/-! ## The census's semantic bug, fixed -/
+
+/-- `string memory s = "abc"; bytes(s)[0] = 0x78; bytes1 b = bytes(s)[0];` -/
+def strItems : RItems SemanticsExamples.E0 [] false .body []
+    [.fixedBytes 1 (by decide), .string .memory] :=
+  .stmt (.declInit (.str [97, 98, 99]) (by decide))
+    (.stmt (.expr (.assign
+      (.indexBytes (.convExplicit (.local .here) (by decide)) (by decide) (.const (Q.ofInt 0)) (by decide))
+      (.conv (.bytesLit (.hex [7, 8] false) 1) (.inl (by decide)))))
+    (.stmt (.declInit (.indexBytes (.convExplicit (.local .here) (τ := .bytes .memory) (by decide))
+        (.const (Q.ofInt 0)) (by decide)) (by decide)) .nil))
+
+/-- **Semantic fix**: writing a byte of `bytes(s)` for a `string memory s`
+updates the string (it was `stuck`, "not bytes"): `b` is `0x78`. -/
+theorem stringByte_write :
+    (match ((execItems (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 20 0 none strItems .nil).run
+      (.nil, SemanticsExamples.s0)).1 with
+    | .ok (.normal (.cons b _)) => b.key
+    | _ => none) = some 0x78 := by
+  rfl
+
 end Solidity.Source.SoundnessExamples

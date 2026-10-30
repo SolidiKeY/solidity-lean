@@ -18,9 +18,9 @@ as operations (`Syn.const_binOp`, `STy.common?_const`).
 derivations before, has none.
 
 Uniqueness for every expression (`Typed.unique`: any two derivations have one
-type and one elaboration) is the remaining obligation of Q1.  This lemma
-settles the literal cases; the rest is a per-constructor case analysis
-recorded in `docs/feature-work/source-s02.md`, "Uniqueness".
+type and one elaboration) builds on these literal cases with a
+per-constructor case analysis, recorded in
+`docs/feature-work/source-s02.md`, "Uniqueness".
 -/
 
 namespace Solidity.Source
@@ -761,7 +761,7 @@ theorem uniqE_prefix {Γ : Ctx} {op : PrefixOp} {x : Syn .expr}
       obtain ⟨h1, e1⟩ := ih.l x hs l1 l2
       cases h1
       exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
-    | delete _ _ => rcases hop with h | h <;> cases h
+    | delete _ _ _ => rcases hop with h | h <;> cases h
     | neg _ _ => rcases hop with h | h <;> cases h
     | negFixed _ => rcases hop with h | h <;> cases h
     | not _ => rcases hop with h | h <;> cases h
@@ -769,9 +769,9 @@ theorem uniqE_prefix {Γ : Ctx} {op : PrefixOp} {x : Syn .expr}
     | _ => first
       | exact (no_const hce ‹_›).elim
       | (exfalso; apply no_binOp hbo; assumption)
-  | delete l1 _ =>
+  | delete l1 _ _ =>
     cases d' with
-    | delete l2 _ =>
+    | delete l2 _ _ =>
       obtain ⟨h1, e1⟩ := ih.l x hs l1 l2
       cases h1
       exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
@@ -916,7 +916,7 @@ theorem uniqE_assign {Γ : Ctx} {op : AssignOp} {a b : Syn .expr} (ih : Uniq Γ 
       simp only [Typed.toR]
       rw [eq_of_heq e1, eq_of_heq e2]
     | compound _ _ h' => cases h'
-    | assignCopy l2 db' h' =>
+    | assignCopy l2 db' h' _ =>
       obtain ⟨h1, -⟩ := ih.l a hs.1 l1 l2
       cases h1
       obtain ⟨h2, -⟩ := ih.e b hs.2 db db'
@@ -936,11 +936,11 @@ theorem uniqE_assign {Γ : Ctx} {op : AssignOp} {a b : Syn .expr} (ih : Uniq Γ 
       refine ⟨rfl, ?_⟩
       simp only [Typed.toR]
       rw [eq_of_heq e1, eq_of_heq e2]
-    | assignCopy _ _ _ => cases h
+    | assignCopy _ _ _ _ => cases h
     | _ => first
       | exact (no_const hce ‹_›).elim
       | (exfalso; apply no_binOp hbo; assumption)
-  | assignCopy l1 db h =>
+  | assignCopy l1 db h _ =>
     cases d' with
     | assign l2 db' h' _ =>
       obtain ⟨h1, -⟩ := ih.l a hs.1 l1 l2
@@ -949,7 +949,7 @@ theorem uniqE_assign {Γ : Ctx} {op : AssignOp} {a b : Syn .expr} (ih : Uniq Γ 
       cases h2
       rw [STy.implicit_of_copiesTo h] at h'; cases h'
     | compound _ _ h' => cases h'
-    | assignCopy l2 db' _ =>
+    | assignCopy l2 db' _ _ =>
       obtain ⟨h1, e1⟩ := ih.l a hs.1 l1 l2
       cases h1
       obtain ⟨h2, e2⟩ := ih.e b hs.2 db db'
