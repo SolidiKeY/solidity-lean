@@ -39,7 +39,8 @@ that shape invariant as well (`SoundnessExamples.ptrHeap_byte_stuck`).
 `HeapShaped` states it (`Data.Top`: a top-level object is a bare value only
 at a type without a location); allocation and writes keep it, and with it a
 byte write at a `bytes`/`string` address is never `stuck`
-(`writeLoc_memByte_ok`).
+(`writeLoc_memByte_ok`), nor is an element or member write of the
+element's or member's type (`memSet_ok`, `writeLoc_mem_ok`).
 -/
 
 namespace Solidity.Source
@@ -678,6 +679,85 @@ theorem writeLoc_memByte_ok {H : HeapTy} (F : Fr) (n a i : Nat) (v : Val E.layou
     refine Hoare.of_false fun y ⟨⟨_, l, hl⟩, hty, _⟩ => ?_
     rw [hty] at hl
     rcases hl with hl | hl <;> cases hl
+
+
+/-- Replacing a field at its own type succeeds. -/
+theorem DataList.setNth_ok {τ : STy} (y : Data E.layout τ) : {τs : List STy} → (fs : DataList E.layout τs) →
+    (i : Nat) → τs[i]? = some τ → ∃ fs', fs.setNth i y = .ok fs'
+  | _, .nil, _, h => by simp only [List.getElem?_nil, reduceCtorEq] at h
+  | _, .cons (τ := σ) x r, 0, h => by
+    simp only [List.getElem?_cons_zero, Option.some.injEq] at h
+    subst h
+    exact ⟨_, by simp only [DataList.setNth, dite_true]; rfl⟩
+  | _, .cons x r, i + 1, h => by
+    simp only [List.getElem?_cons_succ] at h
+    obtain ⟨r', hr⟩ := DataList.setNth_ok y r i h
+    exact ⟨_, by simp only [DataList.setNth, hr]; rfl⟩
+
+/-- **`memSet`, progress and preservation**: storing an agreeing value as
+an element of an array of its type, or as a member of its type, in a
+shaped heap, is never `stuck` (the code writes, or panics out of bounds;
+the statement excludes only `stuck`). -/
+theorem memSet_ok {H : HeapTy} (a i : Nat) {τ : STy} (v : Val E.layout τ) :
+    Hoare (fun y => ((EMOK E H y ∧ HeapShaped y.2.heap) ∧ v.RefOK E y.2.heap.ty) ∧
+        ((∃ l k, y.2.heap.ty a = some (.array l τ k)) ∨
+         (∃ l d, y.2.heap.ty a = some (.struct l d) ∧ (E.layout.fields d)[i]? = some τ)))
+      (memSet a i v : EM E Γ Unit)
+      (fun _ y => EMOK E H y ∧ HeapShaped y.2.heap)
+      (fun e y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ NotStuck e) := by
+  unfold memSet
+  refine Hoare.bind (heapObj_top (a := a) (fun _ h => h.1.1) fun y ⟨_, hc⟩ hg => ?_) fun ⟨σ, d⟩ => ?_
+  · exfalso
+    simp only [Heap.ty, Heap.get] at hc hg
+    rw [hg] at hc
+    rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, _⟩ <;> cases hc
+  cases d with
+  | array len hl xs =>
+    refine Hoare.dite' (fun h => Hoare.dite' (fun e => ?_) (fun e => Hoare.of_false ?_))
+      (fun _ => Hoare.lift' fun y hy => ⟨hy.1.1.1, trivial⟩)
+    · subst e
+      refine Hoare.conseq (heapPut_shaped a _) (fun y ⟨⟨⟨hok, hv⟩, _⟩, hty, hd, _⟩ => ⟨hok, hty, ?_, trivial⟩)
+        (fun _ _ h => h) (fun _ _ h => h.elim)
+      cases hd with
+      | array hxs =>
+        refine .array fun j => ?_
+        by_cases hj : j.val = i
+        · simp only [hj, if_true]; exact .val hv
+        · simp only [hj, if_false]; exact hxs j
+    · intro y ⟨⟨_, hc⟩, hty, _⟩
+      rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, _⟩ <;> rw [hty] at hc <;> cases hc
+      exact e rfl
+  | @struct l d fs =>
+    refine Hoare.bind (Hoare.lift' (Q := fun fs' y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧
+        y.2.heap.ty a = some (.struct l d) ∧ DataOK E y.2.heap.ty (Data.struct (l := l) (d := d) fs'))
+      fun y ⟨⟨⟨hok, hv⟩, hc⟩, hty, hd, _⟩ => ?_) fun fs' =>
+        Hoare.conseq (heapPut_shaped a ⟨.struct l d, .struct fs'⟩)
+          (fun y ⟨hok, hty, hd⟩ => ⟨hok, hty, hd, trivial⟩) (fun _ _ h => h) (fun _ _ h => h.elim)
+    have hf : (E.layout.fields d)[i]? = some τ := by
+      rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, hf⟩ <;> rw [hty] at hc <;> cases hc
+      exact hf
+    obtain ⟨fs', hr⟩ := DataList.setNth_ok (Data.val v) fs i hf
+    rw [hr]
+    cases hd with
+    | struct hfs => exact ⟨hok, hty, .struct (hfs.setNth fs i _ (.val hv) hr)⟩
+  | val w =>
+    refine Hoare.of_false fun y ⟨⟨_, hc⟩, hty, _, ht⟩ => ?_
+    rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, _⟩ <;> rw [hty] at hc <;> cases hc <;>
+      simp only [Data.Top, STy.loc?, reduceCtorEq] at ht
+  | _ =>
+    refine Hoare.of_false fun y ⟨⟨_, hc⟩, hty, _⟩ => ?_
+    rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, _⟩ <;> rw [hty] at hc <;> cases hc
+
+
+/-- **`writeLoc` to memory, progress and preservation** (`memSet_ok`). -/
+theorem writeLoc_mem_ok {H : HeapTy} (F : Fr) (n a i : Nat) {τ : STy} (v : Val E.layout τ) :
+    Hoare (fun y => ((EMOK E H y ∧ HeapShaped y.2.heap) ∧ v.RefOK E y.2.heap.ty) ∧
+        ((∃ l k, y.2.heap.ty a = some (.array l τ k)) ∨
+         (∃ l d, y.2.heap.ty a = some (.struct l d) ∧ (E.layout.fields d)[i]? = some τ)))
+      (writeLoc F n (.mem a i) v : EM E Γ Unit)
+      (fun _ y => EMOK E H y ∧ HeapShaped y.2.heap)
+      (fun e y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ NotStuck e) :=
+  memSet_ok a i v
 
 end
 

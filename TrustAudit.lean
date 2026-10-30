@@ -1590,3 +1590,21 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} object-shape theorems and controls use only the standard axioms"
+
+/-! Lane V04b: progress of memory element and member writes. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.DataList.setNth_ok,
+    ``Solidity.Source.memSet_ok,
+    ``Solidity.Source.writeLoc_mem_ok,
+    ``Solidity.Source.STy.memShape_bytes,
+    ``Solidity.Source.SoundnessExamples.arrHeap_write,
+    ``Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} memory element-write theorems and controls use only the standard axioms"
