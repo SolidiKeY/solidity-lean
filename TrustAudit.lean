@@ -1630,6 +1630,9 @@ run_cmd do
 run_cmd do
   let headlines : List Name := [
     ``Solidity.Source.DataList.nth_val,
+    ``Solidity.Source.heapObj_get,
+    ``Solidity.Source.HeapInner.empty,
+    ``Solidity.Source.SoundnessExamples.arrHeap_inner,
     ``Solidity.Source.memElem_ok,
     ``Solidity.Source.readLoc_mem_ok,
     ``Solidity.Source.HeapInner.alloc,

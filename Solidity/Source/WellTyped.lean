@@ -42,7 +42,7 @@ byte write at a `bytes`/`string` address is never `stuck`
 (`writeLoc_memByte_ok`), nor is an element or member write of the
 element's or member's type (`memSet_ok`, `writeLoc_mem_ok`), nor a byte
 read (`heapBytes_ok`, `readLoc_memByte_ok`). With `HeapInner` too
-(`Data.Inner`: elements and members are bare values), neither is an
+(`Data.Inner`: elements and members are bare values), nor is an
 element or member read (`memElem_ok`, `readLoc_mem_ok`).
 -/
 
@@ -863,7 +863,9 @@ theorem heapObj_get {P : EMState E Γ → Prop} {X : Halt → EMState E Γ → P
 /-- **`memElem`, progress and preservation**: an element of an array of
 type `τ`, or a member of type `τ`, in a shaped heap with bare-value
 elements, is read without getting `stuck` (the code reads or panics out of
-bounds; the statement excludes only `stuck`), and the value read agrees. -/
+bounds; the statement excludes only `stuck`), and the value read agrees.
+The state is unchanged, but the postcondition does not restate
+`HeapInner`. -/
 theorem memElem_ok {H : HeapTy} (a i : Nat) (τ : STy) :
     Hoare (fun y => ((EMOK E H y ∧ HeapShaped y.2.heap) ∧ HeapInner y.2.heap) ∧
         ((∃ l k, y.2.heap.ty a = some (.array l τ k)) ∨

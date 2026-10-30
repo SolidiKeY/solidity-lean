@@ -269,7 +269,7 @@ this shape condition, and `memElem` also needs elements to be `Data.val`
 (`Data.asVal`, "inline aggregate element"): the census "heap" row below.
 The shape condition is now `HeapShaped` and the progress lemmas below
 cover all of these but the `heapBytes` callers other than
-`readLoc .memByte` (`memElem` with `HeapInner`, below). Every site that builds a memory array or struct
+`readLoc .memByte` (`memElem` is covered under `HeapInner`, below). Every site that builds a memory array or struct
 stores `Data.val` elements (`zeroElems`, `zeroFields`, `loadElems`,
 `loadFields`, the ABI decoder, `structNew`, `memSet`), so the element
 condition is also a proof gap only.
@@ -291,10 +291,11 @@ no unshaped allocation (`zeroVal` calls `zeroData` only at memory types,
 all aggregates; `loadMem` reaches its `Data.val` arm only at types without
 a location; the other `allocRef` and `heapPut` sites build aggregates), so
 what remains is a proof gap, not a semantic one. Not yet done: proving
-that for every allocation site; carrying `HeapShaped` through frame
-restores (`Eval.lean` and `Semantics.lean` reset the heap or restore a
-saved one, as for `HeapOK`); that `memSet` keeps `HeapInner` (it writes
-a `Data.val` and keeps the other elements; only the generic
+that every allocation site allocates objects satisfying `HeapShaped` and
+`HeapInner`; carrying both through frame restores (`Eval.lean` and
+`Semantics.lean` reset the heap or restore a saved one, as for
+`HeapOK`); proving that `memSet` keeps `HeapInner` (it writes a
+`Data.val` and keeps the other elements; only the generic
 `HeapInner.alloc`/`HeapInner.write` are proved). Progress for element and
 member reads is proved under the element invariant `HeapInner`
 (`Data.Inner`: an array's elements and a struct's members are
@@ -325,6 +326,14 @@ included; `STy.memShape_array`); a struct member (`Eval.lean`, member access) ha
 `E.fieldTy? d .memory i = some τ`, which is `(E.layout.fields d)[i]?`
 for a memory struct. The struct bridge is not stated as a lemma yet, and there is
 no struct-member control (`SemanticsExamples.E0` has no structs).
+
+**Review of the element-read progress** (finder and skeptic, read-only,
+no blocker): `Data.Inner` checked at every array/struct construction
+site and `memSet`; the control is stuck for the inline element; fixed: the
+"Not yet done" list (now names `HeapInner`), the module docstring's
+grammar, the Handoff row, the TrustAudit list; `memElem_ok`'s success
+postcondition drops `HeapInner` (the state is unchanged; noted in its
+docstring). Build38 (`f9288e5`) passed.
 
 **Review of the byte-read progress** (finder and skeptic, read-only, no
 blocker): stale "pending"/"needs" lines, the scope of "byte reads", the
@@ -632,7 +641,7 @@ Kept current at every checkpoint.
 | Checkpoint | Status | Theorems |
 |---|---|---|
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
-| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element reads (`memElem_ok`, `readLoc_mem_ok`); no preservation theorem for the walk |
+| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element and member reads (`memElem_ok`, `readLoc_mem_ok`); no preservation theorem for the walk |
 | 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types and unit membership, `hdec` (`Elaborated.callInternal_call_ns`); internal calls inside expressions under `CallsOK` (`evalE_callFrag_ns`, joint induction `fragAt`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
 | 4 Close gaps | partial | UDVT argument decoding (`elabW`); Panic `0x41` in the decoder (`elabB`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
