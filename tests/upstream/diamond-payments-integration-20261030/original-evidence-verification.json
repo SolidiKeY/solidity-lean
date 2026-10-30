@@ -1073,7 +1073,7 @@
   "original_validation_verified_note": "Recorded evidence and unchanged documentation findings are verified. Required documentation still exited 1; this is not an all-gates-passing validation.",
   "coordinator_evidence": {
     "verification": "coordinator-evidence-verification.json",
-    "verification_sha256": "d960165fb3259a65dd5242eeecc941d793d56b9b0464f7f964ebeaf70bb416b7",
+    "verification_sha256": "60b7ab31774179938ef278e11632e6bd5970c411e95008819ec48df188a31210",
     "archive": "coordinator-evidence.tar.gz",
     "archive_sha256": "27ca82682ac38c94efc9f774a97a9cc07ffd2cadafd1d37cff01b6ea93ca2992",
     "original_source_checksum_coverage_added": 0

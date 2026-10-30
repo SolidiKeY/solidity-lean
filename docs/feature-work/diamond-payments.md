@@ -324,6 +324,39 @@ hash links, unchanged Lean-file hashes and diff formatting checks pass.
 These reviews cover this evidence repair; the coordinator still owns fresh
 combined validation and approval of the resulting candidate.
 
+### Embedded diagnostic citation repair (2026-10-30)
+
+Attempt 30 passed its 27 execution gates but introduced 18 documentation
+findings: the path checker interpreted filenames in the coordinator JSON's
+historical diagnostic strings as current prose citations. The JSON now uses
+Unicode escapes for those strings' backtick delimiters. Its decoded keys and
+values are identical; raw logs, archives, source checksum coverage and failed
+historical exit codes remain unchanged. Both direct verification digests and
+the original-evidence verification's referring digest are refreshed. The path
+checker and every gate policy are unchanged.
+
+The pinned retrieval, eleven coordinator context files, seven supplemental
+artifacts, 175 original source records and 177 original archive members were
+reverified. The executor/thread and source/base identities agree, and fresh
+checks of all 3,508 committed snapshot blobs reproduce the pinned base/source
+documentation logs, both exit 1 with 26 identical findings. Source-VM headroom
+requirements remain distinct from the LOCAL host's 12 GiB reserve. These
+checks add no original historical evidence or validation pass.
+
+The earlier layer-registration finding is already resolved: PaymentWitness and
+PaymentConditions are explicitly in the core pattern. This repair edits no
+Lean file and runs no Lean checks or full build. The coordinator owns the new
+combined gates, approval and any publication.
+
+The focused documentation check removes exactly the 18 new findings and now
+matches attempt 30's integration baseline: exit 1, 46 missing references and
+37 ambiguities, with zero new findings. It is not a global documentation pass.
+The layer check passes (172 core modules, none reaching the elaborator), and
+diff formatting passes. Fresh read-only finder and skeptic reviews both found
+the transitive original-evidence digest needed refreshing; that defect is fixed.
+Both final read-only refreshes found no remaining defect. Neither reviewer
+used the Lean server.
+
 ### Combined payment-closer regression repair (2026-10-30)
 
 Attempt 25's checksum-verified build log fails in the unchanged PaymentCorpus
