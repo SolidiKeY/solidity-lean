@@ -1422,3 +1422,15 @@ ABI source rows and two historical-profile rows. The Panic trailing-data decoder
 mismatch itself is corrected; its original assembly source producer/composition
 is still absent. No rejected ABI/lazy-calldata work, world/payment rewrite,
 callback-phase integration, target/exclusion change or frozen verdict adjustment.
+
+
+### Static compatibility continuation after aca22c93
+
+The evidence-only [historical PC/harness and six-obligation analysis](diamond-try-static/README.md)
+separates executable creation from copied runtime, attributes each fd site using
+compiler metadata, resolves local jump targets without claiming complete CFG
+reachability, and names exact missing source producers/capture correspondences.
+No runner/profile or Lean semantics changed; original native12/8 strict exit1,
+reference18/2 and66/140 observations remain retained checkpoint evidence.
+Historical execution is unauthorized and the physical/ABI producer lanes remain
+explicit boundaries, not forced passes.
