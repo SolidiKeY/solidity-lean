@@ -145,6 +145,7 @@ import Solidity.Calculus.LeafDerive
 import Solidity.Calculus.AllLeft
 import Solidity.Calculus.Rigid
 import Solidity.Calculus.ProvesDerive
+import Solidity.Calculus.MemoryLoopReplay
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.Closers
 import Solidity.Calculus.ProveChunked
@@ -393,6 +394,17 @@ import Solidity.Evm.MemoryCompile
 import Solidity.Evm.Compiler
 import Solidity.Evm.MemoryCompileExamples
 import Solidity.Evm.MemoryLoopSourceExamples
+import Solidity.Evm.MemoryLoopScope
+import Solidity.Evm.MemoryLoopScopeMeta
+import Solidity.Evm.MemoryLoopScopeSound
+import Solidity.Evm.MemoryLoopScopeRoom
+import Solidity.Evm.MemoryLoopScopeDemand
+import Solidity.Evm.MemoryLoopScopeBudget
+import Solidity.Evm.MemoryLoopScopeCompile
+import Solidity.Evm.MemoryLoopScopeExamples
+import Solidity.Evm.MemoryLoopScopeDivergenceExamples
+import Solidity.Evm.MemoryLoopScopeAllocExamples
+import Solidity.Evm.MemoryLoopScopeSourceExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
 import Solidity.Evm.Interpreter

@@ -40,4 +40,40 @@ contract MemoryCompilerLoops {
             revert();
         }
     }
+
+
+    function scopedArrays() public pure returns (uint) {
+        uint[] memory xs = new uint[](2);
+        uint[] memory same = xs;
+        uint i = 0;
+        if (true) { while (i < xs.length) { xs[i] = i + 3; i++; } }
+        return same[1];
+    }
+
+    function scopedRecords() public pure returns (uint) {
+        Record memory r = Record(0, 5);
+        Record memory same = r;
+        if (true) { while (r.n < 3) { r.n++; r.signed -= 2; } }
+        require(same.signed == -1);
+        return same.n;
+    }
+
+    function scopedAllocateTurn() public pure returns (uint) {
+        uint i = 2;
+        if (true) { while (i > 0) {
+            uint[] memory fresh = new uint[](0);
+            require(fresh.length == 0);
+            i = 0;
+        } }
+        return i;
+    }
+
+    function scopedAllocationBeforeRevert() public pure {
+        uint i = 2;
+        if (true) { while (i > 0) {
+            uint[] memory fresh = new uint[](0);
+            require(fresh.length == 0);
+            revert();
+        } }
+    }
 }

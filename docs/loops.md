@@ -554,47 +554,65 @@ solkey's four open loop ports are `tests/solc/OpenLoops.sol`
 
 ### Nested-return proof sharing (compiler10 memory-loop validation)
 
-The unchanged `returnLeavesNestedLoops` obligation consumed 903 visits of its
-original 1024-step walk. Native proposal evaluation took 3.02 s; the monolithic
-kernel evaluation hit the 10 GiB sampled RSS guard (or address-space failure).
-An explicit structural recursion alone did not fix it. `MemoryLoopReplay`
-shares typed symbolic states and proves one layer against an opaque callback.
-Its successor equation is universally equal to the existing `runK`; checked
-child equations instantiate that callback in original postorder. The final
-proof uses the original `Proves.of_residueWithin` with exactly 1024 steps.
-Source programs, formulas, rules, fresh indices, callback branch order, failed
-and speculative callbacks, returned budget and observations are unchanged.
+The unchanged `returnLeavesNestedLoops` obligation consumes 903 visits of
+its original 1024-step walk. `Calculus/MemoryLoopReplay.lean` shares typed
+symbolic states and one-layer equations universally linked to existing
+`runK`. Checked child equations instantiate the callback in original
+postorder. The root uses `Proves.of_residueWithin` with exactly 1024 steps.
+Programs, formulas, fresh indices, callback order, speculative/failed
+callbacks, returned budgets and expected observations are unchanged.
 
-Native gather/propose code supplies candidate metadata only. Every accepted
-state alias, candidate result and node equation is kernel checked; the final
-proof has only `propext`, `Classical.choice`, `Quot.sound`. A malformed candidate
-cannot supply an equation. Missing or incomplete proofs, wrong roots and
-nonempty residual leaves are refused. Runtime exceptions clear the live job
-and restore the previous environment. Snapshots use the exact typed target.
+Native gather/propose code chooses candidates only. Every original state,
+weakening/freshness equation, step, layer, rigid closure and guard is checked
+by the kernel. Paired guard equalities and shared rigid closures remove
+repeated typed-context normalization; exact typed literalization is checked
+before a proposed closure can be accepted. Root reduction retains no residual
+leaves. Neither sampled agreement nor native evaluation supplies a theorem.
 
-Twenty disk checkpoints retain default per-declaration heartbeat and recursion
-limits, but do not satisfy the original effective timing policy. The original
-`Derived17` workload has one cumulative 300-second allowance, including the
-helper, discovery/assembly stages, root, refusals and the other nine proofs.
-The earlier 1110.96-second scratch group and 965.51-second production group
-are **not timing passes**, even though individual stages took less than 300 s.
-The prior completion decision is superseded by independent combined review.
+Twenty replay checkpoints retain the original default declaration/proof
+limits. They share ONE cumulative 300-second allowance with the helper,
+root, refusals and nine other unchanged `Derived17` proofs. The earlier
+1110.96-second scratch and 965.51-second production groups are failures,
+as is fresh-31 (timeout, exit 75, 300.058 s, 3,578,757,120 peak RSS bytes).
+Cached early stages or separate per-stage allowances never establish a pass.
 
-`scripts/check-memory-loop-timing.py` rechecks all 24 workload modules into a
-new directory, rewires group imports to those fresh outputs, retains source
-snapshots and per-member terminal results, and must run under one 300-second
-outer guard. `scripts/check-memory-loop-timing.mjs` rejects incomplete, cached,
-duplicate, stale, failed or over-budget group evidence. Timed automatic checks
-require `--replay-group-results`; a classification-only check establishes no
-timing result. Unit controls retain the 965.51-second rejection.
+The minimal prerequisite repair is commit
+`082efb3183e66af30d7324a0291a9b45458460d1`, based on published
+`040e59d30a6726fa4f9fee831695eeaa4027ede1`, independently reviewed and
+exported separately for coordinator publication. Its complete fresh workload
+passed in 288.65 s, peak group RSS 2,881,208,320 bytes. After adopting the exact
+helper/refusals into the original memory-loop worktree, a second complete
+fresh workload passed in 262.03 s, exit 0, peak RSS 2,944,225,280 bytes
+(`memory-loop-scope-derived17-fresh-36`). Both include all 24 fresh modules;
+neither substitutes a cached partial timing. The old failures remain archived.
 
-The resumed repairs preserved every kernel check, original 1024-step walk,
-903 visits and proof/search limits. Checked scalar/weakening facts, constructor
-equations and deterministic-premise equations did not complete the cumulative
-gate. Timeout/address-space failures remain BLOCKED. Experimental helpers are
-archived with logs, not substituted for the last completely checked helper.
-The independent exact `maxIdx_wk` proof passed in 9.08 s and is archived as an
-unused independent increment, not registered as completed compiler support.
-The next repair must reduce repeated typed-state/context normalization and
-pass the entire fresh group within 300 seconds; more per-stage allowances or
-cached partial timings cannot resolve this blocker.
+`scripts/check-memory-loop-timing.py` checks the entire original group into a
+new directory, rewires ALL group imports to those fresh outputs, and records
+source snapshots/hashes and per-member terminal results. It must run under
+one outer 300-second guard. `scripts/check-memory-loop-timing.mjs` rejects
+incomplete, stale, cached, duplicate, failed, inconsistent or over-budget
+evidence. Timed strict automatic checks require `--replay-group-results`;
+classification alone establishes no timing result. The 965.51-second
+rejection remains a unit control.
+
+Kernel-negative controls include missing/incomplete checkpoints, wrong roots,
+unassembled/incomplete child proofs, foreign contexts, the actual fresh-index boundary,
+a wrong same-result formula or fresh-index input `k`, first/middle/last false conjunctions,
+the unchanged 512-node rigid boundaries, corrupted guard hints and missing-hint
+fallback. Resource/heartbeat exceptions cannot count as a kernel rejection.
+No `sorry`, new axiom or raised proof/search/node/walk limit is introduced.
+The final root axioms are `propext`, `Classical.choice`, `Quot.sound`;
+helper-specific smaller sets are recorded in the handoff audits.
+
+Current checks use the existing managed VM and a verified Docker hard
+12 GiB/no-swap build-group cgroup, plus the unchanged measured workload guard,
+thread count 1 and explicit Lean `-j1`. The inner supervisor holds the
+checkout writer lock throughout the workload. Historical fallback/guard
+attempts are accurately retained as such; timeout, OOM, address-space and
+interrupted attempts are never passes. Caches remain on disk, and no Lean
+server competes with builds.
+
+This shared prerequisite does not itself complete the MEMORY compiler
+assignment. That assignment's typed scope/loop simulation, source/machine
+observations, four-mode upstream execution, bounds and remaining validation
+are owned by `compiler-verification.md`.
