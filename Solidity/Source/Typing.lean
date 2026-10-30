@@ -549,6 +549,26 @@ def Env.declOf (E : Env) (k : DeclKind) (dn : DeclName) : Option Decl :=
 def Env.structFields (E : Env) (dn : DeclName) (l : DataLoc) : Option (List (String × STy)) :=
   (E.declOf .struct dn).bind (·.structFields E l)
 
+/-- Whether a type is a mapping or holds one through arrays, a struct's
+members asked of `f`. -/
+def STy.mapsWith (f : DeclName → Bool) : STy → Bool
+  | .mapping _ _ => true
+  | .array _ σ _ => σ.mapsWith f
+  | .struct _ d => f d
+  | _ => false
+
+/-- Whether a type contains a mapping, through arrays and struct members
+(`n` levels of structs; a struct beyond them counts as none). -/
+def Env.hasMapping (E : Env) : Nat → STy → Bool
+  | 0, τ => τ.mapsWith fun _ => false
+  | n + 1, τ => τ.mapsWith fun d => ((E.structFields d .storage).getD []).any fun f => E.hasMapping n f.2
+
+/-- Whether an assignment to a value of type `τ` would copy a mapping
+(solc refuses it: 9214 for a mapping, "Types in storage containing
+(nested) mappings cannot be assigned to" otherwise). One level per
+declaration reaches every struct a type can contain. -/
+def Ctx.assignsMapping (Γ : Ctx) (τ : STy) : Bool := Γ.env.hasMapping (Γ.env.decls.length + 1) τ
+
 /-- The type of the `i`-th member of struct `dn` at location `l`. -/
 def Env.fieldTy? (E : Env) (dn : DeclName) (l : DataLoc) (i : Nat) : Option STy :=
   (E.structFields dn l).bind fun fs => (fs[i]?).map Prod.snd
@@ -719,10 +739,10 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   /-- `c ? a : b`: the branches' mobile types meet. -/
   | cond {c a b : Syn .expr} {τa τb τ : STy} : Typed Γ c .bool → Typed Γ a τa → Typed Γ b τb →
       STy.common? Γ.isBase τa.mobile τb.mobile = Option.some τ → Typed Γ (.cond c a b) τ
-  /-- `a = b`: `b` converts implicitly to `a`'s type; a mapping is never
-  assigned. -/
+  /-- `a = b`: `b` converts implicitly to `a`'s type; a type containing a
+  mapping is never assigned. -/
   | assign {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ →
-      σ.implicit Γ.isBase τ = true → (τ matches .mapping _ _) = false → Typed Γ (.assign .assign a b) τ
+      σ.implicit Γ.isBase τ = true → Γ.assignsMapping τ = false → Typed Γ (.assign .assign a b) τ
   /-- `a ∘= b`: as `a = a ∘ b`. -/
   | compound {a b : Syn .expr} {op : AssignOp} {τ σ : STy} :
       LVal Γ a τ → Typed Γ b σ → op.fits Γ.isBase σ τ = true → Typed Γ (.assign op a b) τ

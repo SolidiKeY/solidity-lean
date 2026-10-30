@@ -324,7 +324,7 @@ theorem cond_mem {dc : Typed Γ c .bool} {da : Typed Γ a τa} {db : Typed Γ b 
 
 theorem assign_mem {dl : LVal Γ a τ} {db : Typed Γ b σ} (hl : Res.lval dl ∈ infer Γ a)
     (hb : Res.expr db ∈ infer Γ b) (h1 : σ.implicit Γ.isBase τ = true)
-    (h2 : isMappingTy τ = false) :
+    (h2 : Γ.assignsMapping τ = false) :
     Res.expr (Typed.assign dl db h1 h2) ∈ infer Γ (.assign .assign a b) := by
   refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨⟨τ, dl⟩, mem_lvsOf' hl,
     List.mem_flatMap.mpr ⟨⟨σ, db⟩, mem_tysOf' hb, List.mem_append_left _ (List.mem_append_left _ ?_)⟩⟩)

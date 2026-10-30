@@ -387,6 +387,32 @@ theorem ptrDelete_refused :
     (inferTys Γp (.unaryPrefix .delete (.ident "m"))).length = 1 := by
   decide
 
+/-- `mapping(uint256 => uint256)` -/
+def mapT : Syn .typeName := .mapping (.elem (.int false 256 (by decide)) (by decide)) none u256T none
+
+/-- `contract K { struct Q { uint256 a; mapping(uint256 => uint256) m; } Q s; Q t;
+mapping(uint256 => uint256)[2] am; mapping(uint256 => uint256)[2] bm; uint256 x; }` -/
+def mapUnit : Syn .unit := .unit (.cons (.contract false "K" .none .nil
+  (.cons (.struct "Q" (.structMember u256T "a") (.cons (.structMember mapT "m") .nil))
+  (.cons (.stateVar (.userType ⟨"Q", []⟩) none none none false "s" .none)
+  (.cons (.stateVar (.userType ⟨"Q", []⟩) none none none false "t" .none)
+  (.cons (.stateVar (.array mapT (.some (num 2))) none none none false "am" .none)
+  (.cons (.stateVar (.array mapT (.some (num 2))) none none none false "bm" .none)
+  (.cons (.stateVar u256T none none none false "x" .none) .nil))))))) .nil)
+
+def Γm : Ctx := { env := Syn.env mapUnit, scope := Option.some "K", locals := [] }
+
+/-- **Typing fix**: storage types containing a mapping are never assigned
+(solc: "Types in storage containing (nested) mappings cannot be assigned
+to"): `s = t` for a struct with a mapping member and `am = bm` for arrays
+of mappings have no type (the semantics copied nothing for the first and
+was `stuck` for the second); `s.a = x` is typed. -/
+theorem mapAssign_refused :
+    (inferTys Γm (.assign .assign (.ident "s") (.ident "t"))).isEmpty = true ∧
+    (inferTys Γm (.assign .assign (.ident "am") (.ident "bm"))).isEmpty = true ∧
+    (inferTys Γm (.assign .assign (.member (.ident "s") "a") (.ident "x"))).length = 1 := by
+  decide
+
 /-! ## Standalone constants (backfill item 5) -/
 
 /-- The fields of a fixed-point type, else `none`. -/
@@ -543,3 +569,5 @@ end Solidity.Frontend.Static.InferExamples
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrCopy_refused
 /-- info: 'Solidity.Frontend.Static.InferExamples.ptrDelete_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrDelete_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.mapAssign_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.mapAssign_refused
