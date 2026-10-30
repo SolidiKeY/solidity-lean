@@ -1473,3 +1473,5 @@ and [nonvacuous proof/milestone plan](diamond-try-physical-design/proof-plan.md)
 No producer, admission/D3/target/profile or semantics change is implemented.
 Exact five-row bundle/reference identities and existing mechanism/speed history
 are retained; original native12/8strictEXIT1 and historical backend pause persist.
+
+Official-source-only backend feasibility: [evmone0.22 pins, build edges and abort-interface limits](diamond-try-official-evmone.md). No backend/producer implementation or historical execution is approved by this addendum.
