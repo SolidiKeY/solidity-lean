@@ -575,4 +575,36 @@ theorem Elaborated.inits_opsOK (el : Elaborated) :
     (∀ d i, el.prog.consts d = some i → i.e.OpsOK) ∧ (∀ c, ∀ i ∈ el.prog.inits c, i.e.OpsOK) :=
   ⟨fun d i h => (el.consts_typed d i h).2.opsOK, fun c i h => (el.inits_typed c i h).2.opsOK⟩
 
+/-! ## Implicit conversions of values -/
+
+theorem mkInt_ok (t : IntTy) {v : Int} (h : t.lo ≤ v ∧ v ≤ t.hi) : NotStuckR (mkInt (D := D) t v) := by
+  intro w hw
+  simp only [mkInt, dif_pos h] at hw
+  cases hw
+
+theorem mkFix_ok (t : FixTy) {v : Int} (h : t.lo ≤ v ∧ v ≤ t.hi) : NotStuckR (mkFix (D := D) t v) := by
+  intro w hw
+  simp only [mkFix, dif_pos h] at hw
+  cases hw
+
+theorem FixTy.scale_pos (f : FixTy) : 0 < f.scale := by
+  unfold FixTy.scale
+  have := Nat.pow_pos (n := f.digits) (show 0 < 10 by decide)
+  omega
+
+/-- An integer within solc's integer bounds of a fixed-point type is in its
+range once scaled. -/
+theorem FixTy.scaled_mem (f : FixTy) {x : Int} (h1 : f.minInt ≤ x) (h2 : x ≤ f.maxInt) :
+    f.lo ≤ x * f.scale ∧ x * f.scale ≤ f.hi := by
+  have hs := f.scale_pos
+  have hs' : (0 : Int) ≤ f.scale := Int.le_of_lt hs
+  unfold FixTy.minInt at h1
+  unfold FixTy.maxInt at h2
+  have e1 : (f.hi / f.scale) * f.scale ≤ f.hi := Int.ediv_mul_le _ (Int.ne_of_gt hs)
+  have e2 : ((-f.lo) / f.scale) * f.scale ≤ -f.lo := Int.ediv_mul_le _ (Int.ne_of_gt hs)
+  have m2 := Int.mul_le_mul_of_nonneg_right h2 hs'
+  have m1 := Int.mul_le_mul_of_nonneg_right h1 hs'
+  have e3 : -((-f.lo) / f.scale) * f.scale = -(((-f.lo) / f.scale) * f.scale) := Int.neg_mul _ _
+  omega
+
 end Solidity.Source
