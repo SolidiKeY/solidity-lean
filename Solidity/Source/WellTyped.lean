@@ -1450,7 +1450,11 @@ theorem loadOK_step {F : Fr} {n : Nat} (ih : LoadOK E Γ F n) : LoadOK E Γ F (n
         ⟨hy, .cons (.val (hx.mono hle)) hfs, ⟨x, rfl⟩, hall⟩
 
 /-- **Copies from storage keep the memory invariant** (`MemOK`) at every
-fuel, halts included, and the element read or reference made agrees. -/
+fuel, halts included: `loadMem` builds agreeing, shaped objects with
+bare-value elements, and a reference `loadElem` makes agrees with the heap
+typing (a by-value element agrees trivially; nothing here says the copy
+equals the storage contents). Its consumer is the storage-to-memory
+conversion `allocRef (← loadMem …)` in `Eval.lean`. -/
 theorem loadOK (F : Fr) : ∀ n, LoadOK E Γ F n
   | 0 => loadOK_zero F
   | n + 1 => loadOK_step (loadOK F n)

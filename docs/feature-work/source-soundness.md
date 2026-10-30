@@ -261,8 +261,9 @@ trivially at `Γ = []` and the empty heap typing) whose object at `1` is a
 (`zeroData` and `loadMem` match all four memory reference types before
 their `Data.val` arms, and a mapping has no memory location; the other
 `allocRef` and `heapPut` sites build aggregates), so the gap is in the
-invariant, not the semantics (proved for the zeroing allocator and storage copier, `zeroOK`, `loadOK`
-below; not yet for the other allocation sites). Progress for `memSet`,
+invariant, not the semantics (proved for the zeroing allocator and
+the storage copier, `zeroOK` and `loadOK` below; not yet for the other
+allocation sites). Progress for `memSet`,
 `writeLoc .memByte`, `memElem` and `heapBytes` (`readLoc .memByte`,
 conversions to fixed bytes, `bytesOfRV`) needs `HeapOK` strengthened with
 this shape condition, and `memElem` also needs elements to be `Data.val`
@@ -306,6 +307,11 @@ local and memory writes of agreeing values keep `MemOK` (`writeLoc_local_mem`,
 halts included (`deleteLoc_mem`; witness `arrHeap_delete`: `true`
 reset to `false`). Storage writes are not covered.
 
+**Review of `loadOK`** (finder and skeptic, read-only, no blocker): the
+witness was missing (added: `copyArr_value`); the docstring overstated
+"the element read agrees" (a by-value element agrees trivially; reworded);
+line wraps fixed. Build45 (`6e7dbf9`) passed.
+
 **Review of `deleteLoc_mem`** (finder and skeptic, read-only, no
 blocker): the side condition and "halts included" were confirmed, and
 `Hoare.and` is sound for the deterministic `EM`; fixed: the witness now
@@ -316,7 +322,9 @@ passed. The storage-to-memory
 copier is proved the same way: `loadOK` (structure `LoadOK` over
 `loadMem`, `loadElem`, `loadElems`, `loadFields`; storage reads change
 nothing, `readAt_keep`, `readLen_keep`, `loadBytes_keep`; `allocRef_mem'`
-covers an allocation whose reference is then refused). Not yet done:
+covers an allocation whose reference is then refused); witness
+`copyArr_value` (the storage `[7, 9]` copied to a new memory array of
+bare values `7`, `9`). Not yet done:
 proving the same for the other allocation sites (the ABI decoder,
 `structNew`, literals, the `abi.encode*` result); carrying `HeapShaped` and `HeapInner` (`MemOK`) through frame restores (`Eval.lean` and
 `Semantics.lean` reset the heap or restore a saved one, as for
