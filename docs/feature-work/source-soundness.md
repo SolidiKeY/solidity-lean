@@ -470,12 +470,22 @@ the frame order against `callInternal`, `evalConvArgs_ns`,
   `7` and reverts on `300` (it was `stuck`), and `g(V v)` with
   `type V is int8` runs on `-1` (a sign-extended word) and reverts on
   `200`.
-- Panic `0x41` in the ABI decoder: a `bytes`/`string` or dynamic-array
-  argument whose length is `2^64` or more panics with `0x41` before the
-  bounds check, as solc's decoder does (it reverted with no data):
-  `elabB` (`g(bytes)` with length `2^64` panics, `2^64 - 1` reverts, `"ab"`
-  runs); `Horizon.lean`'s `tailBytes`/`decodeArg` lemmas gained the
-  branch.
+- Panic `0x41` in the ABI decoder, in part: a length word past the data
+  reverts first (solc's `offset + 0x1f < end`), then a `bytes`/`string`
+  or dynamic-array argument whose length is `2^64` or more panics with
+  `0x41` before the bounds check, as solc's `array_allocation_size` (it
+  reverted with no data): `elabB` (`g(bytes)` with length `2^64` panics,
+  `2^32` reverts, a length word cut short reverts, `"ab"` runs; legacy
+  pipeline, the decoder does not depend on it). solc's
+  `finalize_allocation` band just below `2^64` (lower for later arguments
+  and under via-IR) still reverts here: a recorded deviation
+  (`docs/solc-alignment.md`). `Horizon.lean`'s `tailBytes`/`decodeArg`
+  lemmas gained the branches.
+
+  The first version (`3843b17`, marker `d0f8f02`) checked the length
+  before the offset and claimed the whole of solc's behaviour; the
+  coordinator's review (against solc's generated Yul) found both, and the
+  marker was not integrated.
 
 Attempted and reverted: getters of `bytes`/`string` state variables
 (`dispatch` encoding a storage reference; the control returned `"ab"`):

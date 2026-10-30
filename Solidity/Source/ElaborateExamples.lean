@@ -214,13 +214,19 @@ def elabB : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 #guard elabB.isSome
 
 -- **Panic 0x41 in the decoder** (lane V04b): a `bytes` argument whose
--- length is `2^64` panics with `0x41` (solc's allocation check comes before
--- its bounds check); one of length `2^64 - 1` is out of bounds and reverts
--- with no data; `b = "ab"` runs.
+-- length is `2^64` panics with `0x41` (solc's `array_allocation_size`
+-- comes before its bounds check); one of length `2^32` is out of bounds and
+-- reverts with no data; a length word cut short (`32` then one byte)
+-- reverts with no data before any length is read, as solc's
+-- `offset + 0x1f < end` check; `b = "ab"` runs. (Lengths just below `2^64`
+-- also panic in solc, through `finalize_allocation`; that band is a
+-- recorded deviation, `docs/solc-alignment.md`.)
 #guard (elabB.map fun el => runD el 0 [selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 64),
-    selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 64 - 1),
+    selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 32),
+    selOf "g(bytes)" ++ arg 32 ++ [1],
     selOf "g(bytes)" ++ arg 32 ++ arg 2 ++ ([97, 98] ++ List.replicate 30 0)]) ==
-  some [some (.success []), some (.revert (panicData .alloc)), some (.revert []), some (.success [])]
+  some [some (.success []), some (.revert (panicData .alloc)), some (.revert []), some (.revert []),
+    some (.success [])]
 
 /-- `e()` entered in a static frame or not, after deploying `D`. -/
 def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=

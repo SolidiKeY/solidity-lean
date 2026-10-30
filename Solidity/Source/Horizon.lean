@@ -1002,10 +1002,12 @@ theorem tailBytes_grow (data : Bytes) (i : Nat) : Grow (tailBytes (E := E) (Γ :
   unfold tailBytes
   dsimp only
   split
-  · exact Grow.lift _
+  · exact Grow.halt _
   · split
-    · exact Grow.pure _
-    · exact Grow.halt _
+    · exact Grow.lift _
+    · split
+      · exact Grow.pure _
+      · exact Grow.halt _
 theorem decodeArg_grow (data : Bytes) (i : Nat) (τ : STy) : Grow (decodeArg (E := E) (Γ := Γ) data i τ) := by
   unfold decodeArg
   split
@@ -1019,10 +1021,12 @@ theorem decodeArg_grow (data : Bytes) (i : Nat) (τ : STy) : Grow (decodeArg (E 
     · split
       · dsimp only
         split
-        · exact Grow.lift _
+        · exact Grow.halt _
         · split
-          · exact Grow.bind (List.mapM_grow _ (fun _ => Grow.lift _) _) fun _ => allocRef_grow _
-          · exact Grow.halt _
+          · exact Grow.lift _
+          · split
+            · exact Grow.bind (List.mapM_grow _ (fun _ => Grow.lift _) _) fun _ => allocRef_grow _
+            · exact Grow.halt _
       · exact Grow.halt _
     · exact Grow.lift _
   · exact Grow.lift _
@@ -1587,10 +1591,12 @@ theorem tailBytes_const (data : Bytes) (i : Nat) : Const (tailBytes (E := E) (Γ
   unfold tailBytes
   dsimp only
   split
-  · exact Const.lift _
+  · exact Const.halt _
   · split
-    · exact Const.pure _
-    · exact Const.halt _
+    · exact Const.lift _
+    · split
+      · exact Const.pure _
+      · exact Const.halt _
 theorem decodeArg_const (data : Bytes) (i : Nat) (τ : STy) : Const (decodeArg (E := E) (Γ := Γ) data i τ) := by
   unfold decodeArg
   split
@@ -1604,10 +1610,12 @@ theorem decodeArg_const (data : Bytes) (i : Nat) (τ : STy) : Const (decodeArg (
     · split
       · dsimp only
         split
-        · exact Const.lift _
+        · exact Const.halt _
         · split
-          · exact Const.bind (List.mapM_const _ (fun _ => Const.lift _) _) fun _ => allocRef_const _
-          · exact Const.halt _
+          · exact Const.lift _
+          · split
+            · exact Const.bind (List.mapM_const _ (fun _ => Const.lift _) _) fun _ => allocRef_const _
+            · exact Const.halt _
       · exact Const.halt _
     · exact Const.lift _
   · exact Const.lift _

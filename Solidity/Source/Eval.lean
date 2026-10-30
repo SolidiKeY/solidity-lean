@@ -221,13 +221,17 @@ def STy.isValueTy : STy → Bool
   | _ => false
 
 /-- The contents of a dynamic argument whose head is the `i`-th word: its
-offset, then its length and bytes there; a length of `2^64` or more panics
-(`0x41`, solc's allocation check comes first), out of bounds reverts. -/
+offset, then its length and bytes there. A length word past the data
+reverts, as solc's `offset + 0x1f < end` check does; then a length of
+`2^64` or more panics (`0x41`, solc's `array_allocation_size`, before its
+bounds check); then out of bounds reverts. -/
 def tailBytes {Γ : RCtx} (data : Bytes) (i : Nat) : EM E Γ Bytes := do
   let off := wordAt data i
-  let len := wordAt (data.drop off) 0
-  if 2 ^ 64 ≤ len then lift (panic .alloc)
-  else if off + 32 + len ≤ data.length then pure ((data.drop (off + 32)).take len) else halt (.revert [])
+  if data.length < off + 32 then halt (.revert [])
+  else
+    let len := wordAt (data.drop off) 0
+    if 2 ^ 64 ≤ len then lift (panic .alloc)
+    else if off + 32 + len ≤ data.length then pure ((data.drop (off + 32)).take len) else halt (.revert [])
 
 /-- **Decoding one argument** at head word `i`: a static value from its
 word; `bytes`, `string` and a dynamic array of value types (in memory) from
@@ -247,6 +251,8 @@ def decodeArg {Γ : RCtx} (data : Bytes) (i : Nat) (τ : STy) : EM E Γ (Val E.l
     | .memory, none =>
       if σ.isValueTy then do
         let off := wordAt data i
+        if data.length < off + 32 then halt (.revert [])
+        else
         let len := wordAt (data.drop off) 0
         if 2 ^ 64 ≤ len then lift (panic .alloc)
         else if off + 32 + 32 * len ≤ data.length then
