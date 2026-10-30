@@ -665,6 +665,71 @@ Full `./run-lean.sh`, direct full/import/combined audit, TestSuite kernel build
 and corpus validation remain mandatory and pending. The entire assignment
 remains incomplete.
 
+### Reattached audit and terminal validation (2026-10-30)
+
+Audit `98afd51b-d8c1-4814-bc44-01c887ff8bf5` reattached this same VM/thread;
+no replacement, goal reset, push or merge was performed. Transport loss had
+left the original `memorycopy-testsuite` container running after its Python
+supervisor exited. The stale original live JSON and file log are retained.
+The recovered supervisor verified the same container ID, `memory.max=12884901888`
+and `memory.swap.max=0`, reacquired the writer lock and restored the 12 GiB
+OS-reserve/RSS guard. A detached watchdog stops only that owned container if
+its supervisor fails. Exact Docker command metadata and the supervision gap
+are recorded separately; the orphaned attempt is never counted as a pass.
+
+Supported Docker wait/status recovered its true exit 137, `OOMKilled=false`,
+with a reserve stop during `Solidity.TestSuite.Derived17`. After recovery the
+observed peak aggregate RSS was 5,745,340,416 bytes and minimum available RAM
+12,842,168,320 bytes, below the required 12,884,901,888. Container timestamps
+are 11:31:30.363944529Z to 12:04:04.773292456Z. Actual complete Docker output
+retains passing Derived1–16 results; Derived17 did not finish. No second
+checker was launched while the surviving build ran.
+
+A distinct resource repair checked unchanged `Frontend.Checked.UnitExamples`
+alone in a fresh Lake/cgroup, avoiding the previous full run's measured
+461,766,656-byte retained Lake RSS. It still stopped at the reserve guard
+(wrapper 75/container 137, no OOM), in 49.30 s: peak aggregate RSS
+4,232,019,968 bytes; minimum available 12,860,588,032 bytes. This is not a
+passing dependency or full gate. The already-tried asynchronous-checking
+change was not presented as a new repair. No unchanged full/TestSuite retry,
+source takeover, increased budget or relaxed resource limit followed.
+
+All seven source gates were then run individually: frozen snapshot verification,
+TestSuite inventory, orphans, layers, strict automation, static trust and the
+two trust-script tests passed. Snapshot/rules/examples use the repository's
+existing `tests/migration/solkey` paths and unchanged pin
+`473da8944ca7329e6b76819863591407db26e7ec` (274 verified files). The original
+static batch's missing `/workspace/.setup/solkey.pin.json` exit 1 remains failed.
+
+Actual root/import diagnostics fail because the unfinished full build has no
+`Solidity.Semantics.RecursiveStorage` artifact; combined `TrustAudit` diagnostics
+fail on missing `Solidity.Examples.LexMetrics`. Neither audit is passed by the
+separate task-only 90-headline standard-axiom check. An initial serialization
+wrapper used an unmounted `/tmp` lock path and failed before Lean; its exit 66
+logs and failed corpus inputs are retained. Moving only that lock to the mounted
+evidence directory repaired setup, with new result labels and no source or
+expectation edits.
+
+`Solidity.Corpus.Basic` kernel-built successfully. The original corpus probe
+and all four generated-table/module/scoreboard comparisons passed in 31.83 s
+(898,801,664-byte sampled aggregate RSS). Spawned probe checkers were serialized
+with explicit `-j1`; no proof or test budget changed. The mandatory full corpus
+script/kernel target remains blocked by Derived17; probe agreement is not
+corpus kernel completion. Full/import, combined trust and TestSuite/corpus
+kernel validation remain unfulfilled. The entire assignment is **BLOCKED**,
+not done. Current exact-base documentation debt remains 46 missing references
+and 26 ambiguities, with zero new/removed findings; raw doc gates remain failed.
+
+Read-only finder/skeptic reviews confirmed safe same-container recovery,
+unchanged kernel trust under synchronous scheduling, and exact-base source
+identity for UnitExamples (24 local dependencies), Derived17 and OpenLoops
+(227 each). Identity is not a baseline pass or proof of no resource regression.
+The final blocked-handoff review and checksum-bound artifact locations are
+recorded in `/workspace/memory-storage-copy-HANDOFF.json`. Resume only after
+a legitimate resource/dependency repair under the original constraints,
+inspecting surviving processes and the writer lock first. The owning modules
+are not silently repaired or excluded by this task.
+
 ## Preserved memory-storage-copy recovery history
 
 The following ledger is preserved historical task evidence from original HEAD `0f1039dac4e032c4e2c4030ee0d35b38c8393f80` and its recovered WIP. Its passes and failures describe that predecessor, not validation of the recovery base. Current recovery evidence is recorded separately.

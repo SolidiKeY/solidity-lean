@@ -194,3 +194,13 @@ successfully on the pinned new base in 518 seconds under a verified hard
 Task-only axiom checks, per-file diagnostics, static gates, sort alignment and all four external modes now pass. Full/import, combined trust and TestSuite/corpus kernel gates remain pending;
 this checkpoint does not complete the assignment. See the
 [owning record](compiler-verification.md#memory-storage-copy-recovery-checkpoint).
+
+
+Recovery terminal status (2026-10-30): **blocked, not complete**. Reattached
+TestSuite supervision recovered an actual reserve-stop exit during Derived17;
+the orphaned supervision interval is explicit. A fresh isolated UnitExamples
+check also stopped under the unchanged reserve. Root/import and combined trust
+checks lack prerequisites from the unfinished full build. Corpus probes and
+comparisons pass separately from its blocked kernel target. Source gates pass
+with the unchanged repository pin; earlier failed attempts stay failed. See the
+owning recovery record and machine-readable handoff for exact evidence.
