@@ -517,6 +517,10 @@ def arrHeap : Heap SemanticsExamples.E0.layout :=
   ((Heap.empty : Heap SemanticsExamples.E0.layout).alloc
     ⟨.array .memory .bool none, .array 1 (fun _ h => nomatch h) fun _ => .val (.bool false)⟩).1
 
+/-- `arrHeap` is shaped. -/
+theorem arrHeap_shaped : HeapShaped (E := SemanticsExamples.E0) arrHeap :=
+  HeapShaped.empty.alloc trivial
+
 /-- **Witness** (`writeLoc_mem_ok`): writing `true` as element `0` of the
 `bool[]` at `0` succeeds. -/
 theorem arrHeap_write :
@@ -648,6 +652,8 @@ theorem arrHeap_wrong_elem_stuck :
 #guard_msgs in #print axioms Solidity.Source.writeLoc_mem_ok
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_write
+/-- info: 'Solidity.Source.SoundnessExamples.arrHeap_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_shaped
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/

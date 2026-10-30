@@ -696,7 +696,8 @@ theorem DataList.setNth_ok {τ : STy} (y : Data E.layout τ) : {τs : List STy} 
 
 /-- **`memSet`, progress and preservation**: storing an agreeing value as
 an element of an array of its type, or as a member of its type, in a
-shaped heap, is never `stuck` (it writes, or panics out of bounds). -/
+shaped heap, is never `stuck` (the code writes, or panics out of bounds;
+the statement excludes only `stuck`). -/
 theorem memSet_ok {H : HeapTy} (a i : Nat) {τ : STy} (v : Val E.layout τ) :
     Hoare (fun y => ((EMOK E H y ∧ HeapShaped y.2.heap) ∧ v.RefOK E y.2.heap.ty) ∧
         ((∃ l k, y.2.heap.ty a = some (.array l τ k)) ∨

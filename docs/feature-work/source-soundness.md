@@ -289,10 +289,23 @@ restores (`Eval.lean` and `Semantics.lean` reset the heap or restore a
 saved one, as for `HeapOK`); progress for `memElem` and `heapBytes`.
 Progress for element and member writes is proved: `memSet_ok` /
 `writeLoc_mem_ok` (at an array of the value's type, or a struct whose
-member `i` has it, in a shaped heap, the write succeeds or panics out of
-bounds; `DataList.setNth_ok`), witness `arrHeap_write`, control
+member `i` has it, in a shaped heap, the write is not `stuck`: the code
+writes or panics out of bounds; `DataList.setNth_ok`), witness
+`arrHeap_write` (on the shaped `arrHeap_shaped`), control
 `arrHeap_wrong_elem_stuck` (an `address` written into a `bool[]` is
-`stuck`, "element type": the type premise is needed). A caller of `writeLoc_memByte_ok` gets its precondition from
+`stuck`, "element type": the type premise is needed). Callers get the
+premise from the location's construction: an index into a `memory`
+array reference (`indexLoc`) has `Val.RefOK`, and `memShape` is the
+identity on arrays, so the heap type is that array (static arrays
+included); a struct member (`Eval.lean`, member access) has
+`E.fieldTy? d .memory i = some τ`, which is `(E.layout.fields d)[i]?`
+for a memory struct. Neither bridge is stated as a lemma yet, and there is
+no struct-member control (`SemanticsExamples.E0` has no structs).
+
+**Review of `memSet_ok`** (finder and skeptic, read-only, no blocker):
+"succeeds or panics" was stronger than the statement (reworded); the
+caller bridges were unstated (documented above); the witness lacked a
+shaped-heap fact (`arrHeap_shaped` added). Build35 (`ba39d50`) passed. A caller of `writeLoc_memByte_ok` gets its precondition from
 a `memory` reference's `Val.RefOK` through `STy.memShape_bytes` and
 `StOK.le`. The statement excludes only `stuck` (a timeout is not
 excluded by the statement, though the code cannot produce one there).
