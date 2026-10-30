@@ -1608,3 +1608,42 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} memory element-write theorems and controls use only the standard axioms"
+
+/-! Lane V04b: progress of memory byte reads. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.STy.memShape_array,
+    ``Solidity.Source.heapBytes_ok,
+    ``Solidity.Source.readLoc_memByte_ok,
+    ``Solidity.Source.SoundnessExamples.bytesHeap_byte_read,
+    ``Solidity.Source.SoundnessExamples.ptrHeap_byte_read_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} memory byte-read theorems and controls use only the standard axioms"
+
+/-! Lane V04b: progress of memory element reads under `HeapInner`. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.DataList.nth_val,
+    ``Solidity.Source.heapObj_get,
+    ``Solidity.Source.HeapInner.empty,
+    ``Solidity.Source.SoundnessExamples.arrHeap_inner,
+    ``Solidity.Source.memElem_ok,
+    ``Solidity.Source.readLoc_mem_ok,
+    ``Solidity.Source.HeapInner.alloc,
+    ``Solidity.Source.HeapInner.write,
+    ``Solidity.Source.SoundnessExamples.arrHeap_read,
+    ``Solidity.Source.SoundnessExamples.inlineHeap_read_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} memory element-read theorems and controls use only the standard axioms"

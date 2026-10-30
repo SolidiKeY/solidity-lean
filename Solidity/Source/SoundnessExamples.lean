@@ -536,6 +536,48 @@ theorem arrHeap_wrong_elem_stuck :
       .error (.stuck "element type") := by
   rfl
 
+/-- **Witness** (`readLoc_memByte_ok`): reading byte `0` of the shaped
+`bytesHeap` gives `0x01`. -/
+theorem bytesHeap_byte_read :
+    (match ((readLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 (.memByte 0 0)).run
+      (.nil, { SemanticsExamples.s0 with heap := bytesHeap })).1 with
+    | .ok (.fixedBytes bs _) => some bs
+    | _ => none) = some [1] := by
+  rfl
+
+/-- **Negative control** (the shape premise of `readLoc_memByte_ok`):
+reading byte `0` at `1` of the unshaped `ptrHeap` is `stuck`. -/
+theorem ptrHeap_byte_read_stuck :
+    ((readLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 (.memByte 1 0)).run
+      (.nil, { SemanticsExamples.s0 with heap := ptrHeap })).1 = .error (.stuck "not a bytes object") := by
+  rfl
+
+/-- `arrHeap` has bare-value elements. -/
+theorem arrHeap_inner : HeapInner (E := SemanticsExamples.E0) arrHeap :=
+  HeapInner.empty.alloc fun _ => ⟨_, rfl⟩
+
+/-- **Witness** (`readLoc_mem_ok`): element `0` of the `bool[]` at `0` of
+`arrHeap` is `false`. -/
+theorem arrHeap_read :
+    ((readLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 (τ := .bool) (.mem 0 0)).run
+      (.nil, { SemanticsExamples.s0 with heap := arrHeap })).1 = .ok (.bool false) := by
+  rfl
+
+/-- A heap with a `bytes[] memory` at `0` whose one element is an inline
+`bytes` (not a pointer). -/
+def inlineHeap : Heap SemanticsExamples.E0.layout :=
+  ((Heap.empty : Heap SemanticsExamples.E0.layout).alloc
+    ⟨.array .memory (.bytes .memory) none, .array 1 (fun _ h => nomatch h) fun _ => .bytes [1]⟩).1
+
+/-- **Negative control** (the `HeapInner` premise of `readLoc_mem_ok`):
+`inlineHeap` is well typed and shaped but its element is inline, and
+reading it is `stuck`. -/
+theorem inlineHeap_read_stuck :
+    HeapOK (E := SemanticsExamples.E0) inlineHeap ∧ HeapShaped (E := SemanticsExamples.E0) inlineHeap ∧
+    ((readLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 (τ := .bytes .memory) (.mem 0 0)).run
+      (.nil, { SemanticsExamples.s0 with heap := inlineHeap })).1 = .error (.stuck "inline aggregate element") :=
+  ⟨HeapOK.empty.alloc (.array fun _ => .bytes _), HeapShaped.empty.alloc trivial, rfl⟩
+
 /-! ## Axioms -/
 
 /-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -654,6 +696,36 @@ theorem arrHeap_wrong_elem_stuck :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_write
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_shaped
+/-- info: 'Solidity.Source.STy.memShape_array' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Source.STy.memShape_array
+/-- info: 'Solidity.Source.heapBytes_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapBytes_ok
+/-- info: 'Solidity.Source.readLoc_memByte_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readLoc_memByte_ok
+/-- info: 'Solidity.Source.SoundnessExamples.bytesHeap_byte_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.bytesHeap_byte_read
+/-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_byte_read_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ptrHeap_byte_read_stuck
+/-- info: 'Solidity.Source.DataList.nth_val' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.DataList.nth_val
+/-- info: 'Solidity.Source.heapObj_get' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapObj_get
+/-- info: 'Solidity.Source.memElem_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.memElem_ok
+/-- info: 'Solidity.Source.HeapInner.empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.HeapInner.empty
+/-- info: 'Solidity.Source.HeapInner.alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.HeapInner.alloc
+/-- info: 'Solidity.Source.HeapInner.write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.HeapInner.write
+/-- info: 'Solidity.Source.readLoc_mem_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readLoc_mem_ok
+/-- info: 'Solidity.Source.SoundnessExamples.arrHeap_inner' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_inner
+/-- info: 'Solidity.Source.SoundnessExamples.arrHeap_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_read
+/-- info: 'Solidity.Source.SoundnessExamples.inlineHeap_read_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.inlineHeap_read_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
