@@ -2488,3 +2488,19 @@ Read-only finder and skeptic confirmed actual final performance, kernel proof
 integrity and retained hashes. The report now labels the earlier pending list
 as historical, closing the reviewer's stale-label finding. No unsupported
 reference/function-return or broader-dispatch shape is promoted by this repair.
+
+#### Integration control repair (2026-10-30)
+
+The retained review's missing result type on `annotate` is now explicit as
+`Expr`. Per-file Lean MCP checking also exposed two staged-prefix controls
+falling back: asynchronous theorem elaboration restricts generated declaration
+names to the theorem's prefix, rejecting the production stage declarations.
+Those two controls now elaborate synchronously. Their stage-count assertions,
+proof bodies, observations and original budgets are unchanged.
+
+Complete diagnostics for `tests/upstream/GetterKernelSharing.lean` pass without
+errors or warnings; its printed axiom sets contain only the standard three.
+Read-only finder review confirmed both stage assertions and the explicit type;
+skeptic review compared against the baseline and confirmed that the scoped
+scheduling options and type annotation are the only source changes. Combined
+gates remain the integration coordinator's responsibility.

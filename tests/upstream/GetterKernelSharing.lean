@@ -186,6 +186,9 @@ private def stageCount : CoreM Nat := do
   return ((← getEnv).constants.toList.filter fun (name, _) =>
     name.toString.startsWith "prefix_memory_stage").length
 
+-- Staged controls create auxiliary declarations; check synchronously so Lean
+-- does not restrict their names to an asynchronous theorem namespace.
+set_option Elab.async false in
 theorem prefixStagesChecked : ProvesC (C := Empty) .tt false [] .nil
     cdl!{ ∀ uint x; x == 0 → x == 1 → false } := by
   apply ProvesC.allIntro
@@ -200,6 +203,7 @@ theorem prefixStagesChecked : ProvesC (C := Empty) .tt false [] .nil
     replaceMainGoal []
 #print axioms prefixStagesChecked
 
+set_option Elab.async false in
 theorem prefixStagesShared : ProvesC (C := Empty) .tt false [] .nil
     cdl!{ ∀ uint x; x == 0 → x == 1 → false } := by
   apply ProvesC.allIntro
@@ -297,7 +301,7 @@ run_elab do
       forms := forms.push next
       previous := next
     let terminal := mkApp2 (mkConst ``Decide.LFml.closeMem.closeTwice) C previous
-    let annotate (type value : Expr) := mkApp2 (mkConst ``id [0]) type value
+    let annotate (type value : Expr) : Expr := mkApp2 (mkConst ``id [0]) type value
     let boolProof (b : Expr) : MetaM Expr := do
       return annotate (← mkEq b truth) (← mkEqRefl truth)
     let build (badReduction badTerminal : Bool) : MetaM Expr := do
