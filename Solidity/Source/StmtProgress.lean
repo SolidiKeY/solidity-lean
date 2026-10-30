@@ -177,7 +177,7 @@ end
 section
 variable {G : Glob E} {n : Nat}
 
-theorem execS_step (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : s.ValFrag) (ho : s.OpsOK)
     (hfr : BodyFrame nps R Γ) : NSP (execS G F (n + 1) nps ph s l) (fun o => s.Simple → ∃ l', o = .normal l') := by
   have hE : ∀ {Γ τ} (e : RExpr E Γ τ), e.ValFrag → e.OpsOK → NSP (evalE G F n e) (fun _ => True) :=
@@ -289,7 +289,7 @@ theorem execS_step (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E))
     exact NSP.bind (NSP.lift_ok (Locals.setAt_ok' ys hΓ p.2 p.1)) fun _ _ => NSP.pure' fun h => h.elim
   | _ => exact hf.elim
 
-theorem execItems_step (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+theorem execItems_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : b.ValFrag) (ho : b.OpsOK)
     (hfr : BodyFrame nps R Γ) : NSP (execItems G F (n + 1) nps ph b l) (fun _ => True) := by
   cases b with
@@ -315,7 +315,7 @@ theorem execItems_step (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph
     | cont _ => exact NSP.pure' trivial
     | ret _ => exact NSP.pure' trivial
 
-theorem forIter_step (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
+theorem forIter_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
     {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂)
     (l : Locals E.layout Γ₁) (hc : c.ValFrag) (hc' : c.OpsOK) (hp : post.ValFrag) (hp' : post.OpsOK)
     (hb : body.ValFrag) (hb' : body.OpsOK) (hfr : BodyFrame nps R Γ₁) :
@@ -397,10 +397,10 @@ theorem stmtNSAt (G : Glob E) : ∀ n, StmtNSAt G n
   | 0 => stmtNSAt_zero G
   | n + 1 =>
     have ih := stmtNSAt G n
-    { execS := fun F nps ph _ _ _ _ _ s l hf ho hfr => execS_step ih F nps ph s l hf ho hfr
-      execItems := fun F nps ph _ _ _ _ _ b l hf ho hfr => execItems_step ih F nps ph b l hf ho hfr
+    { execS := fun F nps ph _ _ _ _ _ s l hf ho hfr => execS_nsStep ih F nps ph s l hf ho hfr
+      execItems := fun F nps ph _ _ _ _ _ b l hf ho hfr => execItems_nsStep ih F nps ph b l hf ho hfr
       forIter := fun F nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr =>
-        forIter_step ih F nps ph c post body l hc hc' hp hp' hb hb' hfr }
+        forIter_nsStep ih F nps ph c post body l hc hc' hp hp' hb hb' hfr }
 
 /-- **A statement of the value fragment in the operations' domains is
 never `stuck`**: at every horizon, in every state, in any modifier

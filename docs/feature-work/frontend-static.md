@@ -36,13 +36,13 @@ checkpoint's Handoff.
 
 ### The relations
 
-**Programs.** A compilation input is a `Program`: source units by source
+**Programs.** A compilation input is a `UnitSet`: source units by source
 unit name, each an S00 tree `Syn .unit`. Import directives are read off the
 tree (`Syn.imports`), one `Import` per imported name: `all p`
 (`import "p";`), `ns p N` (`import "p" as N;`, `import * as N from "p";`)
 and `sym p a b` (`import {a as b} from "p";`, `b = a` without `as`).
 
-**Paths.** `Program.target R u p` resolves the path `p` imported by unit
+**Paths.** `UnitSet.target R u p` resolves the path `p` imported by unit
 `u` as solc's `CompilerStack` does: `Path.absolute` (solc's
 `absolutePath`: a path whose first segment is `.` or `..` is relative to
 `u`'s directory) then `Remapping.apply` (solc's `ImportRemapper::apply`:
@@ -51,7 +51,7 @@ remapping wins a tie). solc's path sanitizing is not modelled: units are
 named by already-normalized source unit names.
 
 **Identities.** `DeclId` is a unit name and a position in the unit's
-`Syn.decls`, S00's identity extended across units; `Program.decl?` reads
+`Syn.decls`, S00's identity extended across units; `UnitSet.decl?` reads
 it back.
 
 **The file-level scope.** `Sees P R u x σ`: in unit `u`, the name `x`
@@ -89,11 +89,11 @@ minus the ones a more derived function with the same parameters overrides.
   proof counts: a round that adds nothing leaves a closed set, a round that
   adds something adds a node of `U`, and a duplicate-free list inside `U` is
   no longer than `U` (`Nodup.length_le_of_subset`).
-- **The resolver** (`Frontend/Static/Units.lean`). `Program.globals P R u x`
+- **The resolver** (`Frontend/Static/Units.lean`). `UnitSet.globals P R u x`
   saturates the graph of `(unit, name)` nodes from `(u, x)`: `import "p"`
   keeps the name, `{a as x}` renames to `a`. Its result is the leaves of the
   reached nodes (own declarations, namespaces). The bound `U` is
-  `Program.nodes`: unit names and import targets crossed with `x` and every
+  `UnitSet.nodes`: unit names and import targets crossed with `x` and every
   aliased symbol (`nodes_closed`).
   - `globals_sound`, `globals_complete` (`mem_globals`): the resolver
     returns exactly `Sees`, so it terminates on cycles and misses no route.
@@ -103,9 +103,9 @@ minus the ones a more derived function with the same parameters overrides.
     file-level `Env.lookup` finds in a unit is in the resolver's answer, at
     its own identity (the resolver is conservative over S01).
     `globals_lookup`: in a unit without imports the two are equal.
-- **The program check.** `Program.unitsOK` checks distinct names, every
-  import, every imported symbol (`Program.symFound`), and no clash over every unit and every declared or aliased name
-  (`Program.allNames`; `Sees.name_mem` shows no other name is in a scope).
+- **The program check.** `UnitSet.unitsOK` checks distinct names, every
+  import, every imported symbol (`UnitSet.symFound`), and no clash over every unit and every declared or aliased name
+  (`UnitSet.allNames`; `Sees.name_mem` shows no other name is in a scope).
   `unitsOK_iff`: it decides `UnitsOK` exactly (sound and complete).
 - **Overloads** (`Frontend/Static/Overloads.lean`). `Env.inheritedFns E c x`
   walks the linearization most derived first and keeps each visible
@@ -116,10 +116,10 @@ minus the ones a more derived function with the same parameters overrides.
   of a call: the candidates whose parameters accept the argument types,
   resolved only when exactly one does (`selectOverload_unique`), the filter
   S01's `Typed.callInternal` applies to its own candidates.
-- **G05.** `unitsChecker : Checker (Program × List Remapping) Unit …` is a
+- **G05.** `unitsChecker : Checker (UnitSet × List Remapping) Unit …` is a
   value of G05's generic `Checker` structure for `UnitsOK`, complete
   (`unitsChecker_complete`). It is not wired into a `FrontendSpec`/`Chain`:
-  no `FrontendSpec` instance exists yet (G15). `Program.libraries` gives the
+  no `FrontendSpec` instance exists yet (G15). `UnitSet.libraries` gives the
   `(unit name, library name)` pairs G05's `LinksResolved` reads.
 
 ### Controls (`Frontend/Static/UnitsExamples.lean`, all by `decide`)
@@ -170,7 +170,7 @@ minus the ones a more derived function with the same parameters overrides.
   (its getter) and a non-function member do not hide base functions in
   `InheritedFn`; overrides are checked by G14.
 - **Namespaces.** `Sees` binds `N` to a unit; resolving `N.x` is
-  `Program.globals` at that unit, but no rule of S01's typing reads it yet.
+  `UnitSet.globals` at that unit, but no rule of S01's typing reads it yet.
 - **Paths.** solc's path sanitizing, base path and include paths are not
   modelled; a remapping without context is the remapping with context `""`.
 - **Identity.** `DeclId` is a position, like S00's `Syn.graph` (Gate G0:
@@ -189,7 +189,7 @@ Fixed:
 
 | Finding | Fix |
 |---|---|
-| `import {Nope} from "x.sol"` accepted, alias cycles accepted (both) | `SymsResolve` in `UnitsOK`, decided by `Program.symFound`; `missingSym_refused`, `aliasCycle_refused` |
+| `import {Nope} from "x.sol"` accepted, alias cycles accepted (both) | `SymsResolve` in `UnitsOK`, decided by `UnitSet.symFound`; `missingSym_refused`, `aliasCycle_refused` |
 | a free function and an event of one name accepted (both) | `ScopeOK` requires the same kind; `fnEvent_refused` |
 | agreement with S01 shown only without imports (skeptic) | `lookup_sub_globals` for any imports; the doc states what is and is not related to S01 |
 | `lookup_sub_inheritedFns` did not mention `Env.lookup` (both) | restated as `d ∈ E.lookup (some c) x → … → d ∈ E.inheritedFns c x` |
@@ -197,7 +197,7 @@ Fixed:
 | `ambiguous_refused` could hold with zero fitting overloads; `exact_selected` did not pin the choice (both) | the filter has length 2; the selected parameters are `[uint16]` |
 | `shadowed_member` used a unit unrelated to `shadow` (finder) | one unit with a file-level and a member `T`, both sides shown |
 | missing controls: namespace import, overloads across units (skeptic) | `namespace_binds`, `freeOverloads_ok`, `freeOverloads_both` |
-| the G05 instance overstated (skeptic); `Program.libraries` docstring said identities | wording: a `Checker` value, not wired into a `Chain`; `libraries` filters file-level libraries |
+| the G05 instance overstated (skeptic); `UnitSet.libraries` docstring said identities | wording: a `Checker` value, not wired into a `Chain`; `libraries` filters file-level libraries |
 
 Recorded, not fixed (under What G12 does not do): solc's depth-first scope
 snapshot in import cycles (finder M2), duplicate namespace aliases (finder
@@ -239,14 +239,14 @@ full `./run-lean.sh` gate runs at the end of the lane.
   `Env.inheritedFns` (`Solidity/Source/Overloads.lean`) instead of
   `Ctx.functions` (first scope only), keeping its `filter … = [d]`.
 - A program-wide environment: `Env` keyed by `DeclId` (or `DeclName` with
-  the unit), built from `Program.globals`, so that `Syn.tys`, `Env.userTy`
+  the unit), built from `UnitSet.globals`, so that `Syn.tys`, `Env.userTy`
   and `Env.linearize` see imported declarations.
 - `Typing.lean`'s `Env.lookupPath` for `N.x` through a namespace import:
-  `Program.globals` at the unit `N` names.
+  `UnitSet.globals` at the unit `N` names.
 
 **For G15**: assemble a `FrontendSpec` whose `Resolves` includes `UnitsOK`
-(checked by `unitsChecker`) and `libraries := Program.libraries`; relate
-`Program.target` to the `absolutePath`s solc records
+(checked by `unitsChecker`) and `libraries := UnitSet.libraries`; relate
+`UnitSet.target` to the `absolutePath`s solc records
 (`Frontend/SourceUnits.lean`, `checkTree`) for imported fixtures.
 
 ## G13: type inference, constants, user-defined value types
@@ -761,7 +761,7 @@ commit): `InheritanceExamples.lean` 8.4 s, `Certificates.lean` 4.0 s.
 
 **For later groups**:
 
-- Several units: linearize over G12's `Program` (identities `DeclId`)
+- Several units: linearize over G12's `UnitSet` (identities `DeclId`)
   instead of one unit's `Env`, so a base imported from another unit is
   checked.
 - Getters: a public state variable should count as an external function
@@ -939,7 +939,7 @@ server). Findings and their disposition:
 - **Finder findings (open).** `selectOverload_unique`
   (`Frontend/Static/Overloads.lean`) never states that the selected
   candidate accepts the arguments, so it is weaker than its description;
-  Static's `Program` (`Source/Units.lean`) and Checked's `Units`
+  Static's `UnitSet` (`Source/Units.lean`) and Checked's `Units`
   (`Frontend/Checked/Certificate.lean`) are distinct types and G05's
   `Chain.resolve` cannot take the parse stage's output without a bridge
   (remappings are missing from `Units`), which is G15's job; the
