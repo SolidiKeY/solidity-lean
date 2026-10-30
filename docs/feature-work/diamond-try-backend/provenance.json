@@ -1,0 +1,171 @@
+{
+  "files": [
+    {
+      "path": "test/Common.h",
+      "sha256": "9161b97ae79069d0c89321a9ed0894367c14190589af0064e043015615fd492b",
+      "copy": "snapshot-test__Common.h",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/Common.cpp",
+      "sha256": "f921ca3d5fdf5c6c855e09df5690811252065938bcc4c1ca72a3b840c112ce14",
+      "copy": "snapshot-test__Common.cpp",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/CMakeLists.txt",
+      "sha256": "344bb0ac0f02b43d9c1b595649fe06a18c57698d854b7dbbe43b89f91c00fb68",
+      "copy": "snapshot-test__CMakeLists.txt",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/EVMHost.cpp",
+      "sha256": "a5f9c40b2a268f21be3e6c82aee68f2df79c4a161a041c4b62afa4f123375982",
+      "copy": "snapshot-test__EVMHost.cpp",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/EVMHost.h",
+      "sha256": "114a118d2a7cfcd4f200ef39098d1b468cbcf6599be9619b8ba0bf3c3d282a64",
+      "copy": "snapshot-test__EVMHost.h",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/ExecutionFramework.h",
+      "sha256": "cbd2acb8607ecfdfc9ff728f61b221f5cec8976956cc4e1518996e94f12c7a8e",
+      "copy": "snapshot-test__ExecutionFramework.h",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/evmc/README.md",
+      "sha256": "f20ceadd0e307a3b26812c2904d30e98a8b241db0738105b025832302379411b",
+      "copy": "snapshot-test__evmc__README.md",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/evmc/CMakeLists.txt",
+      "sha256": "c2c46f50ff545d3a604904b45b3eac9b5068ab480ef96d88aad3ce160d9a87b5",
+      "copy": "snapshot-test__evmc__CMakeLists.txt",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/evmc/evmc.h",
+      "sha256": "16d6440c6114c0b2699884fa23778405be1b98044ee3d6b65b2f9eee5db2c39f",
+      "copy": "snapshot-test__evmc__evmc.h",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/evmc/evmc.hpp",
+      "sha256": "08d3703480f4cae128e8b90d578072548e19126c892a0fdb9fb44521c752dc65",
+      "copy": "snapshot-test__evmc__evmc.hpp",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/evmc/loader.h",
+      "sha256": "75545a401e82cbcc991bacfa260f431baf4e00ac4a2b1022fdf1e07f4e02eb46",
+      "copy": "snapshot-test__evmc__loader.h",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/evmc/loader.c",
+      "sha256": "381afe9fe0cb317d36bd4468f7930453fcd2c3aa2b91d636f855d84851f5bc8f",
+      "copy": "snapshot-test__evmc__loader.c",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/evmc/helpers.h",
+      "sha256": "850f887cedce39aa75d6858e7089dbff14afb423d4f5891407f8c1e01f22dae7",
+      "copy": "snapshot-test__evmc__helpers.h",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "test/evmc/mocked_host.hpp",
+      "sha256": "1cba95db2e5593376a32babaa731ef523e7f498da250104ee4fa45e0b5a44584",
+      "copy": "snapshot-test__evmc__mocked_host.hpp",
+      "publishedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "scripts/evm-reference/replay.mjs",
+      "sha256": "26fc8345c3ec9e3eb26640281ecc29c446f6208419fece2e452f53f5df469ff0",
+      "copy": "local-scripts__evm-reference__replay.mjs",
+      "localCommit": "4b9a40542b9637be9f459ab5672014185d17b11f"
+    },
+    {
+      "path": "scripts/test-solidity.mjs",
+      "sha256": "cb0601356ad025f9e0f237c3822317bbf1d75598e852c2155167fd32e088783c",
+      "copy": "local-scripts__test-solidity.mjs",
+      "localCommit": "4b9a40542b9637be9f459ab5672014185d17b11f"
+    },
+    {
+      "path": "scripts/tool-job.mjs",
+      "sha256": "4c4f8ff65e833714e02736eda17ce0963aec445df142eb7410f4a30145a7bf79",
+      "copy": "local-scripts__tool-job.mjs",
+      "localCommit": "4b9a40542b9637be9f459ab5672014185d17b11f"
+    },
+    {
+      "path": "scripts/solidity-upstream.mjs",
+      "sha256": "0fa58b93ab478457b8be12ce2aa121c052ba06b1c4116c53c5dae41c3daca4ce",
+      "copy": "local-scripts__solidity-upstream.mjs",
+      "localCommit": "4b9a40542b9637be9f459ab5672014185d17b11f"
+    },
+    {
+      "path": "scripts/evm-reference/package.json",
+      "sha256": "d105ac0296bdb1702134577f341d390f017a6fb0e3c905d7b5045de31f3b863e",
+      "copy": "local-scripts__evm-reference__package.json",
+      "localCommit": "4b9a40542b9637be9f459ab5672014185d17b11f"
+    },
+    {
+      "path": "scripts/evm-reference/package-lock.json",
+      "sha256": "fd223698b68dd5cf9dc1b59589c61da6c0131c3f68af65f7c26a3d5ac0498829",
+      "copy": "local-scripts__evm-reference__package-lock.json",
+      "localCommit": "4b9a40542b9637be9f459ab5672014185d17b11f"
+    },
+    {
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/package.json",
+      "sha256": "8a3c432434a6250963e416156e0387f016db477d95660114c9d595e3602b3b66",
+      "copy": "engine-package.json",
+      "packageVersion": "10.1.3"
+    },
+    {
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/interpreter.js",
+      "sha256": "27106c4194446a01eb6207a2c5158e13eb242fc6cbb7e180d4b937cd87ba6499",
+      "copy": "engine-dist__esm__interpreter.js",
+      "packageVersion": "10.1.3"
+    },
+    {
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/evm.js",
+      "sha256": "e978f659e72aeb8ee22ebc4559bafb37e4760b0557512224f734b5b46da22f46",
+      "copy": "engine-dist__esm__evm.js",
+      "packageVersion": "10.1.3"
+    },
+    {
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/evm.d.ts",
+      "sha256": "9c939246516091b9bbb07e3aac70c5e139d579765f263f4d6801e532136ada64",
+      "copy": "engine-dist__esm__evm.d.ts",
+      "packageVersion": "10.1.3"
+    },
+    {
+      "path": "scripts/evm-reference/replay.mjs",
+      "sha256": "54f60f857c89d3ff78a30ba61c60399c4214ac21c113ce1713254b5f130fe384",
+      "copy": "published-scripts__evm-reference__replay.mjs",
+      "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+      "blob": "b78289fad2aff746a973e2039ffcd78e0da45129"
+    },
+    {
+      "path": "scripts/evm-reference/package.json",
+      "sha256": "d105ac0296bdb1702134577f341d390f017a6fb0e3c905d7b5045de31f3b863e",
+      "copy": "published-scripts__evm-reference__package.json",
+      "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+      "blob": "9a82f23cd017e2284a03b863733efa1bd74da22e"
+    },
+    {
+      "path": "scripts/tool-job.mjs",
+      "sha256": "4c4f8ff65e833714e02736eda17ce0963aec445df142eb7410f4a30145a7bf79",
+      "copy": "published-scripts__tool-job.mjs",
+      "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+      "blob": "b4cbb7b75cd41c9fc01ae2bb5336beac7482a8ca"
+    }
+  ],
+  "allSnapshotFilesVerified": true,
+  "noFetchInstallBuildLoadOrEngineExecution": true
+}

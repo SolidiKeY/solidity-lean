@@ -1,0 +1,162 @@
+{
+  "method": "targeted metadata only; no binary executed/loaded, no environment dump, no claim of global absence",
+  "roots": [
+    {
+      "path": "/workspace/.setup/tools",
+      "exists": true,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search",
+      "entriesCount": 2,
+      "candidateNames": [],
+      "nonsecretImmediateNames": [
+        "lean-4.24.0-linux",
+        "lean-4.24.0-linux.tar.zst"
+      ]
+    },
+    {
+      "path": "/workspace/.setup/cache",
+      "exists": true,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search",
+      "entriesCount": 2,
+      "candidateNames": [],
+      "nonsecretImmediateNames": [
+        "lake",
+        "mathlib"
+      ]
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/build/bin",
+      "exists": true,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search",
+      "entriesCount": 6,
+      "candidateNames": [],
+      "nonsecretImmediateNames": [
+        "solidity-lean",
+        "solidity-lean.hash",
+        "solidity-lean.trace",
+        "solkeycheck",
+        "solkeycheck.hash",
+        "solkeycheck.trace"
+      ]
+    },
+    {
+      "path": "/workspace/solidity-lean/build",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/deps",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.deps",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.gitmodules",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/upstream/solidity/.gitmodules",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/upstream/solidity/CMakeLists.txt",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/upstream/solidity/cmake",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/upstream/solidity/deps",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/upstream/solidity/evmone",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/upstream/solidity/libsolidity",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/upstream/solidity/libevmasm",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/usr/local/lib",
+      "exists": true,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search",
+      "entriesCount": 0,
+      "candidateNames": []
+    },
+    {
+      "path": "/usr/local/bin",
+      "exists": true,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search",
+      "entriesCount": 0,
+      "candidateNames": []
+    },
+    {
+      "path": "/usr/lib/x86_64-linux-gnu",
+      "exists": true,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search",
+      "entriesCount": 142,
+      "candidateNames": []
+    },
+    {
+      "path": "/usr/bin",
+      "exists": true,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search",
+      "entriesCount": 297,
+      "candidateNames": []
+    },
+    {
+      "path": "/opt/evmone",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/opt/solidity",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    },
+    {
+      "path": "/opt/soltest",
+      "exists": false,
+      "symlink": false,
+      "scope": "specified path only; directory immediate entries, no global filesystem search"
+    }
+  ],
+  "candidates": []
+}

@@ -1454,3 +1454,12 @@ a strictly fixture-local observational correspondence or the exact upstream host
 API with a pinned bounded backend. No historical execution, trusted relation,
 runner, model/profile change or source gate pass follows. Original12/8strictEXIT1
 and all earlier proofs/receipts/exports remain retained.
+
+
+### B backend prerequisite after4b9a4054
+
+The [exact-host backend/ABI/instruction-bound investigation](diamond-try-backend/README.md)
+records targeted installation absence, test-only host dependency closure, the
+vendored README12/header13 discrepancy and exact missing shared abortable step
+API. No backend was fetched/built/loaded/executed; A/B remain unapproved choices
+and original12/8strictEXIT1 persists. All previous evidence is preserved.
