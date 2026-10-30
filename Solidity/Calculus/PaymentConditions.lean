@@ -79,12 +79,15 @@ theorem transfer_failure_iff (σ : State C Γ) (r a : Simple C Γ .uint) :
     simp only [Bool.false_eq_true, ↓reduceIte, true_iff]
     by_cases hf : (a.evalT σ).1 ≤ σ.selfBalance.1
     · exact Or.inr fun hr => by
-        have bad := (canPay_iff σ (r.evalT σ) (a.evalT σ)).2 ⟨hf, hr⟩
+        have bad : σ.canPay (r.evalT σ) (a.evalT σ) = true :=
+          (canPay_iff σ (r.evalT σ) (a.evalT σ)).2 ⟨hf, hr⟩
         rw [h] at bad
         cases bad
     · exact Or.inl hf
   | true =>
-    have good := (canPay_iff σ (r.evalT σ) (a.evalT σ)).1 h
+    have good : (a.evalT σ).1 ≤ σ.selfBalance.1 ∧
+        RecipientAccepts σ (r.evalT σ) (a.evalT σ) :=
+      (canPay_iff σ (r.evalT σ) (a.evalT σ)).1 h
     simp only [↓reduceIte, reduceCtorEq, false_iff]
     intro bad
     exact bad.elim (fun hn => hn good.1) (fun hn => hn good.2)

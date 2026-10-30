@@ -36,7 +36,8 @@ theorem insufficient_transfer :
     ¬ Modality.diamond.afterRunTR (fun _ => True)
       (TRun.transfer (.simple recipient) (.simple amount) poor) := by
   intro h
-  have bad := (Solidity.PaymentWitness.transferNoCallbackDiamond poor recipient amount
+  have bad : poor.canPay (recipient.evalT poor) (amount.evalT poor) = true ∧ True :=
+    (Solidity.PaymentWitness.transferNoCallbackDiamond poor recipient amount
     (fun _ => True)).1 h
   have hc : poor.canPay (recipient.evalT poor) (amount.evalT poor) = false := by decide +kernel
   rw [hc] at bad
@@ -47,7 +48,8 @@ theorem reverted_transfer :
     ¬ Modality.diamond.afterRunTR (fun _ => True)
       (TRun.transfer (.simple recipient) (.simple amount) refusing) := by
   intro h
-  have bad := (Solidity.PaymentWitness.transferNoCallbackDiamond refusing recipient amount
+  have bad : refusing.canPay (recipient.evalT refusing) (amount.evalT refusing) = true ∧ True :=
+    (Solidity.PaymentWitness.transferNoCallbackDiamond refusing recipient amount
     (fun _ => True)).1 h
   have hc : refusing.canPay (recipient.evalT refusing) (amount.evalT refusing) = false := by decide +kernel
   rw [hc] at bad

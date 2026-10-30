@@ -49,6 +49,55 @@ review is claimed. Earlier review evidence and failed logs remain intact.
 The coordinator must complete independent reviews and full combined gates.
 This recheck introduces no semantic decision, commit, index write or guard waiver.
 
+### Review repair and evidence boundary (2026-10-30)
+
+The review of `1b561734` identified missing explicit types in the combined
+payment additions. The focused repair annotates the local facts in
+`Calculus/CallbackSound/Payments.lean`, `Calculus/PaymentConditions.lean`,
+`Calculus/PaymentWitness.lean` and the PaymentRules/PaymentWitness tactic
+examples, and gives PaymentSource's `fundingRun` its result type. PaymentClose
+inlines the owner-frame rewrite and types its dynamically inferred integer
+equality. The theorem statements, observations, target predicates, invariants
+and budgets are unchanged. All seven edited files pass complete per-file Lean
+MCP diagnostics, one open document at a time with `-j1`; all 45 printed axiom
+audits contain only the standard axioms. No full combined build was run here.
+The coordinator's combined gates must include `Examples/Tactics/PaymentCorpus.lean`,
+which exercises `sol_payment_close`; checking the edited tactic quotation alone
+does not exercise that caller.
+
+The requested bytecode regression suite passes all seven tests, and pinned
+source AST regeneration with `--check` passes. The source-reference and
+source-world regression commands exit 1: their no-build probes require stale
+artifacts to be rebuilt (`SolSpec`, `FunContract`, `ProveChunked`, `LazyStorage`
+and `Tools.PaymentReplay`). The source-world resume test also requests an
+explicit build, which the repair's local wrapper refuses. These are retained
+failures, not passing regressions; the coordinator owns rebuilding and rerunning
+the combined gates. The compiler download matches the unchanged 0.8.38 SHA256
+pin. Raw diagnostics, failed and passing test output, Lake failure output and
+sampled regression resource records are checksum-bound in
+`tests/upstream/diamond-payments-integration-20261030/manifest.json` and its
+adjacent archive. These records concern this integration checkout only.
+
+The original assignment's evidence finding remains open. Its retrieved
+`retrieval.json` indexes no raw-evidence members (one container maps to an empty
+list); all seven retrieved artifacts
+match their recorded sizes and SHA256 hashes, but they contain no raw original
+source/bytecode fixture reports, complete proof/axiom logs or resource records.
+The referenced `/workspace/diamond-payments*-evidence` directories are not
+available in this worktree. The historical source-branch completion claims
+below therefore remain unverified here. Fresh local checks do not authenticate
+those historical runs. The coordinator must obtain a checksum-bound raw export
+before accepting that finding as resolved. This is an evidence prerequisite,
+not a semantic choice or a gate waiver. No source VM, skill, monitor, external
+index, commit or remote branch is modified by this repair.
+
+Independent read-only finder and skeptic reviews found no remaining repair
+defect or new semantic decision. Both caught an ambiguous count of the original
+retrieval index: its one container key holds zero raw-evidence members. The
+wording and manifest now report both counts explicitly. The skeptic also
+required the PaymentCorpus caller check in the coordinator's combined gates,
+as recorded above. Neither review used the Lean server.
+
 Current scope after the explicit human decision on 2026-10-29: keep existing
 semantics and prove exact conditional success and certified failure conditions.
 For this assignment only, that replaces the unconditional transfer-success

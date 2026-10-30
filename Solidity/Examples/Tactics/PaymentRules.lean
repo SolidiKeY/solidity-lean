@@ -55,7 +55,8 @@ theorem funded_normality :
 theorem poor_normality :
     ¬ holdsC .tt true poor dl!{ ¬ [ (9).transfer(5); ] false } := by
   intro h
-  have accepted := holdsC_transfer_normal_accepted poor (.lit 9 rfl) (.lit 5 rfl) h
+  have accepted : poor.canPay ⟨9, rfl⟩ ⟨5, rfl⟩ = true :=
+    holdsC_transfer_normal_accepted poor (.lit 9 rfl) (.lit 5 rfl) h
   change false = true at accepted
   cases accepted
 
@@ -63,7 +64,8 @@ theorem poor_normality :
 theorem refused_normality :
     ¬ holdsC .tt true refusing dl!{ ¬ [ (9).transfer(5); ] false } := by
   intro h
-  have accepted := holdsC_transfer_normal_accepted refusing (.lit 9 rfl) (.lit 5 rfl) h
+  have accepted : refusing.canPay ⟨9, rfl⟩ ⟨5, rfl⟩ = true :=
+    holdsC_transfer_normal_accepted refusing (.lit 9 rfl) (.lit 5 rfl) h
   change false = true at accepted
   cases accepted
 
@@ -74,7 +76,7 @@ theorem bare_diamond_refused :
   have failed : ExecS ((Fml.tt : Fml StandardExample []).stateInv true) poor
       (.transfer (.simple (.lit 9 rfl)) (.simple (.lit 5 rfl))) (.halt .revert) :=
     .transferHalt rfl rfl
-  have bad := (h poor _ (.halt failed)).1
+  have bad : Modality.diamond.onTHalt .revert := (h poor _ (.halt failed)).1
   cases bad
 
 /-- A failed preceding diamond update cannot be discarded by a guarded formula rule. -/
@@ -82,7 +84,10 @@ theorem failed_diamond_prefix :
     ¬ ValidC Invariant.top dl![.diamond]{ { selfBalance := selfBalance - 1 }
       ((¬ [ (9).transfer(5); ] false) → ⟨ (9).transfer(5); ⟩ true) } := by
   intro h
-  have bad := h (State.ofStorage Storage.standardExample)
+  have bad : holdsC .tt true (State.ofStorage Storage.standardExample)
+      dl![.diamond]{ { selfBalance := selfBalance - 1 }
+        ((¬ [ (9).transfer(5); ] false) → ⟨ (9).transfer(5); ⟩ true) } :=
+    h (State.ofStorage Storage.standardExample)
   change False ∨ false = true at bad
   rcases bad with bad | bad
   · exact bad

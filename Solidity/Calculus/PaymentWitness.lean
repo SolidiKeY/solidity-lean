@@ -107,7 +107,8 @@ theorem transferWithCallbackDiamond_iff (J : StateInv C) (hp : J.pay = true)
     have accepted : σ.canPay (r.evalT σ) (a.evalT σ) = true := by
       cases hc : σ.canPay (r.evalT σ) (a.evalT σ) with
       | false =>
-        have bad := (h _ (transfer_refused J hp σ r a hc)).1
+        have bad : Modality.diamond.onTHalt .revert :=
+          (h _ (transfer_refused J hp σ r a hc)).1
         cases bad
       | true => rfl
     have run : TRun.transfer (.simple r) (.simple a) σ =

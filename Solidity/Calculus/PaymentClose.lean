@@ -65,8 +65,7 @@ private def paymentSettle (gs : List MVarId) (hs : List FVarId) (bounds : Bounds
         | (intros; apply paymentResumeNet (by assumption) (by assumption); assumption)
         | (
           intros
-          have owner_same := paymentOwnerFrame (by assumption) rfl
-          rw [owner_same]
+          rw [paymentOwnerFrame (by assumption) rfl]
           apply paymentDebitZero
           · assumption
           · apply_assumption
@@ -154,7 +153,7 @@ private def paymentCloseSteps : TacticM Unit := do
   evalTactic (← `(tactic| all_goals first
     | omega
     | (apply paymentResumeBalance (by assumption) (by assumption); assumption)
-    | (have broken := paymentStateValue (by assumption); omega)))
+    | (have broken : Eq Int _ 2 := paymentStateValue (by assumption); omega)))
   unless (← getGoals).isEmpty do throwError "sol_close_join_steps: goals left"
 
 /-- Explicit payment-leaf closing, within the existing incremental-closer budget. -/

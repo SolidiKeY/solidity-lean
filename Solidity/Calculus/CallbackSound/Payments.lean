@@ -54,7 +54,8 @@ theorem holdsC_transferCbDiamond {Γ₁ Γ₀ : Ctx} {σ : State C Γ}
     (resume : holdsC I pay σ (.upd .diamond (Upd.nil.snoc (UpdElem.payTo r a))
       (.havoc (.imp (Fml.closedAt I) (Fml.modalK .diamond ω κ φ))))) :
     holdsC I pay σ (.modal .diamond (.cons (.transfer (.simple r) (.simple a)) ω) κ φ) := by
-  have accepted := holdsC_transfer_normal_accepted σ r a normal
+  have accepted : σ.canPay (r.evalT σ) (a.evalT σ) = true :=
+    holdsC_transfer_normal_accepted σ r a normal
   have run : TRun.transfer (.simple r) (.simple a) σ =
       .ok ⟨σ.pay (r.evalT σ) (a.evalT σ).1, List.prefix_refl _⟩ := by
     rw [PaymentWitness.transfer_run, accepted]
@@ -64,8 +65,12 @@ theorem holdsC_transferCbDiamond {Γ₁ Γ₀ : Ctx} {σ : State C Γ}
   | det _ =>
     change COut.thenF _ _ _ _ (COut.ofRes (TRun.transfer _ _ σ))
     rw [run]
-    have landed := (Upd.lands_of_applyP (transfer_booking r a run)).choose_spec
-    have hj := (holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands exit landed)
+    have landed : (Upd.nil.snoc (UpdElem.payTo r a)).Lands σ
+        (Upd.lands_of_applyP (transfer_booking r a run)).choose
+        (σ.pay (r.evalT σ) (a.evalT σ).1) :=
+      (Upd.lands_of_applyP (transfer_booking r a run)).choose_spec
+    have hj : (I.stateInv pay).at (σ.pay (r.evalT σ) (a.evalT σ).1) :=
+      (holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands exit landed)
     exact COut.after_seq (holdsC_modalK _ ω κ φ
       (Upd.afterT.of_lands resume landed _ _ _ ((holdsC_closedAt_iff hI hT _).2 hj)))
   | transferHalt _ h => rw [run] at h; cases h
@@ -87,7 +92,8 @@ theorem holdsC_transferDetDiamond {Γ₁ Γ₀ : Ctx} {σ : State C Γ}
     (rest : holdsC I pay σ (.upd .diamond (Upd.nil.snoc (UpdElem.payTo r a))
       (Fml.modalK .diamond ω κ φ))) :
     holdsC I pay σ (.modal .diamond (.cons (.transfer (.simple r) (.simple a)) ω) κ φ) := by
-  have accepted := holdsC_transfer_normal_accepted σ r a normal
+  have accepted : σ.canPay (r.evalT σ) (a.evalT σ) = true :=
+    holdsC_transfer_normal_accepted σ r a normal
   have run : TRun.transfer (.simple r) (.simple a) σ =
       .ok ⟨σ.pay (r.evalT σ) (a.evalT σ).1, List.prefix_refl _⟩ := by
     rw [PaymentWitness.transfer_run, accepted]

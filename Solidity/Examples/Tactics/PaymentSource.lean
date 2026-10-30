@@ -53,7 +53,8 @@ private def childRef : Handle Transfer.Code.recipient := ⟨child⟩
 /-- The actual deployment supplies exactly these references. -/
 private theorem initialize_run : initialized = .ok (initWorld, (selfRef, some childRef)) := by rfl
 
-private def fundingRun := initWorld.call selfRef Transfer.ownerReceiveEntry
+private def fundingRun : TRes (World Transfer.contracts × Unit) :=
+  initWorld.call selfRef Transfer.ownerReceiveEntry
   {sender := alice, mode := .ordinary ((⟨10, by decide +kernel⟩ : Word))}
 private def fundedWorld : World Transfer.contracts :=
   match fundingRun with | .ok (w, _) => w | .error _ => initWorld
