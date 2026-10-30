@@ -213,7 +213,8 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `exprNSAt` (`ExprNSAt`: `val`, `pair`, `ref`, `loc`; `val_step`, `pair_step`, `ref_step`, `loc_step`) | the induction on the horizon: expressions, operand pairs, mapping references (`RExpr.MapRef`, with the postcondition `RPost`: a storage reference names a path of its type) and lvalues (`RLVal.IsSimple`, with the postcondition `LocOK`: a local, or a storage cell of value type at its own type with a default) |
 | `readAt_ns`, `writeAt_ns`, `Storage.read_isSome`, `keyStep_nsp`, `Val.word_isSome`, `cellTy_key`, `pathTy_key`, `Env.pathTy_go`, `storRef_map_nsp` | storage: a cell of value type at its layout type with a default always reads; a write at the layout type succeeds (or reverts in a static frame); a keyable key is a key step; a mapping value's path has the mapping's value type |
 | `convRV_ns`, `getV_ns`, `readLoc_ok`, `writeLoc_ok`, `compound_dom` | its other steps |
-| `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_step`, `execItems_step`, `forIter_step`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`) is never `stuck`, at any horizon, in any modifier context |
+| `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_step`, `execItems_step`, `forIter_step`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;` and `return e;` of a value type) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
+| `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
 
@@ -223,9 +224,10 @@ evaluates to `3`), `cb_ns`/`cb_value` (S05's `x = x + 1;` on a storage
 variable is never `stuck` and takes `x` from 3 to 4), `loop_ns`/`loop_value` (`uint8 i; while (i < 3) { i += 1; }`
 is never `stuck` and ends with `i = 3`); negative controls
 `badBinary_stuck` (a hand-resolved `true + false` evaluates to `stuck`:
-`OpsOK` is needed) and `ret_unframed_stuck` (`return 1;` outside a frame
-with a return slot is `stuck`: frame coherence, outside the fragment, is
-needed).
+`OpsOK` is needed) and `ret_unframed_stuck`/`ret_unframed_no_frame`
+(`return 1;` over locals without a return slot is `stuck`, and those
+locals are no `BodyFrame`: the frame hypothesis is needed; with the slot,
+`ret_framed_ns`).
 
 The storage side conditions (`E.cellTy d.path = τ`, `E.pathTy d.path =
 some τ`, a default for the value type) are checked per expression in the
@@ -234,9 +236,9 @@ needs the lemma that a resolved state variable is the declaration
 `Env.declOf` finds at its path (the census's `stor` class).
 
 **What the fragment leaves out**, in the order a whole-program proof needs
-it: `return` (frame coherence of `callInternal`/`runMods`: the locals end
-in the return slots, then the parameters; and `break`/`continue` never
-leave a body), memory (the `heap` invariant, `WellTyped.lean`), arrays and
+it: `return (a, b)` (`setRets`), the function level (`runMods`: a body's
+`break`/`continue` never leave it; `callInternal`: virtual dispatch finds
+a body whose locals are the frame `BodyFrame` describes), memory (the `heap` invariant, `WellTyped.lean`), arrays and
 structs in storage, internal calls and modifiers (dispatch coherence),
 external calls, `emit`, builtins, and the transaction layer (dispatch,
 ABI). Each is listed with its sites in the census below.

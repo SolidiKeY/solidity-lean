@@ -476,6 +476,12 @@ import Solidity.Source.Elaborate
 import Solidity.Source.ElaborateExamples
 import Solidity.Source.Session
 import Solidity.Source.SessionExamples
+import Solidity.Source.Hoare
+import Solidity.Source.WellTyped
+import Solidity.Source.ValueProgress
+import Solidity.Source.ExprProgress
+import Solidity.Source.StmtProgress
+import Solidity.Source.SoundnessExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic
