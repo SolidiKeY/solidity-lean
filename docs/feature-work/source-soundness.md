@@ -706,6 +706,14 @@ Kept current at every checkpoint.
 | 4 Close gaps | partial | UDVT argument decoding (`elabW`); Panic `0x41` in the decoder (`elabB`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
 
+Final state (2026-10-30, stopped early at the user's request): last
+green head `8492d26` (build48). Open next steps for checkpoint 2, in
+order: the remaining allocation sites (ABI decoder, `structNew`,
+literals, `abi.encode*`) and frame restores keeping `MemOK`; a witness
+for `storeVal`'s `storRef` arm; preservation of `EMOK`/`MemOK` for
+`evalE`/`execS` on the value fragment (a `Hoare` version of the
+`FragAt` induction).
+
 **Not done** (also under `limitations:`):
 
 - the whole-program progress theorem (every `stuck` of a well-typed
