@@ -333,7 +333,17 @@ reads the heap and allocates only through `loadMem`) keep it at every
 fuel; so every location write of an agreeing value
 (`writeLoc_memOK`) and every `delete` (`deleteLoc_memOK`) keeps `MemOK`,
 halts included; witness `roundTrip_value` (memory `[7, 9]` copied into
-storage and back). Not yet done:
+storage with `storeVal`'s `memRef` arm and back; the `storRef` arm, a
+storage-to-storage copy, has no witness: the example contract has one
+array). `writeLoc_memOK` asks `v.RefOK` for every location;
+`writeLoc_stor_mem` covers storage without it.
+
+**Review of the storage writes** (finder and skeptic, read-only, no
+blocker): the `storRef` arm keeps `MemOK` although `loadMem` allocates
+(`MemOK` asks only `H ≤ heap.ty`); fixed: the V04 row and the "Not done"
+list were stale ("non-storage `delete`"), the module docstring named
+`deleteOK` as a write, the pins are recorded after build47 (`d8af469`,
+passed). Not yet done:
 proving the same for the other allocation sites (the ABI decoder,
 `structNew`, literals, the `abi.encode*` result); carrying `HeapShaped` and `HeapInner` (`MemOK`) through frame restores (`Eval.lean` and
 `Semantics.lean` reset the heap or restore a saved one, as for
@@ -710,11 +720,12 @@ Kept current at every checkpoint.
   (dispatch, ABI decoding, deployment, callbacks);
 - preservation for every interpreter step: proved for the memory
   operations, location reads and writes, the memory invariant `MemOK`
-  (well typed, shaped, bare-value elements) under writes, non-storage
-  `delete`, the zeroing allocator and the storage copier, with progress
-  for memory accesses under `MemOK`, and storage writes; not for the other
-  allocation sites (ABI decoder, `structNew`, literals, `abi.encode*`),
-  frame restores, or `evalE`/`execS` as a whole. For the value fragment preservation of `EMOK` is
+  (well typed, shaped, bare-value elements) under every location write
+  and every `delete`, zeroing, copies from storage and into storage
+  (preservation only for storage), with progress for memory accesses
+  under `MemOK`; not for the other allocation sites (ABI decoder,
+  `structNew`, literals, `abi.encode*`), frame restores, or
+  `evalE`/`execS` as a whole. For the value fragment preservation of `EMOK` is
   expected (locals receive only value types, the heap is untouched, the
   storage references `MapRef` builds are covered by the progress
   postcondition `RPost`), but no theorem states it;

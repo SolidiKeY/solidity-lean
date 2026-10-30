@@ -47,8 +47,8 @@ element or member read (`memElem_ok`, `readLoc_mem_ok`). The zeroing
 allocator and the storage copier keep all three (`MemOK`, `zeroOK`,
 `loadOK`), as do local and memory
 writes of agreeing values and `delete` of a local or memory location
-(`deleteLoc_mem`); so do storage writes and copies into storage
-(`storeOK`, `deleteOK`): every location write of an agreeing value and
+(`deleteLoc_mem`); so do storage writes, deletions and copies into
+storage (`writeAt_mem`, `deleteOK`, `storeOK`): every location write of an agreeing value and
 every `delete` keeps `MemOK` (`writeLoc_memOK`, `deleteLoc_memOK`).
 -/
 
@@ -1627,7 +1627,7 @@ theorem deleteLoc_stor_mem {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (p : SPath
 
 /-- **Every location write keeps `MemOK`**, halts included, for an
 agreeing value: locals, memory elements and members, memory bytes and
-storage. -/
+storage (`writeLoc_stor_mem` covers storage without `v.RefOK`). -/
 theorem writeLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ) (v : Val E.layout τ) :
     Hoare (fun y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (writeLoc F n loc v : EM E Γ Unit)
       (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
