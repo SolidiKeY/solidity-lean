@@ -247,8 +247,9 @@ added after marker `7b94a9b`): `writeLoc_local_pres`, `writeLoc_mem_pres`
 reads `readLoc_local_pres`, `readLoc_mem_pres` (`memElem_pres`, through
 `DataListOK.nth` and `asVal_ok`: the value read agrees),
 `readLoc_memByte_pres`; the generic `heapObj_pres` and `heapPut_pres`.
-A written value must agree (`v.RefOK`). Storage locations (`storeVal`,
-`writeAt`, `readAt`) are not covered.
+A written value must agree (`v.RefOK`). Storage locations are covered
+for the memory invariant `MemOK` below (`writeLoc_memOK`,
+`deleteLoc_memOK`, `readAt_keep`).
 
 **Finding: progress for memory accesses needs object shapes.** `HeapOK`
 says where references point, but not that a top-level object of a memory
@@ -276,8 +277,8 @@ stores `Data.val` elements (`zeroElems`, `zeroFields`, `loadElems`,
 condition is also a proof gap only.
 Progress proofs must use `heapPut_ok`, which keeps the halt detail
 `heapPut_pres` drops. `delete` of a local or memory location keeps
-`MemOK` (`deleteLoc_mem`, below); storage `delete` and locals holding
-calldata references are not covered (`Val.RefOK` of a `cdRef` is
+`MemOK` (`deleteLoc_mem`, below); locals holding calldata references are
+not covered (`Val.RefOK` of a `cdRef` is
 `False`; the semantics creates none).
 
 **The shape invariant, first use.** `HeapShaped h` (`Data.Top`: a
@@ -305,7 +306,7 @@ local and memory writes of agreeing values keep `MemOK` (`writeLoc_local_mem`,
 `writeLoc_memByte_top`, `heapPut_top` and the conjunction rule
 `Hoare.and`), so `delete` of a local or memory location keeps `MemOK`,
 halts included (`deleteLoc_mem`; witness `arrHeap_delete`: `true`
-reset to `false`). Storage writes are not covered.
+reset to `false`). Storage writes: below.
 
 **Review of `loadOK`** (finder and skeptic, read-only, no blocker): the
 witness was missing (added: `copyArr_value`); the docstring overstated
@@ -324,7 +325,15 @@ copier is proved the same way: `loadOK` (structure `LoadOK` over
 nothing, `readAt_keep`, `readLen_keep`, `loadBytes_keep`; `allocRef_mem'`
 covers an allocation whose reference is then refused); witness
 `copyArr_value` (the storage `[7, 9]` copied to a new memory array of
-bare values `7`, `9`). Not yet done:
+bare values `7`, `9`). Storage writes keep `MemOK` too: journaled
+operations change only `ex` (`applyOp_mem`, `setCell_mem`,
+`writeAt_mem`, `writeLen_mem`), storage deletion (`deleteOK`, structure
+`DeleteOK`) and copies into storage (`storeOK`, structure `StoreOK`: it
+reads the heap and allocates only through `loadMem`) keep it at every
+fuel; so every location write of an agreeing value
+(`writeLoc_memOK`) and every `delete` (`deleteLoc_memOK`) keeps `MemOK`,
+halts included; witness `roundTrip_value` (memory `[7, 9]` copied into
+storage and back). Not yet done:
 proving the same for the other allocation sites (the ABI decoder,
 `structNew`, literals, the `abi.encode*` result); carrying `HeapShaped` and `HeapInner` (`MemOK`) through frame restores (`Eval.lean` and
 `Semantics.lean` reset the heap or restore a saved one, as for
@@ -682,7 +691,7 @@ Kept current at every checkpoint.
 | Checkpoint | Status | Theorems |
 |---|---|---|
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
-| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element and member reads (`memElem_ok`, `readLoc_mem_ok`); memory writes keep `HeapInner` (`memSet_inner`, `writeLoc_memByte_inner`); `heapPut_inner`; the zeroing allocator and the storage copier keep `MemOK` (`zeroOK`, `loadOK`, with `allocRef_mem` and `Hoare.memGrow`); writes and non-storage `delete` keep `MemOK` (`writeLoc_*_mem`, `deleteLoc_mem`); no preservation theorem for the walk |
+| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element and member reads (`memElem_ok`, `readLoc_mem_ok`); memory writes keep `HeapInner` (`memSet_inner`, `writeLoc_memByte_inner`); `heapPut_inner`; the zeroing allocator and the storage copier keep `MemOK` (`zeroOK`, `loadOK`, with `allocRef_mem` and `Hoare.memGrow`); every location write and every `delete` keep `MemOK` (`writeLoc_memOK`, `deleteLoc_memOK`, with `storeOK`, `deleteOK`); no preservation theorem for the walk |
 | 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types and unit membership, `hdec` (`Elaborated.callInternal_call_ns`); internal calls inside expressions under `CallsOK` (`evalE_callFrag_ns`, joint induction `fragAt`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
 | 4 Close gaps | partial | UDVT argument decoding (`elabW`); Panic `0x41` in the decoder (`elabB`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
@@ -703,7 +712,7 @@ Kept current at every checkpoint.
   operations, location reads and writes, the memory invariant `MemOK`
   (well typed, shaped, bare-value elements) under writes, non-storage
   `delete`, the zeroing allocator and the storage copier, with progress
-  for memory accesses under `MemOK`; not for storage writes, the other
+  for memory accesses under `MemOK`, and storage writes; not for the other
   allocation sites (ABI decoder, `structNew`, literals, `abi.encode*`),
   frame restores, or `evalE`/`execS` as a whole. For the value fragment preservation of `EMOK` is
   expected (locals receive only value types, the heap is untouched, the
