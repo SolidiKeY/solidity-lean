@@ -2478,6 +2478,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.callInternal_callFrag_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.callInternal_ns": [
   "Classical.choice",
   "Quot.sound",
@@ -2543,12 +2548,27 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.evalConvArgs_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.evalE_callFrag_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.evalE_valFrag_ns": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.exprNSAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.fragAt": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -2623,6 +2643,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.setRets_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.shiftVal_ok": [
   "Classical.choice",
   "Quot.sound",
@@ -2649,6 +2674,21 @@
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.callBadFrame_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.callF_badFrame_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.callF_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.callF_value": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -2717,6 +2757,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.retLocalPair_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.retPair_ns": [
   "Classical.choice",
   "Quot.sound",
@@ -2728,6 +2773,11 @@
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.stringByte_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.stmt_callFrag_ns": [
   "Classical.choice",
   "Quot.sound",
   "propext"
