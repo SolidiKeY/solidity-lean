@@ -1405,3 +1405,17 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} typing-decision controls use only the standard axioms"
+
+/-! Lane V04b: elaborated witnesses of the value fragment. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.indexMapping_ns,
+    ``Solidity.Source.SoundnessExamples.incBody_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} elaborated fragment witnesses use only the standard axioms"

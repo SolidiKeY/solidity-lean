@@ -282,7 +282,9 @@ is never `stuck` and ends with `i = 3`); negative controls
 `OpsOK` is needed) and `ret_unframed_stuck`/`ret_unframed_no_frame`
 (`return 1;` over locals without a return slot is `stuck`, and those
 locals are no `BodyFrame`: the frame hypothesis is needed; with the slot,
-`ret_framed_ns`).
+`ret_framed_ns`). Elaborated witnesses: `incBody_ns` (the counter's typed
+body `count++;`, through `ItemsD.toR_ns`) and `indexMapping_ns` (S01's
+`m[o]`, a mapping value read).
 
 The storage side conditions (`E.cellTy d.path = τ`, `E.pathTy d.path =
 some τ`, a default for the value type) are checked per expression in the
@@ -410,12 +412,13 @@ Kept current at every checkpoint.
   expected (locals receive only value types, the heap is untouched, the
   storage references `MapRef` builds are covered by the progress
   postcondition `RPost`), but no theorem states it;
-- vacuity on elaborated programs: no elaborated contract body is shown to
-  be in `RStmt.ValFrag`; the statement and storage witnesses (`loopItems`,
-  `cbItems`, `condE`) are hand-built resolved terms, the only elaborated
-  witness is the expression `addSub_ns`, and no control reaches a mapping
-  (`MapRef`); nothing proves that function-entry locals satisfy
-  `BodyFrame`;
+- vacuity on elaborated programs: two elaborated witnesses exist
+  (`incBody_ns`: the counter's typed body `count++;`; `indexMapping_ns`:
+  S01's `m[o]`, through `MapRef`), besides `addSub_ns`; the loop, storage
+  and return witnesses (`loopItems`, `cbItems`, `condE`) are hand-built
+  resolved terms. Which elaborated bodies are in the fragment is not
+  characterised, and nothing proves that function-entry locals satisfy
+  `BodyFrame` (the walk does not reach `callInternal`);
 - the storage side conditions of the fragment (`E.cellTy d.path = τ`,
   `E.pathTy d.path = some τ`) are checked per expression, not derived
   from the elaboration;

@@ -28,6 +28,8 @@ it the operation is `stuck`).
 | `cb_ns`, `cb_value` | `x = x + 1;` on a storage variable (S05's callback body) is never `stuck`, and takes `x` from 3 to 4 |
 | `ret_unframed_stuck`, `ret_unframed_no_frame` | a `return 1;` run outside a coherent frame (no return slot) is `stuck`, and those locals are not a `BodyFrame`: the frame hypothesis is needed |
 | `ret_framed_ns` | the same `return 1;` with a return slot is never `stuck` |
+| `indexMapping_ns` | the elaboration of S01's `m[o]` (a mapping value, read through an implicit key conversion) is in the value fragment and never `stuck` |
+| `incBody_ns` | the elaboration of the counter's typed body `count++;` (`TypingExamples.incBody`, an `ItemsD` derivation) is in the statement fragment and never `stuck` in its frame (`ItemsD.toR_ns`) |
 -/
 
 namespace Solidity.Source.SoundnessExamples
@@ -205,6 +207,24 @@ theorem ret_framed_ns (n : Nat) (l : Locals SemanticsExamples.E0.layout [.int In
         rfl (.const (Q.ofInt 1)) (by decide)) l) :=
   stmtNS _ _ n 0 none _ l ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩ trivial ⟨[], [], rfl, rfl⟩
 
+/-! ## Elaborated witnesses: a statement and a mapping -/
+
+open TypingExamples in
+/-- **Witness**: the elaboration of S01's `m[o]` (a mapping value, read)
+is in the value fragment, so its evaluation is never `stuck`. -/
+theorem indexMapping_ns (G : Glob Γ.env) (F : Fr) (n : Nat) : NS (evalE G F n w_index_mapping.toR) :=
+  evalE_valFrag_ns G F n _ (by
+    exact ⟨⟨rfl, rfl, _, _, rfl⟩, ⟨rfl, rfl, .inl rfl⟩, rfl, rfl, rfl⟩) (Typed.toR_opsOK _)
+
+open TypingExamples in
+/-- **Witness**: the elaboration of the counter's body `count++;` (an
+elaborated typing derivation, `incBody`) is in the statement fragment, so
+running it in its function's frame is never `stuck` (`ItemsD.toR_ns`). -/
+theorem incBody_ns (G : Glob Examples.counter.env) (F : Fr) (n : Nat) :
+    NS (execItems G F n 0 none incBody.toR .nil) :=
+  ItemsD.toR_ns G F n 0 none incBody .nil (by
+    exact ⟨⟨rfl, rfl, rfl⟩, trivial⟩) ⟨[], [], rfl, rfl⟩
+
 /-! ## The census's semantic bug, fixed -/
 
 /-- `string memory s = "abc"; bytes(s)[0] = 0x78; bytes1 b = bytes(s)[0];` -/
@@ -318,5 +338,9 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ret_framed_ns
 /-- info: 'Solidity.Source.SoundnessExamples.stringByte_write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.stringByte_write
+/-- info: 'Solidity.Source.SoundnessExamples.indexMapping_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.indexMapping_ns
+/-- info: 'Solidity.Source.SoundnessExamples.incBody_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.incBody_ns
 
 end Solidity.Source.SoundnessExamples
