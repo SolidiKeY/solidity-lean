@@ -215,4 +215,121 @@ theorem transact_tryCreate_handler_steps_failure {α β γ : Type}
 #print axioms atomic_tryCreate_handler_steps_failure
 #print axioms transact_tryCreate_handler_steps_failure
 
+/-- Compose the actual caller-typed library operation in a creation handler.
+No library/source resolution or context-admission premise is discharged here:
+the supplied operation must really succeed at the creation-entry snapshot. -/
+theorem tryCreate_library_handler_failure {α β γ : Type} {caller : K}
+    (w handled : World contracts) (value : α) (kind : K)
+    (target : α → Address) (ctor : α → Prog (contracts kind) [] []) (context : α → Context)
+    (success : World contracts → Handle kind → TRes (World contracts × β))
+    (self : Handle caller) (library : Library contracts caller γ) (libraryContext : Context)
+    (later : World contracts → γ → TRes (World contracts × β)) (result : γ)
+    (creationHalt handlerHalt : THalt)
+    (mutable : (context value).isStatic = false)
+    (failed : w.create kind (target value) (ctor value) (context value) = .error creationHalt)
+    (caught : catchable creationHalt = true)
+    (delegated : w.libraryCall self library libraryContext = .ok (handled, result))
+    (laterFailed : later handled result = .error handlerHalt) :
+    w.tryCreate (.ok value) kind target ctor context success (fun snapshot _ => do
+      let (next, output) ← snapshot.libraryCall self library libraryContext
+      later next output) = .error handlerHalt :=
+  tryCreate_handler_steps_failure w handled value kind target ctor context success
+    (fun before _ => before.libraryCall self library libraryContext) later result
+    creationHalt handlerHalt mutable failed caught delegated laterFailed
+
+/-- Library work in the failed handler is discarded at its enclosing atomic
+snapshot; the exact later halt propagates outside the creation catch. -/
+theorem atomic_tryCreate_library_handler_failure {α β γ : Type} {caller : K}
+    (w handled : World contracts) (value : α) (kind : K)
+    (target : α → Address) (ctor : α → Prog (contracts kind) [] []) (context : α → Context)
+    (success : World contracts → Handle kind → TRes (World contracts × β))
+    (self : Handle caller) (library : Library contracts caller γ) (libraryContext : Context)
+    (later : World contracts → γ → TRes (World contracts × β)) (result : γ)
+    (creationHalt handlerHalt : THalt)
+    (mutable : (context value).isStatic = false)
+    (failed : w.create kind (target value) (ctor value) (context value) = .error creationHalt)
+    (caught : catchable creationHalt = true)
+    (delegated : w.libraryCall self library libraryContext = .ok (handled, result))
+    (laterFailed : later handled result = .error handlerHalt) :
+    atomic w (w.tryCreate (.ok value) kind target ctor context success (fun snapshot _ => do
+      let (next, output) ← snapshot.libraryCall self library libraryContext
+      later next output)) = (w, .error handlerHalt) :=
+  atomic_tryCreate_handler_steps_failure w handled value kind target ctor context success
+    (fun before _ => before.libraryCall self library libraryContext) later result
+    creationHalt handlerHalt mutable failed caught delegated laterFailed
+
+/-- The outer transaction predates both creation and delegated handler work.
+It restores its own reset snapshot, retaining the exact handler halt. -/
+theorem transact_tryCreate_library_handler_failure {α β γ : Type} {caller : K}
+    (w snapshot handled : World contracts) (enter : World contracts → TRes (World contracts × α))
+    (value : α) (kind : K) (target : α → Address)
+    (ctor : α → Prog (contracts kind) [] []) (context : α → Context)
+    (success : World contracts → Handle kind → TRes (World contracts × β))
+    (self : Handle caller) (library : Library contracts caller γ) (libraryContext : Context)
+    (later : World contracts → γ → TRes (World contracts × β)) (result : γ)
+    (creationHalt handlerHalt : THalt)
+    (entered : enter w.resetTransient = .ok (snapshot, value))
+    (mutable : (context value).isStatic = false)
+    (failed : snapshot.create kind (target value) (ctor value) (context value) = .error creationHalt)
+    (caught : catchable creationHalt = true)
+    (delegated : snapshot.libraryCall self library libraryContext = .ok (handled, result))
+    (laterFailed : later handled result = .error handlerHalt) :
+    w.transact (fun input => do
+      let (next, value) ← enter input
+      next.tryCreate (.ok value) kind target ctor context success (fun before _ => do
+        let (after, output) ← before.libraryCall self library libraryContext
+        later after output)) = (w.resetTransient, .error handlerHalt) :=
+  transact_tryCreate_handler_steps_failure w snapshot handled enter value kind target ctor context success
+    (fun before _ => before.libraryCall self library libraryContext) later result
+    creationHalt handlerHalt entered mutable failed caught delegated laterFailed
+
+#print axioms tryCreate_library_handler_failure
+#print axioms atomic_tryCreate_library_handler_failure
+#print axioms transact_tryCreate_library_handler_failure
+
+/-- A successful supplied library body commits only the caller's account
+storage/code record. Its explicit ledger may affect balances; this theorem
+makes no balance or readonly-body claim. -/
+theorem libraryCall_other_accounts {α : Type} {w next : World contracts} {caller : K}
+    (self : Handle caller) (library : Library contracts caller α) (ctx : Context) (value : α)
+    (ran : w.libraryCall self library ctx = .ok (next, value))
+    (address : Address) (different : address ≠ self.address) :
+    next.accounts address = w.accounts address := by
+  unfold World.libraryCall at ran
+  split at ran
+  · cases ran
+  · cases hl : w.storage? (⟨library.address⟩ : Handle library.kind) with
+    | none => simp only [hl, TRes.ofOpt, bind, Except.bind] at ran; cases ran
+    | some linked =>
+      simp only [hl, TRes.ofOpt, bind, Except.bind] at ran
+      cases hs : w.storage? self with
+      | none => simp only [hs] at ran; cases ran
+      | some store =>
+        simp only [hs] at ran
+        let state : State (contracts caller) [] :=
+          { storage := store, H := [], heap := Heap.empty, env := (), net := [],
+            selfBalance := w.funds self.address, tx := ctx.tx w self.address }
+        change (do
+          let output ← library.entry.body.run state
+          let after ← w.finish self.address output.st
+          let result ← library.entry.result output.st
+          pure (after, result)) = .ok (next, value) at ran
+        cases hr : library.entry.body.run state with
+        | error halt => simp only [hr, bind, Except.bind] at ran; cases ran
+        | ok output =>
+          simp only [hr, bind, Except.bind] at ran
+          cases hf : w.finish self.address output.st with
+          | error halt => simp only [hf] at ran; cases ran
+          | ok after =>
+            simp only [hf] at ran
+            cases hv : library.entry.result output.st with
+            | error halt => simp only [hv] at ran; cases ran
+            | ok result =>
+              simp only [hv, pure, Except.pure] at ran
+              have worlds : after = next := congrArg Prod.fst (Except.ok.inj ran)
+              rw [← worlds]
+              exact World.finish_other hf different
+
+#print axioms libraryCall_other_accounts
+
 end Solidity.Lowering.V08

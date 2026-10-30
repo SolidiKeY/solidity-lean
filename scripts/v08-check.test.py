@@ -26,4 +26,8 @@ handler='Solidity/Lowering/V08/HandlerControls.lean'
 assert handler in original['source_sha256'], 'handler source absent from current evidence'
 result=copy.deepcopy(original);result['source_sha256'][handler]='0'*64;check('changed-handler-source',result,False)
 result=copy.deepcopy(original);result['source_sha256'].pop(handler);check('missing-handler-source',result,False)
-print('PASS: current evidence accepted; eleven corrupted/guarded evidence controls rejected; fixtures='+str(fixtures))
+library_handler='Solidity/Lowering/V08/LibraryHandlerControls.lean'
+assert library_handler in original['source_sha256'], 'library-handler source absent from current evidence'
+result=copy.deepcopy(original);result['source_sha256'][library_handler]='0'*64;check('changed-library-handler-source',result,False)
+result=copy.deepcopy(original);result['source_sha256'].pop(library_handler);check('missing-library-handler-source',result,False)
+print('PASS: current evidence accepted; thirteen corrupted/guarded evidence controls rejected; fixtures='+str(fixtures))

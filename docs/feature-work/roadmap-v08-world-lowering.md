@@ -6,7 +6,7 @@ recovers the pinned checkout, traces published evidence and adds independent
 intrinsic adapters plus source/intrinsic byte observation proofs and inhabited
 controls. It adds no axiom, exclusion or replacement source semantics.
 
-Current continuation inventory: **276** exact lane theorem/control pins in26
+Current continuation inventory: **322** exact lane theorem/control pins in27
 owned Lean modules. Source callable metadata, request/environment/transient
 projections, selector/Keccak byte observations, emit-effect controls, payment
 and declaration-role clauses are implemented below. Every G20–G23 parent remains
@@ -1204,3 +1204,203 @@ and failed developmental checks are retained. Exact new committed head is record
 in the external handoff/repository-state evidence,not guessed in this document.
 Separate final finder/skeptic artifact reviews follow source/script/doc reviews.
 The original queue and existing blocked goal remain unfinished and unchanged.
+
+## Library work in a failed creation handler
+
+Continuation froma8a1b099162bd46283216de45057fe1e9d19e291 on the unchanged frozen
+branch/base/worktree. Existing blocked goal untouched;get_goal/LeanMCP unavailable.
+Original276pins retained with identical axiom sets;46new declarations make322total
+in27owned modules. No other-owner edit,unpublished import,new semantics/AST/value/
+state layer,decoder/emitter,premise weakening,exclusion,changed original observation
+or proof/fuel/node/test/time/resource budget. All original queues remain PARTIAL.
+
+Missing combination reproduced against actual code: LibraryControls.delegated_owner
+is successful caller-context delegation; HandlerControls.work is ordinary paid
+World.call in a failed creation handler. Neither combines actual library work,
+creation catch and a later failed call/ancestor rollback. New LibraryHandlerControls
+uses only published typed Contract/World/Library/Entry/Prog and actual operations.
+It reuses LibraryControls.linkedCatalog(false Cell,true Empty) and roles, rather
+than introducing another catalogue/interpreter. Empty library storage is REQUIRED
+by deployLibrary's guard. Actual setup_reached includes successful deployLibrary,
+therefore all role/vars/ctor/inits/runtime guards; library_fields_empty alone is
+only its field fact, not a sufficient deployment certificate.
+
+New core adapters tryCreate_library_handler_failure,
+atomic_tryCreate_library_handler_failure and
+transact_tryCreate_library_handler_failure specialize the existing handler-step
+laws to an ACTUAL caller-typed libraryCall at the creation-entry snapshot. They
+retain explicit actual creation failure,catchable predicate,delegated success and
+later failure premises; transaction adapter also retains actual ancestor success
+at reset input. Handler result is derived by bind,not assumed as a whole-handler
+equation. Supplied libraryContext/source linkage/body selection/admission/frame/
+bytecode relations remain unproved prerequisites. Generic creation failure may
+be guards; no source catchability or arbitrary source callback is asserted.
+
+libraryCall_other_accounts derives the published World.finish_other through the
+actual successful library invocation. It preserves complete NONCALLER account
+storage/code records only; a supplied body's explicit ledger can change balances,
+so no generic balance or readonly preservation claim is made. The actual fixture
+body has no transfer, and its exact balance vector is checked separately. Applied
+account equalities preserve both installed library and populated other instance,
+not merely selected empty fields. This does not redo ordinary readonly-call owners.
+
+Actual setup creates caller/self2 and other3,deploys library4,then pays5 to other
+and writes its slots19/29. Initial timestamp is12345,sender1 has100. Paid ancestor7
+writes caller3/9. Creation of fresh candidate5 uses ZERO-value ctorCtx(sender2),
+consistent with Cell's implicit nonpayable constructor metadata. Its nonempty
+closed typed body writes8/12 then existing revertData/encodeError(ctor bytes);
+actual create returns its nonempty encoded halt. ctor_input_reached and
+ctor_input_context check actual State entry[2,0,5,0,12345],not a fabricated installed
+world. Candidate never installs. Handler delegates using actual caller handle and
+paidCtx(sender1,value7); it writes caller.saved=msg.value+4=11 and scratch23,returns
+[b1,b2] plus all five actual context fields. libraryCall starts its net ledger
+empty and does not charge value7 again. A later actual ordinary1 call writes31/37
+then fails with encoded binary reason[6c,00,ff,48]. Its attempted payment1 never
+settles or returns a changed world. Failure is outside the creation catch.
+
+Complete ordered LISTED vector:
+
+- balances=[sender,caller,library,other,candidate];
+- stores=[caller(saved,scratch),other(saved,scratch),library roots];some[] is an
+  INSTALLED empty library store,none would mean missing/wrong runtime kind;
+- flags=[caller installed,library installed,other installed,candidate installed,
+  caller false-kind lookup,library true-kind lookup,library false-kind lookup,
+  other false-kind lookup,false-kind library-role,true-kind library-role].
+
+Flags are F=[true,true,true,false,true,true,false,true,false,true] at every
+successful reached/rollback point below. Empty library has no persistent or
+transient slots to invent. This projection does not enumerate every World field;
+generic rollback/account equalities separately preserve exact worlds/records.
+Context vector is [sender,value,self,balance,timestamp].
+
+| Actual point | Balances; stores; flags | Exact status/context |
+|---|---|---|
+| setup/base | [95,0,0,5,0];[[0,0],[19,29],[]];F | setup ok(base) |
+| paid ancestor/creation snapshot | [88,7,0,5,0];[[3,9],[19,0],[]];F | ok[ab,cd];ordinary caller ctx sender1,value7 |
+| creation entry/failure | same entry snapshot;no world returned by failure | actual entry ctx[2,0,5,0,12345];revertWith(encodeError[63,74,6f,72]) |
+| delegated handler prefix | [88,7,0,5,0];[[11,23],[19,0],[]];F | ok([b1,b2],[1,7,2,7,12345]) |
+| later failed call | no returned world | revertWith(encodeError[6c,00,ff,48]);attempted payment1,unsettled |
+| enclosing atomic | [88,7,0,5,0];[[3,9],[19,0],[]];F | exact later halt |
+| outer transaction | [95,0,0,5,0];[[0,0],[19,0],[]];F | exact later halt |
+| real ordinary double-payment alternative | [81,14,0,5,0];[[11,23],[19,0],[]];F | ok([b1,b2],[1,7,2,14,12345]) |
+| real wrong-caller delegation | [88,7,0,5,0];[[3,9],[11,23],[]];F | ok([b1,b2],[1,7,3,5,12345]) |
+| real wrong-context delegation(value0) | [88,7,0,5,0];[[4,23],[19,0],[]];F | ok([b1,b2],[1,0,2,7,12345]) |
+| subsequent two real read calls | [95,0,0,5,0];[[0,0],[19,0],[]];F | first exact later halt;next ok[0,0,19,0] |
+
+All store rows above mean some lists,including some[] for library. Actual
+wrong-runtime-identity points the true-kind link at an installed FALSE-kind other
+account and returns revert before writes. Wrong-role and static-writing-library
+contexts also actually return revert under published guards. Double-payment,
+wrong-caller/context,wrong ancestor snapshot and stale-other-transient29 controls
+are independently checked actual alternatives,not invented world states. Exact
+one-byte-wrong binary reason is rejected. Encoded creation/later halts are distinct;
+Source.errorData equality is consumed only for byte observation,not Source execution.
+No exhausted/diverge execution is fabricated; prior classifications are retained.
+
+Observation extension is deliberately LOSSLESS: observe returns(original Result,
+byte length). observation_retains_result proves that every original result byte
+AND all context fields remain. libraryCall_observe gives actual observed prefix
+success; observedLater consumes its ORIGINAL returned result in the actual later
+call. Specialized creation-handler law then proves the same exact failure. The
+published tryCreate_observe also maps BOTH complete continuations in mappedAttempt
+without swallowing the halt. No inverse of a lossy length observation is assumed.
+Repeated application consumes transact_failure_then_commit with actual frame
+failure and two actual caller/other storage-read calls; it retains BOTH raw statuses
+and actual [0,0,19,0],not a constant-read stand-in. Source library/function-value/
+ABI/layout/runtime/callback composition remains absent and unclaimed.
+
+Initial libraryCall_other_accounts proof produced unused-simp warnings; removed
+without disabling linters. Observation normalization hit the original200000
+heartbeat limit once; factored a small map lemma over an abstract existing World
+instead of expanding the concrete reached world. Raw failed595699-c47a6339 retained;
+no budget increase or weakened statement. New fixture/compiler source untouched
+outside owned namespace. Thirteen external evidence-integrity corruptions retain
+the earlier eleven plus changed/missing LibraryHandlerControls source; unique
+persistent test directories preserve all prior fixtures. Kernel controls and
+software evidence tests are distinct from external solc/EVM testing (not run).
+
+Audit598615-a8cbdaeb passes113named modules/114Lakejobs,322exact axiom sets,
+25.74seconds;sampled aggregateRSS1137020928,cgroup535224320;source/config unchanged,
+owned container cleanup verified. Old276sets are unchanged,all322subsets of
+propext/Classical.choice/Quot.sound. Earlier321gate/check/control evidence is
+historical and preserved before final322refresh. No per-file MCP/get_goal exposed.
+Runtime/build constraints unchanged: existing approved runner enforces actual
+memory.max12884901888/swap.max0,CPU1,LEAN_NUM_THREADS1/Lean-j1,600s and OSheadroom;
+heavy checks serial with no LSP/build competition. Initial disk free2880647168bytes,
+recorded before builds; caches/files/seals preserved. New export remains separate.
+
+Independent finder/skeptic read actual proof/control/script source without Lean/
+server/builds. No semantic/nonvacuity/ownership finding. They confirmed account
+frame excludes balances/readonly,actual complete deployment guards via setup,
+zero-value constructor context,populated other account,exact statuses and source
+boundaries. Final lossless observation refinement,current source-bound gates,
+strict/Suite/runtime/static checks and artifact reviews are recorded separately.
+
+All original G20,G21,G22.01-.05,G23 and BackfillA/B remain PARTIAL. Full source
+execution/V07/type/layout/ABI/frame/bytecode/library-resolution/function-value/
+getter/readonly/decoder/precompile applications and source-unit composition stay
+open under the SAME frozen prerequisites/reservations. Whole lane not complete;
+existing blocked goal untouched. No unchanged Decision/full retry or distinct
+supported repair evidence: full496841 and task/base413142/433573 stay FAILED125;
+full suffixes UNREACHED,currentfullunvalidated,literalrun-leanPENDING. No global
+doc/inventory gate is called passed from a no-new comparison. Actual raw full
+finding lists (missing AND ambiguous) are compared,not just unique missing paths.
+Proposed ledger reconciliation is EVIDENCE ONLY for G22.03-.05/BackfillA-B and
+payload/reset observations where applicable; exact feature IDs remain inherited.
+No global ledger/status/manifest/reserved TrustAudit pins edited.
+
+Library-handler checkpoint final validation/handoff:46new declarations,322total
+pins/27modules,all original276sets unchanged. Suite600083-a1505eac PASS260named/
+262jobs,41.08s,RSS63111168/cgroup36298752. Fresh602778-aba5e9e8 PASS3.02s,
+RSS228888576/cgroup408064000,new supported initially absent
+output directory,old executable SHA unchanged;377taclets/131read-bearing/131covered/
+annotations match. Actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b
+and Lake5.0.0-src+797c613,actual two-job KeySort build PASS recorded before runtime
+success. Runtime component success is not full-source/lane validation.
+
+Current source-bound checker PASS322pins/59coreclosure;13corruptions PASS,including
+newfile omissions/changes;earlier321logs preserved separately. Runtime controls,
+layers169core/0elaborator,orphans893reachable/0orphan/0disallowed,trust908sources/
+241sites/0findings PASS. Strict automatic coverage PASS491automatic/61step-budget/
+0manual/11refuted/0pending. Raw doc task/base exits1/1 with FULL72/72 identical
+finding rows:46missing+26ambiguous. Separate full-list NEW0 PASS;earlier46 figures
+counted missing only,not all finding classes. Raw global axiom inventory task/base
+exits1/1,14StorageSlots notes/613pins/0errors;separate identical-list NEW0 PASS.
+Neither raw global gate is called passed. No reserved global pins/docs rewritten.
+
+Separate bash scripts/check-testsuite.sh inventory attempt FAILED1 because its
+default ../solkey examples directory is absent;parity suffix was UNREACHED. Existing
+supported --solkey root /workspace/.setup/solkey/keyext.solidity.examples was then
+discovered read-only. Inspection also found its EXIT trap removes its OWN newly
+allocated scratch directory: that cleanup ran in the failed invocation. No
+preserved checkout/cache/seal path was removed. This process deviation under the
+frozen no-delete constraint is disclosed;wrapper not rerun/rewritten to bypass
+cleanup. Inventory remains failed/unvalidated,not promoted by strict/Suite/fresh
+or NEW0. Initial static driver stopped there;global docs/pins ran separately
+later with actual raw failures. Subsequent independent fresh command passed;
+combined shell exit0 never makes the failed driver/inventory green. Raw output
+and explanation are library-handler-testsuite-inventory.log and
+library-handler-inventory-limitation.md. Literal run-lean remains separately
+pending under its previously recorded deleting-wrapper restriction.
+
+Runtime code identity here means the PUBLISHED catalogue-kind/role/installed
+lookup,not EVM bytecode hash or source-resolved declaration identity. The supplied
+Library body and source linkage/admission remain prerequisites. Account preservation
+covers complete catalogue-key/storage records;bytecode/runtime-source composition
+is not certified. Lossless observation refinement and all current source/pin/log
+bindings were independently finder/skeptic reviewed read-only without Lean/server/
+builds,no findings. Source/build/Git/export writer-lock coverage in this continuation
+is retained through completion. Historical earlier lock gaps remain recorded.
+
+New reviewed commit/export uses
+/workspace/v08-world-lowering-artifacts/checkpoint-library-handler-20261030;
+original patch,checkpoint patch,named branch bundle,current/inherited handoffs,
+full120+record evidence archive and checksums use NEW paths. Prior64root/10nested/
+11handler seals remain. Head/base/branch/path and every original queue item are
+recorded in new handoff. Goal untouched/blocked,no get_goal exposed. No Source/V07/
+type/layout/ABI/runtime-frame or reserved-owner prerequisite is assumed or closed;
+all G20-G23/BackfillA-B source applications remain unfinished. This checkpoint
+adds real lossless observation and repeated-read backfill beyond the suggested
+combined case;it is not the original lane's completion. No supported distinct
+Decision repair appeared,no unchanged full/Decision retry,and all old failed125/
+unreached/pending boundaries are retained. No external solc/EVM run claimed.
