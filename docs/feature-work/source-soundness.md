@@ -270,7 +270,7 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `convRV_ns`, `getV_ns`, `readLoc_ok`, `writeLoc_ok`, `compound_dom` | its other steps |
 | `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_nsStep`, `execItems_nsStep`, `forIter_nsStep`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;` and `return e;` of a value type) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
 | `itemsNSP` (the post `Out.esc`; `Out.close_esc`, `Out.up_esc`) | outside loops (`SCtx.loop = false`) a block of the fragment ends normally or by `return`: no `break`/`continue` escapes it |
-| `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **the function level**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults) |
+| `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **leaf functions**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment (so making no calls, emitting nothing, with value-typed locals) and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults); the frame hypotheses are not derived from the elaboration or dispatch |
 | `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
@@ -286,7 +286,7 @@ is never `stuck` and ends with `i = 3`); negative controls
 locals are no `BodyFrame`: the frame hypothesis is needed; with the slot,
 `ret_framed_ns`). Function level: `callRetOne_ns` (an internal call of a
 `return 1;` body) and `callBadFrame_stuck` (a body whose locals lack the
-return slot is `stuck`, "call frame"). Elaborated witnesses: `incBody_ns` (the counter's typed
+return slot is `stuck`, "call frame"). Witnesses from S01 typing derivations (through `toR`): `incBody_ns` (the counter's typed
 body `count++;`, through `ItemsD.toR_ns`) and `indexMapping_ns` (S01's
 `m[o]`, a mapping value read).
 
@@ -302,8 +302,7 @@ it: `return (a, b)` (`setRets`), modifiers (`runMods` with invocations,
 dispatch finds has the call's parameters and returns, which
 `callInternal_ns` assumes), internal calls as expressions (`callInternal`
 from `evalE`), memory (the `heap` invariant, `WellTyped.lean`), arrays and
-structs in storage, internal calls and modifiers (dispatch coherence),
-external calls, `emit`, builtins, and the transaction layer (dispatch,
+structs in storage, external calls, `emit`, builtins, and the transaction layer (dispatch,
 ABI). Each is listed with its sites in the census below.
 
 ### The `stuck` census
@@ -353,14 +352,16 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   (`ptrCopy_refused`, which also shows `s = P(x)` and `p = s` typed);
 - `delete p` with `p` a local `storage` pointer (solc: "delete cannot be
   applied to storage pointers"): `Typed.delete` requires
-  `(τ.storageRef && Γ.namesLocal e) = false` (`ptrDelete_refused`, which
+  `Γ.deleteRefused τ e = false` (`ptrDelete_refused`, which
   also shows `delete s` and `delete m` typed).
 
 - storage-to-storage assignment of types containing mappings
   (`mapping(uint => uint)[2] a; … a = b;`, `stuck` in `loadMem`; and a
   struct with a mapping member, which ran as a copy of nothing):
-  `Typed.assign` requires `Γ.assignsMapping τ = false`, a test through
-  arrays and struct members (`Env.hasMapping`; `mapAssign_refused`).
+  `Typed.assign` requires `Γ.assignRefused τ a = false`: the type contains
+  no mapping (`Env.hasMapping`, through arrays and struct members), or `a`
+  names a local storage pointer being rebound, solc's exemption
+  (`mapAssign_refused`).
 
 Also decided on 2026-10-30: `delete` of a `calldata` reference is refused
 (`Ctx.deleteRefused`; `cdDelete_refused`).
@@ -379,6 +380,21 @@ from a frame that is not static, which only fails). A callback with value
 from the environment's static frame still fails without halting it: the
 environment's strategy moves next.
 
+**Review of the work since checkpoint 1** (finder and skeptic, read-only,
+on 62379eb..f4eb4e3). Confirmed and fixed: the mapping refusal also
+refused rebinding a local storage pointer, which solc exempts (both
+reviewers); `Env.hasMapping`'s fuel counted every declaration, which made
+a recursive struct (`struct S { S[] a; S[] b; }`) exponential to check:
+it now counts struct declarations (`Env.structCount`); `mapAssign_refused`
+gained a nested struct and the rebinding neighbours; stale text
+(`Typed.delete`'s premise here, `source-s03.md`'s UDVT getter remark,
+the vacuity bullet, a duplicated item, the `badFrameBody` docstring,
+`cdDelete_refused`'s solc citation); `callInternal_ns` is described as
+covering leaf functions. Accepted by both: `itemsNSP` (the `SCtx.loop`
+indexing of `brk`/`cont`, `unchecked`, loops), the fuel's sufficiency,
+`deleteRefused` against solc, the UDVT decoder, the getter revert, the
+pins.
+
 **Run-time gaps closed** (checkpoint 4, partial):
 
 - ABI decoding of a user-defined value type argument, as its underlying
@@ -389,7 +405,7 @@ environment's strategy moves next.
 Attempted and reverted: getters of `bytes`/`string` state variables
 (`dispatch` encoding a storage reference; the control returned `"ab"`):
 the extra branch in `dispatch` makes `Horizon.lean`'s `dispatch_apart`
-proofs exceed the heartbeat limit (build13), and raising it is not
+proofs exceed the heartbeat limit (a full gate run on 8e919d0), and raising it is not
 allowed; it needs the branch moved into a helper with its own `_grow`,
 `_const` and `_below` lemmas in Horizon's lists.
 
@@ -434,13 +450,16 @@ Kept current at every checkpoint.
   expected (locals receive only value types, the heap is untouched, the
   storage references `MapRef` builds are covered by the progress
   postcondition `RPost`), but no theorem states it;
-- vacuity on elaborated programs: two elaborated witnesses exist
-  (`incBody_ns`: the counter's typed body `count++;`; `indexMapping_ns`:
-  S01's `m[o]`, through `MapRef`), besides `addSub_ns`; the loop, storage
-  and return witnesses (`loopItems`, `cbItems`, `condE`) are hand-built
-  resolved terms. Which elaborated bodies are in the fragment is not
-  characterised, and nothing proves that function-entry locals satisfy
-  `BodyFrame` (the walk does not reach `callInternal`);
+- vacuity on elaborated programs: two witnesses come from S01 typing
+  derivations through `toR` (`incBody_ns`: the counter's typed body
+  `count++;`; `indexMapping_ns`: S01's `m[o]`, through `MapRef`), besides
+  `addSub_ns`; the derivations are written by hand and checked against
+  S01's rules, not produced by `elaborate`. The loop, storage and return
+  witnesses (`loopItems`, `cbItems`, `condE`) and the function-level one
+  (`retOneBody`) are hand-built resolved terms. Which elaborated bodies
+  are in the fragment is not characterised, and nothing derives
+  `callInternal_ns`'s frame hypotheses (`hloc`, `hrs`, `hps`) from the
+  elaboration or dispatch;
 - the storage side conditions of the fragment (`E.cellTy d.path = τ`,
   `E.pathTy d.path = some τ`) are checked per expression, not derived
   from the elaboration;
