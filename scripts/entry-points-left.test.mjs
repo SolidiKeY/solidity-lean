@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {runSolidityTests} from './test-solidity.mjs';
+import {solkeyTestOptions} from './test-compiler.mjs';
 
 const source = 'tests/solc/EntryPointsLeft.sol';
+const compilerOptions = solkeyTestOptions();
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 test('entry fixtures retain the same source and exact compiler/settings in both pipelines', () => {
   for (const [suffix, viaIR] of [['ast.json',false], ['viaIR.ast.json',true]]) {
@@ -29,7 +31,7 @@ const cases = [
   ['RefusedGetters', {referenceBytes:'unsupported', referenceString:'unsupported', functionResult:'unsupported'}],
 ];
 for (const [contract, expected] of cases) test(`entry source verdicts: ${contract}`, () => {
-  const report = runSolidityTests([source], {build:false, contract, batchSize:1});
+  const report = runSolidityTests([source], {...compilerOptions, build:false, contract, batchSize:1});
   if (process.env.SOLIDITY_ENTRY_EVIDENCE_DIR) {
     mkdirSync(process.env.SOLIDITY_ENTRY_EVIDENCE_DIR, {recursive:true});
     writeFileSync(`${process.env.SOLIDITY_ENTRY_EVIDENCE_DIR}/${contract}.json`, JSON.stringify(report,null,2)+'\n');

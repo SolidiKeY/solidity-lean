@@ -94,6 +94,21 @@ The source tests require built Lean artifacts; the resume test invokes the
 runner's prerequisite build. Keep such checks serial with Lean `-j1` under
 the repository's resource bounds.
 
+The entry-point source regression, `scripts/entry-points-left.test.mjs`, also
+uses `solkeyTestOptions()` for the verified frozen SolKey snapshot and its exact
+0.8.34 compiler. Its separate fixture check retains both 0.8.38 pipeline pins.
+This removes the sibling-checkout assumption that stopped combined integration
+validation at the compiler stage; all source verdicts and refusal checks remain
+unchanged.
+
+For the 2026-10-30 integration repair, local read-only finder and skeptic passes
+confirmed the helper verifies both snapshot and compiler hashes, and the retained
+`GetterKernelSharing.lean` review finding already has the required explicit
+`annotate` result type. The fixture check and real source compilation passed.
+The end-to-end retry reached Lean for all 21 source cases but stopped at stale
+`Solidity.Language.Features` artifacts under `--no-build`; it did not establish
+their verdicts. The coordinator owns rebuilding and rerunning the combined gates.
+
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
 node scripts/solidity-upstream.mjs verify
