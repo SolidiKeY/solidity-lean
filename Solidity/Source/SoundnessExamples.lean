@@ -468,6 +468,29 @@ theorem stringByte_write :
     | _ => none) = some 0x78 := by
   rfl
 
+/-! ## Preservation of location writes and the shape gap -/
+
+/-- A heap with a `bytes memory` object at `0` and, at `1`, a `bytes memory`
+object stored as a pointer to `0` (a `Data.val`, not a `Data.bytes`). -/
+def ptrHeap : Heap SemanticsExamples.E0.layout :=
+  (((Heap.empty : Heap SemanticsExamples.E0.layout).alloc ⟨.bytes .memory, .bytes [1]⟩).1.alloc
+    ⟨.bytes .memory, .val (Val.memRef rfl 0)⟩).1
+
+/-- `ptrHeap` is well typed: the pointer at `1` names an object of its type. -/
+theorem ptrHeap_ok : HeapOK (E := SemanticsExamples.E0) ptrHeap :=
+  (HeapOK.empty.alloc (.bytes _)).alloc (.val ⟨_, rfl, rfl⟩)
+
+/-- **Negative control (progress needs object shapes)**: a byte write at
+`1` in the well-typed `ptrHeap` is `stuck`, although `writeLoc_memByte_pres`
+keeps the state well typed. `HeapOK` constrains where references point, not
+the shape of the top-level object, so progress for memory writes needs an
+extra invariant (no top-level `Data.val` at a memory reference type). -/
+theorem ptrHeap_byte_stuck :
+    ((writeLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 3 (.memByte 1 0)
+      (Val.fixedBytes [7] rfl)).run (.nil, { SemanticsExamples.s0 with heap := ptrHeap })).1 =
+      .error (.stuck "not bytes") := by
+  rfl
+
 /-! ## Axioms -/
 
 /-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -530,6 +553,36 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.HeapOK.alloc
 /-- info: 'Solidity.Source.HeapOK.write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.HeapOK.write
+/-- info: 'Solidity.Source.heapObj_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapObj_pres
+/-- info: 'Solidity.Source.heapPut_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapPut_pres
+/-- info: 'Solidity.Source.DataListOK.setNth' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.DataListOK.setNth
+/-- info: 'Solidity.Source.DataListOK.nth' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.DataListOK.nth
+/-- info: 'Solidity.Source.asVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.asVal_ok
+/-- info: 'Solidity.Source.memSet_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.memSet_pres
+/-- info: 'Solidity.Source.writeLoc_mem_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_mem_pres
+/-- info: 'Solidity.Source.writeLoc_memByte_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_pres
+/-- info: 'Solidity.Source.writeLoc_local_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_local_pres
+/-- info: 'Solidity.Source.memElem_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.memElem_pres
+/-- info: 'Solidity.Source.readLoc_local_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readLoc_local_pres
+/-- info: 'Solidity.Source.readLoc_mem_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readLoc_mem_pres
+/-- info: 'Solidity.Source.readLoc_memByte_pres' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readLoc_memByte_pres
+/-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ptrHeap_ok
+/-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_byte_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ptrHeap_byte_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.add_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.add_value
 /-- info: 'Solidity.Source.SoundnessExamples.add_bool_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/

@@ -139,7 +139,10 @@ marker: builds 10-12 (typing decisions, function level), 14-16 (UDVT
 decoding, review fixes), 18-22 (elaborated frames, `return (a, b)`,
 dispatch parameters), 23-25 (calls inside expressions), 26 (Panic `0x41`,
 which changes `Eval.lean` and `Horizon.lean`), 27-28 (follow-ups and the
-two-body witness). Build13 failed (the getter change, `Horizon.lean`
+two-body witness; build 26's ordering of the `0x41` checks was rejected
+in integration review and fixed after it), 29 (`c37f137`, `CallsOK` per
+contract), 30 (`93bcaca`, offset check before the `0x41` panic), 31
+(`e79abee`, location read/write preservation). Build13 failed (the getter change, `Horizon.lean`
 heartbeats) and was reverted. Each marker records its build; the last
 gated head is in the final `CLOUD-RESULT`. `check-g07 --log` passed every
 check but the two baselines above (86 unrecorded pins of other lanes,
@@ -235,6 +238,44 @@ an address of another type), `heapObj_ok`, `heapAt_ok` (a read at the
 type the heap typing gives is never `stuck` and returns agreeing
 contents; `heapAt` has no caller in the interpreter), `storRef_ok`; the heap facts `HeapOK.alloc`, `HeapOK.write`,
 `Heap.alloc_le`, `Heap.alloc_ty`, `HeapOK.empty`.
+
+**Proved for location reads and writes** (preservation, halts included;
+added after marker `7b94a9b`): `writeLoc_local_pres`, `writeLoc_mem_pres`
+(`memSet_pres`: array elements and struct members, through
+`DataListOK.setNth`), `writeLoc_memByte_pres` (bytes and strings), and the
+reads `readLoc_local_pres`, `readLoc_mem_pres` (`memElem_pres`, through
+`DataListOK.nth` and `asVal_ok`: the value read agrees),
+`readLoc_memByte_pres`; the generic `heapObj_pres` and `heapPut_pres`.
+A written value must agree (`v.RefOK`). Storage locations (`storeVal`,
+`writeAt`, `readAt`) are not covered.
+
+**Finding: progress for memory accesses needs object shapes.** `HeapOK`
+says where references point, but not that a top-level object of a memory
+reference type is a `Data.bytes`/`Data.string`/`Data.array`/`Data.struct`
+rather than a `Data.val`. The negative control `ptrHeap_byte_stuck`
+builds a well-typed heap (`ptrHeap_ok`; the full state is `EMOK` too,
+trivially at `Γ = []` and the empty heap typing) whose object at `1` is a
+`bytes memory` stored as a pointer, and a byte write there is `stuck`
+("not bytes"). No allocation or `heapPut` site creates such an object
+(`zeroData` and `loadMem` match all four memory reference types before
+their `Data.val` arms, and a mapping has no memory location; the other
+`allocRef` and `heapPut` sites build aggregates), so the gap is in the
+invariant, not the semantics; the proof is pending. Progress for `memSet`,
+`writeLoc .memByte`, `memElem` and `heapBytes` (`readLoc .memByte`,
+conversions to fixed bytes, `bytesOfRV`) needs `HeapOK` strengthened with
+this shape condition, and `memElem` also needs elements to be `Data.val`
+(`Data.asVal`, "inline aggregate element"): the census "heap" row below.
+Progress proofs must use `heapPut_ok`, which keeps the halt detail
+`heapPut_pres` drops. Not covered: `deleteLoc` (through `writeLoc` and
+`zeroVal`), and locals holding calldata references (`Val.RefOK` of a
+`cdRef` is `False`; the semantics creates none).
+
+**Review of the location preservation** (finder and skeptic, read-only,
+no blocker): the open question about allocations was closed by reading
+the code (above); the docstring of `writeLoc_mem_pres` claimed byte writes
+and `writeLoc_memByte_pres` had none; the TrustAudit block left out the
+helper lemmas and called the control "preservation"; the heading said
+"writes" where reads need the shape too. All fixed.
 
 **Not proved**: the triple for every interpreter function (`evalE` …
 `dispatch`, deployment, transactions, callbacks). The approach is the one
