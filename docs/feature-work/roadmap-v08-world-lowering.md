@@ -600,3 +600,66 @@ and patch are saved at /workspace/v08-world-lowering-artifacts/crypto-checkpoint
 and .patch. Next independent G20 work consumes callable payable/receive/fallback
 metadata before final cache-warmed validation; no reserved body/getter/function
 reference or readonly implementation is taken over.
+
+## Continuation checkpoint: callable payment and declaration roles
+
+Parent395ea6818f11bc0af0738a9596a6992635601a44. PayableMetadata reads actual
+Source function/fallback mutability and receive flags, consuming existing
+Decl.receiveOK refusal. attach? sets ONLY the supplied Entry.payable; its actual
+body, typed locals and decoder remain. Constructors/non-callable declarations
+do not manufacture ordinary entries. Source constructor/creation integration
+stays separate. attach_of_flag/attach_none state the exact partial adapter.
+
+nonpayable_enter proves the existing guard's exact revert on every nonzero
+payment. payable_enter_success proves actual header success from numeric
+funding, nonstatic context and bounded receiver-sum checks, not from a desired
+execution hypothesis. source_nonpayable_rejected/source_payable_entered compose
+those guards with the actual source metadata result. No source body/exposure,
+readonly or placement/admission certificate is inferred. Ordinary-entry guards
+do NOT describe rejection of ambient msg.value inside Stmt.call; readsValue
+for internal/private functions is explicitly distinct from payability.
+
+PayableControls has source receive-unit membership, positive payable function/
+fallback/receive flags, malformed receive/noncallable/constructor refusals,
+actual funded7 receipt with supplied writes, exact nonpayable rejection,
+zero-payment successful effects and a wrong erased-payment negative. Source
+bodies here are empty; target bodies are explicitly supplied writing bodies,
+so these are payment-metadata witnesses, not body-lowering examples. Function/
+fallback variants are directly supplied declarations, not resolved/admitted
+source-unit witnesses. Reserved getter/function-reference/readonly work remains
+untouched and required for its eventual applications.
+
+DeclarationRoles reads source contract/library kind into the existing Role;
+interfaces/non-code declarations do not become deployable roles. setRole changes
+one supplied catalogue key and preserves all storage lookups/other keys.
+library_role/library_create_refused/library_call_refused and the source metadata
+composition prove actual intrinsic ordinary-call/create refusals. RoleControls
+uses source library-unit membership, actual empty typed library deployment,
+exact ordinary-create refusal and preserved other catalogue funding/state.
+Catalogue identity/layout, abstractness, source placement/link resolution and
+constructor/body source preservation are still explicit integration premises.
+
+Independent finder/skeptic reviews found no mathematical/ownership/nonvacuity
+defect, using no Lean/server/builds. Their wording finding is fixed: ordinary
+intrinsic creation after source-role attachment is not source-new execution.
+They confirmed the internal ambient-value distinction and direct declaration
+fixture limits. Focused149597 passes the32 new laws/controls, all170 lane
+declarations pinned, unchanged source/config; sampledRSS785846272bytes and
+cgroup193691648bytes. Final combined closure supersedes this log after comment
+clarifications, with raw documentation failures/zero-new gates kept separate.
+
+Header metadata checkpoint handoff: current combined150409 passes106 named
+modules/107 Lake jobs, all170 exact axiom sets, unchanged source/config,
+sampledRSS835645440bytes/cgroup224149504bytes. Finder and skeptic independently
+confirmed comment/fixture limits and exact source hashes without Lean/server/
+builds; no further finding. Static/raw-doc comparison logs are header-*.
+Parent395ea6818f11bc0af0738a9596a6992635601a44; exact committed head/patch at
+/workspace/v08-world-lowering-artifacts/header-checkpoint.md and .patch.
+This remains partial component coverage, not a parent/lane completion.
+
+Next required validation: warm published import closures serially using the
+diagnosed source/toolchain cache, prebuild native executable module facets
+serially, then run the same full layer/default/TestSuite/sort gates under the
+existing600-second bound. Investigate Lake's supported buildDir setting for a
+fresh absent SolKey output directory, retaining the existing executable and
+all generated evidence. No removal/reset or guard/budget relaxation is allowed.

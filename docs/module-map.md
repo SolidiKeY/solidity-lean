@@ -1064,3 +1064,8 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/CryptoObservations.lean` | Published Keccak output-word bound and fixed source/intrinsic word/ABI-byte observation transport; no hash/precompile implementation |
 | `Lowering/V08/CryptoControls.lean` | Inhabited real Keccak pin, actual standard vector and wrong-byte/word kernel controls |
+
+| `Lowering/V08/PayableMetadata.lean` | Source ordinary-entry payable/receive/fallback metadata and actual numeric frame payment guards; no exposure/body/readonly certificate |
+| `Lowering/V08/PayableControls.lean` | Source receive membership and payment flags, malformed/noncallable/constructor refusals, actual paid/zero-call controls |
+| `Lowering/V08/DeclarationRoles.lean` | Source contract/library role metadata on supplied typed catalogue, preserved storage/other keys and actual ordinary-call/create refusals |
+| `Lowering/V08/RoleControls.lean` | Source library membership and real typed empty-library installation/refusal/catalogue controls |

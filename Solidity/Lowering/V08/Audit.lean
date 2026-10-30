@@ -1,3 +1,5 @@
+import Solidity.Lowering.V08.PayableControls
+import Solidity.Lowering.V08.RoleControls
 import Solidity.Lowering.V08.CryptoControls
 import Solidity.Lowering.V08.EmitControls
 import Solidity.Lowering.V08.SelectorControls

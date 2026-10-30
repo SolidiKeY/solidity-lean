@@ -164,6 +164,33 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.DeclarationRoles.attach_of_role": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.DeclarationRoles.library_call_refused": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.DeclarationRoles.library_create_refused": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.DeclarationRoles.library_role": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.DeclarationRoles.other_role": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.DeclarationRoles.source_library_create_refused": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.DeclarationRoles.storage_unchanged": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.EmitControls.dependent_arguments_retained": [
     "Classical.choice",
     "Quot.sound",
@@ -333,6 +360,72 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PayableControls.constructor_refused": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableControls.fallback_flags": [],
+  "Solidity.Lowering.V08.PayableControls.fallback_paid": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableControls.internal_read_not_payable": [],
+  "Solidity.Lowering.V08.PayableControls.malformed_receive_refused": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableControls.noncallable_refused": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableControls.nonpayable_fallback": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableControls.nonpayable_function": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableControls.payable_function": [],
+  "Solidity.Lowering.V08.PayableControls.receive_flag": [],
+  "Solidity.Lowering.V08.PayableControls.receive_member": [],
+  "Solidity.Lowering.V08.PayableControls.receive_paid": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableControls.wrong_payment": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableControls.zero_nonpayable": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableMetadata.attach_none": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableMetadata.attach_of_flag": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableMetadata.nonpayable_enter": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableMetadata.payable_enter_success": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableMetadata.source_nonpayable_rejected": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PayableMetadata.source_payable_entered": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.ProjectionControls.boundary_roundtrips": [
     "Quot.sound",
     "propext"
@@ -427,6 +520,21 @@
     "propext"
   ],
   "Solidity.Lowering.V08.ProjectionControls.wrong_reason": [],
+  "Solidity.Lowering.V08.RoleControls.library_deployed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.RoleControls.library_member": [],
+  "Solidity.Lowering.V08.RoleControls.ordinary_creation_refused": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.RoleControls.other_catalogue_preserved": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.RoleControls.source_roles": [],
   "Solidity.Lowering.V08.SelectorControls.argument_order": [],
   "Solidity.Lowering.V08.SelectorControls.canonical_error": [
     "propext"
