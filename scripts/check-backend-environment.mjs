@@ -8,9 +8,11 @@ import {loadGraph,reach} from './import-fanout.mjs';
 // Dependency availability is frozen even when the reviewed ownership range changes.
 const dependencyBase='50658f41061b366d6e503d1e8a3a324a281e9fca';
 const sourceHead='93e97b28e61f1466eafeb6163baed9da1f9e8240';
-const integrationBase='8445c3fc203144251b9d1fc9181f7f61a8189522';
-// Already integrated scalar files are read-only, pinned by exact blob and mode.
+const integrationBase='b965d675e260a374401b131e59d501f8ce5da147';
+// Other integrated contributions are read-only, pinned by exact blob and mode.
+const scalarBase='8445c3fc203144251b9d1fc9181f7f61a8189522';
 const scalarHead='2a267e4f5f43b87d7e49ae14685082559706a03d';
+const storageHead='8db4c673cd2d0c434221cbf5d398e1a92cf7ea4f';
 const {values}=parseArgs({options:{'ownership-base':{type:'string'},'ownership-head':{type:'string'}}});
 assert.equal(Boolean(values['ownership-base']),Boolean(values['ownership-head']),
  'supply both --ownership-base and --ownership-head');
@@ -38,17 +40,27 @@ function checkOwned(file){
  assert.ok(file.startsWith('Solidity/Backend/Environment/')||file==='docs/feature-work/backend-environment-lowering.md'||
   file==='scripts/check-backend-environment.mjs'||file.startsWith('tests/backend-environment/')||shared.has(file),`unowned write ${file}`);
 }
-const scalarPaths=new Set(paths(git(['diff','--no-renames','--name-only','-z',integrationBase,scalarHead,'--',
- 'Solidity/Backend/Scalar/','docs/feature-work/backend-scalar-lowering.md',
- 'scripts/backend-scalar-thresholds.py','scripts/check-backend-scalar.mjs',
- 'scripts/check-backend-scalar-evm.mjs','scripts/fixtures/backend-scalar-export.lean'])));
+const integratedFiles=new Map();
+for(const {name,base,head,files} of [
+ {name:'scalar',base:scalarBase,head:scalarHead,files:[
+  'Solidity/Backend/Scalar/','docs/feature-work/backend-scalar-lowering.md',
+  'scripts/backend-scalar-thresholds.py','scripts/check-backend-scalar.mjs',
+  'scripts/check-backend-scalar-evm.mjs','scripts/fixtures/backend-scalar-export.lean']},
+ {name:'storage',base:integrationBase,head:storageHead,files:[
+  'Solidity/Storage/Representation/','docs/feature-work/storage-value-representation.md',
+  'tests/storage-values/','docs/feature-work/backend-failure-emission.md']}
+]){
+ for(const file of paths(git(['diff','--no-renames','--name-only','-z',base,head,'--',...files])))
+  integratedFiles.set(file,{name,head});
+}
 function checkOwnership(range,{integrated=false,registryRange=range}={}){
  const changed=paths(git(['diff','--no-renames','--name-only','-z',...range,'--']));
  for(const file of changed){
-  if(integrated&&scalarPaths.has(file)){
+  if(integrated&&integratedFiles.has(file)){
+   const pin=integratedFiles.get(file);
    const endpoint=ownershipHead?[ownershipHead]:[];
-   assert.equal(git(['diff','--no-ext-diff','--no-renames',scalarHead,...endpoint,'--',file]),'',
-    `integrated scalar file changed: ${file}`);
+   assert.equal(git(['diff','--no-ext-diff','--no-renames',pin.head,...endpoint,'--',file]),'',
+    `integrated ${pin.name} file changed: ${file}`);
    continue;
   }
   checkOwned(file);
@@ -59,7 +71,7 @@ function checkOwnership(range,{integrated=false,registryRange=range}={}){
  }
 }
 // Preserve the original lane audit, then include all committed integration repairs.
-// The only other-lane exemption is the exact pinned scalar contribution above.
+// Other lanes qualify only through the exact pinned contributions above.
 checkOwnership([dependencyBase,sourceHead]);
 checkOwnership([ownershipBase,...(ownershipHead?[ownershipHead]:[])],{integrated:true});
 // Also reject staged violations concealed by an unstaged restoration.

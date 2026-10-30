@@ -26,16 +26,20 @@ statements, proof steps, semantics, observations, target scope and budgets are
 unchanged; no axiom or unfinished proof was introduced.
 
 `scripts/check-backend-environment.mjs` keeps dependency availability frozen at
-the original exact base above. Its default ownership review instead covers the
-complete original contribution through source head
-`93e97b28e61f1466eafeb6163baed9da1f9e8240`, rather than other lanes already in
-the integrated checkout. A different committed review interval can be supplied
+the original exact base above. It separately audits the complete original
+contribution through source head
+`93e97b28e61f1466eafeb6163baed9da1f9e8240` and the complete requested integration
+base `b965d675e260a374401b131e59d501f8ce5da147` through the current working tree.
+A different committed review interval can be supplied
 with both `--ownership-base <base>` and `--ownership-head <head>`; these options
 never change dependency availability. The gate additionally checks the index
 and working tree independently against the current HEAD, plus untracked files.
 It retains the owned-path allowlist, append-only shared registries, forbidden
-import closure and proof/budget checks. Committed changes from other integrated
-lanes remain the coordinator's ownership-review responsibility.
+import closure and proof/budget checks. Other integrated contributions qualify
+only at their exact pinned blobs and modes: scalar at `2a267e4f` and storage at
+`8db4c673`, including the latter's backend gap-reference documentation repair.
+These pins do not change the frozen dependency base or exempt source, frontend,
+trust coverage or the append-only shared registries.
 
 The read-only finder confirmed the annotation-only Lean changes. The skeptic
 found that a single HEAD-to-worktree comparison could hide a staged unowned
@@ -43,7 +47,7 @@ edit or registry deletion canceled by an unstaged restoration. Independent
 HEAD-to-index and HEAD-to-worktree checks now reject both. Final finder and
 skeptic reviews reported no remaining findings; neither used Lean or its server.
 
-Focused validation passes: per-file MCP `lean_diagnostic_messages` with
+The earlier annotation repair passed per-file MCP `lean_diagnostic_messages` with
 `interactive=false`, `severity=error` on all seven edited Lean files, serially
 with one open document and one Lean thread; the default Node gate; and
 `node tests/backend-environment/ownership.mjs`. The isolated Git fixtures cover
@@ -55,6 +59,46 @@ remain in this component. The process group retains its 12 GiB/no-swap cap.
 The full combined build and unedited regression-check modules belong to the
 coordinator; this repair does not claim those gates were rerun. Changes are
 left uncommitted and unstaged for the coordinator.
+
+### Requested integration base (2026-10-30)
+
+The retained review of candidate `16b00b6f` found that it omitted the requested
+base's source semantics and trust coverage, changed the ambiguous hex-call
+verdict, and audited an older ownership base. Before this repair, the
+coordinator's refresh through `f1cad31a` restored the complete `b965d675` source
+integration. Read-only Git checks confirm that `b965d675` is now an ancestor and
+that `Solidity/Source/`, `Solidity/Frontend/`, `TrustAudit.lean` and
+`scripts/g07-axiom-pins.json` are identical to that requested base. In particular,
+`hexCall_typed` still refuses the ambiguous call with zero derivations.
+
+This repair restores the two missing README table-header lines and changes the
+default ownership and live registry checks to the requested base. The complete
+combined contribution is checked; the concurrent storage files are accepted
+only when identical to the pinned integration snapshot above. Scalar pin
+discovery retains its separate historical base. Dependency availability remains
+frozen at `50658f41`. The gate retains independent index and worktree checks.
+
+Focused validation: the default ownership gate and isolated ownership fixtures
+pass. The fixtures now advance their integration base with reserved source,
+frontend, trust and registry entries, then reject committed deletions of those
+files and both live and committed loss of only the advanced registry rows.
+They also accept exact integrated storage content and reject changed storage
+content or mode. The existing frozen-import, scalar, proof-budget, closure,
+unowned-write and concealed staged-violation controls remain in force.
+All shared registries have zero deleted lines against `b965d675`.
+
+Separate read-only finder and skeptic passes checked the complete changed-path
+set, requested-base source retention, registry deletion counts, documentation
+links, pin comparisons and fixture cleanup. The fixture cleanup now removes
+only its temporary frontend file, preserving advanced-base frontend content.
+No further findings remain from those local passes. An attempted independent
+reviewer launch failed with `no rollout found`; independent follow-up remains
+with the coordinator. The retained ledger has `validation: null` for this
+rejection, so there is no combined-validation log to report as passed.
+
+No Lean files are edited by this requested-base repair, so no Lean diagnostics
+or competing build are needed. The coordinator owns the full combined gates;
+this focused repair is left uncommitted and unstaged.
 
 The manifest's actual IDs are `msgSender`, `msgValue`, `thisAddress`,
 `addressBalance`, `blockTimestamp`, `keccakBuiltin` (not keccak256Builtin),
