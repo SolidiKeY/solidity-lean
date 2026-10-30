@@ -274,10 +274,24 @@ S04.01–S04.03 status (2026-10-29): [source-s04-state.md](feature-work/source-s
 | G14 | Check inheritance linearization, overrides, modifier binding, constructor order, library/using-for resolution and callable identities; prove resolution against the independent source definitions. |
 | G15 | Complete admission extraction over all execution roots and observations; prove exact profile classification and coverage. Prove the existing solc-JSON import agrees with certified source, or route the public compiler through the checked frontend. |
 
+G12 status (2026-10-29, lane-static): [frontend-static.md](feature-work/frontend-static.md#g12-imports-identities-scopes-and-overloads). Multi-unit programs over S00 syntax with solc's path resolution and remappings, declaration identities, the file-level scope across imports as a least fixpoint (`Sees`), the judgment `UnitsOK` (imports and imported symbols found, no clash) decided by a resolver proved sound and complete (`globals_sound`, `globals_complete`, `unitsOK_iff`) and conservative over S01's lookup; overload sets across bases (`InheritedFn`, `mem_inheritedFns`) and overload selection. Typing across units and S01's use of the merged overloads are handoffs to lane-semantics.
+
+G13 status (2026-10-29, lane-static): [frontend-static.md](feature-work/frontend-static.md#g13-type-inference-constants-user-defined-value-types). Type inference returning S01's own derivations (sound by construction) and complete for every `Typed`/`LVal`/`StmtD`/`ItemsD` rule (`typed_complete`, `stmt_complete`, `hasType_iff`); S01's `WellFormed` decided (`wellFormed_iff`), the typing component of G05's metadata stage (`metadataChecker`); new relations with checkers for compile-time constant initializers, solc's typed constant evaluation with named array lengths, acyclic constants and user-defined value type operators. S01's per-typing overload uniqueness is recorded as a deviation from solc; S01's reading of the new relations is a handoff to lane-semantics.
+
+G14 status (2026-10-29, lane-static): [frontend-static.md](feature-work/frontend-static.md#g14-inheritance-overrides-constructors-modifiers-using-for). New relations `InheritanceOK` (linearization, overrides, required overrides, implementations, `virtual` declarations, base-constructor arguments, modifier invocation resolution, `using L for`) each naming solc's error, decided by checkers (`inheritance_iff`, G05's `inheritanceChecker`); a declarative C3-consistency relation met by S01's `Env.linearize` (`linearize_sound`); constructor order and callable identity (`callable_unique`). Cross-checked on 26 transcribed solc syntax tests; solc's override-graph pruning for 6480, getters, fallback/receive, modifier overriding and several units are recorded gaps.
+
 G11 may link against G08–G10 certificate interfaces during parallel development;
 its integrated whole-parser check runs after their implementations merge. The
 same rule applies to later composition groups: an interface is not a completed
 proof, and their final checks must use the actual implementations.
+
+G08 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g08-checked-lexical-analysis). A checked lexer over source bytes (`Solidity/Frontend/Checked/Lexer.lean`): every lexer rule of the pinned `SolidityLexer.g4` classified with a sample (`lexRules_classified`), maximal munch with modes, solc's scanner rules where they differ from the grammar, and the certificate proved for every accepted source: its pieces re-print it (`lex_reprint`), each token's range re-locates it (`lex_locate`), refusals are located (`lex_error_pos`); the string-escape decoder is proved against an inductive grammar (`strBody_sound`).
+
+G09 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g09-type-and-declaration-syntax). The token yield of S00's syntax under layouts (attribute orders, string fragments) as the grammar derivation; an untrusted fuel-structural parser to `Syn` checked against it (`parse_sound`, `parse_derives`, `parseType_derives`: translation validation); a canonical printer with round trips; recursive and mutual declaration references; every type and declaration constructor covered (`declCtors_covered`). Unambiguity and completeness of the parse are open.
+
+G10 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g10-expressions). Expressions by solc's precedence climbing, the selected tree fixed by `Syn.prec` (levels and associativity of the grammar, refusal where the grammar and solc disagree); level lemmas for every binary constructor (`binary_levels`), every operator parsed (`every_operator`), every expression constructor covered (`exprCtors_covered`), `>>>`/`years` rejected precisely (`expr_out_of_profile`). Translation validated; unambiguity is open.
+
+G11 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g11-statements-definitions-and-whole-units). Whole-source parsing to `Syn .unit` from G08–G10 (`parse_sound`, translation validation; completeness and uniqueness open), syntax-level admission (`parseInProfile`), every one of S00's 112 constructors produced by an accepted program (`allCtors_covered`; in-profile ones by admitted programs, `profileCtors_covered`), G05's parse-stage checker (`parseChecker`, `checkUnits_sound`, `produce_accepted`), and the corpus regression over solc 0.8.38's 3542 syntax tests and the repository's `.sol` files (`scripts/parse-corpus.mjs`, baseline `tests/parse-corpus/baseline.json`: 3126 of 3208 expected-accepted tests accepted, 289 of 334 expected-refused refused, every disagreement with its reason; print/parse round trip without failure).
 
 ### Wave 2 — lowering and complete source semantics (G16–G23)
 
@@ -515,8 +529,8 @@ several groups (noted per row); a lane starts by reading those results.
 | V02 | G03, G05, G06 | V00, V01 | Integrated (with the G06 Osaka re-pin). |
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
 | V04 | S02, S03, S04.04, S05 | V03 | — |
-| V05 | G08, G09, G10, G11 | V04 | — |
-| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). |
+| V05 | G08, G09, G10, G11 | V04 | Partial (lane `roadmap-l2-20261029/lane-parse`, integrated 2026-10-30): checked lexer and parser, translation-validated against the lane's own transcriptions (`classify`, `Syn.yield`, `Syn.prec`); parse completeness and uniqueness open, so G05's `Checked.complete` and G01's `SourceSpec.Unambiguous` are not met; `-x++`, `~x++` and `a ? b : c = d`, which solc compiles, are refused (G10). Round-trip backfill done. |
+| V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). Partial (lane `roadmap-l2-20261029/lane-static`, integrated 2026-10-30): G12 for file-level scopes (typing across units and `N.x` namespaces open); G13 decides S01's `Typed`/`WellFormed`, but the type-metadata trust is not yet removed and UDVT operators do not compose; G14's `InheritanceOK` is stated over the checker's own helpers and accepts programs solc refuses (fallback/receive overrides, getters, modifier overriding); G15 not started. Backfill item 5 (fixed-point mobile constants) done. |
 | V07 | G16, G17, G18, G19 | V06 | — |
 | V08 | G20, G21, G22, G23 | V07 | — |
 | V09 | G24, G25, G26, G31 | V08 | G24's foundation children come from G03; G31's precompile and stipend parts are prepared (`Solidity/Precompiles/`, `Solidity/Stipend/Rule.lean`). |
@@ -560,7 +574,7 @@ is empty, unless the item touches files an open Codex lane owns
    change that drops the never-constructed `refused` case of `StmtOut`. It
    waits for the Codex memory/evm lanes, because it edits
    `Solidity/Evm/**`.
-5. **Fixed-point mobile constants** (S01): encode the decision that a
+5. **Fixed-point mobile constants** — done (lane-static, 2026-10-29). (S01): encode the decision that a
    standalone fractional constant takes solc's mobile type with truncation,
    also as an ABI argument, in `Solidity/Language/FixedPoint/Literals.lean`
    (the merged model still refuses `abi.encode(0.1)` as solc does).
