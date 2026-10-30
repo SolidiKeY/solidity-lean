@@ -89,6 +89,7 @@ history is in git.
 | [site.md](site.md) | The examples site on GitHub Pages. |
 | [feature-work/backend-creation-artifacts.md](feature-work/backend-creation-artifacts.md) | G44.02 creation artifact component proofs, runtime installation scope and remaining composition obligations. |
 | [feature-work/backend-failure-emission.md](feature-work/backend-failure-emission.md) | G38 component: executable failure and return bytes, exact local slice proofs and remaining integration obligations. |
+| [feature-work/backend-scalar-lowering.md](feature-work/backend-scalar-lowering.md) | G25 preparation: numeric instruction-slice semantics, typed selection certificates, queue status and remaining composition/validation obligations. |
 
 | Preparation lane | Document |
 |---|---|
