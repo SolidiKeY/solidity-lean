@@ -512,6 +512,26 @@ theorem bytesHeap_byte_write :
       (Val.fixedBytes [7] rfl)).run (.nil, { SemanticsExamples.s0 with heap := bytesHeap })).1 = .ok () := by
   rfl
 
+/-- A heap with a `bool[] memory` of one element `false` at `0`. -/
+def arrHeap : Heap SemanticsExamples.E0.layout :=
+  ((Heap.empty : Heap SemanticsExamples.E0.layout).alloc
+    ⟨.array .memory .bool none, .array 1 (fun _ h => nomatch h) fun _ => .val (.bool false)⟩).1
+
+/-- **Witness** (`writeLoc_mem_ok`): writing `true` as element `0` of the
+`bool[]` at `0` succeeds. -/
+theorem arrHeap_write :
+    ((writeLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 3 (.mem 0 0)
+      (Val.bool true)).run (.nil, { SemanticsExamples.s0 with heap := arrHeap })).1 = .ok () := by
+  rfl
+
+/-- **Negative control** (the element-type premise of `writeLoc_mem_ok`):
+writing an `address` as an element of the `bool[]` is `stuck`. -/
+theorem arrHeap_wrong_elem_stuck :
+    ((writeLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 3 (.mem 0 0)
+      (Val.address (p := false) (SemanticsExamples.addr 1))).run (.nil, { SemanticsExamples.s0 with heap := arrHeap })).1 =
+      .error (.stuck "element type") := by
+  rfl
+
 /-! ## Axioms -/
 
 /-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -620,6 +640,16 @@ theorem bytesHeap_byte_write :
 #guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_ok
 /-- info: 'Solidity.Source.STy.memShape_bytes' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.STy.memShape_bytes
+/-- info: 'Solidity.Source.DataList.setNth_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.DataList.setNth_ok
+/-- info: 'Solidity.Source.memSet_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.memSet_ok
+/-- info: 'Solidity.Source.writeLoc_mem_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_mem_ok
+/-- info: 'Solidity.Source.SoundnessExamples.arrHeap_write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_write
+/-- info: 'Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ptrHeap_not_shaped
 /-- info: 'Solidity.Source.SoundnessExamples.bytesHeap_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/

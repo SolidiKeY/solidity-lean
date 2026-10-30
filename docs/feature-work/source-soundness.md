@@ -286,8 +286,13 @@ a location; the other `allocRef` and `heapPut` sites build aggregates), so
 what remains is a proof gap, not a semantic one. Not yet done: proving
 that for every allocation site; carrying `HeapShaped` through frame
 restores (`Eval.lean` and `Semantics.lean` reset the heap or restore a
-saved one, as for `HeapOK`); progress for `memSet`, `memElem` and
-`heapBytes`. A caller of `writeLoc_memByte_ok` gets its precondition from
+saved one, as for `HeapOK`); progress for `memElem` and `heapBytes`.
+Progress for element and member writes is proved: `memSet_ok` /
+`writeLoc_mem_ok` (at an array of the value's type, or a struct whose
+member `i` has it, in a shaped heap, the write succeeds or panics out of
+bounds; `DataList.setNth_ok`), witness `arrHeap_write`, control
+`arrHeap_wrong_elem_stuck` (an `address` written into a `bool[]` is
+`stuck`, "element type": the type premise is needed). A caller of `writeLoc_memByte_ok` gets its precondition from
 a `memory` reference's `Val.RefOK` through `STy.memShape_bytes` and
 `StOK.le`. The statement excludes only `stuck` (a timeout is not
 excluded by the statement, though the code cannot produce one there).
