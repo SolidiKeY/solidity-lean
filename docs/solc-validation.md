@@ -200,3 +200,5 @@ external programs, or from a sibling repository.
 4. Coverage reports, **H**, **L**.
 5. **M**, **N**, **O** as automation grows.
 6. **C** against a real EVM; **I** in a sibling repository.
+
+The diamond-try [bounded modern attempt facility](feature-work/diamond-try-carrier-budget.md) supplies an explicitly derived/pinned CommonJS engine API and wiring for only check-source-admission/check-call-exception-vectors at their retained Cancun settings. Derive a separate artifact with scripts/evm-reference/derive-attempt-budget.py before invoking those scripts; the unpatched tree is refused. It is not a global fork/profile or historical runner change.

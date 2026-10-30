@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {verifyBudgetArtifact,runWithAttemptBudget} from './evm-reference/attempt-budget.mjs';
 // Optional independent solc/EVM reference. No dependency is added to Lake.
 // Usage: node scripts/check-source-admission.mjs SOLJSON SHA256 MODULES_DIR
 // MODULES_DIR supplies @ethereumjs/{vm,common,util} and ethers.
@@ -17,6 +18,7 @@ const pins = new Map([
 ]);
 assert(pins.has(compilerSha), 'unknown compiler pin');
 assert.equal(createHash('sha256').update(readFileSync(compilerFile)).digest('hex'), compilerSha);
+verifyBudgetArtifact(modulesDir);
 const req = createRequire(join(resolve(modulesDir), 'package.json'));
 const compiler = req(resolve(compilerFile));
 assert.equal(compiler.cwrap('solidity_version', 'string', [])(), pins.get(compilerSha));
@@ -47,9 +49,9 @@ for (const viaIR of [false, true]) {
     const vm = await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Cancun})});
     await vm.stateManager.putAccount(address, createAccount({balance:0n}));
     for (const name of names) {
-      const result = await vm.evm.runCode({to:address,
+      const result = await runWithAttemptBudget(vm, 'runCode', {to:address,
         code:hexToBytes('0x' + compiled.evm.deployedBytecode.object),
-        data:hexToBytes(iface.encodeFunctionData(name, [])), gasLimit:30000000n});
+        data:hexToBytes(iface.encodeFunctionData(name, [])), gasLimit:30000000n}, {label:`${viaIR ? 'viaIR' : 'legacy'}:${contract}.${name}`});
       if (name === 'falseRemainder') {
         assert.equal(result.exceptionError?.error, 'revert');
         assert.equal(Buffer.from(result.returnValue).toString('hex'),

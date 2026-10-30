@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {verifyBudgetArtifact,runWithAttemptBudget} from './evm-reference/attempt-budget.mjs';
 /** Optional source/EVM reference tests. No Lean or package-local dependency writes.
  * node scripts/check-call-exception-vectors.mjs SOLJSON_FILE EXTERNAL_NODE_MODULES
  * Uses EthereumJS vm/common/util 10.1.3 and ethers 6.17.0, as check-abi-vectors.
@@ -17,6 +18,7 @@ const pins = new Map([
   ['6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390', /^0\.8\.38\+commit\.1835d247/]
 ]);
 assert.ok(pins.has(hash), 'unsupported compiler bytes');
+verifyBudgetArtifact(modules);
 const require = createRequire(resolve(modules, 'reference.cjs'));
 const { createVM } = require('@ethereumjs/vm');
 const { Common, Mainnet, Hardfork } = require('@ethereumjs/common');
@@ -48,8 +50,8 @@ for (const viaIR of [false, true]) {
     // Install code at its actual address: self-calls must execute it.
     const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Cancun }) });
     await vm.stateManager.putCode(to, code);
-    const { execResult: r } = await vm.evm.runCall({ to, caller,
-      data: hexToBytes(iface.encodeFunctionData(name, args)), gasLimit: 30000000n });
+    const { execResult: r } = await runWithAttemptBudget(vm, 'runCall', { to, caller,
+      data: hexToBytes(iface.encodeFunctionData(name, args)), gasLimit: 30000000n }, {label:`${viaIR ? 'viaIR' : 'legacy'}:${name}`});
     if (errorData !== undefined) {
       assert.ok(r.exceptionError, `${name} must fail (viaIR=${viaIR})`);
       assert.equal(bytesToHex(r.returnValue).toLowerCase(), errorData.toLowerCase(), name);
