@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "candidate_head": "3c0af8ffe6145294fa70b085adf461e1d3c8075f",
+  "version": 2,
+  "candidate_head": "9641c774b4bf088dfe82c4f5d7cd731040906f88",
   "source_commit": "20bbb1071e12d6e0765c885434df3defc7477b92",
   "retrieval": "supplemental-retrieval.json",
   "retrieval_sha256": "9d762c79c1c3aaaaa8e14fc56e704cb2ab7578e365d5455672ff0faf41f8f9e1",
@@ -139,9 +139,16 @@
   "documentation": {
     "current_missing_references": 20,
     "final_and_reviewed_logs_identical": true,
-    "baseline_log_available": false,
-    "baseline_debt_identity_verified": false,
-    "note": "No baseline raw log is in the exact 175-record snapshot; the summary assertion is not independent evidence of identical historical debt."
+    "baseline_log_available": true,
+    "baseline_debt_identity_verified": true,
+    "note": "Original175 archive still has no baseline log. Separate pinned coordinator retrieval plus independently recomputed exact Git trees establish identical findings; neither authenticates an original historical baseline execution.",
+    "baseline_log_original_manifest_covered": false,
+    "original_historical_baseline_execution_authenticated": false,
+    "baseline_exit": 1,
+    "source_exit": 1,
+    "identical_findings": 26,
+    "new_findings": [],
+    "global_gate_passed": false
   },
   "historical_resource_summary": {
     "memory_max_bytes": 12884901888,
@@ -155,14 +162,10 @@
     "oom": 0,
     "oom_kill": 0
   },
-  "historical_reserve_satisfied": false,
-  "required_os_reserve_bytes": 12884901888,
-  "resource_note": "The retained source summary reports 8598601728 bytes available during a heavy build, below the required 12884901888 bytes; do not count that run as satisfying the reserve. Raw full-resources.json samples cgroup usage, not host MemAvailable.",
+  "historical_reserve_satisfied": null,
+  "resource_note": "Prior 12GiB reserve failure attributed a LOCAL requirement to the source VM. Frozen source prompt excludes that extra reservation, while retaining hard12GiB/no-swap/serial Lean and VM OS headroom. Raw cgroup samples do not prove continuous host MemAvailable.",
   "original_validation_verified": false,
-  "remaining_prerequisites": [
-    "checksum-bound baseline documentation log and baseline/current comparison",
-    "resolution of historical 12 GiB OS-reserve noncompliance; no waiver inferred"
-  ],
+  "remaining_prerequisites": [],
   "current_combined_validation": "not rerun; coordinator owns combined gates",
   "archive_index": [
     {
@@ -1051,7 +1054,31 @@
       "sha256": "ff9dada581c4f0a797157c49621e502fe55a4021dd64bb190c828502312bc2b0"
     }
   ],
-  "focused_repair_checks": {
+  "prior_audit_head": "3c0af8ffe6145294fa70b085adf461e1d3c8075f",
+  "required_local_os_reserve_bytes": 12884901888,
+  "source_resource_scope": {
+    "frozen_prompt_sha256": "3598d459a259b7df2e914ea6b43e7098627785f2be17fb7ac0906127a9e373ad",
+    "memory_max_bytes": 12884901888,
+    "swap_max_bytes": 0,
+    "lean_j": 1,
+    "lean_threads": 1,
+    "os_headroom_required": true,
+    "extra_local_12GiB_reserve_applies_to_source_VM": false,
+    "summary_reported_mem_available_bytes": 8598601728,
+    "full_resource_samples": 1058,
+    "continuous_host_MemAvailable_samples_available": false,
+    "note": "Cgroup usage is not host MemAvailable; no continuous-headroom proof is inferred. Source requirements are unchanged."
+  },
+  "evidence_verified": true,
+  "original_validation_verified_note": "Recorded evidence and unchanged documentation findings are verified. Required documentation still exited 1; this is not an all-gates-passing validation.",
+  "coordinator_evidence": {
+    "verification": "coordinator-evidence-verification.json",
+    "verification_sha256": "d960165fb3259a65dd5242eeecc941d793d56b9b0464f7f964ebeaf70bb416b7",
+    "archive": "coordinator-evidence.tar.gz",
+    "archive_sha256": "27ca82682ac38c94efc9f774a97a9cc07ffd2cadafd1d37cff01b6ea93ca2992",
+    "original_source_checksum_coverage_added": 0
+  },
+  "prior_focused_repair_checks": {
     "artifact_and_member_hashes": "pass",
     "paired_report_completeness_and_reported_matches": "pass",
     "seven_previous_Lean_source_hashes": "unchanged",
@@ -1070,5 +1097,35 @@
     },
     "index_written": false,
     "commit_created": false
+  },
+  "focused_repair_checks": {
+    "context_hashes": "pass",
+    "original175_reverification": "pass",
+    "exact_git_documentation_recomputation": "26 identical findings; both exits1; zero new",
+    "lean_source_edited": false,
+    "lean_checks_run": false,
+    "independent_reviews": {
+      "finder": {
+        "task": "/root/evidence_finder_fresh",
+        "result": "No findings after final textual recheck. Verified context/original archive hashes, matching identity, Git trees/blob counts/scanner hashes and provenance/resource boundaries. Initial retrieval counts and old validation/reviews are correctly labeled historical. Read-only; no Lean, builds, scanner execution or writes."
+      },
+      "skeptic": {
+        "task": "/root/evidence_skeptic_fresh",
+        "result": "No remaining confirmed defect or new semantic decision. Independently recomputed scanner behavior from all3508 exact committed Git blobs, reproducing both logs with26identicalfindings, zero new, exits1/1. Verified digests and seven unchanged Lean hashes; stale top-level prerequisite cleared and historical fields labeled. Read-only; no Lean/builds/writes."
+      },
+      "fixed_finding": "Cleared stale top-level missing_original_evidence and labeled original retrieval counts and earlier validation/reviews historical.",
+      "scope": "Evidence repair only; not approval of combined candidate or validation gates."
+    },
+    "combined_gates": "Coordinator must run; previous checks and reviews do not approve this repair",
+    "index_written": false,
+    "commit_created": false,
+    "git_diff_check": "pass",
+    "seven_previous_Lean_source_hashes": "unchanged",
+    "documentation_path_check": {
+      "exit": 1,
+      "missing": 46,
+      "ambiguous": 37,
+      "payment_findings": []
+    }
   }
 }

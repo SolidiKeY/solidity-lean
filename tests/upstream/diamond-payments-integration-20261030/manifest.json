@@ -4,9 +4,7 @@
   "source_commit": "20bbb1071e12d6e0765c885434df3defc7477b92",
   "original_validation_verified": false,
   "original_archive_index_entries": 0,
-  "missing_original_evidence": [
-    "checksum-bound baseline documentation log and baseline/current debt comparison"
-  ],
+  "missing_original_evidence": [],
   "current_validation": {
     "lean_files": 7,
     "complete_diagnostics": true,
@@ -61,7 +59,7 @@
     "url": "https://binaries.soliditylang.org/wasm/soljson-v0.8.38+commit.1835d247.js",
     "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
   },
-  "resource_scope": "Regression records sample the inherited capped cgroup and OS reserve; memory.peak is cumulative, not per-command RSS. No historical source-run resource claim is authenticated.",
+  "resource_scope": "Retained regression samples concern LOCAL capped integration cgroup and OS reserve; cumulative memory.peak is not per-command RSS. Original source records are verified separately against the frozen source-VM requirements; LOCAL still requires an extra12GiB OS reserve.",
   "working_file_sha256": {
     "Solidity/Calculus/CallbackSound/Payments.lean": "6f7767828463620ebd40a59ec90ed25a6d2266d14806c12ae408343034cc42bd",
     "Solidity/Calculus/PaymentClose.lean": "05acf671e3d9f1d46f7f9893481f8d69740a95d4241de03cdd27b3907a461b82",
@@ -284,7 +282,7 @@
   },
   "original_evidence_supplement": {
     "verification": "original-evidence-verification.json",
-    "verification_sha256": "1ba217cbb8ce902fac6ff222b3c7d2b5df3d61a5ad1747ddc98638f9e2a7fcf6",
+    "verification_sha256": "c0d59086e20e3419a016a65357a2cb04371ffe1895ead120eedcef96f5045e1a",
     "retrieval": "supplemental-retrieval.json",
     "retrieval_sha256": "9d762c79c1c3aaaaa8e14fc56e704cb2ab7578e365d5455672ff0faf41f8f9e1",
     "archive": "original-source-evidence.tar.gz",
@@ -292,10 +290,52 @@
     "archive_members_verified": 177,
     "original_records_verified": 175,
     "original_validation_verified": false,
-    "historical_os_reserve_satisfied": false,
-    "remaining_prerequisites": [
-      "checksum-bound baseline documentation log and baseline/current comparison",
-      "resolution of historical 12 GiB OS-reserve noncompliance; no waiver inferred"
-    ]
-  }
+    "historical_os_reserve_satisfied": null,
+    "remaining_prerequisites": [],
+    "evidence_verified": true,
+    "original_validation_verified_note": "Recorded evidence and unchanged documentation findings are verified. Required documentation still exited 1; this is not an all-gates-passing validation.",
+    "historical_extra_local_reserve_applicable": false
+  },
+  "evidence_verified": true,
+  "original_validation_verified_note": "Recorded evidence and unchanged documentation findings are verified. Required documentation still exited 1; this is not an all-gates-passing validation.",
+  "coordinator_evidence": {
+    "verification": "coordinator-evidence-verification.json",
+    "verification_sha256": "d960165fb3259a65dd5242eeecc941d793d56b9b0464f7f964ebeaf70bb416b7",
+    "archive": "coordinator-evidence.tar.gz",
+    "archive_sha256": "27ca82682ac38c94efc9f774a97a9cc07ffd2cadafd1d37cff01b6ea93ca2992",
+    "original_source_checksum_coverage_added": 0
+  },
+  "coordinator_evidence_repair": {
+    "head": "9641c774b4bf088dfe82c4f5d7cd731040906f88",
+    "integration_passed": false,
+    "supersedes_prior_reviews_for_new_edits": true,
+    "independent_reviews": {
+      "finder": {
+        "task": "/root/evidence_finder_fresh",
+        "result": "No findings after final textual recheck. Verified context/original archive hashes, matching identity, Git trees/blob counts/scanner hashes and provenance/resource boundaries. Initial retrieval counts and old validation/reviews are correctly labeled historical. Read-only; no Lean, builds, scanner execution or writes."
+      },
+      "skeptic": {
+        "task": "/root/evidence_skeptic_fresh",
+        "result": "No remaining confirmed defect or new semantic decision. Independently recomputed scanner behavior from all3508 exact committed Git blobs, reproducing both logs with26identicalfindings, zero new, exits1/1. Verified digests and seven unchanged Lean hashes; stale top-level prerequisite cleared and historical fields labeled. Read-only; no Lean/builds/writes."
+      },
+      "fixed_finding": "Cleared stale top-level missing_original_evidence and labeled original retrieval counts and earlier validation/reviews historical.",
+      "scope": "Evidence repair only; not approval of combined candidate or validation gates."
+    },
+    "combined_gates": "Coordinator must run; previous checks and reviews do not approve this repair",
+    "focused_checks": {
+      "git_diff_check": 0,
+      "documentation": {
+        "exit": 1,
+        "missing": 46,
+        "ambiguous": 37,
+        "payment_findings": []
+      },
+      "lean_files_unchanged": true,
+      "lean_checks_run": false,
+      "full_build_run": false
+    }
+  },
+  "original_archive_index_scope": "Initial retrieval only: one index container and zero raw members. Superseded availability is documented separately in original_evidence_supplement; original receipts and archives remain unchanged.",
+  "current_validation_scope": "Historical focused repair at candidate_head1b561734; retained failures and successes, not combined validation of the coordinator-evidence repair.",
+  "reviews_scope": "Historical focused repair reviews only. New edits require the independent reviews recorded in coordinator_evidence_repair."
 }

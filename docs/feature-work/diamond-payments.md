@@ -80,8 +80,9 @@ adjacent archive. These records concern this integration checkout only.
 
 The initial retrieval indexed zero raw-evidence members (one container maps to
 an empty list). The supplemental evidence audit below supersedes that absence;
-the original retrieval and integration-repair archive remain intact. Original
-validation remains unverified pending the narrower prerequisites below. No
+the original retrieval and integration-repair archive remain intact. The later
+coordinator-evidence repair below verifies the documentation comparison and
+corrects resource attribution; it does not turn failed gates into passes. No
 source VM, skill, monitor, external index, commit or remote branch is modified
 by this repair.
 
@@ -114,22 +115,21 @@ only standard axioms; the repaired imported-constant audits pass. Earlier
 failed scratch-relocation audits remain in the archive. These are inspected
 historical records, not new checks of the combined candidate.
 
-The documentation gate still exits 1 with 20 missing references. Its final and
-reviewed logs are identical, but the supplement contains no baseline raw log.
-The summary's assertion of baseline debt does not establish that comparison.
-The snapshot explicitly excludes the unlisted historical checkpoint. Obtain a
-checksum-bound baseline log and compare it with the retained current log before
-closing this part of the evidence finding.
+The documentation gate exits 1 with 20 missing references. Its final and
+reviewed logs are identical. The original 175-record manifest contains no
+baseline raw log and explicitly excludes the unlisted historical checkpoint.
+The separately pinned coordinator evidence below supplies extra baseline bytes
+and an exact-commit comparison, without expanding that original coverage.
 
-The original summary also reports 8,598,601,728 bytes of available host memory
-during a heavy build, below the required 12 GiB reserve (12,884,901,888 bytes).
-The cgroup resource log records usage, not host available-memory samples; a
-successful build and zero OOM kills do not establish reserve compliance.
-`original_validation_verified` remains false. No resource budget or gate is
-waived; the coordinator must resolve this historical noncompliance as well as
-the baseline-log prerequisite. The earlier integration regression failures
-remain recorded, and full combined gates remain the coordinator's responsibility.
-This evidence-only repair changes no Lean source and runs no Lean checks.
+The original summary reports 8,598,601,728 bytes of available host memory
+during a heavy build. The source assignment requires a 12 GiB hard cap, no swap,
+serial Lean and VM OS headroom; it explicitly excludes the local machine's
+extra 12 GiB reserve from the per-VM requirements. The earlier attribution of
+historical reserve noncompliance was incorrect. The raw cgroup log measures
+usage, not continuous host available memory, and establishes no such samples.
+The LOCAL integration host still requires its full 12 GiB available-memory
+reserve. No resource budget or gate is waived. Earlier integration regression
+failures remain recorded; the coordinator owns full combined gates.
 
 Fresh read-only finder and skeptic review launches both failed with
 `invalid thread-store request: no rollout found`. No independent review of this
@@ -139,6 +139,51 @@ unchanged hashes for the seven previously repaired Lean files, and
 `git diff --check` pass. The current combined tree's documentation path check
 exits 1 with 46 missing references and no findings in these payment files;
 this is separate from the original source run's 20-reference failure.
+
+### Coordinator evidence correction (2026-10-30)
+
+The independently pinned context manifest has SHA256
+`616cae7d7f64b8ae733455cac84e2f3392fb6dc91c6e3ead13066e026564706b`.
+All eleven listed files match their hashes; source/base commits, executor
+environment and thread match the immutable supplement. The exact manifest,
+extra records, frozen source prompt and fresh comparison logs are retained in
+`tests/upstream/diamond-payments-integration-20261030/coordinator-evidence.tar.gz`.
+Its adjacent `coordinator-evidence-verification.json` records hashes and scope.
+The original supplement, 175-record checksum manifest and archives are unchanged.
+
+The extra retrieved baseline log names base `f4dee4a2` and reports exit 1;
+its separately retrieved comparison reports 20 identical missing references
+and both exits 1. These records have separate coordinator retrieval provenance,
+outside original source checksum coverage. They do not authenticate the time
+or execution of an original historical baseline run.
+
+The coordinator's fresh comparison and this repair's independent recomputation
+use exact committed base `f4dee4a2` (tree `3386c829`) and source `20bbb107`
+(tree `299f250a`). All 3,508 snapshot blobs verify against Git object identities,
+and the unchanged scanners reproduce both retained logs byte-for-byte. All
+26 findings (20 missing references and six ambiguities) match the original
+source log and extra baseline log; zero findings are new. This establishes
+unchanged findings at those commits, not an original historical execution.
+Both documentation exits remain 1. The global documentation gate has failed.
+
+`evidence_verified` now records the verified records and comparison.
+`original_validation_verified` remains false because the required documentation
+gate failed, rather than because a baseline comparison is unavailable.
+The former missing-comparison and source-reserve prerequisites are closed on
+that limited basis. Earlier reviews and checks do not approve these new edits;
+fresh reviews are recorded below, and coordinator combined gates remain required.
+This repair changes no Lean source and runs no Lean checks or full build.
+
+Fresh read-only finder and skeptic reviews of this correction found no remaining
+defect or new semantic decision. The skeptic independently recomputed the same
+26 findings from all 3,508 committed Git blobs. The stale top-level manifest
+prerequisite was cleared, and its original retrieval counts and earlier
+validation/reviews are explicitly labeled historical. Neither reviewer used
+the Lean server. The current worktree documentation scan still exits 1 with
+46 missing references and 37 ambiguities, with no payment-file findings;
+hash links, unchanged Lean-file hashes and diff formatting checks pass.
+These reviews cover this evidence repair; the coordinator still owns fresh
+combined validation and approval of the resulting candidate.
 
 Current scope after the explicit human decision on 2026-10-29: keep existing
 semantics and prove exact conditional success and certified failure conditions.
