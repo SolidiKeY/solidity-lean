@@ -1467,3 +1467,18 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} return-tuple theorems use only the standard axioms"
+
+/-! Lane V04b: dispatch coherence by signature. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Decl.frame?_fnSig,
+    ``Solidity.Source.Elaborated.body_sig,
+    ``Solidity.Source.Elaborated.callInternal_sig_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} signature-coherence theorems use only the standard axioms"

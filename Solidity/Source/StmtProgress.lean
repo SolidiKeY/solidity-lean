@@ -720,6 +720,27 @@ theorem Frame.tysOf_locals {f : Frame} (hp : f.names.length = f.ps.length) (hr :
   rw [this, List.reverse_append]
 
 
+/-- **A function's frame has its signature's types.** -/
+theorem Decl.frame?_fnSig {E : Env} {d : Decl} {ps rs : List STy} {f : Frame} (hs : d.fnSig E = some (ps, rs))
+    (hf : d.frame? E = some f) : f.ps = ps ∧ f.rs = rs := by
+  obtain ⟨k, name, scope, top, node⟩ := d
+  cases k <;> cases node <;> (try cases hs)
+  case function.function _ ps0 _ _ _ _ _ rs0 b0 =>
+    cases b0 with
+    | none => cases hf
+    | some blk =>
+      cases blk with
+      | block b =>
+        change (match ps0.tys E scope .memory, rs0.tys E scope .memory with
+          | Option.some a, Option.some r => Option.some (a, r)
+          | _, _ => Option.none) = some (ps, rs) at hs
+        change Frame.mk? E scope ps0 rs0 b _ false = some f at hf
+        unfold Frame.mk? at hf
+        cases ha : ps0.tys E scope .memory <;> cases hr : rs0.tys E scope .memory <;>
+          simp only [ha, hr, reduceCtorEq, Option.some.injEq, Prod.mk.injEq] at hs hf
+        subst hf
+        exact ⟨hs.1, hs.2⟩
+
 /-- **An elaborated body is in its frame**: its locals are its returns over
 its parameters, last innermost, exactly the frame `callInternal` builds. -/
 theorem Elaborated.body_locals (el : Elaborated) {d : Decl} {b : RBody el.res.env}
@@ -741,5 +762,30 @@ theorem Elaborated.callInternal_ns (el : Elaborated) (G : Glob el.res.env) (hG :
   have hloc : rs.reverseAux (ps.reverseAux []) = b.locals := by
     rw [Elaborated.body_locals el hdec hb', hps, hrs, List.reverseAux_eq, List.reverseAux_eq, List.append_nil]
   exact Solidity.Source.callInternal_ns G F n d vs rs b hb hloc hrs (by rw [hps]) hmods hz hf ho
+
+
+/-- **An elaborated body has its declaration's signature.** -/
+theorem Elaborated.body_sig (el : Elaborated) {d : Decl} {b : RBody el.res.env} {ps rs : List STy}
+    (hd : d ∈ el.res.unit.decls) (hb : el.prog.body d = some b) (hs : d.fnSig el.res.env = some (ps, rs)) :
+    b.ps = ps ∧ b.rs = rs := by
+  obtain ⟨f, L', hf, D, hps, hrs, _⟩ := el.bodies_typed d hd b hb
+  obtain ⟨h1, h2⟩ := Decl.frame?_fnSig hs hf
+  exact ⟨hps.trans h1, hrs.trans h2⟩
+
+/-- **Internal calls in elaborated programs, by signature**: an internal
+call is never `stuck` when the declaration virtual dispatch finds is one
+of the unit's with the call's signature and a body without modifiers in
+the statement fragment (return types with defaults). For a call whose
+dispatch is the called declaration itself, the signature is the call
+node's own (`RExpr.call`'s premise). -/
+theorem Elaborated.callInternal_sig_ns (el : Elaborated) (G : Glob el.res.env) (hG : G.prog = el.prog) (F : Fr)
+    (n : Nat) (d : Decl) {ps : List STy} (vs : Vals el.res.env.layout ps) (rs : List STy) (b : RBody el.res.env)
+    (hdec : G.dispatchFn F.contract d ∈ el.res.unit.decls) (hb : G.prog.body (G.dispatchFn F.contract d) = some b)
+    (hsig : (G.dispatchFn F.contract d).fnSig el.res.env = some (ps, rs)) (hmods : b.mods = [])
+    (hz : ∀ τ ∈ rs, (Val.default el.res.env.layout τ).isSome = true)
+    (hf : b.items.ValFrag) (ho : b.items.OpsOK) : NS (callInternal G F n d vs rs) := by
+  have hb' : el.prog.body (G.dispatchFn F.contract d) = some b := by rw [← hG]; exact hb
+  obtain ⟨hps, hrs⟩ := Elaborated.body_sig el hdec hb' hsig
+  exact Elaborated.callInternal_ns el G hG F n d vs rs b hdec hb hps hrs hmods hz hf ho
 
 end Solidity.Source

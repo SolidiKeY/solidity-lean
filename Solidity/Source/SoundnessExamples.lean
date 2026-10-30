@@ -433,5 +433,11 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.retPair_ns
 /-- info: 'Solidity.Source.SoundnessExamples.retPair_unframed_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.retPair_unframed_stuck
+/-- info: 'Solidity.Source.Decl.frame?_fnSig' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Decl.frame?_fnSig
+/-- info: 'Solidity.Source.Elaborated.body_sig' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.body_sig
+/-- info: 'Solidity.Source.Elaborated.callInternal_sig_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_sig_ns
 
 end Solidity.Source.SoundnessExamples

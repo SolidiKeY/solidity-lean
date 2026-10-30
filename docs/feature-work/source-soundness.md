@@ -272,7 +272,7 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `itemsNSP` (the post `Out.esc`; `Out.close_esc`, `Out.up_esc`) | outside loops (`SCtx.loop = false`) a block of the fragment ends normally or by `return`: no `break`/`continue` escapes it |
 | `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **leaf functions**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment (so making no calls, emitting nothing, with value-typed locals) and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults); the frame hypotheses are not derived from the elaboration or dispatch |
 | `Elaborated.body_locals` (from `Decl.frame?_lengths`, `Frame.mk?_lengths`, `Syn.tys_params_length`, `Syn.tys_typeName_length`, `Frame.tysOf_locals`) | every elaborated body's locals are its returns over its parameters, last innermost: the frame `callInternal` builds |
-| `Elaborated.callInternal_ns` | in an elaborated program, `callInternal_ns`'s frame hypotheses reduce to dispatch coherence: the body virtual dispatch finds has the call's parameter and return types |
+| `Elaborated.callInternal_ns`, `Elaborated.callInternal_sig_ns` (from `Elaborated.body_sig`, `Decl.frame?_fnSig`) | in an elaborated program, `callInternal_ns`'s frame hypotheses reduce to dispatch coherence, stated syntactically: the declaration virtual dispatch finds has the call's signature (`fnSig`); when dispatch returns the called declaration itself, that is the call node's own premise |
 | `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
@@ -480,8 +480,12 @@ generates no equation lemmas for `Decl.frame?`'s nested match) and
 `Frame.tysOf_locals` turn that into `b.rs.reverse ++ b.ps.reverse`
 (`Elaborated.body_locals`), so `Elaborated.callInternal_ns` needs only
 the callee's signature to agree with the call's (`b.ps = ps`,
-`b.rs = rs`) and the dispatched declaration to be one of the unit's.
-That agreement (dispatch coherence) is not proved.
+`b.rs = rs`) and the dispatched declaration to be one of the unit's;
+`Elaborated.callInternal_sig_ns` states it as the dispatched declaration's
+`fnSig` being the call's (`Decl.frame?_fnSig`: a function's frame has its
+signature's types). Dispatch only picks overrides with the call's
+parameter types (`Env.fnIn`), so the open part is the return types of an
+override, which needs G14's override rules (`InheritanceOK`).
 
 **How to continue the walk.** Add a field per interpreter function to the
 induction hypotheses (`ExprNSAt`, `StmtNSAt`, as `Horizon.lean`'s
