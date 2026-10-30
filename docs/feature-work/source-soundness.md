@@ -335,8 +335,7 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
 - `calldata` references (six sites by the census, two of which name
   calldata explicitly; the other four were not re-checked by the review; all shadowed by the decoder's
   refusal: no `cdRef` is ever built);
-- getters of struct and array results (closed for `bytes`/`string`:
-  `string public s` now returns the ABI encoding of `s`, `ElaborateExamples`, `elabStr`);
+- getters of non-value types (`string public s`);
 - `fallback` with parameters;
 - the default of function-typed variables (a function-typed state
   variable read before written; function-typed locals, fields, returns);
@@ -433,7 +432,7 @@ Kept current at every checkpoint.
   from the elaboration;
 - the run-time gaps not on the ledger
   (storage-pointer and calldata return slots, function-typed defaults,
-  getters of struct and array results, `fallback` with parameters, dynamic ABI
+  getters of non-value types, `fallback` with parameters, dynamic ABI
   decoding and encoding of aggregates, calldata references).
 
 **How to continue the walk.** Add a field per interpreter function to the

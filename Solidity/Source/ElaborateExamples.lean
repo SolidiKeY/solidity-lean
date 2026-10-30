@@ -167,26 +167,6 @@ def runD (el : Elaborated) (value : Nat) (inputs : List Bytes) (h : value < 2 ^ 
 #guard (elabD.map fun el => (runD el 1 []).head?) == some (some (some (.revert [])))
 #guard (elabD.map fun el => (runD el 0 []).head?) == some (some (some (.success [])))
 
-/-- `contract D { string public s; function set() public { s = "ab"; } }` -/
-def unitStr : Syn .unit :=
-  .unit (.cons (.contract false "D" .none .nil
-      (.cons (.stateVar (.elem .string) (some .pub) none none false "s" .none)
-      (.cons (.function (.ident "set") .nil (some .pub) none .nil false none .nil (.some (.block
-          (.cons (stmt (.assign .assign (.ident "s") (.lit (.str [97, 98])))) .nil))))
-      .nil)))
-    .nil)
-
-def elabStr : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitStr)
-
-#guard elabStr.isSome
-
--- **A `string` getter** (lane V04b, a run-time gap closed): before `set()`
--- `s()` is the ABI encoding of `""`, after it of `"ab"` (offset, length,
--- padded bytes).
-#guard (elabStr.map fun el => runD el 0 [selOf "s()", selOf "set()", selOf "s()"]) ==
-  some [some (.success []), some (.success (arg 32 ++ arg 0)), some (.success []),
-    some (.success (arg 32 ++ arg 2 ++ ([97, 98] ++ List.replicate 30 0)))]
-
 /-- `e()` entered in a static frame or not, after deploying `D`. -/
 def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
