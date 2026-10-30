@@ -59,6 +59,7 @@ import Solidity.Source.SemanticsExamples
 import Solidity.Source.Unique
 import Solidity.Source.Horizon
 import Solidity.Source.Session
+import Solidity.Source.SoundnessExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -1332,3 +1333,60 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} checkpoint-1 checker theorems use only the standard axioms"
+
+/-! Lane V04b checkpoints 2-3: preservation of the heap typing, the value
+layer and value-fragment progress, the integration fixes (EIP-214, local
+storage pointers, string byte writes; `docs/feature-work/source-soundness.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.binVal_ok,
+    ``Solidity.Source.cmpVal_ok,
+    ``Solidity.Source.shiftVal_ok,
+    ``Solidity.Source.unaryVal_ok,
+    ``Solidity.Source.incDecVal_ok,
+    ``Solidity.Source.amount_ok,
+    ``Solidity.Source.convVal_ok,
+    ``Solidity.Source.constVal_ok,
+    ``Solidity.Source.Typed.toR_opsOK,
+    ``Solidity.Source.StmtD.toR_opsOK,
+    ``Solidity.Source.Elaborated.body_opsOK,
+    ``Solidity.Source.Elaborated.inits_opsOK,
+    ``Solidity.Source.convRV_ns,
+    ``Solidity.Source.readAt_ns,
+    ``Solidity.Source.writeAt_ns,
+    ``Solidity.Source.keyStep_nsp,
+    ``Solidity.Source.exprNSAt,
+    ``Solidity.Source.evalE_valFrag_ns,
+    ``Solidity.Source.stmtNSAt,
+    ``Solidity.Source.stmtNS,
+    ``Solidity.Source.itemsNS,
+    ``Solidity.Source.ItemsD.toR_ns,
+    ``Solidity.Source.alloc_ok,
+    ``Solidity.Source.allocRef_ok,
+    ``Solidity.Source.heapPut_ok,
+    ``Solidity.Source.heapAt_ok,
+    ``Solidity.Source.HeapOK.alloc,
+    ``Solidity.Source.HeapOK.write,
+    ``Solidity.Source.SoundnessExamples.add_value,
+    ``Solidity.Source.SoundnessExamples.add_bool_stuck,
+    ``Solidity.Source.SoundnessExamples.badBinary_not_opsOK,
+    ``Solidity.Source.SoundnessExamples.badBinary_stuck,
+    ``Solidity.Source.SoundnessExamples.cond_value,
+    ``Solidity.Source.SoundnessExamples.loop_ns,
+    ``Solidity.Source.SoundnessExamples.loop_value,
+    ``Solidity.Source.SoundnessExamples.cb_ns,
+    ``Solidity.Source.SoundnessExamples.cb_value,
+    ``Solidity.Source.SoundnessExamples.ret_unframed_stuck,
+    ``Solidity.Source.SoundnessExamples.ret_framed_ns,
+    ``Solidity.Source.SoundnessExamples.stringByte_write,
+    ``Solidity.Source.SemanticsExamples.static_value_call_halts,
+    ``Solidity.Frontend.Static.InferExamples.ptrCopy_refused,
+    ``Solidity.Frontend.Static.InferExamples.ptrDelete_refused]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane V04b checkpoint 2-3 theorems use only the standard axioms"

@@ -387,6 +387,12 @@ def STy.isRef : STy → Bool
   | .bytes _ | .string _ | .array _ _ _ | .struct _ _ | .mapping _ _ => true
   | _ => false
 
+/-- A `storage` reference type (a mapping included). -/
+def STy.storageRef : STy → Bool
+  | .bytes l | .string l | .array l _ _ | .struct l _ => l == .storage
+  | .mapping _ _ => true
+  | _ => false
+
 /-- solc's location rule for a local declaration: a reference type names
 its location (a `mapping` only `storage`), a value type none, and a
 `storage` reference is initialized (no dangling storage pointer). -/
@@ -676,7 +682,7 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   /-- `delete e` on an assignable non-mapping, not a local `storage`
   pointer. -/
   | delete {e : Syn .expr} {τ : STy} : LVal Γ e τ → (τ matches .mapping _ _) = false →
-      (τ.loc? == Option.some .storage && Γ.namesLocal e) = false →
+      (τ.storageRef && Γ.namesLocal e) = false →
       Typed Γ (.unaryPrefix .delete e) (.tuple [])
   /-- `a ∘ b` for `+ - * / %`: numbers meeting at a common type. -/
   | arith {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.arith, a, b) →

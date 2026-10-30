@@ -198,7 +198,7 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
   | .unaryPrefix .delete a => do
     let ⟨τ, l⟩ ← LVal.inferN n Γ a
     if h : τ.isMapping = false then
-      if hp : (τ.loc? == Option.some .storage && Γ.namesLocal a) = false then pure ⟨_, .delete l h hp⟩
+      if hp : (τ.storageRef && Γ.namesLocal a) = false then pure ⟨_, .delete l h hp⟩
       else Option.none
     else Option.none
   | .unarySuffix _ a => do
