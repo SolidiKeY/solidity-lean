@@ -13,8 +13,10 @@ that completes at some horizon is the result at every larger one
 (`firstDone_runTx`), and a `stuck` run stays stuck (`runTx_stuck_stable`),
 so it is not a lack of horizon.
 
-`Approx`/`Grow` additionally track that events only grow; they are the
-start of the events of non-completing transactions, not yet used.
+Every interpreter function also only appends events (`growAt`), and a run
+that times out shows a prefix of the events of the run at every larger
+horizon (`approxAt`, `runTx_events_mono`); `Solidity/Source/Session.lean`
+uses this to show the events of unfinished transactions.
 
 The tactic `below_go` walks two copies of a body that differ only in the
 horizon: through binds, `attempt`s, `match`es and `if`s, closing calls by the

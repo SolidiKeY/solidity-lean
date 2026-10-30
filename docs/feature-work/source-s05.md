@@ -286,56 +286,45 @@ These are listed under `limitations:`.
 
 ## Handoff (S05)
 
-**Checkpoint status.**
+**Checkpoint status** (after the follow-up queue of 2026-10-29).
 
 | Checkpoint | Status | Theorems |
 |---|---|---|
-| 1 | partial | `Elaborated`, `RBody.ofDerivation_typed`, `Env.fieldTy?_of_fieldAt`, the closed typing gaps; uniqueness not proved (Q1) |
-| 2 | done, with the gaps listed | `wrapBits_mem`, `intRes_overflow`, `intRes_unchecked`, `intBin_divZero`; controls `add_overflow_*`, `div_by_zero`, `order_*`, `short_circuit` |
-| 3 | done, with the gaps listed | `firstDone_mono`, `firstDone_spec`, `firstDone_none_iff`; controls `modifier_*`, `ctor_order_*`, `horizon_*` |
-| 4 | done, with the gaps listed | controls `revert_rolls_back*`, `commit_keeps_storage`, `transient_cleared`, `reentrant_callback`, `outside_revert_rolls_back`, `static_callback_refused` |
-| 5 | partial | `sessionGo_mono`, `sessionAt_consistent`, `sourceLang`, `semExprCoverage_of_typed`, `semStmtCoverage_of_typed`, `semExprGaps_spec`, `session_runs`; progress and `SourceSpec` open |
+| 1 | done | `Typed.unique`, `StmtD.unique`, `ItemsD.unique`, `RBody.ofDerivation_unique` (Q1, solc literal typing); `Typed.infer`/`StmtD.infer`, `elaborate`, `Elaborated` coherence for every part (item 1b) |
+| 2 | done, with the gaps listed | as before; dynamic ABI arguments decoded (`decodeArgs`) |
+| 3 | done, with the gaps listed | as before; `runTx_stable`, `deploy_stable`, `firstDone_runTx`, `runTx_stuck_stable` (horizon independence); getters, static `emit`, constructor value |
+| 4 | done, with the gaps listed | as before |
+| 5 | partial | `sessionAt_consistent`, `sourceLang`; `sessionAtEvents_consistent`, `sourceLangEvents` (events of unfinished transactions, from `growAt`, `approxAt`, `runTx_events_mono`); a progress theorem, failure points and `SourceSpec` open |
 
-**Gates.**
+**Gates** (head `02556fb` and its doc follow-up).
 
-- Lean diagnostics are clean on every touched Lean file.
+- Lean diagnostics clean on every touched file; a full `./run-lean.sh`:
+  "Build completed successfully (782 jobs)" and "(262 jobs)".
 - No `sorry`, new axioms, `native_decide`, `implemented_by` or
-  `maxHeartbeats` changes. The pins in `SemanticsExamples.lean` are
-  recorded with `node scripts/check-axiom-pins.mjs --write`.
-- `TrustAudit.lean` has a source-semantics block (21 theorems).
-- `node scripts/check-g07.mjs --log` over a full `./run-lean.sh` (head
-  `6269063`) reports 0 new failures:
-  - check-trust: 0 findings.
-  - check-layers: 0 modules reach the elaborator.
-  - check-orphans: 0 orphaned (790 reachable).
-  - check-noncircular: 0 violations (23 source modules).
-  - check-axiom-pins: 497 pins, 0 errors.
-  - check-source-grammar and `source-ctors --check`: clean.
-  - Script tests: pass.
-  - check-doc-paths: 46 missing, which is the baseline.
-  - G03 ledger: 0 errors.
-  - The build: "Build completed successfully (775 jobs)" and "(262 jobs)".
-  - check-solkey: 37 mismatches, which is the baseline.
-  - An earlier run on `3419665` hit the baselined `Derived17` out-of-memory
-    kill; the final run did not.
+  `maxHeartbeats` changes. Large proofs are split across declarations
+  instead (see [Events of unfinished transactions](#events-of-unfinished-transactions)).
+- Pins recorded with `node scripts/check-axiom-pins.mjs --write` (510 pins,
+  0 errors); `TrustAudit.lean`'s source-semantics block lists the new
+  headline theorems.
+- `node scripts/check-g07.mjs --log`: 0 new failures; check-solkey 37
+  mismatches (baseline).
 
-**Elaboration times** (`./run-lean.sh`, warm):
-
-| Module | Time |
-|---|---|
-| `Solidity.Source.SemanticsExamples` | about 7 s |
-| `Solidity.Source.Eval` | built within the run, no outlier |
-
-The kernel controls need transaction horizons of 20–30. A
-`String`-valued signature was not reducible in the kernel, so signatures
-are character lists (`sigOf`).
+**Elaboration.** `Solidity/Source/Horizon.lean` is the slowest new module
+(a few minutes in a full build); its step theorems each stay within the
+default heartbeats.
 
 **For integration.**
 
-- The sibling lanes read the new `Typed`/`RExpr` constructors and the
-  `DecidableEq STy` instance.
-- G13's checker must produce the new derivations.
-- G15's admission needs an elaborator `Resolution → Program` to give
-  `SourceSpec.meaning`.
-- G46 needs the failure points and the events of unfinished
-  transactions before refinement can be stated against this semantics.
+- G13's checker must follow the `Typed`/`StmtD` rule changes recorded in
+  [source-s02.md](source-s02.md#typed-rules-changed-for-g13s-checker),
+  including `StmtD.rethrow`'s premise `rethrowVar? body = some d`.
+- G15's `SourceSpec.meaning` can use `elaborate`.
+- G46 can read `sourceLangEvents`; it still needs failure points.
+- Sessions: an unfinished *deployment* still shows no events.
+
+**Open** (also under `limitations:`): a progress theorem (`stuck` is stable
+but not ruled out); gas/frame failure points and G01's `Failures`;
+`SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
+rule); calldata references, `abi.decode`, `new`, slices, inline arrays,
+`try`, tuple declarations, `fallback` with parameters; dynamic-length
+`Panic(0x41)`; user-defined value types in the decoder.

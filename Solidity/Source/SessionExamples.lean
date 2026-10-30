@@ -68,7 +68,7 @@ def counts (n : Nat) : Option (Nat × Nat) :=
 #guard ((counts 30).map fun c => decide (c.2 > 1)) == some true
 -- A larger horizon shows more of them (consistency, `sessionAtEvents_consistent`).
 #guard ((counts 30).bind fun c => (counts 60).map fun d => decide (c.2 < d.2)) == some true
--- Neither session has a final observation: the transaction never completes.
+-- The session has no final observation: the transaction never completes.
 #guard (elabSpin.map fun el => (sessionFromEvents (progSpin el) envSpin (addr 0) 60).final.isNone) == some true
 
 end Solidity.Source.SessionExamples
