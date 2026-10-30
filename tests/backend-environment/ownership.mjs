@@ -2,7 +2,7 @@
 // Exercise the real gate and Git ranges in an isolated fixture; no Lean is run.
 import assert from 'node:assert/strict';
 import {execFileSync,spawnSync} from 'node:child_process';
-import {chmodSync,copyFileSync,mkdirSync,mkdtempSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
+import {chmodSync,copyFileSync,mkdirSync,mkdtempSync,readFileSync,rmSync,symlinkSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -33,6 +33,7 @@ try{
  for(let i=0;i<11;i++)write(`Solidity/Backend/Environment/Fixture${i}.lean`,'-- fixture\n');
  for(const file of ['Solidity.lean','docs/README.md','docs/module-map.md'])write(file,'-- retained registry entry\n');
  write('outside.txt','retained\n');
+ write('lakefile.toml','[[lean_lib]]\nname = "Fixture"\nweakLeanArgs = ["--tstack=131072"]\n');
  git(['add','.']);commit();
  // Advance the integration base with reserved source/frontend/trust work and
  // registry additions. None of it may be dropped by the lane's contribution.
@@ -47,14 +48,40 @@ try{
  // Give the isolated history its advanced integration boundary; keep real
  // dependency/source/scalar/storage pins. Exercise the default, with no flags.
  const boundary=git(['rev-parse','HEAD']);
+ // A later authorized combined base can replace source proofs and registry
+ // descriptions. The environment contribution must preserve that exact work.
+ for(const file of reserved)write(file,'-- refreshed source integration\n');
+ for(const file of ['Solidity.lean','docs/README.md','docs/module-map.md'])
+  write(file,'-- retained registry entry\n-- refreshed base registry entry\n');
+ git(['add','.']);commit();
+ const refreshed=git(['rev-parse','HEAD']);
  const gateFile=join(fixture,'scripts/check-backend-environment.mjs');
  const gateSource=readFileSync(gateFile,'utf8');
  assert.ok(gateSource.includes("const integrationBase='b965d675e260a374401b131e59d501f8ce5da147';"));
+ assert.ok(gateSource.includes("const refreshedBase='37f572e8d954f2c697eeb3cda7a1a0206fd33c89';"));
  write('scripts/check-backend-environment.mjs',gateSource.replace(
   "const integrationBase='b965d675e260a374401b131e59d501f8ce5da147';",
-  `const integrationBase='${boundary}';`));
+  `const integrationBase='${boundary}';`).replace(
+  "const refreshedBase='37f572e8d954f2c697eeb3cda7a1a0206fd33c89';",
+  `const refreshedBase='${refreshed}';`));
  git(['add','.']);commit();
  gate(null);
+ // Reproduce the actual combined-validation failure with the exact temporary
+ // serial configuration; arbitrary content and tracked copies remain forbidden.
+ const config='.cloudvm-validation.toml';
+ const serial='[[lean_lib]]\nname = "Fixture"\nweakLeanArgs = ["--tstack=131072", "-j1"]\n';
+ write(config,serial);gate(null);
+ for(const invalid of [serial.replace('-j1','-j2'),serial+'more = true\n',serial.replace('--tstack=131072','-DmaxHeartbeats=0')]){
+  write(config,invalid);gate(/unexpected temporary validation config/);
+ }
+ rmSync(join(fixture,config));
+ write('tests/backend-environment/config.txt',serial);
+ symlinkSync('tests/backend-environment/config.txt',join(fixture,config));
+ gate(/temporary validation config must be a regular file/);
+ rmSync(join(fixture,config));rmSync(join(fixture,'tests/backend-environment/config.txt'));
+ write(config,serial);git(['add',config]);gate(/unowned write .cloudvm-validation.toml/);
+ commit();cleanGate(/unowned write .cloudvm-validation.toml/);
+ git(['reset','--hard','HEAD^']);
  write('tests/backend-environment/owned.txt','allowed repair\n');gate(null);
  write('unowned.txt','unowned repair\n');gate(/unowned write unowned.txt/);
  rmSync(join(fixture,'unowned.txt'));
@@ -66,9 +93,9 @@ try{
  write('docs/README.md','');gate(/shared registry is not append-only/);
  git(['restore','docs/README.md']);
  write('docs/README.md','');git(['add','docs/README.md']);
- write('docs/README.md','-- retained registry entry\n-- advanced base registry entry\n');gate(/shared registry is not append-only/);
+ write('docs/README.md','-- retained registry entry\n-- refreshed base registry entry\n');gate(/shared registry is not append-only/);
  git(['reset','-q','HEAD','--','docs/README.md']);
- write('docs/README.md','-- retained registry entry\n-- advanced base registry entry\n-- appended entry\n');gate(null);
+ write('docs/README.md','-- retained registry entry\n-- refreshed base registry entry\n-- appended entry\n');gate(null);
  git(['restore','docs/README.md']);
  rmSync(join(fixture,'tests/backend-environment/owned.txt'));
  // Clean committed violations must fail under the normal gate invocation.
@@ -83,7 +110,7 @@ try{
   cleanGate(/shared registry is not append-only/);
   git(['reset','--hard',before]);
  }
- write('docs/README.md','-- retained registry entry\n-- advanced base registry entry\n-- committed append\n');
+ write('docs/README.md','-- retained registry entry\n-- refreshed base registry entry\n-- committed append\n');
  git(['add','docs/README.md']);commit();cleanGate(null);
  git(['reset','--hard',before]);
  // Dropping only the advanced base's rows (while retaining the older base)
@@ -95,9 +122,19 @@ try{
   git(['reset','--hard',before]);
  }
  for(const file of reserved){
-  git(['rm',file]);commit();cleanGate(/unowned write/);
+  git(['rm',file]);commit();cleanGate(/integrated combined base file changed/);
+  git(['reset','--hard',before]);
+  write(file,git(['show',`${boundary}:${file}`])+'\n');
+  git(['add',file]);commit();cleanGate(/integrated combined base file changed/);
   git(['reset','--hard',before]);
  }
+ const sourceFile=reserved[0];
+ write(sourceFile,'-- changed source integration\n');gate(/integrated combined base file changed/);
+ git(['add',sourceFile]);
+ write(sourceFile,'-- refreshed source integration\n');gate(/unowned write/);
+ git(['reset','--hard',before]);
+ chmodSync(join(fixture,sourceFile),0o755);git(['add',sourceFile]);commit();
+ cleanGate(/integrated combined base file changed/);git(['reset','--hard',before]);
  // A committed change to a pinned other-lane file cannot use the exemption.
  write('Solidity/Backend/Scalar/Slice.lean','-- changed scalar contribution\n');
  git(['add','.']);commit();cleanGate(/integrated scalar file changed/);
@@ -134,5 +171,5 @@ try{
  git(['restore','Solidity/Backend/Environment/Fixture0.lean']);
  write('Solidity/Backend/Environment/Fixture0.lean','axiom unsound : False\n');
  gate(/proof shortcut\/budget/);
- console.log('ownership regressions pass: advanced integration base and reserved source/trust preservation, contribution range, live repairs, unowned writes/renames, registry deletion, default committed violations/appends, pinned scalar/storage blobs and modes, explicit range, frozen imports, closure, proof gate');
+ console.log('ownership regressions pass: advanced/refreshed integration bases, reserved source/trust blobs and modes, exact untracked serial config, tracked/changed/symlink config rejection, contribution range, live repairs, unowned writes/renames, registry deletion, default committed violations/appends, pinned scalar/storage blobs and modes, explicit range, frozen imports, closure, proof gate');
 }finally{rmSync(fixture,{recursive:true,force:true});}

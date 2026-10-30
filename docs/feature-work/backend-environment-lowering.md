@@ -541,3 +541,45 @@ file. That file is now removed before those cases, and explicit clean-status
 assertions pass. Both review passes were performed by the repair worker:
 attempts to start independent reviewers failed with a thread-store
 `no rollout found` error. No review used Lean, the server or a build.
+
+## Combined validation follow-up (2026-10-30)
+
+Attempt 15 passed combined gates 0–11, then the environment ownership gate
+rejected the coordinator's untracked `.cloudvm-validation.toml`. The gate now
+accepts that exact filename only as an untracked regular file whose complete
+contents equal the current `lakefile.toml` with `"-j1"` added to each
+`weakLeanArgs` list, matching the validator's transformation. Staged/committed
+copies, symlinks, changed arguments and arbitrary extra content still fail.
+The tracked Lake configuration remains outside lane ownership.
+
+The refreshed combined base `37f572e8` also contains later authorized source
+typing, evaluation and soundness changes. The complete requested ownership
+interval still starts at `b965d675`; other contributions changed by the
+refresh are pinned to their exact refreshed blobs and modes. Shared registry
+changes must be additive relative to that refreshed base, preserving its
+updated source descriptions. The original environment contribution and its
+dependency availability remain checked separately at their original pins.
+An additional refreshed-base comparison prevents a committed reversion to
+the older boundary from disappearing from the ownership diff.
+
+The earlier retained P1/P2 findings are preserved by the current integration:
+the requested base is an ancestor, source interpreter/session/progress and
+trust coverage remain present, and `hexCall_typed` still requires zero
+derivations. No Lean file was edited for this follow-up; no Lean diagnostics
+or full builds were run. The coordinator owns the next combined gates.
+
+Focused checks pass: `node scripts/check-backend-environment.mjs`,
+`node tests/backend-environment/ownership.mjs`, and `git diff --check`.
+The fixture exercises advanced and refreshed bases, exact temporary config
+acceptance plus invalid/staged/committed/symlink controls, source/trust
+deletions and old-boundary reversions, modes, staged violations hidden by
+restoration, registry preservation, frozen imports, closure and proof budgets.
+The actual gate also passes with the current Lake configuration transformed
+exactly as the validator does; the temporary file is removed afterward.
+
+Read-only finder review traced the failed log to temporary-config ownership
+and the current failure to refreshed source contributions. Read-only skeptic
+review found that an unchanged refreshed registry produces an empty numstat,
+and that a complete older-boundary reversion can disappear from the original
+interval. Both cases are repaired and covered by the passing fixtures. These
+reviews were performed by the repair worker without Lean/server/build use.
