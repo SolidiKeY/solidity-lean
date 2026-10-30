@@ -578,6 +578,15 @@ theorem inlineHeap_read_stuck :
       (.nil, { SemanticsExamples.s0 with heap := inlineHeap })).1 = .error (.stuck "inline aggregate element") :=
   ⟨HeapOK.empty.alloc (.array fun _ => .bytes _), HeapShaped.empty.alloc trivial, rfl⟩
 
+/-- **Witness** (`zeroOK`): zeroing a `bool[2] memory` allocates one object,
+at `0`, whose elements are bare values (`false`). -/
+theorem zeroArr_alloc :
+    (match ((zeroVal (E := SemanticsExamples.E0) (Γ := []) 6 (.array .memory .bool (some 2))).run
+      (.nil, SemanticsExamples.s0)) with
+    | (.ok (.memRef _ a), y) => some (a, y.2.heap.next)
+    | _ => none) = some (0, 1) := by
+  rfl
+
 /-! ## Axioms -/
 
 /-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -734,6 +743,22 @@ theorem inlineHeap_read_stuck :
 #guard_msgs in #print axioms Solidity.Source.memSet_inner
 /-- info: 'Solidity.Source.writeLoc_memByte_inner' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_inner
+/-- info: 'Solidity.Source.MemOK.self' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.MemOK.self
+/-- info: 'Solidity.Source.Hoare.memGrow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Hoare.memGrow
+/-- info: 'Solidity.Source.Val.default_loc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Val.default_loc
+/-- info: 'Solidity.Source.allocRef_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.allocRef_mem
+/-- info: 'Solidity.Source.zeroOK_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.zeroOK_zero
+/-- info: 'Solidity.Source.zeroOK_step' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.zeroOK_step
+/-- info: 'Solidity.Source.zeroOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.zeroOK
+/-- info: 'Solidity.Source.SoundnessExamples.zeroArr_alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.zeroArr_alloc
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/

@@ -290,9 +290,15 @@ well-typed but unshaped `ptrHeap` is excluded). Reading the code finds
 no unshaped allocation (`zeroVal` calls `zeroData` only at memory types,
 all aggregates; `loadMem` reaches its `Data.val` arm only at types without
 a location; the other `allocRef` and `heapPut` sites build aggregates), so
-what remains is a proof gap, not a semantic one. Not yet done: proving
-that every allocation site allocates objects satisfying `HeapShaped` and
-`HeapInner`; carrying both through frame restores (`Eval.lean` and
+what remains is a proof gap, not a semantic one. The zeroing
+allocator is proved: `zeroOK` (joint induction on fuel over `zeroData`,
+`zeroVal`, `zeroElems`, `zeroFields`, structure `ZeroOK`) shows each keeps
+`MemOK` (`EMOK`, `HeapShaped`, `HeapInner`), halts included, builds
+agreeing, shaped objects with bare-value elements, and `zeroVal`'s value
+agrees (`allocRef_mem`, `Hoare.memGrow` for the growing heap typing,
+`Val.default_loc`); witness `zeroArr_alloc`. Not yet done: proving the
+same for the other allocation sites (`loadMem`, the ABI decoder,
+`structNew`, literals); carrying both through frame restores (`Eval.lean` and
 `Semantics.lean` reset the heap or restore a saved one, as for
 `HeapOK`). Memory writes keep `HeapInner`, halts included:
 `memSet_inner` (it stores a `Data.val` and keeps the other elements;
@@ -641,7 +647,7 @@ Kept current at every checkpoint.
 | Checkpoint | Status | Theorems |
 |---|---|---|
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
-| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element and member reads (`memElem_ok`, `readLoc_mem_ok`); memory writes keep `HeapInner` (`memSet_inner`, `writeLoc_memByte_inner`); no preservation theorem for the walk |
+| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element and member reads (`memElem_ok`, `readLoc_mem_ok`); memory writes keep `HeapInner` (`memSet_inner`, `writeLoc_memByte_inner`); the zeroing allocator keeps `MemOK` (`zeroOK`); no preservation theorem for the walk |
 | 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types and unit membership, `hdec` (`Elaborated.callInternal_call_ns`); internal calls inside expressions under `CallsOK` (`evalE_callFrag_ns`, joint induction `fragAt`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
 | 4 Close gaps | partial | UDVT argument decoding (`elabW`); Panic `0x41` in the decoder (`elabB`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
