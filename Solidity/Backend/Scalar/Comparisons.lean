@@ -21,8 +21,8 @@ def uintLt : BinaryCertificate .lt .uint rfl where
     intro a b tail
     change some (flag (decide ((encodeValue .uint a).toNat < (encodeValue .uint b).toNat)) :: tail) = some (flag (decide (a.val < b.val)) :: tail)
     rw [encode_uint_toNat, encode_uint_toNat]
-    have ha := uint_range a
-    have hb := uint_range b
+    have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
+    have hb : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
     have hc : (a.val.toNat < b.val.toNat) ↔ a.val < b.val := by omega
     simp only [hc]
 
@@ -33,8 +33,8 @@ def uintGt : BinaryCertificate .gt .uint rfl where
     intro a b tail
     change some (flag (decide ((encodeValue .uint b).toNat < (encodeValue .uint a).toNat)) :: tail) = some (flag (decide (b.val < a.val)) :: tail)
     rw [encode_uint_toNat, encode_uint_toNat]
-    have ha := uint_range a
-    have hb := uint_range b
+    have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
+    have hb : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
     have hc : (b.val.toNat < a.val.toNat) ↔ b.val < a.val := by omega
     simp only [hc]
 
@@ -45,8 +45,8 @@ def uintLe : BinaryCertificate .le .uint rfl where
     intro a b tail
     change some (flag (flag (decide ((encodeValue .uint b).toNat < (encodeValue .uint a).toNat)) == 0) :: tail) = some (flag (decide (a.val ≤ b.val)) :: tail)
     rw [encode_uint_toNat, encode_uint_toNat]
-    have ha := uint_range a
-    have hb := uint_range b
+    have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
+    have hb : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
     have hc : (b.val.toNat < a.val.toNat) ↔ b.val < a.val := by omega
     simp only [hc, flag_not_lt]
 
@@ -57,8 +57,8 @@ def uintGe : BinaryCertificate .ge .uint rfl where
     intro a b tail
     change some (flag (flag (decide ((encodeValue .uint a).toNat < (encodeValue .uint b).toNat)) == 0) :: tail) = some (flag (decide (b.val ≤ a.val)) :: tail)
     rw [encode_uint_toNat, encode_uint_toNat]
-    have ha := uint_range a
-    have hb := uint_range b
+    have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
+    have hb : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
     have hc : (a.val.toNat < b.val.toNat) ↔ a.val < b.val := by omega
     simp only [hc, flag_not_lt]
 

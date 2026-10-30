@@ -31,14 +31,22 @@ theorem signedMulTest_raw (a b : Word) (tail : Stack) :
     run signedMulTest (a::b::tail) =
       some (flag (!PrimTy.int.inRange (a.toInt*b.toInt)) :: a::b::tail) := by
   have hs : Evm.sgn ((b.toNat*a.toNat)%Evm.W) = (a*b).toInt := by
-    have h := sgn_word (a*b)
+    have h : Evm.sgn (BitVec.toNat (a * b)) = BitVec.toInt (a * b) := sgn_word (a*b)
     rw [BitVec.toNat_mul] at h
     simpa only [Nat.mul_comm] using h
-  have hq := Evm.tdiv_sgn_range (x := (b.toNat*a.toNat)%Evm.W)
+  have hq : -↑Evm.W ≤ (Evm.sgn (BitVec.toNat b * BitVec.toNat a % Evm.W)).tdiv (BitVec.toInt a) ∧
+      (Evm.sgn (BitVec.toNat b * BitVec.toNat a % Evm.W)).tdiv (BitVec.toInt a) < ↑Evm.W := Evm.tdiv_sgn_range (x := (b.toNat*a.toNat)%Evm.W)
     (Nat.mod_lt _ Evm.W_pos) a.toInt
   rw [hs] at hq
-  have ht := toWord_ofInt ((a*b).toInt.tdiv a.toInt) hq
-  have h := (Evm.smul_ok a.isLt b.isLt).1
+  have ht : Evm.toWord ((BitVec.toInt (a * b)).tdiv (BitVec.toInt a)) =
+      (BitVec.ofInt 256 ((BitVec.toInt (a * b)).tdiv (BitVec.toInt a))).toNat := toWord_ofInt ((a*b).toInt.tdiv a.toInt) hq
+  have h : ¬(BitVec.toNat b = Evm.H ∧ Evm.sgn (BitVec.toNat a) < 0) ∧
+        ((BitVec.toNat b =
+            if BitVec.toNat a = 0 then 0
+            else Evm.toWord ((Evm.sgn (BitVec.toNat b * BitVec.toNat a % Evm.W)).tdiv (Evm.sgn (BitVec.toNat a)))) ∨
+          BitVec.toNat a = 0) ↔
+      -↑Evm.H ≤ Evm.sgn (BitVec.toNat a) * Evm.sgn (BitVec.toNat b) ∧
+        Evm.sgn (BitVec.toNat a) * Evm.sgn (BitVec.toNat b) < ↑Evm.H := (Evm.smul_ok a.isLt b.isLt).1
   rw [sgn_word, sgn_word, hs, ht] at h
   have hz : a.toNat = 0 ↔ a = 0 := by
     exact (BitVec.toNat_eq (x := a) (y := 0#256)).symm

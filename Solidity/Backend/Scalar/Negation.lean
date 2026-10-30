@@ -24,7 +24,7 @@ theorem negationTest_typed (a : PrimTy.int.Denote) (tail : Stack) :
   change some (flag (encodeValue .int minimumInt == encodeValue .int a) ::
     encodeValue .int a :: tail) = _
   rw [encode_int_beq]
-  have ha := int_range a
+  have ha : -((2 ^ 255 : Nat) : Int) ≤ a.val ∧ a.val < ((2 ^ 255 : Nat) : Int) := int_range a
   have he : decide (minimumInt.val = a.val) = !PrimTy.int.inRange (-a.val) := by
     by_cases hr : PrimTy.int.inRange (-a.val) = true
     · have hrr : -((2 ^ 255 : Nat) : Int) ≤ -a.val ∧

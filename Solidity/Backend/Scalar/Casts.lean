@@ -40,7 +40,7 @@ def toInt : UnaryCertificate .toInt .uint rfl where
     intro a tail
     let n : Int := if a.val < Semantics.intBound then a.val else a.val - Semantics.uintBound
     have hn : PrimTy.int.inRange n = true := by
-      have ha := uint_range a
+      have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
       unfold n Semantics.intBound Semantics.uintBound
       simp only [PrimTy.inRange, decide_eq_true_eq]
       split <;> omega
@@ -59,14 +59,18 @@ theorem cast_code_chain (st : Stack) : run (toInt.code ++ toUint.code) st = some
 theorem cast_roundtrip_uint (a : PrimTy.uint.Denote) :
     (UnOp.evalT .toInt (p := .uint) rfl a).bind
       (fun b => UnOp.evalT .toUint (p := .int) rfl b) = some a := by
-  have h1 := toInt.correct a []
+  have h1 : some [encodeValue .uint a] =
+      (UnOp.evalT .toInt (p := .uint) rfl a).map (fun b => [encodeValue .int b]) :=
+    toInt.correct a []
   change some [encodeValue .uint a] =
     (UnOp.evalT .toInt (p := .uint) rfl a).map (fun b => [encodeValue .int b]) at h1
   cases hx : UnOp.evalT .toInt (p := .uint) rfl a with
   | none => simp only [hx, Option.map_none, reduceCtorEq] at h1
   | some b =>
     simp only [hx, Option.map_some, Option.some.injEq, List.cons.injEq, and_true] at h1
-    have h2 := toUint.correct b []
+    have h2 : some [encodeValue .int b] =
+        (UnOp.evalT .toUint (p := .int) rfl b).map (fun c => [encodeValue .uint c]) :=
+      toUint.correct b []
     change some [encodeValue .int b] =
       (UnOp.evalT .toUint (p := .int) rfl b).map (fun c => [encodeValue .uint c]) at h2
     cases hy : UnOp.evalT .toUint (p := .int) rfl b with
@@ -80,14 +84,18 @@ theorem cast_roundtrip_uint (a : PrimTy.uint.Denote) :
 theorem cast_roundtrip_int (a : PrimTy.int.Denote) :
     (UnOp.evalT .toUint (p := .int) rfl a).bind
       (fun b => UnOp.evalT .toInt (p := .uint) rfl b) = some a := by
-  have h1 := toUint.correct a []
+  have h1 : some [encodeValue .int a] =
+      (UnOp.evalT .toUint (p := .int) rfl a).map (fun b => [encodeValue .uint b]) :=
+    toUint.correct a []
   change some [encodeValue .int a] =
     (UnOp.evalT .toUint (p := .int) rfl a).map (fun b => [encodeValue .uint b]) at h1
   cases hx : UnOp.evalT .toUint (p := .int) rfl a with
   | none => simp only [hx, Option.map_none, reduceCtorEq] at h1
   | some b =>
     simp only [hx, Option.map_some, Option.some.injEq, List.cons.injEq, and_true] at h1
-    have h2 := toInt.correct b []
+    have h2 : some [encodeValue .uint b] =
+        (UnOp.evalT .toInt (p := .uint) rfl b).map (fun c => [encodeValue .int c]) :=
+      toInt.correct b []
     change some [encodeValue .uint b] =
       (UnOp.evalT .toInt (p := .uint) rfl b).map (fun c => [encodeValue .int c]) at h2
     cases hy : UnOp.evalT .toInt (p := .uint) rfl b with

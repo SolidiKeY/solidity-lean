@@ -18,7 +18,7 @@ theorem threshold_accept (w : Fin 32) (i : Fin 255) (a : Nat) :
     · exact hn
     exfalso
     have hle : naturalThresholds[w][i]+1 ≤ a := by omega
-    have hp := Nat.pow_le_pow_left hle (i.val+1)
+    have hp : (naturalThresholds[w][i] + 1) ^ (i.val + 1) ≤ a ^ (i.val + 1) := Nat.pow_le_pow_left hle (i.val+1)
     omega
 
 def powerFits (w : Fin 32) (a n : Nat) : Bool :=
@@ -27,7 +27,7 @@ def powerFits (w : Fin 32) (a n : Nat) : Bool :=
 
 theorem powerFits_correct (w : Fin 32) (a n : Nat) :
     powerFits w a n = decide (a^n < 2 ^ widthBits w) := by
-  have hb : 1 < 2 ^ widthBits w := Nat.one_lt_two_pow (by have := widthBits_bounds w; omega)
+  have hb : 1 < 2 ^ widthBits w := Nat.one_lt_two_pow (by have : 8 ≤ widthBits w ∧ widthBits w ≤ 256 := widthBits_bounds w; omega)
   apply Bool.eq_iff_iff.mpr
   simp only [powerFits, Bool.or_eq_true, decide_eq_true_eq, List.any_eq_true,
     Bool.and_eq_true]
@@ -47,9 +47,9 @@ theorem powerFits_correct (w : Fin 32) (a n : Nat) :
       by_cases hlarge : n < 256
       · exact hlarge
       exfalso
-      have hp := Nat.pow_le_pow_left (show 2 ≤ a by omega) n
-      have he := Nat.pow_le_pow_right (by decide : 0 < 2) (show 256 ≤ n by omega)
-      have hw := Nat.pow_le_pow_right (by decide : 0 < 2) (widthBits_bounds w).2
+      have hp : 2 ^ n ≤ a ^ n := Nat.pow_le_pow_left (show 2 ≤ a by omega) n
+      have he : 2 ^ 256 ≤ 2 ^ n := Nat.pow_le_pow_right (by decide : 0 < 2) (show 256 ≤ n by omega)
+      have hw : 2 ^ widthBits w ≤ 2 ^ 256 := Nat.pow_le_pow_right (by decide : 0 < 2) (widthBits_bounds w).2
       omega
     let i : Fin 255 := ⟨n-1, by omega⟩
     have hi : n = i.val+1 := by dsimp only [i]; omega
@@ -156,13 +156,13 @@ def checkedUintPow : CheckedCertificate .pow .uint rfl where
   body := [.op .EXP]
   correct := by
     intro a b tail
-    have hb : ¬ b.val < 0 := by have := uint_range b; omega
+    have hb : ¬ b.val < 0 := by have : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b; omega
     change guarded _ _ _ _ = some (checkedOutcome .uint
       ((if b.val < 0 then none else some (a.val ^ b.val.toNat)).bind PrimTy.uint.ofInt?) tail)
     simp only [hb, if_false, Option.bind_some]
     apply guarded_range_correct _ _ a b (a.val ^ b.val.toNat) tail
     · rw [powerTest_correct, encode_uint_toNat, encode_uint_toNat]
-      have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
+      have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
       have hp : a.val ^ b.val.toNat = ((a.val.toNat ^ b.val.toNat : Nat) : Int) := by
         rw [ha, ← Int.natCast_pow]
         simp only [Int.toNat_natCast]
@@ -176,7 +176,7 @@ def checkedUintPow : CheckedCertificate .pow .uint rfl where
     · change some (BitVec.ofNat 256
         ((encodeValue .uint a).toNat ^ (encodeValue .uint b).toNat) :: tail) = _
       rw [encode_uint_toNat, encode_uint_toNat]
-      have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
+      have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
       rw [ha, ← Int.natCast_pow, BitVec.ofInt_natCast]
       simp only [Int.toNat_natCast]
 

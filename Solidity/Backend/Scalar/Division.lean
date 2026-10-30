@@ -10,9 +10,9 @@ theorem uint_div_body (a b : PrimTy.uint.Denote) (hb : b.val ≠ 0) (tail : Stac
     run [.op .DIV] (encodeValue .uint a :: encodeValue .uint b :: tail) =
       (BinOp.evalT .div (p := .uint) rfl a b).map
         (fun v => encodeValue .uint v :: tail) := by
-  have hbr := uint_range b
+  have hbr : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
   have hbpos : 0 < b.val.toNat := by omega
-  have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
+  have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
   have hbb : b.val = (b.val.toNat : Int) := by omega
   let r : Word := BitVec.ofNat 256 ((encodeValue .uint a).toNat / (encodeValue .uint b).toNat)
   have hq : (encodeValue .uint a).toNat / (encodeValue .uint b).toNat < 2 ^ 256 := by
@@ -37,9 +37,9 @@ theorem uint_mod_body (a b : PrimTy.uint.Denote) (hb : b.val ≠ 0) (tail : Stac
     run [.op .MOD] (encodeValue .uint a :: encodeValue .uint b :: tail) =
       (BinOp.evalT .mod (p := .uint) rfl a b).map
         (fun v => encodeValue .uint v :: tail) := by
-  have hbr := uint_range b
+  have hbr : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
   have hbpos : 0 < b.val.toNat := by omega
-  have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
+  have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
   have hbb : b.val = (b.val.toNat : Int) := by omega
   let r : Word := BitVec.ofNat 256 ((encodeValue .uint a).toNat % (encodeValue .uint b).toNat)
   have hq : (encodeValue .uint a).toNat % (encodeValue .uint b).toNat < 2 ^ 256 := by
@@ -98,9 +98,11 @@ theorem uint_div_correct (a b : PrimTy.uint.Denote) (tail : Stack) :
     simp only [divisionOutcome, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, hb, if_true, Option.bind_none]
     rfl
   · simp only [hb, decide_false, Bool.false_eq_true, if_false]
-    have he := uint_div_body a b hb tail
+    have he : run [Instr.op Op.DIV] (encodeValue PrimTy.uint a :: encodeValue PrimTy.uint b :: tail) =
+        Option.map (fun v => encodeValue PrimTy.uint v :: tail) (BinOp.div.evalT rfl a b) := uint_div_body a b hb tail
     have hs : (BinOp.evalT .div (p := .uint) rfl a b).isSome = true := by
-      have hh := congrArg Option.isSome he
+      have hh : (run [Instr.op Op.DIV] (encodeValue PrimTy.uint a :: encodeValue PrimTy.uint b :: tail)).isSome =
+          (Option.map (fun v => encodeValue PrimTy.uint v :: tail) (BinOp.div.evalT rfl a b)).isSome := congrArg Option.isSome he
       have hleft : (run [.op .DIV] (encodeValue .uint a :: encodeValue .uint b :: tail)).isSome = true := rfl
       rw [hleft, Option.isSome_map] at hh
       exact hh.symm
@@ -117,9 +119,11 @@ theorem uint_mod_correct (a b : PrimTy.uint.Denote) (tail : Stack) :
     simp only [divisionOutcome, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, hb, if_true, Option.bind_none]
     rfl
   · simp only [hb, decide_false, Bool.false_eq_true, if_false]
-    have he := uint_mod_body a b hb tail
+    have he : run [Instr.op Op.MOD] (encodeValue PrimTy.uint a :: encodeValue PrimTy.uint b :: tail) =
+        Option.map (fun v => encodeValue PrimTy.uint v :: tail) (BinOp.mod.evalT rfl a b) := uint_mod_body a b hb tail
     have hs : (BinOp.evalT .mod (p := .uint) rfl a b).isSome = true := by
-      have hh := congrArg Option.isSome he
+      have hh : (run [Instr.op Op.MOD] (encodeValue PrimTy.uint a :: encodeValue PrimTy.uint b :: tail)).isSome =
+          (Option.map (fun v => encodeValue PrimTy.uint v :: tail) (BinOp.mod.evalT rfl a b)).isSome := congrArg Option.isSome he
       have hleft : (run [.op .MOD] (encodeValue .uint a :: encodeValue .uint b :: tail)).isSome = true := rfl
       rw [hleft, Option.isSome_map] at hh
       exact hh.symm

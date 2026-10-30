@@ -38,12 +38,15 @@ theorem signedAddTest_raw (a b : Word) (tail : Stack) :
     run signedAddTest (a :: b :: tail) =
       some (flag (!PrimTy.int.inRange (a.toInt + b.toInt)) :: a :: b :: tail) := by
   have hs : Evm.sgn ((b.toNat + a.toNat) % Evm.W) = (a + b).toInt := by
-    have h := sgn_word (a + b)
+    have h : Evm.sgn (BitVec.toNat (a + b)) = BitVec.toInt (a + b) := sgn_word (a + b)
     rw [BitVec.toNat_add] at h
     simpa only [Nat.add_comm] using h
-  have h := (Evm.sadd_ok a.isLt b.isLt).1
+  have h : (Evm.sgn (BitVec.toNat a) < 0 ↔ Evm.sgn ((BitVec.toNat b + BitVec.toNat a) % Evm.W) < Evm.sgn (BitVec.toNat b)) ↔
+      -↑Evm.H ≤ Evm.sgn (BitVec.toNat a) + Evm.sgn (BitVec.toNat b) ∧
+        Evm.sgn (BitVec.toNat a) + Evm.sgn (BitVec.toNat b) < ↑Evm.H := (Evm.sadd_ok a.isLt b.isLt).1
   rw [sgn_word, sgn_word, hs] at h
-  have he := xor_range (a.toInt < 0) ((a+b).toInt < b.toInt)
+  have he : (decide (BitVec.toInt a < 0) ^^ decide (BitVec.toInt (a + b) < BitVec.toInt b)) =
+      !decide (-((2 ^ 255 : Nat) : Int) ≤ BitVec.toInt a + BitVec.toInt b ∧ BitVec.toInt a + BitVec.toInt b < ((2 ^ 255 : Nat) : Int)) := xor_range (a.toInt < 0) ((a+b).toInt < b.toInt)
     (-((2^255:Nat):Int) ≤ a.toInt+b.toInt ∧ a.toInt+b.toInt < ((2^255:Nat):Int)) h
   change run [.op .SGT, .op .XOR]
     (0 :: a :: flag (decide ((a+b).toInt < b.toInt)) :: a :: b :: tail) = _
@@ -56,12 +59,16 @@ theorem signedSubTest_raw (a b : Word) (tail : Stack) :
     run signedSubTest (a :: b :: tail) =
       some (flag (!PrimTy.int.inRange (a.toInt - b.toInt)) :: a :: b :: tail) := by
   have hs : Evm.sgn ((a.toNat + (Evm.W - b.toNat)) % Evm.W) = (a - b).toInt := by
-    have h := sgn_word (a - b)
+    have h : Evm.sgn (BitVec.toNat (a - b)) = BitVec.toInt (a - b) := sgn_word (a - b)
     rw [BitVec.toNat_sub] at h
     simpa only [Nat.add_comm] using h
-  have h := (Evm.ssub_ok a.isLt b.isLt).1
+  have h : (Evm.sgn (BitVec.toNat b) < 0 ↔
+        Evm.sgn (BitVec.toNat a) < Evm.sgn ((BitVec.toNat a + (Evm.W - BitVec.toNat b)) % Evm.W)) ↔
+      -↑Evm.H ≤ Evm.sgn (BitVec.toNat a) - Evm.sgn (BitVec.toNat b) ∧
+        Evm.sgn (BitVec.toNat a) - Evm.sgn (BitVec.toNat b) < ↑Evm.H := (Evm.ssub_ok a.isLt b.isLt).1
   rw [sgn_word, sgn_word, hs] at h
-  have he := xor_range (b.toInt < 0) (a.toInt < (a-b).toInt)
+  have he : (decide (BitVec.toInt b < 0) ^^ decide (BitVec.toInt a < BitVec.toInt (a - b))) =
+      !decide (-((2 ^ 255 : Nat) : Int) ≤ BitVec.toInt a - BitVec.toInt b ∧ BitVec.toInt a - BitVec.toInt b < ((2 ^ 255 : Nat) : Int)) := xor_range (b.toInt < 0) (a.toInt < (a-b).toInt)
     (-((2^255:Nat):Int) ≤ a.toInt-b.toInt ∧ a.toInt-b.toInt < ((2^255:Nat):Int)) h
   change run [.op .SGT, .op .XOR]
     (0 :: b :: flag (decide (a.toInt < (a-b).toInt)) :: a :: b :: tail) = _

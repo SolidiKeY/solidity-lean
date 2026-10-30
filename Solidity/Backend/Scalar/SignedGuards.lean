@@ -80,9 +80,11 @@ theorem int_div_correct (a b : PrimTy.int.Denote) (tail : Stack) :
         rw [show decide (a.val = minimumInt.val ∧ b.val = -1) = false from decide_eq_false hn]
         rfl
       rw [if_pos hf]
-      have he := int_div_body a b hb hn tail
+      have he : run [Instr.op Op.SDIV] (encodeValue PrimTy.int a :: encodeValue PrimTy.int b :: tail) =
+          Option.map (fun v => encodeValue PrimTy.int v :: tail) (BinOp.div.evalT rfl a b) := int_div_body a b hb hn tail
       have hs : (BinOp.evalT .div (p := .int) rfl a b).isSome = true := by
-        have hh := congrArg Option.isSome he
+        have hh : (run [Instr.op Op.SDIV] (encodeValue PrimTy.int a :: encodeValue PrimTy.int b :: tail)).isSome =
+            (Option.map (fun v => encodeValue PrimTy.int v :: tail) (BinOp.div.evalT rfl a b)).isSome := congrArg Option.isSome he
         have hl : (run [.op .SDIV] (encodeValue .int a :: encodeValue .int b :: tail)).isSome = true := rfl
         rw [hl, Option.isSome_map] at hh
         exact hh.symm
@@ -108,9 +110,11 @@ theorem int_mod_correct (a b : PrimTy.int.Denote) (tail : Stack) :
       BinOp.evalNum, BinOp.arithInt, Option.bind_none]
     rfl
   · simp only [hb, decide_false, Bool.false_eq_true, if_false]
-    have he := int_mod_body a b hb tail
+    have he : run [Instr.op Op.SMOD] (encodeValue PrimTy.int a :: encodeValue PrimTy.int b :: tail) =
+        Option.map (fun v => encodeValue PrimTy.int v :: tail) (BinOp.mod.evalT rfl a b) := int_mod_body a b hb tail
     have hs : (BinOp.evalT .mod (p := .int) rfl a b).isSome = true := by
-      have hh := congrArg Option.isSome he
+      have hh : (run [Instr.op Op.SMOD] (encodeValue PrimTy.int a :: encodeValue PrimTy.int b :: tail)).isSome =
+          (Option.map (fun v => encodeValue PrimTy.int v :: tail) (BinOp.mod.evalT rfl a b)).isSome := congrArg Option.isSome he
       have hl : (run [.op .SMOD] (encodeValue .int a :: encodeValue .int b :: tail)).isSome = true := rfl
       rw [hl, Option.isSome_map] at hh
       exact hh.symm

@@ -403,3 +403,26 @@ P0/P1 reviews and confirmed P1 fixes are retained in preparation-reviews.md and
 p1-reviews.md. The final update changes only status and measured gate reporting;
 reviewed proof code is unchanged. No required component gate remains pending.
 Parent integration obligations listed above remain explicit.
+
+## Integration convention repair (2026-10-30)
+
+The retained integration review identified missing explicit `have` types in
+the added scalar modules, including anonymous declarations nested inside
+other proofs. The repair adds 117 type annotations across 27 Lean files and
+updates the power-threshold generator to reproduce the annotation in
+`PowerBounds.lean`. Existing proof terms, theorem statements, semantics,
+observations, target predicates, invariants and proof budgets are unchanged.
+
+Per-file Lean MCP diagnostics completed successfully for all 27 edited Lean
+files, checked serially with one document open. `PowerBounds.lean` completed
+its kernel threshold checks; its axiom report remains `[propext, Quot.sound]`.
+`node scripts/check-backend-scalar.mjs` passes with 37 roots, zero findings
+and all 8160 generated thresholds matching. `git diff --check` also passes.
+The coordinator retains responsibility for the full combined build gates.
+
+Read-only finder and skeptic reviews independently found no remaining
+untyped `have` declarations across all 37 scalar modules. Their comparison
+against the integration candidate confirmed that the Lean changes contain
+only type annotations and whitespace, and that the generator contains the
+matching template change. Neither reviewer used the Lean server. No further
+finding or scope decision remains for this repair.

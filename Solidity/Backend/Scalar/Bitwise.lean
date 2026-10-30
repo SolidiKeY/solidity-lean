@@ -23,8 +23,8 @@ theorem uintBitwise_encoded (f : Nat → Nat → Nat) (a b : PrimTy.uint.Denote)
     (r : Word) (hr : r.toNat = f a.val.toNat b.val.toNat) (tail : Stack) :
     (PrimTy.uint.ofInt? (Semantics.uintBitwise f a.val b.val)).map
       (fun v => encodeValue .uint v :: tail) = some (r :: tail) := by
-  have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
-  have hb : b.val = (b.val.toNat : Int) := by have := uint_range b; omega
+  have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
+  have hb : b.val = (b.val.toNat : Int) := by have : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b; omega
   have he : Semantics.uintBitwise f a.val b.val = (r.toNat : Int) := by
     calc
       Semantics.uintBitwise f a.val b.val = (f a.val.toNat b.val.toNat : Int) := by
@@ -81,7 +81,7 @@ def uintNot : UnaryCertificate .bnot .uint rfl where
     have he : Semantics.uintBound - 1 - a.val =
         ((~~~encodeValue .uint a).toNat : Int) := by
       rw [BitVec.toNat_not, encode_uint_toNat]
-      have ha := uint_range a
+      have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
       unfold Semantics.uintBound
       omega
     rw [he]

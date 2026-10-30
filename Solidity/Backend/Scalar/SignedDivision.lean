@@ -12,7 +12,7 @@ theorem int_word_zero (a : PrimTy.int.Denote) :
   have he : encodeValue .int a = 0 ↔ a.val = 0 := by
     constructor
     · intro h
-      have hh := congrArg BitVec.toInt h
+      have hh : BitVec.toInt (encodeValue PrimTy.int a) = BitVec.toInt 0 := congrArg BitVec.toInt h
       rw [encode_int_toInt] at hh
       exact hh
     · intro h

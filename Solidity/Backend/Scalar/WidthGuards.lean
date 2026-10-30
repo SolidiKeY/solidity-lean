@@ -9,8 +9,8 @@ namespace Solidity.Backend.Scalar
 
 def unsignedMaximum (w : Fin 32) : PrimTy.uint.Denote :=
   ⟨((2^widthBits w-1:Nat):Int), by
-    have hb := Nat.pow_le_pow_right (by decide : 0<2) (widthBits_bounds w).2
-    have hp := Nat.pow_pos (by decide : 0<2) (n := widthBits w)
+    have hb : 2 ^ widthBits w ≤ 2 ^ 256 := Nat.pow_le_pow_right (by decide : 0<2) (widthBits_bounds w).2
+    have hp : 0 < 2 ^ widthBits w := Nat.pow_pos (by decide : 0<2) (n := widthBits w)
     simp only [PrimTy.inRange, decide_eq_true_eq]
     constructor
     · exact Int.natCast_nonneg _
@@ -18,17 +18,17 @@ def unsignedMaximum (w : Fin 32) : PrimTy.uint.Denote :=
 
 def signedMinimum (w : Fin 32) : PrimTy.int.Denote :=
   ⟨-((2^(widthBits w-1):Nat):Int), by
-    have hb := Nat.pow_le_pow_right (by decide : 0<2)
-      (show widthBits w-1≤255 by have := widthBits_bounds w; omega)
-    have hp := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1)
+    have hb : 2 ^ (widthBits w - 1) ≤ 2 ^ 255 := Nat.pow_le_pow_right (by decide : 0<2)
+      (show widthBits w-1≤255 by have : 8 ≤ widthBits w ∧ widthBits w ≤ 256 := widthBits_bounds w; omega)
+    have hp : 0 < 2 ^ (widthBits w - 1) := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1)
     simp only [PrimTy.inRange, decide_eq_true_eq]
     omega⟩
 
 def signedMaximum (w : Fin 32) : PrimTy.int.Denote :=
   ⟨((2^(widthBits w-1)-1:Nat):Int), by
-    have hb := Nat.pow_le_pow_right (by decide : 0<2)
-      (show widthBits w-1≤255 by have := widthBits_bounds w; omega)
-    have hp := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1)
+    have hb : 2 ^ (widthBits w - 1) ≤ 2 ^ 255 := Nat.pow_le_pow_right (by decide : 0<2)
+      (show widthBits w-1≤255 by have : 8 ≤ widthBits w ∧ widthBits w ≤ 256 := widthBits_bounds w; omega)
+    have hp : 0 < 2 ^ (widthBits w - 1) := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1)
     simp only [PrimTy.inRange, decide_eq_true_eq]
     omega⟩
 
@@ -65,8 +65,8 @@ theorem unsignedWidthTest_correct (w : Fin 32) (a : PrimTy.uint.Denote) (tail : 
       some (flag (!unsignedFits w a)::encodeValue .uint a::tail) := by
   simp only [unsignedWidthTest, run, stepDup1, step_pushWord, stepLT, Option.bind_some]
   rw [encode_uint_toNat, encode_uint_toNat]
-  have ha := uint_range a
-  have hp := Nat.pow_pos (by decide : 0<2) (n := widthBits w)
+  have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
+  have hp : 0 < 2 ^ widthBits w := Nat.pow_pos (by decide : 0<2) (n := widthBits w)
   have he : decide ((unsignedMaximum w).val.toNat < a.val.toNat) = !unsignedFits w a := by
     apply Bool.eq_iff_iff.mpr
     simp only [unsignedMaximum, Int.toNat_natCast, unsignedFits, Bool.not_eq_true',
@@ -81,7 +81,7 @@ theorem signedWidthTest_correct (w : Fin 32) (a : PrimTy.int.Denote) (tail : Sta
     stepDup2, stepSLT, stepOR, Option.bind_some]
   rw [flag_or]
   simp only [encode_int_toInt]
-  have hp := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1)
+  have hp : 0 < 2 ^ (widthBits w - 1) := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1)
   have he : (decide ((signedMaximum w).val < a.val) || decide (a.val < (signedMinimum w).val)) =
       !signedFits w a := by
     apply Bool.eq_iff_iff.mpr

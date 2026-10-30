@@ -20,8 +20,8 @@ def bytesResizeCode (src dst : Fin 32) : Program :=
 
 theorem bytesResize_correct (src dst : Fin 32) (a : Word) (tail : Stack) :
     run (bytesResizeCode src dst) (a::tail) = some (bytesResize src dst a::tail) := by
-  have hf := widthBits_bounds src
-  have ht := widthBits_bounds dst
+  have hf : 8 ≤ widthBits src ∧ widthBits src ≤ 256 := widthBits_bounds src
+  have ht : 8 ≤ widthBits dst ∧ widthBits dst ≤ 256 := widthBits_bounds dst
   by_cases hw : widthBits src ≤ widthBits dst
   · rw [bytesResizeCode, if_pos hw, run, step_pushWord]
     change some ((if (BitVec.ofNat 256 (widthBits dst-widthBits src)).toNat<256
@@ -40,7 +40,7 @@ theorem bytesResize_correct (src dst : Fin 32) (a : Word) (tail : Stack) :
     congr 2
     apply BitVec.eq_of_toNat_eq
     simp only [BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow, BitVec.toNat_ofNat]
-    have hq := Nat.lt_of_le_of_lt (Nat.div_le_self a.toNat (2^(widthBits src-widthBits dst))) a.isLt
+    have hq : BitVec.toNat a / 2 ^ (widthBits src - widthBits dst) < 2 ^ 256 := Nat.lt_of_le_of_lt (Nat.div_le_self a.toNat (2^(widthBits src-widthBits dst))) a.isLt
     exact (Nat.mod_eq_of_lt hq).symm
 
 theorem bytesResize_range (src dst : Fin 32) (a : Nat) (ha : a<2^widthBits src) :
@@ -60,8 +60,8 @@ theorem bytesResize_range (src dst : Fin 32) (a : Nat) (ha : a<2^widthBits src) 
 
 theorem bytesResize_nat (src dst : Fin 32) (a : Word) (ha : a.toNat<2^widthBits src) :
     (bytesResize src dst a).toNat = bytesResizeNat src dst a.toNat := by
-  have hb := bytesResize_range src dst a.toNat ha
-  have hW := Nat.pow_le_pow_right (by decide : 0<2) (widthBits_bounds dst).2
+  have hb : bytesResizeNat src dst (BitVec.toNat a) < 2 ^ widthBits dst := bytesResize_range src dst a.toNat ha
+  have hW : 2 ^ widthBits dst ≤ 2 ^ 256 := Nat.pow_le_pow_right (by decide : 0<2) (widthBits_bounds dst).2
   simp only [bytesResize, BitVec.toNat_ofNat,
     Nat.mod_eq_of_lt (Nat.lt_of_lt_of_le hb hW)]
 
@@ -75,8 +75,8 @@ example : bytesResize ⟨0, by decide⟩ ⟨1, by decide⟩ 0xab ≠ 0xab := by 
 /-- A shift-count literal in the existing intrinsic uint type. -/
 def widthShift (a b : Fin 32) : PrimTy.uint.Denote :=
   ⟨((widthBits a-widthBits b : Nat) : Int), by
-    have ha := widthBits_bounds a
-    have hb := widthBits_bounds b
+    have ha : 8 ≤ widthBits a ∧ widthBits a ≤ 256 := widthBits_bounds a
+    have hb : 8 ≤ widthBits b ∧ widthBits b ≤ 256 := widthBits_bounds b
     simp only [PrimTy.inRange, decide_eq_true_eq]
     constructor
     · exact Int.natCast_nonneg _

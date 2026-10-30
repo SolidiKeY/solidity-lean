@@ -866,7 +866,7 @@ theorem thresholdWord_nat (w : Fin 32) (i : Fin 255) :
 
 theorem exponentWord_nat (i : Fin 255) :
     (exponentWord i).toNat = i.val + 1 := by
-  have hi : i.val + 1 < 2 ^ 256 := by have := i.isLt; omega
+  have hi : i.val + 1 < 2 ^ 256 := by have : i.val < 255 := i.isLt; omega
   simp only [exponentWord, BitVec.toNat_ofNat, Nat.mod_eq_of_lt hi]
 
 #print axioms threshold_bounds

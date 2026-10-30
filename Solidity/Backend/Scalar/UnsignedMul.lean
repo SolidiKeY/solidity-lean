@@ -50,7 +50,7 @@ theorem unsignedMulTest_raw (a b : Word) (tail : Stack) :
       simpa only [han, false_or, Evm.W, BitVec.toNat_mul] using
         (Evm.mul_ok_iff (a := a.toNat) (b := b.toNat))
     by_cases h : (a * b).toNat / a.toNat = b.toNat
-    · have hn : ¬ 2 ^ 256 ≤ a.toNat * b.toNat := by have := hi.mp h; omega
+    · have hn : ¬ 2 ^ 256 ≤ a.toNat * b.toNat := by have : a.toNat * b.toNat < 2 ^ 256 := hi.mp h; omega
       simp only [h, decide_true, Bool.not_true, hn, decide_false]
     · have hn : 2 ^ 256 ≤ a.toNat * b.toNat := by
         have hh : ¬ a.toNat * b.toNat < 2 ^ 256 := fun hh => h (hi.mpr hh)

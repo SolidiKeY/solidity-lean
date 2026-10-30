@@ -17,12 +17,12 @@ def modularBody : ModOp → Program
 
 theorem uint_word_zero (k : PrimTy.uint.Denote) :
     (encodeValue .uint k == 0) = decide (k.val = 0) := by
-  have hk := uint_range k
+  have hk : 0 ≤ k.val ∧ k.val < ((2 ^ 256 : Nat) : Int) := uint_range k
   apply Bool.eq_iff_iff.mpr
   simp only [beq_iff_eq, decide_eq_true_eq]
   constructor
   · intro h
-    have hh := congrArg BitVec.toNat h
+    have hh : BitVec.toNat (encodeValue PrimTy.uint k) = BitVec.toNat 0 := congrArg BitVec.toNat h
     rw [encode_uint_toNat] at hh
     change k.val.toNat = 0 at hh
     omega
@@ -40,14 +40,14 @@ theorem addmod_correct (a b k : PrimTy.uint.Denote) (tail : Stack) :
   by_cases hk : k.val = 0
   · simp only [hk, decide_true, if_true, modularOutcome, ModOp.evalT]
   · simp only [hk, decide_false]
-    have hrk := uint_range k
+    have hrk : 0 ≤ k.val ∧ k.val < ((2 ^ 256 : Nat) : Int) := uint_range k
     have hp : 0 < k.val := by omega
     have hn : PrimTy.uint.inRange (ModOp.wide .addmod a.val b.val % k.val) = true := by
       apply decide_eq_true
       exact ⟨Int.emod_nonneg _ (by omega),
         Int.lt_trans (Int.emod_lt_of_pos _ hp) hrk.2⟩
-    have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
-    have hb : b.val = (b.val.toNat : Int) := by have := uint_range b; omega
+    have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
+    have hb : b.val = (b.val.toNat : Int) := by have : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b; omega
     have hkk : k.val = (k.val.toNat : Int) := by omega
     have he : BitVec.ofInt 256 (ModOp.wide .addmod a.val b.val % k.val) =
         BitVec.ofNat 256 ((a.val.toNat + b.val.toNat) % k.val.toNat) := by
@@ -71,14 +71,14 @@ theorem mulmod_correct (a b k : PrimTy.uint.Denote) (tail : Stack) :
   by_cases hk : k.val = 0
   · simp only [hk, decide_true, if_true, modularOutcome, ModOp.evalT]
   · simp only [hk, decide_false]
-    have hrk := uint_range k
+    have hrk : 0 ≤ k.val ∧ k.val < ((2 ^ 256 : Nat) : Int) := uint_range k
     have hp : 0 < k.val := by omega
     have hn : PrimTy.uint.inRange (ModOp.wide .mulmod a.val b.val % k.val) = true := by
       apply decide_eq_true
       exact ⟨Int.emod_nonneg _ (by omega),
         Int.lt_trans (Int.emod_lt_of_pos _ hp) hrk.2⟩
-    have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
-    have hb : b.val = (b.val.toNat : Int) := by have := uint_range b; omega
+    have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
+    have hb : b.val = (b.val.toNat : Int) := by have : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b; omega
     have hkk : k.val = (k.val.toNat : Int) := by omega
     have he : BitVec.ofInt 256 (ModOp.wide .mulmod a.val b.val % k.val) =
         BitVec.ofNat 256 ((a.val.toNat * b.val.toNat) % k.val.toNat) := by

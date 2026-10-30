@@ -36,7 +36,7 @@ theorem powerSourceResult_map (a : PrimTy.int.Denote) (n : PrimTy.uint.Denote) :
   let m : Int := (a.val.natAbs:Int)^n.val.toNat
   have hm : 0 ≤ m := Int.pow_nonneg (Int.natCast_nonneg _)
   have hH : Semantics.intBound < Semantics.uintBound := by decide
-  have hn : ¬ n.val<0 := by have := uint_range n; omega
+  have hn : ¬ n.val<0 := by have : 0 ≤ n.val ∧ n.val < ((2 ^ 256 : Nat) : Int) := uint_range n; omega
   change (((if n.val<0 then none else some m).bind PrimTy.uint.ofInt?).bind
     (powerPostValue (powerNegative a n))).map (·.val) = _
   simp only [hn, if_false, Option.bind_some]

@@ -18,7 +18,7 @@ theorem ofInt_low (w : Fin 32) (n : Int) :
   have hW : (0:Int)<((2^256:Nat):Int) := by decide
   have hd : ((2^widthBits w:Nat):Int) ∣ ((2^256:Nat):Int) :=
     Int.natCast_dvd_natCast.mpr (Nat.pow_dvd_pow 2 (widthBits_bounds w).2)
-  have hn := Int.emod_nonneg n (show ((2^256:Nat):Int) ≠ 0 by omega)
+  have hn : 0 ≤ n % ((2 ^ 256 : Nat) : Int) := Int.emod_nonneg n (show ((2^256:Nat):Int) ≠ 0 by omega)
   rw [BitVec.toNat_ofInt]
   change (n % ((2^256:Nat):Int)).toNat % 2^widthBits w = _
   calc
@@ -208,7 +208,7 @@ theorem unsigned_powAt_correct (w : Fin 32) (a b : PrimTy.uint.Denote) (tail : S
   · change some (BitVec.ofNat 256
       ((encodeValue .uint a).toNat^(encodeValue .uint b).toNat)::tail) = _
     rw [encode_uint_toNat, encode_uint_toNat]
-    have ha : a.val=(a.val.toNat:Int) := by have := uint_range a; omega
+    have ha : a.val=(a.val.toNat:Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
     rw [ha, ← Int.natCast_pow, BitVec.ofInt_natCast]
     simp only [Int.toNat_natCast]
   · rw [unsigned_correct, clean_ofInt_unsigned]

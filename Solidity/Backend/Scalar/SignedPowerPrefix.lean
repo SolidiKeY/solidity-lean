@@ -8,7 +8,7 @@ namespace Solidity.Backend.Scalar
 
 def magnitudeValue (a : PrimTy.int.Denote) : PrimTy.uint.Denote :=
   ⟨(a.val.natAbs:Int), by
-    have ha := int_range a
+    have ha : -((2 ^ 255 : Nat) : Int) ≤ a.val ∧ a.val < ((2 ^ 255 : Nat) : Int) := int_range a
     rw [← NumericLowering.abs_word a.val ha]
     split
     all_goals
@@ -25,7 +25,7 @@ theorem parity_word (n : Word) : n &&& 1#256 = flag (decide (n.toNat%2=1)) := by
   rw [BitVec.toNat_and]
   change n.toNat &&& 1 = _
   rw [Nat.and_one_is_mod]
-  have hm := Nat.mod_lt n.toNat (by decide : 0<2)
+  have hm : BitVec.toNat n % 2 < 2 := Nat.mod_lt n.toNat (by decide : 0<2)
   by_cases hn : n.toNat%2=1
   · simp only [hn, decide_true, flag, if_true]; rfl
   · simp only [hn, decide_false, flag]
@@ -63,7 +63,7 @@ theorem powerAbsPrefix_correct (a : PrimTy.int.Denote) (tail : Stack) :
   change some (((encodeValue .int a ^^^ BitVec.ofInt 256 ((encodeValue .int a).toInt/(2^255:Int))) -
     BitVec.ofInt 256 ((encodeValue .int a).toInt/(2^255:Int)))::tail) = _
   rw [encode_int_toInt]
-  have har := int_range a
+  have har : -((2 ^ 255 : Nat) : Int) ≤ a.val ∧ a.val < ((2 ^ 255 : Nat) : Int) := int_range a
   have hB : (2^255:Int)=((2^255:Nat):Int) := (Int.natCast_pow 2 255).symm
   by_cases ha : a.val<0
   · have hq : a.val/(2^255:Int) = -1 :=

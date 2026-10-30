@@ -90,7 +90,7 @@ theorem numericStep_height {o : Op} {s t : Stack} (h : numericStep o s = some t)
       simp only [numericStep, hu, hb] at h
       simp only [numericDelta, hu, hb, Option.isSome_none, Option.isSome_some,
         Bool.false_eq_true, if_true, if_false]
-      have hl := applyBinary_length f h
+      have hl : List.length t + 1 = List.length s := applyBinary_length f h
       omega
     | none =>
       cases ht : ternary o with
@@ -98,7 +98,7 @@ theorem numericStep_height {o : Op} {s t : Stack} (h : numericStep o s = some t)
         simp only [numericStep, hu, hb, ht] at h
         simp only [numericDelta, hu, hb, ht, Option.isSome_none, Option.isSome_some,
           Bool.false_eq_true, if_true, if_false]
-        have hl := applyTernary_length f h
+        have hl : List.length t + 2 = List.length s := applyTernary_length f h
         omega
       | none => simp only [numericStep, hu, hb, ht, reduceCtorEq] at h
 
@@ -111,10 +111,10 @@ theorem step_height {i : Instr} {s t : Stack} (h : step i s = some t) :
   | op o =>
     cases o <;> simp only [step, stackDelta] at h ⊢
     case DUP n =>
-      have hl := duplicate_length n.val h
+      have hl : List.length t = List.length s + 1 := duplicate_length n.val h
       omega
     case SWAP n =>
-      have hl := swap_length n.val h
+      have hl : List.length t = List.length s := swap_length n.val h
       omega
     case POP =>
       cases s with
@@ -132,8 +132,8 @@ theorem run_height {p : Program} {s t : Stack} (h : run p s = some t) :
     | none => simp only [run, hs, Option.bind_none, reduceCtorEq] at h
     | some u =>
       simp only [run, hs, Option.bind_some] at h
-      have hi := step_height hs
-      have hp := ih h
+      have hi : ↑(List.length u) = ↑(List.length s) + stackDelta i := step_height hs
+      have hp : ↑(List.length t) = ↑(List.length u) + (List.map stackDelta p).sum := ih h
       simp only [List.map_cons, List.sum_cons]
       omega
 
@@ -179,7 +179,7 @@ theorem run_capacity {p : Program} {s t : Stack} (hr : run p s = some t)
     | none => simp only [run, hs, Option.bind_none, reduceCtorEq] at hr
     | some u =>
       simp only [run, hs, Option.bind_some] at hr
-      have hi := step_height hs
+      have hi : ↑(List.length u) = ↑(List.length s) + stackDelta i := step_height hs
       apply ih hr
       change (heightTrace p (u.length : Int)).all safeHeight = true
       rw [hi]

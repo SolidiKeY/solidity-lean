@@ -22,12 +22,12 @@ def ValueRel (p : PrimTy) (v : p.Denote) (w : Word) : Prop :=
 
 theorem uint_range (v : PrimTy.uint.Denote) :
     0 ≤ v.val ∧ v.val < ((2 ^ 256 : Nat) : Int) := by
-  have h := v.property
+  have h : PrimTy.uint.inRange v.val = true := v.property
   simpa only [PrimTy.inRange, decide_eq_true_eq] using h
 
 theorem int_range (v : PrimTy.int.Denote) :
     -((2 ^ 255 : Nat) : Int) ≤ v.val ∧ v.val < ((2 ^ 255 : Nat) : Int) := by
-  have h := v.property
+  have h : PrimTy.int.inRange v.val = true := v.property
   simpa only [PrimTy.inRange, decide_eq_true_eq] using h
 
 theorem encode_uint_toNat (v : PrimTy.uint.Denote) :
@@ -45,16 +45,18 @@ theorem encode_int_toInt (v : PrimTy.int.Denote) :
 theorem encode_int_injective {a b : PrimTy.int.Denote}
     (h : encodeValue .int a = encodeValue .int b) : a = b := by
   apply Subtype.ext
-  have h' := congrArg BitVec.toInt h
+  have h' : (encodeValue .int a).toInt = (encodeValue .int b).toInt :=
+    congrArg BitVec.toInt h
   simpa only [encode_int_toInt] using h'
 
 theorem encode_uint_injective {a b : PrimTy.uint.Denote}
     (h : encodeValue .uint a = encodeValue .uint b) : a = b := by
   apply Subtype.ext
-  have h' := congrArg BitVec.toNat h
+  have h' : (encodeValue .uint a).toNat = (encodeValue .uint b).toNat :=
+    congrArg BitVec.toNat h
   rw [encode_uint_toNat, encode_uint_toNat] at h'
-  have ha := uint_range a
-  have hb := uint_range b
+  have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
+  have hb : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
   omega
 
 /-- The arithmetic encoding agrees with the existing intrinsic ABI-word

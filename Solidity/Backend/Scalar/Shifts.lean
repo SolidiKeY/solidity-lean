@@ -16,7 +16,7 @@ def uintShl : BinaryCertificate .shl .uint rfl where
     intro a n tail
     have hpow : (2 : Int) ^ n.val.toNat = ((2 ^ n.val.toNat : Nat) : Int) :=
       (Int.natCast_pow 2 n.val.toNat).symm
-    have hr := uint_range n
+    have hr : 0 ≤ n.val ∧ n.val < ((2 ^ 256 : Nat) : Int) := uint_range n
     have hc : (n.val.toNat < 256) ↔ n.val < 256 := by omega
     change some ((if (encodeValue .uint n).toNat < 256 then
         (encodeValue .uint a) <<< (encodeValue .uint n).toNat else 0) :: tail) =
@@ -28,7 +28,7 @@ def uintShl : BinaryCertificate .shl .uint rfl where
     · have hnn : n.val.toNat < 256 := hc.mpr hn
       simp only [hn, hnn, if_true]
       rw [encoded_mod, shiftLeft_word, encode_uint_toNat]
-      have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
+      have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
       rw [ha, hpow, ← Int.natCast_mul, BitVec.ofInt_natCast]
       simp only [Int.toNat_natCast]
     · have hnn : ¬ n.val.toNat < 256 := fun h => hn (hc.mp h)
@@ -42,8 +42,8 @@ def uintShr : BinaryCertificate .shr .uint rfl where
     intro a n tail
     have hpow : (2 : Int) ^ n.val.toNat = ((2 ^ n.val.toNat : Nat) : Int) :=
       (Int.natCast_pow 2 n.val.toNat).symm
-    have hr := uint_range n
-    have har := uint_range a
+    have hr : 0 ≤ n.val ∧ n.val < ((2 ^ 256 : Nat) : Int) := uint_range n
+    have har : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
     have hapos : ¬ a.val < 0 := by omega
     have hc : (n.val.toNat < 256) ↔ n.val < 256 := by omega
     change some ((if (encodeValue .uint n).toNat < 256 then

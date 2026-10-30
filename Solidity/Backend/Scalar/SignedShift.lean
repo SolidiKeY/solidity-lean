@@ -43,7 +43,7 @@ theorem sar_zero (a : Word) : sarResult a 0 = a := by
 
 theorem encode_int_toNat_of_nonneg (n : PrimTy.int.Denote) (hn : 0 ≤ n.val) :
     (encodeValue .int n).toNat = n.val.toNat := by
-  have hw : n.val < ((2 ^ 256 : Nat) : Int) := by have := int_range n; omega
+  have hw : n.val < ((2 ^ 256 : Nat) : Int) := by have : -((2 ^ 255 : Nat) : Int) ≤ n.val ∧ n.val < ((2 ^ 255 : Nat) : Int) := int_range n; omega
   simp only [encodeValue, BitVec.toNat_ofInt, Int.emod_eq_of_lt hn hw]
 
 /-- Source-exact signed right shift, including negative and saturated counts. -/

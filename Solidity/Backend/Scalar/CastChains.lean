@@ -10,21 +10,21 @@ namespace Solidity.Backend.Scalar
 
 theorem width_half (w : Fin 32) :
     2 ^ widthBits w = 2 ^ (widthBits w - 1) + 2 ^ (widthBits w - 1) := by
-  have hw := widthBits_bounds w
+  have hw : 8 ≤ widthBits w ∧ widthBits w ≤ 256 := widthBits_bounds w
   have he : widthBits w = (widthBits w-1)+1 := by omega
   conv => lhs; rw [he, Nat.pow_succ]
   omega
 
 theorem unsignedClean_nat (w : Fin 32) (x : Word) :
     (unsignedClean w x).toNat = x.toNat % 2 ^ widthBits w := by
-  have hb := Nat.pow_le_pow_right (by decide : 0 < 2) (widthBits_bounds w).2
-  have hx := Nat.mod_lt x.toNat (Nat.pow_pos (by decide : 0 < 2) (n := widthBits w))
+  have hb : 2 ^ widthBits w ≤ 2 ^ 256 := Nat.pow_le_pow_right (by decide : 0 < 2) (widthBits_bounds w).2
+  have hx : BitVec.toNat x % 2 ^ widthBits w < 2 ^ widthBits w := Nat.mod_lt x.toNat (Nat.pow_pos (by decide : 0 < 2) (n := widthBits w))
   simp only [unsignedClean, BitVec.toNat_ofNat, Nat.mod_eq_of_lt (Nat.lt_of_lt_of_le hx hb)]
 
 theorem shifted_low (w : Fin 32) (x : Word) :
     (unsignedClean w (x + BitVec.ofNat 256 (2^(widthBits w-1)))).toNat =
       (x.toNat + 2^(widthBits w-1)) % 2^widthBits w := by
-  have hw := widthBits_bounds w
+  have hw : 8 ≤ widthBits w ∧ widthBits w ≤ 256 := widthBits_bounds w
   have hh : 2^(widthBits w-1) < 2^256 :=
     Nat.pow_lt_pow_right (by decide) (by omega)
   rw [unsignedClean_nat, BitVec.toNat_add, BitVec.toNat_ofNat, Nat.mod_eq_of_lt hh,
@@ -39,13 +39,13 @@ theorem signedAt_word (w : Fin 32) (x : Word) :
   have hp : 0 < B := Nat.pow_pos (by decide)
   have hb : B=H+H := width_half w
   have hl : low < B := Nat.mod_lt _ hp
-  have hh : H < B := by have := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1); dsimp only [H, B] at *; omega
+  have hh : H < B := by have : 0 < 2 ^ (widthBits w - 1) := Nat.pow_pos (by decide : 0<2) (n := widthBits w-1); dsimp only [H, B] at *; omega
   have he : (x.toNat+H)%B = (low+H)%B := by
     rw [Nat.add_mod, Nat.mod_eq_of_lt hh]
   have hclean : unsignedClean w (x+BitVec.ofNat 256 H) = BitVec.ofNat 256 ((low+H)%B) := by
     apply BitVec.eq_of_toNat_eq
     rw [shifted_low, he, BitVec.toNat_ofNat]
-    have hbW := Nat.pow_le_pow_right (by decide : 0<2) (widthBits_bounds w).2
+    have hbW : 2 ^ widthBits w ≤ 2 ^ 256 := Nat.pow_le_pow_right (by decide : 0<2) (widthBits_bounds w).2
     exact (Nat.mod_eq_of_lt (Nat.lt_of_lt_of_le (Nat.mod_lt _ hp) hbW)).symm
   rw [hclean]
   have hcast : (BitVec.ofNat 256 ((low+H)%B) - BitVec.ofNat 256 H) =

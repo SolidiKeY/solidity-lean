@@ -57,8 +57,8 @@ theorem unsignedAddTest_raw (a b : Word) (tail : Stack) :
       some (flag (decide (2 ^ 256 ≤ a.toNat + b.toNat)) :: a :: b :: tail) := by
   change some (flag (decide ((a + b).toNat < a.toNat)) :: a :: b :: tail) = _
   rw [BitVec.toNat_add]
-  have ha := a.isLt
-  have hb := b.isLt
+  have ha : BitVec.toNat a < 2 ^ 256 := a.isLt
+  have hb : BitVec.toNat b < 2 ^ 256 := b.isLt
   have he : ((a.toNat + b.toNat) % 2 ^ 256 < a.toNat) ↔
       2 ^ 256 ≤ a.toNat + b.toNat := by
     by_cases hs : a.toNat + b.toNat < 2 ^ 256
@@ -79,8 +79,8 @@ theorem unsignedAddTest_typed (a b : PrimTy.uint.Denote) (tail : Stack) :
       some (flag (!PrimTy.uint.inRange (a.val + b.val)) ::
         encodeValue .uint a :: encodeValue .uint b :: tail) := by
   rw [unsignedAddTest_raw, encode_uint_toNat, encode_uint_toNat]
-  have ha := uint_range a
-  have hb := uint_range b
+  have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
+  have hb : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
   have he : decide (2 ^ 256 ≤ a.val.toNat + b.val.toNat) =
       !PrimTy.uint.inRange (a.val + b.val) := by
     by_cases hr : PrimTy.uint.inRange (a.val + b.val) = true
@@ -100,8 +100,8 @@ theorem unsignedSubTest_typed (a b : PrimTy.uint.Denote) (tail : Stack) :
       some (flag (!PrimTy.uint.inRange (a.val - b.val)) ::
         encodeValue .uint a :: encodeValue .uint b :: tail) := by
   rw [unsignedSubTest_raw, encode_uint_toNat, encode_uint_toNat]
-  have ha := uint_range a
-  have hb := uint_range b
+  have ha : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a
+  have hb : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b
   have he : decide (a.val.toNat < b.val.toNat) =
       !PrimTy.uint.inRange (a.val - b.val) := by
     by_cases hr : PrimTy.uint.inRange (a.val - b.val) = true

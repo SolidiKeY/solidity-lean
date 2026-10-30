@@ -47,7 +47,7 @@ theorem powerPostTest_correct (negative : Bool) (r : PrimTy.uint.Denote) (tail :
       2^255+(if negative then 1 else 0) := by
     cases negative <;> decide +kernel
   rw [hc]
-  have hr := uint_range r
+  have hr : 0 ≤ r.val ∧ r.val < ((2 ^ 256 : Nat) : Int) := uint_range r
   have he : decide (r.val.toNat<2^255+(if negative then 1 else 0)) =
       PrimTy.int.inRange (powerSignedValue negative r) := by
     apply Bool.eq_iff_iff.mpr
@@ -92,7 +92,7 @@ theorem powerPostValue_map (negative : Bool) (r : PrimTy.uint.Denote) :
     (powerPostValue negative r).map (·.val) =
       if negative then (if r.val≤Semantics.intBound then some (-r.val) else none)
       else (if r.val<Semantics.intBound then some r.val else none) := by
-  have hr := uint_range r
+  have hr : 0 ≤ r.val ∧ r.val < ((2 ^ 256 : Nat) : Int) := uint_range r
   have hH : (0:Int)<Semantics.intBound := by decide
   cases negative with
   | false =>

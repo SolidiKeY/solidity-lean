@@ -9,14 +9,14 @@ def wrappingPow : BinaryCertificate .powW .uint rfl where
   code := [.op .EXP]
   correct := by
     intro a b tail
-    have hb : ¬ b.val < 0 := by have := uint_range b; omega
+    have hb : ¬ b.val < 0 := by have : 0 ≤ b.val ∧ b.val < ((2 ^ 256 : Nat) : Int) := uint_range b; omega
     change some (BitVec.ofNat 256
       ((encodeValue .uint a).toNat ^ (encodeValue .uint b).toNat) :: tail) =
       ((if b.val < 0 then none else some (a.val ^ b.val.toNat % Semantics.uintBound)).bind
         PrimTy.uint.ofInt?).map (fun v => encodeValue .uint v :: tail)
     simp only [hb, if_false, Option.bind_some]
     rw [encoded_mod, encode_uint_toNat, encode_uint_toNat]
-    have ha : a.val = (a.val.toNat : Int) := by have := uint_range a; omega
+    have ha : a.val = (a.val.toNat : Int) := by have : 0 ≤ a.val ∧ a.val < ((2 ^ 256 : Nat) : Int) := uint_range a; omega
     rw [ha, ← Int.natCast_pow, BitVec.ofInt_natCast]
     simp only [Int.toNat_natCast]
 
