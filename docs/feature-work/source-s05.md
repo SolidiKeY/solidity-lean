@@ -359,7 +359,7 @@ These are listed under `limitations:`.
 
 ## Handoff (S05)
 
-**Checkpoint status** (after the follow-up queue of 2026-10-29).
+**Checkpoint status** (after the continuation of 2026-10-30).
 
 | Checkpoint | Status | Theorems |
 |---|---|---|
@@ -369,14 +369,14 @@ These are listed under `limitations:`.
 | 4 | done, with the gaps listed | as before |
 | 5 | partial | `sessionAt_consistent`, `sourceLang`; `sessionAtEvents_consistent`, `sourceLangEvents` (events of unfinished transactions, from `growAt`, `approxAt`, `runTx_events_mono`); `txFate`, `stuck_not_diverges` (stuck is not divergence); progress, failure points and `SourceSpec` open |
 
-**Gates** (head `02556fb` and its doc follow-up).
+**Gates** (head `1917b60` and its doc follow-up).
 
 - Lean diagnostics clean on every touched file; a full `./run-lean.sh`:
-  "Build completed successfully (782 jobs)" and "(262 jobs)".
+  "Build completed successfully (783 jobs)" and "(262 jobs)".
 - No `sorry`, new axioms, `native_decide`, `implemented_by` or
   `maxHeartbeats` changes. Large proofs are split across declarations
   instead (see [Events of unfinished transactions](#events-of-unfinished-transactions)).
-- Pins recorded with `node scripts/check-axiom-pins.mjs --write` (510 pins,
+- Pins recorded with `node scripts/check-axiom-pins.mjs --write` (512 pins,
   0 errors); `TrustAudit.lean`'s source-semantics block lists the new
   headline theorems.
 - `node scripts/check-g07.mjs --log`: 0 new failures; check-solkey 37
@@ -439,8 +439,9 @@ interface and has no completeness proof.
 A placeholder instance (`Failures := Unit`, `hashed := []`) would type-check
 but would make `forward_iff`/`guard_iff` vacuous, so none is given.
 
-**Open** (also under `limitations:`): a progress theorem (`stuck` is told
-apart from divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
+**Open** (also under `limitations:`): a progress theorem for a modelled
+fragment, which must first be delimited (`stuck` is told apart from
+divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
 rule); calldata references, `abi.decode`, `new`, slices, inline arrays,
 `try`, tuple declarations, `fallback` with parameters; dynamic-length
