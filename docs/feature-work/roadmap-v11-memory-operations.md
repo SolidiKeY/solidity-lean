@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-four. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-five. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -2116,3 +2116,99 @@ Lean/Lake RSS1599592KiB, cumulative session cgroup peak2160848896bytes,0OOMevent
 full disk increment192512bytes, safely within32MiB allowance. All original queues
 remain partial/blocked with the exact prerequisites enumerated above, no claim
 that all independent work is exhausted or the frozen assignment is completed.
+
+
+## Checkpoint twenty-five: actual decoded uint256 finite schedules
+
+Reproduced missing family: owned `runCaptures` composition existed for Boolean
+initialization, not uint256, despite published checkedCalldataUints extraction/
+read/length/frame/Keeps and generic typed SnapshotSchedule/Provenance. New owned
+CalldataUintSchedule, CalldataUintScheduleGrowth and controls reuse those EXISTING
+operations and proofs. No evaluator, decoder, AST/IR, heap/value semantics,
+payload input, conversion-correctness or desired postrelation is introduced.
+
+`checkedUintCaptures` is actual checkedCalldataUints.bind runCaptures at its REAL
+output. `checkedUintCaptures_some` exposes reached heaps; success is derived from
+actual transfer and ORIGINAL lengths; `checkedUintCaptures_success_lookup`
+further gives EXACT actual calldataUints lookup plus source/destination bounds
+and CapturesValid on ORIGINAL length. `checkedUintCaptures_none` distinguishes
+initial rejection from actual decoded Some, successful prefix and first reached
+failed call; underlying uintTransfer_none_lookup classifies missing/unsupported
+objects and independent reversed/source/destination guards. No suffix heap or
+Source halt/rollback is claimed. ALL final reads use actual extracted payload
+and captureOrigin; interior provenance produces published DecodedArrayRead with
+sourceUint and exact uint range, not a guessed encoding. Whole-heap restoration
+iff compares computed INITIAL values; lengths and other typed objects frame.
+
+Growth success/rejection require independent INITIAL Keeps and actual existing
+DecodedArrayAt certificate; rejection under that certificate does not cover a
+missing decoded table. Actual interstage allocation needs only successful actual
+composition and a supplied existing MObj, allocates on REAL changed decoded mid,
+and derives final Keeps plus fresh own-field frame. Fresh parent fields retaining
+old aliases do not establish deep-child liveness or fresh Source representation.
+
+Controls derive immutable uint input representation from existing uints/uint_repr.
+Initial [7,8,8] plus arbitrary maximum-word tail ->actual decoded[9] at index1 ->
+[7,9,8] ->actual index2-to1 recapture ->[7,8,8], with arbitrary runtime repetitions
+and no schedule/payload cap. An INITIAL-only payload/provenance proof discharges
+exact restoration, then the actual run is reconstructed from input bounds. Both
+dynamic and supported fixed arrays expose actual decoded Some, reached schedule
+Some and complete contents. Neighbors retain [maximum,0,1]; reference-containing
+parent fields retain repeated root IDs[0,0]. Explicit maximum contents/read/value
+2^256-1 rule out accidental truncation; element32 is an element observation only.
+
+The restoring fixture reads UNCHANGED index2, so cannot distinguish frozen input
+from reached input. Separate changed-source recapture reads decoded index1 into0,
+giving actual[9,9,8]; substituting frozen initial8 gives[8,9,8], proved unequal,
+with full actual neighbor/parent observations. Skipped repair is actual Some with
+wrong[7,9,8]. Empty/exact-end, independent missing/unsupported/reversed/source/
+destination failures and actual decodedSome/nonemptyrepairprefixSome/reachedbad
+None/fullNone remain explicit. Actual interstage and initial allocation controls
+observe fresh fields[0,1,0]/old-fresh inequality/full child-neighbor vectors;
+allocated rejection exposes each actual reached stage. Both independent source
+reviewers requested direct initial-allocation success/rejection and explicit
+maximum; those controls were added. Exact guards cover all33public laws/controls.
+
+Preflight579198976 available bytes,32MiB allowance based on prior24182784-byte
+cache-off gate plus8MiB source/log/export, residual above512MiB. Existing runtime,
+child12GiB/no-swap under16GiB parent, Lean-j1/LEAN_NUM_THREADS1, warm keyed outputs
+preserved. Optional cache OFF in TOML AND actual exec environment LAKE_CACHE_DIR
+empty/LAKE_ARTIFACT_CACHE=false (tested/recorded); no cleanup/relocation/image copy.
+Per-file Lean MCP/get_goal unavailable; serial focused closure used, goal unchanged.
+Earlier failed focused diagnostics retained; no sorryAx deliverable or budget rise.
+
+Original G32/G33/G34/G35.01-.06 and Backfill A/B remain PARTIAL/BLOCKED. This adds
+one published primitive family, not general Source/ABI/reference/storage/physical
+bytes/fresh deep-copy/compiler semantics. All-profile defaults/target failures,
+general path/rebinding/delete, recursive Source graph, reserved memory-to-storage
+and final V10/Source/target composition remain named open. No independent-work
+exhaustion, lane completion or compiler/EVM test result is inferred.
+
+Final independent read-only finder and skeptic accepted all refined source/doc
+and33exact guards, actual initial-allocation success and reached failure controls,
+explicit maximum and discriminating changed-source negative. No outstanding
+source finding. Actual guarded80jobs and final wrapper927default/262TestSuite/
+SolKey377taclets131read-bearing PASS exit0. Strict/layer/orphan/trust/complete
+fixtures/script syntax/corruption controls PASS;597standard-only pins76modules.
+Raw global docs FAIL1, complete raw findings byte-identical to exact base (separate
+zeroNEW PASS); inventory FAIL1,611unrecorded=14inherited+597owned,0unsafeerrors.
+Reserved global records untouched; precise additive proposals exported.
+
+Runtime Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs actual PASS. Initial
+versions attempt could not acquire nonblocking writer lock while serial script
+checks were still running (exit1, helper not launched); retained receipt, waited
+for checks then uniquely named runtime02 passed. No active gate was interrupted.
+Final full sampled aggregate Lean/Lake RSS1437488KiB, cumulative session cgroup
+peak2160848896bytes,zeroOOMevents; disk increment192512bytes, within32MiB forecast.
+Explicit cache-off exec environment propagated in focused/full/runtime commands.
+
+Original queue reassessment: published typed schedule/uint transfer now compose
+with actual immutable inputs/context/allocation; this remains primitive-family
+operation evidence. G32 physical bytes, G33 all-profile constructors/target
+allocation failure, G34 general path/rebinding/delete target execution, G35.01
+full storage/source/target realization, G35.02 reserved memory-storage prerequisite,
+G35.03 general ABI/reference/calldata-storage transport, G35.04 fresh deep-copy/
+emitted-loop execution, G35.05 recursive Source graph/maps/shadows/cycles traversal,
+and G35.06 final V10/Source/target composition remain open. Backfill A/B advanced
+but not complete or exhausted. No full-lane closure or external compiler/EVM
+result is inferred. Existing blocked goal preserved unchanged/uncompleted.

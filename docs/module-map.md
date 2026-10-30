@@ -1112,3 +1112,6 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/CalldataSchedule.lean` | Actual decoded Boolean transfer then arbitrary reached-heap snapshots; exact lookup/rejection, source reads, frames and INITIAL-content restoration criterion |
 | `Backend/MemoryOps/CalldataScheduleControls.lean` | Runtime decoded-break/recapture-repair controls, independently computed initial criterion, exact source reads, frozen/ignored-repair negatives and isolated bounds |
 | `Backend/MemoryOps/CalldataScheduleGrowth.lean` | Actual decoded-initialized finite schedules through Keeps, actual interstage allocation and positive/ordered-failure context witnesses |
+| `Backend/MemoryOps/CalldataUintSchedule.lean` | Actual decoded uint256 initialization followed by arbitrary reached-heap snapshots; exact lookup/bounds/failure, immutable reads and initial-content restoration |
+| `Backend/MemoryOps/CalldataUintScheduleGrowth.lean` | Uint-initialized finite schedules through published Keeps and actual supplied-object interstage allocation; fresh structural frames |
+| `Backend/MemoryOps/CalldataUintScheduleControls.lean` | Runtime dynamic/fixed nonuniform uint repair, explicit maximum, changed-source frozen negative, aliases/neighbors/fresh parents and ordered guard failures |
