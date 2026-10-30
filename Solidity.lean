@@ -741,3 +741,14 @@ import Solidity.Solkey.QuantifiedDiamond
 
 import Solidity.Tools.SolCases
 import Solidity.Examples.SolCases
+import Solidity.Backend.Environment.Observations
+import Solidity.Backend.Environment.ObservationsChecks
+import Solidity.Backend.Environment.Metadata
+import Solidity.Backend.Environment.ByteConstants
+import Solidity.Backend.Environment.MetadataChecks
+import Solidity.Backend.Environment.Crypto
+import Solidity.Backend.Environment.Namespace
+import Solidity.Backend.Environment.CryptoChecks
+import Solidity.Backend.Environment.Composition
+import Solidity.Backend.Environment.Frames
+import Solidity.Backend.Environment.CompositionChecks
