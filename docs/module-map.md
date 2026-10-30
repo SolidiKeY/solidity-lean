@@ -1051,3 +1051,6 @@ At the root, the notation's own tests:
 | `Lowering/V08/LibraryControls.lean` | Delegated owner isolation and nonempty constructor installation. |
 | `Lowering/V08/Audit.lean` | Headline axiom output pinned by lane-specific controls. |
 | `Lowering/V08/CallbackControls.lean` | Paid invariant/havoc callback, actual settlement and atomic rollback witnesses; no source reentrancy claim. |
+
+| `Lowering/V08/CallableMetadata.lean` | Source resolved argument/conversion metadata and checked target frame labels; no source evaluator |
+| `Lowering/V08/MetadataControls.lean` | Nonempty source function/error metadata, typed target binding and wrong-order/signature controls |

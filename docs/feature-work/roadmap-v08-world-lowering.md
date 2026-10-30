@@ -331,3 +331,82 @@ modules/60jobs. Evidence JSON module lists are authoritative. The implementation
 checkpoint is967952d5964db81a77d4fd948028707f51e4a607. The follow-up changes only
 this handoff precision; no proof or effective runtime option changes. The
 external handoff records the final documentation commit as well.
+
+## Continuation checkpoint: source callable metadata
+
+Continued from12f1216519b774676dd36032494f5043fd0e352d in the same pinned
+worktree. No goal/receipt was recreated or reset; get_goal is still not exposed.
+The original queues remain binding. Source.Resolved.paramsOf handles event/error
+parameter lists, while functions use Decl.fnSig. CallableMetadata now consumes
+these actual APIs. It adds no evaluator, type representation or value/state layer.
+
+convertedArgs exposes the explicit conversion nodes in RConvArgs as RArgs.
+convert_originTypes proves RArgs.convert retains the full original expression
+type spine in order, with no source caps or conversion-preservation assumption.
+argsFit_length proves exact arity. paramsOf_unique fixes the selected event/error
+parameter list; function_signature_unique fixes both parameter and result lists.
+namesMatch checks source declaration labels against reversed actual Args.names;
+sourceLabel distinguishes user labels from generated anonymous labels without
+relying on configurable printer spelling. namesMatch_iff, target_names_length
+and matched_names_length establish the precise names/arity contract, including
+primitive/storage/memory argument slots. Names alone do not prove type/body
+agreement, unique declaration identity or preservation.
+
+MetadataControls supplies a nonempty two-boolean source function, a resolved
+RExpr.call, explicit ordered conversion nodes, actual target Args.evalT with
+distinct true/false values, and negative swapped-name/value-order/result-signature
+controls. A heterogeneous custom-error declaration consumes paramsOf and retains
+the rational argument's conversion to uint8; reversed types fail argsFit. This
+is not custom-error emission or a source evaluation theorem. The17 new named
+laws/controls pass gate100235 (55 named modules/56 Lake jobs); prior50 remain
+unchanged. All67 exact axiom sets are lane-pinned. Final combined gate follows.
+
+Exact missing interfaces: this pin supplies no general checked STy-to-intrinsic
+parameter/result representation map or RExpr source execution application;
+reserved getter/function-reference/readonly owners remain untouched.
+Source.TypingExamples explicitly defers slices to S02, RExpr has no slice
+constructor, and Source.Calldata.objects has no fixed decoder relation to input.
+A new nested ABI encoder/decoder or invented slice semantics would bypass the
+reserved decoder/source owners, so none is introduced. These identified gaps
+do not stop other independent environment/transient and rollback backfill.
+
+Full-gate diagnosis: gate64122 scheduled870 named modules via873 Lake processes
+but completed216 build invocations before the600-second guard. Several cold
+calculus targets took13--24 seconds each; prior logs/caches are retained. Before
+another unchanged full attempt, use focused import closures to reuse this
+source/toolchain-keyed cache. The cap, proof/fuel/node/TestSuite budgets and
+12GiB/no-swap/OS-headroom guards remain unchanged. New Lean checks are serial;
+no Lean MCP diagnostics are exposed.
+
+Metadata checkpoint review findings: finder and skeptic required explicit
+fixture-environment provenance. MetadataControls now places the function and
+error in one actual abstract source unit and proves both declaration-membership
+witnesses. These do not prove overload resolution, WellFormed admission or
+Typed.toR provenance, which remain open. The finder also required documenting
+that sourceLabel maps every generated label to none: anonymous/repeated-label
+permutations are not distinguished by this names-only observation. The exact
+target value-order negative remains independent of label equality. Neither
+reviewer used Lean/server/builds; their read-only review did not close source
+execution/type-representation premises.
+
+The reviewed membership extension adds two no-axiom witnesses, so this
+checkpoint has19 new named declarations and the combined inventory69. Focused
+gate106681 passes55 named modules/56 Lake jobs, source unchanged; sampled
+aggregate RSS791875584bytes, cgroup peak188837888bytes. Final combined
+source-bound evidence and checkpoint review record are saved alongside the
+original logs, with raw historical failures retained.
+
+Metadata checkpoint handoff: combined gate107408 passes92 named modules/93
+Lake jobs, all69 exact axiom sets, unchanged source/config, sampled aggregate
+RSS810668032bytes/cgroup peak172089344bytes. Separate independent finder and
+skeptic confirmed both fixes on actual source, without Lean/server/builds.
+Final lane control/negative evidence, layers/orphans/trust and doc comparison
+are retained under metadata-* logs. Documentation full exit1/46 remains a
+failure; zero-new comparison is separate. Full final validation and all source
+composition obligations remain open; this checkpoint is not a lane endpoint.
+Checkpoint parent12f1216519b774676dd36032494f5043fd0e352d; frozen base unchanged.
+The committed checkpoint head and patch are recorded at
+/workspace/v08-world-lowering-artifacts/metadata-checkpoint.md and .patch.
+Next independent work is the G23 source/world environment projection adapter
+and populated mixed source/intrinsic rollback observations, followed by other
+authorized independent clauses.

@@ -7,6 +7,34 @@
   "Solidity.Lowering.V08.AbiControls.wrong_panic": [
     "propext"
   ],
+  "Solidity.Lowering.V08.CallableMetadata.argsFit_length": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableMetadata.convert_originTypes": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableMetadata.function_signature_unique": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableMetadata.matched_names_length": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableMetadata.namesMatch_iff": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableMetadata.paramsOf_unique": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableMetadata.target_names_length": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.CallbackControls.callback_after_failure": [
     "Classical.choice",
     "Quot.sound",
@@ -98,6 +126,54 @@
     "propext"
   ],
   "Solidity.Lowering.V08.LibraryControls.delegated_wrong_context": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.binding_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.converted_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.error_argument_origins": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.error_member": [],
+  "Solidity.Lowering.V08.MetadataControls.error_parameters": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.function_member": [],
+  "Solidity.Lowering.V08.MetadataControls.names": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.signature": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.wrong_argument_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.wrong_error_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.wrong_names": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.MetadataControls.wrong_signature": [
     "Classical.choice",
     "Quot.sound",
     "propext"

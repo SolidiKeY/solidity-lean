@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.MetadataControls
 import Solidity.Lowering.V08.Controls
 import Solidity.Lowering.V08.AbiControls
 import Solidity.Lowering.V08.LibraryCreation
