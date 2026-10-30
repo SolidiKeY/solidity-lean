@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint seventeen. Earlier checkpoint
+Current cumulative accounting through checkpoint eighteen. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -1589,3 +1589,63 @@ clauses above. G35.02 remains BLOCKED on reserved memory-to-storage results and
 G35.06 on reserved copy plus V10/Source/target composition. The new local interval
 agreement and actual allocation application supply additional footprint precision;
 they do not close any original parent or prove independent work exhausted.
+
+## Checkpoint18: exact initial-agreement footprint (partial)
+
+Continued original independent BackfillB/G35.03 investigation after checkpoint17:
+the sufficient nonempty-alias clause lacked its necessary converse. New owned
+OverwriteAgreementExact derives target equality iff INITIAL pointwise payload
+agreement from actual overwriteSlice_inside at every runtime index, then lifts
+the iff through boolTransfer_result_lookup's REAL payload and success bounds.
+Actual Some remains a separate premise: the criterion is not a validity test for
+failed calls. Primitive and reference elements use the same intrinsic typed law.
+
+BoolChildRepr.object_eq derives SAME-child contents from two observations of the
+SAME immutable table via existing DecodedBoolRead iff, without address injectivity.
+Thus actual aliased Boolean-transfer child preservation iff initial computed
+agreement; mixed_alias_iff derives the second uint frame intrinsically and keeps
+that exact criterion although the final whole heap can materially change. Target
+equality is a characterized conclusion, not an assumed preservation input. This
+is not a theorem about distinct addresses, arbitrary reference graphs or fresh
+Source entries. All Source profiles and aliased operations remain unchanged.
+
+Independent finder/skeptic preliminary reviews found no mathematical defect but
+both identified a missing direct mixed-iff control. Addressed with mixed_actual:
+for every intrinsic-valid runtime tail n (total child length3+n), BOTH Boolean
+values execute followed by an actual uint write0-to-max. Complete child output is
+[value,true,false]++replicate n false and uint output[max,7]; uint object inequality
+is proved. The resulting child relation iff value=false exercises the new iff
+positively and negatively. n0 still has3 real child values, separate from the
+checkpoint17 empty-root distinction. Separate runtime accepted/rejected controls
+derive actual initial table representation and Some results. No conversion or
+output relation is supplied as a premise; no fixed payload/depth cutoff is added.
+
+Focused errors (Option-match reduction, typed list extensionality, runtime length
+arithmetic and beta reduction) retain actual exit1 logs, each followed by source
+repairs and distinct checks. Exact focused closure passes68jobs; nine headline/
+control axiom outputs are standard. Per-file diagnostics/get_goal remain absent.
+Retained runtime12GiB/swap0/16GiBparent/serial-j1 and all budgets unchanged. Measured
+preflight634470400bytes and conservative3MiB incremental output/log/export budget
+leave OS/disk headroom without cleanup, new runtime or sealed-file mutation.
+All G32-G35/Backfill statuses and missing source/byte/target/reserved prerequisites
+remain as above: no parent completion, independent-exhaustion or EVM result claim.
+
+Checkpoint18 final independent source/doc finder and skeptic reviews both pass
+after the direct mixed-control and two documentation fixes above. Exact guarded
+focused68jobs and full run-lean.sh912default/262TestSuite/SolKey377/131 pass exit0;
+sampled aggregate Lean/Lake RSS1458800KiB, per-exec OOM deltas0. Cumulative session
+peak454889472bytes is not per-exec worker RSS. Same12GiB/no-swap/serial runtime and
+all existing guards persist. Layers/orphans/trust/owned/script syntax/corruption/
+strict automatic/complete fixtures/diff checks pass. Owned452standard pins across
+61modules pass. Global inventory still FAILS exit1,0unsafeerrors466unrecorded
+=14inherited+452owned. Strict docs still FAILS exit1, raw output byte-identical to
+exact base (ea1a09c222d52d1d17953f653c087443e34e6282497f0b02cdc09aad15b7dd48);
+zero-new comparison separately passes. Proposals, raw failed attempts, gates and
+resource receipts stay in NEW checkpoint18 evidence, no reserved records edited.
+
+Original queue audit remains unchanged after this second independent checkpoint:
+G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B PARTIAL; G35.02 and G35.06 BLOCKED
+on reserved copy and final V10/Source/target prerequisites. All exact missing
+physical representation/all-type constructor/target failures/general path/delete/
+rebinding/reference ABI/fresh-copy/general graph/composition clauses remain open.
+This local exact iff is not full lane completion or independent-work exhaustion.

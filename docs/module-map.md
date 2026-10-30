@@ -1099,3 +1099,4 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/OverwriteAgreement.lean` | Initial pointwise list/typed-heap overwrite identity, actual decoded Boolean agreement, child self-table agreement and preserving-prefix transport. |
 | `Backend/MemoryOps/CalldataAgreementChildren.lean` | Nonempty content-agreeing alias frames and actual final child correspondence; reverse execution reuses existing whole-heap mixed commutation with derived bounds. |
 | `Backend/MemoryOps/CalldataAgreementControls.lean` | Runtime repeated aliases with actual nonempty same-content write and materially changing uint, reverse/neighbor/root/typed reads, reference identity, one-value disagreement and published allocation. |
+| `Backend/MemoryOps/OverwriteAgreementExact.lean` | Initial interval agreement iff actual target preservation; immutable same-child contents and exact aliased/mixed decoded preservation, with runtime controls |
