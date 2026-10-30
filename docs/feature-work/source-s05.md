@@ -322,6 +322,30 @@ default heartbeats.
 - G46 can read `sourceLangEvents`; it still needs failure points.
 - Sessions: an unfinished *deployment* still shows no events.
 
+**G13 checker on master (`fb379ae`, `Solidity/Frontend/Static/Infer*.lean`).**
+It is written against S01's typing before this lane's changes (master's
+`Typing.lean` has none of the S02 constructors). Do not merge master into
+this branch; at integration these parts of the checker break:
+
+| Checker file | What breaks | Cause on this branch |
+|---|---|---|
+| `Infer.lean` `constRes` (l. 121–123) | builds `.const hq ha` | `Typed.const` has a third premise, `e.hexLen? = none` |
+| `Infer.lean` `litRes` (l. 138) | builds `.litBytes (h := h) hf` from `fitsBytes` | `Typed.litBytes` takes `hexLen? = some len` and has type `hexConst n.value len` |
+| `Infer.lean` `binPair` shift/exp (l. 219–229) | premises on `τa.mobile`, result at `τa` | `Typed.shift`/`exp` read `τa.shiftTy` and type the result `τa.shiftTy` |
+| `Infer.lean` arith/bit/order/eq (`common?`) | still compiles; results change | `STy.common?` refuses a constant against a constant or a `bytesN` and uses the mobile type |
+| `Infer.lean` (all arms) | no arms for the new rules | new `Typed` constructors `member`, `structNew`, `extCall`, `extCallValue`, `transfer`, `send`, `abiEncode`, `assignCopy`, and `LVal.member` |
+| `InferStmt.lean` l. 71 | builds `.expr p.2` | `StmtD.expr` has the premise `(C.inModifier && e.isUnderscore) = false` |
+| `InferStmt.lean` l. 118 | builds `.retTuple p.2 q.2 hf` | `StmtD.retTuple` has the premise `σs ≠ []` |
+| `InferStmt.lean` `rethrowRes` (l. 143–152) | builds `.rethrow hb hr ht hp` from `Syn.paths` | `StmtD.rethrow`'s last premise is `rethrowVar? body = some d` |
+| `InferComplete.lean` `const_mem`, `litBytes_mem` (l. 65, 143), the main match (l. 543–544, 589–593), `shift_pair`, `exp_pair` (l. 245–253) | the same signature changes | as above; the main match also lacks the new constructors |
+| `InferStmtComplete.lean` l. 87–91, 186–189, 210–213 | `.expr`, `.retTuple`, `.rethrow` cases | as above |
+| `InferExamples.lean` `zero_types` (l. 75) | expects 33 types for `0x00` | `0x00` now has one type, `hexConst 0 1` (solc's literal typing, Q1) |
+
+This branch's `Typed.infer` (`Solidity/Source/Infer.lean`) follows the new
+rules and returns one derivation per expression; by `Typed.unique` that is
+enough for meaning, but it is not the checker's list-of-all-derivations
+interface and has no completeness proof.
+
 **Open** (also under `limitations:`): a progress theorem (`stuck` is stable
 but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
