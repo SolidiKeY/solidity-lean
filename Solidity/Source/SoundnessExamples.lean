@@ -30,6 +30,8 @@ it the operation is `stuck`).
 | `ret_framed_ns` | the same `return 1;` with a return slot is never `stuck` |
 | `indexMapping_ns` | the elaboration of S01's `m[o]` (a mapping value, read through an implicit key conversion) is in the value fragment and never `stuck` |
 | `incBody_ns` | the elaboration of the counter's typed body `count++;` (`TypingExamples.incBody`, an `ItemsD` derivation) is in the statement fragment and never `stuck` in its frame (`ItemsD.toR_ns`) |
+| `callRetOne_ns` | an internal call of `function f() internal returns (uint8) { return 1; }` (no modifiers, a fragment body in the frame the call builds) is never `stuck` (`callInternal_ns`) |
+| `callBadFrame_stuck` | a body whose locals lack the return slot is `stuck` ("call frame"): the frame hypothesis is needed |
 -/
 
 namespace Solidity.Source.SoundnessExamples
@@ -225,6 +227,54 @@ theorem incBody_ns (G : Glob Examples.counter.env) (F : Fr) (n : Nat) :
   ItemsD.toR_ns G F n 0 none incBody .nil (by
     exact ⟨⟨rfl, rfl, rfl⟩, trivial⟩) ⟨[], [], rfl, rfl⟩
 
+/-! ## The function level -/
+
+open SemanticsExamples in
+/-- `function f() internal returns (uint8) { return 1; }`, resolved: its
+locals are the return slot. -/
+def retOneBody : RBody E0 where
+  ps := []
+  rs := [u8]
+  inModifier := false
+  locals := [u8]
+  out := [u8]
+  items := .stmt (.retVal rfl (.const (Q.ofInt 1)) (by decide)) .nil
+
+open SemanticsExamples in
+/-- The same body with no return slot in its locals: not the frame the
+call builds. -/
+def badFrameBody : RBody E0 where
+  ps := []
+  rs := [u8]
+  inModifier := false
+  locals := []
+  out := []
+  items := .nil
+
+open SemanticsExamples in
+/-- A program whose every function has body `b`. -/
+def progOf (b : RBody E0) : Glob E0 :=
+  ⟨{ P0 with body := fun _ => some b }, .viaIR, toyFixed, fun _ => word 0, fun _ _ => false,
+    fun _ => .answer (.success []), word 0⟩
+
+open SemanticsExamples in
+/-- **Witness**: an internal call of `f` (no modifiers, a fragment body,
+the frame the call builds) is never `stuck` (`callInternal_ns`). -/
+theorem callRetOne_ns (d : Decl) (n : Nat) :
+    NS (callInternal (progOf retOneBody) F0 n d (ps := []) .nil [u8]) :=
+  callInternal_ns _ _ n d .nil [u8] retOneBody rfl rfl rfl rfl rfl
+    (fun τ h => by simp only [List.mem_cons, List.not_mem_nil, or_false] at h; subst h; rfl)
+    ⟨⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, trivial⟩ ⟨trivial, trivial⟩
+
+open SemanticsExamples in
+/-- **Negative control**: a body whose locals are not the frame the call
+builds is `stuck` ("call frame"): `callInternal_ns`'s frame hypothesis is
+needed. -/
+theorem callBadFrame_stuck (d : Decl) :
+    ((callInternal (progOf badFrameBody) F0 5 d (ps := []) .nil [u8]).run (.nil, s0)).1 =
+      .error (.stuck "call frame") := by
+  rfl
+
 /-! ## The census's semantic bug, fixed -/
 
 /-- `string memory s = "abc"; bytes(s)[0] = 0x78; bytes1 b = bytes(s)[0];` -/
@@ -342,5 +392,17 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.indexMapping_ns
 /-- info: 'Solidity.Source.SoundnessExamples.incBody_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.incBody_ns
+/-- info: 'Solidity.Source.itemsNSP' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.itemsNSP
+/-- info: 'Solidity.Source.runMods_nil_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.runMods_nil_ns
+/-- info: 'Solidity.Source.callInternal_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.callInternal_ns
+/-- info: 'Solidity.Source.retVals_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.retVals_ok
+/-- info: 'Solidity.Source.SoundnessExamples.callRetOne_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callRetOne_ns
+/-- info: 'Solidity.Source.SoundnessExamples.callBadFrame_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callBadFrame_stuck
 
 end Solidity.Source.SoundnessExamples

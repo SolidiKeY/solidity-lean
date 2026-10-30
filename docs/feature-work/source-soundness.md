@@ -269,6 +269,8 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `readAt_ns`, `writeAt_ns`, `Storage.read_isSome`, `keyStep_nsp`, `Val.word_isSome`, `cellTy_key`, `pathTy_key`, `Env.pathTy_go`, `storRef_map_nsp` | storage: a cell of value type at its layout type with a default always reads; a write at the layout type succeeds (or reverts in a static frame); a keyable key is a key step; a mapping value's path has the mapping's value type |
 | `convRV_ns`, `getV_ns`, `readLoc_ok`, `writeLoc_ok`, `compound_dom` | its other steps |
 | `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_nsStep`, `execItems_nsStep`, `forIter_nsStep`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;` and `return e;` of a value type) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
+| `itemsNSP` (the post `Out.esc`; `Out.close_esc`, `Out.up_esc`) | outside loops (`SCtx.loop = false`) a block of the fragment ends normally or by `return`: no `break`/`continue` escapes it |
+| `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **the function level**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults) |
 | `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
@@ -282,7 +284,9 @@ is never `stuck` and ends with `i = 3`); negative controls
 `OpsOK` is needed) and `ret_unframed_stuck`/`ret_unframed_no_frame`
 (`return 1;` over locals without a return slot is `stuck`, and those
 locals are no `BodyFrame`: the frame hypothesis is needed; with the slot,
-`ret_framed_ns`). Elaborated witnesses: `incBody_ns` (the counter's typed
+`ret_framed_ns`). Function level: `callRetOne_ns` (an internal call of a
+`return 1;` body) and `callBadFrame_stuck` (a body whose locals lack the
+return slot is `stuck`, "call frame"). Elaborated witnesses: `incBody_ns` (the counter's typed
 body `count++;`, through `ItemsD.toR_ns`) and `indexMapping_ns` (S01's
 `m[o]`, a mapping value read).
 
@@ -293,9 +297,11 @@ needs the lemma that a resolved state variable is the declaration
 `Env.declOf` finds at its path (the census's `stor` class).
 
 **What the fragment leaves out**, in the order a whole-program proof needs
-it: `return (a, b)` (`setRets`), the function level (`runMods`: a body's
-`break`/`continue` never leave it; `callInternal`: virtual dispatch finds
-a body whose locals are the frame `BodyFrame` describes), memory (the `heap` invariant, `WellTyped.lean`), arrays and
+it: `return (a, b)` (`setRets`), modifiers (`runMods` with invocations,
+`_`), the coherence of dispatch and elaboration (that the body virtual
+dispatch finds has the call's parameters and returns, which
+`callInternal_ns` assumes), internal calls as expressions (`callInternal`
+from `evalE`), memory (the `heap` invariant, `WellTyped.lean`), arrays and
 structs in storage, internal calls and modifiers (dispatch coherence),
 external calls, `emit`, builtins, and the transaction layer (dispatch,
 ABI). Each is listed with its sites in the census below.
@@ -394,7 +400,7 @@ Kept current at every checkpoint.
 |---|---|---|
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
 | 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; no preservation theorem for the walk |
-| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
+| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
 | 4 Close gaps | not started | |
 | 5 `Failures`, `SourceSpec` | not started | |
 
@@ -404,9 +410,11 @@ Kept current at every checkpoint.
   elaborated program's transaction or deployment is a ledger gap that
   occurs in it), `noGaps` and its corollary, and the token-like witness:
   the interpreter walk covers the value fragment of expressions and
-  statements (with storage, mappings and `return`), not memory, arrays and
-  structs, internal and external calls, modifiers, builtins, `emit`, or
-  the transaction layer (dispatch, ABI decoding, deployment, callbacks);
+  statements (with storage, mappings and `return`) and internal calls to
+  modifier-free fragment bodies under a dispatch-coherence hypothesis, not
+  memory, arrays and structs, internal calls inside expressions,
+  external calls, modifiers, builtins, `emit`, or the transaction layer
+  (dispatch, ABI decoding, deployment, callbacks);
 - preservation for every interpreter step: proved for the memory
   operations only. For the value fragment preservation of `EMOK` is
   expected (locals receive only value types, the heap is untouched, the

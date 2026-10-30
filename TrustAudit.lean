@@ -1419,3 +1419,20 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} elaborated fragment witnesses use only the standard axioms"
+
+/-! Lane V04b: the function level (internal calls without modifiers). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.itemsNSP,
+    ``Solidity.Source.runMods_nil_ns,
+    ``Solidity.Source.callInternal_ns,
+    ``Solidity.Source.SoundnessExamples.callRetOne_ns,
+    ``Solidity.Source.SoundnessExamples.callBadFrame_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} function-level theorems use only the standard axioms"
