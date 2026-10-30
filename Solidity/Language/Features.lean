@@ -1164,7 +1164,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "calls", spelling := "address payable .send(v); .transfer(v)",
       scope := .abstract, current := .limited,
       requirement := r#"Model success/failure, transfer's revert behavior and payment effects; callback exclusion is an explicit selected assumption, not a timeless gas theorem."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 564 }], localEvidence := ["Solidity/Semantics.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 564 }], localEvidence := ["Solidity/Semantics.lean", "Solidity/Calculus/PaymentWitness.lean", "Solidity/Examples/Tactics/PaymentWitness.lean", "Solidity/Calculus/CallbackSound/Payments.lean", "Solidity/Examples/Tactics/PaymentRules.lean", "Solidity/Examples/Tactics/PaymentCorpus.lean", "Solidity/Calculus/PaymentConditions.lean", "Solidity/Examples/Tactics/PaymentConditions.lean", "scripts/payment-reference.test.mjs", "docs/feature-work/diamond-payments.md", "Solidity/Semantics/PaymentWorld.lean", "Solidity/Frontend/PaymentPlan.lean", "Solidity/Frontend/PaymentImport.lean", "Solidity/Tools/PaymentReplay.lean", "Solidity/Examples/Tactics/PaymentSource.lean", "scripts/payment-source.test.mjs"] }
   | .emptyDataValueCall =>
     { category := "calls", spelling := "(bool ok,) = a.call{value:v}(\"\")",
       scope := .abstract, current := .limited,
@@ -1184,7 +1184,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "calls", spelling := "reentrancy during modeled external calls",
       scope := .abstract, current := .limited,
       requirement := r#"Select and record ordinary versus callback modality; state frame guarantees and callback invariants explicitly."#,
-      upstream := [{ path := "docs/control-structures.rst", line := 65 }], localEvidence := ["Solidity/Semantics.lean"] }
+      upstream := [{ path := "docs/control-structures.rst", line := 65 }], localEvidence := ["Solidity/Semantics.lean", "Solidity/Calculus/PaymentWitness.lean", "Solidity/Examples/Tactics/PaymentWitness.lean", "Solidity/Calculus/CallbackSound/Payments.lean", "Solidity/Examples/Tactics/PaymentRules.lean", "Solidity/Examples/Tactics/PaymentCorpus.lean", "Solidity/Calculus/PaymentConditions.lean", "Solidity/Examples/Tactics/PaymentConditions.lean", "scripts/payment-reference.test.mjs", "docs/feature-work/diamond-payments.md"] }
   | .externalLibraryCalls =>
     { category := "calls", spelling := "linked library public/external calls",
       scope := .abstract, current := .limited,

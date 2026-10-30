@@ -74,6 +74,26 @@ The Group 03 continuation records both methods' per-fixture results.
 Use Lean 4.24.0 from `lean-toolchain`, Node, Python 3 and `tar`.
 No dependency is added to the core Lake package.
 
+Focused payment regressions use `scripts/test-compiler.mjs` to locate compilers
+in `.lake/soljson/`, relative to the repository. Populate it with these files
+from `ethereum/solc-bin`'s `gh-pages/bin/`:
+
+| Filename | Required SHA-256 |
+| --- | --- |
+| `soljson-v0.8.34+commit.80d5c536.js` | `c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8` |
+| `soljson-v0.8.38+commit.1835d247.js` | `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390` |
+
+The payment member-reference tests use the verified frozen SolKey snapshot in
+`tests/migration/solkey`, including its 0.8.34 Gradle pin; no sibling checkout
+is needed. Source-world and bytecode tests use the existing 0.8.38 pin.
+`SOLJSON_DIR` overrides the compiler directory; `SOLC_REFERENCE` takes precedence
+for the 0.8.38 file only. Overrides retain the exact hashes and versions above.
+Install the optional bytecode package with
+`npm ci --ignore-scripts --prefix scripts/evm-reference` before those tests.
+The source tests require built Lean artifacts; the resume test invokes the
+runner's prerequisite build. Keep such checks serial with Lean `-j1` under
+the repository's resource bounds.
+
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
 node scripts/solidity-upstream.mjs verify

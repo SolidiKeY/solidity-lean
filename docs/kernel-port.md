@@ -45,8 +45,30 @@ The language and calculus gaps, callbacks included, are listed in
 
 - **Diamond calls.** A diamond `try` closes to `false` (`tryCallDiamond`),
   and so does a diamond payment (`transferDiamond`): solkey's diamond
-  transfer rules are not ported.  The corpus's `net/*-withcallback.key`
-  problems stay unported (`docs/corpus-parity.md`).
+  transfer rules are not ported. The frozen callback `.key` cases remain unsupported
+  (`docs/corpus-parity.md`); PiggyBank has a separate handwritten typed proof,
+  without a corpus mapping. The additive
+  `Calculus/PaymentWitness.lean` proves deterministic payment exactness,
+  callback transfer exactness and callback send sufficiency. Conditional
+  `ProvesC.transferD`/`transferDetD` formula rules now use the existing
+  `¬ [r.transfer(a);] false` antecedent as acceptance evidence and retain
+  the applicable booking, exit and resumption premises. The original bare
+  transfer diamond omits acceptance and is false for unfunded/refused payments.
+  `Examples/Tactics/PaymentCorpus.lean` proves the original PiggyBank box
+  callback body and invariant, including zero-value entry booking, by typed bounded
+  auxiliary proofs. This is separate kernel evidence; the frozen `.key` pin and
+  exact source mapping stay unchanged;
+  the two world-dependent payment fixtures now use a narrow typed bridge;
+  all three original fixtures have typed source and independent bytecode/gas
+  validation. Broader compiler
+  correspondence remains open. See
+  [the payment handoff](feature-work/diamond-payments.md).
+  The human-approved payment assignment now uses exact conditional success and
+  certified failure instead of requiring the unconditional success rule.
+  `Calculus/PaymentConditions.lean` covers that family under unchanged semantics;
+  the named original source-world/payload rows are now handled by the narrow
+  payment frame; gas is independently checked, while general source/compiler
+  correspondence remains open.
 - **A struct recursive through a mapping** (`TestSuite.sol`'s `Tree`) is
   refused: its default value is infinite and the model's are finite
   (`Solkey/TestSuite.lean`'s excluded row).
@@ -148,9 +170,9 @@ their names.
 | Where a callee's body lives | In the call (`Stmt.call f args ret body`), closed over a frame of its own (its returns on its parameters, `rs ++ ps`), not looked up in the contract: a contract holding `Stmt` bodies indexed by itself is an inductive-inductive type Lean lacks.  The contract keeps the body as read (`FunDecl.body`); the elaborator inlines it at each call with every callee local renamed fresh (`renameStmts`, `ElabScope.inlined`) and builds the closed frame directly (`elabCallRet`, `Syntax/Elab.lean`).  `Stmt.run` is structural with no rank certificate, and the elaborator is the only author of a call's body.  A function calls only the functions declared before it, so inlining ends.  A recursive function is the exception ("Recursion", below): its call is `Stmt.callRec`, its body behind a thunk, unrolled frame by frame. |
 | Binding arguments | The arguments are read in the caller's context and bound as the frame's parameters, as solc reads every argument before the call, so `internalCallExpand` and `functionBodyExpand` are exact with no condition (the untyped side's `Arg.separatedFrom` is gone with its run).  The capture rule (`functionCallArgCapture`) takes the leftmost argument that is not simple: a criterion the capture could re-trigger would loop. |
 | `return` | Anywhere in a body, lowered away by the elaborator (`lowerReturns`, run on a callee's body after its locals are renamed) rather than as an abrupt completion in `Stmt.run`.  What follows a `return` is dead; the statements after an `if` with a returning branch move into the other branch.  A moved statement naming a branch's own declaration is an elaboration error.  A callee's `return` ends the callee only. |
-| Callback semantics | A relation over `Stmt.run` (`ExecS`/`ExecP`), not a second interpreter: every statement but a transfer, a branch and a call is `Stmt.run`'s, so the relation cannot drift.  A transfer halts, leaves the invariant broken (an outcome no formula accepts), or resumes in `State.havoc` (storage and ledger replaced; locals, memory and funds kept, as solkey `0b885c229d` keeps `selfBalance`) satisfying it. |
+| Callback semantics | A relation over `Stmt.run` (`ExecS`/`ExecP`), not a second interpreter: ordinary nonforking statements reuse `Stmt.run`; payment and control constructors use relational clauses.  A transfer halts, leaves the invariant broken (an outcome no formula accepts), or resumes in `State.havoc` (storage, ledger and live balance replaced; locals and memory kept) satisfying it. |
 | Callback taclets | A second inductive `CallbackTaclet`, not `Taclet` constructors: `Stmt.sound` is against `holds` (the deterministic run), and one-rule-per-statement would break.  The box constructor as in solkey (the diamond is not ported); the resume premise is a second sequent under `{havoc}` (KeY's anonymising update). |
-| The invariant | An `Invariant C` is a formula with no local and no transfer (solkey's `CInv(storage, net)`); the frame lemmas need it closed.  It may read the ledger, which a callback havocs, and `address(this).balance`, which it keeps (`State.havoc`). |
+| The invariant | An `Invariant C` is a formula with no local and no transfer (solkey's `CInv(storage, net)`); the frame lemmas need it closed.  It may read the ledger, which a callback havocs, and `address(this).balance`, which a callback may replace (`State.havoc`). |
 | `ProvesC` | The ordinary taclets lift on a statement that pays nothing and runs no other, and whose premise pays nothing; a goal with no transfer left is `Proves`'s (`holdsC_iff_holds`).  Validity with callbacks implies validity without (`valid_of_validC`). |
 | External calls (`try`) | The callee is never run.  Without callbacks how a call ends is the transaction's (`TTx.ext`, a table read by `Stmt.run`, which no formula reads); a call with no entry reaches an address with no code and reverts in the caller, and so does data that does not decode (`Binders.decodeT`).  `tryCallNoCallbackBox` has a goal per clause, for every value of the locals it binds (`Premise.branches`, a `∀` per bound local), so a proof holds whatever the table says.  With callbacks a `try` is a point where control leaves (`Stmt.hasTransfer`), and `ExecS` runs it nondeterministically, its success from a `havoc`ked state keeping the invariant. |
 | Function contracts | A derived rule over `Stmt.run`, not a `Proves` constructor (`Calculus/FunContract.lean`): `useContract` has KeY's goals "pre" (`[ params := args ] requires`) and "post" (`[ params := args ] {old := storage ‖ oldNet := net} {havoc} ∀ T r. (ensures → [ res = r; ..ω ] φ)`), box only, its conclusion `⊨ᶠ`, so it applies at the first statement of a goal.  A contract is a fact about the callee's block from any state (`FunContract`), proved from its obligation `requires → {old := storage ‖ oldNet := net} [ T r; body ] (ensures ∧ typed(r))` (solkey's planned `requires -> [g(args)@C] ensures`, no invariant); it owes the result's type (`rangeFml`), as `∀ T r` ranges over the type.  The mutability is read off the inlined body, since `FunDecl` keeps no `pure`/`view` (only `payable`) (`Calculus/Blocks.lean`'s `Stmt.within`): `pure` (a `view` body that reads no state, with the same frame) and `view` keep storage and ledger, so "post" has no `{havoc}`; `nonpayable` (storage writes, `transfer`) gets `State.havoc`'s.  A body with memory, a push, a pop, an alias or a `catch` that binds data has no mutability, hence no contract (a `try` is `nonpayable`): "post" havocs no heap.  The callee's parameters are the call's fresh names, so a contract is stated at a call.  A recursive call by its contract is `useRecContract` (`Calculus/Recursion.lean`), the contract proved by induction over the unrolling ("Recursion", below). |

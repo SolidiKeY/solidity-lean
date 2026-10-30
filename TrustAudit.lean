@@ -1,3 +1,4 @@
+import Solidity.Examples.Tactics.PaymentSource
 import Solidity.Theorems
 import Solidity.Semantics.Termination
 import Solidity.Semantics.LexMetrics
@@ -55,6 +56,11 @@ import Solidity.Frontend.Checked.LexExamples
 import Solidity.Frontend.Checked.TypeExamples
 import Solidity.Frontend.Checked.ExprExamples
 import Solidity.Frontend.Checked.UnitExamples
+import Solidity.Source.SemanticsExamples
+import Solidity.Source.Unique
+import Solidity.Source.Horizon
+import Solidity.Source.Session
+import Solidity.Source.SoundnessExamples
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -824,7 +830,23 @@ run_cmd do
     ``Solidity.Examples.Tactics.FilteredSets.echo_correct,
     ``Solidity.Examples.Tactics.FilteredSets.empty_correct,
     ``Solidity.Examples.Tactics.FilteredSets.undefined_key_correct,
-    ``Solidity.Examples.Tactics.FilteredSets.theory_guard_correct]
+    ``Solidity.Examples.Tactics.FilteredSets.theory_guard_correct,
+    ``Solidity.ContractWorld.World.receiveRun_ok,
+    ``Solidity.ContractWorld.World.stipend_transfer_failure,
+    ``Solidity.ContractWorld.World.receiveRun_unfunded,
+    ``Solidity.ContractWorld.World.call_unit_noop,
+    ``Solidity.ContractWorld.World.createSend_ok,
+    ``Solidity.ContractWorld.World.stipend_send_true,
+    ``Solidity.ContractWorld.sendResult_true_iff,
+    ``Solidity.ContractWorld.sendResult_failure,
+    ``Solidity.ContractWorld.sendResult_uncaught,
+    ``Solidity.ContractWorld.payment_atomic_failure,
+    ``Solidity.ContractWorld.World.paidRun_certificate,
+    ``Solidity.Examples.Tactics.PaymentSource.original_send,
+    ``Solidity.Examples.Tactics.PaymentSource.original_transfer,
+    ``Solidity.Examples.Tactics.PaymentSource.wrong_handle,
+    ``Solidity.Examples.Tactics.PaymentSource.wrong_kind,
+    ``Solidity.Examples.Tactics.PaymentSource.wrong_bytes]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name
@@ -1262,3 +1284,471 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} checked-unit (G11) theorems use only the standard axioms"
+
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.wrapBits_mem,
+    ``Solidity.Source.Env.fieldTy?_of_fieldAt,
+    ``Solidity.Source.firstDone_mono,
+    ``Solidity.Source.firstDone_none_iff,
+    ``Solidity.Source.sessionAt_consistent,
+    ``Solidity.Source.Ledger.semExprCoverage_of_typed,
+    ``Solidity.Source.Ledger.semStmtCoverage_of_typed,
+    ``Solidity.Source.Ledger.semExprGaps_spec,
+    ``Solidity.Source.SemanticsExamples.add_overflow_checked,
+    ``Solidity.Source.SemanticsExamples.order_legacy,
+    ``Solidity.Source.SemanticsExamples.order_viaIR,
+    ``Solidity.Source.SemanticsExamples.modifier_twice_legacy,
+    ``Solidity.Source.SemanticsExamples.modifier_twice_viaIR,
+    ``Solidity.Source.SemanticsExamples.revert_rolls_back,
+    ``Solidity.Source.SemanticsExamples.transient_cleared,
+    ``Solidity.Source.SemanticsExamples.reentrant_callback,
+    ``Solidity.Source.SemanticsExamples.ctor_order_legacy,
+    ``Solidity.Source.SemanticsExamples.ctor_order_viaIR,
+    ``Solidity.Source.SemanticsExamples.outside_revert_rolls_back,
+    ``Solidity.Source.SemanticsExamples.static_callback_refused,
+    ``Solidity.Source.SemanticsExamples.session_runs,
+    ``Solidity.Source.Typed.constShape,
+    ``Solidity.Source.Syn.const_binOp,
+    ``Solidity.Source.zeroLength_illTyped, ``Solidity.Source.Typed.unique,
+    ``Solidity.Source.StmtD.unique, ``Solidity.Source.ItemsD.unique,
+    ``Solidity.Source.RBody.ofDerivation_unique,
+    ``Solidity.Source.belowAt, ``Solidity.Source.runTx_stable, ``Solidity.Source.deploy_stable,
+    ``Solidity.Source.firstDone_runTx, ``Solidity.Source.runTx_stuck_stable,
+    ``Solidity.Source.growAt, ``Solidity.Source.approxAt, ``Solidity.Source.runTx_events_mono,
+    ``Solidity.Source.sessionAtEvents_consistent, ``Solidity.Source.stuck_not_diverges,
+    ``Solidity.Source.stuck_stable, ``Solidity.Source.txFate_mono,
+    ``Solidity.Source.stuck_eventually, ``Solidity.Source.deploy_events_mono]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} source-semantics theorems use only the standard axioms"
+
+/-! Lane V04b checkpoint 1: G13's checker on the S02 typing rules
+(`Solidity/Frontend/Static/`, `docs/feature-work/source-soundness.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.hasType_iff,
+    ``Solidity.Frontend.Static.stmtOK_iff,
+    ``Solidity.Frontend.Static.itemsOK_iff,
+    ``Solidity.Frontend.Static.wellFormed_iff,
+    ``Solidity.Frontend.Static.InferExamples.member_checked,
+    ``Solidity.Frontend.Static.InferExamples.structNew_checked,
+    ``Solidity.Frontend.Static.InferExamples.extCall_checked,
+    ``Solidity.Frontend.Static.InferExamples.extCallValue_checked,
+    ``Solidity.Frontend.Static.InferExamples.pay_checked,
+    ``Solidity.Frontend.Static.InferExamples.abiEncode_checked]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checkpoint-1 checker theorems use only the standard axioms"
+
+/-! Lane V04b checkpoints 2-3: preservation of the heap typing, the value
+layer and value-fragment progress, the integration fixes (EIP-214, local
+storage pointers, string byte writes; `docs/feature-work/source-soundness.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.binVal_ok,
+    ``Solidity.Source.cmpVal_ok,
+    ``Solidity.Source.shiftVal_ok,
+    ``Solidity.Source.unaryVal_ok,
+    ``Solidity.Source.incDecVal_ok,
+    ``Solidity.Source.amount_ok,
+    ``Solidity.Source.convVal_ok,
+    ``Solidity.Source.constVal_ok,
+    ``Solidity.Source.Typed.toR_opsOK,
+    ``Solidity.Source.StmtD.toR_opsOK,
+    ``Solidity.Source.Elaborated.body_opsOK,
+    ``Solidity.Source.Elaborated.inits_opsOK,
+    ``Solidity.Source.convRV_ns,
+    ``Solidity.Source.readAt_ns,
+    ``Solidity.Source.writeAt_ns,
+    ``Solidity.Source.keyStep_nsp,
+    ``Solidity.Source.exprNSAt,
+    ``Solidity.Source.evalE_valFrag_ns,
+    ``Solidity.Source.stmtNSAt,
+    ``Solidity.Source.stmtNS,
+    ``Solidity.Source.itemsNS,
+    ``Solidity.Source.ItemsD.toR_ns,
+    ``Solidity.Source.alloc_ok,
+    ``Solidity.Source.allocRef_ok,
+    ``Solidity.Source.heapPut_ok,
+    ``Solidity.Source.heapAt_ok,
+    ``Solidity.Source.HeapOK.alloc,
+    ``Solidity.Source.HeapOK.write,
+    ``Solidity.Source.SoundnessExamples.add_value,
+    ``Solidity.Source.SoundnessExamples.add_bool_stuck,
+    ``Solidity.Source.SoundnessExamples.badBinary_not_opsOK,
+    ``Solidity.Source.SoundnessExamples.badBinary_stuck,
+    ``Solidity.Source.SoundnessExamples.cond_value,
+    ``Solidity.Source.SoundnessExamples.loop_ns,
+    ``Solidity.Source.SoundnessExamples.loop_value,
+    ``Solidity.Source.SoundnessExamples.cb_ns,
+    ``Solidity.Source.SoundnessExamples.cb_value,
+    ``Solidity.Source.SoundnessExamples.ret_unframed_stuck,
+    ``Solidity.Source.SoundnessExamples.ret_framed_ns,
+    ``Solidity.Source.SoundnessExamples.stringByte_write,
+    ``Solidity.Source.SemanticsExamples.static_value_call_halts,
+    ``Solidity.Frontend.Static.InferExamples.ptrCopy_refused,
+    ``Solidity.Frontend.Static.InferExamples.ptrDelete_refused]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane V04b checkpoint 2-3 theorems use only the standard axioms"
+
+/-! Lane V04b typing decisions of 2026-10-30 (`docs/feature-work/source-s02.md`,
+"Typing decisions"). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.InferExamples.mapAssign_refused,
+    ``Solidity.Frontend.Static.InferExamples.cdDelete_refused]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} typing-decision controls use only the standard axioms"
+
+/-! Lane V04b: elaborated witnesses of the value fragment. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.indexMapping_ns,
+    ``Solidity.Source.SoundnessExamples.incBody_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} elaborated fragment witnesses use only the standard axioms"
+
+/-! Lane V04b: the function level (internal calls without modifiers). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.itemsNSP,
+    ``Solidity.Source.runMods_nil_ns,
+    ``Solidity.Source.callInternal_ns,
+    ``Solidity.Source.SoundnessExamples.callRetOne_ns,
+    ``Solidity.Source.SoundnessExamples.callBadFrame_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} function-level theorems use only the standard axioms"
+
+/-! Lane V04b: elaborated bodies are in the frame internal calls build. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Decl.frame?_lengths,
+    ``Solidity.Source.Elaborated.body_locals,
+    ``Solidity.Source.Elaborated.callInternal_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} elaborated-frame theorems use only the standard axioms"
+
+/-! Lane V04b: `return (a, b)` in the statement fragment. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.evalConvArgs_ns,
+    ``Solidity.Source.setRets_ok,
+    ``Solidity.Source.SoundnessExamples.retPair_ns,
+    ``Solidity.Source.SoundnessExamples.retPair_unframed_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} return-tuple theorems use only the standard axioms"
+
+/-! Lane V04b: dispatch coherence by signature. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Decl.frame?_fnSig,
+    ``Solidity.Source.Elaborated.body_sig,
+    ``Solidity.Source.Elaborated.callInternal_sig_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} signature-coherence theorems use only the standard axioms"
+
+/-! Lane V04b: dispatch keeps the parameter types. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Glob.dispatchFn_params,
+    ``Solidity.Source.Elaborated.callInternal_call_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} dispatch-parameter theorems use only the standard axioms"
+
+/-! Lane V04b: internal calls inside expressions (the joint induction). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.fragAt,
+    ``Solidity.Source.evalE_callFrag_ns,
+    ``Solidity.Source.stmt_callFrag_ns,
+    ``Solidity.Source.callInternal_callFrag_ns,
+    ``Solidity.Source.SoundnessExamples.callF_ns,
+    ``Solidity.Source.SoundnessExamples.callF_value,
+    ``Solidity.Source.SoundnessExamples.callF_badFrame_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} call-fragment theorems use only the standard axioms"
+
+/-! Lane V04b: recursion through calls inside expressions; `return (x, x)`. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.recF_ns,
+    ``Solidity.Source.SoundnessExamples.recF_timeout,
+    ``Solidity.Source.SoundnessExamples.retLocalPair_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} recursion and return-tuple witnesses use only the standard axioms"
+
+/-! Lane V04b: a call through a body that calls, with distinct bodies. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.callG_ns,
+    ``Solidity.Source.SoundnessExamples.callG_value]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} two-body call witnesses use only the standard axioms"
+
+/-! Lane V04b: preservation of location reads and writes; the object-shape control. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.heapObj_pres,
+    ``Solidity.Source.heapPut_pres,
+    ``Solidity.Source.DataListOK.setNth,
+    ``Solidity.Source.DataListOK.nth,
+    ``Solidity.Source.asVal_ok,
+    ``Solidity.Source.memSet_pres,
+    ``Solidity.Source.writeLoc_mem_pres,
+    ``Solidity.Source.writeLoc_memByte_pres,
+    ``Solidity.Source.writeLoc_local_pres,
+    ``Solidity.Source.memElem_pres,
+    ``Solidity.Source.readLoc_local_pres,
+    ``Solidity.Source.readLoc_mem_pres,
+    ``Solidity.Source.readLoc_memByte_pres,
+    ``Solidity.Source.SoundnessExamples.ptrHeap_ok,
+    ``Solidity.Source.SoundnessExamples.ptrHeap_byte_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} location read/write preservation theorems and controls use only the standard axioms"
+
+/-! Lane V04b: object shapes; progress of memory byte writes. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.HeapShaped.alloc,
+    ``Solidity.Source.HeapShaped.write,
+    ``Solidity.Source.heapObj_top,
+    ``Solidity.Source.heapPut_shaped,
+    ``Solidity.Source.writeLoc_memByte_ok,
+    ``Solidity.Source.SoundnessExamples.ptrHeap_not_shaped,
+    ``Solidity.Source.SoundnessExamples.bytesHeap_byte_write]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} object-shape theorems and controls use only the standard axioms"
+
+/-! Lane V04b: progress of memory element and member writes. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.DataList.setNth_ok,
+    ``Solidity.Source.memSet_ok,
+    ``Solidity.Source.writeLoc_mem_ok,
+    ``Solidity.Source.STy.memShape_bytes,
+    ``Solidity.Source.SoundnessExamples.arrHeap_write,
+    ``Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} memory element-write theorems and controls use only the standard axioms"
+
+/-! Lane V04b: progress of memory byte reads. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.STy.memShape_array,
+    ``Solidity.Source.heapBytes_ok,
+    ``Solidity.Source.readLoc_memByte_ok,
+    ``Solidity.Source.SoundnessExamples.bytesHeap_byte_read,
+    ``Solidity.Source.SoundnessExamples.ptrHeap_byte_read_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} memory byte-read theorems and controls use only the standard axioms"
+
+/-! Lane V04b: progress of memory element reads under `HeapInner`. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.DataList.nth_val,
+    ``Solidity.Source.heapObj_get,
+    ``Solidity.Source.HeapInner.empty,
+    ``Solidity.Source.SoundnessExamples.arrHeap_inner,
+    ``Solidity.Source.memElem_ok,
+    ``Solidity.Source.readLoc_mem_ok,
+    ``Solidity.Source.HeapInner.alloc,
+    ``Solidity.Source.HeapInner.write,
+    ``Solidity.Source.SoundnessExamples.arrHeap_read,
+    ``Solidity.Source.SoundnessExamples.inlineHeap_read_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} memory element-read theorems and controls use only the standard axioms"
+
+/-! Lane V04b: memory writes keep `HeapInner`. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.heapPut_inner,
+    ``Solidity.Source.DataList.AllVal.setNth,
+    ``Solidity.Source.memSet_inner,
+    ``Solidity.Source.writeLoc_memByte_inner]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} HeapInner preservation theorems use only the standard axioms"
+
+/-! Lane V04b: zeroed objects keep the memory invariant. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Hoare.memGrow,
+    ``Solidity.Source.allocRef_mem,
+    ``Solidity.Source.zeroOK,
+    ``Solidity.Source.SoundnessExamples.zeroArr_alloc]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} zeroing theorems use only the standard axioms"
+
+/-! Lane V04b: `delete` of a local or memory location keeps the memory invariant. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Hoare.and,
+    ``Solidity.Source.heapPut_top,
+    ``Solidity.Source.memSet_top,
+    ``Solidity.Source.writeLoc_memByte_top,
+    ``Solidity.Source.writeLoc_local_mem,
+    ``Solidity.Source.writeLoc_mem_mem,
+    ``Solidity.Source.writeLoc_memByte_mem,
+    ``Solidity.Source.deleteLoc_mem,
+    ``Solidity.Source.SoundnessExamples.arrHeap_delete]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} delete-preservation theorems use only the standard axioms"
+
+/-! Lane V04b: copies from storage keep the memory invariant. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.readAt_keep,
+    ``Solidity.Source.loadBytes_keep,
+    ``Solidity.Source.allocRef_mem',
+    ``Solidity.Source.loadOK]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} storage-copy theorems use only the standard axioms"
+
+/-! Lane V04b: storage writes, copies into storage and every `delete` keep the memory invariant. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.applyOp_mem,
+    ``Solidity.Source.writeAt_mem,
+    ``Solidity.Source.deleteOK,
+    ``Solidity.Source.storeOK,
+    ``Solidity.Source.writeLoc_memOK,
+    ``Solidity.Source.deleteLoc_memOK,
+    ``Solidity.Source.SoundnessExamples.roundTrip_value]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} storage-write theorems use only the standard axioms"

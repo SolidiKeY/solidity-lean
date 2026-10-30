@@ -372,6 +372,14 @@ commands; it never enters the core import graph.
 | `Calculus/ProofTree.lean` | The proof tree of a scoped goal `H ⊢ φ` (`ProofTree.build`, `ofFormula`), as `Calculus/TreeData.lean`'s `Tree`: each rule the one `ruleOf?` names, applied as `apply update (Taclet.toStep .r)`; scope ends and hidden binders folded into the node before them; leaves closed by `closeTrue`, then by `sol_leaf` and the scoped `sol_close` (`closeTacs`; behind updates of either modality; `sol_leaf` is declared here), then `Config.closers`; a premise built by a function (`Premise.expandCall`) whnf'd to its constructor; `Proves.impRight`/`allRight`/`emptyModality`. |
 | `Calculus/CallbackRules.lean` | The callback taclets on scoped statements (`CallbackTaclet`: `transferWithCallbackBox`, `sendWithCallbackBox`, `sendWithCallbackDiamond`, `tryCallWithCallbackBox`, `Calculus/Rules.lean`'s lines read under `Schema`), each its no-callback twin (`toTaclet`) and so `Stmt.step`'s (`toStep`); below the judgement, so `RuleShapes` needs nothing above the table.
 | `Calculus/Callback.lean` | `ProvesC I pay` over `Calculus/CallbackRules.lean`'s taclets (sequents `dl{ ..H ⟹ᶜ[I] φ }`, `⟹ᶜ[I; noCallback]` unless `pay`, the invariant a closed formula read past a dropping update, `Fml.closedAt`); their printers. |
+| `Calculus/CallbackSound/Payments.lean` | Formula-level normality implies payment acceptance; sound conditional deterministic/callback transfer diamonds retaining exit and storage/ledger/balance resumption premises. |
+| `Calculus/PaymentClose.lean` | Opt-in bounded payment leaf solver with typed root-frame, ledger-debit and resumption lemmas; generic closer and budgets unchanged. |
+| `Examples/Tactics/PaymentRules.lean` | Automatic guarded transfer derivations and funded/refused/insufficient-balance/failed-prefix countercontrols. |
+| `Examples/Tactics/PaymentCorpus.lean` | Original PiggyBank callback body and zero-value entry booking invariant proof; manual typed corpus transcription, separate from adapter/compiler/EVM support. |
+| `Calculus/PaymentConditions.lean` | Exact funding/recipient alternatives, transfer success/refusal and empty failure bytes; send state/flag equations, deterministic universal diamond equivalence, unique refused callback outcome and callback-send necessity/sufficiency under unchanged semantics. |
+| `Examples/Tactics/PaymentConditions.lean` | Recipient error/panic, zero-value refusal, insufficient/self funding, source error-data impossibility and full-gas failure controls for the approved conditional account. |
+| `Calculus/PaymentWitness.lean` | Exact deterministic transfer/send diamond conditions; callback transfer diamond exactness and callback send diamond sufficiency over intrinsic outcomes, with acceptance and invariant obligations retained. Semantic witnesses, not dispatcher taclets. |
+| `Examples/Tactics/PaymentWitness.lean` | Funded payout and callback invariant witnesses; insufficient funds, recipient revert, send failure, broken exit invariant and callback ledger countercontrols; stipend/full-gas selection. |
 | `Calculus/CallbackHolds.lean` | Formulas read with callbacks over the typed state: `holdsC` (`holds`, a modality over `ExecP`/`ExecF`, the invariant kept as `Fml.stateInv`; its update clause `Upd.afterT`), `Invariant`, `Invariant.top`, `ValidC`, `TransferSem` (`noCallback`: a `try` and a value call call back, `docs/options.md`)/`holdsT`/`ValidT`, `validT_noCallback_iff`; `Fml.callsBack_of_FO`, `Fml.callsBack_of_hasTransfer`; `after_frames_iff`, `holdsC_iff_holds`, `holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC`. |
 | `Calculus/CallbackDerive.lean` | `sol_prove`, `sol_derive`, `sol_derive?` on goals read with callbacks (`ValidT`, `ValidC`, `ProvesC`; `docs/options.md`, O3): `ProvesC`'s walk (`CallbackWalk.walk`), `plain` and `Proves`' walk where nothing calls back, the callback taclets, the rule `Stmt.step` fires elsewhere; new premises pruned only by the bounded scoped refutation and `ProvesC.closeFalse`, retaining callback-free context and diamond landing checks; leaves closed by `Proves.assumeInv`, `sol_leaf; sol_close`, `Proves.openInv`. |
 | `Calculus/CallbackSound.lean` | `ProvesC.sound_of`/`ProvesC.fmlValid`/`ProvesC.validT`: the calculus with callbacks sound against `ValidC` for a first-order invariant (`holds_FO_reads`, `holdsC_closedAt_iff`); a rule on a statement that runs as its typed run by `Premise.Runs` (`holdsC_update`, `holdsC_unfold`, `holdsC_bind`, `holdsC_split`), the callback taclets over `ExecS`'s runs (`holdsC_transferCb`, `holdsC_sendCb`, `holdsC_tryCb`), the context and frames with callbacks (`Hyps.wrapC_and`, `holdsC_exit_after`, `holdsC_cons`).  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
@@ -382,7 +390,7 @@ commands; it never enters the core import graph.
 | `Calculus/Sequents.lean` | Checked sequent lines on scoped goals: `show_sequent!{ Γ ⟹ φ }` (and `show sequent!{ … }` under `Scoped`) compares the line the goal prints as (its context folded in front, `Hyps.wrap`, block ends dropped) with the line read scoped (`cdl[C]{ … }`, the entries in front as `sequentFmlC` writes them), and the rule set with the arrow. |
 | `Calculus/SequentNotation.lean` | Scoped sequents as input: wherever it is imported (`Calculus/Surface.lean` imports it), `dl{ ..H, a ⟹[R] φ }` reads as `Proves C R Γ₀ (H.pre a) φ` (the context a `Hyps` telescope built from the left), schema variables and connectives only, as `Delab` prints the rules. |
 | `Calculus/WalkSyntax.lean` | The walk text on a scoped goal (`open scoped Solidity.Scoped`): `apply update r`, `unfold r` (scoped `unfold`, `bind` or `inline`), `split`, `splitBox`, `done`, `Proves.check`, `invBox`/`invLean`, `updIntro`, `empty`, `intro`, `allIntro`, `Proves.fmlValid` (the parameters bound at once, `core_params`; an explicit `∀`, which `cdl!` marks, gets its own `apply allRight`), `refine close ?_`, each the scoped rule of its kind by the named taclet; `core_silent`, the steps KeY does not show (a scope's end, a hidden binder); `core_skip`, `apply empty`/`allIntro` where the strategy already took the step, refused elsewhere. |
-| `Calculus/Closers.lean` | The closers on a scoped leaf: `sol_close`, `sol_close_mt`, `sol_spec_close` read it through `sol_close_unwrap`; `sol_close_eval` on a bare `Fml.Valid ψ`; `sol_merge`, `sol_upd` rewrite it; `sol_prove?` on a scoped goal (the scoped `sol_prove`, then the scoped leaf search, `Derive.searchLeaf`); a scoped formula refuted at a state by its run's outcome at a typed state (`Modality.afterRunTR_not_panic`, `afterRunTR_diamond_fail`, `TRes.isPanic`/`isFail` read by `decide +kernel`). |
+| `Calculus/Closers.lean` | The closers on a scoped leaf: `sol_close`, `sol_close_mt`, `sol_spec_close` read it through `sol_close_unwrap`; `sol_close_eval` on a bare `Fml.Valid ψ`; `sol_merge`, `sol_upd` rewrite it; `sol_auto_theorem` optionally accepts an explicit normalized-leaf proof, emitted as checked auxiliary theorems under unchanged limits; `sol_prove?` on a scoped goal (the scoped `sol_prove`, then the scoped leaf search, `Derive.searchLeaf`); a scoped formula refuted at a state by its run's outcome at a typed state (`Modality.afterRunTR_not_panic`, `afterRunTR_diamond_fail`, `TRes.isPanic`/`isFail` read by `decide +kernel`). |
 | `Calculus/SolSpec.lean` | `sol_spec` on a scoped obligation (`cspec!{f}`): the scoped strategy, then each leaf closed by `Calculus/SurfaceSpec.lean`'s `sol_spec_prep`/`sol_spec_finish`, whose steps read a scoped leaf without its erasure (`Calculus/CloseScoped.lean`); the module holds no code of its own. |
 | `Semantics/Callback.lean` | The callback semantics over the typed run: `COut C H Γ` (over `Out`, the heap's growth carried), an invariant read on the global part (`StateInv`, `StateInv.at`; `StateInv.pay`: whether a `transfer` or a `send` calls back, `Stmt.callsBack`, `Stmt.forksIn`, `docs/options.md`), `ExecS`/`ExecP`/`ExecF` (no `undef` arms, no failed entries; `State.havoc` over typed storage; a call's locals given back by `TRun.callLeave`); the deterministic run is a callback run (`Prog.exec_run`, `Frames.exec_run`), the only one with no payment (`ExecP.eq_run`, `ExecP.forall_iff`). `holdsC` waits for `holds` on typed states. |
 | `Semantics/CallbackFrame.lean` | A callback run within its frame (`ExecS.frame`, `ExecP.frame`): `Stmt.run_frame` for `ExecS`, a callback replacing only the storage and the ledger. |
@@ -654,7 +662,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/State.lean` | S04.01: source values `Val` over a declaration `Layout` (ranges, enum bounds and reference locations intrinsic), contents `Data` (recursive aggregates, content-keyed mappings), typed `memory` (`Heap`, copy and alias laws), read-only `Calldata`, `Storage` typed by its layout, defaults. |
 | `Source/Observe.lean` | S04.02: ABI words and bytes of values (`Val.word`, `Val.word_int`), selectors, `Panic`/`Error` revert data (`panicData_code`, `panic_distinct`) and `revertOutcome`. |
 | `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
-| `Source/Units.lean` | G12: source units of a compilation input (`Program`), solc's import path resolution and remappings (`Path.absolute`, `Remapping.apply`), declaration identities (`DeclId`), the file-level scope across imports (`Sees`) and G12's judgment `UnitsOK`. |
+| `Source/Units.lean` | G12: source units of a compilation input (`UnitSet`), solc's import path resolution and remappings (`Path.absolute`, `Remapping.apply`), declaration identities (`DeclId`), the file-level scope across imports (`Sees`) and G12's judgment `UnitsOK`. |
 | `Source/Overloads.lean` | G12: overload sets across a contract's bases (`InheritedFn`: hidden only by a more derived function with the same parameter types). |
 | `Source/ConstCheck.lean` | G13: compile-time constants: purity of constant initializers (`PureS`, `ConstInitsPure`, solc error 8349), solc's typed constant evaluation (`TEval`, `NamedConst`, `ConstVal`), array lengths through it (`ArrayLenOK`) and acyclic constants (`ConstsAcyclic`). |
 | `Source/UserOps.lean` | G13: user-defined value types: operator bindings of global `using {f as op} for T` directives (`opBindings`, well formed: `UsingOpsOK`), and the typing of operators, `wrap` and `unwrap` (`UdvtTyped`). |
@@ -673,6 +681,26 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Frontend/Checked/ExprExamples.lean` | G10 controls: precedence and associativity lemmas over `Syn.precNode`, every operator, expression trees, refused ambiguous forms, expression constructor coverage (`exprCtors_covered`). |
 | `Frontend/Checked/Certificate.lean` | G11: G05's parse-stage instance: `Units`, `Parses`, `parseChecker` (`checkUnits_sound`), the producer (`produce_accepted`), `FrontendSpec.ofParse`. |
 | `Frontend/Checked/UnitExamples.lean` | G11 controls: statements, definitions and units, every S00 constructor covered (`allCtors_covered`, `profileCtors_covered`), out-of-profile refusals, the G05 checker on a two-unit input. |
+| `Source/Value.lean` | S02: run-time values `RVal`, `Halt`, decidable `STy` equality, wrapping (`wrapBits_mem`), checked/unchecked integer and fixed-point arithmetic, shifts, powers, comparisons, value conversions. |
+| `Source/Elaborated.lean` | S02 prerequisite: resolved bodies, modifier invocations, initializers and base arguments (`Program`), and `Elaborated` (a resolution carrying its program, every part tied to a derivation). |
+| `Source/Unique.lean` | Q1: uniqueness of meaning (`Typed.unique`, `StmtD.unique`, `ItemsD.unique`, `RBody.ofDerivation_unique`), solc's literal typing (`Typed.constShape`), `0.length` refused, literal-gap controls. |
+| `Source/Machine.lean` | S02: the logical storage layout (`Env.cellTy`), `Locals`, the machine state `St`, frames `Fr`, `Glob`, the monad `EM`, storage/memory reads, writes, copies and deletion. |
+| `Source/Eval.lean` | S02/S03: the interpreter of resolved expressions, lvalues, statements, modifiers, internal and external calls, dispatch and environment moves, at a horizon. |
+| `Source/Semantics.lean` | S03.02/S03.04/S04.04/S05: constructor order per pipeline, deployment, transactions, least-horizon completion (`firstDone_mono`), sessions as G01 prefixes (`sessionAt_consistent`, `sourceLang`). |
+| `Source/Ledger.lean` | S05: the semantic status of every expression and statement constructor against S01's coverage (`semExprCoverage_of_typed`, `semExprGaps_spec`). |
+| `Source/SemanticsExamples.lean` | S02–S05 controls: overflow, division by zero, evaluation order per pipeline, short circuit, two placeholders, constructor order, revert rollback of storage and transient storage, a reentrant callback. |
+| `Source/Infer.lean` | S02 item 1b: type inference computing derivations (`Typed.infer`, `StmtD.infer`, `ItemsD.infer`), sound by construction. |
+| `Source/Elaborate.lean` | S02 item 1b: the elaborator `elaborate : Resolution → Option Elaborated` (bodies, modifiers, initializers, constants, base arguments), coherent by construction. |
+| `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
+| `Source/Horizon.lean` | S05 item 2: the interpreter is monotone in its horizon (`belowAt`, horizon independence `runTx_stable`, `firstDone_runTx`), only appends events (`growAt`), and a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
+| `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
+| `Source/Session.lean`, `SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
+| `Source/Hoare.lean` | V04b: Hoare triples over the interpreter monad `EM` (`Hoare`, `NotStuck`), with a rule per combinator (`bind`, `sub'`, `attempt'`, `lift'`, …). |
+| `Source/WellTyped.lean` | V04b preservation: references agree with the heap typing and the layout (`Val.RefOK`, `DataOK`, `RValOK`, `LocalsOK`, `HeapOK`, `StOK`, `EMOK`); memory operations keep it (`alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapAt_ok`). |
+| `Source/ValueProgress.lean` | V04b progress, value layer: `binVal`/`cmpVal`/`shiftVal`/`unaryVal`/`incDecVal`/`convVal`/`constVal` are never stuck in their domains (`NotStuckR`); every elaborated term is in them (`RExpr.OpsOK`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`). |
+| `Source/ExprProgress.lean` | V04b progress, expressions: `NS`/`NSP`; the value fragment (`RExpr.ValFrag`, `RExpr.MapRef`, `RLVal.IsSimple`: locals, value-type state variables, mappings) is never stuck (`exprNSAt`, `evalE_valFrag_ns`; `readAt_ns`, `writeAt_ns`, `keyStep_nsp`, `convRV_ns`); the fragment parameterized by allowed callees (`RExpr.ValFragC`, `CallNS`, `exprNSAt_step`) |
+| `Source/StmtProgress.lean` | V04b progress, statements: the statement value fragment in a body frame is never stuck (`stmtNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`; `RStmt.ext`, `Locals.restore_ok`, `BodyFrame`); calls inside expressions by the joint induction `FragAt`/`fragAt` under `CallsOK` (`evalE_callFrag_ns`); elaborated frames (`Elaborated.body_locals`, `Glob.dispatchFn_params`) |
+| `Source/SoundnessExamples.lean` | V04b controls: value-layer witnesses and stuck negative controls; fragment witnesses evaluated in the kernel (a loop, a storage update), an unframed `return` stuck; call witnesses (`callF_ns`, `recF_ns`, `callF_badFrame_stuck`) |
 
 ## Precompiles
 
@@ -723,7 +751,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/SolcJson/Getters.lean` | Source ABI identities and record-paired, nonempty getter plans, lowered through ordinary function members; primitive/UDVT values, enum mapping keys, reference-result refusal and empty-data array bounds. |
 | `Frontend/SourceUnits.lean` | Original compilation-unit ASTs, per-source provenance and checked compiler import identities; explicit specification/mixed-legacy-ABI refusals. |
 | `Frontend/Static/Closure.lean` | G12–G14: reachability by saturation over a finite graph (`iter_sound`, `iter_complete`), shared by the static checkers. |
-| `Frontend/Static/Units.lean` | G12: the import resolver `Program.globals` (sound and complete for `Sees`, through cycles), the program check `Program.unitsOK` (`unitsOK_iff`), identities (`Sees.decl_exists`) and agreement with S01's lookup (`globals_lookup`). |
+| `Frontend/Static/Units.lean` | G12: the import resolver `UnitSet.globals` (sound and complete for `Sees`, through cycles), the program check `UnitSet.unitsOK` (`unitsOK_iff`), identities (`Sees.decl_exists`) and agreement with S01's lookup (`globals_lookup`). |
 | `Frontend/Static/Overloads.lean` | G12: the inherited overload set `Env.inheritedFns` (`mem_inheritedFns`, extends S01's lookup) and overload selection (`selectOverload`). |
 | `Frontend/Static/UnitsExamples.lean` | G12 controls: an import cycle, a diamond (one identity), a clash, aliases, a missing unit, remappings, shadowing, an ambiguous overload and overloads across bases. |
 | `Frontend/Static/Infer.lean` | G13: type inference `infer` over every category, returning S01 derivations (`Typed`, `LVal`, `TypedArgs`, `TypedSlots`): sound by construction. |
@@ -1051,6 +1079,12 @@ At the root, the notation's own tests:
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
 
+| `Semantics/ContractWorldCertificates.lean` | Published paid-run/source-wrapper operation certificates, reused unchanged from origin/master cc155f36. |
+| `Semantics/PaymentWorld.lean` | Typed stipend source frames over actual world calls; send completed-failure handling, transfer exact halt transport, no-op/funding and atomic rollback laws. |
+| `Frontend/PaymentPlan.lean` | Complete declaration-resolved creation/send and initializer/receive/transfer/getter source shapes; unknown effects and full-gas calls refused. |
+| `Frontend/PaymentImport.lean` | Imports actual receive/getter code, builds typed initializer handle assignment and paid creation/payment compositions with source identities. |
+| `Tools/PaymentReplay.lean` | Ordered deterministic source-world observations with actual nested bytes and committed-world audits; gas remains an independent obligation. |
+| `Examples/Tactics/PaymentSource.lean` | Kernel-checked original send and debug transfer source snapshots, initialized handle/funding/getter witnesses and wrong handle/kind/bytes controls. |
 | `Backend/Creation/Artifact.lean` | G44.02 intrinsic artifact sections, executable CODECOPY/RETURN wrapper, exact minimal PUSH widths, layout and argument extraction laws. |
 
 | `Backend/Creation/ArtifactChecks.lean` | G44.02 inhabited layout, argument separation and negative controls with headline kernel axiom pins. |
@@ -1090,3 +1124,76 @@ At the root, the notation's own tests:
 | `Backend/Failure/UnwindChecks.lean` | Inhabited distinct snapshots, nested emitted failures, caller-memory restoration and wrong-snapshot negatives. |
 | `Backend/Failure/Composition.lean` | Arbitrary two-write-block byte noninterference, immutable input preservation and checked emitter concatenation/terminal distinction. |
 | `Backend/Failure/CompositionChecks.lean` | Inhabited both-executed writes, overlap negative, overlapping ignored suffix and same-bytes terminal controls. |
+| `Storage/Representation/Model.lean` | Intrinsic value-independent layout shapes and represented scalar, struct, mapping, fixed/dynamic-array values including retained shadows. |
+| `Storage/Representation/Controls.lean` | Inhabited representation witnesses, source reads, negative scalar control and exact axiom pins. |
+| `Storage/Representation/Reads.lean` | Exact source scalar/mapping/array reads, failures and source frames. |
+| `Storage/Representation/Frames.lean` | Representation locality over existing Occ footprints and nested frames. |
+| `Storage/Representation/Words.lean` | Supported full-word key bounds, normalization and injectivity. |
+| `Storage/Representation/Updates.lean` | Abstract symbolic replacement and nested mapping source saves. |
+| `Storage/Representation/Members.lean` | Source member reads/replacement with whole intrinsic field-store preservation. |
+| `Storage/Representation/UpdateControls.lean` | Inhabited member/nested mapping combinations, defaults, alias controls and axiom pins. |
+| `Storage/Representation/Arrays.lean` | Fixed/dynamic whole-array source saves, live/retained bounds and exact header/element frames. |
+| `Storage/Representation/ArrayControls.lean` | Heterogeneous fixed/dynamic, nested save, defaults, stale aliases, live failures and header controls. |
+| `Storage/Representation/Transport.lean` | Finite per-run numeric realization, covered writes/sequences, frames and existing exact source observations. |
+| `Storage/Representation/TransportControls.lean` | Inhabited root/hash/data run, source read/save/header combinations and collision/bound/coverage/failure controls. |
+| `Storage/Representation/GraphLayout.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphFrames.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphRepresentation.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphCompatibility.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphControls.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+
+## G25 scalar lowering preparation
+
+| Module | What it defines |
+|---|---|
+| `Backend/Scalar/Slice.lean` | Independent numeric semantics for real Backend instructions, PUSH32, sequencing and untouched tails. |
+| `Backend/Scalar/Typed.lean` | Intrinsic value relation, literal selection and Boolean operation certificates. |
+| `Backend/Scalar/Widths.lean` | All byte-multiple widths, signed/unsigned cleanup and unsigned cast chains. |
+| `Backend/Scalar/Comparisons.lean` | Source-exact signed and unsigned ordering certificates. |
+| `Backend/Scalar/Wrapping.lean` | Intrinsic unsigned wrapping add/sub/mul and width-cleanup composition. |
+| `Backend/Scalar/Casts.lean` | Source-exact word-preserving uint/int casts. |
+| `Backend/Scalar/Guards.lean` | Retained-operand zero tests and existing panic-byte failure selection at the component boundary. |
+| `Backend/Scalar/Modular.lean` | Source-exact addmod/mulmod with unbounded intermediate arithmetic and zero-modulus failure. |
+| `Backend/Scalar/Bitwise.lean` | Intrinsic unsigned bitwise AND/OR/XOR certificates. |
+| `Backend/Scalar/Values.lean` | State-uniform closed intrinsic Val certificates and actual encoded-byte controls. |
+| `Backend/Scalar/Checked.lean` | Scalar instruction-slice Checked contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Division.lean` | Scalar instruction-slice Division contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Exponentiation.lean` | Scalar instruction-slice Exponentiation contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Heights.lean` | Scalar instruction-slice Heights contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Negation.lean` | Scalar instruction-slice Negation contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/PowerBounds.lean` | Scalar instruction-slice PowerBounds contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/PowerGuard.lean` | Scalar instruction-slice PowerGuard contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Shifts.lean` | Scalar instruction-slice Shifts contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedBits.lean` | Scalar instruction-slice SignedBits contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedChecked.lean` | Scalar instruction-slice SignedChecked contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedDivision.lean` | Scalar instruction-slice SignedDivision contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedGuards.lean` | Scalar instruction-slice SignedGuards contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedMul.lean` | Scalar instruction-slice SignedMul contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedShift.lean` | Scalar instruction-slice SignedShift contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/UnsignedMul.lean` | Scalar instruction-slice UnsignedMul contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Axioms.lean` | Scalar instruction-slice Axioms contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/ArithmeticWidths.lean` | Scalar ArithmeticWidths contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Capacity.lean` | Scalar Capacity contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/CastChains.lean` | Scalar CastChains contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Combinations.lean` | Scalar Combinations contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Composition.lean` | Scalar Composition contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/FixedBytes.lean` | Scalar FixedBytes contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Select.lean` | Scalar Select contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/WidthGuards.lean` | Scalar WidthGuards contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPower.lean` | Intrinsic signed-power SignedPower slice/source/capacity contracts; see backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPowerPost.lean` | Intrinsic signed-power SignedPowerPost slice/source/capacity contracts; see backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPowerPrefix.lean` | Intrinsic signed-power SignedPowerPrefix slice/source/capacity contracts; see backend-scalar-lowering.md. |
+
+| G31 preparation module | Purpose |
+|---|---|
+| `Backend/Environment/Observations.lean` | Actual environment opcode selection, local stack semantics, address truncation and intrinsic expression/world observation certificates. |
+| `Backend/Environment/ObservationsChecks.lean` | Inhabited environment witnesses, distinguishing negative controls and headline axiom pins. |
+| `Backend/Environment/Metadata.lean` | Typed metadata PUSH encoding, source declaration selection, selector numeric/ABI alignment, truncation and function/address projections. |
+| `Backend/Environment/ByteConstants.lean` | Byte-valued resolved metadata materialization through PUSH/MSTORE8, exact byte order and memory-frame laws. |
+| `Backend/Environment/MetadataChecks.lean` | Metadata byte regressions, UTF-8 witness, missing metadata refusals and axiom pins. |
+| `Backend/Environment/Crypto.lean` | Executable memory Keccak slices, existing intrinsic hash denotation, exact normalized bytes, argument failure/success, and read-only precompile invocation selection. |
+| `Backend/Environment/Namespace.lean` | ERC-7201's actual two-hash instruction slice, wrapping predecessor, exact ABI-word second preimage and low-byte clearing. |
+| `Backend/Environment/CryptoChecks.lean` | Inhabited typed heap/path hash controls, ecrecover positive/fallback, exact opcode bytes, namespace witness and axiom pins. |
+| `Backend/Environment/Composition.lean` | Constructed intrinsic Val certificates, exact target concatenation/stack order, materialization/hash adapters and typed source-sequence fallback. |
+| `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
+| `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |

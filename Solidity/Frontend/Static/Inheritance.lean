@@ -181,9 +181,9 @@ theorem implB_iff {E : Env} : implB E = true ↔ ImplOK E := by
 
 def ctorArgsB (E : Env) (c : String) : Bool :=
   ((E.chain c).drop 1).all fun B =>
-    (decide (E.ctorParams B = 0) || decide ((E.argsFor (E.chain c) B).length ≤ 1)) &&
-    (E.isAbstract c || decide (E.ctorParams B = 0) || decide ((E.argsFor (E.chain c) B).length = 1)) &&
-    (E.argsFor [c] B).all fun a => a.argCount == Option.some (E.ctorParams B)
+    (decide (E.ctorArity B = 0) || decide ((E.argsFor (E.chain c) B).length ≤ 1)) &&
+    (E.isAbstract c || decide (E.ctorArity B = 0) || decide ((E.argsFor (E.chain c) B).length = 1)) &&
+    (E.argsFor [c] B).all fun a => a.argCount == Option.some (E.ctorArity B)
 
 theorem ctorArgsB_iff {E : Env} {c : String} : ctorArgsB E c = true ↔ CtorArgsOK E c := by
   simp only [ctorArgsB, List.all_eq_true, Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq, beq_iff_eq]
@@ -199,13 +199,13 @@ theorem ctorArgsB_iff {E : Env} {c : String} : ctorArgsB E c = true ↔ CtorArgs
       · exact h'
   · intro w B hB
     refine ⟨⟨?_, ?_⟩, w.count B hB⟩
-    · by_cases hp : E.ctorParams B = 0
+    · by_cases hp : E.ctorArity B = 0
       · exact .inl hp
       · exact .inr (w.once B hB (by omega))
     · cases hab : E.isAbstract c with
       | true => exact .inl (.inl rfl)
       | false =>
-        by_cases hp : E.ctorParams B = 0
+        by_cases hp : E.ctorArity B = 0
         · exact .inl (.inr hp)
         · exact .inr (w.given hab B hB (by omega))
 
@@ -241,7 +241,7 @@ def modInvB (E : Env) (d : Decl) (inv : IdPath × Option (Syn .callArgs)) : Bool
     | Option.some c => ((E.chain c).drop 1).contains inv.1.last
     | Option.none => false)
 
-def modInvsB (E : Env) : Bool := E.decls.all fun d => d.modInvs.all (modInvB E d)
+def modInvsB (E : Env) : Bool := E.decls.all fun d => d.modInvList.all (modInvB E d)
 
 theorem modInvsB_iff {E : Env} : modInvsB E = true ↔ ModInvOK E := by
   unfold modInvsB ModInvOK modInvB

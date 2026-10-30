@@ -10,7 +10,8 @@ import {COMPILER_SHA} from '../solidity-upstream.mjs';
 import {machine, observation, replayBytecode, HostLimit, INITIAL_GAS, runFixture} from './replay.mjs';
 
 // Reference compiler controls use the same integrity gate as the CLI.
-const compiler = resolve(process.env.SOLC_REFERENCE ?? '/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js');
+import {referenceCompiler} from '../test-compiler.mjs';
+const compiler = referenceCompiler();
 assert.equal(createHash('sha256').update(readFileSync(compiler)).digest('hex'), COMPILER_SHA);
 const solc = createRequire(import.meta.url)(compiler);
 const compile = solc.cwrap('solidity_compile','string',['string','number','number']);

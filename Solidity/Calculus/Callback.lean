@@ -326,6 +326,28 @@ not. -/
       (resume : ProvesC I pay Γ₀ (((H.upd .box U).havoc).pre (Fml.closedAt I))
         (.modalK .box ω κ φ)) :
       ProvesC I pay Γ₀ H (.modal .box (.cons s ω) κ φ)
+  /-- SolKey callback-diamond obligations under an explicit normality
+  antecedent. Intrinsic uint operands carry the nonnegative-amount condition. -/
+  | transferD {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {r a : Simple C Γ .uint}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (hp : pay = true)
+      (exit : ProvesC I pay Γ₀ H
+        (.upd .diamond (Upd.nil.snoc (UpdElem.payTo r a)) (Fml.closedAt I)))
+      (resume : ProvesC I pay Γ₀ (((H.upd .diamond
+          (Upd.nil.snoc (UpdElem.payTo r a))).havoc).pre (Fml.closedAt I))
+        (Fml.modalK .diamond ω κ φ)) :
+      ProvesC I pay Γ₀ H (.imp (.not
+        (.modal .box (.cons (.transfer (.simple r) (.simple a)) .nil) .nil .ff))
+        (.modal .diamond (.cons (.transfer (.simple r) (.simple a)) ω) κ φ))
+  /-- The deterministic guarded diamond books its continuation without havoc. -/
+  | transferDetD {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {r a : Simple C Γ .uint}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (hp : pay = false)
+      (rest : ProvesC I pay Γ₀ (H.upd .diamond (Upd.nil.snoc (UpdElem.payTo r a)))
+        (Fml.modalK .diamond ω κ φ)) :
+      ProvesC I pay Γ₀ H (.imp (.not
+        (.modal .box (.cons (.transfer (.simple r) (.simple a)) .nil) .nil .ff))
+        (.modal .diamond (.cons (.transfer (.simple r) (.simple a)) ω) κ φ))
   /-- **`sendWithCallbackBox`**: the invariant after the booking ("invariant on
   exit"); the rest after the booking and `pv := true`, from any state the
   callee may leave in which the invariant holds ("send succeeded"); the rest
