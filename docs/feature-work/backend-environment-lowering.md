@@ -583,3 +583,34 @@ review found that an unchanged refreshed registry produces an empty numstat,
 and that a complete older-boundary reversion can disappear from the original
 interval. Both cases are repaired and covered by the passing fixtures. These
 reviews were performed by the repair worker without Lean/server/build use.
+
+### Combined snapshot refresh (2026-10-30)
+
+The retained attempt-17 P2 review of `8671ccd2` identified a stale
+`refreshedBase`: the gate pinned `37f572e8` while the requested base was
+`1a63602c`. Attempt 16's passing validation covered the earlier candidate and
+base; it does not validate this refresh. Before this repair, the coordinator
+advanced the worktree again: `8e78744a` merges `629c343d` into that candidate.
+The gate now pins the current combined snapshot `629c343d` exactly. Read-only
+Git comparisons confirm that the source/frontend files, `TrustAudit.lean`,
+source-soundness document and `g07-axiom-pins.json` match this latest snapshot.
+
+The dependency base remains `50658f41`, the original contribution audit and
+full ownership interval remain unchanged, and other-lane blobs and modes
+remain exact checks. No ownership flag bypasses the refreshed-base comparison.
+The fixture now includes the five source/trust/document files named in the
+finding, an intermediate refresh followed by a newer snapshot, and a direct
+reproduction that rejects the stale pin under default and explicit ranges.
+It also rejects deletion or reversion to either older source snapshot, while
+retaining the frozen-import, registry, mode, staged-edit and config controls.
+
+Focused checks pass: `node scripts/check-backend-environment.mjs`,
+`node tests/backend-environment/ownership.mjs`, and `git diff --check`.
+Read-only finder review traced the failure to the snapshot comparison and
+confirmed all protected files are preserved. Read-only skeptic review checked
+that the new pin grants no editable ownership and that older-snapshot
+reversions and explicit-range bypasses remain rejected. Both reviews were
+performed by the repair worker without Lean/server/build use. Only the gate,
+its fixture and this document changed; no Lean diagnostics were needed.
+The coordinator owns the full combined gates. Repairs remain uncommitted
+and unstaged; no source VM, monitor or skill was changed.

@@ -40,7 +40,9 @@ try{
  const originalBoundary=git(['rev-parse','HEAD']);
  const reserved=[
   'Solidity/Source/Session.lean','Solidity/Source/ExprProgress.lean',
-  'Solidity/Frontend/Static/InferExamples.lean','TrustAudit.lean','scripts/g07-axiom-pins.json'];
+  'Solidity/Frontend/Static/InferExamples.lean','TrustAudit.lean','scripts/g07-axiom-pins.json',
+  'Solidity/Source/SoundnessExamples.lean','Solidity/Source/WellTyped.lean',
+  'docs/feature-work/source-soundness.md'];
  for(const file of reserved)write(file,'-- retained source integration\n');
  for(const file of ['Solidity.lean','docs/README.md','docs/module-map.md'])
   write(file,'-- retained registry entry\n-- advanced base registry entry\n');
@@ -48,8 +50,14 @@ try{
  // Give the isolated history its advanced integration boundary; keep real
  // dependency/source/scalar/storage pins. Exercise the default, with no flags.
  const boundary=git(['rev-parse','HEAD']);
- // A later authorized combined base can replace source proofs and registry
- // descriptions. The environment contribution must preserve that exact work.
+ // An earlier refreshed base is superseded by further authorized source work.
+ for(const file of reserved)write(file,'-- earlier refreshed source integration\n');
+ for(const file of ['Solidity.lean','docs/README.md','docs/module-map.md'])
+  write(file,'-- retained registry entry\n-- refreshed base registry entry\n');
+ git(['add','.']);commit();
+ const previousRefresh=git(['rev-parse','HEAD']);
+ // The latest combined base can replace source proofs and registry descriptions.
+ // The environment contribution must preserve that exact work.
  for(const file of reserved)write(file,'-- refreshed source integration\n');
  for(const file of ['Solidity.lean','docs/README.md','docs/module-map.md'])
   write(file,'-- retained registry entry\n-- refreshed base registry entry\n');
@@ -58,14 +66,22 @@ try{
  const gateFile=join(fixture,'scripts/check-backend-environment.mjs');
  const gateSource=readFileSync(gateFile,'utf8');
  assert.ok(gateSource.includes("const integrationBase='b965d675e260a374401b131e59d501f8ce5da147';"));
- assert.ok(gateSource.includes("const refreshedBase='37f572e8d954f2c697eeb3cda7a1a0206fd33c89';"));
+ assert.ok(gateSource.includes("const refreshedBase='629c343dd4cd6beb24906523fc92867255dbb29d';"));
  write('scripts/check-backend-environment.mjs',gateSource.replace(
   "const integrationBase='b965d675e260a374401b131e59d501f8ce5da147';",
   `const integrationBase='${boundary}';`).replace(
-  "const refreshedBase='37f572e8d954f2c697eeb3cda7a1a0206fd33c89';",
+  "const refreshedBase='629c343dd4cd6beb24906523fc92867255dbb29d';",
   `const refreshedBase='${refreshed}';`));
  git(['add','.']);commit();
  gate(null);
+ // Reproduce the review finding: the latest retained files fail if the gate
+ // still pins an earlier refresh, even with an explicit ownership interval.
+ const currentGate=readFileSync(gateFile,'utf8');
+ write('scripts/check-backend-environment.mjs',currentGate.replace(
+  `const refreshedBase='${refreshed}';`,`const refreshedBase='${previousRefresh}';`));
+ gate(/integrated combined base file changed/);
+ gate(/integrated combined base file changed/,'--ownership-base',refreshed,'--ownership-head',git(['rev-parse','HEAD']));
+ git(['restore','scripts/check-backend-environment.mjs']);
  // Reproduce the actual combined-validation failure with the exact temporary
  // serial configuration; arbitrary content and tracked copies remain forbidden.
  const config='.cloudvm-validation.toml';
@@ -124,9 +140,14 @@ try{
  for(const file of reserved){
   git(['rm',file]);commit();cleanGate(/integrated combined base file changed/);
   git(['reset','--hard',before]);
-  write(file,git(['show',`${boundary}:${file}`])+'\n');
-  git(['add',file]);commit();cleanGate(/integrated combined base file changed/);
-  git(['reset','--hard',before]);
+  for(const staleBase of [boundary,previousRefresh]){
+   write(file,git(['show',`${staleBase}:${file}`])+'\n');
+   gate(/integrated combined base file changed/);
+   git(['add',file]);commit();cleanGate(/integrated combined base file changed/);
+   // Choosing a later ownership interval cannot bypass the refreshed-base pin.
+   gate(/integrated combined base file changed/,'--ownership-base',before,'--ownership-head',git(['rev-parse','HEAD']));
+   git(['reset','--hard',before]);
+  }
  }
  const sourceFile=reserved[0];
  write(sourceFile,'-- changed source integration\n');gate(/integrated combined base file changed/);
