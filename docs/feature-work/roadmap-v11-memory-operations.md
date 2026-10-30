@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-seven. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-eight. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -2380,3 +2380,100 @@ observer precision is not recursive Source graph/fresh deep-copy/byte-memory/
 all-profile-default/target-failure/path-delete-rebinding/reserved-copy/final
 Source-V10-target closure. Existing goal unchanged and unfinished, no exhaustion
 or compiler/EVM claim.
+
+
+## Checkpoint twenty-eight: existing nested observer after mixed schedules
+
+Reproduced missing clause: RefChildRepr.mixedSequence/mixedSequence_agrees covered
+transfer-only sequences, while the new actual checkedMixedCaptures had only a
+direct BoolChildRepr footprint application. New owned MixedNestedFootprint uses
+EXISTING RefChildRepr, BoolChildRepr, Heap/HRef/ArrTy and actual mixed operations;
+no graph semantics, state/value layer, copy algorithm, decoder or public cutoff.
+
+checkedMixedCaptures_ref_root_frame derives root identity from intrinsic primitive/
+reference-array separation. RefChildRepr.mixed_schedule_iff is PRECISE in BOTH
+directions: given an independently inhabited INITIAL old nested relation and an
+ACTUAL successful run, final old nested correspondence iff every INITIAL selected
+leaf whose LOGICAL ID aliases the Bool destination meets the computed INITIAL
+Boolean payload/provenance criterion. Other leaves use actual frame; uint/Bool-
+leaf separation is type-derived. Repeated descendants are permitted; no pairwise/
+global address injectivity, Uint restoration, whole-heap equality, stagewise or
+final desired child relation is a premise. Necessity follows from the existing
+old-child object equality observer and unchanged root membership; sufficiency
+uses per-object restoration only for aliases. No extra reverse-direction premise.
+
+RefChildRepr.mixed_schedule_index_bool derives the postrelation and ORIGINAL
+outer-bound transport, then calls the EXISTING index_bool/index APIs. It observes
+real outer pointers and inner Bool contents at the final heap, not root IDs alone.
+This is the published finite two-level observer, not unrestricted recursive
+Source graph/cycle/map/shadow correspondence or fresh deep-copy compilation.
+
+Controls independently populate OLD tables at7/8 for Boolean children,10 for
+root[r,other,r] plus runtime repetitions of other, and11 for a NONEMPTY root
+containing only other. Old root and leaf correspondences are proved BEFORE
+execution; these are given existing objects, no Source entries for new memory.
+Actual input is the existing combined decoded table7/9. Actual Bool/uint writes
+change TFF/788 ->TTF/788 ->TTF/798; actual Bool recapture repairs TFF while Uint
+stays798. Full five-stage arrays, unchanged other-child FT and BOTH root ID
+vectors are explicit. The actual both-decoded intermediate has FALSE old nested
+correspondence; the final aliased root is TRUE via an INITIAL-only criterion.
+
+SAME old table/root and successful both-schedules-empty run yields TTF/798,
+identical root fields, FALSE selected-root relation and a concrete wrong inner
+read: OLD decoded false at child7/index1 versus actual some true. Under that SAME
+nonrestoring run the NONEMPTY disjoint root remains represented; no selected
+alias means no Bool restoration obligation, not an admission restriction or an
+empty-root vacuity. Positive reads invoke the NEW composed index adapter and
+existing index_bool: outer0 and2 select repeatedr, outer1 selects other, inner1
+reads false/true respectively with actual OLD decoded observations. Outer and
+selected-child endpoint Option None/decoded-read rejection and outer element32
+(nonempty runtime tail) are retained without Source halt/rollback or byte claims.
+
+Both independent read-only preliminary reviewers found no core defect and asked
+that these actual skipped/disjoint/read/bound cases be completed; they now are.
+Focused core alias-elimination naming and endpoint reflexivity errors were fixed
+without statement/bound changes; every failed receipt retained. Ten new public
+laws/controls have exact standard-only axiom guards. Initial tables/layouts/types,
+observations and all previous fixture vectors are preserved.
+
+Preflight566722560bytes,16MiB warm-route source/module/log/export/safety bound,
+residual549945344bytes above512MiB. Same capped runtime, child12GiB/no swap under
+16GiB parent with OS headroom, Lean-j1/LEAN_NUM_THREADS1 and unchanged proof/fuel/
+node/stack/time/TestSuite guards. Artifact cache OFF in TOML and actual exec
+LAKE_CACHE_DIR empty/LAKE_ARTIFACT_CACHE=false; keyed warm outputs and every old
+file/cache/seal retained, no replacement/deletion/relocation or capacity change.
+Per-file Lean MCP/get_goal unavailable; serial focused closures used, existing
+goal unchanged. Original G32-G35 and Backfill A/B remain PARTIAL/BLOCKED with all
+physical-byte/all-profile-default/target-failure/general-path-delete-rebinding/
+ABI-reference-storage/fresh-deep-copy/recursive-Source/reserved-memory-storage/
+final V10-Source-target obligations explicitly open; no exhaustion/full lane or
+external compiler/EVM correctness is inferred.
+
+Final independent read-only finder/skeptic source/doc review accepted precise
+necessity/sufficiency, derived root/leaf separation, complete alias/disjoint/
+staged/read/endpoint controls and ten exact guards; no outstanding source finding.
+Actual89guardedjobs/full933default/262TestSuite/SolKey377taclets131read-bearing
+PASS exit0. Strict/layer/orphan/trust/complete fixtures/script/corruption controls
+PASS;647owned standard-only pins82modules. Raw global docs FAIL1 with COMPLETE
+exact-base byte equality/noNEW separately PASS; raw inventory FAIL1,661unrecorded
+14inherited+647owned,zero unsafeerrors. Additive proposals exported; reserved
+inventories/manifests/generated ledgers remain untouched.
+
+Actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs PASS. Full sampled aggregate
+Lean/Lake RSS1443848KiB,cumulative session peak2160848896bytes,zeroOOMevents;
+188416byte full disk increment within16MiB measured warm route. All proof/fuel/
+node/stack/time/TestSuite/resource guards preserved, cache OFF in actual exec.
+
+Original full-queue reassessment after this observer application: G32 still lacks
+physical-byte/heap representation and emitted target frames; G33 all-profile
+constructors/defaults/target size-allocation failures and stack-tail execution
+remain open; G34 general path/rebinding/delete/stale-alias compilation open;
+G35.01 published intrinsic storage-tree transport is partial without full Source/
+target/liveness realization; G35.02 reserved memory-to-storage owner prerequisite
+blocked; G35.03 now has this existing two-level OLD observer application, NOT
+general ABI/reference conversion/calldata-storage/Source execution; G35.04 lacks
+fresh deep-copy/emitted loops; G35.05 general recursive Source graphs/maps/shadows/
+cycles/emitted traversal open; G35.06 final reserved-copy/V10/Source/target chain
+blocked. Backfill A/B advanced, not complete or exhausted. No source profile,
+refusal, invariant, expected vector or predicate was weakened to fit the proof.
+Existing blocked goal unchanged/uncompleted, no compiler/EVM or lane closure claim.
