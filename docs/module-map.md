@@ -677,9 +677,9 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/Hoare.lean` | V04b: Hoare triples over the interpreter monad `EM` (`Hoare`, `NotStuck`), with a rule per combinator (`bind`, `sub'`, `attempt'`, `lift'`, …). |
 | `Source/WellTyped.lean` | V04b preservation: references agree with the heap typing and the layout (`Val.RefOK`, `DataOK`, `RValOK`, `LocalsOK`, `HeapOK`, `StOK`, `EMOK`); memory operations keep it (`alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapAt_ok`). |
 | `Source/ValueProgress.lean` | V04b progress, value layer: `binVal`/`cmpVal`/`shiftVal`/`unaryVal`/`incDecVal`/`convVal`/`constVal` are never stuck in their domains (`NotStuckR`); every elaborated term is in them (`RExpr.OpsOK`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`). |
-| `Source/ExprProgress.lean` | V04b progress, expressions: `NS`/`NSP`; the value fragment (`RExpr.ValFrag`, `RExpr.MapRef`, `RLVal.IsSimple`: locals, value-type state variables, mappings) is never stuck (`exprNSAt`, `evalE_valFrag_ns`; `readAt_ns`, `writeAt_ns`, `keyStep_nsp`, `convRV_ns`). |
-| `Source/StmtProgress.lean` | V04b progress, statements: the statement value fragment in a body frame is never stuck (`stmtNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`; `RStmt.ext`, `Locals.restore_ok`, `BodyFrame`). |
-| `Source/SoundnessExamples.lean` | V04b controls: value-layer witnesses and stuck negative controls; fragment witnesses evaluated in the kernel (a loop, a storage update), an unframed `return` stuck. |
+| `Source/ExprProgress.lean` | V04b progress, expressions: `NS`/`NSP`; the value fragment (`RExpr.ValFrag`, `RExpr.MapRef`, `RLVal.IsSimple`: locals, value-type state variables, mappings) is never stuck (`exprNSAt`, `evalE_valFrag_ns`; `readAt_ns`, `writeAt_ns`, `keyStep_nsp`, `convRV_ns`).; the fragment parameterized by allowed callees (`RExpr.ValFragC`, `CallNS`, `exprNSAt_step`) |
+| `Source/StmtProgress.lean` | V04b progress, statements: the statement value fragment in a body frame is never stuck (`stmtNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`; `RStmt.ext`, `Locals.restore_ok`, `BodyFrame`).; calls inside expressions by the joint induction `FragAt`/`fragAt` under `CallsOK` (`evalE_callFrag_ns`); elaborated frames (`Elaborated.body_locals`, `Glob.dispatchFn_params`) |
+| `Source/SoundnessExamples.lean` | V04b controls: value-layer witnesses and stuck negative controls; fragment witnesses evaluated in the kernel (a loop, a storage update), an unframed `return` stuck.; call witnesses (`callF_ns`, `recF_ns`, `callF_badFrame_stuck`) |
 
 ## Precompiles
 

@@ -265,7 +265,7 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | Theorem | Statement |
 |---|---|
 | `evalE_valFrag_ns` | evaluating an expression of the **value fragment** (`RExpr.ValFrag`: literals (not constant state variables), locals of value type, `this`, unary and binary operators including `&&`/`\|\|`, comparisons, shifts and powers, `? :`, implicit conversions from value types and constants; state variables of value types and values of mappings (nested mappings included) with keyable keys, read; and assignment, compound assignment and `++`/`--` to locals, such state variables and such mapping values) that is `OpsOK` is never `stuck`, at any horizon, from any state |
-| `exprNSAt` (`ExprNSAt`: `val`, `pair`, `ref`, `loc`; `val_step`, `pair_step`, `ref_step`, `loc_step`) | the induction on the horizon: expressions, operand pairs, mapping references (`RExpr.MapRef`, with the postcondition `RPost`: a storage reference names a path of its type) and lvalues (`RLVal.IsSimple`, with the postcondition `LocOK`: a local, or a storage cell of value type at its own type with a default) |
+| `exprNSAt` (`ExprNSAt`: `val`, `pair`, `ref`, `loc`, `convArgs`; `val_step`, `pair_step`, `ref_step`, `loc_step`, `convArgs_step`, `exprNSAt_step`) | the induction on the horizon: expressions, operand pairs, mapping references (`RExpr.MapRef`, with the postcondition `RPost`: a storage reference names a path of its type) and lvalues (`RLVal.IsSimple`, with the postcondition `LocOK`: a local, or a storage cell of value type at its own type with a default) |
 | `readAt_ns`, `writeAt_ns`, `Storage.read_isSome`, `keyStep_nsp`, `Val.word_isSome`, `cellTy_key`, `pathTy_key`, `Env.pathTy_go`, `storRef_map_nsp` | storage: a cell of value type at its layout type with a default always reads; a write at the layout type succeeds (or reverts in a static frame); a keyable key is a key step; a mapping value's path has the mapping's value type |
 | `convRV_ns`, `getV_ns`, `readLoc_ok`, `writeLoc_ok`, `compound_dom` | its other steps |
 | `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_nsStep`, `execItems_nsStep`, `forIter_nsStep`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;`, `return e;` and `return (a, b);` of value types: `evalConvArgs_ns`, `setRets_ok`) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
@@ -274,7 +274,7 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `Elaborated.body_locals` (from `Decl.frame?_lengths`, `Frame.mk?_lengths`, `Syn.tys_params_length`, `Syn.tys_typeName_length`, `Frame.tysOf_locals`) | every elaborated body's locals are its returns over its parameters, last innermost: the frame `callInternal` builds |
 | `Glob.dispatchFn_params`, `Elaborated.callInternal_call_ns` | dispatch finds an override with the called declaration's parameter types; for a call node only the override's return types (and membership in the unit) stay open |
 | `Elaborated.callInternal_ns`, `Elaborated.callInternal_sig_ns` (from `Elaborated.body_sig`, `Decl.frame?_fnSig`) | in an elaborated program, `callInternal_ns`'s frame hypotheses reduce to dispatch coherence, stated syntactically: the declaration virtual dispatch finds has the call's signature (`fnSig`); when dispatch returns the called declaration itself, that is the call node's own premise |
-| `evalE_callFrag_ns`, `stmt_callFrag_ns`, `callInternal_callFrag_ns` (from `fragAt`: the joint induction `FragAt` over expressions, statements, bodies without modifiers and internal calls; `exprNSAt_step`, `stmtNSAt_step`, `mods_step`, `call_step`) | **internal calls inside expressions**: the fragment is parameterized by the callees it allows (`RExpr.ValFragC A`, `RStmt.ValFragC A`; the call-free `ValFrag` is `A = fun _ => False`, so the theorems above are unchanged), and for a program whose allowed functions are implemented by fragment bodies in the call's frame (`CallsOK A G`) evaluation is never `stuck` |
+| `evalE_callFrag_ns`, `stmt_callFrag_ns`, `callInternal_callFrag_ns` (from `fragAt`: the joint induction `FragAt` over expressions, statements, bodies without modifiers and internal calls; `exprNSAt_step`, `stmtNSAt_step`, `mods_step`, `call_step`) | **internal calls inside expressions**: the fragment is parameterized by the callees it allows (`RExpr.ValFragC A`, `RStmt.ValFragC A`; the call-free `ValFrag` is `A = fun _ => False`, so `evalE_valFrag_ns`, `stmtNS`, `itemsNS` and `callInternal_ns` keep their statements, while `exprNSAt`/`stmtNSAt` now state the case `A = fun _ => False`), and for a program whose allowed functions are implemented by fragment bodies in the call's frame (`CallsOK A G`, **assumed**: no lemma derives it for an elaborated program) evaluation is never `stuck`, recursion included |
 | `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
@@ -288,7 +288,7 @@ is never `stuck` and ends with `i = 3`); negative controls
 `OpsOK` is needed) and `ret_unframed_stuck`/`ret_unframed_no_frame`
 (`return 1;` over locals without a return slot is `stuck`, and those
 locals are no `BodyFrame`: the frame hypothesis is needed; with the slot,
-`ret_framed_ns`); `retPair_ns`/`retPair_unframed_stuck` for `return (1, 2);`. Calls inside expressions: `callF_ns` (`f()` with `f` implemented by `return 1;`, through `retOne_callsOK`), `callF_value` (it evaluates to `1`) and `callF_badFrame_stuck` (with a body outside the call's frame it is `stuck`: `CallsOK` is needed). Function level: `callRetOne_ns` (an internal call of a
+`ret_framed_ns`); `retPair_ns`/`retPair_unframed_stuck` for `return (1, 2);`. `retLocalPair_ns` for `return (x, x);` over a declared local. Calls inside expressions: `callF_ns` (`f()` with `f` implemented by `return 1;`, through `retOne_callsOK`), `callF_value` (it evaluates to `1`), `recF_ns`/`recF_timeout` (`f` calling itself, `return f();`: never `stuck`, it times out; the callee's body itself calls) and `callF_badFrame_stuck` (with a body outside the call's frame it is `stuck`: the frame conjunct of `CallsOK` is needed). These programs give every declaration one body (`progOf`), and `fDecl` (scope `none`, not in `E0`) is dispatched to itself, so virtual dispatch is not exercised. Function level: `callRetOne_ns` (an internal call of a
 `return 1;` body) and `callBadFrame_stuck` (a body whose locals lack the
 return slot is `stuck`, "call frame"). Witnesses from S01 typing derivations (through `toR`): `incBody_ns` (the counter's typed
 body `count++;`, through `ItemsD.toR_ns`) and `indexMapping_ns` (S01's
@@ -304,8 +304,13 @@ needs the lemma that a resolved state variable is the declaration
 it: modifiers (`runMods` with invocations,
 `_`), the coherence of dispatch and elaboration (that the body virtual
 dispatch finds has the call's return types and is one of the unit's: the
-parameter half is proved, `Glob.dispatchFn_params`; for calls inside
-expressions the whole of it is the `CallsOK` hypothesis), memory (the `heap` invariant, `WellTyped.lean`), arrays and
+parameter half is proved, `Glob.dispatchFn_params`), for calls inside
+expressions the whole-program hypothesis `CallsOK` (assumed, not derived
+for elaborated programs: every allowed callee, from every contract, is
+dispatched to a body without modifiers, in the fragment and `OpsOK`, in
+the call's frame, with defaulted return types; it is stronger than
+needed, since it quantifies over every contract rather than those whose
+frames run the call), memory (the `heap` invariant, `WellTyped.lean`), arrays and
 structs in storage, external calls, `emit`, builtins, and the transaction layer (dispatch,
 ABI). Each is listed with its sites in the census below.
 
@@ -398,6 +403,20 @@ covering leaf functions. Accepted by both: `itemsNSP` (the `SCtx.loop`
 indexing of `brk`/`cont`, `unchecked`, loops), the fuel's sufficiency,
 `deleteRefused` against solc, the UDVT decoder, the getter revert, the
 pins.
+
+**Review of internal calls inside expressions** (finder and skeptic,
+read-only, on 3f61cf3..90f4226). No correctness defect; the horizon
+bookkeeping of `fragAt` was checked against `Eval.lean` by both. Fixed:
+no witness used the mutual part (skeptic): `recF_ns`, `recF_timeout`;
+the coverage-plan row and this document now say that `CallsOK` is
+assumed, not derived, and what it requires (both); `CallsOK`'s quantifier
+over every contract is recorded as stronger than needed (finder); the
+witnesses' degenerate program and `fDecl`'s shape are recorded; the
+`ExprNSAt` field list, `callF_badFrame_stuck`'s docstring (one conjunct),
+the "unchanged theorems" sentence (`exprNSAt`/`stmtNSAt` now state the
+call-free case), module-map rows and the TrustAudit list
+(`retLocalPair_ns`). Recorded, not changed: the argument orders
+`ExprNSAt A G F n` and `StmtNSAt G A n` differ.
 
 **Review of the frame, `return (a, b)` and signature work** (finder and
 skeptic, read-only, on 481d3ee..b934819). Confirmed and fixed: the doc

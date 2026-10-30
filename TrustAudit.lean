@@ -1515,3 +1515,18 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} call-fragment theorems use only the standard axioms"
+
+/-! Lane V04b: recursion through calls inside expressions; `return (x, x)`. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.recF_ns,
+    ``Solidity.Source.SoundnessExamples.recF_timeout,
+    ``Solidity.Source.SoundnessExamples.retLocalPair_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} recursion and return-tuple witnesses use only the standard axioms"
