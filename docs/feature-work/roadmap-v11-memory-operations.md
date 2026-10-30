@@ -1050,3 +1050,127 @@ These are kernel intrinsic proofs plus concrete controls, not external compiler/
 EVM evidence. Final cumulative artifacts/checksums and independent artifact
 receipts are exported separately after commit; all earlier seals remain intact.
 Existing goal remains unchanged and unfinished; no integration is authorized.
+
+
+## Checkpoint twelve: two actual builder generations and checked writes
+
+Parent3af6f9c8885f2ccd1c6a7bb2067dfd7f08df521c; frozen base/branch unchanged.
+Reproduced gap: CopyMirrorFrame preserves one mirror through one same-heap frame
+or one builder/write. Published Mirrors.wk preserves growth, but no owned result
+composed two actual multi-object builders with checked original-object writes
+between/after them, both final recursive mirrors and cross-generation identity.
+BuilderComposition now supplies that operation-side composition, not a new copy
+implementation, heap/traversal semantics, Source table or compiler bridge.
+
+captureAfterCopy_old_len derives every original typed array's intermediate length
+from actual first-copy Keeps and snapshot length preservation. two_builders_success
+uses those equalities to derive second bounds from original lengths, with actual
+checked Some results for both writes. two_builders_none_iff classifies only the
+second snapshot's reversed/source/destination failures; no target construction
+failure or rollback semantics is inferred. Each builder retains mapFree=true.
+
+two_builders_mirrors derives the first tree's intermediate mirror from actual
+copy/write, weakens it through the second actual copy's Keeps, then frames it at
+the ORIGINAL heap's ID threshold under the second original-destination write.
+The second tree's recursive mirror comes from the published copy theorem and its
+higher threshold. It also frames all earlier-generation fresh typed objects.
+Cross-generation root separation follows from earlier HRef.id_lt and the second
+copy's id_ge. generations_mirror_ne applies the same reasoning to any later
+observed child using its derived recursive mirror bound. No final relation,
+within-copy pairwise distinctness or global address/hash injectivity is assumed.
+
+Controls record ordered actual checked results and both final mirrors for nonzero
+Person/Account/Token copying followed by real nested default construction, and
+for arbitrary n same-type fixed/reference/dynamic-child array copies. Final
+Person fields observe11/9/7; a final default child is empty and separated from an
+actual earlier Account field whose weakened identity is retained. Same-type
+array roots and observed Boolean children are separated across generations;
+both final children retain [true]. Empty builder payloads and exact-end empty
+snapshots are inhabited. Old aliases retain ID0; changed recapture observes true
+at33 whereas original index32 was false. The32/33 checks are element boundaries,
+not physical byte encoding. Isolated reversed/source/destination failures remain
+actual Option.none. descendant_mutation_negative performs an actual checked
+write from an old false slot INTO a copied child: the parent pointer stays the
+same, the child becomes false, and the later recursive mirror fails. That case
+is supported by the operations, outside this framing theorem, never excluded.
+
+Independent source reviews identified two initial evidence gaps: the Person
+comment overstated explicit observations, and idle-container OOMKilled=false
+could miss an exec-worker OOM. Explicit final fields and corrected wording fix
+the first. The new runner records cgroup memory.events before/after every new
+command (including oom/oom_kill deltas); cumulative session peak is labeled.
+No source, proof or expected observation was weakened. Focused core03 passes69
+jobs, refined combined01 passes70jobs, all14new headline outputs have exact guards.
+Failed focused attempts remain separate logs, not relabeled passes.
+
+Operational disk investigation: initial available1,361,448,960bytes fell to
+848,969,728bytes while using retained per-gate containers. Docker uses VFS, which
+copies the image filesystem per container; existing containers/caches were NOT
+deleted. One new SAME-VM container v11-two-builders-session reuses the identical
+12GiB/no-swap limits, user, mounts, LEAN_NUM_THREADS1, keyed cache and toolchain
+for serial Lean-j1 checks under the writer lock. Creation cost170,774,528bytes;
+subsequent focused checks keep availability around675MB. Initial runner source
+is preserved; run-checkpoint12-gate.py uses exclusive new logs and per-exec OOM
+counters. This is not a VM/thread/goal replacement or resource-budget increase.
+Final full/static/resource results and artifact review follow below.
+
+Full original-queue audit against coverage-plan: G32 remains partial for actual
+nested/reference byte-addressed representation and target separation; G33 remains
+partial for all in-profile default/allocation compilation and exact target size/
+allocation failures (conditional intrinsic capacities do not close it); G34 remains
+partial for general path/rebinding/delete/stale-alias compilation. G35.01 remains
+partial: published intrinsic tree copying/recursive mirror and generation frames
+are checked, not its full source/target compiler. G35.02 is blocked on the reserved
+memory-storage-copy prerequisite. G35.03 remains partial for general calldata/
+ABI/source/storage transport. G35.04 remains partial for fresh memory-to-memory
+execution/emission and full alias/deep-copy cases. G35.05 remains partial for
+Source/type-graph/cycle/mapping/shadow and emitted recursive traversal coverage;
+finite map-free intrinsic mirror composition is now stronger. G35.06 is blocked
+on reserved location-copy and V10/Source/target prerequisites. Backfill A/B remain
+partial, with this additional supported noninterference/identity composition.
+No parent or original queue is complete and no claim that all independent
+refinements are exhausted. All approved shapes, refusals and budgets remain.
+
+Global doc-count clarification: the retained raw exact-base checker output has
+72missing/ambiguous rows, of which46are missing references; its FAIL footer counts
+those46missing references. Earlier shorthand46findings did not count ambiguity
+rows. The raw74-line output/hash remains unchanged in every sealed package.
+No historical record is rewritten. Global inventory proposals remain coordinator
+reconciliation, never edits to the reserved inventory/ledger/coverage manifest.
+
+New cumulative exports: /workspace/v11-memory-operations-evidence/checkpoint12.
+Every checkpoint11/earlier seal, original checkout, runtime TOML, cache and failure
+is preserved. Per-file Lean RPCs and get_goal remain unavailable. Existing goal
+is unfinished; no integration. Kernel evidence is distinct from external EVM/
+compiler testing, Source/layout correctness and physical byte-address injectivity.
+
+
+Checkpoint-twelve final confirmation v11-checkpoint12-full-01 exits0:896default
+jobs,262TestSuite jobs and final SolKey377taclets/131read-bearing annotations OK.
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613 and actual KeySort2jobPASS are retained in
+v11-checkpoint12-runtime-01.log. RUNTIME_GATE_PASS remains setup evidence only.
+Final sampled aggregate Lean/Lake RSS1,575,568KiB; cumulative session cgroup peak
+391,729,152bytes. Final command's memory.events before/after allzero, including
+zero oom/oom_kill deltas; do not infer worker health from idle PID1 OOMKilled.
+12GiB/no-swap,16GiB parent/OS headroom, serial-j1 and fixed budgets unchanged.
+Final full command disk availability675,328,000before/674,627,584after bytes;
+no resource stop, deletion or budget expansion. Idle session is retained for
+future serial checks without another VFS image copy; it runs no Lean/LSP work.
+
+Strict automation, complete committed-snapshot TestSuite trust/parity, layers,
+orphans, trust, owned boundary/pins, script syntax and diff checks pass. The owned
+checker validates276standard pins45modules. Global inventory still exits1 with
+0unsafe errors290unrecorded=14inherited+276owned; exact additive proposals remain
+coordinator reconciliation. Global docs still exits1 with72missing/ambiguous rows
+(46missing,26ambiguous), raw exact-base equal; separate no-new comparison passes.
+Nothing rewrites reserved inventory/ledger/coverage records or historical seals.
+
+Independent read-only finder and skeptic final source reviews found no remaining
+mathematical/hypothesis/nonvacuity/ownership/doc defect; neither ran Lean/server/
+builds. Both confirmed complete ordered array observations, explicit Person fields,
+actual same-type generation separation and the checked descendant mutation
+negative. Earlier evidence/comment and per-exec OOM findings are fixed and retained.
+Final artifact review follows commit/export. All original Work/Backfill queues
+remain partial/blocked for the exact audited prerequisites above; no full-lane,
+Source/compiler/EVM or physical-byte execution result follows from kernel checks.

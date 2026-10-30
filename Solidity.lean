@@ -765,3 +765,5 @@ import Solidity.Backend.MemoryOps.InterstageBuilderRefControls
 import Solidity.Backend.MemoryOps.InterstageBuilderChildControls
 
 import Solidity.Backend.MemoryOps.CopyMirrorControls
+
+import Solidity.Backend.MemoryOps.BuilderPairControls

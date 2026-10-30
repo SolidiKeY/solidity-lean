@@ -1082,3 +1082,5 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/InterstageBuilderChildControls.lean` | Existing immutable Boolean/nested certificates framed across actual multi-object builder outputs and second checked captures. |
 | `Backend/MemoryOps/CopyMirrorFrame.lean` | Recursive transport of the published typed storage-copy mirror under actual fresh-ID frames, including structs/arrays and default construction. |
 | `Backend/MemoryOps/CopyMirrorControls.lean` | Arbitrary-length nested copy/default families, actual changed recapture, nonzero published Person/Account/Token fields and an unframed old-mirror negative. |
+| `Backend/MemoryOps/BuilderComposition.lean` | Actual two-builder/checked-write composition preserving both recursive mirrors, original lengths and cross-generation typed identity separation. |
+| `Backend/MemoryOps/BuilderPairControls.lean` | Nonzero structs, arbitrary-length same-type array generations, final child/default observations, boundary recapture, failures and a checked copied-descendant mutation negative. |
