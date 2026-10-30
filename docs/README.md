@@ -87,3 +87,6 @@ history is in git.
 | [parallelism.md](parallelism.md) | The core apart from the elaborator, the layering check, the split convention. |
 | [latex.md](latex.md) | LaTeX notation and the checked trace export. |
 | [site.md](site.md) | The examples site on GitHub Pages. |
+
+V08's partial independent adapter checkpoint and its open prerequisites are
+recorded in [roadmap-v08-world-lowering](feature-work/roadmap-v08-world-lowering.md).

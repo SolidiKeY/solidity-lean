@@ -1037,3 +1037,17 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+## V08 independent adapters (partial lane)
+
+| Module | Purpose |
+|---|---|
+| `Lowering/V08/Callable.lean` | Typed result observation extension; paid frame and exact halt preserved. |
+| `Lowering/V08/AbiObservations.lean` | Independent source/intrinsic word, panic and reason byte agreement. |
+| `Lowering/V08/Transactions.lean` | Snapshot, atomic status, observation and repeated reset laws. |
+| `Lowering/V08/LibraryCreation.lean` | Linked caller-context and creation-continuation observations. |
+| `Lowering/V08/Controls.lean` | Funded, failure-byte, rollback, reset and caught constructor controls. |
+| `Lowering/V08/AbiControls.lean` | Exact catch positives and malformed/wrong-code negatives. |
+| `Lowering/V08/LibraryControls.lean` | Delegated owner isolation and nonempty constructor installation. |
+| `Lowering/V08/Audit.lean` | Headline axiom output pinned by lane-specific controls. |
+| `Lowering/V08/CallbackControls.lean` | Paid invariant/havoc callback, actual settlement and atomic rollback witnesses; no source reentrancy claim. |

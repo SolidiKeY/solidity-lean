@@ -1,0 +1,216 @@
+{
+  "Solidity.Lowering.V08.AbiControls.malformed_reason": [],
+  "Solidity.Lowering.V08.AbiControls.panic_catch": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.AbiControls.reason_roundtrip": [],
+  "Solidity.Lowering.V08.AbiControls.wrong_panic": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallbackControls.callback_after_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallbackControls.callback_committed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallbackControls.callback_program": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallbackControls.callback_transfer": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallbackControls.callback_wrong_frame": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.constructor_caught": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.constructor_wrong_snapshot": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.decoder_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.extension_funded": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.funded_call": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.funded_rollback": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.repeated_reset": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.wrong_failure_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.wrong_frame": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.Controls.wrong_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.LibraryControls.constructor_installed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.LibraryControls.constructor_wrong_store": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.LibraryControls.delegated_owner": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.LibraryControls.delegated_wrong_context": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.beBytes_layout": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.beBytes_mod": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.callFrame_observeEntry": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.call_observeEntry": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.call_observeEntry_comp": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.call_observeEntry_error_iff": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.catch_error_transport": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.catch_error_transport_total": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.errorData_transport": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.errorData_transport_total": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.libraryCall_observe": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.natWordBytes_transport": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.pad32_transport": [],
+  "Solidity.Lowering.V08.panicData_transport": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.panic_payload_injective": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.resetTransient_idem": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.rollback_observation": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_atomic_descendant": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_congr": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_descendant_failure": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_observe": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_repeat": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_wrong_halt": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.tryCreate_observe": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.tryCreate_success_continuation_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.wordBytes_transport": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.wordSequence_transport": [
+    "Quot.sound",
+    "propext"
+  ]
+}

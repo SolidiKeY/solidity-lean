@@ -741,3 +741,5 @@ import Solidity.Solkey.QuantifiedDiamond
 
 import Solidity.Tools.SolCases
 import Solidity.Examples.SolCases
+
+import Solidity.Lowering.V08.Audit
