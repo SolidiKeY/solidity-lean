@@ -550,17 +550,26 @@ No witness applies these theorems to a concrete `Elaborated` program; the
 function-level witness (`callRetOne_ns`) uses `callInternal_ns` on a
 hand-built body.
 
-**How to continue the walk.** Add a field per interpreter function to the
-induction hypotheses (`ExprNSAt`, `StmtNSAt`, as `Horizon.lean`'s
-`BelowAt`), with a postcondition that carries what the caller needs
-(`RPost`, `LocOK`, the frame). `simp only [evalE]` unfolds one arm; the
-heavy matchers (`convRV`, `convVal`, `keyStep`) are handled by `split` on
-the general match or by per-case `rfl` equations, never by
-`simp only [convVal]` (whnf timeouts). Memory needs `WellTyped.lean`'s
-`EMOK` in the pre- and postconditions (the heap typing grows); frames
-need `BodyFrame` from `callInternal` (the `if h : … = b.locals` check
-and `Elaborated.bodies_typed`) and a dispatch lemma (the body virtual
-dispatch finds has the parameters and returns of the called signature).
+**How to continue the walk.** New interpreter functions go into the joint
+induction `FragAt` (`StmtProgress.lean`) as fields at horizon `n`, each
+with a step lemma from the fields at `n` (as `Horizon.lean`'s `BelowAt`),
+and a postcondition that carries what the caller needs (`RPost`,
+`LocOK`, `Out.esc`). `simp only [evalE]` unfolds one arm; the heavy
+matchers (`convRV`, `convVal`, `keyStep`) are handled by `split` on the
+general match or by per-case `rfl` equations, never by
+`simp only [convVal]` (whnf timeouts). The next steps, in order:
+
+- modifiers: `runMods` with invocations and the `_` arm read and write
+  `St.fnLocals` and check its context at run time, so they need a state
+  invariant (the running modifier's frame) in the pre- and postcondition,
+  that is, Hoare triples over `NSP`'s "from any state";
+- `CallsOK` for elaborated programs: from `Elaborated.callInternal_call_ns`
+  per call, given the override return-type and unit-membership lemmas
+  above and a characterisation of the bodies in the fragment; `CallsOK`
+  could also be restricted to the contracts whose frames run the call;
+- memory: `WellTyped.lean`'s `EMOK` in the pre- and postconditions (the
+  heap typing grows), which also gives preservation;
+- external calls, `emit`, builtins and the transaction layer.
 
 **Elaboration.** `ExprProgress.lean` and `StmtProgress.lean` each check
 in under a minute with the language server; `SoundnessExamples.lean`
