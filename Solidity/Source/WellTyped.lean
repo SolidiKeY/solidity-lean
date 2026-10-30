@@ -362,6 +362,7 @@ theorem heapObj_gen {H : HeapTy} {P : EMState E Γ → Prop} {X : Halt → EMSta
   · rename_i hg
     exact Hoare.halt' fun y ⟨hs, hp⟩ => by subst hs; exact hX y hp hg
 
+/-- **`heapObj`, preservation**: `heapObj_gen` with `EMOK` on halts. -/
 theorem heapObj_pres {H : HeapTy} {P : EMState E Γ → Prop} (hP : ∀ y, P y → EMOK E H y) (a : Nat) :
     Hoare P (heapObj a : EM E Γ (Σ σ, Data E.layout σ))
       (fun x y => P y ∧ y.2.heap.ty a = some x.1 ∧ DataOK E y.2.heap.ty x.2) (fun _ y => EMOK E H y) :=
@@ -564,8 +565,10 @@ def Data.Top {τ : STy} : Data E.layout τ → Prop
 /-- Every object of the heap has its shape. -/
 def HeapShaped (h : Heap E.layout) : Prop := ∀ a x, h.get a = some x → Data.Top x.2
 
+/-- The empty heap is shaped. -/
 theorem HeapShaped.empty : HeapShaped (Heap.empty : Heap E.layout) := fun _ _ h => by cases h
 
+/-- **Allocation keeps a heap shaped**, given a shaped object. -/
 theorem HeapShaped.alloc {h : Heap E.layout} (hh : HeapShaped h) {x : Σ τ, Data E.layout τ}
     (hx : Data.Top x.2) : HeapShaped (h.alloc x).1 := by
   intro a y hy
@@ -577,6 +580,7 @@ theorem HeapShaped.alloc {h : Heap E.layout} (hh : HeapShaped h) {x : Σ τ, Dat
   · have hy' : h.get a = some y := by simp only [Heap.get, Heap.alloc, e, if_false] at hy; exact hy
     exact hh a y hy'
 
+/-- **A write keeps a heap shaped**, given a shaped object. -/
 theorem HeapShaped.write {h : Heap E.layout} (hh : HeapShaped h) {a : Nat} {τ : STy} {x : Data E.layout τ}
     (hty : h.ty a = some τ) (hx : Data.Top x) : HeapShaped (h.write a x hty) := by
   intro b y hy
@@ -633,9 +637,18 @@ theorem heapObj_top {H : HeapTy} {P : EMState E Γ → Prop} {X : Halt → EMSta
   · rename_i hg
     exact Hoare.halt' fun y ⟨hs, hp⟩ => by subst hs; exact hX y hp hg
 
+/-- The memory shape of `bytes`: a `bytes` or a `string`. -/
+theorem STy.memShape_bytes {σ : STy} {l : DataLoc} (h : σ.memShape = .bytes l) :
+    σ = .bytes l ∨ σ = .string l := by
+  cases σ <;> simp only [STy.memShape, STy.bytes.injEq, reduceCtorEq] at h
+  · exact .inl (by rw [h])
+  · exact .inr (by rw [h])
+
 /-- **`writeLoc` to a memory byte, progress and preservation**: at an
 address the heap typing gives a `bytes` or `string` type, in a shaped
-heap, a byte write is never `stuck` (it writes or panics). -/
+heap, a byte write is never `stuck` (the code writes or panics; the
+statement excludes only `stuck`). A `memory` reference to a `bytes` or
+`string` gives the precondition (`STy.memShape_bytes`, `Val.RefOK`, `StOK.le`). -/
 theorem writeLoc_memByte_ok {H : HeapTy} (F : Fr) (n a i : Nat) (v : Val E.layout (.fixedBytes 1 (by decide))) :
     Hoare (fun y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧
         ∃ l, y.2.heap.ty a = some (.bytes l) ∨ y.2.heap.ty a = some (.string l))

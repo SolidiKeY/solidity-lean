@@ -501,6 +501,7 @@ theorem ptrHeap_not_shaped : ¬ HeapShaped (E := SemanticsExamples.E0) ptrHeap :
 def bytesHeap : Heap SemanticsExamples.E0.layout :=
   ((Heap.empty : Heap SemanticsExamples.E0.layout).alloc ⟨.bytes .memory, .bytes [1]⟩).1
 
+/-- `bytesHeap` is shaped. -/
 theorem bytesHeap_shaped : HeapShaped (E := SemanticsExamples.E0) bytesHeap :=
   HeapShaped.empty.alloc trivial
 
@@ -617,6 +618,8 @@ theorem bytesHeap_byte_write :
 #guard_msgs in #print axioms Solidity.Source.heapPut_shaped
 /-- info: 'Solidity.Source.writeLoc_memByte_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_ok
+/-- info: 'Solidity.Source.STy.memShape_bytes' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Source.STy.memShape_bytes
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ptrHeap_not_shaped
 /-- info: 'Solidity.Source.SoundnessExamples.bytesHeap_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
