@@ -1901,3 +1901,56 @@ complete72/14 findingrows identical and separatelynamedNEW0 pass. Both final
 independentproof/control/sourcebinding reviews pass with nofindings. Remaining
 space235712512bytes precommit, inside40MiBcontinuationenvelope. Alloriginal
 source/applicationqueues and mandatoryvalidation remainunfinished.
+
+
+### Injective complete-history reflection checkpoint
+
+Starting f9088913b5fb1cb6594f8eeccfc836d625addebd, six new general laws
+reflect exact TRes and ENTIRE ordered histories under an EXPLICIT injective
+typed success observer. Every THalt/error/success distinction and list order is
+retained. Actual observedprefixhistories reflect originalprefixhistories, even
+between different initialworlds/frame lists, but imply NO World equality or
+Source/ABI equivalence. Segment complete/history/reflection corollaries preserve
+the genuinely reached prefixworld and exact endpoint, natural truncation/empty
+behavior, all ordered successes/errors. The premise is observerinjectivity,
+never a relation assuming desired preservation. Existing intrinsicfold unchanged.
+
+Eight controls prove actual extendOutput injectivity (wholeoriginaltypedvalue
+retained), full/middle history reflection, and all previous listed vectors and
+ordered results at ALL0..4 boundaries. Same-taglibrarybinary bytes/context,
+fullread and both exact distinct errors retained. A lossyconstant-success observer
+merges actualhistory with a wrongbytecandidate despite their inequality; stronger
+lossy_actual_runs compares two ACTUAL World.transactfolds using pure result
+adapters on the same funded operations/worlds. Their rawhistories differ but
+constant-success observedhistories coincide. Neither is claimed an independent
+Source execution or source-equivalent program. Wrongbyte/order observations are
+rejected by injective reflection. Existing rawreset/emptydirty controls preserved.
+
+Gate788245-4ed664a2 PASS117jobs/37.5548s,freshRSS1028800512,reportedreusedpeak
+381345792(possiblycumulative);461 exactstandardsets preserve all447startingpins.
+Initial786593 FAIL1 was a concrete listtypeannotation, fixed without statement/
+budget change. No authoredsorry/newaxiom or nonstandardaxiom in successfulsets.
+Same stoppedownedruntime/image/CMD/token/mount/config/cache checkedfresh; inner
+12GiB/swap0/CPU1,parent16GiB,serialLEAN_NUM_THREADS1/Lean-j1,600s unchanged.
+No newVFSroot/deletion/capacity/guardchange. Initialavailable227966976; measured
+changedcompiled1192401bytes; conservative32MiB totalgrowth envelope leaves at
+least194412544bytes. Runtimepreflight/budget evidence additive. get_goal/LeanMCP
+unavailable; existingblockedgoal untouched. Independent finder/skeptic readactual
+proofs/controls without Lean/builds/writes and found no substantive issue.
+
+All original G20,G21,G22.01-.05,G23/BackfillA-B source/applicationparents remain
+PARTIAL; no independentqueue exhaustion claimed. MissingSource/V07/type/layout/
+ABI/body/linkage/runtimeframe/bytecode/admission/reserved-owner applications open.
+Mandatoryfull496841/taskDecision413142/baseDecision433573 FAILED125 remain,
+literalwrapperpending; no unchangedretry/waiver. Raw globaldocs/pins exits1 and
+complete exactbase NEW0 comparisons remain separate. This is the committed
+checkpoint handoff; scopedgate results and exact artifacts follow.
+
+Reflectioncheckpoint final scopedgates PASS461exactpins/60coreclosure,19evidence
+and14runtimeprofile corruptions afterpositivecontrols;trust911/241/0findings,
+strict491/61budget/11refuted/0pending,layers169/0elaborator,orphans896/0orphan.
+Rawtask/base docs/pins exits1 remainfailed, complete72/14 identicalfindingrows
+and separatelynamedNEW0 pass. Both finalindependentproof/control/pins/doc reviews
+PASS/no findings. Precommitavailable218337280bytes inside32MiBenvelope; next
+adjacentsegmentcomposition continues. Alloriginalsource/applicationparents and
+mandatorywholevalidation remainunfinished.

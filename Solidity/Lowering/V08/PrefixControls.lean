@@ -823,6 +823,101 @@ theorem wrong_middle_snapshot : extended (transactPrefix base (frames.take 1)).1
   have preceding : transactPrefix base (frames.take 1) = (linked.resetTransient, h1) := boundary1
   rw [preceding]; decide +kernel
 
+theorem extendOutput_injective (first second : Output)
+    (same : extendOutput first = extendOutput second) : first = second := congrArg Prod.fst same
+
+/-- Actual observed full history reflects every candidate only because this
+observer retains the ENTIRE original typed result (including same-tag bytes). -/
+theorem complete_history_reflection (candidate : List (TRes Output)) :
+    (transactPrefix base observedFrames).2 = candidate.map (fun result => result.map extendOutput) ↔
+      h4 = candidate := by
+  simp only [observedFrames, transact_prefix_observe, boundary4]
+  exact history_observe_eq_iff extendOutput extendOutput_injective h4 candidate
+
+theorem middle_history_reflection (candidate : List (TRes Output)) :
+    (((transactPrefix base observedFrames).2.drop 1).take 3) =
+      candidate.map (fun result => result.map extendOutput) ↔
+      [.error laterHalt, .error .revert, .ok readValue] = candidate := by
+  have reflected := transact_prefix_segment_observe_reflect_iff base frames 1 3
+    extendOutput extendOutput_injective candidate
+  have history : (transactPrefix base frames).2 = h4 := congrArg Prod.snd boundary4
+  simpa only [observedFrames, history] using reflected
+
+/-- All previous listed observations and all four full ordered results remain
+at every original boundary alongside injective reflection. -/
+theorem reflection_complete_boundaries :
+    (observeBoundary [] =
+      ((([95, 0, 0, 5, 0], [some [0, 0], some [19, 29], some []], flags), none, false), []) ∧
+    observeBoundary [commit] = (committedVector, h1) ∧
+    observeBoundary [commit, failing] = (committedVector, h2) ∧
+    observeBoundary [commit, failing, occupied] = (committedVector, h3) ∧
+    observeBoundary frames = (committedVector, h4)) ∧
+    ((extended (transactPrefix base observedFrames).1, (transactPrefix base observedFrames).2) =
+      (committedVector, [.ok (commitValue, 2), .error laterHalt, .error .revert, .ok (readValue, 6)])) ∧
+    (∀ candidate : List (TRes Output),
+      (transactPrefix base observedFrames).2 = candidate.map (fun result => result.map extendOutput) ↔
+        h4 = candidate) :=
+  ⟨complete_boundaries, observed_complete, complete_history_reflection⟩
+
+def wrongByteValue : Output := .inl ([0xb1, 0], [1, 7, 2, 7, 12345])
+def wrongByteHistory : List (TRes Output) :=
+  [.ok wrongByteValue, .error laterHalt, .error .revert, .ok readValue]
+
+/-- Lossy constant-success observation merges two different complete histories,
+while both exact errors remain in order. Injectivity cannot be dropped. -/
+theorem lossy_observer_counterexample :
+    (transactPrefix base frames).2.map (fun result => result.map (fun _ : Output => ())) =
+      wrongByteHistory.map (fun result => result.map (fun _ : Output => ())) ∧
+    (transactPrefix base frames).2 ≠ wrongByteHistory := by
+  have history : (transactPrefix base frames).2 = h4 := congrArg Prod.snd boundary4
+  rw [history]
+  constructor
+  · rfl
+  · decide +kernel
+
+theorem injective_wrong_success_rejected :
+    (transactPrefix base observedFrames).2 ≠ wrongByteHistory.map (fun result => result.map extendOutput) := by
+  intro same
+  have wrong : h4 = wrongByteHistory := (complete_history_reflection wrongByteHistory).mp same
+  have differs : h4 ≠ wrongByteHistory := by decide +kernel
+  exact differs wrong
+
+theorem injective_wrong_order_rejected :
+    (transactPrefix base observedFrames).2 ≠
+      ([.ok commitValue, .error .revert, .error laterHalt, .ok readValue] : List (TRes Output)).map (fun result => result.map extendOutput) := by
+  intro same
+  have wrong := (complete_history_reflection _).mp same
+  have differs : h4 ≠ [.ok commitValue, .error .revert, .error laterHalt, .ok readValue] := by decide +kernel
+  exact differs wrong
+
+/-- Pure result adapter on actual frames: funded operations/worlds are retained,
+only the library success bytes change. No alternate call interpreter. -/
+def wrongByteObserver (output : Output) : Output := match output with
+  | .inl libraryResult => .inl ([0xb1, 0], libraryResult.2)
+  | other => other
+def wrongByteFrames := frames.map (fun frame => observeTransactionFrame frame wrongByteObserver)
+
+/-- The same loss of information also occurs between two ACTUAL transaction
+folds with real funded work, not only between an execution and a candidate list. -/
+theorem lossy_actual_runs :
+    (transactPrefix base (frames.map (fun frame => observeTransactionFrame frame (fun _ : Output => ())))).2 =
+      (transactPrefix base (wrongByteFrames.map (fun frame => observeTransactionFrame frame (fun _ : Output => ())))).2 ∧
+    (transactPrefix base frames).2 ≠ (transactPrefix base wrongByteFrames).2 := by
+  simp only [wrongByteFrames, transact_prefix_observe, boundary4]
+  constructor
+  · rfl
+  · decide +kernel
+
+#print axioms lossy_actual_runs
+
+#print axioms extendOutput_injective
+#print axioms complete_history_reflection
+#print axioms middle_history_reflection
+#print axioms reflection_complete_boundaries
+#print axioms lossy_observer_counterexample
+#print axioms injective_wrong_success_rejected
+#print axioms injective_wrong_order_rejected
+
 #print axioms middle_segment_reached
 #print axioms middle_paid_reconstruction
 #print axioms middle_read_reconstruction

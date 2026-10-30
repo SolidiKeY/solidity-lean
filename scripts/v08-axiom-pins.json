@@ -1296,6 +1296,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.complete_history_reflection": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.dirty_read_run": [
     "Classical.choice",
     "Quot.sound",
@@ -1326,6 +1331,7 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.extendOutput_injective": [],
   "Solidity.Lowering.V08.PrefixControls.failing_reached": [
     "Classical.choice",
     "Quot.sound",
@@ -1381,7 +1387,32 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.injective_wrong_order_rejected": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.injective_wrong_success_rejected": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.lossy_actual_runs": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.lossy_observer_counterexample": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.middle_complete_vectors": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.middle_history_reflection": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1447,6 +1478,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.reconstructed_complete_boundaries": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.reflection_complete_boundaries": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1731,6 +1767,9 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.history_observe_eq_iff": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.libraryCall_observe": [
     "Classical.choice",
     "Quot.sound",
@@ -1760,6 +1799,7 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.result_observe_eq_iff": [],
   "Solidity.Lowering.V08.rollback_observation": [
     "propext"
   ],
@@ -1858,6 +1898,9 @@
   "Solidity.Lowering.V08.transact_prefix_observe": [
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_prefix_observe_reflect_iff": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_prefix_segment_boundary": [
     "Classical.choice",
     "Quot.sound",
@@ -1876,6 +1919,17 @@
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_segment_index_bound": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_observe_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_observe_history": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_observe_reflect_iff": [
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_segment_ok_iff": [

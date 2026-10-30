@@ -412,6 +412,82 @@ theorem transact_prefix_segment_error_iff (w : World contracts)
     have localError := (transact_prefix_index_failure _ _ i valid halt failed).1
     simpa only [transact_prefix_segment_history] using localError
 
+/-- An injective typed observer reflects exact TRes equality, retaining every
+THalt and the success/error distinction. No World equality is inferred. -/
+theorem result_observe_eq_iff {β : Type} (observation : α → β)
+    (injective : ∀ x y, observation x = observation y → x = y) (first second : TRes α) :
+    first.map observation = second.map observation ↔ first = second := by
+  constructor
+  · intro same
+    cases first with
+    | error halt =>
+      cases second with
+      | error other => exact congrArg Except.error (Except.error.inj same)
+      | ok value => cases same
+    | ok value =>
+      cases second with
+      | error halt => cases same
+      | ok other => exact congrArg Except.ok (injective value other (Except.ok.inj same))
+  · intro same
+    exact congrArg (fun result => result.map observation) same
+
+/-- Reflection of the ENTIRE ordered history, including all exact error data.
+Injectivity is a real premise, not inferred from an observed trace. -/
+theorem history_observe_eq_iff {β : Type} (observation : α → β)
+    (injective : ∀ x y, observation x = observation y → x = y)
+    (first second : List (TRes α)) :
+    first.map (fun result => result.map observation) =
+      second.map (fun result => result.map observation) ↔ first = second :=
+  List.map_inj_right (fun x y same => (result_observe_eq_iff observation injective x y).mp same)
+
+/-- Equality of actual observed transaction histories reflects equality of the
+original histories only. Initial/final Worlds may differ between the two runs. -/
+theorem transact_prefix_observe_reflect_iff {β : Type} (w other : World contracts)
+    (first second : List (TransactionFrame contracts α)) (observation : α → β)
+    (injective : ∀ x y, observation x = observation y → x = y) :
+    (transactPrefix w (first.map (fun frame => observeTransactionFrame frame observation))).2 =
+      (transactPrefix other (second.map (fun frame => observeTransactionFrame frame observation))).2 ↔
+    (transactPrefix w first).2 = (transactPrefix other second).2 := by
+  simp only [transact_prefix_observe]
+  exact history_observe_eq_iff observation injective _ _
+
+/-- Actual observed whole-history slices map EVERY ordered result in the
+corresponding original segment; empty/truncated segments remain total. -/
+theorem transact_prefix_segment_observe_history {β : Type} (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count : Nat) (observation : α → β) :
+    (((transactPrefix w (frames.map (fun frame => observeTransactionFrame frame observation))).2.drop start).take count) =
+      (((transactPrefix w frames).2.drop start).take count).map (fun result => result.map observation) := by
+  simp only [transact_prefix_observe, ← List.map_drop, ← List.map_take]
+
+/-- Observing an actual segment retains its reached endpoint and maps the
+complete history slice. Its starting world is the genuinely reached prefix. -/
+theorem transact_prefix_segment_observe_complete {β : Type} (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count : Nat) (observation : α → β) :
+    transactPrefix (transactPrefix w (frames.take start)).1
+      (((frames.drop start).take count).map (fun frame => observeTransactionFrame frame observation)) =
+      ((transactPrefix w (frames.take (start + count))).1,
+        (((transactPrefix w frames).2.drop start).take count).map (fun result => result.map observation)) := by
+  rw [transact_prefix_observe, transact_prefix_segment_complete]
+
+/-- Injective reflection of an actual observed segment against any complete
+candidate history. This implies no equivalence of Source/ABI or world states. -/
+theorem transact_prefix_segment_observe_reflect_iff {β : Type} (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start count : Nat)
+    (observation : α → β) (injective : ∀ x y, observation x = observation y → x = y)
+    (candidate : List (TRes α)) :
+    (((transactPrefix w (frames.map (fun frame => observeTransactionFrame frame observation))).2.drop start).take count) =
+      candidate.map (fun result => result.map observation) ↔
+      ((transactPrefix w frames).2.drop start).take count = candidate := by
+  rw [transact_prefix_segment_observe_history]
+  exact history_observe_eq_iff observation injective _ candidate
+
+#print axioms result_observe_eq_iff
+#print axioms history_observe_eq_iff
+#print axioms transact_prefix_observe_reflect_iff
+#print axioms transact_prefix_segment_observe_history
+#print axioms transact_prefix_segment_observe_complete
+#print axioms transact_prefix_segment_observe_reflect_iff
+
 #print axioms transact_prefix_segment_history
 #print axioms transact_prefix_segment_boundary
 #print axioms transact_prefix_segment_complete
