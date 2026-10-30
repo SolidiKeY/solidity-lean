@@ -1554,6 +1554,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.cdDelete_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.clashing_checked": [
   "Classical.choice",
   "Quot.sound",
@@ -1590,6 +1595,11 @@
   "propext"
  ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.hexCall_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.mapAssign_refused": [
   "Classical.choice",
   "Quot.sound",
   "propext"
