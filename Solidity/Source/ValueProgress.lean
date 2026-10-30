@@ -607,4 +607,134 @@ theorem FixTy.scaled_mem (f : FixTy) {x : Int} (h1 : f.minInt ≤ x) (h2 : x ≤
   have e3 : -((-f.lo) / f.scale) * f.scale = -(((-f.lo) / f.scale) * f.scale) := Int.neg_mul _ _
   omega
 
+/-- A conversion of a value of a type to itself, through `convVal`'s
+fallback. -/
+theorem convVal_self_ok {σ : STy} (x : Val D σ) (hf : convVal σ x = if h : σ = σ then pure (h ▸ x)
+    else stuck "implicit conversion of a value") : NotStuckR (convVal σ x) := by
+  rw [hf, dif_pos rfl]
+  exact NotStuckR.pure _
+
+/-- **`convVal` is never stuck on an implicit conversion of a value
+type**, or on the identity: the conversions `toR` inserts around operands
+of value type. -/
+theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.isValue = true)
+    (h : σ.implicit B τ = true ∨ σ = τ) (x : Val D σ) : NotStuckR (convVal τ x) := by
+  rcases h with h | rfl
+  · cases σ <;> (try (cases hσ <;> done)) <;> cases τ <;> (try (cases h <;> done))
+    · rename_i t t'
+      obtain ⟨v, hv, rfl⟩ := Val.eq_int x
+      have r := implicit_int_range h
+      rw [show convVal (D := D) (.int t') (Val.int (t := t) v hv) = mkInt t' v from rfl]
+      exact mkInt_ok _ ⟨Int.le_trans r.1 hv.1, Int.le_trans hv.2 r.2⟩
+    · rename_i t f
+      obtain ⟨v, hv, rfl⟩ := Val.eq_int x
+      have h' : f.minInt ≤ t.lo ∧ t.hi ≤ f.maxInt := by
+        rw [show STy.implicit B (.int t) (.fixed f) = f.intImplicit t.lo t.hi from rfl] at h
+        simpa only [FixTy.intImplicit, Bool.and_eq_true, decide_eq_true_eq] using h
+      rw [show convVal (D := D) (.fixed f) (Val.int (t := t) v hv) = mkFix f (v * f.scale) from rfl]
+      exact mkFix_ok _ (f.scaled_mem (Int.le_trans h'.1 hv.1) (Int.le_trans hv.2 h'.2))
+    · obtain ⟨b, rfl⟩ := Val.eq_bool x
+      rw [show convVal (D := D) .bool (Val.bool b) = pure (.bool b) from rfl]
+      exact NotStuckR.pure _
+    · rename_i p p'
+      obtain ⟨a, rfl⟩ := Val.eq_address x
+      rw [show convVal (D := D) (.address p') (Val.address (p := p) a) = pure (.address a) from rfl]
+      exact NotStuckR.pure _
+    · rename_i n hn m hm
+      obtain ⟨bs, hl, rfl⟩ := Val.eq_fixedBytes x
+      rw [show convVal (D := D) (.fixedBytes m hm) (Val.fixedBytes (h := hn) bs hl) =
+        pure (mkBytes (n := m) (h := hm) bs) from rfl]
+      exact NotStuckR.pure _
+    · rename_i f f'
+      obtain ⟨v, hv, rfl⟩ := Val.eq_fixed x
+      have h' : f.subsumes f' = true := by
+        rw [show STy.implicit B (.fixed f) (.fixed f') = f.implicitOK f' from rfl] at h
+        simp only [FixTy.implicitOK, Bool.and_eq_true] at h
+        exact h.2
+      have r := FixTy.subsumes_inRange h' hv
+      rw [show convVal (D := D) (.fixed f') (Val.fixed (f := f) v hv) =
+        mkFix f' (v * ((10 ^ (f'.digits - f.digits) : Nat) : Int)) from rfl]
+      refine mkFix_ok _ ?_
+      have e : (((10 ^ (f'.digits - f.digits) : Nat) : Int)) = (10 : Int) ^ (f'.digits - f.digits) := by
+        simp only [Int.natCast_pow, Int.cast_ofNat_Int]
+      rw [e]; exact r
+    · rename_i d d'
+      have e : d = d' := by
+        rw [show STy.implicit B (.enum d) (.enum d') = (d == d') from rfl] at h
+        exact beq_iff_eq.mp h
+      subst e
+      obtain ⟨i, rfl⟩ := Val.eq_enum x
+      rw [show convVal (D := D) (.enum d) (Val.enum i) = (if h : i.val < D.enumSize d then
+        pure (Val.enum ⟨i.val, h⟩) else stuck "enum") from rfl, dif_pos i.isLt]
+      exact NotStuckR.pure _
+    · rename_i d d'
+      have e : d = d' := by
+        rw [show STy.implicit B (.udvt d) (.udvt d') = (d == d') from rfl] at h
+        exact beq_iff_eq.mp h
+      subst e
+      rw [show convVal (D := D) (.udvt d) x = (if h : d = d then pure (h ▸ x) else
+        stuck "user-defined value type") from rfl, dif_pos rfl]
+      exact NotStuckR.pure _
+    · rename_i d d'
+      obtain ⟨a, rfl⟩ : ∃ a, x = .contract a := by
+        cases x with
+        | contract a => exact ⟨a, rfl⟩
+        | memRef h _ => cases h
+        | storRef h _ => cases h
+        | cdRef h _ => cases h
+      rw [show convVal (D := D) (.contract d') (Val.contract (d := d) a) = pure (.contract a) from rfl]
+      exact NotStuckR.pure _
+    · rename_i e ps rs m e' ps' rs' m'
+      have he : STy.fn e ps rs m = STy.fn e' ps' rs' m' := by
+        rw [show STy.implicit B (.fn e ps rs m) (.fn e' ps' rs' m') = (e == e' && STy.sameList ps ps' &&
+          STy.sameList rs rs' && m == m') from rfl] at h
+        simp only [Bool.and_eq_true, beq_iff_eq] at h
+        obtain ⟨⟨⟨h1, h2⟩, h3⟩, h4⟩ := h
+        rw [h1, STy.eq_of_sameList _ _ h2, STy.eq_of_sameList _ _ h3, h4]
+      rw [← he]
+      cases x <;> exact convVal_self_ok _ rfl
+  · cases σ <;> (try (cases hσ <;> done))
+    · rename_i t
+      obtain ⟨v, hv, rfl⟩ := Val.eq_int x
+      rw [show convVal (D := D) (.int t) (Val.int (t := t) v hv) = mkInt t v from rfl]
+      exact mkInt_ok _ hv
+    · obtain ⟨b, rfl⟩ := Val.eq_bool x
+      rw [show convVal (D := D) .bool (Val.bool b) = pure (.bool b) from rfl]
+      exact NotStuckR.pure _
+    · rename_i p
+      obtain ⟨a, rfl⟩ := Val.eq_address x
+      rw [show convVal (D := D) (.address p) (Val.address (p := p) a) = pure (.address a) from rfl]
+      exact NotStuckR.pure _
+    · rename_i n hn
+      obtain ⟨bs, hl, rfl⟩ := Val.eq_fixedBytes x
+      rw [show convVal (D := D) (.fixedBytes n hn) (Val.fixedBytes (h := hn) bs hl) =
+        pure (mkBytes (n := n) (h := hn) bs) from rfl]
+      exact NotStuckR.pure _
+    · rename_i f
+      obtain ⟨v, hv, rfl⟩ := Val.eq_fixed x
+      rw [show convVal (D := D) (.fixed f) (Val.fixed (f := f) v hv) =
+        mkFix f (v * ((10 ^ (f.digits - f.digits) : Nat) : Int)) from rfl]
+      refine mkFix_ok _ ?_
+      simp only [Nat.sub_self, Nat.pow_zero, Int.natCast_one, Int.mul_one]
+      exact hv
+    · rename_i d
+      obtain ⟨i, rfl⟩ := Val.eq_enum x
+      rw [show convVal (D := D) (.enum d) (Val.enum i) = (if h : i.val < D.enumSize d then
+        pure (Val.enum ⟨i.val, h⟩) else stuck "enum") from rfl, dif_pos i.isLt]
+      exact NotStuckR.pure _
+    · rename_i d
+      rw [show convVal (D := D) (.udvt d) x = (if h : d = d then pure (h ▸ x) else
+        stuck "user-defined value type") from rfl, dif_pos rfl]
+      exact NotStuckR.pure _
+    · rename_i d
+      obtain ⟨a, rfl⟩ : ∃ a, x = .contract a := by
+        cases x with
+        | contract a => exact ⟨a, rfl⟩
+        | memRef h _ => cases h
+        | storRef h _ => cases h
+        | cdRef h _ => cases h
+      rw [show convVal (D := D) (.contract d) (Val.contract (d := d) a) = pure (.contract a) from rfl]
+      exact NotStuckR.pure _
+    · cases x <;> exact convVal_self_ok _ rfl
+
 end Solidity.Source
