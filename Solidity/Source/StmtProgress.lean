@@ -589,4 +589,75 @@ theorem callInternal_ns (G : Glob E) (F : Fr) (n : Nat) (d : Decl) {ps : List ST
     · rw [hl, hrs, List.nil_append]
     · rw [List.length_reverse, hps]
 
+
+/-! ## Elaborated bodies are in their frame -/
+
+/-- A type name has one type. -/
+theorem Syn.tys_typeName_length {E : Env} {scope : Option String} {loc : DataLoc} (t : Syn .typeName)
+    (a : List STy) (h : t.tys E scope loc = Option.some a) : a.length = 1 := by
+  cases t with
+  | elem e => simp only [Syn.tys, Option.some.injEq] at h; subst h; rfl
+  | userType p =>
+    simp only [Syn.tys, Option.map_eq_some_iff] at h
+    obtain ⟨_, _, rfl⟩ := h; rfl
+  | array t len =>
+    simp only [Syn.tys] at h
+    split at h
+    · simp only [Option.some.injEq] at h; subst h; rfl
+    · cases h
+  | mapping k kn v vn =>
+    simp only [Syn.tys] at h
+    split at h
+    · split at h
+      · simp only [Option.some.injEq] at h; subst h; rfl
+      · cases h
+    · cases h
+  | fnType ps vis m rs =>
+    simp only [Syn.tys] at h
+    split at h
+    · simp only [Option.some.injEq] at h; subst h; rfl
+    · cases h
+
+
+/-- A parameter list has one type per name. -/
+theorem Syn.tys_params_length {E : Env} {scope : Option String} {loc : DataLoc} :
+    (ps : Syn (.list .param)) → (a : List STy) → ps.tys E scope loc = Option.some a →
+      a.length = ps.paramNames.length
+  | .nil, a, h => by simp only [Syn.tys, Option.some.injEq] at h; subst h; rfl
+  | .cons (.param t l n) xs, a, h => by
+    simp only [Syn.tys] at h
+    split at h
+    · rename_i a1 b1 h1 h2
+      simp only [Option.some.injEq] at h
+      subst h
+      rw [List.length_append, Syn.tys_typeName_length t a1 h1, Syn.tys_params_length xs b1 h2]
+      simp only [Syn.paramNames, List.length_append, List.length_singleton]
+    · cases h
+
+
+/-- A frame has one type per parameter and return name. -/
+theorem Frame.mk?_lengths {E : Env} {scope : Option String} {ps rs : Syn (.list .param)}
+    {body : Syn (.list (.item .body))} {mv im : Bool} {f : Frame} (h : Frame.mk? E scope ps rs body mv im = some f) :
+    f.names.length = f.ps.length ∧ f.rnames.length = f.rs.length := by
+  unfold Frame.mk? at h
+  split at h
+  · rename_i a r ha hr
+    simp only [Option.some.injEq] at h
+    subst h
+    exact ⟨(Syn.tys_params_length ps a ha).symm, (Syn.tys_params_length rs r hr).symm⟩
+  · cases h
+
+/-- **A frame's locals are its returns over its parameters**, last
+innermost, as `callInternal` builds them. -/
+theorem Frame.tysOf_locals {f : Frame} (hp : f.names.length = f.ps.length) (hr : f.rnames.length = f.rs.length) :
+    tysOf f.locals = f.rs.reverse ++ f.ps.reverse := by
+  have hl : (f.names ++ f.rnames).length = (f.ps ++ f.rs).length := by
+    simp only [List.length_append, hp, hr]
+  simp only [tysOf, Frame.locals, List.map_reverse, List.map_map]
+  have : List.map (Prod.snd ∘ fun (x : Option String × STy) => (x.1.getD "", x.2)) ((f.names ++ f.rnames).zip (f.ps ++ f.rs))
+      = f.ps ++ f.rs := by
+    rw [show (Prod.snd ∘ fun (x : Option String × STy) => (x.1.getD "", x.2)) = Prod.snd from rfl]
+    exact List.map_snd_zip (Nat.le_of_eq hl.symm)
+  rw [this, List.reverse_append]
+
 end Solidity.Source
