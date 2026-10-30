@@ -126,18 +126,18 @@ as a call from there does (`callAddr`), so `x()` is not entered.  At depth
 /-- The environment calls back `x()` on `D` once, then answers. -/
 def calleeOnce : List Event → Move := fun evs =>
   if evs.any (fun e => match e with | .reentered _ => true | _ => false) then .answer (.success [])
-  else .reenter thisC SemanticsExamples.user (word 0) (selOf "x()") false
+  else .reenter ElaborateExamples.thisC SemanticsExamples.user (word 0) (selOf "x()") false
 
 /-- The callback's outcome after deploying `D` at `thisC`, with the
 environment frame at `depth`. -/
 def callbackAt (el : Elaborated) (depth : Nat) : Option Outcome :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true, calleeOnce, word 0⟩
   let r := runAt (fun n => do
-    let _ ← deploy G n "D" thisC SemanticsExamples.user (word 0) []
+    let _ ← deploy G n "D" ElaborateExamples.thisC SemanticsExamples.user (word 0) []
     envLoop G n depth false) (St.init _) 40
   r.2.events.findSome? fun e => match e with | .reentered o => some o | _ => none
 
 #guard (elabD.bind fun el => callbackAt el 1024) == some (.revert [])
-#guard (elabD.bind fun el => callbackAt el 3) == some (.success (arg 3))
+#guard (elabD.bind fun el => callbackAt el 3) == some (.success (ElaborateExamples.arg 3))
 
 end Solidity.Source.SessionExamples

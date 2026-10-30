@@ -214,8 +214,11 @@ Skeptic review (read-only, no Lean server), fixed:
 - `stuck_not_diverges`' docstring claimed a dependency on stability that the
   proof does not have; `stuck_eventually` states the stronger fact.
 
-Recorded, not fixed: callbacks entered through `envLoop` (`Eval.lean`) do
-not check the depth limit before `enterInstance`.
+- callbacks entered through `envLoop` (`Eval.lean`) did not check the depth
+  limit; a callback from the environment frame at depth 1024 now fails as
+  a call from there does (`callAddr`). The control (`SessionExamples.lean`)
+  calls back `x()` at depth 1024 (reverts, not entered) and at depth 3
+  (returns `3`). `Horizon.lean`'s proofs go through unchanged.
 
 So a reader of fates can tell a stuck run (a modelling gap or ill-formed
 program, observable at a finite horizon) from a divergent one. The session
