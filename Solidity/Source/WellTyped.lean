@@ -970,6 +970,85 @@ theorem readLoc_mem_ok {H : HeapTy} (F : Fr) (a i : Nat) {τ : STy} :
       (fun e y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ NotStuck e) :=
   memElem_ok a i τ
 
+
+/-- **`heapPut` keeps bare-value elements**, given such an object. -/
+theorem heapPut_inner (a : Nat) (x : Σ τ, Data E.layout τ) :
+    Hoare (fun y => HeapInner y.2.heap ∧ Data.Inner x.2) (heapPut a x : EM E Γ Unit)
+      (fun _ y => HeapInner y.2.heap) (fun _ y => HeapInner y.2.heap) := by
+  unfold heapPut
+  refine Hoare.bind (Hoare.st' (Q := fun s y => y.2 = s ∧ HeapInner y.2.heap ∧ Data.Inner x.2)
+    fun y hy => ⟨rfl, hy⟩) fun s => ?_
+  refine Hoare.dite' (fun h => Hoare.setSt' ?_) (fun h => Hoare.halt' fun y hy => hy.2.1)
+  intro ⟨l, s'⟩ ⟨hs, hi, hx⟩
+  subst hs
+  exact hi.write h hx
+
+/-- Replacing a field by a bare value keeps bare-value fields. -/
+theorem DataList.AllVal.setNth {τ : STy} {v : Val E.layout τ} : {τs : List STy} →
+    (fs : DataList E.layout τs) → (i : Nat) → {fs' : DataList E.layout τs} → fs.AllVal →
+    fs.setNth i (Data.val v) = .ok fs' → fs'.AllVal
+  | _, .nil, _, _, _, h => by simp only [DataList.setNth, stuck] at h; cases h
+  | _, .cons (τ := σ) x r, 0, _, hf, h => by
+    simp only [DataList.AllVal] at hf
+    by_cases e : τ = σ
+    · subst e
+      simp only [DataList.setNth, dite_true] at h
+      cases h
+      exact ⟨⟨v, rfl⟩, hf.2⟩
+    · simp only [DataList.setNth, e, dite_false, stuck] at h
+      cases h
+  | _, .cons x r, i + 1, _, hf, h => by
+    simp only [DataList.AllVal] at hf
+    simp only [DataList.setNth] at h
+    cases hr' : r.setNth i (Data.val v) with
+    | error e => rw [hr'] at h; cases h
+    | ok r' =>
+      rw [hr'] at h
+      cases h
+      exact ⟨hf.1, DataList.AllVal.setNth r i hf.2 hr'⟩
+
+/-- **`memSet` keeps bare-value elements** (halts included): it stores a
+`Data.val` and keeps the other elements. -/
+theorem memSet_inner (a i : Nat) {τ : STy} (v : Val E.layout τ) :
+    Hoare (fun y => HeapInner y.2.heap) (memSet a i v : EM E Γ Unit)
+      (fun _ y => HeapInner y.2.heap) (fun _ y => HeapInner y.2.heap) := by
+  unfold memSet
+  refine Hoare.bind (heapObj_get (a := a) fun y hy _ => hy) fun ⟨σ, d⟩ => ?_
+  cases d with
+  | array len hl xs =>
+    refine Hoare.dite' (fun h => Hoare.dite' (fun e => ?_) (fun _ => Hoare.halt' fun y hy => hy.1))
+      (fun _ => Hoare.lift' fun y hy => hy.1)
+    subst e
+    refine Hoare.conseq (heapPut_inner a _) (fun y ⟨hi, hg⟩ => ⟨hi, fun j => ?_⟩)
+      (fun _ _ h => h) (fun _ _ h => h)
+    by_cases hj : j.val = i
+    · simp only [hj, if_true]; exact ⟨v, rfl⟩
+    · simp only [hj, if_false]; exact hi a _ hg j
+  | @struct l d fs =>
+    refine Hoare.bind (Hoare.lift' (Q := fun fs' y => HeapInner y.2.heap ∧ fs'.AllVal)
+      fun y ⟨hi, hg⟩ => ?_) fun fs' => Hoare.conseq (heapPut_inner a ⟨.struct l d, .struct fs'⟩)
+        (fun y h => h) (fun _ _ h => h) (fun _ _ h => h)
+    cases hr : fs.setNth i (Data.val v) with
+    | error e => exact hi
+    | ok fs' => exact ⟨hi, (hi a _ hg : fs.AllVal).setNth fs i hr⟩
+  | _ => exact Hoare.halt' fun y hy => hy.1
+
+
+/-- **A memory byte write keeps bare-value elements** (halts included). -/
+theorem writeLoc_memByte_inner (F : Fr) (n a i : Nat) (v : Val E.layout (.fixedBytes 1 (by decide))) :
+    Hoare (fun y => HeapInner y.2.heap) (writeLoc F n (.memByte a i) v : EM E Γ Unit)
+      (fun _ y => HeapInner y.2.heap) (fun _ y => HeapInner y.2.heap) := by
+  simp only [writeLoc]
+  refine Hoare.bind (heapObj_get (a := a) fun y hy _ => hy) fun ⟨σ, d⟩ => ?_
+  cases d with
+  | bytes bs =>
+    exact Hoare.ite' (fun _ => Hoare.conseq (heapPut_inner a _) (fun y hy => ⟨hy.1, trivial⟩)
+      (fun _ _ h => h) (fun _ _ h => h)) (fun _ => Hoare.lift' fun y hy => hy.1)
+  | string bs =>
+    exact Hoare.ite' (fun _ => Hoare.conseq (heapPut_inner a _) (fun y hy => ⟨hy.1, trivial⟩)
+      (fun _ _ h => h) (fun _ _ h => h)) (fun _ => Hoare.lift' fun y hy => hy.1)
+  | _ => exact Hoare.halt' fun y hy => hy.1
+
 end
 
 end Solidity.Source
