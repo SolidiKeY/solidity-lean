@@ -1,7 +1,7 @@
 import Solidity.Source.ValueProgress
 import Solidity.Source.WellTyped
 import Solidity.Source.TypingExamples
-import Solidity.Source.ExprProgress
+import Solidity.Source.StmtProgress
 import Solidity.Source.SemanticsExamples
 
 /-!
@@ -24,6 +24,8 @@ it the operation is `stuck`).
 | `addSub_ns` | the elaboration of S01's `a + a` is in the value fragment and never `stuck` (`evalE_valFrag_ns`) |
 | `badBinary_stuck` | evaluating the out-of-domain `true + false` is `stuck`: `OpsOK` is needed |
 | `cond_ns`, `cond_value` | `true ? 1 + 2 : 0` at `uint8` is never `stuck` and evaluates to `3` |
+| `loop_ns`, `loop_value` | `uint8 i; while (i < 3) { i += 1; }` is never `stuck` (`itemsNS`) and ends with `i = 3` |
+| `ret_unframed_stuck` | a `return 1;` run outside a coherent frame (no return slot) is `stuck`: frame coherence, outside the fragment, is needed |
 -/
 
 namespace Solidity.Source.SoundnessExamples
@@ -118,6 +120,47 @@ theorem cond_ns (n : Nat) : NS (evalE (SemanticsExamples.G0 .viaIR) SemanticsExa
 theorem cond_value :
     ((evalE (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 5 condE).run (.nil, SemanticsExamples.s0)).1.toOption.map
       (fun v => match v with | .val x => x.key) = some (some 3) := by
+  rfl
+
+/-- `i < 3` over the local `uint8 i`. -/
+def loopCond : RExpr SemanticsExamples.E0 [.int IntTy.u8] .bool :=
+  .compare .lt (.local .here) (.conv (.const (Q.ofInt 3)) (.inl (by decide)))
+
+/-- `i += 1;` -/
+def loopBody : RStmt SemanticsExamples.E0 [] false ⟨true, false⟩ [.int IntTy.u8] [.int IntTy.u8] :=
+  .expr (.compound .add (.local .here) (.const (Q.ofInt 1)) (by decide))
+
+/-- `uint8 i; while (i < 3) { i += 1; }` -/
+def loopItems : RItems SemanticsExamples.E0 [] false .body [] [.int IntTy.u8] :=
+  .stmt (.declVar (.int IntTy.u8)) (.stmt (.whileLoop loopCond loopBody) .nil)
+
+theorem loopItems_frag : loopItems.ValFrag :=
+  ⟨rfl, ⟨⟨rfl, ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, rfl⟩, ⟨trivial, trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩⟩, trivial⟩
+
+theorem loopItems_ops : loopItems.OpsOK :=
+  ⟨trivial, ⟨⟨⟨rfl, rfl, trivial, trivial⟩, ⟨trivial, trivial⟩⟩, trivial⟩⟩
+
+/-- **Witness**: the loop is never `stuck`, at any horizon ... -/
+theorem loop_ns (n : Nat) :
+    NS (execItems (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n 0 none loopItems .nil) :=
+  itemsNS _ _ n 0 none loopItems .nil loopItems_frag loopItems_ops
+
+/-- ... and ends with `i = 3`. -/
+theorem loop_value :
+    (match ((execItems (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 40 0 none loopItems .nil).run
+      (.nil, SemanticsExamples.s0)).1 with
+    | .ok (.normal (.cons v .nil)) => v.key
+    | _ => none) = some 3 := by
+  rfl
+
+/-- **Negative control**: `return 1;` in a body whose locals hold no return
+slot is `stuck` — the frame coherence `callInternal` establishes is needed,
+and `return` is outside the fragment. -/
+theorem ret_unframed_stuck :
+    ((execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 5 0 none
+      (RStmt.retVal (E := SemanticsExamples.E0) (R := [.int IntTy.u8]) (M := false) (k := .body) (Γ := [])
+        rfl (.const (Q.ofInt 1)) (by decide)) .nil).run (.nil, SemanticsExamples.s0)).1 =
+      .error (.stuck "no local") := by
   rfl
 
 end Solidity.Source.SoundnessExamples
