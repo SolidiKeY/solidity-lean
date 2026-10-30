@@ -706,7 +706,7 @@ old aliases, separation, zero tail, public compiler observations and named
 refusals. The handoff records this blocker rather than claiming full completion.
 
 
-### Published-master struct compatibility (2026-10-30)
+### Published-master struct compatibility: initial checkpoint (2026-10-30)
 
 The preserved worker checkpoint is `2cfb116c64237cee48e954bd338f90d48467556a`.
 An isolated worktree applies only its implementation to freshly fetched published
@@ -767,4 +767,82 @@ remain **BLOCKED** while the current aggregate and source-script prerequisites,
 reruns and mandatory full TestSuite validation remain unresolved. Full logs,
 resource JSONs, original cumulative checkpoint, current-base task patch/bundle
 and checksums are exported under
+`/workspace/solidity-compiler10-memory-reference-structs-8445-compat`.
+
+
+#### Completed affected checks and remaining aggregate blockers
+
+The initial API prerequisite failures above were resolved by checking its import
+closure in dependency order: 203 selected targets passed, including cached
+artifact confirmations; the final `Frontend.Testing` confirmation passed.
+Selection used absent local `.olean` paths, which can still have valid artifacts
+in Lake's disk cache. Lake itself checked freshness. No proof was weakened or
+given another search allowance inside a declaration. The unchanged affected
+source tests then passed 2/2, and the utility suites passed 29/29.
+
+The Node runner detaches Lake into another process group. Its outer RSS values
+therefore describe the supervisor group, not the detached Lean workload. The
+compatibility wrapper was corrected to invoke the installed guard separately
+for every Lake call, with the same shared monotonic whole-test deadline. Exact
+source/utility/upstream checks were rerun successfully: six inner Lake groups
+all exited 0. Their largest measured group RSS was 2,388,586,496 bytes. The
+wrapper also refuses an expired deadline before spawning Lake; its negative
+control exits 75 with `notStarted: true`, not a claimed runtime or proof pass.
+Earlier supervisor-only records remain preserved and qualified in the handoff.
+
+| Final affected check | Exit | Elapsed seconds | Measurement scope |
+|---|---:|---:|---|
+| API checked-cache confirmation | 0 | 0.202 | direct guarded group |
+| Utility suites, 29/29 | 0 | 26.483 | supervisor group; separate inner Lake logs |
+| Affected source tests, 2/2 | 0 | 160.811 | supervisor group; separate inner Lake logs |
+| Pinned nested struct, legacy and viaIR | 0 | 5.241 | supervisor group; separate inner Lake logs |
+| SolKey conformance | 0 | 0.606 | direct guarded group |
+
+The published `Frontend.Checked.UnitExamples` initially stopped at the whole-VM
+12 GiB guard (107.509 s, 8,350,715,904 group-RSS bytes). Measured read-only
+file-cache advice reduced idle VM charge from 2,320,809,984 to 620,150,784 bytes,
+retaining every disk artifact. The unchanged module then passed in 144.653 s,
+with 8,871,657,472 peak group-RSS bytes. The retained 100 ms memory trace sampled
+at most 11,898,302,464 VM-charge bytes and zero OOM events. This operational repair
+changed neither its proof nor any guard threshold. It does not imply RSS and
+whole-VM charge are interchangeable.
+
+The full default aggregate nevertheless remained above its fixed cumulative
+300-second window. Its imports were then checked separately in dependency
+order, stopping at the first individual failure: 279 selected targets passed
+before unchanged `Examples.Tactics.Recursion` timed out. A normal asynchronous
+elaboration control retained `-j1` and all proof/resource/time limits and also
+timed out. The import closure contains zero task-modified files.
+
+The independent kernel `TrustAudit` excludes that recursion example and
+Derived17, so it was investigated separately. After its initial cumulative
+300-second timeout, 252 selected import targets passed before unchanged
+`Examples.Decision` timed out. Its normal async control also timed out; its
+321-module repository import closure likewise contains zero task-modified
+files. The source trust script's passing result does not replace this unfinished
+kernel audit.
+
+| Unresolved individual check | Mode | Exit | Seconds | Peak group RSS bytes |
+|---|---|---:|---:|---:|
+| Recursion | serial | 75 | 300.092 | 2040156160 |
+| Recursion | normal async | 75 | 300.021 | 2119651328 |
+| Decision | serial | 75 | 300.092 | 2241052672 |
+| Decision | normal async | 75 | 300.060 | 2241359872 |
+
+These are observed timeout blockers under this worker's fixed limits, not
+memory/OOM findings, semantic counterexamples or a claim that every possible
+performance repair is impossible. No unrelated prover/theorem source was edited.
+The original checkpoint's mandatory TestSuite/Derived17 blocker also remains;
+its reported repair was still unpublished at the final fetch, which confirmed
+master `8445c3fc203144251b9d1fc9181f7f61a8189522` at
+2026-10-30T12:55:01Z. No unmerged sibling was imported.
+
+Both independent read-only reviewers found no remaining own-scope construction,
+alias, separation, capacity, failure-control or compatibility-code gap. The
+original assignment's completion decision remains **BLOCKED** until the shared
+root, kernel trust and mandatory full `./run-lean.sh` gates pass. Their next step
+is a budget-preserving repair by the appropriate proof owners/coordinator,
+followed by bounded gate confirmation. No worker push or merge of master occurred.
+The cumulative original checkpoint and current-base task export, full failed and
+passing logs, resource records, reviews and checksums are retained together in
 `/workspace/solidity-compiler10-memory-reference-structs-8445-compat`.
