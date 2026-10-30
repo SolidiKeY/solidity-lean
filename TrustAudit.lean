@@ -1548,6 +1548,11 @@ run_cmd do
 /-! Lane V04b: preservation of location reads and writes; the object-shape control. -/
 run_cmd do
   let headlines : List Name := [
+    ``Solidity.Source.heapObj_pres,
+    ``Solidity.Source.heapPut_pres,
+    ``Solidity.Source.DataListOK.setNth,
+    ``Solidity.Source.DataListOK.nth,
+    ``Solidity.Source.asVal_ok,
     ``Solidity.Source.memSet_pres,
     ``Solidity.Source.writeLoc_mem_pres,
     ``Solidity.Source.writeLoc_memByte_pres,
@@ -1565,4 +1570,4 @@ run_cmd do
     let extra := axioms.filter (!allowed.contains ·)
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
-  logInfo m!"trust: {headlines.length} location read/write preservation theorems use only the standard axioms"
+  logInfo m!"trust: {headlines.length} location read/write preservation theorems and controls use only the standard axioms"

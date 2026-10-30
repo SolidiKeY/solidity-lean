@@ -562,7 +562,7 @@ stronger obligation, not an additional assumption available to its proofs.
   also panics in `finalize_allocation` when the free pointer plus the
   rounded size passes `2^64 - 1`: with the free pointer at `0x80`, from a
   `bytes`/`string` length above `2^64 - 0xc0` and a value-type array
-  length of about `2^59`, lower for later arguments (the pointer has
+  length of `2^59 - 5` or more (`0x80 + 32 + 32·len > 2^64 - 1`), lower for later arguments (the pointer has
   moved) and under via-IR (the memory guard is higher). Those lengths
   revert here (they are out of bounds of any call data), where solc
   panics. The ABI decoder does not decode static arrays, structs or

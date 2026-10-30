@@ -287,6 +287,14 @@ def callL (el : Elaborated) (input : Bytes) : Option Outcome :=
 #guard (elabL.bind fun el => callL el (selOf "sum2(uint256[])" ++ arg 32 ++ arg 2 ++ arg 5 ++ arg 7)) ==
   some (.success (arg 12))
 
+-- **Panic 0x41 for a dynamic value array** (lane V04b): a length word cut
+-- short reverts with no data, a length of `2^64` panics with `0x41`, and a
+-- length of `2^32` is out of bounds and reverts with no data.
+#guard ([selOf "sum2(uint256[])" ++ arg 32 ++ [1],
+    selOf "sum2(uint256[])" ++ arg 32 ++ arg (2 ^ 64),
+    selOf "sum2(uint256[])" ++ arg 32 ++ arg (2 ^ 32)].map fun i => elabL.bind fun el => callL el i) ==
+  [some (.revert []), some (.revert (panicData .alloc)), some (.revert [])]
+
 -- An offset past the data reverts, as solc's decoder does.
 #guard (elabL.bind fun el => callL el (selOf "len(bytes)" ++ arg 4096 ++ arg 3)) == some (.revert [])
 

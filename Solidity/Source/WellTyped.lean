@@ -34,7 +34,7 @@ included (`writeLoc_local_pres`, `writeLoc_mem_pres`, `writeLoc_memByte_pres`,
 `memSet_pres`, `readLoc_*_pres`, `memElem_pres`); a written value must agree,
 and a value read agrees. These are preservation only: `HeapOK` says where
 references point, not that a top-level object of a memory reference type is
-an aggregate rather than a `Data.val`, so progress for memory writes needs
+an aggregate rather than a `Data.val`, so progress for memory accesses needs
 that shape invariant as well (`SoundnessExamples.ptrHeap_byte_stuck`).
 -/
 
@@ -417,13 +417,15 @@ theorem memSet_pres {H : HeapTy} (a i : Nat) {τ : STy} (v : Val E.layout τ) :
       | ok fs' => exact ⟨hok, .struct (hfs.setNth fs i _ (.val hv) hr)⟩
   | _ => exact Hoare.halt' fun y hy => hy.1.1
 
-/-- **`writeLoc` to memory, preservation**: an element, member or byte
-write of an agreeing value keeps the state well typed. -/
+/-- **`writeLoc` to memory, preservation**: an element or member write of
+an agreeing value keeps the state well typed. -/
 theorem writeLoc_mem_pres {H : HeapTy} (F : Fr) (n a i : Nat) {τ : STy} (v : Val E.layout τ) :
     Hoare (fun y => EMOK E H y ∧ v.RefOK E y.2.heap.ty) (writeLoc F n (.mem a i) v : EM E Γ Unit)
       (fun _ y => EMOK E H y) (fun _ y => EMOK E H y) :=
   memSet_pres a i v
 
+/-- **`writeLoc` to a memory byte, preservation**: a byte write into a
+`bytes` or `string` keeps the state well typed. -/
 theorem writeLoc_memByte_pres {H : HeapTy} (F : Fr) (n a i : Nat) (v : Val E.layout (.fixedBytes 1 (by decide))) :
     Hoare (EMOK E H) (writeLoc F n (.memByte a i) v : EM E Γ Unit)
       (fun _ y => EMOK E H y) (fun _ y => EMOK E H y) := by
