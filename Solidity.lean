@@ -779,3 +779,5 @@ import Solidity.Backend.MemoryOps.CalldataSequenceChildControls
 import Solidity.Backend.MemoryOps.CalldataAgreementControls
 
 import Solidity.Backend.MemoryOps.OverwriteAgreementExact
+
+import Solidity.Backend.MemoryOps.RestorationControls

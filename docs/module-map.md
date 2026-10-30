@@ -1100,3 +1100,6 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/CalldataAgreementChildren.lean` | Nonempty content-agreeing alias frames and actual final child correspondence; reverse execution reuses existing whole-heap mixed commutation with derived bounds. |
 | `Backend/MemoryOps/CalldataAgreementControls.lean` | Runtime repeated aliases with actual nonempty same-content write and materially changing uint, reverse/neighbor/root/typed reads, reference identity, one-value disagreement and published allocation. |
 | `Backend/MemoryOps/OverwriteAgreementExact.lean` | Initial interval agreement iff actual target preservation; immutable same-child contents and exact aliased/mixed decoded preservation, with runtime controls |
+| `Backend/MemoryOps/OverwriteRestoration.lean` | Exact INITIAL last-write footprint iff list/typed-target/heap restoration and existing typed-path transport |
+| `Backend/MemoryOps/CalldataRestoration.lean` | Actual decoded Boolean sequence payload/bounds reconstruction and final old-child restoration without intermediate correspondence |
+| `Backend/MemoryOps/RestorationControls.lean` | Runtime partial-overlap break/restore, both negative criterion halves, ordered failures, identities/endpoints/reference controls |

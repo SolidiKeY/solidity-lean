@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint eighteen. Earlier checkpoint
+Current cumulative accounting through checkpoint nineteen. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -1649,3 +1649,86 @@ on reserved copy and final V10/Source/target prerequisites. All exact missing
 physical representation/all-type constructor/target failures/general path/delete/
 rebinding/reference ABI/fresh-copy/general graph/composition clauses remain open.
 This local exact iff is not full lane completion or independent-work exhaustion.
+
+## Checkpoint19: overlapping two-write restoration (partial)
+
+Original G35.03/.04 and BackfillA/B investigation confirmed that existing sequence
+read/last-write and disjoint commutation laws did not characterize final INITIAL
+footprint restoration when the first operation breaks correspondence. New owned
+OverwriteRestoration defines LastWriteAgrees purely on initial contents and two
+captured payloads: ALL second-written cells equal their original cells; only FIRST
+cells outside the second destination equal their original cells. Existing read_cases
+derives necessity/sufficiency for list, actual typed target and whole heap under
+actual capacities. Second capacity follows length preservation. Primitive/reference
+elements, arbitrary overlap, empty/touching intervals and runtime lengths use the
+same intrinsic definitions. Existing arbitrary typed MPath observations follow the
+proved heap identity. No stagewise agreement, final equality or final relation is
+a premise; no alternative state/evaluator/semantics or admission cutoff is added.
+
+CalldataRestoration reconstructs both REAL payloads, both source bounds and reached
+heaps from existing checkedBoolSequence success plus boolTransfer_result_lookup;
+the second capacity is derived back to the actual initial runtime length. Its
+computed BoolSequenceRestores predicate reads the immutable tables, not caller-
+supplied values or conversion proofs. Target/wholeheap iff and initial immutable
+BoolChildRepr final restoration require no mid-heap correspondence. RefChildRepr
+frames the root and permits selected repeated old aliases when either separate or
+restored by this computed criterion. This is an existing two-level footprint clause,
+not arbitrary fresh/recursive Source graph or compiler correctness.
+
+Actual controls admit independently arbitrary child tail n and root alias count m
+under only existing intrinsic lengths n+3<2^256 and m<2^256. First nonempty payload
+[false,false] at0 changes child [false,true,false]++nfalse to [false,false,false]++nfalse
+and refutes initial child correspondence. Second nonempty payload [true,false] at1
+partially overlaps and restores it. The criterion is discharged against INITIAL
+reads and then directly derives wholeheap identity and final child/root relations;
+actual secondSome is linked to the actual first output. Complete intermediate/final
+child/neighbor/rootID vectors, every valid typed repeated-root index and concrete
+nonempty m33 indices0/32 are observed. n0 remains child length3, while m0 explicitly
+has no selected leaf. Wrong second payload and incomplete repair separately refute
+the SECOND-cell and FIRST-survivor halves; reversed order gives a different actual
+final heap. Empty exact-end and touching calls execute. A reference-valued root-slot
+write changes an old child ID to a neighbor and restores it by the same generic law.
+
+Ordered failure controls record successful firstSome followed by missing second
+lookup, reversed source, source overrun or destination overrun, and actual sequence
+None for each. Missing-first lookup short-circuits separately. Finder and skeptic
+both identified that source[0,3) at destination1 also overran at n0; fixed destination
+to0 in BOTH stage/sequence observations. Explicit isolated_guards now proves source-
+only valid destination at every n, reverse-only remaining bounds, and destination-
+only valid source slice against the REAL reached length. None is no rollback/halt
+claim. All earlier fixtures/pins and admitted shapes remain unchanged.
+
+The preceding automatic approval-service capacity failure did not execute its
+repair; one authorized recovery succeeded on the SAME model/thread/VM/policy.
+Retained proof failures include controls01-04; each received an actual source
+repair and distinct check. controls05 passed before independent isolation review;
+refined controls06 passes71jobs with all26 new public theorem/control axiom outputs
+standard. Exact guarded checks/final gates/reviews follow. Per-file MCP/get_goal
+remain unavailable; existing blocked goal unchanged, no create/reset/reactivation.
+Same retained capped runtime, warm outputs, writer lock, serial-j1/LEAN_NUM_THREADS1,
+12GiB/no child swap under16GiBparent and all proof/time/fuel/node/TestSuite budgets
+remain unchanged. Disk forecast8MiB includes outputs/logs/compact exports; actual
+growth is measured throughout. No cleanup/cache relocation/new container/capacity.
+
+Every original G32-G35/Backfill parent remains partial/blocked, with the original
+physical-byte, all-type/default/target failure, path/rebinding/delete execution,
+general decoded/reference/ABI/Source/storage, fresh deep-copy, unrestricted graph,
+reserved copy and V10/Source/target composition obligations still open. These
+logical intrinsic proofs are not compiler/EVM testing or independent-work exhaustion.
+
+Checkpoint19 final independent source/doc finder and skeptic reviews PASS after
+the isolated-source fix and explicit other-guard observations. Guarded focused71
+and final run-lean.sh915default/262TestSuite/SolKey377/131 exit0. Fresh actual Lean
+4.24.0(797c613)/Lake5.0.0-src+797c613 and KeySort2jobs exit0 observed. Full-gate
+sampled aggregate Lean/Lake RSS1503380KiB,0OOMevent deltas; cumulative session
+cgroup peak454889472bytes is NOT per-exec worker RSS. Retained child12GiB/swap0,
+parent16GiB, hostswap0 and all guards unchanged. Layers/orphans/trust/strict
+automatic/complete fixtures/script syntax/corruption/diff pass; owned478standard
+pins64modules pass. Raw global inventory FAILS exit1,0unsafeerrors492unrecorded
+=14inherited+478owned. Raw global strict docs FAILS exit1 with exact-base byte-
+identical complete output SHA256
+ea1a09c222d52d1d17953f653c087443e34e6282497f0b02cdc09aad15b7dd48; separately
+zeroNEWfindings PASS. Reserved global inventory/ledger/manifest remain untouched.
+All original queue statuses remain partial/blocked; no entire-assignment or
+independent-exhaustion claim follows. Precise new pin proposals and full commands
+are in external checkpoint19 evidence and additive artifact handoff.
