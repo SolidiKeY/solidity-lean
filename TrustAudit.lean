@@ -1530,3 +1530,17 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} recursion and return-tuple witnesses use only the standard axioms"
+
+/-! Lane V04b: a call through a body that calls, with distinct bodies. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.callG_ns,
+    ``Solidity.Source.SoundnessExamples.callG_value]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} two-body call witnesses use only the standard axioms"

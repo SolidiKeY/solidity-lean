@@ -23,7 +23,8 @@ builds (`callInternal_ns`). For elaborated programs that frame is derived
 return types to agree (`Elaborated.callInternal_call_ns`). With internal
 calls inside expressions, expressions, statements, bodies and calls are
 proved together by induction on the horizon (`FragAt`, `fragAt`), for a
-program whose allowed functions are fragment bodies (`CallsOK`):
+program whose allowed functions are fragment bodies (`CallsOK`, a
+hypothesis: nothing derives it for elaborated programs):
 `evalE_callFrag_ns`.
 
 The scope facts it needs are structural: a statement's output context
@@ -246,28 +247,28 @@ variable (G : Glob E)
 /-- **The induction hypothesis**: at horizon `n`, statements, blocks and
 `for` iterations of the fragment are never `stuck`; a simple statement
 completes normally, `for` iterations normally or by `return`. -/
-structure StmtNSAt (A : Decl → Prop) (n : Nat) : Prop where
-  execS : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
+structure StmtNSAt (A : Decl → Prop) (Q : String → Prop) (n : Nat) : Prop where
+  execS : ∀ (F : Fr), Q F.contract → ∀ (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
     (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ), RStmt.ValFragC A s → s.OpsOK → BodyFrame nps R Γ →
     NSP (execS G F n nps ph s l) (fun o => (s.Simple → ∃ l', o = .normal l') ∧ (k.loop = false → o.esc = false))
-  execItems : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
+  execItems : ∀ (F : Fr), Q F.contract → ∀ (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
     (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ), RItems.ValFragC A b → b.OpsOK → BodyFrame nps R Γ →
     NSP (execItems G F n nps ph b l) (fun o => k.loop = false → o.esc = false)
-  forIter : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool} {Γ₁ Γ₂ : RCtx}
+  forIter : ∀ (F : Fr), Q F.contract → ∀ (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool} {Γ₁ Γ₂ : RCtx}
     (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂) (l : Locals E.layout Γ₁),
     ROptBool.ValFragC A c → c.OpsOK → ROptExpr.ValFragC A post → post.OpsOK → RStmt.ValFragC A body →
       body.OpsOK → BodyFrame nps R Γ₁ →
     NSP (forIter G F n nps ph c post body l) (fun o => (∃ l', o = .normal l') ∨ (∃ l', o = .ret l'))
 
-theorem stmtNSAt_zero (A : Decl → Prop) : StmtNSAt G A 0 where
-  execS _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [execS.eq_1]; exact NSP.halt' trivial
-  execItems _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [execItems.eq_1]; exact NSP.halt' trivial
-  forIter _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [forIter.eq_1]; exact NSP.halt' trivial
+theorem stmtNSAt_zero (A : Decl → Prop) (Q : String → Prop) : StmtNSAt G A Q 0 where
+  execS _ _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [execS.eq_1]; exact NSP.halt' trivial
+  execItems _ _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [execItems.eq_1]; exact NSP.halt' trivial
+  forIter _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [forIter.eq_1]; exact NSP.halt' trivial
 
 end
 
 section
-variable {A : Decl → Prop} {G : Glob E} {n : Nat}
+variable {A : Decl → Prop} {Q : String → Prop} {G : Glob E} {n : Nat}
 
 /-- **Converted arguments of the fragment** are never `stuck`. -/
 theorem evalConvArgs_ns (G : Glob E) (F : Fr) {Γ : RCtx} : {τs : List STy} → (es : RConvArgs E Γ τs) →
@@ -293,12 +294,12 @@ theorem setRets_ok {D : Layout} {Γ : RCtx} (ys : RCtx) : (rs : List STy) → {p
     simp only [setRets]
     exact NotStuckR.bind h1 fun l' => setRets_ok ys τs l' hΓ'' vs
 
-theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+theorem execS_nsStep (ih : StmtNSAt G A Q n) (hX : ∀ F, Q F.contract → ExprNSAt A G F n) (F : Fr) (hP : Q F.contract) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : RStmt.ValFragC A s) (ho : s.OpsOK)
     (hfr : BodyFrame nps R Γ) :
     NSP (execS G F (n + 1) nps ph s l) (fun o => (s.Simple → ∃ l', o = .normal l') ∧ (k.loop = false → o.esc = false)) := by
   have hE : ∀ {Γ τ} (e : RExpr E Γ τ), RExpr.ValFragC A e → e.OpsOK → NSP (evalE G F n e) (fun _ => True) :=
-    fun e hf ho => NSP.of_ns ((hX F).val e hf ho)
+    fun e hf ho => NSP.of_ns ((hX F hP).val e hf ho)
   have hsub : ∀ {Γ₀ τ} {l₀ : Locals E.layout Γ₀} (e : RExpr E Γ₀ τ), RExpr.ValFragC A e → e.OpsOK →
       NSP (sub (Γ := []) l₀ (evalE G F n e)) (fun _ => True) :=
     fun e hf ho => NSP.sub' (NSP.weaken (hE e hf ho) fun _ _ _ => trivial)
@@ -307,7 +308,7 @@ theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : F
         (fun (o : Out E.layout Γ Γ) => k.loop = false → o.esc = false) := by
     intro Γ₁ t l₁ ht ho'
     obtain ⟨ys, rfl⟩ := RStmt.ext t
-    exact NSP.bind (ih.execS F nps ph t l₁ ht ho' hfr) fun o h =>
+    exact NSP.bind (ih.execS F hP nps ph t l₁ ht ho' hfr) fun o h =>
       NSP.weaken (Out.close_esc ys o) fun _ h' hk => h'.trans (h.2 hk)
   cases s with
   | expr e =>
@@ -322,12 +323,12 @@ theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : F
     simp only [execS]
     refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns ?_) fun _ _ _ => trivial)) fun _ _ =>
       NSP.pure' ⟨fun _ => ⟨_, rfl⟩, fun _ => rfl⟩
-    exact NS.bind ((hX F).val e hf.1 ho) fun v =>
+    exact NS.bind ((hX F hP).val e hf.1 ho) fun v =>
       NS.bind (convRV_ns F n (.inl h) hf.2.2 v) fun w => getV_ns hf.2.1 w
   | block b =>
     simp only [execS]
     obtain ⟨ys, rfl⟩ := RItems.ext b
-    exact NSP.bind (ih.execItems F nps ph b l hf ho hfr) fun o h =>
+    exact NSP.bind (ih.execItems F hP nps ph b l hf ho hfr) fun o h =>
       NSP.weaken (Out.close_esc ys o) fun _ h' => ⟨fun h0 => h0.elim, fun hk => h'.trans (h hk)⟩
   | ifThen c t =>
     simp only [execS]
@@ -346,12 +347,12 @@ theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : F
     obtain ⟨ys, rfl⟩ := RStmt.ext body
     refine NSP.bind (hsub c hf.1 ho.1) fun p _ => NSP.bind (NSP.of_ns (getV_ns rfl p.1)) fun x _ => ?_
     split
-    · refine NSP.bind (ih.execS F nps ph body p.2 hf.2 ho.2 hfr) fun o _ => ?_
+    · refine NSP.bind (ih.execS F hP nps ph body p.2 hf.2 ho.2 hfr) fun o _ => ?_
       cases o with
       | normal l2 =>
         exact NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun l3 _ =>
-          NSP.weaken (ih.execS F nps ph _ l3 hf ho hfr) fun _ h => ⟨fun h0 => h0.elim, h.2⟩
-      | cont l2 => exact NSP.weaken (ih.execS F nps ph _ l2 hf ho hfr) fun _ h => ⟨fun h0 => h0.elim, h.2⟩
+          NSP.weaken (ih.execS F hP nps ph _ l3 hf ho hfr) fun _ h => ⟨fun h0 => h0.elim, h.2⟩
+      | cont l2 => exact NSP.weaken (ih.execS F hP nps ph _ l2 hf ho hfr) fun _ h => ⟨fun h0 => h0.elim, h.2⟩
       | brk _ => exact NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
       | ret _ => exact NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
     · exact NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
@@ -367,9 +368,9 @@ theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : F
         (fun o => lp = false → o.esc = false) := fun l₂ =>
       NSP.bind (hsub c hf.2 ho.2) fun p _ => NSP.bind (NSP.of_ns (getV_ns rfl p.1)) fun x _ => by
         split
-        · exact NSP.weaken (ih.execS F nps ph _ p.2 hf ho hfr) fun _ h => h.2
+        · exact NSP.weaken (ih.execS F hP nps ph _ p.2 hf ho hfr) fun _ h => h.2
         · exact NSP.pure' fun _ => rfl
-    refine NSP.bind (ih.execS F nps ph body l hf.1 ho.1 hfr) fun o _ => ?_
+    refine NSP.bind (ih.execS F hP nps ph body l hf.1 ho.1 hfr) fun o _ => ?_
     cases o with
     | normal l2 =>
       refine NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun l3 _ => ?_
@@ -382,9 +383,9 @@ theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : F
   | forLoop init c post body =>
     simp only [execS]
     obtain ⟨ys, rfl⟩ := RStmt.ext init
-    refine NSP.bind (ih.execS F nps ph init l hf.2.1 ho.1 hfr) fun o ho1 => ?_
+    refine NSP.bind (ih.execS F hP nps ph init l hf.2.1 ho.1 hfr) fun o ho1 => ?_
     obtain ⟨l1, rfl⟩ := ho1.1 hf.1
-    refine NSP.bind (ih.forIter F nps ph c post body l1 hf.2.2.1 ho.2.1 hf.2.2.2.1 ho.2.2.1 hf.2.2.2.2 ho.2.2.2 (hfr.ext ys))
+    refine NSP.bind (ih.forIter F hP nps ph c post body l1 hf.2.2.1 ho.2.1 hf.2.2.2.1 ho.2.2.1 hf.2.2.2.2 ho.2.2.2 (hfr.ext ys))
       fun o2 h2 => ?_
     rcases h2 with ⟨l2, rfl⟩ | ⟨l2, rfl⟩
     · exact NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun _ _ => NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
@@ -397,7 +398,7 @@ theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : F
     simp only [execS]
     obtain ⟨ys, ps, rfl, hn⟩ := hfr
     refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns (NS.bind
-      ((hX F).val e hf.1 ho) fun v => NS.bind (convRV_ns F n (.inl h) hf.2.2 v) fun w =>
+      ((hX F hP).val e hf.1 ho) fun v => NS.bind (convRV_ns F n (.inl h) hf.2.2 v) fun w =>
         getV_ns hf.2.1 w)) fun _ _ _ => trivial)) fun p _ => ?_
     have hb : (ys ++ (R.reverse ++ ps)).length - (nps + R.length) = ys.length := by
       rw [hR, ← hn]
@@ -410,7 +411,7 @@ theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : F
   | retTuple es =>
     simp only [execS]
     obtain ⟨ys, ps, rfl, hn⟩ := hfr
-    refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns ((hX F).convArgs es hf ho))
+    refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns ((hX F hP).convArgs es hf ho))
       fun _ _ _ => trivial)) fun p _ => ?_
     have hb : (ys ++ (R.reverse ++ ps)).length - (nps + R.length) = ys.length := by
       simp only [List.length_append, List.length_reverse]
@@ -420,7 +421,7 @@ theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : F
       NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
   | _ => exact hf.elim
 
-theorem execItems_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+theorem execItems_nsStep (ih : StmtNSAt G A Q n) (hX : ∀ F, Q F.contract → ExprNSAt A G F n) (F : Fr) (hP : Q F.contract) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : RItems.ValFragC A b) (ho : b.OpsOK)
     (hfr : BodyFrame nps R Γ) : NSP (execItems G F (n + 1) nps ph b l) (fun o => k.loop = false → o.esc = false) := by
   cases b with
@@ -428,10 +429,10 @@ theorem execItems_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F
   | stmt s rest =>
     simp only [execItems]
     obtain ⟨ys, rfl⟩ := RStmt.ext s
-    refine NSP.bind (ih.execS F nps ph s l hf.1 ho.1 hfr) fun o h => ?_
+    refine NSP.bind (ih.execS F hP nps ph s l hf.1 ho.1 hfr) fun o h => ?_
     cases o with
     | normal l1 =>
-      exact NSP.bind (ih.execItems F nps ph rest l1 hf.2 ho.2 (hfr.ext ys)) fun o' h' =>
+      exact NSP.bind (ih.execItems F hP nps ph rest l1 hf.2 ho.2 (hfr.ext ys)) fun o' h' =>
         NSP.weaken (Out.up_esc ys o') fun _ h'' hk => h''.trans (h' hk)
     | brk _ => exact NSP.pure' fun hk => h.2 hk
     | cont _ => exact NSP.pure' fun hk => h.2 hk
@@ -439,15 +440,15 @@ theorem execItems_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F
   | unchecked inner rest =>
     simp only [execItems]
     obtain ⟨ys, rfl⟩ := RItems.ext inner
-    refine NSP.bind (ih.execItems _ nps ph inner l hf.1 ho.1 hfr) fun o h => ?_
+    refine NSP.bind (ih.execItems { F with checked := false } hP nps ph inner l hf.1 ho.1 hfr) fun o h => ?_
     cases o with
     | normal l1 =>
-      exact NSP.bind (NSP.lift_ok (Locals.restore_ok ys l1)) fun l2 _ => ih.execItems F nps ph rest l2 hf.2 ho.2 hfr
+      exact NSP.bind (NSP.lift_ok (Locals.restore_ok ys l1)) fun l2 _ => ih.execItems F hP nps ph rest l2 hf.2 ho.2 hfr
     | brk _ => exact NSP.pure' fun hk => h hk
     | cont _ => exact NSP.pure' fun hk => h hk
     | ret _ => exact NSP.pure' fun _ => rfl
 
-theorem forIter_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
+theorem forIter_nsStep (ih : StmtNSAt G A Q n) (hX : ∀ F, Q F.contract → ExprNSAt A G F n) (F : Fr) (hP : Q F.contract) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
     {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂)
     (l : Locals E.layout Γ₁) (hc : ROptBool.ValFragC A c) (hc' : c.OpsOK) (hp : ROptExpr.ValFragC A post)
     (hp' : post.OpsOK) (hb : RStmt.ValFragC A body) (hb' : body.OpsOK) (hfr : BodyFrame nps R Γ₁) :
@@ -460,82 +461,82 @@ theorem forIter_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F :
     split
     · exact NSP.pure' (.inl ⟨_, rfl⟩)
     · refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun _ _ => ?_
-      refine NSP.bind (ih.execS F nps ph body y.2 hb hb' hfr) fun o _ => ?_
+      refine NSP.bind (ih.execS F hP nps ph body y.2 hb hb' hfr) fun o _ => ?_
       cases o with
       | normal l2 =>
         refine NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun l3 _ => ?_
         cases post with
         | none =>
           exact NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
-            ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
+            ih.forIter F hP nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
         | some pe =>
           exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-            (NSP.of_ns ((hX F).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            (NSP.of_ns ((hX F hP).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
             NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
-              ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
+              ih.forIter F hP nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
       | cont l2 =>
         refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l3 _ => ?_
         cases post with
         | none =>
           exact NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
-            ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
+            ih.forIter F hP nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
         | some pe =>
           exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-            (NSP.of_ns ((hX F).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            (NSP.of_ns ((hX F hP).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
             NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
-              ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
+              ih.forIter F hP nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
       | brk _ => exact NSP.pure' (.inl ⟨_, rfl⟩)
       | ret _ => exact NSP.pure' (.inr ⟨_, rfl⟩)
   | some ce =>
     refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-      (NSP.of_ns ((hX F).val ce hc hc')) fun _ _ _ => trivial)) fun p _ =>
+      (NSP.of_ns ((hX F hP).val ce hc hc')) fun _ _ _ => trivial)) fun p _ =>
       NSP.bind (NSP.of_ns (getV_ns rfl p.1)) fun x _ => ?_
     obtain ⟨b, rfl⟩ := Val.eq_bool x
     refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun y _ => ?_
     split
     · exact NSP.pure' (.inl ⟨_, rfl⟩)
     · refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun _ _ => ?_
-      refine NSP.bind (ih.execS F nps ph body y.2 hb hb' hfr) fun o _ => ?_
+      refine NSP.bind (ih.execS F hP nps ph body y.2 hb hb' hfr) fun o _ => ?_
       cases o with
       | normal l2 =>
         refine NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun l3 _ => ?_
         cases post with
         | none =>
           exact NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
-            ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
+            ih.forIter F hP nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
         | some pe =>
           exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-            (NSP.of_ns ((hX F).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            (NSP.of_ns ((hX F hP).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
             NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
-              ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
+              ih.forIter F hP nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
       | cont l2 =>
         refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l3 _ => ?_
         cases post with
         | none =>
           exact NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
-            ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
+            ih.forIter F hP nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
         | some pe =>
           exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-            (NSP.of_ns ((hX F).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            (NSP.of_ns ((hX F hP).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
             NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
-              ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
+              ih.forIter F hP nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
       | brk _ => exact NSP.pure' (.inl ⟨_, rfl⟩)
       | ret _ => exact NSP.pure' (.inr ⟨_, rfl⟩)
 
 end
 
 /-- **The statement step**, given expression progress at the same horizon. -/
-theorem stmtNSAt_step {A : Decl → Prop} {G : Glob E} {n : Nat} (ih : StmtNSAt G A n)
-    (hX : ∀ F, ExprNSAt A G F n) : StmtNSAt G A (n + 1) where
-  execS F nps ph _ _ _ _ _ s l hf ho hfr := execS_nsStep ih hX F nps ph s l hf ho hfr
-  execItems F nps ph _ _ _ _ _ b l hf ho hfr := execItems_nsStep ih hX F nps ph b l hf ho hfr
-  forIter F nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr :=
-    forIter_nsStep ih hX F nps ph c post body l hc hc' hp hp' hb hb' hfr
+theorem stmtNSAt_step {A : Decl → Prop} {Q : String → Prop} {G : Glob E} {n : Nat} (ih : StmtNSAt G A Q n)
+    (hX : ∀ F, Q F.contract → ExprNSAt A G F n) : StmtNSAt G A Q (n + 1) where
+  execS F hP nps ph _ _ _ _ _ s l hf ho hfr := execS_nsStep ih hX F hP nps ph s l hf ho hfr
+  execItems F hP nps ph _ _ _ _ _ b l hf ho hfr := execItems_nsStep ih hX F hP nps ph b l hf ho hfr
+  forIter F hP nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr :=
+    forIter_nsStep ih hX F hP nps ph c post body l hc hc' hp hp' hb hb' hfr
 
 /-- **Progress on the statement value fragment**, at every horizon. -/
-theorem stmtNSAt (G : Glob E) : ∀ n, StmtNSAt G (fun _ => False) n
-  | 0 => stmtNSAt_zero G _
-  | n + 1 => stmtNSAt_step (stmtNSAt G n) fun F => exprNSAt G F n
+theorem stmtNSAt (G : Glob E) : ∀ n, StmtNSAt G (fun _ => False) (fun _ => True) n
+  | 0 => stmtNSAt_zero G _ _
+  | n + 1 => stmtNSAt_step (stmtNSAt G n) fun F _ => exprNSAt G F n
 
 /-- **A statement of the value fragment in the operations' domains is
 never `stuck`**: at every horizon, in every state, in any modifier
@@ -543,21 +544,21 @@ context. -/
 theorem stmtNS (G : Glob E) (F : Fr) (n nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx}
     {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : s.ValFrag) (ho : s.OpsOK)
     (hfr : BodyFrame nps R Γ) : NS (execS G F n nps ph s l) :=
-  ((stmtNSAt G n).execS F nps ph s l hf ho hfr).ns
+  ((stmtNSAt G n).execS F trivial nps ph s l hf ho hfr).ns
 
 /-- **A block of the value fragment in the operations' domains is never
 `stuck`.** -/
 theorem itemsNS (G : Glob E) (F : Fr) (n nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx}
     {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : b.ValFrag) (ho : b.OpsOK)
     (hfr : BodyFrame nps R Γ) : NS (execItems G F n nps ph b l) :=
-  ((stmtNSAt G n).execItems F nps ph b l hf ho hfr).ns
+  ((stmtNSAt G n).execItems F trivial nps ph b l hf ho hfr).ns
 
 /-- **A block outside loops ends normally or by `return`**: no `break` or
 `continue` escapes it (`Out.esc`), and it is never `stuck`. -/
 theorem itemsNSP (G : Glob E) (F : Fr) (n nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
     {Γ Γ' : RCtx} (b : RItems E R M ⟨false, u⟩ Γ Γ') (l : Locals E.layout Γ) (hf : b.ValFrag) (ho : b.OpsOK)
     (hfr : BodyFrame nps R Γ) : NSP (execItems G F n nps ph b l) (fun o => o.esc = false) :=
-  NSP.weaken ((stmtNSAt G n).execItems F nps ph b l hf ho hfr) fun _ h => h rfl
+  NSP.weaken ((stmtNSAt G n).execItems F trivial nps ph b l hf ho hfr) fun _ h => h rfl
 
 /-- **Elaborated blocks**: a typing derivation whose elaboration is in the
 value fragment is never `stuck` when run (the operations' domains come
@@ -856,92 +857,98 @@ theorem Elaborated.callInternal_call_ns (el : Elaborated) (G : Glob el.res.env) 
 
 /-! ## Internal calls inside expressions -/
 
-/-- **A program whose allowed functions are fragment bodies**: for every
-declaration `A` allows with a signature, virtual dispatch (from any
-contract) finds a body without modifiers, in the statement fragment with
-calls to `A` and in the operations' domains, whose locals are the frame the
-call builds and whose return types have defaults. -/
-def CallsOK (A : Decl → Prop) (G : Glob E) : Prop :=
-  ∀ (c : String) (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → A d →
+/-- **A program whose allowed functions are fragment bodies**, for frames
+of contract `c`: for every declaration `A` allows with a signature, virtual
+dispatch from `c` finds a body without modifiers, in the statement fragment
+with calls to `A` and in the operations' domains, whose locals are the
+frame the call builds and whose return types have defaults. It is
+assumed: no lemma derives it for an elaborated program. -/
+def CallsOK (A : Decl → Prop) (G : Glob E) (c : String) : Prop :=
+  ∀ (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → A d →
     ∃ b, G.prog.body (G.dispatchFn c d) = some b ∧ b.mods = [] ∧
       rs.reverseAux (ps.reverseAux []) = b.locals ∧ b.rs = rs ∧ b.ps.length = ps.length ∧
       (∀ τ ∈ rs, (Val.default E.layout τ).isSome = true) ∧ RItems.ValFragC A b.items ∧ b.items.OpsOK
 
-/-- **The joint induction hypothesis** at horizon `n`: expressions (with
-calls to `A`), statements, bodies without modifiers and internal calls. -/
-structure FragAt (A : Decl → Prop) (G : Glob E) (n : Nat) : Prop where
-  expr : ∀ F, ExprNSAt A G F n
-  stmt : StmtNSAt G A n
-  mods : ∀ (F : Fr) (b : RBody E) (l : Locals E.layout b.locals), RItems.ValFragC A b.items →
+/-- **The joint induction hypothesis** at horizon `n`, for frames of
+contract `c` (an internal call keeps the contract): expressions (with calls
+to `A`), statements, bodies without modifiers and internal calls. -/
+structure FragAt (A : Decl → Prop) (G : Glob E) (c : String) (n : Nat) : Prop where
+  expr : ∀ F, F.contract = c → ExprNSAt A G F n
+  stmt : StmtNSAt G A (· = c) n
+  mods : ∀ (F : Fr), F.contract = c → ∀ (b : RBody E) (l : Locals E.layout b.locals), RItems.ValFragC A b.items →
     b.items.OpsOK → BodyFrame b.ps.length b.rs b.locals → NS (runMods G F n b [] l)
-  call : ∀ F, CallNS A G F n
+  call : ∀ F, F.contract = c → CallNS A G F n
 
-theorem fragAt_zero (A : Decl → Prop) (G : Glob E) : FragAt A G 0 where
-  expr F := exprNSAt_zero A G F
-  stmt := stmtNSAt_zero G A
-  mods _ _ _ _ _ _ := by rw [runMods.eq_1]; exact NS.halt' fun _ e => by cases e
-  call _ _ _ _ _ _ _ := by rw [callInternal.eq_1]; exact NS.halt' fun _ e => by cases e
+theorem fragAt_zero (A : Decl → Prop) (G : Glob E) (c : String) : FragAt A G c 0 where
+  expr F _ := exprNSAt_zero A G F
+  stmt := stmtNSAt_zero G A _
+  mods _ _ _ _ _ _ _ := by rw [runMods.eq_1]; exact NS.halt' fun _ e => by cases e
+  call _ _ _ _ _ _ _ _ := by rw [callInternal.eq_1]; exact NS.halt' fun _ e => by cases e
 
 section
-variable {A : Decl → Prop} {G : Glob E} {n : Nat}
+variable {A : Decl → Prop} {G : Glob E} {c : String} {n : Nat}
 
-theorem mods_step (ih : FragAt A G n) (F : Fr) (b : RBody E) (l : Locals E.layout b.locals)
+theorem mods_step (ih : FragAt A G c n) (F : Fr) (hc : F.contract = c) (b : RBody E) (l : Locals E.layout b.locals)
     (hf : RItems.ValFragC A b.items) (ho : b.items.OpsOK) (hfr : BodyFrame b.ps.length b.rs b.locals) :
     NS (runMods G F (n + 1) b [] l) := by
   simp only [runMods]
   obtain ⟨ys, hys⟩ := RItems.ext b.items
   refine NSP.ns (NSP.bind (R := fun _ => True)
-    (NSP.weaken (ih.stmt.execItems F b.ps.length none b.items l hf ho hfr) fun _ h => h rfl) fun o ho' => ?_)
+    (NSP.weaken (ih.stmt.execItems F hc b.ps.length none b.items l hf ho hfr) fun _ h => h rfl) fun o ho' => ?_)
   cases o with
   | normal l' => exact NSP.of_ns (NS.lift' (Locals.restore_ok' ys hys l'))
   | ret l' => exact NSP.pure' trivial
   | brk _ => exact nomatch ho'
   | cont _ => exact nomatch ho'
 
-theorem call_step (hG : CallsOK A G) (ih : FragAt A G n) (F : Fr) : CallNS A G F (n + 1) := by
+theorem call_step (hG : CallsOK A G c) (ih : FragAt A G c n) (F : Fr) (hc : F.contract = c) :
+    CallNS A G F (n + 1) := by
   intro d ps rs hs hA vs
-  obtain ⟨b, hb, hmods, hloc, hrs, hps, hz, hf, ho⟩ := hG F.contract d hs hA
+  subst hc
+  obtain ⟨b, hb, hmods, hloc, hrs, hps, hz, hf, ho⟩ := hG d hs hA
   have hl : b.locals = rs.reverse ++ ps.reverse := by
     rw [← hloc, List.reverseAux_eq, List.reverseAux_eq, List.append_nil]
   simp only [callInternal, hb]
   refine NS.bind (zeroVals_ns n rs hz) fun rv => ?_
   rw [dif_pos hloc, hmods]
-  refine NS.bind (ih.mods _ b _ hf ho ⟨[], ps.reverse, ?_, ?_⟩) fun l' =>
+  refine NS.bind (ih.mods { F with checked := true } rfl b _ hf ho ⟨[], ps.reverse, ?_, ?_⟩) fun l' =>
     NS.bind (NS.lift' (retVals_ok l' rs (hl.trans rfl))) fun _ => NS.pure' _
   · rw [hl, hrs, List.nil_append]
   · rw [List.length_reverse, hps]
 
 end
 
-/-- **The joint progress induction**, for a program whose allowed functions
-are fragment bodies. -/
-theorem fragAt {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) : ∀ n, FragAt A G n
-  | 0 => fragAt_zero A G
+/-- **The joint progress induction**, for frames of a contract whose
+allowed functions are fragment bodies. -/
+theorem fragAt {A : Decl → Prop} {G : Glob E} {c : String} (hG : CallsOK A G c) : ∀ n, FragAt A G c n
+  | 0 => fragAt_zero A G c
   | n + 1 =>
-    have ih := fragAt hG n
-    { expr := fun F => exprNSAt_step (ih.expr F) (ih.call F)
+    have ih : FragAt A G c n := fragAt hG n
+    { expr := fun F hc => exprNSAt_step (ih.expr F hc) (ih.call F hc)
       stmt := stmtNSAt_step ih.stmt ih.expr
-      mods := fun F b l hf ho hfr => mods_step ih F b l hf ho hfr
-      call := fun F => call_step hG ih F }
+      mods := fun F hc b l hf ho hfr => mods_step ih F hc b l hf ho hfr
+      call := fun F hc => call_step hG ih F hc }
 
-/-- **Progress with internal calls**: an expression of the value fragment
-whose calls go to functions the program implements by fragment bodies
-(`CallsOK`) is never `stuck`, at any horizon, from any state. -/
-theorem evalE_callFrag_ns {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) (F : Fr) (n : Nat) {Γ : RCtx}
-    {τ : STy} (e : RExpr E Γ τ) (hf : RExpr.ValFragC A e) (ho : e.OpsOK) : NS (evalE G F n e) :=
-  ((fragAt hG n).expr F).val e hf ho
+/-- **Progress with internal calls**: in a frame of contract `c`, an
+expression of the value fragment whose calls go to functions `c`'s
+dispatch implements by fragment bodies (`CallsOK`) is never `stuck`, at any
+horizon, from any state. -/
+theorem evalE_callFrag_ns {A : Decl → Prop} {G : Glob E} {c : String} (hG : CallsOK A G c) (F : Fr)
+    (hc : F.contract = c) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) (hf : RExpr.ValFragC A e)
+    (ho : e.OpsOK) : NS (evalE G F n e) :=
+  ((fragAt hG n).expr F hc).val e hf ho
 
 /-- **Statements with internal calls** are never `stuck` in a body frame. -/
-theorem stmt_callFrag_ns {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) (F : Fr) (n nps : Nat)
-    (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ')
-    (l : Locals E.layout Γ) (hf : RStmt.ValFragC A s) (ho : s.OpsOK) (hfr : BodyFrame nps R Γ) :
-    NS (execS G F n nps ph s l) :=
-  ((fragAt hG n).stmt.execS F nps ph s l hf ho hfr).ns
+theorem stmt_callFrag_ns {A : Decl → Prop} {G : Glob E} {c : String} (hG : CallsOK A G c) (F : Fr)
+    (hc : F.contract = c) (n nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
+    (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : RStmt.ValFragC A s) (ho : s.OpsOK)
+    (hfr : BodyFrame nps R Γ) : NS (execS G F n nps ph s l) :=
+  ((fragAt hG n).stmt.execS F hc nps ph s l hf ho hfr).ns
 
 /-- **Internal calls to allowed functions** are never `stuck`. -/
-theorem callInternal_callFrag_ns {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) (F : Fr) (n : Nat)
-    (d : Decl) {ps rs : List STy} (hs : d.fnSig E = some (ps, rs)) (hA : A d) (vs : Vals E.layout ps) :
-    NS (callInternal G F n d vs rs) :=
-  (fragAt hG n).call F d hs hA vs
+theorem callInternal_callFrag_ns {A : Decl → Prop} {G : Glob E} {c : String} (hG : CallsOK A G c) (F : Fr)
+    (hc : F.contract = c) (n : Nat) (d : Decl) {ps rs : List STy} (hs : d.fnSig E = some (ps, rs)) (hA : A d)
+    (vs : Vals E.layout ps) : NS (callInternal G F n d vs rs) :=
+  (fragAt hG n).call F hc d hs hA vs
 
 end Solidity.Source

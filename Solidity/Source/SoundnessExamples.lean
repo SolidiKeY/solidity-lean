@@ -33,6 +33,7 @@ it the operation is `stuck`).
 | `retPair_ns`, `retPair_unframed_stuck` | `return (1, 2);` with two return slots is never `stuck`; over locals without them it is |
 | `callF_ns`, `callF_value`, `callF_badFrame_stuck` | the call expression `f()` (a function implemented by `return 1;`) is never `stuck` (`evalE_callFrag_ns`) and evaluates to `1`; with a body outside the call's frame it is `stuck` |
 | `recF_ns`, `recF_timeout` | with `f` calling itself (`return f();`), `f()` is never `stuck` and runs out of horizon |
+| `callG_ns`, `callG_value` | in a program with distinct bodies for `f` (`return 1;`) and `g` (`return f();`), `g()` is never `stuck` and evaluates to `1` |
 | `retLocalPair_ns` | `return (x, x);` with a declared local `x` over the two return slots is never `stuck` |
 | `callRetOne_ns` | an internal call of `function f() internal returns (uint8) { return 1; }` (no modifiers, a fragment body in the frame the call builds) is never `stuck` (`callInternal_ns`) |
 | `callBadFrame_stuck` | a body whose locals lack the return slot is `stuck` ("call frame"): the frame hypothesis is needed |
@@ -326,8 +327,8 @@ def callF : RExpr SemanticsExamples.E0 [] (STy.ret [.int IntTy.u8]) := .call fDe
 open SemanticsExamples in
 /-- The program implements every function by `return 1;` (`retOneBody`):
 the functions `fDecl` names are fragment bodies. -/
-theorem retOne_callsOK : CallsOK (fun d => d = fDecl) (progOf retOneBody) := by
-  intro c d ps rs hs hA
+theorem retOne_callsOK : CallsOK (fun d => d = fDecl) (progOf retOneBody) "C" := by
+  intro d ps rs hs hA
   subst hA
   rw [fDecl_sig] at hs
   simp only [Option.some.injEq, Prod.mk.injEq] at hs
@@ -341,7 +342,7 @@ open SemanticsExamples in
 (`evalE_callFrag_ns`: the joint induction over expressions, statements,
 bodies and internal calls). -/
 theorem callF_ns (n : Nat) : NS (evalE (progOf retOneBody) F0 n callF) :=
-  evalE_callFrag_ns retOne_callsOK F0 n callF ⟨rfl, trivial⟩ trivial
+  evalE_callFrag_ns retOne_callsOK F0 rfl n callF ⟨rfl, trivial⟩ trivial
 
 open SemanticsExamples in
 /-- **Value control**: `f()` evaluates to `1`. -/
@@ -368,8 +369,8 @@ def recBody : RBody E0 where
   items := .stmt (.retVal rfl (.call fDecl fDecl_sig .nil) (by decide)) .nil
 
 open SemanticsExamples in
-theorem rec_callsOK : CallsOK (fun d => d = fDecl) (progOf recBody) := by
-  intro c d ps rs hs hA
+theorem rec_callsOK : CallsOK (fun d => d = fDecl) (progOf recBody) "C" := by
+  intro d ps rs hs hA
   subst hA
   rw [fDecl_sig] at hs
   simp only [Option.some.injEq, Prod.mk.injEq] at hs
@@ -383,12 +384,67 @@ open SemanticsExamples in
 at any horizon (the joint induction: the callee's body itself calls); it
 only times out. -/
 theorem recF_ns (n : Nat) : NS (evalE (progOf recBody) F0 n callF) :=
-  evalE_callFrag_ns rec_callsOK F0 n callF ⟨rfl, trivial⟩ trivial
+  evalE_callFrag_ns rec_callsOK F0 rfl n callF ⟨rfl, trivial⟩ trivial
 
 open SemanticsExamples in
 /-- **Value control**: the recursion runs out of horizon (a timeout, not
 `stuck`). -/
 theorem recF_timeout : ((evalE (progOf recBody) F0 12 callF).run (.nil, s0)).1 = .error .timeout := by
+  rfl
+
+/-- `function g() internal returns (uint8)`, as a declaration. -/
+def gDecl : Decl := ⟨.function, "g", none, false,
+  .function (.ident "g") .nil (some .internal) none .nil false none
+    (.cons (.param (.elem (.int false 8 (by decide))) none none) .nil) (.some (.block .nil))⟩
+
+theorem gDecl_sig : gDecl.fnSig SemanticsExamples.E0 = some ([], [.int IntTy.u8]) := rfl
+
+open SemanticsExamples in
+/-- `function g() internal returns (uint8) { return f(); }`, resolved. -/
+def gBody : RBody E0 where
+  ps := []
+  rs := [u8]
+  inModifier := false
+  locals := [u8]
+  out := [u8]
+  items := .stmt (.retVal rfl (.call fDecl fDecl_sig .nil) (by decide)) .nil
+
+open SemanticsExamples in
+/-- A program with two bodies: `g` returns `f()`, every other function
+(`f` among them) returns `1`. -/
+def progFG : Glob E0 :=
+  ⟨{ P0 with body := fun d => if d.name = "g" then some gBody else some retOneBody }, .viaIR, toyFixed,
+    fun _ => word 0, fun _ _ => false, fun _ => .answer (.success []), word 0⟩
+
+open SemanticsExamples in
+theorem fg_callsOK : CallsOK (fun d => d = fDecl ∨ d = gDecl) progFG "C" := by
+  intro d ps rs hs hA
+  rcases hA with rfl | rfl
+  · rw [fDecl_sig] at hs
+    simp only [Option.some.injEq, Prod.mk.injEq] at hs
+    obtain ⟨rfl, rfl⟩ := hs
+    exact ⟨retOneBody, rfl, rfl, rfl, rfl, rfl,
+      fun τ h => by simp only [List.mem_cons, List.not_mem_nil, or_false] at h; subst h; rfl,
+      ⟨⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, trivial⟩, ⟨trivial, trivial⟩⟩
+  · rw [gDecl_sig] at hs
+    simp only [Option.some.injEq, Prod.mk.injEq] at hs
+    obtain ⟨rfl, rfl⟩ := hs
+    exact ⟨gBody, rfl, rfl, rfl, rfl, rfl,
+      fun τ h => by simp only [List.mem_cons, List.not_mem_nil, or_false] at h; subst h; rfl,
+      ⟨⟨⟨Or.inl rfl, trivial⟩, rfl, .inl rfl⟩, trivial⟩, ⟨trivial, trivial⟩⟩
+
+/-- The call expression `g()`. -/
+def callG : RExpr SemanticsExamples.E0 [] (STy.ret [.int IntTy.u8]) := .call gDecl gDecl_sig .nil
+
+open SemanticsExamples in
+/-- **Witness, a call through a body that calls**: `g()`, whose body returns
+`f()`, is never `stuck` in a program with distinct bodies for `f` and `g`. -/
+theorem callG_ns (n : Nat) : NS (evalE progFG F0 n callG) :=
+  evalE_callFrag_ns fg_callsOK F0 rfl n callG ⟨Or.inr rfl, trivial⟩ trivial
+
+open SemanticsExamples in
+/-- **Value control**: `g()` evaluates to `f()`'s `1` (at horizon 12). -/
+theorem callG_value : intOf ((evalE progFG F0 12 callG).run (.nil, s0)) = some 1 := by
   rfl
 
 /-! ## The census's semantic bug, fixed -/
@@ -564,5 +620,9 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.recF_ns
 /-- info: 'Solidity.Source.SoundnessExamples.recF_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.recF_timeout
+/-- info: 'Solidity.Source.SoundnessExamples.callG_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callG_ns
+/-- info: 'Solidity.Source.SoundnessExamples.callG_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callG_value
 
 end Solidity.Source.SoundnessExamples

@@ -445,5 +445,5 @@ fragment, which must first be delimited (`stuck` is told apart from
 divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
 rule); calldata references, `abi.decode`, `new`, slices, inline arrays,
-`try`, tuple declarations, `fallback` with parameters; dynamic-length
-`Panic(0x41)`.
+`try`, tuple declarations, `fallback` with parameters (the decoder's
+dynamic-length `Panic(0x41)` is modelled since lane V04b).
