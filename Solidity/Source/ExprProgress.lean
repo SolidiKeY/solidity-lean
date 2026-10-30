@@ -58,6 +58,8 @@ theorem lift' {r : R α} (h : NotStuckR r) : NS (lift r : EM E Γ α) := by
 
 theorem locals' : NS (locals : EM E Γ (Locals E.layout Γ)) := fun _ _ h => by cases h
 
+theorem modSt' (f : St E → St E) : NS (modSt f : EM E Γ Unit) := fun _ _ h => by cases h
+
 end NS
 
 /-- A run-time value of a value type is plain: `getV` is never `stuck`. -/
@@ -157,18 +159,67 @@ theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBa
     · exact hr q v rfl HEq.rfl
     · exact hh q k v rfl HEq.rfl
 
+/-! ## Storage of value types -/
+
+/-- A cell whose type has a default always reads a value. -/
+theorem Storage.read_isSome {D : Layout} {L : SPath → STy} (st : Storage D L) (p : SPath)
+    (h : (Val.default D (L p)).isSome = true) : (st.read p).isSome = true := by
+  unfold Storage.read
+  cases st.cell p with
+  | some _ => rfl
+  | none => exact h
+
+/-- **Reading a storage cell of value type is never `stuck`** when the
+path's layout type is the read type and has a default. -/
+theorem readAt_ns {Γ : RCtx} (F : Fr) (p : SPath) {τ : STy} (hc : E.cellTy p = τ)
+    (hd : (Val.default E.layout τ).isSome = true) : NS (readAt (E := E) (Γ := Γ) F p τ) := by
+  subst hc
+  unfold readAt readCell
+  refine NS.bind (NS.bind (fun _ _ h => by cases h) fun s => ?_) fun v => ?_
+  · dsimp only
+    split
+    · exact NS.pure' _
+    · rename_i hn
+      exfalso
+      split at hn
+      · have := Storage.read_isSome (s.ex.transient.cells F.this) p hd
+        rw [hn] at this; cases this
+      · have := Storage.read_isSome (s.ex.world.accounts F.this).storage p hd
+        rw [hn] at this; cases this
+  · rw [dif_pos rfl]
+    exact NS.pure' _
+
+/-- **Writing a storage cell of value type is never `stuck`** (in a static
+frame it reverts). -/
+theorem writeAt_ns {Γ : RCtx} (F : Fr) (p : SPath) {τ : STy} (hc : τ = E.cellTy p) (v : Val E.layout τ) :
+    NS (writeAt (E := E) (Γ := Γ) F p v) := by
+  unfold writeAt
+  rw [dif_pos hc]
+  unfold setCell
+  split <;>
+  · unfold applyOp
+    split
+    · exact NS.bind (NS.halt' fun _ h => by cases h) fun _ => NS.modSt' _
+    · exact NS.bind (NS.pure' _) fun _ => NS.modSt' _
+
 /-! ## The value fragment -/
 
-/-- **The value fragment** of resolved expressions: no state, memory,
-calls or references; every intermediate value of a value type, every
-conversion from a value type or a constant. -/
-def RLVal.IsLocal {Γ : RCtx} {τ : STy} : RLVal E Γ τ → Prop
-  | .local _ => True
-  | _ => False
+/-- A local, or a state variable of a value type stored at its own cell
+type, with a default. -/
+def RLVal.IsSimple {Γ : RCtx} : {τ : STy} → RLVal E Γ τ → Prop
+  | _, .local _ => True
+  | τ, .state d _ _ => τ.byRef = false ∧ E.cellTy d.path = τ ∧ (Val.default E.layout τ).isSome = true
+  | _, _ => False
 
+/-- **The value fragment** of resolved expressions: no memory, calls or
+references; state variables only of value types at their cell types;
+every intermediate value of a value type, every conversion from a value
+type or a constant. -/
 def RExpr.ValFrag {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .const _ | _, .bytesLit _ _ | _, .addressLit _ | _, .bool _ | _, .this _ | _, .compareConst _ _ _ => True
   | τ, .local _ => τ.isValue = true
+  | τ, .state d _ => d.isConst = false ∧ τ.byRef = false ∧ E.cellTy d.path = τ ∧
+      (Val.default E.layout τ).isSome = true ∧ τ.isValue = true
   | τ, .unary _ a => a.ValFrag ∧ τ.isValue = true
   | τ, .binary _ a b => a.ValFrag ∧ b.ValFrag ∧ τ.isValue = true
   | _, .compare (τ := τ) _ a b => a.ValFrag ∧ b.ValFrag ∧ τ.isValue = true
@@ -176,10 +227,10 @@ def RExpr.ValFrag {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .cond c a b => c.ValFrag ∧ a.ValFrag ∧ b.ValFrag
   | τ, .conv (σ := σ) a _ => a.ValFrag ∧ τ.isValue = true ∧
       (σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k))
-  | τ, .assign l e => l.IsLocal ∧ e.ValFrag ∧ τ.isValue = true
-  | τ, .compound (σ := σ) _ l e _ => l.IsLocal ∧ e.ValFrag ∧ τ.isValue = true ∧
+  | τ, .assign l e => l.IsSimple ∧ e.ValFrag ∧ τ.isValue = true
+  | τ, .compound (σ := σ) _ l e _ => l.IsSimple ∧ e.ValFrag ∧ τ.isValue = true ∧
       (σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k))
-  | _, .incDec _ _ l => l.IsLocal
+  | _, .incDec _ _ l => l.IsSimple
   | _, _ => False
 
 theorem cmpConst_ok {op : BinOp} (hop : (BinKind.order.admits op || BinKind.eq.admits op) = true) (a b : Q) :
@@ -213,6 +264,18 @@ theorem evalLoc_local_bind (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy
     simp only [evalLoc, pure_bind]
     exact hk
 
+/-- Evaluating a state-variable lvalue, then continuing at its path. -/
+theorem evalLoc_state_bind (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} {α : Type} (d : Decl)
+    (h : d.varTy E = some τ) (hm : d.mutable = true) {k : Loc E.layout Γ τ → EM E Γ α}
+    (hk : NS (k (.stor d.path))) : NS (evalLoc G F n (.state d h hm) >>= k) := by
+  cases n with
+  | zero =>
+    rw [evalLoc.eq_1, show (halt .timeout >>= k : EM E Γ α) = halt .timeout from rfl]
+    exact NS.halt' fun _ h => by cases h
+  | succ n =>
+    simp only [evalLoc, pure_bind]
+    exact hk
+
 /-- Reading and writing a local location is never `stuck`. -/
 theorem readLoc_local_ns (F : Fr) {Γ : RCtx} {τ : STy} (i : Idx Γ τ) :
     NS (readLoc (E := E) F (Loc.local i)) :=
@@ -221,6 +284,18 @@ theorem readLoc_local_ns (F : Fr) {Γ : RCtx} {τ : STy} (i : Idx Γ τ) :
 theorem writeLoc_local_ns (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (i : Idx Γ τ) (v : Val E.layout τ) :
     NS (writeLoc (E := E) F n (Loc.local i) v) :=
   NS.bind NS.locals' fun _ => fun _ _ h => by cases h
+
+theorem readLoc_stor_ns {Γ : RCtx} (F : Fr) (p : SPath) {τ : STy} (hb : τ.byRef = false) (hc : E.cellTy p = τ)
+    (hd : (Val.default E.layout τ).isSome = true) : NS (readLoc (E := E) (Γ := Γ) F (Loc.stor (τ := τ) p)) := by
+  show NS (if τ.byRef = true then storRef τ p else readAt F p τ)
+  rw [if_neg (by rw [hb]; exact Bool.false_ne_true)]
+  exact readAt_ns F p hc hd
+
+theorem writeLoc_stor_ns {Γ : RCtx} (F : Fr) (n : Nat) (p : SPath) {τ : STy} (hb : τ.byRef = false)
+    (hc : E.cellTy p = τ) (v : Val E.layout τ) : NS (writeLoc (E := E) (Γ := Γ) F n (Loc.stor p) v) := by
+  show NS (if τ.byRef = true then storeVal F n τ p v else writeAt F p v)
+  rw [if_neg (by rw [hb]; exact Bool.false_ne_true)]
+  exact writeAt_ns F p hc.symm v
 
 /-- The binary operator of a compound assignment is in `binVal`'s domain,
 or the assignment is a shift (`AssignOp.fits`). -/
@@ -267,6 +342,10 @@ theorem evalE_valFrag_ns : ∀ (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ 
     | «local» i =>
       simp only [evalE]
       exact NS.bind NS.locals' fun _ => NS.pure' _
+    | state d h =>
+      simp only [evalE]
+      rw [if_neg (by rw [hf.1]; exact Bool.false_ne_true), if_neg (by rw [hf.2.1]; exact Bool.false_ne_true)]
+      exact NS.bind (readAt_ns F d.path hf.2.2.1 hf.2.2.2.1) fun _ => NS.pure' _
     | unary op a =>
       simp only [evalE]
       exact NS.bind (evalE_valFrag_ns n a hf.1 ho.2) fun v => NS.bind (getV_ns hf.2 v) fun x =>
@@ -324,27 +403,46 @@ theorem evalE_valFrag_ns : ∀ (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ 
       | «local» i =>
         exact NS.bind (evalE_valFrag_ns n e hf.2.1 ho.2) fun v => evalLoc_local_bind G F n i <|
           NS.bind (getV_ns hf.2.2 v) fun x => NS.bind (writeLoc_local_ns F n i x) fun _ => NS.pure' _
+      | state d h hm =>
+        exact NS.bind (evalE_valFrag_ns n e hf.2.1 ho.2) fun v => evalLoc_state_bind G F n d h hm <|
+          NS.bind (getV_ns hf.2.2 v) fun x =>
+            NS.bind (writeLoc_stor_ns F n d.path hf.1.1 hf.1.2.1 x) fun _ => NS.pure' _
       | _ => exact hf.1.elim
-    | compound op l e h =>
+    | @compound _ σ op l e h =>
       simp only [evalE]
-      cases l with
-      | «local» i =>
-        refine NS.bind (evalE_valFrag_ns n e hf.2.1 ho.2) fun v => evalLoc_local_bind G F n i <|
-          NS.bind (readLoc_local_ns F i) fun old => ?_
+      have core : ∀ (L : Loc E.layout Γ τ) (v : RVal E.layout σ), NS (readLoc F L) →
+          (∀ x, NS (writeLoc F n L x)) → NS (do
+            let old ← readLoc F L
+            let new ← match op.kind? with
+              | some .shift => lift (shiftVal F.checked (if op = .shl then .shl else if op = .sar then .sar else .shr)
+                  (← lift v.amount) old)
+              | _ => do
+                let y ← getV (← convRV F n τ v)
+                lift (binVal F.checked (AssignOp.binOp op) old y)
+            writeLoc F n L new
+            return RVal.val new) := by
+        intro L v hr hw
+        refine NS.bind hr fun old => ?_
+        dsimp only
         rcases compound_dom h with ⟨hk, hi, hfit⟩ | ⟨hk, hb, ha⟩
         · split
           · rename_i hk'; exact absurd hk' hk
           · exact NS.bind (convRV_ns F n (.inl hi) hf.2.2.2 v) fun w => NS.bind (getV_ns hf.2.2.1 w) fun y =>
-              NS.bind (NS.lift' (binVal_ok _ hfit old y)) fun nw =>
-                NS.bind (writeLoc_local_ns F n i nw) fun _ => NS.pure' _
+              NS.bind (NS.lift' (binVal_ok _ hfit old y)) fun nw => NS.bind (hw nw) fun _ => NS.pure' _
         · split
           · refine NS.bind (NS.lift' (amount_ok ha v)) fun k =>
-              NS.bind (NS.lift' (shiftVal_ok _ k (.inl ⟨?_, hb⟩) old)) fun nw =>
-                NS.bind (writeLoc_local_ns F n i nw) fun _ => NS.pure' _
+              NS.bind (NS.lift' (shiftVal_ok _ k (.inl ⟨?_, hb⟩) old)) fun nw => NS.bind (hw nw) fun _ => NS.pure' _
             split
             · rfl
             · split <;> rfl
           · rename_i hn; exact (hn hk).elim
+      cases l with
+      | «local» i =>
+        exact NS.bind (evalE_valFrag_ns n e hf.2.1 ho.2) fun v => evalLoc_local_bind G F n i <|
+          core _ v (readLoc_local_ns F i) (writeLoc_local_ns F n i)
+      | state d hd hm =>
+        exact NS.bind (evalE_valFrag_ns n e hf.2.1 ho.2) fun v => evalLoc_state_bind G F n d hd hm <|
+          core _ v (readLoc_stor_ns F d.path hf.1.1 hf.1.2.1 hf.1.2.2) (writeLoc_stor_ns F n d.path hf.1.1 hf.1.2.1)
       | _ => exact hf.1.elim
     | incDec inc pre l =>
       simp only [evalE]
@@ -353,6 +451,11 @@ theorem evalE_valFrag_ns : ∀ (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ 
         exact evalLoc_local_bind G F n i <| NS.bind (readLoc_local_ns F i) fun old =>
           NS.bind (NS.lift' (incDecVal_ok _ inc ho.1 old)) fun nw =>
             NS.bind (writeLoc_local_ns F n i nw) fun _ => NS.pure' _
+      | state d hd hm =>
+        exact evalLoc_state_bind G F n d hd hm <|
+          NS.bind (readLoc_stor_ns F d.path hf.1 hf.2.1 hf.2.2) fun old =>
+          NS.bind (NS.lift' (incDecVal_ok _ inc ho.1 old)) fun nw =>
+            NS.bind (writeLoc_stor_ns F n d.path hf.1 hf.2.1 nw) fun _ => NS.pure' _
       | _ => exact hf.elim
     | _ => exact hf.elim
 

@@ -127,6 +127,183 @@ completeness covers every new constructor, none vacuously (finder);
 `f(0x01)` is refused by solc too (skeptic); `extCallValue`'s shape matches
 `callRes` exactly (skeptic).
 
+## Checkpoint 2: preservation (partial)
+
+**What a well-typed run-time state is.** Most of the state is typed by
+construction (S04.01): a value of type `τ` is a `Val D τ` (ranges, enum
+bounds, byte lengths inside), locals are `Locals D Γ`, storage and
+transient storage are `Storage D L` over the layout `Env.cellTy`, every
+memory object carries its type, and calldata objects too. So
+preservation of those parts holds by construction for every step. What
+is not intrinsic is where **references** point (`Solidity/Source/WellTyped.lean`):
+
+| Predicate | Meaning |
+|---|---|
+| `Val.RefOK E H v` | a `memory` reference of type `τ` names an object the heap typing `H` gives type `τ`; a `storage` reference of type `τ` a path with `Env.pathTy p = some τ`; no value is a `calldata` reference (the semantics creates none) |
+| `DataOK`, `DataListOK`, `RValOK`, `RValsOK`, `LocalsOK` | the same for memory contents, run-time values and locals; all monotone in `H` (`HeapTy.Le`) |
+| `HeapOK h` | every object of the heap agrees with the heap's own typing |
+| `StOK E H s`, `EMOK` | a well-typed machine state (heap well typed, typing extending `H`) and interpreter state (with the locals) |
+
+**Hoare triples** (`Solidity/Source/Hoare.lean`): `Hoare P m Q X` over
+`EM`, with a rule for every combinator the interpreter uses (`pure'`,
+`bind`, `halt'`, `lift'`, `st'`, `setSt'`, `modSt'`, `locals'`,
+`setLocals'`, `sub'`, `attempt'`, `dite'`, `ite'`, `conseq`,
+`cases_pre`). Preservation of an invariant `I` is a triple with `I` in
+the pre- and postconditions and the halt condition; progress is one whose
+halt condition is `NotStuck`.
+
+**Proved for the memory operations** (preservation and, where they read,
+progress): `alloc_ok` (the state stays well typed, the new address has the
+object's type), `allocRef_ok` (the new reference agrees), `heapPut_ok`
+(a write of agreeing contents keeps the state well typed; `stuck` only at
+an address of another type), `heapObj_ok`, `heapAt_ok` (a read at the
+type the heap typing gives is never `stuck` and returns agreeing
+contents), `storRef_ok`; the heap facts `HeapOK.alloc`, `HeapOK.write`,
+`Heap.alloc_le`, `Heap.alloc_ty`, `HeapOK.empty`.
+
+**Not proved**: the triple for every interpreter function (`evalE` …
+`dispatch`, deployment, transactions, callbacks). The approach is the one
+`Solidity/Source/Horizon.lean` uses for horizons: a structure of triples,
+one per function, at horizon `n`, and one step lemma per function. The
+census below lists, per `stuck` site, the invariant the step lemmas need.
+Two facts the invariant must handle, found while setting it up:
+
+- an external call runs the callee in a fresh heap (`enterInstance`) and
+  restores the caller's heap afterwards, while `St.fnLocals` keeps the
+  caller's modifier locals: the invariant on `fnLocals` must hold only
+  for the frame that runs modifiers, not across frames;
+- `bytes(s)` of a `string memory` keeps the pointer, so a `bytes memory`
+  reference may name a string object: `RefOK` must treat `bytes` and
+  `string` objects of one location as compatible (the census, item
+  "bug" below, fixed in the semantics).
+
+## Checkpoint 3: gap-relative progress (partial)
+
+**Value layer** (`Solidity/Source/ValueProgress.lean`). Each pure value
+operation is never `stuck` on operands in its domain, and every elaborated
+term stays in the domains:
+
+| Theorem | Statement |
+|---|---|
+| `binVal_ok` | `binVal` is not `stuck` for an operator of `arith` at a numeric type, of `bit` at a bit type, of `logic` at `bool` (`BinOp.FitsAt`) |
+| `cmpVal_ok` | `cmpVal` is not `stuck` for a comparison at an ordered type or one with equality (every such value has a key, `Val.key_isSome`) |
+| `shiftVal_ok`, `intPow_ok` | shifts at `int`/`bytesN`, powers at `int` |
+| `unaryVal_ok`, `incDecVal_ok`, `amount_ok` | `-`, `!`, `~`; `++`/`--` at a numeric type; shift amounts and exponents |
+| `intRes_ok`, `fixRes_ok`, `intBin_ok`, `fixBin_ok`, `bytesBin_ok` | the arithmetic below them |
+| `binOpName_admits` | the operator `toR` reads off a binary expression is one its rule kind admits (`BinKind.admits`) |
+| `Typed.toR_opsOK`, `StmtD.toR_opsOK`, `ItemsD.toR_opsOK` | every operator node of an elaborated expression, statement or block is in its operation's domain (`RExpr.OpsOK`) |
+| `Elaborated.body_opsOK`, `Elaborated.inits_opsOK` | so is every body, modifier argument, constant and initializer of an elaborated unit |
+
+| `convVal_ok`, `constVal_ok`, `mkInt_ok`, `mkFix_ok`, `FixTy.scaled_mem`, `Q.toFixed?_mem` | implicit conversions of value-type values and of constants are never `stuck` (integer widening, integer to fixed point within solc's bounds, fixed-point rescaling, `bytesN` padding, enums, user-defined value types, contracts, external function types) |
+
+`RExpr` itself does not tie a `binary` node's operator to its type, so
+`OpsOK` is the fact a progress proof needs about the elaborated program
+at those nodes; with it, the 30 `stuck` sites of `Value.lean` the census
+classifies as `shape` are unreachable from an elaborated program, once the
+interpreter walk is done.
+
+**Interpreter, value fragment** (`Solidity/Source/ExprProgress.lean`,
+`Solidity/Source/StmtProgress.lean`). `NS m` says `m` never halts `stuck`
+from any state; `NSP m Q` adds a postcondition on results. Both compose
+through the interpreter's binds, `sub`, `lift`, pipelines and matches.
+
+| Theorem | Statement |
+|---|---|
+| `evalE_valFrag_ns` | evaluating an expression of the **value fragment** (`RExpr.ValFrag`: constants, locals of value type, `this`, unary and binary operators including `&&`/`\|\|`, comparisons, shifts and powers, `? :`, implicit conversions from value types and constants, and assignment, compound assignment and `++`/`--` to locals) that is `OpsOK` is never `stuck`, at any horizon, from any state |
+| `convRV_ns`, `getV_ns`, `evalLoc_local_bind`, `readLoc_local_ns`, `writeLoc_local_ns`, `compound_dom` | its steps |
+| `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_step`, `execItems_step`, `forIter_step`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`) is never `stuck`, at any horizon, in any modifier context |
+| `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
+| `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
+
+Controls (`Solidity/Source/SoundnessExamples.lean`, kernel `rfl`):
+`addSub_ns` (S01's own `a + a`), `cond_ns`/`cond_value` (`true ? 1 + 2 : 0`
+evaluates to `3`), `loop_ns`/`loop_value` (`uint8 i; while (i < 3) { i += 1; }`
+is never `stuck` and ends with `i = 3`); negative controls
+`badBinary_stuck` (a hand-resolved `true + false` evaluates to `stuck`:
+`OpsOK` is needed) and `ret_unframed_stuck` (`return 1;` outside a frame
+with a return slot is `stuck`: frame coherence, outside the fragment, is
+needed).
+
+**What the fragment leaves out**, in the order a whole-program proof needs
+it: `return` (frame coherence of `callInternal`/`runMods`), state variables
+and storage paths (the `stor` invariant), memory (the `heap` invariant,
+`WellTyped.lean`), internal calls and modifiers (dispatch coherence),
+external calls, `emit`, builtins, and the transaction layer (dispatch,
+ABI). Each is listed with its sites in the census below.
+
+### The `stuck` census
+
+A read-only census (finder agent, checked against the code) of all 118
+`Halt.stuck` sites (`Value.lean` 30, `Machine.lean` 22, `Eval.lean` 61,
+`Semantics.lean` 5), by what rules each out for a well-typed elaborated
+program:
+
+| Class | Sites | Ruled out by |
+|---|---|---|
+| shape | 68 | the value's type index plus the `toR` premises (`OpsOK` above for operators; `callTy`, `lengthTy`, `memberTy`, `copiesTo`, key types, `mkRet` shapes for the others) |
+| frame | 18 | program coherence: bodies exist for dispatched functions and overrides (`Elaborated.bodies_typed`), locals end in parameters and returns, `fnLocals` matches the running modifier, constants and initializers at their types, constructor frames |
+| heap | 13 | a `memory` reference of type `τ` names a live object of type `τ` (`bytes`/`string` compatible), aggregates hold `Data.val` elements, struct objects have their layout's fields |
+| stor | 3 | a `storage` reference of type `τ` names a path of declared type `τ` (`Env.cellTy p = τ.cell`), storage element types are storage-located |
+| gap | 12 | not modelled, reachable by well-typed programs (below) |
+| typing gap | 3 | well typed by S01, refused by solc, `stuck` at run time (below) |
+| bug | 1 | fixed (below) |
+| dead | 1 | `heapAt` (`Machine.lean`) has no caller in the interpreter |
+
+**Gaps reachable by well-typed programs** (none is on the per-constructor
+ledger `semExprGaps`, which lists only constructors S01 does not type):
+
+- dynamic ABI decoding of `calldata` parameters, static arrays, structs,
+  user-defined value types and external function types (`Eval.lean`
+  `decodeArgs`), and of memory arrays of non-value elements;
+- ABI encoding of memory arrays and structs (returns, external-call
+  arguments, `emit`/error arguments) and of external function values;
+- `calldata` references (six sites, all shadowed by the decoder's
+  refusal: no `cdRef` is ever built);
+- getters of non-value types (`string public s`);
+- `fallback` with parameters;
+- the default of function-typed variables (a function-typed state
+  variable read before written; function-typed locals, fields, returns);
+- **storage-pointer and calldata return slots and uninitialised calldata
+  locals** (new): `callInternal` zeroes the return slots before the body
+  runs, and a `storage`/`calldata` type has no default, so
+  `function g() internal view returns (uint[] storage r) { r = a; }` is
+  `stuck` at entry although solc accepts it.
+
+**Typing gaps** (S01 types them, solc refuses them, the semantics is
+`stuck`), fixed in S01's rules and G13's checker:
+
+- `p = S(1)` (a copy into storage) with `p` a local `storage` pointer
+  (solc 7407): `Typed.assignCopy` now requires `Γ.namesLocal a = false`;
+- `delete p` with `p` a local `storage` pointer (solc: "delete cannot be
+  applied to storage pointers"): `Typed.delete` requires
+  `(τ.loc? == some .storage && Γ.namesLocal e) = false`.
+
+Recorded, not fixed: storage-to-storage assignment of types containing
+mappings (`mapping(uint => uint)[2] a; … a = b;`, which solc refuses,
+`stuck` in `loadMem`), and of structs containing mappings, which S01
+types and the semantics runs as a copy of nothing (the struct's memory
+layout drops the mapping, and with it every member). A fix needs a
+`containsMapping` test over struct definitions (recursive through the
+environment) in `Typed.assign`.
+
+**Bug fixed**: `bytes(s)[i] = b` on a `string memory s` was `stuck`
+("not bytes"): `convExplicitRV` keeps the pointer, so the object is a
+string, and the byte write accepted only `bytes` objects. The write now
+updates a string object in place (`Eval.lean` `writeLoc`), as solc does.
+
+**Other findings recorded** (not `stuck` sites): `string s = "x";` and
+`string constant S = "x";` at contract level do not elaborate (a string
+literal does not convert implicitly to `string storage`), so the
+`.strLit` arm of `storeRV` is dead; calling an external function that
+takes `bytes calldata` with a memory argument has no type (memory to
+calldata is not implicit in S01), which solc accepts.
+
+**Not proved**: the gap-relative progress theorem for whole programs,
+`noGaps`, and its corollary. The interpreter walk is done for the value
+fragment of expressions and statements (above); the remaining
+constructs need the heap, storage and frame invariants of Checkpoint 2
+threaded through the walk.
+
 ## Handoff
 
 Kept current at every checkpoint.
