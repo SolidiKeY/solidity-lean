@@ -6,8 +6,9 @@ import Solidity.Source.ExprProgress
 `NSP m Q`: from every state, `m` returns a result satisfying `Q` or halts
 other than `stuck`. For the **statement value fragment**
 (`RStmt.ValFrag`: expression statements, declarations of types with a
-default, blocks, `unchecked`, `if`, loops, `break`, `continue`, `return;`
-and `return e;` of a value type, over expressions of the value fragment)
+default, blocks, `unchecked`, `if`, loops, `break`, `continue`, `return;`,
+`return e;` and `return (a, b);` of value types, over expressions of the
+value fragment)
 execution is never `stuck`, at any horizon, in any modifier context,
 provided its expressions are in the operations' domains (`RStmt.OpsOK`,
 which every elaborated statement satisfies, `StmtD.toR_opsOK`) and its
@@ -16,7 +17,10 @@ then the parameters): `stmtNS`, `itemsNS`. Outside loops no `break` or
 `continue` escapes a block (`itemsNSP`), so a body without modifiers runs
 to completion (`runMods_nil_ns`), and an internal call to such a body is
 never `stuck` when dispatch finds it and its frame is the one the call
-builds (`callInternal_ns`).
+builds (`callInternal_ns`). For elaborated programs that frame is derived
+(`Elaborated.body_locals`), and dispatch keeps the parameter types
+(`Glob.dispatchFn_params`), so a call needs only the dispatched override's
+return types to agree (`Elaborated.callInternal_call_ns`).
 
 The scope facts it needs are structural: a statement's output context
 extends its input (`RStmt.ext`, `RItems.ext`), so ending a scope
@@ -159,6 +163,12 @@ def RStmt.Simple {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} : RStmt E 
   | .expr _ | .declVar _ | .declInit _ _ | .skip => True
   | _ => False
 
+/-- Converted arguments of the fragment: each of the value fragment, at a
+value type, converted from a value type or a constant. -/
+def RConvArgs.ValFrag {Γ : RCtx} : {τs : List STy} → RConvArgs E Γ τs → Prop
+  | _, .nil => True
+  | _, .cons (σ := σ) (τ := τ) e _ es => e.ValFrag ∧ τ.isValue = true ∧ σ.FragSrc ∧ RConvArgs.ValFrag es
+
 mutual
 
 /-- **The statement value fragment.** -/
@@ -174,6 +184,7 @@ def RStmt.ValFrag {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} →
   | _, _, _, .forLoop i c p s => i.Simple ∧ RStmt.ValFrag i ∧ c.ValFrag ∧ p.ValFrag ∧ RStmt.ValFrag s
   | _, _, _, .skip | _, _, _, .brk | _, _, _, .cont | _, _, _, .ret _ => True
   | _, _, _, .retVal (σ := σ) (τ := τ) _ e _ => e.ValFrag ∧ τ.isValue = true ∧ σ.FragSrc
+  | _, _, _, .retTuple es => RConvArgs.ValFrag es
   | _, _, _, _ => False
 
 def RItems.ValFrag {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} → RItems E R M k Γ Γ' → Prop
@@ -243,6 +254,30 @@ end
 
 section
 variable {G : Glob E} {n : Nat}
+
+/-- **Converted arguments of the fragment** are never `stuck`. -/
+theorem evalConvArgs_ns (G : Glob E) (F : Fr) {Γ : RCtx} : {τs : List STy} → (es : RConvArgs E Γ τs) →
+    ∀ n, es.ValFrag → es.OpsOK → NS (evalConvArgs G F n es)
+  | _, es, 0, _, _ => by rw [evalConvArgs.eq_1]; exact NS.halt' fun _ e => by cases e
+  | _, .nil, n + 1, _, _ => by simp only [evalConvArgs]; exact NS.pure' _
+  | _, .cons e h es, n + 1, hf, ho => by
+    simp only [evalConvArgs]
+    exact NS.bind (evalE_valFrag_ns G F n e hf.1 ho.1) fun v => NS.bind (convRV_ns F n (.inl h) hf.2.2.1 v)
+      fun w => NS.bind (getV_ns hf.2.1 w) fun _ => NS.bind (evalConvArgs_ns G F es n hf.2.2.2 ho.2) fun _ =>
+        NS.pure' _
+
+/-- **Writing the return slots** of a body frame is never `stuck`. -/
+theorem setRets_ok {D : Layout} {Γ : RCtx} (ys : RCtx) : (rs : List STy) → {ps : RCtx} → (l : Locals D Γ) →
+    Γ = ys ++ (rs.reverse ++ ps) → (vs : Vals D rs) → NotStuckR (setRets l ys.length vs)
+  | [], _, _, _, .nil => NotStuckR.pure _
+  | τ :: τs, ps, l, hΓ, .cons v vs => by
+    have hΓ' : Γ = (ys ++ τs.reverse) ++ τ :: ps := by
+      rw [hΓ, List.reverse_cons, List.append_assoc, List.append_assoc, List.singleton_append]
+    have h1 := Locals.setAt_ok' (ys ++ τs.reverse) hΓ' l v
+    rw [List.length_append, List.length_reverse] at h1
+    have hΓ'' : Γ = ys ++ (τs.reverse ++ τ :: ps) := by rw [hΓ', List.append_assoc]
+    simp only [setRets]
+    exact NotStuckR.bind h1 fun l' => setRets_ok ys τs l' hΓ'' vs
 
 theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : s.ValFrag) (ho : s.OpsOK)
@@ -357,6 +392,17 @@ theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E
     have hΓ : ys ++ (R.reverse ++ ps) = ys ++ τ :: ps := by rw [hR]; rfl
     rw [hb]
     exact NSP.bind (NSP.lift_ok (Locals.setAt_ok' ys hΓ p.2 p.1)) fun _ _ =>
+      NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
+  | retTuple es =>
+    simp only [execS]
+    obtain ⟨ys, ps, rfl, hn⟩ := hfr
+    refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns (evalConvArgs_ns G F es n hf ho))
+      fun _ _ _ => trivial)) fun p _ => ?_
+    have hb : (ys ++ (R.reverse ++ ps)).length - (nps + R.length) = ys.length := by
+      simp only [List.length_append, List.length_reverse]
+      omega
+    rw [hb]
+    exact NSP.bind (NSP.lift_ok (setRets_ok ys R p.2 rfl p.1)) fun _ _ =>
       NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
   | _ => exact hf.elim
 
@@ -677,6 +723,27 @@ theorem Frame.tysOf_locals {f : Frame} (hp : f.names.length = f.ps.length) (hr :
   rw [this, List.reverse_append]
 
 
+/-- **A function's frame has its signature's types.** -/
+theorem Decl.frame?_fnSig {E : Env} {d : Decl} {ps rs : List STy} {f : Frame} (hs : d.fnSig E = some (ps, rs))
+    (hf : d.frame? E = some f) : f.ps = ps ∧ f.rs = rs := by
+  obtain ⟨k, name, scope, top, node⟩ := d
+  cases k <;> cases node <;> (try cases hs)
+  case function.function _ ps0 _ _ _ _ _ rs0 b0 =>
+    cases b0 with
+    | none => cases hf
+    | some blk =>
+      cases blk with
+      | block b =>
+        change (match ps0.tys E scope .memory, rs0.tys E scope .memory with
+          | Option.some a, Option.some r => Option.some (a, r)
+          | _, _ => Option.none) = some (ps, rs) at hs
+        change Frame.mk? E scope ps0 rs0 b _ false = some f at hf
+        unfold Frame.mk? at hf
+        cases ha : ps0.tys E scope .memory <;> cases hr : rs0.tys E scope .memory <;>
+          simp only [ha, hr, reduceCtorEq, Option.some.injEq, Prod.mk.injEq] at hs hf
+        subst hf
+        exact ⟨hs.1, hs.2⟩
+
 /-- **An elaborated body is in its frame**: its locals are its returns over
 its parameters, last innermost, exactly the frame `callInternal` builds. -/
 theorem Elaborated.body_locals (el : Elaborated) {d : Decl} {b : RBody el.res.env}
@@ -686,8 +753,11 @@ theorem Elaborated.body_locals (el : Elaborated) {d : Decl} {b : RBody el.res.en
   rw [hl, Frame.tysOf_locals h1 h2, hps, hrs]
 
 /-- **Internal calls in elaborated programs**: the frame hypotheses of
-`callInternal_ns` reduce to the body dispatch finds having the call's
-parameter and return types (dispatch coherence). -/
+`callInternal_ns` (`hloc`, `hps` as a length) reduce to the body dispatch
+finds having the call's parameter and return types (`hps`, `hrs`: dispatch
+coherence), given that the program is the elaborated one (`hG`) and the
+dispatched declaration is one of the unit's (`hdec`); `hmods`, `hz`, `hf`
+and `ho` are `callInternal_ns`'s, kept. -/
 theorem Elaborated.callInternal_ns (el : Elaborated) (G : Glob el.res.env) (hG : G.prog = el.prog) (F : Fr)
     (n : Nat) (d : Decl) {ps : List STy} (vs : Vals el.res.env.layout ps) (rs : List STy) (b : RBody el.res.env)
     (hdec : G.dispatchFn F.contract d ∈ el.res.unit.decls) (hb : G.prog.body (G.dispatchFn F.contract d) = some b)
@@ -698,5 +768,72 @@ theorem Elaborated.callInternal_ns (el : Elaborated) (G : Glob el.res.env) (hG :
   have hloc : rs.reverseAux (ps.reverseAux []) = b.locals := by
     rw [Elaborated.body_locals el hdec hb', hps, hrs, List.reverseAux_eq, List.reverseAux_eq, List.append_nil]
   exact Solidity.Source.callInternal_ns G F n d vs rs b hb hloc hrs (by rw [hps]) hmods hz hf ho
+
+
+/-- **An elaborated body has its declaration's signature.** -/
+theorem Elaborated.body_sig (el : Elaborated) {d : Decl} {b : RBody el.res.env} {ps rs : List STy}
+    (hd : d ∈ el.res.unit.decls) (hb : el.prog.body d = some b) (hs : d.fnSig el.res.env = some (ps, rs)) :
+    b.ps = ps ∧ b.rs = rs := by
+  obtain ⟨f, L', hf, D, hps, hrs, _⟩ := el.bodies_typed d hd b hb
+  obtain ⟨h1, h2⟩ := Decl.frame?_fnSig hs hf
+  exact ⟨hps.trans h1, hrs.trans h2⟩
+
+/-- **Dispatch keeps the parameter types**: the declaration virtual
+dispatch finds for `d` has `d`'s parameter types (`Env.fnIn` selects
+overrides by them; every fallback is `d` itself). -/
+theorem Glob.dispatchFn_params (G : Glob E) (c : String) (d : Decl) {ps rs ps' rs' : List STy}
+    (hd : d.fnSig E = some (ps, rs)) (h' : (G.dispatchFn c d).fnSig E = some (ps', rs')) : ps' = ps := by
+  unfold Glob.dispatchFn at h'
+  rw [hd] at h'
+  simp only at h'
+  split at h'
+  · cases hf : ((E.linearize c).getD [c]).findSome? (fun s => (E.fnIn s d.name ps).find?
+        fun d' => (G.prog.body d').isSome) with
+    | none =>
+      rw [hf, Option.getD_none, hd] at h'
+      simp only [Option.some.injEq, Prod.mk.injEq] at h'
+      exact h'.1.symm
+    | some d' =>
+      rw [hf, Option.getD_some] at h'
+      obtain ⟨s, _, hs⟩ := List.exists_of_findSome?_eq_some hf
+      have hm := List.mem_of_find?_eq_some hs
+      simp only [Env.fnIn, List.mem_filter, Bool.and_eq_true, beq_iff_eq, h'] at hm
+      exact (STy.eq_of_sameList ps ps' hm.2.2).symm
+  · rw [hd] at h'
+    simp only [Option.some.injEq, Prod.mk.injEq] at h'
+    exact h'.1.symm
+
+/-- **Internal calls in elaborated programs, by signature**: an internal
+call is never `stuck` when the declaration virtual dispatch finds is one
+of the unit's with the call's signature and a body without modifiers in
+the statement fragment (return types with defaults). For a call whose
+dispatch is the called declaration itself, the signature is the call
+node's own (`RExpr.call`'s premise). -/
+theorem Elaborated.callInternal_sig_ns (el : Elaborated) (G : Glob el.res.env) (hG : G.prog = el.prog) (F : Fr)
+    (n : Nat) (d : Decl) {ps : List STy} (vs : Vals el.res.env.layout ps) (rs : List STy) (b : RBody el.res.env)
+    (hdec : G.dispatchFn F.contract d ∈ el.res.unit.decls) (hb : G.prog.body (G.dispatchFn F.contract d) = some b)
+    (hsig : (G.dispatchFn F.contract d).fnSig el.res.env = some (ps, rs)) (hmods : b.mods = [])
+    (hz : ∀ τ ∈ rs, (Val.default el.res.env.layout τ).isSome = true)
+    (hf : b.items.ValFrag) (ho : b.items.OpsOK) : NS (callInternal G F n d vs rs) := by
+  have hb' : el.prog.body (G.dispatchFn F.contract d) = some b := by rw [← hG]; exact hb
+  obtain ⟨hps, hrs⟩ := Elaborated.body_sig el hdec hb' hsig
+  exact Elaborated.callInternal_ns el G hG F n d vs rs b hdec hb hps hrs hmods hz hf ho
+
+
+/-- **Internal calls in elaborated programs, by the call node**: for a call
+`d(args)` with `d`'s signature `(ps, rs)` (`RExpr.call`'s premise), only the
+return types of the declaration virtual dispatch finds remain to agree;
+its parameter types agree by construction (`Glob.dispatchFn_params`). -/
+theorem Elaborated.callInternal_call_ns (el : Elaborated) (G : Glob el.res.env) (hG : G.prog = el.prog) (F : Fr)
+    (n : Nat) (d : Decl) {ps : List STy} (vs : Vals el.res.env.layout ps) (rs : List STy) (b : RBody el.res.env)
+    (hd : d.fnSig el.res.env = some (ps, rs))
+    (hdec : G.dispatchFn F.contract d ∈ el.res.unit.decls) (hb : G.prog.body (G.dispatchFn F.contract d) = some b)
+    (hret : ∃ ps', (G.dispatchFn F.contract d).fnSig el.res.env = some (ps', rs)) (hmods : b.mods = [])
+    (hz : ∀ τ ∈ rs, (Val.default el.res.env.layout τ).isSome = true)
+    (hf : b.items.ValFrag) (ho : b.items.OpsOK) : NS (callInternal G F n d vs rs) := by
+  obtain ⟨ps', h'⟩ := hret
+  have e := Glob.dispatchFn_params G F.contract d hd h'
+  subst e
+  exact Elaborated.callInternal_sig_ns el G hG F n d vs rs b hdec hb h' hmods hz hf ho
 
 end Solidity.Source

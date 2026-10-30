@@ -30,6 +30,7 @@ it the operation is `stuck`).
 | `ret_framed_ns` | the same `return 1;` with a return slot is never `stuck` |
 | `indexMapping_ns` | the elaboration of S01's `m[o]` (a mapping value, read through an implicit key conversion) is in the value fragment and never `stuck` |
 | `incBody_ns` | the elaboration of the counter's typed body `count++;` (`TypingExamples.incBody`, an `ItemsD` derivation) is in the statement fragment and never `stuck` in its frame (`ItemsD.toR_ns`) |
+| `retPair_ns`, `retPair_unframed_stuck` | `return (1, 2);` with two return slots is never `stuck`; over locals without them it is |
 | `callRetOne_ns` | an internal call of `function f() internal returns (uint8) { return 1; }` (no modifiers, a fragment body in the frame the call builds) is never `stuck` (`callInternal_ns`) |
 | `callBadFrame_stuck` | a body whose locals lack the return slot is `stuck` ("call frame"): the frame hypothesis is needed |
 -/
@@ -208,6 +209,24 @@ theorem ret_framed_ns (n : Nat) (l : Locals SemanticsExamples.E0.layout [.int In
       (RStmt.retVal (E := SemanticsExamples.E0) (R := [.int IntTy.u8]) (M := false) (k := .body)
         rfl (.const (Q.ofInt 1)) (by decide)) l) :=
   stmtNS _ _ n 0 none _ l ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩ trivial ⟨[], [], rfl, rfl⟩
+
+/-- `return (1, 2);` in a function returning `(uint8, uint8)`. -/
+def retPair : RStmt SemanticsExamples.E0 [.int IntTy.u8, .int IntTy.u8] false .body Γ Γ :=
+  .retTuple (.cons (.const (Q.ofInt 1)) (by decide) (.cons (.const (Q.ofInt 2)) (by decide) .nil))
+
+/-- **Witness**: `return (1, 2);` with its two return slots is never
+`stuck` (`retTuple`, through `setRets_ok`). -/
+theorem retPair_ns (n : Nat) (l : Locals SemanticsExamples.E0.layout [.int IntTy.u8, .int IntTy.u8]) :
+    NS (execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n 0 none (retPair (Γ := _)) l) :=
+  stmtNS _ _ n 0 none _ l ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩), trivial, rfl, .inr (.inl ⟨_, rfl⟩), trivial⟩
+    ⟨trivial, trivial, trivial⟩ ⟨[], [], rfl, rfl⟩
+
+/-- **Negative control**: the same statement over locals without the return
+slots is `stuck` ("no local"). -/
+theorem retPair_unframed_stuck :
+    ((execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 5 0 none (retPair (Γ := [])) .nil).run
+      (.nil, SemanticsExamples.s0)).1 = .error (.stuck "no local") := by
+  rfl
 
 /-! ## Elaborated witnesses: a statement and a mapping -/
 
@@ -410,5 +429,19 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.Elaborated.body_locals
 /-- info: 'Solidity.Source.Elaborated.callInternal_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_ns
+/-- info: 'Solidity.Source.SoundnessExamples.retPair_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.retPair_ns
+/-- info: 'Solidity.Source.SoundnessExamples.retPair_unframed_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.retPair_unframed_stuck
+/-- info: 'Solidity.Source.Decl.frame?_fnSig' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Decl.frame?_fnSig
+/-- info: 'Solidity.Source.Elaborated.body_sig' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.body_sig
+/-- info: 'Solidity.Source.Elaborated.callInternal_sig_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_sig_ns
+/-- info: 'Solidity.Source.Glob.dispatchFn_params' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Glob.dispatchFn_params
+/-- info: 'Solidity.Source.Elaborated.callInternal_call_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_call_ns
 
 end Solidity.Source.SoundnessExamples
