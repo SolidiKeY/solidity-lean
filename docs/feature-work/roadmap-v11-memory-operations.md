@@ -408,3 +408,73 @@ output; separate no-new passes. Global pin inventory fails with zero errors,
 Final finder found no defect. Skeptic required the open-versus-unavailable
 backfill distinction above; corrected before commit. Further independent generic
 decoded-object laws remain candidate work, not ruled out by a missing evaluator.
+
+## Generic decoded-array and nonprimitive transport checkpoint
+
+`CalldataArrayRead` uses the same published `Source.Data.array` and immutable
+table for every existing element `Source.STy`, both static and dynamic length
+options. `decodedArrayRead_iff` derives exact finite structural observations by
+constructor injectivity, with no axioms. `decodedArrayRead_overrun` rejects an
+index beyond the certified actual length. `decodedArraySlice_length/read/compose`
+connect runtime endpoint bounds, captured existing Source.Data values and nested
+view coordinates. No array-type restriction, payload cap or depth cutoff is
+introduced. This is not child execution, Source expression evaluation or ABI
+correspondence. The earlier Boolean observation is definitionally equivalent
+to this generic observation (`bool_observation_compatibility`, no axioms).
+
+Static nonprimitive controls contain actual `Source.Val.cdRef` offsets37/42,
+including shared37 identities, reject a different38 offset and exact-end read,
+and exercise empty end/source plus nested array constructors. Offsets alone
+are syntactic identities, not validated child lookup/liveness. Both reviewers
+required replacing the word "stale" with "different" for the negative; fixed.
+Those controls do not establish stale-alias execution/compilation.
+
+`decodedArray_overwrite_read/transport` connects generic immutable decoded reads
+to this lane's actual typed heap overwrite. Premises: exact initial decoded
+table/array, an already existing typed value list of the same runtime length,
+an initial per-element relation from Source.Data to MVal, ordered source bounds,
+destination capacity and (for framing) distinct IDs. Every resulting interior
+read and other-object frame is derived. No converter, generic payload emitter,
+loop, alternative value/state or desired preservation premise is introduced.
+The generic conclusion retains the same supplied `rel`, which may close over
+the initial heap; it does not generically establish a heap-indexed relation at
+the output heap. The concrete controls prove that stronger final relation only
+for their separately framed children. Initial correspondence and existing
+payload/conversion remain prerequisites for types without concrete certificates;
+parameterization is not all-type proof completion.
+
+The concrete nonprimitive application discharges every premise: actual parent
+source entries at7 refer to children42/37, those child tables contain the same
+Boolean contents as typed heap children1/0, and the initial relation records
+both offset/identity and child contents. The actual fixed-parent overwrite
+redirects its reference IDs from[0,0] to[1,0]. Both children are framed, so final
+source child table contents and final memory contents still match. A different
+source offset and an absent child table fail the initial relation in explicit
+negative controls. This is genuine decoded-reference-to-existing-memory slice
+transport, not a fresh deep copy or decoder. Initial relations for all approved
+recursive/aggregate types and storage destinations remain unproved.
+
+Focused generic read/control closures pass32/53 jobs and actual reference
+transport54 jobs, with all19new headline/control axiom sets guarded after final
+confirmation. Independent finder/skeptic reviews inspect all four modules and
+preserve the initial-relation versus full-source/target distinction. All prior
+G32-G35 and Backfill statuses remain partial/blocked; this advances G35.03 and
+Backfill A/B without declaring remaining independent work unavailable.
+
+Checkpoint-five handoff is exported at
+`/workspace/v11-memory-operations-evidence/checkpoint5`, with cumulative patch,
+named-ref bundle, exact head/base, raw gates, proposed pins and checksums.
+Parent is `a6953e6b1aaee5d10ee27b975e982db8f82b03a4`. Checkpoint-four artifact
+finder and skeptic both passed all33checksums, exactbase/head/branch, patch,
+bundle, handoff links and honest open-work statuses. Runtime TOML and all prior
+artifacts/caches/failure receipts remain preserved; no integration is performed.
+
+Checkpoint-five final confirmation exits0:870 default jobs,262 TestSuite jobs,
+SolKey377/131 OK; aggregate sampled RSS1,561,324 KiB, cgroup peak381,456,384 bytes.
+Strict automatic and complete committed-snapshot TestSuite trust/parity pass;
+layers/orphans/trust/lane/script/diff pass. Docs global still fails with raw
+byte-identical exact-base output; separate no-new passes. Global pin inventory
+fails with zero errors and104 unrecorded changes:14 inherited plus90owned.
+All90owned pins pass the standard allowlist. Final independent finder/skeptic
+reviews found no further defect after precise relation-boundary wording. No
+all-type correspondence, recursive-child traversal or lane completion follows.

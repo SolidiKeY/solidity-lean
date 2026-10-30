@@ -1054,3 +1054,7 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/DisjointGrowthControls.lean` | Inhabited fresh reference parent and genuinely changed old children, distinguishing structural framing from deep preservation. |
 | `Backend/MemoryOps/ObjectFrames.lean` | Captured range overwrite preserves published word-object reservation/ownership and different-array representation; destination target writes remain required. |
 | `Backend/MemoryOps/ObjectFrameControls.lean` | Populated shared-reference word-representation witnesses, changed child, stale-target and colliding-address negative controls. |
+| `Backend/MemoryOps/CalldataArrayRead.lean` | All-element-type/static-or-dynamic decoded-array finite observations, bounds and typed captured-view laws over existing Source.Data. |
+| `Backend/MemoryOps/CalldataArrayControls.lean` | Actual cdRef identities, nested Data.array contents, wrong-offset and empty/bounds controls; Boolean observation coherence. |
+| `Backend/MemoryOps/CalldataTransport.lean` | Initial typed element correspondence derives immutable decoded-read/actual heap overwrite transport; no converter/emitter. |
+| `Backend/MemoryOps/CalldataTransportControls.lean` | Nonprimitive initial child table/heap correspondences discharged, actual parent redirection and wrong/missing-child negatives. |
