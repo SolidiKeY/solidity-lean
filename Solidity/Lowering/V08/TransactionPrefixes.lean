@@ -592,6 +592,72 @@ theorem transact_prefix_replace_segment (w : World contracts)
     rw [transact_prefix_append w before left, transact_prefix_append w before right, segment]
   rw [transact_prefix_append w (before ++ left) after, transact_prefix_append w (before ++ right) after, middle]
 
+/-- Equality after normalizing ONLY successful returned worlds suffices at a
+transaction boundary. Raw worlds need not be equal; exact values/halts do. -/
+theorem transact_normalized_result_congr (w : World contracts)
+    (left right : TransactionFrame contracts α)
+    (same : (left w.resetTransient).map (fun pair => (pair.1.resetTransient, pair.2)) =
+      (right w.resetTransient).map (fun pair => (pair.1.resetTransient, pair.2))) :
+    w.transact left = w.transact right := by
+  unfold World.transact
+  cases one : left w.resetTransient with
+  | error halt =>
+    cases two : right w.resetTransient with
+    | error other =>
+      simp only [one, two] at same
+      exact congrArg (fun error => (w.resetTransient, (Except.error error : TRes α))) (Except.error.inj same)
+    | ok pair =>
+      simp only [one, two] at same
+      cases same
+  | ok pair =>
+    cases two : right w.resetTransient with
+    | error halt =>
+      simp only [one, two] at same
+      cases same
+    | ok other =>
+      simp only [one, two] at same
+      have returned : (pair.1.resetTransient, pair.2) = (other.1.resetTransient, other.2) := Except.ok.inj same
+      exact congrArg (fun result => (result.1, (Except.ok result.2 : TRes α))) returned
+
+/-- Output-only adapter on a COMPLETED transaction frame, not an internal call
+interpreter or permission to reset transient state inside an unfinished frame. -/
+def normalizeTransactionFrame (frame : TransactionFrame contracts α) : TransactionFrame contracts α :=
+  fun w => (frame w).map (fun pair => (pair.1.resetTransient, pair.2))
+
+theorem transact_normalize_frame (w : World contracts) (frame : TransactionFrame contracts α) :
+    w.transact (normalizeTransactionFrame frame) = w.transact frame := by
+  apply transact_normalized_result_congr
+  unfold normalizeTransactionFrame
+  cases frame w.resetTransient with
+  | error halt => rfl
+  | ok pair => simp only [Except.map, resetTransient_idem]
+
+/-- Exact world and full-history normalization transport at every actual frame
+boundary. No reset is added to the empty prefix or inside a supplied frame. -/
+theorem transact_prefix_normalize_frames (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) :
+    transactPrefix w (frames.map normalizeTransactionFrame) = transactPrefix w frames := by
+  induction frames generalizing w with
+  | nil => rfl
+  | cons frame rest ih =>
+    simp only [List.map_cons, transact_prefix_cons, transact_normalize_frame, ih]
+
+/-- Localized replacement requires equality of complete NORMALIZED raw results
+at the reached reset input; this does not assert equality of raw returned Worlds. -/
+theorem transact_prefix_replace_frame_normalized (w : World contracts)
+    (before after : List (TransactionFrame contracts α)) (left right : TransactionFrame contracts α)
+    (same : (left (transactPrefix w before).1.resetTransient).map (fun pair => (pair.1.resetTransient, pair.2)) =
+      (right (transactPrefix w before).1.resetTransient).map (fun pair => (pair.1.resetTransient, pair.2))) :
+    transactPrefix w (before ++ left :: after) = transactPrefix w (before ++ right :: after) := by
+  have boundary := transact_normalized_result_congr (transactPrefix w before).1 left right same
+  rw [transact_prefix_append w before (left :: after), transact_prefix_append w before (right :: after),
+    transact_prefix_cons, transact_prefix_cons, boundary]
+
+#print axioms transact_normalized_result_congr
+#print axioms transact_normalize_frame
+#print axioms transact_prefix_normalize_frames
+#print axioms transact_prefix_replace_frame_normalized
+
 #print axioms transact_prefix_reachable_congr
 #print axioms transact_prefix_reachable_congr_full
 #print axioms transact_prefix_replace_frame

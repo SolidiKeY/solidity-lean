@@ -1131,6 +1131,96 @@ theorem replacement_segment_application :
     simp only [List.length_cons, List.length_nil] at valid
     omega
 
+private theorem normalize_success (w : World Catalog) (value : Output) :
+    ((.ok (w, value) : TRes (World Catalog × Output)).map
+      (fun pair => (pair.1.resetTransient, pair.2))) = .ok (w.resetTransient, value) := rfl
+
+theorem normalize_commit_reached : normalizeTransactionFrame commit base.resetTransient =
+    .ok (linked.resetTransient, commitValue) := by
+  have mapped := congrArg (fun run : TRes (World Catalog × Output) =>
+    run.map (fun pair => (pair.1.resetTransient, pair.2))) commit_reached
+  exact mapped.trans (normalize_success linked commitValue)
+
+/-- Raw completed worlds REALLY differ on transient cells, though legal boundary
+normalization retains their exact complete committed world and typed value. -/
+theorem normalize_commit_raw_vectors :
+    ((commit base.resetTransient).toOption.map (fun pair => (extended pair.1, pair.2)),
+      (normalizeTransactionFrame commit base.resetTransient).toOption.map (fun pair => (extended pair.1, pair.2))) =
+    (some ((([88, 7, 0, 5, 0], [some [11, 23], some [19, 0], some []], installedFlags), some [8, 12], true), commitValue),
+      some (committedVector, commitValue)) := by
+  rw [commit_reached, normalize_commit_reached]
+  decide +kernel
+
+theorem normalize_commit_raw_different :
+    (commit base.resetTransient).toOption.map (fun pair => extended pair.1) ≠
+      (normalizeTransactionFrame commit base.resetTransient).toOption.map (fun pair => extended pair.1) := by
+  rw [commit_reached, normalize_commit_reached]
+  decide +kernel
+
+theorem normalize_commit_trace :
+    transactPrefix base [normalizeTransactionFrame commit, failing, occupied, reading] = transactPrefix base frames := by
+  symm
+  apply transact_prefix_replace_frame_normalized base [] [failing, occupied, reading] commit (normalizeTransactionFrame commit)
+  simp only [transact_prefix_nil, normalizeTransactionFrame, commit_reached, Except.map, resetTransient_idem]
+
+theorem normalization_every_prefix (count : Nat) :
+    transactPrefix base ((frames.take count).map normalizeTransactionFrame) = transactPrefix base (frames.take count) :=
+  transact_prefix_normalize_frames base (frames.take count)
+
+theorem normalization_every_listed_vector (count : Nat) :
+    (extended (transactPrefix base ((frames.take count).map normalizeTransactionFrame)).1,
+      (transactPrefix base ((frames.take count).map normalizeTransactionFrame)).2) =
+    (extended (transactPrefix base (frames.take count)).1,
+      (transactPrefix base (frames.take count)).2) :=
+  congrArg (fun pair => (extended pair.1, pair.2)) (normalization_every_prefix count)
+
+def badFrames : List (TransactionFrame Catalog Output) := [commit, baseOnlyReplacement, occupied, reading]
+def badHistory : List (TRes Output) := [.ok commitValue, .error .revert, .error .revert, .ok readValue]
+
+/-- Actual invalid replacement still reaches the SAME final world and read,
+but loses the paid call's exact binary halt. No desired trace equation assumed. -/
+theorem bad_trace_reached : transactPrefix base badFrames = (readWorld.resetTransient, badHistory) := by
+  have first : base.transact commit = (linked.resetTransient, .ok commitValue) :=
+    World.transact_commit base linked commit commitValue commit_reached
+  have bad : linked.resetTransient.transact baseOnlyReplacement = (linked.resetTransient, .error .revert) := by
+    have failed : baseOnlyReplacement linked.resetTransient.resetTransient = .error .revert := by
+      simpa only [resetTransient_idem] using base_only_reached_failure
+    rw [World.transact_failure _ _ _ failed, resetTransient_idem]
+  have collision : linked.resetTransient.transact occupied = (linked.resetTransient, .error .revert) := by
+    have failed : occupied linked.resetTransient.resetTransient = .error .revert := by
+      simpa only [resetTransient_idem] using occupied_reached
+    rw [World.transact_failure _ _ _ failed, resetTransient_idem]
+  have read : linked.resetTransient.transact reading = (readWorld.resetTransient, .ok readValue) := by
+    apply World.transact_commit
+    simpa only [resetTransient_idem] using read_reached
+  simp only [badFrames, transact_prefix_cons, first, bad, collision, read, transact_prefix_nil]
+  rfl
+
+theorem same_terminal_not_history :
+    ((transactPrefix base badFrames).1, (transactPrefix base badFrames).2.getLast?) =
+      ((transactPrefix base frames).1, (transactPrefix base frames).2.getLast?) ∧
+    (transactPrefix base badFrames).2 ≠ (transactPrefix base frames).2 := by
+  simp only [bad_trace_reached, boundary4]
+  constructor
+  · rfl
+  · decide +kernel
+
+theorem bad_exact_payload_discriminates :
+    (transactPrefix base badFrames).2[1]'(by rw [transact_prefix_length]; decide) ≠
+      (transactPrefix base frames).2[1]'(by rw [transact_prefix_length]; decide) := by
+  simp only [bad_trace_reached, boundary4]
+  decide +kernel
+
+#print axioms normalize_commit_reached
+#print axioms normalize_commit_raw_vectors
+#print axioms normalize_commit_raw_different
+#print axioms normalize_commit_trace
+#print axioms normalization_every_prefix
+#print axioms normalization_every_listed_vector
+#print axioms bad_trace_reached
+#print axioms same_terminal_not_history
+#print axioms bad_exact_payload_discriminates
+
 #print axioms replacement_pointwise
 #print axioms replacement_every_prefix
 #print axioms replacement_every_listed_vector

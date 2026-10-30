@@ -2065,3 +2065,59 @@ separateNEW0 passes. Both finalindependent reviews PASS/no findings. GatefreshRS
 1133637632,reusedreportedpeak516050944(possiblycumulative). Precommitavailable
 190365696bytes inside32MiBenvelope. Originalsource/application/mandatorywhole
 obligations unfinished; next independentprecisenormalization clause continues.
+
+
+### Precise completed-frame normalization checkpoint
+
+Following c91b4af318f4f35249b4cea7e81a0b1502774736, four separate general laws
+prove normalized-result congruence at actualreachedresetinput, a completed-frame
+outputadapter, exact fullprefix normalizationtransport, and localizednormalized
+replacement. Normalizedpremise maps ONLY successful returnedWorlds through
+published resetTransient and retains exacttypedvalue/errorTHalt. It permits
+unequalRAWworlds; only completepostresetWorlds/results must agree. Casing the
+actual published World.transact proves this step explicitly. The adapter applies
+ONLYafter a suppliedframe has completed at an outertransaction boundary, never
+inside an unfinishedinternalcall/frame. Emptyfold retains dirtyinput; no new
+state/interpreter or raw=normalized identification. Rawreplacementtheorems unchanged.
+
+Nine actual controls prove rawcompletedcommit differs from normalization on caller
+scratch23->0,candidate scratch12->0 while everyother oldlistedfield and fulltyped
+success retained. The real fundedconstructor/library body is unchanged; only its
+completedoutput is normalized before World.transact would normalize it anyway.
+Everyprefix world/history and everylistedvector preserved; explicit normalized
+localizedreplacement instantiated. Actual invalid baseOnlyReplacement instead
+runs occupiedcreation at reachedinput: derived bad_trace_reached has identical
+completefinalWorld AND lasttypedread to original, but completehistory differs
+because binaryhalt replaced byplainrevert. Bothfullsame-tag successvalues and
+read/payload/order remain explicit; no terminal-only/state-only premise substituted.
+All existing completeold0..4vector controls/negatives retained. These are intrinsic
+suppliedbody adapters, not Source/ABI/body/linkage/runtimeframe/bytecode adequacy.
+
+Gate827597-abfc4a74 PASS117jobs/44.2260s,freshRSS1184374784,reusedreportedpeak
+552538112(possiblycumulative);506standardexactsets retain493prior/475starting.
+Initial825535FAIL1 at unchanged200000HB in concretemap reduction retained;
+abstract-world normalize_success helper and congrArg on actualprovedcommit fixed
+it without statement/budgetchanges. No authoredsorry/newaxiom/nonstandardaxes.
+Both independent read-only reviews of actualhypotheses/nonvacuity/fullobservations
+found no issue; no Lean/server/builds/writes by reviewers. Sameexistingbounded
+runtime/config/commands/cache/profile, no allocation/deletion/capacitychange.
+32MiBcontinuationenvelope; finalcompactexport measured beforewrite.
+
+AlloriginalG20,G21,G22.01-.05,G23/BackfillA-B sourceapplicationparents PARTIAL;
+Source/V07/type/layout/ABI/body/linkage/runtimeframe/bytecode/admission/reserved
+applications and mandatorywholevalidation unfinished. Goalblockeduntouched,
+get_goal/LeanMCPunavailable. No independentqueue exhaustion claimed. Fresh Decision
+321dependency sourcecomparisons unchanged, no completedoutput/trace/newpermitted
+repair. Retain full496841/task413142/base433573FAILED125 and literalwrapperpending;
+no unchangedretry/owneredit/async/target/guard/budgetchange orbaselinewaiver.
+Rawglobaldocs/pins exits1 stayfailed; completeexactbaseNEW0 comparisons separate.
+This section is the committedcheckpoint handoff; finalscopedgates/artifacts follow.
+
+Normalizedcheckpoint final scopedgates PASS506exactpins/60coreclosure,
+19evidence+14runtimeprofilecorruptions afterpositivecontrols,trust911/241/0findings,
+strict491/61budget/11refuted/0pending,layers169/0elaborator,orphans896/0orphan.
+Rawtask/base docs/pins exits1 remainfailed; complete72/14findingrows identical
+and separateNEW0 passes. Both finalindependentproof/pins/sourcebinding reviews
+PASS/no findings. Precommitavailable180695040bytes inside32MiBenvelope; measured
+compact additiveexports follow. Alloriginalsource/applicationparents and mandatory
+wholevalidation unfinished; no independentqueue exhaustion claimed.

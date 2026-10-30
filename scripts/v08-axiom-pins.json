@@ -1276,6 +1276,16 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.bad_exact_payload_discriminates": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.bad_trace_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.base_only_agrees_at_wrong_input": [
     "Classical.choice",
     "Quot.sound",
@@ -1497,6 +1507,36 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.normalization_every_listed_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.normalization_every_prefix": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.normalize_commit_raw_different": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.normalize_commit_raw_vectors": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.normalize_commit_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.normalize_commit_trace": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.observed_complete": [
     "Classical.choice",
     "Quot.sound",
@@ -1583,6 +1623,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.replacement_segment_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.same_terminal_not_history": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1943,6 +1988,13 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_normalize_frame": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_normalized_result_congr": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_observe": [
     "propext"
   ],
@@ -2011,6 +2063,10 @@
   "Solidity.Lowering.V08.transact_prefix_nil": [
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_prefix_normalize_frames": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_prefix_normalized": [
     "Quot.sound",
     "propext"
@@ -2033,6 +2089,10 @@
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_replace_frame": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_replace_frame_normalized": [
     "Quot.sound",
     "propext"
   ],
