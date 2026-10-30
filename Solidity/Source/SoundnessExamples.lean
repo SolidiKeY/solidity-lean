@@ -491,6 +491,26 @@ theorem ptrHeap_byte_stuck :
       .error (.stuck "not bytes") := by
   rfl
 
+/-- **Control**: `ptrHeap` is not shaped (`HeapShaped`), so
+`writeLoc_memByte_ok` does not apply to it. -/
+theorem ptrHeap_not_shaped : ¬ HeapShaped (E := SemanticsExamples.E0) ptrHeap := fun h => by
+  have ht := h 1 _ rfl
+  simp only [Data.Top, STy.loc?, reduceCtorEq] at ht
+
+/-- A heap with only the `bytes memory` object `[1]` at `0`. -/
+def bytesHeap : Heap SemanticsExamples.E0.layout :=
+  ((Heap.empty : Heap SemanticsExamples.E0.layout).alloc ⟨.bytes .memory, .bytes [1]⟩).1
+
+theorem bytesHeap_shaped : HeapShaped (E := SemanticsExamples.E0) bytesHeap :=
+  HeapShaped.empty.alloc trivial
+
+/-- **Witness**: in the shaped `bytesHeap`, the byte write at `0` succeeds
+(`writeLoc_memByte_ok`: never `stuck`). -/
+theorem bytesHeap_byte_write :
+    ((writeLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 3 (.memByte 0 0)
+      (Val.fixedBytes [7] rfl)).run (.nil, { SemanticsExamples.s0 with heap := bytesHeap })).1 = .ok () := by
+  rfl
+
 /-! ## Axioms -/
 
 /-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -583,6 +603,26 @@ theorem ptrHeap_byte_stuck :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ptrHeap_ok
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_byte_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ptrHeap_byte_stuck
+/-- info: 'Solidity.Source.HeapShaped.empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.HeapShaped.empty
+/-- info: 'Solidity.Source.HeapShaped.alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.HeapShaped.alloc
+/-- info: 'Solidity.Source.HeapShaped.write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.HeapShaped.write
+/-- info: 'Solidity.Source.heapObj_gen' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapObj_gen
+/-- info: 'Solidity.Source.heapObj_top' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapObj_top
+/-- info: 'Solidity.Source.heapPut_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapPut_shaped
+/-- info: 'Solidity.Source.writeLoc_memByte_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_ok
+/-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ptrHeap_not_shaped
+/-- info: 'Solidity.Source.SoundnessExamples.bytesHeap_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.bytesHeap_shaped
+/-- info: 'Solidity.Source.SoundnessExamples.bytesHeap_byte_write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.bytesHeap_byte_write
 /-- info: 'Solidity.Source.SoundnessExamples.add_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.add_value
 /-- info: 'Solidity.Source.SoundnessExamples.add_bool_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/

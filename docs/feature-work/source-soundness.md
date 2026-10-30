@@ -270,6 +270,18 @@ Progress proofs must use `heapPut_ok`, which keeps the halt detail
 `zeroVal`), and locals holding calldata references (`Val.RefOK` of a
 `cdRef` is `False`; the semantics creates none).
 
+**The shape invariant, first use.** `HeapShaped h` (`Data.Top`: a
+top-level object is a `Data.val` only at a type without a location) is
+kept by allocation of a shaped object (`HeapShaped.alloc`) and by writes
+(`HeapShaped.write`, `heapPut_shaped`, which also proves `heapPut`
+succeeds at the address's own type). With it, `writeLoc_memByte_ok`
+proves progress and preservation of a byte write at an address the heap
+typing gives a `bytes`/`string` type: it writes or panics, never `stuck`.
+Witness `bytesHeap_byte_write`; control `ptrHeap_not_shaped` (the
+well-typed but unshaped `ptrHeap` is excluded). Not yet done: that every
+allocation site allocates a shaped object (`zeroData`/`loadMem` at memory
+types), and progress for `memSet`, `memElem` and `heapBytes`.
+
 **Review of the location preservation** (finder and skeptic, read-only,
 no blocker): the open question about allocations was closed by reading
 the code (above); the docstring of `writeLoc_mem_pres` claimed byte writes
