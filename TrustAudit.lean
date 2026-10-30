@@ -1407,3 +1407,143 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} lane V04b checkpoint 2-3 theorems use only the standard axioms"
+
+/-! Lane V04b typing decisions of 2026-10-30 (`docs/feature-work/source-s02.md`,
+"Typing decisions"). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.InferExamples.mapAssign_refused,
+    ``Solidity.Frontend.Static.InferExamples.cdDelete_refused]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} typing-decision controls use only the standard axioms"
+
+/-! Lane V04b: elaborated witnesses of the value fragment. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.indexMapping_ns,
+    ``Solidity.Source.SoundnessExamples.incBody_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} elaborated fragment witnesses use only the standard axioms"
+
+/-! Lane V04b: the function level (internal calls without modifiers). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.itemsNSP,
+    ``Solidity.Source.runMods_nil_ns,
+    ``Solidity.Source.callInternal_ns,
+    ``Solidity.Source.SoundnessExamples.callRetOne_ns,
+    ``Solidity.Source.SoundnessExamples.callBadFrame_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} function-level theorems use only the standard axioms"
+
+/-! Lane V04b: elaborated bodies are in the frame internal calls build. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Decl.frame?_lengths,
+    ``Solidity.Source.Elaborated.body_locals,
+    ``Solidity.Source.Elaborated.callInternal_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} elaborated-frame theorems use only the standard axioms"
+
+/-! Lane V04b: `return (a, b)` in the statement fragment. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.evalConvArgs_ns,
+    ``Solidity.Source.setRets_ok,
+    ``Solidity.Source.SoundnessExamples.retPair_ns,
+    ``Solidity.Source.SoundnessExamples.retPair_unframed_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} return-tuple theorems use only the standard axioms"
+
+/-! Lane V04b: dispatch coherence by signature. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Decl.frame?_fnSig,
+    ``Solidity.Source.Elaborated.body_sig,
+    ``Solidity.Source.Elaborated.callInternal_sig_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} signature-coherence theorems use only the standard axioms"
+
+/-! Lane V04b: dispatch keeps the parameter types. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Glob.dispatchFn_params,
+    ``Solidity.Source.Elaborated.callInternal_call_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} dispatch-parameter theorems use only the standard axioms"
+
+/-! Lane V04b: internal calls inside expressions (the joint induction). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.fragAt,
+    ``Solidity.Source.evalE_callFrag_ns,
+    ``Solidity.Source.stmt_callFrag_ns,
+    ``Solidity.Source.callInternal_callFrag_ns,
+    ``Solidity.Source.SoundnessExamples.callF_ns,
+    ``Solidity.Source.SoundnessExamples.callF_value,
+    ``Solidity.Source.SoundnessExamples.callF_badFrame_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} call-fragment theorems use only the standard axioms"
+
+/-! Lane V04b: recursion through calls inside expressions; `return (x, x)`. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.recF_ns,
+    ``Solidity.Source.SoundnessExamples.recF_timeout,
+    ``Solidity.Source.SoundnessExamples.retLocalPair_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} recursion and return-tuple witnesses use only the standard axioms"

@@ -183,9 +183,9 @@ def encodeVals {Γ : RCtx} (F : Fr) (n : Nat) (packed : Bool) {τs : List STy} (
 /-- The word at a position of ABI data (zeros past its end). -/
 def wordAt (data : Bytes) (i : Nat) : Nat := beValue (fitBytes 32 (data.drop (32 * i)))
 
-/-- **Decoding a static value** from its word; an invalid word reverts
-with no data, as solc's decoder does. -/
-def decodeWord (D : Layout) (w : Nat) : (τ : STy) → R (Val D τ)
+/-- **Decoding an elementary static value** from its word; an invalid
+word reverts with no data, as solc's decoder does. -/
+def decodeElemWord (D : Layout) (w : Nat) : (τ : STy) → R (Val D τ)
   | .int t =>
     match readInt t (toWord w) with
     | some v => mkInt t v
@@ -202,6 +202,13 @@ def decodeWord (D : Layout) (w : Nat) : (τ : STy) → R (Val D τ)
     | some v => mkFix f v
     | none => .error (.revert [])
   | _ => stuck "dynamic ABI decoding is not modelled"
+
+/-- **Decoding a static value** from its word: a user-defined value type
+as its underlying type (lane V04b), anything else by `decodeElemWord`. -/
+def decodeWord (D : Layout) (w : Nat) (τ : STy) : R (Val D τ) :=
+  match τ with
+  | .udvt d => do pure (.udvt (← decodeElemWord D w (D.underlying d)))
+  | τ => decodeElemWord D w τ
 
 /-- Decoding static values from ABI data, from the `i`-th word. -/
 def decodeVals (D : Layout) (data : Bytes) : (τs : List STy) → Nat → R (Vals D τs)

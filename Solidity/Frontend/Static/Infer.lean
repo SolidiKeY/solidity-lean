@@ -200,7 +200,7 @@ def prefixOne (op : PrefixOp) {x : Syn .expr} : Res Γ .expr x → List (Res Γ 
     | .dec => if h : τ.isNumeric = true then [.expr (.incDec (.inr rfl) d h)] else []
     | .delete =>
       if h : isMappingTy τ = false then
-        if hp : (τ.storageRef && Γ.namesLocal x) = false then [.expr (.delete d h hp)] else []
+        if hp : Γ.deleteRefused τ x = false then [.expr (.delete d h hp)] else []
       else []
     | _ => []
   | _ => []
@@ -289,7 +289,7 @@ def assignRes (op : AssignOp) {a b : Syn .expr} (ra : List (Res Γ .expr a)) (rb
     (match op with
      | .assign =>
        if h1 : pb.1.implicit Γ.isBase pa.1 = true then
-         if h2 : isMappingTy pa.1 = false then [.expr (.assign pa.2 pb.2 h1 h2)] else []
+         if h2 : Γ.assignRefused pa.1 a = false then [.expr (.assign pa.2 pb.2 h1 h2)] else []
        else []
      | _ => []) ++
     (match op with

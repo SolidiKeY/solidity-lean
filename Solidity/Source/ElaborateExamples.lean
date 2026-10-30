@@ -167,6 +167,40 @@ def runD (el : Elaborated) (value : Nat) (inputs : List Bytes) (h : value < 2 ^ 
 #guard (elabD.map fun el => (runD el 1 []).head?) == some (some (some (.revert [])))
 #guard (elabD.map fun el => (runD el 0 []).head?) == some (some (some (.success [])))
 
+/-- `contract D { type W is uint8; type V is int8; uint256 public x;
+function f(W w) public { x = 1; } function g(V v) public { x = 2; } }` -/
+def unitW : Syn .unit :=
+  .unit (.cons (.contract false "D" .none .nil
+      (.cons (.udvt (t := false) "W" (.int false 8 (by decide)))
+      (.cons (.udvt (t := false) "V" (.int true 8 (by decide)))
+      (.cons (.stateVar u256 (some .pub) none none false "x" .none)
+      (.cons (.function (.ident "f") (.cons (.param (.userType ⟨"W", []⟩) none (some "w")) .nil)
+          (some .pub) none .nil false none .nil (.some (.block
+          (.cons (stmt (.assign .assign (.ident "x") (num 1))) .nil))))
+      (.cons (.function (.ident "g") (.cons (.param (.userType ⟨"V", []⟩) none (some "v")) .nil)
+          (some .pub) none .nil false none .nil (.some (.block
+          (.cons (stmt (.assign .assign (.ident "x") (num 2))) .nil))))
+      .nil))))))
+    .nil)
+
+def elabW : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitW)
+
+#guard elabW.isSome
+
+-- **A user-defined value type argument** (lane V04b, a run-time gap
+-- closed) is decoded as its underlying type: `f(7)` runs (`x` becomes 1),
+-- `f(300)` is not a `uint8` and reverts with no data.
+#guard (elabW.map fun el => runD el 0 [selOf "f(uint8)" ++ arg 7, selOf "x()"]) ==
+  some [some (.success []), some (.success []), some (.success (arg 1))]
+#guard (elabW.map fun el => runD el 0 [selOf "f(uint8)" ++ arg 300, selOf "x()"]) ==
+  some [some (.success []), some (.revert []), some (.success (arg 0))]
+-- A signed underlying type: `g(-1)` (the word `2^256 - 1`, sign-extended)
+-- runs, `g(200)` (not sign-extended, out of `int8`) reverts.
+#guard (elabW.map fun el => runD el 0 [selOf "g(int8)" ++ arg (2 ^ 256 - 1), selOf "x()"]) ==
+  some [some (.success []), some (.success []), some (.success (arg 2))]
+#guard (elabW.map fun el => runD el 0 [selOf "g(int8)" ++ arg 200, selOf "x()"]) ==
+  some [some (.success []), some (.revert []), some (.success (arg 0))]
+
 /-- `e()` entered in a static frame or not, after deploying `D`. -/
 def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,

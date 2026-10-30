@@ -9,10 +9,14 @@ import Solidity.Source.Hoare
 **value fragment** of resolved expressions (`RExpr.ValFrag`: constants,
 locals of value type, `this`, unary and binary operators, comparisons,
 shifts and powers, conditionals, and implicit conversions between value
-types or from constants) evaluation is never `stuck` at any horizon,
+types or from constants; state variables and mapping values of value
+types, assignments to them) evaluation is never `stuck` at any horizon,
 provided the expression is in the operations' domains (`RExpr.OpsOK`),
 which every elaborated expression is (`Typed.toR_opsOK`):
-`evalE_valFrag_ns`.
+`evalE_valFrag_ns`. The fragment is parameterized by the callees it
+allows (`RExpr.ValFragC A`); `ValFrag` allows none, and the step lemmas
+take the calls' progress as a hypothesis (`CallNS`), which the joint
+induction of `Solidity/Source/StmtProgress.lean` (`fragAt`) discharges.
 
 This is the expression core of gap-relative progress: the value-layer
 lemmas of `Solidity/Source/ValueProgress.lean` lifted through the
@@ -282,48 +286,69 @@ def STy.keyable : STy → Bool
 
 mutual
 
-/-- **The value fragment** of resolved expressions: no memory, calls or
-references; state variables and mapping values only of value types at
-their cell types; every intermediate value of a value type, every
-conversion from a value type or a constant. -/
-def RExpr.ValFrag {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
+/-- **The value fragment** of resolved expressions, with internal calls to
+the declarations `C` allows: no memory or references; state variables and
+mapping values only of value types at their cell types; every intermediate
+value of a value type, every conversion from a value type or a constant. -/
+def RExpr.ValFragC (C : Decl → Prop) {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .const _ | _, .bytesLit _ _ | _, .addressLit _ | _, .bool _ | _, .this _ | _, .compareConst _ _ _ => True
   | τ, .local _ => τ.isValue = true
   | τ, .state d _ => d.isConst = false ∧ τ.byRef = false ∧ E.cellTy d.path = τ ∧
       (Val.default E.layout τ).isSome = true ∧ τ.isValue = true
-  | τ, .unary _ a => RExpr.ValFrag a ∧ τ.isValue = true
-  | τ, .binary _ a b => RExpr.ValFrag a ∧ RExpr.ValFrag b ∧ τ.isValue = true
-  | _, .compare (τ := τ) _ a b => RExpr.ValFrag a ∧ RExpr.ValFrag b ∧ τ.isValue = true
-  | τ, .shiftLike _ a b _ => RExpr.ValFrag a ∧ RExpr.ValFrag b ∧ τ.isValue = true
-  | τ, .cond c a b => RExpr.ValFrag c ∧ RExpr.ValFrag a ∧ RExpr.ValFrag b ∧ τ.isValue = true
-  | τ, .conv (σ := σ) a _ => RExpr.ValFrag a ∧ τ.isValue = true ∧
+  | τ, .unary _ a => RExpr.ValFragC C a ∧ τ.isValue = true
+  | τ, .binary _ a b => RExpr.ValFragC C a ∧ RExpr.ValFragC C b ∧ τ.isValue = true
+  | _, .compare (τ := τ) _ a b => RExpr.ValFragC C a ∧ RExpr.ValFragC C b ∧ τ.isValue = true
+  | τ, .shiftLike _ a b _ => RExpr.ValFragC C a ∧ RExpr.ValFragC C b ∧ τ.isValue = true
+  | τ, .cond c a b => RExpr.ValFragC C c ∧ RExpr.ValFragC C a ∧ RExpr.ValFragC C b ∧ τ.isValue = true
+  | τ, .conv (σ := σ) a _ => RExpr.ValFragC C a ∧ τ.isValue = true ∧
       (σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k))
-  | τ, .assign l e => l.IsSimple ∧ RExpr.ValFrag e ∧ τ.isValue = true
-  | τ, .compound (σ := σ) _ l e _ => l.IsSimple ∧ RExpr.ValFrag e ∧ τ.isValue = true ∧
+  | τ, .assign l e => RLVal.IsSimpleC C l ∧ RExpr.ValFragC C e ∧ τ.isValue = true
+  | τ, .compound (σ := σ) _ l e _ => RLVal.IsSimpleC C l ∧ RExpr.ValFragC C e ∧ τ.isValue = true ∧
       (σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k))
-  | _, .incDec _ _ l => l.IsSimple
-  | τv, .indexMapping (τk := τk) a k => RExpr.MapRef a ∧ RExpr.ValFrag k ∧ τk.keyable = true ∧
+  | _, .incDec _ _ l => RLVal.IsSimpleC C l
+  | τv, .indexMapping (τk := τk) a k => RExpr.MapRefC C a ∧ RExpr.ValFragC C k ∧ τk.keyable = true ∧
       τv.isValue = true ∧ (Val.default E.layout τv).isSome = true
+  | _, .call d _ args => C d ∧ RConvArgs.ValFragC C args
   | _, _ => False
 
 /-- **Mapping references of the fragment**: a mapping state variable, or a
 mapping value of a mapping, with keys of the fragment. -/
-def RExpr.MapRef {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
+def RExpr.MapRefC (C : Decl → Prop) {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | τ, .state d _ => d.isConst = false ∧ E.pathTy d.path = some τ ∧ (∃ k v, τ = .mapping k v)
-  | τv, .indexMapping (τk := τk) a k => RExpr.MapRef a ∧ RExpr.ValFrag k ∧ τk.keyable = true ∧
+  | τv, .indexMapping (τk := τk) a k => RExpr.MapRefC C a ∧ RExpr.ValFragC C k ∧ τk.keyable = true ∧
       (∃ k' v', τv = .mapping k' v')
   | _, _ => False
 
 /-- A local; a state variable of a value type stored at its own cell
 type, with a default; or such a value of a mapping of the fragment. -/
-def RLVal.IsSimple {Γ : RCtx} : {τ : STy} → RLVal E Γ τ → Prop
+def RLVal.IsSimpleC (C : Decl → Prop) {Γ : RCtx} : {τ : STy} → RLVal E Γ τ → Prop
   | _, .local _ => True
   | τ, .state d _ _ => τ.byRef = false ∧ E.cellTy d.path = τ ∧ (Val.default E.layout τ).isSome = true
-  | τv, .indexMapping (τk := τk) a k => RExpr.MapRef a ∧ RExpr.ValFrag k ∧ τk.keyable = true ∧
+  | τv, .indexMapping (τk := τk) a k => RExpr.MapRefC C a ∧ RExpr.ValFragC C k ∧ τk.keyable = true ∧
       τv.isValue = true ∧ (Val.default E.layout τv).isSome = true
   | _, _ => False
 
+/-- Converted arguments of the fragment: each of the value fragment, at a
+value type, converted from a value type or a constant. -/
+def RConvArgs.ValFragC (C : Decl → Prop) {Γ : RCtx} : {τs : List STy} → RConvArgs E Γ τs → Prop
+  | _, .nil => True
+  | _, .cons (σ := σ) (τ := τ) e _ es => RExpr.ValFragC C e ∧ τ.isValue = true ∧
+      (σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k)) ∧ RConvArgs.ValFragC C es
+
 end
+
+/-- **The value fragment** without calls. -/
+abbrev RExpr.ValFrag {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) : Prop := RExpr.ValFragC (fun _ => False) e
+
+/-- Mapping references of the call-free fragment. -/
+abbrev RExpr.MapRef {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) : Prop := RExpr.MapRefC (fun _ => False) e
+
+/-- Simple lvalues of the call-free fragment. -/
+abbrev RLVal.IsSimple {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) : Prop := RLVal.IsSimpleC (fun _ => False) l
+
+/-- Converted arguments of the call-free fragment. -/
+abbrev RConvArgs.ValFrag {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs) : Prop :=
+  RConvArgs.ValFragC (fun _ => False) es
 
 /-- **A location the fragment reads and writes**: a local, or a storage
 cell of value type at its own type, with a default. -/
@@ -485,24 +510,34 @@ theorem keyStep_nsp {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} (hτ : τ.keyable 
     | _ => cases hτ
 
 /-- **The induction hypothesis** of expression progress at horizon `n`. -/
-structure ExprNSAt (G : Glob E) (F : Fr) (n : Nat) : Prop where
-  val : ∀ {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ), e.ValFrag → e.OpsOK → NS (evalE G F n e)
-  pair : ∀ {Γ : RCtx} {σ ρ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ ρ), a.ValFrag → a.OpsOK →
-    b.ValFrag → b.OpsOK → NS (evalPair G F n a b)
-  ref : ∀ {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ), e.MapRef → e.OpsOK → NSP (evalE G F n e) RPost
-  loc : ∀ {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ), l.IsSimple → RLVal.OpsOK l → NSP (evalLoc G F n l) LocOK
+structure ExprNSAt (C : Decl → Prop) (G : Glob E) (F : Fr) (n : Nat) : Prop where
+  val : ∀ {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ), RExpr.ValFragC C e → e.OpsOK → NS (evalE G F n e)
+  pair : ∀ {Γ : RCtx} {σ ρ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ ρ), RExpr.ValFragC C a → a.OpsOK →
+    RExpr.ValFragC C b → b.OpsOK → NS (evalPair G F n a b)
+  ref : ∀ {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ), RExpr.MapRefC C e → e.OpsOK → NSP (evalE G F n e) RPost
+  loc : ∀ {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ), RLVal.IsSimpleC C l → RLVal.OpsOK l →
+    NSP (evalLoc G F n l) LocOK
+  convArgs : ∀ {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs), RConvArgs.ValFragC C es →
+    RConvArgs.OpsOK es → NS (evalConvArgs G F n es)
 
-theorem exprNSAt_zero (G : Glob E) (F : Fr) : ExprNSAt G F 0 where
+theorem exprNSAt_zero (C : Decl → Prop) (G : Glob E) (F : Fr) : ExprNSAt C G F 0 where
   val _ _ _ := by rw [evalE.eq_1]; exact NS.halt' fun _ h => by cases h
   pair _ _ _ _ _ _ := by rw [evalPair.eq_1]; exact NS.halt' fun _ h => by cases h
   ref _ _ _ := by rw [evalE.eq_1]; exact NSP.halt' trivial
   loc _ _ _ := by rw [evalLoc.eq_1]; exact NSP.halt' trivial
+  convArgs _ _ _ := by rw [evalConvArgs.eq_1]; exact NS.halt' fun _ h => by cases h
+
+/-- Internal calls to the declarations `C` allows are never `stuck` at
+horizon `n` (the hypothesis the expression step takes for the `call` arm). -/
+def CallNS (C : Decl → Prop) (G : Glob E) (F : Fr) (n : Nat) : Prop :=
+  ∀ (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → C d → ∀ vs : Vals E.layout ps,
+    NS (callInternal G F n d vs rs)
 
 section
-variable {G : Glob E} {F : Fr} {n : Nat}
+variable {C : Decl → Prop} {G : Glob E} {F : Fr} {n : Nat}
 
-theorem val_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) (hf : e.ValFrag) (ho : e.OpsOK) :
-    NS (evalE G F (n + 1) e) := by
+theorem val_step (ih : ExprNSAt C G F n) (hcall : CallNS C G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
+    (hf : RExpr.ValFragC C e) (ho : e.OpsOK) : NS (evalE G F (n + 1) e) := by
     cases e with
     | const _ => exact NS.pure' _
     | bytesLit _ _ => exact NS.pure' _
@@ -622,10 +657,16 @@ theorem val_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ
             (cellTy_key hp bs hf.2.2.2.1) hf.2.2.2.2)) fun _ _ => NSP.pure' trivial
         | memRef hm _ => cases hm
         | cdRef hm _ => cases hm
+    | call d h args =>
+      simp only [evalE]
+      exact NS.bind (ih.convArgs args hf.2 ho) fun vs =>
+        NS.bind (NSP.ns (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns (hcall d h hf.1 vs))
+          fun _ _ _ => trivial))) fun _ => NS.pure' _
     | _ => exact hf.elim
 
-theorem pair_step (ih : ExprNSAt G F n) {Γ : RCtx} {σ ρ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ ρ)
-    (ha : a.ValFrag) (ha' : a.OpsOK) (hb : b.ValFrag) (hb' : b.OpsOK) : NS (evalPair G F (n + 1) a b) := by
+theorem pair_step (ih : ExprNSAt C G F n) {Γ : RCtx} {σ ρ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ ρ)
+    (ha : RExpr.ValFragC C a) (ha' : a.OpsOK) (hb : RExpr.ValFragC C b) (hb' : b.OpsOK) :
+    NS (evalPair G F (n + 1) a b) := by
   simp only [evalPair]
   split
   · exact NS.bind (ih.val b hb hb') fun _ => NS.bind (ih.val a ha ha') fun _ => NS.pure' _
@@ -644,7 +685,8 @@ theorem storRef_map_nsp {Γ : RCtx} {τk τv : STy} (p : SPath) (hp : E.pathTy p
   rw [← e]
   exact hp
 
-theorem ref_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) (hm : e.MapRef) (ho : e.OpsOK) :
+theorem ref_step (ih : ExprNSAt C G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) (hm : RExpr.MapRefC C e)
+    (ho : e.OpsOK) :
     NSP (evalE G F (n + 1) e) RPost := by
   cases e with
   | state d h =>
@@ -673,7 +715,7 @@ theorem ref_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ
       | cdRef hm _ => cases hm
   | _ => exact hm.elim
 
-theorem loc_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) (hs : l.IsSimple)
+theorem loc_step (ih : ExprNSAt C G F n) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) (hs : RLVal.IsSimpleC C l)
     (ho : RLVal.OpsOK l) : NSP (evalLoc G F (n + 1) l) LocOK := by
   cases l with
   | «local» i => exact NSP.pure' trivial
@@ -696,17 +738,29 @@ theorem loc_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ
       | cdRef hm _ => cases hm
   | _ => exact hs.elim
 
+theorem convArgs_step (ih : ExprNSAt C G F n) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs)
+    (hf : RConvArgs.ValFragC C es) (ho : RConvArgs.OpsOK es) : NS (evalConvArgs G F (n + 1) es) := by
+  cases es with
+  | nil => simp only [evalConvArgs]; exact NS.pure' _
+  | cons e h es =>
+    simp only [evalConvArgs]
+    exact NS.bind (ih.val e hf.1 ho.1) fun v => NS.bind (convRV_ns F n (.inl h) hf.2.2.1 v)
+      fun w => NS.bind (getV_ns hf.2.1 w) fun _ => NS.bind (ih.convArgs es hf.2.2.2 ho.2) fun _ => NS.pure' _
+
+/-- **The expression step**, given the calls at the same horizon. -/
+theorem exprNSAt_step (ih : ExprNSAt C G F n) (hcall : CallNS C G F n) : ExprNSAt C G F (n + 1) where
+  val e hf ho := val_step ih hcall e hf ho
+  pair a b ha ha' hb hb' := pair_step ih a b ha ha' hb hb'
+  ref e hm ho := ref_step ih e hm ho
+  loc l hs ho := loc_step ih l hs ho
+  convArgs es hf ho := convArgs_step ih es hf ho
+
 end
 
 /-- **Expression progress at every horizon.** -/
-theorem exprNSAt (G : Glob E) (F : Fr) : ∀ n, ExprNSAt G F n
-  | 0 => exprNSAt_zero G F
-  | n + 1 =>
-    have ih := exprNSAt G F n
-    { val := fun e hf ho => val_step ih e hf ho
-      pair := fun a b ha ha' hb hb' => pair_step ih a b ha ha' hb hb'
-      ref := fun e hm ho => ref_step ih e hm ho
-      loc := fun l hs ho => loc_step ih l hs ho }
+theorem exprNSAt (G : Glob E) (F : Fr) : ∀ n, ExprNSAt (fun _ => False) G F n
+  | 0 => exprNSAt_zero _ G F
+  | n + 1 => exprNSAt_step (exprNSAt G F n) fun _ _ _ _ h => h.elim
 
 /-- **Progress on the value fragment**: evaluating an expression of the
 value fragment that is in the operations' domains is never `stuck`, at any

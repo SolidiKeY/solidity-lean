@@ -28,6 +28,14 @@ it the operation is `stuck`).
 | `cb_ns`, `cb_value` | `x = x + 1;` on a storage variable (S05's callback body) is never `stuck`, and takes `x` from 3 to 4 |
 | `ret_unframed_stuck`, `ret_unframed_no_frame` | a `return 1;` run outside a coherent frame (no return slot) is `stuck`, and those locals are not a `BodyFrame`: the frame hypothesis is needed |
 | `ret_framed_ns` | the same `return 1;` with a return slot is never `stuck` |
+| `indexMapping_ns` | the elaboration of S01's `m[o]` (a mapping value, read through an implicit key conversion) is in the value fragment and never `stuck` |
+| `incBody_ns` | the elaboration of the counter's typed body `count++;` (`TypingExamples.incBody`, an `ItemsD` derivation) is in the statement fragment and never `stuck` in its frame (`ItemsD.toR_ns`) |
+| `retPair_ns`, `retPair_unframed_stuck` | `return (1, 2);` with two return slots is never `stuck`; over locals without them it is |
+| `callF_ns`, `callF_value`, `callF_badFrame_stuck` | the call expression `f()` (a function implemented by `return 1;`) is never `stuck` (`evalE_callFrag_ns`) and evaluates to `1`; with a body outside the call's frame it is `stuck` |
+| `recF_ns`, `recF_timeout` | with `f` calling itself (`return f();`), `f()` is never `stuck` and runs out of horizon |
+| `retLocalPair_ns` | `return (x, x);` with a declared local `x` over the two return slots is never `stuck` |
+| `callRetOne_ns` | an internal call of `function f() internal returns (uint8) { return 1; }` (no modifiers, a fragment body in the frame the call builds) is never `stuck` (`callInternal_ns`) |
+| `callBadFrame_stuck` | a body whose locals lack the return slot is `stuck` ("call frame"): the frame hypothesis is needed |
 -/
 
 namespace Solidity.Source.SoundnessExamples
@@ -205,6 +213,184 @@ theorem ret_framed_ns (n : Nat) (l : Locals SemanticsExamples.E0.layout [.int In
         rfl (.const (Q.ofInt 1)) (by decide)) l) :=
   stmtNS _ _ n 0 none _ l ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩ trivial ⟨[], [], rfl, rfl⟩
 
+/-- `return (1, 2);` in a function returning `(uint8, uint8)`. -/
+def retPair : RStmt SemanticsExamples.E0 [.int IntTy.u8, .int IntTy.u8] false .body Γ Γ :=
+  .retTuple (.cons (.const (Q.ofInt 1)) (by decide) (.cons (.const (Q.ofInt 2)) (by decide) .nil))
+
+/-- **Witness**: `return (1, 2);` with its two return slots is never
+`stuck` (`retTuple`, through `setRets_ok`). -/
+theorem retPair_ns (n : Nat) (l : Locals SemanticsExamples.E0.layout [.int IntTy.u8, .int IntTy.u8]) :
+    NS (execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n 0 none (retPair (Γ := _)) l) :=
+  stmtNS _ _ n 0 none _ l ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩), trivial, rfl, .inr (.inl ⟨_, rfl⟩), trivial⟩
+    ⟨trivial, trivial, trivial⟩ ⟨[], [], rfl, rfl⟩
+
+/-- **Negative control**: the same statement over locals without the return
+slots is `stuck` ("no local"). -/
+theorem retPair_unframed_stuck :
+    ((execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 5 0 none (retPair (Γ := [])) .nil).run
+      (.nil, SemanticsExamples.s0)).1 = .error (.stuck "no local") := by
+  rfl
+
+/-- `uint8 x; …; return (x, x);` in a function returning `(uint8, uint8)`:
+the arguments are a local, not constants. -/
+def retLocalPair : RStmt SemanticsExamples.E0 [.int IntTy.u8, .int IntTy.u8] false .body
+    [.int IntTy.u8, .int IntTy.u8, .int IntTy.u8] [.int IntTy.u8, .int IntTy.u8, .int IntTy.u8] :=
+  .retTuple (.cons (.local .here) (by decide) (.cons (.local .here) (by decide) .nil))
+
+/-- **Witness**: `return (x, x);` with a declared local over the two return
+slots is never `stuck`. -/
+theorem retLocalPair_ns (n : Nat)
+    (l : Locals SemanticsExamples.E0.layout [.int IntTy.u8, .int IntTy.u8, .int IntTy.u8]) :
+    NS (execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n 0 none retLocalPair l) :=
+  stmtNS _ _ n 0 none _ l ⟨rfl, rfl, .inl rfl, rfl, rfl, .inl rfl, trivial⟩ ⟨trivial, trivial, trivial⟩
+    ⟨[.int IntTy.u8], [], rfl, rfl⟩
+
+/-! ## Elaborated witnesses: a statement and a mapping -/
+
+open TypingExamples in
+/-- **Witness**: the elaboration of S01's `m[o]` (a mapping value, read)
+is in the value fragment, so its evaluation is never `stuck`. -/
+theorem indexMapping_ns (G : Glob Γ.env) (F : Fr) (n : Nat) : NS (evalE G F n w_index_mapping.toR) :=
+  evalE_valFrag_ns G F n _ (by
+    exact ⟨⟨rfl, rfl, _, _, rfl⟩, ⟨rfl, rfl, .inl rfl⟩, rfl, rfl, rfl⟩) (Typed.toR_opsOK _)
+
+open TypingExamples in
+/-- **Witness**: the elaboration of the counter's body `count++;` (an
+elaborated typing derivation, `incBody`) is in the statement fragment, so
+running it in its function's frame is never `stuck` (`ItemsD.toR_ns`). -/
+theorem incBody_ns (G : Glob Examples.counter.env) (F : Fr) (n : Nat) :
+    NS (execItems G F n 0 none incBody.toR .nil) :=
+  ItemsD.toR_ns G F n 0 none incBody .nil (by
+    exact ⟨⟨rfl, rfl, rfl⟩, trivial⟩) ⟨[], [], rfl, rfl⟩
+
+/-! ## The function level -/
+
+open SemanticsExamples in
+/-- `function f() internal returns (uint8) { return 1; }`, resolved: its
+locals are the return slot. -/
+def retOneBody : RBody E0 where
+  ps := []
+  rs := [u8]
+  inModifier := false
+  locals := [u8]
+  out := [u8]
+  items := .stmt (.retVal rfl (.const (Q.ofInt 1)) (by decide)) .nil
+
+open SemanticsExamples in
+/-- A body with no locals (and no statements) for a call returning
+`uint8`: not the frame the call builds. -/
+def badFrameBody : RBody E0 where
+  ps := []
+  rs := [u8]
+  inModifier := false
+  locals := []
+  out := []
+  items := .nil
+
+open SemanticsExamples in
+/-- A program whose every function has body `b`. -/
+def progOf (b : RBody E0) : Glob E0 :=
+  ⟨{ P0 with body := fun _ => some b }, .viaIR, toyFixed, fun _ => word 0, fun _ _ => false,
+    fun _ => .answer (.success []), word 0⟩
+
+open SemanticsExamples in
+/-- **Witness**: an internal call of `f` (no modifiers, a fragment body,
+the frame the call builds) is never `stuck` (`callInternal_ns`). -/
+theorem callRetOne_ns (d : Decl) (n : Nat) :
+    NS (callInternal (progOf retOneBody) F0 n d (ps := []) .nil [u8]) :=
+  callInternal_ns _ _ n d .nil [u8] retOneBody rfl rfl rfl rfl rfl
+    (fun τ h => by simp only [List.mem_cons, List.not_mem_nil, or_false] at h; subst h; rfl)
+    ⟨⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, trivial⟩ ⟨trivial, trivial⟩
+
+open SemanticsExamples in
+/-- **Negative control**: a body whose locals are not the frame the call
+builds is `stuck` ("call frame"): `callInternal_ns`'s frame hypothesis is
+needed. -/
+theorem callBadFrame_stuck (d : Decl) :
+    ((callInternal (progOf badFrameBody) F0 5 d (ps := []) .nil [u8]).run (.nil, s0)).1 =
+      .error (.stuck "call frame") := by
+  rfl
+
+/-! ## Internal calls inside expressions -/
+
+/-- `function f() internal returns (uint8)`, as a declaration. -/
+def fDecl : Decl := ⟨.function, "f", none, false,
+  .function (.ident "f") .nil (some .internal) none .nil false none
+    (.cons (.param (.elem (.int false 8 (by decide))) none none) .nil) (.some (.block .nil))⟩
+
+theorem fDecl_sig : fDecl.fnSig SemanticsExamples.E0 = some ([], [.int IntTy.u8]) := rfl
+
+/-- The call expression `f()`. -/
+def callF : RExpr SemanticsExamples.E0 [] (STy.ret [.int IntTy.u8]) := .call fDecl fDecl_sig .nil
+
+open SemanticsExamples in
+/-- The program implements every function by `return 1;` (`retOneBody`):
+the functions `fDecl` names are fragment bodies. -/
+theorem retOne_callsOK : CallsOK (fun d => d = fDecl) (progOf retOneBody) := by
+  intro c d ps rs hs hA
+  subst hA
+  rw [fDecl_sig] at hs
+  simp only [Option.some.injEq, Prod.mk.injEq] at hs
+  obtain ⟨rfl, rfl⟩ := hs
+  exact ⟨retOneBody, rfl, rfl, rfl, rfl, rfl,
+    fun τ h => by simp only [List.mem_cons, List.not_mem_nil, or_false] at h; subst h; rfl,
+    ⟨⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, trivial⟩, ⟨trivial, trivial⟩⟩
+
+open SemanticsExamples in
+/-- **Witness**: the call expression `f()` is never `stuck`
+(`evalE_callFrag_ns`: the joint induction over expressions, statements,
+bodies and internal calls). -/
+theorem callF_ns (n : Nat) : NS (evalE (progOf retOneBody) F0 n callF) :=
+  evalE_callFrag_ns retOne_callsOK F0 n callF ⟨rfl, trivial⟩ trivial
+
+open SemanticsExamples in
+/-- **Value control**: `f()` evaluates to `1`. -/
+theorem callF_value : intOf ((evalE (progOf retOneBody) F0 10 callF).run (.nil, s0)) = some 1 := by
+  rfl
+
+open SemanticsExamples in
+/-- **Negative control**: with a body whose locals are not the call's frame,
+`f()` is `stuck` ("call frame"): the frame conjunct of `CallsOK` is
+needed. -/
+theorem callF_badFrame_stuck :
+    ((evalE (progOf badFrameBody) F0 10 callF).run (.nil, s0)).1 = .error (.stuck "call frame") := by
+  rfl
+
+open SemanticsExamples in
+/-- `function f() internal returns (uint8) { return f(); }`, resolved: a body
+that calls, recursively. -/
+def recBody : RBody E0 where
+  ps := []
+  rs := [u8]
+  inModifier := false
+  locals := [u8]
+  out := [u8]
+  items := .stmt (.retVal rfl (.call fDecl fDecl_sig .nil) (by decide)) .nil
+
+open SemanticsExamples in
+theorem rec_callsOK : CallsOK (fun d => d = fDecl) (progOf recBody) := by
+  intro c d ps rs hs hA
+  subst hA
+  rw [fDecl_sig] at hs
+  simp only [Option.some.injEq, Prod.mk.injEq] at hs
+  obtain ⟨rfl, rfl⟩ := hs
+  exact ⟨recBody, rfl, rfl, rfl, rfl, rfl,
+    fun τ h => by simp only [List.mem_cons, List.not_mem_nil, or_false] at h; subst h; rfl,
+    ⟨⟨⟨rfl, trivial⟩, rfl, .inl rfl⟩, trivial⟩, ⟨trivial, trivial⟩⟩
+
+open SemanticsExamples in
+/-- **Witness, recursion**: with `f` calling itself, `f()` is never `stuck`
+at any horizon (the joint induction: the callee's body itself calls); it
+only times out. -/
+theorem recF_ns (n : Nat) : NS (evalE (progOf recBody) F0 n callF) :=
+  evalE_callFrag_ns rec_callsOK F0 n callF ⟨rfl, trivial⟩ trivial
+
+open SemanticsExamples in
+/-- **Value control**: the recursion runs out of horizon (a timeout, not
+`stuck`). -/
+theorem recF_timeout : ((evalE (progOf recBody) F0 12 callF).run (.nil, s0)).1 = .error .timeout := by
+  rfl
+
 /-! ## The census's semantic bug, fixed -/
 
 /-- `string memory s = "abc"; bytes(s)[0] = 0x78; bytes1 b = bytes(s)[0];` -/
@@ -318,5 +504,65 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ret_framed_ns
 /-- info: 'Solidity.Source.SoundnessExamples.stringByte_write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.stringByte_write
+/-- info: 'Solidity.Source.SoundnessExamples.indexMapping_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.indexMapping_ns
+/-- info: 'Solidity.Source.SoundnessExamples.incBody_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.incBody_ns
+/-- info: 'Solidity.Source.itemsNSP' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.itemsNSP
+/-- info: 'Solidity.Source.runMods_nil_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.runMods_nil_ns
+/-- info: 'Solidity.Source.callInternal_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.callInternal_ns
+/-- info: 'Solidity.Source.retVals_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.retVals_ok
+/-- info: 'Solidity.Source.SoundnessExamples.callRetOne_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callRetOne_ns
+/-- info: 'Solidity.Source.SoundnessExamples.callBadFrame_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callBadFrame_stuck
+/-- info: 'Solidity.Source.Decl.frame?_lengths' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Decl.frame?_lengths
+/-- info: 'Solidity.Source.Elaborated.body_locals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.body_locals
+/-- info: 'Solidity.Source.Elaborated.callInternal_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_ns
+/-- info: 'Solidity.Source.SoundnessExamples.retPair_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.retPair_ns
+/-- info: 'Solidity.Source.SoundnessExamples.retPair_unframed_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.retPair_unframed_stuck
+/-- info: 'Solidity.Source.Decl.frame?_fnSig' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Decl.frame?_fnSig
+/-- info: 'Solidity.Source.Elaborated.body_sig' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.body_sig
+/-- info: 'Solidity.Source.Elaborated.callInternal_sig_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_sig_ns
+/-- info: 'Solidity.Source.Glob.dispatchFn_params' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Glob.dispatchFn_params
+/-- info: 'Solidity.Source.Elaborated.callInternal_call_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_call_ns
+/-- info: 'Solidity.Source.fragAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.fragAt
+/-- info: 'Solidity.Source.evalE_callFrag_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.evalE_callFrag_ns
+/-- info: 'Solidity.Source.stmt_callFrag_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.stmt_callFrag_ns
+/-- info: 'Solidity.Source.callInternal_callFrag_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.callInternal_callFrag_ns
+/-- info: 'Solidity.Source.SoundnessExamples.callF_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callF_ns
+/-- info: 'Solidity.Source.SoundnessExamples.callF_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callF_value
+/-- info: 'Solidity.Source.SoundnessExamples.callF_badFrame_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callF_badFrame_stuck
+/-- info: 'Solidity.Source.evalConvArgs_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.evalConvArgs_ns
+/-- info: 'Solidity.Source.setRets_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.setRets_ok
+/-- info: 'Solidity.Source.SoundnessExamples.retLocalPair_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.retLocalPair_ns
+/-- info: 'Solidity.Source.SoundnessExamples.recF_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.recF_ns
+/-- info: 'Solidity.Source.SoundnessExamples.recF_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.recF_timeout
 
 end Solidity.Source.SoundnessExamples
