@@ -1037,3 +1037,11 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+| `Backend/MemoryOps/SliceBounds.lean` | Runtime slice endpoint/index certificates over existing typed heap elements and nested coordinate composition. |
+| `Backend/MemoryOps/SliceExtension.lean` | Slice weakening and allocator noninterference, preserving aliases and distinguishing fresh identities. |
+| `Backend/MemoryOps/Snapshot.lean` | Checked element-list snapshot overwrite, overlap and interval framing laws; no target emitter. |
+| `Backend/MemoryOps/HeapSnapshot.lean` | Captured typed slices overwrite existing array objects through `Heap.set`, with interior, exterior and other-object read laws. |
+| `Backend/MemoryOps/SliceControls.lean` | Inhabited nested-reference, growth and reference-slot overwrite controls. |
+| `Backend/MemoryOps/ContextTransport.lean` | Local/context/adopt transport and old-slice/fresh-root certificates using published storage-copy and default constructors. |
+| `Backend/MemoryOps/SnapshotExtension.lean` | Overwrite capacity and old-object contents commute with preserving heap extension. |

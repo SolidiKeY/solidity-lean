@@ -87,3 +87,4 @@ history is in git.
 | [parallelism.md](parallelism.md) | The core apart from the elaborator, the layering check, the split convention. |
 | [latex.md](latex.md) | LaTeX notation and the checked trace export. |
 | [site.md](site.md) | The examples site on GitHub Pages. |
+| [feature-work/roadmap-v11-memory-operations.md](feature-work/roadmap-v11-memory-operations.md) | V11 operation-side bounds, snapshot and heap-extension checkpoint; open source/target/deep traversal obligations. |
