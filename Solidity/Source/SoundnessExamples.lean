@@ -801,6 +801,24 @@ theorem arrHeap_delete :
 #guard_msgs in #print axioms Solidity.Source.deleteLoc_mem
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_delete
+/-- info: 'Solidity.Source.readCell_keep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readCell_keep
+/-- info: 'Solidity.Source.readAt_keep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readAt_keep
+/-- info: 'Solidity.Source.readLen_keep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readLen_keep
+/-- info: 'Solidity.Source.loadBytes_keep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.loadBytes_keep
+/-- info: 'Solidity.Source.allocRef_mem'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.allocRef_mem'
+/-- info: 'Solidity.Source.STy.loc_of_byRef' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Source.STy.loc_of_byRef
+/-- info: 'Solidity.Source.loadOK_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.loadOK_zero
+/-- info: 'Solidity.Source.loadOK_step' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.loadOK_step
+/-- info: 'Solidity.Source.loadOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.loadOK
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/

@@ -1700,3 +1700,19 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} delete-preservation theorems use only the standard axioms"
+
+/-! Lane V04b: copies from storage keep the memory invariant. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.readAt_keep,
+    ``Solidity.Source.loadBytes_keep,
+    ``Solidity.Source.allocRef_mem',
+    ``Solidity.Source.loadOK]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} storage-copy theorems use only the standard axioms"
