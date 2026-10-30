@@ -1051,3 +1051,37 @@ At the root, the notation's own tests:
 | `Backend/Environment/Composition.lean` | Constructed intrinsic Val certificates, exact target concatenation/stack order, materialization/hash adapters and typed source-sequence fallback. |
 | `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
 | `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
+
+| Backend module | Purpose |
+|---|---|
+| `Backend/Creation/Artifact.lean` | G44.02 intrinsic artifact sections, executable CODECOPY/RETURN wrapper, exact minimal PUSH widths, layout and argument extraction laws. |
+| `Backend/Creation/ArtifactChecks.lean` | G44.02 inhabited layout, argument separation and negative controls with headline kernel axiom pins. |
+| `Backend/Creation/Execution.lean` | Independent byte-consuming PUSH/CODECOPY/RETURN/REVERT slice semantics and exact installed runtime proof. |
+| `Backend/Creation/ExecutionChecks.lean` | Inhabited empty, word and PUSH-width boundary installation witnesses, byte-range negative controls and axiom pins. |
+| `Backend/Creation/Placement.lean` | Relocated runtime-return slice with arithmetic alignment certificate and minimal offset PUSH width. |
+| `Backend/Creation/PlacementChecks.lean` | Inhabited PUSH1/PUSH2 offset transition controls with nonempty runtime and arguments. |
+| `Backend/Creation/Regions.lean` | Bounded typed patch regions, assembler overwrite length/frame laws and disjoint commutation. |
+| `Backend/Creation/Linking.lean` | Certified absolute/local link metadata, exact 20-byte addresses, unresolved refusal and existing assembler linking through wrapper/arguments. |
+| `Backend/Creation/LinkLayout.lean` | Bounds and pairwise disjointness derived from actual assembler link metadata for every successful assembly. |
+| `Backend/Creation/LinkingChecks.lean` | Inhabited library-link/install controls, unresolved/missing/wrong-origin/truncated-argument negatives and axiom pins. |
+| `Backend/Creation/Immutables.lean` | Typed bounded immutable words, disjoint table checks, per-patch readback/frame laws and certified link/immutable combination. |
+| `Backend/Creation/ImmutableChecks.lean` | Immutable bounds/overlap/readback/frame/install and combined library/immutable controls with axiom pins. |
+| `Backend/Creation/Constructor.lean` | Independently checked byte-prefix steps composed with exact runtime-return or exact-byte revert wrappers, over arbitrary prefix memory. |
+| `Backend/Creation/ConstructorChecks.lean` | Actual copying constructor-prefix witnesses, return/revert separation and nonempty argument controls. |
+| `Backend/Creation/ArtifactLaws.lean` | Arbitrary disjoint link permutations, payload determinism, section uniqueness and wrapper decode law. |
+| `Backend/Creation/Provenance.lean` | Intrinsic generated/source range records, section bounds and exact provenance byte extraction. |
+| `Backend/Creation/LawChecks.lean` | Three-link permutation, overlapping-order negative, metadata/layout and inhabited provenance controls. |
+| `Backend/Failure/Immediate.lean` | Big-endian PUSH32 machine immediates and exact numeric reading. |
+| `Backend/Failure/Gap.lean` | Base-interface panic boundary gap controls. |
+| `Backend/Failure/Emit.lean` | Typed failure/return payloads and actual MSTORE8/RETURN/REVERT instruction emission. |
+| `Backend/Failure/EmissionChecks.lean` | Inhabited emission, byte vector, negative and combination controls with axiom pins. |
+| `Backend/Failure/Slice.lean` | Independent typed-word PUSH/MSTORE8/RETURN/REVERT byte-memory execution and checked stack heights. |
+| `Backend/Failure/Correct.lean` | Exact emitter execution, stack/memory frames, bounded-stack certificate and arbitrary chunk/tail laws. |
+| `Backend/Failure/SliceChecks.lean` | Literal instruction, underflow/truncation, memory/frame/chunk, concatenation and1022/1023 stack controls. |
+| `Backend/Failure/Observe.lean` | Existing THalt/TRes source observation relation, deterministic payload correspondence and checked emission. |
+| `Backend/Failure/ObservationChecks.lean` | Inhabited source assert/require/custom/return, complete-body selector negatives and wrong-observation refutations. |
+| `Backend/Failure/Checkpoint.lean` | Independent component-local typed persistent/transient checkpoint relation and compositional restore rules. |
+| `Backend/Failure/Unwind.lean` | Checked emitted payload execution before local unwind; success/failure and nested-failure proofs. |
+| `Backend/Failure/UnwindChecks.lean` | Inhabited distinct snapshots, nested emitted failures, caller-memory restoration and wrong-snapshot negatives. |
+| `Backend/Failure/Composition.lean` | Arbitrary two-write-block byte noninterference, immutable input preservation and checked emitter concatenation/terminal distinction. |
+| `Backend/Failure/CompositionChecks.lean` | Inhabited both-executed writes, overlap negative, overlapping ignored suffix and same-bytes terminal controls. |
