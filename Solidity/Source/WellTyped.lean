@@ -10,7 +10,8 @@ logical layout (`Env.cellTy`), and every memory object carries its type
 (`Σ τ, Data D τ`). What is not intrinsic is **where references point**:
 
 - a `memory` reference of type `τ` must name an object of type `τ`
-  (`HeapTy`, the heap's typing);
+  (`HeapTy`, the heap's typing), up to `bytes`/`string` (`STy.memShape`:
+  `bytes(s)` keeps the pointer of a `string memory s`);
 - a `storage` reference of type `τ` must name a path of declared type `τ`
   (`Env.pathTy`);
 - no value is a `calldata` reference (the semantics creates none: calldata
@@ -49,9 +50,15 @@ theorem HeapTy.Le.trans {H₁ H₂ H₃ : HeapTy} (h₁ : H₁.Le H₂) (h₂ : 
 
 /-! ## References that agree with the state -/
 
+/-- A memory object's shape: `string` and `bytes` objects of one location
+are interchangeable (`bytes(s)` and `string(b)` keep the pointer). -/
+def STy.memShape : STy → STy
+  | .string l => .bytes l
+  | τ => τ
+
 /-- **A value's reference agrees with the heap typing and the layout.** -/
 def Val.RefOK (E : Env) (H : HeapTy) : {τ : STy} → Val E.layout τ → Prop
-  | τ, .memRef _ a => H a = some τ
+  | τ, .memRef _ a => ∃ σ, H a = some σ ∧ σ.memShape = τ.memShape
   | τ, .storRef _ p => E.pathTy p = some τ
   | _, .cdRef _ _ => False
   | _, _ => True
@@ -67,7 +74,9 @@ theorem Val.refOK_of_loc {H : HeapTy} {τ : STy} (hτ : τ.loc? = none) (v : Val
 
 theorem Val.RefOK.mono {H H' : HeapTy} (hle : H.Le H') {τ : STy} {v : Val E.layout τ}
     (h : v.RefOK E H) : v.RefOK E H' := by
-  cases v <;> first | trivial | exact h | exact hle _ _ h
+  cases v with
+  | memRef _ a => obtain ⟨σ, h1, h2⟩ := h; exact ⟨σ, hle _ _ h1, h2⟩
+  | _ => first | trivial | exact h
 
 mutual
 
@@ -251,7 +260,7 @@ theorem allocRef_ok {H : HeapTy} {τ : STy} (x : Data E.layout τ) (hm : τ.loc?
     Hoare (fun y => EMOK E H y ∧ DataOK E y.2.heap.ty x) (allocRef x : EM E Γ (Val E.layout τ))
       (fun v y => EMOK E H y ∧ v.RefOK E y.2.heap.ty) X := by
   refine Hoare.bind (alloc_ok x) fun a => ?_
-  refine Hoare.dite' (fun h => Hoare.pure' fun y hy => ⟨hy.1, hy.2⟩) (fun h => absurd hm h)
+  refine Hoare.dite' (fun h => Hoare.pure' fun y hy => ⟨hy.1, τ, hy.2, rfl⟩) (fun h => absurd hm h)
 
 /-- **`heapPut`**: a write of agreeing contents keeps the state well
 typed; it is `stuck` only at an address whose object has another type. -/

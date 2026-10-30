@@ -79,16 +79,20 @@ theorem badBinary_not_opsOK {E : Env} :
   rcases h.1 with ⟨_, h⟩ | ⟨_, h⟩ | ⟨h, _⟩ <;> cases h
 
 /-- **Negative control**: a memory reference agrees only with a heap typing
-that gives its address its type. -/
+that gives its address its type (up to `bytes`/`string`). -/
 theorem refOK_wrong_heap {E : Env} :
     ¬ (Val.memRef (D := E.layout) (τ := .bytes .memory) rfl 0).RefOK E (fun _ => some .bool) := by
-  intro h
-  cases h
+  intro ⟨σ, h1, h2⟩
+  cases h1
+  cases h2
 
 /-- **Witness**: the same reference agrees with a heap typing that gives
-address `0` the type `bytes memory`. -/
+address `0` the type `bytes memory`, and with one that gives it a string
+(`bytes(s)` of a `string memory s`). -/
 theorem refOK_heap {E : Env} :
-    (Val.memRef (D := E.layout) (τ := .bytes .memory) rfl 0).RefOK E (fun _ => some (.bytes .memory)) := rfl
+    (Val.memRef (D := E.layout) (τ := .bytes .memory) rfl 0).RefOK E (fun _ => some (.bytes .memory)) ∧
+    (Val.memRef (D := E.layout) (τ := .bytes .memory) rfl 0).RefOK E (fun _ => some (.string .memory)) :=
+  ⟨⟨_, rfl, rfl⟩, ⟨_, rfl, rfl⟩⟩
 
 
 open TypingExamples in
@@ -208,7 +212,7 @@ def strItems : RItems SemanticsExamples.E0 [] false .body []
     [.fixedBytes 1 (by decide), .string .memory] :=
   .stmt (.declInit (.str [97, 98, 99]) (by decide))
     (.stmt (.expr (.assign
-      (.indexBytes (.convExplicit (.local .here) (by decide)) (by decide) (.const (Q.ofInt 0)) (by decide))
+      (.indexBytes (.convExplicit (.local .here) (τ := .bytes .memory) (by decide)) (by decide) (.const (Q.ofInt 0)) (by decide))
       (.conv (.bytesLit (.hex [7, 8] false) 1) (.inl (by decide)))))
     (.stmt (.declInit (.indexBytes (.convExplicit (.local .here) (τ := .bytes .memory) (by decide))
         (.const (Q.ofInt 0)) (by decide)) (by decide)) .nil))
@@ -221,5 +225,53 @@ theorem stringByte_write :
     | .ok (.normal (.cons b _)) => b.key
     | _ => none) = some 0x78 := by
   rfl
+
+/-! ## Axioms -/
+
+#print axioms Solidity.Source.binVal_ok
+#print axioms Solidity.Source.cmpVal_ok
+#print axioms Solidity.Source.shiftVal_ok
+#print axioms Solidity.Source.unaryVal_ok
+#print axioms Solidity.Source.incDecVal_ok
+#print axioms Solidity.Source.amount_ok
+#print axioms Solidity.Source.convVal_ok
+#print axioms Solidity.Source.constVal_ok
+#print axioms Solidity.Source.Typed.toR_opsOK
+#print axioms Solidity.Source.StmtD.toR_opsOK
+#print axioms Solidity.Source.Elaborated.body_opsOK
+#print axioms Solidity.Source.Elaborated.inits_opsOK
+#print axioms Solidity.Source.convRV_ns
+#print axioms Solidity.Source.readAt_ns
+#print axioms Solidity.Source.writeAt_ns
+#print axioms Solidity.Source.keyStep_nsp
+#print axioms Solidity.Source.exprNSAt
+#print axioms Solidity.Source.evalE_valFrag_ns
+#print axioms Solidity.Source.stmtNSAt
+#print axioms Solidity.Source.stmtNS
+#print axioms Solidity.Source.itemsNS
+#print axioms Solidity.Source.ItemsD.toR_ns
+#print axioms Solidity.Source.alloc_ok
+#print axioms Solidity.Source.allocRef_ok
+#print axioms Solidity.Source.heapPut_ok
+#print axioms Solidity.Source.heapObj_ok
+#print axioms Solidity.Source.heapAt_ok
+#print axioms Solidity.Source.storRef_ok
+#print axioms Solidity.Source.HeapOK.alloc
+#print axioms Solidity.Source.HeapOK.write
+#print axioms Solidity.Source.SoundnessExamples.add_value
+#print axioms Solidity.Source.SoundnessExamples.add_bool_stuck
+#print axioms Solidity.Source.SoundnessExamples.badBinary_not_opsOK
+#print axioms Solidity.Source.SoundnessExamples.badBinary_stuck
+#print axioms Solidity.Source.SoundnessExamples.refOK_wrong_heap
+#print axioms Solidity.Source.SoundnessExamples.refOK_heap
+#print axioms Solidity.Source.SoundnessExamples.cond_value
+#print axioms Solidity.Source.SoundnessExamples.loop_ns
+#print axioms Solidity.Source.SoundnessExamples.loop_value
+#print axioms Solidity.Source.SoundnessExamples.cb_ns
+#print axioms Solidity.Source.SoundnessExamples.cb_value
+#print axioms Solidity.Source.SoundnessExamples.ret_unframed_stuck
+#print axioms Solidity.Source.SoundnessExamples.ret_unframed_no_frame
+#print axioms Solidity.Source.SoundnessExamples.ret_framed_ns
+#print axioms Solidity.Source.SoundnessExamples.stringByte_write
 
 end Solidity.Source.SoundnessExamples

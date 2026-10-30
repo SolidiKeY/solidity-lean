@@ -45,7 +45,9 @@ mutual
 /-- `STy.same` is equality: soundness. -/
 theorem STy.eq_of_same : (a b : STy) → STy.same a b = true → a = b
   | a, b, h => by
-    cases a <;> cases b <;> simp_all [STy.same] <;>
+    cases a <;> cases b <;>
+      simp_all only [STy.same, Bool.false_eq_true, beq_iff_eq, Bool.and_eq_true, STy.array.injEq,
+        STy.mapping.injEq, STy.fn.injEq, STy.tuple.injEq, and_true, true_and] <;>
       first
       | exact STy.eq_of_same _ _ h.1.2
       | exact ⟨STy.eq_of_same _ _ h.1, STy.eq_of_same _ _ h.2⟩
