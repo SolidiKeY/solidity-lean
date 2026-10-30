@@ -63,7 +63,8 @@ theorem stack_limit_positive :
 theorem stack_limit_negative :
     stackSafe (emit 0 .empty) ⟨List.replicate 1023 ⟨7, by decide⟩, markedMemory⟩ ≠ true := by
   intro h
-  have hb := (empty_stack_boundary 0 (by decide) _).1 h
+  have hb : (List.replicate 1023 (⟨7, by decide⟩ : Roadmap.Word)).length + 2 ≤ 1024 :=
+    (empty_stack_boundary 0 (by decide) _).1 h
   simp only [List.length_replicate] at hb
   omega
 

@@ -54,14 +54,16 @@ theorem restored_memory_control :
 theorem wrong_transient_rejected :
     ¬ CheckpointRel (save root) (.revert [9]) deep { root with transient := ⟨11, by decide⟩ } := by
   intro h
-  have he := CheckpointRel.functional (CheckpointRel.revert [9] deep) h
+  have he : restore (save root) = { root with transient := ⟨11, by decide⟩ } :=
+    CheckpointRel.functional (CheckpointRel.revert [9] deep) h
   have ht : (2 : Nat) = 11 := congrArg (fun s : Witness => s.transient.val) he
   omega
 
 theorem wrong_persistent_rejected :
     ¬ CheckpointRel (save root) (.revert [9]) deep { root with persistent := ⟨7, by decide⟩ } := by
   intro h
-  have he := CheckpointRel.functional (CheckpointRel.revert [9] deep) h
+  have he : restore (save root) = { root with persistent := ⟨7, by decide⟩ } :=
+    CheckpointRel.functional (CheckpointRel.revert [9] deep) h
   have hp : (1 : Nat) = 7 := congrArg (fun s : Witness => s.persistent.val) he
   omega
 

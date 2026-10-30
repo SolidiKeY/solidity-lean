@@ -436,3 +436,22 @@ The evidence archive excludes private caches, node_modules and toolchain
 symlinks; those caches remain on this VM for reuse. The external handoff records
 actual final head, observed elapsed interval, final review results and checksums.
 No scope question is outstanding. No push, merge or PR was performed.
+
+## Integration annotation repair (2026-10-30)
+
+The retained review of candidate `97103547b16456824dffaff31d458dfa3a64c597`
+identified five missing explicit proposition types: `hr`/`hv` in
+`Composition`, `hb` in `SliceChecks`, and both `he` bindings in
+`UnwindChecks`. All five now state their original inferred propositions.
+Per-file Lean MCP error diagnostics completed successfully for all three
+edited modules. No combined-validation failure was supplied with this review;
+the coordinator retains the combined gates.
+
+Read-only finder and skeptic passes over the repair confirmed the five
+annotations and preserved proof terms: erasing only the added annotations
+reproduces the original three source files exactly. No statements, semantics,
+observations, target predicates, invariants, axioms or budgets changed.
+These passes were performed by the repair worker; an independent reviewer
+could not start because the collaboration service reported a missing rollout.
+Independent follow-up review remains with the coordinator. The repair is
+uncommitted and leaves the external Git index untouched.

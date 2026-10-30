@@ -38,8 +38,12 @@ theorem concatenated_emitters (a b : Nat) (i j : Input) (s : Machine)
 theorem return_revert_execution_distinct (a : Nat) (bs : List UInt8) (s : Machine)
     (hf : Fits a bs) (hs : s.stack.length + 2 ≤ 1024) :
     checkedRun (emit a (.returned bs)) s ≠ checkedRun (emit a (.custom bs)) s := by
-  have hr := checkedRun_emit_suffix a (.returned bs) [] s hf hs
-  have hv := checkedRun_emit_suffix a (.custom bs) [] s hf hs
+  have hr : checkedRun (emit a (.returned bs) ++ []) s =
+      some ({ s with memory := putBytes s.memory a bs }, some (.success bs)) :=
+    checkedRun_emit_suffix a (.returned bs) [] s hf hs
+  have hv : checkedRun (emit a (.custom bs) ++ []) s =
+      some ({ s with memory := putBytes s.memory a bs }, some (.revert bs)) :=
+    checkedRun_emit_suffix a (.custom bs) [] s hf hs
   simp only [List.append_nil] at hr hv
   rw [hr, hv]
   intro h
