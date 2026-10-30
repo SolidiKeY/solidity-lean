@@ -162,6 +162,10 @@ theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBa
 /-- **The value fragment** of resolved expressions: no state, memory,
 calls or references; every intermediate value of a value type, every
 conversion from a value type or a constant. -/
+def RLVal.IsLocal {Γ : RCtx} {τ : STy} : RLVal E Γ τ → Prop
+  | .local _ => True
+  | _ => False
+
 def RExpr.ValFrag {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .const _ | _, .bytesLit _ _ | _, .addressLit _ | _, .bool _ | _, .this _ | _, .compareConst _ _ _ => True
   | τ, .local _ => τ.isValue = true
@@ -172,6 +176,10 @@ def RExpr.ValFrag {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .cond c a b => c.ValFrag ∧ a.ValFrag ∧ b.ValFrag
   | τ, .conv (σ := σ) a _ => a.ValFrag ∧ τ.isValue = true ∧
       (σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k))
+  | τ, .assign l e => l.IsLocal ∧ e.ValFrag ∧ τ.isValue = true
+  | τ, .compound (σ := σ) _ l e _ => l.IsLocal ∧ e.ValFrag ∧ τ.isValue = true ∧
+      (σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k))
+  | _, .incDec _ _ l => l.IsLocal
   | _, _ => False
 
 theorem cmpConst_ok {op : BinOp} (hop : (BinKind.order.admits op || BinKind.eq.admits op) = true) (a b : Q) :
@@ -186,6 +194,46 @@ theorem fitsAt_logic {op : BinOp} {τ : STy} (h : op.FitsAt τ) (hl : (op = .and
   · cases op <;> first | exact absurd hop (by decide) | exact absurd hl (by decide)
   · cases op <;> first | exact absurd hop (by decide) | exact absurd hl (by decide)
   · exact hτ
+
+/-- Evaluating a local lvalue is never `stuck`. -/
+theorem evalLoc_local_ns (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (i : Idx Γ τ) :
+    NS (evalLoc G F n (.local i)) := by
+  cases n with
+  | zero => rw [evalLoc.eq_1]; exact NS.halt' fun _ h => by cases h
+  | succ n => exact NS.pure' _
+
+/-- Evaluating a local lvalue, then continuing at its location. -/
+theorem evalLoc_local_bind (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} {α : Type} (i : Idx Γ τ)
+    {k : Loc E.layout Γ τ → EM E Γ α} (hk : NS (k (.local i))) : NS (evalLoc G F n (.local i) >>= k) := by
+  cases n with
+  | zero =>
+    rw [evalLoc.eq_1, show (halt .timeout >>= k : EM E Γ α) = halt .timeout from rfl]
+    exact NS.halt' fun _ h => by cases h
+  | succ n =>
+    simp only [evalLoc, pure_bind]
+    exact hk
+
+/-- Reading and writing a local location is never `stuck`. -/
+theorem readLoc_local_ns (F : Fr) {Γ : RCtx} {τ : STy} (i : Idx Γ τ) :
+    NS (readLoc (E := E) F (Loc.local i)) :=
+  NS.bind NS.locals' fun _ => NS.pure' _
+
+theorem writeLoc_local_ns (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (i : Idx Γ τ) (v : Val E.layout τ) :
+    NS (writeLoc (E := E) F n (Loc.local i) v) :=
+  NS.bind NS.locals' fun _ => fun _ _ h => by cases h
+
+/-- The binary operator of a compound assignment is in `binVal`'s domain,
+or the assignment is a shift (`AssignOp.fits`). -/
+theorem compound_dom {B : DeclName → DeclName → Bool} {op : AssignOp} {σ τ : STy} (h : op.fits B σ τ = true) :
+    (op.kind? ≠ some .shift ∧ σ.implicit B τ = true ∧ (AssignOp.binOp op).FitsAt τ) ∨
+      (op.kind? = some .shift ∧ τ.isBits = true ∧ σ.isAmount = true) := by
+  unfold AssignOp.fits at h
+  cases op <;> simp only [AssignOp.kind?] at h <;> (try simp only [Bool.and_eq_true] at h)
+  all_goals first
+    | exact .inl ⟨by decide, h.1, .inl ⟨rfl, h.2⟩⟩
+    | exact .inl ⟨by decide, h.1, .inr (.inl ⟨rfl, h.2⟩)⟩
+    | exact .inr ⟨rfl, h.1, h.2⟩
+    | exact absurd h (by decide)
 
 section
 variable (G : Glob E) (F : Fr)
@@ -270,6 +318,42 @@ theorem evalE_valFrag_ns : ∀ (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ 
     | conv a h =>
       simp only [evalE]
       exact NS.bind (evalE_valFrag_ns n a hf.1 ho) fun v => convRV_ns F n h hf.2.2 v
+    | assign l e =>
+      simp only [evalE]
+      cases l with
+      | «local» i =>
+        exact NS.bind (evalE_valFrag_ns n e hf.2.1 ho.2) fun v => evalLoc_local_bind G F n i <|
+          NS.bind (getV_ns hf.2.2 v) fun x => NS.bind (writeLoc_local_ns F n i x) fun _ => NS.pure' _
+      | _ => exact hf.1.elim
+    | compound op l e h =>
+      simp only [evalE]
+      cases l with
+      | «local» i =>
+        refine NS.bind (evalE_valFrag_ns n e hf.2.1 ho.2) fun v => evalLoc_local_bind G F n i <|
+          NS.bind (readLoc_local_ns F i) fun old => ?_
+        rcases compound_dom h with ⟨hk, hi, hfit⟩ | ⟨hk, hb, ha⟩
+        · split
+          · rename_i hk'; exact absurd hk' hk
+          · exact NS.bind (convRV_ns F n (.inl hi) hf.2.2.2 v) fun w => NS.bind (getV_ns hf.2.2.1 w) fun y =>
+              NS.bind (NS.lift' (binVal_ok _ hfit old y)) fun nw =>
+                NS.bind (writeLoc_local_ns F n i nw) fun _ => NS.pure' _
+        · split
+          · refine NS.bind (NS.lift' (amount_ok ha v)) fun k =>
+              NS.bind (NS.lift' (shiftVal_ok _ k (.inl ⟨?_, hb⟩) old)) fun nw =>
+                NS.bind (writeLoc_local_ns F n i nw) fun _ => NS.pure' _
+            split
+            · rfl
+            · split <;> rfl
+          · rename_i hn; exact (hn hk).elim
+      | _ => exact hf.1.elim
+    | incDec inc pre l =>
+      simp only [evalE]
+      cases l with
+      | «local» i =>
+        exact evalLoc_local_bind G F n i <| NS.bind (readLoc_local_ns F i) fun old =>
+          NS.bind (NS.lift' (incDecVal_ok _ inc ho.1 old)) fun nw =>
+            NS.bind (writeLoc_local_ns F n i nw) fun _ => NS.pure' _
+      | _ => exact hf.elim
     | _ => exact hf.elim
 
 end
