@@ -1248,3 +1248,75 @@ proposals are checkpoint13-proposed-axiom-pins.json for coordinator reconciliati
 Separate independent finder/skeptic source reviews found no confirmed defect and
 accepted final refined source/doc hypotheses and controls without correction.
 No reviewer ran Lean/server/builds. Artifact review follows commit/export.
+
+
+## Checkpoint fourteen: exact uint256 decoded transfer (G35.03, Backfill A/B)
+
+Continued independent implementation after checkpoint13: published Source.IntTy
+u256 has inclusive range0..2^256-1; intrinsic PrimTy.uint.inRange uses0<=x<2^256.
+The new CalldataUintTransfer proves these exact bounds and retains the SAME Int.
+sourceUint and calldataUint are typed wrappers over the existing constructors;
+calldataUint_exact and calldataUint_sourceUint establish the two directions.
+calldataUint_values derives finite-list reconstruction for arbitrary runtime
+lists, no supplied conversion-correctness premise or truncation/modulo. This is
+not a scalar compiler, alternate value layer or ABI decoder.
+
+checkedCalldataUints consumes the actual immutable table, selects unsigned256
+array objects (dynamic/static), eliminates their typed leaves, captures the
+runtime slice and invokes existing overwriteSlice. It does not accept a payload.
+Exact some/result/none_iff/read/elems/outside/frame/no_payload/keeps theorems retain
+the Boolean adapter's explicit input lookup, bounds/capacity/ID/initial extension
+premises and derived output observations. The additional empty theorem proves
+whole-heap identity for any valid zero interval. Other signedness/widths remain
+unsupported by this adapter, never removed from the admitted Source profile.
+No Source table is fabricated to represent fresh memory references.
+
+Controls execute a nonuniform payload including0,7 and2^256-1, observe the complete
+ordered Int output and immutable typed reads, reject a wrong-order result and
+frame exterior cells/reference parent. Fixed decoded input into a fixed target
+also retains the maximum exactly. Arbitrary typed runtime lists succeed when
+the actual existing target has capacity; no added length/depth cutoff. Empty at
+end and actual zero-length destination both succeed. Reversed/source/destination
+checks fail separately; uint8, signed256, pointer-valued entries and missing offsets
+return None. An element31/32/33 slice yields ordered0,max,7. Actual Heap.alloc
+instantiates keeps and frames a fresh alias-containing parent while the old child
+receives max. Fields retaining old identities do not imply child-content liveness.
+
+Preliminary independent finder/skeptic reviews found no range/semantic/ownership
+defect and requested concrete uint-specific allocation, zero-target and boundary
+controls; those are now proved. Neither reviewer used Lean/server/builds. Focused
+failures remain retained separately; corrections only fixed redundant decide
+conversion, Fin observation normalization and primitive weakening identity.
+No proof/test/resource budget changed. The same retained12GiB/no-swap serial
+runtime and disk caches are reused, without deletion or another image copy.
+Further signed/narrowed/other primitive representation families, general calldata
+references, ABI/source expression execution, fresh reference construction, byte
+transport and Source/V10/target composition remain open. No compiler/EVM run is
+inferred from kernel checking. G32/G33/G34/G35.01/.03/.04/.05 and Backfill A/B are
+still partial; G35.02/.06 remain blocked on reserved copy/composition prerequisites.
+The complete checkpoint12/13 queue audit still applies. No original queue or
+parent group is complete and no claim all independent refinements are exhausted.
+Final bounded checks, source reviews and cumulative export follow below.
+
+
+Checkpoint-fourteen final bounded v11-checkpoint14-full-01 exits0:900default
+jobs,262TestSuite jobs, final SolKey377taclets/131read-bearing annotations OK.
+Current runtime versions/KeySort2jobPASS from checkpoint13-runtime-01 remain
+unchanged and retained (Lean4.24.0 commit797c613, Lake5.0.0-src+797c613).
+Final full peak aggregate Lean/Lake RSS1457172KiB; cumulative session peak
+454889472bytes is separately labeled, not exec-worker RSS. Per-exec memory.events
+before/after allzero with0OOM deltas; enforced12GiB/no-swap and parent16GiB bounds
+unchanged. Disk658968576before/658345984after bytes; no deletion or new runtime.
+Layers/orphans/trust/strict automation/complete TestSuite parity/script/diff and
+owned328standard pins49modules checks pass. Strict automation reports491automatic,
+61step-budget,0manual,11refuted,0pending; cached timing rows are not cold rebuild
+measurements. Complete fixture observations/verdicts and exclusions are unchanged.
+Global inventory still FAILexit1:0unsafeerrors342unrecorded=14inherited+328owned.
+Additive checkpoint14-proposed-axiom-pins.json awaits coordinator reconciliation;
+reserved inventory/ledger/manifest files remain untouched. Raw strict docs still
+FAILexit1 with exact-base byte-identical74line output72missing/ambiguous rows;
+separate no-new comparison passes. No raw failure is relabeled green.
+Both independent final source reviewers accepted the refined actual statements,
+nonvacuity, complete observations, negative controls, ownership and owning document
+without further defect. Artifact reviews follow commit/export. The full original
+Work/Backfill audit remains partial/blocked, not completed by these two families.

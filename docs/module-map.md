@@ -1086,3 +1086,5 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/BuilderPairControls.lean` | Nonzero structs, arbitrary-length same-type array generations, final child/default observations, boundary recapture, failures and a checked copied-descendant mutation negative. |
 | `Backend/MemoryOps/CalldataTransfer.lean` | Actual decoded Boolean-table extraction and checked intrinsic slice transfer, ordered reads, exact guards, frames and preserving growth. |
 | `Backend/MemoryOps/CalldataTransferControls.lean` | Nonuniform dynamic/fixed/runtime-length transfers, element boundaries, lookup/bounds negatives and real allocator transport. |
+| `Backend/MemoryOps/CalldataUintTransfer.lean` | Exact published uint256 range bridge and actual decoded numeric slice transfer, read/guard/frame/growth/empty laws. |
+| `Backend/MemoryOps/CalldataUintControls.lean` | Maximum uint256, nonuniform ordered/runtime/fixed transfers, isolated numeric-family/bounds negatives, zero/end/boundary cases and actual allocator framing. |
