@@ -113,7 +113,7 @@ def condE : RExpr SemanticsExamples.E0 [] (.int IntTy.u8) :=
 theorem cond_ns (n : Nat) : NS (evalE (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n condE) :=
   evalE_valFrag_ns _ _ n condE
     ⟨trivial, ⟨⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, rfl⟩,
-      ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩⟩
+      ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, rfl⟩
     ⟨trivial, ⟨.inl ⟨rfl, rfl⟩, trivial, trivial⟩, trivial⟩
 
 /-- ... and evaluates to `3`. -/
