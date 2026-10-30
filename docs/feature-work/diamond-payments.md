@@ -185,6 +185,39 @@ hash links, unchanged Lean-file hashes and diff formatting checks pass.
 These reviews cover this evidence repair; the coordinator still owns fresh
 combined validation and approval of the resulting candidate.
 
+### Combined payment-closer regression repair (2026-10-30)
+
+Attempt 25's checksum-verified build log fails in the unchanged PaymentCorpus
+caller because the local payment closer quotes `Eq Int _ 2`. `Eq` takes its
+type argument implicitly, so this applies a proposition as a function when
+the tactic runs. The focused repair writes `(_ : Int) = 2`, retaining the
+same state-value lemma, proof search, invariant and budgets.
+
+Per-file MCP diagnostics on PaymentClose pass without warnings or errors.
+To check the actual failed caller against the edited tactic without loading
+a second document or using stale imported tactic code, a temporary probe
+appended the exact PaymentCorpus declarations and their existing imports to
+that same file. All declarations check; the three existing axiom prints
+report only `propext`, `Classical.choice` and `Quot.sound`, without `sorryAx`.
+The probe and extra imports were removed, and final per-file diagnostics pass.
+Raw probe/diagnostic records are local under `.lake/integration-equality-repair/`.
+PaymentCorpus and its theorem statements remain unchanged. No full build or
+combined gate is claimed; the coordinator must rerun those gates.
+
+The supplied context manifest, all eleven context files, the supplemental
+retrieval, all seven artifacts, all 177 archive members and the original
+175 checksum-listed records were reverified. Source/base commits and executor
+identity agree. The frozen prompt distinguishes source-VM headroom from the
+LOCAL host's required 12 GiB reserve. A fresh exact-commit documentation
+comparison is recorded beside the probe: both exits remain 1. No original
+checksum coverage, historical execution claim or review approval is added.
+
+Fresh independent read-only finder and skeptic launches both failed with
+`invalid thread-store request: no rollout found`. Independent review remains
+pending with the coordinator. Local read-only inspection confirms the probe
+replays the unchanged caller, and the final diff contains only this equality
+annotation and its milestone record. No semantic decision is required.
+
 Current scope after the explicit human decision on 2026-10-29: keep existing
 semantics and prove exact conditional success and certified failure conditions.
 For this assignment only, that replaces the unconditional transfer-success
