@@ -1,0 +1,144 @@
+{
+  "kind": "evidence-only setup investigation, not historical execution or new kernel audit",
+  "rows": [
+    {
+      "label": "check",
+      "command": [
+        "python3",
+        "/workspace/next10-diamond-try-evidence/setup-frontier/check.py"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17564,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 13873152,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "inventory",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17208,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 10833920,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "doc-paths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1,
+      "seconds": 3,
+      "peakAggregateRssKiB": 25936,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 8970240,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 15504,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 4526080,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "address-syntax",
+      "command": [
+        "node",
+        "--check",
+        "/workspace/next10-diamond-try-evidence/setup-frontier/address-formulas.mjs"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 18176,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 12943360,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "invocation",
+      "command": [
+        "bash",
+        "-c",
+        "test \"$LEAN_NUM_THREADS\" = 1 && ! flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock true && printf \"threads1 writer_lock_held=true historical_execution=false\n\" && df -h /workspace && free -m"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17900,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 4587520,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "analyze",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17752,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 19263488,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "address-formulas",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17284,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 25161728,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    }
+  ],
+  "docPaths": {
+    "baselineCommit": "71e77d870a22b209258b5acce7d2828a95b6bff9",
+    "baselineExit": 1,
+    "currentExit": 1,
+    "baselineFindings": 20,
+    "currentFindings": 20,
+    "newFindings": 0
+  },
+  "retainedKernelAuditDeclarations": 217,
+  "newKernelAuditDeclarations": 0,
+  "historicalEnginesInstantiated": 0,
+  "fixtureRuns": 0,
+  "compilations": 0,
+  "mapGenerations": 0
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "pure RLP/Keccak address arithmetic, no engine/message/fixture execution",
+  "raw": {
+    "caller": "0x1212121212121212121212121212121212121212",
+    "initialNonce": 0,
+    "incrementedNonce": 1,
+    "addressNonce": 0,
+    "address": "0x501f373d5541129778e4195692f7fff4dd01ebc9"
+  },
+  "host": {
+    "caller": "0x1212121212121212121212121212120000000012",
+    "initialNonce": 0,
+    "incrementedNonce": 1,
+    "addressNonce": 1,
+    "address": "0xc06afe3a8444fc0004668591e8306bfb9968e79e"
+  },
+  "sameSenderControl": {
+    "caller": "0x1212121212121212121212121212121212121212",
+    "nonce0": "0x501f373d5541129778e4195692f7fff4dd01ebc9",
+    "nonce1": "0x8f047056608fdb1be4725341c345326702096cb2"
+  }
+}

@@ -1434,3 +1434,13 @@ No runner/profile or Lean semantics changed; original native12/8 strict exit1,
 reference18/2 and66/140 observations remain retained checkpoint evidence.
 Historical execution is unauthorized and the physical/ABI producer lanes remain
 explicit boundaries, not forced passes.
+
+
+### Setup compatibility continuation after71e77d87
+
+The [caller-entry setup/gas/frame/layout investigation](diamond-try-setup/README.md)
+traces raw runCall and upstream harness nonce/checkpoint/address/gas boundaries,
+adds static intrinsic/deposit arithmetic and occurrence-specific compiler return
+labels, and refines the missing local layout relation. No historical engine,
+runner, evaluator, profile or model was implemented; original fixture gates
+remain open. Prior completed compilations/maps and Lean gates were not repeated.
