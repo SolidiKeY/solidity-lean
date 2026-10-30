@@ -754,3 +754,8 @@ import Solidity.Backend.MemoryOps.CalldataChildControls
 import Solidity.Backend.MemoryOps.CalldataNestedControls
 import Solidity.Backend.MemoryOps.SequentialSnapshotControls
 import Solidity.Backend.MemoryOps.IntervalSnapshotControls
+
+import Solidity.Backend.MemoryOps.InterstagePrimitiveControls
+import Solidity.Backend.MemoryOps.InterstageReferenceControls
+import Solidity.Backend.MemoryOps.InterstageDistinctControls
+import Solidity.Backend.MemoryOps.InterstageCorrespondenceControls

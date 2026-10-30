@@ -1070,3 +1070,9 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/SequentialTransport.lean` | Ordered snapshots/writes transport through preserving growth and real child footprint framing; checked intermediate heaps remain explicit. |
 | `Backend/MemoryOps/SequentialSnapshotControls.lean` | Dynamic recapture/frozen/order negative, all read branches, six isolated stage failures, zero-length/exact-end and allocator controls. |
 | `Backend/MemoryOps/IntervalSnapshotControls.lean` | Fixed/reference separated/touching/overlap controls, actual typed observations and operation-linked reuse of prior decoded-child correspondence. |
+| `Backend/MemoryOps/InterstageGrowth.lean` | Actual checked-mid growth, interstage allocation, recapture read/failure cases and fresh structural frames. |
+| `Backend/MemoryOps/InterstagePrimitiveControls.lean` | Dynamic changed recapture, empty endpoints, supplied changed objects and fresh-reference liveness negatives. |
+| `Backend/MemoryOps/InterstageReferenceControls.lean` | Fixed reference arrays, both overlap directions, fresh shared-parent fields and wrong-original-snapshot controls. |
+| `Backend/MemoryOps/InterstageDistinctControls.lean` | Different source/destination arrays exercise both first-write read branches and actual second-output typed reads. |
+| `Backend/MemoryOps/InterstageCorrespondence.lean` | Actual intermediate growth and allocator applications preserve represented old child footprints under derived frame facts. |
+| `Backend/MemoryOps/InterstageCorrespondenceControls.lean` | Existing immutable child certificate survives two changed parent writes with real interstage allocation. |

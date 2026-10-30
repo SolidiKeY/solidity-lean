@@ -791,3 +791,95 @@ exports are preserved. Runtime TOML remains outside the commit. This checkpoint
 does not complete any parent G group, either original Backfill queue, or the
 original full assignment; remaining independent refinements are not declared
 unavailable by the missing source/byte/compiler prerequisites.
+
+
+## Checkpoint nine: actual interstage allocation and recapture
+
+Parent: `9f340a4396edd6b3ed2388edaded2d3525dd64a3`; frozen base remains
+`fb379ae20f10e2c92113453ddd9d40d8f2efbe09`. Existing sequential transport grew
+before both captures. It did not allocate on the actual first output. The six
+new `Backend/MemoryOps/Interstage*.lean` modules close that operation-side clause
+without changing any intrinsic representation or reserved source.
+
+`checked_interstage_success` starts with an actual checked first result `mid`,
+a prefix extension with `Heap.Keeps mid mid'`, and bounds measured in `mid`.
+It derives the second actual result on weakened old references and its typed
+reads. `checked_interstage_read_cases` distinguishes first-destination interior
+reads from original destination reads outside it; the first source may differ.
+`checked_interstage_none_iff` records exact second-stage Option failures.
+`captureAfterAlloc` applies published `Heap.alloc` to `mid`; its checked, keeps,
+fresh and fresh-index theorems discharge growth and frame the supplied object's
+own structural fields through a second old-object write. No object constructor,
+default builder, Source allocator failure, rollback or target execution is proved.
+
+Dynamic Boolean controls recapture changed data, discriminate a frozen-original
+snapshot, exercise independent second source/destination/reversed failures, empty
+exact-end operations, and a zero-length first/second chain. A supplied actual
+mid-object retains its changed data. Fixed reference-array controls exercise both
+overlap directions, repeated parent identities, exact fresh IDs/fields, typed
+index observations and changed referents. Distinct-object controls discriminate
+both branches of the first-write read formula with different source/destination
+objects. Fresh fields retain old identities; their deep contents are not frozen.
+
+`BoolChildRepr.interstage` and `RefChildRepr.interstage` derive final old-child
+correspondence from initial representation, actual operations, intermediate
+Keeps, and both destination/root/leaf separation facts. The first root frame and
+weakening derive the second leaf footprint. An allocator corollary and inhabited
+existing-certificate chain reuse a published immutable child table: parent IDs
+change `[1,0,1]` to `[0,0,1]` then `[0,1,1]` across actual allocation. No fresh
+Source entry or new address injectivity is assumed. The concrete correspondence
+controls instantiate Boolean and nested children. Both reviewers identified the
+initially missing nested application; `existing_nested_chain` now reuses the
+published nested certificate, records actual first success, allocation on mid
+and second success, and derives final root/leaf correspondence. Its nonempty
+first write changes parent IDs `[3,2]` to `[3,3]`; the second recaptures that
+changed slot. Published type separation discharges both root and leaf frames.
+Generic nested footprint transport is proved, not arbitrary recursive traversal.
+
+The combined focused closure passes69jobs after repairing the closed singleton
+capacity proof. Failed attempts01-04 and their sorryAx diagnostic output remain
+raw evidence; successful final guards contain only standard axioms. Exactly36
+new guarded headline pins are additive proposals, not edits to reserved inventory.
+Full final gate exits0:888default jobs,262TestSuite jobs, and final SolKey377taclets,
+131read-bearing, annotations OK. Refined full02 sampled aggregate Lean/Lake RSS peak1,445,080KiB;
+container cgroup peak386,539,520bytes,12GiB/no-swap and serial-j1 containment.
+
+G32 remains partial: typed frames do not supply all heap-to-physical-byte clauses.
+G33 remains partial: this supplies interstage existing-object allocation transport,
+not all-type defaults, target allocation failures or reserved reference builders.
+G34 remains partial: general paths/rebinding/delete and stale-alias compilation
+remain open. G35.01 is partial; G35.02 is blocked on its reserved copy prerequisite.
+G35.03 remains partial: decoded correspondence is not ABI/general calldata/source
+execution. G35.04 advances actual interstage recapture but does not realize fresh
+deep copy. G35.05 remains partial: no arbitrary recursive child-copy liveness.
+G35.06 remains blocked on reserved copies and V10/Source/target composition.
+Backfill A and B remain partial, with substantive bounds/frame/identity progress;
+no claim is made that all further independent refinements are unavailable.
+Fresh-root representation, new-address injectivity, recursive traversal/copy,
+physical byte-memory and final compiler composition remain explicit obligations.
+
+Checkpoint-nine export directory:
+`/workspace/v11-memory-operations-evidence/checkpoint9`. Exact committed head,
+cumulative patch/bundle, command logs, reviews and checksums are recorded there.
+Prior sealed exports, errors, caches, original checkout and runtime TOML remain
+untouched. No integration, global ledger/status rewrite or goal transition occurs.
+
+
+Final checkpoint-nine source finder and skeptic reviews found no confirmed
+mathematical, hypothesis, ownership or nonvacuity defect. Their concrete nested
+witness gap was fixed, checked and re-reviewed. Their evidence wording finding
+was fixed: final metrics refer to refined `v11-checkpoint9-full-02`, exit0,
+OOMKilled=false; prior full01 and all failed focused runs remain distinct raw logs.
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and
+Lake5.0.0-src+797c613 execute; KeySort passes2jobs in
+`v11-checkpoint9-runtime-01.log`: RUNTIME_GATE_PASS is setup evidence only.
+Strict automation, complete committed-snapshot TestSuite parity/trust, layer,
+orphan, trust, owned boundary/standard-pin, script syntax and diff checks pass.
+Owned evidence covers222standard pins37modules. Global axiom inventory still
+exits1:0unsafe errors236unrecorded=14inherited+222owned. Global docs still exits1
+with46findings; raw output equals the exact frozen-base log, so the separate
+no-new-findings comparison passes. Neither global failure is relabeled green.
+Proposed additive registrations and exact feature IDs remain coordinator work.
+No external compiler/EVM execution or Source/target allocation semantics is claimed.
+The existing blocked goal is unchanged; get_goal and per-file diagnostics RPCs
+remain unavailable. All original queues and mandatory unfinished gates stay open.
