@@ -6,7 +6,7 @@ recovers the pinned checkout, traces published evidence and adds independent
 intrinsic adapters plus source/intrinsic byte observation proofs and inhabited
 controls. It adds no axiom, exclusion or replacement source semantics.
 
-Current continuation inventory: **183** exact lane theorem/control pins in24
+Current continuation inventory: **222** exact lane theorem/control pins in25
 owned Lean modules. Source callable metadata, request/environment/transient
 projections, selector/Keccak byte observations, emit-effect controls, payment
 and declaration-role clauses are implemented below. Every G20–G23 parent remains
@@ -893,3 +893,131 @@ exact-base no-new comparisons PASS0; raw failures remain failures. Final code
 proof binding is8230f88cf703841f1e12b4755a350d95289ee604; only this owned document
 changes in the terminal handoff commit. Exact final head is saved externally
 with verified patch/bundle/evidence/checksum artifacts. No goal completion.
+
+## Nested rollback and creation continuation checkpoint
+
+This continuation starts at ca730b02753d91e6db039bc07213c2e6020ca5b2, on the same
+assigned worktree/branch/frozen base. New laws are in Transactions and
+LibraryCreation, with NestedControls using published intrinsic operations. No
+existing source semantics, owner files, goal or budgets change. Per-file Lean MCP
+and get_goal remain unavailable. The cloud runtime skill was reapplied.
+
+Missing law reproduced: prior transact_atomic_descendant covers one caught
+boundary and a successful tail; prior descendant_failure returns outer failure;
+prior tryCreate_success_continuation_failure lacks the enclosing atomic
+application. None supplies two reached snapshots with two distinct failures and
+a successful outer tail. New transact_two_boundaries consumes actual successful
+enterOuter at reset input, actual successful enterMiddle at outer, exact inner
+failure at middle, exact middleTail failure at middle/inner status, and exact
+outerTail success at outer/middle status. It concludes exact reset final world
+and result. Atomic consumers are arbitrary THalt consumers, NOT Solidity catch
+handlers. transact_complete_observation transports ANY observation of the complete
+world/TRes pair. transact_repeat_failure adds the missing failed second transaction
+case, consuming actual first success and actual second failure at the committed
+world's reset. It never restores the earlier transaction entry on second failure.
+
+atomic_tryCreate_success_continuation_failure explicitly consumes the EXISTING
+tryCreate_success_continuation_failure, with nonstatic context, actual successful
+create, and actual failed success continuation. It restores its enclosing atomic
+entry snapshot with the exact halt, without running the creation handler.
+tryCreate_static and tryCreate_completed_failure preserve argument-before-catch,
+static rejection and the existing catchable predicate. No exhaustion/divergence
+constructor run is fabricated; their controls classify existing halts only.
+
+New inhabited catalogue has original Cell at false and separate CreatedCell at
+true with explicit payable constructor metadata. Supplied constructor Prog has
+nonempty persistent/transient writes; its actual execution/payment/install is
+checked. Both handlers and both status consumers are named separately. Extracted
+world defaults cannot establish success: setup_reached/outer_reached/
+middle_reached/creation_reached/tail_reached give actual successful TRes equalities.
+A private extraction lemma uses a checked successful result observation, avoiding
+function-valued world equality/reduction budget changes.
+
+The complete ordered vector of the listed observations is: (sender balance,self balance,self persistent
+saved,self transient scratch), third balance, third persistent/transient slots
+if installed, third account-isSome, created-kind library-role. Exact statuses
+are reported separately, with raw TRes preserved by complete_status and the
+repeated-failure theorem. Checked vectors:
+
+| Reached point | Full ordered vector | Exact result/halt |
+|---|---|---|
+| outer snapshot | ((93,7,3,9),0,none,false,false) | ok [ab,cd] |
+| middle snapshot | ((91,9,5,17),0,none,false,false) | ok unit |
+| successful constructor | ((88,9,5,17),3,some(8,12),true,false) | ok Handle true third |
+| inner caught at middle | ((91,9,5,17),0,none,false,false) | revertWith [de,ad] |
+| actual middle-tail paid call before later failure | ((84,16,3,9),0,none,false,false) | call ok [ab,cd], then revertWith [fa,02] |
+| successful outer tail before reset | ((92,8,11,23),0,none,false,false) | ok [ab,cd] |
+| committed/reset complete outcome | ((92,8,11,0),0,none,false,false) | ok [ab,cd] |
+| repeated real scratch read | ((92,8,11,0),0,none,false,false) | ok 0 |
+| second-transaction failure rollback | ((92,8,11,0),0,none,false,false) | revertWith [66,77] |
+| actual wrong-ancestor tail from base | ((99,1,11,0),0,none,false,false) | ok [ab,cd] |
+
+The dirty direct scratch read returns23 and differs from repeated transaction0;
+wrong ancestor is an ACTUAL alternate continuation, not an invented tuple.
+Nonempty wrong-result/payload [ab,ce], wrong second halt[66,78], stale transient23,
+and success-continuation recatch alternatives are rejected. Static/argument
+failures bypass handlers; a real paid reverting constructor is caught at middle
+without installed account or leaked writes/payment. distinct_halts checks exact
+[de,ad] vs[fa,02]. nested_application, repeated_application and
+repeated_failure_application explicitly apply the general laws, not just compute
+an unrelated toy expression. These are intrinsic supplied-body applications;
+arbitrary source callback/body execution, source/V07 layout/ABI/bytecode/frame
+certificates and all reserved owner applications remain open. Every G20-G23
+parent and BackfillA/B full source application is still PARTIAL.
+
+Independent finder and skeptic identified two concrete initial fixture issues:
+original Cell lacked payable ctor metadata for payment3; an arbitrary wrong
+balance tuple was too weak a wrong-ancestor control. Both fixed as above and
+independently confirmed. Early failed bounded checks retained: recursion-depth,
+missing local Decidable instances and context-name ambiguity were repaired with
+staged observation instances/checked extraction/qualified Context, no budget
+increase. One repeated-failure proof needed explicit reset idempotence; fixed.
+Final actual-source reviews found no further defect (no Lean/server/builds).
+
+Current Audit541494-647280cc passes111named modules/112Lakejobs,222exact printed
+axiom sets,42.58seconds; sampled aggregateRSS974155776,cgrouppeak362598400,
+unchanged sources/config and verified stopped container. Axiom sets contain only
+propext/Classical.choice/Quot.sound. Lane checker and nine corrupted-evidence
+controls PASS. Final static/executable validation and reviewed committed export
+are recorded in the separate nested checkpoint handoff, preserving all previous
+sealed exports. No global G03/status/TrustAudit pins are rewritten.
+
+Decision forensics is retained in nested-decision-forensics.json/.md. Exact-base
+isolated setup occurred48.79seconds after start and still produced no Decision
+result before the600s guard; no native phase or cold Built dependency in that
+isolated log. Full run spent238.45seconds before Decision setup, but eliminating
+startup alone is not a demonstrated sufficient repair. Actual setup/options/cache
+bindings and stopped-container timestamps are retained. No supported repair was
+established under frozen constraints, so NO identical full retry was performed.
+Prior full496841-193e914c and isolated task/base remain FAILED125 with full suffixes
+UNREACHED, not waived by the baseline timeout. Literal run-lean remains PENDING
+under the previously recorded no-delete conflict; independent fresh refresh is
+separate evidence. Prior98gate records and sealed exports remain untouched.
+
+Nested checkpoint validation handoff: TestSuite543634-f3408386 PASS260named/
+262jobs,41.59seconds, sampledRSS63152128/cgroup38506496. Fresh-sort546423-
+6372f597 PASS3.05seconds, sampledRSS216166400/cgroup408039424, actual initially
+absent supported output directory and old executable preserved;377taclets/
+131read-bearing/131covered/annotations match. Actual Lean4.24.0 commit797c613/
+Lake5.0.0-src+797c613, passing KeySort2jobs in the fresh log, recorded before
+runtime success claim. Runtime evidence is not full source validation.
+Nested static/lane controls PASS:222pins,9evidence corruptions, runtime controls,
+169core/0elaborator,891reachable/0orphan/0disallowed,906sources/241trustsites/
+0findings. Raw task/base docs exits1/1 with46missing; raw global axiom pins
+exits1/1 with14StorageSlots notes/613pins/0errors; exact-base separate NEW0 PASS.
+Raw failures remain FAILED. git diff --check PASS. Neither full gate nor literal
+run-lean is relabelled green. No external compiler/EVM tests were run.
+
+Separate independent read-only finder/skeptic final source/doc/evidence reviews
+confirmed both substantive fixes and source/config/log/222pin bindings, with no
+remaining mathematical/nonvacuity/ownership finding. Finder wording precision
+fixed: this is the complete listed observation vector, not every world field;
+the generic law separately proves exact world equality. No Lean/server/build by
+reviewers. New scoped commit/export and final artifact reviews are saved under
+/workspace/v08-world-lowering-artifacts/checkpoint-nested-20261030 and
+nested-reviews.md, without overwriting any prior sealed export/checksum. Every
+queue item's source applications and mandatory full validation remain unfinished.
+Further independent repeated-failure backfill was completed beyond the suggested
+two-boundary milestone; no claim of exhaustive possible adapter lemmas is made.
+Named source-execution/type/layout/owner prerequisites above block full-lane
+completion, without being assumed or replaced by target evaluation.

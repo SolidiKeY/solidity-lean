@@ -98,4 +98,59 @@ theorem rollback_observation {α β : Type} (w : World contracts)
     observe (w.transact frame).1 = observe w.resetTransient := by
   rw [World.transact_failure w frame halt failed]
 
+/-- Two distinct atomic snapshots. The inner completed failure resumes at
+`middle`; the later middle failure resumes at `outer`. Both status consumers
+are arbitrary THalt consumers, not Solidity catch handlers. Only transact resets. -/
+theorem transact_two_boundaries {α β γ δ ε : Type}
+    (w outer middle final : World contracts)
+    (enterOuter : World contracts → TRes (World contracts × α))
+    (enterMiddle : World contracts → α → TRes (World contracts × β))
+    (inner : World contracts → β → TRes (World contracts × γ))
+    (middleTail : World contracts → TRes γ → TRes (World contracts × δ))
+    (outerTail : World contracts → TRes δ → TRes (World contracts × ε))
+    (a : α) (b : β) (result : ε) (innerHalt middleHalt : THalt)
+    (outerReached : enterOuter w.resetTransient = .ok (outer, a))
+    (middleReached : enterMiddle outer a = .ok (middle, b))
+    (innerFailed : inner middle b = .error innerHalt)
+    (middleFailed : middleTail middle (.error innerHalt) = .error middleHalt)
+    (outerContinued : outerTail outer (.error middleHalt) = .ok (final, result)) :
+    w.transact (fun input => do
+      let (outerSnapshot, a) ← enterOuter input
+      let (afterMiddle, middleStatus) := atomic outerSnapshot (do
+        let (middleSnapshot, b) ← enterMiddle outerSnapshot a
+        let (afterInner, innerStatus) := atomic middleSnapshot (inner middleSnapshot b)
+        middleTail afterInner innerStatus)
+      outerTail afterMiddle middleStatus) = (final.resetTransient, .ok result) := by
+  apply World.transact_commit
+  simp only [outerReached, bind, Except.bind, middleReached, innerFailed,
+    atomic_failure, middleFailed, outerContinued]
+
+/-- Complete observations include both the reset world and exact result/status;
+this is congruence of a proved transaction, not a preservation premise. -/
+theorem transact_complete_observation {α β : Type} (w final : World contracts)
+    (frame : World contracts → TRes (World contracts × α)) (result : α)
+    (ran : frame w.resetTransient = .ok (final, result))
+    (observe : World contracts × TRes α → β) :
+    observe (w.transact frame) = observe (final.resetTransient, .ok result) := by
+  rw [World.transact_commit w final frame result ran]
+
+#print axioms transact_two_boundaries
+#print axioms transact_complete_observation
+
+/-- A failed repeated transaction rolls back to the committed first world's
+reset, never the original transaction's entry or its dirty final state. -/
+theorem transact_repeat_failure {α β : Type} (w middle : World contracts)
+    (first : World contracts → TRes (World contracts × α))
+    (second : World contracts → TRes (World contracts × β)) (value : α) (halt : THalt)
+    (one : first w.resetTransient = .ok (middle, value))
+    (two : second middle.resetTransient = .error halt) :
+    (w.transact first).1.transact second = (middle.resetTransient, .error halt) := by
+  rw [World.transact_commit w middle first value one]
+  have failed : second middle.resetTransient.resetTransient = .error halt := by
+    rw [resetTransient_idem]
+    exact two
+  rw [World.transact_failure middle.resetTransient second halt failed, resetTransient_idem]
+
+#print axioms transact_repeat_failure
+
 end Solidity.Lowering.V08

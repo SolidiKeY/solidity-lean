@@ -1072,3 +1072,5 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/InheritedMetadata.lean` | Published mutOK/FnOverrideOK payment-tag transport and actual entry-header guards; source body/dispatch remains separate |
 | `Lowering/V08/InheritedControls.lean` | Nonempty two-contract source chain, proved baseFns/override certificate, funded header and exact wrong-header/mutability controls |
+
+| `Lowering/V08/NestedControls.lean` | Two populated atomic rollback boundaries with real creation-continuation failure and complete observation controls. |

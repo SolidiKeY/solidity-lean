@@ -405,6 +405,163 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.NestedControls.argument_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.catch_classification": [],
+  "Solidity.Lowering.V08.NestedControls.caught_creation_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.complete_observation": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.complete_status": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.creation_atomic": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.creation_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.dirty_read": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.dirty_transient_reuse": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.distinct_halts": [],
+  "Solidity.Lowering.V08.NestedControls.frame_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.inner_not_reCaught": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.middle_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.middle_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.middle_tail_dirty": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.nested_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.outer_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.populated_snapshots": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.read_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.recatch_negative": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.repeated_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.repeated_dirty_negative": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.repeated_failure_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.repeated_failure_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.repeated_reset": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.second_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.second_wrong_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.setup_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.static_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.tail_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.wrong_ancestor": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.wrong_ancestor_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.NestedControls.wrong_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PayableControls.constructor_refused": [
     "propext"
   ],
@@ -619,6 +776,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.atomic_tryCreate_success_continuation_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.beBytes_layout": [
     "Quot.sound",
     "propext"
@@ -696,6 +858,9 @@
   "Solidity.Lowering.V08.transact_atomic_descendant": [
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_complete_observation": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_congr": [
     "propext"
   ],
@@ -709,10 +874,27 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_repeat_failure": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_two_boundaries": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_wrong_halt": [
     "propext"
   ],
+  "Solidity.Lowering.V08.tryCreate_completed_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.tryCreate_observe": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.tryCreate_static": [
     "Classical.choice",
     "Quot.sound",
     "propext"
