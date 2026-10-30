@@ -332,4 +332,28 @@ theorem libraryCall_other_accounts {α : Type} {w next : World contracts} {calle
 
 #print axioms libraryCall_other_accounts
 
+/-- Successful creation reaches caller-typed library work before the later failure.
+The creation catch does not enclose either success-continuation operation.
+All three actual executions and the creation context guard remain explicit. -/
+theorem tryCreate_library_success_failure {α β γ : Type} {caller : K}
+    (w created delegated : World contracts) (value : α) (kind : K)
+    (target : α → Address) (ctor : α → Prog (contracts kind) [] [])
+    (context : α → Context) (reference : Handle kind)
+    (self : Handle caller) (library : Library contracts caller γ) (libraryContext : Context)
+    (later : World contracts → γ → TRes (World contracts × β))
+    (caught : World contracts → THalt → TRes (World contracts × β))
+    (output : γ) (halt : THalt)
+    (mutable : (context value).isStatic = false)
+    (constructed : w.create kind (target value) (ctor value) (context value) = .ok (created, reference))
+    (linked : created.libraryCall self library libraryContext = .ok (delegated, output))
+    (failed : later delegated output = .error halt) :
+    w.tryCreate (.ok value) kind target ctor context (fun before _ => do
+      let (next, result) ← before.libraryCall self library libraryContext
+      later next result) caught = .error halt := by
+  apply tryCreate_success_continuation_failure w created value kind target ctor context reference
+    _ caught halt mutable constructed
+  simp only [linked, bind, Except.bind, failed]
+
+#print axioms tryCreate_library_success_failure
+
 end Solidity.Lowering.V08

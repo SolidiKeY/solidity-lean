@@ -1437,3 +1437,122 @@ and all source fingerprints are recorded at a NEW final export path:
 No Lean/script/proof/pin/budget changes in this followup. All original queues,
 reserved prerequisites,failed125/full suffixes and pending literalrun-lean remain
 unfinished. Original persistent blocked goal unchanged.
+
+
+## Successful creation and library success continuation (2026-10-30)
+
+Starting checkpoint c3895e4140ad974467ca42c327e9505e9f12fbd8. The coordinator's
+reviewed optional-cache repair restored3282042880 available bytes; its receipt
+is preserved at /tmp/cloudvm-cache-repair-20261030.json. No worker cleanup was
+performed. New scripts/v08-no-artifact-cache.py executes the existing bounded
+runner with exactly two asserted substitutions: Docker receives LAKE_CACHE_DIR
+as the empty string and LAKE_ARTIFACT_CACHE=false, and inner shell assertions
+verify them before Lake. Warm package outputs and every resource/proof/test/time
+budget remain unchanged. The original runner and wrapper are separately hashed.
+All new builds use this wrapper; the preserved artifact cache remains1365files.
+
+The previously missing combination is now inhabited in
+Solidity/Lowering/V08/CreationSuccessControls.lean: actual nonempty goodCtor
+installs candidate5 with persistent8/transient12, then caller-typed linked
+library work runs in the SUCCESS continuation, followed by the real paid failing
+call and its exact encoded binary reason [0x6c,0,0xff,0x48]. This complements the
+previous failed-constructor CATCH-continuation witness. The new general
+tryCreate_library_success_failure explicitly requires the actual create,
+libraryCall and later-failure executions plus the nonstatic creation context;
+it does not supply source linkage/admission/body/runtime preservation.
+
+The complete previous ordered vector is retained, with candidate typed cells
+and typed installation identity appended. Shared setup, paid ancestor and
+constructor-entry contexts are the existing LibraryHandlerControls witnesses.
+Constructor entry remains [2,0,5,0,12345]; delegated result retains bytes[b1,b2]
+and the entire incoming context [1,7,2,7,12345]. Created and delegated worlds
+have balances[88,7,0,5,0]; caller cells move3/9 to11/23, candidate remains8/12,
+other remains19/0 and installed library has empty fields. Complete library,
+other and candidate account records are preserved by actual library execution;
+no generic balance or readonly-body inference is made. Runtime identity means
+published catalogue-kind/role lookup, not deployed bytecode hashing.
+
+The exact later halt is not recaught by the distinguishable panic handler.
+Atomic rollback returns paid ancestor3/9 with candidate absent; outer rollback
+returns reset base0/0 with candidate absent and balances[95,0,0,5,0]. Positive
+keep/commit retains candidate8/0 and caller11/0 after reset. Actual subsequent
+reads return[11,0,19,0,8,0]. Failure-then-recreation really creates and commits
+the SAME address next transaction, retaining both original statuses and the
+complete extended vector. Wrong-world/snapshot, actual double payment,
+wrong-role/runtime-kind, binary payload and wrong-context success-continuation
+runs discriminate actual executions. Lossless observed library success and
+failure retain original bytes/context plus length and feed actual returned
+values to the later continuation.
+
+Current Audit gate632880-f112508e passes115Lake jobs in24.792s:355exact axiom
+sets, including all322previous sets unchanged (and therefore original276).
+Sampled aggregateRSS1040109568,cgrouppeak439570432;12GiB/no-swap,CPU1,
+LEAN_NUM_THREADS1/Lean-j1,600s and OSheadroom guards unchanged. Actual Lean4.24.0
+and Lake5.0.0-src+797c613 are recorded with passing KeySort in the log.
+Proof iterations622173/624200, import-header failure626323 and keyword syntax
+failure631953 remain raw failed evidence; all corrected without budget rises.
+Fifteen external corruption controls include changed/missing new source.
+
+Independent finder and skeptic read the actual proofs/controls/wrapper without
+Lean/server/builds: no substantive findings. Both required separate hashes of
+wrapper and original runner because the transformed runner executes in memory;
+that provenance requirement is included in the new evidence. Current scoped
+checks do not waive full496841/taskDecision413142/baseDecision433573 exit125,
+raw global docs/pin exits1, or pending literal-wrapper validation.
+
+Every original G20,G21,G22.01-.05,G23 and BackfillA/B source/application queue
+remains PARTIAL. Canonical Source/V07/type/layout/ABI/body/runtime-frame/
+bytecode/linkage and reserved-owner applications remain open; this checkpoint
+is intrinsic supplied-body execution, not Source lowering, callbacks or an
+external compiler/EVM test. No claim that all independent adapter work is
+exhausted. Proposed G03 reconciliation is additional local evidence for
+G22.03-.05/BackfillA-B only; no global status or ledger was edited.
+
+
+### Final boundary and validation record
+
+The preceding355-pin Audit is stage evidence. Final Audit704511-e74a9e12
+passes115jobs in25.287s with357exact standard axiom sets: all previous355,
+322 and original276 sets unchanged. New repeat_vector_statuses proves the
+ENTIRE extended vector after actual repeated reads with BOTH statuses; actual
+rollback_candidate_read_fails runs that same procedure at the rollback world
+and returns exact revert. Independent finder/skeptic reviews found no defects
+in these two boundary proofs. SampledRSS1066622976/cgrouppeak487723008.
+
+Current Suite705959-ff5fe225 PASSES all260 requested modules/262jobs in179.811s;
+sampledRSS5984354304,cgrouppeak6023221248. Prior Suite643413/664651/684784 remain
+FAILED125 under the unchanged600s guard (cleanup adds about10s), respectively
+stopping at Derived1/14/21 after226/239/248 completed requested commands. Each
+subsequent run was justified by recorded newly available source/toolchain/
+configuration-keyed package outputs, not by changing tests or limits. Derived7
+and17 alone took175s/166s; these are build-time measurements, not proof failures.
+The largest sampledRSS among these failures was11642351616, below12GiB;
+cgrouppeak is null on interrupted runs and is NOT inferred from RSS.
+
+Fresh634358-b1856fc6 PASS23.096s includes actual KeySort2jobs and377taclets,
+131read-bearing/131covered; original executable SHA11eb6e37ff937d79901cb0072027ff3f9382552d7f65b421078934dadb6d216b
+preserved. Fresh output executable SHAa6cce6c2d7283a7b8faa1da2873baba12537744ad592d63ad36d8cde5b47f458.
+That run precedes only two fixture-proof additions: its GLOBAL fingerprint is
+historical, while its entire closed sort-source input set remains byte-identical
+to current. The final evidence records this distinction explicitly; it is not
+an all-source/default-build or literal-wrapper pass. All current builds used
+empty LAKE_CACHE_DIR and LAKE_ARTIFACT_CACHE=false inside Docker;1365preserved
+optional cache entries remain, with no worker cleanup or copied toolchains.
+
+The initial static driver failed because direct node check-trust lacked its
+required NUL file list; its exit1/full stderr are retained. Supported
+bash scripts/check-trust.sh passes909sources/241sites/0findings. Final source
+binding,15corruptions, strict491automatic/61step-budget/11refuted/0pending,
+169core/0elaborator,894reachable/0orphan/0disallowed are separate scoped gates.
+Raw task/base docs remain exit1 with identicalFULL72findings (46missing plus
+26ambiguous), and global pins exit1 with identical14StorageSlots notes; both
+separate NEW0 comparisons pass, neither raw gate is relabeled green.
+
+No unchanged Decision/full retry occurred. Full496841-193e914c and isolated
+task413142/exactbase433573 remain FAILED125; default-build/Suite suffixes in
+that full run were unreached. Current mandatory full and literal run-lean
+confirmation remain unresolved. Existing blocked goal was not changed;
+get_goal and Lean MCP diagnostics are unavailable. Final artifacts and
+independent artifact reviews are recorded in the new owning handoff at
+/workspace/v08-world-lowering-artifacts/checkpoint-creation-success-20261030.
+Every original Work/Backfill source queue and reserved dependency stays partial.

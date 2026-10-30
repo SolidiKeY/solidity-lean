@@ -110,6 +110,172 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.CreationSuccessControls.atomic_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.combined_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.commit_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.commit_frame_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.commit_repeat": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.committed_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.creation_and_library_vectors": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.creation_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.double_payment_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.exact_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.failure_repeat": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.failure_then_recreate": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.frame_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.keep_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.later_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.library_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.library_result_context": [],
+  "Solidity.Lowering.V08.CreationSuccessControls.not_recaught": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.observed_failure_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.observed_keep_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.read_candidate_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.recreate_vector_statuses": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.repeat_vector_statuses": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.rollback_candidate_read_fails": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.rollback_vectors_status": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.success_work_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.transaction_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.untouched_accounts": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.wrong_continuation_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.wrong_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.wrong_role": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.wrong_rollback_snapshot": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.wrong_runtime_identity": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CreationSuccessControls.wrong_world": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.CryptoControls.empty_hash": [
     "Classical.choice",
     "Quot.sound",
@@ -1366,6 +1532,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.tryCreate_library_handler_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.tryCreate_library_success_failure": [
     "Classical.choice",
     "Quot.sound",
     "propext"

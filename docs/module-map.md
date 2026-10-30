@@ -1078,3 +1078,5 @@ At the root, the notation's own tests:
 | `Lowering/V08/HandlerControls.lean` | Completed constructor failure, paid catch-handler failure, exact payload and ancestor rollback controls. |
 
 | `Lowering/V08/LibraryHandlerControls.lean` | Real caller-context library work inside failed creation-handler rollback and exact context/payload controls. |
+
+| `Lowering/V08/CreationSuccessControls` | Successful creation, caller-library continuation, exact failure and rollback controls |
