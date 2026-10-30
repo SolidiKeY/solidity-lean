@@ -1021,3 +1021,11 @@ Further independent repeated-failure backfill was completed beyond the suggested
 two-boundary milestone; no claim of exhaustive possible adapter lemmas is made.
 Named source-execution/type/layout/owner prerequisites above block full-lane
 completion, without being assumed or replaced by target evaluation.
+
+Process correction for this checkpoint: proof/document/evidence edits and builds
+held the writer lock. The git add/commit commands for c522d898 ran after the
+Python lock-owning process exited, so those two Git mutations were not locked.
+No competing build/writer or unexpected change was observed. This deviation is
+recorded rather than claiming lock coverage; subsequent Git/export commands
+retain the lock in their parent through completion. The original earlier helper
+lock omission remains recorded separately above.
