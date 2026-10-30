@@ -3,6 +3,7 @@
 # Caller must hold the checkout writer lock and enforce repository resource bounds.
 set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export PATH="$HOME/.elan/bin:$PATH"
 cd "$repo_root/Bridge"
 # The function body is verbatim from the already-pinned EVMYulLean commit;
 # no hash/crypto library or network fetch is needed for memory observations.

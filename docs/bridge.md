@@ -1216,6 +1216,39 @@ Current operational configs are snapshotted before removal/restoration; proof
 caches stay on disk. The cumulative export preserves R1–R4 and includes both
 human approvals, every task commit, full logs, resource reports and reviews.
 
+### External memory integration gate repair (2026-10-30)
+
+Combined validation of candidate `35ccc2d2411625a7a42f1748a1dac4d55c3e8899`
+against base `204eb1545cbf57e436196e4cba346075515b7279` stopped at
+`scripts/check-external-memory.sh`: the retained attempt-2 gate-14 log reports
+`lake: command not found` (exit 127), after the allocator checksum passed.
+The script now prepends `$HOME/.elan/bin` to PATH, matching
+`scripts/check-bridge.sh`, so both Lake and `lean --print-prefix` resolve the
+pinned toolchain. No Lean source, observation, proof budget or gate was changed.
+
+The focused repaired gate passed (exit 0) from an initial `PATH=/usr/bin:/bin`:
+28 store/load pairs, 33 allocator samples, six boundary/negative observations
+and eight populated cases. An original-script control under the same restricted
+PATH reproduced exit 127. The repaired run took 4.005 seconds, with sampled
+aggregate RSS 2,267,680,768 bytes and scope memory peak 1,219,211,264 bytes.
+The existing controller systemd scope reported `memory.max=12884901888`,
+`memory.swap.max=0`, zero swap usage and zero OOM/kill events before and after.
+The available-host guard retained a 12 GiB reserve. Host swap was enabled;
+the no-swap claim applies to this workload scope.
+
+Checks ran sequentially with `LEAN_NUM_THREADS=1`. A test-only Bash adapter
+selected a temporary Bridge config adding explicit Lean `-j1` for the build;
+the final `exec lake` used the normal config and its existing explicit `-j1`.
+The temporary config was removed after checking. Full logs, settings snapshot,
+source hashes and resource counters are retained in this integration checkout
+under `.lake/external-memory-repair/`. Shell syntax and diff whitespace checks
+passed. The documentation-path gate still exits 1 with 46 missing references;
+replaying the pre-repair document produced byte-identical findings.
+Independent read-only finder and skeptic reviews found no blocking
+issue; neither used the Lean server. No Lean file was edited, so per-file MCP
+diagnostics were unnecessary. This focused result does not replace the required
+combined rerun or prove the explicit `PaddingCorrect` contract.
+
 ### Integration merge review (2026-10-29)
 
 The merge of `109ba72ac8cf62f4aa4c13ae5590802244400bd0` into
