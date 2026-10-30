@@ -7,7 +7,7 @@ import Solidity.Backend.Environment.Observations
 Reuse committed ABI declaration metadata and assembler big-endian immediates.
 The intrinsic frontend stores selectors as low numeric uints. ABI bytes4 uses
 left alignment separately; confusing these conventions is observably wrong.
-This module does not resolve declarations, assume selector uniqueness, or admit
+This module does not resolve declarations, assume selector uniqueness, or accept
 raw msg.sig/code observations. Resource conditions are those of Observations.
 -/
 namespace Solidity.Backend.Environment
