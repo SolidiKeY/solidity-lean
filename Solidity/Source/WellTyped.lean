@@ -47,7 +47,9 @@ element or member read (`memElem_ok`, `readLoc_mem_ok`). The zeroing
 allocator and the storage copier keep all three (`MemOK`, `zeroOK`,
 `loadOK`), as do local and memory
 writes of agreeing values and `delete` of a local or memory location
-(`deleteLoc_mem`); storage writes are not covered.
+(`deleteLoc_mem`); so do storage writes, deletions and copies into
+storage (`writeAt_mem`, `deleteOK`, `storeOK`): every location write of an agreeing value and
+every `delete` keeps `MemOK` (`writeLoc_memOK`, `deleteLoc_memOK`).
 -/
 
 namespace Solidity.Source
@@ -1458,6 +1460,192 @@ conversion `allocRef (← loadMem …)` in `Eval.lean`. -/
 theorem loadOK (F : Fr) : ∀ n, LoadOK E Γ F n
   | 0 => loadOK_zero F
   | n + 1 => loadOK_step (loadOK F n)
+
+
+/-! ## Storage writes keep the memory invariant -/
+
+/-- **A journaled state operation keeps `MemOK`**: it changes only the
+execution state (`ex`), not the heap or the locals. -/
+theorem applyOp_mem {H : HeapTy} (F : Fr) (o : Op E.layout E.lay E.lay) :
+    Hoare (MemOK E H) (applyOp F o : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  unfold applyOp
+  dsimp only
+  have hm : ∀ (f : St E → St E), (∀ s, (f s).heap = s.heap) →
+      Hoare (MemOK E H) (modSt f : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) :=
+    fun f hf => Hoare.modSt' fun y (h : MemOK E H y) => by
+      have e := hf y.2
+      exact ⟨⟨⟨e ▸ h.1.1.heap, e ▸ h.1.1.le⟩, e ▸ h.1.2⟩, e ▸ h.2⟩
+  exact Hoare.ite' (fun _ => Hoare.bind (Hoare.halt' fun _ h => h) fun _ => hm _ fun _ => rfl)
+    (fun _ => Hoare.bind (Hoare.pure' fun _ h => h) fun _ => hm _ fun _ => rfl)
+
+theorem setCell_mem {H : HeapTy} (F : Fr) (p : SPath) (o : Option (Val E.layout (E.cellTy p))) :
+    Hoare (MemOK E H) (setCell F p o : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  unfold setCell
+  exact Hoare.ite' (fun _ => applyOp_mem F _) (fun _ => applyOp_mem F _)
+
+theorem writeAt_mem {H : HeapTy} {τ : STy} (F : Fr) (p : SPath) (v : Val E.layout τ) :
+    Hoare (MemOK E H) (writeAt F p v : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  unfold writeAt
+  exact Hoare.dite' (fun _ => setCell_mem F p _) (fun _ => Hoare.halt' fun _ h => h)
+
+theorem writeLen_mem {H : HeapTy} (F : Fr) (p : SPath) (n : Nat) :
+    Hoare (MemOK E H) (writeLen F p n : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) :=
+  writeAt_mem F p _
+
+/-- Storage deletion at fuel `n` keeps `MemOK`. -/
+structure DeleteOK (E : Env) (Γ : RCtx) (F : Fr) (n : Nat) : Prop where
+  stor : ∀ (H : HeapTy) (τ : STy) (p : SPath),
+    Hoare (MemOK E H) (deleteStor F n τ p : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)
+  range : ∀ (H : HeapTy) (σ : STy) (p : SPath) (i k : Nat),
+    Hoare (MemOK E H) (deleteRange F n σ p i k : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)
+  fields : ∀ (H : HeapTy) (τs : List STy) (p : SPath) (i : Nat),
+    Hoare (MemOK E H) (deleteFields F n τs p i : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)
+
+theorem deleteOK_zero (F : Fr) : DeleteOK E Γ F 0 where
+  stor _ _ _ := by unfold deleteStor; exact Hoare.halt' fun _ h => h
+  range _ _ _ _ k := by unfold deleteRange; cases k <;> exact Hoare.halt' fun _ h => h
+  fields _ τs _ _ := by unfold deleteFields; cases τs <;> exact Hoare.halt' fun _ h => h
+
+theorem deleteOK_step {F : Fr} {n : Nat} (ih : DeleteOK E Γ F n) : DeleteOK E Γ F (n + 1) where
+  stor H τ p := by
+    unfold deleteStor
+    cases τ with
+    | bytes l =>
+      exact Hoare.bind (readLen_keep F p) fun len => Hoare.bind (ih.range H _ p 0 len) fun _ => setCell_mem F p _
+    | string l =>
+      exact Hoare.bind (readLen_keep F p) fun len => Hoare.bind (ih.range H _ p 0 len) fun _ => setCell_mem F p _
+    | array l σ k =>
+      cases k with
+      | none =>
+        exact Hoare.bind (readLen_keep F p) fun len => Hoare.bind (ih.range H σ p 0 len) fun _ => setCell_mem F p _
+      | some m => exact ih.range H σ p 0 m
+    | struct l d => exact ih.fields H _ p 0
+    | mapping k v => exact Hoare.pure' fun _ h => h
+    | _ => exact setCell_mem F p _
+  range H σ p i k := by
+    unfold deleteRange
+    cases k with
+    | zero => exact Hoare.pure' fun _ h => h
+    | succ k => exact Hoare.bind (ih.stor H σ _) fun _ => ih.range H σ p (i + 1) k
+  fields H τs p i := by
+    unfold deleteFields
+    cases τs with
+    | nil => exact Hoare.pure' fun _ h => h
+    | cons τ τs => exact Hoare.bind (ih.stor H τ _) fun _ => ih.fields H τs p (i + 1)
+
+/-- **Storage deletion keeps the memory invariant** at every fuel, halts
+included. -/
+theorem deleteOK (F : Fr) : ∀ n, DeleteOK E Γ F n
+  | 0 => deleteOK_zero F
+  | n + 1 => deleteOK_step (deleteOK F n)
+
+
+/-- Copying into storage at fuel `n` keeps `MemOK` (it reads the heap,
+allocates only through `loadMem`, and writes storage). -/
+structure StoreOK (E : Env) (Γ : RCtx) (F : Fr) (n : Nat) : Prop where
+  data : ∀ (H : HeapTy) (τ : STy) (p : SPath) {σ : STy} (x : Data E.layout σ),
+    Hoare (MemOK E H) (storeData F n τ p x : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)
+  val : ∀ (H : HeapTy) (τ : STy) (p : SPath) {σ : STy} (v : Val E.layout σ),
+    Hoare (MemOK E H) (storeVal F n τ p v : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)
+  elems : ∀ (H : HeapTy) (τ : STy) (p : SPath) (i len : Nat) {σ : STy} (xs : Fin len → Data E.layout σ),
+    Hoare (MemOK E H) (storeElems F n τ p i len xs : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)
+  fields : ∀ (H : HeapTy) (τs : List STy) (p : SPath) (i : Nat) {σs : List STy} (xs : DataList E.layout σs),
+    Hoare (MemOK E H) (storeFields F n τs p i xs : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)
+  bytes : ∀ (H : HeapTy) (p : SPath) (i : Nat) (bs : List UInt8),
+    Hoare (MemOK E H) (storeBytes F n p i bs : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)
+
+theorem storeOK_zero (F : Fr) : StoreOK E Γ F 0 where
+  data _ _ _ _ _ := by unfold storeData; exact Hoare.halt' fun _ h => h
+  val _ _ _ _ _ := by unfold storeVal; exact Hoare.halt' fun _ h => h
+  elems _ _ _ _ len _ _ := by unfold storeElems; cases len <;> exact Hoare.halt' fun _ h => h
+  fields _ τs _ _ _ xs := by unfold storeFields; cases τs <;> cases xs <;> exact Hoare.halt' fun _ h => h
+  bytes _ _ _ bs := by unfold storeBytes; cases bs <;> exact Hoare.halt' fun _ h => h
+
+theorem storeOK_step {F : Fr} {n : Nat} (ih : StoreOK E Γ F n) : StoreOK E Γ F (n + 1) where
+  data H τ p σ x := by
+    unfold storeData
+    split
+    all_goals first
+      | exact Hoare.bind (readLen_keep F p) fun _ => Hoare.bind (ih.bytes H p 0 _) fun _ =>
+          Hoare.bind ((deleteOK F n).range H _ p _ _) fun _ => writeLen_mem F p _
+      | exact Hoare.bind (readLen_keep F p) fun _ => Hoare.bind (ih.elems H _ p 0 _ _) fun _ =>
+          Hoare.bind ((deleteOK F n).range H _ p _ _) fun _ => writeLen_mem F p _
+      | exact ih.elems H _ p 0 _ _
+      | exact ih.fields H _ p 0 _
+      | exact ih.val H _ p _
+      | exact Hoare.halt' fun _ h => h
+  val H τ p σ v := by
+    unfold storeVal
+    split
+    · exact Hoare.bind (heapObj_get fun y hy _ => hy) fun ⟨_, y⟩ =>
+        Hoare.conseq (ih.data H τ p y) (fun _ h => h.1) (fun _ _ h => h) (fun _ _ h => h)
+    · exact Hoare.ite' (fun _ => Hoare.pure' fun _ h => h) (fun _ =>
+        Hoare.bind ((loadOK F n).mem H _ _) fun x =>
+          Hoare.conseq (ih.data H τ p x) (fun _ h => h.1) (fun _ _ h => h) (fun _ _ h => h))
+    · exact writeAt_mem F p _
+  elems H τ p i len σ xs := by
+    unfold storeElems
+    cases len with
+    | zero => exact Hoare.pure' fun _ h => h
+    | succ len => exact Hoare.bind (ih.data H τ _ _) fun _ => ih.elems H τ p (i + 1) len _
+  fields H τs p i σs xs := by
+    unfold storeFields
+    cases τs with
+    | nil => exact Hoare.pure' fun _ h => h
+    | cons τ τs =>
+      cases xs with
+      | nil => exact Hoare.pure' fun _ h => h
+      | cons x xs => exact Hoare.bind (ih.data H τ _ x) fun _ => ih.fields H τs p (i + 1) xs
+  bytes H p i bs := by
+    unfold storeBytes
+    cases bs with
+    | nil => exact Hoare.pure' fun _ h => h
+    | cons b bs => exact Hoare.bind (writeAt_mem F _ _) fun _ => ih.bytes H p (i + 1) bs
+
+/-- **Copying into storage keeps the memory invariant** at every fuel,
+halts included: it reads the heap, allocates only through `loadMem`
+(`loadOK`), and writes storage (`applyOp_mem`). -/
+theorem storeOK (F : Fr) : ∀ n, StoreOK E Γ F n
+  | 0 => storeOK_zero F
+  | n + 1 => storeOK_step (storeOK F n)
+
+/-- **Writing a storage location keeps `MemOK`**, halts included: a
+value write or a copy into storage. -/
+theorem writeLoc_stor_mem {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (p : SPath) (v : Val E.layout τ) :
+    Hoare (MemOK E H) (writeLoc F n (.stor p) v : EM E Γ Unit)
+      (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  simp only [writeLoc]
+  exact Hoare.ite' (fun _ => (storeOK F n).val H τ p v) (fun _ => writeAt_mem F p v)
+
+/-- **`delete` of a storage location keeps `MemOK`**, halts included. -/
+theorem deleteLoc_stor_mem {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (p : SPath) :
+    Hoare (MemOK E H) (deleteLoc F n (.stor (τ := τ) p) : EM E Γ Unit)
+      (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  simp only [deleteLoc]
+  exact Hoare.ite' (fun _ => (deleteOK F n).stor H τ p) (fun _ => setCell_mem F p none)
+
+
+/-- **Every location write keeps `MemOK`**, halts included, for an
+agreeing value: locals, memory elements and members, memory bytes and
+storage (`writeLoc_stor_mem` covers storage without `v.RefOK`). -/
+theorem writeLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ) (v : Val E.layout τ) :
+    Hoare (fun y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (writeLoc F n loc v : EM E Γ Unit)
+      (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  cases loc with
+  | «local» i => exact writeLoc_local_mem F n i v
+  | stor p => exact Hoare.conseq (writeLoc_stor_mem F n p v) (fun _ h => h.1) (fun _ _ h => h) (fun _ _ h => h)
+  | mem a i => exact writeLoc_mem_mem F n a i v
+  | memByte a i =>
+    exact Hoare.conseq (writeLoc_memByte_mem F n a i v) (fun _ h => h.1) (fun _ _ h => h) (fun _ _ h => h)
+
+/-- **Every `delete` keeps `MemOK`**, halts included. -/
+theorem deleteLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ) :
+    Hoare (MemOK E H) (deleteLoc F n loc : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  cases loc with
+  | stor p => exact deleteLoc_stor_mem F n p
+  | «local» i => exact deleteLoc_mem F n _ fun _ h => nomatch h
+  | mem a i => exact deleteLoc_mem F n _ fun _ h => nomatch h
+  | memByte a i => exact deleteLoc_mem F n _ fun _ h => nomatch h
 
 end
 

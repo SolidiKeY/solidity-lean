@@ -1716,3 +1716,22 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} storage-copy theorems use only the standard axioms"
+
+/-! Lane V04b: storage writes, copies into storage and every `delete` keep the memory invariant. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.applyOp_mem,
+    ``Solidity.Source.writeAt_mem,
+    ``Solidity.Source.deleteOK,
+    ``Solidity.Source.storeOK,
+    ``Solidity.Source.writeLoc_memOK,
+    ``Solidity.Source.deleteLoc_memOK,
+    ``Solidity.Source.SoundnessExamples.roundTrip_value]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} storage-write theorems use only the standard axioms"

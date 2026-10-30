@@ -638,6 +638,30 @@ theorem copyArr_value :
     ((copyArr.run (.nil, SemanticsExamples.s0)).1 matches .ok (some [7, 9])) = true := by
   decide
 
+/-- Copy the memory `uint256[]` `[7, 9]` into the storage `arr` with
+`storeVal`, then copy `arr` back to memory and read it. -/
+def roundTrip : EM TypingExamples.Γ.env [] (Option (List Nat)) := do
+  let a ← allocRef (τ := .array .memory (.int IntTy.u256) none)
+    (Data.array 2 (fun _ h => nomatch h) fun j =>
+      .val (intWrap (D := TypingExamples.Γ.env.layout) IntTy.u256 (7 + 2 * j.val)))
+  storeVal SemanticsExamples.F0 6 (.array .storage (.int IntTy.u256) none) arrPath a
+  let v ← loadElem SemanticsExamples.F0 6 (.array .memory (.int IntTy.u256) none) arrPath
+  match v with
+  | .memRef _ b =>
+    match (← EM.st).heap.get b with
+    | some ⟨_, .array n _ xs⟩ =>
+      pure (some ((List.finRange n).map fun j => match xs j with
+        | .val (.int i _) => i.toNat
+        | _ => 0))
+    | _ => pure none
+  | _ => pure none
+
+/-- **Witness** (`storeOK`): the memory `[7, 9]` copied into storage and
+back is `[7, 9]`. -/
+theorem roundTrip_value :
+    ((roundTrip.run (.nil, SemanticsExamples.s0)).1 matches .ok (some [7, 9])) = true := by
+  decide
+
 /-! ## Axioms -/
 
 /-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -848,6 +872,28 @@ theorem copyArr_value :
 #guard_msgs in #print axioms Solidity.Source.loadOK
 /-- info: 'Solidity.Source.SoundnessExamples.copyArr_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.copyArr_value
+/-- info: 'Solidity.Source.applyOp_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.applyOp_mem
+/-- info: 'Solidity.Source.setCell_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.setCell_mem
+/-- info: 'Solidity.Source.writeAt_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeAt_mem
+/-- info: 'Solidity.Source.writeLen_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLen_mem
+/-- info: 'Solidity.Source.deleteOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.deleteOK
+/-- info: 'Solidity.Source.storeOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.storeOK
+/-- info: 'Solidity.Source.writeLoc_stor_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_stor_mem
+/-- info: 'Solidity.Source.deleteLoc_stor_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.deleteLoc_stor_mem
+/-- info: 'Solidity.Source.writeLoc_memOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_memOK
+/-- info: 'Solidity.Source.deleteLoc_memOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.deleteLoc_memOK
+/-- info: 'Solidity.Source.SoundnessExamples.roundTrip_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.roundTrip_value
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
