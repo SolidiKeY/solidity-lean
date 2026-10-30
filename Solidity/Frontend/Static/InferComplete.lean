@@ -295,7 +295,7 @@ theorem incDec_res {op : PrefixOp} (hop : op = .inc ∨ op = .dec) (d : LVal Γ 
     exact List.mem_singleton.mpr rfl
 
 theorem delete_res (d : LVal Γ a τ) (h : isMappingTy τ = false)
-    (hp : (τ.storageRef && Γ.namesLocal a) = false) :
+    (hp : Γ.deleteRefused τ a = false) :
     Res.expr (Typed.delete d h hp) ∈ prefixOne Γ .delete (.lval d) := by
   simp only [prefixOne]; rw [dif_pos h, dif_pos hp]; exact List.mem_singleton.mpr rfl
 

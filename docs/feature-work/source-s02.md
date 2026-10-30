@@ -222,6 +222,22 @@ arrays, slices, named arguments, calldata references, and tuple
 destructuring (`declTuple`). The ledger in [source-s05.md](source-s05.md)
 records these as gaps.
 
+### Typing decisions (2026-10-30, lane V04b)
+
+Three refusals solc makes, which S01 typed and the semantics then ran
+wrongly or got `stuck` on, are now in S01's rules and G13's checker
+(`Frontend/Static/Infer.lean`, completeness unchanged):
+
+| Decision | Rule | Controls (`Frontend/Static/InferExamples.lean`) |
+|---|---|---|
+| No copy into, and no `delete` of, a local `storage` pointer (solc 7407; "delete cannot be applied to storage pointers") | `Typed.assignCopy` requires `Γ.namesLocal a = false`; `Typed.delete` requires `Γ.deleteRefused τ e = false` | `ptrCopy_refused` (`p = P(x)` refused; `s = P(x)`, `p = s` typed), `ptrDelete_refused` (`delete p` refused; `delete s`, `delete m` typed) |
+| No `delete` of a `calldata` reference (calldata is read-only; the user's decision) | `Ctx.deleteRefused` includes `τ.calldataRef` | `cdDelete_refused` (`delete c` on `bytes calldata` refused; `delete b` on `bytes memory` typed) |
+| No assignment of a storage type containing a mapping anywhere inside (solc: "Types in storage containing (nested) mappings cannot be assigned to"; the user's decision) | `Typed.assign` requires `Γ.assignsMapping τ = false` (`Env.hasMapping`, recursive through arrays and struct members, one level per declaration) | `mapAssign_refused` (`s = t` for a struct with a mapping member and `am = bm` for arrays of mappings refused; `s.a = x` typed) |
+
+Before these decisions the struct assignment copied nothing (the
+struct's memory layout is empty when a member is a mapping) and the
+array-of-mappings assignment was `stuck` in `loadMem`.
+
 ## Item 1b: the elaborator
 
 `elaborate : Resolution → Option Elaborated` (`Elaborate.lean`) builds the
@@ -444,12 +460,8 @@ These items are also listed under `limitations:`.
   type, although solc 0.8 (ABI coder v2) accepts both; G13's
   `abiEncode_checked` negative control pins this known gap, not a solc
   refusal.
-- **Assignment of storage structs with a nested mapping (typing gap).**
-  `Typed.assign` refuses only a top-level mapping, so `s1 = s2` for a
-  storage struct containing a mapping, or an array of mappings, is typed,
-  although solc refuses it. An array of mappings is then `stuck`
-  (`loadMem`: "a mapping is not copied"); a struct runs as a copy of
-  nothing ([source-soundness.md](source-soundness.md#the-stuck-census)).
+- **Assignment of storage types with a nested mapping.** Closed on
+  2026-10-30 ("Typing decisions" above).
 
 ## Gates
 

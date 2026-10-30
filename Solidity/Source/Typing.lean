@@ -490,6 +490,17 @@ def Ctx.namesLocal (Γ : Ctx) : {c : Cat} → Syn c → Bool
   | _, .tuple (.some e) .nil => Γ.namesLocal e
   | _, _ => false
 
+/-- A `calldata` reference type. -/
+def STy.calldataRef : STy → Bool
+  | .bytes l | .string l | .array l _ _ | .struct l _ => l == .calldata
+  | _ => false
+
+/-- Whether `delete e` at type `τ` is refused: a local `storage` pointer
+(solc: "delete cannot be applied to storage pointers") or a `calldata`
+reference (calldata is read-only; decision 2026-10-30). -/
+def Ctx.deleteRefused (Γ : Ctx) (τ : STy) (e : Syn .expr) : Bool :=
+  τ.storageRef && Γ.namesLocal e || τ.calldataRef
+
 /-- The buffer the canonical rethrow `revert(add(D, 32), mload(D))` names
 (`isRethrow`'s shape with both `D` equal). `Syn.paths` collects no Yul
 names, so this is what determines the rethrown local. -/
@@ -700,9 +711,9 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   | incDecSuffix {e : Syn .expr} {op : SuffixOp} {τ : STy} : LVal Γ e τ → τ.isNumeric = true →
       Typed Γ (.unarySuffix op e) τ
   /-- `delete e` on an assignable non-mapping, not a local `storage`
-  pointer. -/
+  pointer or a `calldata` reference (`Ctx.deleteRefused`). -/
   | delete {e : Syn .expr} {τ : STy} : LVal Γ e τ → (τ matches .mapping _ _) = false →
-      (τ.storageRef && Γ.namesLocal e) = false →
+      Γ.deleteRefused τ e = false →
       Typed Γ (.unaryPrefix .delete e) (.tuple [])
   /-- `a ∘ b` for `+ - * / %`: numbers meeting at a common type. -/
   | arith {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.arith, a, b) →

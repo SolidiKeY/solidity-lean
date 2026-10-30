@@ -170,7 +170,8 @@ Panic 0x41 and user-defined value type decoding cross-listed in
 with a nested mapping is `stuck`: the struct's memory layout is empty
 (`Decl.structFields` at `memory` fails for a mapping member), so the
 copy silently does nothing; an array of mappings is `stuck`. Both are
-recorded as typing gaps (`source-s02.md`), not fixed.
+now refused by S01 (`mapAssign_refused`; decision 2026-10-30,
+`source-s02.md`, "Typing decisions").
 
 Finder, fixed: `Value.lean`'s non-`only` `simp`s; the six checkpoint-1
 pins recorded in `scripts/g07-axiom-pins.json`; `abiEncode_checked`
@@ -311,7 +312,7 @@ program:
 | heap | 13 | a `memory` reference of type `τ` names a live object of type `τ` (`bytes`/`string` compatible), aggregates hold `Data.val` elements, struct objects have their layout's fields |
 | stor | 3 | a `storage` reference of type `τ` names a path of declared type `τ` (`Env.cellTy p = τ.cell`), storage element types are storage-located |
 | gap | 12 | not modelled, reachable by well-typed programs (below) |
-| typing gap | 3 | well typed by S01, refused by solc, `stuck` at run time (below; 2 fixed, 1 recorded) |
+| typing gap | 3 | well typed by S01, refused by solc, `stuck` at run time (below; all 3 fixed) |
 | bug | 1 | fixed (below) |
 | dead | 1 | `heapAt` (`Machine.lean`) has no caller in the interpreter |
 
@@ -347,13 +348,14 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   `(τ.storageRef && Γ.namesLocal e) = false` (`ptrDelete_refused`, which
   also shows `delete s` and `delete m` typed).
 
-Recorded, not fixed: storage-to-storage assignment of types containing
-mappings (`mapping(uint => uint)[2] a; … a = b;`, which solc refuses,
-`stuck` in `loadMem`), and of structs containing mappings, which S01
-types and the semantics runs as a copy of nothing (the struct's memory
-layout drops the mapping, and with it every member). A fix needs a
-`containsMapping` test over struct definitions (recursive through the
-environment) in `Typed.assign`.
+- storage-to-storage assignment of types containing mappings
+  (`mapping(uint => uint)[2] a; … a = b;`, `stuck` in `loadMem`; and a
+  struct with a mapping member, which ran as a copy of nothing):
+  `Typed.assign` requires `Γ.assignsMapping τ = false`, a test through
+  arrays and struct members (`Env.hasMapping`; `mapAssign_refused`).
+
+Also decided on 2026-10-30: `delete` of a `calldata` reference is refused
+(`Ctx.deleteRefused`; `cdDelete_refused`).
 
 **Bug fixed**: `bytes(s)[i] = b` on a `string memory s` was `stuck`
 ("not bytes"): `convExplicitRV` keeps the pointer, so the object is a
@@ -414,17 +416,10 @@ Kept current at every checkpoint.
   witness is the expression `addSub_ns`, and no control reaches a mapping
   (`MapRef`); nothing proves that function-entry locals satisfy
   `BodyFrame`;
-- **semantic bug, not fixed**: assigning a storage struct that contains a
-  mapping (`s = t;`) is typed by S01 and runs as a copy of nothing (the
-  memory layout drops the mapping and every member with it): a wrong
-  result, not a `stuck`;
-- open question: whether S01 should refuse `delete` on a `calldata`
-  reference (solc does); not checked;
 - the storage side conditions of the fragment (`E.cellTy d.path = τ`,
   `E.pathTy d.path = some τ`) are checked per expression, not derived
   from the elaboration;
-- the remaining typing gaps of the census (storage assignment of types
-  containing mappings) and the run-time gaps not on the ledger
+- the run-time gaps not on the ledger
   (storage-pointer and calldata return slots, function-typed defaults,
   getters of non-value types, `fallback` with parameters, dynamic ABI
   decoding and encoding of aggregates, calldata references).

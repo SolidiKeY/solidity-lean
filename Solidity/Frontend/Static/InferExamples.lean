@@ -387,6 +387,18 @@ theorem ptrDelete_refused :
     (inferTys Γp (.unaryPrefix .delete (.ident "m"))).length = 1 := by
   decide
 
+/-- Locals `bytes calldata c`, `bytes memory b`. -/
+def Γcd : Ctx := { env := Syn.env ptrUnit, scope := Option.some "K", locals :=
+  [("c", .bytes .calldata), ("b", .bytes .memory)] }
+
+/-- **Typing fix** (decision 2026-10-30): `delete c` on a `calldata`
+reference has no type (solc refuses it: calldata is read-only); `delete b`
+on a memory local is typed. -/
+theorem cdDelete_refused :
+    (inferTys Γcd (.unaryPrefix .delete (.ident "c"))).isEmpty = true ∧
+    (inferTys Γcd (.unaryPrefix .delete (.ident "b"))).length = 1 := by
+  decide
+
 /-- `mapping(uint256 => uint256)` -/
 def mapT : Syn .typeName := .mapping (.elem (.int false 256 (by decide)) (by decide)) none u256T none
 
@@ -571,3 +583,5 @@ end Solidity.Frontend.Static.InferExamples
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrDelete_refused
 /-- info: 'Solidity.Frontend.Static.InferExamples.mapAssign_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.mapAssign_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.cdDelete_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.cdDelete_refused

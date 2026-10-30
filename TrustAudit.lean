@@ -1390,3 +1390,18 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} lane V04b checkpoint 2-3 theorems use only the standard axioms"
+
+/-! Lane V04b typing decisions of 2026-10-30 (`docs/feature-work/source-s02.md`,
+"Typing decisions"). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.InferExamples.mapAssign_refused,
+    ``Solidity.Frontend.Static.InferExamples.cdDelete_refused]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} typing-decision controls use only the standard axioms"
