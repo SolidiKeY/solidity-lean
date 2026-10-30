@@ -377,3 +377,23 @@ closure and all 16 Osaka vectors pass. The vector runner uses the existing
 EthereumJS 10.1.3 installation through
 `NODE_PATH=/tmp/solidity-reference-arrays-20261029/node_modules` because the local
 dependencies are absent. Full combined gates remain the coordinator's task.
+
+## Combined validation dependency repair (2026-10-30)
+
+Attempt 2's gate 16 failed before running any vectors: the task-local
+`@ethereumjs/common` package was not installed. The earlier temporary
+`NODE_PATH` invocation did not prepare the plain gate command. Installing the
+committed lockfile with `npm ci --ignore-scripts --no-audit --no-fund --prefix
+tests/creation-artifacts/evm` repairs the integration worktree's test setup.
+[The vector setup instructions](../../tests/creation-artifacts/README.md)
+record this prerequisite for each fresh checkout. The installed dependencies
+remain in the existing ignored `evm/node_modules` directory.
+
+With `NODE_PATH` explicitly unset, the vector gate passes all 16/16 Osaka
+transactions. The creation import-closure check also passes. Both retained
+alias findings are already fixed in the current source (`: Type` on
+`StackWord` and `BoundedCode`); no Lean file, gate, fixture, package version,
+proof or budget changed in this repair, so no Lean checks were repeated.
+Read-only finder and skeptic passes checked the setup paths, lockfile install,
+existing ignore rule and unchanged gate assertions; no further finding remains.
+Full combined validation remains the coordinator's task. No commit was made.
