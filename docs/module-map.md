@@ -1045,3 +1045,8 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/SliceControls.lean` | Inhabited nested-reference, growth and reference-slot overwrite controls. |
 | `Backend/MemoryOps/ContextTransport.lean` | Local/context/adopt transport and old-slice/fresh-root certificates using published storage-copy and default constructors. |
 | `Backend/MemoryOps/SnapshotExtension.lean` | Overwrite capacity and old-object contents commute with preserving heap extension. |
+
+| `Backend/MemoryOps/CalldataRead.lean` | Actual immutable decoded Boolean-object read certificates and captured-slice transport into existing typed heap arrays; no ABI/source evaluator. |
+| `Backend/MemoryOps/CalldataControls.lean` | Concrete decoded lookup, changed-heap, frame, empty/bounds/type/value and element-boundary controls. |
+| `Backend/MemoryOps/DisjointOverwrite.lean` | Captured disjoint typed overwrites commute as actual heaps and preserve arbitrary existing typed memory-path observations. |
+| `Backend/MemoryOps/DisjointControls.lean` | Distinct reference-containing parents, nested redirected reads, revert observations and same-slot noncommutation controls. |

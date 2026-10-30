@@ -185,3 +185,102 @@ next independent checkpoint will trace actual published calldata objects/read
 interfaces and extend transport or disjoint overwrite composition as those
 interfaces permit. This checkpoint is not completion of any parent G group,
 Backfill queue, or the original persistent goal.
+
+## Decoded-object and disjoint-write checkpoint
+
+This continuation traces the actual `Source/State.lean` interface:
+`Source.Calldata.objects : Nat → Option (Σ τ, Source.Data D τ)`, `Data.array`
+with finite typed contents, and `Val.cdRef`. `Source/TypingExamples.lean`
+explicitly defers slice expressions to S02. There is no published source slice
+execution judgment to instantiate here. Raw `Calldata.input` is independent of
+its decoded-object table; these theorems do not prove their ABI correspondence.
+No Source, byte-memory, decoder or reserved copy implementation is changed.
+
+`CalldataRead` defines a certificate of actual decoded Boolean-array lookup and
+finite structural reads of that existing object, not an expression evaluator.
+`decodedBoolRead_iff` proves those reads exactly equal `List.getElem?` of the
+certified input. `decodedBoolRead_bound` and `decodedBoolRead_overrun` establish
+actual decoded-object bounds/impossibility, not a source halt classification.
+`decodedBoolSlice_read` applies the existing interval index law.
+`decodedBoolSlice_overwrite_read` and `decodedBoolSlice_transport` connect that
+read to the actual intrinsic `overwriteSlice` result and a different typed
+object's contents. Premises are initial object-table equality, ordered source
+endpoints, destination runtime capacity, interior index and (for framing)
+different object IDs. There is no assumed preservation result, payload cap or
+fixed recursion cutoff. The component is dynamic Boolean arrays only; general
+calldata types, decoding, storage targets and source execution remain open.
+
+`overwriteTwo` in `DisjointOverwrite` performs two existing heap overwrites on
+already captured payloads. Original capacities and distinct destination IDs
+derive second-write capacity. `overwriteTwo_comm` proves actual whole-heap
+equality, for arbitrary typed primitive/reference array elements, offsets and
+lists. `overwriteTwo_path` transports every published `MPath.mvalT` observation
+by that heap equality; it assumes no path-preservation premise. `overwriteTwo_first`
+and `overwriteTwo_frame` retain the first destination and every third object.
+`overwriteSlice_empty` proves whole-heap identity at every valid endpoint.
+These laws concern captured shallow values, not re-executed source reads,
+fresh deep copies, source evaluation order or stale-alias compilation.
+
+The concrete controls discharge decoded lookup at offset 7, source slice [1,4),
+and destination offset 1; values change and a reference-containing parent is
+framed. They reject wrong values, absent/wrong-type lookup, reversed/overrun
+endpoints and reads from empty input, exercise an actual empty overwrite at the
+end, and transport a nonempty 33-element slice across element index 32. This is
+not a byte-word encoding claim. Two different fixed reference parents share
+children, both parent slot arrays change, children remain unchanged, an actual
+nested typed path reads the redirected false child, and an out-of-bounds path
+returns the existing revert. Same-slot alias writes demonstrably fail to commute.
+
+Independent read-only finder and skeptic reviews inspected all four modules,
+actual statements, non-vacuity, ownership and controls without builds/server or
+writes. Neither found a semantic defect. Both required exact observed axiom
+pins and explicit source/ABI/general transport boundaries; these are retained.
+Focused closure passes 54 jobs, including all axiom guards, after repairing the
+redundant injection/generalization tactics and explicit concrete evaluator/list
+reductions. Earlier failed elaboration logs remain failures in the evidence.
+Headline axiom sets are only subsets of `propext`, `Quot.sound` and
+`Classical.choice`; no `sorryAx` remains in the passing closure.
+
+Queue accounting remains partial: G32 heap/frame/identity adapters exist but
+heap-to-byte and full compiler certificates remain open. G33 published default
+extension adapters exist but all-type/default/target failures and reserved
+reference construction remain open. G34 overwrite/path observation components
+exist but general path/rebinding/delete/stale-alias compilation remains open.
+G35.01 has published intrinsic storage-tree transport only; G35.02 retains the
+reserved memory-to-storage prerequisite. G35.03 now has actual decoded Boolean
+object-to-memory transport, not general immutable calldata/source/storage/ABI
+transport. G35.04 adds disjoint captured shallow-copy composition to snapshot
+laws, with fresh deep-copy compilation open. G35.05 has arbitrary existing typed
+path observation transport, not recursive child-content traversal; the published
+legacy layout and graph interfaces supply no completed graph-to-memory bridge.
+G35.06 remains blocked on reserved copy/representation/liveness results and the
+V10/source/target chain. Backfill A gains actual decoded reads, empty identity
+and disjoint overwrite composition; Backfill B gains shared-child and nested
+path observations, not full traversal. No parent, queue or goal is complete.
+
+Checkpoint-two final gates: `run-lean.sh` exits 0 in the bounded serial container,
+862 default jobs, 262 TestSuite jobs, and SolKey 377/131 annotations OK; OOMKilled
+is false. Sampled aggregate Lean/Lake RSS peaks at 1,515,016 KiB and cgroup peak
+is 954,744,832 bytes (different measurement domains). The container memory limit
+is 12 GiB and swap allowance zero. Strict automation, complete committed-snapshot
+TestSuite parity/trust, layers, orphans, trust, owned-boundary/script and diff
+checks pass. Global strict docs still exits 1 with exactly the same raw output
+at frozen base and current tree; the separate no-new-doc-findings comparison
+passes. The global axiom inventory exits 1 at both base and current: zero unsafe
+pin errors, respectively 14 and 67 unrecorded changes. The 53 additional pins
+are owned MemoryOps pins from both checkpoints, not changes to the 14 inherited
+pins. The reserved inventory is untouched; exact proposed pin additions are
+exported for coordinator reconciliation. The lane checker independently parses
+all owned pins using the published parser and rejects nonstandard axioms.
+A sandbox-only Docker socket observation was denied; the supported escalated
+read-only observation recovered actual exit 0/OOMKilled=false and the same cap.
+
+Checkpoint-two handoff: the committed parent is
+`899789503b0cb283935e9f151bdb1a6df9c50f01`; exact resulting head is recorded after
+commit in `/workspace/v11-memory-operations-evidence/checkpoint2/handoff.json`.
+Cumulative original patch, incremental bundle, handoff and checksum manifest
+are exported in that absolute directory; raw gates and proposed pin additions
+remain in its parent evidence directory. Runtime TOML stays untracked. Refreshed
+finder found no further issue; skeptic corrected a module-qualified name in this
+document to the actual `overwriteTwo` namespace before closure. No integration,
+publish or persistent-goal completion is authorized by this checkpoint.
