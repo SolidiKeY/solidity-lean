@@ -44,7 +44,8 @@ element's or member's type (`memSet_ok`, `writeLoc_mem_ok`), nor a byte
 read (`heapBytes_ok`, `readLoc_memByte_ok`). With `HeapInner` too
 (`Data.Inner`: elements and members are bare values), nor is an
 element or member read (`memElem_ok`, `readLoc_mem_ok`). The zeroing
-allocator keeps all three (`MemOK`, `zeroOK`), as do local and memory
+allocator and the storage copier keep all three (`MemOK`, `zeroOK`,
+`loadOK`), as do local and memory
 writes of agreeing values and `delete` of a local or memory location
 (`deleteLoc_mem`); storage writes are not covered.
 -/
@@ -1301,6 +1302,162 @@ theorem deleteLoc_mem {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.la
   | memByte a i =>
     exact Hoare.bind (Hoare.conseq ((zeroOK n).val H _) (fun _ h => h) (fun _ _ h => h.1) (fun _ _ h => h))
       fun v => writeLoc_memByte_mem F n a i v
+
+
+/-! ## Copies from storage keep the memory invariant -/
+
+/-- Reading a storage cell changes nothing: any `P` is kept. -/
+theorem readCell_keep {P : EMState E Γ → Prop} (F : Fr) (p : SPath) :
+    Hoare P (readCell F p : EM E Γ (Val E.layout (E.cellTy p))) (fun _ y => P y) (fun _ y => P y) := by
+  unfold readCell
+  refine Hoare.bind (Hoare.st' (Q := fun s y => P y) fun y hy => hy) fun s => ?_
+  dsimp only
+  split
+  · exact Hoare.pure' fun _ h => h
+  · exact Hoare.halt' fun _ h => h
+
+theorem readAt_keep {P : EMState E Γ → Prop} (F : Fr) (p : SPath) (τ : STy) :
+    Hoare P (readAt F p τ : EM E Γ (Val E.layout τ)) (fun _ y => P y) (fun _ y => P y) := by
+  unfold readAt
+  exact Hoare.bind (readCell_keep F p) fun v =>
+    Hoare.dite' (fun _ => Hoare.pure' fun _ h => h) (fun _ => Hoare.halt' fun _ h => h)
+
+theorem readLen_keep {P : EMState E Γ → Prop} (F : Fr) (p : SPath) :
+    Hoare P (readLen F p : EM E Γ Nat) (fun _ y => P y) (fun _ y => P y) := by
+  unfold readLen
+  exact Hoare.bind (readAt_keep F p _) fun v => match v with
+    | .int _ _ => Hoare.pure' fun _ h => h
+
+theorem loadBytes_keep {P : EMState E Γ → Prop} (F : Fr) :
+    ∀ (n : Nat) (p : SPath) (i k : Nat),
+      Hoare P (loadBytes F n p i k : EM E Γ (List UInt8)) (fun _ y => P y) (fun _ y => P y)
+  | 0, p, i, k => by cases k <;> exact Hoare.halt' fun _ h => h
+  | n + 1, p, i, 0 => Hoare.pure' fun _ h => h
+  | n + 1, p, i, k + 1 => by
+    show Hoare P (do
+      match ← readAt F (p.go (.index i)) (.fixedBytes 1 (by decide)) with
+      | .fixedBytes bs _ => pure ((bs.headD 0) :: (← loadBytes F n p (i + 1) k))) _ _
+    exact Hoare.bind (readAt_keep F _ _) fun v => match v with
+      | .fixedBytes _ _ => Hoare.bind (loadBytes_keep F n p (i + 1) k) fun _ => Hoare.pure' fun _ h => h
+
+
+/-- **`allocRef` keeps `MemOK`** for a shaped object with bare-value
+elements, whatever its type: at a type without a `memory` location the
+object is allocated and the reference refused (`stuck`). -/
+theorem allocRef_mem' {H : HeapTy} {τ : STy} (x : Data E.layout τ) (ht : Data.Top x) (hi : Data.Inner x) :
+    Hoare (fun y => MemOK E H y ∧ DataOK E y.2.heap.ty x) (allocRef x : EM E Γ (Val E.layout τ))
+      (fun v y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (fun _ y => MemOK E H y) := by
+  by_cases hm : τ.loc? = some .memory
+  · exact allocRef_mem x hm ht hi
+  · unfold allocRef alloc
+    intro ⟨l, s⟩ ⟨⟨⟨⟨hh, hle⟩, hl⟩, hs, hin⟩, hx⟩
+    simp only [Hoare.run_bind, dif_neg hm]
+    exact ⟨⟨⟨hh.alloc hx, hle.trans (Heap.alloc_le s.heap _)⟩, LocalsOK.mono (Heap.alloc_le s.heap _) l hl⟩,
+      hs.alloc ht, hin.alloc hi⟩
+
+/-- A type held by value has no location. -/
+theorem STy.loc_of_byRef {τ : STy} (h : ¬ τ.byRef = true) : τ.loc? = none := by
+  unfold STy.byRef at h
+  cases e : τ.loc? with
+  | none => rfl
+  | some _ => rw [e] at h; exact absurd rfl h
+
+/-- The copying functions at fuel `n` keep `MemOK` and build agreeing,
+shaped objects with bare-value elements. -/
+structure LoadOK (E : Env) (Γ : RCtx) (F : Fr) (n : Nat) : Prop where
+  mem : ∀ (H : HeapTy) (τ : STy) (p : SPath),
+    Hoare (MemOK E H) (loadMem F n τ p : EM E Γ (Data E.layout τ))
+      (fun x y => MemOK E H y ∧ DataOK E y.2.heap.ty x ∧ Data.Top x ∧ Data.Inner x) (fun _ y => MemOK E H y)
+  elem : ∀ (H : HeapTy) (τ : STy) (p : SPath),
+    Hoare (MemOK E H) (loadElem F n τ p : EM E Γ (Val E.layout τ))
+      (fun v y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (fun _ y => MemOK E H y)
+  elems : ∀ (H : HeapTy) (σ : STy) (p : SPath) (i m : Nat),
+    Hoare (MemOK E H) (loadElems F n σ p i m : EM E Γ (Fin m → Data E.layout σ))
+      (fun xs y => MemOK E H y ∧ ∀ j, ∃ v, xs j = Data.val v ∧ v.RefOK E y.2.heap.ty)
+      (fun _ y => MemOK E H y)
+  fields : ∀ (H : HeapTy) (τs : List STy) (p : SPath) (i : Nat),
+    Hoare (MemOK E H) (loadFields F n τs p i : EM E Γ (DataList E.layout τs))
+      (fun fs y => MemOK E H y ∧ DataListOK E y.2.heap.ty fs ∧ fs.AllVal) (fun _ y => MemOK E H y)
+
+theorem loadOK_zero (F : Fr) : LoadOK E Γ F 0 where
+  mem _ _ _ := by unfold loadMem; exact Hoare.halt' fun _ h => h
+  elem _ _ _ := by unfold loadElem; exact Hoare.halt' fun _ h => h
+  elems _ _ _ _ m := by unfold loadElems; cases m <;> exact Hoare.halt' fun _ h => h
+  fields _ τs _ _ := by unfold loadFields; cases τs <;> exact Hoare.halt' fun _ h => h
+
+theorem loadOK_step {F : Fr} {n : Nat} (ih : LoadOK E Γ F n) : LoadOK E Γ F (n + 1) where
+  mem H τ p := by
+    unfold loadMem
+    cases τ with
+    | bytes l =>
+      exact Hoare.bind (readLen_keep F p) fun len => Hoare.bind (loadBytes_keep F n p 0 len) fun _ =>
+        Hoare.pure' fun y hy => ⟨hy, .bytes _, trivial, trivial⟩
+    | string l =>
+      exact Hoare.bind (readLen_keep F p) fun len => Hoare.bind (loadBytes_keep F n p 0 len) fun _ =>
+        Hoare.pure' fun y hy => ⟨hy, .string _, trivial, trivial⟩
+    | array l σ k =>
+      cases k with
+      | none =>
+        refine Hoare.bind (readLen_keep F p) fun len => Hoare.bind (ih.elems H σ p 0 len) fun xs =>
+          Hoare.pure' fun y ⟨hy, hxs⟩ => ⟨hy, .array fun j => ?_, trivial, fun j => (hxs j).elim fun v h => ⟨v, h.1⟩⟩
+        obtain ⟨v, hv, hr⟩ := hxs j
+        rw [hv]
+        exact .val hr
+      | some m =>
+        refine Hoare.bind (ih.elems H σ p 0 m) fun xs =>
+          Hoare.pure' fun y ⟨hy, hxs⟩ => ⟨hy, .array fun j => ?_, trivial, fun j => (hxs j).elim fun v h => ⟨v, h.1⟩⟩
+        obtain ⟨v, hv, hr⟩ := hxs j
+        rw [hv]
+        exact .val hr
+    | struct l d =>
+      exact Hoare.bind (ih.fields H _ p 0) fun fs => Hoare.pure' fun y ⟨hy, hfs, hall⟩ =>
+        ⟨hy, .struct hfs, trivial, hall⟩
+    | mapping k v => exact Hoare.halt' fun _ h => h
+    | _ =>
+      exact Hoare.bind (readAt_keep F p _) fun w => Hoare.pure' fun y hy =>
+        ⟨hy, .val (Val.refOK_of_loc rfl w), rfl, trivial⟩
+  elem H τ p := by
+    unfold loadElem
+    refine Hoare.ite' (fun _ => Hoare.bind (ih.mem H τ p) fun x => ?_)
+      (fun hb => Hoare.conseq (readAt_keep F p τ) (fun _ h => h)
+        (fun w _ h => ⟨h, Val.refOK_of_loc (STy.loc_of_byRef hb) w⟩) (fun _ _ h => h))
+    by_cases ht : Data.Top x ∧ Data.Inner x
+    · exact Hoare.conseq (allocRef_mem' x ht.1 ht.2) (fun y hy => ⟨hy.1, hy.2.1⟩)
+        (fun _ _ h => h) (fun _ _ h => h)
+    · exact Hoare.of_false fun y hy => ht hy.2.2
+  elems H σ p i m := by
+    unfold loadElems
+    cases m with
+    | zero => exact Hoare.pure' fun y hy => ⟨hy, fun j => j.elim0⟩
+    | succ m =>
+      refine Hoare.bind (ih.elem H σ _) fun x => ?_
+      refine Hoare.bind (Hoare.memGrow (R := fun H' => x.RefOK E H') fun H' => ih.elems H' σ p (i + 1) m)
+        fun f => ?_
+      refine Hoare.pure' fun y ⟨hy, hf, H', hx, hle⟩ => ⟨hy, fun j => ?_⟩
+      by_cases hj : j.val = 0
+      · exact ⟨x, by simp only [finCons, hj, dite_true], hx.mono hle⟩
+      · obtain ⟨v, hv, hr⟩ := hf ⟨j.val - 1, by have := j.isLt; omega⟩
+        exact ⟨v, by simp only [finCons, hj, dite_false]; exact hv, hr⟩
+  fields H τs p i := by
+    unfold loadFields
+    cases τs with
+    | nil => exact Hoare.pure' fun y hy => ⟨hy, .nil, trivial⟩
+    | cons τ τs =>
+      refine Hoare.bind (ih.elem H τ _) fun x => ?_
+      refine Hoare.bind (Hoare.memGrow (R := fun H' => x.RefOK E H') fun H' => ih.fields H' τs p (i + 1))
+        fun fs => ?_
+      exact Hoare.pure' fun y ⟨hy, ⟨hfs, hall⟩, H', hx, hle⟩ =>
+        ⟨hy, .cons (.val (hx.mono hle)) hfs, ⟨x, rfl⟩, hall⟩
+
+/-- **Copies from storage keep the memory invariant** (`MemOK`) at every
+fuel, halts included: `loadMem` builds agreeing, shaped objects with
+bare-value elements, and a reference `loadElem` makes agrees with the heap
+typing (a by-value element agrees trivially; nothing here says the copy
+equals the storage contents). Its consumer is the storage-to-memory
+conversion `allocRef (← loadMem …)` in `Eval.lean`. -/
+theorem loadOK (F : Fr) : ∀ n, LoadOK E Γ F n
+  | 0 => loadOK_zero F
+  | n + 1 => loadOK_step (loadOK F n)
 
 end
 
