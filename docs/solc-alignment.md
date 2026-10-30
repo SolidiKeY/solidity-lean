@@ -554,6 +554,11 @@ stronger obligation, not an additional assumption available to its proofs.
   them); an access through an unset storage pointer reverts (the table
   above). The compiled code has no panic: there a failing `assert` reverts
   (`compile_correct`).
+- **Source semantics (S02–S05, `Solidity/Source/`).** A memory
+  allocation too large for solc (Panic 0x41) is not modelled, and the ABI
+  decoder does not decode user-defined value types (nor static arrays,
+  structs or external function types): such an argument is `stuck`
+  ([source-soundness.md](feature-work/source-soundness.md#the-stuck-census)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's
   (`Evm.inFrag`, `docs/compiler-verification.md`).
