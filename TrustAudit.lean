@@ -1544,3 +1544,25 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} two-body call witnesses use only the standard axioms"
+
+/-! Lane V04b: preservation of location reads and writes; the object-shape control. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.memSet_pres,
+    ``Solidity.Source.writeLoc_mem_pres,
+    ``Solidity.Source.writeLoc_memByte_pres,
+    ``Solidity.Source.writeLoc_local_pres,
+    ``Solidity.Source.memElem_pres,
+    ``Solidity.Source.readLoc_local_pres,
+    ``Solidity.Source.readLoc_mem_pres,
+    ``Solidity.Source.readLoc_memByte_pres,
+    ``Solidity.Source.SoundnessExamples.ptrHeap_ok,
+    ``Solidity.Source.SoundnessExamples.ptrHeap_byte_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} location read/write preservation theorems use only the standard axioms"

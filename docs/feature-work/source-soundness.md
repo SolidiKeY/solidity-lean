@@ -236,6 +236,30 @@ type the heap typing gives is never `stuck` and returns agreeing
 contents; `heapAt` has no caller in the interpreter), `storRef_ok`; the heap facts `HeapOK.alloc`, `HeapOK.write`,
 `Heap.alloc_le`, `Heap.alloc_ty`, `HeapOK.empty`.
 
+**Proved for location reads and writes** (preservation, halts included;
+added after marker `7b94a9b`): `writeLoc_local_pres`, `writeLoc_mem_pres`
+(`memSet_pres`: array elements and struct members, through
+`DataListOK.setNth`), `writeLoc_memByte_pres` (bytes and strings), and the
+reads `readLoc_local_pres`, `readLoc_mem_pres` (`memElem_pres`, through
+`DataListOK.nth` and `asVal_ok`: the value read agrees),
+`readLoc_memByte_pres`; the generic `heapObj_pres` and `heapPut_pres`.
+A written value must agree (`v.RefOK`). Storage locations (`storeVal`,
+`writeAt`, `readAt`) are not covered.
+
+**Finding: progress for memory writes needs object shapes.** `HeapOK`
+says where references point, but not that a top-level object of a memory
+reference type is a `Data.bytes`/`Data.array`/`Data.struct` rather than
+a `Data.val`. The negative control `ptrHeap_byte_stuck` builds a
+well-typed heap (`ptrHeap_ok`) whose object at `1` is a `bytes memory`
+stored as a pointer, and a byte write there is `stuck` ("not bytes").
+The direct allocations of literals, decoded arguments and struct
+constructors build aggregates; `zeroData` and `loadMem` were not checked
+for every type, so whether the interpreter can create such an object is
+open. Either way, progress for
+`memSet`/`writeLoc .memByte`/`memElem` needs `HeapOK` strengthened with
+the shape condition, and the census entries for "not an aggregate" and
+"not bytes" depend on it.
+
 **Not proved**: the triple for every interpreter function (`evalE` …
 `dispatch`, deployment, transactions, callbacks). The approach is the one
 `Solidity/Source/Horizon.lean` uses for horizons: a structure with one
