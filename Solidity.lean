@@ -759,3 +759,7 @@ import Solidity.Backend.MemoryOps.InterstagePrimitiveControls
 import Solidity.Backend.MemoryOps.InterstageReferenceControls
 import Solidity.Backend.MemoryOps.InterstageDistinctControls
 import Solidity.Backend.MemoryOps.InterstageCorrespondenceControls
+
+import Solidity.Backend.MemoryOps.InterstageBuilderControls
+import Solidity.Backend.MemoryOps.InterstageBuilderRefControls
+import Solidity.Backend.MemoryOps.InterstageBuilderChildControls

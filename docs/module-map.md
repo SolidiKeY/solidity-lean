@@ -1076,3 +1076,7 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/InterstageDistinctControls.lean` | Different source/destination arrays exercise both first-write read branches and actual second-output typed reads. |
 | `Backend/MemoryOps/InterstageCorrespondence.lean` | Actual intermediate growth and allocator applications preserve represented old child footprints under derived frame facts. |
 | `Backend/MemoryOps/InterstageCorrespondenceControls.lean` | Existing immutable child certificate survives two changed parent writes with real interstage allocation. |
+| `Backend/MemoryOps/InterstageBuilders.lean` | Actual multi-object storage/default construction on first snapshot output, ordered checked recapture, fresh-object ID frames and old-child correspondence. |
+| `Backend/MemoryOps/InterstageBuilderControls.lean` | Three-object nested default/nonempty storage copy, changed dynamic recapture, fresh child contents at final output, exact guards and endpoints. |
+| `Backend/MemoryOps/InterstageBuilderRefControls.lean` | Fixed reference-valued interstage storage copy, both overlap directions, old aliases, fresh root, isolated guards and frozen-original negative. |
+| `Backend/MemoryOps/InterstageBuilderChildControls.lean` | Existing immutable Boolean/nested certificates framed across actual multi-object builder outputs and second checked captures. |

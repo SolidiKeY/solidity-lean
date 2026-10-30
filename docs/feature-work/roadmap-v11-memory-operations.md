@@ -883,3 +883,94 @@ Proposed additive registrations and exact feature IDs remain coordinator work.
 No external compiler/EVM execution or Source/target allocation semantics is claimed.
 The existing blocked goal is unchanged; get_goal and per-file diagnostics RPCs
 remain unavailable. All original queues and mandatory unfinished gates stay open.
+
+
+## Checkpoint ten: published multi-object builders between snapshots
+
+Parent `c7ac6ae92ba4c35b2a28e538efee2e6346240bc5`, exact frozen base unchanged.
+Reproduced gap: InterstageGrowth used one supplied MObj; ContextTransport and
+SliceExtension used published builders outside a two-capture operation chain.
+The new InterstageBuilders module applies actual SVal.copyStToM to actual mid,
+consuming its Grown.H', ext, heap and val and SVal.keeps_copyStToM read-only.
+Heap.allocDefault is definitionally the published typed-default copy, exercised
+as an actual builder, not replaced by another construction implementation.
+
+captureAfterCopy_checked/keeps and copy_interstage_success/read_cases/none_iff
+transport actual second operations through that concrete growth. Premises remain
+actual first checked Some mid, existing mapFree=true, and second source bounds /
+destination capacity measured in mid. The read formula observes changed first
+payloads; none classifies SECOND snapshot guards, not construction/target failure.
+copy_interstage_alias preserves old IDs/aliases; copyStToM_id_ge separates the
+fresh root. captureAfterCopy_fresh frames the fresh root's own fields.
+The additional independent Backfill frame captureAfterCopy_new_frame proves that
+any typed object with ID at least old H.length is framed by the actual second
+old-object write. Concrete final copied-child contents discharge that ID fact;
+no arbitrary-depth descendant freshness or Source/target liveness is inferred.
+
+Dynamic controls run real nested fixed-of-dynamic defaults and nonempty storage
+trees, each adding two children and a root to H=[B]. Actual roots are3, children
+are1/2, old alias remains0. First [0,2) to2 then recapture [2,4) to4 yields
+[true,false,true,false,true,false], differing from original source data.
+Typed reads, exact fresh fields/IDs, empty default children versus copied
+[true]/[false] children and final output child frames are recorded. First and
+second intervals touch. Six isolated second-stage reversed/source/destination
+failures and both exact-end empty operations are checked as actual Option values.
+Fixed/reference controls grow old [B,B,P] by three actual copied objects, root5;
+first right-overlap and second left-overlap yield old parent IDs [0,1,0,0].
+Original-payload freezing yields [1,0,1,0], a distinct actual heap. Old children
+remain framed; fresh copied children are not claimed to alias old children.
+Existing Boolean and nested immutable child certificates are reused across
+actual first Some, actual three-object storage/default growth, second Some,
+final old-child correspondence and root framing. No Source table is fabricated.
+
+Focused combined closure passes71jobs. Failed proof attempts and one failed
+simp-list cleanup remain raw logs; no sorry/axiom/trust shortcut is delivered.
+Exact new headline guards, registration, reviews and final gate outcomes follow.
+Per-file diagnostics and get_goal are unavailable; existing goal stays unchanged.
+No competing server/build, budget increase, reserved implementation or integration.
+
+Every original queue remains partial/blocked: G32 physical byte representation;
+G33 all-type/default/target size-allocation failure and reserved constructors;
+G34 general paths/rebinding/delete/stale-alias compilation; G35.01 full storage
+copy compiler bridge; G35.02 reserved memory-storage copy prerequisite;
+G35.03 general calldata/ABI/source/storage transport; G35.04 fresh deep-copy
+execution; G35.05 unrestricted recursive traversal/copy liveness; G35.06 reserved
+copies and V10/Source/target composition. Backfill A/B advance concrete builder
+transport and fresh ID framing but remain partial. Missing fresh Source root
+representation/address injectivity, recursive premises and mandatory global
+registrations remain explicit. No assertion that all independent work is exhausted.
+
+New cumulative export directory:
+/workspace/v11-memory-operations-evidence/checkpoint10. Prior seals/errors/caches,
+original checkout and untracked runtime TOML are preserved. Coordinator must
+reconcile additive owned pins/feature IDs; reserved inventories/ledgers unchanged.
+
+
+Checkpoint-ten final confirmation: v11-checkpoint10-full-01 exits0,892default
+jobs,262TestSuite jobs, final SolKey377taclets/131read-bearing, annotations OK.
+All29new headline outputs are kernel guarded with only the standard axioms;
+owned checker passes251pins41modules. Lean4.24.0 commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake5.0.0-src+797c613 execute;
+fresh KeySort passes2jobs in v11-checkpoint10-runtime-01.log. RUNTIME_GATE_PASS
+is setup evidence, not lane completion. Final sampled aggregate Lean/Lake RSS
+1,570,940KiB; cgroup peak422,260,736bytes; OOMKilled=false,12GiB/no-swap child
+containment,16GiB parent/OS headroom, serial Lean-j1/LEAN_NUM_THREADS1 unchanged.
+Strict automation, complete committed-snapshot TestSuite trust/parity, layers,
+orphans, trust, owned boundary/standard-pin, script syntax and diff gates pass.
+Global docs exits1 with46findings, raw exact-base output equal; separate no-new
+comparison passes. Global inventory exits1:0unsafe errors265unrecorded changes,
+14inherited+251owned. Neither global failing gate is relabeled green. Exact
+additive proposals are exported for coordinator reconciliation, no inventory edit.
+
+Independent read-only finder and skeptic reviews inspected all four modules,
+actual hypotheses/nonvacuity, negative controls, new-object frames, registrations
+and document; neither used Lean/server/builds. Both found no remaining source or
+ownership defect. Their initial final-descendant observation gap was fixed by
+captureAfterCopy_new_frame and actual final_child_contents; re-review confirmed
+that ID facts remain explicit and arbitrary-depth freshness is not assumed.
+Kernel proofs and concrete intrinsic controls are distinct from external
+compiler/EVM tests: no such external execution or complete compiler proof occurs.
+Checkpoint artifacts include full commands/exits/raw failures, cumulative patch,
+named-ref bundle, handoff, independent artifact reviews and checksum manifests.
+Only owned new modules/allowed registrations/document are committed; runtime
+TOML stays untracked. Original goal remains unfinished and unchanged.
