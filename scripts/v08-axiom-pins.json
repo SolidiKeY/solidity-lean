@@ -110,6 +110,60 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.CryptoControls.empty_hash": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoControls.fixed_transport": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoControls.wrong_hash": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoControls.wrong_input": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoObservations.byte_input_normalize": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoObservations.fixed_keccak_bytes": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoObservations.fixed_keccak_observation": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoObservations.fold_byte_bound": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoObservations.keccak_bytes_bound": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoObservations.keccak_length_bound": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoObservations.keccak_word_bound": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CryptoObservations.ofBytes_bound": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.EmitControls.dependent_arguments_retained": [
     "Classical.choice",
     "Quot.sound",

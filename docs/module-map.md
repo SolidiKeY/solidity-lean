@@ -1061,3 +1061,6 @@ At the root, the notation's own tests:
 | `Lowering/V08/SelectorObservations.lean` | Independent canonical signature/custom-selector bytes, prefix splitting and ordered ABI word observation extension |
 | `Lowering/V08/SelectorControls.lean` | Kernel UTF-8/selector/argument-order controls; no collision axiom or native trust shortcut |
 | `Lowering/V08/EmitControls.lean` | Actual erased-emit typed effects/read/failure/payment regressions with matching source event/argument-tree fixtures; no source execution theorem |
+
+| `Lowering/V08/CryptoObservations.lean` | Published Keccak output-word bound and fixed source/intrinsic word/ABI-byte observation transport; no hash/precompile implementation |
+| `Lowering/V08/CryptoControls.lean` | Inhabited real Keccak pin, actual standard vector and wrong-byte/word kernel controls |

@@ -553,3 +553,50 @@ and .patch. Next independent work investigates the published Keccak byte-output
 bound needed to transport fixed source crypto observations; no hash implementation
 or precompile/backend owner work will be duplicated. Full validation follows
 substantive component work with the original600-second/process/proof limits.
+
+## Continuation checkpoint: fixed Keccak observations
+
+Parent56db11be40e0f37edb8314c328ded74504dcc824. CryptoObservations proves a
+general fold_byte_bound/ofBytes_bound, then keccak_length_bound (at most four
+published lanes of eight bytes), keccak_bytes_bound (existing modulo256 output)
+and keccak_word_bound for the actual Keccak.keccak256Nat, without input length,
+lane-value, output-bound or collision assumptions. It reads existing hash
+definitions without editing/reimplementing Hash/Keccak/precompile/backend code.
+byte_input_normalize preserves every input UInt8 through existing intrinsic
+Int-to-byte normalization. fixed_keccak_observation consumes the published
+Fixed.Keccak pin and proves fixed.hash agrees exactly with keccakBytes;
+fixed_keccak_bytes transports the actual result's complete ABI word bytes.
+The raw bound is proved, not made a hidden preservation premise. The existing
+pin's Sane and fixed-hash contract remain its supplied G01 prerequisites.
+
+CryptoControls applies the checked existing G07 toyFixed_keccak witness to
+nonempty binary00/ff/80, checks the actual standard empty-input hash, and
+distinguishes a changed input byte and wrong zero result by kernel proofs.
+Only the published real Keccak pin of toyFixed is used: its ledger/precompile
+mocks do NOT certify G03/G06 production integration or other approved crypto.
+No source expression execution or general memory/call lowering is inferred.
+
+Focused gate140654 passes43 named modules/44 Lake jobs, all12 new laws/controls,
+unchanged source/config, sampledRSS2101518336bytes/cgroup1568354304bytes in24.8s.
+All138 current named declarations are lane-pinned. Hash/output proofs elaborate
+within default budgets; no native_decide/axiom/implemented_by shortcut is added.
+Remaining crypto applications: actual Source.RExpr execution; G06 published
+precompile/observation laws for SHA/RIPEMD/ecrecover and their admissible calling
+contexts, plus general memory-byte relations owned by their existing workers.
+Neither a source crypto evaluator nor another precompile implementation is
+introduced to fill those dependencies. Independent finder/skeptic actual-source
+review and combined closure finish this component checkpoint.
+
+Crypto checkpoint handoff: combined141811 passes101 named modules/102 Lake
+jobs, all138 exact axiom sets, unchanged source/config; sampledRSS818151424
+bytes/cgroup177311744bytes. Separate independent finder/skeptic actual-source
+reviews found no theorem, nonvacuity or ownership defect, using no Lean/server/
+builds. They confirmed that the raw bound is derived, the G01 Keccak pin is
+explicit, toyFixed is used solely for its real hash pin, and no other crypto/
+precompile/source execution claim follows. Static/raw doc comparison logs are
+crypto-*; source/profile/composition and final full gates remain open.
+Parent56db11be40e0f37edb8314c328ded74504dcc824; exact checkpoint committed head
+and patch are saved at /workspace/v08-world-lowering-artifacts/crypto-checkpoint.md
+and .patch. Next independent G20 work consumes callable payable/receive/fallback
+metadata before final cache-warmed validation; no reserved body/getter/function
+reference or readonly implementation is taken over.
