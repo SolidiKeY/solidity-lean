@@ -36,13 +36,13 @@ checkpoint's Handoff.
 
 ### The relations
 
-**Programs.** A compilation input is a `Program`: source units by source
+**Programs.** A compilation input is a `UnitSet`: source units by source
 unit name, each an S00 tree `Syn .unit`. Import directives are read off the
 tree (`Syn.imports`), one `Import` per imported name: `all p`
 (`import "p";`), `ns p N` (`import "p" as N;`, `import * as N from "p";`)
 and `sym p a b` (`import {a as b} from "p";`, `b = a` without `as`).
 
-**Paths.** `Program.target R u p` resolves the path `p` imported by unit
+**Paths.** `UnitSet.target R u p` resolves the path `p` imported by unit
 `u` as solc's `CompilerStack` does: `Path.absolute` (solc's
 `absolutePath`: a path whose first segment is `.` or `..` is relative to
 `u`'s directory) then `Remapping.apply` (solc's `ImportRemapper::apply`:
@@ -51,7 +51,7 @@ remapping wins a tie). solc's path sanitizing is not modelled: units are
 named by already-normalized source unit names.
 
 **Identities.** `DeclId` is a unit name and a position in the unit's
-`Syn.decls`, S00's identity extended across units; `Program.decl?` reads
+`Syn.decls`, S00's identity extended across units; `UnitSet.decl?` reads
 it back.
 
 **The file-level scope.** `Sees P R u x σ`: in unit `u`, the name `x`
@@ -89,11 +89,11 @@ minus the ones a more derived function with the same parameters overrides.
   proof counts: a round that adds nothing leaves a closed set, a round that
   adds something adds a node of `U`, and a duplicate-free list inside `U` is
   no longer than `U` (`Nodup.length_le_of_subset`).
-- **The resolver** (`Frontend/Static/Units.lean`). `Program.globals P R u x`
+- **The resolver** (`Frontend/Static/Units.lean`). `UnitSet.globals P R u x`
   saturates the graph of `(unit, name)` nodes from `(u, x)`: `import "p"`
   keeps the name, `{a as x}` renames to `a`. Its result is the leaves of the
   reached nodes (own declarations, namespaces). The bound `U` is
-  `Program.nodes`: unit names and import targets crossed with `x` and every
+  `UnitSet.nodes`: unit names and import targets crossed with `x` and every
   aliased symbol (`nodes_closed`).
   - `globals_sound`, `globals_complete` (`mem_globals`): the resolver
     returns exactly `Sees`, so it terminates on cycles and misses no route.
@@ -103,9 +103,9 @@ minus the ones a more derived function with the same parameters overrides.
     file-level `Env.lookup` finds in a unit is in the resolver's answer, at
     its own identity (the resolver is conservative over S01).
     `globals_lookup`: in a unit without imports the two are equal.
-- **The program check.** `Program.unitsOK` checks distinct names, every
-  import, every imported symbol (`Program.symFound`), and no clash over every unit and every declared or aliased name
-  (`Program.allNames`; `Sees.name_mem` shows no other name is in a scope).
+- **The program check.** `UnitSet.unitsOK` checks distinct names, every
+  import, every imported symbol (`UnitSet.symFound`), and no clash over every unit and every declared or aliased name
+  (`UnitSet.allNames`; `Sees.name_mem` shows no other name is in a scope).
   `unitsOK_iff`: it decides `UnitsOK` exactly (sound and complete).
 - **Overloads** (`Frontend/Static/Overloads.lean`). `Env.inheritedFns E c x`
   walks the linearization most derived first and keeps each visible
@@ -116,10 +116,10 @@ minus the ones a more derived function with the same parameters overrides.
   of a call: the candidates whose parameters accept the argument types,
   resolved only when exactly one does (`selectOverload_unique`), the filter
   S01's `Typed.callInternal` applies to its own candidates.
-- **G05.** `unitsChecker : Checker (Program × List Remapping) Unit …` is a
+- **G05.** `unitsChecker : Checker (UnitSet × List Remapping) Unit …` is a
   value of G05's generic `Checker` structure for `UnitsOK`, complete
   (`unitsChecker_complete`). It is not wired into a `FrontendSpec`/`Chain`:
-  no `FrontendSpec` instance exists yet (G15). `Program.libraries` gives the
+  no `FrontendSpec` instance exists yet (G15). `UnitSet.libraries` gives the
   `(unit name, library name)` pairs G05's `LinksResolved` reads.
 
 ### Controls (`Frontend/Static/UnitsExamples.lean`, all by `decide`)
@@ -170,7 +170,7 @@ minus the ones a more derived function with the same parameters overrides.
   (its getter) and a non-function member do not hide base functions in
   `InheritedFn`; overrides are checked by G14.
 - **Namespaces.** `Sees` binds `N` to a unit; resolving `N.x` is
-  `Program.globals` at that unit, but no rule of S01's typing reads it yet.
+  `UnitSet.globals` at that unit, but no rule of S01's typing reads it yet.
 - **Paths.** solc's path sanitizing, base path and include paths are not
   modelled; a remapping without context is the remapping with context `""`.
 - **Identity.** `DeclId` is a position, like S00's `Syn.graph` (Gate G0:
@@ -189,7 +189,7 @@ Fixed:
 
 | Finding | Fix |
 |---|---|
-| `import {Nope} from "x.sol"` accepted, alias cycles accepted (both) | `SymsResolve` in `UnitsOK`, decided by `Program.symFound`; `missingSym_refused`, `aliasCycle_refused` |
+| `import {Nope} from "x.sol"` accepted, alias cycles accepted (both) | `SymsResolve` in `UnitsOK`, decided by `UnitSet.symFound`; `missingSym_refused`, `aliasCycle_refused` |
 | a free function and an event of one name accepted (both) | `ScopeOK` requires the same kind; `fnEvent_refused` |
 | agreement with S01 shown only without imports (skeptic) | `lookup_sub_globals` for any imports; the doc states what is and is not related to S01 |
 | `lookup_sub_inheritedFns` did not mention `Env.lookup` (both) | restated as `d ∈ E.lookup (some c) x → … → d ∈ E.inheritedFns c x` |
@@ -197,7 +197,7 @@ Fixed:
 | `ambiguous_refused` could hold with zero fitting overloads; `exact_selected` did not pin the choice (both) | the filter has length 2; the selected parameters are `[uint16]` |
 | `shadowed_member` used a unit unrelated to `shadow` (finder) | one unit with a file-level and a member `T`, both sides shown |
 | missing controls: namespace import, overloads across units (skeptic) | `namespace_binds`, `freeOverloads_ok`, `freeOverloads_both` |
-| the G05 instance overstated (skeptic); `Program.libraries` docstring said identities | wording: a `Checker` value, not wired into a `Chain`; `libraries` filters file-level libraries |
+| the G05 instance overstated (skeptic); `UnitSet.libraries` docstring said identities | wording: a `Checker` value, not wired into a `Chain`; `libraries` filters file-level libraries |
 
 Recorded, not fixed (under What G12 does not do): solc's depth-first scope
 snapshot in import cycles (finder M2), duplicate namespace aliases (finder
@@ -239,14 +239,14 @@ full `./run-lean.sh` gate runs at the end of the lane.
   `Env.inheritedFns` (`Solidity/Source/Overloads.lean`) instead of
   `Ctx.functions` (first scope only), keeping its `filter … = [d]`.
 - A program-wide environment: `Env` keyed by `DeclId` (or `DeclName` with
-  the unit), built from `Program.globals`, so that `Syn.tys`, `Env.userTy`
+  the unit), built from `UnitSet.globals`, so that `Syn.tys`, `Env.userTy`
   and `Env.linearize` see imported declarations.
 - `Typing.lean`'s `Env.lookupPath` for `N.x` through a namespace import:
-  `Program.globals` at the unit `N` names.
+  `UnitSet.globals` at the unit `N` names.
 
 **For G15**: assemble a `FrontendSpec` whose `Resolves` includes `UnitsOK`
-(checked by `unitsChecker`) and `libraries := Program.libraries`; relate
-`Program.target` to the `absolutePath`s solc records
+(checked by `unitsChecker`) and `libraries := UnitSet.libraries`; relate
+`UnitSet.target` to the `absolutePath`s solc records
 (`Frontend/SourceUnits.lean`, `checkTree`) for imported fixtures.
 
 ## G13: type inference, constants, user-defined value types
@@ -346,13 +346,18 @@ conversion S01 types (`convElem`, `convUser`, `payable`, the implicit
 conversions of arithmetic, assignment, return, call and event arguments).
 Overload selection is S01's: `Typed.callInternal`, `emit` and `revert E(…)`
 require exactly one candidate accepting the argument types **of one
-argument typing**. That differs from solc, which refuses a call when two
-overloads accept the arguments under any of their typings:
-`hexCall_typed` shows `f(0x01)` with `f(uint8)` and `f(bytes1)` getting two
+argument typing**. Before S02's literal typing that differed from solc,
+which refuses a call when two overloads accept the arguments under any of
+their typings: `hexCall_typed` showed `f(0x01)` with `f(uint8)` and `f(bytes1)` getting two
 derivations, one per callee, where solc reports "No unique declaration
-found after argument-dependent lookup". The checker decides S01's relation
-faithfully, deviation included (Handoff). With a decimal `1`, which has no
-`bytesN` typing, the call is refused (G12's `ambiguous_refused`).
+found after argument-dependent lookup". Since solc's literal typing (Q1,
+lane-semantics) gives `0x01` the single type `hexConst 1 1`, which both
+overloads accept, the call is now refused as solc refuses it, and
+`hexCall_typed` states that (length 0; lane-soundness checkpoint 1). Every
+expression now has at most one type (`Typed.unique`, lane-semantics), so a
+per-typing selection is a selection over all typings. With a decimal `1`
+the call selects `f(uint8)`, as solc does; G12's `ambiguous_refused` is
+about `f(uint8)`/`f(uint16)`.
 
 ### User-defined value types (`Solidity/Source/UserOps.lean`, `Solidity/Frontend/Static/UserOps.lean`)
 
@@ -406,20 +411,21 @@ becomes S01's rules (and the parse, G08–G11).
 | `clashing_checked`, `sameSig_checked`, `ifaceBody_checked`, `twoCtors_checked`, `noVisibility_checked` | S01's five ill-formed units refused by `wellFormedB` |
 | `tooBig_checked`, `fits_checked` | `uint8 x = 300;` has no statement derivation; `uint8 x = 255;` has one |
 | `shl18_checked`, `gasleft_checked`, `msgValue_checked` | `1 << 8` has only its folded type; `gasleft()` and `msg.value` in a non-payable public body have none |
-| `zero_types`, `addLit_types`, `cond_types`, `require_checked` | `0x00` has 33 types; `a + 1` and `b ? a : a` one each; `require(b, "no");` is a statement |
+| `zero_types`, `addLit_types`, `cond_types`, `require_checked` | `0x00` has one type, `hexConst 0 1` (33 before Q1); `a + 1` and `b ? a : a` one each; `require(b, "no");` is a statement |
 | `named_value`, `named_length` | `N = 3; M = N * 2 + 1` gives `M = 7`; the length expression `M` gives 7 |
 | `typed_division`, `overflow_length` | `A = 7`: `A / 2 * 2` is 6; `uint8 C = 255`: `C + 1` is no length |
 | `cyclic_refused`, `cyclic_noValue` (by the mutual recursor), `named_acyclic` | `A = B + 1; B = A + 1` refused, and `A` has no value; `N`, `M` acyclic |
 | `timestamp_wellFormed`, `timestamp_refused`, `keccak_pure` | `block.timestamp` as a constant passes S01, is refused here; `keccak256("x")` is compile-time |
 | `udvt_add`, `udvt_noBinding`, `udvt_wrap`, `udvt_unwrap`, `udvt_bindings_ok`, `badBinding_refused` | `a + b` on `Fixed` with a binding; `a - b` without one has no type; `Fixed.wrap(1)`, `Fixed.unwrap(a)`; the bindings are well formed; binding `add` (returning `Fixed`) to `<` is refused |
-| `hexCall_typed` | the recorded overload deviation: `f(0x01)` has two derivations |
+| `hexCall_typed` | `f(0x01)` with `f(uint8)`/`f(bytes1)` has no derivation (was two before Q1's literal typing) |
 
 ### What G13 does not do
 
 - **S01 itself.** The checkers decide S01's relations as they stand,
   including their recorded gaps ("What S01 does not do": data locations of
-  parameters, `abi.*`, structs, external calls, named arguments, a second
-  declaration of a name in one block) and the overload deviation above.
+  parameters, named arguments, a second declaration of a name in one
+  block; `abi.*`, structs and external calls are typed since S02 and
+  checked since lane-soundness checkpoint 1).
   New rules lane-semantics adds to `Typed`/`StmtD` need matching cases in
   `infer`/`inferS`; their completeness proofs then fail to elaborate until
   the cases are added, which is the intended signal.
@@ -441,9 +447,11 @@ becomes S01's rules (and the parse, G08–G11).
   definition is not proved (completeness is with enough levels), and
   `arrayLenB` has soundness only.
 - **Speed.** `infer` enumerates every derivation: an expression's result
-  list is the product of its operands' type lists filtered by the rules. A
-  literal has up to 33 types, so a call with several `0x00` arguments
-  enumerates up to 33 to the power of their number. The checker is never
+  list is the product of its operands' type lists filtered by the rules.
+  Since S02's literal typing every expression has at most one type
+  (`Typed.unique`), so these products are small. The call arms of
+  lane-soundness evaluate the callee's `infer` (for receivers), so a
+  member chain `s.a.b` is inferred once per level. The checker is never
   kernel hot code; elaboration times are in the Handoff.
 
 ### Gates (G13)
@@ -498,12 +506,10 @@ end of the lane.
 
 **For lane-semantics (existing `Solidity/Source/` files)**:
 
-- `Typing.lean`, overloads: S01's per-typing uniqueness gives `f(0x01)`
-  two derivations with different callees (`hexCall_typed`); solc requires a
-  unique overload across all argument typings. Either `callInternal`
-  (and `emit`, `revertError`) should require the candidate set over every
-  typing of the arguments to be a singleton, or derivations need a
-  canonical choice; S02's meaning depends on it.
+- Done (lane-semantics Q1, checked in lane-soundness checkpoint 1):
+  `Typing.lean`, overloads. With solc's literal typing every expression
+  has one type (`Typed.unique`), and `f(0x01)` with `f(uint8)`/`f(bytes1)`
+  is refused (`hexCall_typed`).
 - `Typing.lean`: read `UdvtTyped` (operators, `wrap`, `unwrap`) as
   `Typed` rules so they compose; `Syn.tys`'s `arrayLen` should read
   `ArrayLenOK` (named constants, solc's typed evaluation).
@@ -755,7 +761,7 @@ commit): `InheritanceExamples.lean` 8.4 s, `Certificates.lean` 4.0 s.
 
 **For later groups**:
 
-- Several units: linearize over G12's `Program` (identities `DeclId`)
+- Several units: linearize over G12's `UnitSet` (identities `DeclId`)
   instead of one unit's `Env`, so a base imported from another unit is
   checked.
 - Getters: a public state variable should count as an external function
@@ -808,7 +814,7 @@ fractional one rational (a type no value has).
   has `FxTy`'s fields; `Q.toRat` reads S01's rational as a `Rat`).
 - Relations over S01's `HasType`: `StandaloneTyped Γ e τ` (`e : σ` and
   `σ.standalone = τ`) and `AbiArgTyped`, only the constant-type restriction
-  on ABI arguments (not a constant-only type, `STy.isConstTy`); solc's other
+  on ABI arguments (not a constant-only type, `STy.isConstOnly`); solc's other
   restrictions on `abi.encode` arguments (mappings, internal function
   types, storage references, tuples) are not in it.
 - Checkers over G13's inference: `standaloneTys`, `abiArgTys`;
@@ -933,7 +939,7 @@ server). Findings and their disposition:
 - **Finder findings (open).** `selectOverload_unique`
   (`Frontend/Static/Overloads.lean`) never states that the selected
   candidate accepts the arguments, so it is weaker than its description;
-  Static's `Program` (`Source/Units.lean`) and Checked's `Units`
+  Static's `UnitSet` (`Source/Units.lean`) and Checked's `Units`
   (`Frontend/Checked/Certificate.lean`) are distinct types and G05's
   `Chain.resolve` cannot take the parse stage's output without a bridge
   (remappings are missing from `Units`), which is G15's job; the
