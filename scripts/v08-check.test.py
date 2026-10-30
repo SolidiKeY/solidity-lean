@@ -37,3 +37,10 @@ assert success in original['source_sha256']
 result=copy.deepcopy(original);result['source_sha256'][success]='0'*64;check('changed-success-creation-source',result,False)
 result=copy.deepcopy(original);result['source_sha256'].pop(success);check('missing-success-creation-source',result,False)
 print('PASS: fifteen corruption controls rejected after accepting current positive evidence')
+
+for module in ['TransactionPrefixes','PrefixControls']:
+ path='Solidity/Lowering/V08/'+module+'.lean'
+ assert path in original['source_sha256']
+ result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
+ result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
+print('PASS: nineteen corruption controls rejected after positive current evidence')

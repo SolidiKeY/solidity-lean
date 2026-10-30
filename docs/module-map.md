@@ -1080,3 +1080,6 @@ At the root, the notation's own tests:
 | `Lowering/V08/LibraryHandlerControls.lean` | Real caller-context library work inside failed creation-handler rollback and exact context/payload controls. |
 
 | `Lowering/V08/CreationSuccessControls` | Successful creation, caller-library continuation, exact failure and rollback controls |
+
+| `Lowering/V08/TransactionPrefixes` | Arbitrary finite prefixes of actual transactions with ordered exact histories |
+| `Lowering/V08/PrefixControls` | Funded commit, real post-commit failures and reads with complete boundary observations |

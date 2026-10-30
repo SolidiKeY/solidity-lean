@@ -1556,3 +1556,113 @@ get_goal and Lean MCP diagnostics are unavailable. Final artifacts and
 independent artifact reviews are recorded in the new owning handoff at
 /workspace/v08-world-lowering-artifacts/checkpoint-creation-success-20261030.
 Every original Work/Backfill source queue and reserved dependency stays partial.
+
+
+## Arbitrary finite transaction prefixes (2026-10-30)
+
+Starting head5f2651bf6be91ecf2f29b57482a28dbe0083964e; same frozen base/branch/VM.
+Existing Transactions laws cover at most two boundary applications; the missing
+arbitrary-prefix/history clause is now proved in TransactionPrefixes and
+inhabited in PrefixControls. The only execution in the ordinary List.foldl
+step is existing World.transact. Accumulator is the existing intrinsic World
+paired with its ordered List(TRes alpha), not another state/value/interpreter.
+There is no public length/depth cutoff or Source-execution claim.
+
+Fourteen general laws prove cons/singleton/append/snoc, exact history length,
+input/output reset and normalization at every nonempty boundary, plus
+per-frame success/failure and a failed transaction followed by arbitrary suffix.
+The failure premise reads the ACTUAL reached prefix world's reset input.
+Its conclusion preserves the previous committed reset world and exact THalt,
+appends the error to all earlier statuses, then executes the remaining suffix.
+Empty prefixes deliberately retain the dirty initial world; this distinction
+is tested, not hidden in a normalization premise.
+
+Twenty-seven concrete laws use successive actual operations: funded constructor/
+library commit; real ordinary1 paid body failure with encoded binary reason
+[0x6c,0,0xff,0x48] AT THE POST-COMMIT INPUT; real occupied-candidate create
+failure with plain revert AT THAT SAME REACHED SNAPSHOT; real caller/other/
+candidate reads after both failures. The two failure equations are independently
+kernel checked at linked.resetTransient, never transplanted from base-world
+failure. Existing result values are losslessly tagged in nested standard Sum:
+full library bytes/context, Unit, typed Handle false and List Int respectively.
+
+The ENTIRE previous extended vector is kept at every prefix: balances
+[sender,caller,library,other,candidate]; caller/other persistent+transient cells;
+installed empty-library fields; every old installation/type-lookup/role flag;
+candidate typed cells/lookup. Empty input has balances95/0/0/5/0,caller0/0,
+other19/29,candidate absent. All nonempty reached boundaries have balances
+88/7/0/5/0,caller11/0,other19/0,candidate8/0 installed,library installed/empty.
+History is exactly [ok tagged full library([b1,b2],[1,7,2,7,12345]),
+error encoded binary reason,error plain revert,ok tagged[11,0,19,0,8,0]].
+Initial/one/multiple-prefix append controls, arbitrary suffix-after-failure,
+dirty direct reads observing23/12, wrong ancestor snapshot, wrong halt and
+swapped-status negatives are checked. Empty dirtyother29 differs from reset0.
+
+Current standalone focused target PrefixControls imports the unchanged prior
+Audit plus both new modules, printing all357 preserved sets and41 new sets:
+398exact standard axiom sets. Old Audit source is byte-identical to starting
+head; no import cycle/core-to-elaborator edge is introduced. Additional core
+closure registration in the lane checker covers TransactionPrefixes. Nineteen
+external corruption controls preserve all15 old cases and changed/missing
+source cases for both new modules. No old theorem or fixture was removed.
+
+A measured operational correction was necessary. Initial free658808832bytes
+was enough for the conservative64MiB proof/evidence estimate, but two NEW
+bounded gate containers consumed about352MiB: Docker uses vfs and retains
+independent base-filesystem copies. Optional artifact count stayed1365.
+Both raw failed gates717877/718396 remain; no source/cache/container/evidence
+was deleted and no capacity/resource limit changed. Default sandbox read-only
+append-lock/socket inspections failed; corrected read-descriptor lock and
+approved local Docker inspection worked. These are operational invocation
+errors, not theorem failures.
+
+New scripts/v08-reuse-prefix.py reuses ONLY this turn's owned, unsealed failed
+container718396: same ID,unchanged configured command/all67 explicit targets,
+image,user,mounts,networknone,12GiB/no-swap,CPU1,cacheflags and Lean-j1. Selected
+nonsecret before/after inspection is retained with unique new logs; seed JSON
+and raw-log SHA remain unchanged. The final existing PrefixControls target
+resolves the116-module current import closure. Its49 added prior-Audit imports
+are bound to successful704511 source/config/toolchain/raw-log validation and
+unchanged output/trace/setup files predating that run, with newly recorded
+SHA/size/ctime and trace-output/hash agreement. These SHAs are new forensic
+snapshots, not hashes claimed to have been captured historically by704511.
+
+Independent finder identified the initial .olean-existence-only evidence gap;
+it was fixed before any restart. Both finder and skeptic reviewed the stronger
+guard and actual controls without Lean/server/builds. Reuse720591-bf21fe57
+passes117jobs in32.169s with all398 sets, fresh sampledRSS1017917440 and
+reported cgrouppeak365793280 (conservatively possibly cumulative on reuse).
+Same containerID and0 writable-root bytes before/after; only about2MiB disk
+increment, no new filesystem copy. All original monitor/time/memory/OSheadroom/
+token-cleanup logic remains; only create->start and container identity plumbing
+change. Full current-closure and previous-explicit-command lists are separate
+evidence. A corrected external inspector harness tests14 corrupt profiles
+after accepting a positive profile; its initial ad-hoc missing-fmt NameError
+is retained in terminal history and is not classified as a helper failure.
+
+Every G20,G21,G22.01-.05,G23 and BackfillA/B SOURCE/application queue stays
+PARTIAL. No Source/V07/type/layout/ABI/body/linkage/runtime-frame/bytecode/
+precompile or arbitrary callback relation is supplied. The original goal stays
+blocked/untouched; get_goal and Lean MCP diagnostics remain unavailable.
+Mandatory full496841/taskDecision413142/baseDecision433573 exit125 are retained,
+with no unchanged retry. Literal-wrapper confirmation remains pending.
+Global docs/pin raw exits1 stay failed; only complete exact-base NEW0 comparisons
+may pass. Existing Suite705959 and fresh634358 evidence is retained only for
+its unchanged closed source dependencies, not a new global source fingerprint
+or whole-lane/source/runtime proof. Further independent obligations are not
+claimed exhausted. Proposed G03 localEvidence additions: BackfillB prefix laws
+and G22.03-.05/G23 intrinsic examples only, no global status/ledger rewrite.
+
+
+Finite-prefix checkpoint gates complete: prefix-binding.log398pins/60coreclosure;
+prefix-controls.log19corruptions;prefix-reuse-controls.log14corruptprofiles;
+trust911sources/241sites/0findings;strict491automatic/61step-budget/11refuted/
+0pending;layers169core/0elaborator;orphans896reachable/0orphan/0disallowed.
+Full current docs/pin raw exits1 retained with72/14 complete exact-base rows
+identical and separate NEW0 passes. Current public law count41 (14general,
+27controls), all357previous axiom sets unchanged. Both independent actual
+proof/control/reuse-protocol reviews pass after the warm-artifact finding was
+fixed; no Lean/server/builds by reviewers. Source/mandatory-full obligations
+remain open. Original storage estimate omitted VFS container copies; repaired
+reuse incurs only small output/log growth without any deletion or cap change.
+This committed section is the handoff for this first prefix checkpoint.

@@ -1236,6 +1236,141 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.append_multiple": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.append_one": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.boundary0": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.boundary1": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.boundary2": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.boundary3": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.boundary4": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.collision_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.commit_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.complete_boundaries": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.dirty_read_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.empty_is_not_a_boundary": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.every_nonempty_boundary_normalized": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.exact_history": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.failing_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.failure_keeps_suffix": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.fourth_input": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.history_length": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.occupied_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.paid_failure_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.read_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.second_input": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.third_input": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_dirty_input": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_halt": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_rollback_snapshot": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_status_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.ProjectionControls.boundary_roundtrips": [
     "Quot.sound",
     "propext"
@@ -1494,7 +1629,56 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_input_reset": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_observe": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_output_normalized": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_append": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_commit_snoc": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_cons": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_failure_snoc": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_failure_suffix": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_initial_reset": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_length": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_nil": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_normalized": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_singleton": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_snoc": [
+    "Quot.sound",
     "propext"
   ],
   "Solidity.Lowering.V08.transact_repeat": [
@@ -1503,6 +1687,9 @@
   ],
   "Solidity.Lowering.V08.transact_repeat_failure": [
     "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_step_history": [
     "propext"
   ],
   "Solidity.Lowering.V08.transact_tryCreate_handler_steps_failure": [
