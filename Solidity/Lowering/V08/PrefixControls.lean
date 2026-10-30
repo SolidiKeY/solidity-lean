@@ -908,6 +908,128 @@ theorem lossy_actual_runs :
   · rfl
   · decide +kernel
 
+theorem adjacent_first_reached :
+    transactPrefix linked.resetTransient ((frames.drop 1).take 1) =
+      (linked.resetTransient, [.error laterHalt]) := by
+  have segment := transact_prefix_segment_complete base frames 1 1
+  have preceding : transactPrefix base (frames.take 1) = (linked.resetTransient, h1) := boundary1
+  have endpoint : transactPrefix base (frames.take (1 + 1)) = (linked.resetTransient, h2) := boundary2
+  rw [preceding, endpoint, boundary4] at segment
+  exact segment
+
+theorem adjacent_second_reached :
+    transactPrefix (transactPrefix base (frames.take 2)).1 ((frames.drop 2).take 2) =
+      (readWorld.resetTransient, [.error .revert, .ok readValue]) := by
+  have segment := transact_prefix_segment_complete base frames 2 2
+  have endpoint : frames.take (2 + 2) = frames := rfl
+  rw [endpoint, boundary4] at segment
+  exact segment
+
+/-- Both reached adjacent snapshots/histories plus EVERY original boundary
+observation; subdivision never projects away either exact error or full return. -/
+theorem adjacent_complete_vectors :
+    (observeBoundary [] =
+      ((([95, 0, 0, 5, 0], [some [0, 0], some [19, 29], some []], flags), none, false), []) ∧
+    observeBoundary [commit] = (committedVector, h1) ∧
+    observeBoundary [commit, failing] = (committedVector, h2) ∧
+    observeBoundary [commit, failing, occupied] = (committedVector, h3) ∧
+    observeBoundary frames = (committedVector, h4)) ∧
+    ((extended (transactPrefix linked.resetTransient ((frames.drop 1).take 1)).1,
+       (transactPrefix linked.resetTransient ((frames.drop 1).take 1)).2),
+     (extended (transactPrefix (transactPrefix base (frames.take 2)).1 ((frames.drop 2).take 2)).1,
+       (transactPrefix (transactPrefix base (frames.take 2)).1 ((frames.drop 2).take 2)).2)) =
+      ((committedVector, [.error laterHalt]), (committedVector, [.error .revert, .ok readValue])) := by
+  constructor
+  · exact complete_boundaries
+  · rw [adjacent_first_reached, adjacent_second_reached, committed_vector_value, read_vector_value]
+
+theorem labelled_partition_reflection (first second : List (TRes Output)) :
+    ((((transactPrefix base observedFrames).2.drop 1).take 1) = first.map (fun result => result.map extendOutput) ∧
+      (((transactPrefix base observedFrames).2.drop 2).take 2) = second.map (fun result => result.map extendOutput)) ↔
+      ([.error laterHalt] = first ∧ [.error .revert, .ok readValue] = second) := by
+  have reflected := transact_prefix_partition_reflect_iff base frames 1 1 2 extendOutput
+    extendOutput_injective first second
+  have history : (transactPrefix base frames).2 = h4 := congrArg Prod.snd boundary4
+  simpa only [observedFrames, history] using reflected
+
+/-- The actual first component contains the binary halt, differs from an empty
+component, and differs from the shifted plain-error component. -/
+theorem wrong_partition :
+    (((transactPrefix base frames).2.drop 1).take 1) ≠ [] ∧
+    (((transactPrefix base frames).2.drop 1).take 1) ≠
+      (((transactPrefix base frames).2.drop 2).take 1) := by
+  have history : (transactPrefix base frames).2 = h4 := congrArg Prod.snd boundary4
+  rw [history]; decide +kernel
+
+/-- An empty first partition followed by the complete real trace does not reset
+the dirty starting world until the first actual World.transact is reached. -/
+theorem empty_first_partition :
+    transactPrefix (transactPrefix base (frames.take 0)).1 ((frames.drop 0).take (0 + 4)) =
+      (readWorld.resetTransient, [] ++ h4) ∧
+    extended (transactPrefix base (frames.take 0)).1 ≠ extended base.resetTransient := by
+  have input : (transactPrefix base (frames.take 0)).1 = base := by
+    rw [List.take_zero, transact_prefix_nil]
+  have whole : (frames.drop 0).take (0 + 4) = frames := rfl
+  constructor
+  · rw [input, whole, List.nil_append, boundary4]
+  · rw [input]
+    decide +kernel
+
+/-- Requested first length7 naturally consumes only the three remaining frames;
+the adjacent segment at index8 is empty at the actually reached final snapshot. -/
+theorem truncated_partition :
+    transactPrefix linked.resetTransient ((frames.drop 1).take (7 + 3)) =
+      (readWorld.resetTransient, [.error laterHalt, .error .revert, .ok readValue]) ∧
+    transactPrefix (transactPrefix base (frames.take (1 + 7))).1 ((frames.drop (1 + 7)).take 3) =
+      (readWorld.resetTransient, []) := by
+  constructor
+  · have same : (frames.drop 1).take (7 + 3) = (frames.drop 1).take 3 := rfl
+    rw [same]; exact middle_segment_reached
+  · have endpoint : frames.take (1 + 7) = frames := rfl
+    rw [endpoint, boundary4]; rfl
+
+/-- Apply the actual subdivision theorem at the populated postcommit split. -/
+theorem adjacent_subdivision_application :
+    transactPrefix linked.resetTransient ((frames.drop 1).take 3) =
+      ((transactPrefix (transactPrefix base (frames.take 2)).1 ((frames.drop 2).take 2)).1,
+       (transactPrefix linked.resetTransient ((frames.drop 1).take 1)).2 ++
+       (transactPrefix (transactPrefix base (frames.take 2)).1 ((frames.drop 2).take 2)).2) := by
+  have subdivision := transact_prefix_segment_subdivide base frames 1 1 2
+  have preceding : transactPrefix base (frames.take 1) = (linked.resetTransient, h1) := boundary1
+  rw [preceding] at subdivision
+  exact subdivision
+
+theorem adjacent_observation_application :
+    (((transactPrefix base observedFrames).2.drop 1).take 3) =
+      (((transactPrefix base frames).2.drop 1).take 1).map (fun result => result.map extendOutput) ++
+      (((transactPrefix base frames).2.drop 2).take 2).map (fun result => result.map extendOutput) := by
+  unfold observedFrames
+  exact transact_prefix_segment_subdivide_observe base frames 1 1 2 extendOutput
+
+/-- Same ENTIRE concatenated history but different labelled first components
+and actual prefix snapshots: history equality cannot locate a partition. -/
+theorem ambiguous_partition_concat :
+    h1 ++ [.error laterHalt, .error .revert, .ok readValue] = [] ++ h4 ∧
+    h1 ≠ [] ∧ extended (transactPrefix base (frames.take 1)).1 ≠ extended base := by
+  constructor
+  · rfl
+  · constructor
+    · decide +kernel
+    · have preceding : transactPrefix base (frames.take 1) = (linked.resetTransient, h1) := boundary1
+      rw [preceding]; decide +kernel
+
+#print axioms adjacent_subdivision_application
+#print axioms adjacent_observation_application
+#print axioms ambiguous_partition_concat
+
+#print axioms adjacent_first_reached
+#print axioms adjacent_second_reached
+#print axioms adjacent_complete_vectors
+#print axioms labelled_partition_reflection
+#print axioms wrong_partition
+#print axioms empty_first_partition
+#print axioms truncated_partition
+
 #print axioms lossy_actual_runs
 
 #print axioms extendOutput_injective

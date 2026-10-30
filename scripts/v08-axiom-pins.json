@@ -1236,6 +1236,36 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.adjacent_complete_vectors": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.adjacent_first_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.adjacent_observation_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.adjacent_second_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.adjacent_subdivision_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.ambiguous_partition_concat": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.append_multiple": [
     "Classical.choice",
     "Quot.sound",
@@ -1302,6 +1332,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.dirty_read_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.empty_first_partition": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1393,6 +1428,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.injective_wrong_success_rejected": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.labelled_partition_reflection": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1502,6 +1542,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.truncated_partition": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.truncated_segment": [
     "Classical.choice",
     "Quot.sound",
@@ -1533,6 +1578,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.wrong_middle_snapshot": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_partition": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1901,6 +1951,9 @@
   "Solidity.Lowering.V08.transact_prefix_observe_reflect_iff": [
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_prefix_partition_reflect_iff": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_prefix_segment_boundary": [
     "Classical.choice",
     "Quot.sound",
@@ -1933,6 +1986,21 @@
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_segment_ok_iff": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_subdivide": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_subdivide_history": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_segment_subdivide_observe": [
+    "Classical.choice",
     "Quot.sound",
     "propext"
   ],

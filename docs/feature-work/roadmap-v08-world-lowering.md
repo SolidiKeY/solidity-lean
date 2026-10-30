@@ -1954,3 +1954,58 @@ and separatelynamedNEW0 pass. Both finalindependentproof/control/pins/doc review
 PASS/no findings. Precommitavailable218337280bytes inside32MiBenvelope; next
 adjacentsegmentcomposition continues. Alloriginalsource/applicationparents and
 mandatorywholevalidation remainunfinished.
+
+
+### Adjacent naturally truncated segment checkpoint
+
+After f02e01669ffad2cd8976627c56df82a6eb151a86, four general laws derive
+actual adjacent subdivision, complete orderedhistory subdivision, forwardmapped
+observation (noinjectivityneeded), and reflection of BOTH labelled component
+histories under explicitinjectivity. Secondsegment starts at actualprefix
+(start+left)world, even when lengths truncate or a segment is empty. No public
+length/depth cap or evaluator. Exact errors/order/fullsuccesses retained.
+Reflection of only concatenation never identifies partitionboundaries/Worlds.
+
+Ten populated controls instantiate the genuinely reached postcommit split into
+actual paidbinaryfailure followed by actualplainfailure/read; retain EVERY old
+listedvector and orderedhistory at ALL0..4 boundaries; and explicitly apply both
+new generic subdivision/observation laws. Labelledreflection preserves BOTH
+componenthistories. Wrongpartition distinguishes empty/shiftedfirstcomponents.
+ambiguous_partition_concat proves SAMEENTIREconcatenation with different labelled
+firstcomponents AND actualprefixsnapshots (dirtybase vsfundedcommittedworld).
+Emptyfirstpartition precedes fullactualtrace without addingreset; overlongfirst
+segment naturally consumes only remainingframes and secondsegment empty atactual
+finalsnapshot. Existingrawreset/dirtyinput/successbyte/errorcontrols retained.
+
+Independentfinder/skeptic identified two evidence gaps: explicit actualapplications
+of the newlaws missing, and wrong_partitioncomment claimed equalconcatenations
+beyond its statement. Both fixed: explicit inhabited applications added, original
+comment narrowed, separate complete ambiguouspartitionwitness added. Both reviewers
+accepted fixes read-only withoutLean/builds/writes. No theorem/premise weakened.
+
+Gate802903-f0c31091 PASS117jobs/39.2770s,freshRSS1068470272,reusedreportedpeak
+413327360(possiblycumulative);475standardexactsets preserve all461prior/447starting
+entries. Raw799016/801042FAIL1 at unchanged200000HB in concreteempty-inputproof
+retained. Explicit inputequality and rewriting the knownboundary theorem fixed
+unification without statement/budget changes; no authorsorry/newaxiom andnone
+in successfulsets. Same boundedruntime/cache/config/commands/cgroupidentity,
+no newVFSroot/deletion/capacity/guardchange.32MiBentirecontinuation envelope.
+
+Every original G20,G21,G22.01-.05,G23 and BackfillA/B sourceapplicationparent
+remainsPARTIAL; no independentqueue exhaustion claimed. Source/V07/type/layout/
+ABI/body/linkage/runtimeframe/bytecode/admission/reservedowner applications open.
+Mandatoryfull496841/taskDecision413142/baseDecision433573 FAILED125 and literal
+run-leanpending retained. Fresh321dependency comparisons show no changed Decision
+input; no output/trace and no supported distinct repair. No unchangedretry,
+target/verdict/async/owner/budgetchange or baselinewaiver. Raw globaldocs/pins
+exits1 remainfailed, separate complete exactbase NEW0 comparisons only.
+This is the committed checkpoint handoff; finalscopedgates/artifacts follow.
+
+Adjacentcheckpoint final scopedgates PASS475exactpins/60coreclosure,19evidence
+and14runtimeprofilecorruptions afterpositivecontrols;trust911/241/0findings,
+strict491/61budget/11refuted/0pending,layers169/0elaborator,orphans896/0orphan.
+Rawtask/base docs/pins exits1 remainfailed; complete72/14findingrows identical,
+separatelynamedNEW0 pass. Both finalindependentproof/control/pins/doc reviews
+PASS/no findings after evidencegap fixes. Precommitavailable207007744bytes,
+inside32MiBtotalcontinuation envelope. Measuredcompact additiveexports follow.
+Alloriginalsource/applicationparents and mandatorywholevalidation unfinished.

@@ -481,6 +481,61 @@ theorem transact_prefix_segment_observe_reflect_iff {β : Type} (w : World contr
   rw [transact_prefix_segment_observe_history]
   exact history_observe_eq_iff observation injective _ candidate
 
+/-- Subdivide an actual naturally truncated segment into adjacent segments.
+The second starts at the genuinely reached first endpoint, including empties. -/
+theorem transact_prefix_segment_subdivide (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start left right : Nat) :
+    transactPrefix (transactPrefix w (frames.take start)).1
+      ((frames.drop start).take (left + right)) =
+      ((transactPrefix (transactPrefix w (frames.take (start + left))).1
+          ((frames.drop (start + left)).take right)).1,
+        (transactPrefix (transactPrefix w (frames.take start)).1
+          ((frames.drop start).take left)).2 ++
+        (transactPrefix (transactPrefix w (frames.take (start + left))).1
+          ((frames.drop (start + left)).take right)).2) := by
+  have split : (frames.drop start).take (left + right) =
+      (frames.drop start).take left ++ (frames.drop (start + left)).take right := by
+    rw [List.take_add, List.drop_drop]
+  rw [split, transact_prefix_append, transact_prefix_segment_boundary]
+
+/-- Ordered whole-history slices subdivide with their natural requested indices,
+not a cap or a guessed length-normalized partition. -/
+theorem transact_prefix_segment_subdivide_history (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start left right : Nat) :
+    ((transactPrefix w frames).2.drop start).take (left + right) =
+      ((transactPrefix w frames).2.drop start).take left ++
+        ((transactPrefix w frames).2.drop (start + left)).take right := by
+  rw [List.take_add, List.drop_drop]
+
+/-- Actual observed adjacent slices retain the mapped ordered successes/errors.
+This forward transport does not need observer injectivity. -/
+theorem transact_prefix_segment_subdivide_observe {β : Type} (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start left right : Nat) (observation : α → β) :
+    (((transactPrefix w (frames.map (fun frame => observeTransactionFrame frame observation))).2.drop start).take (left + right)) =
+      (((transactPrefix w frames).2.drop start).take left).map (fun result => result.map observation) ++
+      (((transactPrefix w frames).2.drop (start + left)).take right).map (fun result => result.map observation) := by
+  rw [transact_prefix_segment_observe_history, transact_prefix_segment_subdivide_history, List.map_append]
+
+/-- Reflect BOTH labelled component histories under injectivity. Equality of only
+their concatenation cannot identify partition boundaries or arbitrary Worlds. -/
+theorem transact_prefix_partition_reflect_iff {β : Type} (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (start left right : Nat)
+    (observation : α → β) (injective : ∀ x y, observation x = observation y → x = y)
+    (first second : List (TRes α)) :
+    ((((transactPrefix w (frames.map (fun frame => observeTransactionFrame frame observation))).2.drop start).take left) =
+      first.map (fun result => result.map observation) ∧
+     (((transactPrefix w (frames.map (fun frame => observeTransactionFrame frame observation))).2.drop (start + left)).take right) =
+      second.map (fun result => result.map observation)) ↔
+    (((transactPrefix w frames).2.drop start).take left = first ∧
+      ((transactPrefix w frames).2.drop (start + left)).take right = second) :=
+  and_congr (transact_prefix_segment_observe_reflect_iff w frames start left observation injective first)
+    (transact_prefix_segment_observe_reflect_iff w frames (start + left) right observation injective second)
+
+#print axioms transact_prefix_segment_subdivide
+#print axioms transact_prefix_segment_subdivide_history
+#print axioms transact_prefix_segment_subdivide_observe
+#print axioms transact_prefix_partition_reflect_iff
+
 #print axioms result_observe_eq_iff
 #print axioms history_observe_eq_iff
 #print axioms transact_prefix_observe_reflect_iff
