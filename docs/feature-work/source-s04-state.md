@@ -253,3 +253,48 @@ parameters, or are excluded by S01.
 
 **For the ABI work.** `Calldata.objects` must be the decoding of
 `Calldata.input`, and `readInt` is the word-level decoder for integers.
+
+## S04.04: transactions
+
+Lane V04, checkpoint 4 (`Solidity/Source/Semantics.lean`, over S03's
+frames in `Solidity/Source/Eval.lean`). This section answers the
+"For S04.04" handoff above.
+
+| Item | Where |
+|---|---|
+| Frame stack | Nested `Fr` frames. An external call to an instance enters a frame (`enterInstance`) with its own memory and a journal mark (`mark`); a revert undoes the journal and the logs back to the mark (`rollbackTo`, built on `ExecState.undoN`); a success keeps them, so an enclosing revert still undoes them. |
+| Depth limit | At depth 1024 a call fails with empty revert data. |
+| Static calls | A static frame refuses every journaled write (`applyOp`) and every value transfer. A call to a `view`/`pure` function is static. |
+| Logs | `emit` records `(address, data)`. Logs roll back with their frame and are not observations (G00 excludes them). |
+| Nonce order | A deployment creates the instance at `Fixed.createAddress deployer deployNonce` with nonce 1 before running the constructors, inside the deployment's mark, so a reverted deployment leaves no instance. The deployer's nonce is the session environment's (G01). `CREATE` from the system (`new`) is not typed, so there is no system nonce bump. |
+| Deployment | `deploy`: the account (balance = deployment value, code = the contract's position in `Program.contracts`), then `construct` in the pipeline's order (S03.02). |
+| Transactions | `runTx` credits the request's value to the target, dispatches the call data at depth 0 with `msg.sender` the request's sender and `block.timestamp` the request's, rolls back on a revert, then ends the transaction (`ExecState.endTx`: transient storage cleared, journal closed) and records `Event.tx`. A request to an address with no instance reverts with no data. |
+| Observable trace | `St.events` holds G01's `Event`s in order: calls out, answers, callbacks and their outcomes, credits, transactions and the deployment. A halt keeps the state, so a reverted frame's events stay emitted. `sessionAt` projects a session to a G01 `Prefix`; see [source-s05.md](source-s05.md). |
+
+### Controls
+
+| Theorem | Statement |
+|---|---|
+| `revert_rolls_back` | `poke()` writes `x` and `t` and reverts: outcome `revert []`, `x` still `3`, not `1` |
+| `revert_rolls_back_transient` | the reverted frame restores transient `t = 4`, not `2` |
+| `commit_keeps_storage` | `g()` writes `x = 5`, `t = 7`, returns `12`; `x` stays `5` |
+| `transient_cleared` | after `g()` the transaction's end leaves `t = 0` |
+| `reentrant_callback`, `no_callback` | `callOut(ext)`: the environment calls back into `cb()` (`x + 1`) before answering. `x` is `4` and the five events are, in order, `call`, `reenter`, `reentered`, `answer`, `tx`. Without the callback `x` stays `3`. |
+
+### What S04.04 does not do
+
+- **Sender funds.** The decision bounds `msg.value` by the sender's
+  ledger balance, so an unaffordable request is invalid. `runTx` does
+  not check this.
+- **Gas.** Exhaustion is not a choice point (see
+  [source-s03.md](source-s03.md#what-s03-does-not-do)).
+- **Environment credits.** Credits between transactions are recorded and
+  credited to instances. External balances are G01's ledger.
+- **Aggregate storage operations.** `push`/`pop` are not typed.
+- **Calldata.** Calldata objects are never produced (see
+  [source-s02.md](source-s02.md#what-s02-does-not-do)).
+
+## Handoff (S04.04)
+
+Theorems: the controls above. Gates are in
+[source-s05.md](source-s05.md#handoff-s05).

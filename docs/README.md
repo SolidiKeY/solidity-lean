@@ -32,6 +32,10 @@ history is in git.
 | [feature-work/source-s00-s01.md](feature-work/source-s00-s01.md) | Source definitions S00/S01: the pinned grammar as intrinsic syntax, constructor index, upstream mapping, precise rejection and declaration graph; static typing, resolution and constants. |
 | [feature-work/frontend-static.md](feature-work/frontend-static.md) | Static frontend checkers G12–G14: import resolution and identities, type checking against S01, inheritance; their G05 checker instances. |
 | [feature-work/source-s04-state.md](feature-work/source-s04-state.md) | Source definitions S04.01–S04.03: source state (values, aggregates, memory, calldata, storage), ABI and revert observations, world, transient storage, call frames and rollback. |
+| [feature-work/source-s02.md](feature-work/source-s02.md) | Source semantics S02: resolved bodies in elaborated units, closed typing gaps, run-time values, arithmetic, effect order per pipeline, references and failures. |
+| [feature-work/source-s03.md](feature-work/source-s03.md) | Source semantics S03: statements, modifiers with repeated placeholders, constructor order, internal/external/callback call frames, horizons and divergence. |
+| [feature-work/source-s05.md](feature-work/source-s05.md) | Source semantics S05: the composition into G01's `Lang`, the source-constructor ledger, controls, reviews and the lane's handoff. |
+| [feature-work/source-soundness.md](feature-work/source-soundness.md) | Lane V04b: integration of the source semantics with G13's checker, type soundness (preservation, gap-relative progress), reviews and handoff. |
 | [feature-work/roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) | Roadmap G04: current compiler theorems, every fragment/input restriction and its discharging group. |
 | [feature-work/roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md) | Roadmap G06 child: hand-written EVM vector scripts re-pinned from Cancun to Osaka; both-fork measurements, bytecode comparison, lane re-runs and Lean-side pin obligations. |
 | [feature-work/fixed-point-semantics.md](feature-work/fixed-point-semantics.md) | Fixed-point types: the pinned specification, the reference model `Language/FixedPoint.lean`, silent-spec proposals, scope questions and roadmap owners. |
@@ -90,6 +94,7 @@ history is in git.
 
 | [feature-work/backend-creation-artifacts.md](feature-work/backend-creation-artifacts.md) | G44.02 creation artifact component proofs, runtime installation scope and remaining composition obligations. |
 | [feature-work/backend-failure-emission.md](feature-work/backend-failure-emission.md) | G38 component: executable failure and return bytes, exact local slice proofs and remaining integration obligations. |
+| [feature-work/storage-value-representation.md](feature-work/storage-value-representation.md) | G27 typed storage representation, bounded validation, reviews and remaining composition obligations. |
 | [feature-work/backend-scalar-lowering.md](feature-work/backend-scalar-lowering.md) | G25 preparation: numeric instruction-slice semantics, typed selection certificates, queue status and remaining composition/validation obligations. |
 
 | Preparation lane | Document |
