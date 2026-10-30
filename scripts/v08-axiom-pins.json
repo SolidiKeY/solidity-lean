@@ -1281,6 +1281,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.commit_history_reconstruction": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.commit_reached": [
     "Classical.choice",
     "Quot.sound",
@@ -1401,7 +1406,17 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.read_history_reconstruction": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.read_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.reconstructed_complete_boundaries": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1432,6 +1447,16 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.wrong_index": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_library_success_value": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.wrong_raw_reset_world": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1763,6 +1788,10 @@
   "Solidity.Lowering.V08.transact_prefix_index_observe": [
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_prefix_index_ok_iff": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_prefix_index_success": [
     "Quot.sound",
     "propext"
@@ -1789,6 +1818,10 @@
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_snoc": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_success_of_index": [
     "Quot.sound",
     "propext"
   ],

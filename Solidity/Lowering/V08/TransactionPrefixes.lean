@@ -293,6 +293,50 @@ theorem transact_prefix_index_error_iff (w : World contracts)
   ⟨fun observed => (transact_prefix_failure_of_index w frames i valid halt observed).1,
     fun failed => (transact_prefix_index_failure w frames i valid halt failed).1⟩
 
+/-- A successful history entry reconstructs an actual raw next world from the
+indexed frame. Only its reset equals the immediate boundary: the raw world may
+still contain transient values, and no later/final world equality follows. -/
+theorem transact_prefix_success_of_index (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) (valid : i < frames.length)
+    (value : α)
+    (observed : (transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid) = .ok value) :
+    ∃ next : World contracts,
+      frames[i] (transactPrefix w (frames.take i)).1.resetTransient = .ok (next, value) ∧
+      (transactPrefix w (frames.take (i + 1))).1 = next.resetTransient := by
+  have result : ((transactPrefix w (frames.take i)).1.transact frames[i]).2 = .ok value :=
+    (transact_prefix_index w frames i valid).symm.trans observed
+  have executed : ∃ next : World contracts,
+      frames[i] (transactPrefix w (frames.take i)).1.resetTransient = .ok (next, value) := by
+    cases ran : frames[i] (transactPrefix w (frames.take i)).1.resetTransient with
+    | error halt =>
+      simp only [World.transact, ran] at result
+      cases result
+    | ok pair =>
+      rcases pair with ⟨next, actual⟩
+      simp only [World.transact, ran] at result
+      have same : actual = value := Except.ok.inj result
+      subst actual
+      exact ⟨next, rfl⟩
+  obtain ⟨next, ran⟩ := executed
+  exact ⟨next, ran, (transact_prefix_index_success w next frames i valid value ran).2⟩
+
+/-- Success observations characterize the actual raw frame return and its
+normalized immediate boundary, without identifying raw and reset worlds. -/
+theorem transact_prefix_index_ok_iff (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) (valid : i < frames.length)
+    (value : α) :
+    (transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid) = .ok value ↔
+      ∃ next : World contracts,
+        frames[i] (transactPrefix w (frames.take i)).1.resetTransient = .ok (next, value) ∧
+        (transactPrefix w (frames.take (i + 1))).1 = next.resetTransient := by
+  constructor
+  · exact transact_prefix_success_of_index w frames i valid value
+  · rintro ⟨next, ran, _⟩
+    exact (transact_prefix_index_success w next frames i valid value ran).1
+
+#print axioms transact_prefix_success_of_index
+#print axioms transact_prefix_index_ok_iff
+
 #print axioms transact_prefix_failure_of_index
 #print axioms transact_prefix_index_error_iff
 

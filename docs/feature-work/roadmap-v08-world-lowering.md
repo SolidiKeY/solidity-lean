@@ -1791,3 +1791,54 @@ docs/pins task/base exits1 retained with complete72/14 rows identical and
 separate NEW0 passes. Both final independent proof/control/evidence reviewers
 pass with no findings; no Lean/server/builds by reviewers. Source/application
 and mandatory whole-gate blockers remain exactly as recorded above.
+
+
+### Successful indexed-history reconstruction checkpoint
+
+Starting ac9ef3be33a1b87a1d4fa008159682a62e151b1d, the missing success
+counterpart is now proved. transact_prefix_success_of_index assumes ONLY a valid
+index and exact typed.okvalue in the actual transaction history. Cases on the
+published World.transact/frame return derive existence of an actual RAW next
+world returned by that frame at the reached prefix reset input, with only its
+resetTransient equal to the immediate(i+1)boundary. index_ok_iff gives both
+directions. No raw=normalized, later/finalworld, arbitrary worldfield or Source/
+ABI/bytecode inference follows from a successful value. All halt distinctions
+remain unchanged. The ordinary intrinsic fold/types/semantics are unchanged.
+
+Concrete commit/read reconstructions consume actual funded constructor/library
+and finalread history entries. reconstructed_complete_boundaries retains EVERY
+old balance/store/transient/installation/kind/role/type lookup observation at
+all0..4 boundaries and ALL ordered statuses (including both distinct errors)
+and full typed result values. Wrongbinarysuccess bytes discriminate same-tag
+values, and wrong_raw_reset_world checks actual dirty raw linked transientcells
+against its committed reset snapshot. Existing shiftedindex/order and dirtyempty
+controls preserved. Seven new checked theorems give432 standard exactpins with
+all425 prior sets unchanged. These are derived intrinsic history reconstructions,
+not independent Source/external observations. Both finder and skeptic reviewed
+the actual statements/premises/controls read-only, without Lean/server/builds,
+and found no substantive issue.
+
+Gate760938-beadbc03 passes117jobs in37.0845s, freshRSS1026854912 and reported
+reusedcgrouppeak381874176(possiblycumulative). Same stoppedowned runtime/image/
+CMD/mount/token/cache/config checked fresh; parent16GiB,inner12GiB/swap0/CPU1,
+LEAN_NUM_THREADS1/Lean-j1 and600s unchanged. No container allocation, deletion,
+capacity/guard/proofbudget change. Actual affected compiledoutput1035226bytes;
+initialfree254799872 with conservative40MiB entirecontinuation envelope and
+expectedremaining212856832bytes. Fresh budget/preflight evidence retained.
+PerfileMCP/get_goal unavailable; existing blockedgoal untouched.
+
+Every original G20,G21,G22.01-.05,G23/BackfillA-B application parent remains
+PARTIAL. Source/V07/type/layout/ABI/body/linkage/runtimeframe/bytecode/admission/
+reservedowner applications open; no independentqueue exhaustion claimed.
+Mandatoryfull496841/taskDecision413142/baseDecision433573 FAILED125 retained;
+no unchanged retry/waiver. Literalwrapper remains pending. Raw globaldocs/pins
+failures and complete exactbase NEW0 comparisons remain separate. This section
+is the checkpoint handoff; exact final scopedgates and additive artifacts follow.
+
+Successcheckpoint final scopedgates PASS432exactpins/60coreclosure,19evidence
+corruptions+14runtimeprofiles afterpositivecontrols;trust911/241/0findings,
+strict491/61stepbudget/11refuted/0pending,layers169/0elaborator,orphans896/0.
+Rawtask/base docs/pins exits1 retained, complete72/14 findings identical and
+separateNEW0 passes. Both finalindependent reviews PASS/no findings. Remaining
+space247001088bytes beforecommit, within40MiBcontinuation envelope. Wholelane
+and mandatoryvalidation remainunfinished; nextmiddle-segment clause continues.

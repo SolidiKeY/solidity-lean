@@ -697,6 +697,53 @@ theorem collision_history_reconstruction :
       (transactPrefix base (frames.take 3)).1 = (transactPrefix base (frames.take 2)).1.resetTransient :=
   transact_prefix_failure_of_index base frames 2 (by decide) .revert indexed_collision.1
 
+/-- Actual constructor/library success reconstructed from the exact full
+history value. Existence preserves raw transient data until the boundary reset. -/
+theorem commit_history_reconstruction :
+    ∃ next : World Catalog,
+      frames[0] (transactPrefix base (frames.take 0)).1.resetTransient = .ok (next, commitValue) ∧
+      (transactPrefix base (frames.take 1)).1 = next.resetTransient :=
+  transact_prefix_success_of_index base frames 0 (by decide) commitValue indexed_commit.1
+
+theorem read_history_reconstruction :
+    ∃ next : World Catalog,
+      frames[3] (transactPrefix base (frames.take 3)).1.resetTransient = .ok (next, readValue) ∧
+      (transactPrefix base (frames.take 4)).1 = next.resetTransient :=
+  transact_prefix_success_of_index base frames 3 (by decide) readValue indexed_read.1
+
+/-- Reconstruction retains all previous listed fields at EVERY boundary and
+both intervening exact errors, not merely a projection of successful values. -/
+theorem reconstructed_complete_boundaries :
+    (∃ next : World Catalog,
+      frames[0] (transactPrefix base (frames.take 0)).1.resetTransient = .ok (next, commitValue) ∧
+      (transactPrefix base (frames.take 1)).1 = next.resetTransient) ∧
+    (∃ next : World Catalog,
+      frames[3] (transactPrefix base (frames.take 3)).1.resetTransient = .ok (next, readValue) ∧
+      (transactPrefix base (frames.take 4)).1 = next.resetTransient) ∧
+    (observeBoundary [] =
+      ((([95, 0, 0, 5, 0], [some [0, 0], some [19, 29], some []], flags), none, false), []) ∧
+    observeBoundary [commit] = (committedVector, h1) ∧
+    observeBoundary [commit, failing] = (committedVector, h2) ∧
+    observeBoundary [commit, failing, occupied] = (committedVector, h3) ∧
+    observeBoundary frames = (committedVector, h4)) :=
+  ⟨commit_history_reconstruction, read_history_reconstruction, complete_boundaries⟩
+
+theorem wrong_library_success_value :
+    (transactPrefix base frames).2[0]'(by rw [transact_prefix_length]; decide) ≠
+      .ok (.inl ([0xb1, 0], [1, 7, 2, 7, 12345])) := by
+  rw [indexed_commit.1]; decide +kernel
+
+/-- Successful raw constructor/library world actually has dirty transient cells;
+it cannot be substituted for the committed boundary world. -/
+theorem wrong_raw_reset_world : extended linked ≠ extended (transactPrefix base [commit]).1 := by
+  rw [boundary1]; decide +kernel
+
+#print axioms commit_history_reconstruction
+#print axioms read_history_reconstruction
+#print axioms reconstructed_complete_boundaries
+#print axioms wrong_library_success_value
+#print axioms wrong_raw_reset_world
+
 #print axioms paid_history_reconstruction
 #print axioms collision_history_reconstruction
 
