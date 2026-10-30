@@ -241,8 +241,8 @@ def retOneBody : RBody E0 where
   items := .stmt (.retVal rfl (.const (Q.ofInt 1)) (by decide)) .nil
 
 open SemanticsExamples in
-/-- The same body with no return slot in its locals: not the frame the
-call builds. -/
+/-- A body with no locals (and no statements) for a call returning
+`uint8`: not the frame the call builds. -/
 def badFrameBody : RBody E0 where
   ps := []
   rs := [u8]

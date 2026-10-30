@@ -143,8 +143,8 @@ Review (finder, read-only). Fixed:
 
 Recorded, not fixed: a dynamic length of `2^64` or more reverts with no data
 where solc panics with `0x41` (its allocation check comes first);
-user-defined value types are value types for getters but `decodeWord` has no
-case for them (`stuck`); the controls do not cover array or constant
+user-defined value types are decoded as their underlying type (lane V04b,
+`decodeWord`); the controls do not cover array or constant
 getters, value sent to a getter, payable constructors, or invalid dynamic
 lengths and elements.
 

@@ -228,7 +228,7 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     let ⟨τ, l⟩ ← LVal.inferN n Γ a
     let ⟨σ, d⟩ ← Typed.inferN n Γ b
     if h : σ.implicit Γ.isBase τ = true then
-      if hm : Γ.assignsMapping τ = false then pure ⟨τ, .assign l d h hm⟩ else Option.none
+      if hm : Γ.assignRefused τ a = false then pure ⟨τ, .assign l d h hm⟩ else Option.none
     else if hc : σ.copiesTo τ = true then
       if hl : Γ.namesLocal a = false then pure ⟨τ, .assignCopy l d hc hl⟩ else Option.none
     else Option.none
