@@ -75,19 +75,22 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
+Current cumulative accounting through checkpoint fourteen. Earlier checkpoint
+narratives retain their historical observations and gate outcomes.
+
 | Item | Status | Remaining obligation / owner boundary |
 |---|---|---|
 | G32 | partial | Intrinsic heap-object framing/noninterference components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
 | G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
 | G34 | partial | Typed slice coordinate/read/overwrite adapters and identity controls proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
-| G35.01 | partial/reserved prerequisite | Published intrinsic storage-copy old-slice/local preservation and fresh-root transport consumed. Storage-to-memory target compiler/representation/liveness relation still required from owners. |
-| G35.02 | open/reserved prerequisite | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
-| G35.03 | partial | Independent endpoint/captured-read laws only. Actual immutable calldata-to-memory/storage transport and source relation remain. |
+| G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
+| G35.02 | blocked | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
+| G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved. General families/reference construction, calldata-to-storage, ABI decoding, independent Source execution and target transport remain. |
 | G35.04 | partial | Actual intrinsic shallow overwrite, original-heap snapshot and overlap/framing laws proved. Target emitter, language alias/deep-copy classification and fresh deep-copy transport remain. |
-| G35.05 | open | Generic runtime typed recursive traversal for every approved shape, deep child-content traversal and target simulation remain; context/heap extension for these adapters is proved. No fixed cutoff is introduced to claim coverage. |
+| G35.05 | partial | Published finite map-free recursive Mirrors are transported through actual multi-generation builder/snapshot operations with typed generation separation. Source/type-graph/cycle/mapping/shadow coverage and emitted traversal/deep-copy realization remain; no fixed cutoff is introduced. |
 | G35.06 | blocked | Requires all preceding copies plus V10/source/target composition; no V07–V10 unpublished lane imported. |
-| Backfill A | partial | Bounds, snapshot/overlap, allocator-extension and heap-write framing components proved. Actual calldata adapters, byte word-boundary transport and their target noninterference remain. |
-| Backfill B | partial | Nested typed alias/growth/read/overwrite witnesses and coordinate composition proved. Context extension and intrinsic storage-tree/memory growth/overwrite combinations proved. Generic recursive child traversal and full storage/calldata/memory source/target identity composition remain. |
+| Backfill A | partial | Runtime bounds, same-object intervals, ordered recapture, real allocator extension, Boolean/uint256 decoded transfer and element-boundary controls are proved. General family/physical-byte/target transport remains. |
+| Backfill B | partial | Typed nested alias/growth/path and multi-generation recursive intrinsic mirror/identity composition are proved. Fresh-root Source representation, general graph/deep-copy realization and mixed-location Source/target composition remain. |
 
 V04 source semantics, V05/V06 partial prerequisites and serial V06→V11 final
 composition remain open at the pinned revision. Other owners' scalar, storage
