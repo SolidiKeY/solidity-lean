@@ -647,6 +647,22 @@ theorem Frame.mk?_lengths {E : Env} {scope : Option String} {ps rs : Syn (.list 
     exact ⟨(Syn.tys_params_length ps a ha).symm, (Syn.tys_params_length rs r hr).symm⟩
   · cases h
 
+/-- **A body's frame**: one type per parameter and return name. -/
+theorem Decl.frame?_lengths {E : Env} {d : Decl} {f : Frame} (h : d.frame? E = some f) :
+    f.names.length = f.ps.length ∧ f.rnames.length = f.rs.length := by
+  obtain ⟨k, name, scope, top, node⟩ := d
+  cases k <;> cases node
+  case modifier.modifier _ ps0 _ _ b0 =>
+    (cases b0 <;> try (rename_i blk; cases blk)) <;> (try cases ps0) <;>
+      first | exact Frame.mk?_lengths h | (cases h <;> exact ⟨rfl, rfl⟩)
+  case fallback.fallback sig _ _ _ _ _ b0 =>
+    (cases b0 <;> try (rename_i blk; cases blk)) <;> (try cases sig) <;>
+      first | exact Frame.mk?_lengths h | (cases h <;> exact ⟨rfl, rfl⟩)
+  all_goals (try (first | exact Frame.mk?_lengths h | cases h))
+  all_goals (rename_i b0; cases b0 <;> (try (first | exact Frame.mk?_lengths h | cases h)))
+  all_goals (rename_i b1; cases b1 <;> (try (first | exact Frame.mk?_lengths h | cases h)))
+  all_goals exact ⟨rfl, rfl⟩
+
 /-- **A frame's locals are its returns over its parameters**, last
 innermost, as `callInternal` builds them. -/
 theorem Frame.tysOf_locals {f : Frame} (hp : f.names.length = f.ps.length) (hr : f.rnames.length = f.rs.length) :
@@ -659,5 +675,28 @@ theorem Frame.tysOf_locals {f : Frame} (hp : f.names.length = f.ps.length) (hr :
     rw [show (Prod.snd ∘ fun (x : Option String × STy) => (x.1.getD "", x.2)) = Prod.snd from rfl]
     exact List.map_snd_zip (Nat.le_of_eq hl.symm)
   rw [this, List.reverse_append]
+
+
+/-- **An elaborated body is in its frame**: its locals are its returns over
+its parameters, last innermost, exactly the frame `callInternal` builds. -/
+theorem Elaborated.body_locals (el : Elaborated) {d : Decl} {b : RBody el.res.env}
+    (hd : d ∈ el.res.unit.decls) (hb : el.prog.body d = some b) : b.locals = b.rs.reverse ++ b.ps.reverse := by
+  obtain ⟨f, L', hf, D, hps, hrs, _, hl, _, _⟩ := el.bodies_typed d hd b hb
+  obtain ⟨h1, h2⟩ := Decl.frame?_lengths hf
+  rw [hl, Frame.tysOf_locals h1 h2, hps, hrs]
+
+/-- **Internal calls in elaborated programs**: the frame hypotheses of
+`callInternal_ns` reduce to the body dispatch finds having the call's
+parameter and return types (dispatch coherence). -/
+theorem Elaborated.callInternal_ns (el : Elaborated) (G : Glob el.res.env) (hG : G.prog = el.prog) (F : Fr)
+    (n : Nat) (d : Decl) {ps : List STy} (vs : Vals el.res.env.layout ps) (rs : List STy) (b : RBody el.res.env)
+    (hdec : G.dispatchFn F.contract d ∈ el.res.unit.decls) (hb : G.prog.body (G.dispatchFn F.contract d) = some b)
+    (hps : b.ps = ps) (hrs : b.rs = rs) (hmods : b.mods = [])
+    (hz : ∀ τ ∈ rs, (Val.default el.res.env.layout τ).isSome = true)
+    (hf : b.items.ValFrag) (ho : b.items.OpsOK) : NS (callInternal G F n d vs rs) := by
+  have hb' : el.prog.body (G.dispatchFn F.contract d) = some b := by rw [← hG]; exact hb
+  have hloc : rs.reverseAux (ps.reverseAux []) = b.locals := by
+    rw [Elaborated.body_locals el hdec hb', hps, hrs, List.reverseAux_eq, List.reverseAux_eq, List.append_nil]
+  exact Solidity.Source.callInternal_ns G F n d vs rs b hb hloc hrs (by rw [hps]) hmods hz hf ho
 
 end Solidity.Source

@@ -404,5 +404,11 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callRetOne_ns
 /-- info: 'Solidity.Source.SoundnessExamples.callBadFrame_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callBadFrame_stuck
+/-- info: 'Solidity.Source.Decl.frame?_lengths' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Decl.frame?_lengths
+/-- info: 'Solidity.Source.Elaborated.body_locals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.body_locals
+/-- info: 'Solidity.Source.Elaborated.callInternal_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_ns
 
 end Solidity.Source.SoundnessExamples

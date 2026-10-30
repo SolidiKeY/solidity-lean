@@ -271,7 +271,8 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_nsStep`, `execItems_nsStep`, `forIter_nsStep`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;` and `return e;` of a value type) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
 | `itemsNSP` (the post `Out.esc`; `Out.close_esc`, `Out.up_esc`) | outside loops (`SCtx.loop = false`) a block of the fragment ends normally or by `return`: no `break`/`continue` escapes it |
 | `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **leaf functions**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment (so making no calls, emitting nothing, with value-typed locals) and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults); the frame hypotheses are not derived from the elaboration or dispatch |
-| `Syn.tys_typeName_length`, `Syn.tys_params_length`, `Frame.mk?_lengths`, `Frame.tysOf_locals` | toward deriving `callInternal_ns`'s frame: a frame built by `Frame.mk?` has one type per parameter and return name, and then its locals are its returns over its parameters, last innermost, as `callInternal` builds them |
+| `Elaborated.body_locals` (from `Decl.frame?_lengths`, `Frame.mk?_lengths`, `Syn.tys_params_length`, `Syn.tys_typeName_length`, `Frame.tysOf_locals`) | every elaborated body's locals are its returns over its parameters, last innermost: the frame `callInternal` builds |
+| `Elaborated.callInternal_ns` | in an elaborated program, `callInternal_ns`'s frame hypotheses reduce to dispatch coherence: the body virtual dispatch finds has the call's parameter and return types |
 | `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
@@ -460,9 +461,10 @@ Kept current at every checkpoint.
   S01's rules, not produced by `elaborate`. The loop, storage and return
   witnesses (`loopItems`, `cbItems`, `condE`) and the function-level one
   (`retOneBody`) are hand-built resolved terms. Which elaborated bodies
-  are in the fragment is not characterised, and nothing derives
-  `callInternal_ns`'s frame hypotheses (`hloc`, `hrs`, `hps`) from the
-  elaboration or dispatch;
+  are in the fragment is not characterised; for elaborated programs
+  `callInternal_ns`'s frame hypotheses are derived from the elaboration
+  (`Elaborated.callInternal_ns`) except dispatch coherence (the callee's
+  signature is the call's);
 - the storage side conditions of the fragment (`E.cellTy d.path = τ`,
   `E.pathTy d.path = some τ`) are checked per expression, not derived
   from the elaboration;
@@ -473,13 +475,13 @@ Kept current at every checkpoint.
 
 **Deriving the frame for elaborated programs.** `Elaborated.bodies_typed`
 gives `b.locals = tysOf f.locals` with `d.frame? E = some f`;
-`Frame.tysOf_locals` turns that into `b.rs.reverse ++ b.ps.reverse` once
-`f`'s name and type lists have equal lengths, which `Frame.mk?_lengths`
-gives for every arm of `Decl.frame?`. The missing lemma is that last step
-for `Decl.frame?` itself: Lean generates no equation lemmas for its nested
-match (`unfold` then `split` fails), so it needs a proof per declaration
-kind. With it, `callInternal_ns`'s `hloc` and `hps` reduce to the callee's
-signature agreeing with the call's (`b.ps = ps`, `b.rs = rs`).
+`Decl.frame?_lengths` (by cases on the declaration kind and node: Lean
+generates no equation lemmas for `Decl.frame?`'s nested match) and
+`Frame.tysOf_locals` turn that into `b.rs.reverse ++ b.ps.reverse`
+(`Elaborated.body_locals`), so `Elaborated.callInternal_ns` needs only
+the callee's signature to agree with the call's (`b.ps = ps`,
+`b.rs = rs`) and the dispatched declaration to be one of the unit's.
+That agreement (dispatch coherence) is not proved.
 
 **How to continue the walk.** Add a field per interpreter function to the
 induction hypotheses (`ExprNSAt`, `StmtNSAt`, as `Horizon.lean`'s
