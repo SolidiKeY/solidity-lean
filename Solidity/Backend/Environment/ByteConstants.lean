@@ -53,8 +53,8 @@ theorem dataStep_constant (width : Fin 33) (v : Fin (256 ^ width.val)) (s : Slic
 /-- One real PUSH1/PUSH32/MSTORE8 byte store. Offsets wrap only in selection;
 materialize_correct below proves wrapping is absent in the owned interval. -/
 def byteCode (offset : Fin (2 ^ 256)) (b : UInt8) : List Instr :=
-  [constant 1 ⟨b.toNat, by have h := b.toNat_lt; exact h⟩,
-   constant 32 ⟨offset.val, by have h := offset.isLt; exact h⟩, .op .MSTORE8]
+  [constant 1 ⟨b.toNat, by have h : b.toNat < 256 := b.toNat_lt; exact h⟩,
+   constant 32 ⟨offset.val, by have h : offset.val < 2 ^ 256 := offset.isLt; exact h⟩, .op .MSTORE8]
 
 theorem byteCode_correct (offset : Fin (2 ^ 256)) (b : UInt8) (s : Slice) :
     runData (byteCode offset b) s =

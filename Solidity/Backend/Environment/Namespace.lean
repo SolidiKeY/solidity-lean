@@ -29,7 +29,7 @@ theorem wordBytes_length (n : Nat) : (Semantics.wordBytes n).length = 32 := by
 def clearByte (w : Word) : Word := wrap ((wrap (w.1.toNat / 256)).1.toNat * 256)
 
 theorem clearByte_value (w : Word) : (clearByte w).1 = (w.1.toNat / 256 * 256 : Nat) := by
-  have hw := of_decide_eq_true w.2
+  have hw : 0 ≤ w.1 ∧ w.1 < ((2 ^ 256 : Nat) : Int) := of_decide_eq_true w.2
   have hn : w.1.toNat < 2 ^ 256 := by omega
   have hq : w.1.toNat / 256 < 2 ^ 256 := Nat.lt_of_le_of_lt (Nat.div_le_self _ _) hn
   have hp : w.1.toNat / 256 * 256 < 2 ^ 256 := Nat.lt_of_le_of_lt (Nat.div_mul_le_self _ _) hn
@@ -40,7 +40,8 @@ theorem clearByte_value (w : Word) : (clearByte w).1 = (w.1.toNat / 256 * 256 : 
 theorem root_value (bs : List UInt8) :
     (ERC7201.root bs).val =
       Keccak.keccak256Nat ((namespacePreimage bs).map UInt8.toNat) / 256 * 256 := by
-  have h := keccak_bound (namespacePreimage bs)
+  have h : Keccak.keccak256Nat ((namespacePreimage bs).map UInt8.toNat) < 2 ^ 256 :=
+    keccak_bound (namespacePreimage bs)
   rw [namespace_preimage] at h
   simp only [ERC7201.root, ERC7201.align, Nat.mod_eq_of_lt h, namespace_preimage]
 

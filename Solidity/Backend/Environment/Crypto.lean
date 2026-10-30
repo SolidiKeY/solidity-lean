@@ -17,8 +17,11 @@ namespace Solidity.Backend.Environment
 abbrev W256 := Fin (2 ^ 256)
 
 theorem keccak_bound (bs : List UInt8) : Keccak.keccak256Nat (bs.map UInt8.toNat) < 2 ^ 256 := by
-  have hb := Storage.keccak256_bytes (bs.map UInt8.toNat)
-  have h1 := Storage.ofBytes_lt hb.1
+  have hb : (∀ b ∈ Keccak.keccak256 (bs.map UInt8.toNat), b < 256) ∧
+      (Keccak.keccak256 (bs.map UInt8.toNat)).length ≤ 32 :=
+    Storage.keccak256_bytes (bs.map UInt8.toNat)
+  have h1 : Keccak.ofBytes (Keccak.keccak256 (bs.map UInt8.toNat)) <
+      256 ^ (Keccak.keccak256 (bs.map UInt8.toNat)).length := Storage.ofBytes_lt hb.1
   have h2 : 256 ^ (Keccak.keccak256 (bs.map UInt8.toNat)).length ≤ 256 ^ 32 :=
     Nat.pow_le_pow_right (by decide) hb.2
   change Keccak.ofBytes (Keccak.keccak256 (bs.map UInt8.toNat)) < 2 ^ 256
@@ -43,7 +46,8 @@ theorem wireBytes_values (bs : List Int) :
 /-- The intrinsic Keccak value is the actual computed word, with no new hash
 premise. Its defensive out-of-range branch is unreachable by the committed bound. -/
 theorem source_digest (bs : List Int) : keccakBytes bs = digest (wireBytes bs) := by
-  have h := keccak_bound (wireBytes bs)
+  have h : Keccak.keccak256Nat ((wireBytes bs).map UInt8.toNat) < 2 ^ 256 :=
+    keccak_bound (wireBytes bs)
   rw [wireBytes_values] at h
   apply Subtype.ext
   simp only [keccakBytes, dif_pos h, digest, lenU, wireBytes_values]
@@ -196,7 +200,8 @@ theorem lowerHash_failure {C : Contract} {Γ : Ctx} {R : RefTy}
 
 theorem HashInput.length_eq {s : Slice} {offset length : W256} {bs : List Int}
     (h : HashInput s offset length bs) : bs.length = length.val := by
-  have e := congrArg List.length h.bytes
+  have e : (readMemory s.memory offset.val length.val).length = (wireBytes bs).length :=
+    congrArg List.length h.bytes
   simp only [readMemory, wireBytes, List.length_map, List.length_range] at e
   exact e.symm
 

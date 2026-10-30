@@ -32,13 +32,13 @@ structure Frame where
 def account (w : Word) : Address :=
   let n : Nat := w.1.toNat % 2 ^ 160
   ⟨⟨(n : Int), by
-    have h := Nat.mod_lt w.1.toNat (by decide : 0 < (2 : Nat) ^ 160)
+    have h : w.1.toNat % 2 ^ 160 < 2 ^ 160 := Nat.mod_lt w.1.toNat (by decide : 0 < (2 : Nat) ^ 160)
     simp only [PrimTy.inRange, decide_eq_true_eq]
     constructor
     · omega
     · omega⟩, by
       change ((w.1.toNat % (2 : Nat) ^ 160 : Nat) : Int) < (2 : Int) ^ 160
-      have h := Nat.mod_lt w.1.toNat (by decide : 0 < (2 : Nat) ^ 160)
+      have h : w.1.toNat % 2 ^ 160 < 2 ^ 160 := Nat.mod_lt w.1.toNat (by decide : 0 < (2 : Nat) ^ 160)
       omega⟩
 
 /-- Truncation is exact, including words with nonzero high bits. -/

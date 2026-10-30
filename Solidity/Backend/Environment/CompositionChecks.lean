@@ -47,7 +47,8 @@ theorem materialize_then_hash (f : Frame) (m : Memory) (tail : List Word) :
   rw [runSlice_append, runSlice_data f _ _ (materialize_supported _ _), materialize_correct]
   · change runSlice f (keccakCode _ _) _ = _
     rw [runSlice_crypto f _ _ (keccak_supported _ _), keccak_correct]
-    have hr := read_written [1, 2, 3] 7 m
+    have hr : readMemory (writeBytes m 7 [1, 2, 3]) 7 [1, 2, 3].length = [1, 2, 3] :=
+      read_written [1, 2, 3] 7 m
     change readMemory (writeBytes m 7 [1, 2, 3]) 7 3 = [1, 2, 3] at hr
     rw [hr]
   · decide
@@ -80,7 +81,12 @@ theorem opcode_order_control :
     runSlice sample [select .msgSender, select .selfAddress] ⟨[], fun _ => 0⟩ ≠
       runSlice sample [select .selfAddress, select .msgSender] ⟨[], fun _ => 0⟩ := by
   intro h
-  have values := congrArg (fun result => result.map fun s => s.stack.map Subtype.val) h
+  have values :
+      (runSlice sample [select .msgSender, select .selfAddress] ⟨[], fun _ => 0⟩).map
+        (fun s => s.stack.map Subtype.val) =
+      (runSlice sample [select .selfAddress, select .msgSender] ⟨[], fun _ => 0⟩).map
+        (fun s => s.stack.map Subtype.val) :=
+    congrArg (fun result => result.map fun s => s.stack.map Subtype.val) h
   change some [7, 9] = some [9, 7] at values
   contradiction
 

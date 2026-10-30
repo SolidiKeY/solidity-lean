@@ -59,7 +59,7 @@ theorem runSlice_crypto (f : Frame) (code : List Instr) (s : Slice)
   induction code generalizing s with
   | nil => rfl
   | cons i code ih =>
-    have hh := h
+    have hh : (i :: code).all cryptoInstruction = true := h
     simp only [List.all_cons, Bool.and_eq_true] at hh
     simp only [runSlice, runCrypto, sliceStep_crypto f i s hh.1]
     cases cryptoStep i s with
@@ -71,7 +71,7 @@ theorem runSlice_data (f : Frame) (code : List Instr) (s : Slice)
   induction code generalizing s with
   | nil => rfl
   | cons i code ih =>
-    have hh := h
+    have hh : (i :: code).all dataInstruction = true := h
     simp only [List.all_cons, Bool.and_eq_true] at hh
     simp only [runSlice, runData, sliceStep_data f i s hh.1]
     cases dataStep i s with

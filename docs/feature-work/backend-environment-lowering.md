@@ -15,6 +15,47 @@ Osaka EVM correspondence. Source denotation remains the existing intrinsic
 - Owned modules: `Solidity/Backend/Environment/`; this document and append-only
   imports/module-map/document registry rows. No other new/unmerged lane is imported; committed reserved interfaces are reused read-only.
 
+### Combined integration repair (2026-10-30)
+
+Review of candidate `455a7e718377a9eaac45dc8e11662cc133521336` found inferred
+`have` bindings in seven new modules and an ownership gate that attributed all
+intervening integration work to this lane. The bindings in `Observations`,
+`Metadata`, `ByteConstants`, `Crypto`, `Namespace`, `Composition` and
+`CompositionChecks` now state their proposition types explicitly. Their theorem
+statements, proof steps, semantics, observations, target scope and budgets are
+unchanged; no axiom or unfinished proof was introduced.
+
+`scripts/check-backend-environment.mjs` keeps dependency availability frozen at
+the original exact base above. Its default ownership review instead covers the
+complete original contribution through source head
+`93e97b28e61f1466eafeb6163baed9da1f9e8240`, rather than other lanes already in
+the integrated checkout. A different committed review interval can be supplied
+with both `--ownership-base <base>` and `--ownership-head <head>`; these options
+never change dependency availability. The gate additionally checks the index
+and working tree independently against the current HEAD, plus untracked files.
+It retains the owned-path allowlist, append-only shared registries, forbidden
+import closure and proof/budget checks. Committed changes from other integrated
+lanes remain the coordinator's ownership-review responsibility.
+
+The read-only finder confirmed the annotation-only Lean changes. The skeptic
+found that a single HEAD-to-worktree comparison could hide a staged unowned
+edit or registry deletion canceled by an unstaged restoration. Independent
+HEAD-to-index and HEAD-to-worktree checks now reject both. Final finder and
+skeptic reviews reported no remaining findings; neither used Lean or its server.
+
+Focused validation passes: per-file MCP `lean_diagnostic_messages` with
+`interactive=false`, `severity=error` on all seven edited Lean files, serially
+with one open document and one Lean thread; the default Node gate; and
+`node tests/backend-environment/ownership.mjs`. The isolated Git fixtures cover
+valid contribution ranges and appends, unowned writes and renames, concealed
+staged violations, registry deletion, explicit committed review ranges, frozen
+dependency availability, forbidden import closure and proof shortcuts.
+`git diff --check` passes, and no inferred `have` bindings or conflict markers
+remain in this component. The process group retains its 12 GiB/no-swap cap.
+The full combined build and unedited regression-check modules belong to the
+coordinator; this repair does not claim those gates were rerun. Changes are
+left uncommitted and unstaged for the coordinator.
+
 The manifest's actual IDs are `msgSender`, `msgValue`, `thisAddress`,
 `addressBalance`, `blockTimestamp`, `keccakBuiltin` (not keccak256Builtin),
 `erc7201Builtin`, `functionSelector`, `functionAddress`, `errorEventSelector`,

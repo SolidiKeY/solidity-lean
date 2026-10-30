@@ -65,14 +65,14 @@ def metadataSelector (d : SourceFunction) : Option (Fin (2 ^ 32)) :=
 /-- Missing canonical ABI metadata is refused; signatures are not guessed. -/
 def declarationCode (d : SourceFunction) : Option Instr :=
   (metadataSelector d).map fun s => constant 4 ⟨s.val, by
-    have h := s.isLt
+    have h : s.val < 2 ^ 32 := s.isLt
     change s.val < 4294967296
     exact h⟩
 
 def selectorCode (s : Fin (2 ^ 32)) : Instr :=
-  constant 4 ⟨s.val, by have h := s.isLt; change s.val < 4294967296; exact h⟩
+  constant 4 ⟨s.val, by have h : s.val < 2 ^ 32 := s.isLt; change s.val < 4294967296; exact h⟩
 
-def selectorWord (s : Fin (2 ^ 32)) : Word := lenU s.val (by have h := s.isLt; omega)
+def selectorWord (s : Fin (2 ^ 32)) : Word := lenU s.val (by have h : s.val < 2 ^ 32 := s.isLt; omega)
 
 theorem selector_correct (s : Fin (2 ^ 32)) (tail : List Word) :
     pushStep (selectorCode s) tail = some (selectorWord s :: tail) :=
@@ -80,7 +80,7 @@ theorem selector_correct (s : Fin (2 ^ 32)) (tail : List Word) :
 
 /-- ABI encoding of a bytes4, unlike its intrinsic numeric value. -/
 def selectorAbiValue (s : Fin (2 ^ 32)) : Fin (256 ^ 32) :=
-  ⟨s.val * 2 ^ 224, by have h := s.isLt; change s.val * 2 ^ 224 < 2 ^ 256; omega⟩
+  ⟨s.val * 2 ^ 224, by have h : s.val < 2 ^ 32 := s.isLt; change s.val * 2 ^ 224 < 2 ^ 256; omega⟩
 
 def selectorAbiCode (s : Fin (2 ^ 32)) : Instr := constant 32 (selectorAbiValue s)
 
@@ -99,7 +99,7 @@ def metadataBytes (width : Fin 33) (v : Fin (256 ^ width.val)) : Instr := consta
 
 /-- Function receiver identities remain bounded to 160 bits and zero extended. -/
 def addressCode (a : Address) : Instr :=
-  constant 20 ⟨a.1.1.toNat, by have h := a.2; change a.1.1.toNat < 2 ^ 160; omega⟩
+  constant 20 ⟨a.1.1.toNat, by have h : a.1.1 < (2 : Int) ^ 160 := a.2; change a.1.1.toNat < 2 ^ 160; omega⟩
 
 theorem address_correct (a : Address) (tail : List Word) :
     pushStep (addressCode a) tail = some (a.1 :: tail) := by
@@ -112,8 +112,8 @@ theorem address_correct (a : Address) (tail : List Word) :
 No new function-value IR is introduced. -/
 def packedFunction (a : Address) (s : Fin (2 ^ 32)) : Fin (256 ^ 24) :=
   ⟨a.1.1.toNat * 2 ^ 32 + s.val, by
-    have ha := a.2
-    have hs := s.isLt
+    have ha : a.1.1 < (2 : Int) ^ 160 := a.2
+    have hs : s.val < 2 ^ 32 := s.isLt
     change a.1.1.toNat * 2 ^ 32 + s.val < 2 ^ 192
     omega⟩
 
@@ -122,7 +122,7 @@ def functionCode (a : Address) (s : Fin (2 ^ 32)) : Instr := constant 24 (packed
 theorem function_projections (a : Address) (s : Fin (2 ^ 32)) :
     (packedFunction a s).val / 2 ^ 32 = a.1.1.toNat ∧
     (packedFunction a s).val % 2 ^ 32 = s.val := by
-  have hs := s.isLt
+  have hs : s.val < 2 ^ 32 := s.isLt
   dsimp only [packedFunction]
   omega
 
@@ -148,7 +148,7 @@ possibly negative source value. -/
 def typedConstant {p : PrimTy} (value : p.Denote) : Instr :=
   let word := PrimTy.toWord value
   constant 32 ⟨word.1.toNat, by
-    have h := of_decide_eq_true word.2
+    have h : 0 ≤ word.1 ∧ word.1 < ((2 ^ 256 : Nat) : Int) := of_decide_eq_true word.2
     change word.1.toNat < 2 ^ 256
     omega⟩
 
