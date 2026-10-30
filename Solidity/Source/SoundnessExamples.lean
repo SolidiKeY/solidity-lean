@@ -1,6 +1,8 @@
 import Solidity.Source.ValueProgress
 import Solidity.Source.WellTyped
 import Solidity.Source.TypingExamples
+import Solidity.Source.ExprProgress
+import Solidity.Source.SemanticsExamples
 
 /-!
 # Controls of the soundness lane (V04b)
@@ -19,6 +21,9 @@ it the operation is `stuck`).
 | `addSub_opsOK`, `order_opsOK`, `shift_opsOK` | elaborated `a + a`, `a < 1`, `a << 1` (S01's controls) are `OpsOK` |
 | `badBinary_not_opsOK` | a resolved `true + false`, which no derivation elaborates to, is not `OpsOK` |
 | `refOK_wrong_heap` | a memory reference to an address the heap typing does not give its type does not agree |
+| `addSub_ns` | the elaboration of S01's `a + a` is in the value fragment and never `stuck` (`evalE_valFrag_ns`) |
+| `badBinary_stuck` | evaluating the out-of-domain `true + false` is `stuck`: `OpsOK` is needed |
+| `cond_ns`, `cond_value` | `true ? 1 + 2 : 0` at `uint8` is never `stuck` and evaluates to `3` |
 -/
 
 namespace Solidity.Source.SoundnessExamples
@@ -80,5 +85,39 @@ theorem refOK_wrong_heap {E : Env} :
 address `0` the type `bytes memory`. -/
 theorem refOK_heap {E : Env} :
     (Val.memRef (D := E.layout) (τ := .bytes .memory) rfl 0).RefOK E (fun _ => some (.bytes .memory)) := rfl
+
+
+open TypingExamples in
+/-- **Witness**: the elaboration of S01's `a + a` is in the value fragment,
+so its evaluation is never `stuck` (at any horizon, in any state). -/
+theorem addSub_ns (G : Glob Γ.env) (F : Fr) (n : Nat) : NS (evalE G F n w_addSub.toR) :=
+  evalE_valFrag_ns G F n _ ⟨⟨rfl, rfl, .inl rfl⟩, ⟨rfl, rfl, .inl rfl⟩, rfl⟩ (Typed.toR_opsOK _)
+
+/-- **Negative control**: `true + false`, resolved by hand (out of the
+operations' domain), is `stuck` when evaluated. -/
+theorem badBinary_stuck :
+    ((evalE (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 3
+      (RExpr.binary (E := SemanticsExamples.E0) (Γ := []) .add (.bool true) (.bool false))).run
+      (.nil, SemanticsExamples.s0)).1 = .error (.stuck "not a boolean operation") := by
+  rfl
+
+/-- `true ? 1 + 2 : 0` at `uint8`, with its conversions. -/
+def condE : RExpr SemanticsExamples.E0 [] (.int IntTy.u8) :=
+  .cond (.bool true)
+    (.binary .add (.conv (.const (Q.ofInt 1)) (.inl (by decide))) (.conv (.const (Q.ofInt 2)) (.inl (by decide))))
+    (.conv (.const (Q.ofInt 0)) (.inl (by decide)))
+
+/-- **Witness**: it is in the fragment and the domains, so never `stuck` ... -/
+theorem cond_ns (n : Nat) : NS (evalE (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n condE) :=
+  evalE_valFrag_ns _ _ n condE
+    ⟨trivial, ⟨⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, rfl⟩,
+      ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩⟩
+    ⟨trivial, ⟨.inl ⟨rfl, rfl⟩, trivial, trivial⟩, trivial⟩
+
+/-- ... and evaluates to `3`. -/
+theorem cond_value :
+    ((evalE (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 5 condE).run (.nil, SemanticsExamples.s0)).1.toOption.map
+      (fun v => match v with | .val x => x.key) = some (some 3) := by
+  rfl
 
 end Solidity.Source.SoundnessExamples
