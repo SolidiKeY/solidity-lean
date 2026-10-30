@@ -578,6 +578,66 @@ theorem inlineHeap_read_stuck :
       (.nil, { SemanticsExamples.s0 with heap := inlineHeap })).1 = .error (.stuck "inline aggregate element") :=
   ⟨HeapOK.empty.alloc (.array fun _ => .bytes _), HeapShaped.empty.alloc trivial, rfl⟩
 
+/-- **Witness** (`zeroOK`): zeroing a `bool[2] memory` allocates one object,
+at `0`, and its two elements are the bare value `false`. -/
+theorem zeroArr_alloc :
+    (match ((zeroVal (E := SemanticsExamples.E0) (Γ := []) 6 (.array .memory .bool (some 2))).run
+      (.nil, SemanticsExamples.s0)) with
+    | (.ok (.memRef _ a), y) =>
+      match y.2.heap.get 0 with
+      | some ⟨_, .array 2 _ xs⟩ =>
+        some (a, y.2.heap.next, (List.finRange 2).map fun j => match xs j with
+          | .val (.bool b) => some b
+          | _ => none)
+      | _ => none
+    | _ => none) = some (0, 1, [some false, some false]) := by
+  rfl
+
+/-- **Witness** (`deleteLoc_mem`): after `xs[0] = true` on the `bool[]` of
+`arrHeap`, `delete xs[0]` succeeds, allocates nothing, and element `0` is
+`false` again. -/
+theorem arrHeap_delete :
+    (match ((do
+        writeLoc SemanticsExamples.F0 3 (.mem 0 0) (Val.bool true)
+        deleteLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 3 (τ := .bool) (.mem 0 0)).run
+      (.nil, { SemanticsExamples.s0 with heap := arrHeap })) with
+    | (.ok (), y) =>
+      match y.2.heap.get 0 with
+      | some ⟨_, .array 1 _ xs⟩ =>
+        some (y.2.heap.next, match xs 0 with
+          | .val (.bool b) => some b
+          | _ => none)
+      | _ => none
+    | _ => none) = some (1, some false) := by
+  rfl
+
+/-- The storage array `arr` of `TypingExamples.unitC`. -/
+def arrPath : SPath := ⟨⟨some "C", "arr"⟩, []⟩
+
+/-- Write `arr = [7, 9]` in storage, copy it to memory (`loadElem`), and
+read the copy's elements back. -/
+def copyArr : EM TypingExamples.Γ.env [] (Option (List Nat)) := do
+  writeLen SemanticsExamples.F0 arrPath 2
+  writeAt SemanticsExamples.F0 (arrPath.go (.index 0)) (intWrap (D := TypingExamples.Γ.env.layout) IntTy.u256 7)
+  writeAt SemanticsExamples.F0 (arrPath.go (.index 1)) (intWrap (D := TypingExamples.Γ.env.layout) IntTy.u256 9)
+  let v ← loadElem SemanticsExamples.F0 6 (.array .memory (.int IntTy.u256) none) arrPath
+  match v with
+  | .memRef _ a =>
+    match (← EM.st).heap.get a with
+    | some ⟨_, .array n _ xs⟩ =>
+      pure (some ((List.finRange n).map fun j => match xs j with
+        | .val (.int i _) => i.toNat
+        | _ => 0))
+    | _ => pure none
+  | _ => pure none
+
+/-- **Witness** (`loadOK`): the memory copy of the storage `uint256[]`
+`[7, 9]` is a new array object whose elements are the bare values `7`
+and `9`. -/
+theorem copyArr_value :
+    ((copyArr.run (.nil, SemanticsExamples.s0)).1 matches .ok (some [7, 9])) = true := by
+  decide
+
 /-! ## Axioms -/
 
 /-- info: 'Solidity.Source.binVal_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -726,6 +786,68 @@ theorem inlineHeap_read_stuck :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_read
 /-- info: 'Solidity.Source.SoundnessExamples.inlineHeap_read_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.inlineHeap_read_stuck
+/-- info: 'Solidity.Source.heapPut_inner' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapPut_inner
+/-- info: 'Solidity.Source.DataList.AllVal.setNth' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.DataList.AllVal.setNth
+/-- info: 'Solidity.Source.memSet_inner' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.memSet_inner
+/-- info: 'Solidity.Source.writeLoc_memByte_inner' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_inner
+/-- info: 'Solidity.Source.MemOK.self' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.MemOK.self
+/-- info: 'Solidity.Source.Hoare.memGrow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Hoare.memGrow
+/-- info: 'Solidity.Source.Val.default_loc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Val.default_loc
+/-- info: 'Solidity.Source.allocRef_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.allocRef_mem
+/-- info: 'Solidity.Source.zeroOK_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.zeroOK_zero
+/-- info: 'Solidity.Source.zeroOK_step' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.zeroOK_step
+/-- info: 'Solidity.Source.zeroOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.zeroOK
+/-- info: 'Solidity.Source.SoundnessExamples.zeroArr_alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.zeroArr_alloc
+/-- info: 'Solidity.Source.Hoare.and' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Hoare.and
+/-- info: 'Solidity.Source.heapPut_top' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.heapPut_top
+/-- info: 'Solidity.Source.memSet_top' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.memSet_top
+/-- info: 'Solidity.Source.writeLoc_memByte_top' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_top
+/-- info: 'Solidity.Source.writeLoc_local_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_local_mem
+/-- info: 'Solidity.Source.writeLoc_mem_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_mem_mem
+/-- info: 'Solidity.Source.writeLoc_memByte_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.writeLoc_memByte_mem
+/-- info: 'Solidity.Source.deleteLoc_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.deleteLoc_mem
+/-- info: 'Solidity.Source.SoundnessExamples.arrHeap_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_delete
+/-- info: 'Solidity.Source.readCell_keep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readCell_keep
+/-- info: 'Solidity.Source.readAt_keep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readAt_keep
+/-- info: 'Solidity.Source.readLen_keep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.readLen_keep
+/-- info: 'Solidity.Source.loadBytes_keep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.loadBytes_keep
+/-- info: 'Solidity.Source.allocRef_mem'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.allocRef_mem'
+/-- info: 'Solidity.Source.STy.loc_of_byRef' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Source.STy.loc_of_byRef
+/-- info: 'Solidity.Source.loadOK_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.loadOK_zero
+/-- info: 'Solidity.Source.loadOK_step' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.loadOK_step
+/-- info: 'Solidity.Source.loadOK' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.loadOK
+/-- info: 'Solidity.Source.SoundnessExamples.copyArr_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.copyArr_value
 /-- info: 'Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.arrHeap_wrong_elem_stuck
 /-- info: 'Solidity.Source.SoundnessExamples.ptrHeap_not_shaped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
