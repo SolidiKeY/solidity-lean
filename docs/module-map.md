@@ -1037,3 +1037,29 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+| `Backend/Creation/Artifact.lean` | G44.02 intrinsic artifact sections, executable CODECOPY/RETURN wrapper, exact minimal PUSH widths, layout and argument extraction laws. |
+
+| `Backend/Creation/ArtifactChecks.lean` | G44.02 inhabited layout, argument separation and negative controls with headline kernel axiom pins. |
+
+| `Backend/Creation/Execution.lean` | Independent byte-consuming PUSH/CODECOPY/RETURN/REVERT slice semantics and exact installed runtime proof. |
+| `Backend/Creation/ExecutionChecks.lean` | Inhabited empty, word and PUSH-width boundary installation witnesses, byte-range negative controls and axiom pins. |
+
+| `Backend/Creation/Placement.lean` | Relocated runtime-return slice with arithmetic alignment certificate and minimal offset PUSH width. |
+| `Backend/Creation/PlacementChecks.lean` | Inhabited PUSH1/PUSH2 offset transition controls with nonempty runtime and arguments. |
+
+| `Backend/Creation/Regions.lean` | Bounded typed patch regions, assembler overwrite length/frame laws and disjoint commutation. |
+| `Backend/Creation/Linking.lean` | Certified absolute/local link metadata, exact 20-byte addresses, unresolved refusal and existing assembler linking through wrapper/arguments. |
+
+| `Backend/Creation/LinkLayout.lean` | Bounds and pairwise disjointness derived from actual assembler link metadata for every successful assembly. |
+| `Backend/Creation/LinkingChecks.lean` | Inhabited library-link/install controls, unresolved/missing/wrong-origin/truncated-argument negatives and axiom pins. |
+
+| `Backend/Creation/Immutables.lean` | Typed bounded immutable words, disjoint table checks, per-patch readback/frame laws and certified link/immutable combination. |
+| `Backend/Creation/ImmutableChecks.lean` | Immutable bounds/overlap/readback/frame/install and combined library/immutable controls with axiom pins. |
+
+| `Backend/Creation/Constructor.lean` | Independently checked byte-prefix steps composed with exact runtime-return or exact-byte revert wrappers, over arbitrary prefix memory. |
+| `Backend/Creation/ConstructorChecks.lean` | Actual copying constructor-prefix witnesses, return/revert separation and nonempty argument controls. |
+
+| `Backend/Creation/ArtifactLaws.lean` | Arbitrary disjoint link permutations, payload determinism, section uniqueness and wrapper decode law. |
+| `Backend/Creation/Provenance.lean` | Intrinsic generated/source range records, section bounds and exact provenance byte extraction. |
+| `Backend/Creation/LawChecks.lean` | Three-link permutation, overlapping-order negative, metadata/layout and inhabited provenance controls. |
