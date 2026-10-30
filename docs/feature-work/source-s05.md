@@ -59,7 +59,7 @@ What `sourceLang` does not give G01 (also under `limitations:`):
   divergence. It is not a lack of horizon: a transaction stuck at one
   horizon is stuck at every larger one (`runTx_stuck_stable`,
   [Horizons](#horizon-independence)), so the two differ in the model even
-  though G01's `Prefix` shows them alike (`txFate`, `stuck_not_diverges`).
+  (`txFate`, `stuck_not_diverges`) though G01's `Prefix` shows them alike.
   Unmodelled features also halt `stuck` (a `string` getter, see
   [Well-formedness](#well-formedness-and-progress-interfaces)), so progress
   holds at best for a modelled fragment; it is not proved.
@@ -68,8 +68,8 @@ What `sourceLang` does not give G01 (also under `limitations:`):
   `sourceLangEvents` (`sessionAtEvents`, `Solidity/Source/Session.lean`)
   shows them and is consistent; see
   [Events of unfinished transactions](#events-of-unfinished-transactions).
-  An unfinished deployment shows its run's events too (`deploy_events_mono`,
-  `HorizonDeploy.lean`).
+  An unfinished deployment shows its run's events too (`deployRun_events_mono`,
+  from `deploy_approx` in `HorizonDeploy.lean`).
 - **Request validity.** `Lang.Affordable` (unaffordable requests are
   dropped) and `Lang.PrecompilesFixed` (precompile addresses are not
   environment accounts) are not met.
@@ -162,10 +162,13 @@ were named for this with the same meaning (`Glob.pickFn`,
 `Glob.pickGetter`, `extReturn`), and `fieldsOf` and `decodeArg` were rewritten as single-level exhaustive matches.
 
 `HorizonDeploy.lean` proves the same for deployments
-(`deploy_events_mono`, from `construct_approx` and the `_grow`/`_approx`
-lemmas of initializers, base arguments and constructor bodies), and
-`sessionFromEvents` shows an unfinished deployment's events at `n` (a
-stuck one's when stuck) instead of none. The control (`SessionExamples.lean`)
+(`deploy_approx`, from `construct_approx` and the `_grow`/`_approx`
+lemmas of initializers, base arguments and constructor bodies;
+`deploy_events_mono` states the prefix), and `sessionFromEvents` shows an
+unfinished deployment's events at `n` (a halted one's when halted) instead
+of none (`deployRun_events_mono`). The control does not pin the
+still-running branch apart from a later halt, and no control reaches the
+halted-deployment branch. The control (`SessionExamples.lean`)
 deploys a constructor that loops calling out: events at horizon 30, more at
 60, no final observation.
 
@@ -223,11 +226,21 @@ Skeptic review (read-only, no Lean server), fixed:
 - `stuck_not_diverges`' docstring claimed a dependency on stability that the
   proof does not have; `stuck_eventually` states the stronger fact.
 
-- callbacks entered through `envLoop` (`Eval.lean`) did not check the depth
-  limit; a callback from the environment frame at depth 1024 now fails as
-  a call from there does (`callAddr`). The control (`SessionExamples.lean`)
-  calls back `x()` at depth 1024 (reverts, not entered) and at depth 3
-  (returns `3`). `Horizon.lean`'s proofs go through unchanged.
+**Semantic fix: callbacks at the depth limit and from static frames.**
+Callbacks entered through `envLoop` (`Eval.lean`) did not apply
+`callAddr`'s checks. A callback from the environment frame at depth 1024,
+or with value while the pending call is static (EIP-214), now fails with
+empty data (`.reenter`, then `.reentered (.revert [])`) without entering.
+The controls (`SessionExamples.lean`) call back `x()` at depths 1024
+(reverts), 1023 and 3 (return `3`), and with value from a static frame
+(reverts). `Horizon.lean`'s proofs go through unchanged. The EVM side's
+bridge must record a refused callback the same way.
+
+Finder/skeptic review of the deployment events and the callback fix
+(read-only, no Lean server), fixed: the static-value check above; a
+depth-1023 control; `deploy_events_mono`'s unused hypothesis dropped and
+the session citations moved to `deployRun_events_mono`/`deploy_approx`;
+"stuck" wording for any halt; citation placement.
 
 So a reader of fates can tell a stuck run (a modelling gap or ill-formed
 program, observable at a finite horizon) from a divergent one. The session

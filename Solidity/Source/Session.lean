@@ -15,7 +15,8 @@ when it is stuck.  The family is still consistent
 `sourceLangEvents` has the type of G01's `Lang Event Outcome`.
 
 An unfinished deployment shows its run's events at `n` as well
-(`deploy_events_mono`, `Solidity/Source/HorizonDeploy.lean`).
+(`deployRun_events_mono`, from `deploy_approx`,
+`Solidity/Source/HorizonDeploy.lean`).
 -/
 
 namespace Solidity.Source
@@ -165,7 +166,7 @@ theorem deployRun_events_mono (P : SrcProg E) (env : SessionEnv) (addr : Address
 
 /-- **A session with unfinished transactions' events**, from the
 deployment at `addr`; an unfinished deployment shows its run's events at
-`n`, and a stuck one its events when stuck. -/
+`n`, and a halted one its events when halted. -/
 def sessionFromEvents (P : SrcProg E) (env : SessionEnv) (addr : Address) (n : Nat) : Prefix Event Outcome :=
   match firstDone (runAt (deployRun P env addr) (St.init E)) n with
   | some (_, (.ok o, s)) => sessionGoEvents P env n n 0 s o

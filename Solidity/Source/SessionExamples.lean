@@ -138,7 +138,38 @@ def callbackAt (el : Elaborated) (depth : Nat) : Option Outcome :=
   r.2.events.findSome? fun e => match e with | .reentered o => some o | _ => none
 
 #guard (elabD.bind fun el => callbackAt el 1024) == some (.revert [])
+#guard (elabD.bind fun el => callbackAt el 1023) == some (.success (ElaborateExamples.arg 3))
 #guard (elabD.bind fun el => callbackAt el 3) == some (.success (ElaborateExamples.arg 3))
+
+/-- `contract P { function p() public payable {} }` -/
+def unitP : Syn .unit :=
+  .unit (.cons (.contract false "P" .none .nil
+      (.cons (.function (.ident "p") .nil (some .pub) (some .payable) .nil false none .nil
+        (.some (.block .nil))) .nil)) .nil)
+
+def elabP : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitP)
+
+#guard elabP.isSome
+
+/-- The environment calls back `p()` with value 1 once, then answers. -/
+def calleePay : List Event → Move := fun evs =>
+  if evs.any (fun e => match e with | .reentered _ => true | _ => false) then .answer (.success [])
+  else .reenter ElaborateExamples.thisC SemanticsExamples.user (word 1) (selOf "p()") false
+
+/-- The callback's outcome and `P`'s balance after it, the pending call
+static or not. -/
+def payCallbackIn (el : Elaborated) (pstatic : Bool) : Option Outcome × Nat :=
+  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true, calleePay, word 0⟩
+  let r := runAt (fun n => do
+    let _ ← deploy G n "P" ElaborateExamples.thisC SemanticsExamples.user (word 0) []
+    envLoop G n 3 pstatic) (St.init _) 40
+  (r.2.events.findSome? (fun e => match e with | .reentered o => some o | _ => none),
+    (r.2.ex.world.accounts ElaborateExamples.thisC).balance.val)
+
+-- **With value from a static frame the callback is refused** (EIP-214): no
+-- credit; outside a static frame `p()` runs and keeps the value.
+#guard (elabP.map fun el => payCallbackIn el true) == some (some (.revert []), 0)
+#guard (elabP.map fun el => payCallbackIn el false) == some (some (.success []), 1)
 
 /-! ## An unfinished deployment
 
@@ -147,7 +178,7 @@ contract K { constructor(address a) { while (true) { I(a).ping(); } } }
 ```
 
 The deployment never completes: `sessionFromEvents` shows its calls and
-answers (`deploy_events_mono`), more at a larger horizon, and no final
+answers (`deployRun_events_mono`), more at a larger horizon, and no final
 observation.
 -/
 

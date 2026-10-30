@@ -164,11 +164,10 @@ theorem deploy_approx (G : Glob E) (n : Nat) (c : String) (addr sender : Address
     refine Approx.bind (Approx.refl (decodeArgs_grow _ _ _)) fun _ => ?_ <;>
     split <;> first | exact construct_approx G _ n c _ | exact Approx.refl (Grow.halt _)
 
-/-- **A deployment's events grow with its horizon**: a deployment not
-completed at horizon `k` shows a prefix of the events at every `k' ≥ k`. -/
+/-- **A deployment's events grow with its horizon**: the events at horizon
+`k` are a prefix of those at every `k' ≥ k` (a completed run's are equal). -/
 theorem deploy_events_mono (G : Glob E) (c : String) (addr sender : Address) (value : Word) (args : Bytes)
-    (s : St E) {k k' : Nat} (hk : k ≤ k')
-    (_hd : Done (runAt (fun f => deploy G f c addr sender value args) s k) = false) :
+    (s : St E) {k k' : Nat} (hk : k ≤ k') :
     (runAt (fun f => deploy G f c addr sender value args) s k).2.events <+:
       (runAt (fun f => deploy G f c addr sender value args) s k').2.events := by
   have ha := Approx.mono (f := fun f => deploy G f c addr sender value args)
