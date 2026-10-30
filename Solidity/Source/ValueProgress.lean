@@ -317,7 +317,8 @@ guarantees of the resolved terms it builds (`RExpr` itself does not tie a
 `binary` node's operator to its type). -/
 def RExpr.OpsOK {E : Env} {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .const _ | _, .bytesLit _ _ | _, .addressLit _ | _, .bool _ | _, .str _ | _, .local _
-  | _, .state _ _ | _, .this _ | _, .compareConst _ _ _ | _, .magic _ _ _ => True
+  | _, .state _ _ | _, .this _ | _, .magic _ _ _ => True
+  | _, .compareConst op _ _ => (BinKind.order.admits op || BinKind.eq.admits op) = true
   | _, .tuple es => RArgs.OpsOK es
   | _, .conv e _ | _, .convExplicit e _ | _, .length e _ | _, .payable e | _, .balance e
   | _, .member e _ _ => RExpr.OpsOK e
@@ -374,7 +375,14 @@ mutual
 theorem Typed.toR_opsOK {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → (d : Typed Γ e τ) → d.toR.OpsOK
   | _, _, .const _ _ _ | _, _, .litBytes _ | _, _, .litAddress _ | _, _, .bool _ | _, _, .str _
   | _, _, .hexStr _ | _, _, .unicodeStr _ | _, _, .loc _ _ | _, _, .state _ _ | _, _, .this _ _
-  | _, _, .compareConst _ _ _ _ | _, _, .magic _ _ _ _ => trivial
+  | _, _, .magic _ _ _ _ => trivial
+  | _, _, .compareConst hk hkk _ _ => by
+    have h := binOpName_admits _ hk
+    rcases hkk with rfl | rfl
+    · show (BinKind.order.admits _ || _) = true
+      rw [h]; rfl
+    · show (_ || BinKind.eq.admits _) = true
+      rw [h, Bool.or_true]
   | _, _, .paren d => Typed.toR_opsOK d
   | _, _, .tuple d ds _ => And.intro (Typed.toR_opsOK d) (TypedSlots.toR_opsOK ds)
   | _, _, .neg d _ => And.intro (.inl ⟨rfl, rfl⟩) (Typed.toR_opsOK d)
