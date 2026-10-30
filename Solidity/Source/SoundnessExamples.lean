@@ -25,6 +25,7 @@ it the operation is `stuck`).
 | `badBinary_stuck` | evaluating the out-of-domain `true + false` is `stuck`: `OpsOK` is needed |
 | `cond_ns`, `cond_value` | `true ? 1 + 2 : 0` at `uint8` is never `stuck` and evaluates to `3` |
 | `loop_ns`, `loop_value` | `uint8 i; while (i < 3) { i += 1; }` is never `stuck` (`itemsNS`) and ends with `i = 3` |
+| `cb_ns`, `cb_value` | `x = x + 1;` on a storage variable (S05's callback body) is never `stuck`, and takes `x` from 3 to 4 |
 | `ret_unframed_stuck` | a `return 1;` run outside a coherent frame (no return slot) is `stuck`: frame coherence, outside the fragment, is needed |
 -/
 
@@ -161,6 +162,28 @@ theorem ret_unframed_stuck :
       (RStmt.retVal (E := SemanticsExamples.E0) (R := [.int IntTy.u8]) (M := false) (k := .body) (Γ := [])
         rfl (.const (Q.ofInt 1)) (by decide)) .nil).run (.nil, SemanticsExamples.s0)).1 =
       .error (.stuck "no local") := by
+  rfl
+
+open SemanticsExamples in
+theorem cbItems_frag : cbBody.items.ValFrag :=
+  ⟨⟨⟨rfl, by decide, rfl⟩, ⟨⟨rfl, rfl, by decide, rfl, rfl⟩, ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, rfl⟩, rfl⟩, trivial⟩
+
+open SemanticsExamples in
+theorem cbItems_ops : cbBody.items.OpsOK :=
+  ⟨⟨trivial, ⟨.inl ⟨rfl, rfl⟩, trivial, trivial⟩⟩, trivial⟩
+
+open SemanticsExamples in
+/-- **Witness**: `x = x + 1;` on a storage variable is never `stuck` ... -/
+theorem cb_ns (n : Nat) (F : Fr) (s : Option (Ph EB)) :
+    NS (execItems (GB answerOnly) F n 0 s cbBody.items .nil) :=
+  itemsNS _ F n 0 s _ .nil cbItems_frag cbItems_ops
+
+open SemanticsExamples in
+/-- ... and takes `x` from 3 to 4 in S05's deployed state. -/
+theorem cb_value :
+    (match (execItems (GB answerOnly) FC 10 0 none cbBody.items .nil).run (.nil, sB) with
+    | (.ok _, (_, s)) => readX s
+    | _ => none) = some 4 := by
   rfl
 
 end Solidity.Source.SoundnessExamples
