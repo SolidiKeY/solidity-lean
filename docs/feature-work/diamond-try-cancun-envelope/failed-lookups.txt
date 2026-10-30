@@ -1,0 +1,3 @@
+Initial functions.exec JavaScript syntax error: no nested tool executed. Corrected orchestration syntax before shell probe.
+Targeted rg decision.json/scoped-plan.json returned exit1: neither attachment present in visible workspace/setup/evidence (hidden included, dependency/tool/cache exclusions). No content fabricated.
+rg asyncEventEmitter.js guessed utility path returned exit2 missing file; actual installed emitter implementation is EVM._emit, audited directly, no alternate engine loaded.

@@ -1,0 +1,13 @@
+{
+  "approval": "call_de2f04158ee743568e4ab4fcc25b6f1d item0",
+  "recoveryAudit": "86c66da6",
+  "priorReceipt": "710f3d1a-d8b6-4994-b1c1-4959111c7288",
+  "priorReceiptResolution": "reconciled_not_accepted,115completepages/5741items stable idle (explicit user evidence)",
+  "priorAcceptedM1OsakaDesignNotReplayed": true,
+  "thisDelivery": "new direct user recovery queue in same active thread",
+  "workerJournaledReceiptOrTurnID": null,
+  "concreteDeferral": "No worker-visible coordinator journaled resume/receipt helper or turnID exposed. No redispatch, receipt clearing or coordinator state mutation. Direct queue and audit authority recorded, not fabricated acceptance.",
+  "decisionJson": "not present: targeted rg --files inclhidden under /workspace excluding node_modules/.git/.lake/tools and setup/evidence found none",
+  "scopedPlanJson": "same missing attachment evidence; exact user scope+reviewed committed plan inspected, no assumed additional approval",
+  "groupsExecution": "held pending verified unchanged5M envelope, no launch attempted"
+}

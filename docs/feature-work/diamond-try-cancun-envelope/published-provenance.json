@@ -1,0 +1,50 @@
+[
+  {
+    "commit": "b965d675e260a374401b131e59d501f8ce5da147",
+    "path": "scripts/check-source-admission.mjs",
+    "blob": "a50b575cbd03fb2867affc67a512f03e04fb2d08",
+    "sha256": "ef88cab4e766ec03df6aa1dd8fb0b9c5e129b675a2a6dc666f23d3e020a0db91",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/published-scripts__check-source-admission.mjs",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "b965d675e260a374401b131e59d501f8ce5da147",
+    "path": "scripts/check-call-exception-vectors.mjs",
+    "blob": "7258569b229adad465b2159172f96e055d06b998",
+    "sha256": "5eace64474b32791b8876e936fa581af7da7e715e5f0e958dba741b4563151a1",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/published-scripts__check-call-exception-vectors.mjs",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "b965d675e260a374401b131e59d501f8ce5da147",
+    "path": "scripts/evm-reference/replay.mjs",
+    "blob": "b78289fad2aff746a973e2039ffcd78e0da45129",
+    "sha256": "54f60f857c89d3ff78a30ba61c60399c4214ac21c113ce1713254b5f130fe384",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/published-scripts__evm-reference__replay.mjs",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "b965d675e260a374401b131e59d501f8ce5da147",
+    "path": "scripts/tool-job.mjs",
+    "blob": "b4cbb7b75cd41c9fc01ae2bb5336beac7482a8ca",
+    "sha256": "4c4f8ff65e833714e02736eda17ce0963aec445df142eb7410f4a30145a7bf79",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/published-scripts__tool-job.mjs",
+    "sameAsLocal": true
+  },
+  {
+    "commit": "b965d675e260a374401b131e59d501f8ce5da147",
+    "path": "docs/solc-validation.md",
+    "blob": "1dd4fe1c72adb6e25617c8dfb094d99c9024444f",
+    "sha256": "4ee68ac0ec9e25edf205133fefe53370d5b32f74df39d180eafb7858a4d8a478",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/published-docs__solc-validation.md",
+    "sameAsLocal": false
+  },
+  {
+    "commit": "b965d675e260a374401b131e59d501f8ce5da147",
+    "path": "docs/solidity-upstream-tests.md",
+    "blob": "d4bad04478cd051d2dc31752f8ac034c7f35cae2",
+    "sha256": "e2238a0868ff6eb2b0c25cff4b67a0029e56f6e91ade39d0c00a266fb5e13de2",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/published-docs__solidity-upstream-tests.md",
+    "sameAsLocal": false
+  }
+]

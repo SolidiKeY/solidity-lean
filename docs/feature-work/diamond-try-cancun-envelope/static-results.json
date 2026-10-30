@@ -1,0 +1,12 @@
+{
+  "fixedInputFilesVerified": 6,
+  "installedSourceFilesVerified": 7,
+  "publishedFilesVerified": 6,
+  "priorEvidenceChecksumsVerified": 2554,
+  "negativeStaticIdentityControls": 4,
+  "compilerOrEVMExecution": false,
+  "validationGroupsLaunched": false,
+  "unchangedSupported5MEnvelopeFound": false,
+  "proofOrSourceAdmissionImplementation": false,
+  "nativeStrictExitRetained": 1
+}

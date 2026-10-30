@@ -1,0 +1,3 @@
+Built-in-only node --input-type=module/createRequire.resolve probe; no req(name), import(engine), compiler call or VM instance.
+universal VM/evm/common/util -> dist/cjs/index.js; ethers -> lib.commonjs/index.js. VM->EVM resolves universal root evm/dist/cjs/index.js.
+conditional VM/ethers MODULE_NOT_FOUND; evm/common/util resolve conditional dist/cjs. Thus conditional is not a valid interchangeable tree for the approved two scripts. Universal metadata vm/evm/common/util10.1.3 +ethers6.17.0 matches approved existing vector-comment pins.
