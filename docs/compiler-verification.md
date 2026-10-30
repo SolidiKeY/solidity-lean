@@ -480,6 +480,42 @@ confirmed no compiler/representation/halt regression and the module-map
 omission they identified was corrected. These independent passes do not
 replace either stopped broader gate.
 
+**Pending-import performance investigation (2026-10-30).** Fresh fetch still
+records published master `8445c3fc`; checkpoint `98103415` and the original
+`6885b749` are preserved. The pending `Frontend.Checked.TypeExamples` has a
+13-module source closure, all unchanged from that published base and containing
+none of this task's files. Every one of its 12 saved imported artifact identities
+exists and matches its producer trace. No completed target trace was identified;
+anonymous cache entries alone cannot establish a valid prior exact-input build.
+Library producers use `Elab.async=true`; the trust command's `false` applies to
+its final file. Lake excludes these `weakLeanArgs` from the input key, so that
+flag difference does not demonstrate cache invalidation. The expensive Taclet
+rebuild also has published source/import changes.
+
+One diagnostic checked the exact source and saved setup with profiling, explicit
+`-j1`, the same resource guard and a 300-second ceiling. It requested no compiled
+outputs and populated no reusable target cache. It finished in 81.084 seconds,
+peak aggregate RSS 5,218,258,944 bytes, **exit 1**: theorem traces completed, but
+profiler messages interfered with the two existing `#guard_msgs` expectations.
+This is diagnostic evidence, not a passing validation. The earlier default and
+trust logs list approximately 245.552 and 293.029 seconds of completed build-job
+durations respectively. These rounded job durations are not a wall-time
+decomposition; the evidence is consistent with cumulative published prerequisite
+work, without proving the complete cause or predicting a successful full run.
+No task-induced import/cache defect or single 300-second proof was demonstrated.
+
+Both read-only reviewers confirmed those limits and no new implementation defect.
+Neither unchanged gate was retried, nor were prerequisites prebuilt to evade its
+cumulative budget. Both timeout obligations remain open. A retry requires a
+concrete published performance repair affecting the measured prerequisite work,
+legitimate exact-input cache evidence, or an authorized validation procedure that
+accounts for cumulative prerequisite work. Frontend proof changes belong to the
+G09 parser owner; this task must not take them over. Derived17 publication is an
+additional independent condition for TestSuite/full-script validation. The
+`perf1030-investigation.json` and failed diagnostic log retain source/setup/input
+hashes, producer traces, effective options and reviewer conclusions. No semantic,
+proof, resource, time or search budget changed.
+
 **Out of the construction fallback**: construction of structs
 with reference members, other uncertified reference-member default layouts, copies other
 than the primitive-member storage-root clause (including memory back to
