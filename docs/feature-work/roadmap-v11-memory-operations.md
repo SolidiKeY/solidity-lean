@@ -284,3 +284,45 @@ remain in its parent evidence directory. Runtime TOML stays untracked. Refreshed
 finder found no further issue; skeptic corrected a module-qualified name in this
 document to the actual `overwriteTwo` namespace before closure. No integration,
 publish or persistent-goal completion is authorized by this checkpoint.
+
+## Allocator and disjoint-write growth checkpoint
+
+`overwriteTwo_keeps` transports both actual captured writes through an initial
+published `Heap.Keeps`. It derives the first/intermediate preserving relation
+and both grown capacities. `overwriteTwo_alloc` discharges initial preservation
+with `Heap.keeps_alloc`. `overwriteTwo_alloc_frame` additionally proves the newly
+allocated object's own contents unchanged, using actual fresh-versus-old IDs.
+Payloads are typed over the original heap; they cannot reference fresh objects.
+The result is old-object naturality plus fresh structural framing, not equality
+with allocation after writes, recursive liveness or a deep-copy compiler.
+
+The inhabited control allocates a fixed reference parent with child identities
+[0,1], then genuinely changes both nonempty Boolean child arrays. It applies the
+allocator transport and fresh-frame theorems and proves exact old contents.
+`child_content_negative` refutes the claim that the framed parent's child
+contents remain unchanged. This distinction matters for nested aliases.
+Separate independent read-only finder and skeptic reviews found no semantic,
+ownership or vacuity defect; neither ran Lean/server/builds or wrote files.
+Skeptic required the original-heap payload limitation, retained above. Focused
+closure passes 47 jobs; all seven new headline/control axiom sets are
+`[propext, Quot.sound]` and are guarded. Prior failed proof attempts are retained.
+This advances G32/G33 and Backfill B operation-side extension only; all prior
+queue statuses and missing source/target/byte/deep-traversal premises remain.
+
+Checkpoint-three handoff will be exported under
+`/workspace/v11-memory-operations-evidence/checkpoint3` with exact head/base,
+cumulative patch, named-ref bundle, gate logs and checksum manifest. Parent head
+is `ba337ab29d9f55a768e11a446f10f2f074526b24`. Checkpoint-two finder and skeptic
+artifact reviews both passed exact patch/bundle/checksum/link and identity
+checks; their original artifacts and manifest are preserved.
+
+Checkpoint-three final confirmation exits 0: 864 default jobs, 262 TestSuite
+jobs and final SolKey 377/131 OK. Sampled aggregate Lean/Lake peak is
+1,566,388 KiB; cgroup peak is 380,190,720 bytes. Strict automation and committed
+snapshot TestSuite parity/trust pass, as do layers/orphans/trust/lane/script/diff.
+Global docs still fail with byte-identical exact-base output; no-new passes.
+Global pin inventory still fails: zero errors and 74 unrecorded changes, comprising
+14 inherited plus 60 owned pins. The owned checker passes all 60 standard pins
+and 13 module boundaries. Final finder and skeptic reviews found no further
+source/document defect; runtime TOML remains outside the commit. These passing
+checkpoint checks do not close G32-G35, reserved prerequisites or the goal.

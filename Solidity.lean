@@ -745,3 +745,4 @@ import Solidity.Examples.SolCases
 import Solidity.Backend.MemoryOps.SliceControls
 import Solidity.Backend.MemoryOps.CalldataControls
 import Solidity.Backend.MemoryOps.DisjointControls
+import Solidity.Backend.MemoryOps.DisjointGrowthControls
