@@ -286,7 +286,12 @@ a location; the other `allocRef` and `heapPut` sites build aggregates), so
 what remains is a proof gap, not a semantic one. Not yet done: proving
 that for every allocation site; carrying `HeapShaped` through frame
 restores (`Eval.lean` and `Semantics.lean` reset the heap or restore a
-saved one, as for `HeapOK`); progress for `memElem` and `heapBytes`.
+saved one, as for `HeapOK`); progress for `memElem` (it also needs
+elements to be `Data.val`). Progress for byte reads is proved:
+`heapBytes_ok`, `readLoc_memByte_ok` (at a `bytes`/`string` address in a
+shaped heap, not `stuck`: the code reads or panics out of bounds),
+witness `bytesHeap_byte_read`, control `ptrHeap_byte_read_stuck` (the
+unshaped `ptrHeap`: "not a bytes object").
 Progress for element and member writes is proved: `memSet_ok` /
 `writeLoc_mem_ok` (at an array of the value's type, or a struct whose
 member `i` has it, in a shaped heap, the write is not `stuck`: the code
@@ -297,9 +302,9 @@ writes or panics out of bounds; `DataList.setNth_ok`), witness
 premise from the location's construction: an index into a `memory`
 array reference (`indexLoc`) has `Val.RefOK`, and `memShape` is the
 identity on arrays, so the heap type is that array (static arrays
-included); a struct member (`Eval.lean`, member access) has
+included; `STy.memShape_array`); a struct member (`Eval.lean`, member access) has
 `E.fieldTy? d .memory i = some τ`, which is `(E.layout.fields d)[i]?`
-for a memory struct. Neither bridge is stated as a lemma yet, and there is
+for a memory struct. The struct bridge is not stated as a lemma yet, and there is
 no struct-member control (`SemanticsExamples.E0` has no structs).
 
 **Review of `memSet_ok`** (finder and skeptic, read-only, no blocker):

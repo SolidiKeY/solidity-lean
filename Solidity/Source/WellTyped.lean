@@ -40,7 +40,8 @@ that shape invariant as well (`SoundnessExamples.ptrHeap_byte_stuck`).
 at a type without a location); allocation and writes keep it, and with it a
 byte write at a `bytes`/`string` address is never `stuck`
 (`writeLoc_memByte_ok`), nor is an element or member write of the
-element's or member's type (`memSet_ok`, `writeLoc_mem_ok`).
+element's or member's type (`memSet_ok`, `writeLoc_mem_ok`), nor a byte
+read (`heapBytes_ok`, `readLoc_memByte_ok`).
 -/
 
 namespace Solidity.Source
@@ -758,6 +759,55 @@ theorem writeLoc_mem_ok {H : HeapTy} (F : Fr) (n a i : Nat) {τ : STy} (v : Val 
       (fun _ y => EMOK E H y ∧ HeapShaped y.2.heap)
       (fun e y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ NotStuck e) :=
   memSet_ok a i v
+
+
+/-- The memory shape of an array is the array itself. -/
+theorem STy.memShape_array {σ ρ : STy} {l : DataLoc} {k : Option Nat}
+    (h : σ.memShape = .array l ρ k) : σ = .array l ρ k := by
+  cases σ <;> simp only [STy.memShape, reduceCtorEq] at h
+  exact h
+
+/-- **`heapBytes`, progress**: at an address the heap typing gives a
+`bytes` or `string` type, in a shaped heap, the read succeeds. -/
+theorem heapBytes_ok {H : HeapTy} {P : EMState E Γ → Prop} (a : Nat)
+    (hP : ∀ y, P y → (EMOK E H y ∧ HeapShaped y.2.heap) ∧
+      ∃ l, y.2.heap.ty a = some (.bytes l) ∨ y.2.heap.ty a = some (.string l)) :
+    Hoare P (heapBytes a : EM E Γ (List UInt8)) (fun _ y => P y) (fun _ _ => False) := by
+  unfold heapBytes
+  refine Hoare.bind (heapObj_top (a := a) (fun y h => (hP y h).1) fun y hy hg => ?_) fun ⟨σ, d⟩ => ?_
+  · obtain ⟨_, l, hl⟩ := hP y hy
+    simp only [Heap.ty, Heap.get] at hl hg
+    rw [hg] at hl
+    rcases hl with hl | hl <;> cases hl
+  cases d with
+  | bytes bs => exact Hoare.pure' fun y hy => hy.1
+  | string bs => exact Hoare.pure' fun y hy => hy.1
+  | val w =>
+    refine Hoare.of_false fun y ⟨hp, hty, _, ht⟩ => ?_
+    obtain ⟨_, l, hl⟩ := hP y hp
+    rw [hty] at hl
+    rcases hl with hl | hl <;> cases hl <;> simp only [Data.Top, STy.loc?, reduceCtorEq] at ht
+  | _ =>
+    refine Hoare.of_false fun y ⟨hp, hty, _⟩ => ?_
+    obtain ⟨_, l, hl⟩ := hP y hp
+    rw [hty] at hl
+    rcases hl with hl | hl <;> cases hl
+
+/-- **`readLoc` of a memory byte, progress and preservation**: at a
+`bytes`/`string` address in a shaped heap, the read is never `stuck` (the
+code reads or panics out of bounds; the statement excludes only `stuck`). -/
+theorem readLoc_memByte_ok {H : HeapTy} (F : Fr) (a i : Nat) :
+    Hoare (fun y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧
+        ∃ l, y.2.heap.ty a = some (.bytes l) ∨ y.2.heap.ty a = some (.string l))
+      (readLoc F (.memByte a i) : EM E Γ (Val E.layout (.fixedBytes 1 (by decide))))
+      (fun _ y => EMOK E H y ∧ HeapShaped y.2.heap)
+      (fun e y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ NotStuck e) := by
+  simp only [readLoc]
+  refine Hoare.bind (Hoare.conseq (heapBytes_ok a fun _ h => h) (fun _ h => h) (fun _ _ h => h)
+    (fun _ _ h => h.elim)) fun bs => ?_
+  split
+  · exact Hoare.pure' fun y hy => hy.1
+  · exact Hoare.lift' fun y hy => ⟨hy.1, trivial⟩
 
 end
 
