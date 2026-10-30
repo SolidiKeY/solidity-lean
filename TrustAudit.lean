@@ -1647,3 +1647,35 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} memory element-read theorems and controls use only the standard axioms"
+
+/-! Lane V04b: memory writes keep `HeapInner`. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.heapPut_inner,
+    ``Solidity.Source.DataList.AllVal.setNth,
+    ``Solidity.Source.memSet_inner,
+    ``Solidity.Source.writeLoc_memByte_inner]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} HeapInner preservation theorems use only the standard axioms"
+
+/-! Lane V04b: zeroed objects keep the memory invariant. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Hoare.memGrow,
+    ``Solidity.Source.allocRef_mem,
+    ``Solidity.Source.zeroOK,
+    ``Solidity.Source.SoundnessExamples.zeroArr_alloc]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} zeroing theorems use only the standard axioms"
