@@ -1,5 +1,36 @@
 # Diamond payments: guarded rules and the original PiggyBank callback proof
 
+## Core layer registration repair (2026-10-30)
+
+The retained review of candidate `e6fb7d45` correctly found that
+`Calculus.PaymentWitness` and `Calculus.PaymentConditions` were absent from
+`scripts/check-layers.mjs`'s `CORE` patterns. The focused repair registers both
+and updates the core list in [parallelism.md](../parallelism.md). The layer
+check now covers 172 core modules (previously 170), with none reaching the
+elaborator. An in-memory negative control runs the actual checker with each
+payment module importing `Syntax.Elab`; both paths are reported and it exits 1.
+`git diff --check` passes. No Lean source, semantic condition or budget changes;
+no Lean check or full combined build is needed for this registration edit.
+
+The supplied supplement retrieval and coordinator-context manifest match their
+pinned SHA256 hashes. All seven supplemental artifacts, 177 archive members
+and eleven coordinator-context files verify. Source/base commits and executor
+environment/thread identities agree; exact Git tree and scanner hashes agree
+with the retained comparison. The original checksum manifest still covers
+175 records only. Both documentation exits remain 1, with 26 identical findings
+and zero new findings at the exact source/base commits. The separate coordinator
+evidence supplies no original historical execution or passing global gate.
+The frozen source prompt excludes the local host's extra 12 GiB reserve from
+source-VM requirements; the local integration reserve remains required.
+
+Fresh independent read-only finder and skeptic review launches both failed with
+`invalid thread-store request: no rollout found`; no new independent review is
+claimed. The coordinator must obtain both reviews and owns staging, fresh
+combined validation and candidate approval. This repair makes no commit or
+publication and requires no semantic decision. Retained integration regression
+logs still record stale-target rebuild failures; they remain failed evidence,
+and this repair runs no competing rebuild.
+
 ## Integration boundary (2026-10-29)
 
 The combined candidate `cec7507b` failed the frozen verdict/scope guard: it
