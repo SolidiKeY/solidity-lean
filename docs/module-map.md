@@ -1060,3 +1060,8 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/CalldataTransportControls.lean` | Nonprimitive initial child table/heap correspondences discharged, actual parent redirection and wrong/missing-child negatives. |
 | `Backend/MemoryOps/CheckedSnapshot.lean` | Exact runtime bounds/success observations around actual heap captureOverwrite, empty identity and successful/failed preserving-growth transport. |
 | `Backend/MemoryOps/CheckedSnapshotControls.lean` | Actual reference-heap overlaps, streaming/bounds negatives, empty endpoint, allocator noninterference and nonempty element-boundary witnesses. |
+| `Backend/MemoryOps/CalldataChildren.lean` | Actual output-heap Boolean-child table/content correspondence for arbitrary runtime reference slices; typed separation and injectivity-qualified identity. |
+| `Backend/MemoryOps/CalldataNestedChildren.lean` | Nested reference-child root/leaf framing and actual typed index/read/bounds composition; finite component, not recursive graph closure. |
+| `Backend/MemoryOps/CalldataChildExtension.lean` | Existing represented child/root/leaf correspondence transported through published preserving heap growth, retaining source offsets. |
+| `Backend/MemoryOps/CalldataChildControls.lean` | Arbitrary intrinsic-length families, changed/shared references, isolated wrong/missing tables, alias/collision negatives and allocator controls. |
+| `Backend/MemoryOps/CalldataNestedControls.lean` | Changed reference-containing child selection, repeated leaf identities, actual nested typed reads/bounds and published allocation transport. |

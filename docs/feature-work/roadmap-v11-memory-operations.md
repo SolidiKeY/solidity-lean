@@ -558,3 +558,125 @@ is preserved, no new/reset/reactivated goal is created, and no completion is
 reported. Full assignment remains partial. Published byte-memory/source/type/
 traversal/owner-copy/V10 prerequisites are required for full closure; this does
 not assert every future independent refinement is unavailable.
+
+## Output-heap decoded child correspondence checkpoint
+
+The reproduced gap is precise: `decodedArray_overwrite_read` returns the same
+supplied initial `rel`; `TransportControls.reference_contents` had a stronger
+output-heap child relation only for private two-element constants. Neither old
+theorem is renamed or weakened. New owned modules prove actual output relations.
+
+`BoolChildRepr` relates an existing `Source.Val.cdRef` to a typed Boolean-array
+`HRef`, its pointer address and the immutable table's actual decoded contents.
+Its `overwrite` theorem derives that relation at the output heap using the real
+`overwriteSlice_frame`. An arbitrary destination type requires explicit distinct
+child/destination IDs; this is a local framing premise, not a source admission
+exclusion. `read_iff` observes the actual heap in its certificate through the
+published decoded Boolean reads. `alias` gives equal memory-ID implies equal
+source pointer; `alias_iff` proves the reverse only with initial address
+injectivity on live represented Boolean children. No global injectivity is
+silently assumed, and a colliding-address negative demonstrates its necessity.
+
+`decodedBoolChildren_overwrite` handles arbitrary runtime reference lists and
+source slices, including shared/repeated children. It concludes actual source
+read, actual destination slot and `BoolChildRepr` at the output heap for every
+interior element. Initial decoded array, list-length/element correspondence,
+ordered endpoints and destination capacity are explicit. Specialized destination
+and child types force ID separation: `boolChild_parent_ne` derives it from
+`ArrTy` and `HRef.heq_of_id`. Callers supply no redundant separation premise.
+`referenceSlice_empty` proves whole-heap identity for empty/exact-end captures.
+There is no arbitrary payload cap; the family witness's `<2^256` is exactly the
+existing dynamic `MObj` constructor invariant, not a new admission limit.
+
+`RefChildRepr` additionally represents a reference-containing child's actual
+immutable decoded table and every referenced Boolean leaf. `overwrite` frames
+both the root and its observed leaf footprint with explicit local separation.
+`decodedRefChildren_overwrite` derives both footprint separations from its
+specialized finite intrinsic types and gives the nested output relation for
+arbitrary runtime lists/slices. No pairwise child or leaf separation is needed.
+`index`, `index_bool` and `index_bounds` compose the existing `Heap.index` and
+finite decoded-array observations, including exact-end failure. They do not
+replace an interpreter, invent Source halts or assume path preservation.
+
+`BoolChildRepr.grow` and `RefChildRepr.grow` transport actual old root/leaf
+correspondence using initial `Heap.Keeps`. `decodedChildRefs_wk` proves the finite
+Source array retains pointer offsets under typed `HRef.wk`. The helper uses
+existing `Source.Data.array` extensionality, not a new value/state layer.
+Actual allocator witnesses discharge initial Keeps and distinguish old children
+from fresh same-type objects. No source representation of a fresh root, nor
+injectivity over a newly extended address set, follows from these theorems.
+
+### Inhabited controls and review fixes
+
+The arbitrary-length family discharges every initial child certificate and
+capacity. Its nonempty sample changes parent IDs[0,0,0] to[1,0,1], keeps repeated
+shared identities and proves alias equivalence under an independently proved
+address assignment. Empty source and exact-end operations are actual identities.
+Missing/wrong child offsets and wrong contents fail separately; perturbed child
+tables retain root7 (and the missing-table control retains the other child37).
+A colliding address can represent two different equal-content heap children,
+so source pointer equality alone cannot imply equal memory IDs.
+
+`aliased_destination_negative` writes the represented Boolean child itself:
+initial contents match the immutable table, the actual write changes them, and
+output correspondence is false. This is the named unresolved general-frame case
+`alias-child-destination`. It is not a possible same-ID case of the differently
+typed specialized parent slices, nor an exclusion from the source profile.
+
+The nested witness changes parent IDs[2,2] to[3,2], selecting an actual child with
+repeated leaf IDs[1,1]. Both final typed memory-index reads succeed and the
+immutable decoded leaf is false; the equivalence is non-vacuous. Exact-end typed
+index/table observations fail. Actual allocation preserves these old nested
+correspondences and proves fresh identity separately.
+
+Independent read-only finder/skeptic reviews found redundant specialized
+separation premises, which were removed and derived from typing. They required
+injectivity-qualified reverse identity, isolated child failures and the
+fresh-root/growth limits, all retained above. Neither reviewer ran Lean/server/
+builds or wrote files. Focused final closure passes59jobs;35new headline/control
+axiom sets are guarded after final confirmation. All earlier failing proof logs
+remain retained failures, including dependent-array congruence attempts.
+
+### Remaining clauses and queue accounting
+
+This advances G35.03/.05 and Backfill B with genuine final-heap correspondence.
+It does not complete arbitrary recursive correspondence: `RefChildRepr` is the
+explicit array-of-Boolean-array component, not a depth admission cutoff. Missing
+clauses include arbitrary nested element/struct fields, mapping treatment,
+source-to-intrinsic type/layout correspondence, graph sharing/cycles and copy
+liveness. The published `Semantics/RecursiveStorage/Legacy.lean` realizes finite
+layouts and does not unfold graph cycles; no full Source/TypeGraph-to-memory
+recursive child-copy certificate is supplied here. These exact clauses remain
+open, without claiming all further independent refinements unavailable.
+G32 byte-memory, G33 generated allocation/size failures and all-type default
+construction, G34 general compilation, reserved G35.01/.02 copy prerequisites,
+G35.04 fresh deep-copy compilation and G35.06 Source/V10/target composition remain
+as before. All original Work and Backfill statuses stay partial or blocked.
+No source-profile, refusal, exclusion, global ledger or reserved file is changed.
+
+Checkpoint-seven handoff is exported at
+`/workspace/v11-memory-operations-evidence/checkpoint7` with cumulative original
+patch, named-ref bundle, exact head/base, logs, proposed pins and checksum manifest.
+Parent is `99512648c9d4d39157b5ba5141d7adf784b65e97`. Previous sealed exports and
+runtime TOML are preserved; no goal reset, completion or integration is performed.
+
+Checkpoint-seven final gates on the refined code tree: `run-lean.sh` exits0,
+877 default jobs,262 TestSuite jobs and final SolKey377/131 OK. Aggregate sampled
+Lean/Lake peak is1,448,544 KiB; cgroup peak388,222,976 bytes (distinct accounting
+measurements). Containment is12GiB/no-swap, serial Lean-j1/LEAN_NUM_THREADS1.
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and
+Lake5.0.0-src+797c613 execute; fresh KeySort gate passes2jobs. Strict automation,
+complete committed-snapshot TestSuite trust/parity, layers/orphans/trust/owned
+boundary+standard-pin/script/diff checks pass. Owned checker covers146pins26modules.
+Global docs still exits1 with raw byte-identical frozen-base output (46findings);
+separate no-new passes. Global inventory still exits1:0unsafeerrors,160unrecorded
+changes=14inherited+146owned. Reserved inventory remains untouched; exact proposed
+owned pin additions are exported for coordinator reconciliation. Both final
+independent source reviews found no further defect after the fixes above.
+
+No `get_goal` or Lean diagnostic RPC is exposed in the actual tool catalog.
+No goal is created/reset/reactivated/completed; serial focused closures were used
+in place of unavailable per-file diagnostics. Full assignment remains partial,
+including every original G32-G35.01-.06 and Backfill A/B obligation recorded above.
+No push/merge/PR or unpublished owner result is used. The only intentionally
+untracked runtime file is `lakefile.v11-runtime.toml`, excluded from the commit.

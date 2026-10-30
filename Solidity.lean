@@ -750,3 +750,5 @@ import Solidity.Backend.MemoryOps.ObjectFrameControls
 import Solidity.Backend.MemoryOps.CalldataArrayControls
 import Solidity.Backend.MemoryOps.CalldataTransportControls
 import Solidity.Backend.MemoryOps.CheckedSnapshotControls
+import Solidity.Backend.MemoryOps.CalldataChildControls
+import Solidity.Backend.MemoryOps.CalldataNestedControls
