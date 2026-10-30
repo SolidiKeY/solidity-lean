@@ -1444,3 +1444,13 @@ adds static intrinsic/deposit arithmetic and occurrence-specific compiler return
 labels, and refines the missing local layout relation. No historical engine,
 runner, evaluator, profile or model was implemented; original fixture gates
 remain open. Prior completed compilations/maps and Lean gates were not repeated.
+
+
+### Fixture-local comparison design aftereef9fc8a
+
+The [comparison dependency/relation/API decision design](diamond-try-comparison/README.md)
+records exact compiler observation dependencies and two unapproved next directions:
+a strictly fixture-local observational correspondence or the exact upstream host
+API with a pinned bounded backend. No historical execution, trusted relation,
+runner, model/profile change or source gate pass follows. Original12/8strictEXIT1
+and all earlier proofs/receipts/exports remain retained.
