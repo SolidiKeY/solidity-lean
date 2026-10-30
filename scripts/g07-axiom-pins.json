@@ -2498,6 +2498,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Decl.frame?_fnSig": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Decl.frame?_lengths": [
   "Classical.choice",
   "Quot.sound",
@@ -2513,7 +2518,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.body_sig": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.callInternal_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.callInternal_sig_ns": [
   "Classical.choice",
   "Quot.sound",
   "propext"
