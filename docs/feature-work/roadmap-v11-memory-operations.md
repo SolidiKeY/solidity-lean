@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint fourteen. Earlier checkpoint
+Current cumulative accounting through checkpoint fifteen. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -85,7 +85,7 @@ narratives retain their historical observations and gate outcomes.
 | G34 | partial | Typed slice coordinate/read/overwrite adapters and identity controls proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
 | G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
 | G35.02 | blocked | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
-| G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved. General families/reference construction, calldata-to-storage, ABI decoding, independent Source execution and target transport remain. |
+| G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved, including actual ordered two-transfer composition and local commutation. General families/reference construction, calldata-to-storage, ABI decoding, independent Source execution and target transport remain. |
 | G35.04 | partial | Actual intrinsic shallow overwrite, original-heap snapshot and overlap/framing laws proved. Target emitter, language alias/deep-copy classification and fresh deep-copy transport remain. |
 | G35.05 | partial | Published finite map-free recursive Mirrors are transported through actual multi-generation builder/snapshot operations with typed generation separation. Source/type-graph/cycle/mapping/shadow coverage and emitted traversal/deep-copy realization remain; no fixed cutoff is introduced. |
 | G35.06 | blocked | Requires all preceding copies plus V10/source/target composition; no V07–V10 unpublished lane imported. |
@@ -1323,3 +1323,95 @@ Both independent final source reviewers accepted the refined actual statements,
 nonvacuity, complete observations, negative controls, ownership and owning document
 without further defect. Artifact reviews follow commit/export. The full original
 Work/Backfill audit remains partial/blocked, not completed by these two families.
+
+
+## Checkpoint fifteen: composing actual decoded transfers (G35.03, Backfill A/B)
+
+Reproduced the precise gap: existing CalldataTransfer/CalldataUintTransfer execute
+one actual decoded transfer; generic capture-based sequence laws capture heap
+payloads, not the immutable decoded tables. New checkedBoolSequence,
+checkedUintSequence, checkedBoolUintSequence and checkedUintBoolSequence are ONLY
+Option.bind of these existing operations. They accept Source.Calldata/typed heap
+refs and runtime coordinates, never caller-supplied payloads or conversion proofs.
+No AST, interpreter, replacement heap/allocator/decoder/emitter or semantic layer
+is introduced. Reserved implementations and all Source definitions stay untouched.
+
+result_lookup reconstructs only payloads actually extracted by a successful
+operation. all_len derives every typed array length using overwriteSlice_all_len.
+Sequence_some_iff exposes actual reached intermediate/final heaps. none_ordered
+records first rejection short-circuit or actual firstSome plus secondNone. General
+none_lookup includes missing/unsupported entries and all three runtime guard cases;
+sequence_none_iff reduces second rejection to the original heap through the proved
+length equality. No preservation premise is assumed. None_keeps covers arbitrary
+failed lookup/bounds through initial preserving growth. Successful keeps derives
+the intermediate Keeps before applying the second existing transfer theorem.
+Input decoded-array lookups remain explicit representation premises for finite
+Source-read laws, never desired output relations. All bounds are actual runtime
+length/capacity premises, no arbitrary payload or depth admission cutoff.
+
+Same_elems derives the complete nested replacement from both actual operations.
+Second_read gives actual immutable second-source reads including overlap;
+first_exterior preserves actual first-source reads outside the second destination.
+Same_comm uses overwriteIntervals_comm for locally separated intervals, allowing
+empty/touching cases. Other_comm and mixed_comm use overwriteTwo_comm/frame for
+distinct objects. Bool/uint array ID separation follows from existing HRef/ArrTy
+indices; no same-ID cross-type witness or global address injectivity is assumed.
+These are sufficient local commutation cases, not new Source exclusions.
+
+Controls execute unequal nonuniform decoded inputs and complete ordered outputs.
+They distinguish reversed overlap precedence, ignored first writes and an ACTUAL
+stale-source call reusing the first table as the second. Touching intervals and
+different same-family objects commute with changed complete outputs; mixed Bool/
+uint operations commute and retain max2^256-1 without truncation/reordering. The
+reference-containing parent keeps its IDs while its Boolean child really changes.
+Actual Heap.alloc discharges composed growth, frames its fresh parent and retains
+both complete old-object outputs; rejection also transports through that actual
+allocation. Fixed uint overlap, arbitrary runtime list families, empty/exact-end,
+and element31/32/33 observations are inhabited. Missing/unsupported first versus
+reached-second input and isolated first/second reversed/source/destination guards
+are observed. Option observations imply no Source halt, rollback or ABI/bytecode
+correctness. Initial immutable fixture tables do not represent newly allocated
+Source objects and no fresh Source entry/address premise is manufactured.
+
+Disk/runtime preflight measured656846848bytes free, parent16GiB and child12GiB/
+swap0, idle retained container and no Lean workers. Small warm increments now
+leave roughly649MB; no new runtime/image, deletion or RAM cache relocation.
+All work uses the writer lock, serial-j1/LEAN_NUM_THREADS1 and unchanged guards.
+Per-file Lean diagnostics and get_goal are unavailable; focused serial closures
+are retained. Focused failures are distinct raw logs; repairs preserve statements
+and observations (case normalization, explicit allocator type, dependent rewrite
+ordering), never budgets or assumptions. Full final gates/reviews follow below.
+
+Full original queue audit: G32 still needs actual nested/reference physical-byte
+representation and target separation. G33 still needs all-profile constructor/
+default compilation and exact target size/allocation failure; published reference
+constructors stay reserved. G34 general path/rebinding/delete/stale-alias target
+execution remains. G35.01 consumes published copying/Mirrors and proves frames,
+not source/target copying correctness. G35.02 is blocked on reserved memory-to-
+storage copying. G35.03 now composes real primitive decoded transfers, but general
+families/references, calldata-to-storage, ABI/independent Source execution and
+target transport remain. G35.04 fresh memory deep-copy execution/emission and full
+alias classification remain. G35.05 Source/type-graph/cycle/mapping/shadow/emitted
+traversal remains, beyond finite map-free intrinsic Mirrors. G35.06 is blocked on
+reserved copies and V10/Source/target composition. Backfill A/B remain partial;
+no claim of independent-refinement exhaustion or whole-lane completion. Exact
+manifest evidence proposals remain additive coordinator reconciliation only.
+
+
+Checkpoint-fifteen final v11-checkpoint15-full-01 exits0:906default jobs,
+262TestSuite jobs and final SolKey377/131annotations OK. Actual runtime15 log
+retains Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613 and KeySort2jobsPASS before RUNTIME_GATE_PASS.
+Peak aggregate Lean/Lake RSS1454864KiB; cumulative session peak454889472bytes is
+separate from exec RSS. Every new per-exec OOM delta is0. Final full disk
+647204864before/646656000after bytes; fixed12GiB/swap0/parent16GiB bounds unchanged.
+Layers/orphans/trust/strict automation/complete fixture parity/script/diff and
+owned408standard pins55modules pass. Global inventory remains FAILexit1 with
+0unsafeerrors422unrecorded=14inherited+408owned; exact additive proposal awaits
+coordinator reconciliation. Strict docs remains FAILexit1 with byte-identical
+exact-base74line72missing/ambiguous findings, separate no-newPASS. No reserved
+inventory, ledger or manifest changed and no raw failure was relabeled green.
+Both independent final source reviews found no confirmed defect; neither ran
+Lean/server/builds. The new sequence is actual operation composition, not full
+Source/target correctness. All original queues remain partial/blocked. Subsequent
+independent child-frame transport is still worth investigating, not presumed done.

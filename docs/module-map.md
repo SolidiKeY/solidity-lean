@@ -1088,3 +1088,9 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/CalldataTransferControls.lean` | Nonuniform dynamic/fixed/runtime-length transfers, element boundaries, lookup/bounds negatives and real allocator transport. |
 | `Backend/MemoryOps/CalldataUintTransfer.lean` | Exact published uint256 range bridge and actual decoded numeric slice transfer, read/guard/frame/growth/empty laws. |
 | `Backend/MemoryOps/CalldataUintControls.lean` | Maximum uint256, nonuniform ordered/runtime/fixed transfers, isolated numeric-family/bounds negatives, zero/end/boundary cases and actual allocator framing. |
+| `Backend/MemoryOps/CalldataSequence.lean` | Actual Bool/uint Option-bind sequences, reached intermediates, derived all-length preservation and complete unknown-input rejection/growth laws. |
+| `Backend/MemoryOps/CalldataSequenceLaws.lean` | Actual ordered decoded-source observations, overlap precedence, local same-object and distinct-object commutation, frames and success transport. |
+| `Backend/MemoryOps/MixedCalldataSequence.lean` | Mixed Bool/uint composition, type-derived ID separation, complete ordered observations, actual disjoint heap commutation and success/rejection transport. |
+| `Backend/MemoryOps/CalldataSequenceFixtures.lean` | Typed immutable primitive fixture tables and derived finite extraction identities; no ABI decoder. |
+| `Backend/MemoryOps/CalldataSequenceControls.lean` | Executed nonuniform overlapping/disjoint/touching sequences, stale/order/ignored-write negatives, stage failures, parent frames and element boundaries. |
+| `Backend/MemoryOps/MixedCalldataSequenceControls.lean` | Mixed maximum-value/full-output reads, actual allocation/growth and fresh parent frames, fixed overlap and arbitrary runtime families. |
