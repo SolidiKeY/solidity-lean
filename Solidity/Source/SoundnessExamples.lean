@@ -32,6 +32,7 @@ it the operation is `stuck`).
 | `incBody_ns` | the elaboration of the counter's typed body `count++;` (`TypingExamples.incBody`, an `ItemsD` derivation) is in the statement fragment and never `stuck` in its frame (`ItemsD.toR_ns`) |
 | `retPair_ns`, `retPair_unframed_stuck` | `return (1, 2);` with two return slots is never `stuck`; over locals without them it is |
 | `callF_ns`, `callF_value`, `callF_badFrame_stuck` | the call expression `f()` (a function implemented by `return 1;`) is never `stuck` (`evalE_callFrag_ns`) and evaluates to `1`; with a body outside the call's frame it is `stuck` |
+| `retLocalPair_ns` | `return (x, x);` with a declared local `x` over the two return slots is never `stuck` |
 | `callRetOne_ns` | an internal call of `function f() internal returns (uint8) { return 1; }` (no modifiers, a fragment body in the frame the call builds) is never `stuck` (`callInternal_ns`) |
 | `callBadFrame_stuck` | a body whose locals lack the return slot is `stuck` ("call frame"): the frame hypothesis is needed |
 -/
@@ -228,6 +229,20 @@ theorem retPair_unframed_stuck :
     ((execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 5 0 none (retPair (Γ := [])) .nil).run
       (.nil, SemanticsExamples.s0)).1 = .error (.stuck "no local") := by
   rfl
+
+/-- `uint8 x; …; return (x, x);` in a function returning `(uint8, uint8)`:
+the arguments are a local, not constants. -/
+def retLocalPair : RStmt SemanticsExamples.E0 [.int IntTy.u8, .int IntTy.u8] false .body
+    [.int IntTy.u8, .int IntTy.u8, .int IntTy.u8] [.int IntTy.u8, .int IntTy.u8, .int IntTy.u8] :=
+  .retTuple (.cons (.local .here) (by decide) (.cons (.local .here) (by decide) .nil))
+
+/-- **Witness**: `return (x, x);` with a declared local over the two return
+slots is never `stuck`. -/
+theorem retLocalPair_ns (n : Nat)
+    (l : Locals SemanticsExamples.E0.layout [.int IntTy.u8, .int IntTy.u8, .int IntTy.u8]) :
+    NS (execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n 0 none retLocalPair l) :=
+  stmtNS _ _ n 0 none _ l ⟨rfl, rfl, .inl rfl, rfl, rfl, .inl rfl, trivial⟩ ⟨trivial, trivial, trivial⟩
+    ⟨[.int IntTy.u8], [], rfl, rfl⟩
 
 /-! ## Elaborated witnesses: a statement and a mapping -/
 
@@ -502,5 +517,11 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callF_value
 /-- info: 'Solidity.Source.SoundnessExamples.callF_badFrame_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callF_badFrame_stuck
+/-- info: 'Solidity.Source.evalConvArgs_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.evalConvArgs_ns
+/-- info: 'Solidity.Source.setRets_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.setRets_ok
+/-- info: 'Solidity.Source.SoundnessExamples.retLocalPair_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.retLocalPair_ns
 
 end Solidity.Source.SoundnessExamples

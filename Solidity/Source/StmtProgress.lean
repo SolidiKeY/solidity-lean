@@ -287,7 +287,7 @@ theorem setRets_ok {D : Layout} {Γ : RCtx} (ys : RCtx) : (rs : List STy) → {p
   | τ :: τs, ps, l, hΓ, .cons v vs => by
     have hΓ' : Γ = (ys ++ τs.reverse) ++ τ :: ps := by
       rw [hΓ, List.reverse_cons, List.append_assoc, List.append_assoc, List.singleton_append]
-    have h1 := Locals.setAt_ok' (ys ++ τs.reverse) hΓ' l v
+    have h1 : NotStuckR (l.setAt (ys ++ τs.reverse).length v) := Locals.setAt_ok' (ys ++ τs.reverse) hΓ' l v
     rw [List.length_append, List.length_reverse] at h1
     have hΓ'' : Γ = ys ++ (τs.reverse ++ τ :: ps) := by rw [hΓ', List.append_assoc]
     simp only [setRets]
@@ -597,7 +597,7 @@ theorem retVals_ok {D : Layout} {Γ : RCtx} (l : Locals D Γ) :
   | r :: rs, ps, hΓ => by
     have hΓ' : Γ = rs.reverse ++ r :: ps := by
       rw [hΓ, List.reverse_cons, List.append_assoc, List.singleton_append]
-    have h1 := Locals.getAt_ok' rs.reverse hΓ' l
+    have h1 : NotStuckR (l.getAt rs.reverse.length r) := Locals.getAt_ok' rs.reverse hΓ' l
     rw [List.length_reverse] at h1
     simp only [retVals, Nat.zero_add]
     exact NotStuckR.bind h1 fun _ => NotStuckR.bind (retVals_ok l rs hΓ') fun _ => NotStuckR.pure _
@@ -813,7 +813,7 @@ theorem Glob.dispatchFn_params (G : Glob E) (c : String) (d : Decl) {ps rs ps' r
     | some d' =>
       rw [hf, Option.getD_some] at h'
       obtain ⟨s, _, hs⟩ := List.exists_of_findSome?_eq_some hf
-      have hm := List.mem_of_find?_eq_some hs
+      have hm : d' ∈ E.fnIn s d.name ps := List.mem_of_find?_eq_some hs
       simp only [Env.fnIn, List.mem_filter, Bool.and_eq_true, beq_iff_eq, h'] at hm
       exact (STy.eq_of_sameList ps ps' hm.2.2).symm
   · rw [hd] at h'
@@ -849,7 +849,7 @@ theorem Elaborated.callInternal_call_ns (el : Elaborated) (G : Glob el.res.env) 
     (hz : ∀ τ ∈ rs, (Val.default el.res.env.layout τ).isSome = true)
     (hf : b.items.ValFrag) (ho : b.items.OpsOK) : NS (callInternal G F n d vs rs) := by
   obtain ⟨ps', h'⟩ := hret
-  have e := Glob.dispatchFn_params G F.contract d hd h'
+  have e : ps' = ps := Glob.dispatchFn_params G F.contract d hd h'
   subst e
   exact Elaborated.callInternal_sig_ns el G hG F n d vs rs b hdec hb h' hmods hz hf ho
 

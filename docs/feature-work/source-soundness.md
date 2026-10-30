@@ -303,9 +303,9 @@ needs the lemma that a resolved state variable is the declaration
 **What the fragment leaves out**, in the order a whole-program proof needs
 it: modifiers (`runMods` with invocations,
 `_`), the coherence of dispatch and elaboration (that the body virtual
-dispatch finds has the call's parameters and returns, which
-`callInternal_ns` assumes; for calls inside expressions it is the
-`CallsOK` hypothesis), memory (the `heap` invariant, `WellTyped.lean`), arrays and
+dispatch finds has the call's return types and is one of the unit's: the
+parameter half is proved, `Glob.dispatchFn_params`; for calls inside
+expressions the whole of it is the `CallsOK` hypothesis), memory (the `heap` invariant, `WellTyped.lean`), arrays and
 structs in storage, external calls, `emit`, builtins, and the transaction layer (dispatch,
 ABI). Each is listed with its sites in the census below.
 
