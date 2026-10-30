@@ -100,8 +100,11 @@ constructor without a wildcard and gives each typed one a derivation
 "Evaluated" is a classification, not progress. An arm can be `stuck` on
 some inputs:
 
-- dynamic ABI decoding;
+- ABI decoding of static arrays, structs and arrays of non-value types;
 - calldata references;
+- storage assignment of an array of mappings (`loadMem`: "a mapping is
+  not copied"), typed by S01 though solc refuses it; the same assignment
+  of a struct containing a mapping is not `stuck` but copies nothing;
 - `fallback` with parameters;
 - nested-array copies;
 - the ABI of user-defined value types and external function types;

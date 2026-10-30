@@ -424,8 +424,10 @@ These items are also listed under `limitations:`.
 
 - **Uniqueness of derivations.** Not true (`(1)`); uniqueness of meaning is proved, see "Uniqueness".
 - **Calldata.** `cdRef` values are never produced. External arguments
-  are decoded into values, and dynamic ABI types are not decoded
-  (`decodeWord` is `stuck` on them).
+  are decoded into values: `bytes`, `string` and dynamic arrays of value
+  types are decoded, but static arrays, structs, user-defined value types,
+  external function types and arrays of non-value types are not
+  (`decodeArgs` is `stuck` on them).
 - **Call options other than `value`.** Not modelled, and neither are
   function-type values or calls through them, `new`, `abi.decode`,
   `type(T)`, slices or inline arrays.
@@ -436,6 +438,18 @@ These items are also listed under `limitations:`.
   here, but addresses are unobservable, so this is not modelled.
 - **Literal evaluation order inside `abi.encode*`.** Fixed at left to
   right.
+- **`abi.encode` of memory structs and arrays (typing gap).**
+  `STy.abiArg` admits value types, `bytes` and `string` only, so
+  `abi.encode(p)` with `p` a `P memory` struct, or a memory array, has no
+  type, although solc 0.8 (ABI coder v2) accepts both; G13's
+  `abiEncode_checked` negative control pins this known gap, not a solc
+  refusal.
+- **Assignment of storage structs with a nested mapping (typing gap).**
+  `Typed.assign` refuses only a top-level mapping, so `s1 = s2` for a
+  storage struct containing a mapping, or an array of mappings, is typed,
+  although solc refuses it. An array of mappings is then `stuck`
+  (`loadMem`: "a mapping is not copied"); a struct runs as a copy of
+  nothing ([source-soundness.md](source-soundness.md#the-stuck-census)).
 
 ## Gates
 
