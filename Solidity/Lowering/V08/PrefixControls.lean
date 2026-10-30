@@ -1018,6 +1018,135 @@ theorem ambiguous_partition_concat :
     · have preceding : transactPrefix base (frames.take 1) = (linked.resetTransient, h1) := boundary1
       rw [preceding]; decide +kernel
 
+/-- Real paidcall when the constructor candidate is installed; otherwise an
+actual creation. Only the actual reached branch is required for replacement. -/
+def paidReplacement (w : World Catalog) : TRes (World Catalog × Output) :=
+  if (w.accounts candidate).isSome then failing w else occupied w
+
+def baseOnlyReplacement (w : World Catalog) : TRes (World Catalog × Output) :=
+  if (w.accounts candidate).isSome then occupied w else failing w
+
+def dirtyOnlyReplacement (w : World Catalog) : TRes (World Catalog × Output) :=
+  if cells w candidate = some [8, 12] then failing w else occupied w
+
+theorem paid_replacement_reached : paidReplacement linked.resetTransient = failing linked.resetTransient := by
+  have present : (linked.resetTransient.accounts candidate).isSome = true := by decide +kernel
+  unfold paidReplacement
+  rw [present]; rfl
+
+theorem paid_replacement_actual_input :
+    failing (transactPrefix base [commit]).1.resetTransient =
+      paidReplacement (transactPrefix base [commit]).1.resetTransient := by
+  rw [boundary1, resetTransient_idem]
+  exact paid_replacement_reached.symm
+
+theorem replacement_continuation :
+    transactPrefix base [commit, paidReplacement, occupied, reading] = transactPrefix base frames :=
+  (transact_prefix_replace_frame base [commit] [occupied, reading] failing paidReplacement paid_replacement_actual_input).symm
+
+/-- All listed balances/cells/identity/context/status observations at all original
+boundaries retained; replaced trace has both exact errors and both full returns. -/
+theorem replacement_complete_vectors :
+    (observeBoundary [] =
+      ((([95, 0, 0, 5, 0], [some [0, 0], some [19, 29], some []], flags), none, false), []) ∧
+    observeBoundary [commit] = (committedVector, h1) ∧
+    observeBoundary [commit, failing] = (committedVector, h2) ∧
+    observeBoundary [commit, failing, occupied] = (committedVector, h3) ∧
+    observeBoundary frames = (committedVector, h4)) ∧
+    (extended (transactPrefix base [commit, paidReplacement, occupied, reading]).1,
+      (transactPrefix base [commit, paidReplacement, occupied, reading]).2) = (committedVector, h4) := by
+  constructor
+  · exact complete_boundaries
+  · rw [replacement_continuation, boundary4, read_vector_value]
+
+theorem base_only_agrees_at_wrong_input : baseOnlyReplacement base.resetTransient = failing base.resetTransient := by
+  have absent : (base.resetTransient.accounts candidate).isSome = false := by decide +kernel
+  unfold baseOnlyReplacement
+  rw [absent]; rfl
+
+theorem base_only_reached_failure : baseOnlyReplacement linked.resetTransient = .error .revert := by
+  have present : (linked.resetTransient.accounts candidate).isSome = true := by decide +kernel
+  unfold baseOnlyReplacement
+  rw [present]
+  exact occupied_reached
+
+theorem wrong_base_input_discriminates :
+    (baseOnlyReplacement linked.resetTransient).halt? ≠ (failing linked.resetTransient).halt? := by
+  rw [base_only_reached_failure, failing_reached]; decide +kernel
+
+theorem dirty_only_agrees_at_wrong_input : dirtyOnlyReplacement linked = failing linked := by
+  have dirty : cells linked candidate = some [8, 12] := by decide +kernel
+  rw [dirtyOnlyReplacement, if_pos dirty]
+
+theorem dirty_only_reached_failure : dirtyOnlyReplacement linked.resetTransient = .error .revert := by
+  have clean : cells linked.resetTransient candidate ≠ some [8, 12] := by decide +kernel
+  rw [dirtyOnlyReplacement, if_neg clean, occupied_reached]
+
+theorem wrong_dirty_input_discriminates :
+    (dirtyOnlyReplacement linked.resetTransient).halt? ≠ (failing linked.resetTransient).halt? := by
+  rw [dirty_only_reached_failure, failing_reached]; decide +kernel
+
+def replacementFrames : List (TransactionFrame Catalog Output) := [commit, paidReplacement, occupied, reading]
+
+/-- The LEFT original trace supplies every premise's reached reset world. No
+agreement on unrelated worlds or equality of traces is assumed. -/
+theorem replacement_pointwise : ∀ i (valid : i < frames.length),
+    frames[i] (transactPrefix base (frames.take i)).1.resetTransient =
+      (replacementFrames[i]'(by exact valid)) (transactPrefix base (frames.take i)).1.resetTransient := by
+  intro i valid
+  match i with
+  | 0 => rfl
+  | 1 =>
+    simpa only [frames, replacementFrames, List.getElem_cons_succ, List.getElem_cons_zero,
+      List.take_succ_cons, List.take_zero] using paid_replacement_actual_input
+  | 2 => rfl
+  | 3 => rfl
+  | i + 4 =>
+    simp only [frames, List.length_cons, List.length_nil] at valid
+    omega
+
+theorem replacement_every_prefix (count : Nat) :
+    transactPrefix base (frames.take count) = transactPrefix base (replacementFrames.take count) :=
+  transact_prefix_reachable_congr base frames replacementFrames rfl replacement_pointwise count
+
+theorem replacement_every_listed_vector (count : Nat) :
+    (extended (transactPrefix base (replacementFrames.take count)).1,
+      (transactPrefix base (replacementFrames.take count)).2) =
+    (extended (transactPrefix base (frames.take count)).1,
+      (transactPrefix base (frames.take count)).2) :=
+  congrArg (fun pair => (extended pair.1, pair.2)) (replacement_every_prefix count).symm
+
+/-- Explicit actual middle-SEGMENT application, preserving the arbitrary prefix
+and the real final read using only two individual reached-input obligations. -/
+theorem replacement_segment_application :
+    transactPrefix base (([commit] ++ [failing, occupied]) ++ [reading]) =
+      transactPrefix base (([commit] ++ [paidReplacement, occupied]) ++ [reading]) := by
+  apply transact_prefix_replace_segment base [commit] [reading] [failing, occupied] [paidReplacement, occupied] rfl
+  intro i valid
+  match i with
+  | 0 =>
+    simpa only [List.getElem_cons_zero, List.take_zero, transact_prefix_nil] using paid_replacement_actual_input
+  | 1 => rfl
+  | i + 2 =>
+    simp only [List.length_cons, List.length_nil] at valid
+    omega
+
+#print axioms replacement_pointwise
+#print axioms replacement_every_prefix
+#print axioms replacement_every_listed_vector
+#print axioms replacement_segment_application
+
+#print axioms paid_replacement_reached
+#print axioms paid_replacement_actual_input
+#print axioms replacement_continuation
+#print axioms replacement_complete_vectors
+#print axioms base_only_agrees_at_wrong_input
+#print axioms base_only_reached_failure
+#print axioms wrong_base_input_discriminates
+#print axioms dirty_only_agrees_at_wrong_input
+#print axioms dirty_only_reached_failure
+#print axioms wrong_dirty_input_discriminates
+
 #print axioms adjacent_subdivision_application
 #print axioms adjacent_observation_application
 #print axioms ambiguous_partition_concat

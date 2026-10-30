@@ -2009,3 +2009,59 @@ separatelynamedNEW0 pass. Both finalindependentproof/control/pins/doc reviews
 PASS/no findings after evidencegap fixes. Precommitavailable207007744bytes,
 inside32MiBtotalcontinuation envelope. Measuredcompact additiveexports follow.
 Alloriginalsource/applicationparents and mandatorywholevalidation unfinished.
+
+
+### Reachable-input frame and segment replacement checkpoint
+
+Starting ca7fa9da632a6a7d37823ea44c2afc27c078aae3, the missing list/contextual
+congruence is now proved. Equal-length lists require INDIVIDUAL COMPLETE rawframe
+TRes(World x typedvalue) agreement ONLY at each LEFT execution's actual reached
+prefixworld.resetTransient. This explicit premise is stronger than normalized-
+result agreement; neither globalfunction equality, source adequacy nor wholetrace
+preservation is assumed. Induction derives exact World AND COMPLETE orderedTRes
+history equality for EVERY finiteprefix, incl naturaltruncation/empty. Full-list,
+localizedframe and localizedsegment corollaries retain arbitrary precedinghistory
+and arbitrary subsequentexecution at the reachedworld. No cutoff/newinterpreter/
+state layer or raw=normalized identification. Perframepremises stay obligations.
+
+Fourteen controls use existing fundedconstructor/library/paidbinaryfailure/
+occupiedcreate/plainfailure/read fixture. paidReplacement selects actualpaidcall
+when candidate installed, otherwise actualcreate. Perframeagreement is established
+at actualpostcommitreset, not base ordirtyworld; general everyprefix and actual
+middleframe/segment theorems instantiated directly. Full listedvector/history at
+ALLold0..4 boundaries and everyreplacedprefix retained, including bothfullsame-tag
+success bytes/context/readvalue and exactbothorderederrors. baseOnlyReplacement
+agrees atoriginalbase yet producesplainrevert at reachedinput instead ofbinaryhalt.
+dirtyOnlyReplacement agrees atrawlinkedworld yet likewise fails at resetinput.
+No arbitrary inventedworld or callinterpreter; guards read existingtypedworldcells/
+accounts and branches invoke actualpublished operations. No Source execution claim.
+
+Gate814624-7aaf3c68 PASS117jobs/39.9992s;493standardexactpins retain475starting
+entries. Initial814065FAIL1 from owninsertionanchor matchingthreeprintprefixes,
+plus indexedfunction parentheses; removed ONLYgenerated duplicates with an exact
+base+addition assertion and parenthesized indexedframe, no oldcommittedtext lost.
+Rawfailure retained; no authorsorry/axiom and no nonstandardaxes in successfulsets.
+Both independent finder/skeptic reviewed actualpremises/nonvacuity/fullobservations
+read-only withoutLean/server/builds/writes, no substantivefinding. Rawworldpremise
+must not be marketed as merelyobservational agreement. Nextprecisenormalization
+clause remains separate. get_goal/LeanMCPunavailable,blockedgoaluntouched.
+
+Same existing checked boundedruntime, no allocation/deletion/capacitychange;
+12GiB/swap0under16GiBparent,CPU1,LEAN_NUM_THREADS1/Lean-j1,600s and allproofbudgets
+unchanged. Initialavailable199041024; affectedcompiled1444171;32MiBentiregrowth
+envelope leaves at least165486592. Fresh preflight/budget evidence retained.
+Every original G20,G21,G22.01-.05,G23/BackfillA-B parent remainsPARTIAL, Source/
+V07/type/layout/ABI/body/linkage/runtimeframe/bytecode/admission/reservedowner
+applications and mandatoryfull/Decision/literalwrapper gates open. No independent
+queueexhaustion claimed; no unchangedfailedmandatoryretry or baselinewaiver.
+Rawglobaldocs/pins exits1 and complete exactbase NEW0 comparisons separate.
+This section is the checkpoint handoff; scopedgates/additiveartifacts follow.
+
+Rawreplacement checkpoint final scopedgates PASS493exactpins/60coreclosure,
+19evidence+14runtimeprofilecorruptions afterpositivecontrols,trust911/241/0findings,
+strict491/61budget/11refuted/0pending,layers169/0elaborator,orphans896/0orphan.
+Rawtask/base docs/pins exits1 retained, complete72/14 findingrows identical and
+separateNEW0 passes. Both finalindependent reviews PASS/no findings. GatefreshRSS
+1133637632,reusedreportedpeak516050944(possiblycumulative). Precommitavailable
+190365696bytes inside32MiBenvelope. Originalsource/application/mandatorywhole
+obligations unfinished; next independentprecisenormalization clause continues.

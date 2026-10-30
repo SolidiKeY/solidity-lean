@@ -531,6 +531,72 @@ theorem transact_prefix_partition_reflect_iff {β : Type} (w : World contracts)
   and_congr (transact_prefix_segment_observe_reflect_iff w frames start left observation injective first)
     (transact_prefix_segment_observe_reflect_iff w frames (start + left) right observation injective second)
 
+/-- Equal-length frame lists agree ONLY at the LEFT execution's actually
+reached reset inputs. These individual raw-result premises imply exact world
+AND entire ordered history equality for EVERY prefix, including truncation. -/
+theorem transact_prefix_reachable_congr (w : World contracts)
+    (left right : List (TransactionFrame contracts α)) (lengths : left.length = right.length)
+    (agree : ∀ i (valid : i < left.length),
+      left[i] (transactPrefix w (left.take i)).1.resetTransient =
+        (right[i]'(by rw [← lengths]; exact valid)) (transactPrefix w (left.take i)).1.resetTransient)
+    (count : Nat) :
+    transactPrefix w (left.take count) = transactPrefix w (right.take count) := by
+  induction count with
+  | zero => simp only [List.take_zero, transact_prefix_nil]
+  | succ i ih =>
+    by_cases valid : i < left.length
+    · have validRight : i < right.length := by rw [← lengths]; exact valid
+      have boundary := transact_congr (transactPrefix w (left.take i)).1 left[i] right[i] (agree i valid)
+      rw [List.take_succ_eq_append_getElem valid, List.take_succ_eq_append_getElem validRight,
+        transact_prefix_snoc, transact_prefix_snoc]
+      unfold transactStep
+      rw [← ih, boundary]
+    · have doneLeft : left.length ≤ i := Nat.le_of_not_gt valid
+      have doneRight : right.length ≤ i := by rw [← lengths]; exact doneLeft
+      simpa only [List.take_of_length_le doneLeft, List.take_of_length_le doneRight,
+        List.take_of_length_le (Nat.le_step doneLeft), List.take_of_length_le (Nat.le_step doneRight)] using ih
+
+/-- Full-list consequence of individual reached-input agreement. Neither trace
+preservation nor agreement at arbitrary/unreached worlds is a premise. -/
+theorem transact_prefix_reachable_congr_full (w : World contracts)
+    (left right : List (TransactionFrame contracts α)) (lengths : left.length = right.length)
+    (agree : ∀ i (valid : i < left.length),
+      left[i] (transactPrefix w (left.take i)).1.resetTransient =
+        (right[i]'(by rw [← lengths]; exact valid)) (transactPrefix w (left.take i)).1.resetTransient) :
+    transactPrefix w left = transactPrefix w right := by
+  have full := transact_prefix_reachable_congr w left right lengths agree left.length
+  have last : right.take left.length = right := by rw [lengths, List.take_length]
+  simpa only [List.take_length, last] using full
+
+/-- Replace one actual middle frame after arbitrary preceding history; all
+following execution starts at the same reached world and retains all statuses. -/
+theorem transact_prefix_replace_frame (w : World contracts)
+    (before after : List (TransactionFrame contracts α)) (left right : TransactionFrame contracts α)
+    (agree : left (transactPrefix w before).1.resetTransient = right (transactPrefix w before).1.resetTransient) :
+    transactPrefix w (before ++ left :: after) = transactPrefix w (before ++ right :: after) := by
+  have boundary := transact_congr (transactPrefix w before).1 left right agree
+  rw [transact_prefix_append w before (left :: after), transact_prefix_append w before (right :: after),
+    transact_prefix_cons, transact_prefix_cons, boundary]
+
+/-- Replace a middle segment using individual raw frame agreement at the LEFT
+segment's reached inputs, then retain arbitrary preceding and following history. -/
+theorem transact_prefix_replace_segment (w : World contracts)
+    (before after left right : List (TransactionFrame contracts α)) (lengths : left.length = right.length)
+    (agree : ∀ i (valid : i < left.length),
+      left[i] (transactPrefix (transactPrefix w before).1 (left.take i)).1.resetTransient =
+        (right[i]'(by rw [← lengths]; exact valid))
+          (transactPrefix (transactPrefix w before).1 (left.take i)).1.resetTransient) :
+    transactPrefix w ((before ++ left) ++ after) = transactPrefix w ((before ++ right) ++ after) := by
+  have segment := transact_prefix_reachable_congr_full (transactPrefix w before).1 left right lengths agree
+  have middle : transactPrefix w (before ++ left) = transactPrefix w (before ++ right) := by
+    rw [transact_prefix_append w before left, transact_prefix_append w before right, segment]
+  rw [transact_prefix_append w (before ++ left) after, transact_prefix_append w (before ++ right) after, middle]
+
+#print axioms transact_prefix_reachable_congr
+#print axioms transact_prefix_reachable_congr_full
+#print axioms transact_prefix_replace_frame
+#print axioms transact_prefix_replace_segment
+
 #print axioms transact_prefix_segment_subdivide
 #print axioms transact_prefix_segment_subdivide_history
 #print axioms transact_prefix_segment_subdivide_observe
