@@ -188,6 +188,29 @@ theorem wrong_status_order : (transactPrefix base frames).2 ≠
     [.ok commitValue, .error .revert, .error laterHalt, .ok readValue] := by
   rw [boundary4]; decide +kernel
 
+/-- Original typed result retained whole, with a derived size observation. -/
+def extendOutput (output : Output) : Output × Nat :=
+  (output, match output with
+    | .inl libraryResult => libraryResult.1.length
+    | .inr (.inl _) => 0
+    | .inr (.inr (.inl _)) => 1
+    | .inr (.inr (.inr values)) => values.length)
+def observedFrames := frames.map (fun frame => observeTransactionFrame frame extendOutput)
+
+theorem observed_complete :
+    (extended (transactPrefix base observedFrames).1, (transactPrefix base observedFrames).2) =
+      (committedVector, [.ok (commitValue, 2), .error laterHalt, .error .revert, .ok (readValue, 6)]) := by
+  simp only [observedFrames, transact_prefix_observe, boundary4, read_vector_value]
+  rfl
+
+/-- Dropping only the ADDED observation recovers every original ordered value
+and exact error, including both real failures between the two successes. -/
+theorem observed_recovery :
+    (transactPrefix base observedFrames).2.map (fun result => result.map Prod.fst) =
+      (transactPrefix base frames).2 := by
+  simp only [observedFrames, transact_prefix_observe, boundary4]
+  rfl
+
 #print axioms commit_reached
 #print axioms paid_failure_reached
 #print axioms failing_reached
@@ -576,4 +599,6 @@ theorem wrong_status_order : (transactPrefix base frames).2 ≠
 #print axioms Solidity.Lowering.V08.wordBytes_transport
 #print axioms Solidity.Lowering.V08.wordSequence_transport
 
+#print axioms observed_complete
+#print axioms observed_recovery
 end Solidity.Lowering.V08.PrefixControls

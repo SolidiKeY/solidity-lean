@@ -1326,6 +1326,16 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.observed_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.observed_recovery": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.occupied_reached": [
     "Classical.choice",
     "Quot.sound",
@@ -1671,6 +1681,9 @@
   ],
   "Solidity.Lowering.V08.transact_prefix_normalized": [
     "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_observe": [
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_singleton": [

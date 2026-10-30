@@ -1666,3 +1666,34 @@ fixed; no Lean/server/builds by reviewers. Source/mandatory-full obligations
 remain open. Original storage estimate omitted VFS container copies; repaired
 reuse incurs only small output/log growth without any deletion or cap change.
 This committed section is the handoff for this first prefix checkpoint.
+
+
+### Prefix observation extension checkpoint
+
+After committed first prefix checkpoint b010202f46208b60682f37f12a5114c9711c9d01,
+the next independent BackfillB clause is now proved: transact_prefix_observe
+lifts existing transact_observe to arbitrary finite lists, preserving exact
+world and every ordered error while mapping successful values. An arbitrary
+observation need not be injective; no generic losslessness is claimed.
+Concrete extendOutput pairs EACH WHOLE ORIGINAL typed Sum value with its size;
+observed_complete retains the ENTIRE extended world vector and allfour statuses,
+and observed_recovery removes ONLY the added Nat to recover the exact original
+ordered history, including both real failures and full return bytes/context.
+These consume the actual constructor/library/postcommit failure/collision/read
+runs already checked, not a Source preservation hypothesis or another evaluator.
+
+Gate726724-3deff8c6 passes the same117-job/116-module focused closure using the
+same unchanged67-command owned-container configuration. The raw gate records
+actual fresh RSS,reported reused cgrouppeak(possiblycumulative),exact tool
+versions,source/config hashes,before/after identity/resource/mount checks and
+zero writable-root bytes. Forty-four new theorems now give401standard sets;
+all398 first-stage,357previous,322earlier and original276 sets are unchanged.
+The first398 result remains stage evidence, not a current global fingerprint.
+Both read-only finder/skeptic observation-law reviews pass with no findings.
+The new general law is not Source/body/ABI/runtime/bytecode lowering. Every
+original group and Backfill source application remains PARTIAL; all mandatory
+full/Decision/rawglobal failures and literal-wrapper pending boundaries persist.
+This section records the second checkpoint's committed handoff; current final
+script gates, exact statuses, both checkpoint heads and sealed artifacts are
+also recorded in the final owning handoff. No further independent work is
+claimed exhausted or goal complete.

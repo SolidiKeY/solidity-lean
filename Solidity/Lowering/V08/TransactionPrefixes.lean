@@ -146,6 +146,25 @@ theorem transact_prefix_failure_suffix (w : World contracts)
     transact_prefix_failure_snoc w earlier frame halt failed]
   simp only [List.append_assoc, List.cons_append, List.nil_append]
 
+/-- Pure result extension of an existing frame; world and exact halt retained. -/
+def observeTransactionFrame {β : Type} (frame : TransactionFrame contracts α)
+    (observation : α → β) : TransactionFrame contracts β := fun w =>
+  (frame w).map (fun pair => (pair.1, observation pair.2))
+
+/-- Lift published single-transaction observation transport to every finite
+prefix, retaining the entire ordered success/error history and exact world. -/
+theorem transact_prefix_observe {β : Type} (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (observation : α → β) :
+    transactPrefix w (frames.map (fun frame => observeTransactionFrame frame observation)) =
+      ((transactPrefix w frames).1, (transactPrefix w frames).2.map (fun result => result.map observation)) := by
+  induction frames generalizing w with
+  | nil => rfl
+  | cons frame rest ih =>
+    have one : w.transact (observeTransactionFrame frame observation) =
+        ((w.transact frame).1, (w.transact frame).2.map observation) :=
+      transact_observe w frame observation
+    simp only [List.map_cons, transact_prefix_cons, one, ih]
+
 #print axioms transact_step_history
 #print axioms transact_prefix_nil
 #print axioms transact_prefix_cons
@@ -161,4 +180,5 @@ theorem transact_prefix_failure_suffix (w : World contracts)
 #print axioms transact_prefix_failure_snoc
 #print axioms transact_prefix_failure_suffix
 
+#print axioms transact_prefix_observe
 end Solidity.Lowering.V08
