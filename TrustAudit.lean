@@ -1309,3 +1309,26 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} source-semantics theorems use only the standard axioms"
+
+/-! Lane V04b checkpoint 1: G13's checker on the S02 typing rules
+(`Solidity/Frontend/Static/`, `docs/feature-work/source-soundness.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.hasType_iff,
+    ``Solidity.Frontend.Static.stmtOK_iff,
+    ``Solidity.Frontend.Static.itemsOK_iff,
+    ``Solidity.Frontend.Static.wellFormed_iff,
+    ``Solidity.Frontend.Static.InferExamples.member_checked,
+    ``Solidity.Frontend.Static.InferExamples.structNew_checked,
+    ``Solidity.Frontend.Static.InferExamples.extCall_checked,
+    ``Solidity.Frontend.Static.InferExamples.extCallValue_checked,
+    ``Solidity.Frontend.Static.InferExamples.pay_checked,
+    ``Solidity.Frontend.Static.InferExamples.abiEncode_checked]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checkpoint-1 checker theorems use only the standard axioms"

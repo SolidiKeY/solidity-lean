@@ -348,10 +348,12 @@ Overload selection is S01's: `Typed.callInternal`, `emit` and `revert E(…)`
 require exactly one candidate accepting the argument types **of one
 argument typing**. That differs from solc, which refuses a call when two
 overloads accept the arguments under any of their typings:
-`hexCall_typed` shows `f(0x01)` with `f(uint8)` and `f(bytes1)` getting two
+`hexCall_typed` showed `f(0x01)` with `f(uint8)` and `f(bytes1)` getting two
 derivations, one per callee, where solc reports "No unique declaration
-found after argument-dependent lookup". The checker decides S01's relation
-faithfully, deviation included (Handoff). With a decimal `1`, which has no
+found after argument-dependent lookup". Since solc's literal typing (Q1,
+lane-semantics) gives `0x01` the single type `hexConst 1 1`, which both
+overloads accept, the call is now refused as solc refuses it, and
+`hexCall_typed` states that (length 0; lane-soundness checkpoint 1). With a decimal `1`, which has no
 `bytesN` typing, the call is refused (G12's `ambiguous_refused`).
 
 ### User-defined value types (`Solidity/Source/UserOps.lean`, `Solidity/Frontend/Static/UserOps.lean`)
@@ -406,13 +408,13 @@ becomes S01's rules (and the parse, G08–G11).
 | `clashing_checked`, `sameSig_checked`, `ifaceBody_checked`, `twoCtors_checked`, `noVisibility_checked` | S01's five ill-formed units refused by `wellFormedB` |
 | `tooBig_checked`, `fits_checked` | `uint8 x = 300;` has no statement derivation; `uint8 x = 255;` has one |
 | `shl18_checked`, `gasleft_checked`, `msgValue_checked` | `1 << 8` has only its folded type; `gasleft()` and `msg.value` in a non-payable public body have none |
-| `zero_types`, `addLit_types`, `cond_types`, `require_checked` | `0x00` has 33 types; `a + 1` and `b ? a : a` one each; `require(b, "no");` is a statement |
+| `zero_types`, `addLit_types`, `cond_types`, `require_checked` | `0x00` has one type, `hexConst 0 1` (33 before Q1); `a + 1` and `b ? a : a` one each; `require(b, "no");` is a statement |
 | `named_value`, `named_length` | `N = 3; M = N * 2 + 1` gives `M = 7`; the length expression `M` gives 7 |
 | `typed_division`, `overflow_length` | `A = 7`: `A / 2 * 2` is 6; `uint8 C = 255`: `C + 1` is no length |
 | `cyclic_refused`, `cyclic_noValue` (by the mutual recursor), `named_acyclic` | `A = B + 1; B = A + 1` refused, and `A` has no value; `N`, `M` acyclic |
 | `timestamp_wellFormed`, `timestamp_refused`, `keccak_pure` | `block.timestamp` as a constant passes S01, is refused here; `keccak256("x")` is compile-time |
 | `udvt_add`, `udvt_noBinding`, `udvt_wrap`, `udvt_unwrap`, `udvt_bindings_ok`, `badBinding_refused` | `a + b` on `Fixed` with a binding; `a - b` without one has no type; `Fixed.wrap(1)`, `Fixed.unwrap(a)`; the bindings are well formed; binding `add` (returning `Fixed`) to `<` is refused |
-| `hexCall_typed` | the recorded overload deviation: `f(0x01)` has two derivations |
+| `hexCall_typed` | `f(0x01)` with `f(uint8)`/`f(bytes1)` has no derivation (was two before Q1's literal typing) |
 
 ### What G13 does not do
 
@@ -808,7 +810,7 @@ fractional one rational (a type no value has).
   has `FxTy`'s fields; `Q.toRat` reads S01's rational as a `Rat`).
 - Relations over S01's `HasType`: `StandaloneTyped Γ e τ` (`e : σ` and
   `σ.standalone = τ`) and `AbiArgTyped`, only the constant-type restriction
-  on ABI arguments (not a constant-only type, `STy.isConstTy`); solc's other
+  on ABI arguments (not a constant-only type, `STy.isConstOnly`); solc's other
   restrictions on `abi.encode` arguments (mappings, internal function
   types, storage references, tuples) are not in it.
 - Checkers over G13's inference: `standaloneTys`, `abiArgTys`;

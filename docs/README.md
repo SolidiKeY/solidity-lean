@@ -35,6 +35,7 @@ history is in git.
 | [feature-work/source-s02.md](feature-work/source-s02.md) | Source semantics S02: resolved bodies in elaborated units, closed typing gaps, run-time values, arithmetic, effect order per pipeline, references and failures. |
 | [feature-work/source-s03.md](feature-work/source-s03.md) | Source semantics S03: statements, modifiers with repeated placeholders, constructor order, internal/external/callback call frames, horizons and divergence. |
 | [feature-work/source-s05.md](feature-work/source-s05.md) | Source semantics S05: the composition into G01's `Lang`, the source-constructor ledger, controls, reviews and the lane's handoff. |
+| [feature-work/source-soundness.md](feature-work/source-soundness.md) | Lane V04b: integration of the source semantics with G13's checker, type soundness (preservation, gap-relative progress), reviews and handoff. |
 | [feature-work/roadmap-g04-restrictions.md](feature-work/roadmap-g04-restrictions.md) | Roadmap G04: current compiler theorems, every fragment/input restriction and its discharging group. |
 | [feature-work/roadmap-g06-osaka.md](feature-work/roadmap-g06-osaka.md) | Roadmap G06 child: hand-written EVM vector scripts re-pinned from Cancun to Osaka; both-fork measurements, bytecode comparison, lane re-runs and Lean-side pin obligations. |
 | [feature-work/fixed-point-semantics.md](feature-work/fixed-point-semantics.md) | Fixed-point types: the pinned specification, the reference model `Language/FixedPoint.lean`, silent-spec proposals, scope questions and roadmap owners. |
