@@ -327,8 +327,8 @@ def callF : RExpr SemanticsExamples.E0 [] (STy.ret [.int IntTy.u8]) := .call fDe
 open SemanticsExamples in
 /-- The program implements every function by `return 1;` (`retOneBody`):
 the functions `fDecl` names are fragment bodies. -/
-theorem retOne_callsOK : CallsOK (fun d => d = fDecl) (progOf retOneBody) := by
-  intro c d ps rs hs hA
+theorem retOne_callsOK : CallsOK (fun d => d = fDecl) (progOf retOneBody) "C" := by
+  intro d ps rs hs hA
   subst hA
   rw [fDecl_sig] at hs
   simp only [Option.some.injEq, Prod.mk.injEq] at hs
@@ -342,7 +342,7 @@ open SemanticsExamples in
 (`evalE_callFrag_ns`: the joint induction over expressions, statements,
 bodies and internal calls). -/
 theorem callF_ns (n : Nat) : NS (evalE (progOf retOneBody) F0 n callF) :=
-  evalE_callFrag_ns retOne_callsOK F0 n callF ⟨rfl, trivial⟩ trivial
+  evalE_callFrag_ns retOne_callsOK F0 rfl n callF ⟨rfl, trivial⟩ trivial
 
 open SemanticsExamples in
 /-- **Value control**: `f()` evaluates to `1`. -/
@@ -369,8 +369,8 @@ def recBody : RBody E0 where
   items := .stmt (.retVal rfl (.call fDecl fDecl_sig .nil) (by decide)) .nil
 
 open SemanticsExamples in
-theorem rec_callsOK : CallsOK (fun d => d = fDecl) (progOf recBody) := by
-  intro c d ps rs hs hA
+theorem rec_callsOK : CallsOK (fun d => d = fDecl) (progOf recBody) "C" := by
+  intro d ps rs hs hA
   subst hA
   rw [fDecl_sig] at hs
   simp only [Option.some.injEq, Prod.mk.injEq] at hs
@@ -384,7 +384,7 @@ open SemanticsExamples in
 at any horizon (the joint induction: the callee's body itself calls); it
 only times out. -/
 theorem recF_ns (n : Nat) : NS (evalE (progOf recBody) F0 n callF) :=
-  evalE_callFrag_ns rec_callsOK F0 n callF ⟨rfl, trivial⟩ trivial
+  evalE_callFrag_ns rec_callsOK F0 rfl n callF ⟨rfl, trivial⟩ trivial
 
 open SemanticsExamples in
 /-- **Value control**: the recursion runs out of horizon (a timeout, not
@@ -417,8 +417,8 @@ def progFG : Glob E0 :=
     fun _ => word 0, fun _ _ => false, fun _ => .answer (.success []), word 0⟩
 
 open SemanticsExamples in
-theorem fg_callsOK : CallsOK (fun d => d = fDecl ∨ d = gDecl) progFG := by
-  intro c d ps rs hs hA
+theorem fg_callsOK : CallsOK (fun d => d = fDecl ∨ d = gDecl) progFG "C" := by
+  intro d ps rs hs hA
   rcases hA with rfl | rfl
   · rw [fDecl_sig] at hs
     simp only [Option.some.injEq, Prod.mk.injEq] at hs
@@ -440,7 +440,7 @@ open SemanticsExamples in
 /-- **Witness, a call through a body that calls**: `g()`, whose body returns
 `f()`, is never `stuck` in a program with distinct bodies for `f` and `g`. -/
 theorem callG_ns (n : Nat) : NS (evalE progFG F0 n callG) :=
-  evalE_callFrag_ns fg_callsOK F0 n callG ⟨Or.inr rfl, trivial⟩ trivial
+  evalE_callFrag_ns fg_callsOK F0 rfl n callG ⟨Or.inr rfl, trivial⟩ trivial
 
 open SemanticsExamples in
 /-- **Value control**: `g()` evaluates to `f()`'s `1` (at horizon 12). -/
