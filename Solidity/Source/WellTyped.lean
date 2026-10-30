@@ -41,7 +41,9 @@ at a type without a location); allocation and writes keep it, and with it a
 byte write at a `bytes`/`string` address is never `stuck`
 (`writeLoc_memByte_ok`), nor is an element or member write of the
 element's or member's type (`memSet_ok`, `writeLoc_mem_ok`), nor a byte
-read (`heapBytes_ok`, `readLoc_memByte_ok`).
+read (`heapBytes_ok`, `readLoc_memByte_ok`). With `HeapInner` too
+(`Data.Inner`: elements and members are bare values), neither is an
+element or member read (`memElem_ok`, `readLoc_mem_ok`).
 -/
 
 namespace Solidity.Source
@@ -808,6 +810,163 @@ theorem readLoc_memByte_ok {H : HeapTy} (F : Fr) (a i : Nat) :
   split
   · exact Hoare.pure' fun y hy => hy.1
   · exact Hoare.lift' fun y hy => ⟨hy.1, trivial⟩
+
+
+/-! ## Inline elements (for progress of memory element reads) -/
+
+/-- Every field is a bare value. -/
+def DataList.AllVal : {τs : List STy} → DataList E.layout τs → Prop
+  | _, .nil => True
+  | _, .cons x r => (∃ v, x = Data.val v) ∧ r.AllVal
+
+/-- **The elements of a top-level object are bare values**: an array's
+elements and a struct's members are `Data.val` (nested aggregates are
+separate objects, referenced by pointer). -/
+def Data.Inner {τ : STy} : Data E.layout τ → Prop
+  | .array _ _ xs => ∀ j, ∃ v, xs j = Data.val v
+  | .struct fs => fs.AllVal
+  | _ => True
+
+/-- Every object of the heap has bare-value elements. -/
+def HeapInner (h : Heap E.layout) : Prop := ∀ a x, h.get a = some x → Data.Inner x.2
+
+/-- A field read at its own type from bare-value fields succeeds with a
+bare value. -/
+theorem DataList.nth_val {τ : STy} : {τs : List STy} → (fs : DataList E.layout τs) → fs.AllVal →
+    (i : Nat) → τs[i]? = some τ → ∃ v, fs.nth i τ = .ok (Data.val v)
+  | _, .nil, _, _, h => by simp only [List.getElem?_nil, reduceCtorEq] at h
+  | _, .cons (τ := σ) x r, hf, 0, h => by
+    simp only [DataList.AllVal] at hf
+    obtain ⟨⟨v, hv⟩, _⟩ := hf
+    simp only [List.getElem?_cons_zero, Option.some.injEq] at h
+    subst h hv
+    exact ⟨v, by simp only [DataList.nth, dite_true]; rfl⟩
+  | _, .cons x r, hf, i + 1, h => by
+    simp only [DataList.AllVal] at hf
+    simp only [List.getElem?_cons_succ] at h
+    obtain ⟨v, hv⟩ := DataList.nth_val r hf.2 i h
+    exact ⟨v, by simp only [DataList.nth]; exact hv⟩
+
+/-- **`heapObj`, with the cell**: the object read is the one at the
+address (any `P` is kept). -/
+theorem heapObj_get {P : EMState E Γ → Prop} {X : Halt → EMState E Γ → Prop}
+    (hX : ∀ y, P y → y.2.heap.get a = none → X (.stuck "dangling memory reference") y) :
+    Hoare P (heapObj a : EM E Γ (Σ σ, Data E.layout σ)) (fun x y => P y ∧ y.2.heap.get a = some x) X := by
+  unfold heapObj
+  refine Hoare.bind (Hoare.st' (Q := fun s y => y.2 = s ∧ P y) fun y hy => ⟨rfl, hy⟩) fun s => ?_
+  split
+  · rename_i x hg
+    exact Hoare.pure' fun y ⟨hs, hp⟩ => by subst hs; exact ⟨hp, hg⟩
+  · rename_i hg
+    exact Hoare.halt' fun y ⟨hs, hp⟩ => by subst hs; exact hX y hp hg
+
+/-- **`memElem`, progress and preservation**: an element of an array of
+type `τ`, or a member of type `τ`, in a shaped heap with bare-value
+elements, is read without getting `stuck` (the code reads or panics out of
+bounds; the statement excludes only `stuck`), and the value read agrees. -/
+theorem memElem_ok {H : HeapTy} (a i : Nat) (τ : STy) :
+    Hoare (fun y => ((EMOK E H y ∧ HeapShaped y.2.heap) ∧ HeapInner y.2.heap) ∧
+        ((∃ l k, y.2.heap.ty a = some (.array l τ k)) ∨
+         (∃ l d, y.2.heap.ty a = some (.struct l d) ∧ (E.layout.fields d)[i]? = some τ)))
+      (memElem a i τ : EM E Γ (Val E.layout τ))
+      (fun v y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ v.RefOK E y.2.heap.ty)
+      (fun e y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ NotStuck e) := by
+  unfold memElem
+  refine Hoare.bind (heapObj_get (a := a) fun y ⟨_, hc⟩ hg => ?_) fun ⟨σ, d⟩ => ?_
+  · exfalso
+    simp only [Heap.ty, Heap.get] at hc hg
+    rw [hg] at hc
+    rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, _⟩ <;> cases hc
+  have hty : ∀ y : EMState E Γ, y.2.heap.get a = some ⟨σ, d⟩ → y.2.heap.ty a = some σ := by
+    intro y hg
+    simp only [Heap.ty, Heap.get] at hg ⊢
+    rw [hg]
+    rfl
+  refine Hoare.conseq (P := fun y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ DataOK E y.2.heap.ty d ∧
+      Data.Top d ∧ Data.Inner d ∧
+      ((∃ l k, σ = .array l τ k) ∨ (∃ l dn, σ = .struct l dn ∧ (E.layout.fields dn)[i]? = some τ)))
+    ?_ (fun y ⟨⟨⟨⟨hok, hsh⟩, hin⟩, hc⟩, hg⟩ => ⟨⟨hok, hsh⟩, hok.1.heap a _ hg, hsh a _ hg, hin a _ hg, by
+      rw [hty y hg] at hc
+      rcases hc with ⟨l, k, hc⟩ | ⟨l, dn, hc, hf⟩
+      · exact .inl ⟨l, k, Option.some.inj hc⟩
+      · exact .inr ⟨l, dn, Option.some.inj hc, hf⟩⟩)
+    (fun _ _ h => h) (fun _ _ h => h)
+  cases d with
+  | array len hl xs =>
+    refine Hoare.dite' (fun h => ?_) (fun _ => Hoare.lift' fun y hy => ⟨hy.1, trivial⟩)
+    refine Hoare.dite' (fun e => ?_) (fun e => Hoare.of_false fun y ⟨_, _, _, _, hc⟩ => ?_)
+    · subst e
+      refine Hoare.lift' fun y ⟨hok, hd, _, hin, _⟩ => ?_
+      obtain ⟨v, hv⟩ := hin ⟨i, h⟩
+      cases hd with
+      | array hxs =>
+        have hx := hxs ⟨i, h⟩
+        rw [hv] at hx ⊢
+        cases hx with
+        | val hr => exact ⟨hok, hr⟩
+    · rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, _⟩ <;> cases hc
+      exact e rfl
+  | @struct l dn fs =>
+    refine Hoare.bind (Hoare.lift' (Q := fun x y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧
+        ∃ v, x = Data.val v ∧ v.RefOK E y.2.heap.ty) fun y ⟨hok, hd, _, hin, hc⟩ => ?_)
+      fun x => Hoare.lift' fun y ⟨hok, v, hx, hr⟩ => ?_
+    · have hf : (E.layout.fields dn)[i]? = some τ := by
+        rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, hf⟩ <;> cases hc
+        exact hf
+      obtain ⟨v, hv⟩ := DataList.nth_val fs hin i hf
+      rw [hv]
+      cases hd with
+      | struct hfs =>
+        have hx := hfs.nth fs i τ hv
+        cases hx with
+        | val hr => exact ⟨hok, v, rfl, hr⟩
+    · subst hx
+      exact ⟨hok, hr⟩
+  | val w =>
+    refine Hoare.of_false fun y ⟨_, _, ht, _, hc⟩ => ?_
+    rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, _⟩ <;> subst hc <;>
+      simp only [Data.Top, STy.loc?, reduceCtorEq] at ht
+  | _ =>
+    refine Hoare.of_false fun y ⟨_, _, _, _, hc⟩ => ?_
+    rcases hc with ⟨_, _, hc⟩ | ⟨_, _, hc, _⟩ <;> cases hc
+
+
+/-- The empty heap has bare-value elements. -/
+theorem HeapInner.empty : HeapInner (Heap.empty : Heap E.layout) := fun _ _ h => by cases h
+
+/-- **Allocation keeps bare-value elements**, given such an object. -/
+theorem HeapInner.alloc {h : Heap E.layout} (hh : HeapInner h) {x : Σ τ, Data E.layout τ}
+    (hx : Data.Inner x.2) : HeapInner (h.alloc x).1 := by
+  intro a y hy
+  by_cases e : a = h.next
+  · subst e
+    simp only [Heap.get, Heap.alloc, if_true, Option.some.injEq] at hy
+    subst hy
+    exact hx
+  · have hy' : h.get a = some y := by simp only [Heap.get, Heap.alloc, e, if_false] at hy; exact hy
+    exact hh a y hy'
+
+/-- **A write keeps bare-value elements**, given such an object. -/
+theorem HeapInner.write {h : Heap E.layout} (hh : HeapInner h) {a : Nat} {τ : STy} {x : Data E.layout τ}
+    (hty : h.ty a = some τ) (hx : Data.Inner x) : HeapInner (h.write a x hty) := by
+  intro b y hy
+  by_cases e : b = a
+  · subst e
+    rw [Heap.write_get] at hy
+    cases hy
+    exact hx
+  · rw [Heap.write_other h e] at hy
+    exact hh b y hy
+
+/-- **`readLoc` of memory, progress and preservation** (`memElem_ok`). -/
+theorem readLoc_mem_ok {H : HeapTy} (F : Fr) (a i : Nat) {τ : STy} :
+    Hoare (fun y => ((EMOK E H y ∧ HeapShaped y.2.heap) ∧ HeapInner y.2.heap) ∧
+        ((∃ l k, y.2.heap.ty a = some (.array l τ k)) ∨
+         (∃ l d, y.2.heap.ty a = some (.struct l d) ∧ (E.layout.fields d)[i]? = some τ)))
+      (readLoc F (.mem a i) : EM E Γ (Val E.layout τ))
+      (fun v y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ v.RefOK E y.2.heap.ty)
+      (fun e y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ NotStuck e) :=
+  memElem_ok a i τ
 
 end
 
