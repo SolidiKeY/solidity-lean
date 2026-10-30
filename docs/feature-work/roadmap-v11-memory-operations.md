@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-five. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-six. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -2212,3 +2212,110 @@ emitted-loop execution, G35.05 recursive Source graph/maps/shadows/cycles traver
 and G35.06 final V10/Source/target composition remain open. Backfill A/B advanced
 but not complete or exhausted. No full-lane closure or external compiler/EVM
 result is inferred. Existing blocked goal preserved unchanged/uncompleted.
+
+
+## Checkpoint twenty-six: mixed decoded initialization and two finite schedules
+
+Reproduced concrete missing application: MixedCalldataSequence had actual Bool/
+uint decoded operations and component finite schedules existed separately, but
+no mixed initializer followed by arbitrary reached-heap schedules on BOTH typed
+destinations. New owned MixedCalldataSchedules composes EXISTING
+checkedBoolUintSequence.bind runCaptures(Bool).bind runCaptures(uint), never a new
+AST/IR/interpreter, copy evaluator, value/heap semantics or decoder. Both refs
+have distinct LOGICAL IDs by published bool_uint_transfer_ne; no same-ID cross-
+type witness, physical-disjointness or profile restriction is assumed.
+
+checkedMixedCaptures_some exposes REAL Bool decoded output, uint decoded output,
+Bool schedule output and final uint schedule output. Original all-object lengths
+are derived across each actual step. Exact input-side success_lookup requires
+actual calldataBools/calldataUints lookup, source SliceBounds, ORIGINAL capacities
+and ORIGINAL-length CapturesValid lists. Payloads are extracted, never operation
+inputs or correctness premises. none_first expands four SHORT-CIRCUIT failure
+positions: Bool decoded None; reached uint decoded None after BoolSome; first
+actual Bool schedule failed step after a real prefix; first actual uint schedule
+failed step after whole Bool schedule and real uint prefix. No unexecuted suffix
+heap, Source halt or rollback is invented.
+
+ALL final reads for BOTH destinations are INITIAL replaceSlice reads at their
+computed captureOrigin. Joint whole-heap restoration iff requires BOTH computed
+INITIAL-content agreements, not desired final equality or stagewise preservation.
+Other typed objects and lengths frame, including reference-containing parents;
+parent fields retaining IDs do not imply unchanged dereferenced children. New
+transport derives exact immutable decoded Source reads for both provenance maps,
+uses explicit existing DecodedArrayAt certificates and independent INITIAL Keeps
+for growth, and allocates supplied MObj on the actual BOTH-decoded changed heap
+before the two schedules. Fresh own fields frame without deep-child liveness or
+fresh Source representation/address injectivity.
+
+Controls use ONE actual Source.Calldata table with Boolean object at7 and uint256
+object at9; raw byte list empty imposes no ABI decoder correctness. INITIAL Bool
+[T,F,F]/uint[7,8,8] plus runtime tails ->Bool decode TTF/uintold ->both decoded TTF/
+798 ->Bool repaired TFF/uint798 ->both repaired TFF/788. Five-stage FULL ordered
+vectors and every-stage neighbor[0,max,1], Boolean parent IDs[0,0] and uint parent
+IDs[1,1] are retained. Independent INITIAL-only criteria reconstruct success then
+prove restoration, without a criterion roundtrip or run/postrelation premise.
+Dynamic/fixed arrays support arbitrary runtime repair repetition counts; intrinsic
+n+3<2^256 is existing object validity only, no added admission/schedule cap.
+
+Selective skipped Bool repair successfully leaves TTF while uint is restored;
+changed-source recapture (1,2,0) on BOTH arrays gives actual TTF/998, versus frozen
+INITIAL reads FTF/898. Both source-read laws are directly applied at origins inside
+the decoded footprints. Initial missing/reversed/source/destination guards on
+BOTH transfers and actual successful prefixes before late Bool AND uint rejection
+are explicit. Empty/exact-end and element32 observations remain element-level.
+Actual decoded zero and maximum uint BOTH retain complete Boolean/uint/neighbor
+vectors; max=2^256-1, no guessed encoding/truncation premise. Direct initial Keeps
+application uses real Heap.alloc; actual after-both-decoded allocation records both
+changed children, actual schedule calls, complete final vectors and fresh parent
+IDs[0,0],freshid5. Nonrestoring changed-run length vector[n+3,n+3,3,2,2] exercises
+all-object length transport including fixed parents. Earlier expected controls
+are unchanged.35new public laws/controls carry exact standard-only axiom guards.
+
+Independent read-only finder/skeptic preliminary review found no core defect;
+both required direct BOTH source reads, initial and after-both-decoded allocation,
+all four rejection positions, and selective/frozen negatives on the COMPOSED run.
+These were implemented. Focused extraction diagnostics exposed literal Fin1
+rewrites versus list-length indexing; concrete equalities over existing values
+resolved them without conversion assumptions. Explicit Keeps certificate binding
+was corrected; all failed receipts retained, no failed elaboration deliverable.
+Final independent source/artifact reviews and gates recorded in checkpoint26.
+
+Preflight575193088 available bytes,32MiB forecast based on prior24182784-byte gate
+plus8MiB source/log/compact exports; residual541638656 above512MiB. SAME existing
+runtime, child12GiB/no-swap under16GiB parent, serial Lean-j1/LEAN_NUM_THREADS1,
+optional cache OFF in TOML and actual LAKE_CACHE_DIR empty/LAKE_ARTIFACT_CACHE=false;
+all source/caches/toolchains/seals and proof/fuel/node/stack/time/TestSuite budgets
+preserved. Per-file Lean MCP/get_goal unavailable; serial focused closures used,
+existing blocked goal unchanged. Original G32-G35 and Backfill A/B remain partial/
+blocked; physical bytes/all-profile constructors/target failures/general path-
+delete-rebinding/general ABI-reference-storage/fresh deep-copy/recursive Source
+graph/reserved memory-to-storage/final V10-Source-target obligations stay open.
+No independent-work exhaustion, full-lane or compiler/EVM correctness is inferred.
+
+Final independent read-only finder and skeptic accepted refined source/doc and
+all35guards: explicit both source-read laws, four rejection positions, independent
+joint initial criterion, selective/frozen negatives, full five-stage vectors and
+initial/after-both-decoded allocation. No outstanding source finding. Actual
+86guardedjobs/full930default/262TestSuite/SolKey377taclets131read-bearing PASS exit0.
+Strict/layer/orphan/trust/complete fixtures/script syntax/corruption checks PASS;
+632owned standard-only pins79modules. Raw global docs FAIL1 with COMPLETE exact-
+base byte equality (separate noNEW PASS); inventory FAIL1,646unrecorded14inherited+
+632owned,zero unsafeerrors. Reserved records unchanged; additive proposals exported.
+
+Actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs PASS. Full sampled aggregate
+Lean/Lake RSS1452176KiB; cumulative session peak2160848896bytes;zeroOOMevents.
+Full disk increment188416bytes within32MiB envelope; prefull parent/child/OS and
+remaining forecast evidence retained. Warm caches and every previous seal/error
+preserved; optional cache OFF in TOML and propagated exec environment.
+
+Original queue reassessment remains exact: G32 physical-byte representation/
+bridge and target frames open; G33 all-profile default/reference construction and
+target allocation failures/stack-tail execution open; G34 general path/rebinding/
+delete/stale-alias compilation open; G35.01 full source/target storage-copy
+realization/liveness open; G35.02 reserved memory-to-storage prerequisite blocked;
+G35.03 general ABI/reference/calldata-storage/source transport open; G35.04 fresh
+memory deep-copy/emitted loops open; G35.05 recursive Source graphs/maps/shadows/
+cycles/emitted traversal open; G35.06 reserved-copy and final V10/Source/target
+composition blocked. Backfill A/B advanced, not complete or exhausted. This is
+actual intrinsic mixed composition, not final compiler/EVM/bytecode correctness.
+Existing blocked goal unchanged/uncompleted; no full-lane completion claim.

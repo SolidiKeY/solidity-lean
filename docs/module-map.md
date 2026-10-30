@@ -1115,3 +1115,6 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/CalldataUintSchedule.lean` | Actual decoded uint256 initialization followed by arbitrary reached-heap snapshots; exact lookup/bounds/failure, immutable reads and initial-content restoration |
 | `Backend/MemoryOps/CalldataUintScheduleGrowth.lean` | Uint-initialized finite schedules through published Keeps and actual supplied-object interstage allocation; fresh structural frames |
 | `Backend/MemoryOps/CalldataUintScheduleControls.lean` | Runtime dynamic/fixed nonuniform uint repair, explicit maximum, changed-source frozen negative, aliases/neighbors/fresh parents and ordered guard failures |
+| `Backend/MemoryOps/MixedCalldataSchedules.lean` | Actual mixed decoded initialization then two reached-heap finite schedules; exact input success/first failure/both read provenance and joint INITIAL restoration |
+| `Backend/MemoryOps/MixedCalldataScheduleTransport.lean` | Both immutable-source read observations, initial Keeps and actual allocation after mixed initialization; fresh own fields only |
+| `Backend/MemoryOps/MixedCalldataScheduleControls.lean` | Same-table dynamic/fixed full five-stage vectors, arbitrary repairs, both failure phases, zero/max words, frozen negatives, parents/neighbors and actual allocations |
