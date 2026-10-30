@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint nineteen. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -1732,3 +1732,67 @@ zeroNEWfindings PASS. Reserved global inventory/ledger/manifest remain untouched
 All original queue statuses remain partial/blocked; no entire-assignment or
 independent-exhaustion claim follows. Precise new pin proposals and full commands
 are in external checkpoint19 evidence and additive artifact handoff.
+
+## Checkpoint20: actual heap-source recapture restoration (partial)
+
+Continued distinct original G35.04/BackfillA/B work after checkpoint19: decoded
+source tables are immutable, but an actual memory snapshot's second payload can
+change after the first write. Existing captureTwice provided ordered reads and
+sufficient noninterference/commutation, not this exact restoration application.
+New owned RecaptureRestoration applies checkpoint19 overwriteIntervals_eq_self_iff
+to the existing actual captureTwice with p=sliceElems(initial) and q=sliceElems
+(actual captureOverwrite intermediate). Initial source/destination bounds remain explicit premises; slice lengths derive
+both payload capacities and length preservation transports the second source
+bounds/capacity to the intermediate. No desired payload equality or final relation
+is assumed. recapturedPayload_read derives each q read from INITIAL
+source cells via the existing first-write read_cases, allowing recapture inside
+the first destination. Actual checked Some(initial) iff the same computed criterion
+requires explicit valid source/destination bounds, not a successful-poststate
+premise. No second operation interpreter or replacement copy semantics is added.
+
+For every intrinsic-valid runtime tail n, initial [true,false,false]++nfalse becomes
+[true,true,false]++nfalse after actual source0..1→destination1; old child-table
+correspondence is false there. Actual second snapshot captures intermediate1..3
+as [true,false] and writes at0, restoring the full initial heap and old child
+representation. Its corresponding INITIAL source slice is [false,false]. Freezing
+that source produces complete [false,false,false]++nfalse and a different final
+heap, refuting a substituted original-snapshot implementation. Controls include
+actual firstSome, reached secondSome and actual composedSome(initial); full
+intermediate/final child and neighbor vectors. Both initial-source branches of
+recapturedPayload_read are directly instantiated at selected indices0/1. Runtime
+n0 still has3 nonempty elements, and n+3<2^256 is only existing intrinsic object
+validity. Generic laws cover primitive/reference elements without payload/depth
+cutoff. Existing earlier reference/fixed/alias/bounds/empty fixtures stay intact.
+
+Separate preliminary finder/skeptic reviews found no mathematical defect and
+requested explicit reached-second, full frozen/final vectors and direct both-
+branch controls; all supplied and focused72jobs pass, eight public axiom outputs
+standard. New exact guards/final checks/reviews follow. The same retained capped
+runtime, serial-j1/LEAN_NUM_THREADS1, fixed budgets, writer lock and keyed outputs
+remain; conservative measured4MiB incremental disk forecast leaves ample headroom
+without cleanup/new runtime/capacity change. No Source entry/decoder/exclusion,
+fresh/deep copy, ABI/compiler/EVM or arbitrary graph claim. All original queues
+and missing physical-byte/target/default/path/source/reserved prerequisites remain
+partial/blocked, with no assertion that independent assigned work is exhausted.
+
+Checkpoint20 final separate independent source/doc finder and skeptic PASS, with
+all requested control/bounds-wording refinements verified. Guarded72jobs and
+final full run-lean.sh916default/262TestSuite/SolKey377/131 exit0. Fresh actual
+Lean4.24.0(797c613)/Lake5.0.0-src+797c613 and KeySort2jobs pass. Aggregate sampled
+Lean/Lake RSS1471952KiB, per-exec OOM deltas0; cumulative session peak454889472bytes
+is not per-exec RSS. Retained12GiB/no childswap, parent16GiB/hostswap0, serial-j1
+and all original limits unchanged. Layers/orphans/trust/strictautomatic/complete
+fixtures/script syntax/corruption/diff PASS. Owned486standard pins65modules PASS.
+Raw global inventory FAIL exit1,0unsafeerrors500unrecorded=14inherited+486owned.
+Raw strict docs FAIL exit1, complete output byte-identical to exactbase
+ea1a09c222d52d1d17953f653c087443e34e6282497f0b02cdc09aad15b7dd48; separately
+zeroNEWfindings PASS. No reserved inventory/ledger/manifest edited.
+
+Original queue re-audit: G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B stay PARTIAL;
+G35.02/.06 BLOCKED on reserved copying and final V10/Source/target prerequisites.
+Intrinsic same-object snapshots and local restoration now cover changed intermediate
+recapture too, but physical byte representation, all-profile/default/target failure,
+general path/delete/rebinding execution, general decoded/reference/ABI/Source/storage
+transport, fresh deep-copy, arbitrary Source graph/emitted traversal and full final
+composition remain open. Further original independent clauses are not declared
+exhausted. Existing persistent goal remains unchanged and unfinished; no integration.

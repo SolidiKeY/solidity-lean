@@ -1103,3 +1103,4 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/OverwriteRestoration.lean` | Exact INITIAL last-write footprint iff list/typed-target/heap restoration and existing typed-path transport |
 | `Backend/MemoryOps/CalldataRestoration.lean` | Actual decoded Boolean sequence payload/bounds reconstruction and final old-child restoration without intermediate correspondence |
 | `Backend/MemoryOps/RestorationControls.lean` | Runtime partial-overlap break/restore, both negative criterion halves, ordered failures, identities/endpoints/reference controls |
+| `Backend/MemoryOps/RecaptureRestoration.lean` | Actual second-heap snapshot restoration criterion, initial-source branch reads, checked recapture and frozen-source negative |
