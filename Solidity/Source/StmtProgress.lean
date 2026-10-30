@@ -322,6 +322,140 @@ theorem execS_step (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E))
   | cont => exact NSP.pure' fun h => h.elim
   | _ => exact hf.elim
 
+theorem execItems_step (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+    {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : b.ValFrag) (ho : b.OpsOK) :
+    NSP (execItems G F (n + 1) nps ph b l) (fun _ => True) := by
+  cases b with
+  | nil => exact NSP.pure' trivial
+  | stmt s rest =>
+    simp only [execItems]
+    obtain ⟨ys, rfl⟩ := RStmt.ext s
+    refine NSP.bind (ih.execS F nps ph s l hf.1 ho.1) fun o _ => ?_
+    cases o with
+    | normal l1 =>
+      exact NSP.bind (ih.execItems F nps ph rest l1 hf.2 ho.2) fun o' _ => NSP.lift_ok (Out.up_ok ys o')
+    | brk _ => exact NSP.pure' trivial
+    | cont _ => exact NSP.pure' trivial
+    | ret _ => exact NSP.pure' trivial
+  | unchecked inner rest =>
+    simp only [execItems]
+    obtain ⟨ys, rfl⟩ := RItems.ext inner
+    refine NSP.bind (ih.execItems _ nps ph inner l hf.1 ho.1) fun o _ => ?_
+    cases o with
+    | normal l1 =>
+      exact NSP.bind (NSP.lift_ok (Locals.restore_ok ys l1)) fun l2 _ => ih.execItems F nps ph rest l2 hf.2 ho.2
+    | brk _ => exact NSP.pure' trivial
+    | cont _ => exact NSP.pure' trivial
+    | ret _ => exact NSP.pure' trivial
+
+theorem forIter_step (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
+    {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂)
+    (l : Locals E.layout Γ₁) (hc : c.ValFrag) (hc' : c.OpsOK) (hp : post.ValFrag) (hp' : post.OpsOK)
+    (hb : body.ValFrag) (hb' : body.OpsOK) :
+    NSP (forIter G F (n + 1) nps ph c post body l) (fun o => (∃ l', o = .normal l') ∨ (∃ l', o = .ret l')) := by
+  simp only [forIter]
+  obtain ⟨ys, rfl⟩ := RStmt.ext body
+  cases c with
+  | none =>
+    refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun y _ => ?_
+    split
+    · exact NSP.pure' (.inl ⟨_, rfl⟩)
+    · refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun _ _ => ?_
+      refine NSP.bind (ih.execS F nps ph body y.2 hb hb') fun o _ => ?_
+      cases o with
+      | normal l2 =>
+        refine NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun l3 _ => ?_
+        cases post with
+        | none =>
+          exact NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
+            ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb'
+        | some pe =>
+          exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
+            (NSP.of_ns (evalE_valFrag_ns G F n pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
+              ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb'
+      | cont l2 =>
+        refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l3 _ => ?_
+        cases post with
+        | none =>
+          exact NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
+            ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb'
+        | some pe =>
+          exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
+            (NSP.of_ns (evalE_valFrag_ns G F n pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
+              ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb'
+      | brk _ => exact NSP.pure' (.inl ⟨_, rfl⟩)
+      | ret _ => exact NSP.pure' (.inr ⟨_, rfl⟩)
+  | some ce =>
+    refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
+      (NSP.of_ns (evalE_valFrag_ns G F n ce hc hc')) fun _ _ _ => trivial)) fun p _ =>
+      NSP.bind (NSP.of_ns (getV_ns rfl p.1)) fun x _ => ?_
+    obtain ⟨b, rfl⟩ := Val.eq_bool x
+    refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun y _ => ?_
+    split
+    · exact NSP.pure' (.inl ⟨_, rfl⟩)
+    · refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun _ _ => ?_
+      refine NSP.bind (ih.execS F nps ph body y.2 hb hb') fun o _ => ?_
+      cases o with
+      | normal l2 =>
+        refine NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun l3 _ => ?_
+        cases post with
+        | none =>
+          exact NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
+            ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb'
+        | some pe =>
+          exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
+            (NSP.of_ns (evalE_valFrag_ns G F n pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
+              ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb'
+      | cont l2 =>
+        refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l3 _ => ?_
+        cases post with
+        | none =>
+          exact NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
+            ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb'
+        | some pe =>
+          exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
+            (NSP.of_ns (evalE_valFrag_ns G F n pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
+              ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb'
+      | brk _ => exact NSP.pure' (.inl ⟨_, rfl⟩)
+      | ret _ => exact NSP.pure' (.inr ⟨_, rfl⟩)
+
 end
+
+/-- **Progress on the statement value fragment**, at every horizon. -/
+theorem stmtNSAt (G : Glob E) : ∀ n, StmtNSAt G n
+  | 0 => stmtNSAt_zero G
+  | n + 1 =>
+    have ih := stmtNSAt G n
+    { execS := fun F nps ph _ _ _ _ _ s l hf ho => execS_step ih F nps ph s l hf ho
+      execItems := fun F nps ph _ _ _ _ _ b l hf ho => execItems_step ih F nps ph b l hf ho
+      forIter := fun F nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' =>
+        forIter_step ih F nps ph c post body l hc hc' hp hp' hb hb' }
+
+/-- **A statement of the value fragment in the operations' domains is
+never `stuck`**: at every horizon, in every state, in any modifier
+context. -/
+theorem stmtNS (G : Glob E) (F : Fr) (n nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx}
+    {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : s.ValFrag) (ho : s.OpsOK) :
+    NS (execS G F n nps ph s l) :=
+  ((stmtNSAt G n).execS F nps ph s l hf ho).ns
+
+/-- **A block of the value fragment in the operations' domains is never
+`stuck`.** -/
+theorem itemsNS (G : Glob E) (F : Fr) (n nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx}
+    {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : b.ValFrag) (ho : b.OpsOK) :
+    NS (execItems G F n nps ph b l) :=
+  ((stmtNSAt G n).execItems F nps ph b l hf ho).ns
+
+/-- **Elaborated blocks**: a typing derivation whose elaboration is in the
+value fragment is never `stuck` when run (the operations' domains come
+from the derivation, `ItemsD.toR_opsOK`). -/
+theorem ItemsD.toR_ns {C : Ctx} (G : Glob C.env) (F : Fr) (n nps : Nat) (ph : Option (Ph C.env))
+    {k : SCtx} {L L' : List (String × STy)} {b : Syn (.list (.item k))} (d : ItemsD C L b L')
+    (l : Locals C.env.layout (tysOf L)) (hf : d.toR.ValFrag) : NS (execItems G F n nps ph d.toR l) :=
+  itemsNS G F n nps ph d.toR l hf (ItemsD.toR_opsOK d)
 
 end Solidity.Source
