@@ -20,7 +20,11 @@ never `stuck` when dispatch finds it and its frame is the one the call
 builds (`callInternal_ns`). For elaborated programs that frame is derived
 (`Elaborated.body_locals`), and dispatch keeps the parameter types
 (`Glob.dispatchFn_params`), so a call needs only the dispatched override's
-return types to agree (`Elaborated.callInternal_call_ns`).
+return types to agree (`Elaborated.callInternal_call_ns`). With internal
+calls inside expressions, expressions, statements, bodies and calls are
+proved together by induction on the horizon (`FragAt`, `fragAt`), for a
+program whose allowed functions are fragment bodies (`CallsOK`):
+`evalE_callFrag_ns`.
 
 The scope facts it needs are structural: a statement's output context
 extends its input (`RStmt.ext`, `RItems.ext`), so ending a scope
@@ -150,49 +154,58 @@ theorem NSP.lift_ok {Γ : RCtx} {α : Type} {r : R α} (h : NotStuckR r) : NSP (
 /-- The fragment's conversions' source types. -/
 def STy.FragSrc (σ : STy) : Prop := σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k)
 
-def ROptBool.ValFrag {Γ : RCtx} : ROptBool E Γ → Prop
+def ROptBool.ValFragC (C : Decl → Prop) {Γ : RCtx} : ROptBool E Γ → Prop
   | .none => True
-  | .some c => c.ValFrag
+  | .some c => RExpr.ValFragC C c
 
-def ROptExpr.ValFrag {Γ : RCtx} : ROptExpr E Γ → Prop
+def ROptExpr.ValFragC (C : Decl → Prop) {Γ : RCtx} : ROptExpr E Γ → Prop
   | .none => True
-  | .some (τ := τ) e => e.ValFrag ∧ τ.isValue = true
+  | .some (τ := τ) e => RExpr.ValFragC C e ∧ τ.isValue = true
 
 /-- A `for` initializer that completes normally when it completes. -/
 def RStmt.Simple {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} : RStmt E R M k Γ Γ' → Prop
   | .expr _ | .declVar _ | .declInit _ _ | .skip => True
   | _ => False
 
-/-- Converted arguments of the fragment: each of the value fragment, at a
-value type, converted from a value type or a constant. -/
-def RConvArgs.ValFrag {Γ : RCtx} : {τs : List STy} → RConvArgs E Γ τs → Prop
-  | _, .nil => True
-  | _, .cons (σ := σ) (τ := τ) e _ es => e.ValFrag ∧ τ.isValue = true ∧ σ.FragSrc ∧ RConvArgs.ValFrag es
-
 mutual
 
-/-- **The statement value fragment.** -/
-def RStmt.ValFrag {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} → RStmt E R M k Γ Γ' → Prop
-  | _, _, _, .expr e => e.ValFrag
+/-- **The statement value fragment**, with internal calls to the
+declarations `C` allows. -/
+def RStmt.ValFragC (C : Decl → Prop) {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} →
+    RStmt E R M k Γ Γ' → Prop
+  | _, _, _, .expr e => RExpr.ValFragC C e
   | _, _, _, .declVar τ => (Val.default E.layout τ).isSome = true
-  | _, _, _, .declInit (σ := σ) (τ := τ) e _ => e.ValFrag ∧ τ.isValue = true ∧ σ.FragSrc
-  | _, _, _, .block b => RItems.ValFrag b
-  | _, _, _, .ifThen c s => c.ValFrag ∧ RStmt.ValFrag s
-  | _, _, _, .ifElse c s t => c.ValFrag ∧ RStmt.ValFrag s ∧ RStmt.ValFrag t
-  | _, _, _, .whileLoop c s => c.ValFrag ∧ RStmt.ValFrag s
-  | _, _, _, .doWhile s c => RStmt.ValFrag s ∧ c.ValFrag
-  | _, _, _, .forLoop i c p s => i.Simple ∧ RStmt.ValFrag i ∧ c.ValFrag ∧ p.ValFrag ∧ RStmt.ValFrag s
+  | _, _, _, .declInit (σ := σ) (τ := τ) e _ => RExpr.ValFragC C e ∧ τ.isValue = true ∧ σ.FragSrc
+  | _, _, _, .block b => RItems.ValFragC C b
+  | _, _, _, .ifThen c s => RExpr.ValFragC C c ∧ RStmt.ValFragC C s
+  | _, _, _, .ifElse c s t => RExpr.ValFragC C c ∧ RStmt.ValFragC C s ∧ RStmt.ValFragC C t
+  | _, _, _, .whileLoop c s => RExpr.ValFragC C c ∧ RStmt.ValFragC C s
+  | _, _, _, .doWhile s c => RStmt.ValFragC C s ∧ RExpr.ValFragC C c
+  | _, _, _, .forLoop i c p s => i.Simple ∧ RStmt.ValFragC C i ∧ ROptBool.ValFragC C c ∧ ROptExpr.ValFragC C p ∧
+      RStmt.ValFragC C s
   | _, _, _, .skip | _, _, _, .brk | _, _, _, .cont | _, _, _, .ret _ => True
-  | _, _, _, .retVal (σ := σ) (τ := τ) _ e _ => e.ValFrag ∧ τ.isValue = true ∧ σ.FragSrc
-  | _, _, _, .retTuple es => RConvArgs.ValFrag es
+  | _, _, _, .retVal (σ := σ) (τ := τ) _ e _ => RExpr.ValFragC C e ∧ τ.isValue = true ∧ σ.FragSrc
+  | _, _, _, .retTuple es => RConvArgs.ValFragC C es
   | _, _, _, _ => False
 
-def RItems.ValFrag {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} → RItems E R M k Γ Γ' → Prop
+def RItems.ValFragC (C : Decl → Prop) {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} →
+    RItems E R M k Γ Γ' → Prop
   | _, _, _, .nil => True
-  | _, _, _, .stmt s rest => RStmt.ValFrag s ∧ RItems.ValFrag rest
-  | _, _, _, .unchecked b rest => RItems.ValFrag b ∧ RItems.ValFrag rest
+  | _, _, _, .stmt s rest => RStmt.ValFragC C s ∧ RItems.ValFragC C rest
+  | _, _, _, .unchecked b rest => RItems.ValFragC C b ∧ RItems.ValFragC C rest
 
 end
+
+/-- The statement value fragment without calls. -/
+abbrev RStmt.ValFrag {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') : Prop :=
+  RStmt.ValFragC (fun _ => False) s
+
+abbrev RItems.ValFrag {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') : Prop :=
+  RItems.ValFragC (fun _ => False) b
+
+abbrev ROptBool.ValFrag {Γ : RCtx} (c : ROptBool E Γ) : Prop := ROptBool.ValFragC (fun _ => False) c
+
+abbrev ROptExpr.ValFrag {Γ : RCtx} (p : ROptExpr E Γ) : Prop := ROptExpr.ValFragC (fun _ => False) p
 
 theorem zeroVal_ns {Γ : RCtx} (n : Nat) {τ : STy} (h : (Val.default E.layout τ).isSome = true) :
     NS (zeroVal (E := E) (Γ := Γ) n τ) := by
@@ -233,19 +246,20 @@ variable (G : Glob E)
 /-- **The induction hypothesis**: at horizon `n`, statements, blocks and
 `for` iterations of the fragment are never `stuck`; a simple statement
 completes normally, `for` iterations normally or by `return`. -/
-structure StmtNSAt (n : Nat) : Prop where
+structure StmtNSAt (A : Decl → Prop) (n : Nat) : Prop where
   execS : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
-    (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ), s.ValFrag → s.OpsOK → BodyFrame nps R Γ →
+    (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ), RStmt.ValFragC A s → s.OpsOK → BodyFrame nps R Γ →
     NSP (execS G F n nps ph s l) (fun o => (s.Simple → ∃ l', o = .normal l') ∧ (k.loop = false → o.esc = false))
   execItems : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
-    (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ), b.ValFrag → b.OpsOK → BodyFrame nps R Γ →
+    (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ), RItems.ValFragC A b → b.OpsOK → BodyFrame nps R Γ →
     NSP (execItems G F n nps ph b l) (fun o => k.loop = false → o.esc = false)
   forIter : ∀ (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool} {Γ₁ Γ₂ : RCtx}
     (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂) (l : Locals E.layout Γ₁),
-    c.ValFrag → c.OpsOK → post.ValFrag → post.OpsOK → body.ValFrag → body.OpsOK → BodyFrame nps R Γ₁ →
+    ROptBool.ValFragC A c → c.OpsOK → ROptExpr.ValFragC A post → post.OpsOK → RStmt.ValFragC A body →
+      body.OpsOK → BodyFrame nps R Γ₁ →
     NSP (forIter G F n nps ph c post body l) (fun o => (∃ l', o = .normal l') ∨ (∃ l', o = .ret l'))
 
-theorem stmtNSAt_zero : StmtNSAt G 0 where
+theorem stmtNSAt_zero (A : Decl → Prop) : StmtNSAt G A 0 where
   execS _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [execS.eq_1]; exact NSP.halt' trivial
   execItems _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [execItems.eq_1]; exact NSP.halt' trivial
   forIter _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [forIter.eq_1]; exact NSP.halt' trivial
@@ -253,7 +267,7 @@ theorem stmtNSAt_zero : StmtNSAt G 0 where
 end
 
 section
-variable {G : Glob E} {n : Nat}
+variable {A : Decl → Prop} {G : Glob E} {n : Nat}
 
 /-- **Converted arguments of the fragment** are never `stuck`. -/
 theorem evalConvArgs_ns (G : Glob E) (F : Fr) {Γ : RCtx} : {τs : List STy} → (es : RConvArgs E Γ τs) →
@@ -279,16 +293,16 @@ theorem setRets_ok {D : Layout} {Γ : RCtx} (ys : RCtx) : (rs : List STy) → {p
     simp only [setRets]
     exact NotStuckR.bind h1 fun l' => setRets_ok ys τs l' hΓ'' vs
 
-theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
-    {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : s.ValFrag) (ho : s.OpsOK)
+theorem execS_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+    {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : RStmt.ValFragC A s) (ho : s.OpsOK)
     (hfr : BodyFrame nps R Γ) :
     NSP (execS G F (n + 1) nps ph s l) (fun o => (s.Simple → ∃ l', o = .normal l') ∧ (k.loop = false → o.esc = false)) := by
-  have hE : ∀ {Γ τ} (e : RExpr E Γ τ), e.ValFrag → e.OpsOK → NSP (evalE G F n e) (fun _ => True) :=
-    fun e hf ho => NSP.of_ns (evalE_valFrag_ns G F n e hf ho)
-  have hsub : ∀ {Γ₀ τ} {l₀ : Locals E.layout Γ₀} (e : RExpr E Γ₀ τ), e.ValFrag → e.OpsOK →
+  have hE : ∀ {Γ τ} (e : RExpr E Γ τ), RExpr.ValFragC A e → e.OpsOK → NSP (evalE G F n e) (fun _ => True) :=
+    fun e hf ho => NSP.of_ns ((hX F).val e hf ho)
+  have hsub : ∀ {Γ₀ τ} {l₀ : Locals E.layout Γ₀} (e : RExpr E Γ₀ τ), RExpr.ValFragC A e → e.OpsOK →
       NSP (sub (Γ := []) l₀ (evalE G F n e)) (fun _ => True) :=
     fun e hf ho => NSP.sub' (NSP.weaken (hE e hf ho) fun _ _ _ => trivial)
-  have hclose : ∀ {Γ₁} {t : RStmt E R M k Γ Γ₁} (l₁ : Locals E.layout Γ), t.ValFrag → t.OpsOK →
+  have hclose : ∀ {Γ₁} {t : RStmt E R M k Γ Γ₁} (l₁ : Locals E.layout Γ), RStmt.ValFragC A t → t.OpsOK →
       NSP (do lift (← execS G F n nps ph t l₁).close)
         (fun (o : Out E.layout Γ Γ) => k.loop = false → o.esc = false) := by
     intro Γ₁ t l₁ ht ho'
@@ -308,7 +322,7 @@ theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E
     simp only [execS]
     refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns ?_) fun _ _ _ => trivial)) fun _ _ =>
       NSP.pure' ⟨fun _ => ⟨_, rfl⟩, fun _ => rfl⟩
-    exact NS.bind (evalE_valFrag_ns G F n e hf.1 ho) fun v =>
+    exact NS.bind ((hX F).val e hf.1 ho) fun v =>
       NS.bind (convRV_ns F n (.inl h) hf.2.2 v) fun w => getV_ns hf.2.1 w
   | block b =>
     simp only [execS]
@@ -383,7 +397,7 @@ theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E
     simp only [execS]
     obtain ⟨ys, ps, rfl, hn⟩ := hfr
     refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns (NS.bind
-      (evalE_valFrag_ns G F n e hf.1 ho) fun v => NS.bind (convRV_ns F n (.inl h) hf.2.2 v) fun w =>
+      ((hX F).val e hf.1 ho) fun v => NS.bind (convRV_ns F n (.inl h) hf.2.2 v) fun w =>
         getV_ns hf.2.1 w)) fun _ _ _ => trivial)) fun p _ => ?_
     have hb : (ys ++ (R.reverse ++ ps)).length - (nps + R.length) = ys.length := by
       rw [hR, ← hn]
@@ -396,7 +410,7 @@ theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E
   | retTuple es =>
     simp only [execS]
     obtain ⟨ys, ps, rfl, hn⟩ := hfr
-    refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns (evalConvArgs_ns G F es n hf ho))
+    refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns ((hX F).convArgs es hf ho))
       fun _ _ _ => trivial)) fun p _ => ?_
     have hb : (ys ++ (R.reverse ++ ps)).length - (nps + R.length) = ys.length := by
       simp only [List.length_append, List.length_reverse]
@@ -406,8 +420,8 @@ theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E
       NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
   | _ => exact hf.elim
 
-theorem execItems_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
-    {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : b.ValFrag) (ho : b.OpsOK)
+theorem execItems_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+    {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : RItems.ValFragC A b) (ho : b.OpsOK)
     (hfr : BodyFrame nps R Γ) : NSP (execItems G F (n + 1) nps ph b l) (fun o => k.loop = false → o.esc = false) := by
   cases b with
   | nil => exact NSP.pure' fun _ => rfl
@@ -433,10 +447,10 @@ theorem execItems_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (
     | cont _ => exact NSP.pure' fun hk => h hk
     | ret _ => exact NSP.pure' fun _ => rfl
 
-theorem forIter_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
+theorem forIter_nsStep (ih : StmtNSAt G A n) (hX : ∀ F, ExprNSAt A G F n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
     {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂)
-    (l : Locals E.layout Γ₁) (hc : c.ValFrag) (hc' : c.OpsOK) (hp : post.ValFrag) (hp' : post.OpsOK)
-    (hb : body.ValFrag) (hb' : body.OpsOK) (hfr : BodyFrame nps R Γ₁) :
+    (l : Locals E.layout Γ₁) (hc : ROptBool.ValFragC A c) (hc' : c.OpsOK) (hp : ROptExpr.ValFragC A post)
+    (hp' : post.OpsOK) (hb : RStmt.ValFragC A body) (hb' : body.OpsOK) (hfr : BodyFrame nps R Γ₁) :
     NSP (forIter G F (n + 1) nps ph c post body l) (fun o => (∃ l', o = .normal l') ∨ (∃ l', o = .ret l')) := by
   simp only [forIter]
   obtain ⟨ys, rfl⟩ := RStmt.ext body
@@ -456,7 +470,7 @@ theorem forIter_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph
             ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
         | some pe =>
           exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-            (NSP.of_ns (evalE_valFrag_ns G F n pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            (NSP.of_ns ((hX F).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
             NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
               ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
       | cont l2 =>
@@ -467,14 +481,14 @@ theorem forIter_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph
             ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
         | some pe =>
           exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-            (NSP.of_ns (evalE_valFrag_ns G F n pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            (NSP.of_ns ((hX F).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
             NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
               ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
       | brk _ => exact NSP.pure' (.inl ⟨_, rfl⟩)
       | ret _ => exact NSP.pure' (.inr ⟨_, rfl⟩)
   | some ce =>
     refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-      (NSP.of_ns (evalE_valFrag_ns G F n ce hc hc')) fun _ _ _ => trivial)) fun p _ =>
+      (NSP.of_ns ((hX F).val ce hc hc')) fun _ _ _ => trivial)) fun p _ =>
       NSP.bind (NSP.of_ns (getV_ns rfl p.1)) fun x _ => ?_
     obtain ⟨b, rfl⟩ := Val.eq_bool x
     refine NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun y _ => ?_
@@ -491,7 +505,7 @@ theorem forIter_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph
             ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
         | some pe =>
           exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-            (NSP.of_ns (evalE_valFrag_ns G F n pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            (NSP.of_ns ((hX F).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
             NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
               ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
       | cont l2 =>
@@ -502,7 +516,7 @@ theorem forIter_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph
             ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
         | some pe =>
           exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken
-            (NSP.of_ns (evalE_valFrag_ns G F n pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
+            (NSP.of_ns ((hX F).val pe hp.1 hp')) fun _ _ _ => trivial)) fun q _ =>
             NSP.bind (NSP.pure' (Q := fun _ => True) trivial) fun l4 _ =>
               ih.forIter F nps ph _ _ body l4 hc hc' hp hp' hb hb' hfr
       | brk _ => exact NSP.pure' (.inl ⟨_, rfl⟩)
@@ -510,15 +524,18 @@ theorem forIter_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph
 
 end
 
+/-- **The statement step**, given expression progress at the same horizon. -/
+theorem stmtNSAt_step {A : Decl → Prop} {G : Glob E} {n : Nat} (ih : StmtNSAt G A n)
+    (hX : ∀ F, ExprNSAt A G F n) : StmtNSAt G A (n + 1) where
+  execS F nps ph _ _ _ _ _ s l hf ho hfr := execS_nsStep ih hX F nps ph s l hf ho hfr
+  execItems F nps ph _ _ _ _ _ b l hf ho hfr := execItems_nsStep ih hX F nps ph b l hf ho hfr
+  forIter F nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr :=
+    forIter_nsStep ih hX F nps ph c post body l hc hc' hp hp' hb hb' hfr
+
 /-- **Progress on the statement value fragment**, at every horizon. -/
-theorem stmtNSAt (G : Glob E) : ∀ n, StmtNSAt G n
-  | 0 => stmtNSAt_zero G
-  | n + 1 =>
-    have ih := stmtNSAt G n
-    { execS := fun F nps ph _ _ _ _ _ s l hf ho hfr => execS_nsStep ih F nps ph s l hf ho hfr
-      execItems := fun F nps ph _ _ _ _ _ b l hf ho hfr => execItems_nsStep ih F nps ph b l hf ho hfr
-      forIter := fun F nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr =>
-        forIter_nsStep ih F nps ph c post body l hc hc' hp hp' hb hb' hfr }
+theorem stmtNSAt (G : Glob E) : ∀ n, StmtNSAt G (fun _ => False) n
+  | 0 => stmtNSAt_zero G _
+  | n + 1 => stmtNSAt_step (stmtNSAt G n) fun F => exprNSAt G F n
 
 /-- **A statement of the value fragment in the operations' domains is
 never `stuck`**: at every horizon, in every state, in any modifier
@@ -835,5 +852,96 @@ theorem Elaborated.callInternal_call_ns (el : Elaborated) (G : Glob el.res.env) 
   have e := Glob.dispatchFn_params G F.contract d hd h'
   subst e
   exact Elaborated.callInternal_sig_ns el G hG F n d vs rs b hdec hb h' hmods hz hf ho
+
+
+/-! ## Internal calls inside expressions -/
+
+/-- **A program whose allowed functions are fragment bodies**: for every
+declaration `A` allows with a signature, virtual dispatch (from any
+contract) finds a body without modifiers, in the statement fragment with
+calls to `A` and in the operations' domains, whose locals are the frame the
+call builds and whose return types have defaults. -/
+def CallsOK (A : Decl → Prop) (G : Glob E) : Prop :=
+  ∀ (c : String) (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → A d →
+    ∃ b, G.prog.body (G.dispatchFn c d) = some b ∧ b.mods = [] ∧
+      rs.reverseAux (ps.reverseAux []) = b.locals ∧ b.rs = rs ∧ b.ps.length = ps.length ∧
+      (∀ τ ∈ rs, (Val.default E.layout τ).isSome = true) ∧ RItems.ValFragC A b.items ∧ b.items.OpsOK
+
+/-- **The joint induction hypothesis** at horizon `n`: expressions (with
+calls to `A`), statements, bodies without modifiers and internal calls. -/
+structure FragAt (A : Decl → Prop) (G : Glob E) (n : Nat) : Prop where
+  expr : ∀ F, ExprNSAt A G F n
+  stmt : StmtNSAt G A n
+  mods : ∀ (F : Fr) (b : RBody E) (l : Locals E.layout b.locals), RItems.ValFragC A b.items →
+    b.items.OpsOK → BodyFrame b.ps.length b.rs b.locals → NS (runMods G F n b [] l)
+  call : ∀ F, CallNS A G F n
+
+theorem fragAt_zero (A : Decl → Prop) (G : Glob E) : FragAt A G 0 where
+  expr F := exprNSAt_zero A G F
+  stmt := stmtNSAt_zero G A
+  mods _ _ _ _ _ _ := by rw [runMods.eq_1]; exact NS.halt' fun _ e => by cases e
+  call _ _ _ _ _ _ _ := by rw [callInternal.eq_1]; exact NS.halt' fun _ e => by cases e
+
+section
+variable {A : Decl → Prop} {G : Glob E} {n : Nat}
+
+theorem mods_step (ih : FragAt A G n) (F : Fr) (b : RBody E) (l : Locals E.layout b.locals)
+    (hf : RItems.ValFragC A b.items) (ho : b.items.OpsOK) (hfr : BodyFrame b.ps.length b.rs b.locals) :
+    NS (runMods G F (n + 1) b [] l) := by
+  simp only [runMods]
+  obtain ⟨ys, hys⟩ := RItems.ext b.items
+  refine NSP.ns (NSP.bind (R := fun _ => True)
+    (NSP.weaken (ih.stmt.execItems F b.ps.length none b.items l hf ho hfr) fun _ h => h rfl) fun o ho' => ?_)
+  cases o with
+  | normal l' => exact NSP.of_ns (NS.lift' (Locals.restore_ok' ys hys l'))
+  | ret l' => exact NSP.pure' trivial
+  | brk _ => exact nomatch ho'
+  | cont _ => exact nomatch ho'
+
+theorem call_step (hG : CallsOK A G) (ih : FragAt A G n) (F : Fr) : CallNS A G F (n + 1) := by
+  intro d ps rs hs hA vs
+  obtain ⟨b, hb, hmods, hloc, hrs, hps, hz, hf, ho⟩ := hG F.contract d hs hA
+  have hl : b.locals = rs.reverse ++ ps.reverse := by
+    rw [← hloc, List.reverseAux_eq, List.reverseAux_eq, List.append_nil]
+  simp only [callInternal, hb]
+  refine NS.bind (zeroVals_ns n rs hz) fun rv => ?_
+  rw [dif_pos hloc, hmods]
+  refine NS.bind (ih.mods _ b _ hf ho ⟨[], ps.reverse, ?_, ?_⟩) fun l' =>
+    NS.bind (NS.lift' (retVals_ok l' rs (hl.trans rfl))) fun _ => NS.pure' _
+  · rw [hl, hrs, List.nil_append]
+  · rw [List.length_reverse, hps]
+
+end
+
+/-- **The joint progress induction**, for a program whose allowed functions
+are fragment bodies. -/
+theorem fragAt {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) : ∀ n, FragAt A G n
+  | 0 => fragAt_zero A G
+  | n + 1 =>
+    have ih := fragAt hG n
+    { expr := fun F => exprNSAt_step (ih.expr F) (ih.call F)
+      stmt := stmtNSAt_step ih.stmt ih.expr
+      mods := fun F b l hf ho hfr => mods_step ih F b l hf ho hfr
+      call := fun F => call_step hG ih F }
+
+/-- **Progress with internal calls**: an expression of the value fragment
+whose calls go to functions the program implements by fragment bodies
+(`CallsOK`) is never `stuck`, at any horizon, from any state. -/
+theorem evalE_callFrag_ns {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) (F : Fr) (n : Nat) {Γ : RCtx}
+    {τ : STy} (e : RExpr E Γ τ) (hf : RExpr.ValFragC A e) (ho : e.OpsOK) : NS (evalE G F n e) :=
+  ((fragAt hG n).expr F).val e hf ho
+
+/-- **Statements with internal calls** are never `stuck` in a body frame. -/
+theorem stmt_callFrag_ns {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) (F : Fr) (n nps : Nat)
+    (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ')
+    (l : Locals E.layout Γ) (hf : RStmt.ValFragC A s) (ho : s.OpsOK) (hfr : BodyFrame nps R Γ) :
+    NS (execS G F n nps ph s l) :=
+  ((fragAt hG n).stmt.execS F nps ph s l hf ho hfr).ns
+
+/-- **Internal calls to allowed functions** are never `stuck`. -/
+theorem callInternal_callFrag_ns {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) (F : Fr) (n : Nat)
+    (d : Decl) {ps rs : List STy} (hs : d.fnSig E = some (ps, rs)) (hA : A d) (vs : Vals E.layout ps) :
+    NS (callInternal G F n d vs rs) :=
+  (fragAt hG n).call F d hs hA vs
 
 end Solidity.Source

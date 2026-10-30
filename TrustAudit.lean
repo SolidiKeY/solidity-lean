@@ -1496,3 +1496,22 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} dispatch-parameter theorems use only the standard axioms"
+
+/-! Lane V04b: internal calls inside expressions (the joint induction). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.fragAt,
+    ``Solidity.Source.evalE_callFrag_ns,
+    ``Solidity.Source.stmt_callFrag_ns,
+    ``Solidity.Source.callInternal_callFrag_ns,
+    ``Solidity.Source.SoundnessExamples.callF_ns,
+    ``Solidity.Source.SoundnessExamples.callF_value,
+    ``Solidity.Source.SoundnessExamples.callF_badFrame_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} call-fragment theorems use only the standard axioms"
