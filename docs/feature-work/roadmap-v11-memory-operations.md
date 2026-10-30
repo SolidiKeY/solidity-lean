@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-two. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-three. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -1961,3 +1961,97 @@ writes. All original queues remain PARTIAL/BLOCKED, including physical bytes/all
 profile defaults/target failures/general paths/delete/rebinding/ABI-reference-
 storage-Source/fresh deep-copy/recursive graph/reserved copy/final V10-target
 composition. Neither independent exhaustion nor full goal completion is claimed.
+
+
+## Checkpoint twenty-three: decoded initialization and finite recapture
+
+Source scan reproduced the missing application: `runCaptures` appeared only in
+schedule/provenance/growth/control modules; decoded compositions handled two
+writes or Bool/uint, not a decoded transfer followed by an arbitrary runtime
+schedule. New owned `CalldataSchedule` composes the EXISTING
+`checkedCalldataBools` and `runCaptures` by Option.bind at the ACTUAL intermediate.
+No payload/conversion proof, output relation, stagewise correspondence, AST,
+interpreter, decoder or Source profile change is an operation input.
+
+`checkedBoolCaptures_some` exposes both actual reached calls;
+`checkedBoolCaptures_success` derives schedule validity against ORIGINAL length
+using the real transfer's all-object length law. Initial decoded failure is
+classified by existing `boolTransfer_none_lookup` (missing/unsupported table,
+reversed slice/source/destination overflow); `checkedBoolCaptures_none` exposes
+that initial failure OR actual decoded Some followed by a real successful prefix
+and its first reached failed call, with no suffix heap/rollback assertion.
+`checkedBoolCaptures_read` extracts the actual immutable table payload and proves
+ALL final reads are initial replaceSlice reads at captureOrigin;
+`checkedBoolCaptures_source_read` connects origins inside the decoded footprint
+to exact published DecodedArrayRead observations. All-array lengths and unrelated
+typed objects are framed. `checkedBoolCaptures_restore` and
+`BoolChildRepr.calldata_schedule_iff` give exact INITIAL-value criteria, not
+final heap/representation premises; an INITIAL old child table relation is
+explicit only in the child theorem.
+
+Controls execute decoded [true] into old [true,false,false] plus arbitrary
+runtime tail, giving [true,true,false] and FALSE old correspondence; actual
+recapture [1,3) to0 repairs the child, followed by arbitrarily many real restoring
+cycles. They retain complete initial/intermediate/final/neighbor vectors and IDs,
+independently prove the initial extraction/provenance criterion (without using a
+run or desired final relation), then apply its sufficiency. New full-read and
+exact immutable-source-read laws are directly exercised. Successful ignored-
+repair gives a wrong vector and false initial criterion; frozen INITIAL payload
+substitution separately gives a wrong vector distinct from actual recapture;
+missing/reversed/source-overrun/destination-overrun initial failures, successful
+nonempty prefix before later invalid call, empty/exact-end, and element32 controls
+remain explicit. Earlier fixed/reference-valued, boundary, wrong-order and alias
+fixtures remain unchanged and checked; this Boolean composition does not claim a
+new general reference conversion.
+
+Independent source finder and skeptic both requested replacing a criterion
+roundtrip with an INITIAL-only proof and adding successful nonrestoration and
+direct new-read controls. These findings were repaired. Focused failed attempts
+are retained separately; exact standard axiom guards and final gates recorded in
+the new checkpoint23 evidence. All original G32/G33/G34/G35.01-.06 and Backfill A/B
+parents remain PARTIAL/BLOCKED; no exhaustion/full-lane claim. Physical bytes,
+all-profile defaults/target allocation failures, general path/rebinding/delete,
+general ABI/reference/storage transport, fresh deep-copy, recursive Source graphs,
+reserved memory-to-storage and final Source/V10/target composition stay open.
+
+Runtime preflight recorded585322496 available bytes and40MiB conservative growth
+allowance based on previous24182784-byte gate growth plus modules/logs/export;
+residual stayed above512MiB. Same existing runtime/cache, optional artifact cache
+OFF, child12GiB/no-swap under16GiB parent and serial Lean-j1/LEAN_NUM_THREADS=1;
+no proof/time/test/resource budget increase or deletion/relocation. Per-file MCP
+and get_goal unavailable; focused serial closures used, existing goal unchanged.
+
+Final source finder accepted all refinements; skeptic accepted proofs/controls
+and requested the frozen-negative wording above be distinguished from the false
+criterion for the actual ignored-repair operation; wording corrected. Final
+bounded wrapper passed:923 default jobs /262 TestSuite /SolKey377 taclets and131
+read-bearing, exit0. Full gate resource receipt retains actual sampled aggregate
+Lean/Lake RSS and cumulative session peak separately, with zero OOM events.
+22 new guarded public laws/controls give558 standard-only owned pins across72
+modules. Raw strict docs and global inventory outcomes are retained separately
+from complete exact-base no-new comparison and owned additive-pin validation.
+
+Actual final checks: layers/orphans/trust/lane/strict automatic/complete fixtures/
+script syntax and corruption controls PASS. Global docs FAIL exit1, complete
+exact-base findings byte-identical (separate zeroNEW PASS); global inventory FAIL
+exit1,0unsafeerrors572unrecorded=14inherited+558owned. Additive owned registration
+proposal exported for coordinator reconciliation, reserved records untouched.
+Final sampled aggregate Lean/Lake RSS1549648KiB, cumulative session cgroup peak
+2160848896bytes,0OOMevents. Full gate incremental disk184320bytes, safely below
+40MiB preflight allowance; actual runtime Lean4.24.0/Lake5.0.0-src+797c613 and
+KeySort2jobs PASS. No external compiler/EVM evidence inferred from kernel/SolKey.
+
+Original-queue reassessment: G32 still lacks the reserved physical-byte bridge;
+G33 supplied/default/multi-object intrinsic growth adapters do not establish
+all-profile construction/target failure/stack-tail execution. G34 typed path and
+local alias laws do not implement general source-to-target rebinding/delete.
+G35.01 consumes published map-free intrinsic storage-tree copying/Mirrors but
+lacks source/target/liveness realization; G35.02 remains reserved/unpublished.
+G35.03 now supplies actual decoded Boolean initialization plus arbitrary finite
+memory recapture, but not general reference/ABI/calldata-to-storage conversion.
+G35.04 finite actual shallow snapshot scheduling does not implement fresh deep
+copy or emitted loops. G35.05 finite map-free Mirrors and index traversal do not
+close recursive Source graphs/maps/shadows/cycles/emitted traversal. G35.06
+reserved-copy/V10/Source/target composition stays blocked. Backfill A/B advanced,
+not complete or exhausted. Further owned primitive-family or preserving-context
+applications may remain; this checkpoint makes no independent-exhaustion claim.
