@@ -1069,3 +1069,6 @@ At the root, the notation's own tests:
 | `Lowering/V08/PayableControls.lean` | Source receive membership and payment flags, malformed/noncallable/constructor refusals, actual paid/zero-call controls |
 | `Lowering/V08/DeclarationRoles.lean` | Source contract/library role metadata on supplied typed catalogue, preserved storage/other keys and actual ordinary-call/create refusals |
 | `Lowering/V08/RoleControls.lean` | Source library membership and real typed empty-library installation/refusal/catalogue controls |
+
+| `Lowering/V08/InheritedMetadata.lean` | Published mutOK/FnOverrideOK payment-tag transport and actual entry-header guards; source body/dispatch remains separate |
+| `Lowering/V08/InheritedControls.lean` | Nonempty two-contract source chain, proved baseFns/override certificate, funded header and exact wrong-header/mutability controls |

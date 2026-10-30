@@ -6,13 +6,14 @@ recovers the pinned checkout, traces published evidence and adds independent
 intrinsic adapters plus source/intrinsic byte observation proofs and inhabited
 controls. It adds no axiom, exclusion or replacement source semantics.
 
-Current continuation inventory: **170** exact lane theorem/control pins in22
+Current continuation inventory: **183** exact lane theorem/control pins in24
 owned Lean modules. Source callable metadata, request/environment/transient
 projections, selector/Keccak byte observations, emit-effect controls, payment
 and declaration-role clauses are implemented below. Every G20–G23 parent remains
 incomplete. The initial tables and counts are historical; continuation sections
 record subsequent checked progress. Largest retained sampled aggregate RSS is
-3553173504 bytes from the historical full timeout64122, not a passing full gate.
+9175519232 bytes from the passing isolated OpenLoops check299349-1fb8f9fa;
+its cgroup peak is9296244736bytes. This is not a passing full gate.
 
 ## Reproduction and setup
 
@@ -725,3 +726,60 @@ ownership issue, while retaining all actual source/representation/decoder/
 reserved-owner/composition prerequisites. No claim that every independent
 conceivable clause is exhausted. Checkpoint exact head/patch and raw gate logs
 are retained with the artifact handoff; the final full gate remains separate.
+
+
+## Continuation checkpoint: inherited payment metadata
+
+Parentbbaa90fdc2ecb423f03149cf8ec6dc2ad18bf211. Published Source.Inheritance
+has FnOverrideOK.mutab and actual mutOK cases, allowing another independent G20
+clause without source execution. InheritedMetadata.mutOK_payable proves every
+accepted override retains the payable tag, including stricter nonpayable
+view/pure cases. override_payable consumes the ACTUAL static certificate and
+membership in environment.baseFns; override_enter transports only that tag in
+existing World.enter, on the SAME supplied world/storage/context.
+override_nonzero_rejected derives the ordinary-entry nonzero-payment refusal
+from the source base's false tag, actual override check and existing frame law.
+Internal ambient msg.value, source body identity/selection/dispatch, visibility
+admission and V07 type/layout certificates remain separate.
+
+InheritedControls builds an actual nonempty abstract A/B source unit with an
+inheritance edge, virtual payable base and public payable override. Both function
+memberships, computed baseFns=[base] and the ENTIRE FnOverrideOK record are
+proved, so the checked relation is inhabited with a real base member. Source
+function bodies are absent; the funded target uses the existing supplied
+writing Entry and payment7, producing93/7/3/9 and exact bytes. It does NOT lower
+these abstract source bodies. Dropping the actual header flag gives exact
+.revert; payable/nonpayable override swaps are rejected, while none->view and
+view->pure remain accepted. No new type/state/AST/semantics or profile cap.
+
+Focused344280-0ca8d978 passes61 named modules/62Lakejobs,13 new exact axiom sets,
+unchanged source/config, sampledRSS818855936bytes/cgroup203902976bytes. Initial
+repeat-case proof was deliberately interrupted through the owned runner's
+SIGTERM/finally path; cleanup was confirmed and125 retained, not passed. An
+explicit finite-case proof checks quickly without a budget increase. Two
+fixture-interface failures are retained and corrected; failed generated
+sorryAx output is not delivered theorem evidence. Combined Audit/registration,
+static gates and independent finder/skeptic reviews finish this checkpoint.
+
+Validation progress since runtime checkpoint: full180746-5e221633 stopped125
+at600s after346 successful invocations; default/TestSuite/sort suffixes unreached.
+Serial segment205659-f689d24f stopped125 after256invocations during Bytes;
+225601-77e8acda after293during CallOperands;245903-08312b5a after261during
+Recursion;279023-fca93815 after300during OpenLoops;317963-c9d58b5f after415during
+Frontend.Checked.UnitExamples. Raw failures remain failed. Successful focused
+published checks include201735-c71be7f5, Recursion265909-e064e903(build346s),
+and OpenLoops299349-1fb8f9fa(build529s, command565s). Caps remain600s/12GiB/
+no-swap/Lean-j1; no reserved source changes. Remaining full-closure suffix and
+unchanged final full gate are still pending. A passing cold target after a
+segment timeout does not turn that timed-out command green.
+
+Inherited checkpoint handoff: combined345133-8b7d471a passes110 named modules/
+111Lakejobs,183exact axioms, unchanged source/config and confirmed cleanup;
+sampledRSS824496128bytes/cgroup185667584bytes. Separate independent finder and
+skeptic actual-source reviews used no Lean/server/builds and found no defect.
+They confirmed the real nonempty base-list witness and explicitly independent
+supplied target header fixture: source functions have zero parameters/results
+and absent bodies, while the target returns bytes. No source body/result/
+dispatch/readonly preservation follows. Static checks and raw-doc/no-new logs
+are inherited-*. Exact committed head/patch is saved in inherited-checkpoint.md
+and .patch under the artifact root. Parents/groups/lane remain incomplete.

@@ -292,6 +292,51 @@
   "Solidity.Lowering.V08.EnvironmentProjection.state_environment_reset": [
     "propext"
   ],
+  "Solidity.Lowering.V08.InheritedControls.base_functions": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.InheritedControls.base_member": [],
+  "Solidity.Lowering.V08.InheritedControls.checked_override": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.InheritedControls.derived_member": [],
+  "Solidity.Lowering.V08.InheritedControls.funded_header": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.InheritedControls.inherited_payment": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.InheritedControls.stricter_nonpayable": [],
+  "Solidity.Lowering.V08.InheritedControls.wrong_header": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.InheritedControls.wrong_payability": [],
+  "Solidity.Lowering.V08.InheritedMetadata.mutOK_payable": [],
+  "Solidity.Lowering.V08.InheritedMetadata.override_enter": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.InheritedMetadata.override_nonzero_rejected": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.InheritedMetadata.override_payable": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.LibraryControls.constructor_installed": [
     "Classical.choice",
     "Quot.sound",
