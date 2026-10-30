@@ -589,4 +589,114 @@ theorem callInternal_ns (G : Glob E) (F : Fr) (n : Nat) (d : Decl) {ps : List ST
     · rw [hl, hrs, List.nil_append]
     · rw [List.length_reverse, hps]
 
+
+/-! ## Elaborated bodies are in their frame -/
+
+/-- A type name has one type. -/
+theorem Syn.tys_typeName_length {E : Env} {scope : Option String} {loc : DataLoc} (t : Syn .typeName)
+    (a : List STy) (h : t.tys E scope loc = Option.some a) : a.length = 1 := by
+  cases t with
+  | elem e => simp only [Syn.tys, Option.some.injEq] at h; subst h; rfl
+  | userType p =>
+    simp only [Syn.tys, Option.map_eq_some_iff] at h
+    obtain ⟨_, _, rfl⟩ := h; rfl
+  | array t len =>
+    simp only [Syn.tys] at h
+    split at h
+    · simp only [Option.some.injEq] at h; subst h; rfl
+    · cases h
+  | mapping k kn v vn =>
+    simp only [Syn.tys] at h
+    split at h
+    · split at h
+      · simp only [Option.some.injEq] at h; subst h; rfl
+      · cases h
+    · cases h
+  | fnType ps vis m rs =>
+    simp only [Syn.tys] at h
+    split at h
+    · simp only [Option.some.injEq] at h; subst h; rfl
+    · cases h
+
+
+/-- A parameter list has one type per name. -/
+theorem Syn.tys_params_length {E : Env} {scope : Option String} {loc : DataLoc} :
+    (ps : Syn (.list .param)) → (a : List STy) → ps.tys E scope loc = Option.some a →
+      a.length = ps.paramNames.length
+  | .nil, a, h => by simp only [Syn.tys, Option.some.injEq] at h; subst h; rfl
+  | .cons (.param t l n) xs, a, h => by
+    simp only [Syn.tys] at h
+    split at h
+    · rename_i a1 b1 h1 h2
+      simp only [Option.some.injEq] at h
+      subst h
+      rw [List.length_append, Syn.tys_typeName_length t a1 h1, Syn.tys_params_length xs b1 h2]
+      simp only [Syn.paramNames, List.length_append, List.length_singleton]
+    · cases h
+
+
+/-- A frame has one type per parameter and return name. -/
+theorem Frame.mk?_lengths {E : Env} {scope : Option String} {ps rs : Syn (.list .param)}
+    {body : Syn (.list (.item .body))} {mv im : Bool} {f : Frame} (h : Frame.mk? E scope ps rs body mv im = some f) :
+    f.names.length = f.ps.length ∧ f.rnames.length = f.rs.length := by
+  unfold Frame.mk? at h
+  split at h
+  · rename_i a r ha hr
+    simp only [Option.some.injEq] at h
+    subst h
+    exact ⟨(Syn.tys_params_length ps a ha).symm, (Syn.tys_params_length rs r hr).symm⟩
+  · cases h
+
+/-- **A body's frame**: one type per parameter and return name. -/
+theorem Decl.frame?_lengths {E : Env} {d : Decl} {f : Frame} (h : d.frame? E = some f) :
+    f.names.length = f.ps.length ∧ f.rnames.length = f.rs.length := by
+  obtain ⟨k, name, scope, top, node⟩ := d
+  cases k <;> cases node
+  case modifier.modifier _ ps0 _ _ b0 =>
+    (cases b0 <;> try (rename_i blk; cases blk)) <;> (try cases ps0) <;>
+      first | exact Frame.mk?_lengths h | (cases h <;> exact ⟨rfl, rfl⟩)
+  case fallback.fallback sig _ _ _ _ _ b0 =>
+    (cases b0 <;> try (rename_i blk; cases blk)) <;> (try cases sig) <;>
+      first | exact Frame.mk?_lengths h | (cases h <;> exact ⟨rfl, rfl⟩)
+  all_goals (try (first | exact Frame.mk?_lengths h | cases h))
+  all_goals (rename_i b0; cases b0 <;> (try (first | exact Frame.mk?_lengths h | cases h)))
+  all_goals (rename_i b1; cases b1 <;> (try (first | exact Frame.mk?_lengths h | cases h)))
+  all_goals exact ⟨rfl, rfl⟩
+
+/-- **A frame's locals are its returns over its parameters**, last
+innermost, as `callInternal` builds them. -/
+theorem Frame.tysOf_locals {f : Frame} (hp : f.names.length = f.ps.length) (hr : f.rnames.length = f.rs.length) :
+    tysOf f.locals = f.rs.reverse ++ f.ps.reverse := by
+  have hl : (f.names ++ f.rnames).length = (f.ps ++ f.rs).length := by
+    simp only [List.length_append, hp, hr]
+  simp only [tysOf, Frame.locals, List.map_reverse, List.map_map]
+  have : List.map (Prod.snd ∘ fun (x : Option String × STy) => (x.1.getD "", x.2)) ((f.names ++ f.rnames).zip (f.ps ++ f.rs))
+      = f.ps ++ f.rs := by
+    rw [show (Prod.snd ∘ fun (x : Option String × STy) => (x.1.getD "", x.2)) = Prod.snd from rfl]
+    exact List.map_snd_zip (Nat.le_of_eq hl.symm)
+  rw [this, List.reverse_append]
+
+
+/-- **An elaborated body is in its frame**: its locals are its returns over
+its parameters, last innermost, exactly the frame `callInternal` builds. -/
+theorem Elaborated.body_locals (el : Elaborated) {d : Decl} {b : RBody el.res.env}
+    (hd : d ∈ el.res.unit.decls) (hb : el.prog.body d = some b) : b.locals = b.rs.reverse ++ b.ps.reverse := by
+  obtain ⟨f, L', hf, D, hps, hrs, _, hl, _, _⟩ := el.bodies_typed d hd b hb
+  obtain ⟨h1, h2⟩ := Decl.frame?_lengths hf
+  rw [hl, Frame.tysOf_locals h1 h2, hps, hrs]
+
+/-- **Internal calls in elaborated programs**: the frame hypotheses of
+`callInternal_ns` reduce to the body dispatch finds having the call's
+parameter and return types (dispatch coherence). -/
+theorem Elaborated.callInternal_ns (el : Elaborated) (G : Glob el.res.env) (hG : G.prog = el.prog) (F : Fr)
+    (n : Nat) (d : Decl) {ps : List STy} (vs : Vals el.res.env.layout ps) (rs : List STy) (b : RBody el.res.env)
+    (hdec : G.dispatchFn F.contract d ∈ el.res.unit.decls) (hb : G.prog.body (G.dispatchFn F.contract d) = some b)
+    (hps : b.ps = ps) (hrs : b.rs = rs) (hmods : b.mods = [])
+    (hz : ∀ τ ∈ rs, (Val.default el.res.env.layout τ).isSome = true)
+    (hf : b.items.ValFrag) (ho : b.items.OpsOK) : NS (callInternal G F n d vs rs) := by
+  have hb' : el.prog.body (G.dispatchFn F.contract d) = some b := by rw [← hG]; exact hb
+  have hloc : rs.reverseAux (ps.reverseAux []) = b.locals := by
+    rw [Elaborated.body_locals el hdec hb', hps, hrs, List.reverseAux_eq, List.reverseAux_eq, List.append_nil]
+  exact Solidity.Source.callInternal_ns G F n d vs rs b hb hloc hrs (by rw [hps]) hmods hz hf ho
+
 end Solidity.Source
