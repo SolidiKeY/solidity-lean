@@ -555,10 +555,19 @@ stronger obligation, not an additional assumption available to its proofs.
   above). The compiled code has no panic: there a failing `assert` reverts
   (`compile_correct`).
 - **Source semantics (S02–S05, `Solidity/Source/`).** A memory
-  allocation too large for solc (Panic 0x41) is not modelled, and the ABI
-  decoder does not decode static arrays, structs or external function
-  types: such an argument is `stuck` (user-defined value types are decoded
-  as their underlying type since lane V04b)
+  allocation too large for solc (Panic 0x41) is modelled only in the ABI
+  decoder, and only solc's first check: a length word past the data
+  reverts, then a dynamic length of `2^64` or more panics
+  (`array_allocation_size`), then out of bounds reverts (lane V04b). solc
+  also panics in `finalize_allocation` when the free pointer plus the
+  rounded size passes `2^64 - 1`: with the free pointer at `0x80`, from a
+  `bytes`/`string` length above `2^64 - 0xc0` and a value-type array
+  length of `2^59 - 5` or more (`0x80 + 32 + 32·len > 2^64 - 1`), lower for later arguments (the pointer has
+  moved) and under via-IR (the memory guard is higher). Those lengths
+  revert here (they are out of bounds of any call data), where solc
+  panics. The ABI decoder does not decode static arrays, structs or
+  external function types: such an argument is `stuck` (user-defined value
+  types are decoded as their underlying type since lane V04b)
   ([source-soundness.md](feature-work/source-soundness.md#the-stuck-census)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's

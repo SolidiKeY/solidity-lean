@@ -121,13 +121,36 @@ typing and are unaffected; they build in the full gate.
   stale at the base `8445c3f` (`Evm/Compiler.lean` line numbers).
   `check-doc-paths` 46 (baseline), required control pins 23/23, 0 error
   lines.
-- Axioms: 45 `#guard_msgs` pins at the end of `SoundnessExamples.lean`,
-  `ptrCopy_refused`/`ptrDelete_refused` in `InferExamples.lean`,
-  `static_value_call_halts` in `SemanticsExamples.lean` (only `propext`,
-  `Classical.choice`, `Quot.sound`); `TrustAudit.lean` checks 43
-  checkpoint 2-3 headlines and the 10 checkpoint-1 ones (language server,
-  no errors). The pins were turned from `#print`s into `#guard_msgs` after
-  build9 and checked with the language server.
+- Axioms at build9 (`0a6a408`): 45 `#guard_msgs` pins at the end of
+  `SoundnessExamples.lean`, `ptrCopy_refused`/`ptrDelete_refused` (fixes
+  of checkpoint 3) in `InferExamples.lean`, `static_value_call_halts` in
+  `SemanticsExamples.lean` (only `propext`, `Classical.choice`,
+  `Quot.sound`); `TrustAudit.lean` checks 43 checkpoint 2-3 headlines and
+  the 10 checkpoint-1 ones (language server, no errors). The pins were
+  turned from `#print`s into `#guard_msgs` after build9 and checked with
+  the language server. Later counts are in "Gates (checkpoints 2-4)".
+
+### Gates (checkpoints 2-4)
+
+Every later head was gated by `./run-lean.sh` (`lake build` 903 jobs and
+`lake build SolkeyTestSuite` 262 jobs completed successfully,
+`check-solkey` 37 mismatches, the baseline) before its `CLOUD-RESULT`
+marker: builds 10-12 (typing decisions, function level), 14-16 (UDVT
+decoding, review fixes), 18-22 (elaborated frames, `return (a, b)`,
+dispatch parameters), 23-25 (calls inside expressions), 26 (Panic `0x41`,
+which changes `Eval.lean` and `Horizon.lean`), 27-28 (follow-ups and the
+two-body witness; build 26's ordering of the `0x41` checks was rejected
+in integration review and fixed after it), 29 (`c37f137`, `CallsOK` per
+contract), 30 (`93bcaca`, offset check before the `0x41` panic), 31
+(`e79abee`, location read/write preservation), 32 (`1f9722e`, review
+fixes), 33 (`3aa644e`, `HeapShaped`). Build13 failed (the getter change, `Horizon.lean`
+heartbeats) and was reverted. Each marker records its build; the last
+gated head is in the final `CLOUD-RESULT`. `check-g07 --log` passed every
+check but the two baselines above (86 unrecorded pins of other lanes,
+the stale G03 ledger). The lane's pins (`SoundnessExamples.lean`,
+`InferExamples.lean`, `SemanticsExamples.lean`) are recorded in
+`scripts/g07-axiom-pins.json`, and `TrustAudit.lean` has one block per
+milestone, all with the standard axioms only.
 
 ### Review (checkpoint 1)
 
@@ -214,13 +237,152 @@ object's type), `allocRef_ok` (the new reference agrees), `heapPut_ok`
 (a write of agreeing contents keeps the state well typed; `stuck` only at
 an address of another type), `heapObj_ok`, `heapAt_ok` (a read at the
 type the heap typing gives is never `stuck` and returns agreeing
-contents), `storRef_ok`; the heap facts `HeapOK.alloc`, `HeapOK.write`,
+contents; `heapAt` has no caller in the interpreter), `storRef_ok`; the heap facts `HeapOK.alloc`, `HeapOK.write`,
 `Heap.alloc_le`, `Heap.alloc_ty`, `HeapOK.empty`.
+
+**Proved for location reads and writes** (preservation, halts included;
+added after marker `7b94a9b`): `writeLoc_local_pres`, `writeLoc_mem_pres`
+(`memSet_pres`: array elements and struct members, through
+`DataListOK.setNth`), `writeLoc_memByte_pres` (bytes and strings), and the
+reads `readLoc_local_pres`, `readLoc_mem_pres` (`memElem_pres`, through
+`DataListOK.nth` and `asVal_ok`: the value read agrees),
+`readLoc_memByte_pres`; the generic `heapObj_pres` and `heapPut_pres`.
+A written value must agree (`v.RefOK`). Storage locations (`storeVal`,
+`writeAt`, `readAt`) are not covered.
+
+**Finding: progress for memory accesses needs object shapes.** `HeapOK`
+says where references point, but not that a top-level object of a memory
+reference type is a `Data.bytes`/`Data.string`/`Data.array`/`Data.struct`
+rather than a `Data.val`. The negative control `ptrHeap_byte_stuck`
+builds a well-typed heap (`ptrHeap_ok`; the full state is `EMOK` too,
+trivially at `Γ = []` and the empty heap typing) whose object at `1` is a
+`bytes memory` stored as a pointer, and a byte write there is `stuck`
+("not bytes"). No allocation or `heapPut` site creates such an object
+(`zeroData` and `loadMem` match all four memory reference types before
+their `Data.val` arms, and a mapping has no memory location; the other
+`allocRef` and `heapPut` sites build aggregates), so the gap is in the
+invariant, not the semantics (proved for the zeroing allocator, `zeroOK`
+below; not yet for the other allocation sites). Progress for `memSet`,
+`writeLoc .memByte`, `memElem` and `heapBytes` (`readLoc .memByte`,
+conversions to fixed bytes, `bytesOfRV`) needs `HeapOK` strengthened with
+this shape condition, and `memElem` also needs elements to be `Data.val`
+(`Data.asVal`, "inline aggregate element"): the census "heap" row below.
+The shape condition is now `HeapShaped` and the progress lemmas below
+cover all of these but the `heapBytes` callers other than
+`readLoc .memByte` (`memElem` is covered under `HeapInner`, below). Every site that builds a memory array or struct
+stores `Data.val` elements (`zeroElems`, `zeroFields`, `loadElems`,
+`loadFields`, the ABI decoder, `structNew`, `memSet`), so the element
+condition is also a proof gap only.
+Progress proofs must use `heapPut_ok`, which keeps the halt detail
+`heapPut_pres` drops. Not covered: `deleteLoc` as a whole (its
+`zeroVal` step is `zeroOK`; the write after it is not composed), and locals holding calldata references (`Val.RefOK` of a
+`cdRef` is `False`; the semantics creates none).
+
+**The shape invariant, first use.** `HeapShaped h` (`Data.Top`: a
+top-level object is a `Data.val` only at a type without a location) is
+kept by allocation of a shaped object (`HeapShaped.alloc`) and by writes
+(`HeapShaped.write`, `heapPut_shaped`, which also proves `heapPut`
+succeeds at the address's own type). With it, `writeLoc_memByte_ok`
+proves progress and preservation of a byte write at an address the heap
+typing gives a `bytes`/`string` type: it writes or panics, never `stuck`.
+Witness `bytesHeap_byte_write`; control `ptrHeap_not_shaped` (the
+well-typed but unshaped `ptrHeap` is excluded). Reading the code finds
+no unshaped allocation (`zeroVal` calls `zeroData` only at memory types,
+all aggregates; `loadMem` reaches its `Data.val` arm only at types without
+a location; the other `allocRef` and `heapPut` sites build aggregates), so
+what remains is a proof gap, not a semantic one. The zeroing
+allocator is proved: `zeroOK` (joint induction on fuel over `zeroData`,
+`zeroVal`, `zeroElems`, `zeroFields`, structure `ZeroOK`) shows each keeps
+`MemOK` (`EMOK`, `HeapShaped`, `HeapInner`), halts included; `zeroData`
+builds an agreeing, shaped object with bare-value elements, `zeroElems`
+and `zeroFields` agreeing bare-value elements, and `zeroVal`'s value
+agrees (`allocRef_mem`, `Hoare.memGrow` for the growing heap typing,
+`Val.default_loc`); witness `zeroArr_alloc`. Not yet done: proving the
+same for the other allocation sites (`loadMem`, the ABI decoder,
+`structNew`, literals, the `abi.encode*` result); carrying `HeapShaped` and `HeapInner` (`MemOK`) through frame restores (`Eval.lean` and
+`Semantics.lean` reset the heap or restore a saved one, as for
+`HeapOK`). Memory writes keep `HeapInner`, halts included:
+`memSet_inner` (it stores a `Data.val` and keeps the other elements;
+`DataList.AllVal.setNth`), `writeLoc_memByte_inner`, `heapPut_inner`. Progress for element and
+member reads is proved under the element invariant `HeapInner`
+(`Data.Inner`: an array's elements and a struct's members are
+`Data.val`): `memElem_ok`, `readLoc_mem_ok` (at an array of type `τ`, or
+a struct whose member `i` has type `τ`, in a shaped heap with bare-value
+elements, not `stuck`: the code reads or panics out of bounds; the value
+read agrees; `DataList.nth_val`, `heapObj_get`), witness `arrHeap_read`
+(with `arrHeap_inner`), control `inlineHeap_read_stuck` (a well-typed,
+shaped heap whose `bytes[]` element is inline: "inline aggregate
+element"). Progress for `readLoc .memByte` is proved:
+`heapBytes_ok`, `readLoc_memByte_ok` (at a `bytes`/`string` address in a
+shaped heap, not `stuck`: the code reads or panics out of bounds),
+witness `bytesHeap_byte_read`, control `ptrHeap_byte_read_stuck` (the
+unshaped `ptrHeap`: "not a bytes object"). `heapBytes_ok` applies to its
+other callers (`bytesOfRV`, the conversion to fixed bytes, the revert
+data) once their premise is derived; that is not done.
+Progress for element and member writes is proved: `memSet_ok` /
+`writeLoc_mem_ok` (at an array of the value's type, or a struct whose
+member `i` has it, in a shaped heap, the write is not `stuck`: the code
+writes or panics out of bounds; `DataList.setNth_ok`), witness
+`arrHeap_write` (on the shaped `arrHeap_shaped`), control
+`arrHeap_wrong_elem_stuck` (an `address` written into a `bool[]` is
+`stuck`, "element type": the type premise is needed). Callers get the
+premise from the location's construction: an index into a `memory`
+array reference (`indexLoc`) has `Val.RefOK`, and `memShape` is the
+identity on arrays, so the heap type is that array (static arrays
+included; `STy.memShape_array`); a struct member (`Eval.lean`, member access) has
+`E.fieldTy? d .memory i = some τ`, which is `(E.layout.fields d)[i]?`
+for a memory struct. The struct bridge is not stated as a lemma yet, and there is
+no struct-member control (`SemanticsExamples.E0` has no structs).
+
+**Review of `HeapInner` preservation and `zeroOK`** (finder and
+skeptic, read-only, no blocker): the `zeroOK` docstring overclaimed for
+declarations and `delete` (now: only their `zeroVal` step); the
+`Hoare.memGrow` docstring was garbled; the witness did not inspect the
+object (it now checks both elements are `false`); stale doc lines and the
+Handoff row were fixed. Build41 (`dcfedbe`) passed.
+
+**Review of the element-read progress** (finder and skeptic, read-only,
+no blocker): `Data.Inner` checked at every array/struct construction
+site and `memSet`; the control is stuck for the inline element; fixed: the
+"Not yet done" list (now names `HeapInner`), the module docstring's
+grammar, the Handoff row, the TrustAudit list; `memElem_ok`'s success
+postcondition drops `HeapInner` (the state is unchanged; noted in its
+docstring). Build38 (`f9288e5`) passed.
+
+**Review of the byte-read progress** (finder and skeptic, read-only, no
+blocker): stale "pending"/"needs" lines, the scope of "byte reads", the
+Handoff row and the `memShape_array` docstring were fixed; the element
+condition was checked at every site (above). Build37 (`a035e78`) passed.
+
+**Review of `memSet_ok`** (finder and skeptic, read-only, no blocker):
+"succeeds or panics" was stronger than the statement (reworded); the
+caller bridges were unstated (documented above); the witness lacked a
+shaped-heap fact (`arrHeap_shaped` added). Build35 (`ba39d50`) passed. A caller of `writeLoc_memByte_ok` gets its precondition from
+a `memory` reference's `Val.RefOK` through `STy.memShape_bytes` and
+`StOK.le`. The statement excludes only `stuck` (a timeout is not
+excluded by the statement, though the code cannot produce one there).
+
+**Review of the shape invariant** (finder and skeptic, read-only, no
+blocker): every allocation site checked shaped; the precondition is
+satisfiable and dischargeable from `Val.RefOK` (the `memShape` inversion
+lemma was missing: added); "writes or panics" was stronger than the
+statement (reworded); `heapObj_pres` had lost its docstring and four new
+lemmas had none (added); frame restores were missing from the to-do list
+(added). Fixed after build33 (`3aa644e`, passed).
+
+**Review of the location preservation** (finder and skeptic, read-only,
+no blocker): the open question about allocations was closed by reading
+the code (above); the docstring of `writeLoc_mem_pres` claimed byte writes
+and `writeLoc_memByte_pres` had none; the TrustAudit block left out the
+helper lemmas and called the control "preservation"; the heading said
+"writes" where reads need the shape too. All fixed.
 
 **Not proved**: the triple for every interpreter function (`evalE` …
 `dispatch`, deployment, transactions, callbacks). The approach is the one
-`Solidity/Source/Horizon.lean` uses for horizons: a structure of triples,
-one per function, at horizon `n`, and one step lemma per function. The
+`Solidity/Source/Horizon.lean` uses for horizons: a structure with one
+field per function at horizon `n` and one step lemma per function, as the
+progress walk (`NS`/`NSP`, `FragAt`) does; preservation and modifiers need
+`Hoare` triples, whose preconditions carry the invariant. The
 census below lists, per `stuck` site, the invariant the step lemmas need.
 Two facts the invariant must handle, found while setting it up:
 
@@ -270,11 +432,11 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `convRV_ns`, `getV_ns`, `readLoc_ok`, `writeLoc_ok`, `compound_dom` | its other steps |
 | `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_nsStep`, `execItems_nsStep`, `forIter_nsStep`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;`, `return e;` and `return (a, b);` of value types: `evalConvArgs_ns`, `setRets_ok`) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
 | `itemsNSP` (the post `Out.esc`; `Out.close_esc`, `Out.up_esc`) | outside loops (`SCtx.loop = false`) a block of the fragment ends normally or by `return`: no `break`/`continue` escapes it |
-| `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **leaf functions**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment (so making no calls, emitting nothing, with value-typed locals) and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults); the frame hypotheses are derived for elaborated programs except dispatch coherence (the `Elaborated.*` rows) |
+| `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **leaf functions**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment (so making no calls, emitting nothing, with value-typed locals) and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults); the frame hypotheses are derived for elaborated programs except the dispatched override's return types and its membership in the unit, `hdec` (the `Elaborated.*` rows) |
 | `Elaborated.body_locals` (from `Decl.frame?_lengths`, `Frame.mk?_lengths`, `Syn.tys_params_length`, `Syn.tys_typeName_length`, `Frame.tysOf_locals`) | every elaborated body's locals are its returns over its parameters, last innermost: the frame `callInternal` builds |
 | `Glob.dispatchFn_params`, `Elaborated.callInternal_call_ns` | dispatch finds an override with the called declaration's parameter types; for a call node only the override's return types (and membership in the unit) stay open |
 | `Elaborated.callInternal_ns`, `Elaborated.callInternal_sig_ns` (from `Elaborated.body_sig`, `Decl.frame?_fnSig`) | in an elaborated program, `callInternal_ns`'s frame hypotheses reduce to dispatch coherence, stated syntactically: the declaration virtual dispatch finds has the call's signature (`fnSig`); when dispatch returns the called declaration itself, that is the call node's own premise |
-| `evalE_callFrag_ns`, `stmt_callFrag_ns`, `callInternal_callFrag_ns` (from `fragAt`: the joint induction `FragAt` over expressions, statements, bodies without modifiers and internal calls; `exprNSAt_step`, `stmtNSAt_step`, `mods_step`, `call_step`) | **internal calls inside expressions**: the fragment is parameterized by the callees it allows (`RExpr.ValFragC A`, `RStmt.ValFragC A`; the call-free `ValFrag` is `A = fun _ => False`, so `evalE_valFrag_ns`, `stmtNS`, `itemsNS` and `callInternal_ns` keep their statements, while `exprNSAt`/`stmtNSAt` now state the case `A = fun _ => False`), and for a program whose allowed functions are implemented by fragment bodies in the call's frame (`CallsOK A G`, **assumed**: no lemma derives it for an elaborated program) evaluation is never `stuck`, recursion included |
+| `evalE_callFrag_ns`, `stmt_callFrag_ns`, `callInternal_callFrag_ns` (from `fragAt`: the joint induction `FragAt` over expressions, statements, bodies without modifiers and internal calls; `exprNSAt_step`, `stmtNSAt_step`, `mods_step`, `call_step`) | **internal calls inside expressions**: the fragment is parameterized by the callees it allows (`RExpr.ValFragC A`, `RStmt.ValFragC A`; the call-free `ValFrag` is `A = fun _ => False`, so `evalE_valFrag_ns`, `stmtNS`, `itemsNS` and `callInternal_ns` keep their statements, while `exprNSAt`/`stmtNSAt` now state the case `A = fun _ => False`), and for a program whose allowed functions are implemented by fragment bodies in the call's frame (`CallsOK A G c`, per contract `c` whose frames run the call, **assumed**: no lemma derives it for an elaborated program) evaluation is never `stuck`, recursion included |
 | `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
@@ -288,7 +450,7 @@ is never `stuck` and ends with `i = 3`); negative controls
 `OpsOK` is needed) and `ret_unframed_stuck`/`ret_unframed_no_frame`
 (`return 1;` over locals without a return slot is `stuck`, and those
 locals are no `BodyFrame`: the frame hypothesis is needed; with the slot,
-`ret_framed_ns`); `retPair_ns`/`retPair_unframed_stuck` for `return (1, 2);`. `retLocalPair_ns` for `return (x, x);` over a declared local. Calls inside expressions: `callF_ns` (`f()` with `f` implemented by `return 1;`, through `retOne_callsOK`), `callF_value` (it evaluates to `1`), `recF_ns`/`recF_timeout` (`f` calling itself, `return f();`: never `stuck`, it times out; the callee's body itself calls) and `callF_badFrame_stuck` (with a body outside the call's frame it is `stuck`: the frame conjunct of `CallsOK` is needed). These programs give every declaration one body (`progOf`), and `fDecl` (scope `none`, not in `E0`) is dispatched to itself, so virtual dispatch is not exercised. Function level: `callRetOne_ns` (an internal call of a
+`ret_framed_ns`); `retPair_ns`/`retPair_unframed_stuck` for `return (1, 2);`. `retLocalPair_ns` for `return (x, x);` over a declared local. Calls inside expressions: `callF_ns` (`f()` with `f` implemented by `return 1;`, through `retOne_callsOK`), `callF_value` (it evaluates to `1`, at horizon 10), `recF_ns`/`recF_timeout` (`f` calling itself, `return f();`: never `stuck`, it times out at horizon 12; the callee's body itself calls) and `callF_badFrame_stuck` (with a body outside the call's frame it is `stuck`: the frame conjunct of `CallsOK` is needed). `callG_ns`/`callG_value` use a program with distinct bodies for `f` and `g` (`g` returns `f()`, which is `1`, at horizon 12; `fg_callsOK`). The declarations (scope `none`, not in `E0`) are dispatched to themselves, so virtual dispatch is not exercised. Function level: `callRetOne_ns` (an internal call of a
 `return 1;` body) and `callBadFrame_stuck` (a body whose locals lack the
 return slot is `stuck`, "call frame"). Witnesses from S01 typing derivations (through `toR`): `incBody_ns` (the counter's typed
 body `count++;`, through `ItemsD.toR_ns`) and `indexMapping_ns` (S01's
@@ -306,11 +468,10 @@ it: modifiers (`runMods` with invocations,
 dispatch finds has the call's return types and is one of the unit's: the
 parameter half is proved, `Glob.dispatchFn_params`), for calls inside
 expressions the whole-program hypothesis `CallsOK` (assumed, not derived
-for elaborated programs: every allowed callee, from every contract, is
-dispatched to a body without modifiers, in the fragment and `OpsOK`, in
-the call's frame, with defaulted return types; it is stronger than
-needed, since it quantifies over every contract rather than those whose
-frames run the call), memory (the `heap` invariant, `WellTyped.lean`), arrays and
+for elaborated programs: every allowed callee, dispatched from the
+contract whose frame runs the call, is a body without modifiers, in the
+fragment and `OpsOK`, in the call's frame, with defaulted return types),
+memory (the `heap` invariant, `WellTyped.lean`), arrays and
 structs in storage, external calls, `emit`, builtins, and the transaction layer (dispatch,
 ABI). Each is listed with its sites in the census below.
 
@@ -363,7 +524,6 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   applied to storage pointers"): `Typed.delete` requires
   `Γ.deleteRefused τ e = false` (`ptrDelete_refused`, which
   also shows `delete s` and `delete m` typed).
-
 - storage-to-storage assignment of types containing mappings
   (`mapping(uint => uint)[2] a; … a = b;`, `stuck` in `loadMem`; and a
   struct with a mapping member, which ran as a copy of nothing):
@@ -404,19 +564,30 @@ indexing of `brk`/`cont`, `unchecked`, loops), the fuel's sufficiency,
 `deleteRefused` against solc, the UDVT decoder, the getter revert, the
 pins.
 
+**Final consistency review** (read-only, the whole document against the
+code at `1fbea8e`). Fixed: the gate record now covers checkpoints 2-4
+("Gates (checkpoints 2-4)"); the checkpoint-1 counts are labelled as of
+build9; checkpoint 4 has its own heading; the `callInternal_ns` row,
+Handoff row 3 and the coverage-plan row name both open coherence
+hypotheses and Panic `0x41`; "Not proved" matches the "Not done" list;
+`cbBody.items`; the `heapAt` caveat; the description of the walk's
+method; a split list.
+
 **Review of internal calls inside expressions** (finder and skeptic,
 read-only, on 3f61cf3..90f4226). No correctness defect; the horizon
 bookkeeping of `fragAt` was checked against `Eval.lean` by both. Fixed:
 no witness used the mutual part (skeptic): `recF_ns`, `recF_timeout`;
 the coverage-plan row and this document now say that `CallsOK` is
 assumed, not derived, and what it requires (both); `CallsOK`'s quantifier
-over every contract is recorded as stronger than needed (finder); the
+over every contract was stronger than needed (finder): it is now per
+contract (`CallsOK A G c`, `FragAt A G c n`, `StmtNSAt`'s contract
+predicate `Q`); the
 witnesses' degenerate program and `fDecl`'s shape are recorded; the
 `ExprNSAt` field list, `callF_badFrame_stuck`'s docstring (one conjunct),
 the "unchanged theorems" sentence (`exprNSAt`/`stmtNSAt` now state the
 call-free case), module-map rows and the TrustAudit list
 (`retLocalPair_ns`). Recorded, not changed: the argument orders
-`ExprNSAt A G F n` and `StmtNSAt G A n` differ.
+`ExprNSAt A G F n` and `StmtNSAt G A Q n` differ.
 
 **Review of the frame, `return (a, b)` and signature work** (finder and
 skeptic, read-only, on 481d3ee..b934819). Confirmed and fixed: the doc
@@ -430,7 +601,9 @@ row and Handoff row. Accepted by both: `setRets`/`retVals` slot positions,
 the frame order against `callInternal`, `evalConvArgs_ns`,
 `Decl.frame?_fnSig` stated for the dispatched declaration, the pins.
 
-**Run-time gaps closed** (checkpoint 4, partial):
+## Checkpoint 4: closing gaps (partial)
+
+**Run-time gaps closed**:
 
 - ABI decoding of a user-defined value type argument, as its underlying
   type (`decodeWord`, a wrapper over `decodeElemWord`): `elabW` in
@@ -438,6 +611,22 @@ the frame order against `callInternal`, `evalConvArgs_ns`,
   `7` and reverts on `300` (it was `stuck`), and `g(V v)` with
   `type V is int8` runs on `-1` (a sign-extended word) and reverts on
   `200`.
+- Panic `0x41` in the ABI decoder, in part: a length word past the data
+  reverts first (solc's `offset + 0x1f < end`), then a `bytes`/`string`
+  or dynamic-array argument whose length is `2^64` or more panics with
+  `0x41` before the bounds check, as solc's `array_allocation_size` (it
+  reverted with no data): `elabB` (`g(bytes)` with length `2^64` panics,
+  `2^32` reverts, a length word cut short reverts, `"ab"` runs; legacy
+  pipeline, the decoder does not depend on it). solc's
+  `finalize_allocation` band just below `2^64` (lower for later arguments
+  and under via-IR) still reverts here: a recorded deviation
+  (`docs/solc-alignment.md`). `Horizon.lean`'s `tailBytes`/`decodeArg`
+  lemmas gained the branches.
+
+  The first version (`3843b17`, marker `d0f8f02`) checked the length
+  before the offset and claimed the whole of solc's behaviour; the
+  coordinator's review (against solc's generated Yul) found both, and the
+  marker was not integrated.
 
 Attempted and reverted: getters of `bytes`/`string` state variables
 (`dispatch` encoding a storage reference; the control returned `"ab"`):
@@ -454,10 +643,10 @@ takes `bytes calldata` with a memory argument has no type (memory to
 calldata is not implicit in S01), which solc accepts.
 
 **Not proved**: the gap-relative progress theorem for whole programs,
-`noGaps`, and its corollary. The interpreter walk is done for the value
-fragment of expressions and statements (above); the remaining
-constructs need the heap, storage and frame invariants of Checkpoint 2
-threaded through the walk.
+`noGaps`, and its corollary. The interpreter walk covers the value
+fragment of expressions and statements, `return`, and internal calls
+(also inside expressions, recursion included) under `CallsOK`; the rest
+is listed in the Handoff's "Not done".
 
 ## Handoff
 
@@ -466,9 +655,9 @@ Kept current at every checkpoint.
 | Checkpoint | Status | Theorems |
 |---|---|---|
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
-| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; no preservation theorem for the walk |
-| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types (`Elaborated.callInternal_call_ns`); internal calls inside expressions under `CallsOK` (`evalE_callFrag_ns`, joint induction `fragAt`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
-| 4 Close gaps | partial | UDVT argument decoding (`elabW`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
+| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element and member reads (`memElem_ok`, `readLoc_mem_ok`); memory writes keep `HeapInner` (`memSet_inner`, `writeLoc_memByte_inner`); `heapPut_inner`; the zeroing allocator keeps `MemOK` (`zeroOK`, with `allocRef_mem` and `Hoare.memGrow`); no preservation theorem for the walk |
+| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types and unit membership, `hdec` (`Elaborated.callInternal_call_ns`); internal calls inside expressions under `CallsOK` (`evalE_callFrag_ns`, joint induction `fragAt`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
+| 4 Close gaps | partial | UDVT argument decoding (`elabW`); Panic `0x41` in the decoder (`elabB`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
 
 **Not done** (also under `limitations:`):
@@ -493,7 +682,7 @@ Kept current at every checkpoint.
   `count++;`; `indexMapping_ns`: S01's `m[o]`, through `MapRef`), besides
   `addSub_ns`; the derivations are written by hand and checked against
   S01's rules, not produced by `elaborate`. The loop, storage and return
-  witnesses (`loopItems`, `cbItems`, `condE`) and the function-level one
+  witnesses (`loopItems`, `cbBody.items`, `condE`) and the function-level one
   (`retOneBody`) are hand-built resolved terms. Which elaborated bodies
   are in the fragment is not characterised; for elaborated programs
   `callInternal_ns`'s frame hypotheses are derived from the elaboration
@@ -544,17 +733,25 @@ No witness applies these theorems to a concrete `Elaborated` program; the
 function-level witness (`callRetOne_ns`) uses `callInternal_ns` on a
 hand-built body.
 
-**How to continue the walk.** Add a field per interpreter function to the
-induction hypotheses (`ExprNSAt`, `StmtNSAt`, as `Horizon.lean`'s
-`BelowAt`), with a postcondition that carries what the caller needs
-(`RPost`, `LocOK`, the frame). `simp only [evalE]` unfolds one arm; the
-heavy matchers (`convRV`, `convVal`, `keyStep`) are handled by `split` on
-the general match or by per-case `rfl` equations, never by
-`simp only [convVal]` (whnf timeouts). Memory needs `WellTyped.lean`'s
-`EMOK` in the pre- and postconditions (the heap typing grows); frames
-need `BodyFrame` from `callInternal` (the `if h : … = b.locals` check
-and `Elaborated.bodies_typed`) and a dispatch lemma (the body virtual
-dispatch finds has the parameters and returns of the called signature).
+**How to continue the walk.** New interpreter functions go into the joint
+induction `FragAt` (`StmtProgress.lean`) as fields at horizon `n`, each
+with a step lemma from the fields at `n` (as `Horizon.lean`'s `BelowAt`),
+and a postcondition that carries what the caller needs (`RPost`,
+`LocOK`, `Out.esc`). `simp only [evalE]` unfolds one arm; the heavy
+matchers (`convRV`, `convVal`, `keyStep`) are handled by `split` on the
+general match or by per-case `rfl` equations, never by
+`simp only [convVal]` (whnf timeouts). The next steps, in order:
+
+- modifiers: `runMods` with invocations and the `_` arm read and write
+  `St.fnLocals` and check its context at run time, so they need a state
+  invariant (the running modifier's frame) in the pre- and postcondition,
+  that is, Hoare triples over `NSP`'s "from any state";
+- `CallsOK` for elaborated programs: from `Elaborated.callInternal_call_ns`
+  per call, given the override return-type and unit-membership lemmas
+  above and a characterisation of the bodies in the fragment;
+- memory: `WellTyped.lean`'s `EMOK` in the pre- and postconditions (the
+  heap typing grows), which also gives preservation;
+- external calls, `emit`, builtins and the transaction layer.
 
 **Elaboration.** `ExprProgress.lean` and `StmtProgress.lean` each check
 in under a minute with the language server; `SoundnessExamples.lean`
