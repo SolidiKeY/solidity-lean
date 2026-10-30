@@ -29,6 +29,26 @@ superseded by this frozen integration boundary. The failed guard remains in
 the coordinator's integration ledger; it was not a passing combined check.
 The coordinator owns the full combined gates after this focused repair.
 
+### Refreshed integration recheck (2026-10-30)
+
+At `6d5f631d`, the registration repair is already present. Against the refreshed
+integration base `fb379ae2`, `tests/solkey/expected.tsv`,
+`docs/solidity-scope.md`, `lakefile.toml` and `lean-toolchain` all match
+byte-for-byte. The generator reproduces all ten generated corpus files exactly;
+`node --test scripts/payment-corpus.test.mjs`, frozen snapshot hash verification
+and the complete static TestSuite gate pass (552 derived, 11 refuted,
+1 excluded, 2 skip, zero pending). The test initially failed because the sandbox
+blocked its Node child process with `EPERM`; the unchanged host rerun passed.
+The recheck record is `.lake/integration-repair/frozen-refresh-check.json`.
+
+No Lean source needs another edit for this discrepancy. The earlier retained
+`SolidityCorpus.lean` MCP diagnostics are partial, with no reported errors;
+they are not a completed check. Fresh finder and skeptic review launches both
+failed with `invalid thread-store request: no rollout found`; no new independent
+review is claimed. Earlier review evidence and failed logs remain intact.
+The coordinator must complete independent reviews and full combined gates.
+This recheck introduces no semantic decision, commit, index write or guard waiver.
+
 Current scope after the explicit human decision on 2026-10-29: keep existing
 semantics and prove exact conditional success and certified failure conditions.
 For this assignment only, that replaces the unconditional transfer-success
