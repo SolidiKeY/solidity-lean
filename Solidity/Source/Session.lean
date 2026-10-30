@@ -232,8 +232,7 @@ theorem txFate_pending_iff (G : Glob E) (q : Request) (s : St E) (n : Nat) :
     rcases x with ⟨k, r⟩
     obtain ⟨hk, rfl, hd⟩ := firstDone_spec hf
     refine ⟨fun h => ?_, fun h => ?_⟩
-    · rcases hr : (runAt (fun f => runTx G f q) s k).1 with o | e <;> simp only [hr] at h <;>
-        exact absurd h (fun h' => nomatch h')
+    · rcases hr : runAt (fun f => runTx G f q) s k with ⟨o | e, t⟩ <;> rw [hr] at h <;> cases h
     · have := h k hk
       rw [← not_done_iff, hd] at this
       cases this
@@ -278,9 +277,7 @@ theorem stuck_iff (G : Glob E) (q : Request) (s : St E) :
       obtain ⟨_, rfl, _⟩ := firstDone_spec hf
       rw [hf] at h
       refine ⟨k, msg, ?_⟩
-      rcases hr : (runAt (fun f => runTx G f q) s k) with ⟨o | e, t⟩ <;> rw [hr] at h
-      · cases h
-      · cases h; rfl
+      rcases hr : (runAt (fun f => runTx G f q) s k) with ⟨o | e, t⟩ <;> rw [hr] at h <;> cases h <;> rfl
   · rintro ⟨k, msg, h⟩
     have hd : Done (runAt (fun f => runTx G f q) s k) = true := by
       rw [done_iff, h]; exact fun h' => nomatch h'
@@ -303,6 +300,10 @@ theorem stuck_stable (G : Glob E) (q : Request) (s : St E) {n n' : Nat} (hn : n 
 /-- info: 'Solidity.Source.sessionAtEvents_consistent' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms sessionAtEvents_consistent
+
+/-- info: 'Solidity.Source.stuck_not_diverges' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms stuck_not_diverges
 
 /-- info: 'Solidity.Source.runTx_events_mono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
