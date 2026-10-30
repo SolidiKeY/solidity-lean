@@ -2603,6 +2603,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.heapBytes_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.heapObj_gen": [
   "Classical.choice",
   "Quot.sound",
@@ -2718,6 +2723,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.readLoc_memByte_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.readLoc_memByte_pres": [
   "Classical.choice",
   "Quot.sound",
@@ -2774,6 +2784,11 @@
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.badBinary_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.bytesHeap_byte_read": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -2854,6 +2869,11 @@
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.loop_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.ptrHeap_byte_read_stuck": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -2950,6 +2970,9 @@
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.storRef_ok": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.STy.memShape_array": [
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.STy.memShape_bytes": [

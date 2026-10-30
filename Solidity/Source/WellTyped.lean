@@ -761,7 +761,7 @@ theorem writeLoc_mem_ok {H : HeapTy} (F : Fr) (n a i : Nat) {τ : STy} (v : Val 
   memSet_ok a i v
 
 
-/-- The memory shape of an array is the array itself. -/
+/-- Only an array has an array memory shape (inversion). -/
 theorem STy.memShape_array {σ ρ : STy} {l : DataLoc} {k : Option Nat}
     (h : σ.memShape = .array l ρ k) : σ = .array l ρ k := by
   cases σ <;> simp only [STy.memShape, reduceCtorEq] at h

@@ -261,11 +261,18 @@ trivially at `Γ = []` and the empty heap typing) whose object at `1` is a
 (`zeroData` and `loadMem` match all four memory reference types before
 their `Data.val` arms, and a mapping has no memory location; the other
 `allocRef` and `heapPut` sites build aggregates), so the gap is in the
-invariant, not the semantics; the proof is pending. Progress for `memSet`,
+invariant, not the semantics (that every allocation is shaped is not yet
+proved). Progress for `memSet`,
 `writeLoc .memByte`, `memElem` and `heapBytes` (`readLoc .memByte`,
 conversions to fixed bytes, `bytesOfRV`) needs `HeapOK` strengthened with
 this shape condition, and `memElem` also needs elements to be `Data.val`
 (`Data.asVal`, "inline aggregate element"): the census "heap" row below.
+The shape condition is now `HeapShaped` and the progress lemmas below
+cover all of these but `memElem` and the `heapBytes` callers other than
+`readLoc .memByte`. Every site that builds a memory array or struct
+stores `Data.val` elements (`zeroElems`, `zeroFields`, `loadElems`,
+`loadFields`, the ABI decoder, `structNew`, `memSet`), so the element
+condition is also a proof gap only.
 Progress proofs must use `heapPut_ok`, which keeps the halt detail
 `heapPut_pres` drops. Not covered: `deleteLoc` (through `writeLoc` and
 `zeroVal`), and locals holding calldata references (`Val.RefOK` of a
@@ -287,11 +294,13 @@ what remains is a proof gap, not a semantic one. Not yet done: proving
 that for every allocation site; carrying `HeapShaped` through frame
 restores (`Eval.lean` and `Semantics.lean` reset the heap or restore a
 saved one, as for `HeapOK`); progress for `memElem` (it also needs
-elements to be `Data.val`). Progress for byte reads is proved:
+elements to be `Data.val`). Progress for `readLoc .memByte` is proved:
 `heapBytes_ok`, `readLoc_memByte_ok` (at a `bytes`/`string` address in a
 shaped heap, not `stuck`: the code reads or panics out of bounds),
 witness `bytesHeap_byte_read`, control `ptrHeap_byte_read_stuck` (the
-unshaped `ptrHeap`: "not a bytes object").
+unshaped `ptrHeap`: "not a bytes object"). `heapBytes_ok` applies to its
+other callers (`bytesOfRV`, the conversion to fixed bytes, the revert
+data) once their premise is derived; that is not done.
 Progress for element and member writes is proved: `memSet_ok` /
 `writeLoc_mem_ok` (at an array of the value's type, or a struct whose
 member `i` has it, in a shaped heap, the write is not `stuck`: the code
@@ -306,6 +315,11 @@ included; `STy.memShape_array`); a struct member (`Eval.lean`, member access) ha
 `E.fieldTy? d .memory i = some τ`, which is `(E.layout.fields d)[i]?`
 for a memory struct. The struct bridge is not stated as a lemma yet, and there is
 no struct-member control (`SemanticsExamples.E0` has no structs).
+
+**Review of the byte-read progress** (finder and skeptic, read-only, no
+blocker): stale "pending"/"needs" lines, the scope of "byte reads", the
+Handoff row and the `memShape_array` docstring were fixed; the element
+condition was checked at every site (above). Build37 (`a035e78`) passed.
 
 **Review of `memSet_ok`** (finder and skeptic, read-only, no blocker):
 "succeeds or panics" was stronger than the statement (reworded); the
@@ -608,7 +622,7 @@ Kept current at every checkpoint.
 | Checkpoint | Status | Theorems |
 |---|---|---|
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
-| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; no preservation theorem for the walk |
+| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`); no preservation theorem for the walk |
 | 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types and unit membership, `hdec` (`Elaborated.callInternal_call_ns`); internal calls inside expressions under `CallsOK` (`evalE_callFrag_ns`, joint induction `fragAt`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
 | 4 Close gaps | partial | UDVT argument decoding (`elabW`); Panic `0x41` in the decoder (`elabB`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
