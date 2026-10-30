@@ -274,9 +274,10 @@ stores `Data.val` elements (`zeroElems`, `zeroFields`, `loadElems`,
 `loadFields`, the ABI decoder, `structNew`, `memSet`), so the element
 condition is also a proof gap only.
 Progress proofs must use `heapPut_ok`, which keeps the halt detail
-`heapPut_pres` drops. Not covered: `deleteLoc` as a whole (its
-`zeroVal` step is `zeroOK`; the write after it is not composed), and locals holding calldata references (`Val.RefOK` of a
-`cdRef` is `False`; the semantics creates none).
+`heapPut_pres` drops. `delete` of a local or memory location keeps
+`MemOK` (`deleteLoc_mem`, below); storage `delete` and locals holding
+calldata references are not covered (`Val.RefOK` of a `cdRef` is
+`False`; the semantics creates none).
 
 **The shape invariant, first use.** `HeapShaped h` (`Data.Top`: a
 top-level object is a `Data.val` only at a type without a location) is
@@ -297,7 +298,21 @@ allocator is proved: `zeroOK` (joint induction on fuel over `zeroData`,
 builds an agreeing, shaped object with bare-value elements, `zeroElems`
 and `zeroFields` agreeing bare-value elements, and `zeroVal`'s value
 agrees (`allocRef_mem`, `Hoare.memGrow` for the growing heap typing,
-`Val.default_loc`); witness `zeroArr_alloc`. Not yet done: proving the
+`Val.default_loc`); witness `zeroArr_alloc`. Composed with the write:
+local and memory writes of agreeing values keep `MemOK` (`writeLoc_local_mem`,
+`writeLoc_mem_mem`, `writeLoc_memByte_mem`, through `memSet_top`,
+`writeLoc_memByte_top`, `heapPut_top` and the conjunction rule
+`Hoare.and`), so `delete` of a local or memory location keeps `MemOK`,
+halts included (`deleteLoc_mem`; witness `arrHeap_delete`: `true`
+reset to `false`). Storage writes are not covered.
+
+**Review of `deleteLoc_mem`** (finder and skeptic, read-only, no
+blocker): the side condition and "halts included" were confirmed, and
+`Hoare.and` is sound for the deterministic `EM`; fixed: the witness now
+starts from `true` and reads element `0` back as `false`, the `zeroOK`
+docstring points to `deleteLoc_mem`, "writes" now says local and memory
+writes, the TrustAudit list matches the pins. Build43 (`0b7c2be`)
+passed. Not yet done: proving the
 same for the other allocation sites (`loadMem`, the ABI decoder,
 `structNew`, literals, the `abi.encode*` result); carrying `HeapShaped` and `HeapInner` (`MemOK`) through frame restores (`Eval.lean` and
 `Semantics.lean` reset the heap or restore a saved one, as for
@@ -655,7 +670,7 @@ Kept current at every checkpoint.
 | Checkpoint | Status | Theorems |
 |---|---|---|
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
-| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element and member reads (`memElem_ok`, `readLoc_mem_ok`); memory writes keep `HeapInner` (`memSet_inner`, `writeLoc_memByte_inner`); `heapPut_inner`; the zeroing allocator keeps `MemOK` (`zeroOK`, with `allocRef_mem` and `Hoare.memGrow`); no preservation theorem for the walk |
+| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; location reads and writes (`writeLoc_*_pres`, `readLoc_*_pres`, `memSet_pres`, `memElem_pres`); the shape invariant `HeapShaped` and progress of memory byte writes and reads and element/member writes (`writeLoc_memByte_ok`, `memSet_ok`, `writeLoc_mem_ok`, `heapBytes_ok`, `readLoc_memByte_ok`) and, under `HeapInner`, element and member reads (`memElem_ok`, `readLoc_mem_ok`); memory writes keep `HeapInner` (`memSet_inner`, `writeLoc_memByte_inner`); `heapPut_inner`; the zeroing allocator keeps `MemOK` (`zeroOK`, with `allocRef_mem` and `Hoare.memGrow`); writes and non-storage `delete` keep `MemOK` (`writeLoc_*_mem`, `deleteLoc_mem`); no preservation theorem for the walk |
 | 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types and unit membership, `hdec` (`Elaborated.callInternal_call_ns`); internal calls inside expressions under `CallsOK` (`evalE_callFrag_ns`, joint induction `fragAt`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
 | 4 Close gaps | partial | UDVT argument decoding (`elabW`); Panic `0x41` in the decoder (`elabB`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |

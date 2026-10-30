@@ -44,7 +44,9 @@ element's or member's type (`memSet_ok`, `writeLoc_mem_ok`), nor a byte
 read (`heapBytes_ok`, `readLoc_memByte_ok`). With `HeapInner` too
 (`Data.Inner`: elements and members are bare values), nor is an
 element or member read (`memElem_ok`, `readLoc_mem_ok`). The zeroing
-allocator keeps all three (`MemOK`, `zeroOK`).
+allocator keeps all three (`MemOK`, `zeroOK`), as do local and memory
+writes of agreeing values and `delete` of a local or memory location
+(`deleteLoc_mem`); storage writes are not covered.
 -/
 
 namespace Solidity.Source
@@ -1179,10 +1181,126 @@ theorem zeroOK_step {n : Nat} (ih : ZeroOK E Γ n) : ZeroOK E Γ (n + 1) where
 /-- **Zeroed objects keep the memory invariant** (`MemOK`: well typed,
 shaped, bare-value elements) at every fuel, halts included; the value of
 `zeroVal` agrees. This covers the `zeroVal` step of a declaration without
-an initializer and of `delete`, not the write or locals update after it. -/
+an initializer and of `delete`; `deleteLoc_mem` composes it with the
+write. -/
 theorem zeroOK : ∀ n, ZeroOK E Γ n
   | 0 => zeroOK_zero
   | n + 1 => zeroOK_step (zeroOK n)
+
+
+/-! ## `delete` of a non-storage location keeps the memory invariant -/
+
+/-- **Conjunction**: two triples for the same program combine. -/
+theorem Hoare.and {P : EMState E Γ → Prop} {m : EM E Γ α} {Q₁ Q₂ : α → EMState E Γ → Prop}
+    {X₁ X₂ : Halt → EMState E Γ → Prop} (h₁ : Hoare P m Q₁ X₁) (h₂ : Hoare P m Q₂ X₂) :
+    Hoare P m (fun a y => Q₁ a y ∧ Q₂ a y) (fun e y => X₁ e y ∧ X₂ e y) := by
+  intro x hx
+  have r₁ := h₁ x hx
+  have r₂ := h₂ x hx
+  revert r₁ r₂
+  cases m.run x with
+  | mk r y => cases r <;> exact fun a b => ⟨a, b⟩
+
+/-- **`heapPut` keeps shapes**, given a shaped object (halts included). -/
+theorem heapPut_top (a : Nat) (x : Σ τ, Data E.layout τ) :
+    Hoare (fun y => HeapShaped y.2.heap ∧ Data.Top x.2) (heapPut a x : EM E Γ Unit)
+      (fun _ y => HeapShaped y.2.heap) (fun _ y => HeapShaped y.2.heap) := by
+  unfold heapPut
+  refine Hoare.bind (Hoare.st' (Q := fun s y => y.2 = s ∧ HeapShaped y.2.heap ∧ Data.Top x.2)
+    fun y hy => ⟨rfl, hy⟩) fun s => ?_
+  refine Hoare.dite' (fun h => Hoare.setSt' ?_) (fun h => Hoare.halt' fun y hy => hy.2.1)
+  intro ⟨l, s'⟩ ⟨hs, hi, hx⟩
+  subst hs
+  exact hi.write h hx
+
+/-- **`memSet` keeps shapes** (halts included): it writes an array or a
+struct. -/
+theorem memSet_top (a i : Nat) {τ : STy} (v : Val E.layout τ) :
+    Hoare (fun y => HeapShaped y.2.heap) (memSet a i v : EM E Γ Unit)
+      (fun _ y => HeapShaped y.2.heap) (fun _ y => HeapShaped y.2.heap) := by
+  unfold memSet
+  refine Hoare.bind (heapObj_get (a := a) fun y hy _ => hy) fun ⟨σ, d⟩ => ?_
+  cases d with
+  | array len hl xs =>
+    refine Hoare.dite' (fun h => Hoare.dite' (fun e => ?_) (fun _ => Hoare.halt' fun y hy => hy.1))
+      (fun _ => Hoare.lift' fun y hy => hy.1)
+    exact Hoare.conseq (heapPut_top a _) (fun y hy => ⟨hy.1, trivial⟩) (fun _ _ h => h) (fun _ _ h => h)
+  | @struct l d fs =>
+    exact Hoare.bind (Hoare.lift' (Q := fun _ y => HeapShaped y.2.heap) fun y hy => by
+        split <;> exact hy.1) fun fs' =>
+      Hoare.conseq (heapPut_top a ⟨.struct l d, .struct fs'⟩) (fun y h => ⟨h, trivial⟩)
+        (fun _ _ h => h) (fun _ _ h => h)
+  | _ => exact Hoare.halt' fun y hy => hy.1
+
+/-- **A memory byte write keeps shapes** (halts included). -/
+theorem writeLoc_memByte_top (F : Fr) (n a i : Nat) (v : Val E.layout (.fixedBytes 1 (by decide))) :
+    Hoare (fun y => HeapShaped y.2.heap) (writeLoc F n (.memByte a i) v : EM E Γ Unit)
+      (fun _ y => HeapShaped y.2.heap) (fun _ y => HeapShaped y.2.heap) := by
+  simp only [writeLoc]
+  refine Hoare.bind (heapObj_get (a := a) fun y hy _ => hy) fun ⟨σ, d⟩ => ?_
+  cases d with
+  | bytes bs =>
+    exact Hoare.ite' (fun _ => Hoare.conseq (heapPut_top a _) (fun y hy => ⟨hy.1, trivial⟩)
+      (fun _ _ h => h) (fun _ _ h => h)) (fun _ => Hoare.lift' fun y hy => hy.1)
+  | string bs =>
+    exact Hoare.ite' (fun _ => Hoare.conseq (heapPut_top a _) (fun y hy => ⟨hy.1, trivial⟩)
+      (fun _ _ h => h) (fun _ _ h => h)) (fun _ => Hoare.lift' fun y hy => hy.1)
+  | _ => exact Hoare.halt' fun y hy => hy.1
+
+/-- **Writing a local keeps `MemOK`** for an agreeing value (the heap is
+unchanged). -/
+theorem writeLoc_local_mem {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (i : Idx Γ τ) (v : Val E.layout τ) :
+    Hoare (fun y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (writeLoc F n (.local i) v : EM E Γ Unit)
+      (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  simp only [writeLoc]
+  refine Hoare.bind (Hoare.locals' (Q := fun l y => y.1 = l ∧ MemOK E H y ∧ v.RefOK E y.2.heap.ty)
+    fun y hy => ⟨rfl, hy⟩) fun l => Hoare.setLocals' ?_
+  intro ⟨l', s⟩ ⟨hl, ⟨⟨hs, hlo⟩, hsh, hin⟩, hv⟩
+  subst hl
+  exact ⟨⟨hs, LocalsOK.set _ i hlo hv⟩, hsh, hin⟩
+
+/-- **An element or member write keeps `MemOK`** for an agreeing value,
+halts included. -/
+theorem writeLoc_mem_mem {H : HeapTy} (F : Fr) (n a i : Nat) {τ : STy} (v : Val E.layout τ) :
+    Hoare (fun y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (writeLoc F n (.mem a i) v : EM E Γ Unit)
+      (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  have h₁ := Hoare.conseq (P' := fun y => MemOK E H y ∧ v.RefOK E y.2.heap.ty)
+    (writeLoc_mem_pres (Γ := Γ) (H := H) F n a i v) (fun y h => ⟨h.1.1, h.2⟩) (fun _ _ h => h) (fun _ _ h => h)
+  have h₂ := Hoare.conseq (P' := fun y => MemOK E H y ∧ v.RefOK E y.2.heap.ty)
+    (memSet_top (Γ := Γ) a i v) (fun y h => h.1.2.1) (fun _ _ h => h) (fun _ _ h => h)
+  have h₃ := Hoare.conseq (P' := fun y => MemOK E H y ∧ v.RefOK E y.2.heap.ty)
+    (memSet_inner (Γ := Γ) a i v) (fun y h => h.1.2.2) (fun _ _ h => h) (fun _ _ h => h)
+  exact Hoare.conseq (Hoare.and (Hoare.and h₁ h₂) h₃) (fun _ h => h)
+    (fun _ _ h => ⟨h.1.1, h.1.2, h.2⟩) (fun _ _ h => ⟨h.1.1, h.1.2, h.2⟩)
+
+/-- **A memory byte write keeps `MemOK`**, halts included. -/
+theorem writeLoc_memByte_mem {H : HeapTy} (F : Fr) (n a i : Nat)
+    (v : Val E.layout (.fixedBytes 1 (by decide))) :
+    Hoare (MemOK E H) (writeLoc F n (.memByte a i) v : EM E Γ Unit)
+      (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  have h₁ := Hoare.conseq (P' := MemOK E H) (writeLoc_memByte_pres (Γ := Γ) (H := H) F n a i v)
+    (fun y h => h.1) (fun _ _ h => h) (fun _ _ h => h)
+  have h₂ := Hoare.conseq (P' := MemOK E H) (writeLoc_memByte_top (Γ := Γ) F n a i v)
+    (fun y h => h.2.1) (fun _ _ h => h) (fun _ _ h => h)
+  have h₃ := Hoare.conseq (P' := MemOK E H) (writeLoc_memByte_inner (Γ := Γ) F n a i v)
+    (fun y h => h.2.2) (fun _ _ h => h) (fun _ _ h => h)
+  exact Hoare.conseq (Hoare.and (Hoare.and h₁ h₂) h₃) (fun _ h => h)
+    (fun _ _ h => ⟨h.1.1, h.1.2, h.2⟩) (fun _ _ h => ⟨h.1.1, h.1.2, h.2⟩)
+
+/-- **`delete` of a local or memory location keeps `MemOK`**, halts
+included: the zeroed value agrees (`zeroOK`) and the write keeps the
+invariant. -/
+theorem deleteLoc_mem {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ)
+    (hl : ∀ p, loc ≠ .stor p) :
+    Hoare (MemOK E H) (deleteLoc F n loc : EM E Γ Unit)
+      (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
+  cases loc with
+  | stor p => exact absurd rfl (hl p)
+  | «local» i => exact Hoare.bind ((zeroOK n).val H τ) fun v => writeLoc_local_mem F n i v
+  | mem a i => exact Hoare.bind ((zeroOK n).val H τ) fun v => writeLoc_mem_mem F n a i v
+  | memByte a i =>
+    exact Hoare.bind (Hoare.conseq ((zeroOK n).val H _) (fun _ h => h) (fun _ _ h => h.1) (fun _ _ h => h))
+      fun v => writeLoc_memByte_mem F n a i v
 
 end
 
