@@ -974,3 +974,79 @@ Checkpoint artifacts include full commands/exits/raw failures, cumulative patch,
 named-ref bundle, handoff, independent artifact reviews and checksum manifests.
 Only owned new modules/allowed registrations/document are committed; runtime
 TOML stays untracked. Original goal remains unfinished and unchanged.
+
+
+## Checkpoint eleven: recursive transport of the published typed mirror
+
+Parent a83ebeeab11198ad9cc20682e7bcbb6271cf47a4; pinned base unchanged.
+After sealing checkpoint ten, further original-queue investigation found the
+published Solidity/Theory/Typed/MemMirror.lean relation SVal.Mirrors already
+records contents and ID lower bounds recursively throughout finite typed storage
+trees. It preserves growth, but lacked the owned operation-side transport through
+second old-object writes. CopyMirrorFrame adds transport of that EXISTING relation,
+not a new value/state/interpreter/copy implementation or source correspondence.
+
+mirrors_frame, fields_mirrors_frame and vec_mirrors_frame recurse over existing
+SVal/SFields/SVec, with no depth or payload cutoff. Their explicit premise is
+equal object contents at every typed identity at least n. The concrete theorem
+captureAfterCopy_mirrors discharges that frame from actual captureAfterCopy's
+new-object frame; the published SVal.mirrors_copyStToM supplies each node's
+ID bound and initial contents. Thus the postrelation is derived, not assumed.
+captureAfterDefault_mirrors instantiates actual Heap.allocDefault's typed default.
+Both retain mapFree=true and the actual intermediate source bounds/capacity.
+This closes recursive INTRINSIC mirror preservation for this operation case,
+not the original unrestricted source/target recursive-copy compiler obligation.
+
+Controls quantify arbitrary n for fixed arrays of reference-containing fixed
+children of nonempty dynamic Boolean arrays, recording actual first checked
+Some mid, actual multi-object builder and second checked Some final. The complete
+published recursive mirror holds at final output for copied and default trees;
+old recapture actually changes false to true. A nonzero published Person with
+Account/Token reference fields exercises the nonempty SFields/struct arms and
+observes final age11. An initially inhabited old-object mirror is destroyed by
+the actual first overwrite: removing the fresh frame would be unsound.
+
+Independent finder and skeptic identified the initially missing concrete struct
+branch control; person_copy/person_default now supply it using published fields,
+without implementing any reserved reference constructor. Focused frame passes68
+jobs and refined controls pass69jobs. Failed negative-control elaboration attempts
+are retained separately; all11new headline outputs have exact standard guards.
+Final source review and required gate/artifact confirmation follow below.
+
+The remaining original obligations remain partial/blocked: physical byte-memory
+representation and execution; all-type/default/target allocation failure; general
+paths/rebinding/delete/stale-alias compilation; reserved memory-storage copies;
+general calldata/ABI/source/storage transport; fresh memory-to-memory deep-copy
+realization; mapping/shadow/source/type-graph/cycle and emitted recursive traversal
+coverage; fresh Source root representation/address injectivity; final reserved
+copy and V10/Source/target composition. Mirrors does not by itself prove pairwise
+fresh-node distinctness or address injectivity. Backfill A/B remain partial, with
+this additional supported independent recursive frame clause now proved. No
+claim that all further independent refinements are exhausted.
+
+New cumulative exports: /workspace/v11-memory-operations-evidence/checkpoint11.
+Checkpoint10 and all earlier sealed artifacts/errors/caches remain immutable.
+Original goal unchanged/unfinished, get_goal/per-file diagnostics unavailable;
+serial-j1,12GiB/no-swap and all proof/fuel/test/time budgets unchanged. No reserved
+file, global ledger/inventory, Source semantics, profile or integration change.
+
+
+Checkpoint-eleven final gate v11-checkpoint11-full-01 exits0:894default jobs,
+262TestSuite jobs, final SolKey377taclets/131read-bearing annotations OK.
+Refined source finder and skeptic both confirm the nonempty struct witness gap
+is fixed, with no remaining mathematical/ownership/nonvacuity/doc defect. Neither
+reviewer used Lean/server/builds. All11new kernel guards use standard axioms;
+owned checker passes262pins43modules. Strict automation, complete committed
+TestSuite trust/parity, layers/orphans/trust/script/diff checks pass. Global docs
+still exits1,46findings raw exact-base equal; separate no-new comparison passes.
+Global inventory still exits1:0unsafe errors276unrecorded=14inherited+262owned.
+Additive proposals remain coordinator reconciliation; no reserved pin edit.
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and
+Lake5.0.0-src+797c613 execute; KeySort passes2jobs in checkpoint11-runtime log.
+RUNTIME_GATE_PASS is runtime/setup only, never full-lane completion.
+Final sampled aggregate RSS1,602,300KiB, cgroup peak392,908,800bytes,
+OOMKilled=false;12GiB/no-swap child,16GiB parent/OS headroom and serial-j1 unchanged.
+These are kernel intrinsic proofs plus concrete controls, not external compiler/
+EVM evidence. Final cumulative artifacts/checksums and independent artifact
+receipts are exported separately after commit; all earlier seals remain intact.
+Existing goal remains unchanged and unfinished; no integration is authorized.

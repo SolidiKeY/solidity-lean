@@ -1080,3 +1080,5 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/InterstageBuilderControls.lean` | Three-object nested default/nonempty storage copy, changed dynamic recapture, fresh child contents at final output, exact guards and endpoints. |
 | `Backend/MemoryOps/InterstageBuilderRefControls.lean` | Fixed reference-valued interstage storage copy, both overlap directions, old aliases, fresh root, isolated guards and frozen-original negative. |
 | `Backend/MemoryOps/InterstageBuilderChildControls.lean` | Existing immutable Boolean/nested certificates framed across actual multi-object builder outputs and second checked captures. |
+| `Backend/MemoryOps/CopyMirrorFrame.lean` | Recursive transport of the published typed storage-copy mirror under actual fresh-ID frames, including structs/arrays and default construction. |
+| `Backend/MemoryOps/CopyMirrorControls.lean` | Arbitrary-length nested copy/default families, actual changed recapture, nonzero published Person/Account/Token fields and an unframed old-mirror negative. |
