@@ -292,6 +292,248 @@
   "Solidity.Lowering.V08.EnvironmentProjection.state_environment_reset": [
     "propext"
   ],
+  "Solidity.Lowering.V08.HandlerControls.argument_bypasses_handler": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.atomic_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.atomic_vector_status": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.collision_atomic_vector_status": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.collision_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.collision_handler_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.constructor_catchable": [],
+  "Solidity.Lowering.V08.HandlerControls.constructor_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.constructor_payload_observation": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.constructor_prefix_view": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.constructor_reason_not_returned": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.correct_work_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.ctor_input_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.dirty_transaction_snapshot": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.distinct_halts": [],
+  "Solidity.Lowering.V08.HandlerControls.fourth_read_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.frame_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.guard_work_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.handler_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.handler_failure_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.handler_payload_observation": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.later_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.later_panic_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.observed_atomic_status": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.observed_handler_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.outer_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.panic_constructor_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.panic_constructor_failed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.panic_handler_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.panic_handler_atomic_vector_status": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.panic_not_exhausted_or_diverged": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.panic_work_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.populated_vectors": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.recatch_negative": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.recatch_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.repeated_after_failure_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.repeated_after_failure_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.setup_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.skipped_payment": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.skipped_payment_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.static_bypasses_handler": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.transaction_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.transaction_vector_status": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.untouched_atomic": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.untouched_transaction": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.work_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.wrong_ancestor_boundary": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.wrong_handler_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.wrong_snapshot": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.HandlerControls.wrong_snapshot_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.InheritedControls.base_functions": [
     "Classical.choice",
     "Quot.sound",
@@ -776,6 +1018,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.atomic_tryCreate_handler_steps_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.atomic_tryCreate_success_continuation_failure": [
     "Classical.choice",
     "Quot.sound",
@@ -867,6 +1114,10 @@
   "Solidity.Lowering.V08.transact_descendant_failure": [
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_failure_then_commit": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_observe": [
     "propext"
   ],
@@ -878,6 +1129,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_tryCreate_handler_steps_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_two_boundaries": [
     "propext"
   ],
@@ -885,6 +1141,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.tryCreate_completed_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.tryCreate_handler_steps_failure": [
     "Classical.choice",
     "Quot.sound",
     "propext"

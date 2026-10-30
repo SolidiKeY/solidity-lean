@@ -135,4 +135,84 @@ theorem tryCreate_completed_failure {α β : Type} (w : World contracts) (value 
 #print axioms tryCreate_static
 #print axioms tryCreate_completed_failure
 
+omit [DecidableEq K] in
+/-- A completed catchable creation-frame failure enters the handler once. Its
+successful work prefix followed by a failed continuation propagates the continuation
+halt exactly (not necessarily distinct); the creation catch does not surround either handler step. -/
+theorem tryCreate_handler_steps_failure {α β γ : Type} (w handled : World contracts)
+    (value : α) (kind : K) (target : α → Address)
+    (ctor : α → Prog (contracts kind) [] []) (context : α → Context)
+    (success : World contracts → Handle kind → TRes (World contracts × β))
+    (work : World contracts → THalt → TRes (World contracts × γ))
+    (later : World contracts → γ → TRes (World contracts × β))
+    (result : γ) (constructorHalt handlerHalt : THalt)
+    (mutable : (context value).isStatic = false)
+    (constructorFailed : w.create kind (target value) (ctor value) (context value) = .error constructorHalt)
+    (caught : catchable constructorHalt = true)
+    (worked : work w constructorHalt = .ok (handled, result))
+    (laterFailed : later handled result = .error handlerHalt) :
+    w.tryCreate (.ok value) kind target ctor context success
+      (fun snapshot halt => do
+        let (next, result) ← work snapshot halt
+        later next result) = .error handlerHalt := by
+  rw [tryCreate_completed_failure w value kind target ctor context success _ constructorHalt
+    mutable constructorFailed]
+  simp only [caught, ↓reduceIte, worked, bind, Except.bind, laterFailed]
+
+omit [DecidableEq K] in
+/-- The enclosing atomic snapshot is restored after a catch handler fails.
+The handler's completed prefix is not committed through the error branch. -/
+theorem atomic_tryCreate_handler_steps_failure {α β γ : Type} (w handled : World contracts)
+    (value : α) (kind : K) (target : α → Address)
+    (ctor : α → Prog (contracts kind) [] []) (context : α → Context)
+    (success : World contracts → Handle kind → TRes (World contracts × β))
+    (work : World contracts → THalt → TRes (World contracts × γ))
+    (later : World contracts → γ → TRes (World contracts × β))
+    (result : γ) (constructorHalt handlerHalt : THalt)
+    (mutable : (context value).isStatic = false)
+    (constructorFailed : w.create kind (target value) (ctor value) (context value) = .error constructorHalt)
+    (caught : catchable constructorHalt = true)
+    (worked : work w constructorHalt = .ok (handled, result))
+    (laterFailed : later handled result = .error handlerHalt) :
+    atomic w (w.tryCreate (.ok value) kind target ctor context success
+      (fun snapshot halt => do
+        let (next, result) ← work snapshot halt
+        later next result)) = (w, .error handlerHalt) := by
+  rw [tryCreate_handler_steps_failure w handled value kind target ctor context success work later
+    result constructorHalt handlerHalt mutable constructorFailed caught worked laterFailed]
+  rfl
+
+omit [DecidableEq K] in
+/-- An enclosing transaction restores its own reset entry, even when a paid
+ancestor reached another snapshot before creation and the handler did more work. -/
+theorem transact_tryCreate_handler_steps_failure {α β γ : Type}
+    (w snapshot handled : World contracts)
+    (enter : World contracts → TRes (World contracts × α))
+    (value : α) (kind : K) (target : α → Address)
+    (ctor : α → Prog (contracts kind) [] []) (context : α → Context)
+    (success : World contracts → Handle kind → TRes (World contracts × β))
+    (work : World contracts → THalt → TRes (World contracts × γ))
+    (later : World contracts → γ → TRes (World contracts × β))
+    (result : γ) (constructorHalt handlerHalt : THalt)
+    (entered : enter w.resetTransient = .ok (snapshot, value))
+    (mutable : (context value).isStatic = false)
+    (constructorFailed : snapshot.create kind (target value) (ctor value) (context value) = .error constructorHalt)
+    (caught : catchable constructorHalt = true)
+    (worked : work snapshot constructorHalt = .ok (handled, result))
+    (laterFailed : later handled result = .error handlerHalt) :
+    w.transact (fun input => do
+      let (next, value) ← enter input
+      next.tryCreate (.ok value) kind target ctor context success
+        (fun before halt => do
+          let (after, result) ← work before halt
+          later after result)) = (w.resetTransient, .error handlerHalt) := by
+  apply World.transact_failure
+  simp only [entered, bind, Except.bind]
+  exact tryCreate_handler_steps_failure snapshot handled value kind target ctor context success
+    work later result constructorHalt handlerHalt mutable constructorFailed caught worked laterFailed
+
+#print axioms tryCreate_handler_steps_failure
+#print axioms atomic_tryCreate_handler_steps_failure
+#print axioms transact_tryCreate_handler_steps_failure
+
 end Solidity.Lowering.V08

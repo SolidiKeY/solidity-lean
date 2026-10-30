@@ -2,12 +2,12 @@
 """Adversarial evidence checks; never edits Lean sources or deletes fixtures.
 These are external validation tests, separate from kernel negative controls.
 """
-import copy, json, subprocess, sys
+import copy, json, subprocess, sys, tempfile
 from pathlib import Path
 root = Path(__file__).resolve().parent.parent
 original = json.loads(Path(sys.argv[1]).read_text())
-fixtures = Path('/workspace/v08-world-lowering-evidence/control-negative-cases')
-fixtures.mkdir(exist_ok=True)
+# Never overwrite prior checkpoint fixtures or remove this persistent directory.
+fixtures = Path(tempfile.mkdtemp(prefix='v08-evidence-controls-', dir='/workspace/v08-world-lowering-evidence'))
 checker = root/'scripts/v08-check.py'
 def check(name, result, expected):
  path=fixtures/(name+'.json');path.write_text(json.dumps(result,indent=2)+'\n')
@@ -22,4 +22,8 @@ result=copy.deepcopy(original);result['source_sha256'].pop(next(iter(result['sou
 result=copy.deepcopy(original);result['runtime_configuration']['sha256']='0'*64;check('changed-config',result,False)
 result=copy.deepcopy(original);result['tool_versions'][0]='wrong toolchain';check('wrong-toolchain',result,False)
 result=copy.deepcopy(original);result['container_cleanup_verified']=False;check('unconfirmed-container-stop',result,False)
-print('PASS: current evidence accepted; nine corrupted/guarded evidence controls rejected')
+handler='Solidity/Lowering/V08/HandlerControls.lean'
+assert handler in original['source_sha256'], 'handler source absent from current evidence'
+result=copy.deepcopy(original);result['source_sha256'][handler]='0'*64;check('changed-handler-source',result,False)
+result=copy.deepcopy(original);result['source_sha256'].pop(handler);check('missing-handler-source',result,False)
+print('PASS: current evidence accepted; eleven corrupted/guarded evidence controls rejected; fixtures='+str(fixtures))

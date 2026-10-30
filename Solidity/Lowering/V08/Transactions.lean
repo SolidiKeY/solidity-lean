@@ -153,4 +153,21 @@ theorem transact_repeat_failure {α β : Type} (w middle : World contracts)
 
 #print axioms transact_repeat_failure
 
+/-- A failed transaction followed by success retains BOTH exact statuses.
+The second frame runs at the same reset entry, not at a dirty handler prefix. -/
+theorem transact_failure_then_commit {α β : Type} (w next : World contracts)
+    (first : World contracts → TRes (World contracts × α))
+    (second : World contracts → TRes (World contracts × β)) (halt : THalt) (value : β)
+    (failed : first w.resetTransient = .error halt)
+    (succeeded : second w.resetTransient = .ok (next, value)) :
+    ((w.transact first).2, (w.transact first).1.transact second) =
+      (.error halt, (next.resetTransient, .ok value)) := by
+  rw [World.transact_failure w first halt failed]
+  have ran : second w.resetTransient.resetTransient = .ok (next, value) := by
+    rw [resetTransient_idem]
+    exact succeeded
+  rw [World.transact_commit w.resetTransient next second value ran]
+
+#print axioms transact_failure_then_commit
+
 end Solidity.Lowering.V08

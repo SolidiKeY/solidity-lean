@@ -1074,3 +1074,5 @@ At the root, the notation's own tests:
 | `Lowering/V08/InheritedControls.lean` | Nonempty two-contract source chain, proved baseFns/override certificate, funded header and exact wrong-header/mutability controls |
 
 | `Lowering/V08/NestedControls.lean` | Two populated atomic rollback boundaries with real creation-continuation failure and complete observation controls. |
+
+| `Lowering/V08/HandlerControls.lean` | Completed constructor failure, paid catch-handler failure, exact payload and ancestor rollback controls. |

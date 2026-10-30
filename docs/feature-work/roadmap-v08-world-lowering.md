@@ -6,7 +6,7 @@ recovers the pinned checkout, traces published evidence and adds independent
 intrinsic adapters plus source/intrinsic byte observation proofs and inhabited
 controls. It adds no axiom, exclusion or replacement source semantics.
 
-Current continuation inventory: **222** exact lane theorem/control pins in25
+Current continuation inventory: **276** exact lane theorem/control pins in26
 owned Lean modules. Source callable metadata, request/environment/transient
 projections, selector/Keccak byte observations, emit-effect controls, payment
 and declaration-role clauses are implemented below. Every G20–G23 parent remains
@@ -1029,3 +1029,178 @@ No competing build/writer or unexpected change was observed. This deviation is
 recorded rather than claiming lock coverage; subsequent Git/export commands
 retain the lock in their parent through completion. The original earlier helper
 lock omission remains recorded separately above.
+
+## Catch-handler failure checkpoint
+
+Same frozen branch/base/worktree, continuation from7a8a8884e6020cb9a207df631bdc607e7a17609c.
+No goal mutation, other-owner edit, unpublished import, new VM/thread or budget
+change. get_goal and per-file Lean MCP remain unavailable. Repository lean-verify
+and cloud runtime guidance were reapplied; focused closure substitutes for absent
+MCP. Every original G20-G23 and Backfill A/B parent remains PARTIAL; whole-source
+composition and mandatory full validation remain BLOCKED.
+
+Missing branch reproduced by actual source audit: prior NestedControls.handler
+returns ok(snapshot,unit), caught_creation_vector therefore exercises successful
+catch continuation only. inner_not_reCaught/creation_atomic exercise failed
+SUCCESS continuation after successful construction. Neither proves nontrivial
+catch-handler work followed by failure. LibraryCreation.tryCreate_completed_failure
+retains the branch predicate, but supplies no application of this failed-handler
+case. New laws consume it directly, without another evaluator or payload emitter.
+
+New generic laws:
+
+- tryCreate_handler_steps_failure consumes nonstatic context, actual World.create
+  failure, catchable=true, actual handler work success at the SAME failed-create
+  snapshot, and actual later failure at the work's returned world/result. The
+  handler result is DERIVED by monadic sequencing, not supplied as a desired
+  whole-handler failure hypothesis. Exact handlerHalt propagates, not the original
+  creation halt. Generic halts need not be distinct; fixtures prove distinctness.
+  Creation-frame failure can include guards; body execution is not inferred from
+  the generic failed-create premise alone.
+- atomic_tryCreate_handler_steps_failure restores the creation entry snapshot,
+  discarding the successful handler prefix and preserving its later exact halt.
+- transact_tryCreate_handler_steps_failure additionally consumes actual ancestor
+  prelude success at transaction.resetTransient input. The enclosing transaction
+  restores ITS OWN reset entry, not the later creation or handler snapshot.
+- transact_failure_then_commit preserves BOTH raw statuses of a failed transaction
+  followed by actual success at the reset entry. Reset idempotence supplies the
+  second transaction's actual input; dirty handler/setup state is not reused.
+
+HandlerControls inhabits these laws with the existing Bool catalogue: original
+Cell at false, payable CreatedCell at true. Actual setup creates another false
+Cell at address4, writes saved19/scratch29 and pays it5 from sender100. A paid7
+ancestor writes self3/9. A typed nonempty constructor writes8/12 then existing
+revertData with published Semantics.encodeError("ctor" bytes). Its actual result
+is revertWith(Error bytes), distinct from guard revert. A separate actual typed
+entry/prefix view checks constructor incoming balance3,msg.value3,slots8/12 and
+pending sender debit3 BEFORE the joined failure; no installed world is fabricated
+for an incomplete constructor. The constructor failure returns no world.
+
+The handler checks the EXACT original halt, pays2 to self, writes11/23 and returns
+[b1,b2]. A later real paid1 typed call writes31/37 and fails with existing
+revertData/encodeError("handler" bytes). Only the prefix payment2 completed; the failing later frame has attempted
+payment1 with no successful settlement or returned world. Work and later actual-run equalities
+are checked independently; handler_failed derives their composite. The handler's
+failure is outside the creation catch. Both reasons are nonempty, exact encoded
+Error bytes. Source.errorData equality is reused only for payload observations;
+there is NO Source execution, canonical ABI/layout, string-allocation lowering,
+source catchability or bytecode preservation claim.
+
+The complete ordered LISTED vector is: (sender/self balances,self saved/scratch),
+third balance,third saved/scratch if installed,third isSome,created-kind library
+role; then (fourth balance,saved,scratch),[fourth installed,fourth wrong-kind-true
+storage exists,false-kind library role]. It does not enumerate every World field.
+Generic rollback laws separately preserve the complete exact snapshot.
+
+| Point | Full listed vector | Exact status |
+|---|---|---|
+| setup/base | ((95,0,0,0),0,none,false,false);(5,19,29);[true,false,false] | setup ok(base) |
+| paid ancestor/creation snapshot | ((88,7,3,9),0,none,false,false);(5,19,0);[true,false,false] | ok[ab,cd] |
+| completed failed constructor | no returned world; handler input is exact ancestor above | revertWith(Semantics.encodeError[99,116,111,114]) |
+| actual paid handler prefix | ((86,9,11,23),0,none,false,false);(5,19,0);[true,false,false] | ok[b1,b2] |
+| failed later handler call | no returned world | revertWith(Semantics.encodeError[104,97,110,100,108,101,114]) |
+| enclosing atomic | ((88,7,3,9),0,none,false,false);(5,19,0);[true,false,false] | exact handler halt |
+| enclosing transaction | ((95,0,0,0),0,none,false,false);(5,19,0);[true,false,false] | exact handler halt |
+| actual wrong handler snapshot(base.resetTransient) prefix | ((93,2,11,23),0,none,false,false);(5,19,0);[true,false,false] | ok[b1,b2] |
+| actual skipped-payment prefix | ((88,7,11,23),0,none,false,false);(5,19,0);[true,false,false] | ok[b1,b2] |
+| repeated fourth scratch read after rollback | ((95,0,0,0),0,none,false,false);(5,19,0);[true,false,false] | first exact handler halt; second ok0 |
+
+Actual panic constructor and actual panic handler-call controls use assert(false),
+with distinct catch-input versus propagated-output boundaries. Collision at an
+already installed self returns guard revert, enters a matching paid/write handler
+and propagates its new encoded halt. Panic/collision atomic controls include full
+listed vector and RAW TRes status. Argument error[a0,01] and static revert bypass
+the handler. Existing catch_classification is classification evidence only for
+exhausted/diverge; no actual such execution is asserted. Actual handler panic is
+proved different from exhausted/diverge. All refusals/panic/error distinctions
+remain. Untouched_atomic/untouched_transaction give exact fourth-account equality
+at the appropriate snapshot (transaction compares to RESET entry, not dirty base).
+
+Wrong-snapshot and skipped-payment negatives are independently executed real calls,
+not invented tuples. Reapplying the handler to its NEW halt produces panic because
+its original-payload guard refuses it; recatch_negative distinguishes this actual
+alternative. Original constructor halt, one-byte-wrong handler reason, wrong ancestor
+boundary and dirty fourth transient29 alternatives are rejected. The published
+tryCreate_observe law maps BOTH continuations and preserves this exact failure;
+observed_handler_failure/observed_atomic_status are actual applications. Repeated
+failure-then-success application retains both exact statuses and actual scratch0,
+not a constant result stand-in.
+
+Proof iteration raw failures remain preserved: invalid namespace alias, local
+instance naming/qualification, staged setup extraction, explicit implicit-kind
+argument and observation-law/projection elaboration repairs. Initial string-literal
+reverts exceeded reduction depth; fixtures now use the existing typed revertData
+with published encodeError bytes, preserving the specified observed payloads.
+This is a supplied intrinsic-byte fixture, NOT a proved source string-allocation
+lowering. No maxRecDepth/maxHeartbeats/proof/fuel/node/test/time increase, new
+axiom/sorry/native_decide/implemented_by or profile exclusion was introduced.
+
+The lane evidence test now creates a unique PERSISTENT mkdtemp directory per run
+(no deletion/overwriting prior fixtures), retains existing nine corruptions and
+adds changed/missing HandlerControls source corruptions. These are external
+software evidence-integrity tests, separate from kernel negative controls. No
+runtime helper/config/cache policy or target/exclusion was changed.
+
+Current Audit574247-19f3ea03 PASS112named modules/113Lakejobs,276exact axiom sets,
+37.40seconds; sampledRSS1172090880,cgroup575324160; source/config unchanged and
+owned container cleanup verified. Actual Lean4.24.0 commit797c613/Lake5.0.0-src+
+797c613 recorded by bounded runner. Serial Lean-j1/LEAN_NUM_THREADS1,CPU1,
+aggregate12GiB/no-swap,600s guard and OS headroom preserved. Scoped source-bound
+checker, eleven corruption cases, structural/trust/docs comparisons and independent
+Suite/fresh executable refresh are recorded in handler-* logs/final handoff.
+
+Separate independent read-only finder/skeptic reviews (no Lean/server/builds)
+found no semantic/nonvacuity/ownership defect. Wording fixes distinguish generic
+creation-frame guards from actual constructor execution and permit equal generic
+halts; actual fixtures prove distinct reasons. They require supplied-byte wording
+rather than source string-allocation lowering; the distinction is explicit above.
+Final source/script/evidence/artifact reviews are retained in handler-reviews.md.
+All source/build/git/export operations in THIS continuation retain the writer lock
+through completion; earlier recorded lock gaps remain historical, not erased.
+
+No supported new Decision repair evidence arose. Full496841-193e914c and isolated
+task413142/base433573 remain FAILED125 at600s; full default/Suite/sort suffixes
+UNREACHED, current whole-source gate unvalidated. No unchanged Decision/full retry,
+owner-file/Elab.async edit, omitted verdict or budget increase. Existing forensics
+remain unchanged. Literal run-lean remains PENDING under the no-delete wrapper
+conflict; independent fresh refresh is not a full-gate substitute. Raw docs/global
+pin exit1 failures and exact-base NEW0 comparisons stay separate. No external
+compiler/EVM differential tests. No G parent or lane completion/goal mutation.
+
+Coordinator proposal: add Transactions/LibraryCreation/HandlerControls checked
+component evidence to the existing exact feature IDs for G21/G22.03/G22.05/G23
+and BackfillA/B where applicable, EVIDENCE ONLY. No manifest/global ledger/status/
+reserved pin edit or missing Source/V07/frame/layout/decoder premise discharge.
+Full original queue still applies: G20 callable resolution/body/type/getter/function-
+reference/readonly applications; G21 nested/reference/calldata/slice/custom-error
+source applications; G22.01-.05 source call/callback/create/library/function-value/
+world/runtime composition; G23 source transient/environment/crypto/emit execution
+and G16-G22 source-unit composition; BackfillA/B source applications. All remain
+PARTIAL under the same named prerequisites. This checkpoint also strengthened
+observation extension and failed-transaction repetition beyond the suggested
+handler case; it is not the entire lane's completion.
+
+Handler checkpoint validation/committed handoff:54new public kernel-pinned laws/
+controls,276total in26owned modules. Suite576120-01a3b2c8 PASS260named/262jobs,
+43.38s,sampledRSS63242240/cgroup38350848. Fresh578874-a4a2def8 PASS3.10s,
+sampledRSS54697984/cgroup408510464,initially absent
+supported output directory;old executable unchanged;377taclets/131read-bearing/
+131covered/annotations match. Actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613;actual KeySort two-job build PASS in fresh log before any
+runtime-success claim. No whole-lane RUNTIME_GATE_PASS is inferred.
+
+Current handler-check.log and handler-controls.log bind574247/276pins and eleven
+corruptions. Earlier570092/269pin check/control logs were preserved separately
+as handler-check-269.log and handler-controls-269.log before refresh. Unique
+persistent fixture directories retain each run. Runtime controls PASS, layers
+169core/0elaborator,orphans892reachable/0orphan/0disallowed,trust907sources/
+241sites/0findings. Raw docs task/base exits1/1 with46missing;rawglobalpins
+exits1/1 with14StorageSlots notes/613pins/0errors. Separate exact-base NEW0 PASS;
+raw failures stay FAILED. New original/checkpoint patches,bundle,handoff,full
+command/evidence archive and checksum manifest use fresh export directory
+/workspace/v08-world-lowering-artifacts/checkpoint-handler-20261030. Prior64-entry
+root and10-entry nested seals remain unchanged;all raw prior gate records/logs
+and failed developmental checks are retained. Exact new committed head is recorded
+in the external handoff/repository-state evidence,not guessed in this document.
+Separate final finder/skeptic artifact reviews follow source/script/doc reviews.
+The original queue and existing blocked goal remain unfinished and unchanged.
