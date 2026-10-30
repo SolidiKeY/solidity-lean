@@ -3,7 +3,7 @@ import Solidity.Backend.Creation.LinkLayout
 /-! Determinism, encoding/layout uniqueness and disjoint linking permutations. -/
 namespace Solidity.Backend.Creation
 
-private abbrev BoundedCode (total : Nat) := { bytes : List UInt8 // bytes.length = total }
+private abbrev BoundedCode (total : Nat) : Type := { bytes : List UInt8 // bytes.length = total }
 
 private def linkStep (addresses : Lib → Vector UInt8 20)
     (code : BoundedCode total) (site : LinkSite total Lib) : BoundedCode total :=

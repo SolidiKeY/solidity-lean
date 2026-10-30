@@ -9,7 +9,7 @@ gas/account/CREATE semantics. The initial creation memory/stack are empty.
 -/
 namespace Solidity.Backend.Creation
 
-abbrev StackWord := Fin (256 ^ 32)
+abbrev StackWord : Type := Fin (256 ^ 32)
 
 /-- EVM byte-range read, including zero-padding outside allocated bytes. -/
 def readBytes (bytes : List UInt8) (offset length : Nat) : List UInt8 :=

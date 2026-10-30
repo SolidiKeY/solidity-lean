@@ -365,3 +365,15 @@ committed patch and evidence. The external handoff records the full final HEAD,
 base, branch, actual checkout, every checkpoint commit, exact commands/exits,
 review findings/fixes, elapsed interval, checksums and this remaining gate blocker.
 The original work checkout is preserved. No push, merge or PR was performed.
+
+## Integration review repair (2026-10-30)
+
+The retained review found missing explicit result types on `StackWord` and
+`BoundedCode`. Both aliases now declare `: Type`. Read-only finder and skeptic
+source checks confirm that the Lean diff contains only these annotations, with
+unchanged alias bodies, imports, proofs and budgets and no conflict markers.
+Per-file MCP error diagnostics pass for both edited files; the creation import
+closure and all 16 Osaka vectors pass. The vector runner uses the existing
+EthereumJS 10.1.3 installation through
+`NODE_PATH=/tmp/solidity-reference-arrays-20261029/node_modules` because the local
+dependencies are absent. Full combined gates remain the coordinator's task.
