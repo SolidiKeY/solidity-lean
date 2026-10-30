@@ -26,7 +26,8 @@ it the operation is `stuck`).
 | `cond_ns`, `cond_value` | `true ? 1 + 2 : 0` at `uint8` is never `stuck` and evaluates to `3` |
 | `loop_ns`, `loop_value` | `uint8 i; while (i < 3) { i += 1; }` is never `stuck` (`itemsNS`) and ends with `i = 3` |
 | `cb_ns`, `cb_value` | `x = x + 1;` on a storage variable (S05's callback body) is never `stuck`, and takes `x` from 3 to 4 |
-| `ret_unframed_stuck` | a `return 1;` run outside a coherent frame (no return slot) is `stuck`: frame coherence, outside the fragment, is needed |
+| `ret_unframed_stuck`, `ret_unframed_no_frame` | a `return 1;` run outside a coherent frame (no return slot) is `stuck`, and those locals are not a `BodyFrame`: the frame hypothesis is needed |
+| `ret_framed_ns` | the same `return 1;` with a return slot is never `stuck` |
 -/
 
 namespace Solidity.Source.SoundnessExamples
@@ -144,7 +145,7 @@ theorem loopItems_ops : loopItems.OpsOK :=
 /-- **Witness**: the loop is never `stuck`, at any horizon ... -/
 theorem loop_ns (n : Nat) :
     NS (execItems (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n 0 none loopItems .nil) :=
-  itemsNS _ _ n 0 none loopItems .nil loopItems_frag loopItems_ops
+  itemsNS _ _ n 0 none loopItems .nil loopItems_frag loopItems_ops ⟨[], [], rfl, rfl⟩
 
 /-- ... and ends with `i = 3`. -/
 theorem loop_value :
@@ -155,8 +156,8 @@ theorem loop_value :
   rfl
 
 /-- **Negative control**: `return 1;` in a body whose locals hold no return
-slot is `stuck` — the frame coherence `callInternal` establishes is needed,
-and `return` is outside the fragment. -/
+slot is `stuck` — `return` is in the fragment, but only under `BodyFrame`
+(the locals end in the return slots), which these locals violate. -/
 theorem ret_unframed_stuck :
     ((execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 5 0 none
       (RStmt.retVal (E := SemanticsExamples.E0) (R := [.int IntTy.u8]) (M := false) (k := .body) (Γ := [])
@@ -176,7 +177,7 @@ open SemanticsExamples in
 /-- **Witness**: `x = x + 1;` on a storage variable is never `stuck` ... -/
 theorem cb_ns (n : Nat) (F : Fr) (s : Option (Ph EB)) :
     NS (execItems (GB answerOnly) F n 0 s cbBody.items .nil) :=
-  itemsNS _ F n 0 s _ .nil cbItems_frag cbItems_ops
+  itemsNS _ F n 0 s _ .nil cbItems_frag cbItems_ops ⟨[], [], rfl, rfl⟩
 
 open SemanticsExamples in
 /-- ... and takes `x` from 3 to 4 in S05's deployed state. -/
@@ -185,5 +186,19 @@ theorem cb_value :
     | (.ok _, (_, s)) => readX s
     | _ => none) = some 4 := by
   rfl
+
+/-- ... and those locals are no `BodyFrame` for a `uint8` return. -/
+theorem ret_unframed_no_frame : ¬ BodyFrame 0 [.int IntTy.u8] [] := by
+  intro ⟨ys, ps, h, _⟩
+  have := congrArg List.length h
+  simp only [List.length_nil, List.length_append, List.length_reverse, List.length_singleton] at this
+  omega
+
+/-- **Witness**: with its return slot, `return 1;` is never `stuck`. -/
+theorem ret_framed_ns (n : Nat) (l : Locals SemanticsExamples.E0.layout [.int IntTy.u8]) :
+    NS (execS (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 n 0 none
+      (RStmt.retVal (E := SemanticsExamples.E0) (R := [.int IntTy.u8]) (M := false) (k := .body)
+        rfl (.const (Q.ofInt 1)) (by decide)) l) :=
+  stmtNS _ _ n 0 none _ l ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩ trivial ⟨[], [], rfl, rfl⟩
 
 end Solidity.Source.SoundnessExamples
