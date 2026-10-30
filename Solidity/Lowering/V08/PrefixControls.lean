@@ -1211,6 +1211,169 @@ theorem bad_exact_payload_discriminates :
   simp only [bad_trace_reached, boundary4]
   decide +kernel
 
+/-- Pure normalization of a completed result is idempotent. Inputs are explicit;
+no whole-prefix agreement is assumed when using this local fact. -/
+private theorem completed_normalize_agreement (frame : TransactionFrame Catalog Output) (input : World Catalog) :
+    (frame input).map (fun pair => (pair.1.resetTransient, pair.2)) =
+      (normalizeTransactionFrame frame input).map (fun pair => (pair.1.resetTransient, pair.2)) := by
+  unfold normalizeTransactionFrame
+  cases frame input with
+  | error halt => rfl
+  | ok pair => simp only [Except.map, resetTransient_idem]
+
+def mixedFrames : List (TransactionFrame Catalog Output) :=
+  [normalizeTransactionFrame commit, failing, normalizeTransactionFrame occupied, reading]
+
+theorem mixed_pointwise_normalized : ∀ i (valid : i < frames.length),
+    (frames[i] (transactPrefix base (frames.take i)).1.resetTransient).map (fun pair => (pair.1.resetTransient, pair.2)) =
+      ((mixedFrames[i]'(by exact valid)) (transactPrefix base (frames.take i)).1.resetTransient).map
+        (fun pair => (pair.1.resetTransient, pair.2)) := by
+  intro i valid
+  match i with
+  | 0 =>
+    simpa only [frames, mixedFrames, List.getElem_cons_zero, List.take_zero, transact_prefix_nil] using
+      completed_normalize_agreement commit base.resetTransient
+  | 1 => rfl
+  | 2 =>
+    simpa only [frames, mixedFrames, List.getElem_cons_succ, List.getElem_cons_zero] using
+      completed_normalize_agreement occupied (transactPrefix base (frames.take 2)).1.resetTransient
+  | 3 => rfl
+  | i + 4 =>
+    simp only [frames, List.length_cons, List.length_nil] at valid
+    omega
+
+theorem mixed_every_prefix (count : Nat) :
+    transactPrefix base (frames.take count) = transactPrefix base (mixedFrames.take count) :=
+  transact_prefix_reachable_normalized_congr base frames mixedFrames rfl mixed_pointwise_normalized count
+
+theorem mixed_full_application : transactPrefix base frames = transactPrefix base mixedFrames :=
+  transact_prefix_reachable_normalized_congr_full base frames mixedFrames rfl mixed_pointwise_normalized
+
+def observeMixed (count : Nat) :=
+  (extended (transactPrefix base (mixedFrames.take count)).1, (transactPrefix base (mixedFrames.take count)).2)
+
+theorem mixed_observation_same (count : Nat) : observeMixed count = observeBoundary (frames.take count) :=
+  congrArg (fun pair => (extended pair.1, pair.2)) (mixed_every_prefix count).symm
+
+/-- EVERY original listed field and complete ordered typed result/history at
+ALL0..4 boundaries; raw/normalized frame mixing loses no success or exact halt. -/
+theorem mixed_complete_boundaries :
+    observeMixed 0 =
+      ((([95, 0, 0, 5, 0], [some [0, 0], some [19, 29], some []], flags), none, false), []) ∧
+    observeMixed 1 = (committedVector, h1) ∧
+    observeMixed 2 = (committedVector, h2) ∧
+    observeMixed 3 = (committedVector, h3) ∧
+    observeMixed 4 = (committedVector, h4) := by
+  simpa only [mixed_observation_same, frames, List.take_succ_cons, List.take_zero] using complete_boundaries
+
+theorem mixed_weaker_than_raw :
+    (commit base.resetTransient).map (fun pair => (pair.1.resetTransient, pair.2)) =
+      (normalizeTransactionFrame commit base.resetTransient).map (fun pair => (pair.1.resetTransient, pair.2)) ∧
+    (commit base.resetTransient).toOption.map (fun pair => extended pair.1) ≠
+      (normalizeTransactionFrame commit base.resetTransient).toOption.map (fun pair => extended pair.1) :=
+  ⟨completed_normalize_agreement commit base.resetTransient, normalize_commit_raw_different⟩
+
+/-- Actual read before construction fails at the absent candidate, furnishing
+a nonempty reached prefix for the subsequent successful constructor segment. -/
+theorem prelude_read_failed : reading base.resetTransient = .error .revert :=
+  extract_failure _ _ (by decide +kernel)
+
+theorem prelude_complete_run : transactPrefix base (reading :: frames) =
+    (readWorld.resetTransient, .error .revert :: h4) := by
+  have prelude : base.transact reading = (base.resetTransient, .error .revert) :=
+    World.transact_failure base reading .revert prelude_read_failed
+  have reset : transactPrefix base.resetTransient frames = transactPrefix base frames :=
+    transact_prefix_initial_reset base commit [failing, occupied, reading]
+  rw [transact_prefix_cons, prelude, reset, boundary4]
+
+/-- Genuinely reached middle segment includes ACTUAL successful construction/
+library work after a real failing prefix, followed by both failures and reads. -/
+theorem middle_success_replacement :
+    transactPrefix base (([reading] ++ [commit, failing, occupied]) ++ [reading]) =
+      transactPrefix base (([reading] ++ [normalizeTransactionFrame commit, failing, normalizeTransactionFrame occupied]) ++ [reading]) := by
+  apply transact_prefix_replace_segment_normalized base [reading] [reading]
+    [commit, failing, occupied] [normalizeTransactionFrame commit, failing, normalizeTransactionFrame occupied] rfl
+  intro i valid
+  match i with
+  | 0 =>
+    simpa only [List.getElem_cons_zero, List.take_zero, transact_prefix_nil] using
+      completed_normalize_agreement commit (transactPrefix base [reading]).1.resetTransient
+  | 1 => rfl
+  | 2 =>
+    simpa only [List.getElem_cons_succ, List.getElem_cons_zero] using
+      completed_normalize_agreement occupied
+        (transactPrefix (transactPrefix base [reading]).1 ([commit, failing, occupied].take 2)).1.resetTransient
+  | i + 3 =>
+    simp only [List.length_cons, List.length_nil] at valid
+    omega
+
+theorem middle_success_complete :
+    transactPrefix base (([reading] ++ [normalizeTransactionFrame commit, failing, normalizeTransactionFrame occupied]) ++ [reading]) =
+      (readWorld.resetTransient, .error .revert :: h4) :=
+  middle_success_replacement.symm.trans prelude_complete_run
+
+theorem mixed_empty_retains_dirty :
+    (transactPrefix base (mixedFrames.take 0)).1 = base ∧
+    extended (transactPrefix base (mixedFrames.take 0)).1 ≠ extended base.resetTransient := by
+  simp only [List.take_zero, transact_prefix_nil]
+  constructor
+  · exact True.intro
+  · decide +kernel
+
+/-- Even actual normalized boundary-WORLD equality alone is insufficient: the
+complete raw result premise MUST retain exact statuses/payloads as well. -/
+theorem normalized_world_only_not_enough :
+    (linked.resetTransient.transact failing).1 = (linked.resetTransient.transact baseOnlyReplacement).1 ∧
+    (linked.resetTransient.transact failing).2 ≠ (linked.resetTransient.transact baseOnlyReplacement).2 := by
+  have good : linked.resetTransient.transact failing = (linked.resetTransient, .error laterHalt) := by
+    have failed : failing linked.resetTransient.resetTransient = .error laterHalt := by
+      simpa only [resetTransient_idem] using failing_reached
+    rw [World.transact_failure _ _ _ failed, resetTransient_idem]
+  have bad : linked.resetTransient.transact baseOnlyReplacement = (linked.resetTransient, .error .revert) := by
+    have failed : baseOnlyReplacement linked.resetTransient.resetTransient = .error .revert := by
+      simpa only [resetTransient_idem] using base_only_reached_failure
+    rw [World.transact_failure _ _ _ failed, resetTransient_idem]
+  rw [good, bad]
+  constructor
+  · rfl
+  · decide +kernel
+
+/-- Direct application of contextual partial-segment congruence for EVERY
+middle prefix, including zero and truncation after the real failing prelude. -/
+theorem middle_success_prefixes (count : Nat) :
+    transactPrefix base ([reading] ++ [commit, failing, occupied].take count) =
+      transactPrefix base ([reading] ++ [normalizeTransactionFrame commit, failing, normalizeTransactionFrame occupied].take count) := by
+  refine transact_prefix_replace_normalized_segment_prefix base [reading]
+    [commit, failing, occupied] [normalizeTransactionFrame commit, failing, normalizeTransactionFrame occupied] rfl ?_ count
+  intro i valid
+  match i with
+  | 0 =>
+    simpa only [List.getElem_cons_zero, List.take_zero, transact_prefix_nil] using
+      completed_normalize_agreement commit (transactPrefix base [reading]).1.resetTransient
+  | 1 => rfl
+  | 2 =>
+    simpa only [List.getElem_cons_succ, List.getElem_cons_zero] using
+      completed_normalize_agreement occupied
+        (transactPrefix (transactPrefix base [reading]).1 ([commit, failing, occupied].take 2)).1.resetTransient
+  | i + 3 =>
+    simp only [List.length_cons, List.length_nil] at valid
+    omega
+
+#print axioms middle_success_prefixes
+
+#print axioms mixed_pointwise_normalized
+#print axioms mixed_every_prefix
+#print axioms mixed_full_application
+#print axioms mixed_observation_same
+#print axioms mixed_complete_boundaries
+#print axioms mixed_weaker_than_raw
+#print axioms prelude_read_failed
+#print axioms prelude_complete_run
+#print axioms middle_success_replacement
+#print axioms middle_success_complete
+#print axioms mixed_empty_retains_dirty
+#print axioms normalized_world_only_not_enough
+
 #print axioms normalize_commit_reached
 #print axioms normalize_commit_raw_vectors
 #print axioms normalize_commit_raw_different

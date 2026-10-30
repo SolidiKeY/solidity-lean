@@ -2121,3 +2121,72 @@ and separateNEW0 passes. Both finalindependentproof/pins/sourcebinding reviews
 PASS/no findings. Precommitavailable180695040bytes inside32MiBenvelope; measured
 compact additiveexports follow. Alloriginalsource/applicationparents and mandatory
 wholevalidation unfinished; no independentqueue exhaustion claimed.
+
+
+### Normalized reached-input arbitrary-prefix and middle-segment checkpoint
+
+Starting0f4d9284965b7e82facc0c7e2096b119b25422a0, four missing normalized
+list/context laws are now proved. Equal-length lists require INDIVIDUAL COMPLETE
+normalizedrawresult agreement at LEFTexecution's actualreachedprefix.reset input.
+Normalization maps only successful returnedWorlds through publishedreset, retaining
+fulltypedvalue and EVERY exactTHalt/error. Existing transact_normalized_result_congr
+supplies eachinductiveboundary; exact World AND ENTIRE orderedhistories follow
+forEVERYfiniteprefix, full-list, contextualpartialsegment and complete middlesegment
+with arbitrary before/aftercontext. No equalityofwholetraces as premise, no raw=
+normalizedWorld inference, publiccutoff, newstate/AST/interpreter or internalreset.
+Perframehypotheses remain explicit proofobligations, not Source/body adequacy.
+
+Thirteen controls use actual fundedconstructor/librarycommit with completedoutput
+normalized, unchangedpaidbinaryfailure, normalizedoccupiedplainfailure and real
+rawread. Generic everyprefix/full laws directly applied. mixed_complete_boundaries
+retains EVERY previous listedbalance/cell/transient/installed/kind/role/type/
+candidate lookup observation, fullsame-tagbinarysuccess/context/read and BOTH
+exactorderederrors at ALLoriginal0..4 boundaries. mixed_weaker_than_raw keeps
+inhabited normalizedagreement together with non-equal RAWcommit views (caller
+scratch23/candidate12 vsreset0), not silentrawidentity. Empty mixedprefix remains
+dirtybase, not reset. Existingbad_trace_reached and alloldnegatives unchanged.
+New normalized_world_only_not_enough proves two ACTUAL reachedtransactionboundary
+Worlds identical while fullTRes differ binaryhalt vsplainrevert: state-onlyagreement
+cannot replace complete normalizedresult equality. Terminal-onlyagreement remains
+explicitly insufficient through existingbadtracecounterexample.
+
+A real read beforeconstruction fails at absentcandidate, providing a NONEMPTY
+reachedprefix. Successfulmiddleconstructor/librarywork then bothrealerrors andread
+are executed afterit. Generic normalizedsegment law and contextualPARTIALsegment
+law are instantiated there for everyprefixcount, includingzero/truncation.
+Complete augmentedhistory retains preludeplainerror followed by ENTIRE originalh4.
+Finder/skeptic identified missingdirectpartiallawapplication in initialcontrols;
+added middle_success_prefixes and bothacceptedcoveragefix. Allsource/hypothesis/
+nonvacuity/fullobservations reviewed read-only,noLean/server/builds/writes, no
+substantivefindings. No Source/ABI/linkage/runtimeframe/bytecode claim.
+
+Gate841312-91187aee PASS117jobs/41.0881s,freshRSS1233989632,reusedreportedpeak
+602947584(possiblycumulative).523standardexactsets retain all506startingpins.
+Raw838867FAIL1 reservedlocalidentifierpartial fixedto prefixPart;839468FAIL1
+simplifiedTruecontrol fixedwithTrue.intro. Statements/observations/budgets unchanged;
+no authorsorry/newaxiom and none in successfulsets. Existingruntime/image/CMD/
+token/mount/cache/config/cgroupcheckedfresh, noVFSallocation/deletion/capacitychange.
+Inner12GiB/swap0/CPU1under16GiBparent,LEAN_NUM_THREADS1/Lean-j1,600s and allproof/
+testbudgets unchanged. Initialavailable172802048,affectedcompiled1763471bytes;
+24MiBentirecontinuationplanningbound leavesminimum147636224. Onecoherent checkpoint
+and compactadditivearchive measured beforewrite. get_goal/LeanMCPunavailable,
+existingblockedgoaluntouched.
+
+EveryoriginalG20,G21,G22.01-.05,G23/BackfillA-B sourceapplicationparent staysPARTIAL.
+MissingSource/V07/type/layout/ABI/body/linkage/runtimeframe/bytecode/admission/
+reservedowner applications and mandatorywholevalidation remainopen. No independent
+queueexhaustion claimed. Full496841/taskDecision413142/baseDecision433573 FAILED125
+retained, both321dependencyclosures unchanged/no completedoutput/trace/newpermitted
+repair. Literalwrapperpending; no unchangedretry/owner/async/target/guard/budget
+change or baselinewaiver. Rawglobaldocs/pins exits1 remainfailed, separate complete
+exactbaseNEW0 comparisons only. This is the committedcheckpoint handoff; exact
+scopedgates,fullqueue table and additiveartifacts follow.
+
+Normalizedprefix checkpoint final scopedgates PASS523exactpins/60coreclosure,
+19evidence+14runtimeprofilecorruptions afterpositivecontrols,trust911/241/0findings,
+strict491/61budget/11refuted/0pending,layers169/0elaborator,orphans896/0orphan.
+Rawtask/base docs/pins exits1 remainfailed; complete72/14findingrows identical
+and separatelynamedNEW0 pass. Both finalindependentproof/pins/sourcebinding
+reviews PASS/no findings. Precommitavailable162390016bytes within24MiBenvelope;
+streammeasuredcompact additiveexports follow. Alloriginalsource/applicationparents
+and mandatorywholevalidation remainunfinished; no independentqueue exhaustion.

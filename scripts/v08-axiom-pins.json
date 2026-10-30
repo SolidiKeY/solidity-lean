@@ -1507,6 +1507,56 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.middle_success_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.middle_success_prefixes": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.middle_success_replacement": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.mixed_complete_boundaries": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.mixed_empty_retains_dirty": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.mixed_every_prefix": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.mixed_full_application": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.mixed_observation_same": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.mixed_pointwise_normalized": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.mixed_weaker_than_raw": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.normalization_every_listed_vector": [
     "Classical.choice",
     "Quot.sound",
@@ -1533,6 +1583,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.normalize_commit_trace": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.normalized_world_only_not_enough": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1573,6 +1628,16 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.paid_replacement_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.prelude_complete_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.prelude_read_failed": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -2088,6 +2153,14 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_prefix_reachable_normalized_congr": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_reachable_normalized_congr_full": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_prefix_replace_frame": [
     "Quot.sound",
     "propext"
@@ -2096,7 +2169,15 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_prefix_replace_normalized_segment_prefix": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_prefix_replace_segment": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_replace_segment_normalized": [
     "Quot.sound",
     "propext"
   ],
