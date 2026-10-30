@@ -33,7 +33,7 @@ for path in (root / 'Solidity/Lowering/V08').glob('*.lean'):
  if namespace:
   theorems.update(namespace.group(1) + '.' + name for name in re.findall(r'^theorem ([A-Za-z0-9_]+)', source, re.MULTILINE))
 assert theorems == set(expected), ('unprinted or obsolete theorem pin', theorems ^ set(expected))
-core = ['Callable', 'AbiObservations', 'Transactions', 'LibraryCreation', 'CallableMetadata']
+core = ['Callable', 'AbiObservations', 'Transactions', 'LibraryCreation', 'CallableMetadata', 'EnvironmentProjection']
 seen = set()
 def visit(module):
  if module in seen: return

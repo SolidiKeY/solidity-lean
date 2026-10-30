@@ -1054,3 +1054,6 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/CallableMetadata.lean` | Source resolved argument/conversion metadata and checked target frame labels; no source evaluator |
 | `Lowering/V08/MetadataControls.lean` | Nonempty source function/error metadata, typed target binding and wrong-order/signature controls |
+
+| `Lowering/V08/EnvironmentProjection.lean` | Total source/intrinsic word/address, request/environment and account/session-ledger observation adapters; no source execution certificate |
+| `Lowering/V08/ProjectionControls.lean` | Populated independent instance journals and actual target nested paid frames, reset/payload negatives and external-ledger selection controls |

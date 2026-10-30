@@ -410,3 +410,76 @@ The committed checkpoint head and patch are recorded at
 Next independent work is the G23 source/world environment projection adapter
 and populated mixed source/intrinsic rollback observations, followed by other
 authorized independent clauses.
+
+## Continuation checkpoint: request, session and mixed-frame observations
+
+Parent implementation afe2a93f0387fda7c4de008eb013f4be2c04f8a7.
+EnvironmentProjection adds total liftWord/lowerWord and liftAddress/lowerAddress
+bijections at the published bounded source/intrinsic types, including zero and
+maxima. No representation/profile exclusion or budget increase is added.
+request_tx retains the G01 sender/value/time/target and supplied response table
+in the actual typed Context.tx; expression_observations proves the actual five
+typed environment reads of the projected state. stateEnvironment preserves the
+supplied storage/heap/locals/net and replaces only request fields/observed balance.
+This is a field projection, not a source evaluator or paid-frame admission proof.
+
+fundsOf/withSourceFunds project source instance-account fields structurally;
+they are NOT universal external-account balance semantics. Finder and skeptic
+identified that Source.World reserves external balances for G01 SessionEnv and
+Fixed.ledger. sessionFunds now chooses installed source balances or the actual
+supplied Fixed.ledger/environment.balance/history at code-less addresses, with
+separate session_funds_installed/session_funds_external/session_funds_endTx
+laws. Installation/domain agreement, constructor-phase handling and the
+canonical G03 ledger application remain explicit prerequisites. No replacement
+ledger is implemented. Controls reuse existing G07 toyFixed solely as a fixture,
+not the canonical ledger: installed balance7 defeats ledger41, while external
+ledger41 defeats the default source account0.
+
+reset_funds_projection/state_environment_reset commute published source endTx
+and intrinsic reset/transactionEntry with these projections. source_rollback_funds
+and source_outer_rollback_funds transport observations through actual arbitrary
+source journal runs, including committed descendants; no source-target execution
+correspondence or history rollback premise is hidden in them.
+
+ProjectionControls runs two real source instance transfers (7 and2), then
+persistent/transient writes, through the existing source journal. Both source
+accounts are explicitly installed fixture instances (code1/code0); these are
+journal-state controls, not a proved admitted source session. Source payment
+success is checked, so getD fallbacks cannot make the witness vacuous. Actual
+typed target calls both succeed and reach dirty91/9/5/17, inner failure restores
+93/7/3/9 with exact nonempty reason bytes, and outer failure restores100/0/0/0.
+The target child uses the actual same outer input world. Independent observations
+agree for this populated case. Both actual boundaries produce93/7/3/0; wrong
+inner-frame/reason/stale-transient controls distinguish failures. No general
+source storage layout/type relation or source RExpr/RStmt execution is supplied.
+
+The36 new generic laws/controls pass gate118536 (58 named modules/59 Lake jobs),
+unchanged source/config, sampled aggregate RSS871882752bytes/cgroup256712704bytes.
+All105 named declarations are lane-pinned. Finder/skeptic actual-source reviews
+use neither Lean/server nor builds. Their boundary-admission wording finding is
+fixed: the boundary theorem proves roundtrips, not an admission predicate.
+Final combined closure and checkpoint handoff follow before the next work item.
+
+G23 still needs source expression/statement applications, approved crypto
+observation applications and erased-emit argument execution; G16--G22 source
+composition is unavailable. Read-only trace: Syntax.Grammar.solEmit translates
+to RawStmt.eval of the operands; Syntax.Elab.Arms hoists eval operands via
+eagerArgsWith and erases only their residual values. SolcJson.Body preserves
+positional emit operands and refuses named emits without pipeline-aware context.
+These definitions are not preservation proofs. No named-argument exclusion or
+source semantics is invented to close that gap.
+
+Projection checkpoint handoff: combined gate119445 passes96 named modules/97
+Lake jobs and all105 exact axiom sets, unchanged source/config. Sampled aggregate
+RSS812957696bytes/cgroup172580864bytes. Both independent read-only reviewers
+confirmed the installed/external ledger fixes and nonvacuity, with no further
+mathematical or ownership finding. stateEnvironment still reads a structural
+source-instance target balance; it does not use sessionFunds for arbitrary
+code-less targets or prove admitted/request execution. Its actual-expression
+read theorem remains exactly a projection law. Canonical ledger, constructor
+phases, source storage/statement semantics and G16--G22 applications remain open.
+This component checkpoint is not a full-lane endpoint. Parent
+afe2a93f0387fda7c4de008eb013f4be2c04f8a7; frozen base unchanged. Final committed
+head/patch are saved at /workspace/v08-world-lowering-artifacts/projection-checkpoint.md
+and .patch. Next independent work is erased-emit effects/selector observation
+controls, followed by bounded cache warming and required final validation.

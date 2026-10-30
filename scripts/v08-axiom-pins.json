@@ -110,6 +110,65 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.EnvironmentProjection.balance_projection": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.expression_observations": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.funds_at_source_address": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.lift_lower_address": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.lift_lower_word": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.lower_lift_address": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.lower_lift_word": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.request_tx": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.reset_funds_projection": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.session_funds_endTx": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.session_funds_external": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.session_funds_installed": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.source_outer_rollback_funds": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.source_rollback_funds": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EnvironmentProjection.state_environment_reset": [
+    "propext"
+  ],
   "Solidity.Lowering.V08.LibraryControls.constructor_installed": [
     "Classical.choice",
     "Quot.sound",
@@ -178,6 +237,100 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.ProjectionControls.boundary_roundtrips": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.environment_values": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.exact_inner_reason": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.external_balance_choice": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.inner_observations": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.installed_balance_choice": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.reset_observations": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.source_caught": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.source_dirty": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.source_payments": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.source_reset": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.source_rolled": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.stale_transient": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.target_caught": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.target_dirty": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.target_rolled": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.target_stale_transient": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.wrong_environment": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.wrong_external_balance": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.wrong_inner_frame": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.ProjectionControls.wrong_reason": [],
   "Solidity.Lowering.V08.beBytes_layout": [
     "Quot.sound",
     "propext"
