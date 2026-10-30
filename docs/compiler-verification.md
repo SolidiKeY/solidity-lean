@@ -626,8 +626,14 @@ doc-debt checks remain pending. This is a partial checkpoint, not completion.
 
 ### Recovery checkpoint terminal checks
 
+The first full-run attempt was deliberately interrupted (exit 137, not OOM)
+after 185.01 seconds to repair missing explicit `-j1` on executable and LeanTeX
+sections of the task-only configuration. All library/executable sections now
+include it; source and proof budgets are unchanged and caches were retained.
+That interrupted attempt is not a pass.
+
 The local recovery/source checkpoint is reviewable and kernel-proved. All
-edited/new source files have successful installed Lean diagnostics: the first
+edited/new Evm Lean files have successful installed Lean diagnostics: the first
 batch stopped only because `MemoryCompileExamples.olean` had not been produced;
 building the five affected legacy examples repaired that dependency, and the
 remaining three diagnostics passed (65.05 s, 2,204,811,264-byte cgroup peak).
