@@ -6,8 +6,9 @@ import Solidity.Source.ExprProgress
 `NSP m Q`: from every state, `m` returns a result satisfying `Q` or halts
 other than `stuck`. For the **statement value fragment**
 (`RStmt.ValFrag`: expression statements, declarations of types with a
-default, blocks, `unchecked`, `if`, loops, `break`, `continue`, `return;`
-and `return e;` of a value type, over expressions of the value fragment)
+default, blocks, `unchecked`, `if`, loops, `break`, `continue`, `return;`,
+`return e;` and `return (a, b);` of value types, over expressions of the
+value fragment)
 execution is never `stuck`, at any horizon, in any modifier context,
 provided its expressions are in the operations' domains (`RStmt.OpsOK`,
 which every elaborated statement satisfies, `StmtD.toR_opsOK`) and its
@@ -159,6 +160,12 @@ def RStmt.Simple {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} : RStmt E 
   | .expr _ | .declVar _ | .declInit _ _ | .skip => True
   | _ => False
 
+/-- Converted arguments of the fragment: each of the value fragment, at a
+value type, converted from a value type or a constant. -/
+def RConvArgs.ValFrag {Γ : RCtx} : {τs : List STy} → RConvArgs E Γ τs → Prop
+  | _, .nil => True
+  | _, .cons (σ := σ) (τ := τ) e _ es => e.ValFrag ∧ τ.isValue = true ∧ σ.FragSrc ∧ RConvArgs.ValFrag es
+
 mutual
 
 /-- **The statement value fragment.** -/
@@ -174,6 +181,7 @@ def RStmt.ValFrag {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} →
   | _, _, _, .forLoop i c p s => i.Simple ∧ RStmt.ValFrag i ∧ c.ValFrag ∧ p.ValFrag ∧ RStmt.ValFrag s
   | _, _, _, .skip | _, _, _, .brk | _, _, _, .cont | _, _, _, .ret _ => True
   | _, _, _, .retVal (σ := σ) (τ := τ) _ e _ => e.ValFrag ∧ τ.isValue = true ∧ σ.FragSrc
+  | _, _, _, .retTuple es => RConvArgs.ValFrag es
   | _, _, _, _ => False
 
 def RItems.ValFrag {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} → RItems E R M k Γ Γ' → Prop
@@ -243,6 +251,30 @@ end
 
 section
 variable {G : Glob E} {n : Nat}
+
+/-- **Converted arguments of the fragment** are never `stuck`. -/
+theorem evalConvArgs_ns (G : Glob E) (F : Fr) {Γ : RCtx} : {τs : List STy} → (es : RConvArgs E Γ τs) →
+    ∀ n, es.ValFrag → es.OpsOK → NS (evalConvArgs G F n es)
+  | _, es, 0, _, _ => by rw [evalConvArgs.eq_1]; exact NS.halt' fun _ e => by cases e
+  | _, .nil, n + 1, _, _ => by simp only [evalConvArgs]; exact NS.pure' _
+  | _, .cons e h es, n + 1, hf, ho => by
+    simp only [evalConvArgs]
+    exact NS.bind (evalE_valFrag_ns G F n e hf.1 ho.1) fun v => NS.bind (convRV_ns F n (.inl h) hf.2.2.1 v)
+      fun w => NS.bind (getV_ns hf.2.1 w) fun _ => NS.bind (evalConvArgs_ns G F es n hf.2.2.2 ho.2) fun _ =>
+        NS.pure' _
+
+/-- **Writing the return slots** of a body frame is never `stuck`. -/
+theorem setRets_ok {D : Layout} {Γ : RCtx} (ys : RCtx) : (rs : List STy) → {ps : RCtx} → (l : Locals D Γ) →
+    Γ = ys ++ (rs.reverse ++ ps) → (vs : Vals D rs) → NotStuckR (setRets l ys.length vs)
+  | [], _, _, _, .nil => NotStuckR.pure _
+  | τ :: τs, ps, l, hΓ, .cons v vs => by
+    have hΓ' : Γ = (ys ++ τs.reverse) ++ τ :: ps := by
+      rw [hΓ, List.reverse_cons, List.append_assoc, List.append_assoc, List.singleton_append]
+    have h1 := Locals.setAt_ok' (ys ++ τs.reverse) hΓ' l v
+    rw [List.length_append, List.length_reverse] at h1
+    have hΓ'' : Γ = ys ++ (τs.reverse ++ τ :: ps) := by rw [hΓ', List.append_assoc]
+    simp only [setRets]
+    exact NotStuckR.bind h1 fun l' => setRets_ok ys τs l' hΓ'' vs
 
 theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : s.ValFrag) (ho : s.OpsOK)
@@ -357,6 +389,17 @@ theorem execS_nsStep (ih : StmtNSAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E
     have hΓ : ys ++ (R.reverse ++ ps) = ys ++ τ :: ps := by rw [hR]; rfl
     rw [hb]
     exact NSP.bind (NSP.lift_ok (Locals.setAt_ok' ys hΓ p.2 p.1)) fun _ _ =>
+      NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
+  | retTuple es =>
+    simp only [execS]
+    obtain ⟨ys, ps, rfl, hn⟩ := hfr
+    refine NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns (evalConvArgs_ns G F es n hf ho))
+      fun _ _ _ => trivial)) fun p _ => ?_
+    have hb : (ys ++ (R.reverse ++ ps)).length - (nps + R.length) = ys.length := by
+      simp only [List.length_append, List.length_reverse]
+      omega
+    rw [hb]
+    exact NSP.bind (NSP.lift_ok (setRets_ok ys R p.2 rfl p.1)) fun _ _ =>
       NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
   | _ => exact hf.elim
 

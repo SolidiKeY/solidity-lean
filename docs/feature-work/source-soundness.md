@@ -268,7 +268,7 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `exprNSAt` (`ExprNSAt`: `val`, `pair`, `ref`, `loc`; `val_step`, `pair_step`, `ref_step`, `loc_step`) | the induction on the horizon: expressions, operand pairs, mapping references (`RExpr.MapRef`, with the postcondition `RPost`: a storage reference names a path of its type) and lvalues (`RLVal.IsSimple`, with the postcondition `LocOK`: a local, or a storage cell of value type at its own type with a default) |
 | `readAt_ns`, `writeAt_ns`, `Storage.read_isSome`, `keyStep_nsp`, `Val.word_isSome`, `cellTy_key`, `pathTy_key`, `Env.pathTy_go`, `storRef_map_nsp` | storage: a cell of value type at its layout type with a default always reads; a write at the layout type succeeds (or reverts in a static frame); a keyable key is a key step; a mapping value's path has the mapping's value type |
 | `convRV_ns`, `getV_ns`, `readLoc_ok`, `writeLoc_ok`, `compound_dom` | its other steps |
-| `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_nsStep`, `execItems_nsStep`, `forIter_nsStep`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;` and `return e;` of a value type) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
+| `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_nsStep`, `execItems_nsStep`, `forIter_nsStep`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;`, `return e;` and `return (a, b);` of value types: `evalConvArgs_ns`, `setRets_ok`) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
 | `itemsNSP` (the post `Out.esc`; `Out.close_esc`, `Out.up_esc`) | outside loops (`SCtx.loop = false`) a block of the fragment ends normally or by `return`: no `break`/`continue` escapes it |
 | `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **leaf functions**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment (so making no calls, emitting nothing, with value-typed locals) and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults); the frame hypotheses are not derived from the elaboration or dispatch |
 | `Elaborated.body_locals` (from `Decl.frame?_lengths`, `Frame.mk?_lengths`, `Syn.tys_params_length`, `Syn.tys_typeName_length`, `Frame.tysOf_locals`) | every elaborated body's locals are its returns over its parameters, last innermost: the frame `callInternal` builds |
@@ -286,7 +286,7 @@ is never `stuck` and ends with `i = 3`); negative controls
 `OpsOK` is needed) and `ret_unframed_stuck`/`ret_unframed_no_frame`
 (`return 1;` over locals without a return slot is `stuck`, and those
 locals are no `BodyFrame`: the frame hypothesis is needed; with the slot,
-`ret_framed_ns`). Function level: `callRetOne_ns` (an internal call of a
+`ret_framed_ns`); `retPair_ns`/`retPair_unframed_stuck` for `return (1, 2);`. Function level: `callRetOne_ns` (an internal call of a
 `return 1;` body) and `callBadFrame_stuck` (a body whose locals lack the
 return slot is `stuck`, "call frame"). Witnesses from S01 typing derivations (through `toR`): `incBody_ns` (the counter's typed
 body `count++;`, through `ItemsD.toR_ns`) and `indexMapping_ns` (S01's
@@ -299,7 +299,7 @@ needs the lemma that a resolved state variable is the declaration
 `Env.declOf` finds at its path (the census's `stor` class).
 
 **What the fragment leaves out**, in the order a whole-program proof needs
-it: `return (a, b)` (`setRets`), modifiers (`runMods` with invocations,
+it: modifiers (`runMods` with invocations,
 `_`), the coherence of dispatch and elaboration (that the body virtual
 dispatch finds has the call's parameters and returns, which
 `callInternal_ns` assumes), internal calls as expressions (`callInternal`

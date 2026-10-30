@@ -1451,3 +1451,19 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} elaborated-frame theorems use only the standard axioms"
+
+/-! Lane V04b: `return (a, b)` in the statement fragment. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.evalConvArgs_ns,
+    ``Solidity.Source.setRets_ok,
+    ``Solidity.Source.SoundnessExamples.retPair_ns,
+    ``Solidity.Source.SoundnessExamples.retPair_unframed_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} return-tuple theorems use only the standard axioms"
