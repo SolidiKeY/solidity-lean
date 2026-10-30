@@ -746,3 +746,4 @@ import Solidity.Backend.MemoryOps.SliceControls
 import Solidity.Backend.MemoryOps.CalldataControls
 import Solidity.Backend.MemoryOps.DisjointControls
 import Solidity.Backend.MemoryOps.DisjointGrowthControls
+import Solidity.Backend.MemoryOps.ObjectFrameControls

@@ -326,3 +326,85 @@ Global pin inventory still fails: zero errors and 74 unrecorded changes, compris
 and 13 module boundaries. Final finder and skeptic reviews found no further
 source/document defect; runtime TOML remains outside the commit. These passing
 checkpoint checks do not close G32-G35, reserved prerequisites or the goal.
+
+## Published word-object frame checkpoint
+
+`ObjectFrames` imports the pinned `Evm/MemoryObjectFrame` read-only. That module
+proves single-element write frames. The new adapter proves
+`overwriteSlice_cells` for this lane's arbitrary captured range overwrite,
+using the unchanged runtime length and different-object frame laws.
+`overwriteSlice_ownership` transports the existing positive, disjoint object
+reservations and frame; `overwriteSlice_base_identity` derives address/identity
+equivalence from the published positive-reservation injectivity theorem.
+`overwriteSlice_other_repr` retains an actual different array's published
+`ArrayRepr` in the unchanged machine, including reference-valued elements.
+Premises are actual initial ownership/representation, runtime range capacity,
+and identity separation for other-object content framing. No preservation
+result is assumed, and no primitive-only payload restriction is added.
+This is a word-object adapter, not the missing byte-memory bridge.
+
+The nontrivial witness simultaneously inhabits separated ownership and actual
+initial word representations of a nonempty Boolean child and a fixed parent
+with two aliases to it. The child changes true to false; parent pointer words
+retain their representation. `stale_target_negative` proves the old machine
+cannot represent the changed destination, so ownership transport cannot be
+mistaken for target execution correctness. `colliding_base_negative` rejects
+coincident addresses. The stack conjunct observes the same unchanged machine;
+it is not an emitted-operation stack-tail preservation proof. Both independent
+read-only reviews found no defect and required this distinction in the handoff.
+Focused closure passes 88 jobs; all eleven new axiom outputs are guarded and
+contain only the standard allowlist. Reserved single-write code, byte-memory,
+copy-loop and reference-construction modules are unchanged.
+
+### Remaining published-interface blockers
+
+The exact pinned `Evm/MemoryObjects.lean` relations use `Machine.mem : Nat → Word`,
+one word per element and dynamic headers. `MemoryObjectCompile.StmtFrag` and
+construction certificates prove only their published fragments. Neither gives
+this lane a range-copy byte emitter/bridge. G04 R31 records the missing
+byte-addressed memory; R25 records the still-explicit allocator-capacity premise
+and missing generated panic check. `AllocationInput` and `GrowsAllocator` in `Evm/MemoryObjectAllocator.lean` retain those capacity hypotheses. This lane cannot erase
+them or count operation-side naturality as exact allocation-failure compilation.
+
+`Source/State.lean` publishes immutable decoded tables and typed array fields,
+but `Source/TypingExamples.lean` explicitly defers source slice execution to S02.
+The Boolean structural observation here is not that missing judgment. Thus
+calldata ABI/source/revert/storage transport remains open. Existing
+`Semantics/RecursiveStorage/Legacy.lean` explicitly realizes finite layouts and
+never unfolds graph cycles; it supplies no generic recursive memory-child copy
+or liveness relation to instantiate. Existing intrinsic heap aliases can share
+children; the negative controls show why unconditional deep preservation is
+false. No depth cutoff or alternate semantics can fill that missing interface.
+Reserved memory-to-storage/loops/reference constructors and final V10/source/
+target prerequisites remain with their owners. All prerequisite source modules
+were read at frozen revision `fb379ae20f10e2c92113453ddd9d40d8f2efbe09`; none
+was imported from another worker's branch or edited here.
+
+Backfill A now has generic typed captured slice/snapshot bounds, overlap,
+empty/nonempty element-boundary controls, allocator noninterference and actual
+decoded Boolean-object transport. Backfill B has context/heap extension,
+nested coordinate/path observations, disjoint overwrite/growth composition,
+fresh-versus-alias identity and published word-object frame transport. Their remaining general calldata/recursive-child obligations remain open; full
+byte/Source/target composition additionally depends on the prerequisites above.
+An unavailable Source evaluator does not establish that every independent
+decoded-object or traversal backfill is unavailable. G32/G33/G34/G35.01/.03/.04/
+.05 and both Backfill queues remain partial; G35.02 and G35.06 remain blocked.
+A full lane cannot close without those published owner results and final chain.
+
+Checkpoint-four handoff path is
+`/workspace/v11-memory-operations-evidence/checkpoint4`; cumulative original
+patch, named-ref bundle, handoff, raw gates, proposed pin inventory and checksums
+record exact head/base. Parent is `7bfc56b0e7bb7bdf2fde0ef1150dae3c8a2d2564`.
+Checkpoint-three independent finder/skeptic artifact reviews both passed exact
+identity, cumulative patch/bundle, all 33 checksums, links and premise/status
+checks. Earlier artifacts, caches, failures and runtime TOML remain preserved.
+
+Checkpoint-four final audits: full gate exits 0 (866 default and 262 TestSuite
+jobs, final SolKey377/131 OK), sampled aggregate Lean/Lake peak1,561,596 KiB,
+cgroup peak380,588,032 bytes. Strict automatic/TestSuite/layer/orphan/trust/lane/
+script/diff checks pass. Strict docs fails with exactly identical raw frozen-base
+output; separate no-new passes. Global pin inventory fails with zero errors,
+85 unrecorded changes:14 inherited and71 owned. Reserved inventory is untouched.
+Final finder found no defect. Skeptic required the open-versus-unavailable
+backfill distinction above; corrected before commit. Further independent generic
+decoded-object laws remain candidate work, not ruled out by a missing evaluator.

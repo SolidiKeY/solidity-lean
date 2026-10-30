@@ -1052,3 +1052,5 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/DisjointControls.lean` | Distinct reference-containing parents, nested redirected reads, revert observations and same-slot noncommutation controls. |
 | `Backend/MemoryOps/DisjointExtension.lean` | Two captured overwrites transport through preserving heap growth and published allocation; fresh own-object framing. |
 | `Backend/MemoryOps/DisjointGrowthControls.lean` | Inhabited fresh reference parent and genuinely changed old children, distinguishing structural framing from deep preservation. |
+| `Backend/MemoryOps/ObjectFrames.lean` | Captured range overwrite preserves published word-object reservation/ownership and different-array representation; destination target writes remain required. |
+| `Backend/MemoryOps/ObjectFrameControls.lean` | Populated shared-reference word-representation witnesses, changed child, stale-target and colliding-address negative controls. |
