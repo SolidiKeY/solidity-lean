@@ -3,6 +3,7 @@ import Solidity.Evm.MemoryCompile
 import Solidity.Evm.MemoryRefArrayCompile
 import Solidity.Evm.MemoryObjectCompile
 import Solidity.Evm.MemoryObjectConstructionCompile
+import Solidity.Evm.MemoryLoopScopeCompile
 
 /-!
 # The checked compiler entry
@@ -23,6 +24,8 @@ inductive Compilation (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) w
   | referenceArrays (result : Memory.ReferenceArrays.CompiledProg b F P)
   | objects (result : Memory.Objects.CompiledProg b F P)
   | construction (result : Memory.Construction.CompiledProg b F P)
+  | memoryLoops (result : Memory.Loops.CompiledProg b F P)
+  | memoryLoopScopes (result : Memory.LoopScopes.CompiledProg b F P)
 
 def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
     Option (Compilation b F P) :=
@@ -34,7 +37,11 @@ def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
       | some result => some (.referenceArrays result)
       | none => match Memory.Objects.compileProg b F P with
         | some result => some (.objects result)
-        | none => (Memory.Construction.compileProg b F P).map .construction
+        | none => match Memory.Construction.compileProg b F P with
+          | some result => some (.construction result)
+          | none => match Memory.Loops.compileProg b F P with
+            | some result => some (.memoryLoops result)
+            | none => (Memory.LoopScopes.compileProg b P F).map .memoryLoopScopes
 
 namespace Compilation
 
@@ -45,6 +52,8 @@ def code {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
   | .referenceArrays result => result.code
   | .objects result => result.code
   | .construction result => result.code
+  | .memoryLoops result => result.code
+  | .memoryLoopScopes result => result.code
 
 def frag {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Frag Δ
@@ -53,30 +62,47 @@ def frag {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
   | .referenceArrays result => result.frag
   | .objects result => result.frag
   | .construction result => result.frag
+  | .memoryLoops result => result.frag
+  | .memoryLoopScopes result => result.frag
 
+/-- Identify the legacy finite-memory path; loop memory has `isMemoryLoops`. -/
 def isMemory {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .core _ _ => false
   | .memory _ => true
   | .referenceArrays _ | .objects _ | .construction _ => false
+  | .memoryLoops _ => false
+  | .memoryLoopScopes _ => false
 
 /-- Select the supplementary, nonallocating reference-array relation. -/
 def isReferenceArray {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .referenceArrays _ => true
-  | .core .. | .memory .. | .objects .. | .construction .. => false
+  | .core .. | .memory .. | .objects .. | .construction .. | .memoryLoops .. | .memoryLoopScopes .. => false
 
 /-- Select full object ownership for the headerless fixed-array path. -/
 def isObject {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .objects _ => true
-  | .core .. | .memory .. | .referenceArrays .. | .construction .. => false
+  | .core .. | .memory .. | .referenceArrays .. | .construction .. | .memoryLoops .. | .memoryLoopScopes .. => false
 
 /-- Select checked reference-array construction with a complete allocator. -/
 def isConstruction {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .construction _ => true
-  | .core .. | .memory .. | .referenceArrays .. | .objects .. => false
+  | .core .. | .memory .. | .referenceArrays .. | .objects .. | .memoryLoops .. | .memoryLoopScopes .. => false
+
+/-- Distinguish prefix-capacity loop inputs from legacy finite-memory inputs. -/
+def isMemoryLoops {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .memoryLoops _ => true
+  | _ => false
+
+/-- Identify checked loops composed beneath enclosing scopes. -/
+def isMemoryLoopScopes {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .memoryLoopScopes _ => true
+  | _ => false
 
 def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)
@@ -91,6 +117,10 @@ def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | .construction _ => Memory.Objects.StateRepr L b frame F σ base m ∧
       b + Memory.frameNeedProg P ≤ frame ∧
       Memory.Objects.AllocationInput b frame (Memory.Construction.allocationCostProg P σ) σ base m
+  | .memoryLoops out => Memory.StateRepr L b frame F σ base m ∧
+      b + out.cert.need ≤ frame ∧ Memory.Loops.Room out.cert frame σ base m
+  | .memoryLoopScopes out => Memory.StateRepr L b frame F σ base m ∧
+      b + out.cert.need ≤ frame ∧ Memory.LoopScopes.Room out.cert frame σ base m
 
 /-- Open the memory premises without reducing the certified compiler result. -/
 theorem memory_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -105,6 +135,8 @@ theorem memory_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | referenceArrays out => cases hm
   | objects out => cases hm
   | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
 
 /-- Open a reference-array input without unfolding the computed compiler result. -/
 theorem referenceArray_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -117,6 +149,8 @@ theorem referenceArray_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C �
   | referenceArrays out => rfl
   | objects out => cases hm
   | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
 
 /-- Open the full object input without unfolding the computed compiler. -/
 theorem object_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -130,6 +164,8 @@ theorem object_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | referenceArrays out => cases hm
   | objects out => rfl
   | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
 
 /-- Open the growing constructor premises without unfolding proof data. -/
 theorem construction_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -144,6 +180,8 @@ theorem construction_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ 
   | referenceArrays out => cases hm
   | objects out => cases hm
   | construction out => rfl
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
 
 def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)
@@ -160,6 +198,14 @@ def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
       Memory.BaseExtends entry.H base base' ∧
       Memory.Objects.GrowsAllocator b frame (Memory.Construction.allocationCostProg P entry)
         entry base initial σ base' m
+  | .memoryLoops out => ∃ base' cost, ∃ e : entry.H <+: σ.H,
+      Memory.Loops.Cost out.cert entry ⟨σ, e⟩ cost ∧
+      Memory.StateRepr L b frame out.frag σ base' m ∧ Memory.BaseExtends entry.H base base' ∧
+      Memory.GrowsAllocator b frame cost entry base initial σ base' m
+  | .memoryLoopScopes out => ∃ base' cost, ∃ e : entry.H <+: σ.H,
+      Memory.LoopScopes.Cost out.cert entry ⟨σ, e⟩ cost ∧
+      Memory.StateRepr L b frame out.frag σ base' m ∧ Memory.BaseExtends entry.H base base' ∧
+      Memory.GrowsAllocator b frame cost entry base initial σ base' m
 
 /-- Expose the full output relation without reducing a certified compiler value. -/
 theorem object_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -175,6 +221,8 @@ theorem object_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | referenceArrays out => cases hm
   | objects out => rfl
   | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
 
 
 /-- Open the complete constructor output relation without unfolding the compiler. -/
@@ -193,6 +241,78 @@ theorem construction_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ
   | referenceArrays out => cases hm
   | objects out => cases hm
   | construction out => rfl
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
+
+/-- Open the source-prefix capacity premises of the loop path. -/
+theorem memoryLoops_input_of {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.Loops.CompiledProg b F P) (L frame : Nat) (base : Nat → Fin W)
+    (σ : State C Γ) (m : Machine) :
+    (Compilation.memoryLoops out).Input L frame base σ m ↔
+      Memory.StateRepr L b frame F σ base m ∧ b + out.cert.need ≤ frame ∧
+        Memory.Loops.Room out.cert frame σ base m := Iff.rfl
+
+/-- Recover the loop certificate without unfolding a computed compiler result. -/
+def memoryLoopsResult {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryLoops = true) : Memory.Loops.CompiledProg b F P :=
+  match result with
+  | .memoryLoops out => out
+  | .core _ _ => False.elim (Bool.noConfusion hm)
+  | .memory _ => False.elim (Bool.noConfusion hm)
+  | .referenceArrays _ => False.elim (Bool.noConfusion hm)
+  | .objects _ => False.elim (Bool.noConfusion hm)
+  | .construction _ => False.elim (Bool.noConfusion hm)
+  | .memoryLoopScopes _ => False.elim (Bool.noConfusion hm)
+
+theorem memoryLoops_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryLoops = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.StateRepr L b frame F σ base m ∧
+      b + (result.memoryLoopsResult hm).cert.need ≤ frame ∧
+      Memory.Loops.Room (result.memoryLoopsResult hm).cert frame σ base m := by
+  cases result with
+  | core out cert => cases hm
+  | memory out => cases hm
+  | referenceArrays out => cases hm
+  | objects out => cases hm
+  | construction out => cases hm
+  | memoryLoops out => rfl
+  | memoryLoopScopes out => cases hm
+
+/-- Open the source-prefix capacity premises of the loop path. -/
+theorem memoryLoopScopes_input_of {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.LoopScopes.CompiledProg b F P) (L frame : Nat) (base : Nat → Fin W)
+    (σ : State C Γ) (m : Machine) :
+    (Compilation.memoryLoopScopes out).Input L frame base σ m ↔
+      Memory.StateRepr L b frame F σ base m ∧ b + out.cert.need ≤ frame ∧
+        Memory.LoopScopes.Room out.cert frame σ base m := Iff.rfl
+
+/-- Recover the loop certificate without unfolding a computed compiler result. -/
+def memoryLoopScopesResult {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryLoopScopes = true) : Memory.LoopScopes.CompiledProg b F P :=
+  match result with
+  | .memoryLoopScopes out => out
+  | .core _ _ => False.elim (Bool.noConfusion hm)
+  | .memory _ => False.elim (Bool.noConfusion hm)
+  | .referenceArrays _ => False.elim (Bool.noConfusion hm)
+  | .objects _ => False.elim (Bool.noConfusion hm)
+  | .construction _ => False.elim (Bool.noConfusion hm)
+  | .memoryLoops _ => False.elim (Bool.noConfusion hm)
+
+theorem memoryLoopScopes_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryLoopScopes = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.StateRepr L b frame F σ base m ∧
+      b + (result.memoryLoopScopesResult hm).cert.need ≤ frame ∧
+      Memory.LoopScopes.Room (result.memoryLoopScopesResult hm).cert frame σ base m := by
+  cases result with
+  | core out cert => cases hm
+  | memory out => cases hm
+  | referenceArrays out => cases hm
+  | objects out => cases hm
+  | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => rfl
 
 /-- The compiler preserves typed states and the evaluation stack, or both
 executions revert; the existing panic and payment cases retain their guards. -/
@@ -238,6 +358,21 @@ theorem correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
       ⟨o, m', base', ho, hc, hm, hst, he, ha⟩ | ⟨ho, hc⟩
     · exact .inl ⟨o, m', ho, hc, hst, base', hm, he, ha⟩
     · exact .inr (.inl ⟨.inl ho, hc⟩)
+  | memoryLoops out =>
+    simp only [Agrees, code, Rep, out.cert.pushes_zero, Nat.add_zero]
+    rcases out.cert.correct h.1 h.2.1 h.2.2 with
+      ⟨o, m', base', cost, ho, hc, hcost, hm, hst, he, ha⟩ | ⟨ho, hc⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, base', cost, o.ext, hcost, hm, he, ha⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
+    · exact .inr (.inr (.inr ⟨ho, .inl hc⟩))
+
+  | memoryLoopScopes out =>
+    simp only [Agrees, code, Rep, out.cert.pushes_zero, Nat.add_zero]
+    rcases out.cert.correct σ base m h.1 h.2.1 h.2.2 with
+      ⟨o, m', base', cost, ho, hc, hcost, hm, hst, he, ha⟩ | ⟨ho, hc⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, base', cost, o.ext, hcost, hm, he, ha⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
+    · exact .inr (.inr (.inr ⟨ho, .inl hc⟩))
 
 end Compilation
 end Solidity.Evm.Compiler

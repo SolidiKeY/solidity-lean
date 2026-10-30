@@ -159,9 +159,19 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 
 | Area | Still due |
 |---|---|
-| Memory compiler | Other storage paths and copies (memory-to-storage, runtime-length arrays, reference-bearing structs), reference-bearing construction and defaults, fixed and reference-element arrays and paths, loops on the memory path, remaining mixed operations. The core path compiles loops (`Instr.loop`, `loop_sim`). |
+| Memory compiler | Other storage paths and copies (memory-to-storage, runtime-length arrays, reference-bearing structs), reference-bearing construction and defaults, fixed and reference-element arrays and paths, nested loop bodies, remaining mixed operations. Finite-body memory loops, including enclosing blocks/branches, have typed reached-prefix capacity certificates and public simulation (`docs/compiler-verification.md`, Checked memory loops). The core path compiles loops (`Instr.loop`, `loop_sim`). |
 | Loop automation | Two `SolcLoopsOpen` functions (`docs/semantic-gaps.md`, `docs/loops.md`). Support sound invariant use where missing; keep a missing invariant distinct from a false specification. |
 | Quantifier instantiation | Broaden ground terms and larger loops only with bounded, checked instances. |
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |
 | Revert semantics | Exact symbolic catch relationships; literal data outside self-call frames; broader panic-code alignment (self-calls already fail with solc's `Panic` codes, `Prog.withPanics`). |
 | Exact verification | `docs/automation.md`, M7 "What is not proved". |
+
+
+Memory-loop compiler follow-up: the full original 24-module Derived17 workload
+now passes its unchanged cumulative 300-second gate (262.03 s in the original
+worktree; all group outputs fresh). Scoped compiler simulations, inhabited
+allocation/divergence/drop controls and actual four-mode upstream executions
+pass their dedicated checks. The final full-repository `./run-lean.sh` confirmation passed (377.01 s),
+including the pinned TestSuite and SolKey annotation checks.
+Historical timing/resource failures and the unchanged documentation-path debt
+remain explicit; sampled EVM observations do not promote source coverage.
