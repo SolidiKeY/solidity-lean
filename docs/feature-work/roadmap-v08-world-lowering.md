@@ -1404,3 +1404,36 @@ adds real lossless observation and repeated-read backfill beyond the suggested
 combined case;it is not the original lane's completion. No supported distinct
 Decision repair appeared,no unchanged full/Decision retry,and all old failed125/
 unreached/pending boundaries are retained. No external solc/EVM run claimed.
+
+### Independent inventory audit followup
+
+After the retained literal wrapper failure, a distinct non-deleting inventory
+route was inspected and completed. Published solkey-port.mjs ran WITHOUT --probe,
+using supported --solkey pointing to the frozen checked-in migration snapshot and
+--out a NEW persistent evidence directory. It verifies snapshot/source hashes
+against existing AST/pins;no source re-pin,compiler invocation,Lean build,network
+or repository-generated-output change. The wrapper's ENTIRE inline Node audit
+was copied byte-for-byte (SHAfd3ba52fd9fadcafc18914c600af1bad9842691f62284d9dd8af44db6899abae)
+and executed as stdin with complete=1 against those persistent outputs. No audit
+condition was removed or modified. Original wrapper remains byte-identical to
+exact base(SHA901475da34815efa09338b1129f3aa3fc2110b8d2e7a8b103d81115bd56c0223)
+and was NOT rerun;its default-root FAILED1 and initial-driver failure stay FAILED.
+
+Independent generation/audit actual exits0/0:31modules trust;existing axiom pin;
+564testSuiteFunctions=552derived+11refuted+0pending+0divergent+1EXISTINGexcluded,
+2skip. No new exclusion or proof premise. Source snapshot473da8944c and TestSuite
+source hash were checked by the existing generator. sole generator rmSync occurs
+inside probe(),not called because PROBE=false. All new outputs persist. Actual
+Nodev24.19.0. Both independent read-only finder/skeptic verified exact audit bytes,
+parameters,pin binding,no deletion/probing and actual output;no Lean/server/builds.
+This is genuine independent inventory/parity PASS,not NEW0,not literal wrapper
+PASS and not kernel/source/full-gate completion. Evidence is
+library-handler-inventory-independent.json/.log,library-handler-inventory-generate.log
+and library-handler-inventory-audit.mjs plus persistent output directory.
+
+The prepared df2f9b4f export is retained unchanged. Final documentation followup
+and all source fingerprints are recorded at a NEW final export path:
+/workspace/v08-world-lowering-artifacts/checkpoint-library-handler-final-20261030.
+No Lean/script/proof/pin/budget changes in this followup. All original queues,
+reserved prerequisites,failed125/full suffixes and pending literalrun-lean remain
+unfinished. Original persistent blocked goal unchanged.
