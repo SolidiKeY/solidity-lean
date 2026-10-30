@@ -179,6 +179,127 @@ def sourceLangEvents (E : Env) : Lang Event Outcome where
   sem := sessionAtEvents
   consistent := sessionAtEvents_consistent
 
+/-! ## Stuck is not divergence
+
+A transaction's **fate** within horizon `n`: it completes, halts (stuck at a
+run-time mismatch), or is pending (it times out at every horizon up to
+`n`).  A pending fate can still change; a completed or halted one is the
+fate at every larger horizon (`txFate_mono`).  Divergence is pending at
+every horizon (`diverges_iff`: a timeout at every horizon); being stuck
+is a run that is stuck at some horizon (`stuck_iff`), and then at every
+larger one (`runTx_stuck_stable`), so a stuck transaction never reads as
+a divergent one (`stuck_not_diverges`). -/
+
+/-- The fate of a transaction within horizon `n`. -/
+inductive TxFate where
+  | done (o : Outcome)
+  | halted (h : Halt)
+  | pending
+  deriving DecidableEq
+
+def txFate (G : Glob E) (q : Request) (s : St E) (n : Nat) : TxFate :=
+  match firstDone (runAt (fun f => runTx G f q) s) n with
+  | some (_, (.ok o, _)) => .done o
+  | some (_, (.error h, _)) => .halted h
+  | none => .pending
+
+/-- A fate that is not pending is the fate at every larger horizon. -/
+theorem txFate_mono (G : Glob E) (q : Request) (s : St E) {n n' : Nat} (hn : n ≤ n')
+    (h : txFate G q s n ≠ .pending) : txFate G q s n' = txFate G q s n := by
+  simp only [txFate] at h ⊢
+  cases hf : firstDone (runAt (fun f => runTx G f q) s) n with
+  | none => rw [hf] at h; exact absurd rfl h
+  | some x => rw [firstDone_mono _ hn hf]
+
+theorem not_done_iff {α σ : Type} (r : Except Halt α × σ) : Done r = false ↔ r.1 = .error .timeout := by
+  rcases r with ⟨r, s⟩
+  cases r with
+  | ok a => exact ⟨(fun h => nomatch h), (fun h => nomatch h)⟩
+  | error h =>
+    cases h with
+    | timeout => exact ⟨(fun _ => rfl), (fun _ => rfl)⟩
+    | revert _ => exact ⟨(fun h => nomatch h), (fun h => nomatch h)⟩
+    | stuck _ => exact ⟨(fun h => nomatch h), (fun h => nomatch h)⟩
+
+/-- Pending within `n` is a timeout at every horizon up to `n`. -/
+theorem txFate_pending_iff (G : Glob E) (q : Request) (s : St E) (n : Nat) :
+    txFate G q s n = .pending ↔ ∀ k ≤ n, (runAt (fun f => runTx G f q) s k).1 = .error .timeout := by
+  simp only [txFate]
+  cases hf : firstDone (runAt (fun f => runTx G f q) s) n with
+  | none =>
+    refine ⟨fun _ k hk => (not_done_iff _).1 (firstDone_none_le hf k hk), fun _ => rfl⟩
+  | some x =>
+    rcases x with ⟨k, r⟩
+    obtain ⟨hk, rfl, hd⟩ := firstDone_spec hf
+    refine ⟨fun h => ?_, fun h => ?_⟩
+    · rcases hr : (runAt (fun f => runTx G f q) s k).1 with o | e <;> simp only [hr] at h <;>
+        exact absurd h (fun h' => nomatch h')
+    · have := h k hk
+      rw [← not_done_iff, hd] at this
+      cases this
+
+/-- A run that is done at a horizon within `n` is the fate within `n`. -/
+theorem txFate_of_done (G : Glob E) (q : Request) (s : St E) {n k : Nat} (hk : k ≤ n)
+    (hd : Done (runAt (fun f => runTx G f q) s k) = true) :
+    txFate G q s n = match (runAt (fun f => runTx G f q) s k).1 with
+      | .ok o => .done o
+      | .error h => .halted h := by
+  simp only [txFate]
+  cases hf : firstDone (runAt (fun f => runTx G f q) s) n with
+  | none => rw [firstDone_none_le hf k hk] at hd; cases hd
+  | some x =>
+    rcases x with ⟨j, r⟩
+    obtain ⟨_, rfl, hdj⟩ := firstDone_spec hf
+    have e : runAt (fun f => runTx G f q) s j = runAt (fun f => runTx G f q) s k := by
+      rw [← runTx_stable G q s (Nat.le_max_left j k) hdj, runTx_stable G q s (Nat.le_max_right j k) hd]
+    rw [e]
+    rcases (runAt (fun f => runTx G f q) s k) with ⟨o | h, _⟩ <;> rfl
+
+/-- **Divergence**: pending at every horizon. -/
+def Diverges (G : Glob E) (q : Request) (s : St E) : Prop := ∀ n, txFate G q s n = .pending
+
+/-- **Stuck**: halted at a run-time mismatch within some horizon. -/
+def Stuck (G : Glob E) (q : Request) (s : St E) : Prop := ∃ n msg, txFate G q s n = .halted (.stuck msg)
+
+theorem diverges_iff (G : Glob E) (q : Request) (s : St E) :
+    Diverges G q s ↔ ∀ k, (runAt (fun f => runTx G f q) s k).1 = .error .timeout :=
+  ⟨fun h k => (txFate_pending_iff G q s k).1 (h k) k (Nat.le_refl _),
+    fun h n => (txFate_pending_iff G q s n).2 fun k _ => h k⟩
+
+theorem stuck_iff (G : Glob E) (q : Request) (s : St E) :
+    Stuck G q s ↔ ∃ k msg, (runAt (fun f => runTx G f q) s k).1 = .error (.stuck msg) := by
+  constructor
+  · rintro ⟨n, msg, h⟩
+    simp only [txFate] at h
+    cases hf : firstDone (runAt (fun f => runTx G f q) s) n with
+    | none => rw [hf] at h; cases h
+    | some x =>
+      rcases x with ⟨k, r⟩
+      obtain ⟨_, rfl, _⟩ := firstDone_spec hf
+      rw [hf] at h
+      refine ⟨k, msg, ?_⟩
+      rcases hr : (runAt (fun f => runTx G f q) s k) with ⟨o | e, t⟩ <;> rw [hr] at h
+      · cases h
+      · cases h; rfl
+  · rintro ⟨k, msg, h⟩
+    have hd : Done (runAt (fun f => runTx G f q) s k) = true := by
+      rw [done_iff, h]; exact fun h' => nomatch h'
+    refine ⟨k, msg, ?_⟩
+    rw [txFate_of_done G q s (Nat.le_refl k) hd, h]
+
+/-- **Stuck is not divergence**: a stuck transaction is stuck at every
+horizon from some horizon on, so it is not pending at all of them. -/
+theorem stuck_not_diverges (G : Glob E) (q : Request) (s : St E) (h : Stuck G q s) : ¬ Diverges G q s := by
+  intro hd
+  obtain ⟨k, msg, hk⟩ := (stuck_iff G q s).1 h
+  rw [(diverges_iff G q s).1 hd k] at hk
+  cases hk
+
+/-- A stuck transaction's fate is the same halt at every larger horizon. -/
+theorem stuck_stable (G : Glob E) (q : Request) (s : St E) {n n' : Nat} (hn : n ≤ n') {msg : String}
+    (h : txFate G q s n = .halted (.stuck msg)) : txFate G q s n' = .halted (.stuck msg) := by
+  rw [txFate_mono G q s hn (by rw [h]; exact fun h' => nomatch h'), h]
+
 /-- info: 'Solidity.Source.sessionAtEvents_consistent' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms sessionAtEvents_consistent

@@ -22,7 +22,7 @@ namespace Solidity.Source.SessionExamples
 
 open Solidity.Source Solidity.Source.Examples Solidity.Source.SemanticsExamples
   Solidity.Source.ElaborateExamples
-open Solidity.Roadmap (Address Word Bytes Event Outcome SessionEnv)
+open Solidity.Roadmap (Address Word Bytes Event Outcome SessionEnv Request)
 
 def pingCall : Syn .expr :=
   .call (.member (.call (.ident "I") (.positional (.cons (.ident "a") .nil))) "ping") (.positional .nil)
@@ -70,5 +70,45 @@ def counts (n : Nat) : Option (Nat × Nat) :=
 #guard ((counts 30).bind fun c => (counts 60).map fun d => decide (c.2 < d.2)) == some true
 -- The session has no final observation: the transaction never completes.
 #guard (elabSpin.map fun el => (sessionFromEvents (progSpin el) envSpin (addr 0) 60).final.isNone) == some true
+
+/-! ## Stuck is not divergence
+
+```solidity
+contract S { string public s; }
+```
+
+The getter of a `string` is not modelled, so `s()` is stuck: halted at
+horizon 40 and at 80 (`stuck_stable`), while `spin` is pending at both
+(`stuck_not_diverges`).
+-/
+
+def unitS : Syn .unit :=
+  .unit (.cons (.contract false "S" .none .nil
+      (.cons (.stateVar (.elem .string) (some .pub) none none false "s" .none) .nil)) .nil)
+
+def elabS : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitS)
+
+#guard elabS.isSome
+
+/-- The fate of one transaction after deploying `main` at `addr 0`, within
+horizon `n`, as a tag: `0` done, `1` stuck, `2` other halt, `3` pending. -/
+def fateAfterDeploy (el : Elaborated) (main : String) (q : Request) (n : Nat) : Nat :=
+  let P : SrcProg el.res.env := ⟨el.prog, .legacy, toyFixed, main⟩
+  let G := P.glob envSpin
+  let s := (runAt (fun f => deploy G f main (addr 0) SemanticsExamples.user (word 0) []) (St.init _) 40).2
+  match txFate G q s n with
+  | .done _ => 0
+  | .halted (.stuck _) => 1
+  | .halted _ => 2
+  | .pending => 3
+
+def reqOf (input : Bytes) : Request := ⟨SemanticsExamples.user, addr 0, word 0, word 0, input⟩
+
+-- `s()` is stuck, at horizon 40 and at 80.
+#guard (elabS.map fun el => (fateAfterDeploy el "S" (reqOf (selOf "s()")) 40,
+  fateAfterDeploy el "S" (reqOf (selOf "s()")) 80)) == some (1, 1)
+-- `spin(ext)` is pending at both.
+#guard (elabSpin.map fun el => (fateAfterDeploy el "C" (reqOf (selOf "spin(address)" ++ arg 9)) 40,
+  fateAfterDeploy el "C" (reqOf (selOf "spin(address)" ++ arg 9)) 80)) == some (3, 3)
 
 end Solidity.Source.SessionExamples

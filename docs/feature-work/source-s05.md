@@ -178,6 +178,27 @@ No progress theorem is proved, so the absence of `stuck` is an obligation:
 for a well-formed elaborated program, no horizon ends `stuck`. The controls
 show non-stuck completion on each program they run.
 
+**Stuck is not divergence** (`Session.lean`). `txFate G q s n` is a
+transaction's fate within horizon `n`: `done o`, `halted h` or `pending`.
+
+| Theorem | Statement |
+|---|---|
+| `txFate_mono` | a fate that is not `pending` is the fate at every larger horizon |
+| `txFate_pending_iff` | `pending` within `n` iff the run times out at every horizon up to `n` |
+| `txFate_of_done` | a run done at some `k ≤ n` gives the fate within `n` |
+| `diverges_iff` | `Diverges` (pending at every horizon) iff the run times out at every horizon |
+| `stuck_iff` | `Stuck` (halted `stuck` within some horizon) iff the run is stuck at some horizon |
+| `stuck_not_diverges` | a stuck transaction does not diverge |
+| `stuck_stable` | a stuck fate stays the same halt at every larger horizon |
+
+So a reader of fates can tell a stuck run (a modelling gap or ill-formed
+program, observable at a finite horizon) from a divergent one. The session
+prefix (G01's `Prefix Event Outcome`) cannot carry the distinction, since
+both end non-final; `txFate` is the observation to read alongside it. The
+control (`SessionExamples.lean`) has `s()` on a `string public s` stuck at
+horizons 40 and 80, and `spin` pending at both. Progress itself (no
+elaborated program is ever stuck) is still open.
+
 ## Controls
 
 All controls are in `Solidity/Source/SemanticsExamples.lean` and are
@@ -294,7 +315,7 @@ These are listed under `limitations:`.
 | 2 | done, with the gaps listed | as before; dynamic ABI arguments decoded (`decodeArgs`) |
 | 3 | done, with the gaps listed | as before; `runTx_stable`, `deploy_stable`, `firstDone_runTx`, `runTx_stuck_stable` (horizon independence); getters, static `emit`, constructor value |
 | 4 | done, with the gaps listed | as before |
-| 5 | partial | `sessionAt_consistent`, `sourceLang`; `sessionAtEvents_consistent`, `sourceLangEvents` (events of unfinished transactions, from `growAt`, `approxAt`, `runTx_events_mono`); a progress theorem, failure points and `SourceSpec` open |
+| 5 | partial | `sessionAt_consistent`, `sourceLang`; `sessionAtEvents_consistent`, `sourceLangEvents` (events of unfinished transactions, from `growAt`, `approxAt`, `runTx_events_mono`); `txFate`, `stuck_not_diverges` (stuck is not divergence); progress, failure points and `SourceSpec` open |
 
 **Gates** (head `02556fb` and its doc follow-up).
 
@@ -346,8 +367,29 @@ rules and returns one derivation per expression; by `Typed.unique` that is
 enough for meaning, but it is not the checker's list-of-all-derivations
 interface and has no completeness proof.
 
-**Open** (also under `limitations:`): a progress theorem (`stuck` is stable
-but not ruled out); gas/frame failure points and G01's `Failures`;
+**Why `SourceSpec` and `Failures` stay open.** `SourceSpec`
+(`Solidity/Roadmap/Contracts.lean`) needs, beyond `sourceLangEvents`:
+
+- `hashed`, the preimages a prefix hashes, prefix-monotone in the bound.
+  `St` records no preimages, and adding a field changes every interpreter
+  step that `Horizon.lean` walks (`belowAt`, `growAt`, `approxAt`), so it is
+  a change to `Machine.lean`/`Eval.lean` plus a re-proof of those theorems
+  with one more monotone component.
+- `Failures`/`withFailures`/`NoFail` over `lang.Res`. The bound is a bare
+  horizon (`Res := Nat`) and the source is idealized (no gas, so no frame
+  fails for gas), so the only honest `Failures` records where the
+  call-depth limit and the stipend rule fail a frame. The depth limit is
+  applied (`Eval.lean`: a call at depth 1024 fails with empty data) but
+  not recorded, and the stipend rule (`stipendFits`) has no source
+  counterpart yet.
+- `Parses`/`Resolves` relations over an `Input`, which belong to S00/S01's
+  front end (`Frontend/`, not this lane's files).
+
+A placeholder instance (`Failures := Unit`, `hashed := []`) would type-check
+but would make `forward_iff`/`guard_iff` vacuous, so none is given.
+
+**Open** (also under `limitations:`): a progress theorem (`stuck` is told
+apart from divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
 rule); calldata references, `abi.decode`, `new`, slices, inline arrays,
 `try`, tuple declarations, `fallback` with parameters; dynamic-length
