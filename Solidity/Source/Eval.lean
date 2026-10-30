@@ -525,13 +525,12 @@ def copyInto {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v
 /-! ### Public getters -/
 
 /-- A public state variable's getter: one parameter per mapping key or array
-index, outermost first, and the type it returns; `none` unless the keys and
-the result are value types (struct, `bytes` and `string` getters are not
-modelled). -/
-def getterSig : STy → Option (List STy × STy)
-  | .mapping k v => if k.isValueTy then (getterSig v).map fun (ps, r) => (k :: ps, r) else none
-  | .array _ τ _ => (getterSig τ).map fun (ps, r) => (.int IntTy.u256 :: ps, r)
-  | τ => if τ.isValueTy then some ([], τ) else none
+index, outermost first, and the type it returns.  Only value-type keys and
+results are modelled; a call to another getter is `stuck`. -/
+def getterSig : STy → List STy × STy
+  | .mapping k v => let (ps, r) := getterSig v; (k :: ps, r)
+  | .array _ τ _ => let (ps, r) := getterSig τ; (.int IntTy.u256 :: ps, r)
+  | τ => ([], τ)
 
 /-- Whether a declaration is a `public` state variable or constant. -/
 def Decl.isPublicVar (d : Decl) : Bool :=
@@ -544,7 +543,7 @@ getters. -/
 def Env.getters (E : Env) (c : String) : List (Decl × List STy × STy) :=
   ((E.linearize c).getD [c]).flatMap fun s =>
     (E.decls.filter fun d => d.scope == some s && d.isPublicVar).filterMap fun d =>
-      (d.varTy E).bind getterSig |>.map fun (ps, r) => (d, ps, r)
+      (d.varTy E).map fun τ => (d, (getterSig τ).1, (getterSig τ).2)
 
 /-- The storage path a getter reads: each key or index, from the call
 data's words, one step down (an index past the end panics). -/
@@ -560,9 +559,10 @@ def getterPath {Γ : RCtx} (F : Fr) (n : Nat) (data : Bytes) : STy → SPath →
     if w < size then getterPath F n data τ (p.go (.index w)) (i + 1) else lift (panic .index)
   | τ, p, _ => pure (p, τ)
 
-/-- The exposed function whose selector call data starts with. -/
+/-- The exposed function with a body (after virtual dispatch) whose selector
+call data starts with; a getter can implement a body-less one. -/
 def Glob.pickFn (G : Glob E) (F : Fr) (input : Bytes) : Option Decl :=
-  (E.exposed F.contract).find? fun d => match d.fnSig E with
+  (E.exposed F.contract).find? fun d => (G.prog.body (G.dispatchFn F.contract d)).isSome && match d.fnSig E with
     | some (ps, _) => G.selector (sigOf E.layout d.name ps) == input.take 4
     | none => false
 
@@ -1341,6 +1341,7 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
     | some (d, ps, r) =>
       if F.value.val ≠ 0 then halt (.revert [])
       if input.length < 4 + 32 * ps.length then halt (.revert [])
+      if !((r :: ps).all STy.isValueTy) then halt (.stuck "getter of this type is not modelled")
       match d.varTy E, G.prog.consts d with
       | _, some ri => do
         let (v, _) ← sub (L0 E) (evalE G F n ri.e)

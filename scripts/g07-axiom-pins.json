@@ -1867,6 +1867,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/Session.lean:Solidity.Source.runTx_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Session.lean:Solidity.Source.sessionAtEvents_consistent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/StateExamples.lean:Solidity.Source.Heap.copy_independent": [
   "Quot.sound",
   "propext"

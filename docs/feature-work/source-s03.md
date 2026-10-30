@@ -130,6 +130,24 @@ ledger is in [source-s05.md](source-s05.md).
 
 The controls run elaborated units (item 1b) and are checked by `#guard`.
 
+Review (finder, read-only). Fixed:
+
+- a getter of an unmodelled type (`string public`, structs, non-value keys)
+  no longer falls through to `fallback`: its selector is matched and the
+  call is `stuck` ("getter of this type is not modelled");
+- a body-less interface function no longer shadows the getter that
+  implements it: `Glob.pickFn` only picks a function with a body after
+  virtual dispatch;
+- `deploy` reverts on constructor arguments shorter than their heads, as
+  `dispatch` does.
+
+Recorded, not fixed: a dynamic length of `2^64` or more reverts with no data
+where solc panics with `0x41` (its allocation check comes first);
+user-defined value types are value types for getters but `decodeWord` has no
+case for them (`stuck`); the controls do not cover array or constant
+getters, value sent to a getter, payable constructors, or invalid dynamic
+lengths and elements.
+
 ## What S03 does not do
 
 These items are also listed under `limitations:`.

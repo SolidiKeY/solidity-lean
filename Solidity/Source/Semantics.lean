@@ -155,6 +155,7 @@ def deploy (G : Glob E) (n : Nat) (c : String) (addr sender : Address) (value : 
   let ps := ((G.prog.ctor c).map RBody.ps).getD []
   let r ← attempt do
     if value.val ≠ 0 && !E.ctorPayable c then halt (.revert [])
+    if args.length < 32 * ps.length then halt (.revert [])
     let vs ← decodeArgs args ps 0
     let l := vs.onto (L0 E)
     if h : ps.reverseAux [] = G.prog.ctorLocals c then construct G F n c (h ▸ l)
