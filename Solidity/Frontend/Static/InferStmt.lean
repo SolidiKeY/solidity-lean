@@ -68,7 +68,9 @@ def consS : {c : Cat} → {x : Syn c} → {xs : Syn (.list c)} → {L : Locals} 
 /-- `T l x;`, `T l x = e;`, `e;`, `_;`: a simple statement as a statement. -/
 def simpleRes {k : SCtx} (L : Locals) : (i : Syn .simple) → List (Σ L', StmtD C (k := k) L (.simpleStmt i) L')
   | .exprStmt e =>
-    ((tysOf (C.at L) (infer (C.at L) e)).map fun p => ⟨L, .expr p.2⟩) ++
+    (if hu : (C.inModifier && e.isUnderscore) = false then
+      (tysOf (C.at L) (infer (C.at L) e)).map fun p => ⟨L, .expr p.2 hu⟩
+     else []) ++
     (match e with
      | .ident "_" => if h : C.inModifier = true then [⟨L, .placeholder h⟩] else []
      | _ => [])
@@ -115,8 +117,12 @@ def returnRes {k : SCtx} (L : Locals) : (o : Syn (.opt .expr)) → List (SRes C 
      | .tuple (.some e0) s0 =>
        (tysOf (C.at L) (infer (C.at L) e0)).flatMap fun p =>
          (slotsOf (C.at L) (infer (C.at L) s0)).filterMap fun q =>
-           if hf : argsFit C.isBase (p.1 :: q.1) C.rets = true then Option.some (.stmt (.retTuple p.2 q.2 hf))
-           else Option.none
+           match q with
+           | ⟨σ' :: σs', ds⟩ =>
+             if hf : argsFit C.isBase (p.1 :: σ' :: σs') C.rets = true then
+               Option.some (.stmt (.retTuple p.2 ds (List.cons_ne_nil _ _) hf))
+             else Option.none
+           | ⟨[], _⟩ => Option.none
      | _ => [])
 
 /-- `emit E(args);`. -/
@@ -148,7 +154,7 @@ def rethrowRes {k : SCtx} (L : Locals) (fl : List String) (body : Syn (.list .yu
       | Option.some (.loc i) =>
         match ht : (L.map Prod.snd)[i]? with
         | Option.some (.bytes .memory) =>
-          if hp : (body.paths.map IdPath.last).all (· == d) = true then
+          if hp : rethrowVar? body = Option.some d then
             Option.some (.stmt (.rethrow hb hr ht hp))
           else Option.none
         | _ => Option.none

@@ -159,6 +159,10 @@ import Solidity.Calculus.ProofTree
 import Solidity.Calculus.CallbackRules
 import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
+import Solidity.Calculus.CallbackSound.Payments
+import Solidity.Calculus.PaymentWitness
+import Solidity.Calculus.PaymentConditions
+import Solidity.Calculus.PaymentClose
 import Solidity.Calculus.CallbackSound
 import Solidity.Calculus.CapturePayments
 import Solidity.Calculus.CallbackDerive
@@ -248,6 +252,10 @@ import Solidity.Examples.Tactics.Memory
 import Solidity.Examples.Tactics.CrossDomain
 import Solidity.Examples.Tactics.Net
 import Solidity.Examples.Tactics.Payment
+import Solidity.Examples.Tactics.PaymentWitness
+import Solidity.Examples.Tactics.PaymentConditions
+import Solidity.Examples.Tactics.PaymentRules
+import Solidity.Examples.Tactics.PaymentCorpus
 import Solidity.Examples.Tactics.Theory
 import Solidity.Examples.Tactics.TermTaclets
 import Solidity.Examples.Tactics.Branch
@@ -461,6 +469,27 @@ import Solidity.Frontend.Checked.TypeExamples
 import Solidity.Frontend.Checked.ExprExamples
 import Solidity.Frontend.Checked.Certificate
 import Solidity.Frontend.Checked.UnitExamples
+import Solidity.Source.Value
+import Solidity.Source.Elaborated
+import Solidity.Source.Unique
+import Solidity.Source.Machine
+import Solidity.Source.Eval
+import Solidity.Source.Semantics
+import Solidity.Source.Ledger
+import Solidity.Source.SemanticsExamples
+import Solidity.Source.Horizon
+import Solidity.Source.HorizonDeploy
+import Solidity.Source.Infer
+import Solidity.Source.Elaborate
+import Solidity.Source.ElaborateExamples
+import Solidity.Source.Session
+import Solidity.Source.SessionExamples
+import Solidity.Source.Hoare
+import Solidity.Source.WellTyped
+import Solidity.Source.ValueProgress
+import Solidity.Source.ExprProgress
+import Solidity.Source.StmtProgress
+import Solidity.Source.SoundnessExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic
@@ -741,7 +770,23 @@ import Solidity.Solkey.QuantifiedDiamond
 
 import Solidity.Tools.SolCases
 import Solidity.Examples.SolCases
+import Solidity.Backend.Environment.Observations
+import Solidity.Backend.Environment.ObservationsChecks
+import Solidity.Backend.Environment.Metadata
+import Solidity.Backend.Environment.ByteConstants
+import Solidity.Backend.Environment.MetadataChecks
+import Solidity.Backend.Environment.Crypto
+import Solidity.Backend.Environment.Namespace
+import Solidity.Backend.Environment.CryptoChecks
+import Solidity.Backend.Environment.Composition
+import Solidity.Backend.Environment.Frames
+import Solidity.Backend.Environment.CompositionChecks
 
+import Solidity.Semantics.PaymentWorld
+import Solidity.Frontend.PaymentPlan
+import Solidity.Frontend.PaymentImport
+import Solidity.Tools.PaymentReplay
+import Solidity.Examples.Tactics.PaymentSource
 import Solidity.Backend.Creation.Artifact
 
 import Solidity.Backend.Creation.ArtifactChecks
@@ -781,3 +826,62 @@ import Solidity.Backend.Failure.Unwind
 import Solidity.Backend.Failure.UnwindChecks
 import Solidity.Backend.Failure.Composition
 import Solidity.Backend.Failure.CompositionChecks
+
+import Solidity.Storage.Representation.Model
+import Solidity.Storage.Representation.Controls
+import Solidity.Storage.Representation.Reads
+import Solidity.Storage.Representation.Frames
+import Solidity.Storage.Representation.Words
+import Solidity.Storage.Representation.Updates
+import Solidity.Storage.Representation.Members
+import Solidity.Storage.Representation.UpdateControls
+import Solidity.Storage.Representation.Arrays
+import Solidity.Storage.Representation.ArrayControls
+import Solidity.Storage.Representation.Transport
+import Solidity.Storage.Representation.TransportControls
+import Solidity.Storage.Representation.GraphLayout
+import Solidity.Storage.Representation.GraphFrames
+import Solidity.Storage.Representation.GraphRepresentation
+import Solidity.Storage.Representation.GraphCompatibility
+import Solidity.Storage.Representation.GraphControls
+
+import Solidity.Backend.Scalar.Slice
+import Solidity.Backend.Scalar.Typed
+import Solidity.Backend.Scalar.Widths
+import Solidity.Backend.Scalar.Comparisons
+import Solidity.Backend.Scalar.Wrapping
+import Solidity.Backend.Scalar.Casts
+import Solidity.Backend.Scalar.Guards
+import Solidity.Backend.Scalar.Modular
+import Solidity.Backend.Scalar.Bitwise
+import Solidity.Backend.Scalar.Values
+
+import Solidity.Backend.Scalar.Checked
+import Solidity.Backend.Scalar.Division
+import Solidity.Backend.Scalar.Exponentiation
+import Solidity.Backend.Scalar.Heights
+import Solidity.Backend.Scalar.Negation
+import Solidity.Backend.Scalar.PowerBounds
+import Solidity.Backend.Scalar.PowerGuard
+import Solidity.Backend.Scalar.Shifts
+import Solidity.Backend.Scalar.SignedBits
+import Solidity.Backend.Scalar.SignedChecked
+import Solidity.Backend.Scalar.SignedDivision
+import Solidity.Backend.Scalar.SignedGuards
+import Solidity.Backend.Scalar.SignedMul
+import Solidity.Backend.Scalar.SignedShift
+import Solidity.Backend.Scalar.UnsignedMul
+import Solidity.Backend.Scalar.Axioms
+
+import Solidity.Backend.Scalar.ArithmeticWidths
+import Solidity.Backend.Scalar.Capacity
+import Solidity.Backend.Scalar.CastChains
+import Solidity.Backend.Scalar.Combinations
+import Solidity.Backend.Scalar.Composition
+import Solidity.Backend.Scalar.FixedBytes
+import Solidity.Backend.Scalar.Select
+import Solidity.Backend.Scalar.WidthGuards
+
+import Solidity.Backend.Scalar.SignedPower
+import Solidity.Backend.Scalar.SignedPowerPost
+import Solidity.Backend.Scalar.SignedPowerPrefix

@@ -18,7 +18,7 @@ is G15's (`docs/feature-work/frontend-static.md`, Handoff).
   (distinct unit names, every import and imported symbol found, no clash in
   any file-level scope), the multi-unit part of what G05's resolution stage
   checks; S01's `Resolves'` is the per-unit part.
-- `Program.libraries`: the `(unit name, library name)` pairs G05's
+- `UnitSet.libraries`: the `(unit name, library name)` pairs G05's
   `LinksResolved` reads.
 
 - `metadataChecker` (G13): a resolved unit is S01-`WellFormed` (every
@@ -39,18 +39,18 @@ open Solidity.Source
 open Solidity.Roadmap.Frontend (Checker)
 
 /-- **G12's resolution checker**, sound by `unitsOK_iff`. -/
-def unitsChecker : Checker (Program × List Remapping) Unit (fun pr _ => UnitsOK pr.1 pr.2) where
+def unitsChecker : Checker (UnitSet × List Remapping) Unit (fun pr _ => UnitsOK pr.1 pr.2) where
   Cert := Unit
   check pr _ _ := pr.1.unitsOK pr.2
   sound _ _ _ h := unitsOK_iff.mp h
 
 /-- The checker is complete: it accepts every program G12's judgment admits. -/
-theorem unitsChecker_complete (P : Program) (R : List Remapping) (h : UnitsOK P R) :
+theorem unitsChecker_complete (P : UnitSet) (R : List Remapping) (h : UnitsOK P R) :
     unitsChecker.check (P, R) () () = true := unitsOK_iff.mpr h
 
 /-- The library declarations of a program, by unit and name (G05's
 `FrontendSpec.libraries`). -/
-def _root_.Solidity.Source.Program.libraries (P : Program) : List (String × String) :=
+def _root_.Solidity.Source.UnitSet.libraries (P : UnitSet) : List (String × String) :=
   P.units.flatMap fun (u, s) =>
     (s.decls.filter fun d => d.kind == .library && d.scope == Option.none).map fun d => (u, d.name)
 

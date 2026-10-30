@@ -143,15 +143,15 @@ def Syn.imports : {c : Cat} → Syn c → List Import
 /-! ## Programs and identities -/
 
 /-- A compilation input's source units, by source unit name. -/
-structure Program where
+structure UnitSet where
   units : List (String × Syn .unit)
 
 /-- The unit of a name. -/
-def Program.unit? (P : Program) (u : String) : Option (Syn .unit) :=
+def UnitSet.unit? (P : UnitSet) (u : String) : Option (Syn .unit) :=
   (P.units.find? (·.1 == u)).map (·.2)
 
 /-- The unit an import path of unit `u` names. -/
-def Program.target (R : List Remapping) (u p : String) : String :=
+def UnitSet.target (R : List Remapping) (u p : String) : String :=
   Remapping.apply R u (Path.absolute p u)
 
 /-- **A declaration's identity**: its unit and its position among the unit's
@@ -162,7 +162,7 @@ structure DeclId where
   deriving DecidableEq, Repr
 
 /-- The declaration an identity names. -/
-def Program.decl? (P : Program) (i : DeclId) : Option Decl :=
+def UnitSet.decl? (P : UnitSet) (i : DeclId) : Option Decl :=
   (P.unit? i.unit).bind fun s => s.decls[i.idx]?
 
 /-- What a file-level name denotes: a declaration, or a unit imported as a
@@ -173,29 +173,29 @@ inductive Sym where
   deriving DecidableEq, Repr
 
 /-- **The file-level scope**: in unit `u`, the name `x` denotes `σ`. -/
-inductive Sees (P : Program) (R : List Remapping) : String → String → Sym → Prop where
+inductive Sees (P : UnitSet) (R : List Remapping) : String → String → Sym → Prop where
   | own {u x : String} {s : Syn .unit} {i : Nat} {d : Decl} : P.unit? u = Option.some s →
       s.decls[i]? = Option.some d → d.scope = Option.none → d.name = x → x ≠ "" →
       Sees P R u x (.decl ⟨u, i⟩)
   | ns {u x p : String} {s : Syn .unit} : P.unit? u = Option.some s → Import.ns p x ∈ s.imports →
-      Sees P R u x (.unit (Program.target R u p))
+      Sees P R u x (.unit (UnitSet.target R u p))
   | all {u x p : String} {s : Syn .unit} {σ : Sym} : P.unit? u = Option.some s →
-      Import.all p ∈ s.imports → Sees P R (Program.target R u p) x σ → Sees P R u x σ
+      Import.all p ∈ s.imports → Sees P R (UnitSet.target R u p) x σ → Sees P R u x σ
   | sym {u x p a : String} {s : Syn .unit} {σ : Sym} : P.unit? u = Option.some s →
-      Import.sym p a x ∈ s.imports → Sees P R (Program.target R u p) a σ → Sees P R u x σ
+      Import.sym p a x ∈ s.imports → Sees P R (UnitSet.target R u p) a σ → Sees P R u x σ
 
 /-- Every import of every unit names a unit of the program (solc: "Source
 not found" otherwise). -/
-def ImportsResolve (P : Program) (R : List Remapping) : Prop :=
+def ImportsResolve (P : UnitSet) (R : List Remapping) : Prop :=
   ∀ u s, (u, s) ∈ P.units → ∀ i, i ∈ s.imports →
-    ∃ s', P.unit? (Program.target R u i.path) = Option.some s'
+    ∃ s', P.unit? (UnitSet.target R u i.path) = Option.some s'
 
 /-- Every symbol import `{a as b} from "p"` finds `a` in `p`'s file-level
 scope (solc error 2904, "Declaration not found", otherwise; also for an
 alias reachable only through a cycle of aliases). -/
-def SymsResolve (P : Program) (R : List Remapping) : Prop :=
+def SymsResolve (P : UnitSet) (R : List Remapping) : Prop :=
   ∀ u s, (u, s) ∈ P.units → ∀ p a b, Import.sym p a b ∈ s.imports →
-    ∃ σ, Sees P R (Program.target R u p) a σ
+    ∃ σ, Sees P R (UnitSet.target R u p) a σ
 
 /-- Kinds of declaration a file-level name may denote several of: free
 functions and events overload, each only with its own kind. -/
@@ -208,17 +208,17 @@ denotes are overloadable declarations of the same kind (solc's
 `DeclarationContainer::conflictingDeclaration`: "Identifier already
 declared" otherwise).  The same identity reached along two routes is one
 thing. -/
-def ScopeOK (P : Program) (R : List Remapping) : Prop :=
+def ScopeOK (P : UnitSet) (R : List Remapping) : Prop :=
   ∀ u x σ σ', Sees P R u x σ → Sees P R u x σ' → σ ≠ σ' →
     ∃ i i' d d', σ = .decl i ∧ σ' = .decl i' ∧ P.decl? i = Option.some d ∧
       P.decl? i' = Option.some d' ∧ d.kind = d'.kind ∧ d.kind.overloads = true
 
 /-- The source unit names are distinct. -/
-def Program.Distinct (P : Program) : Prop := (P.units.map Prod.fst).Nodup
+def UnitSet.Distinct (P : UnitSet) : Prop := (P.units.map Prod.fst).Nodup
 
 /-- **G12's resolution judgment** of a program: distinct unit names, every
 import and imported symbol found, no clash in any file-level scope. -/
-structure UnitsOK (P : Program) (R : List Remapping) : Prop where
+structure UnitsOK (P : UnitSet) (R : List Remapping) : Prop where
   distinct : P.Distinct
   imports : ImportsResolve P R
   syms : SymsResolve P R

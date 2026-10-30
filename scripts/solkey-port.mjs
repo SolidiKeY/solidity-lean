@@ -1409,12 +1409,16 @@ function parityDoc(allRows, internal, commit) {
     "",
     "## The other suites",
     "",
+    "Handwritten `.key` problems listed as proved cite their typed theorem. The generated",
+    "`SolidityCorpus.lean` imports each evidence module and checks every theorem reference.",
+    "These are kernel proofs of the stated abstract problem, not source-runner or EVM results.",
+    "",
     "The obligation form of the translated suites (solkey's `⟨ f() ⟩ true` at",
     "the contract's initial store) and their statuses are explained in",
     "`Solidity/Corpus/Basic.lean` and the script's header; `--probe` re-derives",
     "their verdicts:",
     "",
-    "- **proved**: a theorem, decided by the kernel;",
+    "- **proved**: a theorem, checked by the kernel;",
     "- **evaluated**: the typed run ends normally, but the kernel does not",
     "  decide it, so it is pinned by `#eval`;",
     "- **open**: solkey proves it, the typed run from the initial state does",
@@ -1574,6 +1578,7 @@ async function main() {
 
   // Every problem-bearing `.key` input is inventoried; a row need not be proved.
   const problemFiles = new Set();
+  const keyProofs = [];
   for (const { contract, suite, dir, ported, unported, reason, defaultStatus } of KEY_SUITES) {
     const problems = readdirSync(join(SOLKEY, dir))
       .filter((f) => f.endsWith(".key"))
@@ -1583,9 +1588,12 @@ async function main() {
     for (const name of problems) {
       problemFiles.add(relative(dirname(SOLKEY), join(SOLKEY, dir, `${name}.key`)));
       if (ported[name]) {
-        const [fn, example] = ported[name];
+        const [fn, example, proofPath = "Examples/Tactics/Net.lean"] = ported[name];
+        const proofModule = "Solidity." + proofPath.replace(/\.lean$/, "").replaceAll("/", ".");
+        if (!modules.includes(proofModule)) modules.push(proofModule);
+        keyProofs.push(`Solidity.Examples.Tactics.${example}`);
         rows.push([suite, contract, fn, "proved", `solkey ${name}.key`,
-                   `\`Examples/Tactics/Net.lean\` \`${example}\``]);
+                   `\`${proofPath}\` \`${example}\``]);
       } else if (unported[name]) {
         rows.push([suite, contract, unported[name], "unported", `solkey ${name}.key`, UNPORTED_REASON]);
       } else {
@@ -1609,7 +1617,9 @@ async function main() {
   writeFileSync(join(OUT, "SolidityCorpus.lean"),
     "-- The root of the `SolidityCorpus` library: solkey's example suites, ported\n" +
     "-- by `scripts/solkey-port.mjs` (generated; do not edit).\n" +
-    modules.map((m) => `import ${m}`).join("\n") + "\n");
+    modules.map((m) => `import ${m}`).join("\n") + "\n\n" +
+    "-- Handwritten .key proof mappings are checked by this library too.\n" +
+    keyProofs.map((n) => `#check ${n}`).join("\n") + "\n");
 
   mkdirSync(join(OUT, "tests/solkey"), { recursive: true });
   writeFileSync(join(OUT, "tests/solkey/expected.tsv"),

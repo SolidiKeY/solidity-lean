@@ -506,9 +506,22 @@ def inspect (declarations : List Json) (candidates : List Candidate)
 
 end FiniteDispatch
 
+/-- Native payment heads through the same callee arms as dispatch. Arguments
+and receiver subexpressions are visited independently, not mistaken for callees. -/
+partial def nativePaymentCallee (e : Json) : Bool := (calleeArms e).any fun callee =>
+  if J.kind callee == "FunctionCallOptions" then
+    (J.opt callee "expression").any nativePaymentCallee
+  else
+    (J.tyId callee).startsWith "t_function_send_" ||
+    (J.tyId callee).startsWith "t_function_transfer_" ||
+    (J.kind callee == "MemberAccess" && nativeMember callee &&
+      ["send", "transfer"].contains ((J.str? callee "memberName").getD ""))
+
+/-- Payment dispatch depends on invocation, not an unused member reference.
+Receiver effects are retained separately by the statement reader. -/
 def nativePayment (root : Json) : Bool := (J.nodes root).any fun node =>
-  (valueCall? node).isSome || (J.kind node == "MemberAccess" && nativeMember node &&
-    ["send", "transfer"].contains ((J.str? node "memberName").getD ""))
+  (valueCall? node).isSome || (J.kind node == "FunctionCall" &&
+    (J.opt node "expression").any nativePaymentCallee)
 
 /-- Empty-data calls select receive across the entire C3 order before fallback. -/
 private def selectedPaymentEntry (nodes : List Json) : Option Json :=

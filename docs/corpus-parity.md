@@ -55,12 +55,16 @@ Not derived, by reason:
 
 ## The other suites
 
+Handwritten `.key` problems listed as proved cite their typed theorem. The generated
+`SolidityCorpus.lean` imports each evidence module and checks every theorem reference.
+These are kernel proofs of the stated abstract problem, not source-runner or EVM results.
+
 The obligation form of the translated suites (solkey's `⟨ f() ⟩ true` at
 the contract's initial store) and their statuses are explained in
 `Solidity/Corpus/Basic.lean` and the script's header; `--probe` re-derives
 their verdicts:
 
-- **proved**: a theorem, decided by the kernel;
+- **proved**: a theorem, checked by the kernel;
 - **evaluated**: the typed run ends normally, but the kernel does not
   decide it, so it is pinned by `#eval`;
 - **open**: solkey proves it, the typed run from the initial state does
