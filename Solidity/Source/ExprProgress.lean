@@ -275,13 +275,6 @@ theorem writeAt_ns {Γ : RCtx} (F : Fr) (p : SPath) {τ : STy} (hc : τ = E.cell
 
 /-! ## The value fragment -/
 
-/-- A local, or a state variable of a value type stored at its own cell
-type, with a default. -/
-def RLVal.IsSimple {Γ : RCtx} : {τ : STy} → RLVal E Γ τ → Prop
-  | _, .local _ => True
-  | τ, .state d _ _ => τ.byRef = false ∧ E.cellTy d.path = τ ∧ (Val.default E.layout τ).isSome = true
-  | _, _ => False
-
 /-- Mapping key types whose values have a word (`Val.word`). -/
 def STy.keyable : STy → Bool
   | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .contract _ => true
@@ -321,7 +314,23 @@ def RExpr.MapRef {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
       (∃ k' v', τv = .mapping k' v')
   | _, _ => False
 
+/-- A local; a state variable of a value type stored at its own cell
+type, with a default; or such a value of a mapping of the fragment. -/
+def RLVal.IsSimple {Γ : RCtx} : {τ : STy} → RLVal E Γ τ → Prop
+  | _, .local _ => True
+  | τ, .state d _ _ => τ.byRef = false ∧ E.cellTy d.path = τ ∧ (Val.default E.layout τ).isSome = true
+  | τv, .indexMapping (τk := τk) a k => RExpr.MapRef a ∧ RExpr.ValFrag k ∧ τk.keyable = true ∧
+      τv.isValue = true ∧ (Val.default E.layout τv).isSome = true
+  | _, _ => False
+
 end
+
+/-- **A location the fragment reads and writes**: a local, or a storage
+cell of value type at its own type, with a default. -/
+def LocOK {Γ : RCtx} {τ : STy} : Loc E.layout Γ τ → Prop
+  | .local _ => True
+  | .stor p => τ.byRef = false ∧ E.cellTy p = τ ∧ (Val.default E.layout τ).isSome = true
+  | _ => False
 
 theorem cmpConst_ok {op : BinOp} (hop : (BinKind.order.admits op || BinKind.eq.admits op) = true) (a b : Q) :
     NotStuckR (cmpConst op a b) := by
@@ -386,6 +395,19 @@ theorem writeLoc_stor_ns {Γ : RCtx} (F : Fr) (n : Nat) (p : SPath) {τ : STy} (
   show NS (if τ.byRef = true then storeVal F n τ p v else writeAt F p v)
   rw [if_neg (by rw [hb]; exact Bool.false_ne_true)]
   exact writeAt_ns F p hc.symm v
+
+theorem readLoc_ok {Γ : RCtx} (F : Fr) {τ : STy} (L : Loc E.layout Γ τ) (h : LocOK L) : NS (readLoc F L) := by
+  cases L with
+  | «local» i => exact readLoc_local_ns F i
+  | stor p => exact readLoc_stor_ns F p h.1 h.2.1 h.2.2
+  | _ => exact h.elim
+
+theorem writeLoc_ok {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} (L : Loc E.layout Γ τ) (h : LocOK L)
+    (v : Val E.layout τ) : NS (writeLoc F n L v) := by
+  cases L with
+  | «local» i => exact writeLoc_local_ns F n i v
+  | stor p => exact writeLoc_stor_ns F n p h.1 h.2.1 v
+  | _ => exact h.elim
 
 /-- The binary operator of a compound assignment is in `binVal`'s domain,
 or the assignment is a shift (`AssignOp.fits`). -/
@@ -468,11 +490,13 @@ structure ExprNSAt (G : Glob E) (F : Fr) (n : Nat) : Prop where
   pair : ∀ {Γ : RCtx} {σ ρ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ ρ), a.ValFrag → a.OpsOK →
     b.ValFrag → b.OpsOK → NS (evalPair G F n a b)
   ref : ∀ {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ), e.MapRef → e.OpsOK → NSP (evalE G F n e) RPost
+  loc : ∀ {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ), l.IsSimple → RLVal.OpsOK l → NSP (evalLoc G F n l) LocOK
 
 theorem exprNSAt_zero (G : Glob E) (F : Fr) : ExprNSAt G F 0 where
   val _ _ _ := by rw [evalE.eq_1]; exact NS.halt' fun _ h => by cases h
   pair _ _ _ _ _ _ := by rw [evalPair.eq_1]; exact NS.halt' fun _ h => by cases h
   ref _ _ _ := by rw [evalE.eq_1]; exact NSP.halt' trivial
+  loc _ _ _ := by rw [evalLoc.eq_1]; exact NSP.halt' trivial
 
 section
 variable {G : Glob E} {F : Fr} {n : Nat}
@@ -545,15 +569,8 @@ theorem val_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ
       exact NS.bind (ih.val a hf.1 ho) fun v => convRV_ns F n h hf.2.2 v
     | assign l e =>
       simp only [evalE]
-      cases l with
-      | «local» i =>
-        exact NS.bind (ih.val e hf.2.1 ho.2) fun v => evalLoc_local_bind G F n i <|
-          NS.bind (getV_ns hf.2.2 v) fun x => NS.bind (writeLoc_local_ns F n i x) fun _ => NS.pure' _
-      | state d h hm =>
-        exact NS.bind (ih.val e hf.2.1 ho.2) fun v => evalLoc_state_bind G F n d h hm <|
-          NS.bind (getV_ns hf.2.2 v) fun x =>
-            NS.bind (writeLoc_stor_ns F n d.path hf.1.1 hf.1.2.1 x) fun _ => NS.pure' _
-      | _ => exact hf.1.elim
+      exact NS.bind (ih.val e hf.2.1 ho.2) fun v => NSP.ns (NSP.bind (ih.loc l hf.1 ho.1) fun L hL =>
+        NSP.of_ns (NS.bind (getV_ns hf.2.2 v) fun x => NS.bind (writeLoc_ok F n L hL x) fun _ => NS.pure' _))
     | @compound _ σ op l e h =>
       simp only [evalE]
       have core : ∀ (L : Loc E.layout Γ τ) (v : RVal E.layout σ), NS (readLoc F L) →
@@ -582,27 +599,13 @@ theorem val_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ
             · rfl
             · split <;> rfl
           · rename_i hn; exact (hn hk).elim
-      cases l with
-      | «local» i =>
-        exact NS.bind (ih.val e hf.2.1 ho.2) fun v => evalLoc_local_bind G F n i <|
-          core _ v (readLoc_local_ns F i) (writeLoc_local_ns F n i)
-      | state d hd hm =>
-        exact NS.bind (ih.val e hf.2.1 ho.2) fun v => evalLoc_state_bind G F n d hd hm <|
-          core _ v (readLoc_stor_ns F d.path hf.1.1 hf.1.2.1 hf.1.2.2) (writeLoc_stor_ns F n d.path hf.1.1 hf.1.2.1)
-      | _ => exact hf.1.elim
+      exact NS.bind (ih.val e hf.2.1 ho.2) fun v => NSP.ns (NSP.bind (ih.loc l hf.1 ho.1) fun L hL =>
+        NSP.of_ns (core L v (readLoc_ok F L hL) (writeLoc_ok F n L hL)))
     | incDec inc pre l =>
       simp only [evalE]
-      cases l with
-      | «local» i =>
-        exact evalLoc_local_bind G F n i <| NS.bind (readLoc_local_ns F i) fun old =>
-          NS.bind (NS.lift' (incDecVal_ok _ inc ho.1 old)) fun nw =>
-            NS.bind (writeLoc_local_ns F n i nw) fun _ => NS.pure' _
-      | state d hd hm =>
-        exact evalLoc_state_bind G F n d hd hm <|
-          NS.bind (readLoc_stor_ns F d.path hf.1 hf.2.1 hf.2.2) fun old =>
-          NS.bind (NS.lift' (incDecVal_ok _ inc ho.1 old)) fun nw =>
-            NS.bind (writeLoc_stor_ns F n d.path hf.1 hf.2.1 nw) fun _ => NS.pure' _
-      | _ => exact hf.elim
+      exact NSP.ns (NSP.bind (ih.loc l hf ho.2) fun L hL => NSP.of_ns (NS.bind (readLoc_ok F L hL) fun old =>
+        NS.bind (NS.lift' (incDecVal_ok _ inc ho.1 old)) fun nw =>
+          NS.bind (writeLoc_ok F n L hL nw) fun _ => NS.pure' _))
     | indexMapping a k =>
       simp only [evalE]
       refine NSP.ns (NSP.bind (R := fun _ => True) (ih.ref a hf.1 ho.1) fun v hv => ?_)
@@ -670,6 +673,29 @@ theorem ref_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ
       | cdRef hm _ => cases hm
   | _ => exact hm.elim
 
+theorem loc_step (ih : ExprNSAt G F n) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) (hs : l.IsSimple)
+    (ho : RLVal.OpsOK l) : NSP (evalLoc G F (n + 1) l) LocOK := by
+  cases l with
+  | «local» i => exact NSP.pure' trivial
+  | state d h hm => exact NSP.pure' hs
+  | indexMapping a k =>
+    obtain ⟨ha, hk, hkey, hv, hd⟩ := hs
+    simp only [evalLoc]
+    refine NSP.bind (ih.ref a ha ho.1) fun v hpv => ?_
+    cases v with
+    | val x =>
+      rw [show getV (Γ := Γ) (RVal.val x) = pure x from rfl, pure_bind]
+      cases x with
+      | storRef hs p =>
+        have hp := hpv hs p rfl
+        refine NSP.bind (NSP.of_ns (ih.val k hk ho.2)) fun kv _ =>
+          NSP.bind (keyStep_nsp F n hkey kv) fun st hst => ?_
+        obtain ⟨bs, rfl⟩ := hst
+        exact NSP.pure' ⟨STy.byRef_of_value hv, cellTy_key hp bs hv, hd⟩
+      | memRef hm _ => cases hm
+      | cdRef hm _ => cases hm
+  | _ => exact hs.elim
+
 end
 
 /-- **Expression progress at every horizon.** -/
@@ -679,7 +705,8 @@ theorem exprNSAt (G : Glob E) (F : Fr) : ∀ n, ExprNSAt G F n
     have ih := exprNSAt G F n
     { val := fun e hf ho => val_step ih e hf ho
       pair := fun a b ha ha' hb hb' => pair_step ih a b ha ha' hb hb'
-      ref := fun e hm ho => ref_step ih e hm ho }
+      ref := fun e hm ho => ref_step ih e hm ho
+      loc := fun l hs ho => loc_step ih l hs ho }
 
 /-- **Progress on the value fragment**: evaluating an expression of the
 value fragment that is in the operations' domains is never `stuck`, at any
