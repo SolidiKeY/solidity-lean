@@ -1,0 +1,23 @@
+{
+  "base": "50658f41061b366d6e503d1e8a3a324a281e9fca",
+  "source_parent": "43e72020157130cf982e5158a5e992f5416ab392",
+  "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+  "node": "v24.19.0",
+  "fork": "Osaka",
+  "boundary": "External tests of exact emitted instruction bytes; no solc/source/full ABI/full EVM bridge proof.",
+  "files_sha256": {
+    "lean-toolchain": "42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434",
+    "lakefile.toml": "ef46a777b5d321d65cd4ef544d22d47c2804d122251fe258c33894f948f27164",
+    "Solidity/Backend/Opcode.lean": "70c1285ffee85bd60d8c01588978f0e07a4ab6c1eb7e353cb38fed071b615acc",
+    "Solidity/RevertBytes.lean": "724b287bc4c3f3e159f06ac2a5cd38100ccff9691b5331c17ef2edeab44d76ee",
+    "Solidity/Backend/Failure/Immediate.lean": "6dc688194c21604bd8ee05fa3262047d99f94741ca6a3a30cb5937e0223615b0",
+    "Solidity/Backend/Failure/Emit.lean": "5b32a1d20200713327d72e9f2bbe87b24ea9c5b2cfe11f8636db16a875abe178",
+    "Solidity/Backend/Failure/Slice.lean": "9d1158c792b99054bf55ab6d11096a85163bef7826e5d6f7bdae25cda1a40241",
+    "Solidity/Backend/Failure/Correct.lean": "52e4f2d3776a7f72ff3a4645d3fff9794b279f007a669ea3863fccbe70bc76ca",
+    "Solidity/Backend/Failure/Composition.lean": "34aca499f18faacb256dd28a7e5761841294e9b73a915b383a9dd90e3db7e4af",
+    "tests/failure-emission/Export.lean": "120a8f534d5489a0986d73a396b1347499d2d7eca0b9b9ea7c9d408a95991834",
+    "tests/failure-emission/replay.mjs": "bc21e307d28829fc19f72f16c0f91f841153e1f5c97243dc98bc84c372ffc7b1",
+    "tests/failure-emission/vectors.json": "1be88148266f4c7e7a438d399b1731f55ac62a02d0fa245c372a75c339323899",
+    "scripts/evm-reference/package-lock.json": "fd223698b68dd5cf9dc1b59589c61da6c0131c3f68af65f7c26a3d5ac0498829"
+  }
+}

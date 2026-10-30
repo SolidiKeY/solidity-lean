@@ -1,0 +1,13 @@
+{
+  "name": "solidity-lean-evm-vectors",
+  "private": true,
+  "description": "External modules for the hand-written scripts/check-*.mjs EVM vectors; not a Lean dependency",
+  "dependencies": {
+    "@ethereumjs/common": "10.1.3",
+    "@ethereumjs/evm": "10.1.3",
+    "@ethereumjs/tx": "10.1.3",
+    "@ethereumjs/util": "10.1.3",
+    "@ethereumjs/vm": "10.1.3",
+    "ethers": "6.17.0"
+  }
+}
