@@ -1482,3 +1482,17 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} signature-coherence theorems use only the standard axioms"
+
+/-! Lane V04b: dispatch keeps the parameter types. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.Glob.dispatchFn_params,
+    ``Solidity.Source.Elaborated.callInternal_call_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} dispatch-parameter theorems use only the standard axioms"

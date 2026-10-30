@@ -17,7 +17,10 @@ then the parameters): `stmtNS`, `itemsNS`. Outside loops no `break` or
 `continue` escapes a block (`itemsNSP`), so a body without modifiers runs
 to completion (`runMods_nil_ns`), and an internal call to such a body is
 never `stuck` when dispatch finds it and its frame is the one the call
-builds (`callInternal_ns`).
+builds (`callInternal_ns`). For elaborated programs that frame is derived
+(`Elaborated.body_locals`), and dispatch keeps the parameter types
+(`Glob.dispatchFn_params`), so a call needs only the dispatched override's
+return types to agree (`Elaborated.callInternal_call_ns`).
 
 The scope facts it needs are structural: a statement's output context
 extends its input (`RStmt.ext`, `RItems.ext`), so ending a scope
@@ -772,6 +775,31 @@ theorem Elaborated.body_sig (el : Elaborated) {d : Decl} {b : RBody el.res.env} 
   obtain ⟨h1, h2⟩ := Decl.frame?_fnSig hs hf
   exact ⟨hps.trans h1, hrs.trans h2⟩
 
+/-- **Dispatch keeps the parameter types**: the declaration virtual
+dispatch finds for `d` has `d`'s parameter types (`Env.fnIn` selects
+overrides by them; every fallback is `d` itself). -/
+theorem Glob.dispatchFn_params (G : Glob E) (c : String) (d : Decl) {ps rs ps' rs' : List STy}
+    (hd : d.fnSig E = some (ps, rs)) (h' : (G.dispatchFn c d).fnSig E = some (ps', rs')) : ps' = ps := by
+  unfold Glob.dispatchFn at h'
+  rw [hd] at h'
+  simp only at h'
+  split at h'
+  · cases hf : ((E.linearize c).getD [c]).findSome? (fun s => (E.fnIn s d.name ps).find?
+        fun d' => (G.prog.body d').isSome) with
+    | none =>
+      rw [hf, Option.getD_none, hd] at h'
+      simp only [Option.some.injEq, Prod.mk.injEq] at h'
+      exact h'.1.symm
+    | some d' =>
+      rw [hf, Option.getD_some] at h'
+      obtain ⟨s, _, hs⟩ := List.exists_of_findSome?_eq_some hf
+      have hm := List.mem_of_find?_eq_some hs
+      simp only [Env.fnIn, List.mem_filter, Bool.and_eq_true, beq_iff_eq, h'] at hm
+      exact (STy.eq_of_sameList ps ps' hm.2.2).symm
+  · rw [hd] at h'
+    simp only [Option.some.injEq, Prod.mk.injEq] at h'
+    exact h'.1.symm
+
 /-- **Internal calls in elaborated programs, by signature**: an internal
 call is never `stuck` when the declaration virtual dispatch finds is one
 of the unit's with the call's signature and a body without modifiers in
@@ -787,5 +815,22 @@ theorem Elaborated.callInternal_sig_ns (el : Elaborated) (G : Glob el.res.env) (
   have hb' : el.prog.body (G.dispatchFn F.contract d) = some b := by rw [← hG]; exact hb
   obtain ⟨hps, hrs⟩ := Elaborated.body_sig el hdec hb' hsig
   exact Elaborated.callInternal_ns el G hG F n d vs rs b hdec hb hps hrs hmods hz hf ho
+
+
+/-- **Internal calls in elaborated programs, by the call node**: for a call
+`d(args)` with `d`'s signature `(ps, rs)` (`RExpr.call`'s premise), only the
+return types of the declaration virtual dispatch finds remain to agree;
+its parameter types agree by construction (`Glob.dispatchFn_params`). -/
+theorem Elaborated.callInternal_call_ns (el : Elaborated) (G : Glob el.res.env) (hG : G.prog = el.prog) (F : Fr)
+    (n : Nat) (d : Decl) {ps : List STy} (vs : Vals el.res.env.layout ps) (rs : List STy) (b : RBody el.res.env)
+    (hd : d.fnSig el.res.env = some (ps, rs))
+    (hdec : G.dispatchFn F.contract d ∈ el.res.unit.decls) (hb : G.prog.body (G.dispatchFn F.contract d) = some b)
+    (hret : ∃ ps', (G.dispatchFn F.contract d).fnSig el.res.env = some (ps', rs)) (hmods : b.mods = [])
+    (hz : ∀ τ ∈ rs, (Val.default el.res.env.layout τ).isSome = true)
+    (hf : b.items.ValFrag) (ho : b.items.OpsOK) : NS (callInternal G F n d vs rs) := by
+  obtain ⟨ps', h'⟩ := hret
+  have e := Glob.dispatchFn_params G F.contract d hd h'
+  subst e
+  exact Elaborated.callInternal_sig_ns el G hG F n d vs rs b hdec hb h' hmods hz hf ho
 
 end Solidity.Source

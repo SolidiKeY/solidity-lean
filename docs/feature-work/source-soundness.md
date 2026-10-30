@@ -270,8 +270,9 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `convRV_ns`, `getV_ns`, `readLoc_ok`, `writeLoc_ok`, `compound_dom` | its other steps |
 | `stmtNS`, `itemsNS` (from `StmtNSAt`, `execS_nsStep`, `execItems_nsStep`, `forIter_nsStep`, by induction on the horizon) | executing a statement or block of the **statement value fragment** (`RStmt.ValFrag`: expression statements, declarations of types with a default, blocks, `unchecked`, `if`, `while`, `do`/`while`, `for` with a simple initializer, `break`, `continue`, `return;`, `return e;` and `return (a, b);` of value types: `evalConvArgs_ns`, `setRets_ok`) in a **body frame** (`BodyFrame nps R Γ`: the locals end in the return slots, then the `nps` parameters, as `callInternal` builds them) is never `stuck`, at any horizon, in any modifier context |
 | `itemsNSP` (the post `Out.esc`; `Out.close_esc`, `Out.up_esc`) | outside loops (`SCtx.loop = false`) a block of the fragment ends normally or by `return`: no `break`/`continue` escapes it |
-| `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **leaf functions**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment (so making no calls, emitting nothing, with value-typed locals) and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults); the frame hypotheses are not derived from the elaboration or dispatch |
+| `callInternal_ns` (from `runMods_nil_ns`, `zeroVals_ns`, `retVals_ok`, `Locals.getAt_ok`) | **leaf functions**: an internal call is never `stuck` when virtual dispatch finds a body without modifiers, in the statement fragment (so making no calls, emitting nothing, with value-typed locals) and `OpsOK`, whose locals are the frame the call builds (return slots over parameters, return types with defaults); the frame hypotheses are derived for elaborated programs except dispatch coherence (the `Elaborated.*` rows) |
 | `Elaborated.body_locals` (from `Decl.frame?_lengths`, `Frame.mk?_lengths`, `Syn.tys_params_length`, `Syn.tys_typeName_length`, `Frame.tysOf_locals`) | every elaborated body's locals are its returns over its parameters, last innermost: the frame `callInternal` builds |
+| `Glob.dispatchFn_params`, `Elaborated.callInternal_call_ns` | dispatch finds an override with the called declaration's parameter types; for a call node only the override's return types (and membership in the unit) stay open |
 | `Elaborated.callInternal_ns`, `Elaborated.callInternal_sig_ns` (from `Elaborated.body_sig`, `Decl.frame?_fnSig`) | in an elaborated program, `callInternal_ns`'s frame hypotheses reduce to dispatch coherence, stated syntactically: the declaration virtual dispatch finds has the call's signature (`fnSig`); when dispatch returns the called declaration itself, that is the call node's own premise |
 | `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
@@ -397,6 +398,18 @@ indexing of `brk`/`cont`, `unchecked`, loops), the fuel's sufficiency,
 `deleteRefused` against solc, the UDVT decoder, the getter revert, the
 pins.
 
+**Review of the frame, `return (a, b)` and signature work** (finder and
+skeptic, read-only, on 481d3ee..b934819). Confirmed and fixed: the doc
+said the parameter half of dispatch coherence followed from `Env.fnIn`
+without a theorem (both): now `Glob.dispatchFn_params` and
+`Elaborated.callInternal_call_ns`; G14's override rule compares returns
+only up to locations and against direct bases (finder), and the
+membership hypothesis `hdec` is undischarged (skeptic): both listed as
+open; no concrete `Elaborated` witness (skeptic): recorded; a stale table
+row and Handoff row. Accepted by both: `setRets`/`retVals` slot positions,
+the frame order against `callInternal`, `evalConvArgs_ns`,
+`Decl.frame?_fnSig` stated for the dispatched declaration, the pins.
+
 **Run-time gaps closed** (checkpoint 4, partial):
 
 - ABI decoding of a user-defined value type argument, as its underlying
@@ -434,7 +447,7 @@ Kept current at every checkpoint.
 |---|---|---|
 | 1 Integration | done (gated head: see Gates) | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
 | 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; no preservation theorem for the walk |
-| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
+| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; no escaping `break`/`continue` (`itemsNSP`); internal calls to modifier-free fragment bodies (`callInternal_ns`, `runMods_nil_ns`), with the frame derived for elaborated programs up to the override's return types (`Elaborated.callInternal_call_ns`); `return (a, b)` (`setRets_ok`); the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers: `ptrCopy_refused`, `ptrDelete_refused`), semantic fixes (`bytes(s)[i] = b` on a string: `stringByte_write`; EIP-214: `static_value_call_halts`) |
 | 4 Close gaps | partial | UDVT argument decoding (`elabW`); getters of `bytes`/`string` attempted and reverted (Horizon heartbeats) |
 | 5 `Failures`, `SourceSpec` | not started | |
 
@@ -463,8 +476,10 @@ Kept current at every checkpoint.
   (`retOneBody`) are hand-built resolved terms. Which elaborated bodies
   are in the fragment is not characterised; for elaborated programs
   `callInternal_ns`'s frame hypotheses are derived from the elaboration
-  (`Elaborated.callInternal_ns`) except dispatch coherence (the callee's
-  signature is the call's);
+  (`Elaborated.callInternal_call_ns`) except two: the dispatched override's
+  return types are the call's, and the dispatched declaration is one of
+  the unit's ("Deriving the frame" below); no concrete elaborated program
+  witnesses them;
 - the storage side conditions of the fragment (`E.cellTy d.path = τ`,
   `E.pathTy d.path = some τ`) are checked per expression, not derived
   from the elaboration;
@@ -483,9 +498,27 @@ the callee's signature to agree with the call's (`b.ps = ps`,
 `b.rs = rs`) and the dispatched declaration to be one of the unit's;
 `Elaborated.callInternal_sig_ns` states it as the dispatched declaration's
 `fnSig` being the call's (`Decl.frame?_fnSig`: a function's frame has its
-signature's types). Dispatch only picks overrides with the call's
-parameter types (`Env.fnIn`), so the open part is the return types of an
-override, which needs G14's override rules (`InheritanceOK`).
+signature's types). The parameter half is proved: the declaration
+dispatch finds has the called declaration's parameter types
+(`Glob.dispatchFn_params`: `Env.fnIn` selects overrides by them, through
+`STy.eq_of_sameList`, and every fallback is `d` itself), so for a call
+node `d(args)` (whose signature is `RExpr.call`'s premise)
+`Elaborated.callInternal_call_ns` leaves two hypotheses open:
+
+- the return types of the dispatched override are the call's: G14's
+  `OverridesOK.rets` compares them only up to data locations
+  (`Decl.sameRets`) and only against direct bases, so it would also need
+  location equality (or value-type returns) and transitivity along the
+  linearization;
+- the dispatched declaration is one of the unit's (`hdec`):
+  `Elaborated.bodies_typed` speaks of `res.unit.decls`, and for
+  `resolveUnit` the environment's declarations are the unit's, but
+  `Elaborated` does not record that, and no lemma ties a call node's `d`
+  to the declarations.
+
+No witness applies these theorems to a concrete `Elaborated` program; the
+function-level witness (`callRetOne_ns`) uses `callInternal_ns` on a
+hand-built body.
 
 **How to continue the walk.** Add a field per interpreter function to the
 induction hypotheses (`ExprNSAt`, `StmtNSAt`, as `Horizon.lean`'s

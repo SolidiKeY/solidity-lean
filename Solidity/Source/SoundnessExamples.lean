@@ -439,5 +439,9 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.Elaborated.body_sig
 /-- info: 'Solidity.Source.Elaborated.callInternal_sig_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_sig_ns
+/-- info: 'Solidity.Source.Glob.dispatchFn_params' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Glob.dispatchFn_params
+/-- info: 'Solidity.Source.Elaborated.callInternal_call_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.Elaborated.callInternal_call_ns
 
 end Solidity.Source.SoundnessExamples
