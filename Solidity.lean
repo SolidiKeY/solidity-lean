@@ -635,3 +635,7 @@ import Solidity.Evm.TryByteImage
 import Solidity.Evm.TryByteCapture
 import Solidity.Evm.TryPanicProducer
 import Solidity.Examples.Tactics.TryPanicProducer
+
+-- Closed constructed-call witnesses only; no original-source admission.
+import Solidity.Evm.TryPanicCarrier
+import Solidity.Examples.Tactics.TryPanicCarrier
