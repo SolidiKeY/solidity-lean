@@ -28,10 +28,13 @@ describe the core path.
 
 ## Memory operations
 
-`Compiler.compile` selects one compiler for the whole program: the core path
-(no memory) or the memory path. The core path's output relation is `Sim`
-only; using it as a prefix to memory compilation needs separate preservation
-evidence.
+`Compiler.compile` selects one compiler for the whole program, trying the core,
+first memory, reference-array, full-object and construction paths in order.
+Each has its own input and output relation. The core path's output relation is
+`Sim` only; using it as a prefix to memory compilation needs separate
+preservation evidence. The finite struct defaults below use the first memory
+path. Programs requiring both its struct-default representation and the later
+reference-array or full-object representations remain refused.
 
 **What the memory path accepts.** Dynamic arrays of primitive values and
 structs whose members are primitive (or reference-valued, reserved as one
@@ -194,9 +197,10 @@ before the oversized suffix.
 `Holder { uint[] items; }` objects. Its public input includes genuine reference
 fields; parent redirection and writes through retained/new field aliases yield
 `[48,32,40,40,32,11,13,16,24]` on both runs. Bounds and corrupt-field controls
-are checked. Nonempty reference-bearing struct construction remains refused:
-it requires the separate constructor API, and this input path does not claim to
-implement that API. The source/EVM fixture's constructor setup is independent
+are checked. Nonempty arrays of reference-bearing structs remain refused by
+this full-object/construction fallback: they require a separate child-constructor
+API. Direct finite struct construction is supported by the first memory path;
+this populated array-input path does not compose with that representation. The source/EVM fixture's constructor setup is independent
 behavior evidence, not checked compiler constructor coverage.
 
 **Nonrecursive reference defaults.** `Memory.ReferenceDefaults.compileDefault`
@@ -230,9 +234,11 @@ fixtures and counterexamples are retained unchanged. The old two fixed-default
 refusal names are explicitly replaced by positive registration controls.
 
 The assignment's independent reference-array layout and construction increment
-is implemented. Reference-bearing struct construction remains the explicit
-other-lane dependency: the populated `Holder` input above proves its meaningful
-array/field path without claiming constructor support. Source blocks, branches,
+is implemented. Default construction of reference-bearing struct elements
+inside those arrays remains a dependency of the construction fallback: the
+populated `Holder` input above proves its array/field path without claiming
+that child-constructor support. Direct finite struct defaults use the first
+memory path and do not extend this fallback. Source blocks, branches,
 loops and unsupported expressions retain the existing narrow fragment refusal.
 No universal source coverage or inventory promotion is claimed.
 
@@ -277,11 +283,14 @@ budget is increased. Local/member deletion allocates fresh children as well as
 a fresh parent, retaining objects reached through old aliases. Literal lowering
 may leave replaced default children allocated; those costs remain included.
 
-**Out of the construction fallback**: construction of structs
-with reference members, other uncertified reference-member default layouts, copies other
-than the primitive-member storage-root clause (including memory back to
-storage and runtime-length objects, which need iteration), loops, `assert`,
-calls, payments, and compound storage writes in a mixed memory program.
+**Out of the first memory path**: reference-element arrays, fixed-array and
+mapping memory layouts, recursive reference graphs, uncertified reference-member
+default layouts, and copies other than the primitive-member storage-root clause
+(including memory back to storage and runtime-length objects, which need
+iteration), loops, `assert`, calls, payments and compound storage writes in a
+mixed memory program. The later fallbacks accept their separately documented
+array/object fragments; they do not compose those representations with this
+path's finite struct construction.
 
 **Regressions** (each runs the actual source program and the public
 compiler's code, with an inhabited public input):
@@ -695,3 +704,67 @@ memory-STRUCT construction area and was not taken over. The committed task
 increment retains its complete child-first allocation proof, reached cost,
 old aliases, separation, zero tail, public compiler observations and named
 refusals. The handoff records this blocker rather than claiming full completion.
+
+
+### Published-master struct compatibility (2026-10-30)
+
+The preserved worker checkpoint is `2cfb116c64237cee48e954bd338f90d48467556a`.
+An isolated worktree applies only its implementation to freshly fetched published
+master `8445c3fc203144251b9d1fc9181f7f61a8189522`. The original checkout and
+exports remain unchanged. No Lean implementation or theorem needed a compatibility
+edit: the first memory compiler still selects these finite struct programs before
+the published reference-array/object/construction fallbacks. Documentation conflicts
+were resolved without removing those published descriptions; finder and skeptic
+identified and reviewed the corrected path-specific refusal wording.
+
+The resumed saved VM actually reports Lean 4.24.0 and Lake 5.0.0-src+797c613;
+KeySort passed. The same fallback guard verifies the 16 GiB hard VM cgroup and
+actual disabled swap, imposes 12 GiB per-process address space, and samples a
+10 GiB group-RSS / 12 GiB whole-VM stop. This is not a 12 GiB workload cgroup.
+All checks below ran serially under the writer lock, with `LEAN_NUM_THREADS=1`,
+explicit Lean `-j1`, unchanged proof/search allowances and a 300-second whole-check
+timeout. No competing Lean server or unpublished sibling branch was used.
+
+| Current-base check | Exit | Elapsed seconds | Sampled group peak bytes |
+|---|---:|---:|---:|
+| Lean/Lake and KeySort | 0 | 0.512 | 48627712 |
+| Four task control modules, 158 jobs | 0 | 82.703 | 1136996352 |
+| Adjacent public compiler controls, 157 jobs | 0 | 24.266 | 1110126592 |
+| Orphan gate | 0 | 0.227 | 41193472 |
+| Layer gate, 169 core modules | 0 | 0.204 | 73011200 |
+| Strict automatic gate | 0 | 0.102 | 86016 |
+| Trust source gate | 0 | 4.529 | 257986560 |
+| Pinned nested-struct fixture, legacy and viaIR | 0 | 60.204 | 235376640 |
+| Default aggregate, timeout | 75 | 300.052 | 2021281792 |
+| Frontend.Testing prerequisite, timeout | 75 | 300.053 | 1785544704 |
+| Initial utility suites, 28/29 passed | 1 | 2.621 | 200822784 |
+| Initial affected source tests, 0/2 passed | 1 | 1.511 | 108167168 |
+
+The task controls retain their inhabited compiler inputs, actual source/compiled
+observations, alias/capacity/failure cases and kernel simulation. Printed headline
+axioms remain exactly `propext`, `Classical.choice`, `Quot.sound`. The adjacent
+controls preserve primitive struct/fixed defaults and the published `Holder[]`
+refusal. The upstream fixture retains vectors 1, 2, 3, 4 in both required modes;
+it is source-interpreter diagnostic evidence, not generated-EVM equivalence.
+
+The default aggregate stopped after its fixed 300 seconds, without a reported
+Lean error or memory-guard stop; it did not reach TestSuite. The initial script
+runs actually failed because `--no-build` found stale `SolcJson.Body`,
+`RuleSyntax.Grammar` and `TermSize` prerequisites. A concrete repair built
+`Frontend.Testing` with the explicit serial configuration, but that separate
+build also timed out at its fixed 300 seconds. Conditional script reruns were
+therefore skipped. Neither timeout nor initial script failure is a pass, a
+semantic counterexample, or evidence of memory exhaustion. No unchanged retry
+or budget increase followed. These current aggregate/prerequisite obligations
+are additional to the historical Derived17 dependency; its source is identical
+to the preserved checkpoint, and its reported unpublished repair was not used.
+
+Documentation path checks on the combined tree and exact published base both
+exit 1 with byte-identical output: 46 historical missing references, no new task
+path failure. Independent read-only finder/skeptic reviews found no remaining
+own-scope implementation defect; they require the full completion decision to
+remain **BLOCKED** while the current aggregate and source-script prerequisites,
+reruns and mandatory full TestSuite validation remain unresolved. Full logs,
+resource JSONs, original cumulative checkpoint, current-base task patch/bundle
+and checksums are exported under
+`/workspace/solidity-compiler10-memory-reference-structs-8445-compat`.
