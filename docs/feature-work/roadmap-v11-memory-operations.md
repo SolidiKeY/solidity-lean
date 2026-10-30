@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-eight. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-nine. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -2477,3 +2477,59 @@ cycles/emitted traversal open; G35.06 final reserved-copy/V10/Source/target chai
 blocked. Backfill A/B advanced, not complete or exhausted. No source profile,
 refusal, invariant, expected vector or predicate was weakened to fit the proof.
 Existing blocked goal unchanged/uncompleted, no compiler/EVM or lane closure claim.
+
+
+### Checkpoint29: reflection and real mixed-allocation nested observer
+
+Parent25161394ec3245006894c588521f96f2096ceffc, exact frozen base unchanged.
+`MixedNestedGrowth` proves BoolChildRepr.grow_iff and RefChildRepr.grow_iff:
+actual Keeps reflects as well as preserves the SAME OLD finite observer. Root
+fields map old typed refs; primitive leaf contents weaken identically. No reverse
+address injectivity, new source entries or fresh-root representation is assumed.
+`RefChildRepr.mixed_alloc_iff` consumes actual checkedMixedCaptures success and
+published checkedMixedCaptures_alloc, allocating a supplied MObj on the ACTUAL
+both-decoded intermediate before reached recaptures. Final old nested relation
+is equivalent to the independently computed INITIAL selected-alias Bool criterion.
+No uint restoration, desired final relation, whole-heap equality or stagewise
+correspondence is a premise. Fresh own fields frame, not descendant liveness.
+
+Existing C28 fixtures are reused, not reconstructed: arbitrary runtime n/copies,
+repeated selected aliases and nonempty disjoint root, original intrinsic n+3
+validity only. allocated_repair executes decoded Bool/uint initialization, then
+actual allocation of reference-containing [r,r,other], then actual repair. Old
+nested relation remains FALSE after allocation alone and TRUE after repair;
+Boolean TTF becomes TFF, uint798 remains changed. Fresh own IDs[0,0,1] stay fixed;
+actual weakened outer/inner indices and OLD decoded outer+inner reads agree.
+allocated_skip uses SAME old table/real allocation: selected nested relation
+FALSE, disjoint nonempty root TRUE, actual inner true contradicts OLD false.
+All original C28 five-stage/neighbour/root/child vectors, endpoints, element32,
+lookup/bounds failures and previous controls remain unchanged and checked.
+
+Five new public laws/controls have exact standard-only guards. Focused core PASS,
+controls01/02/03 FAIL retained (dependent weakening reductions/prefix placeholder),
+controls04 PASS and guarded01 PASS91jobs after actual repairs without statement
+or bound changes. Finder and skeptic independently accepted source/proof controls,
+no Lean/server/builds by reviewers. Per-file MCP/get_goal unavailable; existing
+blocked goal unchanged. No physical bytes/ABI/Source/compiler/EVM/deep-copy claim.
+
+Preflight562831360bytes,16MiB warm-route forecast,residual546054144 above unchanged
+512MiB reserve. Same runtime/cache identity, child12GiB/no-swap under16GiB parent,
+OS headroom, serial Lean-j1/LEAN_NUM_THREADS1. Optional cache OFF in TOML and actual
+exec; all old files/caches/seals/failures preserved. Original G32/G33/G34/G35.01,
+.03/.04/.05 and Backfill A/B remain PARTIAL; G35.02/.06 BLOCKED. All named physical
+byte/default/target-failure/general-path/ABI-reference-storage/fresh-deep-copy/
+recursive-Source/reserved-copy/Source-V10-target obligations remain open. This
+application does not establish original-lane completion or independent exhaustion.
+
+Final C29 guarded91jobs/full934default/262TestSuite/SolKey377/131 PASS exit0;
+actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs PASS. Five new standard pins,
+cumulative652owned/83modules; global inventory FAIL1,666unrecorded=14inherited+
+652owned,zero unsafeerrors. Raw strict docs FAIL1; COMPLETE exact-base bytes
+identical/noNEW separately PASS. Initial script route inside retained runtime
+lacked git (trust1/docs127/diff127), raw logs retained; repaired supported host
+script route PASS trust/layers/orphans/strict/fixtures/corruption/script checks.
+No container/toolchain replacement or policy bypass. Independent final reviewers
+accepted proofs/controls and requested cumulative heading twenty-nine, corrected.
+Full sampled Lean/Lake RSS1460752KiB,cumulative sessionpeak2160848896bytes,zeroOOM;
+188416byte full increment within16MiB envelope. Source/target/physical/general
+recursive and reserved-owner obligations remain as above, goal unchanged.

@@ -1121,3 +1121,4 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/MixedChildFootprint.lean` | Exact per-destination INITIAL restoration and old Boolean-child correspondence independent of another changed destination; executed alias-parent controls |
 | `Backend/MemoryOps/MixedNestedFootprint.lean` | Existing nested reference-child correspondence after actual mixed schedules iff selected aliases meet INITIAL Bool footprint; real two-level index transport |
 | `Backend/MemoryOps/MixedNestedControls.lean` | Inhabited repeated-alias and disjoint old roots; actual transient failure/repair, all staged vectors, wrong inner reads, two-level indices and endpoints |
+| `Backend/MemoryOps/MixedNestedGrowth.lean` | Exact reflection of old finite nested observers through Keeps, applied to real interstage mixed allocation and repair |

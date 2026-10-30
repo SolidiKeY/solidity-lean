@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.MixedNestedFootprint
+import Solidity.Backend.MemoryOps.MixedNestedGrowth
 
 namespace Solidity.Backend.MemoryOps.MixedNestedControls
 open SequenceFixtures
@@ -352,6 +353,99 @@ theorem boundary33 :
   subst leaf
   exact ⟨out,ho,hpost,idx,bit,hbool.mpr bit⟩
 
+/-- Allocation is at the genuinely changed decoded intermediate. Its own
+repeated old reference fields stay fixed while their Boolean child is repaired.
+Both directions of reflection are used: allocation alone cannot repair it. -/
+theorem allocated_repair (n copies : Nat) (hn : n+3<2^256) :
+    let e := List.prefix_append H [C]
+    let obj : MObj H C := ⟨[r,r,other],by decide⟩
+    ∃ bm ini out mid' out',
+      checkedCalldataBools input 7 (hp n hn) r .dyn 0 1 1=some bm ∧
+      checkedCalldataUints input 9 bm q .dyn 0 1 1=some ini ∧
+      checkedMixedCaptures input 7 input 9 (hp n hn) r .dyn 0 1 1 q .dyn 0 1 1 (repairs copies) []=some out ∧
+      runCaptures (ini.alloc obj).1 (r.wk e) .dyn (repairs copies)=some mid' ∧
+      runCaptures mid' (q.wk e) .dyn []=some out' ∧ Heap.Keeps e out out' ∧
+      ¬ RefChildRepr (tables n) address (ini.alloc obj).1 sv (root.wk e) ∧
+      RefChildRepr (tables n) address out' sv (root.wk e) ∧
+      out'.get (ini.alloc obj).2=(ini.alloc obj).1.get (ini.alloc obj).2 ∧
+      (MObj.elems .dyn (out'.get (ini.alloc obj).2)).map HRef.id=[0,0,1] ∧
+      MObj.elems .dyn ((ini.alloc obj).1.get (r.wk e))=[true,true,false]++List.replicate n false ∧
+      MObj.elems .dyn (out'.get (r.wk e))=bold n ∧
+      MObj.elems .dyn (out'.get (q.wk e))=[seven,nine,eight]++List.replicate n maximum ∧
+      out'.index (root.wk e) .dyn zero=some (r.wk e) ∧
+      out'.index (r.wk e) .dyn one=some false ∧
+      DecodedBoolRead (tables n) (address r.id) 1 false ∧
+      (∃ leaf, out'.index (root.wk e) .dyn zero=some leaf ∧
+        DecodedArrayRead (tables n) (address root.id) BoolChildTy none 0
+          (.val (.cdRef rfl (address leaf.id))) ∧
+        (DecodedBoolRead (tables n) (address leaf.id) 1 false ↔ out'.index leaf .dyn one=some false)) := by
+  dsimp only
+  let obj : MObj H C := ⟨[r,r,other],by decide⟩
+  obtain ⟨bm,ini,out,hb,hu,hs,ho,hr,hbv,huv,hother,hroot⟩ := repaired n copies hn
+  have hinit := (checkedBoolUintSequence_some_iff _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).mpr ⟨bm,hb,hu⟩
+  have hskip : checkedMixedCaptures input 7 input 9 (hp n hn) r .dyn 0 1 1 q .dyn 0 1 1 [] []=some ini :=
+    (checkedMixedCaptures_some _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).mpr ⟨bm,ini,ini,hb,hu,rfl,rfl⟩
+  obtain ⟨ini2,mid',out',hi2,hs',hu',hk,hfresh,hiff⟩ :=
+    (initial n hn).1.mixed_alloc_iff input 7 input 9 r .dyn 0 1 1 q .dyn 0 1 1 (repairs copies) [] out ho obj
+  have he : ini2=ini := Option.some.inj (hi2.symm.trans hinit)
+  subst ini2
+  refine ⟨bm,ini,out,mid',out',hb,hu,ho,hs',hu',hk,?_,?_,hfresh,?_,?_,?_,?_,?_,?_,?_⟩
+  · intro hbad
+    exact no_repair_false n hn ini hskip ((RefChildRepr.grow_iff _ (Heap.keeps_alloc ini obj)).mp hbad)
+  · exact hiff.mpr (fun leaf hm he => bool_agrees n copies hn)
+  · rw [hfresh,Heap.get_alloc,MObj.elems_wk]
+    simp only [obj,MObj.elems_dyn,List.map_cons,List.map_nil]
+    rfl
+  · rw [Heap.keeps_alloc ini obj r,MObj.elems_wk, List.map_id'' (f := MVal.wk (List.prefix_append H [C]) (.prim .bool)) (fun _ => rfl)]
+    exact (initialized_values n hn ini hskip).1
+  · rw [hk r,MObj.elems_wk, List.map_id'' (f := MVal.wk (List.prefix_append H [C]) (.prim .bool)) (fun _ => rfl)]; exact hbv
+  · rw [hk q,MObj.elems_wk, List.map_id'' (f := MVal.wk (List.prefix_append H [C]) (.prim .uint)) (fun _ => rfl)]; exact huv
+  · change (MObj.elems .dyn (out'.get (root.wk _)))[0]?=some (r.wk _)
+    rw [hk root,MObj.elems_wk,checkedMixedCaptures_ref_root_frame _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ho root]
+    simp only [MObj.elems_dyn]
+    change ((aliases n).map (HRef.wk (List.prefix_append H [C])))[0]?=some (r.wk (List.prefix_append H [C]))
+    simp only [aliases,List.map_append,List.map_cons,List.map_nil]
+    rfl
+  · change (MObj.elems .dyn (out'.get (r.wk _)))[1]?=some false
+    rw [hk r,MObj.elems_wk,hbv]; rfl
+  · refine ⟨((first_repr n hn).read_iff 1 false).mpr (by simp only [MObj.elems_dyn]; rfl), ?_⟩
+    have hpost := hiff.mpr (fun leaf hm he => bool_agrees n copies hn)
+    apply hpost.index_bool zero _ one false
+    change 0 < (MObj.elems .dyn (out'.get (root.wk _))).length
+    rw [hk root,MObj.elems_wk,List.length_map,
+      checkedMixedCaptures_ref_root_frame _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ho root]
+    simp only [MObj.elems_dyn]
+    change 0 < (aliases n).length
+    simp only [aliases,List.length_append,List.length_cons,List.length_nil,List.length_replicate]
+    omega
+
+/-- SAME broken run and OLD table after real allocation, with empty schedules:
+parent fields are present but allocation cannot repair the wrong inner read. -/
+theorem allocated_skip (n : Nat) (hn : n+3<2^256) :
+    let e := List.prefix_append H [C]
+    let obj : MObj H C := ⟨[r,r,other],by decide⟩
+    ∃ ini out', checkedMixedCaptures input 7 input 9 (hp n hn) r .dyn 0 1 1 q .dyn 0 1 1 [] []=some ini ∧
+      runCaptures (ini.alloc obj).1 (r.wk e) .dyn []=some out' ∧
+      ¬ RefChildRepr (tables n) address out' sv (root.wk e) ∧
+      RefChildRepr (tables n) address out' ssep (separate.wk e) ∧
+      out'.index (r.wk e) .dyn one=some true ∧
+      DecodedBoolRead (tables n) (address r.id) 1 false ∧
+      out'.index (r.wk e) .dyn one ≠ some false ∧
+      (MObj.elems .dyn (out'.get (ini.alloc obj).2)).map HRef.id=[0,0,1] := by
+  dsimp only
+  let obj : MObj H C := ⟨[r,r,other],by decide⟩
+  obtain ⟨ini,ho,hbad,hsep,hb,hu,hother,hroot,hsepids,houter,hinner,hsource,hwrong⟩ := skipped_and_disjoint n hn
+  refine ⟨ini,(ini.alloc obj).1,ho,rfl,?_,hsep.grow _ (Heap.keeps_alloc ini obj),?_,hsource,?_,?_⟩
+  · intro hr
+    exact hbad ((RefChildRepr.grow_iff _ (Heap.keeps_alloc ini obj)).mp hr)
+  · change (MObj.elems .dyn ((ini.alloc obj).1.get (r.wk _)))[1]?=some true
+    rw [Heap.keeps_alloc ini obj r,MObj.elems_wk, List.map_id'' (f := MVal.wk (List.prefix_append H [C]) (.prim .bool)) (fun _ => rfl)]; exact hinner
+  · change (MObj.elems .dyn ((ini.alloc obj).1.get (r.wk _)))[1]? ≠ some false
+    rw [Heap.keeps_alloc ini obj r,MObj.elems_wk, List.map_id'' (f := MVal.wk (List.prefix_append H [C]) (.prim .bool)) (fun _ => rfl)]; exact hwrong
+  · rw [Heap.get_alloc,MObj.elems_wk]
+    simp only [obj,MObj.elems_dyn,List.map_cons,List.map_nil]
+    rfl
+
 /-- info: 'Solidity.Backend.MemoryOps.MixedNestedControls.initial' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms initial
 /-- info: 'Solidity.Backend.MemoryOps.MixedNestedControls.repaired' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -372,4 +466,12 @@ theorem boundary33 :
 #guard_msgs in #print axioms endpoint_rejection
 /-- info: 'Solidity.Backend.MemoryOps.MixedNestedControls.boundary33' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms boundary33
+/-- info: 'Solidity.Backend.MemoryOps.MixedNestedControls.allocated_repair' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms allocated_repair
+/-- info: 'Solidity.Backend.MemoryOps.MixedNestedControls.allocated_skip' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms allocated_skip
 end Solidity.Backend.MemoryOps.MixedNestedControls
