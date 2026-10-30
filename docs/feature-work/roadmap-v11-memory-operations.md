@@ -680,3 +680,114 @@ in place of unavailable per-file diagnostics. Full assignment remains partial,
 including every original G32-G35.01-.06 and Backfill A/B obligation recorded above.
 No push/merge/PR or unpublished owner result is used. The only intentionally
 untracked runtime file is `lakefile.v11-runtime.toml`, excluded from the commit.
+
+## Same-object intervals and ordered recapture checkpoint
+
+The reproduced gap is in actual owned source: `overwriteTwo_comm` requires
+distinct object IDs and captures both payloads before either write; previous
+snapshot/checked theorems concern one operation. They do not establish
+same-object separated-interval commutation or second-source recapture.
+No old theorem or premise is weakened to fill that gap.
+
+| New theorem | Material premises and exact result |
+|---|---|
+| `replaceSlice_comm` | Both captured payloads fit the original list; `IntervalsApart` admits empty intervals anywhere and touching ordered endpoints. Two replacements commute. Arbitrary element type and runtime lengths; no payload cap. |
+| `overwriteSlice_len`, `overwriteSlice_all_len` | Actual write capacity. Every existing typed array length is unchanged, including same-ID views, so subsequent capacities are derived. |
+| `overwriteIntervals_comm` | Existing typed array, two captured payloads with original capacities and local interval separation. Actual dependent heaps are equal; all other objects are framed. Primitive and reference elements are equally supported. |
+| `overwriteIntervals_path` | Same premises; whole-heap equality transports every existing `MPath.mvalT` observation, including failures. |
+| `captureTwice_read_cases`, `captureTwice_inside` | Both source intervals and destination capacities hold in the original array. Second capture actually reads the first output. The formula distinguishes both destinations and whether the second source reads inside/outside the first destination. No separation required for these observations. |
+| `captureOverwrite_source_other` | First destination ID differs from the subsequent source object; that source's actual slice is unchanged, even with a different element type. |
+| `captureOverwrite_source_apart` | Same-object first destination and second source intervals are apart. The second source capture is unchanged. This fact is derived from actual per-index frame/read laws. |
+| `captureTwice_frozen` | Source noninterference above suffices to freeze the second input from the original heap. This is not claimed necessary for every value instance. |
+| `captureTwice_comm` | Both cross destination/source interval noninterference facts plus destination separation suffice for true sequential snapshot commutation. Destination separation alone is not sufficient generally. These are sufficient conditions, not an iff. |
+| `checkedCaptureSequence_some_iff`, `captureTwice_checked` | Option composition exposes actual first intermediate and second output; valid same-array bounds yield precisely the ordered heap. |
+| `checkedCaptureSequence_none_iff` | No premises. Failure is exactly either stage's reversed/source-overrun/destination-overrun condition, in original runtime lengths. Successful first writes preserve all lengths; payload contents may still change. |
+| `overwriteIntervals_keeps`, `captureTwice_keeps`, `checkedCaptureSequence_keeps` | Initial published `Heap.Keeps`; first-output preservation is derived and used for the actual second operation. All grown bounds/capacities are derived. |
+| `checkedCaptureSequence_none_keeps` | Initial `Keeps`; exact failure observations transport through growth. |
+| `BoolChildRepr.overwriteIntervals`, `RefChildRepr.overwriteIntervals` | Initial actual child/root/leaf representation and distinct destination footprint; both output relations follow from actual frames. The first root frame derives the second leaf footprint. No output relation or new Source entries are assumed. |
+
+`IntervalsApart` is a local theorem case, not a source admission restriction.
+Overlapping/aliased writes and captures remain defined and checked normally.
+Neither `captureTwice` nor `checkedCaptureSequence` defines a new interpreter:
+they compose the existing intrinsic operations. Option failure is not a Source
+or target halt/rollback observation, and no memory loop or payload emitter is
+implemented. Reference payloads retain identities; fresh deep copies remain open.
+
+### Discriminating concrete observations
+
+Dynamic heap input[true,false,false,true,false,false] first copies[0,2) to2,
+then captures the actual updated[2,4) into4. It yields
+[true,false,true,false,true,false], whereas freezing both original inputs or
+reversing operations yields[true,false,true,false,false,true]. The destination
+intervals touch and are disjoint; their source dependency is the difference.
+Mixed-source controls exercise all four ordered-read branches: outside both,
+retained first-only destination, and second capture outside/inside first output.
+
+Fixed nonprimitive writes change parent IDs[0,1,0,1] to[1,1,0,0], commute on the
+same object and preserve both child contents. Touching nonempty, empty-inside-
+another-range and exact-end empty cases are inhabited. Overlapping captured
+writes with different payloads demonstrably fail to commute; this is a supported
+operation case. Right-overlap then left-overlap reference copies yield[0,1,0,0]
+and preserve children, with actual checked success. A positive mutually
+noninterfering pair inhabits sequential commutation. Existing typed path order
+and actual parent/Boolean child `Heap.index` reads are exercised.
+
+All six first/second reversed/source-only/destination-only failures have actual
+Option-none results while the other guards are valid. A second-failure witness
+also records the successful first intermediate heap. Zero-length dynamic objects
+support two empty copies and reject invalid empty source endpoints independently
+at either stage. Actual allocation discharges the sequential-growth premise.
+
+The child integration reuses the already proved `ChildControls.changed_shared`
+certificate. Its existential statement explicitly records capacities, payload,
+and output equality to the actual `overwriteIntervals` operation, together with
+initial/final child correspondence and parent change[1,0,1] to[0,0,0]. No immutable
+calldata entry or injectivity assumption is manufactured for this witness.
+
+### Reviews and original obligations
+
+Separate independent read-only finder/skeptic reviews found two issues: comments
+incorrectly suggested sufficient interval hypotheses were necessary; fixed.
+The child integration initially constructed the operation only in its proof;
+the statement now records exact operation equality and capacities. All read
+branches and extra dynamic/empty/overlap controls were strengthened. Neither
+reviewer used Lean/server/builds or writes. Focused final closure passes65jobs;
+40new headline/control axiom sets are guarded after final confirmation. Earlier
+proof failures and deprecation diagnostics remain retained in separate logs.
+
+This advances original G35.04 and Backfill A/B; all original G32/G33/G34 and
+G35.01-.06 statuses remain partial or blocked. Fresh-root source representation,
+reverse address injectivity on added objects, arbitrary recursive child/copy
+liveness, generated allocation failures, physical byte memory and final
+Source/V10/target composition remain open as previously recorded. Source
+semantics, reserved loops/copies/constructors and global inventories are untouched.
+No exclusion or admitted shape is removed, and no proof/test/fuel budget changes.
+
+Checkpoint-eight cumulative export directory:
+`/workspace/v11-memory-operations-evidence/checkpoint8`. Exact head/base, original
+patch, named-ref bundle, handoff, raw gates, proposed pins and checksums are
+recorded after commit. Parent is `f205bba434611085faba4da3fb99ae123a51b582`.
+Every prior sealed artifact/cache/error and the untracked runtime TOML is preserved.
+The existing blocked goal remains unchanged and unfinished; no integration occurs.
+
+Checkpoint-eight final refined-tree confirmation exits0:882 default jobs,
+262 TestSuite jobs, final SolKey377/131 OK. Sampled aggregate Lean/Lake RSS peak
+is1,575,252 KiB; cgroup peak386,568,192 bytes, with12GiB/no-swap containment and
+serial-j1/LEAN_NUM_THREADS1. Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613 execute and fresh KeySort passes2jobs. Strict automation,
+committed-snapshot complete TestSuite trust/parity, layers/orphans/trust/owned
+boundary+standard-pin/script/diff checks pass. Owned checker covers186pins31modules.
+Global docs still exits1 with raw byte-identical frozen-base output,46findings;
+separate no-new passes. Global pin inventory still exits1:0unsafeerrors,
+200unrecorded=14inherited+186owned. Earlier160unrecorded checkpoint-seven output
+remains sealed, not rewritten. Exact additive pin proposals are exported; no
+reserved inventory/ledger is edited. Both final source reviews found no further
+confirmed defect after the sufficiency and operation-witness fixes.
+
+Available tools still expose neither `get_goal` nor per-file Lean diagnostic RPC;
+no goal is created/reset/reactivated/completed. Existing writer lock, original
+checkout, pinned branch/base, disk caches, prior failed commands and sealed
+exports are preserved. Runtime TOML remains outside the commit. This checkpoint
+does not complete any parent G group, either original Backfill queue, or the
+original full assignment; remaining independent refinements are not declared
+unavailable by the missing source/byte/compiler prerequisites.

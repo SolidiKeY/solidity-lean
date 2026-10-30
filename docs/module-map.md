@@ -1065,3 +1065,8 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/CalldataChildExtension.lean` | Existing represented child/root/leaf correspondence transported through published preserving heap growth, retaining source offsets. |
 | `Backend/MemoryOps/CalldataChildControls.lean` | Arbitrary intrinsic-length families, changed/shared references, isolated wrong/missing tables, alias/collision negatives and allocator controls. |
 | `Backend/MemoryOps/CalldataNestedControls.lean` | Changed reference-containing child selection, repeated leaf identities, actual nested typed reads/bounds and published allocation transport. |
+| `Backend/MemoryOps/IntervalOverwrite.lean` | Same-object separated captured intervals commute as lists/typed heaps and preserve arbitrary MPath observations; empty/touching cases and derived capacities. |
+| `Backend/MemoryOps/SequentialSnapshot.lean` | Actual second capture from first output, complete ordered read cases, source noninterference and sufficient commutation conditions, exact checked-sequence outcomes. |
+| `Backend/MemoryOps/SequentialTransport.lean` | Ordered snapshots/writes transport through preserving growth and real child footprint framing; checked intermediate heaps remain explicit. |
+| `Backend/MemoryOps/SequentialSnapshotControls.lean` | Dynamic recapture/frozen/order negative, all read branches, six isolated stage failures, zero-length/exact-end and allocator controls. |
+| `Backend/MemoryOps/IntervalSnapshotControls.lean` | Fixed/reference separated/touching/overlap controls, actual typed observations and operation-linked reuse of prior decoded-child correspondence. |
