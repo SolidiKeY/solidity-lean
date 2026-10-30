@@ -730,6 +730,100 @@ a legitimate resource/dependency repair under the original constraints,
 inspecting surviving processes and the writer lock first. The owning modules
 are not silently repaired or excluded by this task.
 
+## Independent prerequisite validation, audit caf9
+
+Audit `caf9c155-32cf-4079-b009-e3fb757bbd97` continued in this same VM,
+thread and task branch from `7f825a4b`. No source algorithm, claim, observation,
+proof/search/test budget, pin or ownership boundary changed. The exact saved
+alternate configuration supplied explicit `-j1` and synchronous scheduling;
+every checker used the writer lock, one Lean worker, hard 12 GiB/no-swap cgroup
+and unchanged 12 GiB OS-reserve guard. Read-only reviewers found a watchdog
+startup exception gap; it was fixed before the independent queues ran.
+
+`Solidity.Semantics.RecursiveStorage` passed 29 jobs in 12.89 s (peak aggregate
+RSS 748,720,128 bytes); `Solidity.Examples.LexMetrics` passed 44 jobs in 4.05 s
+(785,158,144 bytes). The actual import DAG identified 193 missing independent
+targets outside the original UnitExamples/Derived17 failure cones. Serial
+queues stopped and investigated every new failure, then continued only outside
+its dependency cone. Together with the two initial prerequisites, **182 unique
+kernel-build targets passed**, including remaining EVM regression controls,
+source/import controls, independent corpus modules, Derived19 (74.69 s),
+Derived20 (181.45 s), and Refuted (16.98 s). These are prerequisite passes,
+not a reduced substitute for any mandatory full gate. Nine further targets
+remain blocked by DecisionHashes. All other queued independent work finished.
+
+New terminal failures are retained separately:
+
+- `Solidity.Examples.DecisionHashes`: OS-reserve stop, wrapper 75/container
+  137, no OOM, 299.14 s; peak aggregate RSS 4,996,681,728 bytes. Its 319-source
+  closure matches the pinned base; identity is not a baseline pass.
+- `Solidity.Examples.Tactics.AllLeftLater`: checker exit 1 in 10.50 s,
+  line 37: `sol_close_nonlin: bounded search stopped; original goal retained`.
+  Its 215-source closure matches base. No tactic or budget was changed.
+- `Solidity.Examples.Tactics.OpenLoops`: reserve stop, 137/no OOM, 152.15 s,
+  peak aggregate RSS 4,493,791,232 bytes; unchanged owner-source closure.
+- `Solidity.TestSuite.Derived21`: reserve stop, 137/no OOM, 69.47 s,
+  peak aggregate RSS 5,299,404,800 bytes; unchanged 229-source closure.
+
+CallSummary first failed after kernel output while publishing Lake cache
+artifact `17490822145939138609.olean`: exit 1, 57.16 s, ENOSPC. Its build-tree
+artifact was not promoted into a passing target. The 32 GiB filesystem had zero
+user-available bytes. A copy-on-write probe was unsupported; byte-preserving
+zero-block sparsing kept all four file hashes but overlay copy-up consumed
+space. Two normal Git commit attempts and attempted artifact-only root-container
+export startup also failed ENOSPC; no root checker or root commit ran.
+
+Investigation found Docker uses `vfs`: stopped scopes retain full filesystem
+copies, not merely the tiny writable-diff sizes. For 129 scopes created only
+by this continuation, exact terminal metadata and timestamped stdout/stderr
+were exported, hashed and verified before removal. Every diff contained only
+empty mountpoint directories; workspace/source/caches, all original containers,
+base image and recovery inputs remained intact. At zero free space, reversible
+compressed envelopes preserved exact prior record bytes inside allocated
+evidence blocks; the prior DAG was restored byte for byte. This concrete repair
+recovered 20,303,544,320 user-available bytes. CallSummary then genuinely returned
+exit 0 using its already checked artifacts, and the remaining independent queue
+resumed. The original ENOSPC failure and staged documentation draft are retained.
+Disk exhaustion is historical, not the current blocker.
+
+Installed runtime evidence and a nonproof probe verified mimalloc's run-local
+`MIMALLOC_PURGE_DELAY=0` setting (10 ms to immediate purging). This distinct
+execution-only repair was tried once on each memory blocker, without changing
+checker/source budgets or trust. All five attempts still ended at the unchanged
+OS-reserve guard, exit 137 and no OOM:
+
+| Target | Seconds | Peak aggregate RSS bytes | Minimum available bytes |
+| --- | ---: | ---: | ---: |
+| UnitExamples | 24.23 | 3,855,794,176 | 12,863,696,896 |
+| Derived17 | 69.64 | 5,297,598,464 | 12,867,358,720 |
+| DecisionHashes | 140.74 | 5,965,639,680 | 12,882,427,904 |
+| OpenLoops | 268.30 | 5,643,522,048 | 12,850,393,088 |
+| Derived21 | 74.11 | 5,092,384,768 | 12,838,055,936 |
+
+The actual root and combined TrustAudit directly import UnitExamples; their
+remaining dependency cones also contain other failed controls. Corpus/TestSuite
+need Derived17 and Derived21. Root, combined audit, full run and corpus/TestSuite
+were not blindly replayed. Six current failed targets and nine dependent
+unattempted targets are recorded in the final DAG/terminal ledger. Source
+identity, 90-headline task axiom audit, sampled EVM agreement and partial
+prerequisite passes do not establish the missing mandatory gates.
+
+Live `git ls-remote` still reports the exact frozen base. Local `origin/master`
+was a stale October-24 non-descendant ref and was neither adopted nor used as
+publication evidence. No validated owner fix is available. Further dependency
+source repair requires the existing owners or separate explicit authorization;
+no semantic decision, exclusion, premise or budget was weakened. The temporary
+configuration was removed only after byte comparison with its retained copy.
+Documentation checking still exits 1 with the base's 46 missing references and
+26 ambiguities, zero new/removed findings. This milestone remains **BLOCKED**.
+
+Versioned cumulative exports and the machine-readable handoff use
+`/workspace/memory-storage-copy-auditcaf9-*`; earlier checkpoint exports and
+both original checksum manifests remain unchanged. Independent finder/skeptic
+reviews approve blocked-handoff accuracy only, not all-gates completion. All
+raw attempts, failed setup/commit observations, resource measurements and safe
+scope-cleanup snapshots remain in the evidence directory.
+
 ## Preserved memory-storage-copy recovery history
 
 The following ledger is preserved historical task evidence from original HEAD `0f1039dac4e032c4e2c4030ee0d35b38c8393f80` and its recovered WIP. Its passes and failures describe that predecessor, not validation of the recovery base. Current recovery evidence is recorded separately.
