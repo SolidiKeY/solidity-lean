@@ -1554,6 +1554,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.cdDelete_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.clashing_checked": [
   "Classical.choice",
   "Quot.sound",
@@ -1590,6 +1595,11 @@
   "propext"
  ],
  "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.hexCall_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/InferExamples.lean:Solidity.Frontend.Static.InferExamples.mapAssign_refused": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -2468,6 +2478,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.callInternal_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.cmpVal_ok": [],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.constVal_ok": [
   "Quot.sound",
@@ -2543,12 +2558,27 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.itemsNSP": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.keyStep_nsp": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.readAt_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.retVals_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.runMods_nil_ns": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -2578,6 +2608,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.callBadFrame_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.callRetOne_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.cb_ns": [
   "Classical.choice",
   "Quot.sound",
@@ -2589,6 +2629,16 @@
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.cond_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.incBody_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.SoundnessExamples.indexMapping_ns": [
   "Classical.choice",
   "Quot.sound",
   "propext"

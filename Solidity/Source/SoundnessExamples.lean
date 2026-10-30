@@ -28,6 +28,10 @@ it the operation is `stuck`).
 | `cb_ns`, `cb_value` | `x = x + 1;` on a storage variable (S05's callback body) is never `stuck`, and takes `x` from 3 to 4 |
 | `ret_unframed_stuck`, `ret_unframed_no_frame` | a `return 1;` run outside a coherent frame (no return slot) is `stuck`, and those locals are not a `BodyFrame`: the frame hypothesis is needed |
 | `ret_framed_ns` | the same `return 1;` with a return slot is never `stuck` |
+| `indexMapping_ns` | the elaboration of S01's `m[o]` (a mapping value, read through an implicit key conversion) is in the value fragment and never `stuck` |
+| `incBody_ns` | the elaboration of the counter's typed body `count++;` (`TypingExamples.incBody`, an `ItemsD` derivation) is in the statement fragment and never `stuck` in its frame (`ItemsD.toR_ns`) |
+| `callRetOne_ns` | an internal call of `function f() internal returns (uint8) { return 1; }` (no modifiers, a fragment body in the frame the call builds) is never `stuck` (`callInternal_ns`) |
+| `callBadFrame_stuck` | a body whose locals lack the return slot is `stuck` ("call frame"): the frame hypothesis is needed |
 -/
 
 namespace Solidity.Source.SoundnessExamples
@@ -205,6 +209,72 @@ theorem ret_framed_ns (n : Nat) (l : Locals SemanticsExamples.E0.layout [.int In
         rfl (.const (Q.ofInt 1)) (by decide)) l) :=
   stmtNS _ _ n 0 none _ l ⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩ trivial ⟨[], [], rfl, rfl⟩
 
+/-! ## Elaborated witnesses: a statement and a mapping -/
+
+open TypingExamples in
+/-- **Witness**: the elaboration of S01's `m[o]` (a mapping value, read)
+is in the value fragment, so its evaluation is never `stuck`. -/
+theorem indexMapping_ns (G : Glob Γ.env) (F : Fr) (n : Nat) : NS (evalE G F n w_index_mapping.toR) :=
+  evalE_valFrag_ns G F n _ (by
+    exact ⟨⟨rfl, rfl, _, _, rfl⟩, ⟨rfl, rfl, .inl rfl⟩, rfl, rfl, rfl⟩) (Typed.toR_opsOK _)
+
+open TypingExamples in
+/-- **Witness**: the elaboration of the counter's body `count++;` (an
+elaborated typing derivation, `incBody`) is in the statement fragment, so
+running it in its function's frame is never `stuck` (`ItemsD.toR_ns`). -/
+theorem incBody_ns (G : Glob Examples.counter.env) (F : Fr) (n : Nat) :
+    NS (execItems G F n 0 none incBody.toR .nil) :=
+  ItemsD.toR_ns G F n 0 none incBody .nil (by
+    exact ⟨⟨rfl, rfl, rfl⟩, trivial⟩) ⟨[], [], rfl, rfl⟩
+
+/-! ## The function level -/
+
+open SemanticsExamples in
+/-- `function f() internal returns (uint8) { return 1; }`, resolved: its
+locals are the return slot. -/
+def retOneBody : RBody E0 where
+  ps := []
+  rs := [u8]
+  inModifier := false
+  locals := [u8]
+  out := [u8]
+  items := .stmt (.retVal rfl (.const (Q.ofInt 1)) (by decide)) .nil
+
+open SemanticsExamples in
+/-- The same body with no return slot in its locals: not the frame the
+call builds. -/
+def badFrameBody : RBody E0 where
+  ps := []
+  rs := [u8]
+  inModifier := false
+  locals := []
+  out := []
+  items := .nil
+
+open SemanticsExamples in
+/-- A program whose every function has body `b`. -/
+def progOf (b : RBody E0) : Glob E0 :=
+  ⟨{ P0 with body := fun _ => some b }, .viaIR, toyFixed, fun _ => word 0, fun _ _ => false,
+    fun _ => .answer (.success []), word 0⟩
+
+open SemanticsExamples in
+/-- **Witness**: an internal call of `f` (no modifiers, a fragment body,
+the frame the call builds) is never `stuck` (`callInternal_ns`). -/
+theorem callRetOne_ns (d : Decl) (n : Nat) :
+    NS (callInternal (progOf retOneBody) F0 n d (ps := []) .nil [u8]) :=
+  callInternal_ns _ _ n d .nil [u8] retOneBody rfl rfl rfl rfl rfl
+    (fun τ h => by simp only [List.mem_cons, List.not_mem_nil, or_false] at h; subst h; rfl)
+    ⟨⟨trivial, rfl, .inr (.inl ⟨_, rfl⟩)⟩, trivial⟩ ⟨trivial, trivial⟩
+
+open SemanticsExamples in
+/-- **Negative control**: a body whose locals are not the frame the call
+builds is `stuck` ("call frame"): `callInternal_ns`'s frame hypothesis is
+needed. -/
+theorem callBadFrame_stuck (d : Decl) :
+    ((callInternal (progOf badFrameBody) F0 5 d (ps := []) .nil [u8]).run (.nil, s0)).1 =
+      .error (.stuck "call frame") := by
+  rfl
+
 /-! ## The census's semantic bug, fixed -/
 
 /-- `string memory s = "abc"; bytes(s)[0] = 0x78; bytes1 b = bytes(s)[0];` -/
@@ -318,5 +388,21 @@ theorem stringByte_write :
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.ret_framed_ns
 /-- info: 'Solidity.Source.SoundnessExamples.stringByte_write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.SoundnessExamples.stringByte_write
+/-- info: 'Solidity.Source.SoundnessExamples.indexMapping_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.indexMapping_ns
+/-- info: 'Solidity.Source.SoundnessExamples.incBody_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.incBody_ns
+/-- info: 'Solidity.Source.itemsNSP' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.itemsNSP
+/-- info: 'Solidity.Source.runMods_nil_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.runMods_nil_ns
+/-- info: 'Solidity.Source.callInternal_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.callInternal_ns
+/-- info: 'Solidity.Source.retVals_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.retVals_ok
+/-- info: 'Solidity.Source.SoundnessExamples.callRetOne_ns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callRetOne_ns
+/-- info: 'Solidity.Source.SoundnessExamples.callBadFrame_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.SoundnessExamples.callBadFrame_stuck
 
 end Solidity.Source.SoundnessExamples

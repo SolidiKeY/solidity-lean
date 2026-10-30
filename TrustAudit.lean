@@ -1390,3 +1390,49 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} lane V04b checkpoint 2-3 theorems use only the standard axioms"
+
+/-! Lane V04b typing decisions of 2026-10-30 (`docs/feature-work/source-s02.md`,
+"Typing decisions"). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.InferExamples.mapAssign_refused,
+    ``Solidity.Frontend.Static.InferExamples.cdDelete_refused]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} typing-decision controls use only the standard axioms"
+
+/-! Lane V04b: elaborated witnesses of the value fragment. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.SoundnessExamples.indexMapping_ns,
+    ``Solidity.Source.SoundnessExamples.incBody_ns]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} elaborated fragment witnesses use only the standard axioms"
+
+/-! Lane V04b: the function level (internal calls without modifiers). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.itemsNSP,
+    ``Solidity.Source.runMods_nil_ns,
+    ``Solidity.Source.callInternal_ns,
+    ``Solidity.Source.SoundnessExamples.callRetOne_ns,
+    ``Solidity.Source.SoundnessExamples.callBadFrame_stuck]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} function-level theorems use only the standard axioms"
