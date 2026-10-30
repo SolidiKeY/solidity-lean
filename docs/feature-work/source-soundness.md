@@ -193,7 +193,6 @@ term stays in the domains:
 | `binOpName_admits` | the operator `toR` reads off a binary expression is one its rule kind admits (`BinKind.admits`) |
 | `Typed.toR_opsOK`, `StmtD.toR_opsOK`, `ItemsD.toR_opsOK` | every operator node of an elaborated expression, statement or block is in its operation's domain (`RExpr.OpsOK`) |
 | `Elaborated.body_opsOK`, `Elaborated.inits_opsOK` | so is every body, modifier argument, constant and initializer of an elaborated unit |
-
 | `convVal_ok`, `constVal_ok`, `mkInt_ok`, `mkFix_ok`, `FixTy.scaled_mem`, `Q.toFixed?_mem` | implicit conversions of value-type values and of constants are never `stuck` (integer widening, integer to fixed point within solc's bounds, fixed-point rescaling, `bytesN` padding, enums, user-defined value types, contracts, external function types) |
 
 `RExpr` itself does not tie a `binary` node's operator to its type, so
@@ -209,7 +208,7 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 
 | Theorem | Statement |
 |---|---|
-| `evalE_valFrag_ns` | evaluating an expression of the **value fragment** (`RExpr.ValFrag`: constants, locals of value type, `this`, unary and binary operators including `&&`/`\|\|`, comparisons, shifts and powers, `? :`, implicit conversions from value types and constants; state variables of value types and values of mappings (nested mappings included) with keyable keys, read; and assignment, compound assignment and `++`/`--` to locals, such state variables and such mapping values) that is `OpsOK` is never `stuck`, at any horizon, from any state |
+| `evalE_valFrag_ns` | evaluating an expression of the **value fragment** (`RExpr.ValFrag`: literals (not constant state variables), locals of value type, `this`, unary and binary operators including `&&`/`\|\|`, comparisons, shifts and powers, `? :`, implicit conversions from value types and constants; state variables of value types and values of mappings (nested mappings included) with keyable keys, read; and assignment, compound assignment and `++`/`--` to locals, such state variables and such mapping values) that is `OpsOK` is never `stuck`, at any horizon, from any state |
 | `exprNSAt` (`ExprNSAt`: `val`, `pair`, `ref`, `loc`; `val_step`, `pair_step`, `ref_step`, `loc_step`) | the induction on the horizon: expressions, operand pairs, mapping references (`RExpr.MapRef`, with the postcondition `RPost`: a storage reference names a path of its type) and lvalues (`RLVal.IsSimple`, with the postcondition `LocOK`: a local, or a storage cell of value type at its own type with a default) |
 | `readAt_ns`, `writeAt_ns`, `Storage.read_isSome`, `keyStep_nsp`, `Val.word_isSome`, `cellTy_key`, `pathTy_key`, `Env.pathTy_go`, `storRef_map_nsp` | storage: a cell of value type at its layout type with a default always reads; a write at the layout type succeeds (or reverts in a static frame); a keyable key is a key step; a mapping value's path has the mapping's value type |
 | `convRV_ns`, `getV_ns`, `readLoc_ok`, `writeLoc_ok`, `compound_dom` | its other steps |
@@ -218,7 +217,7 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
 
-Controls (`Solidity/Source/SoundnessExamples.lean`, kernel `rfl`):
+Controls (`Solidity/Source/SoundnessExamples.lean`; the `*_value` and `*_stuck` controls are kernel `rfl`, the `*_ns` ones ordinary proofs):
 `addSub_ns` (S01's own `a + a`), `cond_ns`/`cond_value` (`true ? 1 + 2 : 0`
 evaluates to `3`), `cb_ns`/`cb_value` (S05's `x = x + 1;` on a storage
 variable is never `stuck` and takes `x` from 3 to 4), `loop_ns`/`loop_value` (`uint8 i; while (i < 3) { i += 1; }`
@@ -257,7 +256,7 @@ program:
 | heap | 13 | a `memory` reference of type `τ` names a live object of type `τ` (`bytes`/`string` compatible), aggregates hold `Data.val` elements, struct objects have their layout's fields |
 | stor | 3 | a `storage` reference of type `τ` names a path of declared type `τ` (`Env.cellTy p = τ.cell`), storage element types are storage-located |
 | gap | 12 | not modelled, reachable by well-typed programs (below) |
-| typing gap | 3 | well typed by S01, refused by solc, `stuck` at run time (below) |
+| typing gap | 3 | well typed by S01, refused by solc, `stuck` at run time (below; 2 fixed, 1 recorded) |
 | bug | 1 | fixed (below) |
 | dead | 1 | `heapAt` (`Machine.lean`) has no caller in the interpreter |
 
@@ -269,7 +268,8 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   `decodeArgs`), and of memory arrays of non-value elements;
 - ABI encoding of memory arrays and structs (returns, external-call
   arguments, `emit`/error arguments) and of external function values;
-- `calldata` references (six sites, all shadowed by the decoder's
+- `calldata` references (six sites by the census, two of which name
+  calldata explicitly; the other four were not re-checked by the review; all shadowed by the decoder's
   refusal: no `cdRef` is ever built);
 - getters of non-value types (`string public s`);
 - `fallback` with parameters;
@@ -282,10 +282,11 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   `stuck` at entry although solc accepts it.
 
 **Typing gaps** (S01 types them, solc refuses them, the semantics is
-`stuck`), fixed in S01's rules and G13's checker:
+`stuck`); the fix to S01's rules and G13's checker is being applied
+(not yet committed):
 
 - `p = S(1)` (a copy into storage) with `p` a local `storage` pointer
-  (solc 7407): `Typed.assignCopy` now requires `Γ.namesLocal a = false`;
+  (solc 7407): `Typed.assignCopy` will require `Γ.namesLocal a = false`;
 - `delete p` with `p` a local `storage` pointer (solc: "delete cannot be
   applied to storage pointers"): `Typed.delete` requires
   `(τ.loc? == some .storage && Γ.namesLocal e) = false`.
@@ -301,7 +302,8 @@ environment) in `Typed.assign`.
 **Bug fixed**: `bytes(s)[i] = b` on a `string memory s` was `stuck`
 ("not bytes"): `convExplicitRV` keeps the pointer, so the object is a
 string, and the byte write accepted only `bytes` objects. The write now
-updates a string object in place (`Eval.lean` `writeLoc`), as solc does.
+should update a string object in place (`Eval.lean` `writeLoc`), as solc
+does; the fix is being applied (not yet in this commit).
 
 **Other findings recorded** (not `stuck` sites): `string s = "x";` and
 `string constant S = "x";` at contract level do not elaborate (a string
@@ -323,8 +325,8 @@ Kept current at every checkpoint.
 | Checkpoint | Status | Theorems |
 |---|---|---|
 | 1 Integration | done | `hasType_iff`, `stmtOK_iff`, `itemsOK_iff`, `wellFormed_iff` over S02's typing; controls `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked`, `zero_types`, `hexCall_typed` |
-| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok`, `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; for the value fragment, preservation is by construction (no reference is created) |
-| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; the `stuck` census; typing gaps fixed in S01 and G13 (`assignCopy`, `delete` of local storage pointers) and a semantic bug fixed (`bytes(s)[i] = b` on a string) |
+| 2 Preservation | partial | `Hoare` and its rules; `alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapObj_ok`, `heapAt_ok` (dead code: `heapAt` has no caller), `storRef_ok`, `HeapOK.alloc`, `HeapOK.write`; no preservation theorem for the walk |
+| 3 Gap-relative progress | partial | value layer (`binVal_ok` … `convVal_ok`, `constVal_ok`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`); interpreter on the value fragment (`evalE_valFrag_ns`, `exprNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`) with storage, mappings and `return`; the `stuck` census; typing-gap fixes (`assignCopy`, `delete` of local storage pointers) and a semantic bug fix (`bytes(s)[i] = b` on a string) pending |
 | 4 Close gaps | not started | |
 | 5 `Failures`, `SourceSpec` | not started | |
 
@@ -338,7 +340,22 @@ Kept current at every checkpoint.
   structs, internal and external calls, modifiers, builtins, `emit`, or
   the transaction layer (dispatch, ABI decoding, deployment, callbacks);
 - preservation for every interpreter step: proved for the memory
-  operations and by construction for the fragment, not for the walk;
+  operations only. For the value fragment preservation of `EMOK` is
+  expected (locals receive only value types, the heap is untouched, the
+  storage references `MapRef` builds are covered by the progress
+  postcondition `RPost`), but no theorem states it;
+- vacuity on elaborated programs: no elaborated contract body is shown to
+  be in `RStmt.ValFrag`; the statement and storage witnesses (`loopItems`,
+  `cbItems`, `condE`) are hand-built resolved terms, the only elaborated
+  witness is the expression `addSub_ns`, and no control reaches a mapping
+  (`MapRef`); nothing proves that function-entry locals satisfy
+  `BodyFrame`;
+- **semantic bug, not fixed**: assigning a storage struct that contains a
+  mapping (`s = t;`) is typed by S01 and runs as a copy of nothing (the
+  memory layout drops the mapping and every member with it): a wrong
+  result, not a `stuck`;
+- open question: whether S01 should refuse `delete` on a `calldata`
+  reference (solc does); not checked;
 - the storage side conditions of the fragment (`E.cellTy d.path = τ`,
   `E.pathTy d.path = some τ`) are checked per expression, not derived
   from the elaboration;
