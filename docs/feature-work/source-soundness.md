@@ -400,7 +400,9 @@ pins.
 - ABI decoding of a user-defined value type argument, as its underlying
   type (`decodeWord`, a wrapper over `decodeElemWord`): `elabW` in
   `ElaborateExamples.lean`, where `f(W w)` with `type W is uint8` runs on
-  `7` and reverts on `300` (it was `stuck`).
+  `7` and reverts on `300` (it was `stuck`), and `g(V v)` with
+  `type V is int8` runs on `-1` (a sign-extended word) and reverts on
+  `200`.
 
 Attempted and reverted: getters of `bytes`/`string` state variables
 (`dispatch` encoding a storage reference; the control returned `"ab"`):
