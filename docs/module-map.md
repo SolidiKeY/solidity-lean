@@ -1057,3 +1057,7 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/EnvironmentProjection.lean` | Total source/intrinsic word/address, request/environment and account/session-ledger observation adapters; no source execution certificate |
 | `Lowering/V08/ProjectionControls.lean` | Populated independent instance journals and actual target nested paid frames, reset/payload negatives and external-ledger selection controls |
+
+| `Lowering/V08/SelectorObservations.lean` | Independent canonical signature/custom-selector bytes, prefix splitting and ordered ABI word observation extension |
+| `Lowering/V08/SelectorControls.lean` | Kernel UTF-8/selector/argument-order controls; no collision axiom or native trust shortcut |
+| `Lowering/V08/EmitControls.lean` | Actual erased-emit typed effects/read/failure/payment regressions with matching source event/argument-tree fixtures; no source execution theorem |

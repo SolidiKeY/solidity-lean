@@ -483,3 +483,73 @@ afe2a93f0387fda7c4de008eb013f4be2c04f8a7; frozen base unchanged. Final committed
 head/patch are saved at /workspace/v08-world-lowering-artifacts/projection-checkpoint.md
 and .patch. Next independent work is erased-emit effects/selector observation
 controls, followed by bounded cache warming and required final validation.
+
+## Continuation checkpoint: signature bytes and erased-emit arguments
+
+Parent961ec71a659e0c4ba7522ddab191a96f24b8b90b. SelectorObservations proves
+beBytes_split/beBytes_take for arbitrary high/low byte observations, then
+selectorBytes_layout/selectorBytes_ofNat for the existing UInt32 selector
+format, including truncation above32 bits. signature_selector relates the
+independent Source.selector to actual Semantics.selectorBytes(customSelector)
+for every supplied signature string. No raw-hash bound, injectivity/collision
+premise, new crypto implementation, emitter or decoder is used.
+signature_arguments composes those exact observations with existing typed ABI
+word streams in supplied order. Canonical string derivation from source
+declarations and full nested/reference ABI lowering remain open applications.
+
+SelectorControls proves literal UTF-8 input vectors, actual standard Error
+selector bytes, distinct Error/Panic signatures and distinguishable argument
+word order after any selector prefix. Plain kernel conversion was stuck at
+ByteArray.toList's well-founded recursion; recursive simp hit the unchanged
+recursion limit. Applying one published loop equation at a time with explicit
+literal size proofs succeeds. The controls use kernel proofs only; no axiom,
+native_decide, implemented_by shortcut or proof/resource budget increase.
+Failed development logs are retained, not presented as accepted proofs.
+
+EmitControls consumes the actual solEmit/RawStmt.eval elaboration and existing
+withPanics wrapper in typed Entry bodies. Source event E with two parameters
+and E3 with three have actual source-unit membership witnesses, and resolved
+RStmt.emit/RConvArgs fixtures retain assignment/read expressions explicitly.
+The target entries retain the elaborator's actual capture contexts (two uint
+locals or one), rather than erasing them to force an empty context.
+
+Noncommuting arguments saved=saved+1 then saved=saved*10 yield10 in an actual
+nonzero paid call, defeating dropped-effects0/reversed-effects1 controls. A
+three-argument E3 first assigns saved2 before10/saved, then writes scratch9;
+its actual call succeeds. Moving the divide earlier yields exact Panic0x12
+and rolls back payment/storage; Panic0x11 is rejected. The matching three-arg
+source event/statement fixtures were added after independent finder/skeptic
+identified a two-versus-three-parameter mismatch. These are source-tree and
+actual target lowering regressions, NOT a proof of independent RStmt execution
+preservation. Source WellFormed/name resolution/Typed.toR/body-lowering and
+source effect-order semantics applications remain prerequisites.
+
+Clean focused gate131876 passes the then-current three modules (21 new named laws/
+controls; all126 lane declarations pinned), unchanged source/config, sampled
+aggregate RSS881311744bytes/cgroup245563392bytes. Original actual selector
+computation130398 took17.38s, sampledRSS1906442240bytes, within all original
+budgets. Separate independent actual-source finder/skeptic reviews used no
+Lean/server/build; their confirmed fixture finding is fixed and rechecked.
+Final combined source-bound gate and checkpoint handoff follow.
+
+Final emit fixture review also found the source scratch state-variable flag
+was persistent while the target field is transient. It is corrected to true
+in the published source syntax constructor, with source membership/conversion
+fixtures rechecked. This is provenance fidelity, not a replacement source
+state/statement execution theorem; no general layout premise is discharged.
+
+Selector/emit checkpoint handoff: the final source-bound refresh133794 includes
+the corrected transient flag and passes99 named modules/100 Lake jobs, all126
+exact axiom sets; unchanged source/config, sampledRSS875573248bytes and
+cgroup247820288bytes. This supersedes131876/132718 as current-source evidence.
+Both independent finder/skeptic reviewers confirmed the matching E/E3 source
+arity and transient flag on actual source, no Lean/server/builds. Static gates
+and raw documentation failure/zero-new comparison are retained as selector-*.
+No source signature derivation, independent source effect execution, general
+ABI/reference lowering or full source-unit composition is claimed. Parent
+961ec71a659e0c4ba7522ddab191a96f24b8b90b; frozen base unchanged. Exact committed
+head/patch: /workspace/v08-world-lowering-artifacts/selector-emit-checkpoint.md
+and .patch. Next independent work investigates the published Keccak byte-output
+bound needed to transport fixed source crypto observations; no hash implementation
+or precompile/backend owner work will be duplicated. Full validation follows
+substantive component work with the original600-second/process/proof limits.

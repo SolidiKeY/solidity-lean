@@ -1,3 +1,5 @@
+import Solidity.Lowering.V08.EmitControls
+import Solidity.Lowering.V08.SelectorControls
 import Solidity.Lowering.V08.ProjectionControls
 import Solidity.Lowering.V08.MetadataControls
 import Solidity.Lowering.V08.Controls

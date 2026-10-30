@@ -110,6 +110,48 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.EmitControls.dependent_arguments_retained": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EmitControls.dependent_read": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EmitControls.dropped_effects": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EmitControls.effect_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EmitControls.event3_member": [],
+  "Solidity.Lowering.V08.EmitControls.event_member": [],
+  "Solidity.Lowering.V08.EmitControls.reordered_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EmitControls.reversed_effects": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EmitControls.source_arguments_retained": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.EmitControls.wrong_failure_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.EnvironmentProjection.balance_projection": [
     "Quot.sound",
     "propext"
@@ -331,6 +373,45 @@
     "propext"
   ],
   "Solidity.Lowering.V08.ProjectionControls.wrong_reason": [],
+  "Solidity.Lowering.V08.SelectorControls.argument_order": [],
+  "Solidity.Lowering.V08.SelectorControls.canonical_error": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorControls.distinct_signatures": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorControls.error_input": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorControls.panic_input": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorObservations.beBytes_split": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorObservations.beBytes_take": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorObservations.selectorBytes_layout": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorObservations.selectorBytes_ofNat": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorObservations.signature_arguments": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SelectorObservations.signature_selector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.beBytes_layout": [
     "Quot.sound",
     "propext"
