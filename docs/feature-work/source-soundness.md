@@ -142,7 +142,8 @@ which changes `Eval.lean` and `Horizon.lean`), 27-28 (follow-ups and the
 two-body witness; build 26's ordering of the `0x41` checks was rejected
 in integration review and fixed after it), 29 (`c37f137`, `CallsOK` per
 contract), 30 (`93bcaca`, offset check before the `0x41` panic), 31
-(`e79abee`, location read/write preservation). Build13 failed (the getter change, `Horizon.lean`
+(`e79abee`, location read/write preservation), 32 (`1f9722e`, review
+fixes), 33 (`3aa644e`, `HeapShaped`). Build13 failed (the getter change, `Horizon.lean`
 heartbeats) and was reverted. Each marker records its build; the last
 gated head is in the final `CLOUD-RESULT`. `check-g07 --log` passed every
 check but the two baselines above (86 unrecorded pins of other lanes,
@@ -269,6 +270,35 @@ Progress proofs must use `heapPut_ok`, which keeps the halt detail
 `heapPut_pres` drops. Not covered: `deleteLoc` (through `writeLoc` and
 `zeroVal`), and locals holding calldata references (`Val.RefOK` of a
 `cdRef` is `False`; the semantics creates none).
+
+**The shape invariant, first use.** `HeapShaped h` (`Data.Top`: a
+top-level object is a `Data.val` only at a type without a location) is
+kept by allocation of a shaped object (`HeapShaped.alloc`) and by writes
+(`HeapShaped.write`, `heapPut_shaped`, which also proves `heapPut`
+succeeds at the address's own type). With it, `writeLoc_memByte_ok`
+proves progress and preservation of a byte write at an address the heap
+typing gives a `bytes`/`string` type: it writes or panics, never `stuck`.
+Witness `bytesHeap_byte_write`; control `ptrHeap_not_shaped` (the
+well-typed but unshaped `ptrHeap` is excluded). Reading the code finds
+no unshaped allocation (`zeroVal` calls `zeroData` only at memory types,
+all aggregates; `loadMem` reaches its `Data.val` arm only at types without
+a location; the other `allocRef` and `heapPut` sites build aggregates), so
+what remains is a proof gap, not a semantic one. Not yet done: proving
+that for every allocation site; carrying `HeapShaped` through frame
+restores (`Eval.lean` and `Semantics.lean` reset the heap or restore a
+saved one, as for `HeapOK`); progress for `memSet`, `memElem` and
+`heapBytes`. A caller of `writeLoc_memByte_ok` gets its precondition from
+a `memory` reference's `Val.RefOK` through `STy.memShape_bytes` and
+`StOK.le`. The statement excludes only `stuck` (a timeout is not
+excluded by the statement, though the code cannot produce one there).
+
+**Review of the shape invariant** (finder and skeptic, read-only, no
+blocker): every allocation site checked shaped; the precondition is
+satisfiable and dischargeable from `Val.RefOK` (the `memShape` inversion
+lemma was missing: added); "writes or panics" was stronger than the
+statement (reworded); `heapObj_pres` had lost its docstring and four new
+lemmas had none (added); frame restores were missing from the to-do list
+(added). Fixed after build33 (`3aa644e`, passed).
 
 **Review of the location preservation** (finder and skeptic, read-only,
 no blocker): the open question about allocations was closed by reading

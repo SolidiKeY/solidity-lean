@@ -1571,3 +1571,22 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} location read/write preservation theorems and controls use only the standard axioms"
+
+/-! Lane V04b: object shapes; progress of memory byte writes. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.HeapShaped.alloc,
+    ``Solidity.Source.HeapShaped.write,
+    ``Solidity.Source.heapObj_top,
+    ``Solidity.Source.heapPut_shaped,
+    ``Solidity.Source.writeLoc_memByte_ok,
+    ``Solidity.Source.SoundnessExamples.ptrHeap_not_shaped,
+    ``Solidity.Source.SoundnessExamples.bytesHeap_byte_write]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} object-shape theorems and controls use only the standard axioms"

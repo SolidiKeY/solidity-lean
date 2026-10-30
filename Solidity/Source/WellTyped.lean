@@ -36,6 +36,10 @@ and a value read agrees. These are preservation only: `HeapOK` says where
 references point, not that a top-level object of a memory reference type is
 an aggregate rather than a `Data.val`, so progress for memory accesses needs
 that shape invariant as well (`SoundnessExamples.ptrHeap_byte_stuck`).
+`HeapShaped` states it (`Data.Top`: a top-level object is a bare value only
+at a type without a location); allocation and writes keep it, and with it a
+byte write at a `bytes`/`string` address is never `stuck`
+(`writeLoc_memByte_ok`).
 -/
 
 namespace Solidity.Source
@@ -337,11 +341,14 @@ theorem storRef_ok {P : EMState E Γ → Prop} {τ : STy} (p : SPath) (hs : τ.l
 
 /-! ## Writes and reads of locations keep it -/
 
-/-- **`heapObj`, preservation**: the object read has the address's type
-and agrees; the state is unchanged, so any `P` stronger than `EMOK` is kept. -/
-theorem heapObj_pres {H : HeapTy} {P : EMState E Γ → Prop} (hP : ∀ y, P y → EMOK E H y) (a : Nat) :
+/-- **`heapObj`, preservation**, with any halt condition that holds at a
+dangling address: the object read has the address's type and agrees; the
+state is unchanged, so any `P` stronger than `EMOK` is kept. -/
+theorem heapObj_gen {H : HeapTy} {P : EMState E Γ → Prop} {X : Halt → EMState E Γ → Prop}
+    (hP : ∀ y, P y → EMOK E H y)
+    (hX : ∀ y, P y → y.2.heap.get a = none → X (.stuck "dangling memory reference") y) :
     Hoare P (heapObj a : EM E Γ (Σ σ, Data E.layout σ))
-      (fun x y => P y ∧ y.2.heap.ty a = some x.1 ∧ DataOK E y.2.heap.ty x.2) (fun _ y => EMOK E H y) := by
+      (fun x y => P y ∧ y.2.heap.ty a = some x.1 ∧ DataOK E y.2.heap.ty x.2) X := by
   unfold heapObj
   refine Hoare.bind (Hoare.st' (Q := fun s y => y.2 = s ∧ P y) fun y hy => ⟨rfl, hy⟩) fun s => ?_
   split
@@ -352,7 +359,14 @@ theorem heapObj_pres {H : HeapTy} {P : EMState E Γ → Prop} (hP : ∀ y, P y �
     simp only [Heap.ty, Heap.get] at hg ⊢
     rw [hg]
     rfl
-  · exact Hoare.halt' fun y hy => hP y hy.2
+  · rename_i hg
+    exact Hoare.halt' fun y ⟨hs, hp⟩ => by subst hs; exact hX y hp hg
+
+/-- **`heapObj`, preservation**: `heapObj_gen` with `EMOK` on halts. -/
+theorem heapObj_pres {H : HeapTy} {P : EMState E Γ → Prop} (hP : ∀ y, P y → EMOK E H y) (a : Nat) :
+    Hoare P (heapObj a : EM E Γ (Σ σ, Data E.layout σ))
+      (fun x y => P y ∧ y.2.heap.ty a = some x.1 ∧ DataOK E y.2.heap.ty x.2) (fun _ y => EMOK E H y) :=
+  heapObj_gen hP fun y hy _ => hP y hy
 
 /-- **`heapPut`, preservation**: halts included. -/
 theorem heapPut_pres {H : HeapTy} (a : Nat) (x : Σ τ, Data E.layout τ) :
@@ -537,6 +551,133 @@ theorem readLoc_memByte_pres {H : HeapTy} (F : Fr) (a i : Nat) :
   · split
     · exact Hoare.pure' fun y hy => hy
     · exact Hoare.lift' fun y hy => hy
+
+
+/-! ## Object shapes (for progress of memory accesses) -/
+
+/-- **A top-level memory object has its aggregate shape**: it is a
+`Data.val` only at a type without a location (never a bare pointer). (`HeapOK` does not
+say this; `SoundnessExamples.ptrHeap_byte_stuck`.) -/
+def Data.Top {τ : STy} : Data E.layout τ → Prop
+  | .val _ => τ.loc? = none
+  | _ => True
+
+/-- Every object of the heap has its shape. -/
+def HeapShaped (h : Heap E.layout) : Prop := ∀ a x, h.get a = some x → Data.Top x.2
+
+/-- The empty heap is shaped. -/
+theorem HeapShaped.empty : HeapShaped (Heap.empty : Heap E.layout) := fun _ _ h => by cases h
+
+/-- **Allocation keeps a heap shaped**, given a shaped object. -/
+theorem HeapShaped.alloc {h : Heap E.layout} (hh : HeapShaped h) {x : Σ τ, Data E.layout τ}
+    (hx : Data.Top x.2) : HeapShaped (h.alloc x).1 := by
+  intro a y hy
+  by_cases e : a = h.next
+  · subst e
+    simp only [Heap.get, Heap.alloc, if_true, Option.some.injEq] at hy
+    subst hy
+    exact hx
+  · have hy' : h.get a = some y := by simp only [Heap.get, Heap.alloc, e, if_false] at hy; exact hy
+    exact hh a y hy'
+
+/-- **A write keeps a heap shaped**, given a shaped object. -/
+theorem HeapShaped.write {h : Heap E.layout} (hh : HeapShaped h) {a : Nat} {τ : STy} {x : Data E.layout τ}
+    (hty : h.ty a = some τ) (hx : Data.Top x) : HeapShaped (h.write a x hty) := by
+  intro b y hy
+  by_cases e : b = a
+  · subst e
+    rw [Heap.write_get] at hy
+    cases hy
+    exact hx
+  · rw [Heap.write_other h e] at hy
+    exact hh b y hy
+
+/-- **`heapPut`, progress and preservation of shapes**: a write at the
+address's own type, of agreeing and shaped contents, succeeds and keeps the
+state well typed and shaped. -/
+theorem heapPut_shaped {H : HeapTy} (a : Nat) (x : Σ τ, Data E.layout τ) :
+    Hoare (fun y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ y.2.heap.ty a = some x.1 ∧
+        DataOK E y.2.heap.ty x.2 ∧ Data.Top x.2)
+      (heapPut a x : EM E Γ Unit) (fun _ y => EMOK E H y ∧ HeapShaped y.2.heap)
+      (fun _ _ => False) := by
+  unfold heapPut
+  refine Hoare.bind (Hoare.st' (Q := fun s y => y.2 = s ∧ (EMOK E H y ∧ HeapShaped y.2.heap) ∧
+    y.2.heap.ty a = some x.1 ∧ DataOK E y.2.heap.ty x.2 ∧ Data.Top x.2)
+    fun y hy => ⟨rfl, hy⟩) fun s => ?_
+  refine Hoare.dite' (fun h => Hoare.setSt' ?_) (fun h => Hoare.of_false ?_)
+  · intro ⟨l, s'⟩ ⟨hs, ⟨⟨⟨hh, hle⟩, hl⟩, hsh⟩, _, hx, ht⟩
+    subst hs
+    have hteq : (s'.heap.write a x.2 h).ty = s'.heap.ty := funext fun b => Heap.write_ty s'.heap a b x.2 h
+    refine ⟨⟨⟨hh.write h hx, ?_⟩, ?_⟩, hsh.write h ht⟩
+    · show H.Le (s'.heap.write a x.2 h).ty
+      rw [hteq]; exact hle
+    · show LocalsOK E (s'.heap.write a x.2 h).ty l
+      rw [hteq]; exact hl
+  · intro y ⟨hs, _, hty, _⟩
+    subst hs
+    exact h hty
+
+/-- **`heapObj` in a shaped heap**: as `heapObj_gen`, and the object read
+has its shape. -/
+theorem heapObj_top {H : HeapTy} {P : EMState E Γ → Prop} {X : Halt → EMState E Γ → Prop}
+    (hP : ∀ y, P y → EMOK E H y ∧ HeapShaped y.2.heap)
+    (hX : ∀ y, P y → y.2.heap.get a = none → X (.stuck "dangling memory reference") y) :
+    Hoare P (heapObj a : EM E Γ (Σ σ, Data E.layout σ))
+      (fun x y => P y ∧ y.2.heap.ty a = some x.1 ∧ DataOK E y.2.heap.ty x.2 ∧ Data.Top x.2) X := by
+  unfold heapObj
+  refine Hoare.bind (Hoare.st' (Q := fun s y => y.2 = s ∧ P y) fun y hy => ⟨rfl, hy⟩) fun s => ?_
+  split
+  · rename_i x hg
+    refine Hoare.pure' fun y ⟨hs, hp⟩ => ?_
+    subst hs
+    refine ⟨hp, ?_, (hP y hp).1.1.heap a x hg, (hP y hp).2 a x hg⟩
+    simp only [Heap.ty, Heap.get] at hg ⊢
+    rw [hg]
+    rfl
+  · rename_i hg
+    exact Hoare.halt' fun y ⟨hs, hp⟩ => by subst hs; exact hX y hp hg
+
+/-- The memory shape of `bytes`: a `bytes` or a `string`. -/
+theorem STy.memShape_bytes {σ : STy} {l : DataLoc} (h : σ.memShape = .bytes l) :
+    σ = .bytes l ∨ σ = .string l := by
+  cases σ <;> simp only [STy.memShape, STy.bytes.injEq, reduceCtorEq] at h
+  · exact .inl (by rw [h])
+  · exact .inr (by rw [h])
+
+/-- **`writeLoc` to a memory byte, progress and preservation**: at an
+address the heap typing gives a `bytes` or `string` type, in a shaped
+heap, a byte write is never `stuck` (the code writes or panics; the
+statement excludes only `stuck`). A `memory` reference to a `bytes` or
+`string` gives the precondition (`STy.memShape_bytes`, `Val.RefOK`, `StOK.le`). -/
+theorem writeLoc_memByte_ok {H : HeapTy} (F : Fr) (n a i : Nat) (v : Val E.layout (.fixedBytes 1 (by decide))) :
+    Hoare (fun y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧
+        ∃ l, y.2.heap.ty a = some (.bytes l) ∨ y.2.heap.ty a = some (.string l))
+      (writeLoc F n (.memByte a i) v : EM E Γ Unit)
+      (fun _ y => EMOK E H y ∧ HeapShaped y.2.heap)
+      (fun e y => (EMOK E H y ∧ HeapShaped y.2.heap) ∧ NotStuck e) := by
+  simp only [writeLoc]
+  refine Hoare.bind (heapObj_top (a := a) (fun _ h => h.1) fun y ⟨_, l, hl⟩ hg => ?_) fun ⟨σ, d⟩ => ?_
+  · exfalso
+    simp only [Heap.ty, Heap.get] at hl hg
+    rw [hg] at hl
+    rcases hl with hl | hl <;> cases hl
+  cases d with
+  | bytes bs =>
+    exact Hoare.ite' (fun _ => Hoare.conseq (heapPut_shaped a _)
+      (fun y hy => ⟨hy.1.1, hy.2.1, .bytes _, trivial⟩) (fun _ _ h => h) (fun _ _ h => h.elim))
+      (fun _ => Hoare.lift' fun y hy => ⟨hy.1.1, trivial⟩)
+  | string bs =>
+    exact Hoare.ite' (fun _ => Hoare.conseq (heapPut_shaped a _)
+      (fun y hy => ⟨hy.1.1, hy.2.1, .string _, trivial⟩) (fun _ _ h => h) (fun _ _ h => h.elim))
+      (fun _ => Hoare.lift' fun y hy => ⟨hy.1.1, trivial⟩)
+  | val w =>
+    refine Hoare.of_false fun y ⟨⟨_, l, hl⟩, hty, _, ht⟩ => ?_
+    rw [hty] at hl
+    rcases hl with hl | hl <;> cases hl <;> simp only [Data.Top, STy.loc?, reduceCtorEq] at ht
+  | _ =>
+    refine Hoare.of_false fun y ⟨⟨_, l, hl⟩, hty, _⟩ => ?_
+    rw [hty] at hl
+    rcases hl with hl | hl <;> cases hl
 
 end
 
