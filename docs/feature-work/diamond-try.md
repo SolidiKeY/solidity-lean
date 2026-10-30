@@ -1475,3 +1475,5 @@ Exact five-row bundle/reference identities and existing mechanism/speed history
 are retained; original native12/8strictEXIT1 and historical backend pause persist.
 
 Official-source-only backend feasibility: [evmone0.22 pins, build edges and abort-interface limits](diamond-try-official-evmone.md). No backend/producer implementation or historical execution is approved by this addendum.
+
+Human-approved bounded [M1 computed producer/capture](diamond-try-m1.md) implements only the reviewed first proof component. P4/P5b/P8, original source admission and all eight native blocked rows remain open.

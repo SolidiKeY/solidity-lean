@@ -913,3 +913,10 @@ At the root, the notation's own tests:
 | `Examples/Tactics/LibraryTrySource.lean` | Original ordered outputs, ordinary-reading equality and actual prefix storage witnesses. |
 | `Examples/Tactics/LibraryTryControls.lean` | Wrong role/identity/frame, decoder/input/static refusals, exact storage alias and atomic rollback controls. |
 | `Examples/Tactics/LibraryTrySourceIR.lean` | Separately compiled via-IR original linked source with all ordered output certificates. |
+
+M1 try producer side witnesses: `Evm/TryByteImage.lean` bounds scalar-frame
+byte images and overlap/snapshots; `Evm/TryByteCapture.lean` reuses typed
+allocation and raw halt; `Evm/TryPanicProducer.lean` computes the source-linked
+36-byte component. `Examples/Tactics/TryPanicProducer.lean` keeps constructed-call
+controls distinct. See [bounded milestone](feature-work/diamond-try-m1.md); none
+admits physical assembly or proves target-byte/original-callee transport.

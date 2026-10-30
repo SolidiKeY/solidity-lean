@@ -629,3 +629,9 @@ import Solidity.Tools.LibraryTryReplay
 import Solidity.Examples.Tactics.LibraryTrySource
 import Solidity.Examples.Tactics.LibraryTryControls
 import Solidity.Examples.Tactics.LibraryTrySourceIR
+
+-- Bounded physical-byte producer/capture witnesses; no source admission.
+import Solidity.Evm.TryByteImage
+import Solidity.Evm.TryByteCapture
+import Solidity.Evm.TryPanicProducer
+import Solidity.Examples.Tactics.TryPanicProducer
