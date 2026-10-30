@@ -1757,3 +1757,37 @@ have identical complete72 findings; raw globalpin exits1 have identical14 notes.
 Separate NEW0 comparisons pass, without waiving either rawfailure. Both final
 independent read-only proof/control/inventory reviews pass. Remaining disk before
 commit271130624bytes, within the measured48MiB incremental envelope.
+
+
+### Retrospective indexed error checkpoint
+
+After d33c3ce2d4f10d9c71977f9f956fbfa78731efb3, a further independent
+Backfill B clause is proved: transact_prefix_failure_of_index consumes ONLY an
+exact recorded indexed error and validindex, derives the actual frame error at
+the reached reset input by cases on published World.transact, and proves the
+immediate rollback snapshot. transact_prefix_index_error_iff establishes both
+directions. No frame execution equality or whole source preservation premise is
+assumed in the converse. Populated paid/collision history reconstruction controls
+consume the previously checked actual indexed histories; these are derived
+reconstructions, not independent external observations or new Source executions.
+All prior vectors/results/pins retained; four new theorems give425 standard sets.
+
+Gate749814-1701c3a7 passes117jobs/33.7169s, freshRSS1027612672, reported reused
+cgrouppeak380309504(possiblycumulative). The initial dependent-case target error
+749303 exit1 is retained; fixed by using the already rewritten case target,
+without statement or budget changes. Finder/skeptic independently reviewed the
+actual converse hypotheses and controls read-only with no findings/builds.
+Same checked bounded runtime/cache identity and unchanged commands/limits; no
+container allocation, deletion, capacity change or Decision/full retry.
+Every original Work/Backfill source/application parent remains PARTIAL; missing
+Source/V07/ABI/layout/body/linkage/runtime-frame/bytecode/admission/owner
+applications and mandatory full/Decision/literal-wrapper boundaries stay open.
+Final scoped checks and raw-vs-NEW0 outcomes accompany the additive sealed handoff.
+
+Retrospective checkpoint final gates pass425exactpins/60coreclosure,19evidence
+and14runtime-profile corruption controls, trust911/241/0findings, strict491/
+61budget/11refuted/0pending, layers169/0elaborator,orphans896/0orphan. Raw global
+docs/pins task/base exits1 retained with complete72/14 rows identical and
+separate NEW0 passes. Both final independent proof/control/evidence reviewers
+pass with no findings; no Lean/server/builds by reviewers. Source/application
+and mandatory whole-gate blockers remain exactly as recorded above.

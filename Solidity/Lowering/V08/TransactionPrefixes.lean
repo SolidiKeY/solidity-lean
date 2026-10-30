@@ -262,6 +262,40 @@ theorem transact_prefix_index_observe {β : Type} (w : World contracts)
       ((transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid)).map observation := by
   simp only [transact_prefix_observe, List.getElem_map]
 
+/-- A recorded indexed error itself determines the actual frame failure and
+its immediate rollback boundary. This converse assumes only the exact observed
+history entry, not a whole execution equation or source preservation relation. -/
+theorem transact_prefix_failure_of_index (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) (valid : i < frames.length)
+    (halt : THalt)
+    (observed : (transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid) = .error halt) :
+    frames[i] (transactPrefix w (frames.take i)).1.resetTransient = .error halt ∧
+      (transactPrefix w (frames.take (i + 1))).1 =
+        (transactPrefix w (frames.take i)).1.resetTransient := by
+  have result : ((transactPrefix w (frames.take i)).1.transact frames[i]).2 = .error halt :=
+    (transact_prefix_index w frames i valid).symm.trans observed
+  have failed : frames[i] (transactPrefix w (frames.take i)).1.resetTransient = .error halt := by
+    cases ran : frames[i] (transactPrefix w (frames.take i)).1.resetTransient with
+    | error actual =>
+      simp only [World.transact, ran] at result
+      exact congrArg Except.error (Except.error.inj result)
+    | ok pair =>
+      simp only [World.transact, ran] at result
+      cases result
+  exact ⟨failed, (transact_prefix_index_failure w frames i valid halt failed).2⟩
+
+/-- Exact error observations characterize actual failure at the reached input. -/
+theorem transact_prefix_index_error_iff (w : World contracts)
+    (frames : List (TransactionFrame contracts α)) (i : Nat) (valid : i < frames.length)
+    (halt : THalt) :
+    (transactPrefix w frames).2[i]'(transact_prefix_index_bound w frames i valid) = .error halt ↔
+      frames[i] (transactPrefix w (frames.take i)).1.resetTransient = .error halt :=
+  ⟨fun observed => (transact_prefix_failure_of_index w frames i valid halt observed).1,
+    fun failed => (transact_prefix_index_failure w frames i valid halt failed).1⟩
+
+#print axioms transact_prefix_failure_of_index
+#print axioms transact_prefix_index_error_iff
+
 #print axioms transact_prefix_index_observe
 
 #print axioms transact_prefix_take_drop

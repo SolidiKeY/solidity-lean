@@ -1271,6 +1271,11 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.PrefixControls.collision_history_reconstruction": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.PrefixControls.collision_reached": [
     "Classical.choice",
     "Quot.sound",
@@ -1387,6 +1392,11 @@
     "propext"
   ],
   "Solidity.Lowering.V08.PrefixControls.paid_failure_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.PrefixControls.paid_history_reconstruction": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -1724,6 +1734,10 @@
   "Solidity.Lowering.V08.transact_prefix_drop_history": [
     "propext"
   ],
+  "Solidity.Lowering.V08.transact_prefix_failure_of_index": [
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.transact_prefix_failure_snoc": [
     "Quot.sound",
     "propext"
@@ -1736,6 +1750,10 @@
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_index_bound": [
+    "propext"
+  ],
+  "Solidity.Lowering.V08.transact_prefix_index_error_iff": [
+    "Quot.sound",
     "propext"
   ],
   "Solidity.Lowering.V08.transact_prefix_index_failure": [

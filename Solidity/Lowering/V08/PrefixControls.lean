@@ -685,6 +685,21 @@ theorem wrong_suffix_order : (transactPrefix base frames).2.drop 1 ≠
     [.error .revert, .error laterHalt, .ok readValue] := by
   rw [boundary4]; decide +kernel
 
+/-- Recover the actual paid binary failure and immediate snapshot from its
+recorded middle-history observation. No new execution equality is assumed. -/
+theorem paid_history_reconstruction :
+    frames[1] (transactPrefix base (frames.take 1)).1.resetTransient = .error laterHalt ∧
+      (transactPrefix base (frames.take 2)).1 = (transactPrefix base (frames.take 1)).1.resetTransient :=
+  transact_prefix_failure_of_index base frames 1 (by decide) laterHalt indexed_paid_failure.1
+
+theorem collision_history_reconstruction :
+    frames[2] (transactPrefix base (frames.take 2)).1.resetTransient = .error .revert ∧
+      (transactPrefix base (frames.take 3)).1 = (transactPrefix base (frames.take 2)).1.resetTransient :=
+  transact_prefix_failure_of_index base frames 2 (by decide) .revert indexed_collision.1
+
+#print axioms paid_history_reconstruction
+#print axioms collision_history_reconstruction
+
 #print axioms indexed_commit
 #print axioms indexed_paid_failure
 #print axioms indexed_collision
