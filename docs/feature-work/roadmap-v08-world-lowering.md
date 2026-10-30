@@ -35,7 +35,7 @@ Docker container succeeds with memory.max=12884901888 and memory.swap.max=0.
 The mandatory KeySort build then passes with LEAN_NUM_THREADS=1 and -j1 in
 a session-specific alternate TOML: Built Solidity.KeySort (1.9s), Build
 completed successfully (2 jobs), exit 0. Cgroup peak is 139890688 bytes.
-RUNTIME_GATE_PASS is established for this recovered setup; the passing owned 60-module closure subsequently records 851103744 bytes
+RUNTIME_GATE_PASS is established for this recovered setup; the passing owned 59-module closure (60 Lake jobs) subsequently records 851103744 bytes
 sampled aggregate RSS and 255733760 bytes cgroup peak. Failed development
 checks are retained; the largest sampled RSS so far is 2399289344 bytes during
 a failed conversion-heavy control proof. No proof budget was raised. The
@@ -233,7 +233,7 @@ that same verified settlement before revertWith [0xfa,0x11], then proves the
 raw atomic snapshot sender=100/self=0/store=0; callback_wrong_frame rejects
 the successful callback snapshot for this ancestor failure.
 
-The successful 86-module owned closure is recorded in v08-gate-52413.log/json:
+The successful 85-module owned closure is recorded in v08-gate-52413.log/json:
 exit 0, 816951296 bytes peak sampled aggregate RSS, 199753728 bytes cgroup peak.
 That run prints the then-current 46 theorem/control axiom sets, including the previously omitted
 pad32_transport (no axioms). Earlier 40-pin claims were incomplete and are
@@ -273,7 +273,7 @@ proves equal decoder outputs, not a universal successful roundtrip for lists
 longer than the represented ABI length. Independent finder and skeptic reviews
 confirmed these exact statements and source independence without a Lean build.
 
-The source-bound 86-module gate v08-gate-58133.log/json passes with all 50
+The source-bound 85-module gate v08-gate-58133.log/json passes with all 50
 current theorem/control axiom sets: sampled aggregate RSS 787935232 bytes,
 cgroup peak 207249408 bytes. Source/config SHA256 remained unchanged.
 The lane checker initially rejected the inherited AST import of built-in Lean;
@@ -320,7 +320,14 @@ checkpoint does not assert that all conceivable independent work is exhausted.
 The whole original queue remains frozen and incomplete, with checked progress
 as tabulated above. No scope answer or exclusion has been inferred.
 
-After normalization, the refreshed 86-module source-bound gate
-v08-gate-84788.log/json passes (cached replay), all50 exact axiom sets,
+After normalization, the refreshed 85-module source-bound gate
+v08-gate-84788.log/json passes (cached replay,86 Lake jobs), all50 exact axiom sets,
 source/config unchanged: sampled RSS58781696 and cgroup peak31449088bytes.
 The earlier58133 gate remains the original checked source evidence.
+
+Final artifact review corrected terminology: the focused closure contains85
+named modules, reported by Lake as86 jobs; the earlier closure contained59
+modules/60jobs. Evidence JSON module lists are authoritative. The implementation
+checkpoint is967952d5964db81a77d4fd948028707f51e4a607. The follow-up changes only
+this handoff precision; no proof or effective runtime option changes. The
+external handoff records the final documentation commit as well.
