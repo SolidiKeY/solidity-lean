@@ -370,10 +370,10 @@ def CatchKind.datas {Γ Γ' : Ctx} : CatchKind → Prog C Γ Γ' → Option DSet
   | .raw, P => (P.revertDatas true).map fun S =>
     ([] :: S.1, (if P.asserts then [Pat.panic] else []) ++ S.2)
 
-/-- Data known in part that no `Panic(uint256)` data matches: not its
-length, or a known byte of the selector that is not `Panic`'s. -/
+/-- Data known in part that no `Panic(uint256)` data matches: shorter than its
+minimum length, or a known byte of the selector that is not `Panic`'s. -/
 def Pat.notPanic (p : Pat) : Bool :=
-  p.length != 36 || (List.range 4).any fun i => match p[i]? with
+  decide (p.length < 36) || (List.range 4).any fun i => match p[i]? with
     | some (some b) => b != Semantics.panicSelector[i]!
     | _ => false
 

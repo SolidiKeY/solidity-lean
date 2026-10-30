@@ -1857,7 +1857,7 @@
       "syntax": "catch Error(string); Panic(uint); (bytes); catch {...}",
       "scope": "model",
       "current": "partial",
-      "requirement": "Dispatch by valid revert bytes, handle malformed payloads and preserve caller/callee rollback boundaries. A narrow source-checked linked-library try composition now executes original scalar and exact caller-storage-reference view entries with real installed identity, actual Error payloads and caller tails; it remains partial and is not general library/ABI/world or callback source validity.",
+      "requirement": "Dispatch by valid revert bytes, handle malformed payloads and preserve caller/callee rollback boundaries. A narrow source-checked linked-library try composition now executes original scalar and exact caller-storage-reference view entries with real installed identity, actual Error payloads and caller tails; it remains partial and is not general library/ABI/world or callback source validity. Panic decoding requires the exact selector and at least36 bytes, reads only the first unsigned word, and ignores trailing payload bytes; this does not implement physical-memory source adapters.",
       "upstream": [
         {
           "path": "docs/grammar/SolidityParser.g4",
@@ -1870,7 +1870,10 @@
         "Solidity/Frontend/LibraryTryImport.lean",
         "Solidity/Examples/Tactics/LibraryTrySource.lean",
         "Solidity/Examples/Tactics/LibraryTryControls.lean",
-        "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
+        "Solidity/Examples/Tactics/LibraryTrySourceIR.lean",
+        "Solidity/Semantics/RevertData.lean",
+        "Solidity/Calculus/DataIn.lean",
+        "Solidity/Examples/Tactics/TryConditions.lean"
       ]
     },
     {

@@ -1,18 +1,20 @@
 # External try execution witnesses — partial step 11
 
 **Step 11 remains incomplete at its native source-adapter boundary.** The human
-selected unchanged semantics and explicit conditional success/failure statements
-for this assignment. That resolves the earlier request for a profile decision;
-no stronger global admissibility premise is introduced. The conditional account
-provides exact typed conditions for all external/catch-data outcomes, ordinary
-formula transport, and conditions for the existing creation-try interface. The
-latest continuation adds source-checked scalar/storage linked-library try
-composition over existing typed World operations, following the creation and
-entry-return bridges. Twelve original fixtures now pass native replay in both
-pipelines; eighteen pass separate compiler/EVM replay. Neither replay establishes universal source
-validity. The remaining native dependencies are enumerated below.
+selected explicit conditional success/failure statements without stronger global
+admissibility assumptions, and subsequently authorized the narrow Panic decoder
+correction described below. Existing callback APIs/default universal reading and
+source/profile scope remain; the decoder's raw-data behavior is the approved
+delta. The conditional account retains exact typed outcome conditions, ordinary
+formula transport and creation interfaces. Source bridges cover entry returns,
+creation and scalar/storage linked-library try composition. Twelve original
+fixtures pass native replay in both pipelines; eighteen pass separate fresh
+compiler/EVM replay. Neither finite replay nor an existential typed execution
+establishes universal source validity. The remaining dependencies are explicit.
 
-All original unconditional claims and their certified refutations remain.
+All original unconditional source claims and their certified refutations remain.
+The former exact36-byte decoder policy certificate is historical at ffabfb22;
+its approved replacement does not change frozen source observations/verdicts.
 `tryCallDiamond`/`catchDataDiamond`, callback judgments, the six original gap
 statements and target certificates, exclusions, Waivers, DecisionTheorem,
 profile choices and frozen expectations are unchanged. The historical sections
@@ -1253,3 +1255,170 @@ Panic versus36-byte decoder counterexample and historical runner proposal still
 require human review; neither was changed or enabled. Legacy callback judgments,
 all six original gap statements/target certificates, target/exclusion/admissibility
 predicates and frozen observations/verdicts retain their meanings.
+
+
+## Approved Panic decoder correction after ffabfb22
+
+Human decision call_ce385a5125ae4d06b1e976f6c1561935 authorizes the narrow
+Panic decoder correction, while retaining the existing callback/default/source
+judgments. Earlier sections' exact36-byte policy/refutation and pending-review
+statements describe the retained ffabfb22 checkpoint, not this corrected decoder.
+The previous files/certificates remain in history and the panic-decoder evidence.
+
+Pinned solc0.8.38's actual try_decode_panic_data uses gt(returndatasize(),0x23)
+then returndatacopy(0,4,0x20). The intrinsic decoder now requires the exact selector
+and at least36 bytes, reads only the first32 bytes after the selector and ignores
+the suffix. Uint256 has no invalid full32-byte encodings; byte values are
+intrinsic UInt8. Short/truncated or wrong-selector payloads remain refused.
+Pat.notPanic excludes only short patterns or known selector mismatches, so long
+unknown Panic-shaped data cannot unsoundly lose its handler. The original
+universal Pat.notPanic_decode theorem retains its meaning; its length proof is
+updated. Existing deterministic/callback soundness consumers use this theorem
+and decoder directly; no broader callback rule or target/profile is changed.
+
+Controls distinguish exact/trailing/256-byte data, unsigned byte order, zero and
+high-bit words, incorrect/missing selectors, truncated data and partial patterns.
+Actual typed self-call continuations and raw failure capture are tested separately
+from source/EVM observations. An existential callback Panic alternative does not
+eliminate legacy callback failure alternatives or establish holdsC/ValidT.
+Physical-memory/Yul source admission is still absent for the six original rows;
+no fixture may be promoted merely because its decoder discrepancy is repaired.
+
+Historical-profile investigation compiled both original gas8000 fixtures in
+both pipelines for five target forks and queried the existing pinned EVM opcode
+tables. No historical fixture was executed and no historical runner was enabled.
+See [/workspace/next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md](/workspace/next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md)
+and exact compiler inputs/outputs/compatibility.json. The current profile's
+blocked results and frozen observations remain unchanged. Runtime compatibility
+is not established by compilation or opcode-table membership alone.
+
+A static scan additionally finds REVERT(0xfd) instruction sites in both
+historical generators while that opcode is absent from the pinned pre-Byzantium
+engine tables. This is an exact compatibility boundary, not a proof that the
+original valid rows fail: capped inner failure paths may intentionally trap.
+No historical execution or profile support is claimed.
+
+The original Osaka panic fixtures were separately replayed in both pipelines
+with actual child-call receipts: all16 ordered observations match full frozen
+outputs, child sizes3/6/36/256, and actual256-byte suffix has byte0x80 at offset95.
+The kernel long zero-suffix datum is representative only. The proved arbitrary
+suffix theorem establishes the decoder's independence of those bytes, without
+injecting EVM reference bytes into Lean. The actual typed code-capture control
+reads67 from caller storage after binding and scope pop.
+
+Actual validation and retained nonzero exits follow.
+
+
+### Panic correction actual final validation
+
+The complete original native family is **12 working / 8 blocked / 0 broken**;
+its strict command retains **exit1**, not a passing family gate. Eighteen original
+fixtures complete both fresh compiler/EVM pipelines; two historical-profile
+reports remain blocked, not successful replays. All **66** native/reference and
+**140** reference/frozen ordered observations match signatures, failure flags
+and complete bytes. The supplemental16 original Osaka panic observations add
+actual child-call receipts, not extra unique rows beyond that family count.
+
+Actual transitive axiom audits cover **217 distinct declarations**: all191 prior
+names plus20 additional controls and six existing critical soundness consumers.
+Only `propext`, `Classical.choice`, `Quot.sound` occur. The updated former
+trailing-data policy theorem is explicitly identified above; no false old-model
+claim is asserted under the corrected decoder. Five changed Lean owners have
+structured MCP success, nonpartial results, empty errors and no failed imports.
+All146 affected script controls and88 existing exception vectors pass.
+
+Full library/SolkeyTestSuite, Corpus, complete frozen TestSuite, source admission,
+orphan/layer, strict automation/trust, generated inventory and whitespace checks
+have actual successful exits. Historical doc paths retain actual exit1 with the
+identical20 baseline missing references and zero new findings. No failed,
+stopped, rejected or blocked invocation is relabeled passed.
+
+The first full attempt reported missing Decidable equality for the capture
+control and was stopped after that real source error: overall143,3565s,
+7394652160byte cgroup peak,zeroOOM. The SAME full result equality was repaired
+via a kernel-checked positive toOption and constructor inversion, with no global
+Eq instance or expected-output weakening. Rejected temporary done insertion did
+not execute; safe read-only trials preceded the complete repair. Initial MCP
+import timeouts, cache invalidations, direct-normalization recursion stops and
+trial/API/layout errors remain in the evidence. No limits were raised.
+
+Every final group verifies12GiB/no swap and one Lean thread/explicit-j1, with
+private disk caches and OS/disk headroom. The documented writer lock is held
+inside subsequent one-shot jobs and logs/footers write directly to task disk;
+reattachment does not release the lock early. The same surviving initial full
+container was adopted, not duplicated. No VM/service/monitor/timer or tracked
+configuration was added. Exact runtime configuration is retained externally.
+
+| Final command | Actual exit | Command seconds | Cgroup peak bytes |
+|---|---:|---:|---:|
+| inventory.log | 0 | 1 | 10743808 |
+| full.log | 0 | 4778 | 12176072704 |
+| corpus.log | 0 | 83 | 1142280192 |
+| frozen.log | 0 | 1 | 41742336 |
+| source-admission.log | 0 | 2 | 271446016 |
+| orphans.log | 0 | 1 | 64249856 |
+| layers.log | 0 | 1 | 64196608 |
+| automatic.log | 0 | 1 | 20983808 |
+| trust.log | 0 | 4 | 168980480 |
+| script-tests.log | 0 | 4 | 498679808 |
+| vectors88.log | 0 | 4 | 371331072 |
+| axioms.log | 0 | 6 | 196743168 |
+| axioms-library.log | 0 | 4 | 175718400 |
+| axioms-creation.log | 0 | 3 | 175685632 |
+| axioms-return.log | 0 | 4 | 175558656 |
+| axioms-conditional.log | 0 | 2 | 160595968 |
+| axioms-continuation.log | 0 | 5 | 156876800 |
+| axioms-original.log | 0 | 4 | 155463680 |
+| axioms-universal.log | 0 | 3 | 185905152 |
+| native-family.log | 1 | 69 | 484274176 |
+| doc-paths.log | 1 | 3 | 8679424 |
+| whitespace.log | 0 | 1 | 4440064 |
+| reference-assert.log | 0 | 3 | 406450176 |
+| reference-require.log | 0 | 3 | 376475648 |
+| reference-simple_notuple.log | 0 | 4 | 377458688 |
+| reference-simple.log | 0 | 4 | 376172544 |
+| reference-lowLevel.log | 0 | 3 | 383307776 |
+| reference-structured.log | 0 | 4 | 383250432 |
+| reference-structuredAndLowLevel.log | 0 | 4 | 387510272 |
+| reference-nested.log | 0 | 4 | 371040256 |
+| reference-panic.log | 0 | 4 | 399904768 |
+| reference-return_function.log | 0 | 4 | 378736640 |
+| reference-invalid_error_encoding.log | 0 | 4 | 433549312 |
+| reference-malformed_error.log | 0 | 4 | 372355072 |
+| reference-malformed_panic.log | 0 | 4 | 383725568 |
+| reference-malformed_panic_2.log | 0 | 5 | 383332352 |
+| reference-malformed_panic_3.log | 0 | 4 | 385687552 |
+| reference-malformed_panic_4.log | 0 | 4 | 384155648 |
+| reference-create.log | 0 | 4 | 385839104 |
+| reference-try_catch_library_call.log | 0 | 4 | 374800384 |
+| compatibility.log | 0 | 3 | 276107264 |
+| compatibility-opcodes.log | 0 | 1 | 55480320 |
+| panic-original-receipts.log | 0 | 1 | 77705216 |
+| invocation-control.log | 0 | 1 | 4665344 |
+
+Actual command footers distinguish command time from host driver/writer-lock
+queue time and sampled aggregate RSS from physical cgroup peak. Evidence and
+per-fixture before/after account:
+[/workspace/next10-diamond-try-evidence/panic-decoder/fixture-account.md](/workspace/next10-diamond-try-evidence/panic-decoder/fixture-account.md),
+[parity](/workspace/next10-diamond-try-evidence/panic-decoder/fixture-parity.json),
+[axioms](/workspace/next10-diamond-try-evidence/panic-decoder/axiom-account.json),
+[gates](/workspace/next10-diamond-try-evidence/panic-decoder/gate-account.json),
+[diagnostics](/workspace/next10-diamond-try-evidence/panic-decoder/diagnostics-final.json),
+[actual child receipts](/workspace/next10-diamond-try-evidence/panic-decoder/panic-original-receipts.json)
+and [compatibility proposal](/workspace/next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md).
+
+Independent finder/skeptic reviews are read-only, with neither Lean server nor
+checks/writes. Confirmed hash-label, representative-tail description and exact
+capture-proof issues were repaired. Final evidence consistency review is retained
+with the export. Historical investigation comprises20 compiler rows for the two
+sources (12pre-Byzantium plus8Byzantium/Osaka controls), four extra Osaka panic
+compile rows, five opcode tables and20linear scans. Candidate0xfd sites include
+embedded code/data in creation streams and are not CFG reachability or execution
+evidence. No historical runner was implemented/enabled or original row executed
+at a new profile. Exact halt/gas/receipt compatibility remains an open proposal.
+
+Whole-assignment completion remains blocked by six physical-memory/nonprimitive
+ABI source rows and two historical-profile rows. The Panic trailing-data decoder
+mismatch itself is corrected; its original assembly source producer/composition
+is still absent. No rejected ABI/lazy-calldata work, world/payment rewrite,
+callback-phase integration, target/exclusion change or frozen verdict adjustment.
