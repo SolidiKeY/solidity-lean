@@ -2523,6 +2523,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.callInternal_call_ns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Elaborated.callInternal_ns": [
   "Classical.choice",
   "Quot.sound",
@@ -2544,6 +2549,11 @@
   "propext"
  ],
  "Solidity/Source/SoundnessExamples.lean:Solidity.Source.exprNSAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/SoundnessExamples.lean:Solidity.Source.Glob.dispatchFn_params": [
   "Classical.choice",
   "Quot.sound",
   "propext"
