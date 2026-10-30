@@ -9,9 +9,9 @@ import {loadGraph,reach} from './import-fanout.mjs';
 const dependencyBase='50658f41061b366d6e503d1e8a3a324a281e9fca';
 const sourceHead='93e97b28e61f1466eafeb6163baed9da1f9e8240';
 const integrationBase='b965d675e260a374401b131e59d501f8ce5da147';
-// The coordinator refreshed through 1a63602c, then 629c343d with source soundness work.
+// The requested combined base includes the final source soundness merge at 0e2a8ec3.
 // Audit the complete requested interval, pinning these contributions separately.
-const refreshedBase='629c343dd4cd6beb24906523fc92867255dbb29d';
+const refreshedBase='0e2a8ec34c6279853e1d9673b704735403341257';
 // Other integrated contributions are read-only, pinned by exact blob and mode.
 const scalarBase='8445c3fc203144251b9d1fc9181f7f61a8189522';
 const scalarHead='2a267e4f5f43b87d7e49ae14685082559706a03d';

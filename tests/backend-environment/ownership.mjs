@@ -56,6 +56,11 @@ try{
   write(file,'-- retained registry entry\n-- refreshed base registry entry\n');
  git(['add','.']);commit();
  const previousRefresh=git(['rev-parse','HEAD']);
+ // A previously repaired pin can itself become stale after the final merge.
+ // Advance the reviewed source/trust files once more below.
+ for(const file of reserved)write(file,'-- intermediate refreshed source integration\n');
+ git(['add','.']);commit();
+ const intermediateRefresh=git(['rev-parse','HEAD']);
  // The latest combined base can replace source proofs and registry descriptions.
  // The environment contribution must preserve that exact work.
  for(const file of reserved)write(file,'-- refreshed source integration\n');
@@ -66,21 +71,24 @@ try{
  const gateFile=join(fixture,'scripts/check-backend-environment.mjs');
  const gateSource=readFileSync(gateFile,'utf8');
  assert.ok(gateSource.includes("const integrationBase='b965d675e260a374401b131e59d501f8ce5da147';"));
- assert.ok(gateSource.includes("const refreshedBase='629c343dd4cd6beb24906523fc92867255dbb29d';"));
+ assert.ok(gateSource.includes("const refreshedBase='0e2a8ec34c6279853e1d9673b704735403341257';"));
  write('scripts/check-backend-environment.mjs',gateSource.replace(
   "const integrationBase='b965d675e260a374401b131e59d501f8ce5da147';",
   `const integrationBase='${boundary}';`).replace(
-  "const refreshedBase='629c343dd4cd6beb24906523fc92867255dbb29d';",
+  "const refreshedBase='0e2a8ec34c6279853e1d9673b704735403341257';",
   `const refreshedBase='${refreshed}';`));
  git(['add','.']);commit();
  gate(null);
+ gate(null,'--ownership-base',refreshed,'--ownership-head',git(['rev-parse','HEAD']));
  // Reproduce the review finding: the latest retained files fail if the gate
  // still pins an earlier refresh, even with an explicit ownership interval.
  const currentGate=readFileSync(gateFile,'utf8');
- write('scripts/check-backend-environment.mjs',currentGate.replace(
-  `const refreshedBase='${refreshed}';`,`const refreshedBase='${previousRefresh}';`));
- gate(/integrated combined base file changed/);
- gate(/integrated combined base file changed/,'--ownership-base',refreshed,'--ownership-head',git(['rev-parse','HEAD']));
+ for(const staleBase of [previousRefresh,intermediateRefresh]){
+  write('scripts/check-backend-environment.mjs',currentGate.replace(
+   `const refreshedBase='${refreshed}';`,`const refreshedBase='${staleBase}';`));
+  gate(/integrated combined base file changed/);
+  gate(/integrated combined base file changed/,'--ownership-base',refreshed,'--ownership-head',git(['rev-parse','HEAD']));
+ }
  git(['restore','scripts/check-backend-environment.mjs']);
  // Reproduce the actual combined-validation failure with the exact temporary
  // serial configuration; arbitrary content and tracked copies remain forbidden.
@@ -140,7 +148,7 @@ try{
  for(const file of reserved){
   git(['rm',file]);commit();cleanGate(/integrated combined base file changed/);
   git(['reset','--hard',before]);
-  for(const staleBase of [boundary,previousRefresh]){
+  for(const staleBase of [boundary,previousRefresh,intermediateRefresh]){
    write(file,git(['show',`${staleBase}:${file}`])+'\n');
    gate(/integrated combined base file changed/);
    git(['add',file]);commit();cleanGate(/integrated combined base file changed/);

@@ -614,3 +614,32 @@ performed by the repair worker without Lean/server/build use. Only the gate,
 its fixture and this document changed; no Lean diagnostics were needed.
 The coordinator owns the full combined gates. Repairs remain uncommitted
 and unstaged; no source VM, monitor or skill was changed.
+
+### Final source merge snapshot repair (2026-10-30)
+
+The retained P2 review of candidate `9933489d` found that the preceding repair
+still pinned `629c343d` after the requested combined base advanced to
+`0e2a8ec3`. The normal gate reproduced the failure at
+`Solidity/Source/SoundnessExamples.lean`. That file, `Source/WellTyped.lean`,
+`TrustAudit.lean`, the source-soundness document and `g07-axiom-pins.json`
+match the requested base exactly. The snapshot pin now names the full
+`0e2a8ec34c6279853e1d9673b704735403341257` commit.
+
+The ownership fixture models another intermediate refresh before the final
+merge. It accepts the final snapshot under default and explicit ownership
+ranges, rejects both stale refreshed pins under both invocations, and rejects
+deletion or reversion of protected files to every modeled older snapshot.
+The original contribution audit, frozen dependency base `50658f41`, exact
+blob/mode checks, append-only registries and all proof-budget controls remain
+unchanged. No Lean file was edited or checked; the coordinator owns the full
+combined gates. The repairs remain unstaged and uncommitted.
+
+Focused checks pass: `node scripts/check-backend-environment.mjs` under both
+the default range and explicit `0e2a8ec3..9933489d`,
+`node tests/backend-environment/ownership.mjs`, and `git diff --check`.
+Node/Git execution required running outside the sandbox after a sandbox
+`EPERM`; the reproduced gate assertion preceded the repair. Independent
+read-only finder and skeptic reviews report no findings. The finder confirmed
+the five reviewed files match the requested base; the skeptic confirmed that
+the snapshot refresh adds no ownership bypass and preserves frozen checks.
+Neither reviewer used Lean, its server or a build.
