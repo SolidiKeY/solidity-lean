@@ -1684,7 +1684,9 @@ run_cmd do
 run_cmd do
   let headlines : List Name := [
     ``Solidity.Source.Hoare.and,
+    ``Solidity.Source.heapPut_top,
     ``Solidity.Source.memSet_top,
+    ``Solidity.Source.writeLoc_memByte_top,
     ``Solidity.Source.writeLoc_local_mem,
     ``Solidity.Source.writeLoc_mem_mem,
     ``Solidity.Source.writeLoc_memByte_mem,

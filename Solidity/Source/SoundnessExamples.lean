@@ -593,13 +593,22 @@ theorem zeroArr_alloc :
     | _ => none) = some (0, 1, [some false, some false]) := by
   rfl
 
-/-- **Witness** (`deleteLoc_mem`): `delete xs[0]` on the `bool[]` of
-`arrHeap` succeeds and leaves one object in the heap. -/
+/-- **Witness** (`deleteLoc_mem`): after `xs[0] = true` on the `bool[]` of
+`arrHeap`, `delete xs[0]` succeeds, allocates nothing, and element `0` is
+`false` again. -/
 theorem arrHeap_delete :
-    (match ((deleteLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 3 (τ := .bool) (.mem 0 0)).run
+    (match ((do
+        writeLoc SemanticsExamples.F0 3 (.mem 0 0) (Val.bool true)
+        deleteLoc (E := SemanticsExamples.E0) (Γ := []) SemanticsExamples.F0 3 (τ := .bool) (.mem 0 0)).run
       (.nil, { SemanticsExamples.s0 with heap := arrHeap })) with
-    | (.ok (), y) => some y.2.heap.next
-    | _ => none) = some 1 := by
+    | (.ok (), y) =>
+      match y.2.heap.get 0 with
+      | some ⟨_, .array 1 _ xs⟩ =>
+        some (y.2.heap.next, match xs 0 with
+          | .val (.bool b) => some b
+          | _ => none)
+      | _ => none
+    | _ => none) = some (1, some false) := by
   rfl
 
 /-! ## Axioms -/

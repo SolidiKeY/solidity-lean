@@ -44,8 +44,9 @@ element's or member's type (`memSet_ok`, `writeLoc_mem_ok`), nor a byte
 read (`heapBytes_ok`, `readLoc_memByte_ok`). With `HeapInner` too
 (`Data.Inner`: elements and members are bare values), nor is an
 element or member read (`memElem_ok`, `readLoc_mem_ok`). The zeroing
-allocator keeps all three (`MemOK`, `zeroOK`), as do writes of agreeing
-values and `delete` of a local or memory location (`deleteLoc_mem`).
+allocator keeps all three (`MemOK`, `zeroOK`), as do local and memory
+writes of agreeing values and `delete` of a local or memory location
+(`deleteLoc_mem`); storage writes are not covered.
 -/
 
 namespace Solidity.Source
@@ -1180,7 +1181,8 @@ theorem zeroOK_step {n : Nat} (ih : ZeroOK E Γ n) : ZeroOK E Γ (n + 1) where
 /-- **Zeroed objects keep the memory invariant** (`MemOK`: well typed,
 shaped, bare-value elements) at every fuel, halts included; the value of
 `zeroVal` agrees. This covers the `zeroVal` step of a declaration without
-an initializer and of `delete`, not the write or locals update after it. -/
+an initializer and of `delete`; `deleteLoc_mem` composes it with the
+write. -/
 theorem zeroOK : ∀ n, ZeroOK E Γ n
   | 0 => zeroOK_zero
   | n + 1 => zeroOK_step (zeroOK n)
@@ -1199,7 +1201,7 @@ theorem Hoare.and {P : EMState E Γ → Prop} {m : EM E Γ α} {Q₁ Q₂ : α �
   cases m.run x with
   | mk r y => cases r <;> exact fun a b => ⟨a, b⟩
 
-/-- **`heapPut` keeps shapes**, given a shaped object. -/
+/-- **`heapPut` keeps shapes**, given a shaped object (halts included). -/
 theorem heapPut_top (a : Nat) (x : Σ τ, Data E.layout τ) :
     Hoare (fun y => HeapShaped y.2.heap ∧ Data.Top x.2) (heapPut a x : EM E Γ Unit)
       (fun _ y => HeapShaped y.2.heap) (fun _ y => HeapShaped y.2.heap) := by

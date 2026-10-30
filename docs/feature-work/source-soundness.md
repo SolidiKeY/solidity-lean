@@ -275,8 +275,9 @@ stores `Data.val` elements (`zeroElems`, `zeroFields`, `loadElems`,
 condition is also a proof gap only.
 Progress proofs must use `heapPut_ok`, which keeps the halt detail
 `heapPut_pres` drops. `delete` of a local or memory location keeps
-`MemOK` (`deleteLoc_mem`, below); storage `delete` is not covered, and locals holding calldata references (`Val.RefOK` of a
-`cdRef` is `False`; the semantics creates none).
+`MemOK` (`deleteLoc_mem`, below); storage `delete` and locals holding
+calldata references are not covered (`Val.RefOK` of a `cdRef` is
+`False`; the semantics creates none).
 
 **The shape invariant, first use.** `HeapShaped h` (`Data.Top`: a
 top-level object is a `Data.val` only at a type without a location) is
@@ -298,11 +299,20 @@ builds an agreeing, shaped object with bare-value elements, `zeroElems`
 and `zeroFields` agreeing bare-value elements, and `zeroVal`'s value
 agrees (`allocRef_mem`, `Hoare.memGrow` for the growing heap typing,
 `Val.default_loc`); witness `zeroArr_alloc`. Composed with the write:
-writes of agreeing values keep `MemOK` (`writeLoc_local_mem`,
+local and memory writes of agreeing values keep `MemOK` (`writeLoc_local_mem`,
 `writeLoc_mem_mem`, `writeLoc_memByte_mem`, through `memSet_top`,
 `writeLoc_memByte_top`, `heapPut_top` and the conjunction rule
 `Hoare.and`), so `delete` of a local or memory location keeps `MemOK`,
-halts included (`deleteLoc_mem`; witness `arrHeap_delete`). Not yet done: proving the
+halts included (`deleteLoc_mem`; witness `arrHeap_delete`: `true`
+reset to `false`). Storage writes are not covered.
+
+**Review of `deleteLoc_mem`** (finder and skeptic, read-only, no
+blocker): the side condition and "halts included" were confirmed, and
+`Hoare.and` is sound for the deterministic `EM`; fixed: the witness now
+starts from `true` and reads element `0` back as `false`, the `zeroOK`
+docstring points to `deleteLoc_mem`, "writes" now says local and memory
+writes, the TrustAudit list matches the pins. Build43 (`0b7c2be`)
+passed. Not yet done: proving the
 same for the other allocation sites (`loadMem`, the ABI decoder,
 `structNew`, literals, the `abi.encode*` result); carrying `HeapShaped` and `HeapInner` (`MemOK`) through frame restores (`Eval.lean` and
 `Semantics.lean` reset the heap or restore a saved one, as for
