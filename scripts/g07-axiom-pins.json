@@ -1877,6 +1877,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/Session.lean:Solidity.Source.stuck_not_diverges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/StateExamples.lean:Solidity.Source.Heap.copy_independent": [
   "Quot.sound",
   "propext"

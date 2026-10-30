@@ -59,8 +59,10 @@ What `sourceLang` does not give G01 (also under `limitations:`):
   divergence. It is not a lack of horizon: a transaction stuck at one
   horizon is stuck at every larger one (`runTx_stuck_stable`,
   [Horizons](#horizon-independence)), so the two differ in the model even
-  though G01's `Prefix` shows them alike. A progress theorem would rule it
-  out; it is not proved.
+  though G01's `Prefix` shows them alike (`txFate`, `stuck_not_diverges`).
+  Unmodelled features also halt `stuck` (a `string` getter, see
+  [Well-formedness](#well-formedness-and-progress-interfaces)), so progress
+  holds at best for a modelled fragment; it is not proved.
 - **Events of unfinished transactions.** `sourceLang` (`sessionAt`) shows
   none of the events of a transaction that never completes.
   `sourceLangEvents` (`sessionAtEvents`, `Solidity/Source/Session.lean`)
@@ -174,9 +176,13 @@ What is not intrinsic is checked at run time and fails as `stuck`. That
 covers layout agreement (`Env.cellTy` against a path's static type), memory
 object types, and frame shapes.
 
-No progress theorem is proved, so the absence of `stuck` is an obligation:
-for a well-formed elaborated program, no horizon ends `stuck`. The controls
-show non-stuck completion on each program they run.
+No progress theorem is proved, and as worded for every elaborated program
+it is false: unmodelled features halt `stuck` too (the getter of a
+`string` state variable, `Eval.lean`'s getter branch, elaborates and is
+not refused by the profile). The absence of `stuck` is an obligation for
+a modelled fragment, which is not yet delimited (by a hypothesis or by
+profile exclusions of the unmodelled features). The controls other than
+the stuck one below complete without `stuck`.
 
 **Stuck is not divergence** (`Session.lean`). `txFate G q s n` is a
 transaction's fate within horizon `n`: `done o`, `halted h` or `pending`.
@@ -190,6 +196,26 @@ transaction's fate within horizon `n`: `done o`, `halted h` or `pending`.
 | `stuck_iff` | `Stuck` (halted `stuck` within some horizon) iff the run is stuck at some horizon |
 | `stuck_not_diverges` | a stuck transaction does not diverge |
 | `stuck_stable` | a stuck fate stays the same halt at every larger horizon |
+| `stuck_eventually` | a stuck transaction has, from some horizon on, the same `stuck` fate at every horizon |
+
+`stuck_not_diverges` itself is shallow (a stuck run is not a timeout); the
+content is in `stuck_iff`'s converse and `txFate_of_done`, which use
+`runTx_stable` so that the least completing horizon has the run's result.
+`txFate_mono`, `stuck_stable` and `stuck_eventually` follow from how
+`firstDone` is built.
+
+Skeptic review (read-only, no Lean server), fixed:
+
+- the doc called progress for every elaborated program open; the `string`
+  getter control refutes it, so the doc now asks for a modelled fragment;
+- the `Failures` paragraph named depth and stipend as its content; it now
+  names G06's failure points;
+- the control checks the deployment and the stuck message;
+- `stuck_not_diverges`' docstring claimed a dependency on stability that the
+  proof does not have; `stuck_eventually` states the stronger fact.
+
+Recorded, not fixed: callbacks entered through `envLoop` (`Eval.lean`) do
+not check the depth limit before `enterInstance`.
 
 So a reader of fates can tell a stuck run (a modelling gap or ill-formed
 program, observable at a finite horizon) from a divergent one. The session
@@ -197,7 +223,8 @@ prefix (G01's `Prefix Event Outcome`) cannot carry the distinction, since
 both end non-final; `txFate` is the observation to read alongside it. The
 control (`SessionExamples.lean`) has `s()` on a `string public s` stuck at
 horizons 40 and 80, and `spin` pending at both. Progress itself (no
-elaborated program is ever stuck) is still open.
+modelled program is ever stuck) is still open, and needs the modelled
+fragment delimited first.
 
 ## Controls
 
@@ -355,12 +382,12 @@ this branch; at integration these parts of the checker break:
 | `Infer.lean` `binPair` shift/exp (l. 219–229) | premises on `τa.mobile`, result at `τa` | `Typed.shift`/`exp` read `τa.shiftTy` and type the result `τa.shiftTy` |
 | `Infer.lean` arith/bit/order/eq (`common?`) | still compiles; results change | `STy.common?` refuses a constant against a constant or a `bytesN` and uses the mobile type |
 | `Infer.lean` (all arms) | no arms for the new rules | new `Typed` constructors `member`, `structNew`, `extCall`, `extCallValue`, `transfer`, `send`, `abiEncode`, `assignCopy`, and `LVal.member` |
-| `InferStmt.lean` l. 71 | builds `.expr p.2` | `StmtD.expr` has the premise `(C.inModifier && e.isUnderscore) = false` |
-| `InferStmt.lean` l. 118 | builds `.retTuple p.2 q.2 hf` | `StmtD.retTuple` has the premise `σs ≠ []` |
-| `InferStmt.lean` `rethrowRes` (l. 143–152) | builds `.rethrow hb hr ht hp` from `Syn.paths` | `StmtD.rethrow`'s last premise is `rethrowVar? body = some d` |
-| `InferComplete.lean` `const_mem`, `litBytes_mem` (l. 65, 143), the main match (l. 543–544, 589–593), `shift_pair`, `exp_pair` (l. 245–253) | the same signature changes | as above; the main match also lacks the new constructors |
-| `InferStmtComplete.lean` l. 87–91, 186–189, 210–213 | `.expr`, `.retTuple`, `.rethrow` cases | as above |
-| `InferExamples.lean` `zero_types` (l. 75) | expects 33 types for `0x00` | `0x00` now has one type, `hexConst 0 1` (solc's literal typing, Q1) |
+| `Static/InferStmt` (master) l. 71 | builds `.expr p.2` | `StmtD.expr` has the premise `(C.inModifier && e.isUnderscore) = false` |
+| `Static/InferStmt` (master) l. 118 | builds `.retTuple p.2 q.2 hf` | `StmtD.retTuple` has the premise `σs ≠ []` |
+| `Static/InferStmt` (master) `rethrowRes` (l. 143–152) | builds `.rethrow hb hr ht hp` from `Syn.paths` | `StmtD.rethrow`'s last premise is `rethrowVar? body = some d` |
+| `Static/InferComplete` (master) `const_mem`, `litBytes_mem` (l. 65, 143), the main match (l. 543–544, 589–593), `shift_pair`, `exp_pair` (l. 245–253) | the same signature changes | as above; the main match also lacks the new constructors |
+| `Static/InferStmtComplete` (master) l. 87–91, 186–189, 210–213 | `.expr`, `.retTuple`, `.rethrow` cases | as above |
+| `Static/InferExamples` (master) `zero_types` (l. 75) | expects 33 types for `0x00` | `0x00` now has one type, `hexConst 0 1` (solc's literal typing, Q1) |
 
 This branch's `Typed.infer` (`Solidity/Source/Infer.lean`) follows the new
 rules and returns one derivation per expression; by `Typed.unique` that is
@@ -376,12 +403,12 @@ interface and has no completeness proof.
   a change to `Machine.lean`/`Eval.lean` plus a re-proof of those theorems
   with one more monotone component.
 - `Failures`/`withFailures`/`NoFail` over `lang.Res`. The bound is a bare
-  horizon (`Res := Nat`) and the source is idealized (no gas, so no frame
-  fails for gas), so the only honest `Failures` records where the
-  call-depth limit and the stipend rule fail a frame. The depth limit is
-  applied (`Eval.lean`: a call at depth 1024 fails with empty data) but
-  not recorded, and the stipend rule (`stipendFits`) has no source
-  counterpart yet.
+  horizon (`Res := Nat`). G06's failure points let each request be
+  dropped or run with its post-fee balance, and any external frame fail
+  at a chosen point; the semantics has no such choice (only the depth
+  limit fails a call, `Eval.lean`, and the stipend rule `stipendFits` has
+  no source counterpart), so the bound must first carry failure points
+  and every call site consult them.
 - `Parses`/`Resolves` relations over an `Input`, which belong to S00/S01's
   front end (`Frontend/`, not this lane's files).
 

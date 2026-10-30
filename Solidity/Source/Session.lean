@@ -185,10 +185,13 @@ A transaction's **fate** within horizon `n`: it completes, halts (stuck at a
 run-time mismatch), or is pending (it times out at every horizon up to
 `n`).  A pending fate can still change; a completed or halted one is the
 fate at every larger horizon (`txFate_mono`).  Divergence is pending at
-every horizon (`diverges_iff`: a timeout at every horizon); being stuck
-is a run that is stuck at some horizon (`stuck_iff`), and then at every
-larger one (`runTx_stuck_stable`), so a stuck transaction never reads as
-a divergent one (`stuck_not_diverges`). -/
+every horizon; it is a timeout at every horizon (`diverges_iff`).  A
+stuck fate within some horizon is a run stuck at some horizon
+(`stuck_iff`, by `runTx_stable`: the least completing horizon has the
+same result), and from then on the fate is that halt at every horizon
+(`stuck_eventually`), so a stuck transaction never reads as a divergent
+one (`stuck_not_diverges`).  `runTx` turns a revert into a completed
+outcome, so `halted` is in practice `stuck`. -/
 
 /-- The fate of a transaction within horizon `n`. -/
 inductive TxFate where
@@ -284,8 +287,8 @@ theorem stuck_iff (G : Glob E) (q : Request) (s : St E) :
     refine ⟨k, msg, ?_⟩
     rw [txFate_of_done G q s (Nat.le_refl k) hd, h]
 
-/-- **Stuck is not divergence**: a stuck transaction is stuck at every
-horizon from some horizon on, so it is not pending at all of them. -/
+/-- **Stuck is not divergence**: a run stuck at some horizon does not time
+out there. -/
 theorem stuck_not_diverges (G : Glob E) (q : Request) (s : St E) (h : Stuck G q s) : ¬ Diverges G q s := by
   intro hd
   obtain ⟨k, msg, hk⟩ := (stuck_iff G q s).1 h
@@ -308,5 +311,12 @@ theorem stuck_stable (G : Glob E) (q : Request) (s : St E) {n n' : Nat} (hn : n 
 /-- info: 'Solidity.Source.runTx_events_mono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms runTx_events_mono
+
+/-- **A stuck transaction is eventually always stuck**: from some horizon
+on, its fate is the same `stuck` halt. -/
+theorem stuck_eventually (G : Glob E) (q : Request) (s : St E) (h : Stuck G q s) :
+    ∃ n msg, ∀ n', n ≤ n' → txFate G q s n' = .halted (.stuck msg) := by
+  obtain ⟨n, msg, hn⟩ := h
+  exact ⟨n, msg, fun _ h' => stuck_stable G q s h' hn⟩
 
 end Solidity.Source

@@ -78,8 +78,9 @@ contract S { string public s; }
 ```
 
 The getter of a `string` is not modelled, so `s()` is stuck: halted at
-horizon 40 and at 80 (`stuck_stable`), while `spin` is pending at both
-(`stuck_not_diverges`).
+horizon 40 and at 80 (as `stuck_stable` says it must stay), while `spin`
+is pending at both.  Two sampled horizons do not show that `spin`
+diverges; they show the two fates apart.
 -/
 
 def unitS : Syn .unit :=
@@ -91,16 +92,20 @@ def elabS : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 #guard elabS.isSome
 
 /-- The fate of one transaction after deploying `main` at `addr 0`, within
-horizon `n`, as a tag: `0` done, `1` stuck, `2` other halt, `3` pending. -/
+horizon `n`, as a tag: `0` done, `1` stuck at the unmodelled getter, `2`
+another halt, `3` pending.  The deployment must succeed. -/
 def fateAfterDeploy (el : Elaborated) (main : String) (q : Request) (n : Nat) : Nat :=
   let P : SrcProg el.res.env := ⟨el.prog, .legacy, toyFixed, main⟩
   let G := P.glob envSpin
-  let s := (runAt (fun f => deploy G f main (addr 0) SemanticsExamples.user (word 0) []) (St.init _) 40).2
-  match txFate G q s n with
-  | .done _ => 0
-  | .halted (.stuck _) => 1
-  | .halted _ => 2
-  | .pending => 3
+  let d := runAt (fun f => deploy G f main (addr 0) SemanticsExamples.user (word 0) []) (St.init _) 40
+  match d.1 with
+  | .ok (.success _) =>
+    match txFate G q d.2 n with
+    | .done _ => 0
+    | .halted (.stuck m) => if m == "getter of this type is not modelled" then 1 else 2
+    | .halted _ => 2
+    | .pending => 3
+  | _ => 4
 
 def reqOf (input : Bytes) : Request := ⟨SemanticsExamples.user, addr 0, word 0, word 0, input⟩
 
