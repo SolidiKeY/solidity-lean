@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-one. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-two. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -1889,3 +1889,75 @@ failures/general paths/delete/rebinding/general ABI-reference-storage-Source/fre
 deep-copy/recursive Source graph or emitted-loop correctness. Further original
 operation/growth/application clauses are not declared exhausted. Persistent goal
 unchanged/unfinished; no integration.
+
+## Checkpoint22: finite-schedule growth and actual interstage allocation (partial)
+
+Continued independently justified original G33/G35.04/BackfillA-B application
+after checkpoint21: existing checked-step Keeps proves growth, but no finite
+schedule extension/application existed. New SnapshotScheduleGrowth derives actual
+run success and final Keeps through arbitrary finite schedules by the published
+checkedCaptureOverwrite_keeps at each REAL changed intermediate. Initial prefix
+Keeps is explicit, independent of run/restoration; actual Heap.alloc discharges
+it. None transports iff because original bounds use preserved lengths. Actual
+allocation after a successful arbitrary prefix derives its reached heap from
+runCaptures_split_some, then transports the arbitrary remaining tail. No desired
+final preservation, frozen payloads or mid-representation are assumed. Fresh
+object own fields frame by actual old_ne_fresh and runCaptures_frame; this is
+not a proof of deep referenced-child liveness or an allocation constructor.
+
+Primitive runtime control performs a meaningful first write, proves its immutable
+child-table representation FALSE, actually allocates supplied parent[r,r] on that
+reached heap, then repair ++ restoreCycles(copies) ++ repair for arbitrary Nat
+copies. Full initial/mid/final child vectors are inherited from actual checked
+instances; old child ends[F,F,F]++nfalse while new parent's old-ID fields0,0 and
+neighbor[F,T] frame. Fresh-vs-old separation and NO Source entry for the fresh
+root are explicit. This uses Heap.alloc with supplied MObj only, not reference
+construction/default/compiler/target-failure implementations.
+
+Finder requested explicit allocated failure prefix and broken-mid relation; both
+supplied. allocated_failure now returns actual allocated three-step prefixSome,
+its reached invalid destination callNone and full sequenceNone, with no suffix
+heap/rollback. Skeptic requested nonprimitive weakening: reference_allocated runs
+actual allocated arbitrary runtime cycles plus actual first-copy control. Full
+weakened old reference vectors change[left,right,right] to[left,left,right] at
+firstOut and restore in the full run; new parent fields retain old root IDs2,2
+at both outputs; distinct old child content vectors frame. For copies1, literal
+checked secondSome is linked to the ACTUAL firstOut. Nontrivial HRef weakening,
+recapture and own-fields versus child-content boundaries are independently
+inhabited, not assumed output relations or fresh Source representations.
+
+Separate independent read-only finder/skeptic refined reviews accept all controls
+with no mathematical/ownership defect. Focused03 passes77jobs, all7public outputs
+standard; exact guards/final checks follow. Raw failed02 attempt retained (private
+fixture rewrite matching and Lean reserved identifier), actual source repaired.
+Same existing capped serial runtime, warm outputs, writer lock and all budgets;
+measured4MiB small-module/log/compact-export forecast, no new runtime/cache copies/
+cleanup/capacity change. Every original queue remains partial/blocked and all
+physical-byte/all-profile default/target failure/general path-delete-rebinding/
+ABI-reference-storage-Source/fresh deep-copy/recursive graph/reserved-copy/final
+V10-Source-target obligations stay open. No exhaustion or whole-lane claim.
+
+Checkpoint22 final independent source/doc finder/skeptic PASS after explicit
+allocated-prefix/midnegative/nonprimitive-weakening controls. Guarded77jobs and
+unchanged full run-lean.sh921default/262TestSuite/SolKey377/131 exit0. Fresh actual
+Lean4.24.0(797c613)/Lake5.0.0-src+797c613 and KeySort2jobs PASS. Aggregate sampled
+Lean/Lake RSS1779724KiB; per-exec OOM deltas0; cumulative whole-session
+cgroup peak2160848896bytes is not per-exec RSS. Same12GiB/no childswap under16GiB
+parent/hostswap0, serial-j1 and all proof/time/fuel/node/TestSuite guards unchanged.
+Layers/orphans/trust/strictautomatic/complete fixtures/script syntax/corruption/diff
+PASS. Owned536standard pins70modules PASS. Raw global inventory FAIL exit1,0unsafe
+errors550unrecorded=14inherited+536owned. Strict docs FAIL exit1, complete findings
+byte-identical to exactbase ea1a09c222d52d1d17953f653c087443e34e6282497f0b02cdc09aad15b7dd48;
+zeroNEWcomparison separately PASS. Reserved global records untouched.
+
+As requested, supported optional artifact cache is now OFF in the UNTRACKED runtime
+TOML; original enabled config snapshot retained in new evidence, old sealed runtime
+configs unchanged. Warm regular .olean files reused and all caches/toolchains kept
+in place, no copying/cleanup. Cache-off final gate produced ~24MiB additional build/
+link output, exceeding the initial4MiB small-module forecast; raw disk receipts
+retain this measured overrun. No capacity/guard/budget change; measured remaining
+~587MB supports compact additive export. Actual export headroom is recorded before
+writes. All original queues remain PARTIAL/BLOCKED, including physical bytes/all-
+profile defaults/target failures/general paths/delete/rebinding/ABI-reference-
+storage-Source/fresh deep-copy/recursive graph/reserved copy/final V10-target
+composition. Neither independent exhaustion nor full goal completion is claimed.

@@ -1108,3 +1108,4 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/SnapshotProvenance.lean` | Backward index transport proved against actual complete schedule reads; INITIAL-content target/heap/child restoration iff |
 | `Backend/MemoryOps/SnapshotScheduleControls.lean` | Arbitrary runtime restore cycles, broken intermediate representation, three material writes, complete vectors, reversed/frozen/later-failure/empty/touching controls |
 | `Backend/MemoryOps/SnapshotReferenceSchedules.lean` | Dynamic and fixed reference-valued runtime schedules; old alias identities, actual recapture, framed children and element32 witnesses |
+| `Backend/MemoryOps/SnapshotScheduleGrowth.lean` | Finite actual snapshot success/failure through published Keeps; actual interstage allocation, fresh-field frames and nonprimitive weakening controls |
