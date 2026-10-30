@@ -1293,7 +1293,8 @@ termination_by structural n
 
 /-- **The environment's moves** while a call of the system is pending:
 answers end it; credits and callbacks (into any instance) are recorded and
-the strategy is asked again. -/
+the strategy is asked again.  `depth` is the environment frame's; a
+callback from depth 1024 fails as a call from there does (`callAddr`). -/
 def envLoop (G : Glob E) (n : Nat) (depth : Nat) (pstatic : Bool) : EM E [] Outcome :=
   match n with
   | 0 => halt .timeout
@@ -1308,7 +1309,7 @@ def envLoop (G : Glob E) (n : Nat) (depth : Nat) (pstatic : Bool) : EM E [] Outc
       envLoop G n depth pstatic
     | .reenter t sender v input static => do
       emitEvent (.reenter t sender v input static)
-      let o ← match ← instanceAt G t with
+      let o ← if depth ≥ 1024 then pure (.revert []) else match ← instanceAt G t with
         | some c => do
           let m ← mark
           credit t v

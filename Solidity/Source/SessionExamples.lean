@@ -22,7 +22,7 @@ namespace Solidity.Source.SessionExamples
 
 open Solidity.Source Solidity.Source.Examples Solidity.Source.SemanticsExamples
   Solidity.Source.ElaborateExamples
-open Solidity.Roadmap (Address Word Bytes Event Outcome SessionEnv Request)
+open Solidity.Roadmap (Address Word Bytes Event Outcome SessionEnv Request Move)
 
 def pingCall : Syn .expr :=
   .call (.member (.call (.ident "I") (.positional (.cons (.ident "a") .nil))) "ping") (.positional .nil)
@@ -115,5 +115,29 @@ def reqOf (input : Bytes) : Request := ⟨SemanticsExamples.user, addr 0, word 0
 -- `spin(ext)` is pending at both.
 #guard (elabSpin.map fun el => (fateAfterDeploy el "C" (reqOf (selOf "spin(address)" ++ arg 9)) 40,
   fateAfterDeploy el "C" (reqOf (selOf "spin(address)" ++ arg 9)) 80)) == some (3, 3)
+
+/-! ## Callbacks at the depth limit
+
+The environment frame at depth 1024 cannot call back: its callback fails
+as a call from there does (`callAddr`), so `x()` is not entered.  At depth
+3 the callback runs the getter.
+-/
+
+/-- The environment calls back `x()` on `D` once, then answers. -/
+def calleeOnce : List Event → Move := fun evs =>
+  if evs.any (fun e => match e with | .reentered _ => true | _ => false) then .answer (.success [])
+  else .reenter thisC SemanticsExamples.user (word 0) (selOf "x()") false
+
+/-- The callback's outcome after deploying `D` at `thisC`, with the
+environment frame at `depth`. -/
+def callbackAt (el : Elaborated) (depth : Nat) : Option Outcome :=
+  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true, calleeOnce, word 0⟩
+  let r := runAt (fun n => do
+    let _ ← deploy G n "D" thisC SemanticsExamples.user (word 0) []
+    envLoop G n depth false) (St.init _) 40
+  r.2.events.findSome? fun e => match e with | .reentered o => some o | _ => none
+
+#guard (elabD.bind fun el => callbackAt el 1024) == some (.revert [])
+#guard (elabD.bind fun el => callbackAt el 3) == some (.success (arg 3))
 
 end Solidity.Source.SessionExamples
