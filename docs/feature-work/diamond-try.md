@@ -1479,3 +1479,5 @@ Official-source-only backend feasibility: [evmone0.22 pins, build edges and abor
 Human-approved bounded [M1 computed producer/capture](diamond-try-m1.md) implements only the reviewed first proof component. P4/P5b/P8, original source admission and all eight native blocked rows remain open.
 
 [Post-M1 published-interface/readiness design](diamond-try-post-m1-design.md) updates P4/P5b/P8 only from current published source and actual M1; all execution permission and implementation boundaries remain in force.
+
+Compatible Osaka validation after M1: [actual results and held groups](diamond-try-osaka-validation.md). Original native family remains exit1; no source-admission or P4/P5b/P8 change.

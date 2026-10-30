@@ -1,0 +1,4 @@
+Finder/skeptic pre-execution: actual import/main guards/native earlycompatibility guard/reference exactfilter/selectedtest paths reviewed; no historical execution path found. Minor parser/settings-versus-compile-input wording corrected.
+Final finder: read report, raw footers/account script/results/plan/dependency/delivery scope; counts and ordered comparisons supported. Corrected historicalNeverCompiledOrExecuted key to historicalNotCompiledOrExecutedThisIncrement because earlier authorized static compilations exist. No current-run violation.
+Final skeptic: read report/plan/results/account/log footers/dependency/delivery records; counts, held Cancun groups, unchanged earlyhistorical refusal, exact lock tree, finite claim limits and temporary cleanup supported. No concrete finding.
+Neither reviewer ran scripts/checks/Lean/server/build/compiler/fixtures/EVM or wrote files; no coordinator receipt certification.
