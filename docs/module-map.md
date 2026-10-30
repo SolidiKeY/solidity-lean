@@ -1052,3 +1052,17 @@ At the root, the notation's own tests:
 | `Frontend/PaymentImport.lean` | Imports actual receive/getter code, builds typed initializer handle assignment and paid creation/payment compositions with source identities. |
 | `Tools/PaymentReplay.lean` | Ordered deterministic source-world observations with actual nested bytes and committed-world audits; gas remains an independent obligation. |
 | `Examples/Tactics/PaymentSource.lean` | Kernel-checked original send and debug transfer source snapshots, initialized handle/funding/getter witnesses and wrong handle/kind/bytes controls. |
+| `Backend/Failure/Immediate.lean` | Big-endian PUSH32 machine immediates and exact numeric reading. |
+| `Backend/Failure/Gap.lean` | Base-interface panic boundary gap controls. |
+| `Backend/Failure/Emit.lean` | Typed failure/return payloads and actual MSTORE8/RETURN/REVERT instruction emission. |
+| `Backend/Failure/EmissionChecks.lean` | Inhabited emission, byte vector, negative and combination controls with axiom pins. |
+| `Backend/Failure/Slice.lean` | Independent typed-word PUSH/MSTORE8/RETURN/REVERT byte-memory execution and checked stack heights. |
+| `Backend/Failure/Correct.lean` | Exact emitter execution, stack/memory frames, bounded-stack certificate and arbitrary chunk/tail laws. |
+| `Backend/Failure/SliceChecks.lean` | Literal instruction, underflow/truncation, memory/frame/chunk, concatenation and1022/1023 stack controls. |
+| `Backend/Failure/Observe.lean` | Existing THalt/TRes source observation relation, deterministic payload correspondence and checked emission. |
+| `Backend/Failure/ObservationChecks.lean` | Inhabited source assert/require/custom/return, complete-body selector negatives and wrong-observation refutations. |
+| `Backend/Failure/Checkpoint.lean` | Independent component-local typed persistent/transient checkpoint relation and compositional restore rules. |
+| `Backend/Failure/Unwind.lean` | Checked emitted payload execution before local unwind; success/failure and nested-failure proofs. |
+| `Backend/Failure/UnwindChecks.lean` | Inhabited distinct snapshots, nested emitted failures, caller-memory restoration and wrong-snapshot negatives. |
+| `Backend/Failure/Composition.lean` | Arbitrary two-write-block byte noninterference, immutable input preservation and checked emitter concatenation/terminal distinction. |
+| `Backend/Failure/CompositionChecks.lean` | Inhabited both-executed writes, overlap negative, overlapping ignored suffix and same-bytes terminal controls. |
