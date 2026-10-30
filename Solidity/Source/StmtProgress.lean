@@ -23,7 +23,8 @@ builds (`callInternal_ns`). For elaborated programs that frame is derived
 return types to agree (`Elaborated.callInternal_call_ns`). With internal
 calls inside expressions, expressions, statements, bodies and calls are
 proved together by induction on the horizon (`FragAt`, `fragAt`), for a
-program whose allowed functions are fragment bodies (`CallsOK`):
+program whose allowed functions are fragment bodies (`CallsOK`, a
+hypothesis: nothing derives it for elaborated programs):
 `evalE_callFrag_ns`.
 
 The scope facts it needs are structural: a statement's output context
@@ -860,7 +861,8 @@ theorem Elaborated.callInternal_call_ns (el : Elaborated) (G : Glob el.res.env) 
 declaration `A` allows with a signature, virtual dispatch (from any
 contract) finds a body without modifiers, in the statement fragment with
 calls to `A` and in the operations' domains, whose locals are the frame the
-call builds and whose return types have defaults. -/
+call builds and whose return types have defaults. It is assumed: no lemma
+derives it for an elaborated program. -/
 def CallsOK (A : Decl → Prop) (G : Glob E) : Prop :=
   ∀ (c : String) (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → A d →
     ∃ b, G.prog.body (G.dispatchFn c d) = some b ∧ b.mods = [] ∧
@@ -918,7 +920,7 @@ are fragment bodies. -/
 theorem fragAt {A : Decl → Prop} {G : Glob E} (hG : CallsOK A G) : ∀ n, FragAt A G n
   | 0 => fragAt_zero A G
   | n + 1 =>
-    have ih := fragAt hG n
+    have ih : FragAt A G n := fragAt hG n
     { expr := fun F => exprNSAt_step (ih.expr F) (ih.call F)
       stmt := stmtNSAt_step ih.stmt ih.expr
       mods := fun F b l hf ho hfr => mods_step ih F b l hf ho hfr
