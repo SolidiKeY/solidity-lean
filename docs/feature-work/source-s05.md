@@ -102,12 +102,10 @@ some inputs:
 
 - ABI decoding of static arrays, structs and arrays of non-value types;
 - calldata references;
-- storage assignment of an array of mappings (`loadMem`: "a mapping is
-  not copied"), typed by S01 though solc refuses it; the same assignment
-  of a struct containing a mapping is not `stuck` but copies nothing;
 - `fallback` with parameters;
 - nested-array copies;
-- the ABI of user-defined value types and external function types;
+- the ABI of external function types (user-defined value types are
+  decoded as their underlying type since lane V04b);
 - function-typed defaults.
 
 These are recorded in [source-s02.md](source-s02.md#what-s02-does-not-do)
@@ -447,5 +445,5 @@ fragment, which must first be delimited (`stuck` is told apart from
 divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
 rule); calldata references, `abi.decode`, `new`, slices, inline arrays,
-`try`, tuple declarations, `fallback` with parameters; dynamic-length
-`Panic(0x41)`; user-defined value types in the decoder.
+`try`, tuple declarations, `fallback` with parameters (the decoder's
+dynamic-length `Panic(0x41)` is modelled since lane V04b).

@@ -183,9 +183,9 @@ def encodeVals {Γ : RCtx} (F : Fr) (n : Nat) (packed : Bool) {τs : List STy} (
 /-- The word at a position of ABI data (zeros past its end). -/
 def wordAt (data : Bytes) (i : Nat) : Nat := beValue (fitBytes 32 (data.drop (32 * i)))
 
-/-- **Decoding a static value** from its word; an invalid word reverts
-with no data, as solc's decoder does. -/
-def decodeWord (D : Layout) (w : Nat) : (τ : STy) → R (Val D τ)
+/-- **Decoding an elementary static value** from its word; an invalid
+word reverts with no data, as solc's decoder does. -/
+def decodeElemWord (D : Layout) (w : Nat) : (τ : STy) → R (Val D τ)
   | .int t =>
     match readInt t (toWord w) with
     | some v => mkInt t v
@@ -203,6 +203,13 @@ def decodeWord (D : Layout) (w : Nat) : (τ : STy) → R (Val D τ)
     | none => .error (.revert [])
   | _ => stuck "dynamic ABI decoding is not modelled"
 
+/-- **Decoding a static value** from its word: a user-defined value type
+as its underlying type (lane V04b), anything else by `decodeElemWord`. -/
+def decodeWord (D : Layout) (w : Nat) (τ : STy) : R (Val D τ) :=
+  match τ with
+  | .udvt d => do pure (.udvt (← decodeElemWord D w (D.underlying d)))
+  | τ => decodeElemWord D w τ
+
 /-- Decoding static values from ABI data, from the `i`-th word. -/
 def decodeVals (D : Layout) (data : Bytes) : (τs : List STy) → Nat → R (Vals D τs)
   | [], _ => pure .nil
@@ -214,11 +221,17 @@ def STy.isValueTy : STy → Bool
   | _ => false
 
 /-- The contents of a dynamic argument whose head is the `i`-th word: its
-offset, then its length and bytes there; out of bounds reverts. -/
+offset, then its length and bytes there. A length word past the data
+reverts, as solc's `offset + 0x1f < end` check does; then a length of
+`2^64` or more panics (`0x41`, solc's `array_allocation_size`, before its
+bounds check); then out of bounds reverts. -/
 def tailBytes {Γ : RCtx} (data : Bytes) (i : Nat) : EM E Γ Bytes := do
   let off := wordAt data i
-  let len := wordAt (data.drop off) 0
-  if off + 32 + len ≤ data.length then pure ((data.drop (off + 32)).take len) else halt (.revert [])
+  if data.length < off + 32 then halt (.revert [])
+  else
+    let len := wordAt (data.drop off) 0
+    if 2 ^ 64 ≤ len then lift (panic .alloc)
+    else if off + 32 + len ≤ data.length then pure ((data.drop (off + 32)).take len) else halt (.revert [])
 
 /-- **Decoding one argument** at head word `i`: a static value from its
 word; `bytes`, `string` and a dynamic array of value types (in memory) from
@@ -238,8 +251,11 @@ def decodeArg {Γ : RCtx} (data : Bytes) (i : Nat) (τ : STy) : EM E Γ (Val E.l
     | .memory, none =>
       if σ.isValueTy then do
         let off := wordAt data i
+        if data.length < off + 32 then halt (.revert [])
+        else
         let len := wordAt (data.drop off) 0
-        if off + 32 + 32 * len ≤ data.length then
+        if 2 ^ 64 ≤ len then lift (panic .alloc)
+        else if off + 32 + 32 * len ≤ data.length then
           let xs ← (List.range len).mapM fun j => lift (decodeWord E.layout (wordAt (data.drop (off + 32)) j) σ)
           allocRef (Data.array (D := E.layout) (l := .memory) (n := none) xs.length (fun _ h => nomatch h)
             (fun k => .val (xs.get k)))

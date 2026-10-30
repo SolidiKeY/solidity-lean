@@ -167,6 +167,67 @@ def runD (el : Elaborated) (value : Nat) (inputs : List Bytes) (h : value < 2 ^ 
 #guard (elabD.map fun el => (runD el 1 []).head?) == some (some (some (.revert [])))
 #guard (elabD.map fun el => (runD el 0 []).head?) == some (some (some (.success [])))
 
+/-- `contract D { type W is uint8; type V is int8; uint256 public x;
+function f(W w) public { x = 1; } function g(V v) public { x = 2; } }` -/
+def unitW : Syn .unit :=
+  .unit (.cons (.contract false "D" .none .nil
+      (.cons (.udvt (t := false) "W" (.int false 8 (by decide)))
+      (.cons (.udvt (t := false) "V" (.int true 8 (by decide)))
+      (.cons (.stateVar u256 (some .pub) none none false "x" .none)
+      (.cons (.function (.ident "f") (.cons (.param (.userType ⟨"W", []⟩) none (some "w")) .nil)
+          (some .pub) none .nil false none .nil (.some (.block
+          (.cons (stmt (.assign .assign (.ident "x") (num 1))) .nil))))
+      (.cons (.function (.ident "g") (.cons (.param (.userType ⟨"V", []⟩) none (some "v")) .nil)
+          (some .pub) none .nil false none .nil (.some (.block
+          (.cons (stmt (.assign .assign (.ident "x") (num 2))) .nil))))
+      .nil))))))
+    .nil)
+
+def elabW : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitW)
+
+#guard elabW.isSome
+
+-- **A user-defined value type argument** (lane V04b, a run-time gap
+-- closed) is decoded as its underlying type: `f(7)` runs (`x` becomes 1),
+-- `f(300)` is not a `uint8` and reverts with no data.
+#guard (elabW.map fun el => runD el 0 [selOf "f(uint8)" ++ arg 7, selOf "x()"]) ==
+  some [some (.success []), some (.success []), some (.success (arg 1))]
+#guard (elabW.map fun el => runD el 0 [selOf "f(uint8)" ++ arg 300, selOf "x()"]) ==
+  some [some (.success []), some (.revert []), some (.success (arg 0))]
+-- A signed underlying type: `g(-1)` (the word `2^256 - 1`, sign-extended)
+-- runs, `g(200)` (not sign-extended, out of `int8`) reverts.
+#guard (elabW.map fun el => runD el 0 [selOf "g(int8)" ++ arg (2 ^ 256 - 1), selOf "x()"]) ==
+  some [some (.success []), some (.success []), some (.success (arg 2))]
+#guard (elabW.map fun el => runD el 0 [selOf "g(int8)" ++ arg 200, selOf "x()"]) ==
+  some [some (.success []), some (.revert []), some (.success (arg 0))]
+
+/-- `contract D { function g(bytes memory b) public {} }` -/
+def unitB : Syn .unit :=
+  .unit (.cons (.contract false "D" .none .nil
+      (.cons (.function (.ident "g") (.cons (.param (.elem .bytes) (some .memory) (some "b")) .nil)
+          (some .pub) none .nil false none .nil (.some (.block .nil)))
+      .nil))
+    .nil)
+
+def elabB : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitB)
+
+#guard elabB.isSome
+
+-- **Panic 0x41 in the decoder** (lane V04b): a `bytes` argument whose
+-- length is `2^64` panics with `0x41` (solc's `array_allocation_size`
+-- comes before its bounds check); one of length `2^32` is out of bounds and
+-- reverts with no data; a length word cut short (`32` then one byte)
+-- reverts with no data before any length is read, as solc's
+-- `offset + 0x1f < end` check; `b = "ab"` runs. (Lengths just below `2^64`
+-- also panic in solc, through `finalize_allocation`; that band is a
+-- recorded deviation, `docs/solc-alignment.md`.)
+#guard (elabB.map fun el => runD el 0 [selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 64),
+    selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 32),
+    selOf "g(bytes)" ++ arg 32 ++ [1],
+    selOf "g(bytes)" ++ arg 32 ++ arg 2 ++ ([97, 98] ++ List.replicate 30 0)]) ==
+  some [some (.success []), some (.revert (panicData .alloc)), some (.revert []), some (.revert []),
+    some (.success [])]
+
 /-- `e()` entered in a static frame or not, after deploying `D`. -/
 def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
@@ -225,6 +286,14 @@ def callL (el : Elaborated) (input : Bytes) : Option Outcome :=
 -- **A dynamic array**: `sum2([5, 7])` is `12`.
 #guard (elabL.bind fun el => callL el (selOf "sum2(uint256[])" ++ arg 32 ++ arg 2 ++ arg 5 ++ arg 7)) ==
   some (.success (arg 12))
+
+-- **Panic 0x41 for a dynamic value array** (lane V04b): a length word cut
+-- short reverts with no data, a length of `2^64` panics with `0x41`, and a
+-- length of `2^32` is out of bounds and reverts with no data.
+#guard ([selOf "sum2(uint256[])" ++ arg 32 ++ [1],
+    selOf "sum2(uint256[])" ++ arg 32 ++ arg (2 ^ 64),
+    selOf "sum2(uint256[])" ++ arg 32 ++ arg (2 ^ 32)].map fun i => elabL.bind fun el => callL el i) ==
+  [some (.revert []), some (.revert (panicData .alloc)), some (.revert [])]
 
 -- An offset past the data reverts, as solc's decoder does.
 #guard (elabL.bind fun el => callL el (selOf "len(bytes)" ++ arg 4096 ++ arg 3)) == some (.revert [])

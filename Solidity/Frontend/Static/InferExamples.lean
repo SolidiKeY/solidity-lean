@@ -387,6 +387,56 @@ theorem ptrDelete_refused :
     (inferTys Γp (.unaryPrefix .delete (.ident "m"))).length = 1 := by
   decide
 
+/-- Locals `bytes calldata c`, `bytes memory b`. -/
+def Γcd : Ctx := { env := Syn.env ptrUnit, scope := Option.some "K", locals :=
+  [("c", .bytes .calldata), ("b", .bytes .memory)] }
+
+/-- **Typing fix** (decision 2026-10-30): `delete c` on a `calldata`
+reference has no type (solc's `ReferenceType::unaryOperatorResult`
+refuses `delete` on calldata); `delete b` on a memory local is typed. -/
+theorem cdDelete_refused :
+    (inferTys Γcd (.unaryPrefix .delete (.ident "c"))).isEmpty = true ∧
+    (inferTys Γcd (.unaryPrefix .delete (.ident "b"))).length = 1 := by
+  decide
+
+/-- `mapping(uint256 => uint256)` -/
+def mapT : Syn .typeName := .mapping (.elem (.int false 256 (by decide)) (by decide)) none u256T none
+
+/-- `contract K { struct Q { uint256 a; mapping(uint256 => uint256) m; } struct R { Q q; }
+R u; R w; mapping(uint256 => uint256) mm; Q s; Q t;
+mapping(uint256 => uint256)[2] am; mapping(uint256 => uint256)[2] bm; uint256 x; }` -/
+def mapUnit : Syn .unit := .unit (.cons (.contract false "K" .none .nil
+  (.cons (.struct "Q" (.structMember u256T "a") (.cons (.structMember mapT "m") .nil))
+  (.cons (.struct "R" (.structMember (.userType ⟨"Q", []⟩) "q") .nil)
+  (.cons (.stateVar (.userType ⟨"R", []⟩) none none none false "u" .none)
+  (.cons (.stateVar (.userType ⟨"R", []⟩) none none none false "w" .none)
+  (.cons (.stateVar mapT none none none false "mm" .none)
+  (.cons (.stateVar (.userType ⟨"Q", []⟩) none none none false "s" .none)
+  (.cons (.stateVar (.userType ⟨"Q", []⟩) none none none false "t" .none)
+  (.cons (.stateVar (.array mapT (.some (num 2))) none none none false "am" .none)
+  (.cons (.stateVar (.array mapT (.some (num 2))) none none none false "bm" .none)
+  (.cons (.stateVar u256T none none none false "x" .none) .nil))))))))))) .nil)
+
+/-- Locals `Q storage p`, `mapping(uint256 => uint256) storage mp`. -/
+def Γm : Ctx := { env := Syn.env mapUnit, scope := Option.some "K", locals :=
+  [("p", .struct .storage ⟨Option.some "K", "Q"⟩), ("mp", .mapping (.int IntTy.u256) (.int IntTy.u256))] }
+
+/-- **Typing fix**: storage types containing a mapping are never assigned
+(solc: "Types in storage containing (nested) mappings cannot be assigned
+to", 9214): `s = t` for a struct with a mapping member, `u = w` for a
+struct holding such a struct, and `am = bm` for arrays of mappings have no
+type (the semantics copied nothing for the structs and was `stuck` for the
+arrays); `s.a = x` is typed, and so is rebinding a local storage pointer
+(`p = t`, `mp = mm`), solc's exemption for locals. -/
+theorem mapAssign_refused :
+    (inferTys Γm (.assign .assign (.ident "s") (.ident "t"))).isEmpty = true ∧
+    (inferTys Γm (.assign .assign (.ident "u") (.ident "w"))).isEmpty = true ∧
+    (inferTys Γm (.assign .assign (.ident "am") (.ident "bm"))).isEmpty = true ∧
+    (inferTys Γm (.assign .assign (.member (.ident "s") "a") (.ident "x"))).length = 1 ∧
+    (inferTys Γm (.assign .assign (.ident "p") (.ident "t"))).length = 1 ∧
+    (inferTys Γm (.assign .assign (.ident "mp") (.ident "mm"))).length = 1 := by
+  decide
+
 /-! ## Standalone constants (backfill item 5) -/
 
 /-- The fields of a fixed-point type, else `none`. -/
@@ -543,3 +593,7 @@ end Solidity.Frontend.Static.InferExamples
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrCopy_refused
 /-- info: 'Solidity.Frontend.Static.InferExamples.ptrDelete_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrDelete_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.mapAssign_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.mapAssign_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.cdDelete_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.cdDelete_refused
