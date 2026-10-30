@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint twenty-six. Earlier checkpoint
+Current cumulative accounting through checkpoint twenty-seven. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -2319,3 +2319,64 @@ cycles/emitted traversal open; G35.06 reserved-copy and final V10/Source/target
 composition blocked. Backfill A/B advanced, not complete or exhausted. This is
 actual intrinsic mixed composition, not final compiler/EVM/bytecode correctness.
 Existing blocked goal unchanged/uncompleted; no full-lane completion claim.
+
+
+## Checkpoint twenty-seven: per-child mixed footprint precision
+
+After sealed checkpoint26, a concrete original Backfill B/G35.03 correspondence
+clause remained: joint whole-heap restoration requires BOTH arrays to restore,
+whereas an OLD Boolean child can be restored while uint remains changed. No
+existing owned mixed-child law supplied that precise case. New owned
+MixedChildFootprint derives exact per-destination iff from the EXISTING mixed
+read law and actual immutable payload uniqueness; neither criterion assumes a
+final relation, stagewise preservation or restoration of the OTHER destination.
+`BoolChildRepr.mixed_schedule_iff` consumes ONLY an explicit INITIAL old immutable
+child table relation and the actual successful composed operation, then reduces
+to the independently computed Boolean INITIAL criterion. This is the existing
+Bool-child observer, not a new recursive graph/value/state semantics.
+
+Inhabited actual controls use published same mixed input7/9. The old observer
+is independently inhabited by existing bools(old n)/cdRef7 BEFORE execution;
+no fresh Source entry or address injectivity is manufactured. Real decoded Bool
+and uint writes change TFF/788 to TTF/798. Boolean recaptures repair TFF while
+uint schedule is empty, retaining798. The OLD Boolean child relation is true by
+its INITIAL-only criterion while the whole heap differs and the uint criterion
+is false by the new uint iff. Same inputs with both schedules empty execute Some
+with TTF/798 and false old Boolean child correspondence. Both complete destination
+vectors and repeated-parent IDs[0,0] are retained; arbitrary runtime n/copies use
+existing intrinsic object validity only. No false premise that unchanged parent
+fields imply unchanged descendants, general child graphs, fresh deep-copy,
+physical bytes, ABI/compiler/EVM or Source execution is asserted.
+
+Both independent read-only source reviewers found no mathematical/ownership
+issue in the precise clause and meaningful nonvacuous controls. Focused diagnostics
+required explicit inclusion of the ACTUAL run premise in section theorems and
+proper value normalization; those were fixed without weakening statements.
+Five public laws/controls carry exact standard-only guards; prior errors/seals
+remain retained. Original queues remain partial/blocked with the exact upstream
+and reserved prerequisites enumerated in checkpoint26, not exhausted or complete.
+
+Storage bound now uses16MiB for ONE small module, unchanged executable roots/
+cache/toolchain and four actual warm full gates188416..192512bytes, <=4MiB compact
+exports plus module/log/safety allowance. This changes no fixed resource/OS guard:
+preflight569888768bytes,residual553111552 above512MiB; cacheOFF/child12GiB-no-swap/
+parent16GiB/serialLean-j1/LEAN_NUM_THREADS1 and all proof/time/test budgets remain.
+No file/cache/seal deletion, relocation, runtime replacement or capacity change.
+
+Final independent finder and skeptic read-only source/doc review accepted actual
+run premises explicitly included, precise per-object/old-child boundary, five
+standard guards and nonvacuous executed controls. No remaining source finding.
+Actual87guardedjobs/full931default/262TestSuite/SolKey377taclets131read-bearing
+PASS exit0. Strict/layer/orphan/trust/complete fixtures/script/corruption checks
+PASS;637standard-only pins80modules. Raw global docs FAIL1, COMPLETE exact-base
+byte equality/noNEW separately PASS; raw inventory FAIL1,651unrecorded14inherited+
+637owned,zero unsafeerrors. Proposed additive reconciliation remains unintegrated.
+Actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs PASS. Full sampled aggregate
+Lean/Lake RSS1592876KiB,cumulative session peak2160848896bytes,zeroOOMevents;
+188416byte full disk increment, within documented16MiB warm-route bound. No
+resource/proof/stack/time/test guard change, deletion or cache/source relocation.
+All original G32-G35/Backfill A/B parents remain partial/blocked; typed local
+observer precision is not recursive Source graph/fresh deep-copy/byte-memory/
+all-profile-default/target-failure/path-delete-rebinding/reserved-copy/final
+Source-V10-target closure. Existing goal unchanged and unfinished, no exhaustion
+or compiler/EVM claim.

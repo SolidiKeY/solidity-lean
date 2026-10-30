@@ -795,3 +795,5 @@ import Solidity.Backend.MemoryOps.CalldataScheduleGrowth
 import Solidity.Backend.MemoryOps.CalldataUintScheduleControls
 
 import Solidity.Backend.MemoryOps.MixedCalldataScheduleControls
+
+import Solidity.Backend.MemoryOps.MixedChildFootprint

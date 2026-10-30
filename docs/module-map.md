@@ -1118,3 +1118,4 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/MixedCalldataSchedules.lean` | Actual mixed decoded initialization then two reached-heap finite schedules; exact input success/first failure/both read provenance and joint INITIAL restoration |
 | `Backend/MemoryOps/MixedCalldataScheduleTransport.lean` | Both immutable-source read observations, initial Keeps and actual allocation after mixed initialization; fresh own fields only |
 | `Backend/MemoryOps/MixedCalldataScheduleControls.lean` | Same-table dynamic/fixed full five-stage vectors, arbitrary repairs, both failure phases, zero/max words, frozen negatives, parents/neighbors and actual allocations |
+| `Backend/MemoryOps/MixedChildFootprint.lean` | Exact per-destination INITIAL restoration and old Boolean-child correspondence independent of another changed destination; executed alias-parent controls |
