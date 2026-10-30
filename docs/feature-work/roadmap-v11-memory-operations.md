@@ -1174,3 +1174,77 @@ negative. Earlier evidence/comment and per-exec OOM findings are fixed and retai
 Final artifact review follows commit/export. All original Work/Backfill queues
 remain partial/blocked for the exact audited prerequisites above; no full-lane,
 Source/compiler/EVM or physical-byte execution result follows from kernel checks.
+
+
+## Checkpoint thirteen: actual decoded Boolean transfer (G35.03, Backfill A/B)
+
+The reproduced gap was concrete: CalldataTransport takes an existing values list
+and pointwise relation; CalldataNestedChildren transports existing pointers.
+Neither constructs a payload from the actual immutable decoded table. The new
+CalldataTransfer module eliminates Source.Data/Val.bool, extracts a finite list
+from a decoded Boolean array found in Calldata.objects, and invokes the existing
+overwriteSlice with exact checked bounds. No payload or conversion-correctness
+premise is supplied. Dynamic/static Source Boolean arrays and dynamic/fixed typed
+heap destinations are supported. Other/missing entries, including pointer-valued
+objects, return None at this adapter; this is not a new admitted-source refusal.
+
+calldataBools_lookup and calldataBool_exact establish extraction directly from
+published constructors. checkedCalldataBools_some/result/none_iff derive actual
+success and exactly reversed/source/destination guard failures from the actual
+runtime length. checkedCalldataBools_read supplies every immutable finite source
+read and corresponding destination observation; elems gives the entire ordered
+replacement. outside/frame retain exterior cells and every distinct typed object.
+The initial DecodedArrayAt premise is an input lookup, not a desired output
+relation. No generic preservation relation is assumed. checkedCalldataBools_keeps
+also transports actual success and all old typed observations through existing
+Heap.Keeps; the payload is heap-independent. allocated_transfer discharges Keeps
+with a real Heap.alloc, frames its fresh parent and observes the changed child.
+Structural parent preservation is not deep child-content liveness.
+
+Controls derive their concrete representation lookup. They execute a nonuniform
+changed transfer, observe exact ordered contents, distinguish wrong value/order,
+frame two exterior cells and a reference-containing parent, run static Source to
+fixed destination, empty/exact-end cases, missing/wrong type/location/pointer and
+wrong-element entries, and independent reversed/source/destination bounds failures.
+An arbitrary-length family uses only the intrinsic heap n<2^256 invariant, with no
+new payload cap. A full34-element observation crosses indices32/33 as ELEMENTS,
+never as a physical-byte-encoding claim. Existing operations/shapes remain intact.
+
+Focused raw failures and the old-log collision guard are retained separately.
+The collision refused to overwrite a historical log; new names use cp13. No old
+error was mistaken for a current build failure or rewritten. All proof repairs
+preserve statements and budgets. No Lean MCP diagnostics/get_goal are exposed;
+focused serial Lake closures are used. Runtime is the retained same-VM container
+v11-two-builders-session via unchanged run-checkpoint12-gate.py, no image copy or
+cleanup. Parent16GiB, child12GiB/swap0, serial Lean-j1/LEAN_NUM_THREADS1 and per-exec
+memory.events/OOM deltas remain enforced. Availability began673193984bytes and
+remains about666MB after warm focused outputs. Prior seals remain immutable.
+
+This advances actual primitive decoded-data transfer only. It is not ABI decoding,
+Source expression execution, fresh reference construction, a target emitter,
+physical byte transport, storage copying or V10/Source/target composition.
+Further primitive families require their exact published numeric/representation
+conversion clauses, not a guessed shared encoding. Existing finite map-free mirror
+results remain separate. No external EVM/compiler test is inferred from kernel
+proofs. All G32/G33/G34/G35.01/.03/.04/.05 and Backfill A/B remain PARTIAL; G35.02
+and G35.06 remain BLOCKED on reserved copy/final composition prerequisites. Every
+checkpoint12 queue detail above remains open; no assertion of independent-work
+exhaustion or whole-lane completion. Final gate/review results follow below.
+
+
+Checkpoint-thirteen final bounded run v11-checkpoint13-full-01 exits0 with898
+initial/default jobs,262TestSuite jobs and final SolKey377/131 annotations OK.
+Complete ordered gate stdout and per-exec receipt are retained. Peak aggregate
+Lean/Lake RSS1458384KiB; session memory.peak454889472bytes is cumulative, not exec
+worker RSS. memory.events before/after allzero, no OOM deltas. Disk665649152before/
+665034752after bytes; fixed12GiB/no-swap and parent16GiB bounds are unchanged.
+Required layers/orphans/trust/owned checker, strict automation, complete fixture
+parity and script/diff checks pass. Owned checker validates300standard pins47
+modules. Raw global inventory exits1 with0unsafe errors314unrecorded entries=
+14inherited+300owned. Raw strict docs exits1, byte-identical to exact-base output
+SHA256ea1a09c222d52d1d17953f653c087443e34e6282497f0b02cdc09aad15b7dd48;
+separate no-new comparison passes. Reserved inventories remain untouched; additive
+proposals are checkpoint13-proposed-axiom-pins.json for coordinator reconciliation.
+Separate independent finder/skeptic source reviews found no confirmed defect and
+accepted final refined source/doc hypotheses and controls without correction.
+No reviewer ran Lean/server/builds. Artifact review follows commit/export.
