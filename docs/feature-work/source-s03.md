@@ -123,7 +123,7 @@ ledger is in [source-s05.md](source-s05.md).
 
 | Gap | Now | Control (`ElaborateExamples.lean`) |
 |---|---|---|
-| Public getters | `dispatch` answers the getter of a `public` state variable or constant (`Env.getters`, `getterSig`): one parameter per mapping key or array index, a value-type result read from storage (`getterPath`, an index past the end panics with `0x32`) or a constant's value; struct, `bytes` and `string` getters and non-value keys are not modelled | after `set(2)`: `x()` is 3, `m(2)` is 5, `m(3)` is 0 |
+| Public getters | `dispatch` answers the getter of a `public` state variable or constant (`Env.getters`, `getterSig`): one parameter per mapping key or array index, a value-type result read from storage (`getterPath`, an index past the end panics with `0x32`), a `bytes`/`string` result ABI-encoded from storage (lane V04b), or a constant's value; struct getters and non-value keys are not modelled | after `set(2)`: `x()` is 3, `m(2)` is 5, `m(3)` is 0; `s()` of `string public s` is `""`, then `"ab"` after `set()` (`elabStr`) |
 | `emit` in a static frame | reverts with no data, as `LOG` does | `e()` entered static reverts, non-static succeeds |
 | Value to a non-payable constructor | the deployment reverts (`Env.ctorPayable`; a contract without a constructor has solc's non-payable default) | `D` deployed with value 1 reverts, with 0 succeeds |
 | Dynamic ABI arguments | `dispatch` and `deploy` decode arguments with `decodeArgs`: a value type from its word; `bytes`, `string` and a dynamic array of value types (in `memory`) from their tail into a new memory object; an offset or length past the data reverts. Nested dynamic types, static arrays, structs and `calldata` parameters are not decoded (`stuck`); return data of external calls is still decoded statically | `len(0x010203)` is 3, `sum2([5, 7])` is 12, an offset past the data reverts |
@@ -132,7 +132,7 @@ The controls run elaborated units (item 1b) and are checked by `#guard`.
 
 Review (finder, read-only). Fixed:
 
-- a getter of an unmodelled type (`string public`, structs, non-value keys)
+- a getter of an unmodelled type (structs, non-value keys)
   no longer falls through to `fallback`: its selector is matched and the
   call is `stuck` ("getter of this type is not modelled");
 - a body-less interface function no longer shadows the getter that

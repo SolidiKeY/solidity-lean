@@ -213,6 +213,11 @@ def STy.isValueTy : STy → Bool
   | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
   | _ => false
 
+/-- `bytes` or `string`, at any location. -/
+def STy.isByteArray : STy → Bool
+  | .bytes _ | .string _ => true
+  | _ => false
+
 /-- The contents of a dynamic argument whose head is the `i`-th word: its
 offset, then its length and bytes there; out of bounds reverts. -/
 def tailBytes {Γ : RCtx} (data : Bytes) (i : Nat) : EM E Γ Bytes := do
@@ -528,8 +533,10 @@ def copyInto {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v
 /-! ### Public getters -/
 
 /-- A public state variable's getter: one parameter per mapping key or array
-index, outermost first, and the type it returns.  Only value-type keys and
-results are modelled; a call to another getter is `stuck`. -/
+index, outermost first, and the type it returns.  Value-type keys, and
+value-type, `bytes` and `string` results (ABI-encoded from storage) are
+modelled; a call to another getter (a struct or array result) is
+`stuck`. -/
 def getterSig : STy → List STy × STy
   | .mapping k v => let (ps, r) := getterSig v; (k :: ps, r)
   | .array _ τ _ => let (ps, r) := getterSig τ; (.int IntTy.u256 :: ps, r)
@@ -1350,15 +1357,18 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
     | some (d, ps, r) =>
       if F.value.val ≠ 0 then halt (.revert [])
       if input.length < 4 + 32 * ps.length then halt (.revert [])
-      if !((r :: ps).all STy.isValueTy) then halt (.stuck "getter of this type is not modelled")
+      if !(ps.all STy.isValueTy && (r.isValueTy || r.isByteArray)) then
+        halt (.stuck "getter of this type is not modelled")
       match d.varTy E, G.prog.consts d with
       | _, some ri => do
         let (v, _) ← sub (L0 E) (evalE G F n ri.e)
         if h : ri.τ = r then encodeVals F n false (.cons (h ▸ v) .nil) else halt (.stuck "getter type")
       | some τ, none => do
         let (p, ρ) ← getterPath F n (input.drop 4) τ d.path 0
-        let v ← readAt F p ρ
-        encodeVals F n false (.cons (.val v) .nil)
+        if ρ.isByteArray then encodeVals F n false (.cons (.val (← storRef ρ p)) .nil)
+        else
+          let v ← readAt F p ρ
+          encodeVals F n false (.cons (.val v) .nil)
       | none, none => halt (.stuck "getter type")
     | none =>
       let special := if input.isEmpty then (E.special F.contract .receive).orElse fun _ => E.special F.contract .fallback
