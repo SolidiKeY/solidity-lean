@@ -700,7 +700,12 @@ Kept current at every checkpoint.
   arrays and structs, external calls, modifiers, builtins, `emit`, or the transaction layer
   (dispatch, ABI decoding, deployment, callbacks);
 - preservation for every interpreter step: proved for the memory
-  operations only. For the value fragment preservation of `EMOK` is
+  operations, location reads and writes, the memory invariant `MemOK`
+  (well typed, shaped, bare-value elements) under writes, non-storage
+  `delete`, the zeroing allocator and the storage copier, with progress
+  for memory accesses under `MemOK`; not for storage writes, the other
+  allocation sites (ABI decoder, `structNew`, literals, `abi.encode*`),
+  frame restores, or `evalE`/`execS` as a whole. For the value fragment preservation of `EMOK` is
   expected (locals receive only value types, the heap is untouched, the
   storage references `MapRef` builds are covered by the progress
   postcondition `RPost`), but no theorem states it;
