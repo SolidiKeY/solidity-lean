@@ -5,10 +5,7 @@
   "original_validation_verified": false,
   "original_archive_index_entries": 0,
   "missing_original_evidence": [
-    "ordered source fixture reports",
-    "ordered bytecode fixture reports",
-    "complete proof and axiom logs",
-    "raw resource records"
+    "checksum-bound baseline documentation log and baseline/current debt comparison"
   ],
   "current_validation": {
     "lean_files": 7,
@@ -284,5 +281,21 @@
     "skeptic": "no remaining repair defect; combined gates must exercise PaymentCorpus",
     "fixed_finding": "separate archive index container and raw member counts",
     "reviewed_archive_members_before_review_notes": 38
+  },
+  "original_evidence_supplement": {
+    "verification": "original-evidence-verification.json",
+    "verification_sha256": "1ba217cbb8ce902fac6ff222b3c7d2b5df3d61a5ad1747ddc98638f9e2a7fcf6",
+    "retrieval": "supplemental-retrieval.json",
+    "retrieval_sha256": "9d762c79c1c3aaaaa8e14fc56e704cb2ab7578e365d5455672ff0faf41f8f9e1",
+    "archive": "original-source-evidence.tar.gz",
+    "archive_sha256": "e8bc40d0aa74edb65d0a99f76891102d0c0ea4ed8d43260e70a096c616fb68b1",
+    "archive_members_verified": 177,
+    "original_records_verified": 175,
+    "original_validation_verified": false,
+    "historical_os_reserve_satisfied": false,
+    "remaining_prerequisites": [
+      "checksum-bound baseline documentation log and baseline/current comparison",
+      "resolution of historical 12 GiB OS-reserve noncompliance; no waiver inferred"
+    ]
   }
 }

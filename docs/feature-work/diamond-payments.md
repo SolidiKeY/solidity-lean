@@ -78,18 +78,12 @@ sampled regression resource records are checksum-bound in
 `tests/upstream/diamond-payments-integration-20261030/manifest.json` and its
 adjacent archive. These records concern this integration checkout only.
 
-The original assignment's evidence finding remains open. Its retrieved
-`retrieval.json` indexes no raw-evidence members (one container maps to an empty
-list); all seven retrieved artifacts
-match their recorded sizes and SHA256 hashes, but they contain no raw original
-source/bytecode fixture reports, complete proof/axiom logs or resource records.
-The referenced `/workspace/diamond-payments*-evidence` directories are not
-available in this worktree. The historical source-branch completion claims
-below therefore remain unverified here. Fresh local checks do not authenticate
-those historical runs. The coordinator must obtain a checksum-bound raw export
-before accepting that finding as resolved. This is an evidence prerequisite,
-not a semantic choice or a gate waiver. No source VM, skill, monitor, external
-index, commit or remote branch is modified by this repair.
+The initial retrieval indexed zero raw-evidence members (one container maps to
+an empty list). The supplemental evidence audit below supersedes that absence;
+the original retrieval and integration-repair archive remain intact. Original
+validation remains unverified pending the narrower prerequisites below. No
+source VM, skill, monitor, external index, commit or remote branch is modified
+by this repair.
 
 Independent read-only finder and skeptic reviews found no remaining repair
 defect or new semantic decision. Both caught an ambiguous count of the original
@@ -97,6 +91,54 @@ retrieval index: its one container key holds zero raw-evidence members. The
 wording and manifest now report both counts explicitly. The skeptic also
 required the PaymentCorpus caller check in the coordinator's combined gates,
 as recorded above. Neither review used the Lean server.
+
+### Supplemental original-evidence audit (2026-10-30)
+
+At `3c0af8ff`, the supplied immutable supplement's retrieval SHA256 is
+`9d762c79c1c3aaaaa8e14fc56e704cb2ab7578e365d5455672ff0faf41f8f9e1`.
+All seven artifacts match their recorded sizes and hashes. Its archive contains
+177 verified members: the original 175 records, their checksum manifest and
+snapshot provenance. Every original path and hash agrees with the retained
+175-record manifest (SHA256
+`0ae506f378730c2a813f4c12de0acd859a924f3dc4e56508a2b92ef07291a8b3`).
+The archive and retrieval are retained beside the integration manifest as
+`original-source-evidence.tar.gz` and `supplemental-retrieval.json`.
+`original-evidence-verification.json` records member hashes and the audit.
+
+All three named original source reports are complete and working in legacy and
+viaIR. Their paired bytecode reports cover every declared required profile;
+all reported observation and gas matches are true, and compiler/snapshot
+provenance agrees. Original build, gate, proof/axiom and cgroup resource logs
+are now available. The retained trust audit reports 545 headline theorems using
+only standard axioms; the repaired imported-constant audits pass. Earlier
+failed scratch-relocation audits remain in the archive. These are inspected
+historical records, not new checks of the combined candidate.
+
+The documentation gate still exits 1 with 20 missing references. Its final and
+reviewed logs are identical, but the supplement contains no baseline raw log.
+The summary's assertion of baseline debt does not establish that comparison.
+The snapshot explicitly excludes the unlisted historical checkpoint. Obtain a
+checksum-bound baseline log and compare it with the retained current log before
+closing this part of the evidence finding.
+
+The original summary also reports 8,598,601,728 bytes of available host memory
+during a heavy build, below the required 12 GiB reserve (12,884,901,888 bytes).
+The cgroup resource log records usage, not host available-memory samples; a
+successful build and zero OOM kills do not establish reserve compliance.
+`original_validation_verified` remains false. No resource budget or gate is
+waived; the coordinator must resolve this historical noncompliance as well as
+the baseline-log prerequisite. The earlier integration regression failures
+remain recorded, and full combined gates remain the coordinator's responsibility.
+This evidence-only repair changes no Lean source and runs no Lean checks.
+
+Fresh read-only finder and skeptic review launches both failed with
+`invalid thread-store request: no rollout found`. No independent review of this
+supplemental audit is claimed; the coordinator must complete those reviews.
+Artifact/member hashes, paired-report completeness and reported matches,
+unchanged hashes for the seven previously repaired Lean files, and
+`git diff --check` pass. The current combined tree's documentation path check
+exits 1 with 46 missing references and no findings in these payment files;
+this is separate from the original source run's 20-reference failure.
 
 Current scope after the explicit human decision on 2026-10-29: keep existing
 semantics and prove exact conditional success and certified failure conditions.
