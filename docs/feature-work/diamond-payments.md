@@ -1,5 +1,57 @@
 # Diamond payments: guarded rules and the original PiggyBank callback proof
 
+## Child Lake lookup repair (2026-10-30)
+
+Attempt 28 at `5397dbc1` passed its first twelve combined gates, then
+`payment-reference.test.mjs` failed two of four tests at the Lean stage with
+`spawn lake ENOENT`. The coordinator invoked Lake by absolute path for its
+builds, while `scripts/test-solidity.mjs` required it on the child `PATH`.
+The focused repair resolves the first executable Lake on `PATH` for both
+the API build and no-build probes, preserving wrappers and their failures.
+Only when no executable is found does it fall back to `ELAN_HOME/bin/lake`,
+defaulting to `~/.elan/bin/lake`. If neither exists, the normal spawn failure
+remains an error. See [the runner setup](../solidity-testing.md).
+
+`node --test scripts/payment-reference.test.mjs` now exits 0 with all four
+tests passing, in 5.26 s. This focused run deliberately used
+`PATH=/usr/bin:/bin` and a local `ELAN_HOME` containing a no-build-only wrapper
+that adds `-j1`; the fallback therefore exercised the actual Lean checks.
+It retained `LEAN_NUM_THREADS=1`, the inherited 12 GiB/no-swap cgroup and a
+12 GiB host-reserve guard. Sampled cgroup usage peaked at 3,403,198,464 bytes;
+available host memory stayed at or above 34,696,536,064 bytes. The earlier
+same-suite run with Node process isolation disabled also passed all four
+tests; the exact command above is the final focused result.
+
+The three resolver controls pass: ordered PATH/wrapper priority and Elan
+fallback, relative/empty PATH entries, and rejection of directories or
+non-executable files. They ran with
+`node --test --test-isolation=none scripts/lake-command.test.mjs` so their
+individual results were visible in the sandbox. The sandbox's first payment
+probe failed with subprocess-supervision `EPERM`; it is not counted as a
+passing check. Both passing payment runs used the same guarded runner outside
+that restriction. Logs, resource samples and the read-only evidence verifier
+are in `.lake/payment-lake-resolution/`. Layer enforcement still reports
+172 core modules and zero paths to the elaborator; `git diff --check` passes.
+
+The supplied retrieval and coordinator manifest, all seven supplemental
+artifacts, 177 indexed archive members and eleven coordinator files verify
+against their pinned hashes. The original checksum manifest still covers
+exactly 175 records. Bundle HEAD, source/base ancestry, executor and thread
+identities agree. The retained exact-base/source comparison's Git trees,
+scanner hashes and logs agree, with 26 identical findings, zero new findings
+and both documentation exits still 1. Coordinator evidence remains separate
+from original source coverage. The frozen prompt distinguishes source-VM OS
+headroom from the unchanged LOCAL integration-host 12 GiB reserve.
+
+Independent read-only finder and skeptic launches both failed with
+`invalid thread-store request: no rollout found`; no fresh independent review
+is claimed. The coordinator must obtain those reviews and run the remaining
+combined gates, including the new resolver controls. No Lean source was
+edited or MCP document opened. No semantics, observations, invariants, target
+predicates, expected verdicts or budgets change. No index write, commit,
+publication, source-VM, skill or monitor modification is made; there is no
+pending semantic decision.
+
 ## Portable payment regression setup repair (2026-10-30)
 
 Attempt 27's required `payment-reference.test.mjs` gate failed three checks

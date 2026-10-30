@@ -190,6 +190,8 @@ requires a future parser-based extension. Function and loop annotations use
 their defining contract or library's scope, including inlined helpers.
 The test runner uses `lake --no-build lean` after building the API, so its
 single-file checks can also read imports held only in Lake's shared cache.
+It uses the first executable `lake` on `PATH`, preserving local wrappers. If
+none is found, it uses `ELAN_HOME/bin/lake` (by default `~/.elan/bin/lake`).
 
 The compiler helper reads one source unit; source imports/remappings and
 unsupported AST forms remain frontend limitations. The frontend imports

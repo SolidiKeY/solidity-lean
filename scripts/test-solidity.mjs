@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { sourceHash, sourceLocations, sourceWitness } from './source-locations.mjs';
+import { lakeCommand } from './lake-command.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ignored = new Set([".git", ".lake", "node_modules"]);
@@ -97,7 +98,8 @@ export function runSolidityTests(paths, options = {}) {
     selfClause = ` self ${selfAddress.toString()}`;
   }
   const api = options.action ? "Solidity.Frontend.Cli" : "Solidity.Frontend.Testing";
-  if (options.build !== false) runTool("lake", ["build", api], timeoutMs);
+  const lake = lakeCommand(process.env, ROOT);
+  if (options.build !== false) runTool(lake, ["build", api], timeoutMs);
   const results = [], errors = [];
   for (const source of files) {
     const scratch = mkdtempSync(join(tmpdir(), "solidity-test-"));
@@ -141,7 +143,7 @@ ${command}
           // `lake lean` supplies the artifact-cache import map. `lake env lean`
           // only sees local oleans, which a freshly cached worktree need not have.
           // The API's build step above owns rebuilding; keep this check read-only.
-          const diagnostics = runTool("lake", ["--quiet", "--no-build", "lean", wrapper,
+          const diagnostics = runTool(lake, ["--quiet", "--no-build", "lean", wrapper,
             "--", "--tstack=131072"], timeoutMs);
           // Keep other/legacy import warnings visible alongside refused deployment rows.
           if (diagnostics.includes("warning: solc_import:")) errors.push({ source, contract, reason: diagnostics.trim() });
