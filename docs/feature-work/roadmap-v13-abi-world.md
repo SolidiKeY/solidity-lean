@@ -422,3 +422,144 @@ exact theorem premises and external-test boundaries. No new external EVM/solc
 test is claimed. The existing blocked persistent goal is retained; no getter
 is exposed in this tool surface, and no goal creation, reset, reactivation,
 continuation scheduling or completion was attempted. Parent status is BLOCKED.
+
+
+## Published memory-call consumption
+
+The human notified this original VM/thread that ordinary memory internal calls
+were actually published on origin/master at
+91e94ab57305ca055127934fd9e68fe9ea5e6be3. Clean task head
+ d6df81f66466c9641fff1f5497a134b31e27a6ea was preserved, and that exact published
+revision was merged into the isolated task branch as
+1578f42505c5edf6c1cdd72d6b13348cd2e89b3e. No master branch, unmerged worker branch
+or reserved producer was edited. Both independent read-only integration reviews
+verified exact published producer bytes and every prior owned file/suffix.
+The publication itself updates the existing Compiler module-map row; the task's
+own additions remain append-only relative to this integration baseline.
+All earlier sealed manifests, artifacts, raw failures and the single cache remain.
+
+The new owned CompiledMemoryCalls module consumes the actual public
+Compiler.Compilation.memoryCalls_input/correct branch and its StateRepr,
+requiredFrame, allocationCost, BaseExtends and GrowsAllocator relations.
+memory_calls_rep exposes that exact output relation. completed_transport
+requires actual Input, isMemoryCalls, no payment and a successful intrinsic run;
+it concludes actual target success, stack equality, full state representation,
+old-base relation and reached allocator growth. shared_completed discharges all
+of these premises for a compiled typed program; five public input/agreement
+endpoints are inhabited for shared, escaping, failing, empty and wide returns.
+No desired frame/alias preservation is inserted as a hypothesis.
+
+The actual call's caller contains an older three-word buffer, another alias,
+marker77 and stored9, with nonempty machine stack77 and sentinel memory127=99.
+The shared-return callee mutates the old buffer's second word to127, exports its
+reference, then rebinds the private parameter to a separate allocation and
+writes238 there. Caller writes67 through the returned alias. Actual source
+references are [heap3,result0,alias0,original0,marker77]; target pointer locals all
+hold256, old payload is [67,127,254], the independent parameter object has238,
+and allocator cursor263. The escaping callee returns its own two-word object:
+resultid2/address261, both older aliases remain id0/address256 with [66,0,254],
+returned contents [67,136], cursor264. Source/target store9, marker77, stack77
+and sentinel99 are explicitly observed. Private LOCAL BINDERS are dropped;
+physical target memory cells need not be cleared.
+
+The exact expanded requiredFrame is6 for every control, exceeding four surviving
+caller locals. Reached costs are7(shared),8(escape),5(require failure). Frame1 and
+cursor W-7 refuse the shared Input. A default empty return causes the caller's
+indexed write to revert (cost5), while the actual intrinsic uint word300 is
+compiled successfully but rejected by this partial byte observation. Recursive
+and external-call constructors retain actual compiler refusals.
+
+returned_error_observation follows the actual returned target pointer, checks
+the buffer header equals3 and each observed word is below256, and binds the
+result into existing Source.errorData/CatchKind.reason.decode using the existing
+source_error_bytes/catch_error proofs. No second codec is defined. The observer
+rejects a two-word result and word300; those are observer boundaries, not new
+compiler/source-profile exclusions. It is a fixed three-cell observation, not a
+uniform aggregate decoder or a compiled byte encoder.
+
+Whole-program entry has an EMPTY heap: its BaseExtends witness is consequently
+vacuous at entry. The actual call's older aliases and return identity controls
+are nontrivial, but this endpoint must not be promoted to a nonempty-entry
+arbitrary-world theorem. The missing packet composition interface is precise:
+Evm.Machine.mem is word-cell memory; Failure.Slice.Machine.memory is
+byte-addressed. No published adapter here maps the returned word-array header,
+pointer and contents into a compiled byte-addressed Error/Panic REVERT packet.
+Existing packet emitters remain usable independently. No external CALL/
+RETURNDATA, arbitrary recursion, bytecode/gas adequacy, callback/world rollback,
+aggregate ABI codec or complete source-lowering theorem follows.
+
+The lane import checker now permits Evm dependencies ONLY for this new consumer
+and ONLY within the published Compiler dependency closure. The prior 11 modules
+retain their Evm exclusion; every module still rejects Frontend, elaborators,
+printers and Tools. No producer/example/front-end file is copied or imported as
+an owned implementation; programs are built with existing intrinsic constructors.
+
+Queue status: G40 blocked; G41 partial preparation now includes the actual
+compiled returned-word/ABI-helper observation; G42.01-.02 blocked for typed
+external/self ABI/world compilation; G42.03 partial journal preparation with
+compiled callbacks open; G42.04-.05 blocked; G42.06 partial prefix preparation
+with full call-mode/ABI/world/rollback/resource composition open. Backfill A
+remains partial for published codecs. Backfill B gains actual compiled direct
+memory-call frame/alias/escape/resource controls; full V12/source lowering,
+nonempty-entry world transport and external-mode combinations remain open.
+The persistent original goal stays blocked. Publication discharges this direct
+memory-call prerequisite only; remaining premises are not counted as discharged.
+
+
+### Published-component validation and handoff
+
+Both independent read-only source reviews passed after the binder wording,
+source-store and returned-reference/byte-observer negative improvements.
+Reviewed source SHA256 is
+914c13c5bdbd5de5ad346cfda515f0f13a1a592eb15d089514d243deed77e6c6.
+Neither reviewer ran Lean/server/builds. NEW evidence is stored at
+/workspace/scratch/v13-memory-calls-91e94ab5-evidence; earlier evidence and sealed
+manifests remain unchanged. The raw numbered diagnostic failures include the
+200000-heartbeat and recursion-depth failures; both were fixed by proved halt
+certificates and explicit Option rewrites, with no budget increase.
+
+| Gate command | Actual outcome and decisive evidence |
+|---|---|
+| `lean --version`, `lake --version`, `lake build Solidity.KeySort` | Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake5.0.0-src+797c613. KeySort exit0,2jobs; versions/keysort logs. RUNTIME_GATE_PASS followed this output and cap verification. |
+| Focused `lake build Solidity.KeySort Solidity.Evm.Compiler` after publication integration | Pass exit0,156jobs; published-focused.log. |
+| Per-file MCP on new consumer, interactive=false/severity=error/timeout_s=45 | Pass, complete empty errors/dependencies; consumer-mcp-final.log/exit. |
+| `lake build Solidity.Backend.AbiWorld.CompiledMemoryCalls` | Pass exit0,185jobs before/after scoped pins; consumer-focused-01/final logs. Pins accept only propext/Classical.choice/Quot.sound. |
+| `timeout 5400 bash ./run-lean.sh` | Pass exit0,111.986seconds;995 default jobs,262 TestSuite jobs,frozen377taclets/131read-bearing match. Published MemoryCallExamples built in26seconds. final-run-lean.log/json. |
+| Root MCP after the full gate | Pass, complete empty diagnostics; root-mcp.log/exit. |
+| `node scripts/check-layers.mjs`, `node scripts/check-orphans.mjs`, `bash scripts/check-trust.sh`, owned import test | Pass:172core/0meta,1010reachable/0orphans,1025sources/0trust findings,12owned modules/0forbidden imports. |
+| Owned paths, append-only registrations vs integration baseline, exact published producer bytes, forbidden construct/budget scan and owned relative links | Pass; static.json. Published module-map row update remains attributed to publication. |
+| `bash scripts/check-doc-paths.sh --strict` on current, frozen base and published revision | All raw exits1. Current/published have85findings (48missing,37ambiguities); frozen has83 (46missing,37ambiguities). Raw failures retained. |
+| No-new-doc-findings vs frozen exact base | FAIL:two references inherited unchanged from the newly published inline-assembly document. static.json lists exact findings. This gate is not green. |
+| Separate no-new-doc-findings vs exact published revision | PASS:zero new findings from this lane. A temporary task-owned source-only snapshot verified exact publication, then was removed; no cache/build tree was duplicated or deleted. |
+| Prior sealed artifact manifests | All original5 and recovery8 entries pass; original-checksums/recovery-checksums logs. |
+
+Full-gate sampled peak aggregate RSS2745936KiB (shared mappings can count more
+than once), actual cgroup peak2197045248bytes, max12884901888, swap.max0 and
+OOM/OOM-kill0. LEAN_NUM_THREADS=1 and explicit lean-j1 wrappers, serial heavy
+work and one cached build tree were retained; disk/RAM snapshots are saved.
+No unchanged failed heavy command was repeated or budget enlarged.
+
+The two frozen-base doc regressions are in the byte-identical published
+ docs/feature-work/inline-assembly.md: references to
+Solidity/Frontend/SolcJson/Yul.lean and Solidity/Yul/Syntax.lean, whose modules
+are not published here. This lane must not edit another owner's feature doc or
+create placeholder semantic files. Requested owner/coordinator patch: mark
+these two path mentions explicitly as planned locations using plain text rather
+than the checker's existing-file citation syntax, OR publish the genuinely
+implemented referenced modules through their owners. This is a documentation
+prerequisite request, not authorization to weaken a theorem/profile or a reason
+to reclassify the frozen-base no-new-findings gate as passing.
+
+The published MemoryCallExamples payloadCall_source/payloadCall_observed controls
+also confirm the remaining packet boundary: the intrinsic payload is observed,
+but Compiler.compile refuses that revertData-containing call. No general
+aggregate or byte-emission premise is silently inferred from the new component.
+
+Commit this reviewed consumer and handoff section on the same task branch;
+seal NEW artifacts at /workspace/scratch/v13-memory-calls-91e94ab5-artifacts.
+HANDOFF.md will record frozen base, exact publication, integration commit and
+final full head; original/full patch, consumer-only patch, bundle, owning doc,
+command logs, independent artifact reviews, checksums and every queue/backfill
+status. The compiled consumer's kernel obligations pass, but the checkpoint
+retains the inherited frozen-base documentation failure and the entire original
+assignment/goal remains BLOCKED on the still-open prerequisites above.

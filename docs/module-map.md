@@ -1213,3 +1213,4 @@ At the root, the notation's own tests:
 | `Backend/AbiWorld/PublishedLayoutControls.lean` | Empty, mixed, boundary, nested-packet and cursor-wrap kernel controls. |
 | `Backend/AbiWorld/CatchTransport.lean` | Actual intrinsic self-call catch classification and decoded fresh-byte allocation/clause-pop consumers, retaining explicit executed-callee premises. |
 | `Backend/AbiWorld/CatchControls.lean` | Discharged typed call/catch executions with Source/Failure bytes, old caller aliases, malformed/noncanonical packets, refusals and true divergence; no target/world compilation claim. |
+| `Backend/AbiWorld/CompiledMemoryCalls.lean` | Published direct memory-return compiler/frame consumer, discharged state/base/allocator transport, alias/escape/store/stack and return-failure controls, bounded word-byte observer; no external-call/aggregate claim. |
