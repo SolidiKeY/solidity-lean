@@ -896,3 +896,5 @@ import Solidity.Backend.Executable.ScalarSequenceResources
 import Solidity.Backend.Executable.ScalarSequenceChecks
 import Solidity.Backend.Executable.ScalarArtifact
 import Solidity.Backend.Executable.ScalarArtifactChecks
+import Solidity.Backend.Executable.WorldPrefixes
+import Solidity.Backend.Executable.WorldPrefixChecks

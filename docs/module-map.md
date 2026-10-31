@@ -1208,3 +1208,5 @@ At the root, the notation's own tests:
 | `Backend/Executable/ScalarSequenceChecks.lean` | Populated distinct caller locals, wrapping subtraction/signed comparison, first/test boundaries, full bytes, wrong-order and intermediate-capacity negatives. |
 | `Backend/Executable/ScalarArtifact.lean` | Derived placement of actual 104/175-byte scalar encodings behind nonempty constructor prefixes; exact return/revert, runtime/argument slices and separate typed/numeric observations. |
 | `Backend/Executable/ScalarArtifactChecks.lean` | Both payload sizes, separate protected creation/scalar tails, source/capacity/byte conjunction and return/revert argument contamination controls. |
+| `Backend/Executable/WorldPrefixes.lean` | Existing world-operation fold success iff, exact failure ordering, finite replicated prefix cuts and atomic checkpoint consequences; no loop semantics or compiler simulation. |
+| `Backend/Executable/WorldPrefixChecks.lean` | Actual creation/three funded calls, exact debit/credit and error-byte ordering, explicit nonempty iteration cuts, stopped successful tails and rollback controls. |

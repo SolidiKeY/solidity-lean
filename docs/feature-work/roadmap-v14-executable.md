@@ -438,3 +438,62 @@ and handoff qualify `typed_payload` as the base104-byte variant only. Actual
 constructor/layout facts still cover both104/175-byte payloads. Focused80jobs,
 fresh two-file diagnostics, seven pins and static gates pass; real guard11/0;
 raw docs exit1/46 is unchanged and separate no-new comparison passes.
+
+
+## Recovery checkpoint: actual world finite prefixes
+
+[WorldPrefixes](../../Solidity/Backend/Executable/WorldPrefixes.lean) continues
+backfill B using existing `List.foldlM` and `ContractWorld.Operation.run` directly.
+It adds no operation syntax, payment semantics, execution function or loop
+interpreter. `success_iff` proves both directions of actual prefix/suffix world
+factorization; `cut_success_iff` handles every take/drop position, including
+empty/whole cuts. `prefix_failure` blocks later operations after the exact first
+halt; `suffix_failure` transports the exact suffix halt after a real successful
+prefix. `iteration_split` uses published list replication/folding laws to
+factor any finite n+m repetitions. It does not claim divergence correspondence.
+
+`atomic_suffix_failure` restores the original complete world after any actual
+failed suffix, retaining the exact halt. `atomic_prefix_success` separately
+commits the genuine prefix world. These are existing atomic result algebra;
+for arbitrary THalt they do not assert a completed chain Step or that model
+exhaustion/divergence becomes a caught revert. G36.03 still requires independent
+G43 and the actual V12/G37 simulation producers, with no circular G43 premise.
+
+[Controls](../../Solidity/Backend/Executable/WorldPrefixChecks.lean) reuse the
+existing empty typed contract/receive fixture and install a real account from
+a sender funded with3units. Three actual1-unit payable empty calls settle
+sender3→0 and recipient0→3. The explicit1+2 iteration cut consumes the general
+split theorem and identifies its real middle as `paidOne`; two-sided prefix
+extraction identifies that same world. A funded failing receive exposes actual
+nonempty bytes de/ad, while an unfunded call fails empty before executing the
+same recipient. A failed real prefix blocks a tail call proved successful
+from that input world. Outer rollback restores creation and every earlier
+settled payment, while a separately committed prefix retains the installed
+account and actual balances. These are unmetered paid-call controls, not
+compiled send/transfer/stipend adequacy or approved environment simulation.
+
+Exact premises: `success_iff`, `cut_success_iff` and `iteration_split` are
+unconditional algebra of existing actual operation executions. `prefix_failure`
+requires its exact actual prefix failure equation; `suffix_failure` and
+`atomic_suffix_failure` require actual prefix success and suffix failure;
+`atomic_prefix_success` requires actual prefix success. These equations are
+discharged by the inhabited controls, not counted as whole compiler/world
+preservation. Source effects, receiver bytes and funding are read through
+existing APIs. Private value/error result projections merely recover closed
+kernel-checked observations and do not supply execution semantics or oracles.
+
+The first whole-world `rfl` controls exceeded the unchanged recursion-depth
+limit. Shared result projection, kernel-only Boolean/error observations and
+published fold/bind equations fixed them without raising recursion, heartbeats,
+fuel, nodes or test limits. Original failures are retained. Focused closure
+passes35jobs; eight scoped headline/control axiom pins retain only standard
+Lean subsets. Separate read-only finder/skeptic reviews found no semantic or
+ownership defect; their actual-middle, stopped-successful-tail and nonempty
+iteration-cut refinements are implemented. Fresh diagnostics/static/docs/final
+review results and actual checkpoint head appear in the recovery handoff.
+
+All original Work/Backfill/reserved obligations remain binding. This completes
+additional independent prefix/iteration preparation, not G43/G36.03/payment
+asymmetry or a source constructor/runtime/executable-byte proof. Next final
+validation runs the required unchanged full repository gate under the same
+serial resource controls, without relabeling historical docs failure green.
