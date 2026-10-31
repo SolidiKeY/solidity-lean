@@ -174,3 +174,15 @@ mutant mismatches. Full Y10/G48–G51 and world/memory/source correspondence rem
 pending; the existing goal stays blocked. Original checkpoint/artifacts remain
 preserved; new full head, commands, reviews and checksums are in
 `/workspace/vy5-composition/recovery-20261031/handoff.json`.
+
+### VY5 state observation checkpoint — 2026-10-31
+
+The [lane observation record](inline-assembly-vy5.md#state-and-memory-observation-checkpoint--2026-10-31)
+and [coverage ledger](../../tests/yul-composition/observation-coverage.json)
+record public-API touched-account/slot worlds, frame memory and last-call buffers.
+Four source-bound controlled fixtures match16 state-oracle profiles; the227
+upstream byte/log matches retain pending independent state comparisons and21
+older-fork blocks. Source/correspondence and Y10/G48–G51 proofs remain pending.
+Original checkpoints/artifacts are preserved; new full committed identity,
+commands, reviews and checksums are in
+`/workspace/vy5-composition/observations-20261031/handoff.json`.

@@ -4,8 +4,9 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
+import {capturedMachine,validateCapture,validateCallCapture} from './capture.mjs';
 import {parseFixture,withPreamble,runtimePipelines,revertBytes,abiType,evmCompatible} from '../solidity-upstream.mjs';
-import {machine,INITIAL_GAS,STEP_LIMIT} from '../evm-reference/replay.mjs';
+import {INITIAL_GAS,STEP_LIMIT} from '../evm-reference/replay.mjs';
 import {Account,createAddressFromString,hexToBytes,bytesToHex} from '../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js';
 const ROOT=fileURLToPath(new URL('../../',import.meta.url));
 const sha=b=>createHash('sha256').update(b).digest('hex');
@@ -117,21 +118,21 @@ export async function beginFrame(evm,previous) {
 }
 export async function replay(artifact,plan) {
  if(!plan||!Array.isArray(plan.calls)||!plan.calls.length)throw Error('missing call plan');
- const vm=await machine();const sender=createAddressFromString(HOST.sender),origin=createAddressFromString(HOST.origin);
+ const {vm,observer}=await capturedMachine();const sender=createAddressFromString(HOST.sender),origin=createAddressFromString(HOST.origin);
  await vm.evm.stateManager.deleteAccount(createAddressFromString('0x'+'12'.repeat(20)));
  for(let i=0;i<10;i++)await vm.evm.stateManager.putAccount(createAddressFromString('0x'+(BigInt(HOST.sender)+BigInt(i)*0x1000n).toString(16).padStart(40,'0')),new Account(0n,1n<<100n));
  for(let i=1;i<=8;i++)await vm.evm.stateManager.putAccount(createAddressFromString('0x'+i.toString(16).padStart(40,'0')),new Account(0n,1n));
  let transaction=0,address;const observed=[];let deployment,previous=null;
  async function call(data,value,to) {
-  transaction++;const frame=await beginFrame(vm.evm,previous);
+  transaction++;
   const block={header:{number:BigInt(transaction),timestamp:15n*BigInt(transaction),coinbase:createAddressFromString(HOST.coinbase),difficulty:200000000n,prevRandao:hexToBytes(HOST.prevrandao),gasLimit:20000000n,baseFeePerGas:7n,getBlobGasPrice:()=>1n}};
-  const response=await vm.call({caller:sender,origin,data:hexToBytes(data),value:BigInt(value),...(to?{to}:{}),block,gasPrice:3000000000n,blobVersionedHashes:HOST.blobHashes});
+  const response=await observer.run({caller:sender,origin,data:hexToBytes(data),value:BigInt(value),...(to?{to}:{}),block,gasPrice:3000000000n,blobVersionedHashes:HOST.blobHashes},transaction,()=>beginFrame(vm.evm,previous));
   previous=response.result.execResult;
-  return {...response,transaction,frame,requestData:data};
+  return {...response,transaction,frame:response.boundary,requestData:data};
  }
  async function deploy(c) {
   const r=await call('0x'+artifact.evm.bytecode.object+Buffer.from(c.calldata).toString('hex'),c.value);
-  const actual=exactObservation(r.result.execResult,r.metrics),addr=r.result.createdAddress?.toString()??null,record={transaction:r.transaction,frame:r.frame,requestData:r.requestData,actual,address:addr};
+  const actual=exactObservation(r.result.execResult,r.metrics),addr=r.result.createdAddress?.toString()??null,record={transaction:r.transaction,frame:r.frame,requestData:r.requestData,capture:r.capture,actual,address:addr};
   if(!actual.failed){if(!addr)throw Error('successful creation without address');address=r.result.createdAddress;const installed=bytesToHex(await vm.evm.stateManager.getCode(address));if(installed!==actual.returnData)throw Error('creation output differs from installed runtime');record.installedRuntime=installed;record.runtimeSha256=sha(hexToBytes(installed));}
   return record;
  }
@@ -147,7 +148,7 @@ export async function replay(artifact,plan) {
     const declaration=artifact.abi.find(d=>d.type==='function'&&`${d.name}(${d.inputs.map(abiType).join(',')})`===c.signature),selector=artifact.evm.methodIdentifiers[c.signature];
     if(!declaration||!selector)throw Error('missing ABI declaration/selector: '+c.signature);
     if(!Array.isArray(c.calldata)||!Array.isArray(c.expectedBytes))throw Error('missing byte-vector evidence');
-    const result=await call('0x'+selector+Buffer.from(c.calldata).toString('hex'),c.value,address);actual=exactObservation(result.result.execResult,result.metrics);record={transaction:result.transaction,frame:result.frame,requestData:result.requestData};
+    const result=await call('0x'+selector+Buffer.from(c.calldata).toString('hex'),c.value,address);actual=exactObservation(result.result.execResult,result.metrics);record={transaction:result.transaction,frame:result.frame,requestData:result.requestData,capture:result.capture};
    }
    const comparison=compareCall(c,actual,address?.toString()??null,{creation:c.constructor});observed.push({index,signature:c.signature,inputBytes:hex(c.calldata),value:c.value,...record,actual,comparison});mismatch ||=comparison.status==='broken';
   }catch(e){return {status:mismatch?'broken':'blocked',reason:e.message,stack:e.stack,deployment,observed,blockedCall:index,expectedCallCount:plan.calls.length};}
@@ -164,7 +165,7 @@ export async function runFixture(path,directory,compile,scanPolicy) {
  const raw=readFileSync(join(directory,path)),manifest=JSON.parse(readFileSync(join(ROOT,'tests/upstream/snapshot.json'))),pin=manifest.files.find(f=>f.path===path);
  if(!pin||raw.length!==pin.bytes||sha(raw)!==pin.sha256)throw Error('unpinned fixture bytes: '+path);
  const fixture=parseFixture(new TextDecoder('utf8',{fatal:true}).decode(raw));
- const result={path,sourceSha256:sha(raw),originalSettings:fixture.settings,originalExpectations:fixture.expectations,stage:'vy5-reference-bytes',scope:'External byte/log reference only; no admission/correspondence proof or complete world/final-memory comparison. EthereumJS CREATE address convention differs from pinned EVMHost pre-increment; concrete CREATE-address-dependent oracles are not adapted.',requiredPipelines:runtimePipelines(fixture.settings),environment:HOST,initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,variants:[]};
+ const result={path,sourceSha256:sha(raw),originalSettings:fixture.settings,originalExpectations:fixture.expectations,stage:'vy5-reference-bytes',scope:'External byte/log reference with API-touched state and raw frame-memory capture; state/memory comparison pending independent upstream oracles, not admission/correspondence proof or untouched-world equivalence. EthereumJS CREATE address convention differs from pinned EVMHost pre-increment; concrete CREATE-address-dependent oracles are not adapted.',requiredPipelines:runtimePipelines(fixture.settings),environment:HOST,initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,variants:[]};
  try {
   const plan=parseExpectations(fixture.expectations);result.plan=plan;
   for(const profile of profilesFor(fixture,plan)) {
@@ -180,7 +181,7 @@ export async function runFixture(path,directory,compile,scanPolicy) {
     const artifact=output.contracts[fixture.mainSource][contract];
     let creates=false;walk(ast,n=>{if(n.nodeType==='NewExpression'||n.nodeType==='YulFunctionCall'&&['create','create2'].includes(n.functionName?.name))creates=true;});
     if(creates&&plan.calls.some(c=>artifact.abi.some(d=>d.type==='function'&&`${d.name}(${d.inputs.map(abiType).join(',')})`===c.signature&&d.outputs.some(o=>o.type==='address'))))throw Error('concrete creation-address oracle not adapted to upstream nonce convention');
-    v.creationSha256=sha(Buffer.from(artifact.evm.bytecode.object,'hex'));v.runtimeTemplateSha256=sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex'));Object.assign(v,await replay(artifact,plan));
+    v.creationSha256=sha(Buffer.from(artifact.evm.bytecode.object,'hex'));v.runtimeTemplateSha256=sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex'));Object.assign(v,await replay(artifact,plan));v.stateComparison={status:'pending',reason:'Original upstream expectations specify bytes/failure/logs; independent complete state/memory oracle absent'};
    }catch(e){v.reason=e.message;v.stack=e.stack;}
   }
  }catch(e){result.reason=e.message;result.stack=e.stack;}
@@ -215,11 +216,14 @@ export function validateFixtureEvidence(result,directory) {
   }
   const observations=v.observed;
   if(v.status==='working') {
+   if(v.stateComparison?.status!=='pending')throw Error('unproved upstream state comparison');
+   validateCapture(v.deployment?.capture);if(v.deployment.capture.transaction!==1)throw Error('deployment capture transaction');
    const d=v.deployment,a=d?.actual;
+   validateCallCapture(d.capture,a,{transaction:1,input:d.requestData,value:plan.calls[0].constructor?plan.calls[0].value:'0',caller:HOST.sender,to:null});
    if(!a?.metrics||!Number.isSafeInteger(a.metrics.steps)||a.metrics.steps<0||a.metrics.steps>STEP_LIMIT)throw Error('invalid deployment metrics');
    if(plan.calls[0].constructor) {
     const o=observations?.[0];
-    for(const k of ['actual','transaction','frame','requestData'])if(!isDeepStrictEqual(d[k],o?.[k]))throw Error('inconsistent explicit deployment evidence');
+    for(const k of ['actual','transaction','frame','requestData','capture'])if(!isDeepStrictEqual(d[k],o?.[k]))throw Error('inconsistent explicit deployment evidence');
    } else {
     const c={failure:false,expectedBytes:[],logs:[]};
     if(compareCall(c,a,d.address,{creation:true}).status!=='working'||d.transaction!==1)throw Error('invalid implicit deployment observation');
@@ -231,7 +235,10 @@ export function validateFixtureEvidence(result,directory) {
   if(v.status==='blocked'&&typeof v.reason!=='string')throw Error('missing block reason');
   for(const [i,o]of (observations??[]).entries()) {
    if(!o.actual?.metrics||!Number.isSafeInteger(o.actual.metrics.steps)||o.actual.metrics.steps<0||o.actual.metrics.steps>STEP_LIMIT)throw Error('missing/invalid execution metrics');
-   const c=plan.calls[i];if(!c||o.index!==i||o.signature!==c.signature||o.inputBytes!==hex(c.calldata)||o.value!==c.value)throw Error('changed/dropped/reordered call evidence');
+   validateCapture(o.capture);if(o.capture.transaction!==o.transaction)throw Error('call capture transaction');
+   const c=plan.calls[i];
+   validateCallCapture(o.capture,o.actual,{transaction:o.transaction,input:o.requestData,value:c.value,caller:HOST.sender,to:c.constructor?null:v.deployment.address});
+   if(!c||o.index!==i||o.signature!==c.signature||o.inputBytes!==hex(c.calldata)||o.value!==c.value)throw Error('changed/dropped/reordered call evidence');
    if(o.transaction!==i+(plan.calls[0].constructor?1:2))throw Error('transaction sequence mismatch');
    const comparison=compareCall(c,o.actual,v.deployment?.address??null,{creation:c.constructor});
    if(!isDeepStrictEqual(comparison,o.comparison))throw Error('malformed or stale comparison');

@@ -6,7 +6,7 @@ import {parseFixture,semanticVectors}from'../solidity-upstream.mjs';
 import {checkedCompiler,compileRecord,ROOT}from'./harness.mjs';
 import {parseExpectations,parseLog,profilesFor,exactObservation,compareCall,runFixture,replay,validateFixtureEvidence,osakaCompatible}from'./upstream.mjs';
 const directory='/workspace/vy5-composition/corpus';
-const out=mkdtempSync('/workspace/vy5-composition/recovery-20261031/tests-');chmodSync(out,0o755);console.log('test evidence: '+out);
+const out=mkdtempSync('/workspace/vy5-composition/observations-20261031/upstream-tests-');chmodSync(out,0o755);console.log('test evidence: '+out);
 const compileRaw=checkedCompiler('/workspace/vy5-composition/soljson-v0.8.38+commit.1835d247.js');
 let counter=0;const compile=input=>compileRecord(compileRaw,input,join(out,'compile-'+counter++)).output;
 const path=name=>'test/libsolidity/semanticTests/inlineAssembly/'+name;
@@ -77,6 +77,9 @@ test('actual EIP-6780 finalization deletes newly-created but keeps old code',asy
  const r=await replay(a,parseExpectations(['make() ->','size() -> 0','makeOld() ->','killOld() ->','oldValue() -> 42']));
  writeFileSync(join(out,'selfdestruct-frames.actual.json'),JSON.stringify(r,null,2));
  assert.equal(r.status,'working',r.reason);assert.equal(r.observed[1].frame.deletedAccounts.length,1);assert.equal(r.observed[4].frame.deletedAccounts.length,0);
+ const deleted=r.observed[1].frame.deletedAccounts[0],capture=r.observed[1].capture;
+ assert(capture.operations.some(o=>o.kind==='deleteAccount'&&o.address===deleted));
+ assert.equal(capture.pre[deleted].exists,true);assert.equal(capture.post[deleted].exists,false);assert.equal(capture.post[deleted].code,'0x');
  writeFileSync(join(out,'selfdestruct-frames.report.json'),JSON.stringify(r,null,2));
 });
 

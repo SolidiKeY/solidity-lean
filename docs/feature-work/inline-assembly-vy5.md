@@ -292,3 +292,99 @@ universally quantified source/target correspondence remain open. Work 3, G48–G
 and final joint kernel/import/composition gates remain pending. No dependency
 preparation, compiler match or mock closes them. No new semantic question is
 established; original YQ1–YQ7 authorization remains in force.
+
+## State and memory observation checkpoint — 2026-10-31
+
+This reviewed checkpoint follows `5d2025cfae09794e8f70784fca51d83da2f5239c`
+in the same clean assigned branch and VM. The original artifact root and
+`recovery-20261031` artifacts are preserved. New full head/base/branch, patch,
+bundle, raw evidence and checksum paths are recorded after committing in
+`/workspace/vy5-composition/observations-20261031/handoff.json`. The existing
+full-assignment goal remains blocked; no reset or reactivation is performed.
+
+The lane-owned [observer](../../scripts/yul-composition/capture.mjs) decorates
+public methods on an isolated machine instance and subscribes to public events;
+shared engine/parser sources, dependency lockfiles and limits are unchanged.
+It discovers accounts and persistent/transient slots from actual API accesses,
+not fixture expected keys. Each transaction and frame preserves pre/post account
+existence, balance, nonce, code bytes/SHA256 and all discovered slot words.
+SHA256 is evidence integrity, not an EVM codehash. API access counts, ordered
+mutations, checkpoint/commit/revert and transient-clear payloads retain rollback
+and reset evidence. Explicit next-transaction EIP-6780 cleanup includes deleted
+accounts and cleared code/storage. Transaction pre-state precedes host cleanup;
+frame pre-state is at beforeMessage, after engine caller-nonce handling. Frame
+post-state follows the engine journal decision, and top-level cleanup may already
+have reset transient slots; the pre-clear payload remains a separate observation.
+
+The scope is the **API-touched domain since observer installation**, including
+seeded host accounts. It is not Ethereum-wide enumeration or a state-root proof.
+The private-token `capturedMachine` factory installs capture immediately after
+the exported fresh engine constructor, before all later writes. This justifies
+zero initial values for subsequently discovered slots even after a constructor
+bulk clear. A generic observer with unknown preinstallation storage blocks a new
+slot first seen after bulk clear; it does not infer emptiness from a nonexistent
+account (the public simple manager permits detached storage). Initial transient
+slots are discovered using public toJSON. Raw regressions preserve both cases.
+Unknown/missing APIs or capture errors block execution evidence rather than
+becoming empty state. Native/precompile internals and untouched accounts remain
+outside this capture boundary.
+
+Raw final frame memory is read through the public result memory API. Pre-opcode
+LOG/RETURN/REVERT snapshots retain allocated bytes, offsets, lengths, frame and
+step/PC identity as diagnostics; no PC/gas builtin is admitted. Final per-frame
+last-call returndata uses public interpreter getters and remains separate from
+frame output and memory. The nested-revert control distinguishes parent buffer
+77, parent output42, child revert memory77 and rolled-back persistent/transient
+slots0. Memory never becomes an arbitrary cross-pipeline equality. The original
+allocation layout/refinement and dirty-bit controls retain their expected values.
+No source-level returndata-buffer correspondence theorem is claimed.
+
+Four source-hash-bound [controlled oracles](../../tests/yul-composition/state-oracles.json)
+cover memory-storage-logs, try-catch, modifiers and constructors in legacy/viaIR,
+optimizer off/on: **16 state-oracle matches**. The registration has frozen hash,
+required IDs and fail-closed gate recomputation. Additional real bytecode tests
+cover external balance/nonce/code, stateful calls, transient reset, nested reverted
+writes/value transfer, memory and returndata. Consistent wrong slot/balance/nonce/
+memory/buffer evidence mismatches despite unchanged return bytes; missing worlds,
+frames, request/result bindings, oracle rows or context metadata block. Mutation
+tests distinguish malformed evidence from genuinely wrong observations.
+
+Final serial `observation-final` exits0: **73 JavaScript and two Python tests**;
+80 pinned fixtures,248 runtime profiles retain **227 byte/log matches and21
+old-fork blocks**. Working upstream profiles record674 unique transaction
+captures and838 frames, including838 final memory and last-call-buffer captures,
+plus765 pre-opcode memory regions. Their independent whole-state comparisons
+remain explicitly pending. The [observation coverage ledger](../../tests/yul-composition/observation-coverage.json)
+records exact per-fixture/profile counts and the16 controlled matches. Projection
+against original report SHA256
+`0183a26c65468d780c31e74a7fd1ed127d601eb43b9f96f9cd36555cef6c678c`
+confirms unchanged sources/settings/profile identities, input hashes, all calls,
+failure/bytes/logs, metrics, gas telemetry and cleanup evidence. Seven older-fork
+constraints are unchanged. The separate416 compiler probes retain72 matches,
+eight intended mutant mismatches,four diagnostic matches,304 pending and28
+blocked. AST coverage remains16 manifest rows with **zero obligations closed**.
+
+Separate read-only finder and skeptic reviews (without Lean/server/build) found
+and prompted fixes for frame-domain omission, request/result binding, vacuous or
+missing oracles, provenance hashes, unknown prevalues after clear, fresh-constructor
+handling and nested context metadata. Both accepted final source and scope;
+raw early probe/focused failures remain alongside passing runs. Reviews, exact
+commands and per-run resources are in the new handoff. The final run used the
+writer lock, one CPU, LEAN_NUM_THREADS=1 and aggregate Docker12GiB memory with
+memory-swap equal12GiB (no swap allowance). Sampled peak RSS1,091,117,056 bytes;
+minimum OS availability16,802,652,160 bytes; no resource stop/OOM. More than16GiB
+disk headroom remained. No engine step/gas or proof/test budget increased.
+
+Work2 and BackfillA/B advance through concrete capture and controlled oracles;
+full source/target world, storage, memory and returndata comparisons remain
+partial. Work1/3, all24 obligations, six combinations and final joint Y10/G48–G51
+kernel/import closure still require actual VY1–VY4/V16 and the other recorded
+owner interfaces. No Lean source/import, intrinsic representation, theorem,
+premise, axiom or budget changed; no new kernel gate is claimed. Prior KeySort
+(two jobs,exit0) and full policy (981 library/262 TestSuite jobs,exit0) are attributed
+to their tested earlier tree, whose Lean files are unchanged. Actual toolchain
+remains Lean4.24.0 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, Lake5.0.0-src+797c613.
+Baseline docs/G03 exit1 failures are preserved; scoped new paths and ownership
+are checked without repairing unrelated history. Existing YQ1–YQ7 decisions,
+admission refusals and canonical-rethrow exception remain unchanged. No new
+semantic/profile decision is needed for this external observation checkpoint.

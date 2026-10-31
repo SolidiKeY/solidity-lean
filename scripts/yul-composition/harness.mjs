@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
+import {capturedMachine,validateCapture,validateCallCapture,compareState} from './capture.mjs';
 import {parseFixture,withPreamble,evmCompatible,runtimePipelines} from '../solidity-upstream.mjs';
 export const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 export const PIN='1835d247de183f23e7b0e2bc4a50732af525b77c';
@@ -127,18 +128,24 @@ export function checkException(exception,stage='runtime') {
 export function diagnosticsMatch(errors,expected) {
   return isDeepStrictEqual(errors.map(e=>({type:e.type,code:e.errorCode,message:e.message})),expected);
 }
+const STATE_ORACLE_IDS=['constructors','memory-storage-logs','modifiers','try-catch'];
+export function checkStateOracles(raw) {
+ if(sha(raw)!=='083c5a4aa64cf53579aa03c1fa4e469fc19b6b358054b803104c661df633cbb6')throw Error('missing/stale state oracle registration');
+ const rows=JSON.parse(raw);if(!isDeepStrictEqual(rows.map(r=>r.id).sort(),STATE_ORACLE_IDS))throw Error('missing/duplicate state oracle');
+ return rows;
+}
 /** Reference engine only. No source-state/target relation is asserted. */
-async function execute(artifact,fixture) {
-  const {machine}=await import('../evm-reference/replay.mjs');
+export async function execute(artifact,fixture) {
   const {hexToBytes,bytesToHex}=await import('../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js');
-  const vm=await machine();
-  const deployment=await vm.call({data:hexToBytes('0x'+artifact.evm.bytecode.object)});
+  const {vm,observer}=await capturedMachine();let transaction=0;
+  const call=options=>observer.run(options,++transaction);
+  const deployment=await call({data:hexToBytes('0x'+artifact.evm.bytecode.object)});
   const address=deployment.result.createdAddress;
   if(fixture.deploymentOnly) {
     const e=deployment.result.execResult;
     const exception=e.exceptionError?.error??null;
     checkException(exception,'deployment');
-    return {observed:{failed:!!e.exceptionError,exception,returnData:bytesToHex(e.returnValue),logs:(e.logs??[]).map(([emitter,topics,data])=>({emitter:bytesToHex(emitter),topics:topics.map(bytesToHex),data:bytesToHex(data)}))}};
+    return {deploymentCapture:deployment.capture,observed:{capture:deployment.capture,metrics:deployment.metrics,failed:!!e.exceptionError,exception,returnData:bytesToHex(e.returnValue),logs:(e.logs??[]).map(([emitter,topics,data])=>({emitter:bytesToHex(emitter),topics:topics.map(bytesToHex),data:bytesToHex(data)}))}};
   }
   if(deployment.result.execResult.exceptionError || !address) throw Error('reference deployment failed');
   const installed=bytesToHex(await vm.evm.stateManager.getCode(address));
@@ -151,7 +158,7 @@ async function execute(artifact,fixture) {
     const referenceRuntime=fixture.targetMutation==='incorrect-opcode'?'0x60016029015f5260205ff3':installed;
     await vm.evm.stateManager.putCode(address,hexToBytes(referenceRuntime));
     if(bytesToHex(await vm.evm.stateManager.getCode(address))!==referenceRuntime) throw Error('reference target read-back differs');
-    const preview=await vm.call({to:address,data:hexToBytes('0x'+artifact.evm.methodIdentifiers[fixture.signature]+fixture.args.join(''))});
+    const preview=await call({to:address,data:hexToBytes('0x'+artifact.evm.methodIdentifiers[fixture.signature]+fixture.args.join(''))});
     const pe=preview.result.execResult;
     const previewObservation={failed:!!pe.exceptionError,exception:checkException(pe.exceptionError?.error??null),returnData:bytesToHex(pe.returnValue),logs:(pe.logs??[]).map(([emitter,topics,data])=>({emitter:bytesToHex(emitter),topics:topics.map(bytesToHex),data:bytesToHex(data)}))};
     if(compare(fixture.expected,previewObservation).status!=='match') throw Error('unmutated reference target did not match');
@@ -161,19 +168,19 @@ async function execute(artifact,fixture) {
   }
   const selector=artifact.evm.methodIdentifiers[fixture.signature];
   if(!selector) throw Error('missing method identifier');
-  const {result,metrics}=await vm.call({to:address,data:hexToBytes('0x'+selector+fixture.args.join(''))});
+  const {result,metrics,capture}=await call({to:address,data:hexToBytes('0x'+selector+fixture.args.join(''))});
   const e=result.execResult,exception=e.exceptionError?.error??null;
   checkException(exception);
   const observed={failed:exception!==null,returnData:bytesToHex(e.returnValue),logs:(e.logs??[]).map(([emitter,topics,data])=>({emitter:bytesToHex(emitter)===address.toString()?'self':bytesToHex(emitter),topics:topics.map(bytesToHex),data:bytesToHex(data)})),exception,metrics,
-    worldScope:'deployed account storage only; balances/nonces/external account worlds not compared',
-    memoryScope:'memory effects observed through return bytes/logs/storage; raw final VM memory not compared'};
+    capture,worldScope:'All API-touched accounts/slots captured; independent comparisons only for explicit controlled oracles, no untouched-world equivalence',
+    memoryScope:'Frame-indexed raw final memory and before-LOG/RETURN/REVERT snapshots; only specified semantic regions compared'};
   observed.rawLogs=(e.logs??[]).map(([emitter,topics,data])=>({emitter:bytesToHex(emitter),topics:topics.map(bytesToHex),data:bytesToHex(data)}));
   observed.storage={};
-  for(const slot of Object.keys(fixture.expected?.storage??{})) {
-    const value=await vm.evm.stateManager.getStorage(address,hexToBytes('0x'+BigInt(slot).toString(16).padStart(64,'0')));
-    observed.storage[slot]='0x'+bytesToHex(value).slice(2).padStart(64,'0');
-  }
-  return {deployment:{address:address.toString(),runtimeSha256:sha(deployment.result.execResult.returnValue),metrics:deployment.metrics},targetMutation,observed};
+  for(const [slot,value]of Object.entries(capture.post[address.toString()]?.persistent??{}))observed.storage[BigInt(slot).toString()]=value;
+  const oracle=checkStateOracles(readFileSync(join(ROOT,'tests/yul-composition/state-oracles.json'),'utf8')).find(o=>o.id===fixture.id);
+  if(oracle&&oracle.sourceSha256!==sha(fixture.source))throw Error('stale state oracle source');
+  const stateComparison=compareState(capture,oracle?.oracle,{self:address.toString(),caller:'0x'+'12'.repeat(20)});
+  return {stateComparison,deploymentCapture:deployment.capture,deployment:{address:address.toString(),runtimeSha256:sha(deployment.result.execResult.returnValue),metrics:deployment.metrics},targetMutation,observed};
 }
 const LOCAL_IDS=["loops", "modifiers", "try-catch", "unchecked", "constructors", "libraries", "always-revert", "incorrect-opcode", "compiler-dependent", "non-memory-safe", "unsupported-callcode", "dirty-bits", "allocation", "memory-storage-logs", "malformed-import", "constructor-failure", "dirty-bits-cleaned", "try-body", "try-error", "try-bytes", "try-panic", "mixed-logs", "new-constructor", "always-revert-target"];
 const LOCAL_POSITIVE=["loops", "modifiers", "try-catch", "unchecked", "constructors", "libraries", "always-revert", "non-memory-safe", "dirty-bits", "memory-storage-logs", "constructor-failure", "dirty-bits-cleaned", "try-body", "try-error", "try-bytes", "try-panic", "mixed-logs", "new-constructor"];
@@ -200,6 +207,14 @@ export function controlFailures(results,requireExecution=false) {
   if(requireExecution) for(const pipeline of ['legacy','viaIR'])
     if(!results.some(r=>r.id==='incorrect-opcode' && r.pipeline===pipeline)) failures.push('missing incorrect-opcode '+pipeline);
   for(const r of results) {
+    if(r.stateComparison&&['mismatch','blocked'].includes(r.stateComparison.status))failures.push(r.id+': state oracle did not match');
+    if(requireExecution&&STATE_ORACLE_IDS.includes(r.id)) {
+      const oracle=checkStateOracles(readFileSync(join(ROOT,'tests/yul-composition/state-oracles.json'),'utf8')).find(o=>o.id===r.id);
+      const comparison=compareState(r.observed?.capture,oracle.oracle,{self:r.deployment?.address,caller:'0x'+'12'.repeat(20)});
+      if(comparison.status!=='match'||!isDeepStrictEqual(comparison,r.stateComparison))failures.push(r.id+': missing/stale required state comparison');
+    }
+    if(requireExecution&&r.kind==='combination'&&[...LOCAL_POSITIVE,'incorrect-opcode','always-revert-target','allocation'].includes(r.id)&&!r.observed?.capture)failures.push(r.id+': missing required capture');
+    if(requireExecution&&r.observed)try{validateCallCapture(r.observed.capture,r.observed);validateCapture(r.deploymentCapture);}catch(e){failures.push(r.id+': missing/malformed capture: '+e.message);}
     if(r.layoutSanity===false) failures.push(r.id+': invalid reference allocation layout');
     if(r.policyCheck==='mismatch' || r.compilerControl==='mismatch') failures.push(r.id+': control mismatch');
     if(r.reference?.validationFailure) failures.push(r.id+': malformed upstream evidence: '+r.reference.validationFailure);
@@ -284,6 +299,7 @@ export async function run({compiler,out,corpus,executeReference=false,optimizerA
     fixturesSha256:sha(readFileSync(join(ROOT,'tests/yul-composition/fixtures.json'))),
     adapterSha256:sha(readFileSync(join(ROOT,'scripts/solidity-upstream.mjs'))),
     upstreamWrapperSha256:sha(readFileSync(join(ROOT,'scripts/yul-composition/upstream.mjs'))),
+    stateOraclesSha256:sha(readFileSync(join(ROOT,'tests/yul-composition/state-oracles.json'))),captureSha256:sha(readFileSync(join(ROOT,'scripts/yul-composition/capture.mjs'))),
     referenceEngineSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/replay.mjs'))),
     referenceHost:{engine:'@ethereumjs/evm 10.1.3',hardfork:'osaka',initialGas:'100000000',stepLimit:5000000,allowUnlimitedContractSize:true,allowUnlimitedInitCodeSize:true},
     referenceLockSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/package-lock.json'))),results};

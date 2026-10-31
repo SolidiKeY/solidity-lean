@@ -1,0 +1,114 @@
+[
+  {
+    "id": "memory-storage-logs",
+    "sourceSha256": "98adb44e7d7859ed606dff77f3346f3a2fc6620260dcc4f8a9653c2ddd5b0ef4",
+    "oracle": {
+      "accounts": [
+        {
+          "address": "self",
+          "phase": "post",
+          "fields": {
+            "exists": true,
+            "balance": "0",
+            "nonce": "1"
+          }
+        }
+      ],
+      "slots": [
+        {
+          "address": "self",
+          "phase": "post",
+          "kind": "persistent",
+          "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      ],
+      "memory": [
+        {
+          "depth": 0,
+          "at": "LOG1",
+          "offset": 0,
+          "bytes": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      ]
+    }
+  },
+  {
+    "id": "try-catch",
+    "sourceSha256": "ae3ed4d44a5041ade8883b0d111f81eba7e7ded0a3630027c4198b98bcde7e3d",
+    "oracle": {
+      "accounts": [
+        {
+          "address": "self",
+          "phase": "post",
+          "fields": {
+            "exists": true,
+            "balance": "0",
+            "nonce": "1"
+          }
+        }
+      ],
+      "slots": [
+        {
+          "address": "self",
+          "phase": "post",
+          "kind": "persistent",
+          "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  },
+  {
+    "id": "modifiers",
+    "sourceSha256": "6e23b39bae795b6c87502216e2ad13e70ec5913452b71cb6056ade5bfa8d1ed4",
+    "oracle": {
+      "accounts": [
+        {
+          "address": "self",
+          "phase": "post",
+          "fields": {
+            "exists": true,
+            "balance": "0",
+            "nonce": "1"
+          }
+        }
+      ],
+      "slots": [
+        {
+          "address": "self",
+          "phase": "post",
+          "kind": "persistent",
+          "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0x0000000000000000000000000000000000000000000000000000000000000003"
+        }
+      ]
+    }
+  },
+  {
+    "id": "constructors",
+    "sourceSha256": "8404030042d6d07b44066a13654663cd7db5e0b4fe54742dd2e13a1ab89ca1de",
+    "oracle": {
+      "accounts": [
+        {
+          "address": "self",
+          "phase": "post",
+          "fields": {
+            "exists": true,
+            "balance": "0",
+            "nonce": "1"
+          }
+        }
+      ],
+      "slots": [
+        {
+          "address": "self",
+          "phase": "post",
+          "kind": "persistent",
+          "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      ]
+    }
+  }
+]
