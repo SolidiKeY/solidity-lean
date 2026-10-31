@@ -129,6 +129,23 @@ rebuilding and rerunning them. Read-only finder and skeptic reviews checked ever
 compiler call and confirmed that the patch only changes compiler/snapshot location
 wiring; no admission, observation, target predicate or proof budget changes.
 
+The next combined retry (attempt 4, gate 23) exposed the sibling-checkout
+assumption in `scripts/test-solidity.test.mjs`: 62 of 68 tests failed at source
+compilation. That suite now applies the same verified `solkeyTestOptions()`
+through a local API wrapper and passes its paths to both direct compiler calls.
+Read-only finder and skeptic reviews found no missed compiler call or changed
+assertion, timeout, batch size, semantic check or proof budget. The retained
+`annotate : Expr` fix is already present; no Lean source changed in this repair.
+JavaScript syntax and whitespace checks pass. A serial four-case retry with the
+12 GiB/no-swap cap, 12 GiB OS reserve guard and Lean `-j1` passed compilation
+in every case and the library-annotation test passed. The editor-report, Runner
+proof-search and nominal-renaming tests stopped at out-of-date
+`Solidity.Calculus.DecideComplete` and `Solidity.Calculus.Callback` artifacts
+under `--no-build`; their assertions remain unverified. Logs are retained locally
+in `.lake/entrypoints-repair/test-solidity-focused-host.log` and
+`.lake/entrypoints-repair/test-solidity-focused-details.log`. The coordinator owns
+rebuilding and rerunning the combined gates.
+
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
 node scripts/solidity-upstream.mjs verify
