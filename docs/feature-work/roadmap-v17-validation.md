@@ -306,3 +306,72 @@ and configuration cleanup completed. The monitor now requests PID/command/RSS,
 with an added created→running→exited lifecycle regression. Retrying this changed
 collector is not repeating an unchanged failed Lean operation. No build failure
 was relabeled or erased.
+
+## Preventive native-job serialization checkpoint
+
+Continuation starts from clean `04a9fe8540bbfcff8db426f35d67fd29aceb0c55`
+on the same assigned branch and VM. This is useful independent G54.01/backfill
+preparation; G54.02/.03 and G55 remain closed to premature execution. Prior
+artifacts, the approved compiler and the 640-comparison witness retain their
+original revision and are not relabeled or needlessly rerun.
+
+Inspection found the preceding admission wrapper covers Lean but not Lake's
+C compilation, native linking and archive jobs. Process polling can observe
+these jobs but cannot prevent short overlaps. The new schema-2 collector uses
+child-only read-only overlays for the installed `lean`, `clang`, `llvm-ar`,
+`ld.lld` and `leanc` entrypoints, sharing one inherited descriptor lock. The
+original toolchain is mounted read-only at its alias with library layout intact;
+no bytes are changed or copied into a second toolchain. Snapshots/cache keys now
+also bind all five original tool binaries. Exact canonical Docker argv/mounts,
+all canonical mounted-launcher paths/bytes and observed default-entrypoint hashes are validated, beside
+raw-tool hashes, before/after source/configuration state and full inventories.
+
+The approved spawn boundaries were inspected in Lake's installed
+`Config/InstallPath` and `Build/Common`, plus the installed `Leanc` source.
+`LEAN_CC` is deliberately not overridden: doing so would select custom-compiler
+flags in Lake/Leanc and drop bundled internal flags. The overlays preserve the
+existing native command arguments and only retain the already-required Lean
+`-j1`. No tracked lakefile, core, source semantics, reserved repair, proof budget,
+assertion, profile or verdict changes. The matching G02/history entries were
+inspected. Serializing C/link jobs may slow a build; the 300s preparation process
+ceiling and original suite-module budget are unchanged, and cannot be raised
+through this harness. A failure or timeout will remain a failure.
+
+The shell supervisor opens descriptor 9 on the absolute shared lock, acquires it
+with the descriptor-only `flock -x 9` form, and holds it while the original tool
+runs. An inherited family token is accepted only with the matching descriptor;
+a stripped or forged descriptor fails closed rather than deadlocking or bypassing
+admission. This serializes independent job families. Synchronous nested helpers
+belong to the same family; it does not claim every nested OS process is globally
+exclusive. All descendants remain in the hard 12 GiB/no-swap child scope and
+one-CPU ceiling. Existing telemetry is observation evidence, not the admission
+mechanism or a kernel proof. Unsupported execution patterns are not assumed safe
+or counted as final proof closure.
+
+Independent reviews caught an important initial defect: `flock -x 9 COMMAND`
+locks a filename named `9`, rather than the descriptor. The initial same-directory
+controls missed that. The new cross-directory control reproduced independent
+family overlap (peak 2), retained in
+`/workspace/scratch/v17-spawn/fd-form-failure.log`. The empty task-generated
+untracked file was attributed and hashed in `stray-lock-file.json`, then removed
+to restore the verified starting checkout state. No unexpected preexisting work
+was removed. The corrected controls now check the intended lock inode and absence
+of cwd files. Review also required binding actual Docker mount configuration and
+observed wrapper bytes, so storing unused launchers cannot satisfy provenance.
+
+The 82 controls include concurrent very short synthetic Lean/C/link/archive jobs,
+an unwrapped overlapping negative control, cross-working-directory admission,
+intended-inode blocking, inherited synchronous children, stripped/forged family
+failure, native nonzero exits, killed waiters and owner-group timeout/recovery.
+Synthetic tool-prefix/lock paths are substituted; no Lean proof or build is run
+by these process controls. Existing provenance corruption controls remain in
+force. Separate finder/skeptic re-review and any bounded real target outcomes
+will be exported at `/workspace/scratch/v17-spawn`, without overwriting prior
+`v17-evidence` or `v17-recovery` handoffs/checksums.
+
+Default/compiler/frontend targets remain independently selectable through the
+published `lake build` commands. Clean target collection still requires genuinely
+empty observed build/cache state; this checkpoint neither deletes inherited
+materializations nor labels a warm target clean. Actual final clean proof closure,
+all 457 child/feature rows, V11–V16 premises, kernel extraction, full corpus/suite
+closure and complete clean/cache equivalence remain open.

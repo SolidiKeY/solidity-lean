@@ -14,6 +14,7 @@ import shutil
 import sys
 
 BASE = '2fe1f8932f96be15b00df03ba2cde46f64a87758'
+BUILD_TOOL_NAMES = ('lean', 'clang', 'llvm-ar', 'ld.lld', 'leanc')
 LEDGER = 'docs/feature-work/roadmap-g03-ledger.json'
 PIN_INPUTS = [LEDGER, 'lean-toolchain', 'lakefile.toml', 'lake-manifest.json',
               'tests/migration/solkey.pin.json', 'tests/solkey/expected.tsv',
@@ -76,7 +77,10 @@ def snapshot(root):
         require(binary is not None, 'tool missing from PATH: ' + name)
         runtime[name] = {'path': str(Path(binary).resolve()), 'sha256': digest(Path(binary).resolve().read_bytes()),
                          'version': subprocess.check_output([binary, '--version'], text=True, timeout=10).strip()}
-    key = digest(json.dumps({'runtime': runtime, 'tree': git(root, 'rev-parse', 'HEAD^{tree}'),
+    prefix = Path(runtime['lean']['path']).parent
+    build_tools = {name: {'path': str(prefix / name), 'sha256': digest((prefix / name).read_bytes())}
+                   for name in BUILD_TOOL_NAMES}
+    key = digest(json.dumps({'buildTools': build_tools, 'runtime': runtime, 'tree': git(root, 'rev-parse', 'HEAD^{tree}'),
                              'inputs': files}, sort_keys=True).encode())
     require(git(root, 'rev-parse', 'HEAD') == head and not git(root, 'status', '--porcelain', '--untracked-files=all'), 'checkout changed during snapshot')
     return {'schema': 1, 'revision': head, 'base': BASE, 'inputs': files,
@@ -84,7 +88,7 @@ def snapshot(root):
             'sourceTree': git(root, 'rev-parse', 'HEAD^{tree}'),
             'serialConfigSha256': digest((root / 'lakefile.toml').read_bytes().replace(
                 b'weakLeanArgs = ["--tstack=131072"]', b'weakLeanArgs = ["--tstack=131072", "-j1"]')),
-            'sourceToolchainKey': key, 'runtime': runtime, 'releaseClosed': False}
+            'sourceToolchainKey': key, 'runtime': runtime, 'buildTools': build_tools, 'releaseClosed': False}
 
 
 def local_file(root, name):

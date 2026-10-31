@@ -25,6 +25,7 @@ class ProvenanceTests(unittest.TestCase):
                         'sourceToolchainKey':'a'*64, 'serialConfigSha256':e.digest(b'config'),
                         'repository':str(self.root),'inputs':{'lakefile.toml':'b'*64},
                         'runtime':{name:{'path':'/usr/bin/'+name,'sha256':c*64,'version':name+' version'} for name,c in [('lean','c'),('lake','d')]}}
+        self.current['buildTools'] = {name: {'path':'/usr/bin/'+name,'sha256':'c'*64 if name=='lean' else 'e'*64} for name in e.BUILD_TOOL_NAMES}
         self.build = self.root/'.lake/build'; self.build.mkdir(parents=True)
         self.cache = self.root/'.lake/roadmap-v17-cache'/('a'*64); self.cache.mkdir(parents=True)
         path=self.build/'lib/lean/Solidity/Evm/Compiler.olean'; path.parent.mkdir(parents=True); path.write_bytes(b'artifact')
@@ -36,12 +37,12 @@ class ProvenanceTests(unittest.TestCase):
 
     def record(self, mode):
         name=mode+'-compiler'
-        runtime={'memoryMax':p.CAP,'swapMax':0,'memoryPeak':1024,'image':p.IMAGE,
+        runtime={'entrypointHashes':{tool:e.digest(p.launcher_bytes(tool)) for tool in e.BUILD_TOOL_NAMES},'toolHashes':{k:v['sha256'] for k,v in self.current['buildTools'].items()},'memoryMax':p.CAP,'swapMax':0,'memoryPeak':1024,'image':p.IMAGE,
                  'realLeanSha256':'c'*64,'lakeSha256':'d'*64,'leanVersion':'lean version','lakeVersion':'lake version','leanNumThreads':'1'}
-        r={'schema':1,'collectionDirectory':str(self.root),'gate':name,'mode':mode,'before':copy.deepcopy(self.current),'after':copy.deepcopy(self.current),
+        r={'schema':2,'buildTools':copy.deepcopy(self.current['buildTools']),'collectionDirectory':str(self.root),'gate':name,'mode':mode,'before':copy.deepcopy(self.current),'after':copy.deepcopy(self.current),
            'budgets':copy.deepcopy(p.BUDGET),'configuration':mode+'.toml','configurationSha256':self.attach(mode+'.toml',b'config'),
            'configurationAfterSha256':e.digest(b'config'),
-           'launcher':mode+'.launcher','launcherSha256':self.attach(mode+'.launcher',p.launcher_bytes()),
+           'launcher':'lean-launcher','launcherSha256':self.attach('lean-launcher',p.launcher_bytes()),
            'runtime':mode+'.runtime','runtimeSha256':self.attach(mode+'.runtime',json.dumps(runtime).encode()),
            'samples':mode+'.samples','samplesSha256':self.attach(mode+'.samples',b'[{"rssBytes":10,"leanWorkers":1}]'),
            'log':mode+'.log','logSha256':self.attach(mode+'.log',b'Build completed successfully\n'),
@@ -49,6 +50,13 @@ class ProvenanceTests(unittest.TestCase):
            'command':['lake','-f','roadmap-v17-runtime.lakefile.toml','build','Solidity.Evm.Compiler'],
            'buildStart':p.inventory(self.build),'cacheStart':p.inventory(self.cache),
            'buildEnd':p.inventory(self.build),'cacheEnd':p.inventory(self.cache)}
+        r['serializers']={}
+        for tool in e.BUILD_TOOL_NAMES:
+            path=tool+'-launcher'
+            r['serializers'][tool]={'path':path,'sha256':self.attach(path,p.launcher_bytes(tool))}
+        r['containerName']='roadmap-v17-'+'a'*32
+        r['dockerArgv']=mode+'.docker.json'
+        r['dockerArgvSha256']=self.attach(r['dockerArgv'],json.dumps(p.docker_create_argv(self.root,self.current,r['containerName'],r['command'])).encode())
         r['executionScript']=mode+'.sh'
         r['executionScriptSha256']=self.attach(mode+'.sh',p.execution_script(self.root,r['command'],Path(self.current['runtime']['lake']['path'])).encode())
         if mode=='clean':
@@ -252,6 +260,34 @@ class ProvenanceTests(unittest.TestCase):
     def test_boolean_exit_rejected(self):
         self.clean['exit']=False
         with self.assertRaisesRegex(ValueError,'invalid provenance exit'): self.validate()
+
+    def test_missing_c_or_changed_serializer_rejected(self):
+        bad=copy.deepcopy(self.clean); del bad['serializers']['clang']
+        with self.assertRaisesRegex(ValueError,'missing serialized'): self.validate(bad)
+        ref=self.clean['serializers']['clang']; ref['sha256']=self.attach(ref['path'],b'#!/bin/sh\nexec clang "$@"\n')
+        with self.assertRaisesRegex(ValueError,'changed tool serializer'): self.validate()
+
+    def test_changed_native_tool_hash_rejected(self):
+        self.clean['buildTools']['clang']['sha256']='f'*64
+        with self.assertRaisesRegex(ValueError,'tool binaries'): self.validate()
+
+    def test_unwrapped_or_changed_mount_cannot_validate(self):
+        argv=e.loads((self.root/self.clean['dockerArgv']).read_bytes())
+        index=next(i for i,arg in enumerate(argv) if 'clang-launcher' in arg)
+        argv[index]=argv[index].replace('clang-launcher','unwrapped-clang')
+        self.clean['dockerArgvSha256']=self.attach(self.clean['dockerArgv'],json.dumps(argv).encode())
+        with self.assertRaisesRegex(ValueError,'Docker spawn'): self.validate()
+
+    def test_observed_unwrapped_native_entrypoint_rejected(self):
+        runtime=e.loads((self.root/'clean.runtime').read_bytes())
+        runtime['entrypointHashes']['clang']=self.current['buildTools']['clang']['sha256']
+        self.clean['runtimeSha256']=self.attach('clean.runtime',json.dumps(runtime).encode())
+        with self.assertRaisesRegex(ValueError,'unwrapped runtime'): self.validate()
+
+    def test_correct_but_unused_serializer_attachment_rejected(self):
+        ref=self.clean['serializers']['clang']; data=(self.root/ref['path']).read_bytes()
+        ref['path']='unused-good-launcher'; ref['sha256']=self.attach(ref['path'],data)
+        with self.assertRaisesRegex(ValueError,'mounted source'): self.validate()
 
     def test_gate_log_or_exit_disagreement(self):
         row={'exit':1,'sha256':self.clean['logSha256'],'log':'clean.log','command':self.clean['command']}
