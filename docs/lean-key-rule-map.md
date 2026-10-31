@@ -1074,3 +1074,12 @@ are preparation theorems with real typed found-data/Placement/canonical member/
 owned candidate coverage/initial-H premises. No taclet or concrete Yul calculus
 rule/notation/printer/source adequacy is claimed; original Y09.02 remains open.
 See [VY2](feature-work/inline-assembly-vy2.md#simultaneous-heterogeneous-struct-writeback-2026-10-31).
+
+
+VY2 canonical array families (Lean-only preparation, YQ5):
+`decodeArrayMembers_sound/reads/encode`, `memberArrayHeap_encode/unchanged`,
+`memberArrayState_MemOK/unchanged`, `memberArrayResultPlacement`,
+`memberArrayView_reencode`, `memberArray_other_region` derive component laws
+from actual typed source data, canonical member/coverage/Placement and initial-H
+premises. No concrete Yul rule/notation/printer/source soundness is installed;
+Y09.02 remains open. [VY2](feature-work/inline-assembly-vy2.md#canonical-array-element-families-2026-10-31).

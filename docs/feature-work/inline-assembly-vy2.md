@@ -1361,3 +1361,71 @@ concurrent Lean processes/MCP/server, resource event or budget increase; final
 affected/full/scoped gates serial. Writer lock/12GiB/no-swap/caches preserved.
 This checkpoint follows committed dynamic-array validation1c85e49f68b71d0548c4f6bd91b7a710269f0e8a;
 final full SHA/patch/bundle/resources/checksums are in the versioned handoff.
+
+
+## Canonical array element families (2026-10-31)
+
+[MemberArray](../../Solidity/Yul/Views/MemberArray.lean) constructs fixed and
+header-preserving dynamic actual Source.Data arrays using the existing typed
+canonical bool/fulluint256/owned-reference decoder. Recursion is on ordinary
+Nat length, no size/fuel cap; all elements are actual Source.Val, references
+remain pointer cells to separately owned children. OrdinaryMemberType retains
+its explicit limited component meaning, not a renamed Yul coverage fragment.
+Successful decoding DERIVES MemoryElement for every index, DataOK/Inner, real
+MemoryObjectWords; candidate coverage/supported type and actual encoded words
+prove decode-after-encode. Arbitrary input raw reencoding is exact whole
+ByteView identity. Valid actual found data/Placement derives length/word-window
+bounds, output same-shape Placement, unrelated cells/types/next/boundedness and
+other real regions/reserved/free/zero preservation. No inverse/read/safety/
+placement result is an assumed structure field.
+
+Heap writeback preserves unchanged WHOLE heap; state wrapper runs complete
+actual Source.heapPut Except/state, including wrong-type errors and EVERY
+initial H owner MemOK. Unchanged whole state includes .ok() and exact initial
+state, with real found/read/coverage/support premises. Fixed header guards,
+existing codecs/owner/full obligation signatures are unchanged. Dirty2 bool,
+narrow/noncanonical/shared-zero/interior/missing-candidate cases remain original
+unfinished semantics; None is unsupported preparation, never Yul refusal/no-op/
+deallocation or compiler behavior. Header-preserving arrays do not yet discharge
+retained-capacity size changes or universal dynamic/whole-memory writeback.
+
+[Controls](../../Solidity/Yul/Views/MemberArrayControls.lean) inhabit actual bool
+and pointer-array heaps: all bool elements change; both static array references
+retarget the same real dynamicuint child; nested length/read behavior and child
+update are observed through both aliases; generic source/physical disjoint orders
+agree. Dynamic bytes-pointer array retargets both children to a real nonUTF8
+string; actual Source readLoc→bytesOfRV works at every horizon. Original H,
+unchanged whole state, source type-error/state, missing candidates/dirty bool,
+unrelated roots/nonzero gaps/reserved/free/zero are controlled.
+
+[MemberArrays.sol](../../tests/yul-views/MemberArrays.sol) independently checks
+all58ABIwords/bytes for6orderedcalls per pinned legacy/viaIR pipeline: initial,
+all fixed/dynamic bool/pointer updates, reverse order, shared-child update,
+revert/fresh. Explicit1792pool precedes96+64static defaults; observed free2080
+before output allocation.183strict negative controls discriminate every old
+observation index, aliases/pointers/headers/bytes/status/deployment/inventory.
+All previous226calls/report fields are identical; cumulative238. External finite
+observations are separate from kernel/source/compiler/allocator adequacy.
+Initial malformed33byte fixture literal and proof/default-heartbeat failures are
+retained; corrected implementation/proof structure, not expected observations
+or budgets. Versioned evidence `/workspace/vy2-evidence/member-arrays/`.
+
+Full Y04/Y05/Y06 and both backfills PARTIAL; actual Y09.02 and final producer/
+compiler/calculus closure remain open. Canonical array components do not solve
+whole-store/path/hash/dirty ownership, universal memory/shared-zero/interior/
+allocator provenance/refinement or concrete V10/V11 agreement instances. Actual
+owner MemOK/World/Bridge available and reused; missing Yul adequacy not assumed.
+Original oversized-MemOK boundary and YQ1–YQ7/exclusions preserved. Original
+persistent goal BLOCKED unchanged, get_goal absent, no goal transition or new
+semantic decision. All4444previous hashes verified before writes; prior versions
+and raw failures preserved. Future checks are strictly serialized.
+
+Array-family checkpoint gates: per-file/focused56jobs/fullwrapper1049default+
+262suite/131annotations exit0. Actual Lean4.24.0/Lake5.0.0-src+797c613, KeySort
+2jobs exit0. Scoped1407declarations/783theorems standard axioms only. Trust/
+strict/layers/orphans and all prior negative suites plus183new controls pass.
+Global docs ACTUAL exit1, identical48missing/37ambiguous base lines; zero delta
+comparison passes, markdownbase1/head1/new0. Both independent read-only reviews
+clear. Serial-j1/12GiB/no-swap/writer lock/monitor/caches retained; no overlap
+in this recovery. Complete commands/signatures/reviews/resources/committed SHA
+and artifacts are in the versioned handoff. Full original queue remains open.

@@ -355,3 +355,14 @@ and `/workspace/vy2-evidence/aggregate-writeback/HANDOFF.md`. Both pinned pipeli
 retain all prior214calls and add12/153negative controls. Full lane/both backfills
 remain unfinished; no admission, full writeback or source/compiler/calculus
 closure follows from these supported components.
+
+
+### VY2 canonical array-family handoff (2026-10-31)
+
+Actual fixed/header-preserving bool/u256/owned-reference array decode/writeback,
+complete Source.heapPut result/all-H MemOK, unchanged state/placement/residual
+laws and alias controls. See [lane record](inline-assembly-vy2.md#canonical-array-element-families-2026-10-31)
+and `/workspace/vy2-evidence/member-arrays/HANDOFF.md`. Pinned pipelines add12calls
+and183strict negatives, retain all previous226fields/calls. Full lane/both
+backfills remain unfinished, including retained-capacity/general memory/source/
+compiler/calculus closure; no admission promotion or original obligation change.
