@@ -410,6 +410,38 @@ theorem wrong_scalar_destination : scalars exported.st ≠ [1,42] := by decide +
 theorem wrong_old_content : contents final.st ≠ some [[2,7,11],[1,23],[2,99,101]] := by decide +kernel
 theorem wrong_cursor : words (Evm.run (prefixCode ++ producer.code) machine) [0] ≠ some [w[77],w[261]] := by decide +kernel
 
+/-- Actual successful private allocation/mutation followed by a bare failure.
+The final allocation is unreachable; no failed State or rollback is recovered. -/
+def lateBody : Prog C Input (.mem A :: Input) :=
+  .cons (.block body) (.cons .revert
+    (.cons (.declMem A (.user "skipped") (some (.newArr (.lit 3 rfl) rfl)) rfl rfl) .nil))
+def lateCall : Stmt C Caller Final := .call "lateFailure" arguments ret lateBody
+def lateProducer : Calls.Program 1 prefixProducer.frag (.cons lateCall .nil) :=
+  (FragilePrograms.compile 1 prefixProducer.frag (.cons lateCall .nil)).get (by decide +kernel)
+attribute [irreducible] lateProducer
+
+theorem late_source : lateCall.run caller.st = .error .revert := by
+  have hb : lateBody.runR entry.st = .error .revert := error_tag (by decide +kernel)
+  exact InternalFlow.call_body_failure arguments ret lateBody.ext lateBody.runR caller.st values actual_arguments .revert hb
+
+theorem late_cost : (lateProducer.allocates,lateProducer.cost caller.st,lateProducer.need) = (true,3,10) := by decide +kernel
+
+theorem late_target : Evm.run (prefixCode ++ lateProducer.code) machine = .revert := by
+  obtain ⟨m₁,base₁,hpre,repr,stack,space⟩ := prefix_endpoint (lateProducer.cost caller.st) (by decide +kernel)
+  have source : (Prog.cons lateCall .nil).run caller.st = .error .revert := by
+    show TRun.seq lateCall.runR Prog.nil.runR caller.st = _
+    have h := late_source
+    simp only [TRun.seq,Stmt.run] at h ⊢
+    rw [h]
+  rw [run_append_ok hpre]
+  exact TuplePrograms.program_revert (L := 3) (frame := 128) (σ := caller.st) (base := base₁) (m := m₁)
+    lateProducer repr (by decide +kernel) space source
+
+theorem late_no_skipped_cost : lateProducer.cost caller.st ≠ 0 ∧ lateProducer.cost caller.st ≠ 7 := by
+  have hc : lateProducer.cost caller.st = 3 := congrArg (fun x => x.2.1) late_cost
+  rw [hc]
+  decide +kernel
+
 #print axioms noRef
 #print axioms initial_repr
 #print axioms actual_storage

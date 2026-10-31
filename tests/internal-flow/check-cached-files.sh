@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Validate every owned target through Lake's source/toolchain-keyed cache, then
-# check every standalone fixture directly. This is NOT the raw-source sweep or
+# import every source/toolchain/dependency-keyed, kernel-checked fixture.
+# Cold fixture preparation is separate and bounded; missing/stale caches FAIL.
+# This is NOT the raw-source sweep or
 # the repository full gate. Do not raise its external120s/resource bound.
 set -euo pipefail
 out=${1:?absolute evidence directory required}
@@ -25,5 +27,5 @@ done
 lake build "${modules[@]}" > "$out/cached-owned-imports.log" 2>&1
 for file in tests/internal-flow/*.lean; do
   name=$(basename "$file" .lean)
-  lake env lean -j1 --tstack=131072 "$file" > "$out/cached-$name-diagnostics.log" 2>&1
+  node tests/internal-flow/fixture-cache.mjs check "$file" "$out" > "$out/cached-$name-cache.log" 2>&1
 done
