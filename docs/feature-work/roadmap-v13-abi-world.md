@@ -310,3 +310,115 @@ HANDOFF.md under /workspace/scratch/v13-abi-world-artifacts after committing thi
 section. No empty result-marker commit, push, merge or PR is performed. The full
 persistent assignment remains blocked by the reserved prerequisites listed above;
 G40/G41/G42 and unavailable aggregate/call backfill are not declared complete.
+
+
+## Recovery catch consumer checkpoint
+
+Audit run: `63a82c65-2eae-4212-9f05-f84978fc7695`. Continued the same VM,
+branch and blocked original goal from clean committed preparation head
+`53fedb6574fc26694e268aad96d728744f854b9e`; the frozen base above is unchanged.
+The five original artifact checksums verified from their artifact directory.
+Original artifacts/manifests and all raw failed gates remain untouched.
+
+The new CatchTransport module consumes the published intrinsic tryCall,
+catchBytes and catchData interfaces, RevertMemory self-call byte extraction,
+and AllocBytes literal allocation, all read-only. try_revertWith retains the
+nonzero/self receiver and actual executed-callee premises, Error-before-Panic
+branch order, named code environment and exact clause drops. catch_allocated
+retains the executed-callee and actual CatchKind.decode premises and derives
+clause execution from the fresh bytesObj, followed by popping the data binder
+and every clause local. It removes only the Out heap-extension certificate
+from its observation, not state fields. Neither theorem assumes desired frame
+preservation, supplies a new evaluator, or concludes whole-world rollback.
+
+CatchControls.actual_reverting_call and extracted_actual discharge execution
+for arbitrary literal byte packets using actual Prog.runR/TRun.call and the
+published THalt.ofData behavior, including bare reverts. The inhabited caller
+has four locals: a result slot, marker 77, and two aliases of an older object
+at identity 0 with bytes [161,178]. source_error_clause and source_panic_clause
+instantiate the generic dispatch law and explicitly consume source_error_bytes,
+source_panic_bytes, error_roundtrip and panic_roundtrip. allocated_source_error
+uses catch_allocated with the actual callee premise discharged; it reads byte
+66 in the clause, pops both the fresh data binder and a further bool local,
+and observes heap length 2, marker 77 and both original aliases/ordered bytes.
+allocated_other_packets and empty_allocation cover raw/custom, unpadded Error
+and accepted empty allocation. observed_payloads reads and rethrows the exact
+reason [66,0,254], custom [222,173,190,239,0,255] and full Panic packet from actual
+catch memory. emitted_and_consumed connects the same Source Error bytes to the
+existing checked REVERT instruction emitter and this executed catch consumer;
+it is a byte boundary, not a proof of CALL/RETURNDATA simulation.
+
+The controls distinguish Error reason (result 20), encoded allocation Panic
+(code/result 65), intrinsic assertion Panic (default code 1), raw/custom/bare
+(catch-all result 30), and success (result 10). They preserve accepted unpadded
+Error data, reject a truncated declared payload through the actual reason
+consumer, and exercise wrong-kind, zero-address, absent-callee and successful
+call extraction refusals. Empty indexed reads retain the published revert
+behavior, while a clause that does not index accepts the same empty raw data.
+The exhaustion witness uses intrinsic assumeFalse, which has no Solidity source
+syntax: it proves propagation, not realistic resource exhaustion/adequacy.
+The divergence witness is a real typed while(true) empty loop with a mathematical
+unbounded-run proof; it is not a finite-fuel timeout or completed revert.
+
+Finder and skeptic independently inspected actual sources without running Lean
+or a server. Both found the initial certificate-erasure wording imprecise and
+requested explicit source_panic_bytes reuse; both corrections were made. The
+raw bounded proof attempt exceeding 200000 heartbeats was preserved; the final
+control reuses catch_allocated instead of increasing any proof budget.
+Final reviewed gate results and committed handoff are recorded below after the
+bounded checks. All new evidence is separate from the original sealed archive.
+
+Queue accounting remains: G40 blocked; G41 partial intrinsic packet preparation,
+with uniform aggregate result/error encoding and cross-call decoding open;
+G42.01-.02 blocked; G42.03 partial journal preparation with compiled callbacks
+open; G42.04-.05 blocked; G42.06 partial independent prefix preparation with full
+call-mode/world/rollback composition open. Backfill A remains partial for the
+published Error/layout codecs, now with executed malformed/noncanonical catch
+controls; general aggregate codecs remain unavailable. Backfill B gains actual
+intrinsic catch allocation/frame controls, but V12, arbitrary external-world
+execution, compiled frames, caller-storage libraries and resource-indexed
+composition remain unresolved. No missing prerequisite is an approved exclusion
+or new premise counted as discharged. The full persistent goal stays blocked.
+
+
+### Recovery gates and committed handoff
+
+Final sources received independent read-only finder and skeptic approval after
+the corrections above. Their reports are finder-source-review.md and
+skeptic-source-review.md in the NEW evidence directory
+/workspace/scratch/v13-abi-world-recovery-63a82c65-evidence. Neither ran Lean.
+Both final source hashes are recorded there; final artifact reviews are saved
+separately after the checkpoint commit, without rewriting the old manifest.
+
+| Command/gate | Actual outcome and decisive evidence |
+|---|---|
+| Lean/Lake versions | Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake 5.0.0-src+797c613. lean-version.log, lake-version.log. |
+| Serial capped `lake build Solidity.KeySort` | Pass, exit 0: Build completed successfully (2 jobs). keysort.log. RUNTIME_GATE_PASS follows this output. |
+| Per-file MCP, each new module, interactive=false, severity=error | Pass: success=true, partial=false, timed_out=false, items=[], failed_dependencies=[]; transport-mcp-final.log and controls-mcp-final.log. |
+| `lake build Solidity.KeySort Solidity.Backend.AbiWorld.CatchControls` | Pass, exit 0, 84 jobs; runtime-focused.log. All scoped headline axiom pins accept only propext, Classical.choice and Quot.sound. |
+| `timeout 5400 bash ./run-lean.sh` | Pass, exit 0, 3.144 seconds using the existing cache: 992 default jobs, 262 TestSuite jobs, 377 taclets/131 read-bearing/table covers131 and frozen annotations match. final-run-lean.log/json. |
+| Root MCP after full build | Pass with complete empty error diagnostics; root-mcp.log. The earlier failed root attempt remains in original evidence. |
+| `node scripts/check-layers.mjs`, `node scripts/check-orphans.mjs`, `bash scripts/check-trust.sh`, `node tests/v13-abi-world/check-imports.mjs` | All pass; layers.log, orphans.log, trust.log, imports.log. Exact 11 owned modules, zero forbidden imports. |
+| `git diff --cached --check`, owned paths, append-only registrations, proof-construct scan and owned links | Pass, static.json and diff.log. No foreign path, new trust construct or budget increase. |
+| `bash scripts/check-doc-paths.sh --strict`, current and verified exact-base snapshot | Both raw exits 1; same 46 missing references and 37 strict ambiguity findings, no new findings. docs-current.log, docs-base.log, base-snapshot-verify.log and static.json. Raw failure is not green. |
+| Original five sealed artifact checksums | All pass again; original-checksums.log. Original SHA256SUMS and archive are unchanged. |
+
+The full gate sampled peak aggregate RSS 1131076 KiB (shared mappings may be
+counted multiple times); cgroup peak 997322752 bytes, max 12884901888, swap.max 0,
+OOM/OOM-kill 0. Runtime/MCP cgroup and host resource logs are retained; checks
+were serial and no swap was available. No unchanged failed heavy gate was
+repeated: changed sources received the required new bounded confirmation.
+The original cold 5400-second exit124, failed root attempt and raw doc exit1
+remain preserved in the old evidence/artifacts; local failed proof diagnostics
+and the unchanged-heartbeat failure are in the new evidence.
+
+Checkpoint handoff: commit only this reviewed intrinsic catch-consumer addition,
+then seal a NEW original patch (frozen base to committed head), recovery-only
+patch, Git bundle, owning document, HANDOFF.md, raw evidence archive, committed
+state record and SHA256SUMS under
+/workspace/scratch/v13-abi-world-recovery-63a82c65-artifacts. HANDOFF.md records
+the full committed head/base/branch/repository, every Work/Backfill disposition,
+exact theorem premises and external-test boundaries. No new external EVM/solc
+test is claimed. The existing blocked persistent goal is retained; no getter
+is exposed in this tool surface, and no goal creation, reset, reactivation,
+continuation scheduling or completion was attempted. Parent status is BLOCKED.

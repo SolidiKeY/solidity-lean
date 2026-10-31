@@ -895,3 +895,5 @@ import Solidity.Backend.AbiWorld.Controls
 import Solidity.Backend.AbiWorld.PublishedCallControls
 import Solidity.Backend.AbiWorld.PublishedLayout
 import Solidity.Backend.AbiWorld.PublishedLayoutControls
+import Solidity.Backend.AbiWorld.CatchTransport
+import Solidity.Backend.AbiWorld.CatchControls
