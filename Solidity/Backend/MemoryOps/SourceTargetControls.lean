@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceDeclaration
 import Solidity.Backend.MemoryOps.SourceIndexedDelete
 import Solidity.Backend.MemoryOps.SourceDeleteTarget
 import Solidity.Backend.MemoryOps.SourceDefault
@@ -409,5 +410,52 @@ theorem resolved_runtime_endpoint (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms resolved_runtime_endpoint
+
+
+/-- The REAL resolved default declaration returns a fresh reference local;
+full existing constructor observations are tied to the SAME reached heap. -/
+theorem resolved_default_declaration (p : Roadmap.Pipeline) :
+    ∃ z : Source.EMState E0 [],
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 3 0 none
+        (.declVar (.array .memory .bool none) : Source.RStmt E0 [] false .body [] [.array .memory .bool none]) .nil).run (.nil,sy.2)=
+          (.ok (.normal (.cons (.memRef rfl 1) z.1)),(.nil,z.2)) ∧
+      TRun.declMem B none rfl σ=.ok ⟨ctorState,List.prefix_append _ _⟩ ∧
+      run ctorCode machine=.ok ctorMachine 0 ∧
+      SourceBoolMemoryAt (.cons (.memRef rfl 1 : Source.Val E0.layout (.array .memory .bool none)) z.1,z.2)
+        1 ctorState.heap ctorRef .dyn ∧
+      Source.MemOK E0 SH (.cons (.memRef rfl 1 : Source.Val E0.layout (.array .memory .bool none)) z.1,z.2) ∧
+      [sy.2.heap.get 0,z.2.heap.get 0,z.2.heap.get 1]=
+        [some ⟨.array .memory .bool none,sourceBoolMemory [true,false,false]⟩,
+         some ⟨.array .memory .bool none,sourceBoolMemory [true,false,false]⟩,
+         some ⟨.array .memory .bool none,sourceBoolMemory []⟩] ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems (H := ctorState.H) .dyn (ctorState.heap.get (r.wk (List.prefix_append H [B]))),
+        MObj.elems (H := ctorState.H) .dyn (ctorState.heap.get ctorRef)]=[[true,false,false],[true,false,false],[]] ∧
+      [ctorMachine.mem 0,ctorMachine.mem 1,ctorMachine.mem 2,ctorMachine.mem 5,ctorMachine.mem 16,
+        ctorMachine.mem 17,ctorMachine.mem 18,ctorMachine.mem 19,ctorMachine.mem 20]=
+        [w[21],w[16],w[20],w[99],w[3],w[1],w[0],w[0],w[0]] ∧
+      ctorMachine.stack=[w[42]] ∧ ctorRef.id=1 ∧ r.id=0 := by
+  obtain ⟨z,hzero,hs,hd,hc,hr,hnew,hm,ha,hstack,hid⟩ :=
+    source_bool_declaration_word (Source.SemanticsExamples.G0 p) F0 sy 0 SH source_memOK σ
+      initial_repr initial_allocator (by decide) (by decide) (by decide)
+  obtain ⟨z0,hzero0,_,_,_,_,_,hv,ht,hw,hstack0,hid0,hold,_,_,_⟩ := default_constructor_views
+  have he : z=z0 := congrArg Prod.snd (hzero.symm.trans hzero0)
+  subst z0
+  exact ⟨z,hs,hd,hc,hr,hnew,ht,hv,hw,hstack0,hid0,hold⟩
+
+/-- Low Source horizons cannot return a fabricated fresh local. The same
+nontrivial old heap is unchanged at every supported timeout observation. -/
+theorem resolved_declaration_timeouts (p : Roadmap.Pipeline) :
+    ∀ n, n≤2 → (Source.execS (Source.SemanticsExamples.G0 p) F0 n 0 none
+      (.declVar (.array .memory .bool none) : Source.RStmt E0 [] false .body [] [.array .memory .bool none]) .nil).run (.nil,sy.2)=
+        (.error .timeout,(.nil,sy.2)) :=
+  source_bool_declaration_timeouts (Source.SemanticsExamples.G0 p) F0 sy
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.resolved_default_declaration' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms resolved_default_declaration
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.resolved_declaration_timeouts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms resolved_declaration_timeouts
 
 end Solidity.Backend.MemoryOps.SourceTargetControls
