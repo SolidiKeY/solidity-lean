@@ -19,6 +19,8 @@ e = p.e
 class ProvenanceTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        resource_patch=patch.object(p,'resource_snapshot',return_value={'hostMemAvailableBytes':20*1024**3,'enclosingCgroupLimitBytes':16*1024**3,'enclosingCgroupCurrentBytes':2*1024**3,'headroomBytes':14*1024**3})
+        resource_patch.start(); self.addCleanup(resource_patch.stop)
         self.root = Path(self.tmp.name)
         marker=patch.object(p,'UNRESOLVED',self.root/'unresolved.json'); marker.start(); self.addCleanup(marker.stop)
         self.current = {'schema':1,'revision':'1'*40,'sourceTree':'2'*40,

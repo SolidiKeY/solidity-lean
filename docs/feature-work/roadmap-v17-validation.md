@@ -504,3 +504,38 @@ warm compiler/frontend attempts after reviewed commit and resource preflight.
 Warm observations never establish clean-start or full cache equivalence. This
 repair closes no semantic premise or any of the 457 still-open feature rows;
 all original G52–G55 and backfill limitations remain binding.
+
+### Producer accounting joined to checked declarations
+
+`scripts/roadmap-v17-join.py` adds a separate consumer without changing the
+existing producer-only `closure` mode. It joins exact declaration metadata to
+producer accounting only after retained kernel records and attachments validate,
+fresh bounded extraction replays, and source/tree/toolchain/import/query bindings
+match. Canonical JSON comparison distinguishes booleans from integer metadata.
+Retained records and attachments are rechecked after replay and before output.
+
+Matching declarations do not establish semantic feature correspondence. All ledger
+rows remain open; feature `done` claims and semantic-discharge/release promotion
+flags are rejected. Each theorem retains conditional proposition binders, any
+unaccounted indices, named producer premises and unverified observations. Each
+feature row separately exposes unmatched and unverified producer observations.
+Acknowledging a binder never discharges it. Definitions/contracts and external
+tests cannot be relabeled unconditional compiler correctness theorems.
+
+The source-only catalog preserves the complete G03 ledger and prepares bounded
+requests for 14 published declarations across `Solidity.Roadmap.Contracts` and
+`Solidity.Evm.Compiler`. Its excerpts retain `Compilation.correct`'s explicit
+`result.Input` hypothesis and the memory/array/object/construction input and
+representation adapters. G01 certificate/refinement transfer laws retain their
+actual premises. No theorem-to-feature mapping or observation sufficiency is
+invented; current checked evidence stays missing until validated live extraction.
+A full fresh Compiler closure is deliberately not launched by this preparation.
+
+Separate independent read-only finder/skeptic reviews found missing retained-input
+rechecks, per-feature observation/promotion accounting, and Python bool/int equality
+in metadata comparisons. These were corrected with positive-baseline and mutation
+controls. Historical KeySort metadata is explicitly test data, not current proof.
+Mocked collector tests now supply synthetic resource measurements independently
+of VM pressure; production resource guards are unchanged. Actual source-bound
+catalog/join runs, extraction admission or resource refusal, final reviews and all
+original queue limitations are retained in the new external checkpoint handoff.
