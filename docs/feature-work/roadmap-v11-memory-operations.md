@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty-five. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-six. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3522,3 +3522,54 @@ Raw inventory1:1181unrecorded=359inherited+822owned,0unsafe,notglobalpass.
 Both independent read-only finder/skeptic source reviews pass without confirmed
 remaining defect. Frozen INITIAL STATE wording verified; oldvectors/seals/raw
 failures preserved. No new C45 Lean attempt failed; original goal BLOCKEDunchanged.
+
+
+### C46 — actual resolved nested delete with independent default and unit return
+
+Continued original G34/BackfillB after C45. SourceNestedDelete consumes existing
+Source.delete/zeroVal/deleteLoc, C44 nested location, C43 whole finite mutation
+frame and published RefPtrFrag/primitive word-array clear. Five laws prove actual
+Source nested delete evalE and expr statement with Source.RVal.unit, intrinsic
+nested deleteMem and the WHOLE constant-zero→pointer-path→child-index→write code.
+No Boolean RHS ghost/local is needed: false comes from independent Source zeroVal
+and existing intrinsic default, not emitted-target execution or a supplied value.
+No alternate allocator/decoder/interpreter/path compiler or owner code is added.
+
+INITIAL existing nested correspondence, actual root/index alignment and parent
+Some child, runtime child bound, Source MemOK/full RefArrayStateRepr and the same
+sufficient INITIAL selected footprint derive final finite observer/MemOK/word
+ownership, unchanged locals/parent/stack and existing allocator. The condition is
+not globally injective or universally necessary, and changes no source profile.
+Parent and child rejection plus low horizons0..3 are proved independently; Source
+panic bytes, intrinsic revert and word revert remain distinct, no suffix heap or
+Source/target rollback equivalence fabricated.
+
+Two controls use the ACTUAL C45 reached TTT child, then delete child2 to TTF,
+retaining earlierchild1true/rightFTF and sharedparentIDs[0,1,0]. Source unit-return
+expression and stmt, intrinsic clear, whole delete code and THREE-operation word
+append all execute; complete Source child tables/reads, 22wordcells/neighbour/
+freepointer/stack and cursor48 allocator are derived. The current Boolean RHS
+local remains true while the cleared word becomes zero, discriminating delete
+from accidentally reusing assignment's RHS. Both actual nested-delete endpoints
+and insufficient horizons are checked in both pipelines. Every earlier control
+body/vector/guard stays verbatim apart from one new owned import.
+
+Per-file Lean MCP unavailable, bounded serial focused checks used. Initial C46
+notation/dependent location/typed delete arity-inference failures remain retained;
+final exact standard-only guards required. Same VM/runtime/12GiB-noswap/CPU0/
+threads1/j1/cacheOFF and all original proof/fuel/node/TestSuite/time budgets.
+This supports primitive Bool leaves in the finite nested shape, not recursive
+reference-container deletion/general graphs/physical bytes/ABI/deepcopy/whole
+Source/V10/target. All original Work/Backfill parents partial/blocked, existing
+blocked goal unchanged, no completion or independent-exhaustion assertion.
+
+C46 guarded170/full1085default/262Suite/SolKey377/131 exit0. Fresh actual versions/
+KeySort2jobs/cacheOFF pass. Strict automatic/completefixtures/layer/orphan/trust/
+script syntax+corruption/829standardpins104modules pass. Full sampled aggregate
+RSS1598884KiB,disk241664bytes,new max/OOM/kill events0. Raw docs1 COMPLETE83public
+findings byte-identical; frozen no-newFAIL11incoming,ownednew0. Raw inventory1:
+1188unrecorded=359inherited+829owned,0unsafe,notglobalpass. Both independent source
+reviews pass without confirmed remaining defects. Proposed current feature IDs:
+memoryLocation,memoryAliasing,rangeAccess,deleteExpression (supported-case evidence
+only, no parent/feature completion). Every older vector/guard/seal/failure retained.
+Original goal remains BLOCKED unchanged; no independent-exhaustion claim.

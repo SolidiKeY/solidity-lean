@@ -3,6 +3,7 @@ import Solidity.Backend.MemoryOps.SourceNestedSelect
 import Solidity.Backend.MemoryOps.SourceNestedMutation
 import Solidity.Backend.MemoryOps.SourceNestedAssignment
 import Solidity.Backend.MemoryOps.SourceNestedSequence
+import Solidity.Backend.MemoryOps.SourceNestedDelete
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -1241,5 +1242,101 @@ theorem nested_late_error_views (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms nested_late_error_views
+
+
+private def d46h := p45out.set left (MObj.setElem .dyn (p45out.get left) 2 false)
+private def d46y : Source.EMState E0 NSΓ := (p45z.1,{p45z.2 with heap := p45z.2.heap.write 0 (sourceBoolMemory [true,true,false]) (by rfl)})
+private def d46m := writeMachine p45target 19 w[0]
+private def d46term : Source.RExpr E0 NSΓ (.tuple []) := sourceNestedDelete nsroot nsi nsi
+private def d46code : List Instr := nestedDeleteCode (C := C) 1 nroot ni ni
+private def d46stmt : Stmt C NΓ NΓ := .deleteMem
+  (.loc (.index .dyn (.loc (.index .dyn (.var nroot rfl) (.simple (.local ni)))) (.simple (.local ni)))) rfl
+private theorem d46repr : RefArrayStateRepr 1 1 8 nf (p45s.withHeap p45out) base p45target := by
+  have hmid := p45repr.setPrimitive left 1 (by
+    change 1<hp.len left .dyn;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide) true w[1] rfl
+  exact hmid.setPrimitive left 2 (by
+    change 2<nh.len left .dyn
+    simp only [Heap.len,nh,Heap.get_set_same,MObj.elems_setElem,List.length_set]
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide) true w[1] rfl
+
+/-- Clear a true element at the ACTUAL reached C45 output. Source returns unit,
+not false; the earlier other write survives and all shared parents stay framed. -/
+theorem nested_delete_reached_views (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 d46term).run p45z=(.ok Source.RVal.unit,d46y) ∧
+    (Source.execS (Source.SemanticsExamples.G0 p) F0 5 NSΓ.length none
+      (.expr d46term : Source.RStmt E0 [] false .body NSΓ NSΓ) p45z.1).run (.nil,p45z.2)=(.ok (.normal d46y.1),(.nil,d46y.2)) ∧
+    Stmt.run (p45s.withHeap p45out) d46stmt=.ok ⟨p45s.withHeap d46h,List.prefix_refl _⟩ ∧
+    run d46code p45target=.ok d46m 0 ∧ run ((ncode++p45code2)++d46code) p45m=.ok d46m 0 ∧
+    SourceBoolRefsAt d46y 3 d46h fresh addresses ∧ Source.MemOK E0 SH d46y ∧
+    RefArrayStateRepr 1 1 8 nf (p45s.withHeap d46h) base d46m ∧
+    [MObj.elems .dyn (p45out.get left),MObj.elems .dyn (d46h.get left),MObj.elems .dyn (d46h.get right)]=
+      [[true,true,true],[true,true,false],[false,true,false]] ∧
+    [(MObj.elems .dyn (d46h.get fresh)).map HRef.id]=[[0,1,0]] ∧
+    [p45z.2.heap.get 0,d46y.2.heap.get 0]=[some ⟨SB,sourceBoolMemory [true,true,true]⟩,some ⟨SB,sourceBoolMemory [true,true,false]⟩] ∧
+    (Source.readLoc (E := E0) (Γ := NSΓ) F0 (τ := .bool) (.mem 0 2)).run d46y=(.ok (.bool false),d46y) ∧
+    (Source.readLoc (E := E0) (Γ := NSΓ) F0 (τ := .bool) (.mem 0 1)).run d46y=(.ok (.bool true),d46y) ∧
+    cells d46m=[w[48],w[32],w[32],w[36],w[1],w[2],w[99],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]] ∧
+    [p45target.mem 6,p45target.mem 19,d46m.mem 6,d46m.mem 19]=[w[1],w[1],w[1],w[0]] ∧
+    d46y.1=p45z.1 ∧ d46m.stack=[w[42]] ∧ StructAllocatorRepr (p45s.withHeap d46h).heap base 8 ⟨48,by decide⟩ d46m := by
+  obtain ⟨_,_,_,_,_,_,hprefix,_,hr0,_,hm0,_,_,_,_,_,_,_,ha0⟩ := nested_reached_pair_views p
+  have hq : p45out.index fresh .dyn (indexValue ⟨2,by decide⟩)=some left := by
+    simp only [Heap.index,p45out,Heap.get_set_ne nh left fresh (by decide),nh,Heap.get_set_ne hp left fresh (by decide)]
+    simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,indexValue,Int.toNat_natCast];rfl
+  obtain ⟨out,z,ho,hs,he,hstmt,hi,hcode,hr,hm,hrepr,hl,_,ha⟩ :=
+    SourceBoolRefsAt.resolved_nested_delete_word (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi nsi (p45s.withHeap p45out)
+      nroot ni ni fresh left ⟨2,by decide⟩ ⟨2,by decide⟩ addresses hr0 rfl rfl rfl rfl rfl rfl hq
+      (by change 2<p45out.len left .dyn;simp only [Heap.len,p45out,nh,Heap.get_set_same,MObj.elems_setElem,List.length_set];simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+      (by intro t ht hne;exact hne) SH hm0 d46repr
+  have hh : p45out.writeAddr (.index left .dyn (indexValue ⟨2,by decide⟩)) false=some d46h := by
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+    exact if_pos (by simp only [p45out,nh,Heap.get_set_same,MObj.elems_setElem,List.length_set];simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+  have hout : out=d46h := Option.some.inj (ho.symm.trans hh)
+  have hs' : (Source.writeLoc (E := E0) (Γ := NSΓ) F0 3 (.mem 0 2) (.bool false)).run p45z=(.ok (),d46y) := by
+    have hget : p45z.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,true,true]⟩ := Source.Heap.write_get _ _ _ (by rfl)
+    obtain ⟨_,hw⟩ := source_bool_write p45z 0 [true,true,true] hget 2 (by decide) false
+    exact hw
+  have hz : z=d46y := congrArg Prod.snd (hs.symm.trans hs')
+  subst out;subst z
+  refine ⟨he,hstmt,hi,hcode,?_,hr,hm,hrepr,?_,?_,rfl,
+    (hr.child_read_iff F0 2 left ?_ (indexValue ⟨2,by decide⟩) false).mpr ?_,
+    (hr.child_read_iff F0 0 left ?_ (indexValue ⟨1,by decide⟩) true).mpr ?_,rfl,rfl,hl,rfl,ha ⟨48,by decide⟩ (by decide) ha0⟩
+  · rw [run_append_ok hprefix];exact hcode
+  all_goals simp only [d46h,p45out,nh,Heap.index,Heap.get_set_same,Heap.get_set_ne p45out left right (by decide),
+    Heap.get_set_ne nh left right (by decide),Heap.get_set_ne hp left right (by decide),
+    Heap.get_set_ne p45out left fresh (by decide),Heap.get_set_ne nh left fresh (by decide),Heap.get_set_ne hp left fresh (by decide),MObj.elems_setElem]
+  all_goals simp only [Heap.get,Objs.get,hp,left,right,fresh,MObj.elems_dyn,indexValue,Int.toNat_natCast]
+  all_goals rfl
+
+private def dpstmt : Stmt C NΓ NΓ := .deleteMem
+  (.loc (.index .dyn (.loc (.index .dyn (.var nroot rfl) (.simple (.local ni)))) (.simple (.local nj)))) rfl
+
+/-- Both actual nested-delete endpoints and minimum horizons are checked;
+Source panic payloads, intrinsic revert and word revert stay separate. -/
+theorem nested_delete_rejection (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 (sourceNestedDelete nsroot nsi nsj)).run npy=
+      (.error (.revert (Source.panicData .index)),npy) ∧
+    Stmt.run nps dpstmt=.error .revert ∧ run (nestedDeleteCode (C := C) 1 nroot ni nj) npm=.revert ∧
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 (sourceNestedDelete nsroot nsi nsj)).run ncy=
+      (.error (.revert (Source.panicData .index)),ncy) ∧
+    Stmt.run ncs dpstmt=.error .revert ∧ run (nestedDeleteCode (C := C) 1 nroot ni nj) ncm=.revert ∧
+    (∀ n,n≤3 → (Source.evalE (Source.SemanticsExamples.G0 p) F0 n (sourceNestedDelete nsroot nsi nsj)).run ny=(.error .timeout,ny)) := by
+  have hp0 : SourceBoolRefsAt npy 3 nps.heap fresh addresses := fresh_at.same_heaps rfl rfl
+  obtain ⟨he,hi,hc⟩ := SourceBoolRefsAt.nested_delete_parent_bounds (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi nsj nps
+    nroot ni nj fresh ⟨3,by decide⟩ addresses hp0 rfl rfl rfl rfl
+    (by change hp.len fresh .dyn≤3;simp only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide) npr
+  have hc0 : SourceBoolRefsAt ncy 3 ncs.heap fresh addresses := fresh_at.same_heaps rfl rfl
+  obtain ⟨he',hi',hc'⟩ := SourceBoolRefsAt.nested_delete_child_bounds (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi nsj ncs
+    nroot ni nj fresh left ⟨0,by decide⟩ ⟨3,by decide⟩ addresses hc0 rfl rfl rfl rfl rfl rfl nparent
+    (by change hp.len left .dyn≤3;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide) ncr
+  exact ⟨he,hi,hc,he',hi',hc',source_nested_delete_low_horizon (Source.SemanticsExamples.G0 p) F0 ny nsroot nsi nsj⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_delete_reached_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_delete_reached_views
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_delete_rejection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_delete_rejection
 
 end Solidity.Backend.MemoryOps.SourceNestedMemoryControls
