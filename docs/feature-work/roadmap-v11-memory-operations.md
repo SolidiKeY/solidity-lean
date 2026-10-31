@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty-six. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-seven. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3573,3 +3573,76 @@ reviews pass without confirmed remaining defects. Proposed current feature IDs:
 memoryLocation,memoryAliasing,rangeAccess,deleteExpression (supported-case evidence
 only, no parent/feature completion). Every older vector/guard/seal/failure retained.
 Original goal remains BLOCKED unchanged; no independent-exhaustion claim.
+
+
+### C47 — parent reference-slot redirection and reached nested mutation
+
+Investigated original G34/BackfillB gap against actual published Source.memSet/
+assign, RefArrayRepr.write/set and RefArrayStateRepr.setReference: prior local
+rebinding and primitive child writes did not update a parent reference slot.
+SourceReferenceWrite derives the canonical new parent table from INITIAL runtime
+contents and the already represented child's identity. SourceReferenceAssignment
+proves actual RHS-first resolved Source evalLoc/evalE/expr-statement, intrinsic
+assignMem and the WHOLE existing reference-pointer/index/writeArrayStack sequence.
+No new pointer compiler, allocator, evaluator, decoder, value/state or deep-copy
+operation is introduced. Both Source and target execute independently.
+
+INITIAL SourceBoolRefsAt, the supplied existing child's INITIAL SourceBoolMemoryAt,
+aligned parent/RHS/index locals, real runtime bound, MemOK and published full
+RefArrayStateRepr derive the reached observer/MemOK/full word ownership, exact
+parent elements, every Boolean intrinsic object and every INITIAL represented
+Source Boolean alias (even a removed child). Source locals, ex (world/transient/
+storage/journal), events/logs/fnLocals remain unchanged. Parent/Boolean address
+separation follows incompatible existing typed tables, not global injectivity.
+Other reference parents are not globally framed without their own local address
+facts. The finite observer does not establish arbitrary Source graph liveness.
+
+The old StructAllocatorRepr owns primitive/struct intervals, not reference arrays.
+reference_slot_allocator therefore explicitly needs THIS parent interval below
+its cursor, alongside actual reference ownership and successful slot bound. This
+is a local allocator theorem premise, not an admitted-source restriction. A real
+cursor48 fixture discharges it and the subsequent reached primitive delete frame.
+
+The C41-C46 populated fixture is preserved verbatim. Actual assignment redirects
+parent entry0: [left,right,left] -> [right,right,left], preserving both child tables
+TFF/FTF and old parent[left]. Then actual reached nested read sees right=false;
+reached nested delete of right[1] yields FFF while left TFF and its retained aliases
+remain unchanged. Complete ordered Source parent/child tables, IDs, 22 wordcells,
+RHS pointer cell, neighbours/freepointer/stack, Source context and allocator are
+checked under BOTH pipelines. Separate controls show successful same-pointer
+redirection, true parent endpoint Source panic versus intrinsic None/word revert,
+low horizons0..2 and stale-pointer/wrong-child/initial-state reuse negatives.
+The runtime repetition family constructs actual Source inputs and executes the
+write for arbitrary n+1 < 2^256, no new payload/depth admission cutoff; this bound
+is intrinsic validity and indices32 are not physical-byte encoding.
+
+Per-file Lean MCP and goal RPCs unavailable; bounded serial focused closure used,
+existing goal BLOCKED unchanged. All failed type/irreducible/dependent guard and
+exact-axiom formatting attempts are retained; final guarded closure passes172jobs
+with14 new exact standard-only pins. Allocator frame uses propext/Quot.sound;
+other new public results use the existing standard trio, no sorryAx deliverable.
+Original budgets/12GiB-noswap/CPU0/threads1/Lean-j1/cacheOFF unchanged. This is
+supported pointer rebinding, not fresh construction, deep-copy, physical bytes,
+ABI/emitted EVM/general graph/whole Source-V10-target proof. ALL original queues
+remain partial/blocked; no whole-lane or independent-exhaustion claim.
+
+
+C47 finder/skeptic source reviews found no mathematical defect; both identified
+one overprecise runtime comment (index0 write in a33-element parent is not an
+index32 selection). Corrected to retained entry32; no proof/fixture change. Bound
+controls certify actual Source syntax, intrinsic writeAddr None and existing
+writeArrayCode revert, not a generic whole referenceWriteCode rejection theorem.
+A refined full rerun follows this comment correction; first full pass retained.
+
+
+C47 refined full02:1087default/262Suite/SolKey377/131 exit0; fresh actual
+Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs/cacheOFF pass. Strict automatic,
+completefixtures, layer/orphan/trust, lane/script corruption and843standardpins
+106modules pass. Full02 aggregateRSS1719508KiB,disk253952bytes,new max/OOM/kill
+0; historical session peaks/events remain separately retained. Raw docs1 still
+COMPLETE83findings byte-identical to public; frozen no-newFAIL11incoming,ownednew0.
+Raw inventory1:1202unrecorded=359publicinherited+843owned,0unsafe,notglobalpass.
+All2506 prior seal records verified unchanged. Every earlier fixture body/guard
+verbatim verified. Finder/skeptic source mathematical PASS and comment fix applied;
+committed artifact review follows. Original goal BLOCKED, all original queues
+partial/blocked, no independent-exhaustion or external compiler/EVM test claim.

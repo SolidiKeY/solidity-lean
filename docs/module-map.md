@@ -1317,3 +1317,6 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceNestedSequence.lean` | Actual reached nested assignment pairs in Source RItems, intrinsic Prog and appended word code; derived second bounds/parent/locals/frames, complete prefixes and late rejection without a suffix heap. |
 
 | `Solidity/Backend/MemoryOps/SourceNestedDelete.lean` | Actual resolved nested Source delete/unit return, intrinsic clear and whole constant-zero pointer-path/write sequence; finite graph/allocator frames and exact parent/child/horizon failures without a RHS ghost local. |
+
+| `Solidity/Backend/MemoryOps/SourceReferenceWrite.lean` | Actual Source parent reference-slot replacement, derived finite observer and all old Boolean alias/context frames, consuming published full word reference-array write ownership. |
+| `Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean` | RHS-first resolved parent-slot Source expression/statement, intrinsic assignment and whole existing word sequence; bounds/horizon and locally live allocator framing. |

@@ -955,3 +955,6 @@ import Solidity.Backend.MemoryOps.SourceTargetControls
 import Solidity.Backend.MemoryOps.SourceAliasControls
 
 import Solidity.Backend.MemoryOps.SourceNestedMemoryControls
+
+import Solidity.Backend.MemoryOps.SourceReferenceWrite
+import Solidity.Backend.MemoryOps.SourceReferenceAssignment
