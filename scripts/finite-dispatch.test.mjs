@@ -42,7 +42,7 @@ partial def modifyTree (f : Json → Json) : Json → Json
 
 // Run the real import command for specification and native-model checks.
 // This deliberately uses Import's private production callbacks through solc_import.
-function productionCheck(source, body, options = '') {
+function productionCheck(source, body, viaIR = false) {
   const dir = mkdtempSync(join(tmpdir(), 'solidity-production-dispatch-'));
   try {
     const input = join(dir, 'FiniteDispatch.sol');
@@ -50,13 +50,13 @@ function productionCheck(source, body, options = '') {
     const check = join(dir, 'Check.lean');
     writeFileSync(input, '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n' + source);
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source', input,
-      '--out', fixture, '--no-wrapper'], {stdio:'pipe'});
+      '--out', fixture, '--no-wrapper', ...(viaIR ? ['--via-ir'] : [])], {stdio:'pipe'});
     let hash = 0xcbf29ce484222325n;
     for (const byte of readFileSync(fixture))
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
     writeFileSync(check, `import Solidity.Tools.Upstream
 open Solidity Solidity.Frontend
-solc_import "FiniteDispatch.ast.json" hash 0x${hash.toString(16)} as Imported.C testing${options}
+solc_import "FiniteDispatch.ast.json" hash 0x${hash.toString(16)} as Imported.C testing
 ${body}
 `);
     runLean(check);
@@ -194,14 +194,18 @@ test('missing candidate signature metadata cannot silently remove a possible tar
       put node "typeName" (Json.mkObj []) else node) ast`);
 });
 
-test('reference arguments remain explicitly refused by native dispatch', () => {
+test('memory reference arguments are admitted by native dispatch since lane CF2', () => {
+  // Before lane CF2 this was the explicit refusal; calldata and other
+  // reference shapes remain refused ('other reference signatures remain refused').
   scopeCheck(`contract C {
     function target(uint[] memory xs) internal pure returns(uint) { return xs.length; }
     function entry(uint[] memory xs) public pure {
       function(uint[] memory) internal pure returns(uint) h = target;
       h(xs);
     }
-  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "a memory-array argument was not admitted")`);
 });
 
 test('private candidates cannot become self external targets through native type erasure', () => {
@@ -479,9 +483,7 @@ function referenceVectors(viaIR) {
   }).join(',\n    ');
 }
 function referenceReplay(viaIR) {
-  // narrow() takes a uint8[] memory argument: refused (no narrow capture).
-  return `#guard Imported.C.report.all fun r => r.status == .elaborated || r.name == "narrow"
-#guard (Imported.C.report.find? (·.name == "narrow")).any fun r => r.status != .elaborated
+  return `#guard Imported.C.report.all fun r => r.status == .elaborated
 #eval (do
   let data := Lean.Json.mkObj [("vectors", Lean.toJson [
     ${referenceVectors(viaIR)}])]
@@ -495,7 +497,7 @@ test('memory-array arguments alias, copy and dispatch as the compiler does (lega
 });
 
 test('memory-array arguments under the viaIR schedule read the callee first', () => {
-  productionCheck(referenceSource, referenceReplay(true), ' evalOrder .viaIR');
+  productionCheck(referenceSource, referenceReplay(true), true);
 });
 
 // A refusal for this reason: the dispatch diagnostic, or the declaration
@@ -604,6 +606,12 @@ test('other reference signatures remain refused', () => {
     function entry() public pure {
       S[] memory xs = new S[](1);
       function(S[] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a narrow element (a capture carries no width rows)
+    `function target(uint8[] memory xs) internal pure returns(uint) { return xs[0]; }
+    function entry() public pure {
+      uint8[] memory xs = new uint8[](1);
+      function(uint8[] memory) internal pure returns(uint) h = target; h(xs);
     }`,
     // a byte element
     `function target(bytes1[] memory xs) internal pure returns(uint) { return xs.length; }

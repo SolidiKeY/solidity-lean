@@ -233,12 +233,12 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   typed state.
 - `scripts/finite-dispatch.test.mjs`: replay of
   `tests/solc/FunctionValueReferences.sol` through `solc_import` in both
-  schedules (its `narrow()` refused); admission of exact memory and storage
+  schedules (the viaIR one from a `--via-ir` fixture); admission of exact memory and storage
   candidates and of a scalar argument beside a memory-byte return; nominal
   struct candidates; refusal (by the dispatch diagnostic or the reader's
   function-type refusal, checked by name) of address/uint element
-  collisions, external struct parameters, struct returns, struct, byte and
-  nested array elements, calldata references, storage mappings,
+  collisions, external struct parameters, struct returns, struct, narrow,
+  byte and nested array elements, calldata references, storage mappings,
   storage-array returns, several returns with a memory one and external
   memory-array parameters and returns; elaborator refusal of a recursive
   struct; refusal of calldata passed to a function value's memory parameter.
@@ -247,7 +247,7 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   elements stay unparsed.
 - `scripts/check-function-value-references.mjs SOLJSON MODULES_DIR [cancun|osaka]`:
   the pinned solc 0.8.34 on ethereumjs 10.1.3, legacy/viaIR × optimizer
-  off/on (84 executions per EVM version; cancun and osaka both pass), the
+  off/on (80 executions per EVM version; cancun and osaka both pass), the
   source of every expected observation above.
 
 ## Dispatch correctness
@@ -330,8 +330,8 @@ with the confirmed findings and their fixes:
   Pre-existing; a dead arm at worst (the frontend never admits a `bytes1[]`
   candidate), not fixed.
 - Finder 7 / import replay: narrow element captures lost their width rows
-  (`narrow()` failed to elaborate). Fixed by refusing narrow elements on
-  both sides.
+  (a `uint8[] memory` dispatch failed to elaborate). Fixed by refusing
+  narrow elements on both sides (a refusal case in the test).
 - Import replay: imported struct names are table encodings
   (`P{…}`); the keys now use the written name (`structDisplay`) and
   `Contract.structName?`.

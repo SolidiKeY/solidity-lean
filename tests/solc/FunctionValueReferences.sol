@@ -35,7 +35,6 @@ contract FunctionValueReferences {
     function sopA(uint x) internal pure returns (uint) { return x + 1; }
     function sopB(uint x) internal pure returns (uint) { return x + 2; }
     function swapSop() internal returns (uint) { sop = sopB; return 10; }
-    function narrowFirst(uint8[] memory xs) internal pure returns (uint) { return xs[0]; }
 
     function aliasing() public returns (uint, uint, uint) {
         uint[] memory xs = new uint[](2);
@@ -102,12 +101,6 @@ contract FunctionValueReferences {
         return op(xs);
     }
 
-    function narrow() public pure returns (uint) {
-        uint8[] memory xs = new uint8[](1);
-        xs[0] = 200;
-        function(uint8[] memory) internal pure returns (uint) h = narrowFirst;
-        return h(xs);
-    }
 
     function storageAlias() public returns (uint, uint) {
         delete values; values.push(1);

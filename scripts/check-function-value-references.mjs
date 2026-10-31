@@ -40,7 +40,6 @@ const vectors = [
   ['unassignedStored', [], '4e487b71' + '0'.repeat(62) + '51'],
   ['calleeOrderScalar', [], {legacy:[12n], viaIR:[11n]}],
   ['deleted', [], '4e487b71' + '0'.repeat(62) + '51'],
-  ['narrow', [], [200n]],
   ['storageAlias', [], [6n, 6n]],
   ['storageOrder', [], [901n, 9n]],
   ['arrayReturn', [true], [106n, 106n, 1n]],
