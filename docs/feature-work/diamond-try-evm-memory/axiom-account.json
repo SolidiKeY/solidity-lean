@@ -1,0 +1,220 @@
+{
+  "publicTheoremsAudited": 29,
+  "allStandardOnly": true,
+  "audits": [
+    {
+      "name": "Solidity.Evm.External.TryMemory.mstore_dispatch",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.mstore_empty",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.mstore_one",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.mstore_memory",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.mstore_frame",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.prologue_words",
+      "axioms": []
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.overlap_words",
+      "axioms": []
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.wrong_prologue_words",
+      "axioms": []
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.mstore_byte",
+      "axioms": []
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.prologue_expansion",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.overlap_expansion",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.fresh_fields",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.mstore_base_cost",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.wrong_opcode",
+      "axioms": []
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemory.overlap_memory",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryCode.legacy_size",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryCode.legacy_head",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryCode.legacy_body_opcodes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryCode.viaIR_size",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryCode.viaIR_head",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryCode.viaIR_body_opcodes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryDriver.decode_mstore",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryDriver.legacy_decode4",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryDriver.viaIR_decode4",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryDriver.driver_step",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryDriver.legacy_at4",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryDriver.viaIR_at4",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryDriver.step_zero_fuel",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Solidity.Evm.External.TryMemoryDriver.X_zero_fuel",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "privateHelpersCoveredTransitively": true,
+  "newNamedTheoremDeclarations": 139
+}

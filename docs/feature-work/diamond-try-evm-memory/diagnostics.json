@@ -1,0 +1,39 @@
+{
+  "owningFiles": [
+    {
+      "fileLog": "mcp-TryMemory-clean.log",
+      "result": {
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    },
+    {
+      "fileLog": "mcp-TryMemoryCode-linter-clean.log",
+      "result": {
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    },
+    {
+      "fileLog": "mcp-TryMemoryDriver-clean.log",
+      "result": {
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    }
+  ],
+  "registrationRootLog": "mcp-Bridge-root-original.log",
+  "registrationRootKnownClean": false
+}
