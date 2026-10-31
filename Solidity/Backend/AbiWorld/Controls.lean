@@ -43,11 +43,17 @@ theorem live_writes :
     Account.empty, Transient.set, Transient.empty, dite_true, Storage.write_read]
   trivial
 
-/-- Panic words cover zero and the largest code; trailing bytes retain strict rejection. -/
+/-- Zero/max codes retain their values; the approved decoder ignores trailing bytes. -/
 theorem panic_boundary_controls :
     (decodePanic (encodePanic 0)).map (fun w => w.1.toNat) = some 0 ∧
     (decodePanic (encodePanic (2 ^ 256 - 1))).map (fun w => w.1.toNat) = some (2 ^ 256 - 1) ∧
-    decodePanic (encodePanic 1 ++ [0]) = none := by decide +kernel
+    (decodePanic (encodePanic 1 ++ [0])).map (fun w => w.1.toNat) = some 1 := by decide +kernel
+
+/-- Genuine truncated/missing-word and wrong-selector failures remain refused. -/
+theorem panic_malformed_controls :
+    decodePanic ((encodePanic 1).take 35) = none ∧
+    decodePanic panicSelector = none ∧
+    decodePanic ([0x4e,0x48,0x7b,0x72] ++ wordBytes 1) = none := by decide +kernel
 
 /-- The codec word bound is exact: the largest word reads back and the next wraps. -/
 theorem word_boundary_control :

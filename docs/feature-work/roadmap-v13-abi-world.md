@@ -797,14 +797,16 @@ records both original pipelines/native receipts, and its kernel controls prove
 suffix independence, unsigned bounds and genuine malformed refusals. Raw producer
 receipts are not present on this VM; no new local native replay is claimed.
 
-The relay explicitly does not authorize changing this retained V13 control.
-`Q-PANIC-CONTROL` therefore requests only the prepared local-control reconciliation:
-replace the obsolete suffix rejection with exact code1 acceptance, preserve zero/
-max cases and all existing genuine negatives, and add truncated35-byte, missing-word
-and wrong-selector negatives. The concrete patch is external and unapplied;
-both independent reviewers confirmed its local scope without granting authority.
-Original fixtures, expectations/verdicts, source/default profiles, pins and the
-decoder remain untouched. No decoder rollback/compatible-closure request remains.
+The relay itself did not authorize changing the retained V13 control. A concrete,
+independently reviewed local-only patch was prepared, and the human then explicitly
+answered `Q-PANIC-CONTROL`: “Authorize only this local V13 control reconciliation
+and added malformed negatives, followed by required validation.” Exactly that patch
+was applied. The obsolete suffix rejection now observes exact code1 acceptance;
+zero/max and all existing genuine negatives remain, with truncated35-byte,
+missing-word and wrong-selector negatives added. Decoder, original fixtures,
+expectations/verdicts, source/default profiles and pins remain unchanged. This is
+not a historical-runner authorization or broader semantic/ABI coverage decision.
+The local question is resolved; missing original producers and failed gates remain.
 
 Two existing owned proofs were adapted without changing statements or premises:
 `ErrorEmission.panic_roundtrip` now takes the complete32-byte word explicitly;
@@ -815,7 +817,13 @@ Its raw failure and resource data remain separate from subsequent successful rep
 checks: ReturnedBytes MCP strict success and focused closure199 jobs PASS. The
 full run reached its hard12GiB cap (253 max events), swap0, no OOM/kill; sampled
 aggregate peak RSS9097008KiB. No time/proof/resource budget was increased.
-Dependent final gates stay blocked pending the precise local-control decision.
+After explicit authorization, Controls MCP and focused46-job build pass. The
+whole default/import closure passes1034 jobs (2.126s cached), and fresh whole-root
+MCP is strict success/nonpartial/no errors or failed dependencies. Both authorized
+control theorem axiom sets are guarded in a separate scoped audit: only propext.
+The earlier full/root failures remain raw failures, not retroactively relabeled.
+The unchanged timed-out TestSuite is not retried or granted a larger bound; the
+composite full gate remains unresolved for that independent validation obligation.
 
 | Original obligation | Current status and remaining producer |
 |---|---|
@@ -843,14 +851,14 @@ remain retained; no failed gate is relabeled green.
 
 
 Terminal validation account: Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2 jobs
-passed. Root MCP returned nonpartial failure/diagnostics_unavailable with failed
+passed. Earlier root MCP returned nonpartial failure/diagnostics_unavailable with failed
 dependencies (including retained Controls); root is not certified clean. Independent
 SolkeyTestSuite build retained timeout124 at180.12 seconds under its unchanged
 180-second bound; it was not retried. The pinned sort gate passed:377 taclets,
 131 read-bearing, table covers131. Initial full gate remains exit1/5038.87 seconds;
 after the unchanged-statement ReturnedBytes repair, focused import closure passed
-199 jobs. A further whole-root gate is pending the required local-control decision,
-not silently treated as passing. The original goal stays blocked and untouched.
+199 jobs. The later post-authorization default/import gate and root MCP pass separately;
+the full composite TestSuite obligation remains failed/unresolved, not waived. The original goal stays blocked and untouched.
 
 Static evidence:17 owned modules/0 forbidden imports;180 core modules/0 layer
 violations;1049 reachable/0 orphans;trust1064 sources/248 inventoried sites/0 findings;
@@ -867,3 +875,10 @@ G41, G42.04 and G42.06/BackfillB; retain every original parent as incomplete and
 all original signatures/refusals/observations. No generated ledger/coverage status
 or global TrustAudit pin was edited. No native_decide/sorry/new axiom, proof-budget
 increase, new profile, historical runner, push/default-branch merge or PR.
+
+
+Post-authorization checkpoint review covers the actual applied local-control diff,
+explicit human scope, genuine malformed negatives and guarded propext-only audits.
+Earlier pre-authorization exports are preserved separately and were not sealed;
+the final authorized export uses a new directory/head and never rewrites prior seals.
+No original fixture observation or global semantic/profile default changed.
