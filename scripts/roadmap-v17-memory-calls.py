@@ -3,6 +3,7 @@
 import hashlib
 import importlib.util
 import json
+import re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 PUBLICATION='91e94ab57305ca055127934fd9e68fe9ea5e6be3'
@@ -26,7 +27,7 @@ def query_bytes():
     source+='\nrun_cmd do\n  let result ← Lean.Elab.Command.liftTermElabM do\n    let mut requests := #['+requests+']\n'
     for suffix in PRIVATE:
         source+='    requests := requests.push (← Solidity.Roadmap.V17.MemoryCalls.privateName '+json.dumps(suffix)+', `Solidity.Evm.MemoryCallExamples, "definition")\n'
-    source+='    Solidity.Roadmap.V17.KernelQuery.extract requests\n  Lean.Elab.Command.liftIO (IO.println ("V17_MEMORY_KERNEL_BEGIN\\n" ++ result.compress ++ "\\nV17_MEMORY_KERNEL_END"))\n'
+    source+='    let mut rows : Array Lean.Json := #[]\n    let mut imports := Lean.Json.null\n    for request in requests do\n      let includeValues := request.1 != `Solidity.Evm.Compiler.Compilation.correct\n      let part ← Solidity.Roadmap.V17.KernelQuery.extract #[request] includeValues\n      let .ok (.arr rs) := part.getObjVal? "rows" | throwError "internal metadata rows missing"\n      rows := rows ++ rs\n      let .ok loaded := part.getObjVal? "imports" | throwError "internal import inventory missing"\n      imports := loaded\n    pure (Lean.Json.mkObj [("schema", toJson (1 : Nat)), ("rows", .arr rows), ("imports", imports), ("releaseClosed", toJson false)])\n  Lean.Elab.Command.liftIO (IO.println ("V17_MEMORY_KERNEL_BEGIN\\n" ++ result.compress ++ "\\nV17_MEMORY_KERNEL_END"))\n'
     return source.encode()
 
 def frame(raw,begin,end):
@@ -72,11 +73,41 @@ def publication_identity():
             'externalReferenceRun':'not run: distinct pins, no substitution'}
 
 
-def verify(record,directory,current):
-    k=load_kernel();k.p.validate(record,directory,current,'warm-memory-calls-observation')
+
+def check_value_evidence(row,k):
+    for tree,field in [(row['type'],'typeDependencies'),(row['value'],'valueDependencies')]:
+        if tree is None:
+            if row['name']=='Solidity.Evm.Compiler.Compilation.correct' and field=='valueDependencies' and row.get('valueOmitted') is True and row[field] is None:continue
+            if field=='typeDependencies' or row['kind'] in ('theorem','definition','opaque') or row[field]!=[]:raise ValueError('missing complete expression')
+            continue
+        k.validate_expr(tree)
+        deps,_=k.ast_names(tree)
+        if row[field]!=deps:raise ValueError('changed checked dependencies')
+
+
+def headline_axioms(raw):
+    names={'Solidity.Roadmap.V17.MemoryCalls.'+n for n in ['compile_identity','endpoint_input','endpoint_agreement','target_observation','wrong_code_rejected','wrong_alias_rejected','private_frame_rejected']}
+    rows={}
+    for line in raw.decode().splitlines():
+        if not line.startswith("'Solidity.Roadmap.V17.MemoryCalls."):continue
+        match=re.fullmatch(r"'([^']+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])",line)
+        if match is None or match[1] not in names or match[1] in rows:raise ValueError('invalid/duplicate headline axiom print')
+        axioms=sorted(x.strip() for x in (match[2] or '').split(',') if x.strip())
+        if not set(axioms)<={'propext','Classical.choice','Quot.sound'}:raise ValueError('unapproved headline axiom')
+        rows[match[1]]=axioms
+    if set(rows)!=names:raise ValueError('missing headline axiom output')
+    return rows
+
+def verify(record,directory,current,producer=None,producer_directory=None):
+    k=load_kernel()
+    if producer is None or producer_directory is None:raise ValueError('missing producer build receipt')
+    if k.p.validate(producer,producer_directory,current,'warm-memory-calls') is not True:raise ValueError('failed producer build')
+    if k.p.validate(record,directory,current,'warm-memory-calls-observation') is not True:raise ValueError('failed observation gate')
+    if producer['buildEnd']!=record['buildStart'] or producer['cacheEnd']!=record['cacheStart']:raise ValueError('producer/query artifact continuity differs')
+    if producer['installedAfter']!=record['installedBefore']:raise ValueError('producer/query installed inputs differ')
     raw=k.p.read_bound(directory,record['log'],record['logSha256']);obs=observation(raw)
     meta=frame(raw,'V17_MEMORY_KERNEL_BEGIN','V17_MEMORY_KERNEL_END')
-    if set(meta)!={'schema','rows','imports','releaseClosed'} or meta['schema']!=1 or meta['releaseClosed'] is not False or len(meta['rows'])!=16:raise ValueError('missing checked metadata')
+    if set(meta)!={'schema','rows','imports','releaseClosed'} or type(meta['schema']) is not int or meta['schema']!=1 or meta['releaseClosed'] is not False or len(meta['rows'])!=16:raise ValueError('missing checked metadata')
     requested={(name,module,kind) for module,name,kind in PUBLIC_REQUESTS};private_seen=set();seen=set()
     for row in meta['rows']:
         if row['name'] in seen:raise ValueError('duplicate checked declaration')
@@ -86,14 +117,13 @@ def verify(record,directory,current):
             if suffix is None or suffix in private_seen or row['module']!='Solidity.Evm.MemoryCallExamples' or row['kind']!='definition':raise ValueError('unrequested private declaration')
             private_seen.add(suffix)
         if row['unsafe'] is not False or row['partial'] is not False or row['semanticPremisesDischarged'] is not False:raise ValueError('unsafe or promoted metadata')
-        for tree,field in [(row['type'],'typeDependencies'),(row['value'],'valueDependencies')]:
-            if tree is None:raise ValueError('missing complete expression')
-            k.validate_expr(tree)
-            deps,_=k.ast_names(tree)
-            if row[field]!=deps:raise ValueError('changed checked dependencies')
-        if type(row['binderCount']) is not int or row['propositionBinders']!=sorted(set(row['propositionBinders'])) or any(type(i) is not int or i<0 or i>=row['binderCount'] for i in row['propositionBinders']):raise ValueError('invalid binders')
+        check_value_evidence(row,k)
+        if type(row['binderCount']) is not int or row['binderCount']<0 or row['propositionBinders']!=sorted(set(row['propositionBinders'])) or any(type(i) is not int or i<0 or i>=row['binderCount'] for i in row['propositionBinders']):raise ValueError('invalid binders')
         if row['axioms']!=sorted(set(row['axioms'])) or not set(row['axioms'])<={'propext','Classical.choice','Quot.sound'}:raise ValueError('unapproved axiom')
     if not requested<={(r['name'],r['module'],r['kind']) for r in meta['rows']} or private_seen!=set(PRIVATE):raise ValueError('missing requested declaration')
+    correct=next(r for r in meta['rows'] if r['name']=='Solidity.Evm.Compiler.Compilation.correct')
+    if correct.get('valueOmitted') is not True or correct['value'] is not None:raise ValueError('missing explicit full-value extraction boundary')
+    if any(r.get('valueOmitted',False) for r in meta['rows'] if r is not correct):raise ValueError('unexpected omitted value')
     # Warm import paths must be exact current build artifacts, never mislabeled fresh.
     installed=k.tool_inputs(current);imports=set()
     prefix=Path(current['runtime']['lean']['path']).parent.parent
@@ -103,25 +133,36 @@ def verify(record,directory,current):
         imports.add(module)
         if module.startswith('Solidity.'):
             rel='lib/lean/'+module.replace('.','/')+'.olean'
-            if path.resolve()!=(ROOT/'.lake/build'/rel).resolve() or record['buildEnd']['files'].get(rel)!=hashlib.sha256(path.read_bytes()).hexdigest():raise ValueError('unbound warm import')
+            if path.resolve()!=(ROOT/'.lake/build'/rel).resolve() or record['buildEnd']['files'].get(rel)!=k.p.resources.hash_file(path):raise ValueError('unbound warm import')
         else:
             if path.is_relative_to('/opt/v17-toolchain'):path=prefix/path.relative_to('/opt/v17-toolchain')
             if str(path.resolve()) not in installed:raise ValueError('unbound installed input')
     if 'Solidity.Evm.MemoryCallExamples' not in imports:raise ValueError('missing producer import')
-    return {'observation':obs,'metadata':meta,'profile':publication_identity(),'sourceSnapshot':current,
+    axiom_rows=headline_axioms(raw)
+    return {'metadataComplete':False,'missingValueEvidence':['Solidity.Evm.Compiler.Compilation.correct'],'headlineAxioms':axiom_rows,'installedInputs':record['installedBefore'],'observation':obs,'metadata':meta,'profile':publication_identity(),'sourceSnapshot':current,
             'intrinsicCodeSha256':hashlib.sha256(obs['intrinsicCode'].encode()).hexdigest(),
-            'boundary':'Warm current checked producer/example inputs and replay; not fresh whole-source extraction or source-lowering/bytecode/gas proof.',
+            'boundary':'Warm current checked producer/example consistency; a separate live replay must match this full wrapper; not fresh whole-source extraction or source-lowering/bytecode/gas proof.',
             'semanticPremisesDischarged':False,'releaseClosed':False}
 
 
 if __name__=='__main__':
-    import argparse
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--report',type=Path,required=True);parser.add_argument('--out',type=Path,required=True)
+    import argparse,fcntl
+    from types import SimpleNamespace
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--report',type=Path,required=True);parser.add_argument('--producer',type=Path,required=True)
+    parser.add_argument('--out',type=Path,required=True);parser.add_argument('--replay-out',type=Path,required=True)
     args=parser.parse_args()
     try:
-        k=load_kernel();r=k.e.load(args.report);current=k.e.snapshot(ROOT)
-        result=verify(r,args.report.parent,current)
-        args.out.write_text(json.dumps(result,indent=2)+'\n')
-        print(json.dumps({'declarations':len(result['metadata']['rows']),'constructorObserved':result['observation']['isMemoryCalls'],'frame':result['observation']['requiredFrame'],'allocationCost':result['observation']['allocationCost'],'semanticPremisesDischarged':False,'releaseClosed':False}))
+        k=load_kernel()
+        with open('/tmp/solidity-lean-feature-groups-20261025/writer.lock','a+') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            r=k.e.load(args.report);producer=k.e.load(args.producer);current=k.e.snapshot(ROOT)
+            first=verify(r,args.report.parent,current,producer,args.producer.parent)
+            if k.p.collect(SimpleNamespace(gate='warm-memory-calls-observation',out=args.replay_out))!=0:raise ValueError('live observation replay failed')
+            replay=k.e.load(args.replay_out/'provenance.json')
+            second=verify(replay,args.replay_out,k.e.snapshot(ROOT),producer,args.producer.parent)
+            exact_replay(first,second)
+            args.out.write_text(json.dumps({'verified':first,'replay':second,'exactObservationReplay':True,'semanticPremisesDischarged':False,'releaseClosed':False},indent=2)+'\n')
+            print(json.dumps({'declarations':len(first['metadata']['rows']),'constructorObserved':first['observation']['isMemoryCalls'],'frame':first['observation']['requiredFrame'],'allocationCost':first['observation']['allocationCost'],'semanticPremisesDischarged':False,'releaseClosed':False}))
     except (ValueError,KeyError,TypeError,OSError) as error:
         print(json.dumps({'error':str(error),'releaseClosed':False}));raise SystemExit(2)

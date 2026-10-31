@@ -4,6 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
 ROOT=Path(__file__).resolve().parents[2]
 spec=importlib.util.spec_from_file_location('m',ROOT/'scripts/roadmap-v17-memory-calls.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 class MemoryCallsControls(unittest.TestCase):
@@ -24,5 +26,44 @@ class MemoryCallsControls(unittest.TestCase):
         identity=m.publication_identity();self.assertEqual(identity['publication'],m.PUBLICATION)
         self.assertEqual(len(m.PUBLIC_REQUESTS)+len(m.PRIVATE),16)
         raw=m.query_bytes();self.assertIn(m.name_term('Solidity.Evm.Compiler.Compilation.memoryCalls').encode(),raw);self.assertIn(b'wrong_code_rejected',raw);self.assertIn(b'private_frame_rejected',raw)
-        self.assertIn(b'KernelQuery.extract requests',raw)
+        self.assertIn(b'KernelQuery.extract #[request] includeValues',raw)
+    def test_failed_or_missing_producer_cannot_reach_frames(self):
+        fake=SimpleNamespace(p=SimpleNamespace(validate=lambda *a:False))
+        with patch.object(m,'load_kernel',return_value=fake),patch.object(m,'observation') as observed:
+            with self.assertRaisesRegex(ValueError,'missing producer'):m.verify({},Path('/tmp'),{})
+            with self.assertRaisesRegex(ValueError,'failed producer'):m.verify({},Path('/tmp'),{},producer={},producer_directory=Path('/tmp'))
+            observed.assert_not_called()
+        fake.p.validate=lambda record,*a:record['exit']==0
+        with patch.object(m,'load_kernel',return_value=fake),patch.object(m,'observation') as observed:
+            with self.assertRaisesRegex(ValueError,'failed observation'):m.verify({'exit':125},Path('/tmp'),{},producer={'exit':0},producer_directory=Path('/tmp'))
+            observed.assert_not_called()
+    def test_producer_import_and_installed_continuity_guards(self):
+        producer={'exit':0,'buildEnd':{'files':{'module':'hash'}},'cacheEnd':{'key':'same'},'installedAfter':{'lib':'hash'}}
+        record={'exit':0,'buildStart':copy.deepcopy(producer['buildEnd']),'cacheStart':copy.deepcopy(producer['cacheEnd']),'installedBefore':copy.deepcopy(producer['installedAfter']),'log':'log','logSha256':'hash'}
+        fake=SimpleNamespace(p=SimpleNamespace(validate=lambda *a:True,read_bound=lambda *a:b'fixture'))
+        with patch.object(m,'load_kernel',return_value=fake),patch.object(m,'observation',side_effect=RuntimeError('positive guards reached')):
+            with self.assertRaisesRegex(RuntimeError,'positive guards'):m.verify(record,Path('/tmp'),{},producer,Path('/tmp'))
+            for field in ['buildStart','cacheStart','installedBefore']:
+                bad=copy.deepcopy(record);bad[field]={}
+                with self.subTest(field=field),self.assertRaises(ValueError):m.verify(bad,Path('/tmp'),{},producer,Path('/tmp'))
+    def test_constructor_and_explicit_type_only_boundary(self):
+        k=m.load_kernel();row={'name':'Solidity.Evm.Compiler.Compilation.memoryCalls','kind':'constructor','type':['sort',['zero']],'value':None,'typeDependencies':[],'valueDependencies':[]}
+        m.check_value_evidence(row,k)
+        row['kind']='theorem'
+        with self.assertRaises(ValueError):m.check_value_evidence(row,k)
+        row.update(name='Solidity.Evm.Compiler.Compilation.correct',valueOmitted=True,valueDependencies=None)
+        m.check_value_evidence(row,k)
+        row['type']=None
+        with self.assertRaises(ValueError):m.check_value_evidence(row,k)
+    def test_full_wrapper_replay_and_axiom_refusals(self):
+        first={'observation':self.row(),'metadata':{'kind':'constructor'},'profile':{'source':'published'},'sourceSnapshot':{'revision':'a'},'installedInputs':{'olean':'sha'}}
+        m.exact_replay(first,copy.deepcopy(first))
+        for field in ['metadata','profile','sourceSnapshot','installedInputs']:
+            bad=copy.deepcopy(first);bad[field]={}
+            with self.subTest(field=field),self.assertRaises(ValueError):m.exact_replay(first,bad)
+        names=['compile_identity','endpoint_input','endpoint_agreement','target_observation','wrong_code_rejected','wrong_alias_rejected','private_frame_rejected']
+        raw=''.join("'Solidity.Roadmap.V17.MemoryCalls."+n+"' does not depend on any axioms\n" for n in names).encode()
+        self.assertEqual(len(m.headline_axioms(raw)),7)
+        for bad in [b'',raw+raw,raw.replace(b'does not depend on any axioms',b'depends on axioms: [sorryAx]',1)]:
+            with self.assertRaises(ValueError):m.headline_axioms(bad)
 if __name__=='__main__':unittest.main()

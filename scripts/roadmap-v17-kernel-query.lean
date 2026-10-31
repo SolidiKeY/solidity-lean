@@ -7,7 +7,7 @@ open Lean Lean.Meta Lean.Elab
 
 def arr (xs : List Json) : Json := Json.arr xs.toArray
 
-def nameJson : Name → Json
+def nameJson : Lean.Name → Json
   | .anonymous => arr [.str "anonymous"]
   | .str p s => arr [.str "str", nameJson p, .str s]
   | .num p n => arr [.str "num", nameJson p, .str (toString n)]
@@ -72,10 +72,10 @@ def kind : ConstantInfo → String
   | .ctorInfo _ => "constructor"
   | .recInfo _ => "recursor"
 
-def namesJson (ns : Array Name) : Json :=
-  toJson ((ns.map Name.toString).toList.mergeSort (· ≤ ·))
+def namesJson (ns : Array Lean.Name) : Json :=
+  toJson ((ns.map Lean.Name.toString).toList.mergeSort (· ≤ ·))
 
-def extract (requests : Array (Name × Name × String)) : TermElabM Json := do
+def extract (requests : Array (Lean.Name × Lean.Name × String)) (includeValues : Bool := true) : TermElabM Json := do
   let env ← getEnv
   let mut rows : Array Json := #[]
   for (n, expectedModule, expectedKind) in requests do
@@ -87,13 +87,13 @@ def extract (requests : Array (Name × Name × String)) : TermElabM Json := do
     if kind ci != expectedKind then throwError "wrong declaration kind for {n}: {kind ci}"
     let typeAst ← match encodeExpr ci.type with
       | .ok j => pure j
-      | .error e => throwError "{e}"
+      | .error e => throwError "{n} type: {e}"
     let value := ci.value? true
     let valueAst ← match value with
       | none => pure Json.null
-      | some v => match encodeExpr v with
+      | some v => if !includeValues then pure Json.null else match encodeExpr v with
         | .ok j => pure j
-        | .error e => throwError "{e}"
+        | .error e => throwError "{n} value: {e}"
     let (binderCount, hypothesisIndices) ← forallTelescope ci.type fun xs _ => do
       let mut indices : Array Nat := #[]
       for i in [:xs.size] do
@@ -101,15 +101,16 @@ def extract (requests : Array (Name × Name × String)) : TermElabM Json := do
       pure (xs.size, indices)
     let axioms ← collectAxioms n
     let pretty ← withOptions (fun o => o.setBool `pp.all true) (ppExpr ci.type)
-    rows := rows.push (Json.mkObj [
+    rows := rows.push (Json.mkObj ([
       ("name", .str n.toString), ("nameAst", nameJson n), ("module", .str module.toString),
       ("kind", .str (kind ci)), ("unsafe", toJson ci.isUnsafe), ("partial", toJson ci.isPartial),
       ("levels", arr (ci.levelParams.map nameJson)), ("type", typeAst), ("value", valueAst),
       ("typeDisplaySupplemental", .str pretty.pretty),
       ("typeDependencies", namesJson ci.type.getUsedConstants),
-      ("valueDependencies", namesJson (value.map Expr.getUsedConstants |>.getD #[])),
+      ("valueDependencies", if includeValues then namesJson (value.map Expr.getUsedConstants |>.getD #[]) else Json.null),
       ("axioms", namesJson axioms), ("binderCount", toJson binderCount), ("propositionBinders", toJson hypothesisIndices),
-      ("semanticPremisesDischarged", toJson false)])
+      ("semanticPremisesDischarged", toJson false)] ++
+      if includeValues then [] else [("valueOmitted", toJson true)]))
   let mut imports : Array Json := #[]
   for n in env.header.moduleNames do
     let path ← liftM (m := IO) (findOLean n)

@@ -570,8 +570,12 @@ recursive target calls, external byte transport, gas or any parent feature row.
 The owned above-core memory-call query reuses published examples and their
 inhabited endpoint/negative-frame proofs, without editing private producer values.
 It discovers their checked constant identities in the exact published module.
-The existing kernel metadata encoder is reused for full checked type/value,
-dependency and axiom observations, including the changed Compiler.correct.
+The existing kernel metadata encoder is reused for checked type/value,
+dependency and axiom observations. The changed Compiler.correct retains its
+complete type and axiom set, but its value and value dependencies are explicitly
+omitted after the unchanged 100,000-node serialization limit refused the full
+body. The focused view is metadata-incomplete; the original full extractor stays
+strict by default, and the original full Compiler9 value audit remains open.
 Finite source alias/target observations and wrong-code/alias/frame controls are
 kernel checked; executable observations are retained separately. Source/program
 constant, intrinsic instruction representation and fixture/profile hashes remain
@@ -585,3 +589,22 @@ match exact code/output/alias/frame/allocation observations. The producer's
 optional external reference uses solc0.8.34; V17's approved differential pin
 remains0.8.38, with no substitution or dependency change. Actual gate outcomes,
 reviews and all still-open G52–G55/Backfill obligations are in the new handoff.
+
+
+Read-only finder/skeptic review required successful producer and query receipts,
+exact build/cache/installed-input continuity, constructor no-value handling,
+strict headline axiom output, and an actual live replay comparing the complete
+verified wrapper. All were corrected with targeted controls. A real compiler
+import exposed Solidity.Name shadowing; the above-core query now uses Lean.Name
+explicitly. The inhabited compile-result equation checks after explicit unfolding
+of the exact published witness, without raising heartbeat limits. The retained
+failed diagnostic includes its rejected implicit recovery term; it is not a gate
+pass. Current successful focused diagnostics contain no such recovery axiom.
+
+Checksum bookkeeping now uses read-only direct IO where supported, with unchanged
+SHA-256 results and stable-file checks; unsupported direct IO falls back to
+ordinary reads and the actual resource guard still decides admission. This avoids
+repopulating inactive artifact pages during inventories. The potentially slower
+bookkeeping was announced and hashing history inspected; byte-equivalence, tail,
+fallback and changed-input controls pass. No proof, expression or time budget,
+cache bytes, source semantics or global status was changed by this IO repair.

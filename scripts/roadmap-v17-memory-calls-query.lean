@@ -6,7 +6,7 @@ open Lean Lean.Meta Lean.Elab
 open Solidity Solidity.Evm Solidity.Evm.Memory
 namespace Solidity.Roadmap.V17.MemoryCalls
 
-def privateName (suffix : String) : TermElabM Name := do
+def privateName (suffix : String) : TermElabM Lean.Name := do
   let env ← getEnv
   let names := env.constants.toList.filterMap fun (n, _) => do
     let idx ← env.getModuleIdxFor? n
@@ -19,6 +19,10 @@ def privateName (suffix : String) : TermElabM Name := do
 elab "v17Example% " suffix:str : term => do
   mkConstWithFreshMVarLevels (← privateName suffix.getString)
 
+elab "v17_unfold " suffix:str : tactic => do
+  let n ← liftM (privateName suffix.getString)
+  Lean.Elab.Tactic.evalTactic (← `(tactic| unfold $(mkIdent n)))
+
 private abbrev result := v17Example% "compiledMutation"
 private abbrev program := v17Example% "mutation"
 private abbrev state := v17Example% "initial"
@@ -28,7 +32,9 @@ private abbrev sourceArrays := v17Example% "sourceArrays"
 private abbrev targetWords := v17Example% "targetWords"
 
 theorem compile_identity : Compiler.compile 1 (Frag.init []) program = some result := by
-  exact (Option.some_get (by decide +kernel)).symm
+  unfold result program
+  v17_unfold "compiledMutation"
+  exact (Option.some_get _).symm
 
 theorem selected : result.isMemoryCalls = true := by decide +kernel
 theorem expanded_frame : result.requiredFrame = 12 := by decide +kernel

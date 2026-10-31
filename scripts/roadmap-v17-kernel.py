@@ -125,14 +125,7 @@ def axiom_query(req):
     return ('import '+req['module']+'\n'+''.join('#print axioms '+x['name']+'\n' for x in req['declarations'])).encode()
 
 
-def tool_inputs(current):
-    prefix=Path(current['runtime']['lean']['path']).parent.parent
-    files={}
-    for path in sorted((prefix/'lib').rglob('*')):
-        if path.is_file() and ('.olean' in path.name or '.so' in path.name):
-            with path.open('rb') as stream: files[str(path.resolve())]=hashlib.file_digest(stream,'sha256').hexdigest()
-    e.require(files, 'missing installed toolchain import inputs')
-    return files
+tool_inputs = p.resources.tool_inputs
 
 
 def parse_output(data):

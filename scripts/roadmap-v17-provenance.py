@@ -65,7 +65,7 @@ def inventory(path):
         for p in sorted(path.rglob('*')):
             e.require(not p.is_symlink(), 'symlink in build/cache inventory')
             if p.is_file():
-                with p.open('rb') as stream: files[str(p.relative_to(path))] = hashlib.file_digest(stream, 'sha256').hexdigest()
+                files[str(p.relative_to(path))] = resources.hash_file(p)
     return {'path': str(path), 'files': files}
 
 
@@ -98,6 +98,8 @@ def validate(record, evidence_root, current, gate, gate_row=None):
     argv = e.loads(read_bound(evidence_root, record['dockerArgv'], record['dockerArgvSha256']))
     e.require(argv == docker_create_argv(evidence_root.resolve(), current, record['containerName'], record['command']), 'changed Docker spawn configuration')
     e.require(record['command'] == gate_command(gate,evidence_root.resolve()), 'wrong build command')
+    if gate in ('warm-memory-calls','warm-memory-calls-observation'):
+        e.require(record['installedBefore']==record['installedAfter']==resources.tool_inputs(current),'changed installed observation inputs')
     if gate=='warm-memory-calls-observation':
         e.require((evidence_root/'MemoryCallsQuery.lean').read_bytes()==memory_query_bytes(),'changed memory call query bytes')
     e.require(record['mode'] in ('clean', 'warm'), 'unknown cache mode')
@@ -306,6 +308,7 @@ def collect(args):
     start_build, start_cache = inventory(build), inventory(cache)
     mode = 'clean' if args.gate.startswith('clean-') else 'warm'
     if mode == 'clean': e.require(not start_build['files'] and not start_cache['files'], 'refusing nonempty clean start; no cache/build deletion performed')
+    installed_before = resources.tool_inputs(before) if args.gate in ('warm-memory-calls','warm-memory-calls-observation') else None
     resource_fields = resource_snapshot(); check_headroom(resource_fields)
     disk = os.statvfs(ROOT); free = disk.f_bavail * disk.f_frsize
     e.require(free >= 1024**3, 'disk guard')
@@ -416,6 +419,12 @@ def collect(args):
               'executionScript':'execution.sh','executionScriptSha256':e.digest((out/'execution.sh').read_bytes()),
               'buildStart':start_build,'cacheStart':start_cache,'buildEnd':inventory(build),'cacheEnd':inventory(cache),
               'releaseClosed':False}
+    if installed_before is not None:
+        record['installedBefore']=installed_before
+        try: record['installedAfter']=resources.tool_inputs(before)
+        except (OSError,ValueError) as error:
+            record['installedAfter']=None; record['validationExit']=125; record['exit']=final_exit(execution_exit,cleanup_exit,125); errors.append({'phase':'installed inputs after','error':str(error)})
+            (out/'execution-errors.json').write_text(json.dumps(errors,indent=2));record['errorsSha256']=e.digest((out/'execution-errors.json').read_bytes())
     if record['exit']==0:
         try: validate(record,out,before,args.gate)
         except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError) as error:
