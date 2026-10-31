@@ -5,6 +5,9 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {runSolidityTests} from './test-solidity.mjs';
+import {solkeyTestOptions} from './test-compiler.mjs';
+
+const compilerOptions = solkeyTestOptions();
 
 function withSource(source, action) {
   const directory = mkdtempSync(join(tmpdir(), 'solidity-getter-dispatch-'));
@@ -21,7 +24,8 @@ function productionCheck(source, body, mutate) {
   withSource(source, (input, directory) => {
     const fixture = join(directory, 'GetterDispatch.ast.json');
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source', input,
-      '--out', fixture, '--no-wrapper'], {stdio:'pipe'});
+      '--out', fixture, '--no-wrapper', '--solkey', compilerOptions.solkey,
+      '--soljson', compilerOptions.soljson], {stdio:'pipe'});
     if (mutate) {
       const json = JSON.parse(readFileSync(fixture, 'utf8'));
       mutate(json.ast.nodes.find(node => node.nodeType === 'ContractDefinition' && node.name === 'C'));
@@ -49,7 +53,7 @@ const admitted = name => `#guard (Imported.C.report.find? (·.name == "${name}")
 
 function proved(source, name = 'entry') {
   withSource(source, input => {
-    const report = runSolidityTests([input], {build:false, contract:'C', function:name});
+    const report = runSolidityTests([input], {...compilerOptions, build:false, contract:'C', function:name});
     assert.deepEqual(report.errors, []);
     assert.equal(report.results.find(row => row.function === name)?.status, 'proved',
       JSON.stringify(report.results));

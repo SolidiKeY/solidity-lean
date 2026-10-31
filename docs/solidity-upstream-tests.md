@@ -109,6 +109,26 @@ The end-to-end retry reached Lean for all 21 source cases but stopped at stale
 `Solidity.Language.Features` artifacts under `--no-build`; it did not establish
 their verdicts. The coordinator owns rebuilding and rerunning the combined gates.
 
+The 2026-10-31 combined integration retry exposed the same sibling-checkout
+assumption in `scripts/finite-dispatch.test.mjs`. That suite, plus the two
+remaining source-compiling getter suites (`scripts/getter-dispatch.test.mjs`
+and `scripts/public-getters.test.mjs`), now passes `solkeyTestOptions()` to
+both direct compiler invocations and `runSolidityTests`. Snapshot verification,
+compiler hashes, source fixtures, expected verdicts and budgets are unchanged.
+The retained `annotate` result-type finding was already resolved; this repair
+changes no Lean source.
+
+Serial focused retries under the 12 GiB/no-swap cap, a 12 GiB OS reserve guard
+and Lean `-j1` pass 21/22 finite-dispatch, 6/9 getter-dispatch and 1/7
+public-getter tests. The ten remaining tests reach the no-build Lean invocation
+but cannot check their assertions with the current artifacts. A complete
+FunctionTypes error capture identifies out-of-date `Solidity.Calculus.DecideComplete`
+and `Solidity.Calculus.Callback` targets. No missing sibling-path error remains.
+These are incomplete verdicts, not passing combined gates; the coordinator owns
+rebuilding and rerunning them. Read-only finder and skeptic reviews checked every
+compiler call and confirmed that the patch only changes compiler/snapshot location
+wiring; no admission, observation, target predicate or proof budget changes.
+
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
 node scripts/solidity-upstream.mjs verify
