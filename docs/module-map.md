@@ -1219,3 +1219,4 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/EvaluatedRevertChecks.lean` | Evaluated 134-byte word/heap payload through nested calls and scoped prefix, checked byte/stack/root observations, empty/class/evaluation/headroom controls. |
 | `Backend/InternalFlow/PublishedDirectCalls.lean` | Consumers of published direct memory-call endpoint, exact frame export, allocator and bare-revert proofs. |
 | `Backend/InternalFlow/TupleCalls.lean` | Checked direct primitive-tuple call expansion/export for arbitrary binder arity, real instruction compaction/frame proof, and explicit reference-binder type boundaries. |
+| `Backend/InternalFlow/TuplePrograms.lean` | Owned tuple-aware finite direct-call program composition via public checked sequence/block/branch/call constructors; global admission and unbounded recursion remain unchanged. |
