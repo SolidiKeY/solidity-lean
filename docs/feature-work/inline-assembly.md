@@ -147,3 +147,25 @@ that growth is counted in VY3/VY4, not in V10–V15.
 
 None yet. Each checkpoint appends its handoff here (revision, theorems and
 premises, checks, remaining obligations).
+
+
+### VY2 preparation handoff (2026-10-31)
+
+On `codex/solidity-inline-assembly5-20261031/vy2-physical` from exact base
+`0b078cefaf7daad79007b87b72df64eb6936420f`,
+[VY2](inline-assembly-vy2.md) adds dependency-free intrinsic physical-view
+preparation under `Solidity/Yul/Views/`: packed-field read/update/frame/width
+laws, typed canonical codecs and residual reconstruction, byte/word/copy
+operations with both word roundtrips, raw calldata/fixed hash/environment
+inputs, allocation and actual V04b MemOK extension obligations, and inhabited
+negative/combination/source-reset/rollback controls. YQ1–YQ7 approval is recorded
+in scope; no frontend or manifest exclusion is reopened.
+
+This is partial backfill, not Y04/Y05/Y06/Y09.02 completion. VY1 is absent;
+full typed source packing/writeback, dirty owned bits, residual journaling,
+V10/V11 agreement instances, memory-safe MemOK preservation, allocation's final
+refinement/adequacy, source builtin/row integration, notation/printers and
+statement soundness remain open. Separate finder/skeptic findings and checks
+are in the lane record. Committed revision, exact commands/outcomes/resources,
+raw failures, patch/bundle and checksum paths are in
+`/workspace/vy2-evidence/HANDOFF.md` on this VM.

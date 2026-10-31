@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.38;
+
+// Reference-only controls. No claim of Lean frontend admission.
+contract Physical {
+    bool public flag;
+    function wordRoundtrip() external pure returns (uint x) {
+        assembly ("memory-safe") { mstore(0x80, 0x12345678) x := mload(0x80) }
+    }
+    function lowByte() external pure returns (uint x) {
+        assembly ("memory-safe") {
+            mstore(0x80, 0)
+            mstore8(0x9f, 0xabcd)
+            x := mload(0x80)
+        }
+    }
+    function overlapRight() external pure returns (uint x) {
+        assembly ("memory-safe") {
+            mstore(0x80, 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f)
+            mcopy(0x82, 0x80, 6)
+            x := shr(176, mload(0x80))
+        }
+    }
+    function overlapLeft() external pure returns (uint x) {
+        assembly ("memory-safe") {
+            mstore(0x80, 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f)
+            mcopy(0x80, 0x82, 6)
+            x := shr(176, mload(0x80))
+        }
+    }
+    function calldataTail() external pure returns (uint x) {
+        assembly ("memory-safe") {
+            calldatacopy(0x80, calldatasize(), 32)
+            x := or(mload(0x80), calldataload(calldatasize()))
+        }
+    }
+    function emptyHash() external pure returns (uint x) {
+        assembly ("memory-safe") { x := keccak256(0, 0) }
+    }
+    function dirtyLocal() external pure returns (uint raw, uint cleaned) {
+        uint8 small;
+        assembly ("memory-safe") { small := 0x123456 raw := small }
+        cleaned = small;
+    }
+    function dirtyBool() external pure returns (uint raw, bool cleaned) {
+        bool value;
+        assembly ("memory-safe") { value := 2 raw := value }
+        cleaned = value;
+    }
+    function dirtyStorageBool() external returns (uint raw, bool logical) {
+        assembly ("memory-safe") { sstore(flag.slot, 2) raw := sload(flag.slot) }
+        logical = flag;
+    }
+    function residualSlots() external returns (uint x) {
+        assembly ("memory-safe") {
+            sstore(999, 42)
+            tstore(999, 7)
+            x := add(sload(999), tload(999))
+        }
+    }
+}

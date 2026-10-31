@@ -935,3 +935,30 @@ are capped at 512 syntax nodes before substitution; the final condition is
 also capped. Non-ground conditions use the existing `Seq.refuteS` clauses.
 A rigid refusal or failed check conservatively walks both branches, even if
 contradictory unused premises could have closed one in the previous path.
+
+
+### VY2 physical equational preparation (Lean-only)
+
+Decision YQ5 (2026-10-31) authorizes Lean-only Yul rules. The following are
+kernel-checked **equational preparation laws**, with no SolKey taclet.
+They are not Y09.02 statement rules: VY1 terms/statements, `dl{ … }` / `tm{ … }`
+notation, printers and source-step soundness remain open. No admission row
+is reopened by this table.
+
+| Preparation law (no SolKey taclet) | Lean theorem | Premises |
+| --- | --- | --- |
+| Packed read after update | `Yul.Views.Field.find_save` | Bounded field value; field fits one slot |
+| Packed unchanged update | `Yul.Views.Field.save_unchanged` | Actual extracted field value |
+| Packed update frames | `Yul.Views.Field.save_low`, `Yul.Views.Field.save_high`, `Yul.Views.Field.find_save_disjoint` | Bounded field value; other-field law requires disjoint byte intervals |
+| Slot read after update | `Yul.Views.find_saveSlot`, `Yul.Views.find_saveSlot_other` | Other-slot law requires unequal slots |
+| Byte read after update | `Yul.Views.find_saveByte`, `Yul.Views.find_saveByte_other` | Other-byte law requires unequal addresses |
+| Snapshot copy read/frame | `Yul.Views.find_copyBytes`, `Yul.Views.copyBytes_outside` | In-range index / outside destination interval |
+| Word decode/encode | `Yul.Views.mload_mstore`, `Yul.Views.mstore_mload` | Any byte view and word; successful EVM integration additionally requires valid ranges/resources |
+| Typed region decode/encode | `Yul.Views.Regions.decode_encode` | Actual typed codec identity; inverse region ownership |
+| Region unchanged reconstruction | `Yul.Views.Regions.unchanged` | Canonical owned bytes; retains every residual byte |
+| Byte/string object decode and unchanged view | `Yul.Views.decode_bytesObjectView`, `Yul.Views.decode_stringObjectView`, `Yul.Views.bytesObject_unchanged` | Word-sized source length; unchanged view requires matching header/live payload; all residual/padding retained |
+| Calldata tail padding | `Yul.Views.calldata_zero`, `Yul.Views.calldataload_zero` | Offset at or after raw input length |
+| Fixed hash congruence | `Yul.Views.keccak256_congr` | Equal input byte lists; no collision premise |
+
+See [VY2 lane record](feature-work/inline-assembly-vy2.md) for integration
+limits, controls and reviews.

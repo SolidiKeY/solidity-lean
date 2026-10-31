@@ -885,3 +885,9 @@ import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.SignedPower
 import Solidity.Backend.Scalar.SignedPowerPost
 import Solidity.Backend.Scalar.SignedPowerPrefix
+
+-- VY2 independent physical-view preparation; concrete Yul integration remains open.
+import Solidity.Yul.Views.MemoryControls
+import Solidity.Yul.Views.SourceControls
+import Solidity.Yul.Views.Agreements
+import Solidity.Yul.Views.ReadControls

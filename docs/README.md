@@ -103,3 +103,5 @@ history is in git.
 | Preparation lane | Document |
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
+
+- [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical view laws, explicit owner agreements, and outstanding concrete integration.
