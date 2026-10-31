@@ -1,5 +1,6 @@
 import Solidity.Evm.Correct
 import Solidity.Evm.MemoryCompile
+import Solidity.Evm.MemoryCalls
 import Solidity.Evm.MemoryRefArrayCompile
 import Solidity.Evm.MemoryObjectCompile
 import Solidity.Evm.MemoryObjectConstructionCompile
@@ -9,8 +10,8 @@ import Solidity.Evm.MemoryLoopScopeCompile
 # The checked compiler entry
 
 One entry selects the existing core compiler when its fragment applies,
-otherwise the memory compiler. Its result retains the corresponding fragment
-certificate. The common agreement theorem preserves the stronger heap and
+otherwise the published memory backends, then the checked internal-call path.
+Its result retains the corresponding fragment certificate. The common agreement theorem preserves the stronger heap and
 pointer relation on the memory path; its input states that relation and the
 reserved frame bound explicitly.
 -/
@@ -26,6 +27,7 @@ inductive Compilation (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) w
   | construction (result : Memory.Construction.CompiledProg b F P)
   | memoryLoops (result : Memory.Loops.CompiledProg b F P)
   | memoryLoopScopes (result : Memory.LoopScopes.CompiledProg b F P)
+  | memoryCalls (result : Memory.Calls.Program b F P) (pushFree : Evm.Prog.pushes P = 0)
 
 def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
     Option (Compilation b F P) :=
@@ -41,7 +43,11 @@ def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
           | some result => some (.construction result)
           | none => match Memory.Loops.compileProg b F P with
             | some result => some (.memoryLoops result)
-            | none => (Memory.LoopScopes.compileProg b P F).map .memoryLoopScopes
+            | none => match Memory.LoopScopes.compileProg b P F with
+              | some result => some (.memoryLoopScopes result)
+              | none => if hz : Evm.Prog.pushes P = 0 then
+                  (Memory.Calls.compile b F P).map (fun result => .memoryCalls result hz)
+                else none
 
 namespace Compilation
 
@@ -54,6 +60,7 @@ def code {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
   | .construction result => result.code
   | .memoryLoops result => result.code
   | .memoryLoopScopes result => result.code
+  | .memoryCalls result _ => result.code
 
 def frag {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Frag Δ
@@ -64,6 +71,7 @@ def frag {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
   | .construction result => result.frag
   | .memoryLoops result => result.frag
   | .memoryLoopScopes result => result.frag
+  | .memoryCalls result _ => result.frag
 
 /-- Identify the legacy finite-memory path; loop memory has `isMemoryLoops`. -/
 def isMemory {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
@@ -73,24 +81,25 @@ def isMemory {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
   | .referenceArrays _ | .objects _ | .construction _ => false
   | .memoryLoops _ => false
   | .memoryLoopScopes _ => false
+  | .memoryCalls .. => false
 
 /-- Select the supplementary, nonallocating reference-array relation. -/
 def isReferenceArray {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .referenceArrays _ => true
-  | .core .. | .memory .. | .objects .. | .construction .. | .memoryLoops .. | .memoryLoopScopes .. => false
+  | .core .. | .memory .. | .objects .. | .construction .. | .memoryLoops .. | .memoryLoopScopes .. | .memoryCalls .. => false
 
 /-- Select full object ownership for the headerless fixed-array path. -/
 def isObject {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .objects _ => true
-  | .core .. | .memory .. | .referenceArrays .. | .construction .. | .memoryLoops .. | .memoryLoopScopes .. => false
+  | .core .. | .memory .. | .referenceArrays .. | .construction .. | .memoryLoops .. | .memoryLoopScopes .. | .memoryCalls .. => false
 
 /-- Select checked reference-array construction with a complete allocator. -/
 def isConstruction {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .construction _ => true
-  | .core .. | .memory .. | .referenceArrays .. | .objects .. | .memoryLoops .. | .memoryLoopScopes .. => false
+  | .core .. | .memory .. | .referenceArrays .. | .objects .. | .memoryLoops .. | .memoryLoopScopes .. | .memoryCalls .. => false
 
 /-- Distinguish prefix-capacity loop inputs from legacy finite-memory inputs. -/
 def isMemoryLoops {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
@@ -103,6 +112,37 @@ def isMemoryLoopScopes {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} 
     Compilation b F P → Bool
   | .memoryLoopScopes _ => true
   | _ => false
+
+/-- The stronger memory backend with expanded internal call frames. -/
+def isMemoryCalls {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .memoryCalls _ _ => true
+  | _ => false
+
+/-- Every heap backend; each retains its own distinct input/output relation. -/
+def usesMemory {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) : Bool :=
+  match result with
+  | .core .. => false
+  | _ => true
+
+/-- Includes every private internal-call parameter, return and temporary cell. -/
+def requiredFrame {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Nat
+  | .memoryCalls out _ => out.need
+  | .memoryLoops out => out.cert.need
+  | .memoryLoopScopes out => out.cert.need
+  | _ => Memory.frameNeedProg P
+
+/-- Reached allocation cost for finite-memory paths; failed call arguments do not
+reach return allocation. Loop paths use their certificate's `Cost` relation in
+`Rep` and prefix-capacity `Room` in `Input`, rather than this finite metric. -/
+def allocationCost {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → State C Γ → Nat
+  | .memoryCalls out _ => out.cost
+  | .construction _ => Memory.Construction.allocationCostProg P
+  | .referenceArrays _ | .objects _ => fun _ => 0
+  | _ => Memory.allocationCostProg P
 
 def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)
@@ -121,6 +161,8 @@ def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
       b + out.cert.need ≤ frame ∧ Memory.Loops.Room out.cert frame σ base m
   | .memoryLoopScopes out => Memory.StateRepr L b frame F σ base m ∧
       b + out.cert.need ≤ frame ∧ Memory.LoopScopes.Room out.cert frame σ base m
+  | .memoryCalls out _ => Memory.StateRepr L b frame F σ base m ∧ b + out.need ≤ frame ∧
+      Memory.AllocationInput b frame (out.cost σ) σ base m
 
 /-- Open the memory premises without reducing the certified compiler result. -/
 theorem memory_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -137,6 +179,7 @@ theorem memory_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | construction out => cases hm
   | memoryLoops out => cases hm
   | memoryLoopScopes out => cases hm
+  | memoryCalls out _ => cases hm
 
 /-- Open a reference-array input without unfolding the computed compiler result. -/
 theorem referenceArray_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -151,6 +194,7 @@ theorem referenceArray_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C �
   | construction out => cases hm
   | memoryLoops out => cases hm
   | memoryLoopScopes out => cases hm
+  | memoryCalls out _ => cases hm
 
 /-- Open the full object input without unfolding the computed compiler. -/
 theorem object_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -166,6 +210,7 @@ theorem object_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | construction out => cases hm
   | memoryLoops out => cases hm
   | memoryLoopScopes out => cases hm
+  | memoryCalls out _ => cases hm
 
 /-- Open the growing constructor premises without unfolding proof data. -/
 theorem construction_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -182,6 +227,24 @@ theorem construction_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ 
   | construction out => rfl
   | memoryLoops out => cases hm
   | memoryLoopScopes out => cases hm
+  | memoryCalls out _ => cases hm
+
+/-- Open expanded-call premises without unfolding the compiler's code or proof. -/
+theorem memoryCalls_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryCalls = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.StateRepr L b frame F σ base m ∧
+      b + result.requiredFrame ≤ frame ∧
+      Memory.AllocationInput b frame (result.allocationCost σ) σ base m := by
+  cases result with
+  | core _ _ => cases hm
+  | memory _ => cases hm
+  | referenceArrays _ => cases hm
+  | objects _ => cases hm
+  | construction _ => cases hm
+  | memoryLoops _ => cases hm
+  | memoryLoopScopes _ => cases hm
+  | memoryCalls _ _ => rfl
 
 def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)
@@ -206,6 +269,9 @@ def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
       Memory.LoopScopes.Cost out.cert entry ⟨σ, e⟩ cost ∧
       Memory.StateRepr L b frame out.frag σ base' m ∧ Memory.BaseExtends entry.H base base' ∧
       Memory.GrowsAllocator b frame cost entry base initial σ base' m
+  | .memoryCalls out _ => ∃ base', Memory.StateRepr L b frame out.frag σ base' m ∧
+      Memory.BaseExtends entry.H base base' ∧
+      Memory.GrowsAllocator b frame (out.cost entry) entry base initial σ base' m
 
 /-- Expose the full output relation without reducing a certified compiler value. -/
 theorem object_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -223,7 +289,7 @@ theorem object_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | construction out => cases hm
   | memoryLoops out => cases hm
   | memoryLoopScopes out => cases hm
-
+  | memoryCalls out _ => cases hm
 
 /-- Open the complete constructor output relation without unfolding the compiler. -/
 theorem construction_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -243,6 +309,7 @@ theorem construction_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ
   | construction out => rfl
   | memoryLoops out => cases hm
   | memoryLoopScopes out => cases hm
+  | memoryCalls out _ => cases hm
 
 /-- Open the source-prefix capacity premises of the loop path. -/
 theorem memoryLoops_input_of {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -263,6 +330,7 @@ def memoryLoopsResult {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | .objects _ => False.elim (Bool.noConfusion hm)
   | .construction _ => False.elim (Bool.noConfusion hm)
   | .memoryLoopScopes _ => False.elim (Bool.noConfusion hm)
+  | .memoryCalls .. => False.elim (Bool.noConfusion hm)
 
 theorem memoryLoops_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (hm : result.isMemoryLoops = true) (L frame : Nat)
@@ -278,6 +346,7 @@ theorem memoryLoops_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ �
   | construction out => cases hm
   | memoryLoops out => rfl
   | memoryLoopScopes out => cases hm
+  | memoryCalls out _ => cases hm
 
 /-- Open the source-prefix capacity premises of the loop path. -/
 theorem memoryLoopScopes_input_of {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -298,6 +367,7 @@ def memoryLoopScopesResult {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ 
   | .objects _ => False.elim (Bool.noConfusion hm)
   | .construction _ => False.elim (Bool.noConfusion hm)
   | .memoryLoops _ => False.elim (Bool.noConfusion hm)
+  | .memoryCalls .. => False.elim (Bool.noConfusion hm)
 
 theorem memoryLoopScopes_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (hm : result.isMemoryLoopScopes = true) (L frame : Nat)
@@ -313,6 +383,7 @@ theorem memoryLoopScopes_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C
   | construction out => cases hm
   | memoryLoops out => cases hm
   | memoryLoopScopes out => rfl
+  | memoryCalls out _ => cases hm
 
 /-- The compiler preserves typed states and the evaluation stack, or both
 executions revert; the existing panic and payment cases retain their guards. -/
@@ -373,6 +444,13 @@ theorem correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     · exact .inl ⟨o, m', ho, hc, hst, base', cost, o.ext, hcost, hm, he, ha⟩
     · exact .inr (.inl ⟨.inl ho, hc⟩)
     · exact .inr (.inr (.inr ⟨ho, .inl hc⟩))
+
+  | memoryCalls out hz =>
+    simp only [Agrees, code, Rep, hz, Nat.add_zero]
+    rcases out.sound h.1 h.2.1 h.2.2 with
+      ⟨o, m', base', ho, hc, hm, hst, he, ha⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, base', hm, he, ha⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
 
 end Compilation
 end Solidity.Evm.Compiler
