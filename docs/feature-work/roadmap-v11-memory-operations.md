@@ -75,12 +75,12 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint thirty-three. Earlier checkpoint
+Current cumulative accounting through checkpoint thirty-four. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
 |---|---|---|
-| G32 | partial | Intrinsic heap-object framing/noninterference components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
+| G32 | partial | Intrinsic heap-object framing/noninterference and supported Source primitive delete-to-symbolic-word frame components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
 | G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors; supported actual Source Boolean allocation and MemOK preservation now checked. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
 | G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads, single-element read/write-to-intrinsic-copy and primitive delete-to-clearT transitions proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
 | G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
@@ -2788,3 +2788,61 @@ public83byteequal, originalfrozenno-newFAIL11incoming; globalinventory1 remains
 1054unrecorded=359publicinherited+695owned,0unsafe. These remain failed global
 gates; coordinator additive reconciliation proposed only. Independent source
 finder/skeptic accepted with no defect. All previous seals retained.
+
+## Checkpoint thirty-four: independent Source delete to published word target
+
+Original G32/G34/Backfill investigation found the actual published
+Evm.Memory.deleteLocalValue_correct certificate. It was already available and
+consumed read-only; no reserved Evm compiler file or implementation duplicated.
+SourceDeleteTarget composes C33's ACTUAL Source.deleteLoc and intrinsic writeAddr/
+clearT/deleteMem with that certificate. Initial local SourceBoolMemoryAt, initial
+Evm.Memory.StateRepr, initialized typed memory local, actual index expression
+evaluation/bound and the EXISTING compiler valIn fragment premise are explicit.
+The index-code contract is derived via published val_sim, NOT assumed target
+preservation. Actual intrinsic Some and deleteMem success, independent Source
+Some, compiled run Some, final local Source relation, full final word StateRepr,
+stack equality and existing allocator framing are conclusions. Positive existing
+Source fuel remains explicit, not an altered run limit.
+
+Bounds theorem derives actual Source index panic/state identity and actual
+symbolic target revert from the same initial representations and out-of-bounds
+index. These are SEPARATE exact observations: it does not equate Source panic
+bytes to emitted returndata. General Source syntax, physical bytes, executable
+bytecode and external EVM/compiler testing remain outside this certificate.
+
+Controls independently construct the complete initial StateRepr: live Bool array
+TFF at wordbase16 with header3, pointerlocalcell1=16, allocatorcell0=20, sentinel
+cell5=99, stacktail42, no unproved initial/final representation assumption. Source
+state is actual allocRef(TFF) output, independently MemOK. Direct general theorem
+application executes Source/intrinsic/compiled deletion oftrue tofalse, complete
+intrinsicTFF→FFF and source reads true→false; wordvector positions0,1,5,16,17,18,19
+changes[20,16,99,3,1,0,0]→[20,16,99,3,0,0,0], stack42 preserved and stale1 excluded.
+Actual endpoint3 Source panic and compiled revert are proved; fuel0 separately
+timeouts. All earlier runtime, element32, nonprimitive and mixed-copy fixtures
+remain unchanged. Four new public laws/controls pinned standard-only.
+
+Retained failures include initial witness length/binder proof repairs and three
+closed-machine raw-run conversions hitting unchanged200000heartbeats with
+12GiB cap pressure (max-eventdeltas529/37/6, noOOM/kill). No resource stop hidden or
+budget raised. A parameterized machine helper consumes published run_append/
+arrayAddrStack lemmas and explicit pointer/header facts, then instantiates SAME
+concrete fixture and all cells/stack observations. Passing fullfocused152jobs
+peakRSS907432KiB, no new cap/OOMevents. Exact same runtime/cacheOFF/j1/parent/
+child/reserve; preflight1689575424bytes and64MiB warm route forecast.
+
+This closes a supported independent Source-operation→intrinsic→symbolic-word
+application, not G32/G34 or a whole source compiler. General shapes, resolved
+Source programs, physical byte/returndata transport, all-profile constructors/
+target allocation failures, reference rebinding/delete, deep-copy/emitted loops/
+recursive graphs, reserved memory-storage and final V10/Source/target chain remain
+open. All original parents stay partial/blocked; Backfill advanced, not exhausted.
+
+C34 final152guardedjobs and1071default/262TestSuite/SolKey377/131 wrapperexit0.
+Strict automatic, complete fixture, layer/orphan/trust, lane699standardpins/
+90modules, script corruption pass. Warm finalgate225280bytes disk growth, sampled
+aggregateRSS1603364KiB, no new memory.max/OOM/kill events; older C31/C34failures
+caused cumulative12GiBpeak and1051maxevents, all retained. Raw docs1 complete
+public83byteequal/originalfrozenno-newFAIL11incoming; globalinventory1 remains
+1058unrecorded=359publicinherited+699owned,0unsafe. Reserved global records unchanged.
+Source finder/skeptic accepted actual hypotheses/nonvacuity/ownership/controls
+with no defect. No global debt or lane completion waiver.

@@ -1288,3 +1288,6 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceWrite.lean` | Actual independent Source Boolean read/write transition and checked intrinsic singleton capture, reached representation, MemOK and separate bounds outcomes. |
 
 | `Solidity/Backend/MemoryOps/SourceDelete.lean` | Actual Source primitive memory delete, intrinsic writeAddr/clearT, final local representation, MemOK and separate timeout/bounds outcomes. |
+
+| `Solidity/Backend/MemoryOps/SourceDeleteTarget.lean` | Independent Source primitive delete composed with the published symbolic word-memory compiler certificate; initial representation/index-fragment premises explicit. |
+| `Solidity/Backend/MemoryOps/SourceTargetControls.lean` | Inhabited three-view Source/intrinsic/compiled-word deletion, exact cells/stack/frame, MemOK and endpoint/fuel controls. |

@@ -949,3 +949,5 @@ import Solidity.Backend.Scalar.SignedPowerPost
 import Solidity.Backend.Scalar.SignedPowerPrefix
 
 import Solidity.Backend.MemoryOps.SourceMemoryControls
+
+import Solidity.Backend.MemoryOps.SourceTargetControls
