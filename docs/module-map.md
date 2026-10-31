@@ -1291,3 +1291,5 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceDeleteTarget.lean` | Independent Source primitive delete composed with the published symbolic word-memory compiler certificate; initial representation/index-fragment premises explicit. |
 | `Solidity/Backend/MemoryOps/SourceTargetControls.lean` | Inhabited three-view Source/intrinsic/compiled-word deletion, exact cells/stack/frame, MemOK and endpoint/fuel controls. |
+
+| `Solidity/Backend/MemoryOps/SourceDefault.lean` | Actual Source zero-default constructor, published intrinsic growth/fresh framing, supported word allocator composition, low fuel and unchecked cursor-wrap boundary. |

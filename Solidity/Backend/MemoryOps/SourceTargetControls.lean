@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.SourceDeleteTarget
+import Solidity.Backend.MemoryOps.SourceDefault
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -164,6 +165,135 @@ theorem delete_word_endpoint :
     decide
   have h := source_delete_word_bounds σ r represented F0 0 .here rfl endpoint (uintOfNat 3) rfl hk initial_repr rfl
   exact ⟨h.1,h.2,source_bool_delete_timeout sy F0 0 3⟩
+
+private theorem cons_eq {α : Type} {a b : α} {xs ys : List α}
+    (ha : a=b) (hs : xs=ys) : a::xs=b::ys := by
+  cases ha
+  cases hs
+  rfl
+private theorem initial_allocator : StructAllocatorRepr σ.heap base 8 ⟨20,by decide⟩ machine := by
+  apply AllocatorRepr.withoutStructs _ (fun q => no_struct q)
+  refine ⟨initial_repr.heap,?_,?_⟩
+  · refine ⟨by decide,by decide,rfl,?_⟩
+    intro addr ha
+    change 20≤addr at ha
+    change (if addr=0 then w[20] else if addr=1 then w[16] else if addr=5 then w[99] else
+      if addr=16 then w[3] else if addr=17 then w[1] else w[0])=w[0]
+    rw [if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega)]
+  · intro p q
+    obtain ⟨ht,hq⟩ := HRef.heq_of_id q r (id_zero q)
+    have hp : p=.bool := Ty.prim.inj (RefTy.array.inj ht)
+    cases hp
+    cases eq_of_heq hq
+    simp only [σ,base,Heap.len,Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+    decide
+private def ctorObj : MObj H B := defaultArray .bool ⟨0,W_pos⟩
+private def ctorState := σ.allocPush ctorObj
+private def ctorRef := (σ.alloc ctorObj).2
+private def ctorBase := upd base H.length (⟨20,by decide⟩ : Fin W)
+private def ctorMachine := writeMachine (allocateMachine machine ⟨20,by decide⟩ ⟨0,W_pos⟩) 2 w[20]
+private def ctorCode := declareNewCode 1 (.lit 0 rfl : Simple C Γ .uint)
+
+/-- Actual Source constructor, Heap.allocDefault, intrinsic default declaration
+and published emitted allocator share their observed empty fresh root. -/
+theorem default_constructor_views :
+    ∃ z : Source.EMState E0 [],
+      (Source.zeroVal (E := E0) (Γ := []) 2 (.array .memory .bool none)).run sy=(.ok (.memRef rfl 1),z) ∧
+      TRun.declMem B none rfl σ=.ok ⟨ctorState,List.prefix_append _ _⟩ ∧
+      run ctorCode machine=.ok ctorMachine 0 ∧
+      StateRepr 1 1 8 ((Frag.init Γ).push (.mem B) .ok) ctorState ctorBase ctorMachine ∧
+      StructAllocatorRepr ctorState.heap ctorBase 8 ⟨21,by decide⟩ ctorMachine ∧
+      SourceBoolMemoryAt z 1 ctorState.heap ctorRef .dyn ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems (H := ctorState.H) .dyn (ctorState.heap.get (r.wk (List.prefix_append H [B]))),
+        MObj.elems (H := ctorState.H) .dyn (ctorState.heap.get ctorRef)]=[[true,false,false],[true,false,false],[]] ∧
+      [sy.2.heap.get 0,z.2.heap.get 0,z.2.heap.get 1]=
+        [some ⟨.array .memory .bool none,sourceBoolMemory [true,false,false]⟩,
+         some ⟨.array .memory .bool none,sourceBoolMemory [true,false,false]⟩,
+         some ⟨.array .memory .bool none,sourceBoolMemory []⟩] ∧
+      [ctorMachine.mem 0,ctorMachine.mem 1,ctorMachine.mem 2,ctorMachine.mem 5,
+       ctorMachine.mem 16,ctorMachine.mem 17,ctorMachine.mem 18,ctorMachine.mem 19,ctorMachine.mem 20]=
+        [w[21],w[16],w[20],w[99],w[3],w[1],w[0],w[0],w[0]] ∧
+      ctorMachine.stack=[w[42]] ∧ ctorRef.id=1 ∧ r.id=0 ∧
+      Source.MemOK E0 SH z ∧
+      (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 1 0)).run z=
+        (.error (.revert (Source.panicData .index)),z) ∧
+      (let g := hp.allocDefault B rfl
+       SourceBoolMemoryAt z 1 g.heap g.val .dyn ∧
+       SourceBoolMemoryAt z 0 g.heap (r.wk g.ext) .dyn ∧g.val.id≠(r.wk g.ext).id) := by
+  obtain ⟨z,hs,hd,hcode,hr,hrep,ha,hstack,hid⟩ := source_bool_default_word sy 0 σ initial_repr initial_allocator
+    (by decide) (by decide) (by decide)
+  have hsource : (Source.zeroVal (E := E0) (Γ := []) 2 (.array .memory .bool none)).run sy=(.ok (.memRef rfl 1),z) := hs
+  have hvnew : MObj.elems .dyn (ctorState.heap.get ctorRef)=[] := by
+    change MObj.elems .dyn ((σ.allocPush ctorObj).heap.get (σ.alloc ctorObj).2)=[]
+    rw [State.allocPush_get,MObj.elems_wk,MObj.elems_dyn]
+    simp only [ctorObj,defaultArray,List.replicate_zero,List.map_nil]
+  have hvold : MObj.elems .dyn (ctorState.heap.get (r.wk (List.prefix_append H [B])))=[true,false,false] := by
+    change MObj.elems .dyn ((hp.alloc ctorObj).1.get (r.wk (List.prefix_append H [B])))=_
+    rw [Heap.keeps_alloc hp ctorObj r,MObj.elems_wk,MObj.elems_dyn]
+    rfl
+  have hsz : z=(sy.1,{sy.2 with heap := (sy.2.heap.alloc ⟨.array .memory .bool none,sourceBoolMemory []⟩).1}) := by
+    have he := hsource.symm.trans (source_bool_default_run sy 0)
+    exact congrArg Prod.snd he
+  have hm := source_bool_default_memOK (E := E0) (Γ := []) SH 0 sy source_memOK
+  rw [hsource] at hm
+  have hroot := source_bool_default_intrinsic sy hp 0
+  have hframe := represented.default_frame 0
+  rw [hsource] at hroot hframe
+  refine ⟨z,hsource,hd,hcode,hrep,ha,hr,?_,?_,?_,hstack,hid,rfl,hm.1,?_,hroot.1,hframe.1,hframe.2.2.1⟩
+  · have h0 : MObj.elems .dyn (hp.get r)=[true,false,false] := by
+      simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+    exact cons_eq h0 (cons_eq hvold (congrArg (fun xs : List Bool => [xs]) hvnew))
+  · have h0 : sy.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [true,false,false]⟩ := rfl
+    have hmid : z.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [true,false,false]⟩ := by
+      rw [hsz]
+      change (sy.2.heap.alloc ⟨.array .memory .bool none,sourceBoolMemory []⟩).1.get 0=some _
+      exact (Source.Heap.alloc_other sy.2.heap ⟨.array .memory .bool none,sourceBoolMemory []⟩
+        (a := 0) (by decide : 0≠1)).trans h0
+    have hnew : z.2.heap.get 1=some ⟨.array .memory .bool none,sourceBoolMemory []⟩ := by
+      have he : z.2.heap.get 1=some ⟨.array .memory .bool none,
+        sourceBoolMemory (MObj.elems .dyn (ctorState.heap.get ctorRef))⟩ := hr
+      exact he.trans (congrArg (fun xs : List Bool => (some ⟨Source.STy.array .memory .bool none,
+        sourceBoolMemory (D := E0.layout) xs⟩ : Option (Σ τ, Source.Data E0.layout τ))) hvnew)
+    exact cons_eq h0 (cons_eq hmid (congrArg (fun x => [x]) hnew))
+  · simp only [ctorMachine,allocateMachine]
+    rw [wmod_of_lt (by decide : 21<W)]
+    rfl
+  · have he : z.2.heap.get 1=some ⟨.array .memory .bool none,sourceBoolMemory []⟩ := by rw [←hvnew];exact hr
+    exact source_bool_bounds z 1 [] he 0 (Nat.le_refl _)
+
+private def limit : Fin W := ⟨W-1,by have h := W_pos;omega⟩
+private def fullMachine : Machine := writeMachine machine 0 (.val limit)
+
+/-- Preserve both real source timeout cases and a concrete word-cursor wrap.
+The latter is symbolic allocator behavior, not a physical EVM failure claim. -/
+theorem constructor_boundaries :
+    ∃ z : Source.EMState E0 [],
+      (Source.zeroVal (E := E0) (Γ := []) 2 (.array .memory .bool none)).run sy=(.ok (.memRef rfl 1),z) ∧
+      (Source.zeroVal (E := E0) (Γ := []) 0 (.array .memory .bool none)).run sy=(.error .timeout,sy) ∧
+      (Source.zeroVal (E := E0) (Γ := []) 1 (.array .memory .bool none)).run sy=(.error .timeout,sy) ∧
+      run allocateArrayCode (fullMachine.push w[0])=
+        .ok ((allocateMachine fullMachine limit ⟨0,W_pos⟩).push (.val limit)) 0 ∧
+      (allocateMachine fullMachine limit ⟨0,W_pos⟩).mem 0=w[0] ∧
+      ¬FreeMemory 8 ⟨0,W_pos⟩ (allocateMachine fullMachine limit ⟨0,W_pos⟩) := by
+  obtain ⟨z,hs,_⟩ := default_constructor_views
+  have hl : limit.val+1=W := by
+    change W-1+1=W
+    exact Nat.sub_add_cancel (by have h := W_pos;omega)
+  have hc : fullMachine.mem 0=.val limit := by
+    simp only [fullMachine,writeMachine,upd_same]
+  have hw := word_empty_allocator_wrap fullMachine limit hc hl
+  have hlow := source_bool_default_lowfuel sy
+  exact ⟨z,hs,hlow.1,hlow.2,hw.1,hw.2.1,hw.2.2 8 (by decide)⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.default_constructor_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms default_constructor_views
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.constructor_boundaries' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms constructor_boundaries
+
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.delete_three_views' depends on axioms: [propext,
  Classical.choice,
