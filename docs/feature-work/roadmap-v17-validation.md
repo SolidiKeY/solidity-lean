@@ -70,7 +70,7 @@ Command: `lake -f roadmap-v17-runtime.lakefile.toml build Solidity.KeySort`.
 Outcome: exit 0, `Build completed successfully (2 jobs).`
 Cgroup peak: 25,579,520 bytes. This is a warm runtime/toolchain check only.
 `RUNTIME_GATE_PASS` applies to that check; it says nothing about G54 closure.
-Raw output: `/workspace/scratch/v17-evidence/keysort.log`.
+Raw output: `/workspace/scratch/v17-evidence/keysort.log`. This earlier warm check ran at the assigned base before the first V17 commit, with untracked V17 scripts and unchanged Lean sources; the raw log has no embedded Git revision and is not attributed to a later head.
 
 ## Reproduction and evidence contracts
 
@@ -154,3 +154,58 @@ source-only worktree reproduces the identical raw output in `docs-base.log`.
 The separate byte-for-byte no-new-findings comparison passes. No Lean imports
 were changed; per-file diagnostics are inapplicable. Heavy full, clean, suite,
 corpus and Bridge checks remain pending, not waived by these controls.
+
+## Read-only gate collection checkpoint
+
+At committed preparation revision `f18f3815ea0c718dc06b5381149802596eb14c9f`,
+the internally locked probe reports `unchangedCheckout: true`.
+The first setup-copy probe fails because `/workspace/.setup/solkey.pin.json`
+is absent; that raw failure is retained. Selecting the actual published
+`tests/migration/solkey` snapshot resolves the input-path error without editing
+or re-pinning anything. The new bounded run has these actual outcomes:
+
+| Gate | Outcome and decisive evidence |
+|---|---|
+| Layers | Pass: 172 core modules, 0 reach the elaborator |
+| Orphans | Pass: 996 reachable, 0 orphaned |
+| Trust inventory | Pass: 1011 sources, 246 inventoried sites, 0 findings |
+| Complete TestSuite inventory/parity | Pass: 564 functions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip. No Lean is run by this check. |
+| Strict automation inventory | Pass: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending |
+| Existing sort-check executable | Pass: 377 taclets parsed, 131 read-bearing annotations, table covers 131. Binary and snapshot inputs hashed. This is not a clean rebuilt-executable gate. |
+| Full documentation paths | **Fail**, 46 findings; separate exact-base no-new comparison passes |
+| G03 generated inventory freshness | **Fail**, stale generated Markdown/JSON. Exact base reproduces identical failure. Reserved outputs remain untouched. |
+| Lexical public-import inventory | Pass as textual preparation only; joint kernel/Bridge imports pending |
+| Historical differential report | **Rejected**, exit 2: historical differential revision |
+
+Raw logs and argv/exit/provenance/RSS records are in
+`/workspace/scratch/v17-evidence/probes-frozen-f18f3815`; the earlier failed
+setup-copy run remains in `probes-f18f3815`. Sampled peak aggregate probe RSS
+is 270,479,360 bytes (trust scan). These are lightweight process-group samples,
+not a heavy proof build bound. Outer cgroup observed peak after collection:
+678,776,832 bytes. Disk remains 30 GiB available; evidence is under 1 MiB
+before final exports. The temporary exact-base source worktree is task-owned,
+155 MiB, with no copied build tree or cache.
+
+The final export includes an exact-head snapshot, all 457 pending accounting
+rows, failing aggregate output, raw gate logs, reviews, handoff, original patch,
+git bundle and SHA256 manifest. Every runtime/gate result retains its actual
+revision. Earlier preparation output is never relabeled as final integrated
+proof evidence. No prerequisite branch is imported, pushed, merged or published.
+
+Final missing prerequisites: actual integrated source/admission/lowering and
+V11–V16 composition proofs; fresh supported differential combinations including
+callbacks; final re-pin/corpus strict kernel closure; clean default/compiler/
+frontend/suite/corpus/Bridge builds; theorem type/premise and scoped axiom
+extraction; executable reproducibility and clean/cache equivalence; independent
+all-child G55 evidence review. The lane cannot complete with these open.
+
+The attached tool inventory exposes `stop_goal` but no `get_goal`; no second
+goal was created and no completion transition is requested. The existing goal
+must be blocked on the concrete integration/validation prerequisites above.
+
+Second checkpoint finder/skeptic evidence reviews independently confirmed all
+reported gate counts/statuses and raw-log checksums, append-only registration,
+owned diff, exact-base failure equality and open proof boundaries. Both requested
+precise revision attribution for the earlier warm KeySort log; the runtime
+section now explicitly records its pre-commit base working state. No remaining
+preparation blocker was reported. This is not an integrated G55 closure review.
