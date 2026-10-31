@@ -97,7 +97,9 @@ The Bridge manifest pins Mathlib `f897ebcf72cd16f89ab4577d0c826cd14afaafc7`
 and 5 oleans, CSLib has source and 0 oleans, and lean-auto source is absent.
 This initial snapshot was availability evidence only. Recovery later tested the
 actual pinned cache endpoint and received CONNECT 403 failures, recorded below.
-No external packages were fetched. The small Docker runtime image was fetched separately.
+That initial inspection did not fetch external packages. Its auto-source-absent
+statement is historical, not the current availability result below. The small
+Docker runtime image was fetched separately.
 
 The vendored interpreter still declares `TargetSchedule := "Cancun"` in
 `Bridge/vendor/EvmYul/Wheels.lean`. The existing assembler record documents
@@ -349,7 +351,11 @@ fetch was attempted. The unchanged failed cache gate will not be repeated.
 
 The precise cache-dependent closure remains `EvmYul.UInt256` and the existing
 external `encode`/`decode`/numeric adapters; its Mathlib oleans are not available.
-CSLib has no built oleans and configured lean-auto source remains absent.
+The final actual package check confirms source repositories for CSLib, lean-auto
+and Mathlib at their configured revisions: respectively 0, 0 and 5 oleans.
+Lean-auto source is present now; the initial absence snapshot is not current.
+actual-package-heads.log verifies each actual git root and exact pinned HEAD.
+No package revision or toolchain was upgraded.
 Full Bridge execution/import confirmation remains pending. Independently, a
 production Osaka `Roadmap.Evm.Pinned`/`Certificate` and V13/V14 assembly/world
 interfaces are required before G46/G47 can close. The current vendor pin is
@@ -541,3 +547,77 @@ transition correspondence is silently counted discharged.
 The separate pending core import-closure target now passed: timeout 5400 lake build +Solidity, 970 jobs in 4,921.916 seconds, peak cgroup 9,834,909,696 bytes and sampled aggregate Lean/Lake RSS 9,214,480,384 bytes, swap cap 0. This does not relabel the earlier failed cold full command or validate the external Bridge umbrella. TestSuite/native/sort phases remain separately accountable. The latest lightweight authorized endpoint probe still fails CONNECT 403 (curl exit 56); cache-host-probe-final.log retains the raw result.
 
 Halt checkpoint handoff: independent follow-up finder and skeptic cleared the actual staged proofs, hypotheses, inhabited/negative controls, ownership and evidence. All ten owned modules and their import closure pass in owned-final-closure.log, including all 46 scoped axiom reports; peak cgroup 224,415,744 bytes. The layer/orphan/trust/owned-structural/whitespace gates pass. Raw docs still fails with 46 missing and 37 ambiguous findings; halt-docs-comparison.json reports zero additions of either class, with multiplicities. All150 opcode rows retain open obligations and empty dischargedByV15. The temporary runtime configuration is removed before this commit. Exact-head exports and final remaining-phase results belong in /workspace/v15-evm-agreement-artifacts/recovery-201ebab8; raw recovery evidence remains /workspace/v15-evm-agreement-evidence/recovery-201ebab8. G46/G47 and the full lane remain unfinished.
+
+
+## Final recovery validation and handoff
+
+The original cold full command remains **failed**: exit 124 at its unchanged
+5,400-second outer guard, 806/981 jobs, raw repository-gate.log/json. No unchanged
+broad full command was repeated or relabeled green. The previously unchecked
+constituents were then checked separately with the populated single cache:
+
+| Command | Actual outcome and decisive output |
+|---|---|
+| timeout 5400 lake build +Solidity | PASS, 970 jobs, 4,921.916 s; cgroup peak 9,834,909,696 bytes, aggregate sampled Lean/Lake RSS 9,214,480,384 bytes. |
+| timeout 900 lake build solkeycheck solidity-lean | PASS, 15 jobs, 1.638 s; cgroup peak 27,009,024 bytes. |
+| timeout 5400 lake build SolkeyTestSuite | PASS, 262 jobs, 1,158.520 s; cgroup peak 11,458,535,424 bytes, aggregate sampled Lean/Lake RSS 11,857,256,448 bytes. Existing source profile, skips, exclusion and pins unchanged. |
+| timeout 900 ./scripts/check-solkey.sh | PASS: parsed 377 taclets, 131 read-bearing, table covers 131; annotations match the actual configured SolKey rules file. Cgroup peak 379,105,280 bytes. |
+| Existing vendor SHA256SUMS checks (EvmYul, Loom, CaseStudies) | PASS, without changing any vendor or pin. This integrity result does not turn the Cancun reference into Osaka. |
+
+The separate passing stages do not retroactively pass the timed-out cold full
+command. LEAN_NUM_THREADS=1 and explicit Lean -j1 stayed in force. All heavy
+checks were serial, with a 12 GiB hard cgroup limit and swap limit 0, leaving the
+16 GiB task cgroup headroom for the OS. No proof, fuel, node, process or TestSuite
+budget was increased. The temporary runtime TOML is removed, its exact effective
+contents retained externally. The actual Lean/Lake versions and passing KeySort
+runtime output are retained in prior-runtime-probes.log and prior-keysort.log.
+
+The owned ten-module closure and all 46 scoped public consumer axiom reports pass;
+only subsets of propext, Classical.choice and Quot.sound occur. The local
+accounting tests pass all 12 tests, the fresh manifest lists all 150 byte-distinct
+rows with open secondary obligations and empty dischargedByV15, and ownership,
+append-only registration, layer, orphan, trust and whitespace checks pass.
+The raw documentation checker still fails with 46 missing and 37 ambiguous
+findings, matching exact base with multiplicities; the separate complete-log
+no-new-findings comparison passes. Raw base/current failures, including the
+initial extra ambiguity, remain retained. The global checker is not passed.
+
+Full external Bridge confirmation is pending. The native pinned cache request
+failed (0/860 downloads, CONNECT 403), and the latest normal-route lightweight
+probe still fails (curl exit 56). Human authorization to restore the existing endpoint
+persists; exposed runtime tools have no configuration setter and no restoration
+was applied. Actual pinned package/source/cache availability is recorded in
+handoff-obligations.json. No upgrade, alternate fork, new VM, proxy bypass,
+unmerged worker fetch, reserved edit or extra premise was used.
+
+All queue items G46.01 through G46.06 and G47 remain open/blocked. Backfills A/B
+are partial at the lane boundary: the available core encoding, completed-halt,
+prefix, cumulative-region and published-world consumers are kernel checked,
+but reference-word equations and actual Osaka instruction/memory/slot/environment/
+hash execution, resource adequacy, V13/V14 production composition, arbitrary
+permitted callees, nonce/log/fee rollback and finite/infinite EVM traces remain
+unproved. No local journal or payment Boolean supplies these missing facts.
+No bounded external EVM/compiler differential test was run. Kernel component
+proofs, core TestSuite/profile checks, static obligation accounting and actual
+external machine correspondence are distinct evidence.
+
+Coordinator reconciliation: keep G46.01, G46.02, G46.03, G46.04, G46.05, G46.06
+and G47 open; link only the scoped component evidence, without promoting parent
+status. Exact affected feature IDs are listed in the fresh manifest's
+coordinatorFeatureIds field. No generated G03 ledger, global coverage, manifest,
+TrustAudit pin, SolKey name or source admission rule was edited. No reserved
+patch is needed for the new checked laws; missing reference/cache/production
+interfaces remain publication/infrastructure prerequisites for subsequent work.
+
+The recovery exports are located under
+/workspace/v15-evm-agreement-artifacts/recovery-201ebab8: original.patch (full
+frozen-base diff), recovery.patch (since 4511898e), v15.bundle, owning-document
+snapshot, exact committed-head handoff.md/json, evidence.tar.gz and SHA256SUMS.
+Raw evidence is /workspace/v15-evm-agreement-evidence/recovery-201ebab8. Original
+checkpoint artifacts and raw failures remain intact in their original parent
+directories. The final handoff records the full actual committed head/base,
+branch and repository, exact commands/outcomes, theorem statements/premises,
+review results, proof/testing boundaries and unfinished work. This checkpoint
+and its report do not mark the persistent full assignment complete.
+
+Separate final read-only finder and skeptic reviews cleared the validation/handoff section and actual component diff, retaining full-lane incompleteness. A fresh availability check corrected stale historical lean-auto wording: all three actual source repository HEADs match their configured pins, with CSLib/auto/Mathlib olean counts 0/0/5. Both follow-ups cleared that correction. Actual exported-artifact/head/checksum review is retained externally after export; no Lean server or builds were used by reviewers.
