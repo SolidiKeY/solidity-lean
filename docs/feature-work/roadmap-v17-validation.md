@@ -209,3 +209,91 @@ owned diff, exact-base failure equality and open proof boundaries. Both requeste
 precise revision attribution for the earlier warm KeySort log; the runtime
 section now explicitly records its pre-commit base working state. No remaining
 preparation blocker was reported. This is not an integrated G55 closure review.
+
+## Auditor recovery: executable clean/cache provenance
+
+Recovery continues the same VM, branch, goal and frozen base from clean head
+`a219f1dbac901e1d12024131b985e50bd48e0295`. Prior artifacts in
+`/workspace/scratch/v17-evidence` remain untouched. New evidence is retained in
+`/workspace/scratch/v17-recovery`. No integration configuration exists and no
+source branch is imported. All 457 rows and V11–V16 premises remain open.
+
+The auditor identified a real accounting gap: a warm build log with a clean
+label could previously satisfy a clean gate. The new owned
+`scripts/roadmap-v17-provenance.py` collects and validates executable provenance.
+Aggregation now requires that provenance for every non-pending clean/warm build
+row; ordinary logs, missing attachments and mismatches cannot count as clean.
+Snapshots explicitly bind the repository, committed tree, exact input hashes,
+actual Lean/Lake executable paths/bytes/versions and deterministic serial
+configuration hash, together with the existing source/toolchain key.
+
+The collector holds the repository writer lock, requires a clean committed
+checkout, inventories the actual build directory and one source/toolchain-keyed
+cache at start/end, and never deletes or copies either. Clean collection refuses
+an existing populated build or cache. Warm state cannot be relabeled clean.
+Before/after source/tool snapshots and configuration bytes must agree. Exact
+canonical build/cache paths, complete output maps, required target artifacts,
+log checksums and same-target clean/warm continuity are checked. Attachments use
+the same duplicate-key-rejecting parser as the primary evidence reader.
+
+Actual execution uses the published `lake build` targets through a temporary
+serial TOML and an exact checked execution script. Every Lean subprocess enters
+a shared OS file lock and receives `-j1`; `LEAN_NUM_THREADS=1` is observed inside
+the child. The child is network-disabled, one CPU, hard 12 GiB/no-swap capped,
+and checks its actual cgroup limits. It records binary hashes/versions, cgroup
+peak, sampled aggregate RSS/Lean worker count, available memory and disk.
+The unchanged 300s bounded process ceiling is enforced both by the child timeout
+and the host deadline; Docker RPCs and cleanup have bounded timeouts. This
+conservative preparation bound does not replace the repository's final full
+build policy or increase any process, proof or TestSuite module budget.
+
+The toolchain is mounted read-only at a second path preserving Lean's library
+layout; bytes are not duplicated or edited. Only the child overlay supplies the
+serialization launcher. Configuration is removed even after execution/cleanup
+failure. Raw Docker errors and after-snapshot failures remain structured
+provenance failures. An unresolved task-container marker prevents another
+collection until the previous container is confirmed stopped/removed, preserving
+aggregate resource serialization after uncertain cleanup.
+
+A scoped pair result identifies its target and always has `releaseClosed:false`.
+It cannot satisfy the final `cache-equivalence` gate: aggregation explicitly
+refuses that substitution. Actual G54.03 still waits for the requisite proof
+leaves and complete same-revision target/artifact audit. These are producer
+consistency controls, not an independently authenticated execution or kernel
+proof engine. Kernel theorem/premise/axiom extraction remains pending.
+
+Preparation invocation, from a clean committed checkout and the actual toolchain
+on PATH (evidence output must be outside the checkout):
+
+```sh
+python3 scripts/roadmap-v17-provenance.py collect --gate generator-solcases --out /absolute/new-collection
+python3 scripts/roadmap-v17-provenance.py validate --report /absolute/new-collection/provenance.json --evidence-root /absolute/new-collection
+python3 scripts/roadmap-v17-provenance.py pair --report /absolute/pair.json --evidence-root /absolute/collections
+```
+
+The 66 controls include inhabited synthetic clean/warm pairs and rejection of
+warm-as-clean, nonempty clean caches, missing provenance/gates, nonzero mandatory
+gates, changed source/tool/input/config/budget, wrong cache roots, corrupt or
+duplicate attachments, truncated/unmatched artifacts, missing cap/swap/metrics,
+parallel/invalid worker counts, commented or appended execution commands, narrow
+pair misuse, and unresolved-container overlap. Mocked execution controls cover
+Docker timeout, cleanup failure and changed-source failure retention. They are
+explicitly synthetic, not actual clean proof validation.
+
+Separate independent read-only finder/skeptic reviews found and prompted fixes
+for canonical paths, loader layout, Docker deadlines/lifecycle, cleanup/error
+retention, exact inventory equality, strict JSON/worker schemas, exact execution
+script bytes and unresolved-container overlap. Reviewers run no builds, tests or
+Lean server. Final confirmation and any actual collection outcomes are retained
+with their exact revision in the updated handoff.
+
+For G52, the existing acquisition path in `docs/solidity-upstream-tests.md` was
+inspected along with the published compiler table/runner and earlier failures.
+The documented ethereum/solc-bin URL downloaded the exact approved
+`soljson-v0.8.38+commit.1835d247.js` into the ignored `.lake/soljson` cache.
+Its SHA256 is `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`;
+the published runner's `compiler()` accepts its full version and checksum.
+No upgrade, re-pin, replacement generator, fixture/assertion change or callback
+exclusion occurred. The next bounded actual operation is the published
+`solcases` target; its outcome and any subsequent same-revision published runner
+execution must remain separate from synthetic controls and all universal proofs.

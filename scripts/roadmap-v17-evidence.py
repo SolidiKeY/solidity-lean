@@ -47,14 +47,18 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def load(path):
+def loads(data):
     def unique(pairs):
         out = {}
         for key, value in pairs:
             require(key not in out, 'duplicate JSON key: ' + key)
             out[key] = value
         return out
-    return json.loads(Path(path).read_text(), object_pairs_hook=unique)
+    return json.loads(data, object_pairs_hook=unique)
+
+
+def load(path):
+    return loads(Path(path).read_text())
 
 
 def git(root, *args):
@@ -70,12 +74,16 @@ def snapshot(root):
     for name in ('lean', 'lake'):
         binary = shutil.which(name)
         require(binary is not None, 'tool missing from PATH: ' + name)
-        runtime[name] = {'sha256': digest(Path(binary).resolve().read_bytes()),
+        runtime[name] = {'path': str(Path(binary).resolve()), 'sha256': digest(Path(binary).resolve().read_bytes()),
                          'version': subprocess.check_output([binary, '--version'], text=True, timeout=10).strip()}
     key = digest(json.dumps({'runtime': runtime, 'tree': git(root, 'rev-parse', 'HEAD^{tree}'),
                              'inputs': files}, sort_keys=True).encode())
     require(git(root, 'rev-parse', 'HEAD') == head and not git(root, 'status', '--porcelain', '--untracked-files=all'), 'checkout changed during snapshot')
     return {'schema': 1, 'revision': head, 'base': BASE, 'inputs': files,
+            'repository': str(root.resolve()),
+            'sourceTree': git(root, 'rev-parse', 'HEAD^{tree}'),
+            'serialConfigSha256': digest((root / 'lakefile.toml').read_bytes().replace(
+                b'weakLeanArgs = ["--tstack=131072"]', b'weakLeanArgs = ["--tstack=131072", "-j1"]')),
             'sourceToolchainKey': key, 'runtime': runtime, 'releaseClosed': False}
 
 
@@ -87,7 +95,7 @@ def local_file(root, name):
     return path
 
 
-def aggregate(report, root, revision, required):
+def aggregate(report, root, revision, required, current=None):
     require(report['schema'] == 1 and report['revision'] == revision, 'wrong schema/revision')
     require(report.get('unchangedCheckout', True) is True, 'checkout changed during gates')
     rows = {}
@@ -99,8 +107,8 @@ def aggregate(report, root, revision, required):
                 all(isinstance(x, str) and x for x in row['command']), 'missing command')
         if name in COMMANDS and row['status'] != 'pending':
             command = row['command']
-            # The runtime probe may use the documented temporary serial config.
-            if name == 'runtime-keysort' and command[1:3] == ['-f', 'roadmap-v17-runtime.lakefile.toml']:
+            # Build probes may use the documented temporary serial config.
+            if command[1:3] == ['-f', 'roadmap-v17-runtime.lakefile.toml']:
                 command = command[:1] + command[3:]
             require(command == COMMANDS[name], 'mislabeled gate command: ' + name)
         require(type(row['exit']) is int or row['exit'] is None, 'invalid exit')
@@ -111,6 +119,16 @@ def aggregate(report, root, revision, required):
         require(HEX.fullmatch(row['sha256']) is not None, 'invalid checksum')
         data = local_file(root, row['log']).read_bytes()
         require(data and digest(data) == row['sha256'], 'empty/corrupt log: ' + name)
+        if row['status'] != 'pending' and (name.startswith(('clean-', 'warm-')) or 'provenance' in row):
+            require(current is not None, 'current source/toolchain snapshot required')
+            require('provenance' in row and 'provenanceSha256' in row, 'missing build provenance')
+            import importlib.util
+            spec = importlib.util.spec_from_file_location('v17_provenance', Path(__file__).with_name('roadmap-v17-provenance.py'))
+            provenance = importlib.util.module_from_spec(spec); spec.loader.exec_module(provenance)
+            raw = provenance.read_bound(root, row['provenance'], row['provenanceSha256'])
+            provenance.validate(loads(raw), root, current, name, row)
+        if name == 'cache-equivalence' and row['status'] != 'pending':
+            require(False, 'scoped pair preparation cannot discharge final cache-equivalence gate')
         rows[name] = row
     missing = sorted(set(required) - rows.keys())
     failed = sorted(k for k, v in rows.items() if v['status'] != 'pass')
@@ -266,7 +284,7 @@ def main():
         report = load(args.report)
         if mode == 'aggregate':
             require(args.evidence_root is not None, '--evidence-root required')
-            result = aggregate(report, args.evidence_root, snap['revision'], REQUIRED_GATES)
+            result = aggregate(report, args.evidence_root, snap['revision'], REQUIRED_GATES, snap)
         elif mode == 'verify-snapshot':
             result = verify_snapshot(report, snap)
         elif mode == 'closure':
