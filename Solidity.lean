@@ -898,3 +898,5 @@ import Solidity.Backend.InternalFlow.NestedRootEmission
 
 import Solidity.Backend.InternalFlow.AllocationFrame
 import Solidity.Backend.InternalFlow.AllocationFrameChecks
+
+import Solidity.Backend.InternalFlow.RecursiveUnroll

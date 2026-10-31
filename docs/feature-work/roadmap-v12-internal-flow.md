@@ -422,3 +422,100 @@ commands/outcomes. Finder and skeptic found no proof/control/ownership defect;
 both identified the erroneous module-qualified theorem name in prose, now
 corrected, and skeptic requested this explicit gate summary. No full gate
 claim follows from these scoped passes.
+
+
+### Continuation 3: inhabited finite recursive calls (partial Backfill A)
+
+`Solidity.Backend.InternalFlow.finite_recursive_return` consumes published
+`Stmt.run_callRec`, `recUnroll`, `Prog.withinM_recUnroll`, `Prog.run_frameM`,
+`CallRet.enterT_frameM` and actual `TRun.call` return. For any finite unrolling
+depth, its step hypothesis is syntactic withinM closure under the body thunk;
+argument/body execution successes are explicit premises. Induction derives
+body admission, then entry/body frames compose at exactly entry.ext.trans
+out.ext. The conclusion includes actual recursive-call success, exact typed
+result/caller export and Heap.Keeps for every older caller object. It contains
+no assumed desired preservation equation. This generic theorem does not assert
+an argument readsIn/call-admission certificate. Concrete `call_within` separately
+discharges both readable arguments and body admission for view.
+
+In `RecursiveUnroll`, n2 calls n1 which calls n0 through actual callRec nodes
+and recUnroll depth3. Each frame allocates a one-element scratch array inside
+a block and unwinds its local. The bottom returns13, recursive callers add1,
+and the outer result15 overwrites caller slot2 while same-typed slot3 stays11.
+The pre-existing nonempty [7,11] object has two caller aliases; the memory
+parameter is forwarded at each recursive boundary. `nested_execution` proves
+actual success; `body_execution` discharges the body premise of the reusable
+consumer. `exact_recursive_export` binds the actual result to the exact composed
+entry/body extension and typed caller/result export. `caller_aliases_transport`
+uses the published local frame law, while `recursive_heap_contents` and
+`recursive_globals` derive old-content and view-qualified storage/net/balance/
+transaction preservation. Final observations pin both aliases, returned15,
+untouched11 and heap size4. A separately executed inner boundary pins return14,
+retained caller n2, old alias contents and heap size4; its arguments evaluate
+to n1 with the transported alias.
+
+The witness definitions extract outputs from the actual existing runs. Their
+fallback states are ruled out by independent kernel-checked success proofs;
+they are not an evaluator or successful default. Keeping these owned witness
+definitions irreducible for elaborator inference avoids repeated whole-run
+normalization; the kernel still checks their ordinary definitions. Initial
+whole-State rfl normalization and subsequent inference reached the unchanged
+200000-heartbeat bound. Those raw failures are retained; no proof limit was
+raised. Final kernel success/observation proofs check within the same budgets.
+
+Countercontrols reject returned14 instead of15, overwriting the wrong scalar
+slot, a fresh scratch reference substituted for an old alias, and a lost caller
+prefix. Depth0 and depth2 actually halt with THalt.exhausted. Further controls
+reject interpreting depth2 as success or ordinary revert. recBase remains
+assumeFalse/exhausted; the d metadata is not a runtime depth guard independently
+of the supplied body thunk. No cutoff/refusal is removed or generalized away.
+This is finite intrinsic unrolling backfill, not G37.02 unbounded source/target
+recursion, termination/divergence correspondence or target runtime compilation.
+
+All original Work1 target frames, Work2 unbounded recursion, Work3 dispatch,
+Work4 structured/general mixed loops and G36.03 final applications, Work5 full
+failure/return composition and Work6 transient callback/world applications stay
+open against their reserved owners. Backfills A and B remain partial. No
+source/compiler/semantics/RunFrameMem edit, new evaluator, new axiom or generated
+G03/status change is made. The original full run-lean.sh exit124 at fixed300s
+remains FAIL/incomplete (TestSuite/sort unreached), not repeated. Prior no-build
+exit3 remains inventory only. Normal/strict raw docs exits1 remain failures;
+exact-frozen-base zero additions is a separately compared gate. No new integrated
+prerequisite justifies rerunning the unchanged failed full gate.
+
+Continuation3 exports use /workspace/scratch/v12-flow-calls/continuation-3,
+leaving all three prior sealed sets unchanged. External HANDOFF records exact
+head/base/branch, every scoped command/exit and measurement, theorem premises,
+full queue limitations, source hashes, reviews, patches, bundle and checksums.
+Separate finder/skeptic source reviews found no semantic/ownership defect and
+requested explicit types on inferred have bindings; corrected before checkpoint.
+Final guarded/focused/static/doc comparisons and artifact reviews follow below
+or in that exact-head external handoff. No integration/push/merge/PR authority.
+
+
+Continuation3 scoped gate record: final `lake build
+Solidity.Backend.InternalFlow.RecursiveUnroll` passes78jobs in5.184s,
+sampled aggregate RSS943096KiB, cgroup peak492658688B (`cp4-final-focused`).
+The eleven-file serial sweep `bash tests/internal-flow/check-files.sh
+<evidence>/guarded-files` passes in22.886s, RSS902768KiB. Review then added only
+an explicit dependent type on firstScratch; the changed file's final
+`lake env lean -j1 --tstack=131072
+Solidity/Backend/InternalFlow/RecursiveUnroll.lean` passes in4.560s,
+RSS899864KiB (`cp4-final-rec`), followed by that final focused closure.
+All23new theorem axiom guards pass, limited to propext/Classical.choice/
+Quot.sound (some proper subsets). No Lean MCP is exposed; capped CLI diagnostics
+follow the repository lean-verify fallback. All checks retain120s bounds,
+LEAN_NUM_THREADS=1/explicit-j1, canonical writer lock,12GiB memory/swap0,
+serial heavy execution and the same existing source/toolchain-keyed cache.
+Initial default-heartbeat failures remain in cp4-rec-3/cp4-rec-4; budgets unchanged.
+`lean --version; lake --version; lake build Solidity.KeySort` passes2jobs:
+Lean4.24.0 commit797c613, Lake5.0.0-src+797c613 (`cp4-runtime`), runtime gate only.
+Layer/import/orphan/trust/diff checks pass:172core/0elaborator,11owned/0findings,
+1007reachable/0orphans,1022sources/246trust sites/0findings. Normal/strict raw
+docs checks exit1; complete outputs are byte-identical to frozen-base outputs,
+so both separate zero-new-findings comparisons pass. Evidence and exact commands
+are in /workspace/scratch/v12-flow-calls/continuation-3/evidence.
+Both read-only source reviewers clear the corrected have/firstScratch types,
+actual recursive controls, guarded proofs, ownership and finite-scope wording.
+Final actual diff/handoff/artifact reviews and committed hash bindings are
+recorded in the external HANDOFF; full Work1–6/A/B completion remains open.

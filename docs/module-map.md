@@ -1210,3 +1210,4 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/NestedRootEmission.lean` | Two actual local emissions retaining inner-entry projected roots, exact bytes, outer return/failure and three-snapshot memory/stack controls. |
 | `Backend/InternalFlow/AllocationFrame.lean` | Actual allocation-only memory-result call consumer of published withinM frames, composed extension, heap contents and caller/result export. |
 | `Backend/InternalFlow/AllocationFrameChecks.lean` | Two actual allocating calls with nonempty aliased contents, branch/block unwind, global frames and excluded old-alias write controls. |
+| `Backend/InternalFlow/RecursiveUnroll.lean` | Published finite recursive unrolling return/frame consumer; actual nested allocating recursive calls, typed aliases, exact export and cutoff exhaustion controls. |
