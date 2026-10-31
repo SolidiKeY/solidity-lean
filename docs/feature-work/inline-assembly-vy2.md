@@ -1610,3 +1610,79 @@ unchanged; no new semantic decision, unpublished integration or owner rewrite.
 Versioned evidence `/workspace/vy2-evidence/canonical-aliases/`.
 
 Final validation: focused70jobs/full1057default+262TestSuite/131annotations exit0;1623public declarations/899scoped theorem reports standard axioms only. All16negative suites pass, including137genuine-alias mutations. Separate finder/skeptic read-only reviews clear; old evidence-scope finding remains fixed/recorded. Global docs exit1 remains identical48missing/37ambiguous exact-base debt, zero delta separately; not a global pass. Serial12GiB/no-swap checks, caches and raw failures retained. No original full obligation or goal status changed.
+
+
+## Joint ordinary-memory writeback (2026-10-31)
+
+Original Y05/BackfillA/B productive continuation from
+`fb44149b4c168c7a15b655a5ffd02e556d0100a0`; frozen base
+`0b078cefaf7daad79007b87b72df64eb6936420f`, same assigned branch/VM.
+Approved YQ1–YQ7 in solidity-scope remain binding. No owner representation,
+Placement/Source.Val.word/whole-obligation/API/codec/guard/expected old fixture
+change, new exclusion, producer integration, goal transition or raised budget.
+Full goal stays BLOCKED, get_goal read absent; no other goal tool used.
+
+MemoryTransport constructs intrinsic image and actual MixedHeapEntry transport
+through same-type Heap.write: written contents replaced, unchanged children keep
+transported images, IDs/types/addresses and owned coverage preserved. Pointer,
+canonical member/field/array decoder equality holds for ALL raw inputs, including
+None. This proves candidate stability, not an assumed inverse/read agreement.
+GateG0/history inspected: no Source/state/AST change, parameter-only ordinary
+recursion and constructor eliminators. Modest additional checking cost warned;
+per-file cost recorded, recursion/heartbeat failures retained then fixed by
+factoring small explicit source/header equalities, never raising limits.
+
+JointMemory decodes simultaneous declared fields and fixed/header-preserving
+dynamic array contents from ONE snapshot and executes actual two heapPut binds.
+General two-order COMPLETE result equality requires both actual original root
+types and distinct roots; no equality claimed for arbitrary failure order.
+Every original H owner MemOK is preserved even on complete first/second source
+errors; second type error retains successful caller-prefix state. Unchanged
+WHOLE state, cells/types/next/boundedness/locals/world preservation derived from
+real owner operations. JointPlacement constructs both output placements and
+refreshes typed images/coverage/pointers after EACH write, with concrete
+struct/array instance. JointSequential equates snapshot joint writeback to the
+second concrete decoder after the actual first write/refreshed candidates,
+including None and complete second error results. Actual first found/decode and
+intrinsic constructor-image premises are explicit; no opaque result law.
+
+JointRetained derives original-capacity changes from actual RetainedAllocation,
+constructing current exact shape, full-region bounds/separation and two-write
+lineage. JointRetainedControls inhabits scalar struct+bytes3 array2→0→2 with
+full refreshed coverage, real alias locals/indexLoc/readLoc/Panic and every-H
+MemOK, plus actual initial owner MemOK. JointMemoryControls combines changed
+heterogeneous pointer fields and pointer-array elements, both orders, true
+array aliases and shared children at every horizon, unrelated roots, type-error
+prefix and nonzero padding/gaps/reserved/free/zero preservation. JointRaw uses
+actual successful typed decode plus real Placement length bound to prove exact
+joint raw re-encoding over the original snapshot/residual bytes, no cleaning.
+All exact signatures/premises and scoped axioms saved in joint-memory/ evidence.
+
+Pinned solc0.8.38/Osaka legacy+viaIR JointMemory fixture uses actual x/y struct
+and c/d array aliases, retargets pointer words to a real other array, updates all
+array words, unchanged other objects, maxword/sign/bytesN alignment,
+shrink/regrow, Panic0x32/empty revert/fresh calls. Initial legacy stack-too-deep
+failure retained; fixture-only local reduction preserved golden values/settings.
+Skeptic CONFIRMED evidence gap: initial four cases had identical outputs and no
+actual calldata receipts. Fixed by34word outputs,777/888 nonshrink sentinels
+versus actual0/0shrink, returned order/regrow flags and exact actual calldata
+recorded/validated against pinned selectors. Six first-four swaps/every-call
+calldata corruption plus raw-root/pointer/tail/revert/storage/deployment/budget
+mutations guard the fix. Pre-review source/report/raw failures retained; finder
+acknowledged missing the first gap; independent follow-ups clear. No old296
+report fields or fixture expectations changed. Cumulative310 ordered calls;
+external tests are NOT kernel/source/compiler/whole-memory adequacy.
+
+Entire original Y04/Y05/Y06 and BackfillA/B PARTIAL, concrete Y09.02 BLOCKED.
+Whole-store/path/hash/dynamic/dirty ownership, universal memory/writeback,
+shared-zero/interior/dirty/narrow/unhandled representations, reachable allocator
+provenance/refinement, exact V10/V11 agreements and actual VY1/source/compiler/
+calculus/notation/printer/final-joint closure remain open. Existing owner MemOK,
+World/ContractWorld/memory-call/Bridge are AVAILABLE, not Yul adequacy. Original
+oversized-MemOK counterexample retains ONLY its documented unqualified ordinary
+Placement boundary; no reachable allocator/resource/profile choice inferred.
+Queues NOT exhausted; no new human semantic question established. Checkpoint
+patch/bundle/handoff/gates/raw resources/checksums versioned at absolute
+`/workspace/vy2-evidence/joint-memory/`; cumulative artifacts retain old versions.
+
+Final checkpoint gates: focused79jobs, full wrapper1065default/262TestSuite/131annotations exit0; actual Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs0;1718public declarations/961scoped theorem reports standard axioms only. All17negative suites pass including213joint mutations. Layers/orphans/trust/strict/markdown0. Initial five lane short-path doc findings fixed; final globaldocs STILL exit1 same48missing/37ambiguous exact-base debt, zero delta separatePASS. Raw proof, recursion/heartbeat, compiler stack, test-inventory and doc failures retained. Separate final finder/skeptic reviews clear after confirmed external gap fix; full original queue/goal unchanged.

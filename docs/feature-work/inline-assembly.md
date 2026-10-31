@@ -397,3 +397,14 @@ external aliases with complete Panic bytes. [Lane record](inline-assembly-vy2.md
 `/workspace/vy2-evidence/canonical-aliases/HANDOFF.md`. Both pipelines add14calls/
 137negatives, all preceding282fields/calls unchanged. This follows the canonical
 scalar checkpoint, not full VY2 completion or Yul/compiler correspondence.
+
+
+### VY2 joint ordinary-memory preparation handoff
+
+See [lane checkpoint](inline-assembly-vy2.md#joint-ordinary-memory-writeback-2026-10-31).
+New lane modules construct joint struct/array source writeback, all-raw candidate
+transport, complete-result order/error laws, exact raw re-encode and retained
+placement/history; actual source controls and pinned both-pipeline alias fixtures
+remain distinct evidence. Original Y04–Y06/backfills partial, Y09.02/source/
+compiler/calculus closure blocked. No admission promotion or goal transition.
+Full SHAs/commands/checksums: `/workspace/vy2-evidence/joint-memory/HANDOFF.md`.

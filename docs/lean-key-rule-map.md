@@ -1110,3 +1110,13 @@ VY2 exact canonical compatibility (Lean-only/YQ5 preparation):
 prove complete result equality with real old-domain type premises. No installed
 Yul calculus rule/source adequacy or renamed full-coverage predicate follows;
 [original Y09.02 remains open](feature-work/inline-assembly-vy2.md#canonical-compatibility-and-genuine-aliases-2026-10-31).
+
+
+VY2 joint ordinary-memory PREPARATION laws (YQ5 Lean-only; no SolKey taclet,
+no concrete Y09.02 rule/notation/printer registration or completeness claim):
+`decodeExtended_refresh`, `canonicalJoint_order`, `canonicalJoint_MemOK`,
+`canonicalJoint_geometry`, `canonicalJoint_sequential`,
+`canonicalJointRetained_geometry`, `canonicalJoint_raw_reencode` in
+`Solidity/Yul/Views/MemoryTransport.lean`, `Solidity/Yul/Views/JointMemory.lean`,
+`Solidity/Yul/Views/JointPlacement.lean`, `Solidity/Yul/Views/JointSequential.lean`, `Solidity/Yul/Views/JointRetained.lean`, `Solidity/Yul/Views/JointRaw.lean`.
+Premises/scope and evidence: [VY2 checkpoint](feature-work/inline-assembly-vy2.md#joint-ordinary-memory-writeback-2026-10-31).
