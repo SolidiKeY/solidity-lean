@@ -899,3 +899,4 @@ import Solidity.Yul.Views.ResidualControls
 import Solidity.Yul.Views.FiniteResidualControls
 import Solidity.Yul.Views.HeapByteBoundaries
 import Solidity.Yul.Views.HeapByteResizeBoundaries
+import Solidity.Yul.Views.RetainedByteControls

@@ -1017,3 +1017,13 @@ VY2 bounded resize preparation (Lean-only, YQ5): `heapByteResize_fixed_compat`,
 `heapByteResizeState_preserves` derive actual typed output/read/placement/MemOK
 laws with real input footprint and separation facts. No SolKey taclet, all-block
 semantics, Y09.02 notation/printing, full realization or compiler closure claim.
+
+
+VY2 retained-allocation preparation (Lean-only, YQ5): `retainedByte_encode`,
+`retainedByte_result_history`, `retainedByte_live_view`,
+`retainedByteState_MemOK` and `bytesObject_disjoint_commute` prove selected typed
+write/read/history/MemOK and exact disjoint physical-update laws. Premises include
+actual origin/current placements, constructive typed-write lineage, explicit
+footprint/separation and initial owner MemOK. Initial allocation provenance and
+full source/compiler/assembly closure remain obligations. No SolKey taclet or
+Y09.02 notation/printing/composition claim.

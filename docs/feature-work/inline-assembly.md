@@ -283,3 +283,16 @@ and103 negatives pass both pipelines; all old fixtures/controls unchanged.
 859/470 signatures/axioms and wrapper1029/262+131 pass after independent reviews.
 Entire Y04/Y05/Y06/Backfills A/B stay partial, Y09.02 and goal blocked unchanged.
 Exact revisions/gates/full obligations/versioned artifacts: `/workspace/vy2-evidence/HANDOFF.md`.
+
+
+### VY2 retained-allocation handoff (2026-10-31)
+
+Constructive selected-object retained-allocation lineage now preserves original
+real Placement extents across bytes/string shrink-to-zero and regrowth, with
+exact current shapes, full-region separation, actual owner MemOK and logical/
+physical two-order laws. Fixed/bounded APIs and original counter-control remain.
+See [VY2 checkpoint](inline-assembly-vy2.md#retained-ordinary-allocation-checkpoint-2026-10-31)
+and `/workspace/vy2-evidence/retained-allocation/HANDOFF.md` for full committed
+revision, premises, reviews and gates. Initial allocator provenance, whole-store/
+heap/assembly/source/compiler/calculus/refinement closure remain open. Y04–Y06
+partial, Y09.02 blocked, both backfills unfinished; no admission promotion.

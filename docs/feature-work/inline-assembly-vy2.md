@@ -899,3 +899,91 @@ interfaces/gates. Goal remains blocked unchanged; get_goal unavailable; no goal
 transition/create/reset/reactivation/completion. Approved YQ1–YQ7 preserved;
 questions=[]. Original3666 manifest/artifacts verified and retained under
 heap-resize/prior-*; all previous code/raw failures/caches remain.
+
+
+## Retained ordinary allocation checkpoint (2026-10-31)
+
+Recovery parent `5c108b7ffc4074f40ea5c5bd8a47f755cc7c3c44`; pinned base
+`0b078cefaf7daad79007b87b72df64eb6936420f`; assigned branch
+`codex/solidity-inline-assembly5-20261031/vy2-physical` in
+`/workspace/solidity-lean`. Exact committed head is in the versioned handoff
+`/workspace/vy2-evidence/retained-allocation/HANDOFF.md`.
+
+[RetainedAllocation](../../Solidity/Yul/Views/RetainedAllocation.lean) adds a
+separate typed witness. RetainedGeometry proves occupancy, address/free identity
+and exact current-shape bounds against a supplied actual origin heap/Placement.
+It is NOT enough for writeback: RetainedAllocation records inductive lineage
+from that initial placement through actual typed Heap.write operations. Initial
+allocation-snapshot provenance still must be established by the integrated
+allocator; the witness does not prove allocation refinement or a source trace.
+Retained capacity means that placement's original shape footprint, never an
+address gap/free-pointer guess or all capacity of a custom memory pool.
+Constructive output placements retain the real current data shape while using
+original full-region ends/separation. No owner representation or existing
+Placement/HasMemoryShape/fixed/bounded API or obligation signature changed.
+
+`retainedByte_encode`, `retainedByte_unchanged`, `retainedByte_result_history`,
+`retainedByte_result_choices`, `retainedByte_preservation`,
+`retainedByte_full_separation`, `retainedByte_other_region`,
+`retainedByte_live_view` and `retainedByteState_MemOK` prove actual supported
+writes, exact byte/header/residual agreement, whole-heap unchanged identity,
+types/next/boundedness/other cells and owner MemOK for EVERY initial typing H.
+Real found/type/Placement/lineage/rounded-footprint/separation premises are
+explicit in the scoped signatures. No opaque inverse or desired-result law,
+new axiom, hash injectivity, false old shape or decoder/fuel cap is assumed.
+The unmodified old historical_capacity_not_recovered remains a negative control
+for the original minimal API. Prep None still means unsupported preparation,
+never Yul refusal/no-op, deallocation or observed compiler behavior.
+
+[Controls](../../Solidity/Yul/Views/RetainedByteControls.lean) inhabit bytes
+3→0→4/32 and33→0→64, raw nonUTF8 string33→0→64, both aliases at every horizon,
+nonzero retained live tails/padding/gaps, actual reserved/free/zero words, unrelated
+cells and two retained regions in both orders. The coherent both-zero physical
+prefix is used in both orders; universal disjoint byte-object commutation proves
+exact physical equality as well as actual heap-write commutation.
+[RetainedHeap.sol](../../tests/yul-views/RetainedHeap.sol) imports the frozen
+previous fixtures. Nine ordered calls per pinned legacy/viaIR pipeline compare
+complete ABI bytes/values, aliases at observable zero/regrowth stages, original
+padding/tails, unrelated objects, free/zero, explicit revert and fresh calls;
+all deployment exceptions/bytes/runtime hashes remain checked. The external
+forward/reverse case retains the original0x61 string payload, while the kernel
+combined case uses the nonUTF8ff/62 prefix: complementary instances, not an
+identical golden input or a correspondence proof. Actual combined source state
+controls carry four aliases and prove owner MemOK after both regrowth writes. 121 new negative
+controls reject dropped/reordered/wrong byte/state/stage/failure/deployment
+observations. Every prior reference-report field is identical, with all earlier
+81/14/33/55/89/103 controls preserved. This is external compiler/EVM evidence,
+NOT kernel source/target correspondence or frontend admission. Gas100m/steps5m,
+proof/fuel/node/test limits and fork exclusions unchanged.
+
+Reviews: separate read-only finder and skeptic without Lean/server/build/tests.
+Their provenance and inconsistent-intermediate-map findings were addressed with
+constructive lineage and the coherent both-zero prefix/physical commutation;
+final review results and exact gates/resources/signatures are saved in the
+versioned evidence/handoff. An initial proof placeholder-inference failure and
+wrong test filename invocation are retained, not passes. G0/speed history read;
+no owner state/compiler rewrite, no source representation change. Serial-j1,
+LEAN_NUM_THREADS=1, hard aggregate12GiB/no swap, actual OS/RSS/disk monitoring,
+writer lock and caches preserved. Global docs still exit1 with exact-base48
+findings and zero new findings; zero delta is not a global pass.
+
+Full queue remains unfinished: Y04/Y05/Y06 and Backfills A/B PARTIAL, actual
+Y09.02 BLOCKED. Historical extent retention for these ordinary selected objects
+is now constructive; whole-store/path/dynamic/hash separation, shared-zero,
+larger-than-origin/pool ownership, dirty/pointer/nested memory, whole-memory
+realization, exact full MemoryWritebackObligations/MemoryLayoutObligations,
+actual Yul/source assembly MemOK and allocation refinement, V10/V11 instances,
+Yul compiler/calculus and final joint closure remain. Actual owner MemOK/World/
+memory-call/Bridge code exists and is reused, not claimed absent or adequate for
+missing VY1/source/assembly/allocation/compiler/calculus interfaces. No worker
+fetch/merge, scope promotion, goal reset/reactivation/completion or push. Goal
+remains blocked unchanged; get_goal is not exposed. YQ1–YQ7 remain binding;
+questions=[]. All3793 prior hashes verified before preserving prior-* snapshots;
+versioned patch/bundle/handoff/evidence/checksums retain every older artifact.
+
+Final checkpoint gates: per-file CLI fallback and focused46jobs pass; final
+fullwrapper1031default/262suitejobs/131matchedannotations exit0, actual
+Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs exit0. Scoped960declarations/
+517theorem reports have only propext/Quot.sound/Classical.choice. Both independent
+final reviews clear, including four-alias actual-state addition and59/121
+inventory assertions. Raw failures and baseline-equal docs exit1 are retained.
