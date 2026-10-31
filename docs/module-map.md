@@ -1210,3 +1210,6 @@ At the root, the notation's own tests:
 | `Backend/Executable/ScalarArtifactChecks.lean` | Both payload sizes, separate protected creation/scalar tails, source/capacity/byte conjunction and return/revert argument contamination controls. |
 | `Backend/Executable/WorldPrefixes.lean` | Existing world-operation fold success iff, exact failure ordering, finite replicated prefix cuts and atomic checkpoint consequences; no loop semantics or compiler simulation. |
 | `Backend/Executable/WorldPrefixChecks.lean` | Actual creation/three funded calls, exact debit/credit and error-byte ordering, explicit nonempty iteration cuts, stopped successful tails and rollback controls. |
+
+| `Backend/Executable/LocalFrame.lean` | Uniform typed caller-local DUP reads and local-derived scalar composition; general runtime-frame producer open. |
+| `Backend/Executable/LocalFrameChecks.lean` | Distinct locals, shifted DUP3, wrong-index/order and physical-headroom controls. |

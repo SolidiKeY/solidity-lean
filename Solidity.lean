@@ -898,3 +898,6 @@ import Solidity.Backend.Executable.ScalarArtifact
 import Solidity.Backend.Executable.ScalarArtifactChecks
 import Solidity.Backend.Executable.WorldPrefixes
 import Solidity.Backend.Executable.WorldPrefixChecks
+
+import Solidity.Backend.Executable.LocalFrame
+import Solidity.Backend.Executable.LocalFrameChecks

@@ -497,3 +497,63 @@ additional independent prefix/iteration preparation, not G43/G36.03/payment
 asymmetry or a source constructor/runtime/executable-byte proof. Next final
 validation runs the required unchanged full repository gate under the same
 serial resource controls, without relabeling historical docs failure green.
+
+
+## Recovery checkpoint: actual typed local reads
+
+Completeness review found that protected populated cells were not yet read by
+emitted code. [LocalFrame](../../Solidity/Backend/Executable/LocalFrame.lean)
+now proves uniform intrinsic `.local .here` int and `.local (.there .here)` uint
+lookup against actual DUP1/DUP2 over the existing two-cell `frameTail`. No local
+is evaluated into a literal in generated code. Exact source/target read values
+are `TEnv.get` of the arbitrary typed state, with arbitrary protected spill.
+
+The noncommutative local subtraction emits the right literal first, shifts the
+uint local access to DUP3, then consumes the published selected SUB certificate.
+`stages` proves each physical boundary and result/tail order. `source` requires
+only the actual intrinsic operation result and exact short-circuit refusal.
+Actual heights are h,h+1,h+2,h+1; `capacity` derives spill≤1020, while each plain
+read derives spill≤1021. `prefix_safe` consumes the resulting complete-code
+capacity for any actual prefix. All35 emitted bytes are pinned, including the
+PUSH32 payload, DUP3/SUB and same-encoder roundtrip.
+
+[Controls](../../Solidity/Backend/Executable/LocalFrameChecks.lean) read real
+locals-7/99 with spill123/456, compute99-3=96, and reject a wrong caller index,
+a forgotten PUSH-induced index shift and reversed SUB operands. Spill1021
+admits the final output height but refuses the intermediate1025-word peak.
+Five scoped guarded headline/control axiom outputs contain standard Lean
+subsets only. Initial source literal normalization and symbolic encoder `rfl`
+failures are retained; explicit source reduction and published encoder equations
+fix them without changing budgets. Focused73jobs passes; fresh/static/final
+separate read-only finder/skeptic results and head are in checkpoint5 handoff.
+General local/reference/runtime-frame production and fetched Osaka execution
+remain OPEN; these are real reads in an independently specified typed frame.
+
+The first full-gate attempt failed before Lean (container Node missing,
+exit127); exposing the existing host binary fixed that setup. The next full
+build was deliberately interrupted (exit137, NOT a pass) after completeness
+reviews identified the local-read, tryCreate, linking/immutable and permitted
+source-journal gaps. Its original raw log/cache remain. Final full gate follows
+those changes; no inherited Lean failure has been waived and no proof/test
+budget raised. Blanket absence claims are replaced with exact boundaries:
+Source.construct/deploy and old Bridge loop transport already exist; required
+relations from NEW Backend outputs/frames to those published interfaces do not.
+
+
+Checkpoint5 exact API premises: `int_source`, `uint_source`, `reads`,
+`read_capacity`, `heights`, `capacity`, `bytes`, `decode` are unconditional
+component consequences for their arbitrary typed state/spill/operand inputs.
+`stages` additionally requires the actual intrinsic SUB result equation;
+`source` also requires exact short-circuit refusal. `prefix_safe` requires
+spill≤1020, an actual whole-code split and a successful actual prefix run.
+No local-value or simulation oracle occurs. Five guarded axiom pins pass.
+
+| Checkpoint5 command | Actual result and absolute evidence |
+|---|---|
+| `lake -f v14-runtime.lakefile.toml build Solidity.Backend.Executable.LocalFrameChecks` | PASS73jobs; `/workspace/v14-recovery-evidence/local-frame-pins.log` |
+| `lake -f v14-runtime.lakefile.toml env lean -j1 --tstack=131072` on LocalFrame and LocalFrameChecks, each180second limit | Fresh2files PASS,1worker675MiB; `/workspace/v14-recovery-evidence/local-frame-fresh.log` |
+| Lane/layer/orphan/trust/whitespace/docs static commands | `/workspace/v14-recovery-evidence/checkpoint5-checks.json`; raw docs46/1 separate from no-new PASS |
+
+Final separate finder/skeptic found no proof defect. Their actual log mapping,
+real module-path extensions and external handoff link-base corrections are
+applied before checkpoint commit/export.
