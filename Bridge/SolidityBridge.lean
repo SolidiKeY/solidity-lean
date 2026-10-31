@@ -28,3 +28,12 @@ import SolidityBridge.ExternalEvm.Obstructions
 import SolidityBridge.ExternalEvm.Memory
 import SolidityBridge.ExternalEvm.MemoryRefinement
 import SolidityBridge.ExternalEvm.MemoryComposition
+import SolidityBridge.ExternalEvm.Assembly.LayoutChecks
+import SolidityBridge.ExternalEvm.Assembly.ControlChecks
+import SolidityBridge.ExternalEvm.Assembly.CompositionChecks
+import SolidityBridge.ExternalEvm.Assembly.StackLoopChecks
+import SolidityBridge.ExternalEvm.Assembly.Placement
+import SolidityBridge.ExternalEvm.Assembly.LinkedChecks
+import SolidityBridge.ExternalEvm.Assembly.ResourceChecks
+import SolidityBridge.ExternalEvm.Assembly.SafeDivergenceChecks
+import SolidityBridge.ExternalEvm.Assembly.PopChecks

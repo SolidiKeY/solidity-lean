@@ -128,35 +128,70 @@ def evalSolAuto : Tactic := fun stx => withMainContext do
 
 /-- `sol_auto_theorem n : φ`: the theorem `n`, proved by `sol_auto`, the
 walk and each leaf elaborated with heartbeats of their own, and the
-declaration added after them.  A tactic cannot give that: whatever the
+declaration added after them. An optional `:= by` supplies the proof of each
+normalized leaf. It uses the derivation-only walk and emits checked `leafN`
+auxiliary theorems, separating normalization from closing without changing
+any heartbeat limit. A tactic cannot give that: whatever the
 elaborator runs after it is checked against the declaration's heartbeats
 since its start.  Each step is bounded as any proof's is; their number
 grows with the leaves.  The kernel checks the whole proof, as always. -/
-syntax (name := solAutoTheorem) "sol_auto_theorem " ident " : " term : command
+syntax (name := solAutoTheorem) "sol_auto_theorem " ident " : " term
+  (" := " "by " tacticSeq)? : command
 
 open Lean Elab Command Term Meta in
 @[command_elab solAutoTheorem]
 def elabSolAutoTheorem : CommandElab := fun stx => do
+  let leaf? ← match stx with
+    | `(command| sol_auto_theorem $_:ident : $_:term := by $ts:tacticSeq) => pure (some ts)
+    | _ => pure none
   let n := stx[1].getId
   let declName := (← getCurrNamespace) ++ n
   liftTermElabM do
+    -- Every auxiliary is a checked theorem, with the same limit as the root.
+    let addProof (name : Lean.Name) (type value : Expr) : TermElabM Unit := do
+      addDecl <| .thmDecl { name, levelParams := [], type, value }
     let type ← withCurrHeartbeats do
       let t ← elabType stx[3]
       synthesizeSyntheticMVarsNoPostponing
       instantiateMVars t
     let g ← mkFreshExprSyntheticOpaqueMVar type
     let leaves ← withCurrHeartbeats do
-      Tactic.run g.mvarId! (Tactic.evalTactic (← `(tactic| sol_prove)))
+      let walk ← if leaf?.isSome then `(tactic| sol_derive) else `(tactic| sol_prove)
+      Tactic.run g.mvarId! (Tactic.evalTactic walk)
+    let mut idx := 0
     for l in leaves do
-      withCurrHeartbeats do
-        let closed ← Tactic.run l do
-          if (← Derive.searchLeaf l Seq.goalFits).isNone then
-            throwError "sol_auto_theorem: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
-        unless closed.isEmpty do throwError "sol_auto_theorem: a leaf is left open"
+      match leaf? with
+      | none =>
+        withCurrHeartbeats do
+          let closed ← Tactic.run l do
+            if (← Derive.searchLeaf l Seq.goalFits).isNone then
+              throwError "sol_auto_theorem: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
+          unless closed.isEmpty do throwError "sol_auto_theorem: a leaf is left open"
+      | some ts =>
+        -- Freeze the exact normalized leaf before spending its proof budget.
+        let normalized ← withCurrHeartbeats do
+          Tactic.run l (Tactic.evalTactic (← `(tactic| first
+            | exact Proves.assumeInv
+            | (refine Proves.openInv ?_; sol_leaf)
+            | sol_leaf)))
+        for n in normalized do
+          idx := idx + 1
+          let auxType ← instantiateMVars (← n.getType)
+          if auxType.hasFVar || auxType.hasMVar then
+            throwError "sol_auto_theorem: an auxiliary leaf is not closed"
+          let aux ← mkFreshExprSyntheticOpaqueMVar auxType (← n.getTag)
+          withCurrHeartbeats do
+            let closed ← Tactic.run aux.mvarId! (Tactic.evalTactic (← `(tactic| ($ts:tacticSeq))))
+            unless closed.isEmpty do throwError "sol_auto_theorem: an auxiliary leaf is left open"
+          let auxValue ← instantiateMVars aux
+          if auxValue.hasMVar then throwError "sol_auto_theorem: an auxiliary proof is not closed"
+          let auxName := declName ++ Lean.Name.mkSimple s!"leaf{idx}"
+          withCurrHeartbeats do addProof auxName auxType auxValue
+          n.assign (mkConst auxName)
     withCurrHeartbeats do
       let value ← instantiateMVars g
       if value.hasMVar then throwError "sol_auto_theorem: the proof is not closed"
-      addDecl <| .thmDecl { name := declName, levelParams := [], type, value }
+      addProof declName type value
 
 /-! ## A scoped formula refuted at a state
 

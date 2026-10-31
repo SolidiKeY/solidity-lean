@@ -1,0 +1,6 @@
+import Solidity.Backend.Assembler
+open Solidity.Backend
+-- Nontrivial existing facility: assembler placeholders have exactly 20 bytes.
+example : (placeholder.toList).length = 20 := by decide
+-- Expected preimplementation failure: no installed-runtime theorem exists.
+#check Solidity.Backend.Creation.installs_runtime
