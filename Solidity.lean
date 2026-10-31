@@ -899,3 +899,6 @@ import Solidity.Roadmap.V16.Specifications
 import Solidity.Roadmap.V16.SpecificationControls
 
 import Solidity.Roadmap.V16.LoopControls
+
+import Solidity.Roadmap.V16.CallbackConsumers
+import Solidity.Roadmap.V16.CallbackControls

@@ -1,3 +1,4 @@
+import Solidity.Roadmap.V16.CallbackControls
 import Solidity.Roadmap.V16.LoopControls
 import Solidity.Roadmap.V16.HashHistory
 import Solidity.Roadmap.V16.SessionControls
@@ -78,3 +79,29 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.pending_is_not_divergence
 #print axioms Solidity.Roadmap.V16.loop_revert_payload
 #print axioms Solidity.Roadmap.V16.forever_loop_inhabited
+
+#print axioms Solidity.Roadmap.V16.callback_post
+
+#print axioms Solidity.Roadmap.V16.callback_valid_post
+
+#print axioms Solidity.Roadmap.V16.callback_no_violation
+
+#print axioms Solidity.Roadmap.V16.callback_frames_no_violation
+
+#print axioms Solidity.Roadmap.V16.callback_halt
+
+#print axioms Solidity.Roadmap.V16.CallbackControls.nil_callback_box
+
+#print axioms Solidity.Roadmap.V16.CallbackControls.nil_callback_post
+
+#print axioms Solidity.Roadmap.V16.CallbackControls.wrong_callback_post
+
+#print axioms Solidity.Roadmap.V16.CallbackControls.broken_callback_execution
+
+#print axioms Solidity.Roadmap.V16.CallbackControls.broken_callback_box
+
+#print axioms Solidity.Roadmap.V16.CallbackControls.callback_resumes
+
+#print axioms Solidity.Roadmap.V16.CallbackControls.resumption_changes_balance
+
+#print axioms Solidity.Roadmap.V16.CallbackControls.resumed_post_if_modal

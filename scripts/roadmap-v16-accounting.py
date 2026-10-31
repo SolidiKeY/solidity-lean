@@ -126,7 +126,7 @@ def validate_claims(claims, inv):
         flags = theorem_obligations(thms[c["theorem"]])
         require(c["kind"] in {"generic","witness"}, "premise-only or unproved full-scope claim: "+",".join(flags))
         if c["kind"]=="witness":
-            controls=[".V16.Checks.",".V16.TransactionControls.",".V16.SessionControls.",".V16.SpecificationControls."]
+            controls=[".V16.Checks.",".V16.TransactionControls.",".V16.SessionControls.",".V16.SpecificationControls.",".V16.CallbackControls."]
             require(any(p in c["theorem"] for p in controls),"generic theorem is not an audited inhabited control")
             require(not any(f in flags for f in ["assumed-PublicCorrectness","undischarged-pass-domain","actual-certificate-argument-required","residual-fragment-domain"]),"premise-only theorem is not an inhabited certificate witness")
     return True

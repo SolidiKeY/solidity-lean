@@ -16,6 +16,8 @@ class AccountingTests(unittest.TestCase):
         with self.assertRaises(m.Invalid): m.validate_report(self.report,self.inv,self.ledger)
     def invalid_inventory(self):
         with self.assertRaises(m.Invalid): m.validate_inventory(self.inv)
+    def test_callback_control_claim(self):
+        m.validate_claims([{ "id":"callback-success", "theorem":"Solidity.Roadmap.V16.CallbackControls.nil_callback_post", "kind":"witness"}], self.inv)
     def test_live_report(self):
         m.validate_inventory(self.inv);m.validate_report(self.report,self.inv,self.ledger)
     def test_nested_owned_module_cannot_escape(self):

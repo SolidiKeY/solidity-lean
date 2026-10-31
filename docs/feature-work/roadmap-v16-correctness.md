@@ -1,7 +1,7 @@
 # V16 compiler correctness, transactions and specification transfer
 
 Status: independent backfill extended through recovery checkpoints; full lane
-blocked on unpublished concrete prerequisites and pending full-lane validation.
+blocked on unpublished concrete prerequisites; scoped final validation passed.
 Base: `2fe1f8932f96be15b00df03ba2cde46f64a87758`.
 Branch: `codex/solidity-v12-v17-20261031/v16-correctness-transfer`.
 Repository: `/workspace/solidity-lean`.
@@ -277,3 +277,115 @@ is never relabeled green. All final required gates remain open until observed.
 
 Current checkpoint-5 accounting has 74 core-closure theorems and 25 passing
 accounting controls. The four test-only escrow theorem audits remain separate.
+
+
+## Recovery checkpoint 6: callback consumers
+
+Skeptic correctly identified a remaining independently executable scoped callback
+consumer; it did not require concrete V12–V15 runtime certificates. New consumers
+use published holdsC/ValidT, ExecP and ExecF with their dependent heap extensions.
+They preserve successful postconditions, exact halt values/modality reading and
+panic exclusion, and reject program/frame invariant violations. Controls inhabit
+an actual nil execution, reject a false postcondition through NEW transport, and
+construct an actual zero-value transfer violating a false callback invariant.
+This is scoped consumption, not a callback rule repair or runtime correspondence.
+Selected transfer semantics, Fml.inTarget and SolKey correspondence are unchanged.
+
+The checkpoint-5 full command also exited124 at the unchanged5400-second bound:
+default991jobs passed; kernel TestSuite reached Derived20 but did not finish.
+Raw full-run-lean-checkpoint5.log remains a FAILED full gate, not a success.
+A revised-source final gate retains the same cap, timeout and shared cache.
+
+Both callback reviews passed; they correctly distinguished nil success from
+callback resumption. A strengthening now constructs an actual transferResume
+under the existing true invariant, changing self balance from0 to1, and applies
+NEW postcondition transport at that actual run with its modality still explicit.
+This supplies intrinsic callback-resumption evidence, not reentrant bytecode or
+external-world coverage. The first nil control proof failed because trivial did
+not unfold the modality reading; the existing afterRunTR_ok lemma fixed it.
+
+
+## Final recovery handoff: independent backfill completed, parent blocked
+
+The revised callback source passed the actual run-lean.sh command under the
+unchanged5400-second timeout, explicit-j1 serial policy and asserted12GiB/no-swap
+Docker cap: default993jobs, kernel SolkeyTestSuite262jobs, then solkeycheck parsed
+377taclets with131 read-bearing annotations and matching table; exit0. Earlier
+cold/default and checkpoint5/TestSuite timeouts remain raw exit124 failures.
+The final successful cgroup peak was5009735680bytes; sampled worker maxima and
+all three gate resource histories are recorded in runtime-summary.json outside
+the repository. No changed proof/fuel/node/TestSuite budgets and no new trust
+shortcut. Lean4.24.0(commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b),
+Lake5.0.0-src+797c613; the preserved KeySort gate completed successfully(2jobs).
+
+The strict checker over explicitly concatenated raw TestSuite timing logs passed
+its default300seconds/module:26 timed modules,491 automatic plus61 step-budget
+proofs,0manual,11refuted,0pending. Complete TestSuite accounting passed using the
+UNCHANGED repository-pinned migration fixture:564=552derived+11refuted+0pending
++0divergent+1excluded,2skip. The initial setup-checkout audit failed because that
+layout lacks its sibling pin manifest; raw ENOENT and the separate pinned-fixture
+pass are both retained, no fixture/pin/dependency upgrade performed.
+Layers:184core/0inversions; orphans:1008reachable/0orphan/0notallowed;
+trust:1023sources/246inventoried sites/0findings; noncircular:1256modules/0violations.
+The raw full docs checker still exits1 with46missing paths plus37ambiguities.
+Complete exact-base/current finding arrays match:zero new AND zero removed,
+not a count-only waiver. diff whitespace check passes.
+
+Final scoped inventory has305inductive families,1537constructors and91actual
+V16 theorem/dependency/axiom entries (including generated proof auxiliaries).
+The explicit ScopedAudit prints87 named consumer/control theorem axiom sets;
+four test-only escrow statements/axiom sets remain separately checked. All use
+only the standard propext/Classical.choice/Quot.sound allowance or no axioms.
+All26 accounting controls pass. All1859constructor/G03/stage obligations remain
+OPEN; laneComplete=false. These checks supplement, not replace, kernel proofs.
+Fresh final committed-head metadata and checksums are generated after this
+handoff is committed. Final gate's checked Lean-source digest must match that
+final committed-head inventory; doc-only changes do not alter the Lean tree.
+
+Separate read-only finder and skeptic reviews passed checkpoint6 and its actual
+positive callback-resumption strengthening. They used no Lean server/builds.
+Confirmed recovery findings and fixes are recorded above; final artifact reviews
+are retained in the external evidence directory. Independent A/B, scoped loop,
+callback, box/diamond/spec consumers and their controls are now implemented.
+Historical statements that those backfills were unfinished describe their earlier
+checkpoints, not the final recovery state. They do not imply full-profile closure.
+
+Investigated remaining concrete dependency map (no reserved-owner repair):
+
+* G48: source-s05 leaves SourceSpec state/evaluation preimage history, failure
+  budgets, stipendFits and Horizon proofs open; independent frontend parse,
+  resolve, WF/profile/progress, Admission.sound/complete and actual Lowering
+  certificates remain prerequisites. G07 toy instances are not the full profile.
+* G49.01: existing Evm compiler/pass APIs still expose Option/fragment-specific
+  Input domains. Actual total approved-constructor Compilation certificates and
+  integrated published V12–V15 adapters remain unavailable here.
+* G49.02–03: actual Execution assemble/dom/agrees/cert, pinned byte/runtime EVM
+  correspondence, approved full-history hashes, compiler coverage and computable
+  resource bounds must be supplied without residual fragment admission. Generic
+  composition or an assumed PublicCorrectness does not construct these fields.
+* G50.01–02: actual source constructor/initcode/artifact/install correspondence,
+  creates_table, address/nonce/payment/rollback/code deposit and StateExport
+  decode_reach/decode_commutes are needed. Target adversarial/backward interaction
+  coverage is not supplied by forward finite-trace transport or deterministic
+  Lifetime invariants. Preserve full per-run hash histories across transactions.
+* G51.01–02: final applications need those actual runtime/deployment results and
+  matching SolKey callback/loop/function-spec consumers. Reserved rule/closer,
+  TestSuite, verdict, Fml.inTarget and search-target work is untouched. Scoped
+  callback/loop consumers are now present, not incorrectly listed as blocked.
+
+Kernel evidence covers only the precise generic/scoped premises and actual
+intrinsic controls named in the checked inventory, plus the separately checked
+published escrow safety witness. There are no new concrete external EVM/compiler
+or deployment differential tests, no full-profile SourceSpec witness, and no
+concrete final G48–G51 theorem. The entire frozen assignment/goal stays BLOCKED;
+no exclusion, premise, owner repair, fetch/cherry-pick, merge/push/PR is requested.
+No human scope decision is needed to state these published dependency gaps.
+
+Artifacts use absolute VM paths under /workspace/scratch/v16-recovery-201ebab8:
+original.patch(full frozen-base diff), recovery.patch, v16.bundle, handoff.md,
+handoff.json, gates.json, raw evidence, runtime-summary.json and SHA256SUMS.
+The original f9d367860fcee1471de830611b1635851f71e3b7 evidence directory is preserved
+and its checksum verification passed. Repository/branch/frozen base appear above;
+full final committed head is recorded in the external exact-head handoff to avoid
+self-referential commit hashes. Coordinator reconciliation should retain every
+G48,G49.01,G49.02,G49.03,G50.01,G50.02,G51.01,G51.02 ledger obligation as OPEN.
