@@ -1,0 +1,30 @@
+[
+  {
+    "package": "@ethereumjs/vm",
+    "version": "10.1.3",
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/vm/package.json",
+    "metadataSHA256": "8552b9165b0b816a8ad35cc67aa40df13924795e3324b890df45e11b73ba31aa",
+    "loadedOrExecutedThisIncrement": false
+  },
+  {
+    "package": "@ethereumjs/common",
+    "version": "10.1.3",
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/common/package.json",
+    "metadataSHA256": "c17012956360864f36c257791c3a6036c844e09e70417d25997605106e5b5ba8",
+    "loadedOrExecutedThisIncrement": false
+  },
+  {
+    "package": "@ethereumjs/util",
+    "version": "10.1.3",
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/util/package.json",
+    "metadataSHA256": "ea68e9bde58b3dcb293d36ebbe53cd04e87c71f4d978dc6ac80f1466b59839fa",
+    "loadedOrExecutedThisIncrement": false
+  },
+  {
+    "package": "ethers",
+    "version": "6.17.0",
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/ethers/package.json",
+    "metadataSHA256": "d644d7df228197962e4ca19824b06e8d50dce0b5ee2aced63dcfc2a11ec7b90f",
+    "loadedOrExecutedThisIncrement": false
+  }
+]

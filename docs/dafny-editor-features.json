@@ -1,0 +1,2617 @@
+{
+  "schemaVersion": 1,
+  "upstream": {
+    "extension": {
+      "repository": "dafny-lang/ide-vscode",
+      "commit": "1a329b121ef66f2c8be8ca2c28eda437040042eb",
+      "version": "3.5.4"
+    },
+    "server": {
+      "repository": "dafny-lang/dafny",
+      "commit": "fcb2042d6d043a2634f0854338c08feeaaaf4ae2"
+    }
+  },
+  "discovery": {
+    "featureCount": 88,
+    "featureIdsSha256": "99752737fe9f94319ece4a02bc7d8b7a50f4365080e2eca90654d7e4641c4ff0"
+  },
+  "sources": [
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "package.json",
+      "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/language/dafnyLanguageClient.ts",
+      "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+      "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+      "sha256": "d2d3d55d558fb4ecec6128a2e6e97ef8d4f46e7f5d1adfca0f2e851b494fd486"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/ui/verificationGutterStatusView.ts",
+      "sha256": "b6acc91ebc6ce3eda2722214f786ea08780a0560433f5981d5042b5964472d10"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/ui/ghostDiagnosticsView.ts",
+      "sha256": "0320b0f774cdfb8f7c71fd4a59990f402002362a45817bbf925c3a02f1c50eef"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/ui/verificationSymbolStatusView.ts",
+      "sha256": "94dd241bff3a64b4c624961a7aae77fc9f001a1fe3693e4b5fe788722051b507"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/ui/compilationStatusView.ts",
+      "sha256": "26e9bfea14f196d404271fbc9529565f2ba49fa49dbc1df4e61a79b32263901b"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/ui/verificationTraceView.ts",
+      "sha256": "b520f7c1dab01017a34e562bf5f763db368d8aa7270ceb8a0da68d7cd9c5ede5"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/ui/relatedErrorView.ts",
+      "sha256": "128a85e81fef91cdff8c762f987fbf304175366f7fe76357e9fae1089e23cf41"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/ui/statusBarActionView.ts",
+      "sha256": "e3424d7607e8c2ba71e9fe4198d459f82ace66c33c43fd4a43c51352178d631a"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/ui/dafnyVersionView.ts",
+      "sha256": "a2cde727144552fe1db39386aae4c20169ce15b7d686f7d60fcb1494c8c5303f"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/language/dafnyInstallation.ts",
+      "sha256": "4a7f6e3c58005c0c75d5b832bd2c76de43f13340c4dbdd54bc0ecdae5299d1d7"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/commands.ts",
+      "sha256": "c7fa547cebbd36594008c28266c5ce79afe4a512acfed7307dd6d7d5f4370680"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "dafny-language-configuration.json",
+      "sha256": "566d01cc308daacce17b52ea8f85355f0af1638a643832224daa562ad72f06a5"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/ProjectFiles/ProjectFilesTest.cs",
+      "sha256": "68128b57307528e1a6a9fbcad160b8a17c35339c1aa47769a609214ca1061dba"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/ProjectFiles/CompetingProjectFilesTest.cs",
+      "sha256": "35f850b7e6c94deb7ac209f58c47ed85d36c16f9283dcb9918aa96264f810c2b"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/ProjectFiles/MultipleFilesProjectTest.cs",
+      "sha256": "24dd7350349023ad460b108bea2fe8706c47acbfeabfed8039249d557c9467c8"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/ProjectFiles/SolverOptionsTest.cs",
+      "sha256": "84b77f8febf516f712e4e3cd08e85d939e0c62ad2e58c02db08838de6278ec30"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Synchronization/IncludeFileTest.cs",
+      "sha256": "fa9cb2453e9eb9dc59c33bbbc642f0ce2c9c7af7870cd63b1fcf742d42abc4d6"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Various/CompilationStatusNotificationTest.cs",
+      "sha256": "4165655892c3a6aaf12dd4af7142d5d754045d4d6ee7abb15ad4dcec123d5757"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Completion/DotCompletionTest.cs",
+      "sha256": "7ccbf03120e16655bf3acf5ba15a247c1a94ba1b407e091c6207176e6cdc99fd"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Completion/AtCompletionTest.cs",
+      "sha256": "312177459487edc41764d7f97aa67349fd9feab9f79634d83de4381c4cce8524"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Lookup/HoverVerificationTest.cs",
+      "sha256": "e5016d1fe195aeff9a02bd066ab27f8edea04b720f23c35834297aa1aa1087fd"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Synchronization/CachingTest.cs",
+      "sha256": "de0557930d5a7c32e45abb8629b077e3c4fb10cb2d603e072ebb04c3ca207ce2"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Synchronization/VerificationOrderTest.cs",
+      "sha256": "ecf879b9d8b0664ec9ebbdfdeef723e83f0f3b3272e0e9e4413fc38b531be8d1"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Synchronization/VerificationOrderTest2.cs",
+      "sha256": "c61f47b2201f8fc0aa9c2565c8cc35a75d9609735a8c092984d87614ab5a21fe"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Various/ConcurrentInteractionsTest.cs",
+      "sha256": "bfc1e3c5f23401bfb3da5b1ef307d9a64cba2bc5626bc48eebb46082296e8ac0"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Performance/LargeFilesTest.cs",
+      "sha256": "550d564005f1a9ebc2910e6f3af37dafe8a5c6a0a9548465a0fa3e7638d800af"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Performance/ThreadUsageTest.cs",
+      "sha256": "2a23ff032dd54100ce5b42d0df590b985d7bfb66b270d0eadc367a27bfaa4440"
+    },
+    {
+      "repository": "dafny-lang/ide-vscode",
+      "path": "src/startupCheck.ts",
+      "sha256": "2c593cdca22ad968b8bdcabe54400d0d91d42f2f80d265867b769fb37948f8f8"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyCore/Pipeline/Compilation.cs",
+      "sha256": "f04e91c59364030e47534668d338693711911e21f88a8f43858ec7dbffd34251"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer/Language/DafnyProgramVerifier.cs",
+      "sha256": "725209900105f7a813ef18b8a0ce9e98ce99ac9c2cde675f247b0f0fd6290063"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "docs/DafnyRef/VSCodeIDE.md",
+      "sha256": "d5bc3d8e7f47ca7d1ba2e32600f2138ff7b2ca6743ada912568bea74468f1b9a"
+    }
+  ],
+  "features": [
+    {
+      "id": "submenus:dafny.context",
+      "kind": "submenus",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "id": "dafny.context",
+        "label": "Dafny"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "menus:editor/context",
+      "kind": "menus",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": [
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "submenu": "dafny.context",
+          "group": "7_Dafny@5"
+        }
+      ],
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "menus:dafny.context",
+      "kind": "menus",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": [
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.build",
+          "group": "7_Dafny@5"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.buildCustomArgs",
+          "group": "7_Dafny@6"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.run",
+          "group": "7_Dafny@7"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.test",
+          "group": "7_Dafny@8"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny && dafny.verificationTraceMenu.CanShowVerificationTrace",
+          "command": "dafny.showVerificationTrace",
+          "group": "7_Dafny@1"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny && !dafny.verificationTraceMenu.CanShowVerificationTrace",
+          "command": "dafny.hideVerificationTrace",
+          "group": "7_Dafny@2"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.copyVerificationTrace",
+          "group": "7_Dafny@2"
+        }
+      ],
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "keybindings:dafny.build",
+      "kind": "keybindings",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.build",
+        "key": "ctrl+shift+b",
+        "mac": "⇧⌘B",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "keybindings:dafny.run",
+      "kind": "keybindings",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.run",
+        "key": "f5",
+        "mac": "f5",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "keybindings:dafny.test",
+      "kind": "keybindings",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.test",
+        "key": "shift+f5",
+        "mac": "⇧f5",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "keybindings:dafny.buildCustomArgs",
+      "kind": "keybindings",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.buildCustomArgs",
+        "key": "f6",
+        "mac": "f6",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "keybindings:dafny.showVerificationTrace",
+      "kind": "keybindings",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.showVerificationTrace",
+        "key": "f7",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "keybindings:dafny.hideVerificationTrace",
+      "kind": "keybindings",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.hideVerificationTrace",
+        "key": "f8",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "languages:dafny",
+      "kind": "languages",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "id": "dafny",
+        "aliases": [
+          "Dafny",
+          "dafny"
+        ],
+        "extensions": [
+          ".dfy",
+          ".dfyi"
+        ],
+        "configuration": "./dafny-language-configuration.json"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "grammars:dafny",
+      "kind": "grammars",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "language": "dafny",
+        "scopeName": "text.dfy.dafny",
+        "path": "./syntaxes/Dafny.tmLanguage"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.automaticVerification",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "string",
+        "default": "onchange",
+        "enum": [
+          "never",
+          "onchange",
+          "onsave"
+        ],
+        "description": "When Dafny should run verification automatically (requires restart). Notes:\n* If set on 'never', it is always possible to trigger verification of individual declarations manually using the test interface of VSCode if the option 'Display Verification As Tests' is checked\n* In any case but especially if using 'onchange', with versions of Dafny published after June 11, 2023, you can use the `{:only}` attribute on assertions and declarations to restrict verification temporarily"
+      },
+      "assessment": {
+        "status": "partial",
+        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "configuration-and-save"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.verificationTimeLimit",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "number",
+        "default": "20",
+        "description": "Maximum number of time in seconds to verify a document, 0=infinite (requires restart)"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.verificationVirtualCores",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "number",
+        "default": "0",
+        "description": "Maximum number of virtual cores that may be used for verification, 0=auto (requires restart)"
+      },
+      "assessment": {
+        "status": "partial",
+        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "concurrent-files-and-requests"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.verificationCachingPolicy",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "string",
+        "enum": [
+          "No caching",
+          "Basic caching",
+          "Advanced caching"
+        ],
+        "enumDescriptions": [
+          "Reverifies the whole file after each change",
+          "Keeps a per-procedure cache of verification results",
+          "Keeps a per-assertion cache of verification results"
+        ],
+        "default": "No caching",
+        "description": "EXPERIMENTAL: How Dafny reuses previous verification results as a source file is being edited (requires restart)."
+      },
+      "assessment": {
+        "status": "partial",
+        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "incremental-verification"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.markGhostStatements",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "boolean",
+        "default": "true",
+        "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.displayGutterStatus",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "boolean",
+        "default": "true",
+        "description": "Display verification status in the gutter (requires restart and Dafny 3.7.0+)"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.displayVerificationAsTests",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "boolean",
+        "default": "true",
+        "description": "Display verification status both in the test panel, and as actionable buttons next to top-level symbols in the editor (requires restart and Dafny 3.8.1+)"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.dafnyPlugins",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [],
+        "description": "(Deprecated, use repeated --plugin:<path> in Language Server Launch Args) Absolute paths to assemblies to be used as plugins (requires restart and Dafny 3.4.0+).\nExample 1: /user/home/dafnyplugin.dll\nExample 2: /user/home/dafnyplugin.dll,oneArgument\nExample 3: /user/home/dafnyplugin.dll,\"argument with space and \\\" escaped quote\" secondArgument"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.dafnyServerArguments",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [],
+        "description": "Optional array of strings to use an options when starting 'dafny server', the language server that powers this extension. Only works if the Dafny version is 3.10 or greater. Available options can be seen using 'dafny server --help'. Note that for project specific options, it is better to configure them in a Dafny project file, which the Dafny extension then automatically finds and uses."
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.cliPath",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "string",
+        "default": null,
+        "description": "Path to Dafny.exe, Dafny.dll or a Dafny executable. Only used when 'custom' is the chosen Dafny version. The Dafny version must be 3.10 or greater."
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.compilerOutputDir",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "string",
+        "default": "bin",
+        "description": "Absolute or relative path to the compilation output directory."
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.dafnyRunArguments",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [],
+        "description": "Optional array of strings to pass as options when invoking `dafny run` and `dafny build`. Available options can be seen using 'dafny run --help'"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.version",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "string",
+        "enum": [
+          "latest stable release",
+          "4.11.0",
+          "4.10.0",
+          "4.9.1",
+          "4.9.0",
+          "4.8.1",
+          "4.8.0",
+          "4.7.0",
+          "4.6.0",
+          "4.5.0",
+          "4.4.0",
+          "4.3.0",
+          "4.2.0",
+          "4.1.0",
+          "4.0.0",
+          "3.13.1",
+          "3.12.0",
+          "3.11.0",
+          "3.10.0",
+          "3.9.1",
+          "3.9.0",
+          "3.8.1",
+          "3.8.0",
+          "3.7.3",
+          "3.6.0",
+          "3.5.0",
+          "3.4.2",
+          "3.3.0",
+          "3.2.0",
+          "custom",
+          "latest nightly"
+        ],
+        "default": "latest stable release",
+        "description": "The preferred Dafny version to use (requires restart). Select 'custom' and configure the option 'Cli Path' to use the Dafny binary at that location."
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.dotnetExecutablePath",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "string",
+        "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.colorVerificationTrace",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "object",
+        "default": {
+          "backgroundColor": null,
+          "fontColor": null
+        },
+        "description": "Customize the color (HEX) of failing contexts. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "setting:dafny.terminalCommandPrefix",
+      "kind": "setting",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "type": "string",
+        "default": null,
+        "description": "The prefix to use when executing a command in the VS Code terminal. Defaults to & on windows."
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.build",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.build",
+        "title": "Dafny: Build"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.buildCustomArgs",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.buildCustomArgs",
+        "title": "Dafny: Build with Custom Arguments"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.test",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.test",
+        "title": "Dafny: Test"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.run",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.run",
+        "title": "Dafny: Run"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.showVerificationTrace",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.showVerificationTrace",
+        "title": "Dafny: Show verification trace (experimental)"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.hideVerificationTrace",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.hideVerificationTrace",
+        "title": "Dafny: Hide verification trace (experimental)"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.copyVerificationTrace",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.copyVerificationTrace",
+        "title": "Dafny: Copy verification trace as Dafny (experimental)"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.restartServer",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "package.json",
+          "sha256": "6eb460617992dedffde57709e4291da766e22bc919e7c0e039e25f065d972f06"
+        }
+      ],
+      "detail": {
+        "command": "dafny.restartServer",
+        "title": "Dafny: Restart server"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/textDocument/symbolStatus",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+          "sha256": "d2d3d55d558fb4ecec6128a2e6e97ef8d4f46e7f5d1adfca0f2e851b494fd486"
+        }
+      ],
+      "detail": {
+        "method": "dafny/textDocument/symbolStatus"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "initial-verification"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/counterExample",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+          "sha256": "d2d3d55d558fb4ecec6128a2e6e97ef8d4f46e7f5d1adfca0f2e851b494fd486"
+        }
+      ],
+      "detail": {
+        "method": "dafny/counterExample"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "counterexamples"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/ghost/diagnostics",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+          "sha256": "d2d3d55d558fb4ecec6128a2e6e97ef8d4f46e7f5d1adfca0f2e851b494fd486"
+        }
+      ],
+      "detail": {
+        "method": "dafny/ghost/diagnostics"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/verification/status/gutter",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+          "sha256": "d2d3d55d558fb4ecec6128a2e6e97ef8d4f46e7f5d1adfca0f2e851b494fd486"
+        }
+      ],
+      "detail": {
+        "method": "dafny/verification/status/gutter"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/compilation/status",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+          "sha256": "d2d3d55d558fb4ecec6128a2e6e97ef8d4f46e7f5d1adfca0f2e851b494fd486"
+        }
+      ],
+      "detail": {
+        "method": "dafny/compilation/status"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "initial-verification"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafnyLanguageServerVersionReceived",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        }
+      ],
+      "detail": {
+        "method": "dafnyLanguageServerVersionReceived"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/verification/started",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        }
+      ],
+      "detail": {
+        "method": "dafny/verification/started"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/verification/completed",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        }
+      ],
+      "detail": {
+        "method": "dafny/verification/completed"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/textDocument/verifySymbol",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+          "sha256": "d2d3d55d558fb4ecec6128a2e6e97ef8d4f46e7f5d1adfca0f2e851b494fd486"
+        }
+      ],
+      "detail": {
+        "method": "dafny/textDocument/verifySymbol"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "initial-verification"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "protocol:dafny/textDocument/cancelVerifySymbol",
+      "kind": "custom-protocol",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+          "sha256": "d2d3d55d558fb4ecec6128a2e6e97ef8d4f46e7f5d1adfca0f2e851b494fd486"
+        }
+      ],
+      "detail": {
+        "method": "dafny/textDocument/cancelVerifySymbol"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "cancellation"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyTextDocumentHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyTextDocumentHandler"
+      },
+      "assessment": {
+        "status": "partial",
+        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "rapid-edits-stale-results"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyDocumentSymbolHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyDocumentSymbolHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyHoverHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyHoverHandler"
+      },
+      "assessment": {
+        "status": "partial",
+        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "hover"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyDefinitionHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyDefinitionHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyReferencesHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyReferencesHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyRenameHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyRenameHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyCompletionHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyCompletionHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnySignatureHelpHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnySignatureHelpHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyCounterExampleHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyCounterExampleHandler"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyCodeActionHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyCodeActionHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyFormattingHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyFormattingHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:VerificationHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "VerificationHandler"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "handler:DafnyWorkspaceSymbolHandler",
+      "kind": "language-server-handler",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {
+        "handler": "DafnyWorkspaceSymbolHandler"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:gutter-status",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/verificationGutterStatusView.ts",
+          "sha256": "b6acc91ebc6ce3eda2722214f786ea08780a0560433f5981d5042b5964472d10"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:ghost-highlighting",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/ghostDiagnosticsView.ts",
+          "sha256": "0320b0f774cdfb8f7c71fd4a59990f402002362a45817bbf925c3a02f1c50eef"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:verification-tests",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/verificationSymbolStatusView.ts",
+          "sha256": "94dd241bff3a64b4c624961a7aae77fc9f001a1fe3693e4b5fe788722051b507"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "partial",
+        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "initial-verification"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:compilation-status",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/compilationStatusView.ts",
+          "sha256": "26e9bfea14f196d404271fbc9529565f2ba49fa49dbc1df4e61a79b32263901b"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "partial",
+        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "initial-verification"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:verification-trace",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/verificationTraceView.ts",
+          "sha256": "b520f7c1dab01017a34e562bf5f763db368d8aa7270ceb8a0da68d7cd9c5ede5"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:related-errors",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/relatedErrorView.ts",
+          "sha256": "128a85e81fef91cdff8c762f987fbf304175366f7fe76357e9fae1089e23cf41"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:status-bar-actions",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/statusBarActionView.ts",
+          "sha256": "e3424d7607e8c2ba71e9fe4198d459f82ace66c33c43fd4a43c51352178d631a"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:version-status",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/dafnyVersionView.ts",
+          "sha256": "a2cde727144552fe1db39386aae4c20169ce15b7d686f7d60fcb1494c8c5303f"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:server-installation",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyInstallation.ts",
+          "sha256": "4a7f6e3c58005c0c75d5b832bd2c76de43f13340c4dbdd54bc0ecdae5299d1d7"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:launch-and-concurrency",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/language/dafnyLanguageClient.ts",
+          "sha256": "28ddc7c27828f719f25d1357be324022c6e3950540764eb37a31b6e28eeb9c00"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "partial",
+        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [
+          "concurrent-files-and-requests"
+        ],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "commands:dafny.openStatusBarMenu",
+      "kind": "commands",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/commands.ts",
+          "sha256": "c7fa547cebbd36594008c28266c5ce79afe4a512acfed7307dd6d7d5f4370680"
+        }
+      ],
+      "detail": {
+        "command": "dafny.openStatusBarMenu",
+        "discovery": "source constant, including unmanifested runtime commands"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:language-editing-configuration",
+      "kind": "editor-behavior",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "dafny-language-configuration.json",
+          "sha256": "566d01cc308daacce17b52ea8f85355f0af1638a643832224daa562ad72f06a5"
+        }
+      ],
+      "detail": {
+        "scope": "comments, brackets, auto-closing and surrounding pairs"
+      },
+      "assessment": {
+        "status": "missing",
+        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:project-discovery-and-ownership",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/ProjectFiles/ProjectFilesTest.cs",
+          "sha256": "68128b57307528e1a6a9fbcad160b8a17c35339c1aa47769a609214ca1061dba"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/ProjectFiles/CompetingProjectFilesTest.cs",
+          "sha256": "35f850b7e6c94deb7ac209f58c47ed85d36c16f9283dcb9918aa96264f810c2b"
+        }
+      ],
+      "detail": {
+        "scope": "project-discovery-and-ownership"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:project-includes-and-solver-options",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/ProjectFiles/MultipleFilesProjectTest.cs",
+          "sha256": "24dd7350349023ad460b108bea2fe8706c47acbfeabfed8039249d557c9467c8"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/ProjectFiles/SolverOptionsTest.cs",
+          "sha256": "84b77f8febf516f712e4e3cd08e85d939e0c62ad2e58c02db08838de6278ec30"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Synchronization/IncludeFileTest.cs",
+          "sha256": "fa9cb2453e9eb9dc59c33bbbc642f0ce2c9c7af7870cd63b1fcf742d42abc4d6"
+        }
+      ],
+      "detail": {
+        "scope": "project-includes-and-solver-options"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:parse-resolution-verification-diagnostics",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Various/CompilationStatusNotificationTest.cs",
+          "sha256": "4165655892c3a6aaf12dd4af7142d5d754045d4d6ee7abb15ad4dcec123d5757"
+        }
+      ],
+      "detail": {
+        "scope": "parse-resolution-verification-diagnostics"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:member-and-attribute-completion",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Completion/DotCompletionTest.cs",
+          "sha256": "7ccbf03120e16655bf3acf5ba15a247c1a94ba1b407e091c6207176e6cdc99fd"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Completion/AtCompletionTest.cs",
+          "sha256": "312177459487edc41764d7f97aa67349fd9feab9f79634d83de4381c4cce8524"
+        }
+      ],
+      "detail": {
+        "scope": "member-and-attribute-completion"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:assertion-batch-hover-cost",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Lookup/HoverVerificationTest.cs",
+          "sha256": "e5016d1fe195aeff9a02bd066ab27f8edea04b720f23c35834297aa1aa1087fd"
+        }
+      ],
+      "detail": {
+        "scope": "assertion-batch-hover-cost"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:cache-invalidation-and-migration",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Synchronization/CachingTest.cs",
+          "sha256": "de0557930d5a7c32e45abb8629b077e3c4fb10cb2d603e072ebb04c3ca207ce2"
+        }
+      ],
+      "detail": {
+        "scope": "cache-invalidation-and-migration"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:scheduling-fairness-and-contention",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Synchronization/VerificationOrderTest.cs",
+          "sha256": "ecf879b9d8b0664ec9ebbdfdeef723e83f0f3b3272e0e9e4413fc38b531be8d1"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Synchronization/VerificationOrderTest2.cs",
+          "sha256": "c61f47b2201f8fc0aa9c2565c8cc35a75d9609735a8c092984d87614ab5a21fe"
+        }
+      ],
+      "detail": {
+        "scope": "scheduling-fairness-and-contention"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:concurrent-interactions-and-large-projects",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Various/ConcurrentInteractionsTest.cs",
+          "sha256": "bfc1e3c5f23401bfb3da5b1ef307d9a64cba2bc5626bc48eebb46082296e8ac0"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Performance/LargeFilesTest.cs",
+          "sha256": "550d564005f1a9ebc2910e6f3af37dafe8a5c6a0a9548465a0fa3e7638d800af"
+        }
+      ],
+      "detail": {
+        "scope": "concurrent-interactions-and-large-projects"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:thread-retention",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Performance/ThreadUsageTest.cs",
+          "sha256": "2a23ff032dd54100ce5b42d0df590b985d7bfb66b270d0eadc367a27bfaa4440"
+        }
+      ],
+      "detail": {
+        "scope": "thread-retention"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:testing-exclusions-and-state-transitions",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/verificationSymbolStatusView.ts",
+          "sha256": "94dd241bff3a64b4c624961a7aae77fc9f001a1fe3693e4b5fe788722051b507"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:expanded-related-diagnostics",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/ui/relatedErrorView.ts",
+          "sha256": "128a85e81fef91cdff8c762f987fbf304175366f7fe76357e9fae1089e23cf41"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:startup-and-version-compatibility",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/ide-vscode",
+          "path": "src/startupCheck.ts",
+          "sha256": "2c593cdca22ad968b8bdcabe54400d0d91d42f2f80d265867b769fb37948f8f8"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:plugin-handlers-and-code-actions",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Handlers/LanguageServerExtensions.cs",
+          "sha256": "25b84ab4d73665d49ed733747491c0453eebc2e026bb33eec2e7b879e7c908fd"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:assertion-splitting-and-task-scheduling",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyCore/Pipeline/Compilation.cs",
+          "sha256": "f04e91c59364030e47534668d338693711911e21f88a8f43858ec7dbffd34251"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:frontend-vc-generation-serialization",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer/Language/DafnyProgramVerifier.cs",
+          "sha256": "725209900105f7a813ef18b8a0ce9e98ce99ac9c2cde675f247b0f0fd6290063"
+        }
+      ],
+      "detail": {},
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "documentation:14.1. Dafny functionality within VSCode",
+      "kind": "documentation",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "docs/DafnyRef/VSCodeIDE.md",
+          "sha256": "d5bc3d8e7f47ca7d1ba2e32600f2138ff7b2ca6743ada912568bea74468f1b9a"
+        }
+      ],
+      "detail": {
+        "heading": "14.1. Dafny functionality within VSCode"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "documentation:14.2. Gutter highlights {#sec-gutter-highlights}",
+      "kind": "documentation",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "docs/DafnyRef/VSCodeIDE.md",
+          "sha256": "d5bc3d8e7f47ca7d1ba2e32600f2138ff7b2ca6743ada912568bea74468f1b9a"
+        }
+      ],
+      "detail": {
+        "heading": "14.2. Gutter highlights {#sec-gutter-highlights}"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "documentation:14.3. The Dafny Server {#sec-old-dafny-server}",
+      "kind": "documentation",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "docs/DafnyRef/VSCodeIDE.md",
+          "sha256": "d5bc3d8e7f47ca7d1ba2e32600f2138ff7b2ca6743ada912568bea74468f1b9a"
+        }
+      ],
+      "detail": {
+        "heading": "14.3. The Dafny Server {#sec-old-dafny-server}"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+name: editor-parity
+
+on:
+  workflow_dispatch:
+    inputs:
+      trials:
+        description: Measurement repetitions per configuration
+        default: '5'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editor-parity-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  live-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/checkout@v5
+        with:
+          repository: dafny-lang/ide-vscode
+          ref: 1a329b121ef66f2c8be8ca2c28eda437040042eb
+          path: .cache/dafny-extension
+      - uses: actions/checkout@v5
+        with:
+          repository: dafny-lang/dafny
+          ref: fcb2042d6d043a2634f0854338c08feeaaaf4ae2
+          path: .cache/dafny-source
+      - name: Validate source inventory and harness
+        run: |
+          node vscode/parity/discover.cjs --extension .cache/dafny-extension --server .cache/dafny-source --check-source
+          node --test vscode/test/*.test.cjs
+      - name: Prepare reference extension and executables
+        run: |
+          npm ci --prefix .cache/dafny-extension --no-audit --no-fund
+          npm run compile --prefix .cache/dafny-extension
+          curl --fail --location --retry 3 https://github.com/dafny-lang/dafny/releases/download/v4.11.0/dafny-4.11.0-x64-ubuntu-22.04.zip --output .cache/dafny.zip
+          unzip -q .cache/dafny.zip -d .cache/dafny-runtime
+          chmod +x .cache/dafny-runtime/dafny/dafny .cache/dafny-runtime/dafny/z3/bin/*
+          npm install --prefix /tmp/parity-editor --no-audit --no-fund @vscode/test-electron@2.5.2
+          node - <<'JS'
+          const fs=require('node:fs');
+          require('/tmp/parity-editor/node_modules/@vscode/test-electron').downloadAndUnzipVSCode('1.108.0').then(path=>fs.appendFileSync(process.env.GITHUB_ENV,`PARITY_CODE=${path}\n`)).catch(error=>{console.error(error);process.exitCode=1;});
+          JS
+      - name: Build current verification backend
+        uses: leanprover/lean-action@v1
+        env:
+          LEAN_NUM_THREADS: '1'
+        with:
+          build-args: Solidity.Frontend.Testing
+          use-mathlib-cache: 'false'
+          test: 'false'
+          lint: 'false'
+      - name: Prepare source compiler
+        run: |
+          mkdir -p .cache/parity-solkey/keyext.solidity.core/build/soljson
+          cp tests/migration/solkey/keyext.solidity.core/build.gradle .cache/parity-solkey/keyext.solidity.core/build.gradle
+          curl --fail --location --retry 3 https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js --output .cache/parity-solkey/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js
+      - name: Compare real editors serially
+        env:
+          TRIALS: ${{ inputs.trials }}
+          LEAN_NUM_THREADS: '1'
+        run: |
+          export SOLKEY_ROOT="$GITHUB_WORKSPACE/.cache/parity-solkey"
+          xvfb-run -a node vscode/parity/run.cjs --code "$PARITY_CODE" --dafny "$GITHUB_WORKSPACE/.cache/dafny-runtime/dafny/dafny" --dafny-extension "$GITHUB_WORKSPACE/.cache/dafny-extension" --dotnet "$(command -v dotnet)" --trials "$TRIALS" --warmups 1 --workers 1,2,4 --cache none,basic --memory-reserve-mib 2048 --output .cache/editor-parity/ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editor-parity-evidence
+          retention-days: 7
+          include-hidden-files: true
+          path: |
+            .cache/editor-parity/ci/**
+            !.cache/editor-parity/ci/**/profile/**
+            !.cache/editor-parity/ci/**/extensions/**
+            !.cache/editor-parity/ci/**/workspace/**

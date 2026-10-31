@@ -1,0 +1,50 @@
+{
+  "staticInstructionRecordsChecked": 2309,
+  "negativeStaticControls": [
+    {
+      "mode": "legacy",
+      "pc": 963,
+      "wrong": "name",
+      "refused": true
+    },
+    {
+      "mode": "viaIR",
+      "pc": 1756,
+      "wrong": "operand",
+      "refused": true
+    },
+    {
+      "mode": "legacy",
+      "pc": 836,
+      "wrong": "operand",
+      "refused": true
+    },
+    {
+      "mode": "viaIR",
+      "pc": 813,
+      "wrong": "name",
+      "refused": true
+    },
+    {
+      "mode": "legacy",
+      "wrong": "return label in PUSH operand sequence",
+      "refused": true
+    },
+    {
+      "mode": "viaIR",
+      "wrong": "return label in PUSH operand sequence",
+      "refused": true
+    }
+  ],
+  "priorChecksumCountsVerified": {
+    "m1-producer": 2386,
+    "post-m1-design": 2454,
+    "osaka-validation": 2510
+  },
+  "runtimeOrCompilerOrLeanRunsThisIncrement": 0,
+  "targetSimulationImplemented": false,
+  "sourceConstructionOrAdmissionImplemented": false,
+  "heldGroupsExecuted": false,
+  "reachabilityOrGasProof": false,
+  "changedOnlyDocs": true
+}
