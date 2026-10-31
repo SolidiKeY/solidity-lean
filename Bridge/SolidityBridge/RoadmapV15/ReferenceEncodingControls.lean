@@ -1,7 +1,7 @@
 import SolidityBridge.RoadmapV15.ReferenceEncoding
 
-/-! Candidate reference controls, NOT locally kernel-checked: external imports
-are unavailable. Pure encoding only; no allocator, read/store or EVM driver run.
+/-! Reference controls for the actual pinned pure encoding. No allocator,
+physical read/store or EVM driver run is supplied by these observations.
 Checked source-independent analogues are in EncodingUniquenessControls. -/
 namespace SolidityBridge.RoadmapV15.ReferenceEncodingControls
 open Solidity Solidity.Backend
@@ -19,13 +19,13 @@ example : (encoding first).toList ≠ (encoding second).toList := by
   omega
 example : (encoding first).size = 32 := (encoding_spec first).1
 example : (encoding first).toList.length ≠ 31 := by
-  rw [reference_encoding_scalar]
+  rw [first, reference_encoding_scalar]
   decide
 example : (encoding first).toList ≠ (toBytesBE 32 258).toList.reverse := by
-  rw [reference_encoding_scalar]
+  rw [first, reference_encoding_scalar]
   decide +kernel
 example : (encoding first).toList ≠ (toBytesBE 31 258).toList := by
-  rw [reference_encoding_scalar]
+  rw [first, reference_encoding_scalar]
   decide +kernel
 example : EvmYul.fromByteArrayBigEndian (encoding first) = 258 := (encoding_spec first).2
 example : (encoding (EvmYul.UInt256.ofNat (2 ^ 256 + 1))).toList =
@@ -64,7 +64,7 @@ example : (Roadmap.Evm.Halt.success (encoding second).toList).observe =
     (Roadmap.Evm.Halt.success (toBytesBE 32 second.toNat).toList).observe :=
   reference_complete_observation true second
 
--- Required audits remain pending with this file's blocked external import.
+-- Explicit axiom audits for all original reader/encoding consequences.
 #print axioms reference_big_reader
 #print axioms reference_array_reader
 #print axioms reference_encoding_bytes

@@ -972,3 +972,60 @@ mutation tests. The draft now says13 remaining encoding declarations plus the
 old full controls, and20 source tests. No proof/profile/status premise changed.
 Both reviews require the disclosed retry-log loss to remain a limitation, not
 a passing retention claim.
+
+
+## Original reference encoding checked (a359b418 recovery)
+
+Parentc80a48fa497f93cd10466b6a494ca6fa21aa4fd6 remains on the assigned branch
+and frozen base.684 exact requested archives arrived, independently rehashed
+against all684 current source files and installed cache bytes; bundle SHA256
+is e9c798dfb770d5ef72811fdbec031520317c8c88c7c1c3a0d6d01f40c59daddf,
+25292800bytes. The unchanged offline unpack ran ONCE with the original300s cap,
+processing1537 available files, exit0, cgroup peak479084544bytes under
+memory.max12884901888/swap.max0. QOFF1 is fulfilled for the requested archives
+and actual reference imports; no endpoint-access restoration is inferred.
+No source/pin/toolchain/profile change or giant cold Mathlib build occurred.
+
+The actual published MemoryBytes/ExternalEvm/CSLib dependency closure now passes
+serial kernel checks from unchanged sources. `Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean`
+passes all13 remaining original encoding statements, and
+`Bridge/SolidityBridge/RoadmapV15/ReferenceEncodingControls.lean` passes actual
+nonzero/signed/narrow/modulo/length/endian/order/terminal controls and all15
+original reader/encoding #print axioms reports. Pure encoding_spec supplies its
+exact32-byte length and actual reader value for every UInt256, without an
+allocator hypothesis. These laws preserve complete ordered List/ByteArray
+observations, existing typed scalar/ABI representations, constructor modulo,
+stack tails, sequence order and completed-frame success bit/payload.
+71previous checked names plus13 newly checked names gives84; zero original
+encoding proposals remain uncompiled. Source-only accounting remains distinct
+from kernel evidence and does not certify any opcode correspondence.
+
+The first real proof check hit the ORIGINAL200000-heartbeat limit at the empty
+case of reference_encoding_sequence. Its full ordered statement is unchanged;
+List.flatMap_congr now applies pointwise reference_encoding_bytes instead of
+reduction-heavy induction. No heartbeat, recursion, stack, fuel or time budget
+was increased. Three initial controls failed to rewrite through a private first
+fixture; explicit unfolding fixes elaboration without changing expected bytes.
+Both failures are retained as failures. All headlines use only propext,
+Classical.choice and Quot.sound (the two reader laws need no choice).
+
+Separate independent read-only finder/skeptic source reviews clear the exact
+statements, hypotheses, inhabited controls, ownership and unchanged budget/profile
+boundaries. Focused import/control closure passes. Lean4.24.0 commit797c613 and
+Lake5.0.0-src+797c613 are printed before KeySort2jobs passes and RUNTIME_GATE_PASS.
+Structural/trust/orphan,32 mutation tests and full raw docs/no-new comparison
+results accompany this checkpoint's handoff. Original raw full5400s exit124,
+network403, docsexit1 and the earlier unsealed retry raw/timing loss remain
+historical failures/limitations, never manufactured or relabeled green.
+
+This checkpoint does NOT prove UInt256.toByteArray serialization, provide a
+PaddingCorrect witness, execute physical stores, discharge fetched-code/X gas
+prechecks or establish Osaka/resource/account/transaction/trace correspondence.
+G46.01-.06/G47 and Backfill A/B retain all remaining productionV13/V14,
+compiler-symbolic-path, driver/resource, arbitrary permitted-callee and exact
+account/call/create/return/revert/fee/nonce/log/rollback/finite-infinite trace
+obligations. All150 opcode rows and secondary obligations stay OPEN. The goal
+is unchanged blocked; get_goal unavailable, no mutation/reactivation/recreation.
+New evidence: /workspace/v15-evm-agreement-evidence/encoding-a359b418. Next ready
+owned work consumes the newly checked encoding in typed image and preallocated
+observation consequences, without duplicating reserved memory adapters.

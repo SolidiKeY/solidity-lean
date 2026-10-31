@@ -5,10 +5,9 @@ import SolidityBridge.RoadmapV15.EncodingUniqueness
 import SolidityBridge.RoadmapV15.HaltObservation
 
 /-!
-Thirteen encoding proposals consuming the published reference encoding and
-existing numeric adapter remain blocked at the memory/external imports. The two
-reader laws now live in the checked narrow ReferenceReader module; this file is
-not counted as kernel-checked. See the owning V15 report.
+Thirteen encoding consequences consuming the published reference encoding and
+existing numeric adapter. The two reader laws live in the narrow ReferenceReader
+module. These pure observations do not establish physical execution.
 Only pure encoding is used: no allocator contract, actual toByteArray serialization,
 preallocated read/store refinement, supplied-opcode run or driver is asserted.
 -/
@@ -108,9 +107,7 @@ theorem reference_signed_cleanup (width : Fin 32) (w : Scalar.Word) (tail : Scal
 theorem reference_encoding_sequence (vs : List EvmYul.UInt256) :
     vs.flatMap (fun v => (encoding v).toList) =
       vs.flatMap (fun v => (toBytesBE 32 v.toNat).toList) := by
-  induction vs with
-  | nil => rfl
-  | cons v vs ih => simp only [List.flatMap_cons, reference_encoding_bytes, ih]
+  exact List.flatMap_congr (fun v _ => reference_encoding_bytes v)
 
 /-- Preserve the existing completed-frame success bit and all payload bytes.
 These are observation representatives, not evidence that a frame executed. -/

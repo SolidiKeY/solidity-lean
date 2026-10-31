@@ -1226,3 +1226,9 @@ At the root, the notation's own tests:
 | `Bridge/SolidityBridge/RoadmapV15/ReferenceReader.lean` | Checked actual pinned reference list/array readers versus backend byte order; two original laws moved unchanged to narrow imports. |
 | `Bridge/SolidityBridge/RoadmapV15/ReferenceWordObservation.lean` | Checked bounded reader, actual UInt256 constructor and typed image/signed observation consumers; no physical execution claim. |
 | `Bridge/SolidityBridge/RoadmapV15/ReferenceReaderControls.lean` | Checked actual reader/word/image boundary, endian/length/order, signed/narrow and seven theorem-axiom controls. |
+
+V15 validation update (a359b418): the earlier uncompiled registration statuses
+for `Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean` and
+`Bridge/SolidityBridge/RoadmapV15/ReferenceEncodingControls.lean` are superseded:
+all13 encoding laws and the original15 reader/encoding axiom/control checks now
+pass. This is pure encoding/observation evidence, not machine correspondence.
