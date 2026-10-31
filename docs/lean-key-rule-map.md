@@ -1101,3 +1101,12 @@ VY2 canonical scalar-memory extension (Lean-only preparation/YQ5):
 are concrete component laws, with actual typed/canonical/layout/ownership and
 original-H premises. No installed Yul rule/notation/printer/calculus/source
 composition claimed. [VY2](feature-work/inline-assembly-vy2.md#canonical-scalar-memory-extension-2026-10-31).
+
+
+VY2 exact canonical compatibility (Lean-only/YQ5 preparation):
+`decodeExtendedMemoryMember_legacy`, `decodeCanonicalArray_legacy`,
+`decodeCanonicalFields_legacy`, `canonicalArrayState_legacy`,
+`canonicalStructState_legacy`, `canonicalRetainedState_legacy` (and heap variants)
+prove complete result equality with real old-domain type premises. No installed
+Yul calculus rule/source adequacy or renamed full-coverage predicate follows;
+[original Y09.02 remains open](feature-work/inline-assembly-vy2.md#canonical-compatibility-and-genuine-aliases-2026-10-31).

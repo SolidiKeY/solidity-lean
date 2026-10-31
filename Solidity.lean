@@ -908,3 +908,4 @@ import Solidity.Yul.Views.AggregateWritebackControls
 import Solidity.Yul.Views.MemberArrayControls
 import Solidity.Yul.Views.RetainedMemberControls
 import Solidity.Yul.Views.MemoryScalarControls
+import Solidity.Yul.Views.CanonicalAliasControls

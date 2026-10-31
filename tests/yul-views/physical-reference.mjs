@@ -9,6 +9,7 @@ import {replayWriteback} from './writeback-reference.mjs';
 import {replayResidual} from './residual-reference.mjs';
 import {replayFinite} from './finite-reference.mjs';
 import {replayHeapBytes} from './heap-bytes-reference.mjs';
+import {replayScalarMemoryAlias} from './scalar-memory-alias-reference.mjs';
 import {replayMemoryScalarWords} from './memory-scalar-words-reference.mjs';
 import {replayScalarMemoryOps} from './scalar-memory-ops-reference.mjs';
 import {replayRetainedMemberArrays} from './retained-member-arrays-reference.mjs';
@@ -67,7 +68,8 @@ const memberArrays=await replayMemberArrays(compile);
 const retainedMemberArrays=await replayRetainedMemberArrays(compile);
 const memoryScalarWords=await replayMemoryScalarWords(compile);
 const scalarMemoryOps=await replayScalarMemoryOps(compile);
-const report={memoryScalarWords,scalarMemoryOps,retainedMemberArrays,memberArrays,aggregateWriteback,dynamicUint,wordWriteback,mixedHeap,retainedHeap,heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
+const scalarMemoryAlias=await replayScalarMemoryAlias(compile);
+const report={scalarMemoryAlias,memoryScalarWords,scalarMemoryOps,retainedMemberArrays,memberArrays,aggregateWriteback,dynamicUint,wordWriteback,mixedHeap,retainedHeap,heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
  sourceSha256:sha(source),lockSha256:sha(readFileSync(new URL('../../scripts/evm-reference/package-lock.json',import.meta.url))),
  fork:'osaka',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,reports};
 writeFileSync(resolve(outPath),JSON.stringify(report,null,2)+'\n');
@@ -87,4 +89,5 @@ console.log('memberArrays: '+memberArrays.variants.map(v=>`${v.viaIR?'viaIR':'le
 console.log('retainedMemberArrays: '+retainedMemberArrays.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('memoryScalarWords: '+memoryScalarWords.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('scalarMemoryOps: '+scalarMemoryOps.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
-process.exitCode=memoryScalarWords.status==='working'&&scalarMemoryOps.status==='working'&&retainedMemberArrays.status==='working'&&memberArrays.status==='working'&&aggregateWriteback.status==='working'&&dynamicUint.status==='working'&&wordWriteback.status==='working'&&mixedHeap.status==='working'&&retainedHeap.status==='working'&&heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;
+console.log('scalarMemoryAlias: '+scalarMemoryAlias.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
+process.exitCode=scalarMemoryAlias.status==='working'&&memoryScalarWords.status==='working'&&scalarMemoryOps.status==='working'&&retainedMemberArrays.status==='working'&&memberArrays.status==='working'&&aggregateWriteback.status==='working'&&dynamicUint.status==='working'&&wordWriteback.status==='working'&&mixedHeap.status==='working'&&retainedHeap.status==='working'&&heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;

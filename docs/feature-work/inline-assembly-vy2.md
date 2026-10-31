@@ -1564,3 +1564,49 @@ fixed (external repeats b reads, real alias evidence kernel-side) and follow-up
 clear. Source/owner/old decoder APIs unchanged, no budgets raised. Serial-j1/
 12GiB/no-swap/writer lock/monitor/caches maintained. Versioned handoff records
 exact signatures/resources/commands/committed SHA. Full original lane remains open.
+
+
+## Canonical compatibility and genuine aliases (2026-10-31)
+
+[CanonicalCompatibility](../../Solidity/Yul/Views/CanonicalCompatibility.lean)
+proves exact ALL-RAW-input equality of the canonical extension with old component
+APIs on their original supported types. Member, array/field folds, heap/state
+struct/array operations and retained heap/state operations preserve the entire
+Option/Except/state result: dirty bool None, missing/invalid owned pointers,
+header/capacity failures and source errors are not dropped. Real old type/field
+support premises remain explicit, no new fragment predicate or full Yul coverage
+claim. No old definition or signature changed.
+
+[CanonicalAliasControls](../../Solidity/Yul/Views/CanonicalAliasControls.lean)
+executes real Source.locals→indexLoc→readLoc paths through both typed aliases,
+including after canonical bytes3 array shrink/regrowth and a subsequent typed
+update seen by BOTH aliases; all original H owner MemOK follows actual heapPut.
+An index through the other alias after length0 yields the exact source
+Panic(.index) bytes/state. Old bool/u256/pointer all-raw equality, capacity/None
+and full-result examples instantiate the generic compatibility proofs.
+
+[ScalarMemoryAlias](../../tests/yul-views/ScalarMemoryAlias.sol) now supplies
+GENUINE independent aliases (unlike the prior fixture's repeated b reads):
+write through b and observe a/b for bytes3, signed8 and address arrays, retained
+header shrink/regrowth/tails and further aliased update, explicit revert,
+nonempty Panic(0x32) and fresh-call observation. Complete12word success ABIs and
+all36Panic bytes/status are compared in order for7calls/pipeline;137strict
+mutations include wrong panic code/data/status, alias bit/sign/alignment,
+missing/reordered vectors/deployment and attempted storage writes. All preceding
+282reportfields/calls exactly identical; cumulative296.
+
+The shared replayBytecode empty-revert scalar profile is unchanged. A narrow
+exact-fixture adapter uses public machine/observation/creationObservation and
+existing storage-write observer, preserving original100m gas/5m step limits,
+transaction resets, log/unknown-host refusal and all return bytes. Zero attempted
+storage writes are checked after deployment/every call. This is NOT a new
+general host harness, VY5 composition takeover or source/compiler adequacy.
+Compiler/runtime pins, prior fixture/goldens/budgets and all original obligations
+are intact. Initial skeptic evidence-scope finding remains recorded as fixed;
+this separate regression adds actual external alias evidence without relabeling
+old repeated reads. Y04/Y05/Y06 and both backfills PARTIAL; Y09.02 concrete and
+full allocator/source/compiler/calculus/joint closure remain open. Goal BLOCKED
+unchanged; no new semantic decision, unpublished integration or owner rewrite.
+Versioned evidence `/workspace/vy2-evidence/canonical-aliases/`.
+
+Final validation: focused70jobs/full1057default+262TestSuite/131annotations exit0;1623public declarations/899scoped theorem reports standard axioms only. All16negative suites pass, including137genuine-alias mutations. Separate finder/skeptic read-only reviews clear; old evidence-scope finding remains fixed/recorded. Global docs exit1 remains identical48missing/37ambiguous exact-base debt, zero delta separately; not a global pass. Serial12GiB/no-swap checks, caches and raw failures retained. No original full obligation or goal status changed.

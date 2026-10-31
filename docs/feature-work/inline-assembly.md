@@ -388,3 +388,12 @@ keeping all old decoder APIs untouched. [Lane record](inline-assembly-vy2.md#can
 `/workspace/vy2-evidence/memory-scalars/HANDOFF.md`. Both pipelines preserve all
 prior254calls and add28/99+155negative controls. Full lane remains unfinished;
 no dirty cleanup, new admission exclusion or compiler/source adequacy inferred.
+
+
+### VY2 canonical compatibility/alias handoff (2026-10-31)
+
+Exact old-domain all-raw decoder/heap/state API equality and genuine typed source/
+external aliases with complete Panic bytes. [Lane record](inline-assembly-vy2.md#canonical-compatibility-and-genuine-aliases-2026-10-31),
+`/workspace/vy2-evidence/canonical-aliases/HANDOFF.md`. Both pipelines add14calls/
+137negatives, all preceding282fields/calls unchanged. This follows the canonical
+scalar checkpoint, not full VY2 completion or Yul/compiler correspondence.
