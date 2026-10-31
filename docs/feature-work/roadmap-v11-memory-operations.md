@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty-two. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-three. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3341,3 +3341,62 @@ Raw docs1 remains complete83publicfindings identical; frozen no-newFAIL11incomin
 ownednew0. Raw inventory1:1155unrecorded=359inherited+796owned,0unsafe,notgreen.
 Both independent read-only source reviews passed without confirmed defects;
 C42 heading forty-two verified. No original queue/goal completion or exhaustion.
+
+
+### C43 — selected-child mutation and exact finite graph frame
+
+Continued original G32/G34/BackfillB beyond C42. Actual Source.Heap.write_other,
+intrinsic Heap.get_set_ne and published RefArrayStateRepr.setPrimitive /
+writeArray_correct support a concrete selected-child write application. Three
+laws in SourceNestedMutation derive parent/child Source address inequality from
+INITIAL differently typed tables, then perform the existing Source.writeLoc and
+intrinsic Heap.writeAddr and reconstruct the entire finite SourceBoolRefsAt
+observer after the write. Source MemOK is derived from published writeLoc_memOK.
+The word law certifies the SAME actual write with existing writeArrayCode and
+full reference-array ownership after setPrimitive; it does not duplicate a copy,
+constructor, path compiler, state or interpreter.
+
+A sufficient INITIAL local footprint condition says each selected child whose
+logical ID differs from the written child has a different Source address from
+THAT child. Repeated written-child identities are allowed; other children need
+not be pairwise distinct. This is neither global injectivity, a desired final
+relation nor a source-profile restriction. Independent reviewers correctly noted
+it is not universally necessary: no-op writes can preserve agreement without
+separation. The module wording now explicitly says sufficient. General graph
+mutation requires establishing the appropriate initial alias relation, still open.
+
+Four controls retain every C41/C42/earlier vector. The actual shared left write
+TFF→FFF updates both repeated selections in parent[left,right,left], while right
+FTF, all parent IDs/fields, old aliases, neighbour/free-pointer/stack remain.
+Actual Source/intrinsic/word execution and complete resulting word cells are
+checked. A generic actual Source builder witness instantiates the theorem for
+arbitrary runtime lists containing the written leaf, with only intrinsic length
+validity. Empty/no-selected-member is outside that selected-member theorem only,
+not an excluded source shape. Exact child endpoint3 produces Source panic,
+intrinsic None and word revert, without a fabricated successful suffix heap.
+
+The negative uses actual Source allocRef, initial Source MemOK and independently
+inhabited read correspondence: two DISTINCT intrinsic children TFF/TFF share one
+Source address. A material write makes the Source cell FFF, intrinsic left FFF
+and right TFF. Source MemOK remains true, parent pointers stay fixed, but the old
+nested correspondence is false by an actual wrong inner read. This proves the
+initial read observer alone cannot justify every mutation; it is not an exclusion
+or an assertion that the sufficient separation premise is necessary for no-ops.
+
+Scope: selected explicit Source child location plus published word base/read/write
+certificate, not resolved nested-write syntax or composed pointer-path-to-write
+compiler closure. Arbitrary recursive graphs/physical bytes/deep-copy/ABI/general
+storage/source/V10/target/reserved memory-storage obligations remain open. All
+original Work/Backfill parents partial/blocked; blocked goal unchanged. Focused
+failures are retained, no proof/resource budget or old fixture changed.
+
+C43 guarded165/full1082default/262Suite/SolKey377/131 exit0. Fresh versions and
+KeySort2jobs pass with artifactcacheOFF. Strict automatic,completefixture,
+layer/orphan/trust,script syntax/corruption,803standardpins/101modules pass.
+Full sampled aggregateRSS1734280KiB,disk229376bytes,new max/OOM/kill events0.
+Raw docs1 COMPLETE83public findings identical; frozen no-newFAIL11incoming,
+ownednew0. Raw inventory1:1162unrecorded=359inherited+803owned,0unsafe,notgreen.
+Finder/skeptic final source reviews accepted real material collapsed-alias
+counterexample, runtime lists and full positive frames; sufficient-vs-necessary
+wording correction applied. No remaining confirmed defects. Prior focused
+failures/format mismatches remain evidence, final guards contain no sorryAx.

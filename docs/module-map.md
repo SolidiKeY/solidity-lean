@@ -1309,3 +1309,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceNestedMemoryControls.lean` | Independently inhabited different/shared Boolean children and old/new/empty reference parents; actual reached Source alias/nested reads, complete word vectors, stale/wrong-child, self-alias, runtime-list and endpoint controls. |
 
 | `Solidity/Backend/MemoryOps/SourceNestedSelect.lean` | Actual Source indexed child-reference assignment, intrinsic rebindMem path and published RefPtrFrag word selection/store; derived same-child initial/reached correspondence, bounds and horizon observations. |
+
+| `Solidity/Backend/MemoryOps/SourceNestedMutation.lean` | Actual selected Boolean-child Source/intrinsic/word write with derived whole finite parent/child frame and MemOK; explicit sufficient initial local alias footprint, repeated selections and typed parent separation. |

@@ -1,5 +1,6 @@
 import Solidity.Backend.MemoryOps.SourceNestedMemory
 import Solidity.Backend.MemoryOps.SourceNestedSelect
+import Solidity.Backend.MemoryOps.SourceNestedMutation
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -587,5 +588,190 @@ theorem selected_child_low_horizon (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms selected_child_bounds
+
+
+private def mutatedHeap := hp.set left (MObj.setElem .dyn (hp.get left) 0 false)
+private def mutatedSource : Source.EMState E0 SΓ :=
+  (sy.1,{sy.2 with heap := sy.2.heap.write 0 (sourceBoolMemory [false,false,false]) (by rfl)})
+private def mutatedMachine := writeMachine machine 17 w[0]
+private theorem mutated_index : mutatedHeap.index left .dyn (uintOfNat 0)=some false := by
+  simp only [mutatedHeap,Heap.index,Heap.get_set_same,MObj.elems_setElem]
+  simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn,uintOfNat];rfl
+private theorem mutation_source_run :
+    (Source.writeLoc (E := E0) (Γ := SΓ) F0 0 (.mem 0 0) (.bool false)).run sy=(.ok (),mutatedSource) := by
+  have hh : sy.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ := by
+    simpa only [SourceBoolMemoryAt,Heap.get,Objs.get,hp,left,MObj.elems_dyn] using left_at
+  obtain ⟨_,hw⟩ := source_bool_write sy 0 [true,false,false] hh 0 (by decide) false
+  exact hw
+private theorem mutation_heap_run : hp.writeAddr (.index left .dyn (indexValue ⟨0,by decide⟩)) false=some mutatedHeap := by
+  simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+  exact if_pos (by simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+
+/-- Mutating the shared selected child changes BOTH repeated observations;
+the independent other child and parent identities/fields remain intact. -/
+theorem shared_child_mutation :
+    hp.writeAddr (.index left .dyn (indexValue ⟨0,by decide⟩)) false=some mutatedHeap ∧
+    (Source.writeLoc (E := E0) (Γ := SΓ) F0 0 (.mem 0 0) (.bool false)).run sy=(.ok (),mutatedSource) ∧
+    run (writeArrayCode (base left.id)) ((machine.push w[0]).push w[0])=.ok mutatedMachine 0 ∧
+    SourceBoolRefsAt mutatedSource 3 mutatedHeap fresh addresses ∧ Source.MemOK E0 SH mutatedSource ∧
+    RefArrayStateRepr 1 1 8 frag (σ.withHeap mutatedHeap) base mutatedMachine ∧
+    (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := SB) (.mem 3 0)).run mutatedSource=(.ok (.memRef rfl 0),mutatedSource) ∧
+    (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := SB) (.mem 3 2)).run mutatedSource=(.ok (.memRef rfl 0),mutatedSource) ∧
+    (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run mutatedSource=(.ok (.bool false),mutatedSource) ∧
+    (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 1 1)).run mutatedSource=(.ok (.bool true),mutatedSource) ∧
+    [(MObj.elems .dyn (mutatedHeap.get fresh)).map HRef.id]=[[0,1,0]] ∧
+    [MObj.elems .dyn (mutatedHeap.get left),MObj.elems .dyn (mutatedHeap.get right)]=
+      [[false,false,false],[false,true,false]] ∧
+    cells mutatedMachine=[w[48],w[32],w[32],w[36],w[1],w[0],w[99],w[3],w[0],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]] ∧
+    mutatedSource.1=sy.1 ∧ mutatedMachine.stack=[w[42]] := by
+  obtain ⟨out,z,ho,hs,hc,hr,hm,hrepr,hl,hparent⟩ :=
+    SourceBoolRefsAt.write_child_word σ fresh addresses fresh_at left
+      (by change left∈MObj.elems .dyn (hp.get fresh);simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.mem_cons];exact Or.inl trivial)
+      (by intro t ht hne;exact hne) F0 0 ⟨0,by decide⟩ false
+      (by simp only [σ,σ1,σ0,Heap.len,Heap.get,hp,left,MObj.elems_dyn];decide) SH source_memOK initial_repr
+  have hout : out=mutatedHeap := Option.some.inj (ho.symm.trans mutation_heap_run)
+  have hz : z=mutatedSource := congrArg Prod.snd (hs.symm.trans mutation_source_run)
+  subst out;subst z
+  have hright : SourceBoolMemoryAt mutatedSource 1 mutatedHeap right .dyn := hr.children right (by
+    rw [hparent]
+    change right∈MObj.elems .dyn (hp.get fresh)
+    simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.mem_cons];exact Or.inr (Or.inl trivial))
+  refine ⟨ho,hs,hc,hr,hm,hrepr,hr.parent_read F0 0 left ?_,hr.parent_read F0 2 left ?_,
+    (hr.child_read_iff F0 0 left ?_ (uintOfNat 0) false).mpr mutated_index,
+    (hright.read_iff F0 (uintOfNat 1) true).mpr ?_,?_,?_,rfl,hl,rfl⟩
+  all_goals simp only [mutatedHeap,Heap.index,Heap.get_set_ne hp left fresh (by decide),Heap.get_set_ne hp left right (by decide),Heap.get_set_same,MObj.elems_setElem]
+  all_goals simp only [Heap.get,Objs.get,hp,left,right,fresh,MObj.elems_dyn,uintOfNat]
+  all_goals rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.shared_child_mutation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms shared_child_mutation
+
+
+private def collapsedAddresses (_ : Nat) := 0
+private def collapsedHeap : Heap H := (⟨[true,false,false],by decide⟩,(⟨[true,false,false],by decide⟩,
+  (⟨[left],by decide⟩,(⟨[left,right,left],by decide⟩,(⟨[],by decide⟩,())))))
+private def collapsedData : Source.Data E0.layout SR := sourceBoolRefMemory collapsedAddresses [left,right,left]
+private def collapsedSource : Source.EMState E0 [] := ((Source.allocRef collapsedData).run yl).2
+private def collapsedOut := collapsedHeap.set left (MObj.setElem .dyn (collapsedHeap.get left) 0 false)
+private def collapsedPost : Source.EMState E0 [] :=
+  (collapsedSource.1,{collapsedSource.2 with heap := collapsedSource.2.heap.write 0 (sourceBoolMemory [false,false,false]) (by rfl)})
+private theorem collapsed_memOK : Source.MemOK E0 SH collapsedSource := by
+  have hd : Source.DataOK E0 yl.2.heap.ty collapsedData := by
+    apply Source.DataOK.array
+    intro i
+    apply Source.DataOK.val
+    exact ⟨SB,rfl,rfl⟩
+  have h := Source.allocRef_mem' (E := E0) (Γ := []) (H := SH) collapsedData (by trivial)
+    (by intro i;exact ⟨.memRef rfl 0,rfl⟩) yl ⟨left_memOK,hd⟩
+  have he : (Source.allocRef (E := E0) (Γ := []) collapsedData).run yl=
+    (.ok (.memRef rfl 1),collapsedSource) := rfl
+  rw [he] at h
+  exact h.1
+private theorem collapsed_at : SourceBoolRefsAt collapsedSource 1 collapsedHeap fresh collapsedAddresses := by
+  refine ⟨?_,?_⟩
+  · simp only [Heap.get,Objs.get,collapsedHeap,fresh,MObj.elems_dyn];rfl
+  · intro t ht
+    simp only [Heap.get,Objs.get,collapsedHeap,fresh,MObj.elems_dyn,List.mem_cons,List.not_mem_nil,or_false] at ht
+    rcases ht with ht|ht|ht <;> subst t
+    all_goals unfold SourceBoolMemoryAt
+    all_goals simp only [Heap.get,Objs.get,collapsedHeap,left,right,MObj.elems_dyn]
+    all_goals rfl
+private theorem collapsed_write :
+    (Source.writeLoc (E := E0) (Γ := []) F0 0 (.mem 0 0) (.bool false)).run collapsedSource=(.ok (),collapsedPost) := by
+  have hh : collapsedSource.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ := rfl
+  obtain ⟨_,hw⟩ := source_bool_write collapsedSource 0 [true,false,false] hh 0 (by decide) false
+  exact hw
+private theorem collapsed_target_write :
+    collapsedHeap.writeAddr (.index left .dyn (indexValue ⟨0,by decide⟩)) false=some collapsedOut := by
+  simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+  exact if_pos (by simp only [Heap.get,Objs.get,collapsedHeap,left,MObj.elems_dyn];decide)
+
+/-- Read agreement plus Source MemOK does not imply mutation framing: two
+DISTINCT typed children may initially denote equal values at the SAME Source
+address. A material write changes both Source aliases but only one intrinsic
+object. This is a counterexample, not a new source-profile exclusion. -/
+theorem collapsed_alias_mutation_counterexample :
+    SourceBoolRefsAt collapsedSource 1 collapsedHeap fresh collapsedAddresses ∧
+    Source.MemOK E0 SH collapsedSource ∧ left.id≠right.id ∧ collapsedAddresses left.id=collapsedAddresses right.id ∧
+    collapsedHeap.writeAddr (.index left .dyn (indexValue ⟨0,by decide⟩)) false=some collapsedOut ∧
+    (Source.writeLoc (E := E0) (Γ := []) F0 0 (.mem 0 0) (.bool false)).run collapsedSource=(.ok (),collapsedPost) ∧
+    Source.MemOK E0 SH collapsedPost ∧
+    ¬SourceBoolRefsAt collapsedPost 1 collapsedOut fresh collapsedAddresses ∧
+    [MObj.elems .dyn (collapsedOut.get left),MObj.elems .dyn (collapsedOut.get right)]=
+      [[false,false,false],[true,false,false]] ∧
+    [(MObj.elems .dyn (collapsedOut.get fresh)).map HRef.id]=[[0,1,0]] ∧
+    (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 0)).run collapsedPost=
+      (.ok (.bool false),collapsedPost) := by
+  have hnew : collapsedPost.2.heap.get 0=some ⟨SB,sourceBoolMemory [false,false,false]⟩ :=
+    Source.Heap.write_get collapsedSource.2.heap 0 (sourceBoolMemory [false,false,false]) (by rfl)
+  have hread := source_bool_read collapsedPost 0 [false,false,false] hnew 0 (by decide)
+  have hmk := Source.writeLoc_memOK (E := E0) (Γ := []) (H := SH) F0 0
+    (.mem (τ := .bool) 0 0) (.bool false) collapsedSource ⟨collapsed_memOK,trivial⟩
+  rw [collapsed_write] at hmk
+  refine ⟨collapsed_at,collapsed_memOK,by decide,rfl,collapsed_target_write,collapsed_write,hmk,?_,?_,?_,hread⟩
+  · intro hfinal
+    have hsel : (MObj.elems .dyn (collapsedOut.get fresh))[1]?=some right := by
+      simp only [collapsedOut,Heap.get_set_ne collapsedHeap left fresh (by decide)]
+      simp only [Heap.get,Objs.get,collapsedHeap,fresh,MObj.elems_dyn];rfl
+    have hright : collapsedOut.index right .dyn (uintOfNat 0)=some true := by
+      simp only [collapsedOut,Heap.index,Heap.get_set_ne collapsedHeap left right (by decide)]
+      simp only [Heap.get,Objs.get,collapsedHeap,right,MObj.elems_dyn,uintOfNat];rfl
+    have hbad := (hfinal.child_read_iff F0 1 right hsel (uintOfNat 0) true).mpr hright
+    have he := congrArg Prod.fst (hbad.symm.trans hread)
+    cases he
+  · simp only [collapsedOut,Heap.get_set_same,Heap.get_set_ne collapsedHeap left right (by decide),MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,collapsedHeap,left,right,MObj.elems_dyn];rfl
+  · simp only [collapsedOut,Heap.get_set_ne collapsedHeap left fresh (by decide)]
+    simp only [Heap.get,Objs.get,collapsedHeap,fresh,MObj.elems_dyn];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.collapsed_alias_mutation_counterexample' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms collapsed_alias_mutation_counterexample
+
+
+/-- Arbitrary runtime parent lists and repetitions containing the selected leaf
+instantiate the actual mutation theorem, not just a fixed three-element frame.
+The empty/no-selected-leaf case is outside this selected-member theorem only. -/
+theorem runtime_shared_mutation (rs : List (HRef H B)) (hlen : rs.length<2^256) (hq : left∈rs) :
+    ∃ (out : Heap H) (z : Source.EMState E0 SΓ),
+      (runtimeHeap rs hlen).writeAddr (.index left .dyn (uintOfNat 0)) false=some out ∧
+      (Source.writeLoc (E := E0) (Γ := SΓ) F0 0 (.mem 0 0) (.bool false)).run (runtimeSource rs)=(.ok (),z) ∧
+      SourceBoolRefsAt z 3 out fresh addresses ∧ Source.MemOK E0 SH z ∧
+      z.1=(runtimeSource rs).1 ∧ out.get fresh=(runtimeHeap rs hlen).get fresh := by
+  obtain ⟨hm,hr,_⟩ := runtime_initial_nested rs hlen
+  exact hr.write_child left (by
+    simpa only [Heap.get,Objs.get,runtimeHeap,fresh,MObj.elems_dyn] using hq)
+    (by intro t ht hne;exact hne) F0 0 (uintOfNat 0) false
+    (by simp only [Heap.len,Heap.get,Objs.get,runtimeHeap,left,MObj.elems_dyn,uintOfNat];decide) SH hm
+
+/-- The actual bad write returns no successful heap; no target rollback state
+or Source halt equivalence is inferred from these separate observations. -/
+theorem shared_mutation_bounds :
+    (Source.writeLoc (E := E0) (Γ := SΓ) F0 0 (.mem 0 3) (.bool false)).run sy=
+      (.error (.revert (Source.panicData .index)),sy) ∧
+    hp.writeAddr (.index left .dyn (indexValue ⟨3,by decide⟩)) false=none ∧
+    run (writeArrayCode (base left.id)) ((machine.push w[0]).push w[3])=.revert := by
+  have hh : sy.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ := by
+    simpa only [SourceBoolMemoryAt,Heap.get,Objs.get,hp,left,MObj.elems_dyn] using left_at
+  have hs := source_bool_write_bounds sy 0 [true,false,false] hh 3 (by decide) false
+  have hn : hp.writeAddr (.index left .dyn (indexValue ⟨3,by decide⟩)) false=none := by
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+    exact if_neg (by simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+  rcases writeArray_correct (initial_repr.state.heap.arrays left) ⟨3,by decide⟩ false w[0] rfl with ⟨out,hw,_,_⟩|⟨_,hc⟩
+  · have hw' : hp.writeAddr (.index left .dyn (indexValue ⟨3,by decide⟩)) false=some out := hw
+    rw [hn] at hw';cases hw'
+  · exact ⟨hs,hn,hc⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.runtime_shared_mutation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms runtime_shared_mutation
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.shared_mutation_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms shared_mutation_bounds
 
 end Solidity.Backend.MemoryOps.SourceNestedMemoryControls
