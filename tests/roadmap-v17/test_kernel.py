@@ -128,4 +128,33 @@ class HeadroomControls(unittest.TestCase):
         for key,value in [('headroomBytes',20*1024**3),('enclosingCgroupCurrentBytes',3*1024**3),('hostMemAvailableBytes',13*1024**3)]:
             bad=copy.deepcopy(r); bad[key]=value
             with self.subTest(key=key),self.assertRaises(ValueError): k.check_headroom(bad)
+class PreflightObservationControls(unittest.TestCase):
+    def test_failed_guard_retains_partial_numeric_evidence_and_never_launches(self):
+        cases=[('starved',str(16*1024**3),str(3*1024**3)),('unlimited','max','0'),('unavailable',None,'0')]
+        for label,limit,used in cases:
+            with self.subTest(label=label),tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
+                out=Path(tmp)/'evidence'
+                readings={'/proc/self/cgroup':'0::/','/proc/meminfo':'MemAvailable: 20971520 kB','/sys/fs/cgroup/memory.max':limit,'/sys/fs/cgroup/memory.current':used}
+                def read(path):
+                    value=readings[str(path)]
+                    if value is None: raise OSError('telemetry unavailable')
+                    return value
+                with patch.object(k.p,'ensure_no_unresolved'),patch.object(k.e,'snapshot',return_value={'revision':'a'*40}),patch.object(k,'source_closure',return_value={}),patch.object(k,'tool_inputs',return_value={}),patch.object(Path,'read_text',read),patch.object(k.p,'docker') as docker,patch.object(k.subprocess,'Popen') as popen:
+                    r=k.collect(KernelControls().req(),out)
+                self.assertEqual(r['exit'],2);self.assertEqual(r['preflightExit'],2);self.assertIsNone(r['commandExit']);self.assertFalse(r['launched'])
+                docker.assert_not_called();popen.assert_not_called();self.assertFalse((out/'fresh').exists())
+                obs=r['preflight']['resourceObservations'];self.assertEqual(obs['measurements']['hostMemAvailableBytes'],20*1024**3)
+                self.assertEqual(r['preflight']['requirements']['requiredEffectiveBytes'],14*1024**3)
+                if label=='starved':
+                    self.assertEqual(obs['measurements']['headroomBytes'],13*1024**3)
+                    self.assertFalse(r['preflight']['comparisons']['effectiveAtLeastCapPlusReserve'])
+                else:
+                    self.assertNotIn('headroomBytes',obs['measurements']);self.assertIsNone(r['preflight']['comparisons']['effectiveAtLeastCapPlusReserve'])
+                self.assertEqual(k.e.load(out/'record.json'),r)
+    def test_disk_failure_does_not_invent_resource_observations(self):
+        with tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
+            with patch.object(k.p,'ensure_no_unresolved'),patch.object(k.os,'statvfs',side_effect=OSError('disk unavailable')),patch.object(k,'resource_snapshot') as resources,patch.object(k.p,'docker') as docker:
+                r=k.collect(KernelControls().req(),Path(tmp)/'out')
+            self.assertEqual(r['exit'],2);self.assertIsNone(r['preflight']['comparisons']['diskAtLeastRequired'])
+            self.assertNotIn('resourceObservations',r['preflight']);resources.assert_not_called();docker.assert_not_called()
 if __name__=='__main__': unittest.main()

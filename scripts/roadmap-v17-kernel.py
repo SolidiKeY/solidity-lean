@@ -279,13 +279,22 @@ def collect(req, out):
     e.require(not out.exists() and out.is_absolute() and out.resolve()==out and not out.is_relative_to(ROOT) and out.is_relative_to(Path('/workspace')), 'new external evidence directory required')
     out.mkdir(parents=True)
     (out/'request.json').write_bytes(canonical(req))
+    before=None; closure=None; installed=None; resources=None; free=None
+    preflight={'requirements':{'memoryCapBytes':p.CAP,'osReserveBytes':p.resources.RESERVE,'requiredEffectiveBytes':p.CAP+p.resources.RESERVE,'diskFreeBytes':1024**3}}
     try:
+        disk=os.statvfs(ROOT); free=disk.f_bavail*disk.f_frsize
+        preflight['diskFreeBytes']=free
         before=e.snapshot(ROOT); closure=source_closure(req['module']); installed=tool_inputs(before)
         resources=resource_snapshot(); check_headroom(resources)
-        disk=os.statvfs(ROOT); free=disk.f_bavail*disk.f_frsize
         e.require(free>=1024**3,'disk guard')
     except (OSError,ValueError,subprocess.SubprocessError) as err:
-        failure={'schema':1,'exit':2,'phase':'preflight','request':req,'error':str(err),'releaseClosed':False,'semanticPremisesDischarged':False}
+        observed=getattr(err,'observations',None)
+        if observed is not None: preflight['resourceObservations']=observed
+        elif resources is not None: preflight['resourceObservations']={'measurements':resources}
+        measurements=preflight.get('resourceObservations',{}).get('measurements',{})
+        effective=measurements.get('headroomBytes')
+        preflight['comparisons']={'effectiveAtLeastCapPlusReserve':effective>=p.CAP+p.resources.RESERVE if type(effective) is int else None,'diskAtLeastRequired':free>=1024**3 if type(free) is int else None}
+        failure={'schema':1,'exit':2,'preflightExit':2,'commandExit':None,'launched':False,'phase':'preflight','request':req,'error':str(err),'preflight':preflight,'before':before,'sourceClosure':closure,'installedInputsSha256':e.digest(canonical(installed)) if installed is not None else None,'releaseClosed':False,'semanticPremisesDischarged':False}
         (out/'record.json').write_text(json.dumps(failure,indent=2)+'\n'); return failure
     e.require(not (out/'fresh').exists(),'fresh compilation directory is not empty')
     (out/'Query.lean').write_bytes(query_bytes(req))

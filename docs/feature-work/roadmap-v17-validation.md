@@ -539,3 +539,22 @@ Mocked collector tests now supply synthetic resource measurements independently
 of VM pressure; production resource guards are unchanged. Actual source-bound
 catalog/join runs, extraction admission or resource refusal, final reviews and all
 original queue limitations are retained in the new external checkpoint handoff.
+
+### Resource-refusal evidence recovery
+
+The shared resource sampler now attaches only actual raw and parsed observations
+to a refusal exception. Its finite-measurement parser and `check_headroom` policy
+are unchanged. Kernel preflight failure records retain those available resource
+observations, disk availability, exact cap/reserve/disk thresholds and comparison
+results, including explicit unknown values for unavailable telemetry. They retain
+preflight exit 2, null command exit and `launched=false`; missing telemetry never
+becomes invented capacity. Independent read-only finder and skeptic reviews
+accepted the repair and its starvation, malformed/unavailable telemetry, disk
+failure and no-container/no-process controls (129 total controls).
+
+Any task-owned clean-file page-cache advice and actual subsequent extraction/join
+belong to the new external handoff. Prior refusals and sealed sets stay unchanged.
+Read-only cache advice changes no disk artifact and cannot substitute for the
+unchanged production guard passing. Actual positive declaration matches, if
+obtained, still discharge no semantic premise or feature row; all original
+G52–G55, Backfill A/B and missing integrated source/V11–V16 obligations remain.
