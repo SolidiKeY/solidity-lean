@@ -376,3 +376,19 @@ the human subsequently requested inspection and integration of completed work
 from Codex Cloud VMs, worktrees and branches, with delivery to `origin/master`.
 That authorizes serial integration after the existing reviews and validation;
 it does not establish that any assembly implementation is complete.
+
+## Automation lane decisions (2026-10-31)
+
+The human approved the after-roadmap automation lanes in the originating chat
+on 2026-10-31. This isolated VA2 checkout records the exact decision receipt:
+
+| ID | Exact human answer |
+|---|---|
+| AQ1 | "Yes, start both lanes" |
+| AQ2 | "Yes, keep unrolling and warn" |
+
+AQ1 authorizes VA1 and VA2. AQ2 keeps unrolling unannotated literal-bounded
+loops and adds a warning naming the loop, with no new option. These answers
+close no proof obligation and grant no broader scope. Decisions c, c-prime,
+d, e3-prime and e3-double-prime remain in force: undecidable or unprovable
+classes remain unknown; exact validity and hash premises remain unchanged.

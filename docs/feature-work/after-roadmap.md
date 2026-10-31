@@ -121,4 +121,4 @@ matching solc's optimizer needs VP2, VP3 and probably continuation lanes.
 
 ## Handoffs
 
-None yet.
+- [VA2 AU03/AU04](after-roadmap-va2.md): isolated approval setup; runtime blocked, implementation pending.
