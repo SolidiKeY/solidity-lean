@@ -389,3 +389,19 @@ and its checksum verification passed. Repository/branch/frozen base appear above
 full final committed head is recorded in the external exact-head handoff to avoid
 self-referential commit hashes. Coordinator reconciliation should retain every
 G48,G49.01,G49.02,G49.03,G50.01,G50.02,G51.01,G51.02 ledger obligation as OPEN.
+
+
+## Published-prerequisite recovery 2de14d52
+
+Explicit human recovery authorization permits fetching published master and
+integrating91e94ab57305ca055127934fd9e68fe9ea5e6be3 into this isolated task branch.
+Earlier no-fetch/no-merge statements describe the prior authorization period;
+no unmerged branch, producer repair, default-branch merge or push is authorized.
+The published merge preserves35df1dc09d5b47c9d3ef1f472a8049300f3b12b2 and all110
+sealed artifacts unchanged. Both independent read-only integration reviewers
+verified every reserved file equals published91 and every owned implementation
+remains unchanged, with both sides of append-only registration preserved.
+This integration itself establishes no new consumer theorem or build success.
+New bounded checks and artifact evidence use a fresh directory:
+/workspace/scratch/v16-published-2de14d52. The existing source/toolchain cache and
+all original raw failures remain intact. Full final import validation is pending.
