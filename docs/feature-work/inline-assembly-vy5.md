@@ -14,6 +14,9 @@ verified. No other lane was integrated or modified.
 
 ## Queue accounting
 
+The table and checks below describe the original checkpoint; the dated recovery
+section updates its reference-adapter results without closing proof obligations.
+
 | Item | Result and remaining obligation |
 |---|---|
 | Work 1: Y10 composition | Pending. The G03 extension has 24 explicit pending obligations, six constructor combinations and exact dependency/owner validation. No concrete V16/VY3/VY4 assembly interfaces exist in this tree. No residual predicate or generic certificate wrapper substitutes for them. |
@@ -205,3 +208,87 @@ Final handoff, original patch, Git bundle and checksum manifest are generated
 at that root after committing. They contain full head/base/branch identities,
 commands, exits, raw failures, resource/review evidence and all pending work.
 The full assignment remains unfinished; no push, PR or merge is authorized.
+
+## Reference adapter recovery — 2026-10-31
+
+Reviewed recovery follows checkpoint `2f8682af36deb36b1a39c0c1cc85a482e71e360a`
+on the same branch/VM. The existing full-assignment goal remains blocked; this
+manual turn neither resets it nor establishes automatic continuation.
+Original artifacts under `/workspace/vy5-composition` remain unchanged. New
+artifacts and full committed identity are under
+`/workspace/vy5-composition/recovery-20261031/handoff.json`.
+
+The missing `args.map` field was a real adapter error: the existing parser emits
+raw ABI `calldata`/`expectedBytes` vectors for bytes32, dynamic arrays and similar
+signatures. The lane wrapper consumes those exact bytes with the exported
+bounded engine, preserving selectors and every original call. Shared V17/legacy
+scripts are unchanged. Ordered anonymous logs include literal emitter, topics,
+data and order. Omitted arrows retain calls with empty expected output. Gas
+metadata is retained as telemetry/profile selection, never semantic output.
+The [per-fixture recovery ledger](../../tests/yul-composition/reference-recovery.json)
+retains original reasons, source hashes, exact profiles and call counts.
+
+All 44 missing-map, 30 conservative-host and six expectation-syntax blocked
+variants in the previous nested reference output now execute and match. Pinned
+EVMHost/ExecutionFramework inputs supply accounts, value, environment and
+transaction number/time; real transaction-sequence regressions cover transient
+reset and EIP-6780 new-versus-old destruction. The actual first deletion test
+failed because SimpleStateManager metadata deletion leaves code; the wrapper
+now explicitly clears public code/storage as well. Failed tests are retained.
+EthereumJS CREATE address derivation differs from the pinned host's pre-increment
+nonce convention: address-returning creation oracles are explicitly blocked;
+no whole-host equivalence is claimed. No current selected fixture hits that
+boundary. Blockhash history and unsupported settings remain fail closed.
+
+Pinned SemanticTest.cpp defaults SSA-CFG on when viaIR runs. Actual compiler
+probes confirm it requires `experimental:true`; the wrapper preserves that
+setting and required SSA-CFG profile separately from ordinary viaIR and
+explicit gas-metadata optimized profiles. The `<amsterdam` fixture accepts Osaka
+according to the pinned fork ordering. Seven old-fork fixtures still exclude
+Osaka: basefee_berlin_function, blobbasefee_shanghai_function, blobhash_pre_cancun,
+clz_pre_osaka, difficulty, mcopy_as_identifier_pre_cancun and
+tload_tstore_not_reserved_before_cancun (all `.sol`). Each retains three blocked
+profiles and its exact fork reason; no expectations were changed.
+
+Final `recovery-reviewed` command exits 0: **53 JavaScript tests, two Python
+tests; 80 fixtures, 248 runtime profiles, 227 matching and 21 fork-blocked**.
+The integrated 416 four-way compiler probes retain 72 matches, eight intended
+mutant mismatches and four diagnostic matches; 304 remain pending and 28 blocked.
+The single former blocked-to-pending probe is the repaired `<amsterdam` adapter,
+not a proof pass. Nested runtime reports are separate from those compiler probes.
+All raw compile inputs/outputs, provenance, observations, failures and commands
+are saved in `reviewed-reference`, `reviewed-integrated` and recovery evidence.
+
+Reports reject missing/reordered calls, changed pinned oracle/settings, omitted
+profiles, malformed bytes/logs/deployment, wrong compile-input hashes and hidden
+mismatches. A prior mismatch dominates a later adapter block. Independent finder
+and skeptic reviews found and prompted fixes for profile labels, immutable
+oracle binding, deployment evidence and compile metadata validation. Both accept
+the final reference-only scope; review records are in the recovery handoff.
+The integrated dynamic-import deadlock (exit 13) and earlier failing regressions
+remain raw evidence, followed by passing reviewed runs.
+
+No Lean source/import, theorem statement, proof budget, admission rule, manifest
+verdict or other lane changed in this recovery. Existing gas/msize/pc/own-code,
+callcode and non-memory-safe admission refusals plus canonical rethrow remain.
+This external runner may observe excluded upstream programs without admitting
+them. No new theorem or axiom report is claimed. Prior KeySort and full-policy
+exit-0 evidence remains applicable to unchanged Lean: Lean 4.24.0
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, Lake 5.0.0-src+797c613.
+No redundant full Lean build was run. Existing docs/G03 exit-1 outputs retain
+hashes `01fd3beaa0d1694397f6231999418eea67e797d42150bf68d2d8a96bc4ea109a`
+and `3bada79141a6a9818dc160a9d15066bbebc678462507be4dba6130aa3371f681`.
+
+Recovery heavy checks were serial under the writer lock, Docker memory=swap
+limit=12 GiB (no added swap), one CPU and LEAN_NUM_THREADS=1. Final sampled RSS
+561,205,248 bytes, minimum OS availability 17,309,073,408 bytes; zero OOM.
+No proof/fuel/node/test budget increased. The final resource record includes
+exact command, limits and samples; disk retained more than 19 GiB headroom.
+
+Work 1 remains pending all 24 child obligations and six combinations; concrete
+VY1–VY4/V16 and recorded V04/V04b/V12/V13/V15 contracts are missing. Work 2 and
+Backfill A/B improved, but complete raw-memory/world/storage observations and
+universally quantified source/target correspondence remain open. Work 3, G48–G51
+and final joint kernel/import/composition gates remain pending. No dependency
+preparation, compiler match or mock closes them. No new semantic question is
+established; original YQ1–YQ7 authorization remains in force.

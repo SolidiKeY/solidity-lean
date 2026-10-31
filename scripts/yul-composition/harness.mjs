@@ -202,6 +202,7 @@ export function controlFailures(results,requireExecution=false) {
   for(const r of results) {
     if(r.layoutSanity===false) failures.push(r.id+': invalid reference allocation layout');
     if(r.policyCheck==='mismatch' || r.compilerControl==='mismatch') failures.push(r.id+': control mismatch');
+    if(r.reference?.validationFailure) failures.push(r.id+': malformed upstream evidence: '+r.reference.validationFailure);
     if(r.reference?.status==='broken') failures.push(r.id+': upstream reference mismatch');
     if(r.status==='mismatch' && !['must-mismatch','must-reject-always-revert'].includes(r.negativeControl)) failures.push(r.id+': observation mismatch');
     if(requireExecution && r.id==='incorrect-opcode' &&
@@ -263,14 +264,15 @@ export async function run({compiler,out,corpus,executeReference=false,optimizerA
         row.layoutSanity=ptr>=128n && ptr%32n===0n;
         row.status='pending';row.reason='reference pointer retained; source allocation refinement pending';
       }
-      // Upstream replay uses the existing bounded reference adapter unchanged.
+      // Upstream byte-vector wrapper reuses the shared bounded engine unchanged.
       if(job.kind==='upstream' && executeReference) {
-        const {runFixture}=await import('../evm-reference/replay.mjs');
+        const {runFixture,validateFixtureEvidence}=await import('./upstream.mjs');
         // runFixture retains exactly the upstream-required pipelines/settings;
         // save once rather than presenting probe modes as upstream matches.
         if(pipeline==='legacy' && !optimized) {
           let referenceIndex=0;
-          row.reference=await runFixture(job.path,corpus,i=>compileRecord(compile,i,stem+'.reference-'+referenceIndex++).output);
+          row.reference=await runFixture(job.path,corpus,i=>compileRecord(compile,i,stem+'.reference-'+referenceIndex++).output,policyScan);
+          try { validateFixtureEvidence(row.reference,corpus); } catch(e) { row.reference.validationFailure=e.message; }
           save(stem+'.reference.json',row.reference);
         }
       }
@@ -281,6 +283,7 @@ export async function run({compiler,out,corpus,executeReference=false,optimizerA
     ledger,proofControls,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
     fixturesSha256:sha(readFileSync(join(ROOT,'tests/yul-composition/fixtures.json'))),
     adapterSha256:sha(readFileSync(join(ROOT,'scripts/solidity-upstream.mjs'))),
+    upstreamWrapperSha256:sha(readFileSync(join(ROOT,'scripts/yul-composition/upstream.mjs'))),
     referenceEngineSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/replay.mjs'))),
     referenceHost:{engine:'@ethereumjs/evm 10.1.3',hardfork:'osaka',initialGas:'100000000',stepLimit:5000000,allowUnlimitedContractSize:true,allowUnlimitedInitCodeSize:true},
     referenceLockSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/package-lock.json'))),results};

@@ -162,3 +162,15 @@ Y10/G48–G51 concrete composition, complete G52 observations and final joint
 proof closure remain pending actual V16/VY3/VY4 and other recorded inputs.
 The authorization is recorded in [scope](../solidity-scope.md#inline-assembly-decisions-2026-10-31);
 the older proposal status above is historical, not a revocation of YQ1–YQ7.
+
+### VY5 reference recovery — 2026-10-31
+
+The [lane recovery record](inline-assembly-vy5.md#reference-adapter-recovery--2026-10-31)
+and [per-fixture ledger](../../tests/yul-composition/reference-recovery.json)
+record repaired raw ABI vectors, ordered anonymous logs/call sequences, pinned
+host inputs and exact required runtime profiles. 227 profiles match; 21 retain
+old-fork incompatibilities. Separate four-way probes retain eight intended
+mutant mismatches. Full Y10/G48–G51 and world/memory/source correspondence remain
+pending; the existing goal stays blocked. Original checkpoint/artifacts remain
+preserved; new full head, commands, reviews and checksums are in
+`/workspace/vy5-composition/recovery-20261031/handoff.json`.

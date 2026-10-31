@@ -138,3 +138,7 @@ test('mutated always-revert target control cannot be an ordinary mismatch',()=>{
  assert(ownedFailures([{...report,comparison:{differences:['returnData']}}]).length);
  assert(ownedFailures([{...report,targetMutation:null}]).length);
 });
+
+test('malformed nested reference evidence fails the aggregate gate',()=>{
+ assert(controlFailures([{id:'bad',reference:{status:'working',validationFailure:'changed pinned oracle'}}]).length);
+});
