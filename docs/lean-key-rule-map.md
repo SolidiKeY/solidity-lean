@@ -1044,3 +1044,13 @@ scalar/owned-pointer/struct/static-array/dynamic-array/bytes/string layout laws.
 Actual typed constructors, real child ownership and valid placement/distinct
 supported coverage are explicit; no SolKey taclet, dirty cleanup, universal
 writeback, Y09.02 notation/printing or full source/compiler/calculus closure.
+
+
+VY2 selected word writeback (Lean-only, YQ5): decodeStaticUint_encode/reencode,
+staticUintWriteback_unchanged, staticUintState_MemOK/unchanged,
+decodeMemoryPointer_encode/read, structPointerWriteback_MemOK and
+mstore_disjoint_commute are kernel laws for concrete supported components.
+Actual typed found objects/declared indices/Placement/real candidate ownership
+and explicit coverage for pointer completeness remain premises. No SolKey taclet,
+generic raw struct/whole-memory or dirty/shared-zero semantics, Y09.02 notation/
+printing or full source/compiler/calculus coverage claim.

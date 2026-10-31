@@ -320,3 +320,15 @@ compare complete pointer/header/alias/ABI observations with157negative controls;
 initial broken fixture evidence preserved. See [lane checkpoint](inline-assembly-vy2.md#mixed-ordinary-aggregatepointer-views-2026-10-31)
 and `/workspace/vy2-evidence/mixed-heap/HANDOFF.md`. Universal realization,
 writeback/allocation/source/compiler/calculus closure and full VY2 remain open.
+
+
+### VY2 selected word writeback handoff (2026-10-31)
+
+Continued after mixed-view checkpoint: concrete full-width static uint256 array
+decode/writeback and ownership-based pointer decoder composed with actual typed
+Source.writeLoc, all-initial-H owner MemOK, unchanged and concrete physical/source
+two-order controls. Isolated pinned fixture checks both combinations/maxword/
+revert/fresh with149negative controls. See [lane record](inline-assembly-vy2.md#concrete-selected-array-and-pointer-writeback-2026-10-31)
+and `/workspace/vy2-evidence/static-uint/HANDOFF.md`. Selected support is not
+universal whole-memory/dirty/shared-zero/source/compiler/calculus closure;
+full VY2 and both backfills remain unfinished, goal blocked unchanged.

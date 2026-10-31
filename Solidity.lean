@@ -902,3 +902,4 @@ import Solidity.Yul.Views.HeapByteResizeBoundaries
 import Solidity.Yul.Views.RetainedByteControls
 import Solidity.Yul.Views.ByteHeapRealizationControls
 import Solidity.Yul.Views.MixedHeapControls
+import Solidity.Yul.Views.WordWritebackControls

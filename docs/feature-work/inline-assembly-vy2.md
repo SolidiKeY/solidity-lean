@@ -1144,3 +1144,81 @@ KeySort2jobs exit0. Scoped1106declarations/600theorem reports standard axioms.
 Layers230core/0elaboratorreach,1054reachable/0orphan, trust1069sources/246sites/
 0findings, strict491automatic/61budgeted/11refuted/0pending pass. Raw docs exit1
 same48findings, markdown base1/head1/new0. Final independent reviews clear.
+
+
+## Concrete selected array and pointer writeback (2026-10-31)
+
+Continued original Y05/Backfill A/B AFTER reviewed/gated mixed-view commit
+`3cd014adf657cdc84f697f165720d5744844f70e`. New
+[StaticUintMemory](../../Solidity/Yul/Views/StaticUintMemory.lean) constructs
+uint256 values from ALL256bits, static arrays at their declared length and exact
+physical decoders. uintValueOfWord_word, decodeStaticUint_encode/reencode,
+staticUintWriteback_encode/unchanged/other/types, staticUintWrittenPlacement,
+staticUintState_MemOK/unchanged and staticUint_word_fits prove constructive
+roundtrip, whole heap/state unchanged identity, actual typed Heap.write,
+unrelated cells/types/next/boundedness and original address/shape/free choices.
+EVERY initial owner typing H is preserved; no inverse/preservation law is assumed.
+Valid original found array/Placement supplies length/word bounds, not an added
+cap. Full-width uint256 has no discarded dirty high bits; this does NOT provide
+narrow dirty-word cleanup or resolve YQ4 for other types.
+
+[PointerMemory](../../Solidity/Yul/Views/PointerMemory.lean) searches a finite
+set of actual typed MixedHeapEntry witnesses. Candidate shape and EXACT raw
+address must match; no gap/free-pointer inference. Successful decoding proves
+actual RefOK and ElementWord raw-bit agreement. Complete supported coverage and
+Placement.distinct give decodeMemoryPointer_encode, not an assumed inverse.
+The candidate list is explicit; incomplete lists do NOT imply absence of a real
+child. pointerStateWriteback composes with ACTUAL Source.writeLoc and exposes
+its full Except/state result; real owner MemOK for EVERY initial H is preserved
+through successes AND source errors. structPointerWriteback reads the actual
+physical member word with real found-struct/declared Fin-index/type premises;
+structPointer_word_fits derives its word window bounds. It is SELECTED-FIELD
+writeback: it does not decode other simultaneously changed struct fields or
+claim generic target progress/all-block safety. None is unsupported preparation,
+not Yul refusal/no-op/deallocation; shared-zero/interior/unrepresented/dirty
+pointer cases remain original open obligations. Existing owner and full memory
+obligation signatures are unchanged.
+
+[Controls](../../Solidity/Yul/Views/WordWritebackControls.lean) use the actual
+mixed Env/Heap: array7,9→7,42, unchanged whole state, full2^256-1 value, two array
+aliases/actual Source.readLoc, retarget a bytes member to a real string child,
+actual member reads and bytesOfRV at EVERY horizon, unchanged pointer source
+step, invalid129/wrong-type/shared-zero96/missing-coverage preparation controls,
+reserved/free/zero/padding/other roots. Concrete array→physical-pointer and
+pointer→array source state steps agree, with actual all-H owner MemOK;
+mstore_disjoint_commute proves exact whole physical equality of both orders.
+No full source Expr/Yul/compiler correspondence is inferred.
+
+[WordWriteback.sol](../../tests/yul-views/WordWriteback.sol) imports the frozen
+MixedHeap.sol. Six ordered calls per pinned legacy/viaIR pipeline compare ALL42
+ABIwords/bytes for pointer+scalar orders, maximum uint256, explicit revert and
+fresh state.73mutations per pipeline+3inventory=149negative controls have fixed
+asserted counts. All old complete report fields/184calls are identical; new
+cumulative196calls. Gas100m/steps5m, compiler/fork pins, all prior fixtures and
+expected observations remain unchanged. Compiler/EVM evidence is separate from
+kernel/source/target/Yul admission proof. Scope is canonical supported parts;
+no promotion or exclusion change. Exact signatures/axioms, commands/exits,
+reviews/resources/head/artifacts are saved under
+`/workspace/vy2-evidence/static-uint/HANDOFF.md` and cumulative handoff.
+
+Full work/backfill accounting remains Y04/Y05/Y06 and A/B PARTIAL, concrete
+Y09.02 BLOCKED. Still open: whole-store/path/hash/dynamic/dirty ownership,
+generic dynamic/struct/all-fields and whole-memory writeback/realization,
+shared-zero/interior/pointer/nested source semantics, allocator provenance/
+refinement, V10/V11 agreement instances and actual VY1/source/compiler/calculus/
+final joint closure. Owner MemOK/World/ContractWorld/Bridge are available and
+reused, not substitutes for missing actual Yul adequacy. Oversized MemOK/no-
+ordinary-Placement counterexample retains its EXACT earlier boundary; no new
+capacity premise/refusal or reachable-allocation claim. Goal remains blocked
+unchanged, get_goal absent, no transition/new VM/thread/model/worker merge/push;
+YQ1–YQ7 preserved; questions=[]. Original3988manifest/prior artifacts and every
+failed attempt, including initial mixed fixture/proofs/lock probes, are retained.
+
+Final selected-word validation: per-file/focused50jobs/fullwrapper1042default+
+262suitejobs/131matchedannotations exit0; actual Lean4.24.0/Lake5.0.0-src+797c613,
+KeySort2jobs exit0. Scoped1188declarations/652theorem reports standard axioms only.
+Layers233core/0elaboratorreach,1057reachable/0orphan, trust1072sources/246sites/
+0findings, strict491automatic/61budgeted/11refuted/0pending pass. Global docs
+ACTUAL exit1 with same48exact-base findings/zero delta; markdown base1/head1/new0.
+Both independent final reviews clear. Complete external196calls preserve ALL
+preceding fields, and all81/14/33/55/89/103/121/157/149negative suites pass.
