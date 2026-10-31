@@ -1,0 +1,194 @@
+{
+  "nativeSummarySha256": "336593d9714cc1489edaa8e7ae229ab6dd1bcd425d76abd109fc31b0947a3adf",
+  "nativeWorking": 12,
+  "nativeBlocked": 8,
+  "nativeStrictExit": 1,
+  "referenceWorking": 18,
+  "referenceHistoricalBlocked": 2,
+  "oldNativeReferenceOrderedComparisons": 66,
+  "oldReferenceFrozenOrderedComparisons": 140,
+  "freshComparisons": 0,
+  "rows": [
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/assert.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/assert_pre_byzantium.sol",
+      "native": "blocked",
+      "reference": "blocked",
+      "nativeDetail": "upstream EVM constraint excludes osaka: <byzantium",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "historical profile/runner execution unapproved; compatibility investigation only"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/create.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/invalid_error_encoding.sol",
+      "native": "blocked",
+      "reference": "working",
+      "nativeDetail": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "external reference/nonprimitive ABI producer, policy-blocked owner lane; not this source bridge"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/lowLevel.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/malformed_error.sol",
+      "native": "blocked",
+      "reference": "working",
+      "nativeDetail": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "four-store typed producer, invalidated free-pointer/zero-slot, interior Error decoder capture/default sentinel/return transport; P4/P5b/P8"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/malformed_panic.sol",
+      "native": "blocked",
+      "reference": "working",
+      "nativeDetail": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "M1 n36 component completed; source carrier/reification and original body association absent, other sizes not completed; P4/P5b/P8"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/malformed_panic_2.sol",
+      "native": "blocked",
+      "reference": "working",
+      "nativeDetail": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "two-store producer generalization and exact caller closures/short/trailing alternatives; P4/P5b/P8"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/malformed_panic_3.sol",
+      "native": "blocked",
+      "reference": "working",
+      "nativeDetail": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "two-store producer generalization and exact caller closures/short/trailing alternatives; P4/P5b/P8"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/malformed_panic_4.sol",
+      "native": "blocked",
+      "reference": "working",
+      "nativeDetail": "transaction/block/self-address or cross-contract host behavior not adapted",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "two-store producer generalization and exact caller closures/short/trailing alternatives; P4/P5b/P8"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/nested.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/require.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/require_pre_byzantium.sol",
+      "native": "blocked",
+      "reference": "blocked",
+      "nativeDetail": "upstream EVM constraint excludes osaka: <byzantium",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "historical profile/runner execution unapproved; compatibility investigation only"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/return_function.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/simple.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/simple_notuple.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/structured.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/structuredAndLowLevel.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    },
+    {
+      "fixture": "test/libsolidity/semanticTests/tryCatch/try_catch_library_call.sol",
+      "native": "working",
+      "reference": "working",
+      "nativeDetail": "functional runtime vectors match in every required source evaluation mode",
+      "retainedNativeExit": 1,
+      "newExecution": false,
+      "preciseNextLayer": "retained compatible native/reference success; no new pass"
+    }
+  ],
+  "warning": "retained classification/ordered observations only, NOT a fresh required-pipeline replay"
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "log": "mcp-carrier-final",
+    "result": {
+      "partial": false,
+      "still_elaborating_lines": null,
+      "success": true,
+      "timed_out": false,
+      "items": [],
+      "failed_dependencies": []
+    }
+  },
+  {
+    "log": "mcp-carrier-return-final",
+    "result": {
+      "partial": false,
+      "still_elaborating_lines": null,
+      "success": true,
+      "timed_out": false,
+      "items": [],
+      "failed_dependencies": []
+    }
+  },
+  {
+    "log": "mcp-top",
+    "result": {
+      "partial": false,
+      "still_elaborating_lines": null,
+      "success": true,
+      "timed_out": false,
+      "items": [],
+      "failed_dependencies": []
+    }
+  }
+]

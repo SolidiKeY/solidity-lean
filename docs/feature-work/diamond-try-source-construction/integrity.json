@@ -1,0 +1,9 @@
+{
+  "previousManifestSha256": "e5ade26045403f1d98369148216f553d368e8626db96b5acde80251156f8d39e",
+  "previousEntriesVerified": 2723,
+  "sourcePipelines": 2,
+  "metadataNegativeControls": 12,
+  "kernelProofsExecuted": 0,
+  "compilerOrEVMExecution": false,
+  "newImplementation": false
+}

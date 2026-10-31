@@ -29,5 +29,9 @@
       }
     }
   },
-  "scripts": { "test": "node --test test/*.test.cjs" }
+  "scripts": {
+    "test": "node --test test/*.test.cjs",
+    "parity": "node parity/run.cjs",
+    "parity:check": "node parity/discover.cjs --check"
+  }
 }

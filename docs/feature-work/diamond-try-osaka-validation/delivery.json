@@ -1,0 +1,21 @@
+{
+  "humanDecision": "call_773eaf24f18747868cab51e9a9fed612 item0",
+  "delivery": "direct user message in this retained active thread",
+  "workerDispatchReceipt": null,
+  "turnID": null,
+  "reason": "No coordinator journaled resume helper/receipt API is exposed in this worker; receipt reconciliation remains coordinator-owned. No fabricated receipt or re-dispatch. New validation authorization consumed once here, not replay of accepted M1/design.",
+  "executor": "ccarenv_b64_Y2NhcmVudl9mMDA5NzMwMmYyNWM4MTkxYTViNmJmYmEzYTcyZTAxOA",
+  "verifiedHead": "bd1e54e72bd28bb3934d3c2bada5a297ce6ed0ea",
+  "clean": true,
+  "timestampUTC": "2026-10-30T13:24:45.087129+00:00",
+  "executionStatus": "consumed once in this retained active turn",
+  "launchToolResultChunks": {
+    "scriptTests": "328c92",
+    "nativeFamily": "277519",
+    "referenceMalformedPanic": "db32bc"
+  },
+  "chunksAreNotCoordinatorReceipts": true,
+  "coordinatorReceiptDeferral": "Worker has no exposed journaled-resume/receipt-reconciliation helper. Direct user approval is recorded; coordinator owns authoritative receipt/turn reconciliation. No helper or coordinator state modified.",
+  "newAutomaticRejection": false,
+  "preservedOriginalRejection": "m1-producer/approval-rejection.txt"
+}

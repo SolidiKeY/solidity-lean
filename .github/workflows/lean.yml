@@ -32,6 +32,7 @@ jobs:
       - name: Check Dafny inventory and editor integration
         run: |
           node scripts/check-dafny-features.mjs
+          node vscode/parity/discover.cjs --check
           node --test scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs vscode/test/*.test.cjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
       # the printers or the tactic front ends, even transitively.
