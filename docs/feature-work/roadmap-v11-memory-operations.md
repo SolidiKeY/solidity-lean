@@ -75,14 +75,14 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint thirty-one. Earlier checkpoint
+Current cumulative accounting through checkpoint thirty-two. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
 |---|---|---|
 | G32 | partial | Intrinsic heap-object framing/noninterference components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
 | G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors; supported actual Source Boolean allocation and MemOK preservation now checked. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
-| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
+| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads and single-element read/write-to-intrinsic-copy transitions proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
 | G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
 | G35.02 | blocked | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
 | G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved, including actual ordered two-transfer composition and local commutation. General families/reference construction, calldata-to-storage, ABI decoding, general Source copy/program execution and target transport remain. |
@@ -2686,3 +2686,55 @@ is consumed for the supported local read/allocation case; earlier holds are not
 repeated as a blanket excuse. Backfill A/B advanced, not exhausted or complete.
 
 C31 final synchronized gate:1067 default jobs,262 TestSuite jobs, final SolKey377/131, wrapper exit0. Peak sampled aggregate Lean/Lake RSS11432472KiB, cumulative child peak12884901888bytes, memory.max event delta479, OOM/kill deltas0. The existing cap was reached and enforced; no limit/budget change. Complete strict timing check is recorded separately. Raw docs exit1/current83findings exactly equal new public baseline;11incoming findings relative original frozen72 remain a FAILED original no-new gate, not V11 regressions. Global inventory exit1:1037unrecorded=359public inherited+678owned,0unsafe; scoped678standardpins/86modules pass independently. Global whitespace exit2 matches public inherited Source/Horizon debt; owned-vs-public whitespace passes.
+
+## Checkpoint thirty-two: independent Source read/write and actual intrinsic capture
+
+Reproduced a distinct supported original G34/G35.04/BackfillA-B clause: C31
+observes initial Source reads but does not execute Source writes. SourceWrite
+composes EXISTING readLoc then writeLoc at the actual reached Source state.
+source_bool_write proves published memSet's exact state/heap.write with canonical
+updated typed Data; no second allocator/state/evaluator. capture_singleton_elems
+derives actual captured payload from the intrinsic source slot and exact target
+list.set; no caller-supplied payload or conversion oracle. SourceBoolMemoryAt.copy
+derives actual checkedCaptureOverwrite Some, actual Source composed Some and
+final local representation from INITIAL representation and two runtime bounds.
+copy_memOK consumes published writeLoc_memOK after the actual read; no desired
+final invariant premise. source_bool_write_bounds/copy_bounds derive actual
+Source index panic and OptionNone separately, with first-read short circuit and
+bad-write-after-successful-read cases, no invented rollback/suffix heap.
+
+Controls reuse C31's independently allocated Source state, existing intrinsic
+heap and initial MemOK. Both Source and target actually execute0→1 then changed
+1→2, with complete old/mid/final TFFtail/TTFtail/TTTtail, complete Source object
+contents, untouched target neighborFT, both reached MemOK, original read1false
+versus reached read1true/finalread2true and frozen-sourcefalse negative, IDs0/1.
+Runtime n is uncapped beyond existing n+3<2^256 object validity. Independent bad
+source and destination exact-end outcomes retain successful read0 before bad
+write. Actual element32 changes false→true and retains neighbor. All prior
+nonprimitive/default/copy/schedule/empty/alias fixtures and exact pins remain.
+Nine new public laws/controls carry exact standard-only axiom guards.
+
+Focused failed elaborations are retained: redundant simplification, dependent
+Data-array congruence/index casts, Hoare run reduction and dependent list rewrite
+motives were repaired. No theorem, observation or premise weakened, no heartbeat/
+fuel/node/stack/time budget changed; no deliverable sorryAx. Same runtime/lock,
+12GiB/no-swap child and16GiBparent, serialLean-j1/cacheOFF; preflight1.72GiB free
+and64MiB warm-build/log/export envelope with unchanged512MiB reserve.
+
+This is actual independent Source primitive operation transport, not compilation
+of resolved syntax or a Source slice loop. G32 physical bytes/target frames, G33
+all-profile construction/target failure, G34 general path/rebinding/delete/stale
+alias compilation, G35.01 general Source/target copying/liveness, G35.02 reserved
+memory-storage, G35.03 general ABI/reference/calldata-storage/target, G35.04 fresh
+deep-copy/emitted loops, G35.05 recursive Source graphs and G35.06 final V10/Source/
+target chain remain open. Backfill A/B advanced, not exhausted or complete.
+
+C32 guarded closure109jobs PASS; final unchanged run-lean.sh1068default/262Suite/
+SolKey377/131 exit0. Strict automatic, fixture/layer/orphan/trust/lane687standard
+pins/87modules/script corruption pass. Warm final gate233472bytes disk growth,
+peak aggregateRSS1675360KiB, no new memory.max/OOM/kill events; cumulative session
+peak12GiB belongs to earlier C31 cold gate. Separate source finder/skeptic accept
+with no defect; neighbor framing explicitly intrinsic-only. Raw docs1 exactly
+public baseline83 findings, original no-new remainsFAIL for11incoming; raw global
+inventory1:1046unrecorded=359publicinherited+687owned,0unsafe. Reserved inventories
+unchanged. Complete gate/resource/review receipts and additive proposals retained.

@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.SourceMemory
+import Solidity.Backend.MemoryOps.SourceWrite
 import Solidity.Source.SemanticsExamples
 
 namespace Solidity.Backend.MemoryOps.SourceMemoryControls
@@ -177,6 +177,122 @@ theorem source_boundary32 :
     rfl
   rw [hi] at hs
   exact ⟨out,ho,hs.2.mp hread⟩
+private theorem singleton_values (input output : Heap H) (src dst : Nat)
+    (hs : src<input.len r .dyn) (hd : dst<input.len r .dyn)
+    (ho : checkedCaptureOverwrite input r .dyn r .dyn src (src+1) dst=some output) :
+    MObj.elems .dyn (output.get r)=(MObj.elems .dyn (input.get r)).set dst (MObj.elems .dyn (input.get r))[src] := by
+  obtain ⟨hs',hd',rfl⟩ := (checkedCaptureOverwrite_some_iff input r .dyn r .dyn src (src+1) dst output).mp ho
+  exact capture_singleton_elems input r .dyn src dst hs hd
+
+/-- Both independent Source transitions execute at the ACTUAL reached state.
+All intermediate/final source contents and intrinsic vectors are observed. -/
+theorem source_written_copies (n : Nat) (hn : n+3<2^256) :
+    ∃ (mid out : Heap H) (z₁ z₂ : Source.EMState E0 []),
+      checkedCaptureOverwrite (hp n hn) r .dyn r .dyn 0 1 1=some mid ∧
+      (sourceBoolCopy F0 0 0 0 1).run (sy n)=(.ok (),z₁) ∧
+      checkedCaptureOverwrite mid r .dyn r .dyn 1 2 2=some out ∧
+      (sourceBoolCopy F0 0 0 1 2).run z₁=(.ok (),z₂) ∧
+      [MObj.elems .dyn ((hp n hn).get r),MObj.elems .dyn (mid.get r),MObj.elems .dyn (out.get r)]=
+        [initial n,[true,true,false]++List.replicate n false,finalValues n] ∧
+      [((sy n).2.heap.get 0),z₁.2.heap.get 0,z₂.2.heap.get 0]=
+        [some ⟨.array .memory .bool none,sourceBoolMemory (initial n)⟩,
+         some ⟨.array .memory .bool none,sourceBoolMemory ([true,true,false]++List.replicate n false)⟩,
+         some ⟨.array .memory .bool none,sourceBoolMemory (finalValues n)⟩] ∧
+      MObj.elems .dyn (mid.get neighbor)=[false,true] ∧ MObj.elems .dyn (out.get neighbor)=[false,true] ∧
+      Source.MemOK E0 emptyTy z₁ ∧ Source.MemOK E0 emptyTy z₂ ∧
+      (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 1)).run (sy n)=(.ok (.bool false),sy n) ∧
+      (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 1)).run z₁=(.ok (.bool true),z₁) ∧
+      (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 2)).run z₂=(.ok (.bool true),z₂) ∧
+      (MObj.elems .dyn (out.get r))[2]?≠some false ∧ r.id=0 ∧ neighbor.id=1 := by
+  have h0 := allocated_source n hn
+  have hs0 : 0<(hp n hn).len r .dyn := by rw [size]; omega
+  have hd1 : 1<(hp n hn).len r .dyn := by rw [size]; omega
+  obtain ⟨mid,z₁,hm,hs₁,hr₁⟩ := h0.2.2.copy F0 0 0 1 hs0 hd1
+  have hv₁ : MObj.elems .dyn (mid.get r)=[true,true,false]++List.replicate n false := by
+    rw [singleton_values _ _ 0 1 hs0 hd1 hm]
+    simp only [old_elems]
+    rfl
+  have hl₁ : mid.len r .dyn=n+3 := by
+    simp only [Heap.len,hv₁,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega
+  have hsrc : 1<mid.len r .dyn := by rw [hl₁]; omega
+  have hdst : 2<mid.len r .dyn := by rw [hl₁]; omega
+  obtain ⟨out,z₂,ho,hs₂,hr₂⟩ := hr₁.copy F0 0 1 2 hsrc hdst
+  have hv₂ : MObj.elems .dyn (out.get r)=finalValues n := by
+    rw [singleton_values _ _ 1 2 hsrc hdst ho]
+    simp only [hv₁]
+    rfl
+  have hn₁ := checkedCaptureOverwrite_frame (hp n hn) r .dyn r .dyn 0 1 1 mid hm neighbor (by decide)
+  have hn₂ := checkedCaptureOverwrite_frame mid r .dyn r .dyn 1 2 2 out ho neighbor (by decide)
+  have hm₁ := h0.2.2.copy_memOK F0 0 0 1 hs0 hs₁ emptyTy h0.2.1
+  have hm₂ := hr₁.copy_memOK F0 0 1 2 hsrc hs₂ emptyTy hm₁
+  refine ⟨mid,out,z₁,z₂,hm,hs₁,ho,hs₂,?_,?_,?_,?_,hm₁,hm₂,?_,?_,?_,?_,rfl,rfl⟩
+  · rw [old_elems,hv₁,hv₂]
+  · change [_,_,_]=_
+    rw [show (sy n).2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory (initial n)⟩ from rfl,
+      show z₁.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory (MObj.elems .dyn (mid.get r))⟩ from hr₁,
+      show z₂.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory (MObj.elems .dyn (out.get r))⟩ from hr₂,hv₁,hv₂]
+  · rw [hn₁,neighbor_elems]
+  · rw [hn₂,hn₁,neighbor_elems]
+  · exact source_bool_read (sy n) 0 (initial n) rfl 1 (by simp only [initial,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega)
+  · have he : z₁.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory ([true,true,false]++List.replicate n false)⟩ := by rw [←hv₁]; exact hr₁
+    exact source_bool_read z₁ 0 _ he 1 (by simp only [List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega)
+  · have he : z₂.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory (finalValues n)⟩ := by rw [←hv₂]; exact hr₂
+    exact source_bool_read z₂ 0 _ he 2 (by simp only [finalValues,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega)
+  · rw [hv₂]
+    change (some true : Option Bool)≠some false
+    decide
+
+/-- Independent first-read and reached-write endpoint failures, plus the
+successful read which precedes the bad write. -/
+theorem source_copy_failures (n : Nat) (hn : n+3<2^256) :
+    (sourceBoolCopy F0 0 0 (n+3) 0).run (sy n)=(.error (.revert (Source.panicData .index)),sy n) ∧
+      checkedCaptureOverwrite (hp n hn) r .dyn r .dyn (n+3) (n+4) 0=none ∧
+    (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 0)).run (sy n)=(.ok (.bool true),sy n) ∧
+    (sourceBoolCopy F0 0 0 0 (n+3)).run (sy n)=(.error (.revert (Source.panicData .index)),sy n) ∧
+      checkedCaptureOverwrite (hp n hn) r .dyn r .dyn 0 1 (n+3)=none := by
+  have h := represented n hn
+  have h₁ := h.copy_bounds F0 0 (n+3) 0 (Or.inl (by rw [size]; exact Nat.le_refl _))
+  have h₂ := h.copy_bounds F0 0 0 (n+3) (Or.inr (by rw [size]; exact Nat.le_refl _))
+  refine ⟨h₁.1,h₁.2,?_,h₂.1,h₂.2⟩
+  exact source_bool_read (sy n) 0 (initial n) rfl 0 (by simp only [initial,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega)
+
+theorem source_write_boundary32 :
+    ∃ (out : Heap H) (z : Source.EMState E0 []),
+      checkedCaptureOverwrite (hp 33 (by decide)) r .dyn r .dyn 0 1 32=some out ∧
+      (sourceBoolCopy F0 0 0 0 32).run (sy 33)=(.ok (),z) ∧
+      (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 32)).run (sy 33)=(.ok (.bool false),sy 33) ∧
+      (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 32)).run z=(.ok (.bool true),z) ∧
+      (MObj.elems .dyn (out.get r))[32]?=some true ∧ MObj.elems .dyn (out.get neighbor)=[false,true] := by
+  have hs : 0<(hp 33 (by decide)).len r .dyn := by rw [size]; decide
+  have hd : 32<(hp 33 (by decide)).len r .dyn := by rw [size]; decide
+  obtain ⟨out,z,ho,hz,hr⟩ := (represented 33 (by decide)).copy F0 0 0 32 hs hd
+  have he := singleton_values _ _ 0 32 hs hd ho
+  have hv : (MObj.elems .dyn (out.get r))[32]?=some true := by
+    rw [he,List.getElem?_set_self hd]
+    simp only [old_elems]
+    rfl
+  refine ⟨out,z,ho,hz,?_,?_,hv,?_⟩
+  · exact source_bool_read (sy 33) 0 (initial 33) rfl 32 (by decide)
+  · have hh := hr.read_iff F0 (uintOfNat 32) true
+    have hu : (uintOfNat 32).1.toNat=32 := by rw [uintOfNat_val (by decide)]; rfl
+    apply hh.mpr
+    change (MObj.elems .dyn (out.get r))[(uintOfNat 32).1.toNat]?=some true
+    rw [hu]; exact hv
+  · rw [checkedCaptureOverwrite_frame _ _ _ _ _ _ _ _ _ ho neighbor (by decide),neighbor_elems]
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceMemoryControls.source_written_copies' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms source_written_copies
+/-- info: 'Solidity.Backend.MemoryOps.SourceMemoryControls.source_copy_failures' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms source_copy_failures
+/-- info: 'Solidity.Backend.MemoryOps.SourceMemoryControls.source_write_boundary32' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms source_write_boundary32
+
 /-- info: 'Solidity.Backend.MemoryOps.SourceMemoryControls.allocated_source' depends on axioms: [propext,
  Classical.choice,
  Quot.sound] -/

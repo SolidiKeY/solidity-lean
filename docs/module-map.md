@@ -1284,3 +1284,5 @@ At the root, the notation's own tests:
 | `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
 | `Backend/MemoryOps/SourceMemory.lean` | Independent published Source memory reads/allocation, exact bounds panic, MemOK and actual intrinsic recursive-copy/schedule observations |
 | `Backend/MemoryOps/SourceMemoryControls.lean` | Actual Source allocator states with MemOK, runtime copied/scheduled observations, wrong-origin/type/dangling negatives and empty/endpoint/element32 controls |
+
+| `Solidity/Backend/MemoryOps/SourceWrite.lean` | Actual independent Source Boolean read/write transition and checked intrinsic singleton capture, reached representation, MemOK and separate bounds outcomes. |
