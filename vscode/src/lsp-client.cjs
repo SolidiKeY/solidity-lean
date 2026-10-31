@@ -17,13 +17,13 @@ class LanguageClient extends EventEmitter {
     this.child.on('error',error=>this.peer.close(error));
     this.child.on('exit',code=>this.peer.close(new Error(`Solidity language server exited ${code}: ${this.stderr}`)));
     this.peer.on('close',error=>{if(!this.disposed)this.emit('serverError',error);});
-    for(const [method,event]of [['textDocument/publishDiagnostics','diagnostics'],['solidityLean/report','report'],['solidityLean/status','status']])
+    for(const [method,event]of [['textDocument/publishDiagnostics','diagnostics'],['solidityLean/report','report'],['solidityLean/status','status'],['solidityLean/invalidated','invalidated']])
       this.peer.onNotification(method,params=>{if(event==='report')parseReport(JSON.stringify(params.report));this.emit(event,params);});
     this.peer.onNotification('window/logMessage',params=>this.emit('log',params.message));
     const automaticVerification=configuration.automaticVerification||'never';
     this.ready=this.peer.request('initialize',{processId:process.pid,rootUri:pathToFileURL(configuration.backendPath).href,
       capabilities:{textDocument:{publishDiagnostics:{versionSupport:true}}},initializationOptions:{backendPath:configuration.backendPath,
-        settings:{workers:configuration.workers||1,timeoutMs:configuration.timeoutMs||600000,automaticVerification,
+        settings:{projectRoot:configuration.projectRoot,includePaths:configuration.includePaths||[],remappings:configuration.remappings||[],workers:configuration.workers||1,timeoutMs:configuration.timeoutMs||600000,automaticVerification,
           counterexamples:!!configuration.counterexamples,auditPreconditions:!!configuration.auditPreconditions}}},{timeoutMs:30000})
       .then(result=>{this.capabilities=result.capabilities;this.peer.notify('initialized',{});return result;});
     // Initialization can fail before a provider/verification awaits it.
@@ -76,7 +76,7 @@ class LanguageServers extends EventEmitter {
     let client=this.clients.get(key);
     if(!client||client.peer.closed){
       client=new LanguageClient(configuration);this.clients.set(key,client);
-      for(const event of ['report','status','diagnostics'])client.on(event,params=>{
+      for(const event of ['report','status','diagnostics','invalidated'])client.on(event,params=>{
         if(this.owners.get(params.uri)===client)this.emit(event,params);
       });
       client.on('serverError',error=>this.emit('serverError',error));client.on('log',message=>this.emit('log',message));
@@ -89,6 +89,8 @@ class LanguageServers extends EventEmitter {
   async open(doc){await this.settled();const client=this.client(doc);await client.sync(doc);return client;}
   async verify(args){await this.settled();const client=this.client(args.document);return client.verify(args.document,args);}
   async request(method,doc,params,options){await this.settled();const client=this.client(doc);return client.request(method,doc,params,options);}
+  async workspaceSymbols(query,options){await this.settled();const results=(await Promise.all([...this.clients.values()].map(async client=>{await client.ready;return client.peer.request('workspace/symbol',{query},options);}))).flat();return [...new Map(results.map(s=>[JSON.stringify(s.location),s])).values()];}
+  changed(uri){for(const client of this.clients.values())if(!client.peer.closed)client.ready.then(()=>client.peer.notify('workspace/didChangeWatchedFiles',{changes:[{uri:uri.toString(),type:2}]})).catch(error=>this.emit('serverError',error));}
   save(doc){this.open(doc).then(client=>client.peer.notify('textDocument/didSave',{textDocument:{uri:doc.uri.toString()},text:doc.getText()})).catch(error=>this.emit('serverError',error));}
   close(uri){const key=uri.toString(),client=this.owners.get(key);client?.closeDocument(key);this.owners.delete(key);}
   cancel(uri){if(uri)this.owners.get(uri.toString())?.cancel(uri.toString());else for(const client of this.clients.values())client.cancel();}

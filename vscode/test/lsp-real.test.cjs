@@ -94,6 +94,7 @@ test('real Solidity LSP keeps Lean warm and verifies versioned in-memory snapsho
       const report=await rpc.request('solidityLean/verify',{textDocument:{uri:multiUri,version:1},options:{}},{timeoutMs:60000});
       assert.equal(report.errors.length,0);const functions=report.results.filter(r=>r.function==='f');
       assert.deepEqual(functions.map(r=>[r.contract,r.status]),[['A','proved'],['B','proved']]);
+      assert.equal(report.backend.verificationMode,'functions');assert.equal(report.backend.workers.length,2);
       assert.notEqual(functions[0].sourceId,functions[1].sourceId);assert.notEqual(functions[0].range.start.line,functions[1].range.start.line);
     });
     await t.test('a crashed native Lean server reopens its document in the replacement session',async()=>{

@@ -1,5 +1,5 @@
 'use strict';
-const { resolve, extname } = require('node:path');
+const { resolve, extname, dirname } = require('node:path');
 const { createHash } = require('node:crypto');
 const { runBackend } = require('./backend.cjs');
 const model = require('./model.cjs');
@@ -25,6 +25,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     if (!configured && !workspace) throw new Error('Set solidityLean.backendPath to the Solidity Lean repository directory');
     const automatic = cfg.get('verifyOnSave', false) ? 'onsave' : cfg.get('automaticVerification', 'never');
     return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false), counterexamples: cfg.get('counterexamples', false),
+      projectRoot:workspace||dirname(doc.uri.fsPath),includePaths:cfg.get('includePaths',[]),remappings:cfg.get('remappings',[]),
       workers: cfg.get('workers', 1), automaticVerification: {onchange:'change',onsave:'save',never:'never'}[automatic] || 'never' };
   }
   function cancel(uri) {
@@ -36,8 +37,8 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       for (const job of active.values()) job.abort();
     }
   }
-  function clear(uri) {
-    cancel(uri);
+  function clear(uri,notifyServer=true) {
+    if(notifyServer)cancel(uri);
     diagnostics.delete(uri);
     reports.delete(key(uri));
     editorServices?.clear(uri);
@@ -233,13 +234,15 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     };
     const receiveDiagnostics=params=>{
       const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version)return;
-      diagnostics.set(doc.uri,params.diagnostics.map(row=>{const d=new vscode.Diagnostic(toRange(row.range),row.message,row.severity-1);d.source=row.source;d.code=row.code;return d;}));
+      diagnostics.set(doc.uri,params.diagnostics.map(row=>{const d=new vscode.Diagnostic(toRange(row.range),row.message,row.severity-1);d.source=row.source;d.code=row.code;if(row.relatedInformation)d.relatedInformation=row.relatedInformation.map(r=>new vscode.DiagnosticRelatedInformation(new vscode.Location(vscode.Uri.parse(r.location.uri),toRange(r.location.range)),r.message));return d;}));
     };
+    const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version)clear(doc.uri,false);};
+    service.on('invalidated',invalidated);
     service.on('report',receive);service.on('diagnostics',receiveDiagnostics);service.on('serverError',showError);service.on('log',message=>output.appendLine(message));
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(open),
       vscode.commands.registerCommand('solidityLean.restartServer',async()=>{cancel();for(const doc of documents.values())clear(doc.uri);await service.restart();for(const doc of documents.values())open(doc);}),
       vscode.workspace.onDidChangeConfiguration(event=>{if(event.affectsConfiguration('solidityLean')){cancel();for(const doc of documents.values())clear(doc.uri);service.restart().then(()=>{for(const doc of documents.values())open(doc);}).catch(showError);}}),
-      {dispose(){service.removeListener('report',receive);service.removeListener('diagnostics',receiveDiagnostics);service.removeListener('serverError',showError);}});
+      {dispose(){service.removeListener('invalidated',invalidated);service.removeListener('report',receive);service.removeListener('diagnostics',receiveDiagnostics);service.removeListener('serverError',showError);}});
     for(const doc of vscode.workspace.textDocuments)open(doc);
   }
   let disposed=false;
@@ -253,7 +256,7 @@ function activate(context) {
     if(!vscode.workspace.isTrusted)throw new Error('Language services require a trusted workspace');
     const cfg=vscode.workspace.getConfiguration('solidityLean',doc.uri),workspace=vscode.workspace.getWorkspaceFolder(doc.uri)?.uri.fsPath;
     const configured=cfg.get('backendPath','');if(!configured&&!workspace)throw new Error('Set solidityLean.backendPath to the repository directory');
-    return {backendPath:resolve(workspace||'.',configured||'.'),nodePath:cfg.get('nodePath','node'),timeoutMs:cfg.get('timeoutMs',600000),workers:cfg.get('workers',1),
+    return {projectRoot:workspace||dirname(doc.uri.fsPath),includePaths:cfg.get('includePaths',[]),remappings:cfg.get('remappings',[]),backendPath:resolve(workspace||'.',configured||'.'),nodePath:cfg.get('nodePath','node'),timeoutMs:cfg.get('timeoutMs',600000),workers:cfg.get('workers',1),
       automaticVerification:cfg.get('verifyOnSave',false)?'save':({onchange:'change',onsave:'save',never:'never'}[cfg.get('automaticVerification','never')]||'never'),
       counterexamples:cfg.get('counterexamples',false),auditPreconditions:cfg.get('auditPreconditions',false)};
   };

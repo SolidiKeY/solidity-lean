@@ -9,8 +9,8 @@ buffer versions, compiler diagnostics, analysis, proof scheduling, exact-snapsho
 cache entries and dependency generations. Each proof worker keeps one generated
 Lean document open, retaining its imported environment between versions. Compiler
 analysis runs separately so editor queries need not wait for proof completion.
-Workers are bounded to 1–4 concurrent files; each document's contracts and
-obligations remain serial. Cancellation kills active worker trees; replacements
+Workers are bounded to 1–4 concurrent function/file tasks. Multiple workers use
+checked function signatures; assertions within a function remain serial. Cancellation kills active worker trees; replacements
 start lazily. Restart and configuration changes clear sessions and caches.
 
 Completion, definitions, references, symbols, signatures, highlights and rename
@@ -26,9 +26,10 @@ backend generation. Sources, compiler pins and artifact identities invalidate
 both reports and live Lean sessions. The cache reuses already checked reports;
 changed source still requires Lean checking. It is not assertion-level caching.
 
-Receiver-type completion, formatting, code actions, workspace symbols, project
-includes, per-assertion scheduling, full refactoring and Dafny protocol equivalence
-remain open. The [88-feature inventory](../dafny-editor-features.json) keeps these
+Receiver completion, formatting, quick fixes, workspace symbols, project imports,
+cross-file rename and function scheduling are implemented in
+[version 0.5](compiler-project-services.md). Assertion splitting, specification-text
+refactoring and complete Dafny protocol equivalence remain open. The [88-feature inventory](../dafny-editor-features.json) keeps these
 limits visible. The [extension guide](../../vscode/README.md) documents operation
 and [comparison guide](../dafny-editor-parity.md) documents measurement scope.
 
@@ -59,7 +60,7 @@ stopped, the API built separately, and the final checks rerun with built artifac
 The [validation record](../../tests/editor-parity/lsp-validation.json) includes
 commands, exact source hashes and the native host's check list.
 
-## Measured editor results
+## Version 0.4 measured editor results
 
 The [current measured report](../../tests/editor-parity/lsp-baseline.md) retains
 18 isolated launches: two full functional runs and sixteen benchmark launches
