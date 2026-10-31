@@ -1205,3 +1205,5 @@ At the root, the notation's own tests:
 V16 recovery adds `Solidity/Roadmap/V16/Relational.lean` (exact prefix/certificate composition), `Solidity/Roadmap/V16/Transactions.lean` (published lifetime induction) and `Solidity/Roadmap/V16/TransactionControls.lean` (actual commit/rollback/wait and local divergence controls).
 
 V16 adds `Solidity/Roadmap/V16/HashHistory.lean` for history-premise adequacy; `Solidity/Roadmap/V16/SessionControls.lean` for published event-bearing executions; `Solidity/Roadmap/V16/Specifications.lean` and `Solidity/Roadmap/V16/SpecificationControls.lean` for scoped box/diamond/function-spec consumers and controls.
+
+`Solidity/Roadmap/V16/LoopControls.lean` consumes actual TLoop finite iterations, success invariants and no-failure/failure controls. Test-only `tests/roadmap-v16/NontrivialLifetime.lean` transports the published escrow invariant without importing elaborators into core.

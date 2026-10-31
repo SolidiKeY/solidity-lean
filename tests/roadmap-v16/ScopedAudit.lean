@@ -1,3 +1,4 @@
+import Solidity.Roadmap.V16.LoopControls
 import Solidity.Roadmap.V16.HashHistory
 import Solidity.Roadmap.V16.SessionControls
 import Solidity.Roadmap.V16.SpecificationControls
@@ -69,3 +70,11 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.hash_history_tail
 #print axioms Solidity.Roadmap.V16.hash_history_cross
 #print axioms Solidity.Roadmap.V16.local_hash_premises_do_not_join
+
+#print axioms Solidity.Roadmap.V16.loop_iteration_invariant
+#print axioms Solidity.Roadmap.V16.loop_success_invariant
+#print axioms Solidity.Roadmap.V16.forever_iteration
+#print axioms Solidity.Roadmap.V16.forever_loop_fuel
+#print axioms Solidity.Roadmap.V16.pending_is_not_divergence
+#print axioms Solidity.Roadmap.V16.loop_revert_payload
+#print axioms Solidity.Roadmap.V16.forever_loop_inhabited

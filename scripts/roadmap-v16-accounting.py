@@ -16,8 +16,14 @@ def require(test, message):
     if not test: raise Invalid(message)
 def digest(data): return hashlib.sha256(data).hexdigest()
 def sources(root):
-    return {str(p.relative_to(root)):digest(p.read_bytes()) for p in (root/"Solidity/Roadmap/V16").glob("*.lean")}
+    return {str(p.relative_to(root)):digest(p.read_bytes()) for p in (root/"Solidity/Roadmap/V16").rglob("*.lean")}
+def validate_owned_imports(inv):
+    owned={".".join(pathlib.Path(p).with_suffix("").parts) for p in inv["sources"]}
+    require(owned <= set(inv["modules"]), "owned theorem module missing from checked import closure")
+
 def current_binding(root=ROOT):
+    frozen=digest(subprocess.check_output(["git","show",BASE+":"+LEDGER],cwd=root))
+    require(digest((root/LEDGER).read_bytes())==frozen,"modified frozen G03 ledger")
     names=subprocess.check_output(["git","ls-files","-z","--cached","--others","--exclude-standard","*.lean"],cwd=root).decode().split("\0")
     h=hashlib.sha256()
     for name in sorted(set(n for n in names if n)):
@@ -52,6 +58,8 @@ def validate_inventory(inv, root=ROOT):
     require(inv["rawLogSha256"] == digest(pathlib.Path(inv["rawLogPath"]).read_bytes()), "changed raw inventory log")
     actual = raw_inventory(inv["rawLogPath"])
     require(actual["binding"]==current,"stale execution-time source/revision binding")
+    require(inv["modules"]==actual["modules"], "altered actual import closure")
+    validate_owned_imports(inv)
     require(inv["inductives"] == actual["inductives"], "absent/altered actual constructors")
     require(inv["theorems"] == actual["theorems"], "absent/altered actual statement, dependency or axiom output")
     require(PARENTS <= {r["name"] for r in inv["inductives"]} and len(inv["inductives"]) == len({r["name"] for r in inv["inductives"]}), "absent/duplicate required inductive family")

@@ -204,9 +204,10 @@ tail and cross-preimage obligations. The singleton Bool counterexample refutes
 joining independent local premises; it asserts no Keccak collision.
 
 The metadata extractor under tests/roadmap-v16 queries actual Lean environment
-inductive constructors, all V16 theorem statements, direct type/body constants
+inductive constructors, V16 theorem statements in the checked imported core
+closure, direct type/body constants
 and transitive collectAxioms results. ScopedAudit also prints actual axioms for
-all 67 current theorem declarations. The 295-family/1428-constructor universe is
+all 67 theorem declarations in that checkpoint-4 core-closure snapshot. The 295-family/1428-constructor universe is
 all Solidity inductives in this checked import closure, not an asserted complete
 Solidity source profile. Read-only G03 accounting includes all 175 features,
 41 combinations, 98 symbolic combinations and eight G48–G51 checkpoints. Every
@@ -244,3 +245,35 @@ Docker cap, OS headroom and writer lock remain enforced. Full-gate timeout is
 5400 seconds, the existing G02 bound. RSS and actual Lean/compiler process counts
 are sampled, not inferred from thread flags. The full gate outcome is pending
 until its actual final log; no permission to relax any required gate is implied.
+
+## Recovery checkpoint 5: loop consumers and substantive invariant witness
+
+LoopControls proves preservation at actual TLoop finite iterations/successful
+exits, inhabits a typed forever-loop fuel witness, refutes inference of divergence
+from one pending horizon, and retains exact revertWith [9]. No loop rule,
+semantics or resource profile is changed. NontrivialLifetime, under tests only,
+uses NEW reachable_invariant with the published escrow safeInvariant and actual
+paymentPossible reachability; a typed world with both flags true is excluded.
+This replaces reliance on the earlier True/identity smoke test for substantive
+invariant evidence, while retaining explicit identity-model scope: no backend
+simulation or runtime deployment is claimed. Its four theorem statements and
+axiom prints are audited separately from the core import-closure inventory.
+
+Finder and skeptic found no proof/ownership defect. Finder requested recursive
+owned-module discovery, full relative module names, and a nested-owned-file
+negative control; fixed. The core inventory also verifies that every discovered
+owned module is actually imported, and frozen G03 bytes match the exact base.
+The test-only elaborator imports never enter core. The first loop check's two
+redundant trailing tactics failed and were removed; raw failures are preserved.
+
+The first cold full run on da76b8e831ddbf9d305b7971f95d530dd06ccac0 exhausted the
+UNCHANGED 5400-second bound during default targets (last completed LedgerCut,
+active existing Recursion example); exit 124 is a failed gate. TestSuite and
+SolKey were not reached. No source error or memory stop was reported, but that
+is not a passing full check. Raw output remains full-run-lean-first.log. Later
+checks of the revised loop/import checkpoint reuse the single existing cache,
+retain the same budget/cap and record their own actual outcomes; the cold failure
+is never relabeled green. All final required gates remain open until observed.
+
+Current checkpoint-5 accounting has 74 core-closure theorems and 25 passing
+accounting controls. The four test-only escrow theorem audits remain separate.

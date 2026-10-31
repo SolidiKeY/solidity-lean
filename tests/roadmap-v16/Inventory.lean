@@ -1,4 +1,5 @@
 import Lean
+import Solidity.Roadmap.V16.LoopControls
 import Solidity.Roadmap.V16.HashHistory
 import Solidity.Roadmap.V16.SessionControls
 import Solidity.Roadmap.V16.SpecificationControls
@@ -24,4 +25,4 @@ run_cmd do
           ("typeConstants", toJson (info.type.getUsedConstants.toList.map Name.toString)),
           ("dependencies", toJson (info.getUsedConstantsAsSet.toList.map Name.toString)),
           ("axioms", toJson (axs.toList.map Name.toString))])
-  logInfo m!"V16-INVENTORY {(Json.mkObj [("inductives", .arr inductives), ("theorems", .arr theorems)]).compress}"
+  logInfo m!"V16-INVENTORY {(Json.mkObj [("modules", toJson (env.header.moduleNames.toList.map Name.toString)), ("inductives", .arr inductives), ("theorems", .arr theorems)]).compress}"

@@ -60,7 +60,7 @@ def main():
             else: cmd=["timeout","5400","./run-lean.sh"]
             # A direct metadata/audit run must not import stale V16 oleans.
             if cmd[:3] == ["lake","-f",alt.name] and "env" in cmd:
-                modules=["Solidity.Roadmap.V16."+p.stem for p in sorted((ROOT/"Solidity/Roadmap/V16").glob("*.lean"))]
+                modules=[".".join(p.relative_to(ROOT).with_suffix("").parts) for p in sorted((ROOT/"Solidity/Roadmap/V16").rglob("*.lean"))]
                 preparatory=["lake","-f",alt.name,"build"]+modules
             else: preparatory=[]
             monitor = "(while true; do awk '/^Name:/ {n=$2} /^VmRSS:/ {t += $2; if(n==\"lean\") l++; if(n ~ /^(clang|gcc|cc1)/) c++} END {print \"RSS_KiB=\" t \" LEAN_WORKERS=\" l+0 \" CC_WORKERS=\" c+0}' /proc/[0-9]*/status; sleep 0.1; done) & mon=$!; "
