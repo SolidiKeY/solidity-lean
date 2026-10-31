@@ -1218,3 +1218,5 @@ At the root, the notation's own tests:
 
 | `Backend/Executable/PatchedPayload.lean` | Actual library/immutable PUSH-data patches equal selected scalar runtime bytes; constructor return/args/readback. |
 | `Backend/Executable/PatchedPayloadChecks.lean` | Actual patched numeric behavior, opcode/args, overlap, unresolved/missing-link and bounds controls. |
+
+| `Backend/Executable/SourceJournal.lean` | Published independent source-journal funded transfer, nested/committed rollback composition and typed controls. |

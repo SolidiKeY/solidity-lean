@@ -651,3 +651,70 @@ provenance caveat and stronger argument-return negative are implemented.
 Next preparation repairs the overbroad Source import guard boundary to admit
 published pure independent source semantics and consumes actual source journal
 and initializer prefix laws read only; it does not change reserved source code.
+
+
+## Recovery checkpoint: independent source journal and permitted read-only imports
+
+The completeness review found the guard's blanket Source ban broader than the
+assignment, which permits consumers of published independent source semantics.
+The guard now allows the exact pure `Source.World` dependency closure (World,
+State, Types, Const, Syntax). Source implementations remain reserved/read only;
+the writable-path guard still rejects any Source edit. Every allowed module's
+raw recursive imports and independent published graph are checked. New tests
+accept pure Source reads, reject reserved writes, and detect forbidden raw or
+graph edges hidden behind an allowed Source module. This is an import audit,
+not a new source admission/exclusion.17/17 regressions pass, zero skipped.
+A mistaken read-only-shell test invocation failed EROFS creating its temporary
+fixtures; original output is retained in source-guard-readonly-failure.log.
+The authorized write-enabled fixture run passes source-guard-tests.log.
+
+[SourceJournal](../../Solidity/Backend/Executable/SourceJournal.lean) consumes
+the actual independent source `ExecState.transfer/apply/run/enter`,
+`rollback_transfer`, `rollback_run` and `rollback_outer_after_commit`.
+`transfer_operations` requires an actual successful transfer and distinct
+addresses and extracts its two existing journal operations. `paid_inner_outer`
+uses that actual transfer after an existing installation-operation list: inner
+rollback keeps the paid world; payment-frame rollback keeps the preceding
+installation; outer rollback removes it too. `paid_commit_outer` derives the
+joined installation/payment operation prefix and proves an inner commit plus
+later writes is still undone by the outer frame. All execution/operations/types
+are the existing source definitions, not a new AST or payment runner.
+
+Exact generic premises: arbitrary intrinsic source layout/state, existing
+installation/inner/tail operation lists, two distinct checked addresses and
+an actual paid-transfer equation. No world preservation or source/EVM relation
+is assumed. Six guarded headline/control axiom pins contain only propext and
+Quot.sound. `checkpoints_distinct` witnesses the worlds actually differ.
+
+Controls journal an actual code0/nonce1 account update (explicitly **not**
+Source.deploy/CREATE or a constructor run), settle sender3→2/recipient0→1,
+then perform real storage+transient Boolean writes. Journal lengths3/5 and
+exact typed before/after reads are kernel checked. Nested/committed rollback,
+wrong-checkpoint refusal, unaffordable and self-transfer funding checks, and
+recipient overflow despite sufficient sender funds are inhabited. Projection
+helpers only recover kernel-checked observations; reference alternatives are
+eliminated by their existing impossible location proofs. Source execution
+failure-byte, initializer/constructor and compiler/EVM relations remain OPEN.
+
+| Checkpoint8 command | Evidence |
+|---|---|
+| `lake -f v14-runtime.lakefile.toml build Solidity.Backend.Executable.SourceJournal` | PASS11jobs; `/workspace/v14-recovery-evidence/source-journal-final.log` |
+| Fresh `lake -f v14-runtime.lakefile.toml env lean -j1 --tstack=131072 Solidity/Backend/Executable/SourceJournal.lean`,180second limit | Fresh PASS,1worker243MiB/noOOM; `/workspace/v14-recovery-evidence/source-journal-final-fresh.log` |
+| `node --test tests/v14-executable/guard.test.mjs` | PASS17/17; `/workspace/v14-recovery-evidence/source-guard-tests.log` |
+| Static lane/layer/orphan/trust/whitespace/docs commands | `/workspace/v14-recovery-evidence/checkpoint8-checks.json`; raw docs46/1 separate from exact-base no-new |
+
+Initial transfer witness inference and dependent-Val equality controls failed;
+explicit original operations and typed Boolean observation recovery fix them
+without changing budgets. Independent separate proof and guard finder/skeptic
+review results are retained at checkpoint export. Next source initializer and
+base-argument prefix transport consumes published source semantics read only;
+full lowering/runtime/payment prerequisites remain undischarged.
+
+
+Checkpoint8 independent proof finder/skeptic found no correctness defect.
+Their exact-self-transfer identity and committed-inner-plus-tail observations
+are added: the funded self-transfer returns precisely `some paid`, while the
+pre-rollback committed state has source nonce9 and six journal entries. This
+makes the later-write leg nontrivial; rollback still restores the earlier
+complete source state. Guard finder/skeptic accepted the exact pure closure,
+read-only ownership boundary and17/17 meaningful no-skip regressions.

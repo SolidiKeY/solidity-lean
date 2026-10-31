@@ -906,3 +906,5 @@ import Solidity.Backend.Executable.CreationAttempt
 
 import Solidity.Backend.Executable.PatchedPayload
 import Solidity.Backend.Executable.PatchedPayloadChecks
+
+import Solidity.Backend.Executable.SourceJournal
