@@ -401,3 +401,22 @@ telemetry is rejected rather than silently becoming a zero-process sample.
 A genuine header-only result is retained explicitly as empty. This leaves the
 current checkpoint at 87 synthetic/control tests, separate from actual target
 proof results and all final lane gates.
+
+The distinct warm frontend target at
+`95e3e2ffdd7a2f7da1b55f9d66736e50157402ed` completed 35 jobs in 202.45s
+(cgroup peak 877,391,872 bytes; sampled aggregate RSS peak 1,083,969,536 bytes).
+Its unchanged before/after snapshots and all mounted wrapper hashes were recorded,
+but two unclassified samples kept provenance validation rejected. The old samples
+lack command/state detail; their cause is not inferred and they are not relabeled.
+Both the successful build and separate failed validation remain raw evidence.
+
+The next sampler version retains process state and full diagnostic context for
+unknown Lean commands. Explicit zero-RSS zombies and the two exact descriptor-lock
+transition commands are retained in separate counters rather than counted as
+running Lean. Unknown running commands still fail validation. Header validation
+and sample-format versioning remain strict. These are observable OS lifecycle
+categories, not a claim that ps snapshots are atomic or prove serialization.
+The preventive admission lock is unchanged. A small runtime/KeySort smoke may
+check this changed measurement boundary; neither compiler nor frontend will be
+rerun merely to replace their failed validation records. The checkpoint has
+89 synthetic/control tests and all original lane obligations remain open.

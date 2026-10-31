@@ -20,7 +20,7 @@ spec.loader.exec_module(e)
 UNRESOLVED = Path('/workspace/scratch/v17-unresolved-container.json')
 CAP = 12 * 1024**3
 BUDGET = {'processSeconds': 300, 'suiteModuleSeconds': 300, 'leanNumThreads': 1}
-SAMPLE_FORMAT = 'pid-comm-rss-args/native-v1'
+SAMPLE_FORMAT = 'pid-stat-comm-rss-args/native-v2'
 IMAGE = 'debian@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3'
 TARGETS = {
     'runtime-keysort': (['Solidity.KeySort'], ['lib/lean/Solidity/KeySort.olean']),
@@ -104,7 +104,7 @@ def validate(record, evidence_root, current, gate, gate_row=None):
     e.require(0 < runtime['memoryPeak'] <= CAP and runtime['image'] == IMAGE, 'invalid execution peak/image')
     e.require(record['sampleFormat'] == SAMPLE_FORMAT, 'unsupported process sample format')
     samples = e.loads(read_bound(evidence_root, record['samples'], record['samplesSha256']))
-    e.require(samples and all(type(s['rssBytes']) is int and s['rssBytes'] >= 0 and type(s['leanWorkers']) is int and 0 <= s['leanWorkers'] <= 1 and type(s['leanSupervisors']) is int and s['leanSupervisors'] >= 0 and type(s['unclassifiedLeanWorkers']) is int and s['unclassifiedLeanWorkers'] == 0 for s in samples), 'missing/parallel execution samples')
+    e.require(samples and all(type(s['rssBytes']) is int and s['rssBytes'] >= 0 and type(s['leanWorkers']) is int and 0 <= s['leanWorkers'] <= 1 and type(s['leanSupervisors']) is int and s['leanSupervisors'] >= 0 and all(type(s.get(k)) is int and s[k] >= 0 for k in ('leanZombies', 'leanTransitions')) and type(s['unclassifiedLeanWorkers']) is int and s['unclassifiedLeanWorkers'] == 0 and s.get('unknownLeanProcesses') == [] for s in samples), 'missing/parallel execution samples')
     e.require(record['headroomBytes'] >= 2 * 1024**3 and record['diskFreeBytes'] >= 1024**3, 'insufficient recorded headroom/disk')
     e.require(0 < record['elapsedSeconds'] <= BUDGET['processSeconds'] + 5, 'execution budget exceeded')
     execution = read_bound(evidence_root, record['executionScript'], record['executionScriptSha256'])
@@ -205,24 +205,29 @@ def docker_create_argv(out, current, container_name, command):
 
 
 def process_sample(output, lean_path):
-    """Count actual native Lean executables, retaining supervisor/unknown counts.
-    Admission is enforced by the lock; a sample is not an absence-of-overlap proof.
+    """Observe native executables, supervisors, zombies and exec transitions.
+    Unknown running commands remain fail-closed with their diagnostic context.
+    Admission is enforced by the lock; ps sampling is not an atomic process proof.
     """
     lines = output.splitlines()
-    e.require(lines and lines[0].split() == ['PID', 'COMMAND', 'RSS', 'COMMAND'], 'malformed process telemetry header')
-    rss = native = supervisors = unknown = 0
+    e.require(lines and lines[0].split() == ['PID', 'STAT', 'COMMAND', 'RSS', 'COMMAND'], 'malformed process telemetry header')
+    rss = native = supervisors = zombies = transitions = 0
+    unknown = []
     for line in lines[1:]:
         if not line.strip(): continue
-        fields = line.split(None, 3)
-        e.require(len(fields) == 4 and fields[0].isdigit(), 'malformed process telemetry')
-        amount = int(fields[2]); e.require(amount >= 0, 'negative process RSS')
+        fields = line.split(None, 4)
+        e.require(len(fields) == 5 and fields[0].isdigit(), 'malformed process telemetry')
+        amount = int(fields[3]); e.require(amount >= 0, 'negative process RSS')
         rss += amount * 1024
-        if fields[1] != 'lean': continue
-        args = fields[3].split()
-        if args[0] == '/opt/v17-toolchain/bin/lean': native += 1
-        elif len(args) >= 2 and args[0] in ('/bin/sh', 'sh') and args[1] == str(lean_path): supervisors += 1
-        else: unknown += 1
-    return {'rssBytes':rss, 'leanWorkers':native, 'leanSupervisors':supervisors, 'unclassifiedLeanWorkers':unknown}
+        args = fields[4].split()
+        if fields[1].startswith('Z') and amount == 0 and fields[2] == 'lean': zombies += 1
+        elif args[0] == '/opt/v17-toolchain/bin/lean': native += 1
+        elif fields[2] == 'lean':
+            if len(args) >= 2 and args[0] in ('/bin/sh', 'sh') and args[1] == str(lean_path): supervisors += 1
+            elif args in (['/usr/bin/flock','-x','9'], ['/usr/bin/flock','-n','-x','9']): transitions += 1
+            else: unknown.append({'pid':int(fields[0]),'state':fields[1],'rssBytes':amount*1024,'arguments':fields[4]})
+    return {'rssBytes':rss,'leanWorkers':native,'leanSupervisors':supervisors,'leanZombies':zombies,
+            'leanTransitions':transitions,'unclassifiedLeanWorkers':len(unknown),'unknownLeanProcesses':unknown}
 
 
 def missing_container(error):
@@ -294,7 +299,7 @@ def collect(args):
                     code = proc.wait(timeout=remaining()); break
                 if state == 'running':
                     try:
-                        top = docker('top',cid,'-ww','-eo','pid,comm,rss,args',timeout=remaining()).stdout.decode()
+                        top = docker('top',cid,'-ww','-eo','pid,stat,comm,rss,args',timeout=remaining()).stdout.decode()
                     except subprocess.CalledProcessError:
                         # Re-inspect a possible rapid exit, retaining the error if still running.
                         if docker('inspect','--format','{{.State.Status}}',cid,timeout=remaining()).stdout.decode().strip() == 'running': raise

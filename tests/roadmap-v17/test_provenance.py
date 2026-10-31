@@ -44,7 +44,7 @@ class ProvenanceTests(unittest.TestCase):
            'configurationAfterSha256':e.digest(b'config'),
            'launcher':'lean-launcher','launcherSha256':self.attach('lean-launcher',p.launcher_bytes()),
            'runtime':mode+'.runtime','runtimeSha256':self.attach(mode+'.runtime',json.dumps(runtime).encode()),
-           'samples':mode+'.samples','samplesSha256':self.attach(mode+'.samples',b'[{"rssBytes":10,"leanWorkers":1,"leanSupervisors":0,"unclassifiedLeanWorkers":0}]'),
+           'samples':mode+'.samples','samplesSha256':self.attach(mode+'.samples',b'[{"rssBytes":10,"leanWorkers":1,"leanSupervisors":0,"leanZombies":0,"leanTransitions":0,"unclassifiedLeanWorkers":0,"unknownLeanProcesses":[]}]'),
            'log':mode+'.log','logSha256':self.attach(mode+'.log',b'Build completed successfully\n'),
            'exit':0,'headroomBytes':3*1024**3,'diskFreeBytes':2*1024**3,'elapsedSeconds':1,
            'command':['lake','-f','roadmap-v17-runtime.lakefile.toml','build','Solidity.Evm.Compiler'],
@@ -234,14 +234,14 @@ class ProvenanceTests(unittest.TestCase):
                 if args[0]=='create': return SimpleNamespace(stdout=b'owned-container')
                 if args[0]=='inspect': return SimpleNamespace(stdout=next(states))
                 if args[0]=='top':
-                    self.assertEqual(args[-1],'pid,comm,rss,args')
-                    return SimpleNamespace(stdout=b'PID COMMAND RSS COMMAND\n1 lean 10 /opt/v17-toolchain/bin/lean -j1\n2 lean 2 /bin/sh /usr/bin/true args\n')
+                    self.assertEqual(args[-1],'pid,stat,comm,rss,args')
+                    return SimpleNamespace(stdout=b'PID STAT COMMAND RSS COMMAND\n1 R lean 10 /opt/v17-toolchain/bin/lean -j1\n2 S lean 2 /bin/sh /usr/bin/true args\n')
                 return SimpleNamespace(stdout=b'')
             with patch.object(p,'ROOT',self.root), patch.object(p.e,'snapshot',return_value=self.current), \
                  patch('shutil.which',return_value='/usr/bin/true'), patch.object(p,'docker',side_effect=docker), \
                  patch.object(p.subprocess,'Popen',return_value=proc):
                 self.assertEqual(p.collect(SimpleNamespace(out=out,gate='warm-compiler')),0)
-            self.assertEqual(e.load(out/'samples.json'),[{'rssBytes':12288,'leanWorkers':1,'leanSupervisors':1,'unclassifiedLeanWorkers':0}])
+            self.assertEqual(e.load(out/'samples.json'),[{'rssBytes':12288,'leanWorkers':1,'leanSupervisors':1,'leanZombies':0,'leanTransitions':0,'unclassifiedLeanWorkers':0,'unknownLeanProcesses':[]}])
 
     def test_unresolved_container_refuses_another_collection(self):
         p.UNRESOLVED.write_text(json.dumps({'container':'roadmap-v17-'+'a'*32}))
@@ -290,9 +290,9 @@ class ProvenanceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'mounted source'): self.validate()
 
     def test_native_sampler_retains_supervisor_and_unknown_counts(self):
-        text='PID COMMAND RSS COMMAND\n1 lean 10 /opt/v17-toolchain/bin/lean -j1\n2 lean 2 /bin/sh /usr/bin/lean file\n3 lean 3 /unknown/lean file\n'
+        text='PID STAT COMMAND RSS COMMAND\n1 R lean 10 /opt/v17-toolchain/bin/lean -j1\n2 S lean 2 /bin/sh /usr/bin/lean file\n3 S lean 3 /unknown/lean file\n'
         sample=p.process_sample(text,Path('/usr/bin/lean'))
-        self.assertEqual(sample,{'rssBytes':15360,'leanWorkers':1,'leanSupervisors':1,'unclassifiedLeanWorkers':1})
+        self.assertEqual(sample,{'rssBytes':15360,'leanWorkers':1,'leanSupervisors':1,'leanZombies':0,'leanTransitions':0,'unclassifiedLeanWorkers':1,'unknownLeanProcesses':[{'pid':3,'state':'S','rssBytes':3072,'arguments':'/unknown/lean file'}]})
 
     def test_unknown_lean_process_cannot_validate(self):
         data=[{'rssBytes':10,'leanWorkers':1,'leanSupervisors':0,'unclassifiedLeanWorkers':1}]
@@ -308,8 +308,21 @@ class ProvenanceTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'telemetry header'): p.process_sample(text,Path('/usr/bin/lean'))
 
     def test_header_only_sample_is_explicitly_empty(self):
-        self.assertEqual(p.process_sample('PID COMMAND RSS COMMAND\n',Path('/usr/bin/lean')),
-                         {'rssBytes':0,'leanWorkers':0,'leanSupervisors':0,'unclassifiedLeanWorkers':0})
+        self.assertEqual(p.process_sample('PID STAT COMMAND RSS COMMAND\n',Path('/usr/bin/lean')),
+                         {'rssBytes':0,'leanWorkers':0,'leanSupervisors':0,'leanZombies':0,'leanTransitions':0,'unclassifiedLeanWorkers':0,'unknownLeanProcesses':[]})
+
+    def test_explicit_zombie_and_lock_transition_are_retained_not_running(self):
+        text='PID STAT COMMAND RSS COMMAND\n1 Z lean 0 [lean] <defunct>\n2 S lean 2 /usr/bin/flock -x 9\n'
+        sample=p.process_sample(text,Path('/usr/bin/lean'))
+        self.assertEqual(sample['leanWorkers'],0)
+        self.assertEqual(sample['leanZombies'],1)
+        self.assertEqual(sample['leanTransitions'],1)
+        self.assertEqual(sample['unclassifiedLeanWorkers'],0)
+        self.assertEqual(sample['rssBytes'],2048)
+
+    def test_zombie_label_with_nonzero_rss_is_not_silently_ignored(self):
+        text='PID STAT COMMAND RSS COMMAND\n1 Z lean 10 [lean] <defunct>\n'
+        self.assertEqual(p.process_sample(text,Path('/usr/bin/lean'))['unclassifiedLeanWorkers'],1)
 
     def test_gate_log_or_exit_disagreement(self):
         row={'exit':1,'sha256':self.clean['logSha256'],'log':'clean.log','command':self.clean['command']}
