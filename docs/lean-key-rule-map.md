@@ -1083,3 +1083,12 @@ VY2 canonical array families (Lean-only preparation, YQ5):
 from actual typed source data, canonical member/coverage/Placement and initial-H
 premises. No concrete Yul rule/notation/printer/source soundness is installed;
 Y09.02 remains open. [VY2](feature-work/inline-assembly-vy2.md#canonical-array-element-families-2026-10-31).
+
+
+VY2 retained array-family preparation (Lean-only/YQ5):
+`retainedMemberArray_encode/unchanged/result/history/preservation/MemOK`,
+`retainedMemberArrayState_unchanged/other_region/raw_reencode` are derived
+component theorems with actual original/current Placement+typed history,
+canonical owned-member decoding/coverage and original-H premises. No concrete
+Yul rule/taclet/notation/printer or source/compiler composition claimed;
+[Y09.02 remains open](feature-work/inline-assembly-vy2.md#retained-array-element-family-resizing-2026-10-31).

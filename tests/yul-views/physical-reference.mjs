@@ -9,6 +9,7 @@ import {replayWriteback} from './writeback-reference.mjs';
 import {replayResidual} from './residual-reference.mjs';
 import {replayFinite} from './finite-reference.mjs';
 import {replayHeapBytes} from './heap-bytes-reference.mjs';
+import {replayRetainedMemberArrays} from './retained-member-arrays-reference.mjs';
 import {replayMemberArrays} from './member-arrays-reference.mjs';
 import {replayAggregateWriteback} from './aggregate-writeback-reference.mjs';
 import {replayDynamicUint} from './dynamic-uint-reference.mjs';
@@ -61,7 +62,8 @@ const wordWriteback=await replayWordWriteback(compile);
 const dynamicUint=await replayDynamicUint(compile);
 const aggregateWriteback=await replayAggregateWriteback(compile);
 const memberArrays=await replayMemberArrays(compile);
-const report={memberArrays,aggregateWriteback,dynamicUint,wordWriteback,mixedHeap,retainedHeap,heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
+const retainedMemberArrays=await replayRetainedMemberArrays(compile);
+const report={retainedMemberArrays,memberArrays,aggregateWriteback,dynamicUint,wordWriteback,mixedHeap,retainedHeap,heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
  sourceSha256:sha(source),lockSha256:sha(readFileSync(new URL('../../scripts/evm-reference/package-lock.json',import.meta.url))),
  fork:'osaka',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,reports};
 writeFileSync(resolve(outPath),JSON.stringify(report,null,2)+'\n');
@@ -78,4 +80,5 @@ console.log('wordWriteback: '+wordWriteback.variants.map(v=>`${v.viaIR?'viaIR':'
 console.log('dynamicUint: '+dynamicUint.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('aggregateWriteback: '+aggregateWriteback.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('memberArrays: '+memberArrays.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
-process.exitCode=memberArrays.status==='working'&&aggregateWriteback.status==='working'&&dynamicUint.status==='working'&&wordWriteback.status==='working'&&mixedHeap.status==='working'&&retainedHeap.status==='working'&&heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;
+console.log('retainedMemberArrays: '+retainedMemberArrays.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
+process.exitCode=retainedMemberArrays.status==='working'&&memberArrays.status==='working'&&aggregateWriteback.status==='working'&&dynamicUint.status==='working'&&wordWriteback.status==='working'&&mixedHeap.status==='working'&&retainedHeap.status==='working'&&heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;

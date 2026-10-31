@@ -906,3 +906,4 @@ import Solidity.Yul.Views.WordWritebackControls
 import Solidity.Yul.Views.DynamicUintControls
 import Solidity.Yul.Views.AggregateWritebackControls
 import Solidity.Yul.Views.MemberArrayControls
+import Solidity.Yul.Views.RetainedMemberControls

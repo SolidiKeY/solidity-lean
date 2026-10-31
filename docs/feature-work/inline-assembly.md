@@ -366,3 +366,14 @@ and `/workspace/vy2-evidence/member-arrays/HANDOFF.md`. Pinned pipelines add12ca
 and183strict negatives, retain all previous226fields/calls. Full lane/both
 backfills remain unfinished, including retained-capacity/general memory/source/
 compiler/calculus closure; no admission promotion or original obligation change.
+
+
+### VY2 retained array-family handoff (2026-10-31)
+
+Constructive actual retained-capacity canonical array resizing, output current
+Placement/history, complete source heapPut/all-H MemOK and bool/reference
+shrink/regrow/alias/tail controls. [Lane record](inline-assembly-vy2.md#retained-array-element-family-resizing-2026-10-31),
+`/workspace/vy2-evidence/retained-members/HANDOFF.md`. Both pinned pipelines add
+16orderedcalls/195negatives; every prior238reportfield/call unchanged. Full lane/
+both backfills remain unfinished; no admission/universal writeback/allocator/
+source/compiler/calculus closure inferred.

@@ -1429,3 +1429,66 @@ comparison passes, markdownbase1/head1/new0. Both independent read-only reviews
 clear. Serial-j1/12GiB/no-swap/writer lock/monitor/caches retained; no overlap
 in this recovery. Complete commands/signatures/reviews/resources/committed SHA
 and artifacts are in the versioned handoff. Full original queue remains open.
+
+
+## Retained array element-family resizing (2026-10-31)
+
+[RetainedMemberArray](../../Solidity/Yul/Views/RetainedMemberArray.lean) adds
+actual dynamic bool/u256/owned-reference array resizing bounded ONLY by a real
+original Placement extent and existing typed RetainedAllocation lineage.
+Current shape always describes new data; original ownership/history preserves
+full original region separation, addresses/free and all other shapes. Successful
+decode DERIVES actual values/typed Heap.write/output Placement+history, not an
+opaque result or inverse premise. Other cells/types/next/boundedness, actual
+whole-state unchanged, raw ByteView reencode/tails/other original regions are
+proved. Full Source.heapPut Except/state and EVERY original H owner MemOK cover
+success and actual source errors. The prior header-preserving guard is intact.
+
+[Controls](../../Solidity/Yul/Views/RetainedMemberControls.lean) inhabit actual
+reference2→0→2 and bool3→0→3 allocated arrays. Raw header changes retain live/dead
+tails; decoded pointers use concrete owned child candidates, real source alias
+reads see both retained children at every horizon. Initial and all-H owner
+MemOK, exact current0shape/history, bool aliases/length/member reads, old guard
+negative regrowth, beyond-original-capacity preparation, actual source type
+error, disjoint typed/physical writes and reserved/free/zero/nonzero gap controls
+are retained. decodeArrayMembers_of_decodes composes actual successful per-cell
+decoder evaluations; controls derive these from concrete raw loads and typed
+candidates, never assume a generic inverse/read agreement.
+
+[RetainedMemberArrays.sol](../../tests/yul-views/RetainedMemberArrays.sol) checks
+complete58ABIword envelopes/bytes for8orderedcalls per pinned pipeline: initial,
+zero shrink, full/partial/reversed regrowth, retargeted shared-child update,
+revert/fresh. Raw tail words remain observed even when logical length0; guarded
+absent logical elements yield explicitly expected0, never dropped observations.
+195strict negative controls discriminate headers/tails/aliases/deployment/order/
+bytes/status. All preceding238reportfields/calls exactly identical; total254.
+Initial viaIR fixture extra alias locals caused a32byte spill/shift; raw broken
+source/report preserved. Simplified locals rather than changing independently
+specified expected words2080FMP/pointers or budgets. This finite fixture does
+NOT prove nondeterministic allocation refinement or erase pipeline differences.
+Kernel source bool aliases and separate real child aliases remain explicit.
+
+Retained snapshot provenance is NOT a reachable allocator theorem. Shared-zero/
+interior/beyond-proven-extent/noncanonical/dirty/narrow/generic nested ownership
+and universal memory/store/source/compiler/calculus closure remain original
+unfinished obligations. None is unsupported preparation, not a Yul refusal,
+no-op, deallocation or compiler outcome. Existing owner/full obligation/API
+signatures, oversized-MemOK boundary and YQ1–YQ7 preserved. Y04/Y05/Y06 and A/B
+PARTIAL; concreteY09.02 BLOCKED. Goal BLOCKED unchanged; no get_goal tool/goal
+transition/worker integration or new semantic question. Evidence
+`/workspace/vy2-evidence/retained-members/` retains proofs/reviews/raw failures/
+exact signatures/gates and full queue handoff. This follows array checkpoint
+`ebcdee018556551d87c20a82140282e262f7bed0`, not whole-lane completion.
+
+Retained-family final checks: per-file/focused58jobs/fullwrapper1051default+
+262suite/131annotations exit0; scoped1468declarations/815theorem reports standard
+axioms only. Layers242core/0elaboratorreach,1066reachable/0orphan, trust1081sources/
+246sites/0findings; strict491automatic/61budgeted/11refuted/0pending pass. Full
+254calls and all preceding suites plus183/195new negatives pass, prior report
+fields exactly identical. Docs ACTUAL exit1 same48missing/37ambiguous base lines,
+zero delta separatePASS; markdownbase1/head1/new0. Both independent read-only
+reviews clear. Real Lean4.24.0/Lake5.0.0-src+797c613 and2jobKeySort0 saved in
+preceding same-runtime checkpoint. All current heavy job intervals serial;
+previous1.528s recovery overlap preserved. Writer lock/hard12GiB/no-swap/caches/
+OS+aggregateRSS monitoring retained. Full original lane and both backfills stay
+unfinished; no goal transition, premise/exclusion or owner representation change.

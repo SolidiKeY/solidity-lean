@@ -38,6 +38,27 @@ theorem decodeArrayMembers_sound {E : Source.Env} {h : Source.Heap E.layout} (p 
         · have eq : base + j.succ.val * 32 = base + 32 + j.val * 32 := by simp only [Fin.val_succ]; omega
           simpa only [Fin.cases_succ, eq] using ih (base + 32) tail dt j
 
+/-- Composition of actual per-cell decoder results; no inverse law is assumed. -/
+theorem decodeArrayMembers_of_decodes {D : Source.Layout} {h : Source.Heap D} (p : Placement h)
+    (es : List (MixedHeapEntry p)) (τ : Source.STy) (n : Nat) (m : ByteView) (base : Nat)
+    (values : Fin n → Source.Val D τ)
+    (decodes : ∀ i, decodeMemoryMember p es τ (mload m (base + i.val * 32)) = some (values i)) :
+    decodeArrayMembers p es τ n m base = some values := by
+  induction n generalizing base with
+  | zero =>
+    have same : values = Fin.elim0 := by funext i; exact Fin.elim0 i
+    rw [same]
+    rfl
+  | succ n ih =>
+    have head : decodeMemoryMember p es τ (mload m base) = some (values 0) := decodes 0
+    have tail := ih (base + 32) (fun i => values i.succ) (by
+      intro i
+      have eq : base + i.succ.val * 32 = base + 32 + i.val * 32 := by simp only [Fin.val_succ]; omega
+      simpa only [eq] using decodes i.succ)
+    have same : Fin.cases (values 0) (fun i => values i.succ) = values := by funext i; exact Fin.cases rfl (fun _ => rfl) i
+    simp only [decodeArrayMembers, head, tail]
+    exact congrArg some same
+
 theorem decodeArrayMembers_reads {D : Source.Layout} {h : Source.Heap D} (p : Placement h)
     (es : List (MixedHeapEntry p)) (coverage : CoversMixedHeap es) (τ : Source.STy) (supported : OrdinaryMemberType τ)
     (n : Nat) (values : Fin n → Source.Val D τ) (words : Fin n → Roadmap.Word)
