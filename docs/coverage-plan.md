@@ -564,6 +564,18 @@ checker applies them through `PROPOSED_PACKAGES` until they land. A lane
 that still finishes early takes backfill items or the next ready lane's
 first group, and the coordinator merges the lane in parts.
 
+### Authorized extension: inline assembly (2026-10-31)
+
+Inline assembly (Yul) remains excluded by current admission. The human has
+[authorized its implementation](solidity-scope.md#inline-assembly-decisions-2026-10-31)
+in ten groups Y01–Y10 and five lanes VY1–VY5 (tier A, words only: VY1;
+tier B, physical storage/memory/inputs: VY2–VY3; tier C, raw calls, creation
+and logs: VY4–VY5). The plan is in [inline-assembly.md](feature-work/inline-assembly.md).
+YQ1–YQ7 are approved; prerequisite gates still apply. V10 and V11 already have
+active workers, so they inherit agreement obligations for VY2's storage and
+memory layout definitions (Y04, Y05). Parallel VY preparation does not discharge
+those obligations or establish implemented support.
+
 ### Backfill queue
 
 These items are ready now, are independent of the lane order, and are owned
