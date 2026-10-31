@@ -1029,3 +1029,95 @@ is unchanged blocked; get_goal unavailable, no mutation/reactivation/recreation.
 New evidence: /workspace/v15-evm-agreement-evidence/encoding-a359b418. Next ready
 owned work consumes the newly checked encoding in typed image and preallocated
 observation consequences, without duplicating reserved memory adapters.
+
+
+## Typed images and preallocated reference observations
+
+After the checked84-law checkpoint1d82d0715dea2f43226174852d4e56b42dddc932,
+new owned consumers use the now-checked pure reference encoding and the unchanged
+published MemoryComposition/MemoryRefinement producers. Both producers also
+kernel-check under the original serial300s per-file/12GiB/no-swap limits.
+
+`Bridge/SolidityBridge/RoadmapV15/ReferenceImageTransport.lean` proves
+ typed_image_reference_bytes, typed_image_reference_observation,
+image_pair_reference_bytes and disjoint_image_reference_bytes. Every intrinsic
+scalar uses its existing toWord/Scalar encoding. The complete ordered32-byte
+reference observation equals the actual published store32/snapshot image;
+full intrinsic State and FrameKey identity are retained. Two successive snapshots
+retain observation order even with overlap: this does NOT assert that both
+values remain in the final overlapping image. Preserving the earlier final
+observation requires the explicit natural interval-disjointness clause. The
+producer's ScalarFrame remains a representation field, not a compiler exclusion.
+
+`Bridge/SolidityBridge/RoadmapV15/PreallocatedObservation.lean` proves
+populated_backend_observation, populated_typed_observation, populated_load_frame
+and populated_supplied_load. They consume the actual published inhabited
+populatedState/populatedCore/Represents constructor: its complete64 physical
+bytes equal the two backend big-endian words, including leading zeros and order.
+The typed law uses the actual intrinsic ABI encoding, including signed values.
+The load-frame law preserves the entire actual MachineState for in-capacity
+indices. The supplied-opcode law proves the real EvmYul.EVM.step equation with
+positive fuel and zero charged gas plus preservation of all64 bytes. Its returned
+word is deliberately the actual lookup expression. No padding/read-value contract,
+serialization/allocation witness, stack-height/gas/X precheck, fetched bytecode,
+source reachability, Osaka/account/transaction or resource adequacy is supplied.
+Preallocation is numeric representation capacity only.
+
+`Bridge/SolidityBridge/RoadmapV15/ReferenceObservationControls.lean` passes all
+new controls and8 explicit axiom reports (propext, Classical.choice, Quot.sound).
+Witnesses include actual nonzero distinct258/513 cells, signed-1 ABI bytes,
+full64-byte target order/length negatives, unaligned overlap and disjoint framing,
+both cell indices and upper-capacity refusal, nonempty stack tails, and actual
+zero-fuel OutOfFuel refusal. Both legacy/viaIR FrameKey identities are exercised;
+these pure identity fixtures do not claim compiler-pipeline execution. Initial
+controls required explicit numeral bounds to remove a free pipeline variable
+before decide and explicit private-fixture unfolding; expected bytes were not
+changed. Their raw failures and passing follow-up are retained uniquely.
+
+The new8 laws/control closure pass, bringing the total to92 checked laws. All
+original15 reader/encoding laws are checked; no original encoding proposal is
+left uncompiled. Separate read-only finder and skeptic source reviews clear the
+exact premises, non-vacuity, temporal-versus-final ordering, ownership and actual
+supplied-opcode boundary. Neither reviewer runs Lean/server/builds. Final
+registration/docs/handoff and sealed artifact checks follow before export.
+
+Remaining full-gate runtime dependency was inspected without a giant cold build.
+A naive text inventory was retained but superseded because it mistook comment
+text and truncated apostrophe module names as imports. The final inventory uses
+Lean.parseImports on actual headers:1971 modules across the configured mandatory
+default Bridge targets, zero unresolved source names or parse errors,96 further
+missing cache modules and240 other unbuilt products at inspection. These96
+LTAR names are DISJOINT from the fulfilled684 request, and none is installed.
+The unchanged pinned Cache.Hashing API supplies exact source-SHA256/LTAR identities
+in /workspace/v15-evm-agreement-evidence/encoding-a359b418/full-bridge-cache-request.json,
+SHA256 aa6df5806a1a1ddb8f7a2c7a81a81cb35da69b4a659cff5ce80260f24d2a5aad.
+QOFF2 requests matching existing host archives for the broader mandatory Bridge
+gate only. It does not reopen QOFF1, infer availability, request pin/profile
+changes or certify that imports alone will make the full gate pass. No403 probe,
+cache fetch, tunnel/mirror or unchanged full5400s failed gate was repeated.
+
+Full G46.01-.06/G47 and Backfill A/B remain unfinished: actual Osaka primitive
+correspondence, symbolic compiler paths/calldata, environment/hash/cryptographic
+observations under approved per-run premises, driver/exact resource abstraction,
+productionV13/V14 and actual arbitrary permitted-callee account/call/create/
+return/revert/transaction/fee/nonce/log/rollback/finite-infinite trace composition
+remain open. All150 opcode rows and secondary obligations stay OPEN. No new
+axiom, sorry, native/implemented_by shortcut, desired simulation, global hash
+injectivity, weakened observation/profile or increased budget was introduced.
+Original full exit124, raw docs exit1 and previous retry-retention loss stay
+explicit failures/limitations; goal remains unchanged blocked, never mutated.
+
+Cumulative exact-head artifacts will be sealed at
+/workspace/v15-evm-agreement-artifacts/encoding-a359b418; actual commands, raw
+failures, resource/axiom outputs, full cache request and reviews are under
+/workspace/v15-evm-agreement-evidence/encoding-a359b418. First checkpoint and final
+head/base/branch, proof-versus-external-test boundaries and all queue statuses
+are recorded in the handoff. No new external execution test was substituted for
+kernel proof; old source/compiled-pipeline fixture expectations are untouched.
+
+Final92-law handoff review correction: both independent reviewers caught the
+stale G46.02 instruction to kernel-check consumers; it now names only the actual
+remaining physical read-value/allocator/compiler-path/calldata/driver/resource
+and full-gate obligations. The finder also required QOFF2's draft to carry its
+full standalone question, source tags and mutually exclusive consequences;
+these are now present. No theorem, premise, expected observation or scope changed.

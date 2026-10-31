@@ -1232,3 +1232,9 @@ for `Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean` and
 `Bridge/SolidityBridge/RoadmapV15/ReferenceEncodingControls.lean` are superseded:
 all13 encoding laws and the original15 reader/encoding axiom/control checks now
 pass. This is pure encoding/observation evidence, not machine correspondence.
+
+| Module | Role |
+|---|---|
+| `Bridge/SolidityBridge/RoadmapV15/ReferenceImageTransport.lean` | Checked complete typed image/reference byte, state/key, temporal-pair and disjoint observation consequences. |
+| `Bridge/SolidityBridge/RoadmapV15/PreallocatedObservation.lean` | Checked64-byte published target constructor, typed ABI, actual mload frame and supplied-opcode byte frame; no read-value/allocator/driver adequacy. |
+| `Bridge/SolidityBridge/RoadmapV15/ReferenceObservationControls.lean` | Nonzero, pipeline-identity, order/length/overlap, signed, cell-boundary and zero-fuel controls; eight axiom audits. |
