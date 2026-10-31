@@ -75,14 +75,14 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint thirty-nine. Earlier checkpoint
+Current cumulative accounting through checkpoint forty. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
 |---|---|---|
 | G32 | partial | Intrinsic heap-object framing/noninterference and supported Source primitive delete-to-symbolic-word frame components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
 | G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors; supported actual Source Boolean allocation/zero-default and resolved declaration with a fresh typed local, intrinsic and word fresh-root/old-object framing, and enlarged-context MemOK preservation now checked. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
-| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads, single-element read/write-to-intrinsic-copy and primitive delete-to-clearT transitions plus resolved Source local-index deletion and Boolean assignment expression/statements plus actual reached RItems/intrinsic-program/word sequencing proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
+| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads, single-element read/write-to-intrinsic-copy and primitive delete-to-clearT transitions plus resolved Source local-index deletion and Boolean assignment expression/statements plus actual reached RItems/intrinsic-program/word sequencing and selected reference-local rebinding with parallel pointer identity proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
 | G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
 | G35.02 | blocked | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
 | G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved, including actual ordered two-transfer composition and local commutation. General families/reference construction, calldata-to-storage, ABI decoding, general Source copy/program execution and target transport remain. |
@@ -3150,3 +3150,71 @@ Separate final finder/skeptic source reviews accepted 18exactguards, explicit
 actual stageSome witnesses and same-input ordercounterexample with no defect.
 Goal remains blocked, this authorized implementation turn is not reactivation.
 Original queues and all prior seals/failures preserved; no wholelane claim.
+
+## Checkpoint forty: nonprimitive reference-local rebinding
+
+After C39, investigated actual Source.assign local reference/writeLoc.local and
+published Evm.Memory.aliasLocal_correct/RefArrayStateRepr.setMem, not an absent
+Source execution premise. New SourceAlias executes EXISTING typed Source local
+assignment and expression statement, intrinsic Stmt.rebindMem and published word
+aliasLocalCode. Initial Source local pointer/address, target typed HRef binding,
+SourceMemOK, existing target mapFree and full RefArrayStateRepr are explicit.
+Both heaps stay unchanged; new bindings/MemOK/full reference-array word ownership/
+stack/allocator derive from existing operations. No distinctness premise: same
+local/self-alias is supported. No fresh/deep copy or constructor implementation.
+
+Precise boundary: Source STy/address and intrinsic RefTy/HRef parameters are
+independent, so generic theorem is PARALLEL INITIAL-POINTER IDENTITY TRANSPORT,
+not a cross-layer type-graph/deep-content representation theorem. It copies the
+actual initial paired pointers on each side and preserves any initial heap
+observations by unchanged heaps. It does not supply missing full graph/source
+compiler alignment, reverse/global address injectivity or liveness premises.
+The concrete nonprimitive witness independently aligns real nested input tables
+and contents; it does not turn this generic parallel theorem into whole lowering.
+Existing mapFree is retained, not a new admission exclusion or all-profile repair.
+
+Independently inhabited intrinsic heap has childID0=TFF, old parentID1=[child0],
+new parentID2=[child0,child0]. Actual Source allocRef calls create the matching
+child and two parents, with DataOK/Top/Inner and MemOK structurally discharged.
+No reference-constructor algorithm is implemented. Full primitive and reference
+array word ownership, interval separation and initial allocator free32 are proved.
+Actual Source/target operation changes dstID1→2 and pointer24→28, while backupID1/
+pointer24 remains. Complete old/new pointer bindings, both parents' child-ID
+lists and Source tables, intrinsic child TFF/TFF and all14 word cells are retained:
+[32,24,24,28,99,3,1,0,0,1,16,2,16,16]→
+[32,24,28,28,99,3,1,0,0,1,16,2,16,16].
+Actual Source parent lengths2 versus backup1 and two-level parent→child reads
+(memRef0 then true/false) derive from these reached tables. Heap/root counts3
+unchanged, stale pointer24 is NOT the new destination, stack42 and concrete
+allocator preserved. Self-alias gives exact same Source/target state and word
+machine; semantic horizons0/1 timeout. These are not target gas/physical-byte
+or general effectful ordering/ABI/compiler claims.
+
+Core01 unavailable get-set lemma name repaired to actual TEnv.get_set; fixture01
+opaque Heap.len reductions repaired explicitly; controls01 dependent Source type
+length/child observation and self-alias cell specialization repaired without
+weakening statements. Core02/fixture02/controls02/03 pass. Seven new public exact
+standard guards; generic locals-get/set has NO axioms. Same capped warm serial
+cacheOFF runtime; preflight1558994944bytes/96MiB forecast/unchanged512MiB reserve.
+Separate preliminary finder/skeptic accepted actual semantics/initial hypotheses/
+nonvacuity/parallel-identity boundary without defect; their suggested concrete
+allocator application is now included rather than leaving a vacuous conditional.
+
+Original G32–G35 and BackfillA/B remain partial/blocked: general type-graph memory
+representation/paths, all-profile constructors/checked target allocation failures,
+ABI/reference/storage/freshdeepcopy/recursiveSourcegraphs/physicalbytes, reserved
+memory-storage and final V10/Source/target composition stay open. Raw docs/pins
+remain actual failures, owned proposals separate. Existing goal BLOCKED and
+untouched by this authorized turn; no reset/reactivation/completion/newgoal.
+
+C40 final guarded158jobs/full1078default/262Suite/SolKey377/131 exit0.
+Strict automatic, complete fixture, layer/orphan/trust, lane760standardpins/
+97modules and script-corruption controls pass. Final sampled aggregateRSS
+1551556KiB,233472bytes warm disk growth, zero new memory.max/OOM/kill events.
+Raw docs1 matches complete83public findings; frozen no-new remainsFAIL11incoming.
+Raw globalinventory1:1119unrecorded=359publicinherited+760owned,0unsafe.
+Separate final finder/skeptic source reviews accepted sevenexactguards, concrete
+allocator preservation and precise parallel-identity/graph-relation boundary
+with no remaining defect. All old seals/rawfailures retained. Existing goal
+BLOCKEDunchanged; authorizedturn progress is not goalreactivation/completion.
+Original fullqueue remains partialblocked, no exhaustion/wholelane claim.

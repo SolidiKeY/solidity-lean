@@ -1301,3 +1301,6 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceAssignment.lean` | Actual resolved Source indexed Boolean assignment with local RHS/index, intrinsic statement and published word write; initial alignment, MemOK, complete frames and separate bounds observations. |
 
 | `Solidity/Backend/MemoryOps/SourceSequence.lean` | Actual reached Source RItems, intrinsic program and word-code sequencing for indexed assignment/delete in both orders; derived second bounds, exact prefix failure, horizon and typed frame laws. |
+
+| `Solidity/Backend/MemoryOps/SourceAlias.lean` | Actual Source local reference assignment and published intrinsic/word alias rebinding: parallel initial-pointer identity, unchanged heaps, MemOK and complete reference-array ownership. |
+| `Solidity/Backend/MemoryOps/SourceAliasControls.lean` | Independently inhabited nested reference parents/shared Boolean child, material destination identity/pointer change, retained alias, exact tables/reads/word vectors, allocator/self-alias/horizon controls. |
