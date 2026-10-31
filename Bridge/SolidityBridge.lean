@@ -48,3 +48,7 @@ import SolidityBridge.ExternalEvm.Memory
 import SolidityBridge.ExternalEvm.MemoryBytes
 import SolidityBridge.ExternalEvm.MemoryRefinement
 import SolidityBridge.ExternalEvm.MemoryComposition
+import SolidityBridge.RoadmapV15.EncodingUniqueness
+import SolidityBridge.RoadmapV15.EncodingUniquenessControls
+import SolidityBridge.RoadmapV15.ReferenceEncoding
+import SolidityBridge.RoadmapV15.ReferenceEncodingControls

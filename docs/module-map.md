@@ -1216,3 +1216,7 @@ At the root, the notation's own tests:
 | `Bridge/SolidityBridge/ExternalEvm/MemoryBytes.lean` | Pure 32-byte encoding, conditional actual serialization and in-bounds byte write/readback/frame laws; explicit opaque allocator contract. |
 | `Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean` | Persistent preallocated numeric-cell/byte relation, all four actual core/macro simulations, independently inhabited input, composed readback and alignment controls. |
 | `Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean` | Arbitrarily populated pure two-cell inputs; actual fixed/dynamic store/load program compositions, persistent postrelation, exact stack tails and nonzero-neighbor frame controls. |
+| `Bridge/SolidityBridge/RoadmapV15/EncodingUniqueness.lean` | Checked backend byte-encoding inverse, range and exact-length ordered-byte uniqueness consumers. |
+| `Bridge/SolidityBridge/RoadmapV15/EncodingUniquenessControls.lean` | Checked nonzero/signed/narrow/boundary, wrong-endian/length and complete ordered-observation controls. |
+| `Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean` | Uncompiled source proposal: actual published pure reference encoding to backend/scalar/full ordered-byte observations; external import gate blocked. |
+| `Bridge/SolidityBridge/RoadmapV15/ReferenceEncodingControls.lean` | Uncompiled reference-specific controls and pending axiom audits; checked independent analogues in the preceding control module. |

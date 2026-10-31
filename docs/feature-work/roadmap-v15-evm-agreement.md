@@ -35,7 +35,7 @@ recreated or imported from an unmerged branch.
 | Item | Status and exact outstanding obligation |
 |---|---|
 | 1 / G46.01 | Open. No new opcode selection/truncation/control correspondence against Osaka. Published numeric/control bridges remain read only; their hypotheses are not discharged here. |
-| 2 / G46.02 | Open. Compiler byte-memory/calldata representation transport to an actual pinned transition still needs the published memory bridge, padding, driver and exact expansion/resource clauses. |
+| 2 / G46.02 | Open. Published memory sources are now incorporated read only; a pure reference encoding consumer source proposal is prepared, but local kernel validation is cache-blocked. Actual pinned transition, conditional serialization, padding, driver and exact expansion/resource clauses remain open. |
 | 2 / G46.03 | Open. Persistent/transient numeric-slot consumers still need symbolic-path representation, approved per-run region premise and published slot adapter composition. |
 | 3 / G46.04 | Open. Environment/balance/metadata instructions need full frame/account and compiler representation agreement, beyond published local environment slices. |
 | 3 / G46.05 | Open. Hash-region membership transport is proved below. Actual memory-preimage/cryptographic observation consumers and existing decoder/precompile agreement remain prerequisites. No global injectivity is introduced. |
@@ -546,7 +546,7 @@ transition correspondence is silently counted discharged.
 
 The separate pending core import-closure target now passed: timeout 5400 lake build +Solidity, 970 jobs in 4,921.916 seconds, peak cgroup 9,834,909,696 bytes and sampled aggregate Lean/Lake RSS 9,214,480,384 bytes, swap cap 0. This does not relabel the earlier failed cold full command or validate the external Bridge umbrella. TestSuite/native/sort phases remain separately accountable. The latest lightweight authorized endpoint probe still fails CONNECT 403 (curl exit 56); cache-host-probe-final.log retains the raw result.
 
-Halt checkpoint handoff: independent follow-up finder and skeptic cleared the actual staged proofs, hypotheses, inhabited/negative controls, ownership and evidence. All ten owned modules and their import closure pass in owned-final-closure.log, including all 46 scoped axiom reports; peak cgroup 224,415,744 bytes. The layer/orphan/trust/owned-structural/whitespace gates pass. Raw docs still fails with 46 missing and 37 ambiguous findings; halt-docs-comparison.json reports zero additions of either class, with multiplicities. All150 opcode rows retain open obligations and empty dischargedByV15. The temporary runtime configuration is removed before this commit. Exact-head exports and final remaining-phase results belong in /workspace/v15-evm-agreement-artifacts/recovery-201ebab8; raw recovery evidence remains /workspace/v15-evm-agreement-evidence/recovery-201ebab8. G46/G47 and the full lane remain unfinished.
+Halt checkpoint handoff: independent follow-up finder and skeptic cleared the actual staged proofs, hypotheses, inhabited/negative controls, ownership and evidence. All ten owned modules and their import closure pass in owned-final-closure.log, including all 46 scoped axiom reports; peak cgroup 224,415,744 bytes. The layer/orphan/trust/owned-structural/whitespace gates pass. Raw docs still fails with 46 missing and 37 ambiguous findings; halt-docs-comparison.json reports zero additions of either class, with multiplicities. All 150 opcode rows retain open obligations and empty dischargedByV15. The temporary runtime configuration is removed before this commit. Exact-head exports and final remaining-phase results belong in /workspace/v15-evm-agreement-artifacts/recovery-201ebab8; raw recovery evidence remains /workspace/v15-evm-agreement-evidence/recovery-201ebab8. G46/G47 and the full lane remain unfinished.
 
 
 ## Final recovery validation and handoff
@@ -656,4 +656,98 @@ fetch, CONNECT probe, giant cold external closure or failed full gate is repeate
 
 The first offline per-file producer check (producer-import.log/json) fails before elaboration: unknown module prefix EvmYul. No newly published producer is kernel-checked in this VM. Current total .olean counts are Mathlib/CSLib/auto 6/0/1; library-output counts are 5/0/0, with the Mathlib five belonging only to its cache tool. Configuration oleans do not supply the missing EVM/Mathlib closure. The bounded process cap is 12 GiB with swap 0; peak for this failed narrow check is 60,473,344 bytes. The existing cache 0/860 CONNECT403 failure and original cold full exit124 remain retained, not rerun or waived. The exact checked Core byte-encoding helpers and candidate reference consumer are the next assigned Backfill A work.
 
-Producer checkpoint handoff: separate independent read-only finder and skeptic verified all four source blobs against the genuine published commit, its frozen-base ancestry, append-only registration, exact hypothesis/driver boundaries and the actual failed import. Both clear source-only incorporation, not kernel compatibility or lane completion. Layer/whitespace checks pass; raw docs still exits1 with the same46 missing/37 ambiguous findings and zero additions in the separate exact-base comparison. Source publication does not resolve the authorized but still unperformed cache endpoint repair. The next checkpoint continues the original Backfill A encoding consumer, rather than ending at this source-only checkpoint.
+Producer checkpoint handoff: separate independent read-only finder and skeptic verified all four source blobs against the genuine published commit, its frozen-base ancestry, append-only registration, exact hypothesis/driver boundaries and the actual failed import. Both clear source-only incorporation, not kernel compatibility or lane completion. Layer/whitespace checks pass; raw docs still exits 1 with the same 46 missing/37 ambiguous findings and zero additions in the separate exact-base comparison. Source publication does not resolve the authorized but still unperformed cache endpoint repair. The next checkpoint continues the original Backfill A encoding consumer, rather than ending at this source-only checkpoint.
+
+
+## Publication consumer checkpoint: exact bytes and explicit kernel boundary
+
+The new `Bridge/SolidityBridge/RoadmapV15/EncodingUniqueness.lean` proves four
+source-independent consumer laws over the existing Backend encoder/reader:
+
+| Checked declaration | Exact statement boundary |
+|---|---|
+| bytes_encoding_roundtrip | Every List UInt8 is exactly reconstructed by toBytesBE at its original length after ofBytesBE, including leading zeroes. |
+| bytes_value_bound | Every such list decodes below 256^length. No word-width/modulo premise is silently added. |
+| bytes_eq_of_length_read | Equal lengths AND equal decoded naturals imply equality of complete ordered bytes. Omitting length is false. |
+| bytes_canonical | A producer's exact width and decoded-value clauses determine its entire ordered encoding, not just a numeric projection. |
+
+All four pass per-file kernel checks and print only propext/Quot.sound.
+`Bridge/SolidityBridge/RoadmapV15/EncodingUniquenessControls.lean` passes with
+nonempty/nonzero distinct words 258/513, leading zeroes, wrong endian and length,
+right-versus-left padding, signed -1/minimum, unsigned maximum, narrow unsigned
+257-to1/signed128-to-128 cleanup, full-word wrapping and preserved word order.
+Existing G06 success/revert observations keep their bit and every payload byte.
+The previous 46 checked consumer laws and all earlier controls remain unchanged;
+there are now 50 locally checked public consumer laws, not 65.
+
+`Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean` and
+`Bridge/SolidityBridge/RoadmapV15/ReferenceEncodingControls.lean` are complete
+source proposals with **15 reference declarations NOT locally kernel-checked**.
+The failed producer import prevents their elaboration; their axiom reports and
+reference-specific controls are pending, not passed. No alternate cache fetch,
+endpoint probe, cold external closure, synthetic reference semantics or driver
+was used to bypass that blocker. Source-only static review cannot replace it.
+Their actual intended cross-representation result is full ordered-list AND
+ByteArray equality between the published pure encoding and Backend.toBytesBE32,
+proved in source from encoding_spec plus the checked bytes_canonical consumer.
+The existing reserved External.encode/decode numeric adapters are reused unchanged.
+No allocator hypothesis is introduced and no conditional serialize_eq result is
+used. UInt256.ofNat inputs retain the explicit modulo 2^256 clause.
+
+The exact pending declarations are reference_big_reader, reference_array_reader,
+reference_encoding_bytes, reference_encoding_array, reference_encoding_scalar,
+reference_encoding_nat_modulo, reference_encoding_injective,
+reference_scalar_immediate, reference_signed_observation,
+reference_unsigned_observation, reference_typed_abi_bytes,
+reference_unsigned_cleanup, reference_signed_cleanup,
+reference_encoding_sequence and reference_complete_observation.
+They preserve signed/unsigned scalar and typed ABI representation, stack tails,
+full ordered byte sequences and existing completed-frame success/revert observers.
+Encoding injectivity is a finite word-encoding fact, never hash injectivity.
+No actual reference instruction execution, fetched-bytecode driver, gas/resource,
+account-world, CALL/CREATE/transaction or finite/infinite trace proof follows.
+
+The new scripts/roadmap-v15-memory-publication.py source-boundary report verifies
+all four exact publication blobs and distinguishes unconditional pure encoding
+from allocator-conditioned serialization/read/store results, preallocated numeric
+representation, and supplied zero-charge opcode execution. Its 18 mutation tests
+reject source drift, missing modules, added pure-encoding hypotheses, omitted or
+wrong allocator clauses, weakened capacity, changed runner scope, weakened full
+bytes, invented witnesses, missing/duplicate consumers/conditional rows and false
+kernel/driver/Osaka/transaction promotion. This is structural accounting, not a
+semantics or proof certificate. All 15 reference rows explicitly remain pending.
+Existing 150 opcode obligation rows remain open; no status is promoted.
+
+Focused failures are retained: the first owned import needed a unified namespace
+cache index (symlinks to unchanged previous outputs, no copied old cache); new
+proof normalization needed explicit dependent-length transport and the actual
+implicit length_reverse argument; a uint control initially used an arithmetic
+Prop instead of the intrinsic Boolean inRange=true. All were fixed without
+changing public statements, definitions or heartbeat/recursion/time budgets.
+Actual passing evidence is uniqueness-checked.log and uniqueness-controls-checked.log;
+uniqueness-final.log is an earlier FAILED attempt and is not relabeled green.
+Source-boundary tests pass 18/18 in memory-boundary-tests-reviewed.log. The actual
+producer import remains failed in producer-import.log, and the full registered
+Bridge gate is pending. The old full 5400-second exit124 and cache 860/403 failure
+remain sealed historical failures, not rerun. Independent reviews and final
+publication-specific export paths are recorded at checkpoint completion below.
+
+Consumer review finding: the skeptic observed that text-mode file loading could normalize CRLF and mask published-byte drift. The source loader now decodes raw bytes without newline translation, and a temporary-fixture CRLF mutation test exercises actual loading and rejects that drift. The real four producer files remain exact published blobs. The checked Core laws are unchanged; the reference-specific source remains uncompiled, including all axiom/control requests.
+
+Consumer checkpoint handoff: separate independent read-only finder and skeptic
+inspected the actual source, hypotheses, non-vacuity, negative/combination
+controls, publisher identity and kernel/source-only status split. Both cleared
+the four checked laws and static proposals, with all fifteen reference laws
+still uncompiled. The confirmed CRLF provenance finding was fixed and both
+follow-ups cleared the raw-loading control. New core closure passes in
+checked-encoding-closure.log; four axiom reports pass in
+uniqueness-controls-checked.log (peak cgroup 179,539,968 bytes). All 18 boundary
+tests pass; all fifteen reference rows remain pending. Layer/orphan/trust,
+append-only/ownership and whitespace checks pass. The full docs checker still
+fails with 46 missing/37 ambiguous; the separate exact-frozen-base all-findings
+comparison has zero additions. Prior sealed artifacts and all ten original own
+modules remain unchanged. The final new exports are under
+/workspace/v15-evm-agreement-artifacts/publication-7499c0a3; raw evidence is
+/workspace/v15-evm-agreement-evidence/publication-7499c0a3. Full G46/G47 and
+Backfill A/B remain unfinished. The already-authorized runtime action is normal
+access restoration to the existing cache endpoint; it needs no reapproval.
