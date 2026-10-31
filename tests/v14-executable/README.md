@@ -49,3 +49,10 @@ initializer controls separately execute existing source deploy and preserve
 legacy/viaIR order. Standalone base-argument metadata is not Program.Derived
 or constructor argument lowering. Published source fixtures use toyFixed;
 no Keccak, account-byte or pinned-EVM agreement follows from these controls.
+
+Published creation-frame recovery adds `Solidity.Backend.Executable.CreationFrame`:
+actual paid world plus separate typed caller, decoded Error catch allocation,
+old aliases, heap-dependent tail, exact outer rollback and handle observation.
+The fixed incorporation baseline preserves the frozen assignment identity;
+behavioral guard tests cover ancestry/parent rejection and post-baseline edits.
+These are intrinsic semantics, with no paid execute/finish or EVM claim.

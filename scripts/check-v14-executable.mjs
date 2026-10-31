@@ -6,6 +6,10 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadGraph, reach } from "./import-fanout.mjs";
 export const frozenBase = "2fe1f8932f96be15b00df03ba2cde46f64a87758";
+// Exact reviewed incorporation; frozenBase remains the assignment/history base.
+// Local changes after this merge must still obey the same namespace boundary.
+export const incorporationBase = "e85fc5f07d52a2ed7f0a8299bab57e1b828a2d5a";
+export const publishedBase = "4165de133bafd522ab18099e18cad489bb1aa7d6";
 const owned = "Solidity.Backend.Executable.";
 const registrations = ["Solidity.lean", "docs/module-map.md", "docs/README.md"];
 
@@ -148,7 +152,7 @@ export function analyzeSources(sources, registration, graph) {
   }
   return { modules, failures };
 }
-export function changedPaths(root, base = frozenBase) {
+export function changedPaths(root, base = incorporationBase) {
   const git = args => execFileSync("git", ["-C", root, ...args], { encoding: "utf8" }).split("\0").filter(Boolean);
   return [...new Set([...git(["diff", "--no-renames", "--name-only", "-z", base]),
     ...git(["ls-files", "--others", "--exclude-standard", "-z"])])];
@@ -158,14 +162,22 @@ export function scopeFindings(paths) {
     [...registrations, "docs/feature-work/roadmap-v14-executable.md", "scripts/check-v14-executable.mjs"].includes(file)))
     .map(file => `out-of-scope changed or untracked file: ${file}`);
 }
+export function verifyIncorporation(root, git = args => execFileSync("git", ["-C", root, ...args], { encoding: "utf8" })) {
+  for (const ancestor of [frozenBase, incorporationBase, publishedBase])
+    git(["merge-base", "--is-ancestor", ancestor, "HEAD"]);
+  const parents = git(["show", "-s", "--format=%P", incorporationBase]).trim();
+  if (parents !== `e74b7ac80fc5bccfa6e547764097f456c8020476 ${publishedBase}`)
+    throw new Error("published prerequisite incorporation identity mismatch");
+}
 export function main() {
   const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
+  verifyIncorporation(root);
   const sources = scanSources(root);
   const { graph } = loadGraph();
   const result = analyzeSources(sources, readFileSync(resolve(root, "Solidity.lean"), "utf8"), graph);
   result.failures.push(...scopeFindings(changedPaths(root)));
   for (const file of registrations) {
-    const before = execFileSync("git", ["-C", root, "show", `${frozenBase}:${file}`], { encoding: "utf8" });
+    const before = execFileSync("git", ["-C", root, "show", `${incorporationBase}:${file}`], { encoding: "utf8" });
     if (!readFileSync(resolve(root, file), "utf8").startsWith(before)) result.failures.push(`${file}: registration must be append-only`);
   }
   for (const failure of result.failures) console.error(failure);

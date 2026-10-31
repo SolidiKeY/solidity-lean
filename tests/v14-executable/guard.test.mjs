@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
-import { analyzeSources, scanSources, scopeFindings, rawImports, changedPaths } from "../../scripts/check-v14-executable.mjs";
+import { analyzeSources, scanSources, scopeFindings, rawImports, changedPaths, frozenBase, incorporationBase, publishedBase, verifyIncorporation } from "../../scripts/check-v14-executable.mjs";
 const name = "Solidity.Backend.Executable.Consumer";
 const analyze = (source, registration = `import ${name}\n`) =>
   analyzeSources(new Map([[name, source]]), registration, new Map([[name, []]]));
@@ -79,6 +79,9 @@ test("Git census includes untracked files and both sides of a reserved rename", 
     writeFileSync(join(root, "Solidity/Backend/Scalar/Reserved.lean"), "def reserved := 7\n");
     git(["add", "."]);
     git(["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", "commit", "-qm", "fixture"]);
+    assert.deepEqual(changedPaths(root, "HEAD"), []);
+    writeFileSync(join(root, "Solidity/Backend/Scalar/Reserved.lean"), "def reserved := 8\n");
+    assert.ok(scopeFindings(changedPaths(root, "HEAD")).some(x => x.includes("Scalar/Reserved")));
     git(["mv", "Solidity/Backend/Scalar/Reserved.lean", "Solidity/Backend/Executable/Moved.lean"]);
     writeFileSync(join(root, "Solidity/Backend/Executable/Untracked.lean"), "axiom bad : False\n");
     const paths = changedPaths(root, "HEAD");
@@ -143,4 +146,27 @@ test("published source graph edges remain independently checked", () => {
   const sources = new Map([[name, `import ${world}\n`], [world, ""]]);
   const graph = new Map([[name, [world]], [world, ["Lean.Elab"]], ["Lean.Elab", []]]);
   assert.ok(analyzeSources(sources, `import ${name}\n`, graph).failures.some(x => x.includes("forbidden published dependency")));
+});
+
+test("published incorporation keeps the frozen identity and audits local deltas", () => {
+  assert.equal(frozenBase, "2fe1f8932f96be15b00df03ba2cde46f64a87758");
+  assert.equal(publishedBase, "4165de133bafd522ab18099e18cad489bb1aa7d6");
+  assert.equal(incorporationBase, "e85fc5f07d52a2ed7f0a8299bab57e1b828a2d5a");
+  // Published reserved files are inherited; a subsequent local edit is still forbidden.
+  assert.ok(scopeFindings(["Solidity/Semantics/CreationTryFrame.lean"]).length);
+  assert.equal(scopeFindings(["Solidity/Backend/Executable/CreationFrame.lean"]).length, 0);
+});
+
+test("incorporation verifier requires ancestry and exact ordered parents", () => {
+  const parents = `e74b7ac80fc5bccfa6e547764097f456c8020476 ${publishedBase}`;
+  const commands = [];
+  verifyIncorporation("unused", args => { commands.push(args); return args[0] === "show" ? parents : ""; });
+  assert.deepEqual(commands.slice(0,3), [frozenBase, incorporationBase, publishedBase].map(a => ["merge-base", "--is-ancestor", a, "HEAD"]));
+  for (const absent of [frozenBase, incorporationBase, publishedBase])
+    assert.throws(() => verifyIncorporation("unused", args => {
+      if (args[0] === "merge-base" && args[2] === absent) throw new Error("not ancestor");
+      return parents;
+    }), /not ancestor/);
+  for (const bad of ["", parents.split(" ").reverse().join(" "), `${parents} extra`, `${publishedBase} ${publishedBase}`])
+    assert.throws(() => verifyIncorporation("unused", args => args[0] === "show" ? bad : ""), /identity mismatch/);
 });

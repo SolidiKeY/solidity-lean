@@ -889,3 +889,84 @@ Backfill statuses and theorem premises above remain binding. Coordinator G03
 reconciliation should record independent preparation for G43/G36.03/G44.01-.03/
 G45.01-.06 and the feature IDs already listed, without changing parent verdicts
 or TrustAudit/manifest pins. No human semantic scope choice is requested.
+
+
+## Published creation-frame recovery (audit 57995d33)
+
+The frozen assignment base remains `2fe1f8932f96be15b00df03ba2cde46f64a87758`.
+Original sealed source/export HEAD `e74b7ac80fc5bccfa6e547764097f456c8020476`
+is retained as the first parent of incorporation
+`e85fc5f07d52a2ed7f0a8299bab57e1b828a2d5a`. Its second parent is the exact
+human-authorized published `4165de133bafd522ab18099e18cad489bb1aa7d6`.
+The merge was conflict-free; separate read-only finder/skeptic reviews verified
+all prior owned files unchanged, all registrations retained, and all other
+merged blobs identical to publication. No unmerged worker branch was fetched.
+The consumed `Semantics/CreationTryFrame.lean` has blob
+`4cbd2c9b8e4d6497aca23e753efc56b27d6ad325` and SHA256
+`e813b13eeb9e2ab3134de2fa8e5f3294db13ec153af383b1c8b8360f3532f95f`.
+Reserved producers remain read only after incorporation.
+
+`Backend/Executable/CreationFrame.lean` consumes actual `CreationTryFrame.run`,
+`caught`, `success`, `tail_success`, `tail_body_failure`, `atomic_tail_failure`
+and `errorData_refused`. Its constructor failure uses `encodeError` of boom,
+proved to decode by actual `CatchKind.decode .reason`; raw ca/fe is explicitly
+refused. `caught_run` and `paid_prefix_resumes` discharge creation and branch
+premises constructively, using the actual existing paid-prefix witness.
+The original caller has two aliases of object0 and local41. The handler
+allocates object1 with decoded bytes98,111,111,109, drops its local, and retains
+object0 containing7,8. `old_length_read` and `resumed_run` execute the caller
+on that grown heap, reading the old alias length2, not the catch length4.
+`fresh_catch_binding`, `caught_heap`, `exact_objects`, `resumed_frame` and
+`wrong_tail_heap_refused` expose those intermediate/final distinctions.
+
+`argument_bypasses` and `argument_outer_rollback` propagate exact argument ab
+outside the catch. `selected_tail_failure` propagates exact tail77, not the
+constructor payload, and `paid_outer_rollback` restores outer `created`, not
+`paidOne`. `success_run` stores the actual supplied returned handle in the old
+uint local; `success_handle_observed` distinguishes its address from `fresh`,
+and `success_installs`/`returned_identity` prove actual installation/identity.
+There are wrong-world, bytes, alias and malformed-payload controls.
+These public headlines are closed kernel proofs, with no external simulation
+premise; private helpers only recover actual evaluated results or abstract the
+pair while consuming the existing proved constructor result. Scoped axiom
+outputs pin either none or the existing standard propext/choice/Quot.sound set.
+
+The pending caller explicitly identifies sender and retains balance3/netempty;
+the paid world has sender2/fresh1. No `World.finish` or `CreationTryFrame.execute`
+is used: execute's unpaid/local-only convention cannot reconcile this stale
+paid caller. These results concern intrinsic world/typed heap semantics, not
+independent Source lowering, nonce derivation, compiled constructor/new, target
+CREATE, fetched byte execution or gas. G44.03/Backfill B gain this independent
+composition; every remaining Work/Backfill obligation in the queue table stays
+open/partial with exactly the prior scope. In particular G43 stipend/payment
+asymmetry, G36.03 and G45 fetched-state/resource relations are not discharged.
+
+The owned guard now checks local scope and append-only registrations against
+the exact reviewed incorporation, while verifying frozen/incorporation/published
+ancestry and the incorporation's exact ordered parents. All raw/transitive,
+zero-census, untracked and trust fences remain. Behavioral controls reject each
+missing ancestor and malformed/reordered parent sets, and a real Git fixture
+shows unchanged inherited reserved content excluded and subsequent reserved
+edits rejected. This is provenance/scope validation, not a semantic premise.
+
+Separate read-only proof finder/skeptic reviews required the actual-handle
+success observation, alias-dependent tail read and explicit payer identity;
+all are implemented and re-reviewed without remaining findings. Separate guard
+finder/skeptic reviews required behavioral ancestry/parent rejection tests;
+those are implemented. Neither review area ran Lean/server/builds.
+Post-incorporation focused/import, static, documentation-baseline and full-gate
+outcomes are recorded in the new absolute VM evidence/handoff, preserving all
+old seals and raw failures. Until that final gate passes, the old full pass is
+only evidence for its old source. This recovery does not complete the lane or
+change the unchanged persistent goal's blocked status.
+
+Recovery focused gate passed64jobs with26 scoped axiom pins. Guard regressions
+passed19/19,0skips; scope22modules/0findings, layers/orphans/trust/automatic and
+whitespace passed. Fresh Lean4.24.0/Lake5.0.0-src and KeySort2jobs passed under
+12GiB/no-swap (RUNTIME_GATE_PASS). Raw docs exit1 remains: frozen46missing/
+37ambiguous; publication/current48missing/37ambiguous. The complete multiset
+difference is exactly publication's two inline-assembly references; no lane
+addition or omission relative to publication. This is a separate no-new-finding
+pass, never a passing raw docs gate or zero global delta against frozen base.
+Post-incorporation full gate is pending at this checkpoint. New evidence:
+`/workspace/v14-creation-frame-evidence`; prior sealed exports remain untouched.

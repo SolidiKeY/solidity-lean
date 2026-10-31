@@ -954,3 +954,5 @@ import Solidity.Backend.Executable.SourceJournal
 
 import Solidity.Backend.Executable.SourceInitializers
 import Solidity.Backend.Executable.SourceInitializerChecks
+
+import Solidity.Backend.Executable.CreationFrame

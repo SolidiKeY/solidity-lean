@@ -1296,3 +1296,5 @@ admits physical assembly or proves target-byte/original-callee transport.
 
 | `Backend/Executable/SourceInitializers.lean` | Published source initializer/argument/collection prefixes preserve exact full EM state and halt. |
 | `Backend/Executable/SourceInitializerChecks.lean` | Existing inheritance initializer fixture cuts/order, successful source deploy tags, static and argument failure controls. |
+
+| `Backend/Executable/CreationFrame.lean` | Intrinsic paid-prefix creation catch allocation, caller aliases and resumed typed tail; no paid ledger reconciliation or EVM simulation |
