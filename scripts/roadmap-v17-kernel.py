@@ -270,6 +270,21 @@ def name_ast(n):
     return value
 
 
+def resource_snapshot():
+    host=int(next(l.split()[1] for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:')))*1024
+    # This managed VM exposes the enclosing cgroup-v2 limit at its namespace root.
+    e.require(Path('/proc/self/cgroup').read_text().strip()=='0::/','unsupported enclosing cgroup layout')
+    limit=int(Path('/sys/fs/cgroup/memory.max').read_text().strip())
+    used=int(Path('/sys/fs/cgroup/memory.current').read_text().strip())
+    return {'hostMemAvailableBytes':host,'enclosingCgroupLimitBytes':limit,'enclosingCgroupCurrentBytes':used,'headroomBytes':min(host,limit-used)}
+
+
+def check_headroom(r):
+    host=r['hostMemAvailableBytes']; limit=r['enclosingCgroupLimitBytes']; used=r['enclosingCgroupCurrentBytes']
+    e.require(all(type(x) is int and x>=0 for x in (host,limit,used)) and used<=limit,'invalid enclosing memory measurements')
+    e.require(r['headroomBytes']==min(host,limit-used) and r['headroomBytes']>=p.CAP+2*1024**3,'insufficient effective headroom/OS reserve')
+
+
 def collect(req, out):
     req=request(req); p.ensure_no_unresolved()
     e.require(not out.exists() and out.is_absolute() and out.resolve()==out and not out.is_relative_to(ROOT) and out.is_relative_to(Path('/workspace')), 'new external evidence directory required')
@@ -277,9 +292,9 @@ def collect(req, out):
     (out/'request.json').write_bytes(canonical(req))
     try:
         before=e.snapshot(ROOT); closure=source_closure(req['module']); installed=tool_inputs(before)
-        headroom=int(next(l.split()[1] for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:')))*1024
+        resources=resource_snapshot(); check_headroom(resources)
         disk=os.statvfs(ROOT); free=disk.f_bavail*disk.f_frsize
-        e.require(headroom>=2*1024**3 and free>=1024**3,'headroom/disk guard')
+        e.require(free>=1024**3,'disk guard')
     except (OSError,ValueError,subprocess.SubprocessError) as err:
         failure={'schema':1,'exit':2,'phase':'preflight','request':req,'error':str(err),'releaseClosed':False,'semanticPremisesDischarged':False}
         (out/'record.json').write_text(json.dumps(failure,indent=2)+'\n'); return failure
@@ -342,7 +357,7 @@ def collect(req, out):
     record={'schema':1,'directory':str(out),'before':before,'after':after,'request':req,'sourceClosure':closure,
             'templateSha256':e.digest(TEMPLATE.read_bytes()),'querySha256':e.digest((out/'Query.lean').read_bytes()),
             'pipelineSha256':e.digest((out/'pipeline.sh').read_bytes()),'dockerArgvSha256':e.digest((out/'docker-argv.json').read_bytes()),
-            'headroomBytes':headroom,'diskFreeBytes':free,'commandExit':command_exit,'installedBefore':installed,'installedAfter':installed_after,'exit':code,'elapsedSeconds':elapsed,'containerName':container,
+            **resources,'diskFreeBytes':free,'commandExit':command_exit,'installedBefore':installed,'installedAfter':installed_after,'exit':code,'elapsedSeconds':elapsed,'containerName':container,
             'sampleFormat':p.SAMPLE_FORMAT,'freshStartAbsent':True,'samples':samples,'errors':errors,'result':result,'releaseClosed':False,'semanticPremisesDischarged':False}
     record['attachments']={str(path.relative_to(out)):e.digest(path.read_bytes()) for path in out.rglob('*') if path.is_file()}
     if record['exit']==0:
@@ -354,7 +369,8 @@ def collect(req, out):
 
 
 def check_runtime(r, current, out):
-    e.require(r['headroomBytes']>=2*1024**3 and r['diskFreeBytes']>=1024**3,'insufficient recorded headroom/disk')
+    check_headroom(r)
+    e.require(r['diskFreeBytes']>=1024**3,'insufficient recorded disk')
     e.require(r['freshStartAbsent'] is True and r['sampleFormat']==p.SAMPLE_FORMAT,'missing fresh execution/runtime evidence')
     e.require(0<r['elapsedSeconds']<=305,'execution budget exceeded')
     mandatory={'request.json','Query.lean','Axioms.lean','pipeline.sh','docker-argv.json','execution.sh','command.stdout','query.stdout','query.stderr','axioms.stdout','axioms.stderr','memoryMax','swapMax','memoryPeak','realLeanSha256','lakeSha256','leanVersion','lakeVersion','leanNumThreads'}

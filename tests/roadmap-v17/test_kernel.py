@@ -76,16 +76,16 @@ class BindingControls(unittest.TestCase):
             r=self.record(); r[field]=value
             with self.subTest(field=field),self.assertRaisesRegex(ValueError,reason): self.validate(r)
     def test_missing_runtime_and_headroom(self):
-        r=dict(headroomBytes=2*1024**3,diskFreeBytes=1024**3,freshStartAbsent=True,sampleFormat=k.p.SAMPLE_FORMAT,elapsedSeconds=1,sourceClosure={'order':[]},attachments={})
+        r=dict(headroomBytes=14*1024**3,hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,enclosingCgroupCurrentBytes=2*1024**3,diskFreeBytes=1024**3,freshStartAbsent=True,sampleFormat=k.p.SAMPLE_FORMAT,elapsedSeconds=1,sourceClosure={'order':[]},attachments={})
         with self.assertRaisesRegex(ValueError,'mandatory extraction attachment'): k.check_runtime(r,{},Path('/workspace/scratch/example'))
         r['headroomBytes']=0
-        with self.assertRaisesRegex(ValueError,'headroom/disk'): k.check_runtime(r,{},Path('/workspace/scratch/example'))
+        with self.assertRaisesRegex(ValueError,'headroom/OS'): k.check_runtime(r,{},Path('/workspace/scratch/example'))
 class RuntimeControls(unittest.TestCase):
     def test_valid_runtime_then_corruptions(self):
         with tempfile.TemporaryDirectory() as tmp:
             out=Path(tmp); req=KernelControls().req(); closure={'order':[],'modules':{}}
             current={'runtime':{'lean':{'path':'/tools/bin/lean','version':'lean version','sha256':'a'*64},'lake':{'path':'/tools/bin/lake','version':'lake version','sha256':'b'*64}},'buildTools':{tool:{'sha256':'c'*64} for tool in k.e.BUILD_TOOL_NAMES}}
-            r=dict(request=req,sourceClosure=closure,headroomBytes=2*1024**3,diskFreeBytes=1024**3,freshStartAbsent=True,sampleFormat=k.p.SAMPLE_FORMAT,elapsedSeconds=1,samples=[{'leanWorkers':1,'unclassifiedLeanWorkers':0,'unknownLeanProcesses':[]}],attachments={})
+            r=dict(request=req,sourceClosure=closure,headroomBytes=14*1024**3,hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,enclosingCgroupCurrentBytes=2*1024**3,diskFreeBytes=1024**3,freshStartAbsent=True,sampleFormat=k.p.SAMPLE_FORMAT,elapsedSeconds=1,samples=[{'leanWorkers':1,'unclassifiedLeanWorkers':0,'unknownLeanProcesses':[]}],attachments={})
             files={'request.json':k.canonical(req),'Query.lean':k.query_bytes(req),'Axioms.lean':k.axiom_query(req),'pipeline.sh':k.pipeline_bytes(req,closure,out),'execution.sh':k.p.execution_script(out,['sh',str(out/'pipeline.sh')],Path('/tools/bin/lake')).encode(),'docker-argv.json':b'[]','command.stdout':b'','query.stdout':b'','query.stderr':b'','axioms.stdout':b'','axioms.stderr':b'','memoryMax':str(k.p.CAP).encode(),'swapMax':b'0','memoryPeak':b'123','realLeanSha256':b'a'*64,'lakeSha256':b'b'*64,'leanVersion':b'lean version','lakeVersion':b'lake version','leanNumThreads':b'1'}
             for tool in k.e.BUILD_TOOL_NAMES:
                 files[tool+'-launcher']=k.p.launcher_bytes(tool); files['tool-'+tool]=b'c'*64; files['entrypoint-'+tool]=k.e.digest(k.p.launcher_bytes(tool)).encode()
@@ -121,4 +121,11 @@ class ReplayControls(unittest.TestCase):
         for key,value in [('before',{'revision':'other'}),('after',{'revision':'other'}),('installedBefore',{}),('installedAfter',{}),('result',{'rows':['forged']})]:
             replay=copy.deepcopy(old); replay[key]=value
             with self.subTest(key=key),self.assertRaises(ValueError): k.match_replay(old,replay)
+class HeadroomControls(unittest.TestCase):
+    def test_effective_reserve(self):
+        r=dict(hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,enclosingCgroupCurrentBytes=2*1024**3,headroomBytes=14*1024**3)
+        k.check_headroom(r)
+        for key,value in [('headroomBytes',20*1024**3),('enclosingCgroupCurrentBytes',3*1024**3),('hostMemAvailableBytes',13*1024**3)]:
+            bad=copy.deepcopy(r); bad[key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError): k.check_headroom(bad)
 if __name__=='__main__': unittest.main()

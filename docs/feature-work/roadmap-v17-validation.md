@@ -469,3 +469,10 @@ replay revision, tree, configuration and installed import-input snapshots even
 when declaration rows coincide. Both were corrected; dedicated replay mutation
 controls cover a matching baseline and changed bindings. These are provenance
 checks, not additional semantic proof assumptions.
+
+Final skeptic review found that host `MemAvailable` alone overstates availability
+inside this VM. The owned collector now records host availability and enclosing
+cgroup limit/current usage separately, uses their minimum remaining capacity,
+and requires the full 12 GiB execution cap plus 2 GiB OS reserve before launch.
+Unsupported cgroup layouts fail closed. Earlier host-only records remain raw
+historical evidence; the corrected runtime path requires a fresh bound run.
