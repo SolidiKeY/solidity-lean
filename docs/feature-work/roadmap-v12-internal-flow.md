@@ -653,3 +653,158 @@ defect. Skeptic corrected a module-as-namespace prose reference to the exact
 Solidity.Source.Val.internalFn declaration. Both final artifact reviews and
 exact committed source hashes are retained in the external continuation handoff.
 Full Work1–6/A/B and mandatory full validation remain unfinished.
+
+
+### Continuation 5: evaluated runtime payloads into checked emission (partial Work5/Backfill B)
+
+Generic names below live in Solidity.Backend.InternalFlow, concrete control
+names in Solidity.Backend.InternalFlow.EvaluatedRevertChecks.
+`canonicalRevertInput` is a narrow THalt classifier into the EXISTING Input;
+`checkedRuntimeRevert` consumes the actual TRes, selects that input and invokes
+existing emit/checkedRun. `localRuntimeRevert` feeds the SAME runtime-derived
+input to existing Local.execute. These are result-to-component adapters, not
+another evaluator, codec, machine or source-to-target compiler. Unlike a
+conjunction of unrelated source/emission facts, the actual runtime error's
+bytes determine the instructions and output in the conclusion.
+
+`evaluated_revert_execution` consumes actual ordered
+parts.mapM (RevPart.evalT state)=ok chunks and derives TRun.revertData's exact
+THalt.ofData chunks.flatten. `checked_evaluated_revert` wires this statement
+result to checkedRun_emit_suffix, with Fits/headroom explicit.
+`checked_call_evaluated_revert` additionally consumes actual Args.evalT success
+and evaluates parts in ret.enterT(caller.withEnv arguments).st; call_body_failure
+preserves that exact normalized halt. Those premises are execution equations,
+not assumed simulation/preservation. `local_evaluated_revert` uses live root
+projections FROM that actual known pre-revert State.storage; its saved snapshot
+and caller/live slice machines remain explicit component representation hooks.
+No failed whole-State is reconstructed. Storage/heap/stack/layout relations
+between an intrinsic State and a slice Machine are not proved by these adapters.
+
+The classifier accepts only bare revert and nonempty revertWith. It refuses
+panic, exhausted, diverge and noncanonical revertWith [], though each can have
+empty THalt.data. Actual revertData normalizes empty evaluated bytes to bare
+revert via ofData, and nonempty bytes to revertWith. No panic code is guessed;
+this adapter does not reuse inputOfResult's generic panic interpretation.
+Assert/panic-code coupling needs its qualified published evidence and target
+representation; the actual assert-false control here only proves panic and
+refuses emission through this narrow byte-revert adapter. Require-false is an
+actual bare-revert-to-checked-empty emission control. A successful actual nil
+run is refused rather than converted to failure.
+
+The inhabited source witness reuses the ACTUAL successful MixedLoopPrefixes
+prefix (p7/t9→p8/t11, counter9→10, untouched17, populated caller aliases[7,11],
+shrink/allocation/unwind), not a newly duplicated loop. successful_prefix ties
+its statement run to the known prefix State; ordered_prefix_observations retain
+the complete selected initial/prefix projections. Arguments/entered-frame/scoped
+argument observations preserve BOTH old aliases and distinct scalars10/17 while
+the outer scope declares a distinct55. Two nested ordinary calls and a block
+execute the actual parts: literal de-00, word(counter10), raw heap alias[7,11],
+empty chunk, word(other17), word(p8), word(t11), second raw alias[7,11].
+parts_evaluate proves the complete eight ordered chunks using existing wordBytes
+and heap evaluation; lengths2/32/2/0/32/32/32/2 flatten to134 bytes, with zero
+padding/embedded zeros and multiple word-boundary crossings. nested_failure and
+original_halt_class prove the actual full Prog.runR's revertWith134bytes.
+checked_execution feeds THAT actual nested result into emission; checked_direct_call
+also instantiates the generic dependent call theorem with both actual premises
+discharged. Output-extraction fallback arguments are excluded by success proof.
+
+The checked emitter runs at offset31 on a nonzero dirty byte memory with a
+three-word protected stack and an unsupported suffix after the terminal opcode.
+The complete output interval[31,165), immutable outcome bytes and exact stack
+tail are proved via existing checkedRun_emit_suffix/getBytes_putBytes. The
+outside_interval theorem covers EVERY address outside it; boundary markers at
+30/165 and bytes31/32/164 are pinned. Source-derived live root projections8/11
+and saved7/9 are distinct. Local execution restores the explicit saved journal
+and its caller memory0x11, while returning the immutable evaluated134byte list
+whose emitted first byte is0xde. This is local projected-journal restoration,
+not source catch, whole-State/world rollback, gas/EVM agreement or G01 events.
+RETURN of those same evaluated bytes is only an existing Local.execute_return
+component contrast, preserving live roots/memory; no intrinsic ABI return
+lowering is inferred.
+
+Controls reject reordered chunks, wrong length133, shifted output offset,
+transient-zero substituted into the payload, success instead of revert and
+premature root reset. Empty parts actually evaluate empty and halt bare revert.
+The current intrinsic division-by-zero evaluation returns bare revert (consumed
+unchanged, NOT claimed source Panic correctness); an actual nonzero division
+baseline returns word5. A failing part discards earlier de-ad partial chunks,
+so only the original empty-revert result reaches emission. Stack baseline1022
+succeeds with the same valid offset/empty payload;1023 is initially legal but
+fails precisely the required two-word temporary headroom, and checked emission
+returns none. No failure is replaced by success, no Fits is waived and no
+heartbeat/recursion/fuel/node/test limit is increased. Early type/default-depth
+failures remain raw evidence; final proofs use explicit types, memory-frame and
+stack-boundary laws rather than larger budgets.
+
+#### Remaining original producer map (no parent closure)
+
+| Item | Exact remaining producer/boundary |
+|---|---|
+| Work1/G37.01 | Published core Evm.argsIn/CallRetIn still refuse general memory/reference call transport. V11 target heap/layout plus old internal-call frame/stack representation exports remain missing; the independent source result adapter is not such a representation. |
+| Work2/G37.02 | Existing Syntax.Scoped recDepth/recUnroll/recBase and Elab.Arms cutoff are unchanged; core callRec refusal remains. Source/lowering owner's unbounded recursive execution and target-frame simulation remain open. |
+| Work3/G37.03 | Solidity.Source.Val.internalFn retains dependent signatures; its target dispatch lowering must consume the unavailable general frame theorem. Restricted function-ref-args owner stays untouched. |
+| Work4/G36.01–.03 | Structured source/flag lowering and target frame/alias proofs, general push/pop/shrink/allocation loop simulation and payment/call-loop interface/application stay open. Prior withinM push/pop and core mixed-loop refusals remain actual controls. |
+| Work5/G38 | NEW actual evaluated statement/call payload→checked/local emitter coupling is proved. Still missing: an actual target-frame representation relating State C Γ to Slice.Machine and proving the chosen stack tail/byte-address layout/offset denote that State; target storage/root representation; statement lowering carrying that relation across the prefix/calls and qualified assert/panic-code/ABI-return applications. Existing TRes(Out C σ.H Γ) error returns only THalt, so no failed live State can be extracted to establish whole-State rollback. Such an enriched source/world rollback producer belongs to its existing owners, not a new premise silently discharged here. |
+| Work6/G39 | Logical root projections/reset laws are unchanged; target transient/persistent root representation, sharing/rollback and arbitrary V13/V15 self-call/callback/world coupling remain open. |
+| Backfill A | Prior frame/content/finite-recursion controls remain partial; general target-frame composition and full original coverage remain outstanding. |
+| Backfill B | Evaluated payload bytes now drive actual projected emission after a successful scoped prefix; general target local-unwind/transient/world composition and full original coverage remain outstanding. |
+
+The concrete machine hook is deliberately not identified with source heap or
+locals: a representation relation of type State C Γ → Slice.Machine → Prop
+is an open producer obligation, not a declared or assumed relation here.
+The reserved producer must construct/prove that relation for actual lowering,
+including stack/local encoding, heap byte layout and a noninterfering output
+interval, and connect persistent/transient target roots. This is an explicit
+open representation/transport obligation, NOT an assumed hypothesis in the
+payload theorems. TRes.error's codomain obstruction additionally prevents
+inventing a lost live State. No reserved source/predicate/semantic/component
+implementation was edited, no unmerged branch imported and no global status/
+G03/profile/refusal/Fml.inTarget/SolKey mapping changed. All Work1–6 and BOTH
+full backfills remain unfinished. No semantic human choice is pending.
+
+Original full run-lean.sh exit124 at fixed300s remains FAIL/incomplete with
+TestSuite/final sort unreached, not repeated, extended or narrowed. Prior
+no-build exit3 remains readiness inventory. Normal/strict docs raw exits1 stay
+failures, separately compared COMPLETE exact-base findings for zero additions.
+No new integrated prerequisite justifies rerunning that unchanged failed gate.
+Continuation5 uses /workspace/scratch/v12-flow-calls/continuation-5, preserving
+all five prior sealed sets and raw failures. Existing independently blocked goal
+(audit ac446be6-6529-4285-a739-06bf368cfe30) stays untouched: no status write/retry,
+reset/reactivation/recreation or competing continuation. Separate read-only
+finder/skeptic source reviews clear actual coupling/non-vacuity/ownership and
+require the qualified machine/projection/class boundaries retained above.
+Exact scoped gates/resources/guarded sets, final diff/artifact reviews and full
+committed source/base/head bindings follow below or in the external handoff.
+
+
+Continuation5 checkpoint gates: `lake build
+Solidity.Backend.InternalFlow.EvaluatedRevert
+Solidity.Backend.InternalFlow.EvaluatedRevertChecks` passes81jobs in9.014s,
+sampled aggregate RSS1040084KiB, cgroup peak598540288B (`cp6-focused`).
+Final `bash tests/internal-flow/check-files.sh <evidence>/guarded-files` passes
+all15files in40.084s,RSS995432KiB,peak386379776B (`cp6-final-files`). Each file
+uses `lake env lean -j1 --tstack=131072 <owned-file>`; no Lean MCP is exposed,
+so repository lean-verify's permitted CLI fallback is used. All55new public
+axiom reports, INCLUDING axiom-free reports, are guarded and pass; dependency
+sets are only propext/Classical.choice/Quot.sound or subsets/none. All gates
+retain120s bounds, explicit-j1/LEAN_NUM_THREADS=1, canonical writer lock and
+enforced aggregate12884901888B memory/swap0, with serial heavy work and OS/disk
+headroom. Existing source/toolchain-keyed .lake cache remains1.9GB; no duplicate
+tree/cache. Exact stopped cp6 CID/name records were checked before cleanup;
+only those owned stopped containers were removed, without force/prune or touching
+source/evidence/cache/older resources. Cleanup and per-gate disk/RSS/cgroup
+measurements are saved. Early type/default recursion-depth failures remain raw
+cp6-checks-* evidence; no limits changed. `lean --version; lake --version;
+lake build Solidity.KeySort` passes2jobs in1.724s:Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613 (`cp6-runtime`), runtime gate only.
+Layer/import/orphan/trust/diff gates pass172core/0elaborator,15owned/0findings,
+1011reachable/0orphans,1026sources/246trust sites/0findings. Normal/strict docs
+raw exits1 remain; BOTH complete outputs equal exact-frozen-base outputs
+byte-for-byte, separately passing zero additions (static.json). All prior
+109/84/91/86/114checksum entries verify unchanged. Source finder/skeptic reviews
+found no defect; skeptic suggested the added actual-success rejection control.
+Both clear source/hypotheses/non-vacuity/ownership and insist on the explicit
+result-coupling, class, machine-hook and projected-restoration boundaries above.
+Final staged diff/artifact review and actual full head/base/source hashes are
+bound in the external continuation handoff. All original Work1–6/A/B and the
+mandatory full gate remain unfinished; no whole-lane completion is claimed.

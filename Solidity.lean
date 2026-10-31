@@ -903,3 +903,6 @@ import Solidity.Backend.InternalFlow.RecursiveUnroll
 
 import Solidity.Backend.InternalFlow.ScopedLoopFrame
 import Solidity.Backend.InternalFlow.MixedLoopPrefixes
+
+import Solidity.Backend.InternalFlow.EvaluatedRevert
+import Solidity.Backend.InternalFlow.EvaluatedRevertChecks

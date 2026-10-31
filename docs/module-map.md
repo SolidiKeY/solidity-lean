@@ -1213,3 +1213,5 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/RecursiveUnroll.lean` | Published finite recursive unrolling return/frame consumer; actual nested allocating recursive calls, typed aliases, exact export and cutoff exhaustion controls. |
 | `Backend/InternalFlow/ScopedLoopFrame.lean` | Actual finite scoped loop prefixes: withinM-derived heap/local frames with exact allocation extension and local unwind. |
 | `Backend/InternalFlow/MixedLoopPrefixes.lean` | Two actual mixed-state iterations and ordered horizons, concrete old/scratch contents, later exact-byte failure/absorption, admitted-prefix witness and preserved target/admission refusals. |
+| `Backend/InternalFlow/EvaluatedRevert.lean` | Actual typed payload/call result to checked/local failure emission, preserving normalized bytes and refusing lossy halt-class interpretation. |
+| `Backend/InternalFlow/EvaluatedRevertChecks.lean` | Evaluated 134-byte word/heap payload through nested calls and scoped prefix, checked byte/stack/root observations, empty/class/evaluation/headroom controls. |
