@@ -654,6 +654,35 @@ wrong-halt and unchanged host instruction-budget refusals remain controls.
 These sampled upstream executions complement kernel simulation; they are not
 a solc/EVM refinement theorem. No feature inventory status is promoted.
 
+Integration worktrees must install the optional EVM package from its existing
+lockfile and populate both pinned compiler files in `.lake/soljson/` before
+running these regressions; see [compiler setup](solidity-upstream-tests.md#reproduce).
+Dependencies and compiler caches are local to each worktree. The memory-loop
+runners use `MEMORY_LOOP_SOLC` for the 0.8.34 file; the replay tests discover
+the 0.8.38 file in `.lake/soljson/` (or use `SOLC_REFERENCE`). With those
+prerequisites present, run these checks sequentially under the resource scope:
+
+```sh
+npm ci --ignore-scripts --prefix scripts/evm-reference
+node --test scripts/check-memory-loop-timing.test.mjs scripts/check-automatic.test.mjs scripts/evm-reference/replay.test.mjs
+MEMORY_LOOP_SOLC="$PWD/.lake/soljson/soljson-v0.8.34+commit.80d5c536.js" node scripts/memory-loop-evm.mjs
+MEMORY_LOOP_SOLC="$PWD/.lake/soljson/soljson-v0.8.34+commit.80d5c536.js" node scripts/memory-loop-scope-evm.mjs
+```
+
+The combined integration at `4d5f5d61a3ec252d5b1b5a25488f5c214a51bc2d`
+passed its first 16 gates, then failed to load `@ethereumjs/util` in the
+replay tests. Installing the unchanged dependency lock exposed a second absent
+prerequisite, the pinned 0.8.38 compiler. After restoring both compiler caches
+with their existing SHA-256 checks, the affected tests and both four-mode EVM
+runners exited 0. This repaired checkout setup; no observations, proofs,
+assertions or budgets changed. The full combined gate sequence still requires
+a fresh controller run. Local repair receipts are retained in
+`.lake/integration-repair/resources.json`, `gate-0.log` through `gate-2.log`,
+and the two `memory-loop*-evm.json` reports. Read-only finder and skeptic
+reviews used no Lean server and found no remaining setup defect or changed
+semantic gate. Their request to make the focused evidence discoverable is
+resolved by these paths; full combined validation remains pending.
+
 Current validation, batch `solidity-compiler10-20261028`, original base
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`:
 
