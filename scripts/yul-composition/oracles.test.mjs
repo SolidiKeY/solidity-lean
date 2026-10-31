@@ -8,7 +8,7 @@ import {validateCapture,capturedMachine}from'./capture.mjs';
 import {Account,createAddressFromString,hexToBytes}from'../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js';
 import {execute,checkedCompiler,compileRecord,inputFor,controlFailures}from'./harness.mjs';
 import {runFixture,validateFixtureEvidence,HOST}from'./upstream.mjs';
-const out=mkdtempSync('/workspace/vy5-composition/physical-20261031/oracle-tests-');chmodSync(out,0o755);console.log('independent oracle evidence: '+out);
+const out=mkdtempSync('/workspace/vy5-composition/remaining-20261031/oracle-tests-');chmodSync(out,0o755);console.log('independent oracle evidence: '+out);
 const compiler=checkedCompiler('/workspace/vy5-composition/soljson-v0.8.38+commit.1835d247.js');let counter=0;
 const compile=i=>compileRecord(compiler,i,out+'/compile-'+counter++).output;
 const fixtures=JSON.parse(readFileSync('tests/yul-composition/fixtures.json')),word=n=>'0x'+BigInt(n).toString(16).padStart(64,'0'),aliases=predictedAliases();
@@ -22,7 +22,7 @@ test('CREATE root nonce0 and child nonce1 predictions match independent short RL
  }
 });
 test('local and upstream registration hashes reject missing/stale/reordered oracle rows',()=>{
- for(const [file,check,count]of [['state-oracles.json',checkStateOracles,7],['upstream-state-oracles.json',checkUpstreamOracles,39]]){
+ for(const [file,check,count]of [['state-oracles.json',checkStateOracles,7],['upstream-state-oracles.json',checkUpstreamOracles,73]]){
   const raw=readFileSync('tests/yul-composition/'+file,'utf8'),rows=check(raw);assert.equal(rows.length,count);
   for(const mutation of [r=>r.pop(),r=>r.reverse(),r=>r[0].sourceSha256='bad']){const bad=structuredClone(rows);mutation(bad);assert.throws(()=>check(JSON.stringify(bad)));}
  }

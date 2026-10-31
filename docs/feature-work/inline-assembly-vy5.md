@@ -618,3 +618,74 @@ Y10/G48–G51 kernel/import closure still require actual assembly-compatible own
 interfaces. No other-worker integration, shared engine/parser/lockfile rewrite,
 fixture/verdict change, axiom/sorry, budget increase or publication occurred.
 YQ1–YQ7 and canonical-rethrow behavior remain intact; questions remain empty.
+
+## Remaining finite-oracle backfill — 2026-10-31
+
+Starting checkpoint ec708bf11d7fd6f0b5abf521d9fab58b4d47bf1a is preserved.
+The remaining34 working upstream sources now have source-derived assertions:
+calldata offsets/lengths and alias assignments, pure/control/constants/function
+pointers, explicit host/environment inputs, Fixed Keccak windows/storage,
+selfbalance and reverted/static transient effects. The unchanged original call
+plans, bytes/failure/log expectations, settings and required profiles are retained.
+Selected RETURN windows describe semantic bytes and relative regions; compiler
+allocation addresses are not compared across pipelines. Dirty-bit differences
+and original failure verdicts remain intact. Expectations were saved before
+execution in the new artifact directory below.
+
+All73 working sources now have finite independent assertions:227 profiles and
+458 ordered calls, with21 older-fork profiles still blocked. The complete
+original compiler/runtime receipt and observation projection matches the
+previous physical checkpoint exactly. This is finite selected-domain evidence,
+not complete memory, untouched-world or source/target correspondence. The
+[coverage record](../../tests/yul-composition/observation-coverage.json) retains
+per-profile pending domains. Local controls remain28 profiles. The416 compiler
+probes remain72 matches, eight intended mutant mismatches, four diagnostic
+matches,304 pending and28 blocked; zero kernel obligations closed.
+
+CREATE2 target addresses are independently calculated from caller, salt and
+receipted initcode. The source hexadecimal bytes32 literals are right-padded,
+not numeric words. The initial authoring oracle used numeric salt padding;
+focused run v1 correctly failed (164/165 JS tests, exit1). That raw failure and
+the corrected source derivation are preserved. Final checks bind each predicted
+target to nonce/balance, nested CREATE2 initcode, compiler-receipted runtime and
+transient state owner. These are compiler-receipt-relative finite controls,
+not compiler correctness proofs or independent runtime-byte semantics.
+
+For the existing selfdestruct fixture, five profiles additionally capture the
+actual supported host beginFrame cleanup after the complete original plan.
+The separate record verifies deletion of the newly created child, survival of
+the older child, state/slot clearing and transient reset. It adds no source call
+and does not label runCall as runTx or claim consensus transaction finalization.
+Missing, reordered, malformed or wrong owner/address/code/nonce/state evidence
+fails closed. Equal-return mutations cover calldata windows, hash slots, funding,
+CREATE2 inputs/receipts and cleanup, alongside all original eight mutants.
+
+Final serial gate:183 JavaScript tests and two Python tests passed; pinned solc
+0.8.38/Osaka reference227 working/21 blocked; integrated matrices and feature
+coverage passed with the counts above. Exact commands, exits and raw outputs
+are in `/workspace/vy5-composition/evidence/remaining-final.*`.
+The writer-locked bounded runner used one CPU, aggregate12GiB memory and equal
+memory-swap limit, LEAN_NUM_THREADS=1, unchanged engine budgets, no OOM/stop;
+peak sampled RSS1,032,871,936 bytes, minimum OS availability16,751,665,152 bytes.
+No Lean source/import changed: earlier Lean4.24.0/Lake5.0.0-src+797c613,
+KeySort exit0/two jobs and full-policy exit0 remain attributed to their tested
+tree. Historical docs/G03 exit1 baseline failures remain failures.
+
+Independent read-only finder and skeptic reviews, without Lean server/build,
+accepted the source changes after the CREATE2 fixes; final documentation and
+accounting reviews are retained in the new handoff evidence. No shared replay,
+parser, dependency lock, fixture/verdict, admission, shared G03 obligation ledger
+or owner file changed.
+Published master4165de133bafd522ab18099e18cad489bb1aa7d6 has general memory/try
+components but no assembly correctness exports, as recorded in the prior exact
+immutable-object readback. No worker integration occurred.
+
+Work1 and Work3 remain blocked; Work2 and BackfillA/B remain partial for complete
+assigned observation/source correspondence and owner wiring. All24 obligations,
+six combinations, G01 amendments and concrete joint Y01–Y09/Y10/G48–G51 kernel
+and import closure remain pending. No generic theorem replaces those proofs.
+The existing full-assignment goal remains blocked and untouched; get_goal is
+not exposed in this turn. YQ1–YQ7 remain authoritative; no new question arises.
+New versioned patch, bundle, handoff, raw evidence and checksums are under
+`/workspace/vy5-composition/remaining-20261031/`; all earlier manifests/artifacts
+are preserved. This checkpoint does not complete the original lane.

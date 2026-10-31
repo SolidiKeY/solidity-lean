@@ -2777,12 +2777,12 @@
     "sourceSha256": "274011f18f2e9fe9b7da7e09bf7d87c62a102b4b5c3e0d6040c55042b2a552e4",
     "premises": [
       "Four source functions each CREATE2 one child, increment self nonce1..5 with value0. Delegatecall writes caller-owned transient5→6; ordinary/static targets do not overwrite caller-owned5. Final selftransient0 and ABItrue. Static illegal target write is checked by original byte/failure plan, not an invented zero native state.",
-      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only.",
+      "CREATE2 targets independently computed before VM from caller/self, source salts0..3, and compiler-receipted D initcode. Target nonce1,balance0 and transient owner effects are expected from source, not captured address/code.",
+      "Contextual bytes32 hex-string salts hex00/01/02/03 right-pad their literal byte: 00..00,01 followed31zero bytes,02 followed31zero bytes,03 followed31zero bytes. Numeric word1/2/3 predictions were rejected; derive from fixed-bytes conversion, not observed address."
     ],
     "pendingDomains": [
-      "CREATE2 target address/initcode/code and target-owned transient values remain pending independent identity/owner contract; not derived from observed code/address.",
-      "Only known self account/slot and top-level semantic window assertions are claimed.",
-      "Untouched/native worlds and universal source/target correspondence"
+      "Source/compiler correctness for receipted initcode and untouched/native worlds remain unproved."
     ],
     "calls": [
       {
@@ -2805,6 +2805,26 @@
                 "nonce": "1",
                 "balance": "0"
               }
+            },
+            {
+              "address": "create2:0",
+              "phase": "pre",
+              "fields": {
+                "exists": false,
+                "nonce": "0",
+                "balance": "0",
+                "code": "0x"
+              }
+            },
+            {
+              "address": "create2:0",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0",
+                "hasCode": true
+              }
             }
           ],
           "logs": [
@@ -2818,6 +2838,12 @@
               "address": "self",
               "phase": "post",
               "kind": "persistent",
+              "value": {}
+            },
+            {
+              "address": "create2:0",
+              "phase": "post",
+              "kind": "transient",
               "value": {}
             }
           ],
@@ -2874,6 +2900,82 @@
               ],
               "count": 1
             }
+          ],
+          "installations": [
+            {
+              "frame": 2,
+              "address": "create2:0"
+            }
+          ],
+          "frames": [
+            {
+              "frame": 0,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "caller",
+                "depth": 0,
+                "parent": null,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+              }
+            },
+            {
+              "frame": 1,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x",
+                "input": "0x60fe47b10000000000000000000000000000000000000000000000000000000000000005"
+              }
+            },
+            {
+              "frame": 2,
+              "fields": {
+                "kind": "create",
+                "address": "create2:0",
+                "createdAddress": "create2:0",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "value": "0"
+              }
+            },
+            {
+              "frame": 3,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "codeAddress": "create2:0",
+                "caller": "caller",
+                "depth": 1,
+                "parent": 0,
+                "isStatic": false,
+                "delegatecall": true,
+                "exception": null,
+                "bytes": "0x",
+                "input": "0x6057d3ee"
+              }
+            },
+            {
+              "frame": 4,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "isStatic": true,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000006",
+                "input": "0x6d4ce63c"
+              }
+            }
           ]
         }
       },
@@ -2896,6 +2998,26 @@
               "fields": {
                 "nonce": "2",
                 "balance": "0"
+              }
+            },
+            {
+              "address": "create2:1",
+              "phase": "pre",
+              "fields": {
+                "exists": false,
+                "nonce": "0",
+                "balance": "0",
+                "code": "0x"
+              }
+            },
+            {
+              "address": "create2:1",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0",
+                "hasCode": true
               }
             }
           ],
@@ -2923,6 +3045,20 @@
             },
             {
               "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "create2:1",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "create2:1",
               "phase": "post",
               "kind": "transient",
               "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -2958,6 +3094,105 @@
                 }
               ],
               "count": 1
+            },
+            {
+              "kind": "transient.put",
+              "address": "create2:1",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000005"
+                },
+                {
+                  "address": "create2:1",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000001"
+                }
+              ],
+              "count": 1
+            }
+          ],
+          "installations": [
+            {
+              "frame": 2,
+              "address": "create2:1"
+            }
+          ],
+          "frames": [
+            {
+              "frame": 0,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "caller",
+                "depth": 0,
+                "parent": null,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+              }
+            },
+            {
+              "frame": 1,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x",
+                "input": "0x60fe47b10000000000000000000000000000000000000000000000000000000000000005"
+              }
+            },
+            {
+              "frame": 2,
+              "fields": {
+                "kind": "create",
+                "address": "create2:1",
+                "createdAddress": "create2:1",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "value": "0"
+              }
+            },
+            {
+              "frame": 3,
+              "fields": {
+                "kind": "call",
+                "address": "create2:1",
+                "codeAddress": "create2:1",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "isStatic": false,
+                "delegatecall": false,
+                "exception": null,
+                "bytes": "0x",
+                "input": "0x6057d3ee"
+              }
+            },
+            {
+              "frame": 4,
+              "fields": {
+                "kind": "call",
+                "address": "create2:1",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "isStatic": false,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                "input": "0x6d4ce63c"
+              }
             }
           ]
         }
@@ -2982,6 +3217,26 @@
                 "nonce": "3",
                 "balance": "0"
               }
+            },
+            {
+              "address": "create2:2",
+              "phase": "pre",
+              "fields": {
+                "exists": false,
+                "nonce": "0",
+                "balance": "0",
+                "code": "0x"
+              }
+            },
+            {
+              "address": "create2:2",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0",
+                "hasCode": true
+              }
             }
           ],
           "logs": [
@@ -3008,6 +3263,20 @@
             },
             {
               "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "create2:2",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "create2:2",
               "phase": "post",
               "kind": "transient",
               "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -3044,6 +3313,68 @@
               ],
               "count": 1
             }
+          ],
+          "installations": [
+            {
+              "frame": 2,
+              "address": "create2:2"
+            }
+          ],
+          "frames": [
+            {
+              "frame": 0,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "caller",
+                "depth": 0,
+                "parent": null,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+              }
+            },
+            {
+              "frame": 1,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x",
+                "input": "0x60fe47b10000000000000000000000000000000000000000000000000000000000000005"
+              }
+            },
+            {
+              "frame": 2,
+              "fields": {
+                "kind": "create",
+                "address": "create2:2",
+                "createdAddress": "create2:2",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "value": "0"
+              }
+            },
+            {
+              "frame": 3,
+              "fields": {
+                "kind": "call",
+                "address": "create2:2",
+                "codeAddress": "create2:2",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "isStatic": true,
+                "delegatecall": false,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "input": "0x6d4ce63c"
+              }
+            }
           ]
         }
       },
@@ -3066,6 +3397,26 @@
               "fields": {
                 "nonce": "4",
                 "balance": "0"
+              }
+            },
+            {
+              "address": "create2:3",
+              "phase": "pre",
+              "fields": {
+                "exists": false,
+                "nonce": "0",
+                "balance": "0",
+                "code": "0x"
+              }
+            },
+            {
+              "address": "create2:3",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0",
+                "hasCode": true
               }
             }
           ],
@@ -3097,6 +3448,20 @@
               "kind": "transient",
               "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
               "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "create2:3",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "create2:3",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
             }
           ],
           "memory": [
@@ -3109,6 +3474,63 @@
               "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
               "count": 1
             }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "create2:3",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 0
+            }
+          ],
+          "installations": [
+            {
+              "frame": 1,
+              "address": "create2:3"
+            }
+          ],
+          "frames": [
+            {
+              "frame": 0,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "caller",
+                "depth": 0,
+                "parent": null,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+              }
+            },
+            {
+              "frame": 1,
+              "fields": {
+                "kind": "create",
+                "address": "create2:3",
+                "createdAddress": "create2:3",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "value": "0"
+              }
+            },
+            {
+              "frame": 2,
+              "fields": {
+                "kind": "call",
+                "address": "create2:3",
+                "codeAddress": "create2:3",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "isStatic": true,
+                "delegatecall": false,
+                "exception": "static state change",
+                "bytes": "0x",
+                "input": "0x6057d3ee"
+              }
+            }
           ]
         }
       }
@@ -3120,11 +3542,11 @@
     "sourceSha256": "7cc27bb86089e1b36d35a55c827bda0cfb219d419c760d938d6dc872036aabc4",
     "premises": [
       "D constructor creates C using nonce1, stores its address in slot0. destroy uses prior-call C (EIP6780 code survives), TSTORE42 persists through selfdestruct until top cleanup. createAndDestroy creates C at nonce2 and stores its address; same-message get still returns42. Captures are before deferred next-boundary deletion, not runTx finalization.",
-      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only.",
+      "After all original calls, independently expected host beginFrame cleanup deletes only new child at CREATE(self,2), preserves old child CREATE(self,1) and unchanged other known accounts. No additional EVM source call is executed."
     ],
     "pendingDomains": [
-      "Deletion of newly created child after unavailable subsequent transaction boundary remains pending; no deletion/finalization inferred.",
-      "Untouched/native worlds and source correspondence"
+      "Observed next host beginFrame cleanup is not a runTx receipt or universal Ethereum finalization/source proof."
     ],
     "calls": [
       {
@@ -5138,5 +5560,2983 @@
       }
     ],
     "callPlanSha256": "10d889e8c73d14ddb595c22e803b459ee0a26f38203e40fc58180c43f7831a5f"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_assign.sol",
+    "sourceSha256": "1c44f9797862e8d2a1087f52092fe78274d7637f5dae2aca2124955fe4457b3b",
+    "callPlanSha256": "d44fd6bff1c6c2205760923c97b92b6379030b41eb8e939214390b720000faf5",
+    "premises": [
+      "x.offset1,length3 returns selector bytes1..3. Dynamic ABI head32,length3,padded payload.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f(bytes)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000035754f80000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_assign_from_nowhere.sol",
+    "sourceSha256": "fac9f207ac25c90e8cd8e2fb2ae6aff6b84eccc5387eb6c7f231b4143ea3d8de",
+    "callPlanSha256": "f7ae5df3c5a593040ebd9b4104e0084b35ecf10386d971d75659fc6afe0efa07",
+    "premises": [
+      "x.offset0,length4 returns entire independently computed f() selector.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000426121ff000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_length_read.sol",
+    "sourceSha256": "6f6d8edf0cdad127ef9f7170e6955d0679597bf795c4fac56d0bbd0f254fbb12",
+    "callPlanSha256": "27c469800f2787d0ac6ca9558149da3489fa81da28a2664d76b63228515caebc",
+    "premises": [
+      "bytes/string length words4,0,33 are read as specified even with extra calldata payload.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "lenBytesRead(bytes)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000004",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "lenBytesRead(bytes)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "lenBytesRead(bytes)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000021",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "lenStringRead(string)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000004",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "lenStringRead(string)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "lenStringRead(string)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000021",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_offset_read.sol",
+    "sourceSha256": "2253032e84ec7788de7b04341692862e01db6c96a7abd24f35035c042647559a",
+    "callPlanSha256": "523af0371626eaf3bb4e2898f74fd67dc286ad3583a68dadbd1a63b18ae30ef8",
+    "premises": [
+      "4-byte selector + input head0x20/0x22/0x60/0 plus32-byte length word gives offsets0x44/0x46/0x84/0x24; unusual pointers remain valid.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f(bytes)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000044",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(bytes)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000046",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256,bytes,uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000840000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256,bytes,uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000240000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_offset_read_write.sol",
+    "sourceSha256": "29e24ef936072300cfac8fcd8de04ebd6cf430b68a36580e9ee28c6512665604",
+    "callPlanSha256": "f6f544f6f34f2c62055d364f21aa7f52ad710b8042e3321111a1a5b704af4271",
+    "premises": [
+      "Assembly assigns offset8,length20 regardless of input head; no memory allocation address assumption.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256,bytes,uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000014",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256,bytes,uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000014",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_struct_assign.sol",
+    "sourceSha256": "d60bf3ec922aca1088147ea2d16a4f12c63cc42e16aba2ddceee853e36205052",
+    "callPlanSha256": "271fad240d07384c2cc67d3c2e78eab4a4cba09e37a36b4ccf46f74ff7ce4387",
+    "premises": [
+      "s aliases original s2 at calldata word1; s2 reassigned4 points to original s.x word0; results7,0x42.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f((uint256),(uint256,uint256))",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000042",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_struct_assign_and_return.sol",
+    "sourceSha256": "23d86634f9fd6222d22df2741921be359dd6a577dd41837a80875f437ae5df7e",
+    "callPlanSha256": "5748ecfbdf7738c5b6304c54edd1fe64b6d14cf7f92acb9dadb5432e0b7ec6fa",
+    "premises": [
+      "s=0x24; clean int8 words66/33 pass; dirty0x4242/0x2121 fails ABI cleanup validation; out-of-range calldataload yields0 for missing second word; h ignores pointer; i missing tuple fails decode.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000420000000000000000000000000000000000000000000000000000000000000021",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000420000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "h()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000042",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "i()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/blobhash.sol",
+    "sourceSha256": "970cff5c232b406e16922cb19a8c20159c1533a6c842a78f007bd60a20f5dfaa",
+    "callPlanSha256": "c23c0e14e94d0ee7fbe9221d426e6c2dae1884bfce3b08767c3d357f496998dc",
+    "premises": [
+      "BLOBHASH0 is explicit pinned host versioned hash0.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0100000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/blobhash_index_exceeding_blob_count.sol",
+    "sourceSha256": "e5a23185e29a8d7f3f2936b5168d3b1b6e8abb2fead1d1dd390764579bd323cd",
+    "callPlanSha256": "ca7629035cae06c82e6e67fef6db6d86f622c2eae141237d32646e19ea36ff7b",
+    "premises": [
+      "EIP4844: index2 equals host hash count2, returns0.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/chainid.sol",
+    "sourceSha256": "f561fb1d00e038cd4935d63b39d275e1c2e04c4170a07a71e43da8e2aa36f015",
+    "callPlanSha256": "c18dcdf144a3dfd3e1b3bf2b596f60dd2f0a8bd4dcdab3906ce3460bb1daf474",
+    "premises": [
+      "Chain id from explicit universal-input instantiation HOST.chainId1.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/prevrandao.sol",
+    "sourceSha256": "35f9bdf4a70f6eac789b4e52feeefa1546d67fdf267aec3b6a3f9af42242ea8c",
+    "callPlanSha256": "c403e1a46d942dba6cd6d6cc8a05ee99bd8f56899bc683208daf5c8231cf283f",
+    "premises": [
+      "Exact prevrandao from original pinned host inputs, no claim for all environment values.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0xa86c2e601b6c44eb4848f7d23d9df3113fbcac42041c49cbed5000cb4f118777",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/clz.sol",
+    "sourceSha256": "2aecd37d0ec4e00dae42149f41bf1464bdf86f6dc162fe784e7d7358d3c879f9",
+    "callPlanSha256": "c5fb740f5d88f3d32bf6d837b695f0b74aee598a1909f8a08520e7dff4cd8669",
+    "premises": [
+      "256-bit leading-zero count: zero256,one255,bit254set leaves1 leadingzero.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000100",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "h()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/constant_access.sol",
+    "sourceSha256": "033440f6fefceaf50a124bb4c37f425a0ef87e4d265209dcfd98c6d30da3a6bc",
+    "callPlanSha256": "a898efc2c669accc6613508daf409e1c0c44416947c2c210d2e428d3a121a610",
+    "premises": [
+      "Constant aliases preserve uint2, left-aligned bytes2abcd/bytes3abc,booltrue,address12x20; no silent dirty-bit cleanup assumptions.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 160,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002abcd000000000000000000000000000000000000000000000000000000000000616263000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/constant_access_referencing.sol",
+    "sourceSha256": "e077fb6ba3664e3f55dcf5ddaca0b2dc4f71c8dcde7c9cec29d271d979b119ca",
+    "callPlanSha256": "a898efc2c669accc6613508daf409e1c0c44416947c2c210d2e428d3a121a610",
+    "premises": [
+      "Constant aliases preserve uint2, left-aligned bytes2abcd/bytes3abc,booltrue,address12x20; no silent dirty-bit cleanup assumptions.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 160,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002abcd000000000000000000000000000000000000000000000000000000000000616263000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_address.sol",
+    "sourceSha256": "308dd2bde94eb04f6e9610e62c27d169d8571c71fe817eeef0f121b8d7a16659",
+    "callPlanSha256": "069fd5949abad79ea5ace2e8cd9178bdc947d86caa5631223d7a0c0d1567b4e3",
+    "premises": [
+      "Both languages read supplied function-pointer address0x1234, no call to target.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "testYul()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000001234",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "testSol()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000001234",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_address_assignment.sol",
+    "sourceSha256": "0774edfbb5e4a91310082c17dd2d60bf1677c7fbaf4efaca1b7e46b4b0324de4",
+    "callPlanSha256": "954e93d3eb0d06676ef2f567eabcac36e9280c09f3fd25b77ad47b6f6dd46144",
+    "premises": [
+      "Source assigns two explicit address arguments, returns each address unchanged.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "testYul(address)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000001234567890",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "testYul(address)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000c0ffee3ea7",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_selector.sol",
+    "sourceSha256": "a216fac809084a9384d6d3216d0bf3383c00469dfc251d44b35c5f2e822ee4f3",
+    "callPlanSha256": "d3eb118c08fd2f63e3fe709378a8b1d8450d4b8ed6fe1a3a3a8686c46f1a1b67",
+    "premises": [
+      "Keccak256(testFunction()) first4 bytes, right-aligned uint32; source shifts/converts exactly to that value.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "testYul()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000e16b4a9b",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "testSol()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000e16b4a9b",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_selector_assignment.sol",
+    "sourceSha256": "973bb542e366d938cfab28754375359409a713def4dd1c0f820a78600e0ac678",
+    "callPlanSha256": "af40328a3b1deb9f69337b7a913a322b74c8feb6c30f0fbe404e428535d96f91",
+    "premises": [
+      "Assigned uint32 selector arguments returned right-aligned; preserve both original inputs.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "testYul(uint32)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000012345678",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "testYul(uint32)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000abcdef00",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/external_identifier_access_shadowing.sol",
+    "sourceSha256": "f8ebcda73178d336918875ee9f3f56ac34c6b9c7784166d3f00fceafeae6b9bc",
+    "callPlanSha256": "fa85eb90e41ef7358fc21fabc30896f42077f7124bdf7956f9b4eb6fa6494b4b",
+    "premises": [
+      "Yul g return named f is2, assigned Solidity x.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/function_name_clash.sol",
+    "sourceSha256": "00782384bd34aa1db11ad55bf30a8c84fb9ca532bc6f97141d08940919c8d8d4",
+    "callPlanSha256": "72a778bd3737eff49ba94e3ff58d934d0aa9b2d3fc4da08486c5c6665d825e91",
+    "premises": [
+      "Two separately scoped Yul f functions return1 and2.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_in_modifiers.sol",
+    "sourceSha256": "80ef45281adee35dbd09209316b2b9347217bff553c7e524fd8972b5fe392aaa",
+    "callPlanSha256": "78caf7546abd2898c1845a60dae8566ac1fe02c2c3ba9871fd79fa7ec19ce905",
+    "premises": [
+      "Modifier m sets local a2 and executes body true; n sets2, skips body and reverts.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inlineasm_empty_let.sol",
+    "sourceSha256": "f9b481e95fd2a72751fd79bf1f4dcf5675b64ba51b52627745c3c4baf8921557",
+    "callPlanSha256": "2346e43fb26fce4dc9df2b5ad49cb7a0959bd6c4304e3d75017980eb15e06487",
+    "premises": [
+      "Yul uninitialized let x/y/z are0; returns x,z.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/truefalse.sol",
+    "sourceSha256": "87312e292f0fdd6d5093441922de571d51dce8f4c2d79499c58fd0074d49f553",
+    "callPlanSha256": "0c26c8de514681223d23a6db200ca7ea8b10d695a0b1e26c6fb191201c56246a",
+    "premises": [
+      "Yul true1,false0.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/shadowing_local_function_opcode.sol",
+    "sourceSha256": "db47b638f53f49b953fd64bb1ee60f4691dd94a76b6541993bea7f3542ac2a71",
+    "callPlanSha256": "182a5ff3ef3a01028acec2eeffc22401ca7d62b0a6064d0c1d1c3c980ee9dbab",
+    "premises": [
+      "Solidity add returns7; Yul add(1,2) opcode returns3.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000003",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/slotnum_pre_amsterdam_function.sol",
+    "sourceSha256": "b56b87b65e6ad920f67e8e512bb4e86493d956f3438bc25f7ac7cc12cb526b7a",
+    "callPlanSha256": "e63475938acfea9ba40a6a4ef227b85e43894a69f187a2c734f5ca3bafc507a9",
+    "premises": [
+      "Osaka before Amsterdam: local variable999 and local function1000 shadow future reserved name.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000003e7",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000003e8",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_assembly.sol",
+    "sourceSha256": "4ccbc461df2811def7772195f1668e2c98eb5345f93e95c8618e7cca572e7ee2",
+    "callPlanSha256": "115e6db625f141cd67b28385dfa184695f26ed133637f3aca9aa366157de45be",
+    "premises": [
+      "Fixed Keccak256 of empty bytes, not NIST SHA3.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_optimization.sol",
+    "sourceSha256": "c8cb4711634ff9ab2dc29acd1c45a610e9e0cb48dff60c718305e2dc0579b904",
+    "callPlanSha256": "8c4dd9234baba7f2b7f1c994d1de6594c1c337f838cf289b91ba1b9176637106",
+    "premises": [
+      "Two mstore copies of calldataload0: identical4-byte selector preimages hash equal.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_optimizer_bug_different_memory_location.sol",
+    "sourceSha256": "e3b6b2da66258102d156fc92cf61c9fb3ba8503c8f68a48bc32617105c26c6b9",
+    "callPlanSha256": "e88f07454671f6caee03be3b636cfa1b9d0a3dae129f3b7773903b06c83b44ac",
+    "premises": [
+      "4-byte selector preimage differs from selector+4zero bytes, Fixed Keccak values computed independently.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_optimizer_cache_bug.sol",
+    "sourceSha256": "2fef0220d5523ccb492634145978c96e3976ece0447c68eff06aa720b7493dea",
+    "callPlanSha256": "6a2a9b7532fa8cb5f7574a294dd7de5036af6aad8bb7cb486ddfd5062019365b",
+    "premises": [
+      "data.length2 at slot0; element0 at K(zero32)=234; unrelated K(zero23)+1=123; element1 K(zero32)+1 remains0. Distinct Fixed hashes, no observed slot seeds.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "val()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000002"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563",
+              "value": "0x00000000000000000000000000000000000000000000000000000000000000ea"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0xe2b9f9f9430b05bfa9a3abd3bac9a181434d23a707ef1cde8bd25d30203538d9",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000007b"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e564",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/keccak_optimization_bug_string.sol",
+    "sourceSha256": "99ecc391f261f51d8434717bf17084791b06cf5e8b382cd3d533322be3a8d330",
+    "callPlanSha256": "b6988af26affd099076ee167d777369fca4e2293a10644407455f85382dd7a82",
+    "premises": [
+      "s points to length word0/5/46, so K(lengthword32) differs from K(first8zero bytes) for all three source inputs.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f(string)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(string)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(string)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/keccak_yul_optimization.sol",
+    "sourceSha256": "64b568d66ff257a96de3d661e9aedbd4c7bd8a1e9c0fe83e8f16533b5f337301",
+    "callPlanSha256": "a40bc92e82c509885271da3abe57043358aa1bf87966a46226544ae18f346516",
+    "premises": [
+      "Sixteen leadingff bytes of uintmax preimage, both outside/inside loop20; Fixed Keccak independent, no loop/gas observation.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0xcdb56c384a9682c600315e3470157a4cf7638d0d33e9dae5c40ffd2644fc5a80",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0xcdb56c384a9682c600315e3470157a4cf7638d0d33e9dae5c40ffd2644fc5a80",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/selfbalance.sol",
+    "sourceSha256": "92b5a2412917427603c947b7e898a29a4108a1ad5123fc7be9fe7f833b594b94",
+    "callPlanSha256": "c47b4c990eadfc84ee0402d2e2f964f76ef6003e12e9e75843a29ecdcb8ab196",
+    "premises": [
+      "Fresh self balance0 receives254wei; runCall transfers value without runTx gas fee accounting.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "fields": {
+                "balance": "0",
+                "nonce": "1"
+              }
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "balance": "254",
+                "nonce": "1"
+              }
+            },
+            {
+              "address": "caller",
+              "phase": "pre",
+              "fields": {
+                "balance": "1267650600228229401496703205376",
+                "nonce": "1"
+              }
+            },
+            {
+              "address": "caller",
+              "phase": "post",
+              "fields": {
+                "balance": "1267650600228229401496703205122",
+                "nonce": "2"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000fe",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/returndatacopy_using_stale_returndatasize.sol",
+    "sourceSha256": "46b9288bf3f2ef0bcc204d389bbc3fce05d6b96dadc69e822e9cdf352046bb5d",
+    "callPlanSha256": "75189f4ef46fe4f290c02eb6ef93927d3dd411673f396a070101f45e5407cc30",
+    "premises": [
+      "First staticcall e1 returns word1; second e returns empty buffer; stale size32 at offset96 exceeds current buffer0 and traps. GAS remains refused for model admission; this is external reference only.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "buffers": [
+            {
+              "frame": 0,
+              "bytes": "0x"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "final",
+              "offset": 0,
+              "bytes": "0xffae15ba00000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ],
+          "frames": [
+            {
+              "frame": 0,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "caller",
+                "depth": 0,
+                "parent": null,
+                "exception": "out of gas",
+                "bytes": "0x"
+              }
+            },
+            {
+              "frame": 1,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                "inputSignature": "e1()",
+                "isStatic": true
+              }
+            },
+            {
+              "frame": 2,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x",
+                "inputSignature": "e()",
+                "isStatic": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/tstore_hidden_staticcall.sol",
+    "sourceSha256": "2df5c6f1848335a731deecfaecdab01fcf3b43ff37e81f8aa915683e46832a73",
+    "callPlanSha256": "68b64c9d27e6ec583b115e48fecf5d2e44188682412af8e3e6ea172926abf21a",
+    "premises": [
+      "this.g invokes STATICCALL; internal function pointer cast cannot authorize transient write; child traps static state change, parent bubbles revert, no persistent writes or transient puts.",
+      "Expected values from pinned source/ABI/Fixed Keccak/explicit host inputs before new EVM output; not from captures."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correctness"
+    ],
+    "calls": [
+      {
+        "signature": "test()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 0
+            }
+          ],
+          "frames": [
+            {
+              "frame": 0,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "caller",
+                "depth": 0,
+                "parent": null,
+                "exception": "revert",
+                "bytes": "0x"
+              }
+            },
+            {
+              "frame": 1,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "isStatic": true,
+                "exception": "static state change",
+                "bytes": "0x",
+                "inputSignature": "g()"
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

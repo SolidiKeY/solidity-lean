@@ -117,7 +117,7 @@ export async function beginFrame(evm,previous) {
  const transientBeforeReset=evm.transientStorage.toJSON();evm.transientStorage.clear();
  return {deletedAccounts,transientBeforeReset,transientReset:true};
 }
-export async function replay(artifact,plan) {
+export async function replay(artifact,plan,{captureFinalBoundary=false}={}) {
  if(!plan||!Array.isArray(plan.calls)||!plan.calls.length)throw Error('missing call plan');
  const {vm,observer}=await capturedMachine();const sender=createAddressFromString(HOST.sender),origin=createAddressFromString(HOST.origin);
  await vm.evm.stateManager.deleteAccount(createAddressFromString('0x'+'12'.repeat(20)));
@@ -154,7 +154,9 @@ export async function replay(artifact,plan) {
    const comparison=compareCall(c,actual,address?.toString()??null,{creation:c.constructor});observed.push({index,signature:c.signature,inputBytes:hex(c.calldata),value:c.value,...record,actual,comparison});mismatch ||=comparison.status==='broken';
   }catch(e){return {status:mismatch?'broken':'blocked',reason:e.message,stack:e.stack,deployment,observed,blockedCall:index,expectedCallCount:plan.calls.length};}
  }
- return {status:mismatch?'broken':'working',deployment,observed,expectedCallCount:plan.calls.length};
+ let postPlanCleanup;
+ if(captureFinalBoundary)try{postPlanCleanup=await observer.boundary(transaction+1,()=>beginFrame(vm.evm,previous));}catch(e){postPlanCleanup={status:'blocked',reason:e.message};}
+ return {status:mismatch?'broken':'working',deployment,observed,expectedCallCount:plan.calls.length,...(captureFinalBoundary?{postPlanCleanup}:{})};
 }
 function fixtureInput(fixture,profile) {
  const sources=Object.fromEntries([...fixture.sources].map(([name,source])=>[name,{content:withPreamble(source)}]));
@@ -182,7 +184,9 @@ export async function runFixture(path,directory,compile,scanPolicy) {
     const artifact=output.contracts[fixture.mainSource][contract];
     let creates=false;walk(ast,n=>{if(n.nodeType==='NewExpression'||n.nodeType==='YulFunctionCall'&&['create','create2'].includes(n.functionName?.name))creates=true;});
     if(creates&&plan.calls.some(c=>artifact.abi.some(d=>d.type==='function'&&`${d.name}(${d.inputs.map(abiType).join(',')})`===c.signature&&d.outputs.some(o=>o.type==='address'))))throw Error('concrete creation-address oracle not adapted to upstream nonce convention');
-    v.creationSha256=sha(Buffer.from(artifact.evm.bytecode.object,'hex'));v.runtimeTemplateSha256=sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex'));Object.assign(v,await replay(artifact,plan));v.stateComparison=compareUpstreamState(result,v,HOST.sender);
+    v.creationSha256=sha(Buffer.from(artifact.evm.bytecode.object,'hex'));v.runtimeTemplateSha256=sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex'));v.artifactHashes=Object.fromEntries(Object.entries(output.contracts[fixture.mainSource]).map(([name,a])=>[name,{creation:sha(Buffer.from(a.evm.bytecode.object,'hex')),runtime:sha(Buffer.from(a.evm.deployedBytecode.object,'hex'))}]));
+    if(path.endsWith('/transient_storage_low_level_calls.sol')){const d=output.contracts[fixture.mainSource].D;v.oracleInputs={create2Initcode:'0x'+d.evm.bytecode.object,initcodeSha256:sha(Buffer.from(d.evm.bytecode.object,'hex')),contract:'D',inputSha256:v.inputSha256};}
+    Object.assign(v,await replay(artifact,plan,{captureFinalBoundary:path.endsWith('/transient_storage_selfdestruct.sol')}));v.stateComparison=compareUpstreamState(result,v,HOST.sender);
    }catch(e){v.reason=e.message;v.stack=e.stack;}
   }
  }catch(e){result.reason=e.message;result.stack=e.stack;}

@@ -212,3 +212,22 @@ eight intended mutants are unchanged. Published-master owner exports were read
 without integration; all concrete Y10/G48–G51 proofs remain pending. New committed
 identities/artifacts: `/workspace/vy5-composition/physical-20261031/handoff.json`.
 Earlier artifacts are preserved and the original goal remains blocked.
+
+### VY5 remaining finite-oracle backfill — 2026-10-31
+
+From ec708bf11d7fd6f0b5abf521d9fab58b4d47bf1a, the
+[VY5 handoff](inline-assembly-vy5.md#remaining-finite-oracle-backfill--2026-10-31)
+adds source-derived finite assertions for the remaining34 working sources:
+all73 working sources/227 profiles/458 calls now have selected assertions;
+21 older-fork profiles remain blocked. Original ordered observations/settings
+are unchanged. CREATE2 checks use independently predicted right-padded bytes32
+salts and compiler-receipted initcode/runtime; five separate host beginFrame
+cleanup records preserve the runCall versus runTx distinction. Neither proves
+whole-world or source/target correspondence.183 JS+2 Python tests and final
+pinned reference/integrated checks passed; the initial wrong-salt oracle exit1
+is retained. Independent finder/skeptic reviews and versioned artifacts reside
+at `/workspace/vy5-composition/remaining-20261031/`. Work2/BackfillA/B remain
+partial, Work1/3 blocked: all24 proof obligations/six combinations and final
+Y10/G48–G51 closure await actual assembly owner interfaces. No Lean/import or
+shared owner code changed; prior kernel gates retain their original tested-tree
+attribution and historical docs/G03 exit1 failures are preserved.

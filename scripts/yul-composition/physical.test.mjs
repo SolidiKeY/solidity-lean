@@ -6,7 +6,7 @@ import {readFileSync,writeFileSync,mkdtempSync,chmodSync}from'node:fs';
 import {checkedCompiler,compileRecord}from'./harness.mjs';
 import {runFixture,validateFixtureEvidence,HOST}from'./upstream.mjs';
 import {compareUpstreamState,predictedAliases,checkUpstreamOracles}from'./oracles.mjs';
-const out=mkdtempSync('/workspace/vy5-composition/physical-20261031/tests-');chmodSync(out,0o755);console.log('physical oracle evidence: '+out);
+const out=mkdtempSync('/workspace/vy5-composition/remaining-20261031/tests-');chmodSync(out,0o755);console.log('physical oracle evidence: '+out);
 const compiler=checkedCompiler('/workspace/vy5-composition/soljson-v0.8.38+commit.1835d247.js');let counter=0;
 const compile=i=>compileRecord(compiler,i,out+'/compile-'+counter++).output;
 const rows=checkUpstreamOracles(readFileSync('tests/yul-composition/upstream-state-oracles.json','utf8')),names=rows.slice(5).map(r=>r.path),cases=new Map(),word=n=>'0x'+BigInt(n).toString(16).padStart(64,'0');
@@ -43,7 +43,7 @@ test('ordered transient self-call identity and reset evidence cannot be lost/reo
 test('CREATE child pointer and low-level delegate-owner expectations use no observed address oracle',()=>{
  const a=predictedAliases(HOST.sender);reject('transient_storage_selfdestruct.sol',v=>changeWorld(v.observed[2].capture,word(0),word(BigInt(a.child))));
  reject('transient_storage_low_level_calls.sol',v=>{const c=v.observed[0].capture,o=c.operations.find(o=>o.kind==='transient.put'&&o.address===a.self&&o.value===word(6));o.address=a.caller;});
- const row=rows.find(r=>r.path.endsWith('/transient_storage_low_level_calls.sol'));assert(row.pendingDomains.some(s=>s.includes('CREATE2')));
+ const row=rows.find(r=>r.path.endsWith('/transient_storage_low_level_calls.sol'));assert(row.premises.some(s=>s.includes('CREATE2 targets independently')));assert(!row.pendingDomains.some(s=>s.includes('target identity')));
 });
 test('full source-plan, stale source, missing selected oracle and reordered identical-signature calls fail closed',()=>{
  const f=cases.get('slot_access_via_mapping_pointer.sol'),v=f.variants[0],bad=structuredClone(f);bad.plan.calls.reverse();assert.equal(compareUpstreamState(bad,v,HOST.sender).status,'blocked');

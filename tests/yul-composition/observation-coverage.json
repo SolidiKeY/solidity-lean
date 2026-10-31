@@ -1,15 +1,15 @@
 {
   "schema": 1,
   "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
-  "previousCheckpoint": "be8a5a17f1eb7e0e61e833bab979e56fe04f461f",
+  "previousCheckpoint": "ec708bf11d7fd6f0b5abf521d9fab58b4d47bf1a",
   "scope": "Finite source-derived assertions, including explicitly partial owner domains; no total-state/source/target theorem.",
   "sourceHashes": {
-    "scripts/yul-composition/capture.mjs": "71e0f986780476ed0a92e2cfde713d859d136139b02f3fcc608a34c9dd828949",
-    "scripts/yul-composition/oracles.mjs": "b6c79872a43f55dcc68a702d6f1f2deaef37e697e8f192ce7cc1c92c3c8ab3ca",
+    "scripts/yul-composition/capture.mjs": "4e82f729be5cead407feb443a1b0cc688f2ad394cb77cf9d5b1744123720a44f",
+    "scripts/yul-composition/oracles.mjs": "39d7a3b614c5fbb90bf2452c6182ea2cbe2b2c9ed6f48532fd726614ea19e2bb",
     "tests/yul-composition/state-oracles.json": "44782a1ec3dc372ee6228df202f0d9f5908350157b9402945bdd25ab839248b3",
-    "tests/yul-composition/upstream-state-oracles.json": "20ac5acd591a47ae8b19f0b2b2ede8c2f94c331d32fe7c97c95c214622639d6c"
+    "tests/yul-composition/upstream-state-oracles.json": "4809f87e1b5915d9c8d6d18ed8520e6d7a6d3be04b516af1837851d84cf7837c"
   },
-  "originalReferenceReportSha256": "3d2685dafc11ad508d292549d136c5897a6d822015596dfa1fd985d146e57970",
+  "originalReferenceReportSha256": "920a7c21bd2f796f7e5d41e180ab22d8e71449f3b44774bd4f0dcf6239d1561c",
   "originalReferenceProjection": "Exact unchanged pinned sources/settings/completeplans/requiredprofiles/inputhashes/orderedcalls/actualbytes,failure,logs,metrics,gastelemetry/cleanup",
   "upstreamByteLogCounts": {
     "blocked": 21,
@@ -253,12 +253,11 @@
   ],
   "upstreamStateProfiles": {
     "not-executed": 21,
-    "pending": 106,
-    "match": 121
+    "match": 227
   },
-  "upstreamStateCalls": 275,
+  "upstreamStateCalls": 458,
   "kernelObligationsClosed": 0,
-  "wholeUpstreamStateComparison": "39selectedsources121profiles275calls have finite assertions;106working profiles unselected; selected CREATE2 target/deferred cleanup/native domains explicitly pending.",
+  "wholeUpstreamStateComparison": "73 selected sources: all227 working profiles have finite independent assertions;21 older-fork profiles not executed. Host beginFrame cleanup is not runTx. Untouched/native worlds and universal source/target correspondence remain pending.",
   "fixtures": [
     {
       "path": "test/libsolidity/semanticTests/inlineAssembly/basefee_berlin_function.sol",
@@ -276,7 +275,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -290,7 +290,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -304,7 +305,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -324,7 +326,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -338,7 +341,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -352,7 +356,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -370,9 +375,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -384,9 +399,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -398,9 +423,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -418,9 +453,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -432,9 +477,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -446,9 +501,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -468,7 +533,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -482,7 +548,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -496,7 +563,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -525,7 +593,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -548,7 +617,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -571,7 +641,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -600,7 +671,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -623,7 +695,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -646,7 +719,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -675,7 +749,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -698,7 +773,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -721,7 +797,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -739,9 +816,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -753,9 +840,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -767,9 +864,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -787,9 +894,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -801,9 +918,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -815,9 +942,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -835,9 +972,49 @@
           "memoryFrames": 7,
           "lastCallBufferFrames": 7,
           "frameLogs": 7,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 5,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -849,9 +1026,49 @@
           "memoryFrames": 7,
           "lastCallBufferFrames": 7,
           "frameLogs": 7,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 5,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -863,9 +1080,49 @@
           "memoryFrames": 7,
           "lastCallBufferFrames": 7,
           "frameLogs": 7,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "lenBytesRead(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 5,
+              "signature": "lenStringRead(string)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -883,9 +1140,37 @@
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
           "frameLogs": 5,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -897,9 +1182,37 @@
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
           "frameLogs": 5,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -911,9 +1224,37 @@
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
           "frameLogs": 5,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(bytes)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -931,9 +1272,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -945,9 +1302,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -959,9 +1332,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(uint256,bytes,uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -979,9 +1368,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f((uint256),(uint256,uint256))",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -993,9 +1392,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f((uint256),(uint256,uint256))",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1007,9 +1416,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f((uint256),(uint256,uint256))",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1027,9 +1446,43 @@
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
           "frameLogs": 6,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "h()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "i()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1041,9 +1494,43 @@
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
           "frameLogs": 6,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "h()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "i()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1055,9 +1542,43 @@
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
           "frameLogs": 6,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "h()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "i()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1075,9 +1596,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1089,9 +1620,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1103,9 +1644,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1123,9 +1674,31 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "h()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1137,9 +1710,31 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "h()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1151,9 +1746,31 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "h()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1173,7 +1790,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1187,7 +1805,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1201,7 +1820,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1219,9 +1839,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1233,9 +1863,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1247,9 +1887,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1267,9 +1917,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1281,9 +1941,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1295,9 +1965,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1317,7 +1997,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1331,7 +2012,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1345,7 +2027,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1363,9 +2046,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testSol()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1377,9 +2076,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testSol()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1391,9 +2106,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testSol()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1411,9 +2142,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul(address)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testYul(address)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1425,9 +2172,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul(address)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testYul(address)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1439,9 +2202,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul(address)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testYul(address)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1459,9 +2238,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testSol()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1473,9 +2268,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testSol()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1487,9 +2298,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testSol()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1507,9 +2334,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul(uint32)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testYul(uint32)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1521,9 +2364,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul(uint32)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testYul(uint32)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1535,9 +2394,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "testYul(uint32)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "testYul(uint32)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1555,9 +2430,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1569,9 +2454,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1583,9 +2478,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1614,7 +2519,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1637,7 +2543,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1660,7 +2567,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1689,7 +2597,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1712,7 +2621,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1735,7 +2645,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1782,7 +2693,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1823,7 +2735,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1864,7 +2777,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1882,9 +2796,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1896,9 +2826,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1910,9 +2856,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -1941,7 +2903,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -1964,7 +2927,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -1987,7 +2951,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2040,7 +3005,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2087,7 +3053,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2134,7 +3101,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2175,7 +3143,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2210,7 +3179,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2245,7 +3215,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2274,7 +3245,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2297,7 +3269,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2320,7 +3293,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2349,7 +3323,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2372,7 +3347,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2395,7 +3371,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2424,7 +3401,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2447,7 +3425,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2470,7 +3449,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2517,7 +3497,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2558,7 +3539,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2599,7 +3581,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2617,9 +3600,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2631,9 +3630,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2645,9 +3660,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2676,7 +3707,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2699,7 +3731,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2722,7 +3755,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2751,7 +3785,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2774,7 +3809,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2797,7 +3833,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2850,7 +3887,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -2897,7 +3935,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -2944,7 +3983,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -2979,7 +4019,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3008,7 +4049,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3037,7 +4079,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3072,7 +4115,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3101,7 +4145,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3130,7 +4175,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3159,7 +4205,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3182,7 +4229,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3205,7 +4253,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3252,7 +4301,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3293,7 +4343,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3334,7 +4385,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3381,7 +4433,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3422,7 +4475,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3463,7 +4517,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3492,7 +4547,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3515,7 +4571,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3538,7 +4595,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3567,7 +4625,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3590,7 +4649,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3613,7 +4673,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3631,9 +4692,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3645,9 +4716,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3659,9 +4740,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3679,9 +4770,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3693,9 +4794,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3707,9 +4818,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3727,9 +4848,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3741,9 +4872,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3755,9 +4896,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3775,9 +4926,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3789,9 +4950,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3803,9 +4974,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3823,9 +5004,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "val()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3837,9 +5028,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "val()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3851,9 +5052,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "val()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3871,9 +5082,31 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3885,9 +5118,31 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3899,9 +5154,31 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "f(string)",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -3919,9 +5196,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -3933,9 +5226,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -3947,9 +5256,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "irOptimized",
@@ -3961,9 +5286,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "legacyOptimized",
@@ -3975,9 +5316,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4006,7 +5363,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4029,7 +5387,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4052,7 +5411,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4081,7 +5441,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4104,7 +5465,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4127,7 +5489,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4147,7 +5510,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4161,7 +5525,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4175,7 +5540,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4204,7 +5570,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4227,7 +5594,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4250,7 +5618,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4303,7 +5672,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4350,7 +5720,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4397,7 +5768,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4432,7 +5804,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4461,7 +5834,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4490,7 +5864,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4519,7 +5894,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4542,7 +5918,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4565,7 +5942,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4583,9 +5961,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4597,9 +5985,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4611,9 +6009,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4631,9 +6039,19 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4645,9 +6063,19 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4659,9 +6087,19 @@
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
           "frameLogs": 4,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4679,9 +6117,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4693,9 +6141,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4707,9 +6165,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4727,9 +6195,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4741,9 +6219,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4755,9 +6243,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4810,7 +6308,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4857,7 +6356,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -4904,7 +6404,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -4945,7 +6446,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -4980,7 +6482,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5015,7 +6518,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5033,9 +6537,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5047,9 +6567,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5061,9 +6597,25 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5083,7 +6635,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5097,7 +6650,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5111,7 +6665,8 @@
           "frameLogs": 0,
           "independentStateComparison": "not-executed",
           "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateCalls": [],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5140,7 +6695,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5163,7 +6719,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5186,7 +6743,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5206,9 +6764,7 @@
           "frameLogs": 18,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "CREATE2 target address/initcode/code and target-owned transient values remain pending independent identity/owner contract; not derived from observed code/address.",
-            "Only known self account/slot and top-level semantic window assertions are claimed.",
-            "Untouched/native worlds and universal source/target correspondence"
+            "Source/compiler correctness for receipted initcode and untouched/native worlds remain unproved."
           ],
           "independentStateCalls": [
             {
@@ -5235,7 +6791,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5249,9 +6806,7 @@
           "frameLogs": 18,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "CREATE2 target address/initcode/code and target-owned transient values remain pending independent identity/owner contract; not derived from observed code/address.",
-            "Only known self account/slot and top-level semantic window assertions are claimed.",
-            "Untouched/native worlds and universal source/target correspondence"
+            "Source/compiler correctness for receipted initcode and untouched/native worlds remain unproved."
           ],
           "independentStateCalls": [
             {
@@ -5278,7 +6833,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5292,9 +6848,7 @@
           "frameLogs": 18,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "CREATE2 target address/initcode/code and target-owned transient values remain pending independent identity/owner contract; not derived from observed code/address.",
-            "Only known self account/slot and top-level semantic window assertions are claimed.",
-            "Untouched/native worlds and universal source/target correspondence"
+            "Source/compiler correctness for receipted initcode and untouched/native worlds remain unproved."
           ],
           "independentStateCalls": [
             {
@@ -5321,7 +6875,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "irOptimized",
@@ -5335,9 +6890,7 @@
           "frameLogs": 18,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "CREATE2 target address/initcode/code and target-owned transient values remain pending independent identity/owner contract; not derived from observed code/address.",
-            "Only known self account/slot and top-level semantic window assertions are claimed.",
-            "Untouched/native worlds and universal source/target correspondence"
+            "Source/compiler correctness for receipted initcode and untouched/native worlds remain unproved."
           ],
           "independentStateCalls": [
             {
@@ -5364,7 +6917,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "legacyOptimized",
@@ -5378,9 +6932,7 @@
           "frameLogs": 18,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "CREATE2 target address/initcode/code and target-owned transient values remain pending independent identity/owner contract; not derived from observed code/address.",
-            "Only known self account/slot and top-level semantic window assertions are claimed.",
-            "Untouched/native worlds and universal source/target correspondence"
+            "Source/compiler correctness for receipted initcode and untouched/native worlds remain unproved."
           ],
           "independentStateCalls": [
             {
@@ -5407,7 +6959,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5442,7 +6995,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5471,7 +7025,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5500,7 +7055,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5553,7 +7109,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5600,7 +7157,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5647,7 +7205,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5682,7 +7241,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5711,7 +7271,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5740,7 +7301,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5775,7 +7337,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5804,7 +7367,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5833,7 +7397,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -5853,8 +7418,7 @@
           "frameLogs": 11,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "Deletion of newly created child after unavailable subsequent transaction boundary remains pending; no deletion/finalization inferred.",
-            "Untouched/native worlds and source correspondence"
+            "Observed next host beginFrame cleanup is not a runTx receipt or universal Ethereum finalization/source proof."
           ],
           "independentStateCalls": [
             {
@@ -5875,7 +7439,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -5889,8 +7454,7 @@
           "frameLogs": 11,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "Deletion of newly created child after unavailable subsequent transaction boundary remains pending; no deletion/finalization inferred.",
-            "Untouched/native worlds and source correspondence"
+            "Observed next host beginFrame cleanup is not a runTx receipt or universal Ethereum finalization/source proof."
           ],
           "independentStateCalls": [
             {
@@ -5911,7 +7475,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -5925,8 +7490,7 @@
           "frameLogs": 11,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "Deletion of newly created child after unavailable subsequent transaction boundary remains pending; no deletion/finalization inferred.",
-            "Untouched/native worlds and source correspondence"
+            "Observed next host beginFrame cleanup is not a runTx receipt or universal Ethereum finalization/source proof."
           ],
           "independentStateCalls": [
             {
@@ -5947,7 +7511,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "irOptimized",
@@ -5961,8 +7526,7 @@
           "frameLogs": 11,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "Deletion of newly created child after unavailable subsequent transaction boundary remains pending; no deletion/finalization inferred.",
-            "Untouched/native worlds and source correspondence"
+            "Observed next host beginFrame cleanup is not a runTx receipt or universal Ethereum finalization/source proof."
           ],
           "independentStateCalls": [
             {
@@ -5983,7 +7547,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "legacyOptimized",
@@ -5997,8 +7562,7 @@
           "frameLogs": 11,
           "independentStateComparison": "match",
           "pendingDomains": [
-            "Deletion of newly created child after unavailable subsequent transaction boundary remains pending; no deletion/finalization inferred.",
-            "Untouched/native worlds and source correspondence"
+            "Observed next host beginFrame cleanup is not a runTx receipt or universal Ethereum finalization/source proof."
           ],
           "independentStateCalls": [
             {
@@ -6019,7 +7583,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -6054,7 +7619,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -6083,7 +7649,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -6112,7 +7679,8 @@
               "status": "match",
               "differences": []
             }
-          ]
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -6130,9 +7698,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -6144,9 +7722,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -6158,9 +7746,19 @@
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
           "frameLogs": 2,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     },
@@ -6178,9 +7776,19 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ir",
@@ -6192,9 +7800,19 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "ssaCFGOptimized",
@@ -6206,9 +7824,19 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "irOptimized",
@@ -6220,9 +7848,19 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         },
         {
           "name": "legacyOptimized",
@@ -6234,11 +7872,22 @@
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
           "frameLogs": 3,
-          "independentStateComparison": "pending",
-          "pendingDomains": [],
-          "independentStateCalls": []
+          "independentStateComparison": "match",
+          "pendingDomains": [
+            "Untouched/native worlds and universal source/target correctness"
+          ],
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ],
+          "postPlanCleanup": null
         }
       ]
     }
-  ]
+  ],
+  "postPlanHostBoundaries": 5
 }

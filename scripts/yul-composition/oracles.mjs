@@ -7,13 +7,37 @@ import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
 import {createAddressFromString,createContractAddress} from '../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js';
 import {keccak_256} from '../evm-reference/node_modules/@noble/hashes/sha3.js';
-import {compareState,validateCapture,validateCallCapture} from './capture.mjs';
+import {compareState,validateCapture,validateCallCapture,validateBoundary} from './capture.mjs';
 const ROOT=fileURLToPath(new URL('../../',import.meta.url)),sha=b=>createHash('sha256').update(b).digest('hex');
 export const LOCAL_CALLER='0x'+'12'.repeat(20);
 export function predictedAliases(caller=LOCAL_CALLER) {
  if(!/^0x[0-9a-f]{40}$/.test(caller))throw Error('invalid independent creator input');
  const self=createContractAddress(createAddressFromString(caller),0n).toString();
  return {caller,self,child:createContractAddress(createAddressFromString(self),1n).toString(),child2:createContractAddress(createAddressFromString(self),2n).toString()};
+}
+/** Salt/initcode are compiler-input receipts fixed before VM execution. */
+export function create2Aliases(caller,initcode) {
+ const a=predictedAliases(caller);if(typeof initcode!=='string'||!/^0x(?:[0-9a-f]{2})+$/.test(initcode))throw Error('missing CREATE2 initcode input');
+ const initHash=Buffer.from(keccak_256(Buffer.from(initcode.slice(2),'hex')));
+ for(let salt=0;salt<4;salt++)a['create2:'+salt]='0x'+Buffer.from(keccak_256(Buffer.concat([Buffer.from([255]),Buffer.from(a.self.slice(2),'hex'),Buffer.from(salt.toString(16).padStart(2,'0').padEnd(64,'0'),'hex'),initHash]))).subarray(12).toString('hex');return a;
+}
+export function compareFinalCleanup(variant,aliases) {
+ try {
+  const c=variant.postPlanCleanup;validateBoundary(c);const last=variant.observed.at(-1);
+  if(c.nextCallOrdinal!==last.transaction+1||!isDeepStrictEqual(c.pre,last.capture.post))throw Error('cleanup phase/pre-state mismatch');
+  const deleted=aliases.child2,kept=aliases.child,differences=[];
+  if(!isDeepStrictEqual(c.effects.deletedAccounts,[deleted])||!isDeepStrictEqual(c.effects.transientBeforeReset,{}))differences.push('cleanup-effects');
+  const before=c.pre[deleted],after=c.post[deleted];if(!before||!after||!c.post[kept])throw Error('missing independently predicted cleanup accounts');
+  if(!before.exists||before.balance!=='0'||before.nonce!=='1'||before.code==='0x'||after.exists||after.nonce!=='0'||after.balance!=='0'||after.code!=='0x'||Object.values(after.persistent).some(w=>BigInt(w)!==0n))differences.push('deleted-child-state');
+  for(const [address,a]of Object.entries(c.pre))if(address!==deleted) {
+   const b=c.post[address];for(const field of ['exists','balance','nonce','code','codeSha256','persistent'])if(!isDeepStrictEqual(a[field],b[field]))differences.push('cleanup-unrelated/'+address+'/'+field);
+  }
+  for(const a of Object.values(c.post))if(Object.values(a.transient).some(w=>BigInt(w)!==0n))differences.push('cleanup-transient-reset');
+  for(const kind of ['deleteAccount','clearStorage','putCode']){const ops=c.operations.filter(o=>o.kind===kind);if(ops.length!==1||ops[0].address!==deleted||kind==='putCode'&&ops[0].value!=='0x')differences.push('cleanup-operation/'+kind);}
+  const clears=c.operations.filter(o=>o.kind==='transient.clear');if(clears.length!==1||!isDeepStrictEqual(clears[0].value,c.effects.transientBeforeReset))differences.push('cleanup-clear-payload');
+  if(!c.post[kept].exists||c.post[kept].code==='0x')differences.push('old-child-destroyed');
+  return{status:differences.length?'mismatch':'match',differences,scope:'Observed host beginFrame cleanup, no extra EVM call or runTx/finalization theorem'};
+ }catch(e){return{status:'blocked',reason:e.message};}
 }
 export const STATE_ORACLE_IDS=['constructor-failure','constructors','memory-storage-logs','mixed-logs','modifiers','new-constructor','try-catch'];
 export function checkStateOracles(raw) {
@@ -52,8 +76,8 @@ export function independentRequest(call,reported,creationSha256) {
  return reported;
 }
 export function checkUpstreamOracles(raw) {
- if(sha(raw)!=='20ac5acd591a47ae8b19f0b2b2ede8c2f94c331d32fe7c97c95c214622639d6c')throw Error('missing/stale upstream state oracle registration');
- const rows=JSON.parse(raw);const names=["calldata_array_assign_dynamic.sol","calldata_array_assign_static.sol","calldata_array_read.sol","for_loop_break.sol","for_loop_continue.sol","for_loop_nested.sol","inline_assembly_embedded_function_call.sol","inline_assembly_for.sol","inline_assembly_for2.sol","inline_assembly_function_call.sol","inline_assembly_function_call2.sol","inline_assembly_function_call_assignment.sol","inline_assembly_if.sol","inline_assembly_memory_access.sol","inline_assembly_read_and_write_stack.sol","inline_assembly_recursion.sol","inline_assembly_storage_access.sol","inline_assembly_storage_access_inside_function.sol","inline_assembly_storage_access_local_var.sol","inline_assembly_storage_access_via_pointer.sol","inline_assembly_switch.sol","inline_assembly_transient_storage_access_inside_function.sol","inline_assembly_write_to_stack.sol","leave.sol","mcopy.sol","mcopy_empty.sol","mcopy_overlap.sol","optimize_memory_store_multi_block.sol","optimize_memory_store_multi_block_bugreport.sol","slot_access.sol","slot_access_via_mapping_pointer.sol","transient_storage_creation.sol","transient_storage_low_level_calls.sol","transient_storage_multiple_calls_different_transactions.sol","transient_storage_multiple_transactions.sol","transient_storage_reset_between_creation_runtime.sol","transient_storage_sanity_checks.sol","transient_storage_selfdestruct.sol","transient_storage_simple_reentrancy_lock.sol"];
+ if(sha(raw)!=='4809f87e1b5915d9c8d6d18ed8520e6d7a6d3be04b516af1837851d84cf7837c')throw Error('missing/stale upstream state oracle registration');
+ const rows=JSON.parse(raw),names=["blobhash.sol","blobhash_index_exceeding_blob_count.sol","calldata_array_assign_dynamic.sol","calldata_array_assign_static.sol","calldata_array_read.sol","calldata_assign.sol","calldata_assign_from_nowhere.sol","calldata_length_read.sol","calldata_offset_read.sol","calldata_offset_read_write.sol","calldata_struct_assign.sol","calldata_struct_assign_and_return.sol","chainid.sol","clz.sol","constant_access.sol","constant_access_referencing.sol","external_function_pointer_address.sol","external_function_pointer_address_assignment.sol","external_function_pointer_selector.sol","external_function_pointer_selector_assignment.sol","external_identifier_access_shadowing.sol","for_loop_break.sol","for_loop_continue.sol","for_loop_nested.sol","function_name_clash.sol","inline_assembly_embedded_function_call.sol","inline_assembly_for.sol","inline_assembly_for2.sol","inline_assembly_function_call.sol","inline_assembly_function_call2.sol","inline_assembly_function_call_assignment.sol","inline_assembly_if.sol","inline_assembly_in_modifiers.sol","inline_assembly_memory_access.sol","inline_assembly_read_and_write_stack.sol","inline_assembly_recursion.sol","inline_assembly_storage_access.sol","inline_assembly_storage_access_inside_function.sol","inline_assembly_storage_access_local_var.sol","inline_assembly_storage_access_via_pointer.sol","inline_assembly_switch.sol","inline_assembly_transient_storage_access_inside_function.sol","inline_assembly_write_to_stack.sol","inlineasm_empty_let.sol","keccak256_assembly.sol","keccak256_optimization.sol","keccak256_optimizer_bug_different_memory_location.sol","keccak256_optimizer_cache_bug.sol","keccak_optimization_bug_string.sol","keccak_yul_optimization.sol","leave.sol","mcopy.sol","mcopy_empty.sol","mcopy_overlap.sol","optimize_memory_store_multi_block.sol","optimize_memory_store_multi_block_bugreport.sol","prevrandao.sol","returndatacopy_using_stale_returndatasize.sol","selfbalance.sol","shadowing_local_function_opcode.sol","slot_access.sol","slot_access_via_mapping_pointer.sol","slotnum_pre_amsterdam_function.sol","transient_storage_creation.sol","transient_storage_low_level_calls.sol","transient_storage_multiple_calls_different_transactions.sol","transient_storage_multiple_transactions.sol","transient_storage_reset_between_creation_runtime.sol","transient_storage_sanity_checks.sol","transient_storage_selfdestruct.sol","transient_storage_simple_reentrancy_lock.sol","truefalse.sol","tstore_hidden_staticcall.sol"];
  if(!isDeepStrictEqual(rows.map(r=>r.path.split('/').at(-1)).sort(),names))throw Error('missing/duplicate upstream oracle');return rows;
 }
 
@@ -63,7 +87,12 @@ export function compareUpstreamState(fixture,variant,caller) {
  try {
   if(spec.callPlanSha256!==sha(JSON.stringify(fixture.plan))||spec.sourceSha256!==fixture.sourceSha256||!isDeepStrictEqual(spec.calls.map(o=>o.signature),fixture.plan.calls.map(c=>c.signature)))throw Error('stale source/call oracle');
   if(!Array.isArray(variant.observed))throw Error('missing independent state observations');
-  const aliases=predictedAliases(caller),calls=[];
+  let aliases=predictedAliases(caller);const calls=[];
+  if(fixture.path.endsWith('/transient_storage_low_level_calls.sol')) {
+   const q=variant.oracleInputs;
+   if(!q||q.contract!=='D'||q.inputSha256!==variant.inputSha256||q.initcodeSha256!==sha(Buffer.from(q.create2Initcode?.slice(2)??'','hex'))||q.initcodeSha256!==variant.artifactHashes?.D?.creation||!/^[0-9a-f]{64}$/.test(variant.artifactHashes?.D?.runtime))throw Error('missing/stale CREATE2 compiler inputs');
+   aliases=create2Aliases(caller,q.create2Initcode);
+  }
   const mapping='0x'+Buffer.from(keccak_256(Buffer.from('0'.repeat(63)+'1'+'0'.repeat(64),'hex'))).toString('hex');
   for(const [i,s]of spec.calls.entries()) {
    try {
@@ -73,6 +102,10 @@ export function compareUpstreamState(fixture,variant,caller) {
    const input=independentRequest(call,o.requestData,variant.creationSha256);
    validateCallCapture(o.capture,o.actual,{transaction,input,value:call.value,caller,to:call.constructor?null:aliases.self});
    const oracle=structuredClone(s.oracle);
+   if(fixture.path.endsWith('/transient_storage_low_level_calls.sol')) {
+    for(const f of oracle.frames??[])if(f.fields.kind==='create')f.fields.input=variant.oracleInputs.create2Initcode;
+    const a=oracle.accounts.find(a=>a.address==='create2:'+i&&a.phase==='post');if(!a)throw Error('missing target expectation');a.fields.codeSha256=variant.artifactHashes.D.runtime;
+   }
    for(const e of oracle.slots??[])if(typeof e.value==='string'&&e.value.startsWith('address:')) {
     const value=aliases[e.value.slice(8)];if(!value)throw Error('unknown independent address input');e.value='0x'+BigInt(value).toString(16).padStart(64,'0');
    }
@@ -81,6 +114,8 @@ export function compareUpstreamState(fixture,variant,caller) {
    }catch(e){calls.push({index:i,signature:s.signature,status:'blocked',reason:e.message});}
   }
   if(variant.status!=='working'||variant.observed.length!==spec.calls.length)calls.push({status:'blocked',reason:'incomplete/extra reference observations or execution'});
-  return {status:calls.some(c=>c.status==='mismatch')?'mismatch':calls.some(c=>c.status==='blocked')?'blocked':calls.every(c=>c.status==='match')?'match':'pending',scope:'Finite selected source-derived assertions; complete upstream state/world correspondence pending',pendingDomains:spec.pendingDomains??['Untouched/native worlds and source correspondence'],calls};
+  const cleanup=fixture.path.endsWith('/transient_storage_selfdestruct.sol')?compareFinalCleanup(variant,aliases):undefined;
+  const states=cleanup?[...calls,cleanup]:calls;
+  return {...(cleanup?{cleanup}:{}),status:states.some(c=>c.status==='mismatch')?'mismatch':states.some(c=>c.status==='blocked')?'blocked':states.every(c=>c.status==='match')?'match':'pending',scope:'Finite selected source-derived assertions; complete upstream state/world correspondence pending',pendingDomains:spec.pendingDomains??['Untouched/native worlds and source correspondence'],calls};
  }catch(e){return{status:'blocked',reason:e.message};}
 }
