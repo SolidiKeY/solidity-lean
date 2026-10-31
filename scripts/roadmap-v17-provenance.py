@@ -20,6 +20,7 @@ spec.loader.exec_module(e)
 UNRESOLVED = Path('/workspace/scratch/v17-unresolved-container.json')
 CAP = 12 * 1024**3
 BUDGET = {'processSeconds': 300, 'suiteModuleSeconds': 300, 'leanNumThreads': 1}
+SAMPLE_FORMAT = 'pid-comm-rss-args/native-v1'
 IMAGE = 'debian@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3'
 TARGETS = {
     'runtime-keysort': (['Solidity.KeySort'], ['lib/lean/Solidity/KeySort.olean']),
@@ -101,8 +102,9 @@ def validate(record, evidence_root, current, gate, gate_row=None):
     e.require(runtime['realLeanSha256'] == current['runtime']['lean']['sha256'] and
               runtime['lakeSha256'] == current['runtime']['lake']['sha256'] and runtime['leanVersion'] == current['runtime']['lean']['version'] and runtime['lakeVersion'] == current['runtime']['lake']['version'] and runtime['leanNumThreads'] == '1', 'runtime binary mismatch')
     e.require(0 < runtime['memoryPeak'] <= CAP and runtime['image'] == IMAGE, 'invalid execution peak/image')
+    e.require(record['sampleFormat'] == SAMPLE_FORMAT, 'unsupported process sample format')
     samples = e.loads(read_bound(evidence_root, record['samples'], record['samplesSha256']))
-    e.require(samples and all(type(s['rssBytes']) is int and s['rssBytes'] >= 0 and type(s['leanWorkers']) is int and 0 <= s['leanWorkers'] <= 1 for s in samples), 'missing/parallel execution samples')
+    e.require(samples and all(type(s['rssBytes']) is int and s['rssBytes'] >= 0 and type(s['leanWorkers']) is int and 0 <= s['leanWorkers'] <= 1 and type(s['leanSupervisors']) is int and s['leanSupervisors'] >= 0 and type(s['unclassifiedLeanWorkers']) is int and s['unclassifiedLeanWorkers'] == 0 for s in samples), 'missing/parallel execution samples')
     e.require(record['headroomBytes'] >= 2 * 1024**3 and record['diskFreeBytes'] >= 1024**3, 'insufficient recorded headroom/disk')
     e.require(0 < record['elapsedSeconds'] <= BUDGET['processSeconds'] + 5, 'execution budget exceeded')
     execution = read_bound(evidence_root, record['executionScript'], record['executionScriptSha256'])
@@ -202,6 +204,27 @@ def docker_create_argv(out, current, container_name, command):
                    IMAGE, 'sh', '-c', execution_script(out, command, lake)]
 
 
+def process_sample(output, lean_path):
+    """Count actual native Lean executables, retaining supervisor/unknown counts.
+    Admission is enforced by the lock; a sample is not an absence-of-overlap proof.
+    """
+    lines = output.splitlines()
+    e.require(lines and lines[0].split() == ['PID', 'COMMAND', 'RSS', 'COMMAND'], 'malformed process telemetry header')
+    rss = native = supervisors = unknown = 0
+    for line in lines[1:]:
+        if not line.strip(): continue
+        fields = line.split(None, 3)
+        e.require(len(fields) == 4 and fields[0].isdigit(), 'malformed process telemetry')
+        amount = int(fields[2]); e.require(amount >= 0, 'negative process RSS')
+        rss += amount * 1024
+        if fields[1] != 'lean': continue
+        args = fields[3].split()
+        if args[0] == '/opt/v17-toolchain/bin/lean': native += 1
+        elif len(args) >= 2 and args[0] in ('/bin/sh', 'sh') and args[1] == str(lean_path): supervisors += 1
+        else: unknown += 1
+    return {'rssBytes':rss, 'leanWorkers':native, 'leanSupervisors':supervisors, 'unclassifiedLeanWorkers':unknown}
+
+
 def missing_container(error):
     return isinstance(error, subprocess.CalledProcessError) and error.returncode == 1 and any(
         text in str(error.stderr) for text in ('No such container', 'No such object'))
@@ -271,13 +294,12 @@ def collect(args):
                     code = proc.wait(timeout=remaining()); break
                 if state == 'running':
                     try:
-                        top = docker('top',cid,'-eo','pid,comm,rss',timeout=remaining()).stdout.decode().splitlines()[1:]
+                        top = docker('top',cid,'-ww','-eo','pid,comm,rss,args',timeout=remaining()).stdout.decode()
                     except subprocess.CalledProcessError:
                         # Re-inspect a possible rapid exit, retaining the error if still running.
                         if docker('inspect','--format','{{.State.Status}}',cid,timeout=remaining()).stdout.decode().strip() == 'running': raise
                         continue
-                    entries = [line.split() for line in top if len(line.split()) == 3]
-                    samples.append({'rssBytes':sum(int(x[2])*1024 for x in entries), 'leanWorkers':sum(x[1]=='lean' for x in entries)})
+                    samples.append(process_sample(top, lean))
                 elif state != 'created':
                     raise ValueError('unexpected container state: ' + state)
                 remaining(); time.sleep(0.05)
@@ -314,7 +336,7 @@ def collect(args):
     (out/'runtime.json').write_text(json.dumps(runtime))
     (out/'samples.json').write_text(json.dumps(samples))
     if not (out/'build.log').exists(): (out/'build.log').write_text('Execution failed before build start.\n')
-    record = {'schema':2,'containerName':container_name,'dockerArgv':'docker-argv.json','dockerArgvSha256':e.digest((out/'docker-argv.json').read_bytes()) if (out/'docker-argv.json').exists() else None,'serializers':serializers,'buildTools':runtime_tools(before),'collectionDirectory':str(out),'gate':args.gate,'mode':mode,'command':command,'before':before,'after':after,
+    record = {'schema':2,'sampleFormat':SAMPLE_FORMAT,'containerName':container_name,'dockerArgv':'docker-argv.json','dockerArgvSha256':e.digest((out/'docker-argv.json').read_bytes()) if (out/'docker-argv.json').exists() else None,'serializers':serializers,'buildTools':runtime_tools(before),'collectionDirectory':str(out),'gate':args.gate,'mode':mode,'command':command,'before':before,'after':after,
               'budgets':BUDGET,'configuration':'configuration.toml','configurationSha256':e.digest(cfg),'configurationAfterSha256':config_after,
               'launcher':'lean-launcher','launcherSha256':e.digest(launcher_bytes()),
               'runtime':'runtime.json','runtimeSha256':e.digest((out/'runtime.json').read_bytes()),

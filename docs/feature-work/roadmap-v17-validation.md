@@ -375,3 +375,29 @@ empty observed build/cache state; this checkpoint neither deletes inherited
 materializations nor labels a warm target clean. Actual final clean proof closure,
 all 457 child/feature rows, V11–V16 premises, kernel extraction, full corpus/suite
 closure and complete clean/cache equivalence remain open.
+
+The actual warm compiler target at `94c20fda787687c79338965fe657b40425b04f7a`
+completed 135 jobs in 296.48s under the unchanged 300s bound, with cgroup peak
+979,652,608 bytes and sampled aggregate RSS peak 1,216,532,480 bytes. Before/after
+snapshots agree. Its original comm-only sampler counted the waiting shell
+supervisor and actual native Lean process as two workers, so its validator
+correctly refused that recorded sample format. Build success and provenance
+validation failure are retained separately in `v17-spawn/warm-compiler` and
+`warm-compiler-validation.log`; neither the samples nor the old result is
+rewritten or reclassified. No unchanged compiler retry is planned.
+
+A small sampler correction now requests full-width PID/comm/RSS/args and counts
+only the canonical native Lean executable. Waiting wrapper supervisors remain
+explicit counts and their RSS stays included. Unknown Lean commands prevent
+validation; they are never silently dropped. An explicit sample-format field
+prevents the previous comm-only records being interpreted with new semantics.
+The preventive family lock remains the admission mechanism. Focused controls
+cover the original supervisor/native ambiguity, unknown processes and old-format
+rejection. Any next actual check uses a distinct focused target and retains its
+own source revision and outcome. This does not establish clean validation.
+
+Sampler review also added strict expected-header validation: empty/headerless
+telemetry is rejected rather than silently becoming a zero-process sample.
+A genuine header-only result is retained explicitly as empty. This leaves the
+current checkpoint at 87 synthetic/control tests, separate from actual target
+proof results and all final lane gates.

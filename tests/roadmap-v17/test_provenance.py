@@ -39,12 +39,12 @@ class ProvenanceTests(unittest.TestCase):
         name=mode+'-compiler'
         runtime={'entrypointHashes':{tool:e.digest(p.launcher_bytes(tool)) for tool in e.BUILD_TOOL_NAMES},'toolHashes':{k:v['sha256'] for k,v in self.current['buildTools'].items()},'memoryMax':p.CAP,'swapMax':0,'memoryPeak':1024,'image':p.IMAGE,
                  'realLeanSha256':'c'*64,'lakeSha256':'d'*64,'leanVersion':'lean version','lakeVersion':'lake version','leanNumThreads':'1'}
-        r={'schema':2,'buildTools':copy.deepcopy(self.current['buildTools']),'collectionDirectory':str(self.root),'gate':name,'mode':mode,'before':copy.deepcopy(self.current),'after':copy.deepcopy(self.current),
+        r={'schema':2,'sampleFormat':p.SAMPLE_FORMAT,'buildTools':copy.deepcopy(self.current['buildTools']),'collectionDirectory':str(self.root),'gate':name,'mode':mode,'before':copy.deepcopy(self.current),'after':copy.deepcopy(self.current),
            'budgets':copy.deepcopy(p.BUDGET),'configuration':mode+'.toml','configurationSha256':self.attach(mode+'.toml',b'config'),
            'configurationAfterSha256':e.digest(b'config'),
            'launcher':'lean-launcher','launcherSha256':self.attach('lean-launcher',p.launcher_bytes()),
            'runtime':mode+'.runtime','runtimeSha256':self.attach(mode+'.runtime',json.dumps(runtime).encode()),
-           'samples':mode+'.samples','samplesSha256':self.attach(mode+'.samples',b'[{"rssBytes":10,"leanWorkers":1}]'),
+           'samples':mode+'.samples','samplesSha256':self.attach(mode+'.samples',b'[{"rssBytes":10,"leanWorkers":1,"leanSupervisors":0,"unclassifiedLeanWorkers":0}]'),
            'log':mode+'.log','logSha256':self.attach(mode+'.log',b'Build completed successfully\n'),
            'exit':0,'headroomBytes':3*1024**3,'diskFreeBytes':2*1024**3,'elapsedSeconds':1,
            'command':['lake','-f','roadmap-v17-runtime.lakefile.toml','build','Solidity.Evm.Compiler'],
@@ -234,14 +234,14 @@ class ProvenanceTests(unittest.TestCase):
                 if args[0]=='create': return SimpleNamespace(stdout=b'owned-container')
                 if args[0]=='inspect': return SimpleNamespace(stdout=next(states))
                 if args[0]=='top':
-                    self.assertEqual(args[-1],'pid,comm,rss')
-                    return SimpleNamespace(stdout=b'PID COMMAND RSS\n1 lean 10\n')
+                    self.assertEqual(args[-1],'pid,comm,rss,args')
+                    return SimpleNamespace(stdout=b'PID COMMAND RSS COMMAND\n1 lean 10 /opt/v17-toolchain/bin/lean -j1\n2 lean 2 /bin/sh /usr/bin/true args\n')
                 return SimpleNamespace(stdout=b'')
             with patch.object(p,'ROOT',self.root), patch.object(p.e,'snapshot',return_value=self.current), \
                  patch('shutil.which',return_value='/usr/bin/true'), patch.object(p,'docker',side_effect=docker), \
                  patch.object(p.subprocess,'Popen',return_value=proc):
                 self.assertEqual(p.collect(SimpleNamespace(out=out,gate='warm-compiler')),0)
-            self.assertEqual(e.load(out/'samples.json'),[{'rssBytes':10240,'leanWorkers':1}])
+            self.assertEqual(e.load(out/'samples.json'),[{'rssBytes':12288,'leanWorkers':1,'leanSupervisors':1,'unclassifiedLeanWorkers':0}])
 
     def test_unresolved_container_refuses_another_collection(self):
         p.UNRESOLVED.write_text(json.dumps({'container':'roadmap-v17-'+'a'*32}))
@@ -288,6 +288,28 @@ class ProvenanceTests(unittest.TestCase):
         ref=self.clean['serializers']['clang']; data=(self.root/ref['path']).read_bytes()
         ref['path']='unused-good-launcher'; ref['sha256']=self.attach(ref['path'],data)
         with self.assertRaisesRegex(ValueError,'mounted source'): self.validate()
+
+    def test_native_sampler_retains_supervisor_and_unknown_counts(self):
+        text='PID COMMAND RSS COMMAND\n1 lean 10 /opt/v17-toolchain/bin/lean -j1\n2 lean 2 /bin/sh /usr/bin/lean file\n3 lean 3 /unknown/lean file\n'
+        sample=p.process_sample(text,Path('/usr/bin/lean'))
+        self.assertEqual(sample,{'rssBytes':15360,'leanWorkers':1,'leanSupervisors':1,'unclassifiedLeanWorkers':1})
+
+    def test_unknown_lean_process_cannot_validate(self):
+        data=[{'rssBytes':10,'leanWorkers':1,'leanSupervisors':0,'unclassifiedLeanWorkers':1}]
+        self.clean['samplesSha256']=self.attach('clean.samples',json.dumps(data).encode())
+        with self.assertRaisesRegex(ValueError,'samples'): self.validate()
+
+    def test_old_sample_semantics_cannot_be_reinterpreted(self):
+        self.clean['sampleFormat']='comm-only/v1'
+        with self.assertRaisesRegex(ValueError,'sample format'): self.validate()
+
+    def test_empty_or_headerless_telemetry_rejected(self):
+        for text in ['', '1 lean 10 /opt/v17-toolchain/bin/lean -j1']:
+            with self.assertRaisesRegex(ValueError,'telemetry header'): p.process_sample(text,Path('/usr/bin/lean'))
+
+    def test_header_only_sample_is_explicitly_empty(self):
+        self.assertEqual(p.process_sample('PID COMMAND RSS COMMAND\n',Path('/usr/bin/lean')),
+                         {'rssBytes':0,'leanWorkers':0,'leanSupervisors':0,'unclassifiedLeanWorkers':0})
 
     def test_gate_log_or_exit_disagreement(self):
         row={'exit':1,'sha256':self.clean['logSha256'],'log':'clean.log','command':self.clean['command']}
