@@ -1,6 +1,7 @@
 import Solidity.Backend.MemoryOps.SourceNestedMemory
 import Solidity.Backend.MemoryOps.SourceNestedSelect
 import Solidity.Backend.MemoryOps.SourceNestedMutation
+import Solidity.Backend.MemoryOps.SourceNestedAssignment
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -773,5 +774,291 @@ theorem shared_mutation_bounds :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms shared_mutation_bounds
+
+
+private abbrev NΓ : Ctx := .val .bool::Γ
+private abbrev NSΓ : Source.RCtx := .bool::SΓ
+private def ns : State C NΓ := σ.push (t := .val .bool) true
+private def ny : Source.EMState E0 NSΓ := (.cons (.bool true) sy.1,sy.2)
+private def nm := writeMachine machine 6 w[1]
+private def nf := frag.push (.val .bool) .ok
+private def nroot : Idx NΓ (.mem R) := .there tsrc
+private def ni : Idx NΓ (.val .uint) := .there .here
+private def nj : Idx NΓ (.val .uint) := .there (.there .here)
+private def nsroot : Source.Idx NSΓ SR := .there ssrc
+private def nsi : Source.Idx NSΓ (.int .u256) := .there sj
+private def nsj : Source.Idx NSΓ (.int .u256) := .there si
+private def nterm : Source.RExpr E0 NSΓ .bool := sourceNestedAssign nsroot nsi nsj .here
+private def ncode : List Instr := nestedWriteCode (C := C) 1 nroot ni nj .here
+private def nprog : Stmt C NΓ NΓ := .assignMem (.index .dyn (.loc (.index .dyn (.var nroot rfl) (.simple (.local ni)))) (.simple (.local nj))) (.val (.simple (.local .here)))
+private def nh := hp.set left (MObj.setElem .dyn (hp.get left) 1 true)
+private def nz : Source.EMState E0 NSΓ := (ny.1,{ny.2 with heap := ny.2.heap.write 0 (sourceBoolMemory [true,true,false]) (by rfl)})
+private def nt := writeMachine nm 18 w[1]
+private theorem nmem : Source.MemOK E0 SH ny := ⟨⟨source_memOK.1.1,⟨trivial,source_memOK.1.2⟩⟩,source_memOK.2⟩
+private theorem nrepr : RefArrayStateRepr 1 1 8 nf ns base nm :=
+  ⟨initial_repr.state.consVal (p := .bool) true w[1] rfl (by decide),initial_repr.arrays.localWrite 6 (by decide) w[1]⟩
+private theorem nat_initial : SourceBoolRefsAt ny 3 ns.heap fresh addresses := fresh_at.same_heaps rfl rfl
+private theorem nparent : ns.heap.index fresh .dyn (indexValue ⟨0,by decide⟩)=some left := by
+  change hp.index fresh .dyn (indexValue ⟨0,by decide⟩)=some left
+  simp only [Heap.index,indexValue,Int.toNat_natCast,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+private theorem nheaprun : ns.heap.writeAddr (.index left .dyn (indexValue ⟨1,by decide⟩)) true=some nh := by
+  change hp.writeAddr (.index left .dyn (indexValue ⟨1,by decide⟩)) true=some nh
+  simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+  exact if_pos (by simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+private theorem nsourcerun : (Source.writeLoc (E := E0) (Γ := NSΓ) F0 3 (.mem 0 1) (.bool true)).run ny=(.ok (),nz) := by
+  have hh : ny.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ := rfl
+  obtain ⟨_,hw⟩ := source_bool_write ny 0 [true,false,false] hh 1 (by decide) true
+  exact hw
+
+/-- Actual RHS-first nested syntax and whole path-to-write code materially
+change the shared child, while all repeated IDs and other objects stay framed. -/
+theorem nested_assignment_views (p : Roadmap.Pipeline) :
+    (Source.evalLoc (Source.SemanticsExamples.G0 p) F0 3 (sourceNestedLoc nsroot nsi nsj)).run ny=(.ok (.mem 0 1),ny) ∧
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 nterm).run ny=(.ok (.val (.bool true)),nz) ∧
+    (Source.execS (Source.SemanticsExamples.G0 p) F0 5 NSΓ.length none
+      (.expr nterm : Source.RStmt E0 [] false .body NSΓ NSΓ) ny.1).run (.nil,ny.2)=(.ok (.normal nz.1),(.nil,nz.2)) ∧
+    Stmt.run ns nprog=.ok ⟨ns.withHeap nh,List.prefix_refl _⟩ ∧
+    run ncode nm=.ok nt 0 ∧ SourceBoolRefsAt nz 3 nh fresh addresses ∧ Source.MemOK E0 SH nz ∧
+    RefArrayStateRepr 1 1 8 nf (ns.withHeap nh) base nt ∧ nz.1=ny.1 ∧
+    [MObj.elems .dyn (nh.get left),MObj.elems .dyn (nh.get right)]=[[true,true,false],[false,true,false]] ∧
+    [(MObj.elems .dyn (nh.get old)).map HRef.id,(MObj.elems .dyn (nh.get fresh)).map HRef.id]=[[0],[0,1,0]] ∧
+    (Source.readLoc (E := E0) (Γ := NSΓ) F0 (τ := SB) (.mem 3 0)).run nz=(.ok (.memRef rfl 0),nz) ∧
+    (Source.readLoc (E := E0) (Γ := NSΓ) F0 (τ := SB) (.mem 3 2)).run nz=(.ok (.memRef rfl 0),nz) ∧
+    (Source.readLoc (E := E0) (Γ := NSΓ) F0 (τ := .bool) (.mem 0 1)).run nz=(.ok (.bool true),nz) ∧
+    cells nt=[w[48],w[32],w[32],w[36],w[1],w[0],w[99],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]] ∧
+    [nm.mem 6,nt.mem 6]=[w[1],w[1]] ∧ nt.stack=[w[42]] ∧
+    KeepsAllocator 1 8 ns base nm (ns.withHeap nh) nt := by
+  obtain ⟨out,z,ho,hs,hloc,he,hstmt,hi,hc,hr,hm,hrepr,hlocals,hparent,ha⟩ :=
+    SourceBoolRefsAt.resolved_nested_assign_word (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi nsj .here ns
+      nroot ni nj .here fresh left ⟨0,by decide⟩ ⟨1,by decide⟩ true addresses nat_initial rfl rfl rfl rfl
+      rfl rfl rfl rfl nparent (by change 1<hp.len left .dyn;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+      (by intro t ht hne;exact hne) SH nmem nrepr
+  have hout : out=nh := Option.some.inj (ho.symm.trans nheaprun)
+  have hz : z=nz := congrArg Prod.snd (hs.symm.trans nsourcerun)
+  subst out;subst z
+  refine ⟨hloc,he,hstmt,hi,hc,hr,hm,hrepr,hlocals,?_,?_,hr.parent_read F0 0 left ?_,hr.parent_read F0 2 left ?_,
+    (hr.child_read_iff F0 0 left ?_ (uintOfNat 1) true).mpr ?_,rfl,rfl,rfl,ha⟩
+  all_goals simp only [nh,Heap.index,Heap.get_set_same,Heap.get_set_ne hp left right (by decide),
+    Heap.get_set_ne hp left old (by decide),Heap.get_set_ne hp left fresh (by decide),MObj.elems_setElem]
+  all_goals simp only [Heap.get,Objs.get,hp,left,right,old,fresh,MObj.elems_dyn,uintOfNat]
+  all_goals rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_assignment_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_assignment_views
+
+
+private def nah := hp.set right (MObj.setElem .dyn (hp.get right) 0 true)
+private def naz : Source.EMState E0 NSΓ := (ny.1,{ny.2 with heap := ny.2.heap.write 1 (sourceBoolMemory [true,true,false]) (by rfl)})
+private def natarget := writeMachine nm 25 w[1]
+private def naltTerm : Source.RExpr E0 NSΓ .bool := sourceNestedAssign nsroot nsj nsi .here
+private def naltCode : List Instr := nestedWriteCode (C := C) 1 nroot nj ni .here
+private def oldSourceRoot : Source.Idx NSΓ SR := .there backup
+private def oldTargetRoot : Idx NΓ (.mem R) := .there (.there (.there (.there (.there .here))))
+
+/-- Swapping the ACTUAL current indices selects the different child and gives
+materially different complete heaps/cells. Reusing the stale old parent rejects. -/
+theorem nested_changed_selection (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 naltTerm).run ny=(.ok (.val (.bool true)),naz) ∧
+    run naltCode nm=.ok natarget 0 ∧ SourceBoolRefsAt naz 3 nah fresh addresses ∧
+    [MObj.elems .dyn (nah.get left),MObj.elems .dyn (nah.get right)]=[[true,false,false],[true,true,false]] ∧
+    cells natarget=[w[48],w[32],w[32],w[36],w[1],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[1],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]] ∧
+    [nt.mem 18,nt.mem 25,natarget.mem 18,natarget.mem 25]=[w[1],w[0],w[0],w[1]] ∧
+    nt≠natarget ∧
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 (sourceNestedAssign oldSourceRoot nsj nsi .here)).run ny=
+      (.error (.revert (Source.panicData .index)),ny) ∧
+    run (nestedWriteCode (C := C) 1 oldTargetRoot nj ni .here) nm=.revert := by
+  have hq : ns.heap.index fresh .dyn (indexValue ⟨1,by decide⟩)=some right := by
+    change hp.index fresh .dyn (indexValue ⟨1,by decide⟩)=some right
+    exact parent_word
+  obtain ⟨out,z,ho,hs,_,he,_,_,hc,hr,_,_,_,_,_⟩ :=
+    SourceBoolRefsAt.resolved_nested_assign_word (Source.SemanticsExamples.G0 p) F0 0 nsroot nsj nsi .here ns
+      nroot nj ni .here fresh right ⟨1,by decide⟩ ⟨0,by decide⟩ true addresses nat_initial rfl rfl rfl rfl rfl rfl rfl rfl
+      hq (by change 0<hp.len right .dyn;simp only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn];decide)
+      (by intro t ht hne;exact hne) SH nmem nrepr
+  have hh : ns.heap.writeAddr (.index right .dyn (indexValue ⟨0,by decide⟩)) true=some nah := by
+    change hp.writeAddr (.index right .dyn (indexValue ⟨0,by decide⟩)) true=some nah
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+    exact if_pos (by simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn];decide)
+  have hout : out=nah := Option.some.inj (ho.symm.trans hh)
+  have hs' : (Source.writeLoc (E := E0) (Γ := NSΓ) F0 3 (.mem 1 0) (.bool true)).run ny=(.ok (),naz) := by
+    have h : ny.2.heap.get 1=some ⟨SB,sourceBoolMemory [false,true,false]⟩ := rfl
+    obtain ⟨_,hw⟩ := source_bool_write ny 1 [false,true,false] h 0 (by decide) true
+    exact hw
+  have hz : z=naz := congrArg Prod.snd (hs.symm.trans hs')
+  subst out;subst z
+  have hold : SourceBoolRefsAt ny 2 ns.heap old addresses := old_at.same_heaps rfl rfl
+  obtain ⟨hbad,_,hbadcode⟩ := SourceBoolRefsAt.nested_assign_parent_bounds (Source.SemanticsExamples.G0 p) F0 0
+    oldSourceRoot nsj nsi .here ns oldTargetRoot nj ni .here old ⟨1,by decide⟩ true addresses hold rfl rfl rfl rfl rfl rfl
+    (by change hp.len old .dyn≤1;simp only [Heap.len,Heap.get,Objs.get,hp,old,MObj.elems_dyn];decide) nrepr
+  refine ⟨he,hc,hr,?_,rfl,rfl,?_,hbad,hbadcode⟩
+  · simp only [nah,Heap.get_set_same,Heap.get_set_ne hp right left (by decide),MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,hp,left,right,MObj.elems_dyn];rfl
+  · intro heq
+    have h := congrArg (fun x : Machine => x.mem 18) heq
+    change w[1]=w[0] at h
+    cases h
+
+private def npy : Source.EMState E0 NSΓ := (ny.1.set nsi (sourceUint (indexValue ⟨3,by decide⟩)),ny.2)
+private def nps := ns.setLocal ni (indexValue ⟨3,by decide⟩)
+private def npm := writeMachine nm 5 w[3]
+private theorem npr : RefArrayStateRepr 1 1 8 nf nps base npm :=
+  ⟨nrepr.state.setVal ni (indexValue ⟨3,by decide⟩) w[3] (ReprV.uint_of rfl),nrepr.arrays.localWrite 5 (by decide) w[3]⟩
+private def ncy : Source.EMState E0 NSΓ := (ny.1.set nsj (sourceUint (indexValue ⟨3,by decide⟩)),ny.2)
+private def ncs := ns.setLocal nj (indexValue ⟨3,by decide⟩)
+private def ncm := writeMachine nm 4 w[3]
+private theorem ncr : RefArrayStateRepr 1 1 8 nf ncs base ncm :=
+  ⟨nrepr.state.setVal nj (indexValue ⟨3,by decide⟩) w[3] (ReprV.uint_of rfl),nrepr.arrays.localWrite 4 (by decide) w[3]⟩
+
+/-- Parent and child endpoint rejection are independently reached by the SAME
+nested assignment; insufficient horizons are actual unchanged-state timeouts. -/
+theorem nested_assignment_rejection (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 nterm).run npy=(.error (.revert (Source.panicData .index)),npy) ∧
+    Stmt.run nps nprog=.error .revert ∧ run ncode npm=.revert ∧
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 nterm).run ncy=(.error (.revert (Source.panicData .index)),ncy) ∧
+    Stmt.run ncs nprog=.error .revert ∧ run ncode ncm=.revert ∧
+    (∀ n,n≤3 → (Source.evalE (Source.SemanticsExamples.G0 p) F0 n nterm).run ny=(.error .timeout,ny)) := by
+  have hpa : SourceBoolRefsAt npy 3 nps.heap fresh addresses := fresh_at.same_heaps rfl rfl
+  obtain ⟨he,hi,hc⟩ := SourceBoolRefsAt.nested_assign_parent_bounds (Source.SemanticsExamples.G0 p) F0 0
+    nsroot nsi nsj .here nps nroot ni nj .here fresh ⟨3,by decide⟩ true addresses hpa rfl rfl rfl rfl rfl rfl
+    (by change hp.len fresh .dyn≤3;simp only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide) npr
+  have hch : SourceBoolRefsAt ncy 3 ncs.heap fresh addresses := fresh_at.same_heaps rfl rfl
+  obtain ⟨he',hi',hc'⟩ := SourceBoolRefsAt.nested_assign_child_bounds (Source.SemanticsExamples.G0 p) F0 0
+    nsroot nsi nsj .here ncs nroot ni nj .here fresh left ⟨0,by decide⟩ ⟨3,by decide⟩ true addresses hch
+    rfl rfl rfl rfl rfl rfl rfl rfl nparent
+    (by change hp.len left .dyn≤3;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide) ncr
+  exact ⟨he,hi,hc,he',hi',hc',source_nested_assign_low_horizon (Source.SemanticsExamples.G0 p) F0 ny nsroot nsi nsj .here⟩
+
+private theorem nallocator0 : StructAllocatorRepr σ0.heap base 8 ⟨48,by decide⟩ machine0 := by
+  apply AllocatorRepr.withoutStructs _ (fun q => no_struct q)
+  refine ⟨initial_state0.heap,?_,?_⟩
+  · refine ⟨by decide,by decide,rfl,?_⟩
+    intro addr ha
+    change 48≤addr at ha
+    change (if addr=0 then w[48] else if addr=1 then w[32] else if addr=2 then w[32] else if addr=3 then w[36] else if addr=7 then w[99]
+      else if addr=16 then w[3] else if addr=17 then w[1] else if addr=24 then w[3] else if addr=26 then w[1]
+      else if addr=32 then w[1] else if addr=33 then w[16] else if addr=36 then w[3] else if addr=37 then w[16]
+      else if addr=38 then w[24] else if addr=39 then w[16] else w[0])=w[0]
+    rw [if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),
+      if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),
+      if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega)]
+  · intro p q
+    obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+    all_goals simp only [σ0,Heap.len,Heap.get,Objs.get,hp,left,right,base,MObj.elems_dyn] <;> decide
+private theorem nallocator : StructAllocatorRepr ns.heap base 8 ⟨48,by decide⟩ nm :=
+  ((nallocator0.localWrite 4 (by decide) (by decide) w[1]).localWrite 5 (by decide) (by decide) w[0]).localWrite 6 (by decide) (by decide) w[1]
+
+/-- The allocator conclusion is inhabited, not just a vacuous conditional. -/
+theorem nested_allocator_instance (p : Roadmap.Pipeline) :
+    StructAllocatorRepr ns.heap base 8 ⟨48,by decide⟩ nm ∧
+    StructAllocatorRepr (ns.withHeap nh).heap base 8 ⟨48,by decide⟩ nt := by
+  obtain ⟨_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,ha⟩ := nested_assignment_views p
+  exact ⟨nallocator,ha ⟨48,by decide⟩ (by decide) nallocator⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_changed_selection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_changed_selection
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_assignment_rejection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_assignment_rejection
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_allocator_instance' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_allocator_instance
+
+
+private def nfy : Source.EMState E0 NSΓ := (ny.1.set .here (.bool false),ny.2)
+private def nfs := ns.setLocal (.here : Idx NΓ (.val .bool)) false
+private def nfm := writeMachine nm 6 w[0]
+private theorem nfr : RefArrayStateRepr 1 1 8 nf nfs base nfm :=
+  ⟨nrepr.state.setVal .here false w[0] rfl,nrepr.arrays.localWrite 6 (by decide) w[0]⟩
+private theorem nfmemo : Source.MemOK E0 SH nfy :=
+  ⟨⟨nmem.1.1,Source.LocalsOK.set ny.1 .here nmem.1.2 trivial⟩,nmem.2⟩
+
+/-- Changing the CURRENT RHS changes the written value. The whole code cannot
+substitute the earlier true payload or ignore its actual stack input. -/
+theorem nested_current_rhs (p : Roadmap.Pipeline) :
+    ∃ (out : Heap H) (z : Source.EMState E0 NSΓ),
+      (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 nterm).run nfy=(.ok (.val (.bool false)),z) ∧
+      Stmt.run nfs nprog=.ok ⟨nfs.withHeap out,List.prefix_refl _⟩ ∧
+      run ncode nfm=.ok (writeMachine nfm 18 w[0]) 0 ∧ SourceBoolRefsAt z 3 out fresh addresses ∧
+      Source.MemOK E0 SH z ∧
+      [MObj.elems .dyn (out.get left),MObj.elems .dyn (out.get right)]=[[true,false,false],[false,true,false]] ∧
+      out.index left .dyn (indexValue ⟨1,by decide⟩)=some false ∧
+      (Source.readLoc (E := E0) (Γ := NSΓ) F0 (τ := .bool) (.mem 0 1)).run z=(.ok (.bool false),z) ∧
+      cells (writeMachine nfm 18 w[0])=cells machine ∧
+      [nt.mem 18,(writeMachine nfm 18 w[0]).mem 18]=[w[1],w[0]] ∧ z.1=nfy.1 := by
+  have hr : SourceBoolRefsAt nfy 3 nfs.heap fresh addresses := fresh_at.same_heaps rfl rfl
+  obtain ⟨out,z,ho,_,_,he,_,hi,hc,hrep,hm,_,hl,_,_⟩ :=
+    SourceBoolRefsAt.resolved_nested_assign_word (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi nsj .here nfs
+      nroot ni nj .here fresh left ⟨0,by decide⟩ ⟨1,by decide⟩ false addresses hr rfl rfl rfl rfl rfl rfl rfl rfl
+      nparent (by change 1<hp.len left .dyn;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+      (by intro t ht hne;exact hne) SH nfmemo nfr
+  have hout : out=hp.set left (MObj.setElem .dyn (hp.get left) 1 false) := by
+    have hw : nfs.heap.writeAddr (.index left .dyn (indexValue ⟨1,by decide⟩)) false=
+        some (hp.set left (MObj.setElem .dyn (hp.get left) 1 false)) := by
+      change hp.writeAddr (.index left .dyn (indexValue ⟨1,by decide⟩)) false=_
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+      exact if_pos (by simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+    exact Option.some.inj (ho.symm.trans hw)
+  have hval : out.index left .dyn (indexValue ⟨1,by decide⟩)=some false := Heap.readAddr_writeAddr_same ho
+  refine ⟨out,z,he,hi,hc,hrep,hm,?_,hval,(hrep.child_read_iff F0 0 left ?_ (indexValue ⟨1,by decide⟩) false).mpr hval,rfl,rfl,hl⟩
+  · rw [hout]
+    simp only [Heap.get_set_same,Heap.get_set_ne hp left right (by decide),MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,hp,left,right,MObj.elems_dyn];rfl
+  · rw [hout,Heap.get_set_ne hp left fresh (by decide)]
+    simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_current_rhs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_current_rhs
+
+
+private def nptr : List Instr := [.mload (cellOf 1 nroot)] ++ compileVal 1 (.simple (.local ni) : Val C NΓ .uint) ++ readArrayStackCode
+
+/-- COMPLETE ordered RHS/pointer/index/write observations: the current RHS stays
+beneath the selected child pointer and child index until the real write consumes
+all three. Source parent/index observations are actual independent evaluations. -/
+theorem nested_ordered_prefixes (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 3 (.local (.here : Source.Idx NSΓ .bool))).run ny=
+      (.ok (.val (.bool true)),ny) ∧
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 2 (.indexArray (.local nsroot) (.local nsi) rfl)).run ny=
+      (.ok (.val (.memRef rfl 0)),ny) ∧
+    run (compileVal 1 (.simple (.local (.here : Idx NΓ (.val .bool))) : Val C NΓ .bool)) nm=.ok (nm.push w[1]) 0 ∧
+    run nptr (nm.push w[1])=.ok ((nm.push w[1]).push w[16]) 0 ∧
+    run (compileVal 1 (.simple (.local nj) : Val C NΓ .uint)) ((nm.push w[1]).push w[16])=
+      .ok (((nm.push w[1]).push w[16]).push w[1]) 0 ∧
+    run writeArrayStackCode (((nm.push w[1]).push w[16]).push w[1])=.ok nt 0 ∧
+    [MObj.elems .dyn (ns.heap.get left),MObj.elems .dyn (ns.heap.get right)]=[[true,false,false],[false,true,false]] ∧
+    cells nm=cells machine ∧ [nm.mem 6,nt.mem 6]=[w[1],w[1]] := by
+  have hcert : RefPtrFrag 1 nf (.loc (.index .dyn (.var nroot rfl) (.simple (.local ni)))) nptr :=
+    .index _ _ (.local nroot rfl) _ rfl
+  have he : (MPath.loc (.index .dyn (.var nroot rfl) (.simple (.local ni)))).mvalT ns=.ok left := by
+    simp only [MPath.mvalT,MLoc.addrT,Val.evalT,Simple.evalT,
+      show TEnv.get nroot ns.env=some fresh from rfl,
+      show TEnv.get ni ns.env=indexValue ⟨0,by decide⟩ from rfl,
+      Heap.readAddr,nparent,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+  have hptr := hcert.run_of_eval (nrepr.push w[1]) he
+  have hwrite : run (writeArrayCode (base left.id)) ((nm.push w[1]).push w[1])=.ok nt 0 := by
+    rcases writeArray_correct (nrepr.state.heap.arrays left) ⟨1,by decide⟩ true w[1] rfl with ⟨_,_,hc,_⟩|⟨hn,_⟩
+    · exact hc
+    · rw [nheaprun] at hn;cases hn
+  refine ⟨source_local_value_run (Source.SemanticsExamples.G0 p) F0 2 ny .here (.bool true) rfl,
+    nat_initial.eval_parent_read (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi (indexValue ⟨0,by decide⟩) left rfl rfl nparent,
+    rfl,hptr,rfl,?_,?_,rfl,rfl⟩
+  · change run writeArrayStackCode (((nm.push w[1]).push (.val (base left.id))).push w[1])=.ok nt 0
+    rw [writeArrayStackCode,arrayStack_append_eq (nm.push w[1]) (base left.id) ⟨1,by decide⟩ _
+      (ns.heap.len_dyn_lt left) (nrepr.state.heap.arrays left).length,←writeArrayCode]
+    exact hwrite
+  · simp only [ns,State.push,σ,σ1,σ0,Heap.get,Objs.get,hp,left,right,MObj.elems_dyn]
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_ordered_prefixes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_ordered_prefixes
 
 end Solidity.Backend.MemoryOps.SourceNestedMemoryControls

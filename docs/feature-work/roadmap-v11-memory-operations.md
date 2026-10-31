@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty-three. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-four. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3400,3 +3400,73 @@ Finder/skeptic final source reviews accepted real material collapsed-alias
 counterexample, runtime lists and full positive frames; sufficient-vs-necessary
 wording correction applied. No remaining confirmed defects. Prior focused
 failures/format mismatches remain evidence, final guards contain no sorryAx.
+
+
+### C44 — actual nested Source assignment and whole word path-to-write
+
+The C43 handoff left resolved nested-write syntax and the composed pointer path
+open. Source/Eval assign/evalLoc, SourceNestedMemory.eval_parent_read,
+RefPtrFrag.index/run_of_eval, simple_sim, arrayStack_append_eq and C43's actual
+write_child_word now discharge this supported application read-only. The new
+owned SourceNestedAssignment module composes existing operations, introducing
+no new AST/interpreter, heap/value layer, path compiler or constructor.
+
+Eight public laws derive actual Source evalLoc(parent[i][j]), actual RHS-first
+Source evalE assignment and expr statement, the intrinsic nested assignMem and
+the WHOLE word sequence: compile current RHS, published parent/index pointer
+path, compile current child index, existing writeArrayStackCode. Source actual
+writeLoc is exposed as a reached witness. INITIAL table/content correspondence,
+Source/target locals and actual parent Some child plus child bounds, Source
+MemOK and full RefArrayStateRepr suffice; C43's sufficient INITIAL selected-leaf
+alias footprint remains explicit. No final relation or write outcome is assumed.
+Derive final finite observer, MemOK, full reference ownership, unchanged locals,
+parent fields, stack and any existing allocator. No global/pairwise injection or
+new source exclusion is introduced. Pure local operands do not establish general
+side-effectful evaluation-order equivalence.
+
+Parent rejection short-circuits before child index execution and needs no child
+alignment premise. Child rejection reaches the real selected child. Both derive
+actual Source panic bytes, intrinsic revert and whole word revert as SEPARATE
+observations, no invented successful suffix/rollback. Horizons0..3 are actual
+unchanged-state timeouts; success uses horizon+4 expression and horizon+5 stmt,
+without changing any engine/proof/test/time budget or source profile.
+
+Six controls extend the independently inhabited C41-C43 fixture; every prior
+body/vector/guard is retained verbatim. Main parent[0][1]=true materially changes
+shared left TFF→TTF, rightFTF unchanged. Actual Source location/expression/stmt,
+intrinsic assignment, whole code, parent/repeated IDs, two-level reads, complete
+word cells/neighbour/free-pointer/stack and derived observer are checked. Swapped
+current indices select right and yield leftTFF/rightTTF and DIFFERENT word cells;
+stale old parent index1 actually rejects. Current false RHS gives false output,
+leftTFF/rightFTF and different destination word, so stale true payload/ignored
+stack input cannot satisfy the controls. Ordered Source RHS/parent and word
+RHS→pointer→index→write prefixes preserve the actual stack payload. Independent
+parent/child endpoints and low horizons run the SAME assignment. Allocator
+preservation has a real cursor48 initial/final StructAllocatorRepr witness, not
+just a conditional with no inhabitant.
+
+Per-file MCP/goal APIs unavailable; existing bounded serial focused checks used,
+no goal mutation/recreation/reactivation. Initial focused errors (Except.pure
+reduction, fixture annotations/parentheses/shadowed names, explicit word-base
+rewrite) retained in distinct logs; final laws have exact standard-only guards.
+Resource preflight:1472573440bytes,96MiB growth forecast,512MiB reserve; same
+child12GiB/swap0 under parent16GiB, actual inherited CPU0 affinity, threads1/j1,
+artifact cacheOFF, no source/cache/seal deletion or replacement runtime.
+
+This closes only the supported finite resolved nested assignment application.
+General references/graphs/effectful operands/delete/rebinding, physical bytes,
+all-profile constructors/checked target failures, deep-copy/emitted loops/ABI/
+storage, reserved memory-storage and final V10/Source/target remain open. All
+original Work/Backfill parents remain partial/blocked, no exhaustion or goal
+completion claim. Required final gates and independent source/artifact reviews
+remain distinct from external compiler/EVM testing.
+
+C44 final guarded166/full1083default/262Suite/SolKey377/131 exit0. Actual fresh
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs/cacheOFF verified. Strict automatic,
+completefixture,layers/orphans/trust,script syntax/corruption,817standardpins/
+102modules pass. Full aggregate sampledRSS1647268KiB,disk225280bytes,new max/OOM/
+kill events0. Raw docs1 COMPLETE83publicfindings byte-identical; frozen no-new
+FAIL11incoming/ownednew0. Raw inventory1:1176unrecorded=359inherited+817owned,
+0unsafe,notglobalpass. Independent finder/skeptic source reviews pass all eight
+laws/six meaningful controls with no confirmedremainingdefect. Every earlier
+vector/guard/seal/failure retained. Existing goal remains BLOCKED unchanged.

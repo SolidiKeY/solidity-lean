@@ -1311,3 +1311,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceNestedSelect.lean` | Actual Source indexed child-reference assignment, intrinsic rebindMem path and published RefPtrFrag word selection/store; derived same-child initial/reached correspondence, bounds and horizon observations. |
 
 | `Solidity/Backend/MemoryOps/SourceNestedMutation.lean` | Actual selected Boolean-child Source/intrinsic/word write with derived whole finite parent/child frame and MemOK; explicit sufficient initial local alias footprint, repeated selections and typed parent separation. |
+
+| `Solidity/Backend/MemoryOps/SourceNestedAssignment.lean` | Actual resolved nested parent/child Source location and RHS-first assignment/statement, intrinsic nested assignment and whole published word pointer-path/write sequence; derived frames, allocator and exact parent/child/horizon failures. |
