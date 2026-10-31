@@ -1220,3 +1220,6 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/PublishedDirectCalls.lean` | Consumers of published direct memory-call endpoint, exact frame export, allocator and bare-revert proofs. |
 | `Backend/InternalFlow/TupleCalls.lean` | Checked direct primitive-tuple call expansion/export for arbitrary binder arity, real instruction compaction/frame proof, and explicit reference-binder type boundaries. |
 | `Backend/InternalFlow/TuplePrograms.lean` | Owned tuple-aware finite direct-call program composition via public checked sequence/block/branch/call constructors; global admission and unbounded recursion remain unchanged. |
+| `Backend/InternalFlow/StorageFrames.lean` | Plain storage-alias declaration/rebinding over actual memory StateRepr, core path execution and heap/allocator frames. |
+| `Backend/InternalFlow/StorageCalls.lean` | Exact single storage-reference call expansion and symbolic-slot export with actual heap extension/cost and bare-failure simulation. |
+| `Backend/InternalFlow/StoragePrograms.lean` | Owned finite selector for checked plain-storage calls and statements, preserving public admission and unsupported/fragile/unset/recursive refusals. |

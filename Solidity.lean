@@ -911,3 +911,6 @@ import Solidity.Backend.InternalFlow.EvaluatedRevertChecks
 import Solidity.Backend.InternalFlow.PublishedDirectCalls
 import Solidity.Backend.InternalFlow.TupleCalls
 import Solidity.Backend.InternalFlow.TuplePrograms
+import Solidity.Backend.InternalFlow.StorageFrames
+import Solidity.Backend.InternalFlow.StorageCalls
+import Solidity.Backend.InternalFlow.StoragePrograms
