@@ -272,14 +272,38 @@ returning a reference (`CallRet.isValues`; `docs/kernel-port.md`,
 the oracle), so a send under the diamond is the run's:
 `CallbackTaclet.sendWithCallbackDiamond` (solkey's, read by `ProvesC.sendD`)
 and `ProvesC.sendDetD` (`sendNoCallbackDiamond` for a gas-limited send), sound
-over any modality (`holdsC_sendCb`, `holdsC_sendDet`). A `transfer` stays
-without a diamond, by the earlier decision: the run reverts on a refusal
-(`TRun.transfer`, `State.canPay`) that the box rule does not see, and
-`Evm.compile_correct` still states a payment case where the machine alone
-reverts (a stale weakening no proof reaches, [G04 R32](feature-work/roadmap-g04-restrictions.md#27-payments)),
-so `⟨ transfer ⟩` would claim a termination the compiler theorem does not
-back. solkey's `transferNoCallbackDiamond` and `transferWithCallbackDiamond`
-stay unclaimed (`RuleShapes.unclaimedTaclets`).
+over any modality (`holdsC_sendCb`, `holdsC_sendDet`). Transfer diamonds now
+have conditional formula rules `ProvesC.transferD` and `transferDetD`:
+`¬ [r.transfer(a);] false` supplies actual runtime acceptance for the same
+simple operands. The callback rule separately requires the booked exit
+invariant and continuation after arbitrary invariant-preserving storage,
+ledger and balance havoc; the deterministic rule requires only the booked
+continuation. `CallbackDerive` recognizes this exact conditional shape.
+These are sufficient Lean adaptations, not equivalences or unconditional
+SolKey taclet ports. The bare `LeanTaclet.transferDiamond` remains false:
+funding and recipient acceptance cannot be inferred from uint nonnegativity.
+The semantic exactness results remain in `PaymentWitness`; see the
+[payment handoff](feature-work/diamond-payments.md).
+
+For the diamond-payments assignment, the recorded human decision permits
+conditional proofs under these existing semantics. This does not settle the
+global [G00 payment-acceptance replacement obligation](solidity-scope.md#user-decisions-2026-10-29),
+which remains recorded in the feature catalog. Exact funding/recipient,
+refusal-state and deterministic/callback send conditions are in
+`Calculus/PaymentConditions.lean`: callback failure remains mandatory even after
+acceptance. This does not replace the unconditional transfer refutation or claim
+general source-world/gas correspondence. The narrow original payment source
+fixtures now use `Frontend/PaymentImport.lean` over existing world frames, with
+actual receive bodies and independent bytecode/gas agreement. This deterministic
+unmetered source layer does not change the callback judgment or establish
+2300-gas adequacy in Lean.
+
+The earlier compiler limitation remains: `Evm.compile_correct` still states
+a payment case where the machine alone reverts (a stale weakening no proof
+reaches, [G04 R32](feature-work/roadmap-g04-restrictions.md#27-payments)).
+The conditional formula rules do not establish compiler correspondence;
+SolKey's unconditional `transferNoCallbackDiamond` and
+`transferWithCallbackDiamond` stay unclaimed (`RuleShapes.unclaimedTaclets`).
 
 **Calls with callbacks.** An internal call whose body calls back is inlined
 as `Stmt.step` inlines it (`ProvesC.callNone`, `ProvesC.callRets`: the

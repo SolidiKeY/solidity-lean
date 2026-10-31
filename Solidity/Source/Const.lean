@@ -16,8 +16,10 @@ evaluation over S00's syntax (`Syn .expr`):
   not a compile-time number: a variable, a call, a division by zero, an
   exponent or shift beyond solc's bounds, a bitwise operation or shift on a
   non-integer);
-- `Q.FitsInt`, `Q.toFixed?` and `Q.fitsBytes`: the implicit conversions of a
-  constant (`Solidity/Source/Types.lean` uses them).
+- `Q.FitsInt` and `Q.toFixed?`: the implicit conversions of a constant
+  (`Solidity/Source/Types.lean` uses them); `NumLit.fitsBytes` is no longer
+  read by any typing rule (a hexadecimal literal's bytes length is
+  `Syn.hexLen?`).
 
 Bitwise operations on negative integers are two's complement of unbounded
 width, as solc's `RationalNumberType` computes them (`Int.bitAnd` …).  The
@@ -167,8 +169,12 @@ def maxShift : Nat := 4097
 (on decimal literals only: solc rejects a unit on a hexadecimal number),
 parentheses, unary `-`/`~`, `+ - * / % **`, shifts and bitwise operations,
 folded exactly and bounded as solc bounds them; anything else is not a
-compile-time number. -/
+compile-time number.  A hexadecimal literal of 39 to 41 digits looks like
+an address (solc's `Literal::looksLikeAddress`): it is an address if it is a
+checksummed 40-digit one, an error otherwise, and never a number. -/
 def Syn.const : {c : Cat} → Syn c → Option Q
+  | _, .lit (.num (.hex ds cs)) =>
+    if 39 ≤ ds.length ∧ ds.length ≤ 41 then Option.none else Option.some (NumLit.hex ds cs).value
   | _, .lit (.num n) => Option.some n.value
   | _, .litUnit (.dec m f e) u => Option.some ((NumLit.dec m f e).value.mul (Q.ofInt u.factor))
   | _, .tuple (.some e) .nil => e.const
@@ -202,6 +208,17 @@ def Syn.const : {c : Cat} → Syn c → Option Q
   | _, .bitXor a b => do
       pure (Q.ofInt (Int.bitXor (← (← a.const).int?) (← (← b.const).int?)))
   | _, _ => Option.none
+
+/-- A literal's constant is its value. -/
+theorem Syn.const_lit_eq {n : NumLit} {q : Q} (h : (Syn.lit (.num n) : Syn .expr).const = Option.some q) :
+    q = n.value := by
+  cases n with
+  | dec m f x => cases h; rfl
+  | hex ds cs =>
+    change (if 39 ≤ ds.length ∧ ds.length ≤ 41 then Option.none else Option.some _) = _ at h
+    split at h
+    · cases h
+    · cases h; rfl
 
 /-! ## Conversions of constants -/
 

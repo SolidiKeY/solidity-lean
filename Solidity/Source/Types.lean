@@ -50,6 +50,10 @@ inductive STy where
   | fn (external : Bool) (params rets : List STy) (mutability : Option Mutability)
   /-- The type of a constant expression: its exact value (`RationalNumberType`). -/
   | rational (q : Q)
+  /-- The type of a hexadecimal literal of `2·len` digits: a constant of
+  value `q` that also converts implicitly to `bytes{len}` (solc's
+  `RationalNumberType` with a compatible bytes type). -/
+  | hexConst (q : Q) (len : Nat)
   /-- The type of a string literal (`StringLiteralType`). -/
   | stringLit (bytes : List UInt8)
   | tuple (ts : List STy)
@@ -178,6 +182,7 @@ def STy.same : STy → STy → Bool
   | .mapping k v, .mapping k' v' => STy.same k k' && STy.same v v'
   | .fn e ps rs m, .fn e' ps' rs' m' => e == e' && STy.sameList ps ps' && STy.sameList rs rs' && m == m'
   | .rational q, .rational q' => q == q'
+  | .hexConst q n, .hexConst q' n' => q == q' && n == n'
   | .stringLit s, .stringLit s' => s == s'
   | .tuple ts, .tuple ts' => STy.sameList ts ts'
   | _, _ => false
@@ -212,6 +217,10 @@ def STy.implicit (isBase : DeclName → DeclName → Bool) : STy → STy → Boo
   | .fn e ps rs m, .fn e' ps' rs' m' => e == e' && STy.sameList ps ps' && STy.sameList rs rs' && m == m'
   | .rational q, .int t => decide (q.FitsInt t)
   | .rational q, .fixed f => (q.toFixed? f).isSome
+  | .rational q, .fixedBytes _ _ => q.num == 0
+  | .hexConst q _, .int t => decide (q.FitsInt t)
+  | .hexConst q _, .fixed f => (q.toFixed? f).isSome
+  | .hexConst q n, .fixedBytes m _ => n == m || q.num == 0
   | .stringLit _, .bytes .memory | .stringLit _, .string .memory => true
   | .stringLit s, .fixedBytes n _ => decide (s.length ≤ n)
   | _, _ => false
@@ -239,7 +248,17 @@ def STy.explicit (isBase : DeclName → DeclName → Bool) (s t : STy) : Bool :=
   | .rational q, .fixed f => (q.toFixedExplicit? f).isSome
   | .rational q, .address false => decide (q.FitsInt IntTy.u160)
   | .rational q, .enum _ => q.isInt && decide (0 ≤ q.toInt)
+  | .hexConst q _, .int a => (q.toIntExplicit? a).isSome
+  | .hexConst q _, .fixed f => (q.toFixedExplicit? f).isSome
+  | .hexConst q _, .address false => decide (q.FitsInt IntTy.u160)
+  | .hexConst q _, .enum _ => q.isInt && decide (0 ≤ q.toInt)
   | _, _ => false
+
+theorem STy.implicit_rational_int (B : DeclName → DeclName → Bool) (q : Q) (t : IntTy) :
+    STy.implicit B (.rational q) (.int t) = decide (q.FitsInt t) := rfl
+
+theorem STy.implicit_hexConst_int (B : DeclName → DeclName → Bool) (q : Q) (n : Nat) (t : IntTy) :
+    STy.implicit B (.hexConst q n) (.int t) = decide (q.FitsInt t) := rfl
 
 theorem STy.explicit_of_implicit {isBase : DeclName → DeclName → Bool} {s t : STy}
     (h : s.implicit isBase t = true) : s.explicit isBase t = true := by

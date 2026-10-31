@@ -1,3 +1,5 @@
+import Solidity.Lowering.V08.SourceFailureControls
+import Solidity.Lowering.V08.SourceEnvironmentControls
 import Solidity.Lowering.V08.CreationSuccessControls
 import Solidity.Lowering.V08.LibraryHandlerControls
 import Solidity.Lowering.V08.HandlerControls

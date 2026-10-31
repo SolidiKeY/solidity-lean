@@ -2190,3 +2190,201 @@ and separatelynamedNEW0 pass. Both finalindependentproof/pins/sourcebinding
 reviews PASS/no findings. Precommitavailable162390016bytes within24MiBenvelope;
 streammeasuredcompact additiveexports follow. Alloriginalsource/applicationparents
 and mandatorywholevalidation remainunfinished; no independentqueue exhaustion.
+
+
+## Published prerequisites and actual source execution — 2026-10-31
+
+The original frozen base remains `fb379ae20f10e2c92113453ddd9d40d8f2efbe09`.
+This checkpoint consumes only public `origin/master`
+`2fe1f8932f96be15b00df03ba2cde46f64a87758`, fetched and checked as its
+ancestor's descendant. It contains independent `Source.evalE`/`execS`, machine,
+typing/progress and backend scalar/environment components. Earlier statements
+that only source journal operations existed describe the frozen base, not this
+published revision. V04/V05/V06 remain partial in the published coverage plan;
+there is still no published V07 lowering namespace in this tree.
+
+The sealed old checkout `/workspace/v08-world-lowering-pinned` remains detached
+at `e7d2c06046a22cf46ccbcc23882f7e31f429fd53`; its files, caches and sealed exports
+are preserved. The assigned branch continues in the separate
+`/workspace/v08-world-lowering-published` worktree. The published merge's three
+registration conflicts retain all incoming imports/docs entries and append all
+V08 entries. Independent review verified every incoming owner file against the
+exact publication. No unpublished branches or owner implementations were taken.
+
+### New actual source clauses
+
+[SourceEnvironment](../../Solidity/Lowering/V08/SourceEnvironment.lean) proves
+actual resolved sender/value/timestamp evaluation for every positive horizon and
+both pipelines, retaining the COMPLETE source `(locals, St)`, including world,
+transient storage, journal, heap, events, logs and function locals. `exec_sender`
+executes the actual resolved expression statement. The zero horizon is exactly
+`Source.Halt.timeout`; it is not a target revert or a divergence assertion.
+Source addresses/words use the existing total numeric adapters. The intrinsic
+state is explicitly projected; frame admission and general state/body lowering
+are not inferred. Bounded source-word range is proved, not a new premise.
+
+[SourceEnvironmentControls](../../Solidity/Lowering/V08/SourceEnvironmentControls.lean)
+uses source balances 93/7, installed identity/nonce, persistent/transient booleans,
+three actual journal entries, binary heap contents/events/logs and nonempty locals.
+Both pipelines preserve the entire machine. A separate actual paid intrinsic
+body writes saved=3/scratch=9 and returns the complete context
+`[sender,value,time,self,balance] = [1,7,12345,2,7]`, retaining balances 93/7.
+Wrong sender, skipped payment, swapped value/time, maximum-address and timeout
+controls discriminate the claims. This fixture supplies a direct declaration
+Env and mock global configuration, not an admitted SourceSpec/source-unit or
+canonical frame/layout certificate. Its source boolean and target integer stores
+are deliberately not identified.
+
+[SourceFailures](../../Solidity/Lowering/V08/SourceFailures.lean) executes the
+published source literal-reason builtin and expression statement. For every byte
+list and both pipelines, sufficient horizons yield exact `Source.errorData` with
+full source-state retention. The existing total byte-layout law identifies this
+with `Semantics.encodeError`; actual `Stmt.revertData` returns the exact intrinsic
+`revertWith` payload. It introduces no emitter, decoder or replacement semantics.
+The n+5/n+6 formulas are sufficient horizons for these finite constructors, not
+admission depth cutoffs. Horizon 2 remains timeout. General argument effects,
+compiler body selection, catchability, frame rollback and bytecode are not
+assumed or claimed by the execution transport conjunction.
+
+[SourceFailureControls](../../Solidity/Lowering/V08/SourceFailureControls.lean)
+retains the same populated source machine, tests binary `[0,255,128]`, empty and
+33-byte reasons, rejects a wrong byte and empty-reason/plain-revert confusion,
+and executes a real paid target call under `World.transact`. Its complete listed
+rollback observation is balances/stores `(100,0,0,0)` AND the exact raw `TRes Unit`
+error containing the encoded binary reason. Wrong paid snapshot and wrong plain
+halt are rejected. Rollback follows this actual enclosing transaction, not from
+the existence of a target halt alone.
+
+### Full original queue accounting
+
+| Item | Status | Remaining original applications |
+|---|---|---|
+| G20 | PARTIAL | Metadata/argument/result/role laws retained. Source declaration/body selection and canonical parameter/result/type/layout, getter/function-reference/readonly applications remain open. |
+| G21 | PARTIAL | Actual source literal-reason execution and intrinsic payload transport added. Nested/reference/calldata/slice/custom-error/catch and canonical decoder/layout applications remain open. |
+| G22.01 | PARTIAL | Existing actual typed calls retained. Source external/self-call, admission, runtime-frame and bytecode relations remain open. |
+| G22.02 | PARTIAL | Existing funded callback/nested rollback laws and full controls retained. General source callback/reentrancy/frame applications remain open. |
+| G22.03 | PARTIAL | Constructor/library success/catch continuation and rollback controls retained. Source new/try-new/body/admission applications remain open. |
+| G22.04 | PARTIAL | Existing real library caller/context/kind/role controls retained. Source linkage/function-value/storage mapping remains open. |
+| G22.05 | PARTIAL | All finite-prefix, exact-history and normalized reached-input laws from e7d2c060 retained. Source/world/runtime/admission composition remains open. |
+| G23 | PARTIAL | Actual source environment reads and statement fragment added. General transient/layout, crypto/erased-emit argument execution and G16–G22 composition remain open. |
+| Backfill A | PARTIAL | Full previous populated nested/callback/creation snapshots retained, plus actual literal-reason paid rollback. Source frame/layout applications remain open. |
+| Backfill B | PARTIAL | All previous signature/ABI/prefix/repeated-reset/constructor laws retained. Source/V07 certificate applications remain open. |
+
+Current `Source.decodeArg` supports memory bytes/strings and dynamic value arrays;
+it explicitly refuses unmodelled dynamic shapes. The published coverage plan
+still lists calldata references, abi.decode, slices/new/try and source admission
+or failure/progress obligations. The old unconstrained `Calldata.objects` issue
+must not be substituted for this new evaluator's actual supported interfaces.
+Canonical source-to-intrinsic representation and reserved decoder laws remain
+necessary. Published `CallsOK` and source body/admission obligations are not
+silently discharged. No whole-source/lane theorem or independent-queue exhaustion
+is claimed by these component clauses.
+
+### Checks, reviews and mandatory hold
+
+Twenty source-environment and fifteen source-reason laws/controls add to all 523
+preserved exact standard axiom sets: 558 total. No new axiom/sorry/native trust
+shortcut or proof/fuel/node/test budget change. Initial failed proof checks are
+retained: record layout/fixture decidability and literal-list normalization were
+fixed without weakening statements, observations or premises. Final gates and
+exact command/resource evidence are recorded in the additive handoff.
+
+Independent read-only finder/skeptic reviews confirmed genuine independent source
+execution, nonvacuity, complete observations and explicit projection/admission
+limits; neither used Lean/server/builds. The finder required a stronger warm-cache
+certificate; the retry now checks all completed-prefix source/config/toolchain
+bindings and eight artifacts per module, trace/hash consistency and timestamps
+not newer than the retained run completion boundary. Both reviews accepted the
+fix. Scoped stopped-runtime maintenance was separately reviewed, fixed to exact
+historically owned IDs and preserved full inspect/State/mount/diff/merged logs;
+only zero-byte copied roots with known mount scaffolding were removed. No bind,
+source, warm output, image, volume, seal or raw failure was deleted.
+
+The same original runner enforces aggregate 12GiB/no swap under the 16GiB parent,
+CPU1, serial Lean-j1/LEAN_NUM_THREADS1, OS headroom and the unchanged 600s guard.
+Optional artifact caching is disabled inside Docker. Source-keyed separate warm
+outputs preserve the old checkout. Actual Lean4.24.0/Lake5.0.0-src+797c613 and
+KeySort2-job success were observed before component runtime claims.
+
+Original full496841/taskDecision413142/baseDecision433573 FAILED125 records remain.
+The new publication changes Decision's Closers/Callback dependencies, justifying
+new checking. Cold published gate22265 FAILED125 in DecisionHashes, after a real
+128-second Hashing rebuild. The independently reviewed warm attempt45496 also
+FAILED125, but completed DecisionHashes in269seconds before its parent Decision
+remained unfinished. These are failed gates, not baseline waivers or full passes.
+No target/verdict/async/guard/budget was changed. Default/full/literal-wrapper
+completion is still pending actual passing evidence. Raw global checks and their
+separate exact-base no-new comparisons are recorded distinctly in the handoff.
+No external compiler/EVM, bytecode or general SourceSpec proof is claimed.
+
+
+Final source closure65693 PASS125jobs/51.1287s, sampled aggregateRSS1273528320,
+reported cgrouppeak619229184; 558 exact sets retain all523 starting sets. Static
+binding/corruption/runtime/trust/strict/layer/orphan/whitespace checks pass. The
+legacy profile test first failed when invoked from the new worktree against its
+old-root seed; its unchanged test passes in the preserved old checkout. This
+invocation failure is retained, not relabelled a passing current-runtime test.
+Current-runtime profile controls separately pass against the new-root seed.
+Raw docs/current/public-base exit1/1: COMPLETE83findings (46missing/37ambiguous)
+match exactly. Raw globalpin/current/public-base exit1/1:359notes,1161pins,0errors
+match exactly. Separate public-base NEW0 comparisons pass. Compared with the
+frozen baseline's72/14 findings,11doc ambiguities and345pin notes were introduced
+by the consumed publication; the frozen-base no-new comparisons FAIL and are not
+waived. Owner/global debt is not rewritten in this lane.
+
+A separate final retry helper binds the newly completed269second DecisionHashes
+output and all320 imported modules to45496's source/config/toolchain/cache traces,
+with exact original command/targets/runtime/600s guard. Both read-only reviews
+accepted this distinct cache-progress justification for one final check. It does
+not assert a repaired parent proof; no further unchanged retry is justified if
+the fully warm parent itself times out. Its actual outcome is in the handoff.
+
+Process limitation: the initial public fetch and some early draft/setup edits
+preceded acquiring the writer lock. Builds, integration writes, subsequent
+reviewed edits and exports use the lock. No concurrent writer was observed, and
+preserved source/seal hashes are checked. This is recorded rather than claiming
+perfect retrospective lock compliance.
+
+
+All-imports-warm parentDecision78278 also FAILED125 at the original guard,
+sampled aggregateRSS5571874816, no cgrouppeak emitted after stop and no
+Decision.olean/trace. No further unchanged Decision/default/full retry is made.
+This isolates the parent check as the remaining mandatory runtime bottleneck;
+completed Hashes is component evidence only. Cold currentSuite98977 FAILED125
+while building Derived10 after completing Derived1–9, including157s/80s Derived7/8.
+A separately reviewed same-runtime continuation certifies all235completed-prefix
+modules against the immutable cold source/config/toolchain/log and8artifacts per
+module before reuse, preserving the exact targets and600s/resource guards.
+Its actual final outcome remains separate from mandatory full/literal validation.
+
+
+WarmSuite119252 also FAILED125 at600s guard (610.84s includesunchangedcleanup),
+sampled aggregateRSS11744055296, no final cgrouppeak emitted. It nevertheless
+completed Derived10–20, including Derived17(144s)/Derived20(149s), leavingDerived21
+uncompiled. Both reviews independently accepted a separate exact-runtime final
+continuation, certifying all248completed-prefix modules (8artifacts each) before
+Derived21 against119252's source/config/toolchain/log/trace/timestamp boundary.
+No limit was raised; earlierSuite failures remainfailed. The finaloutcome follows.
+
+
+FinalcurrentSuite139309 PASS262jobs/177.7931seconds after the explicitly recorded
+bounded cold/warm progress. Sampled aggregateRSS5988339712, reported reused
+cgrouppeak6010142720 (conservativelypossiblycumulative). Source/config unchanged,
+actualLean4.24.0/Lake5.0.0-src+797c613/KeySort2job output retained. Earlier98977 and
+119252 remainFAILED125, notrelabeled. CurrentSuite iscomponent evidence, not a
+passingDecision/default/full/literalwrapper. No furtherDecision retry occurred.
+All35newsource laws/controls retain558exactstandardsets and allold523pins.
+The additive handoff records rawgate commands/exits/resources, bothbaseline
+comparisons, exactrevision/input/artifacthashes and completeoriginalqueue status.
+EveryparentG20-G23/BackfillA-B remainsPARTIAL; no SourceSpec/admission/V07/runtime/
+bytecode or canonicalwhole-world certificate is asserted. Further independent
+work is not claimed exhausted. Candidate next work includes actualSourcecrypto
+read observations; canonicalmemory/type/layout and wholecall/body applications
+remain distinct prerequisite obligations. All priorseals are preserved.
+
+
+The raw stagedmerge whitespace gate exits2 on sixtrailing-space lines in the
+published Source/Horizon.lean. Its COMPLETEoutput exactlyequals the publication's
+frozenfb→2fe whitespace findings. The separate owned2fe→task whitespace gate
+passes0. OwnerSourcebytes remainexactpublication; no whitespacefix/sourceowner
+edit is made. The rawstaged gate is FAILED, notconvertedgreen by NEW0.

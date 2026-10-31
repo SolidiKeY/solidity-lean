@@ -41,7 +41,7 @@ for path in (root / 'Solidity/Lowering/V08').glob('*.lean'):
  if namespace:
   theorems.update(namespace.group(1) + '.' + name for name in re.findall(r'^theorem ([A-Za-z0-9_]+)', source, re.MULTILINE))
 assert theorems == set(expected), ('unprinted or obsolete theorem pin', theorems ^ set(expected))
-core = ['Callable', 'AbiObservations', 'Transactions', 'TransactionPrefixes', 'LibraryCreation', 'CallableMetadata', 'EnvironmentProjection', 'SelectorObservations', 'CryptoObservations', 'PayableMetadata', 'DeclarationRoles', 'InheritedMetadata']
+core = ['SourceFailures', 'SourceEnvironment', 'Callable', 'AbiObservations', 'Transactions', 'TransactionPrefixes', 'LibraryCreation', 'CallableMetadata', 'EnvironmentProjection', 'SelectorObservations', 'CryptoObservations', 'PayableMetadata', 'DeclarationRoles', 'InheritedMetadata']
 seen = set()
 def visit(module):
  if module in seen: return
@@ -57,7 +57,11 @@ def visit(module):
     for dependency in line[7:].split():
      if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_.]*', dependency): visit(dependency)
 for module in core: visit('Solidity.Lowering.V08.' + module)
-base = 'fb379ae20f10e2c92113453ddd9d40d8f2efbe09'
+# Ownership and append-only registration are checked against the exact consumed
+# published prerequisite revision. The frozen assignment base remains its ancestor.
+base = '2fe1f8932f96be15b00df03ba2cde46f64a87758'
+subprocess.run(['git', 'merge-base', '--is-ancestor',
+ 'fb379ae20f10e2c92113453ddd9d40d8f2efbe09', base], cwd=root, check=True)
 for path in ['Solidity.lean', 'docs/module-map.md', 'docs/README.md']:
  original = subprocess.check_output(['git', 'show', base+':'+path], cwd=root)
  assert (root/path).read_bytes().startswith(original), ('not append-only', path)

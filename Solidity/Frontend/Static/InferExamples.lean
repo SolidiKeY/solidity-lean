@@ -17,7 +17,8 @@ in the kernel (`decide`), independently of those proofs:
 | `clashing_checked`, `sameSig_checked`, `ifaceBody_checked`, `twoCtors_checked`, `noVisibility_checked` | S01's five ill-formed units are refused |
 | `tooBig_checked`, `fits_checked` | `uint8 x = 300;` has no statement derivation; `uint8 x = 255;` has one |
 | `shl18_checked`, `gasleft_checked`, `msgValue_checked` | `1 << 8` has only its folded type; `gasleft()` and `msg.value` in a non-payable public body have none |
-| `zero_types`, `addLit_types`, `cond_types` | `0x00` has 33 types (the constant and `bytes1`…`bytes32`); `a + 1` and `b ? a : a` have exactly one |
+| `zero_types`, `addLit_types`, `cond_types` | `0x00` has one type, `hexConst 0 1` (solc's literal typing); `a + 1` and `b ? a : a` have exactly one |
+| `member_checked`, `structNew_checked`, `extCall_checked`, `extCallValue_checked`, `pay_checked`, `abiEncode_checked` | the S02 rules: struct members (read and assigned), `P(x)`, external calls with and without `value`, `transfer`/`send`, `abi.encode`, each with a refused neighbour |
 | `require_checked` | `require(b, "no");` is a statement |
 | `named_value`, `named_length` | `N = 3; M = N * 2 + 1` gives `M = 7`, and `uint256[M]` has length 7 |
 | `cyclic_none` | `A = B + 1; B = A + 1` has no value |
@@ -71,8 +72,11 @@ theorem gasleft_checked : (inferTys Γ (.call (.ident "gasleft") (.positional .n
 /-- **Negative control**: `msg.value` in a non-payable public body has no type. -/
 theorem msgValue_checked : (inferTys Γv (.member (.ident "msg") "value")).isEmpty = true := by decide
 
-/-- `0x00`: its constant and every `bytesN`. -/
-theorem zero_types : (inferTys Γ (.lit (.num (.hex [0, 0] false)))).length = 33 := by decide
+/-- `0x00`: one type, the hexadecimal constant `hexConst 0 1`, which
+converts to every `bytesN` (solc's literal typing, Q1). -/
+theorem zero_types :
+    (inferTys Γ (.lit (.num (.hex [0, 0] false)))).map (STy.same (.hexConst (Q.ofInt 0) 1)) = [true] := by
+  decide
 
 theorem addLit_types : (inferTys Γ (.addSub .add a one)).length = 1 := by decide
 
@@ -257,7 +261,7 @@ theorem badBinding_refused : ¬ UsingOpsOK (Syn.env badBindingUnit) badBindingUn
   revert e
   decide
 
-/-! ## Overload uniqueness, per argument typing (an S01 deviation) -/
+/-! ## Overload uniqueness (formerly an S01 deviation, now aligned with solc) -/
 
 /-- A parameter of type `t`. -/
 def paramOf (t : Syn .typeName) : Syn .param := .param t Option.none (Option.some "v")
@@ -274,13 +278,163 @@ def hexUnit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
 
 def Γh : Ctx := { env := Syn.env hexUnit, scope := Option.some "C", locals := [] }
 
-/-- **Recorded deviation**: `f(0x01)` fits both `f(uint8)` and `f(bytes1)`,
-which solc refuses as ambiguous.  S01's `callInternal` asks for a unique
-overload per argument typing: the rational typing of `0x01` selects only
-`f(uint8)` and its `bytes1` typing only `f(bytes1)`, so S01 (and the
-checker, faithfully) gives the call two derivations with different callees. -/
+/-- **Former deviation, now aligned** (the name is kept for the pins; the
+call is now refused): `f(0x01)` with `f(uint8)` and
+`f(bytes1)` is refused as ambiguous, as solc does.  Under the earlier S01
+typing `0x01` had a rational and a `bytes1` typing, each selecting one
+overload, so the call had two derivations; with solc's literal typing
+(Q1) `0x01` has the one type `hexConst 1 1`, which both overloads accept,
+so `callInternal`'s uniqueness premise fails. -/
 theorem hexCall_typed :
-    (inferTys Γh (.call (.ident "f") (.positional (.cons (.lit (.num (.hex [0, 1] false))) .nil)))).length = 2 := by
+    (inferTys Γh (.call (.ident "f") (.positional (.cons (.lit (.num (.hex [0, 1] false))) .nil)))).length = 0 := by
+  decide
+
+/-! ## Rules added by S02 (members, struct construction, external calls, payments, encoding) -/
+
+/-- `contract K { struct P { uint256 a; } function g(uint256 v) external payable {}
+function h(uint256 v) external {} }` -/
+def callUnit : Syn .unit := .unit (.cons (.contract false "K" .none .nil
+  (.cons (.struct "P" (.structMember u256T "a") .nil)
+  (.cons (.function (.ident "g") (.cons (paramOf u256T) .nil) (Option.some .external)
+      (Option.some .payable) .nil false Option.none .nil (.some (.block .nil)))
+  (.cons (.function (.ident "h") (.cons (paramOf u256T) .nil) (Option.some .external)
+      Option.none .nil false Option.none .nil (.some (.block .nil))) .nil)))) .nil)
+
+/-- Locals `P memory p`, `K k`, `address payable q`, `address r`, `uint256 x`. -/
+def Γc : Ctx := { env := Syn.env callUnit, scope := Option.some "K", locals :=
+  [("p", .struct .memory ⟨Option.some "K", "P"⟩), ("k", .contract ⟨Option.none, "K"⟩),
+   ("q", .address true), ("r", .address false), ("x", .int IntTy.u256)] }
+
+def x1 : Syn (.list .expr) := .cons (.ident "x") .nil
+
+/-- `p.a` is a `uint256`, an lvalue, and `p.a = x` is typed; `p.b` has no
+type. -/
+theorem member_checked :
+    (inferTys Γc (.member (.ident "p") "a")).map (STy.same (.int IntTy.u256)) = [true] ∧
+    (lvsOf Γc (infer Γc (.member (.ident "p") "a"))).length = 1 ∧
+    (inferTys Γc (.assign .assign (.member (.ident "p") "a") (.ident "x"))).map
+      (STy.same (.int IntTy.u256)) = [true] ∧
+    (inferTys Γc (.member (.ident "p") "b")).isEmpty = true := by decide
+
+/-- `P(x)` is a `P memory`; `P()` (too few members) has no type. -/
+theorem structNew_checked :
+    (inferTys Γc (.call (.ident "P") (.positional x1))).map
+      (STy.same (.struct .memory ⟨Option.some "K", "P"⟩)) = [true] ∧
+    (inferTys Γc (.call (.ident "P") (.positional .nil))).isEmpty = true := by decide
+
+/-- `k.g(x)` and `k.h(x)` are external calls; `k.z(x)` has no type. -/
+theorem extCall_checked :
+    (inferTys Γc (.call (.member (.ident "k") "g") (.positional x1))).map (STy.same (.tuple [])) = [true] ∧
+    (inferTys Γc (.call (.member (.ident "k") "h") (.positional x1))).map (STy.same (.tuple [])) = [true] ∧
+    (inferTys Γc (.call (.member (.ident "k") "z") (.positional x1))).isEmpty = true := by decide
+
+/-- `k.g{value: x}(x)` is typed (`g` is `payable`); `k.h{value: x}(x)` is
+not (`h` is not), as in solc.  `k.g{gas: x}(x)`, which solc accepts, is not
+typed: call options other than `value` are a recorded S02 gap. -/
+theorem extCallValue_checked :
+    (inferTys Γc (.call (.callOptions (.member (.ident "k") "g") (.namedArg "value" (.ident "x")) .nil)
+      (.positional x1))).map (STy.same (.tuple [])) = [true] ∧
+    (inferTys Γc (.call (.callOptions (.member (.ident "k") "h") (.namedArg "value" (.ident "x")) .nil)
+      (.positional x1))).isEmpty = true ∧
+    (inferTys Γc (.call (.callOptions (.member (.ident "k") "g") (.namedArg "gas" (.ident "x")) .nil)
+      (.positional x1))).isEmpty = true := by decide
+
+/-- `q.transfer(x)` and `q.send(x)` on an `address payable`; neither on a
+plain `address`. -/
+theorem pay_checked :
+    (inferTys Γc (.call (.member (.ident "q") "transfer") (.positional x1))).map (STy.same (.tuple [])) = [true] ∧
+    (inferTys Γc (.call (.member (.ident "q") "send") (.positional x1))).map (STy.same .bool) = [true] ∧
+    (inferTys Γc (.call (.member (.ident "r") "transfer") (.positional x1))).isEmpty = true ∧
+    (inferTys Γc (.call (.member (.ident "r") "send") (.positional x1))).isEmpty = true := by decide
+
+/-- `abi.encode(x)` is `bytes memory`.  `abi.encode(p)` (a struct) is not
+typed: S01's `STy.abiArg` admits value types and memory `bytes`/`string`
+only, where solc (ABI coder v2) also encodes structs and arrays — a
+recorded deviation (`docs/feature-work/source-soundness.md`), not a
+refusal solc makes. -/
+theorem abiEncode_checked :
+    (inferTys Γc (.call (.member (.ident "abi") "encode") (.positional x1))).map (STy.same (.bytes .memory)) = [true] ∧
+    (inferTys Γc (.call (.member (.ident "abi") "encode")
+      (.positional (.cons (.ident "p") .nil)))).isEmpty = true := by decide
+
+/-! ## Local storage pointers (lane-soundness typing fixes) -/
+
+/-- `contract K { struct P { uint256 a; } P s; }` -/
+def ptrUnit : Syn .unit := .unit (.cons (.contract false "K" .none .nil
+  (.cons (.struct "P" (.structMember u256T "a") .nil)
+  (.cons (.stateVar (.userType ⟨"P", []⟩) none none none false "s" .none) .nil))) .nil)
+
+/-- Locals `P storage p`, `P memory m`, `uint256 x`. -/
+def Γp : Ctx := { env := Syn.env ptrUnit, scope := Option.some "K", locals :=
+  [("p", .struct .storage ⟨Option.some "K", "P"⟩), ("m", .struct .memory ⟨Option.some "K", "P"⟩),
+   ("x", .int IntTy.u256)] }
+
+/-- **Typing fix**: `p = P(x)` with `p` a local storage pointer has no type
+(solc 7407: a memory struct is not a storage pointer); `s = P(x)`, a copy
+into the state variable, and `p = s`, rebinding the pointer, are typed. -/
+theorem ptrCopy_refused :
+    (inferTys Γp (.assign .assign (.ident "p") (.call (.ident "P") (.positional x1)))).isEmpty = true ∧
+    (inferTys Γp (.assign .assign (.ident "s") (.call (.ident "P") (.positional x1)))).length = 1 ∧
+    (inferTys Γp (.assign .assign (.ident "p") (.ident "s"))).length = 1 := by
+  decide
+
+/-- **Typing fix**: `delete p` with `p` a local storage pointer has no type
+(solc: delete cannot be applied to storage pointers); `delete s` and
+`delete m` (a memory local) are typed. -/
+theorem ptrDelete_refused :
+    (inferTys Γp (.unaryPrefix .delete (.ident "p"))).isEmpty = true ∧
+    (inferTys Γp (.unaryPrefix .delete (.ident "s"))).length = 1 ∧
+    (inferTys Γp (.unaryPrefix .delete (.ident "m"))).length = 1 := by
+  decide
+
+/-- Locals `bytes calldata c`, `bytes memory b`. -/
+def Γcd : Ctx := { env := Syn.env ptrUnit, scope := Option.some "K", locals :=
+  [("c", .bytes .calldata), ("b", .bytes .memory)] }
+
+/-- **Typing fix** (decision 2026-10-30): `delete c` on a `calldata`
+reference has no type (solc's `ReferenceType::unaryOperatorResult`
+refuses `delete` on calldata); `delete b` on a memory local is typed. -/
+theorem cdDelete_refused :
+    (inferTys Γcd (.unaryPrefix .delete (.ident "c"))).isEmpty = true ∧
+    (inferTys Γcd (.unaryPrefix .delete (.ident "b"))).length = 1 := by
+  decide
+
+/-- `mapping(uint256 => uint256)` -/
+def mapT : Syn .typeName := .mapping (.elem (.int false 256 (by decide)) (by decide)) none u256T none
+
+/-- `contract K { struct Q { uint256 a; mapping(uint256 => uint256) m; } struct R { Q q; }
+R u; R w; mapping(uint256 => uint256) mm; Q s; Q t;
+mapping(uint256 => uint256)[2] am; mapping(uint256 => uint256)[2] bm; uint256 x; }` -/
+def mapUnit : Syn .unit := .unit (.cons (.contract false "K" .none .nil
+  (.cons (.struct "Q" (.structMember u256T "a") (.cons (.structMember mapT "m") .nil))
+  (.cons (.struct "R" (.structMember (.userType ⟨"Q", []⟩) "q") .nil)
+  (.cons (.stateVar (.userType ⟨"R", []⟩) none none none false "u" .none)
+  (.cons (.stateVar (.userType ⟨"R", []⟩) none none none false "w" .none)
+  (.cons (.stateVar mapT none none none false "mm" .none)
+  (.cons (.stateVar (.userType ⟨"Q", []⟩) none none none false "s" .none)
+  (.cons (.stateVar (.userType ⟨"Q", []⟩) none none none false "t" .none)
+  (.cons (.stateVar (.array mapT (.some (num 2))) none none none false "am" .none)
+  (.cons (.stateVar (.array mapT (.some (num 2))) none none none false "bm" .none)
+  (.cons (.stateVar u256T none none none false "x" .none) .nil))))))))))) .nil)
+
+/-- Locals `Q storage p`, `mapping(uint256 => uint256) storage mp`. -/
+def Γm : Ctx := { env := Syn.env mapUnit, scope := Option.some "K", locals :=
+  [("p", .struct .storage ⟨Option.some "K", "Q"⟩), ("mp", .mapping (.int IntTy.u256) (.int IntTy.u256))] }
+
+/-- **Typing fix**: storage types containing a mapping are never assigned
+(solc: "Types in storage containing (nested) mappings cannot be assigned
+to", 9214): `s = t` for a struct with a mapping member, `u = w` for a
+struct holding such a struct, and `am = bm` for arrays of mappings have no
+type (the semantics copied nothing for the structs and was `stuck` for the
+arrays); `s.a = x` is typed, and so is rebinding a local storage pointer
+(`p = t`, `mp = mm`), solc's exemption for locals. -/
+theorem mapAssign_refused :
+    (inferTys Γm (.assign .assign (.ident "s") (.ident "t"))).isEmpty = true ∧
+    (inferTys Γm (.assign .assign (.ident "u") (.ident "w"))).isEmpty = true ∧
+    (inferTys Γm (.assign .assign (.ident "am") (.ident "bm"))).isEmpty = true ∧
+    (inferTys Γm (.assign .assign (.member (.ident "s") "a") (.ident "x"))).length = 1 ∧
+    (inferTys Γm (.assign .assign (.ident "p") (.ident "t"))).length = 1 ∧
+    (inferTys Γm (.assign .assign (.ident "mp") (.ident "mm"))).length = 1 := by
   decide
 
 /-! ## Standalone constants (backfill item 5) -/
@@ -302,7 +456,7 @@ there; S01's own `STy.mobile` leaves it rational. -/
 theorem oneThird_standalone :
     (standaloneTys Γ oneThird).map fixedFields = [Option.some (false, 256, 77)] ∧
     (abiArgTys Γ oneThird).length = 1 ∧
-    (inferTys Γ oneThird).map (fun τ => τ.mobile.isConstTy) = [true] := by
+    (inferTys Γ oneThird).map (fun τ => τ.mobile.isConstOnly) = [true] := by
   decide +kernel
 
 /-- The integer fields of a type, else `none`. -/
@@ -423,3 +577,23 @@ end Solidity.Frontend.Static.InferExamples
 #guard_msgs in #print axioms Solidity.Frontend.Static.standalone_toFixedExplicit
 /-- info: 'Solidity.Frontend.Static.standalone_abi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.Static.standalone_abi
+/-- info: 'Solidity.Frontend.Static.InferExamples.member_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.member_checked
+/-- info: 'Solidity.Frontend.Static.InferExamples.structNew_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.structNew_checked
+/-- info: 'Solidity.Frontend.Static.InferExamples.extCall_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.extCall_checked
+/-- info: 'Solidity.Frontend.Static.InferExamples.extCallValue_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.extCallValue_checked
+/-- info: 'Solidity.Frontend.Static.InferExamples.pay_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.pay_checked
+/-- info: 'Solidity.Frontend.Static.InferExamples.abiEncode_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.abiEncode_checked
+/-- info: 'Solidity.Frontend.Static.InferExamples.ptrCopy_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrCopy_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.ptrDelete_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.ptrDelete_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.mapAssign_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.mapAssign_refused
+/-- info: 'Solidity.Frontend.Static.InferExamples.cdDelete_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.Static.InferExamples.cdDelete_refused
