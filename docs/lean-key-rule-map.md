@@ -1027,3 +1027,11 @@ actual origin/current placements, constructive typed-write lineage, explicit
 footprint/separation and initial owner MemOK. Initial allocation provenance and
 full source/compiler/assembly closure remain obligations. No SolKey taclet or
 Y09.02 notation/printing/composition claim.
+
+
+VY2 byte-heap view preparation (Lean-only, YQ5): `encodeByteHeap_reads`,
+`encodeByteHeap_residual`, `encodeByteHeap_unchanged`,
+`encodeByteHeap_source_word` and `encodeByteHeap_source_byte` prove concrete
+supported ordinary-byte/string view/update/read laws. Actual typed Heap.get
+witnesses, valid Placement and distinct finite coverage are explicit premises.
+No SolKey taclet, full-memory or Y09.02 calculus/printing/composition claim.

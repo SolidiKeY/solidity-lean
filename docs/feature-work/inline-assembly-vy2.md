@@ -987,3 +987,67 @@ Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs exit0. Scoped960declarations/
 517theorem reports have only propext/Quot.sound/Classical.choice. Both independent
 final reviews clear, including four-alias actual-state addition and59/121
 inventory assertions. Raw failures and baseline-equal docs exit1 are retained.
+
+
+## Constructive supported byte-heap realization (2026-10-31)
+
+Continued original Y05/Backfill A/B after reviewed retained checkpoint
+`a1536515747bd091aa2254cc154146831122b243` on the same branch/VM.
+[ByteHeapRealization](../../Solidity/Yul/Views/ByteHeapRealization.lean)
+constructs physical views by a finite List fold over actual typed Heap.get
+witnesses, not an untyped state, owner rewrite or assumed inverse. Each entry
+contains its actual source id, bytes/string choice, contents and found proof.
+`encodeByteHeap_reads`, `encodeByteHeap_reserved`, `encodeByteHeap_residual`,
+`encodeByteHeap_unchanged` and `encodeByteHeap_realizes` derive exact reads,
+reserved words and arbitrary residual/padding preservation. All lengths/bounds
+come from the valid actual Placement. List coverage and distinct ids are real
+explicit premises; no artificial size/fuel limit. `encodeByteHeap_source_word`
+and `encodeByteHeap_source_byte` prove ALL actual ObjectWord/ObjectByte reads
+for a heap covered by those entries. This is bytes/string-only ordinary support,
+not the universal MemoryLayoutObligations/MemoryWritebackObligations instance or
+a changed source/calculus coverage predicate. Existing obligation signatures
+remain unchanged.
+
+[Controls](../../Solidity/Yul/Views/ByteHeapRealizationControls.lean) construct
+all three heterogeneous objects of actual byteHeap, exact bytePhysical equality,
+whole supported-view unchanged identity and coverage. Missing-string coverage
+and wrong bytes/string type are negative controls. The same construction covers
+the actual two-region retained/regrown heap, with its real output Placement and
+RetainedAllocation lineage, exact reads/unchanged/reserved/padding. Existing
+pinned compiler fixtures already compare this original three-object physical
+layout; no external test is a kernel correspondence proof. No fixture/driver/
+expectation changed in this checkpoint. Previous both-pipeline observations and
+121new negative controls remain applicable unchanged.
+
+[Y05/realize-capacity] Exact obstruction, not a semantic exclusion:
+`oversized_actual_MemOK` proves actual owner MemOK for a source heap allocated
+with List.replicate (2^256) bytes. `oversized_no_ordinary_placement` proves that
+heap has NO ordinary Placement, using the existing documented byte-layout bound.
+Thus an implication from arbitrary owner MemOK to existence of this ordinary
+EVM placement is false. This does NOT refute MemoryLayoutObligations.realize
+(which already takes a valid placement), nor every possible relation satisfying
+MemoryWritebackObligations.realize; it blocks silently realizing ALL MemOK states
+via ordinary placements without further concrete source/allocation reasoning.
+No contract/premise was weakened, new resource bound/refusal introduced, or human
+choice assumed. Initial allocation/refinement and full realization remain open.
+
+Initial failed proof/control outputs retained, including the mistaken NEW
+padding offset416 (actually c payload), corrected to419 using the actual view.
+No old expected verdict changed. G0 uses parameter-only List recursion, not a
+new indexed Data match. Independent finder/skeptic read-only reviews, final gates,
+exact committed SHA/signatures/resources and artifacts are recorded in
+`/workspace/vy2-evidence/heap-realization/HANDOFF.md`; cumulative artifacts remain
+under `/workspace/vy2-evidence`. Full queue still Y04/Y05/Y06 and Backfills A/B
+PARTIAL, concrete Y09.02 BLOCKED; dirty/dynamic/pointer/hash/whole-memory/source/
+assembly/allocator/V10/V11/compiler/calculus/final closure obligations unfulfilled.
+Actual owner interfaces are available and reused. Goal remains blocked unchanged;
+YQ1–YQ7 approved, no promotion, push/merge or owner takeover; questions=[].
+
+Final supported-view validation: per-file/focused48jobs, fullwrapper1033default/
+262suitejobs/131matchedannotations, actual Lean4.24.0/Lake5.0.0-src+797c613 and
+KeySort2jobs exit0. Scoped999declarations/543theorem reports standard axioms only;
+layers224core/0elaboratorreach, orphans1048reachable/0orphan, trust1063sources/
+246inventoriedsites/0findings, strict491automatic/61budgeted/11refuted/0pending
+pass. Global docs exit1 same48findings; markdown base1/head1/new0. No preceding
+fixture/API/owner source changed. Separate read-only reviews cover final
+retained/oversized controls and exact scope. Every raw failed attempt retained.

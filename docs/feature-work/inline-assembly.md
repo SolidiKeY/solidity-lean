@@ -296,3 +296,15 @@ and `/workspace/vy2-evidence/retained-allocation/HANDOFF.md` for full committed
 revision, premises, reviews and gates. Initial allocator provenance, whole-store/
 heap/assembly/source/compiler/calculus/refinement closure remain open. Y04–Y06
 partial, Y09.02 blocked, both backfills unfinished; no admission promotion.
+
+
+### VY2 supported byte-heap view handoff (2026-10-31)
+
+Continued original backfill constructs finite ordinary bytes/string whole-
+supported-heap views from actual Heap.get witnesses and valid Placement, with
+exact typed layout reads/reserved/residual/unchanged laws. Real three-object and
+retained-regrowth controls are inhabited. An actual owner-MemOK oversized object
+provably lacks ordinary Placement; no obligation signature or scope changed.
+See [VY2 realization](inline-assembly-vy2.md#constructive-supported-byte-heap-realization-2026-10-31)
+and `/workspace/vy2-evidence/heap-realization/HANDOFF.md`. Universal realization,
+source/assembly/allocator/compiler/calculus closure and full VY2 remain open.
