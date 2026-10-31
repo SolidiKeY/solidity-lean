@@ -1249,3 +1249,6 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/SourceFailures.lean` | Actual resolved literal-reason failure execution and exact intrinsic payload transport. |
 | `Lowering/V08/SourceFailureControls.lean` | Binary, empty and unaligned reasons, horizon distinctions and real paid rollback. |
+
+| `Lowering/V08/SourceKeccak.lean` | Actual resolved literal Keccak execution, exact heap allocation and explicitly pinned intrinsic byte/word observation. |
+| `Lowering/V08/SourceKeccakControls.lean` | Populated binary, empty and 33-byte executions, both pipelines, complete machine and actual wrong-output controls. |

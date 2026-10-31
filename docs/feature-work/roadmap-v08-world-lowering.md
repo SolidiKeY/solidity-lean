@@ -2388,3 +2388,74 @@ published Source/Horizon.lean. Its COMPLETEoutput exactlyequals the publication'
 frozenfb→2fe whitespace findings. The separate owned2fe→task whitespace gate
 passes0. OwnerSourcebytes remainexactpublication; no whitespacefix/sourceowner
 edit is made. The rawstaged gate is FAILED, notconvertedgreen by NEW0.
+
+
+## Actual source literal Keccak application (2026-10-31, partial)
+
+The independent published evaluator now has a checked application in the owned
+SourceKeccak module. `eval_literal` executes the resolved builtin with a literal
+binary byte argument at every horizon n+5, for either pipeline. This is a
+constructor-specific sufficient horizon, not an admission cutoff. Conversion
+allocates a memory byte object: the exact resulting heap is `afterLiteral`, not
+the original heap. Complete locals and all nonheap fields (world, transient,
+journal, events, logs and function locals) remain exact. `allocated` checks the
+fresh object; `mk_wordBytes` proves bytes32 keeps every output byte and
+`word_observation` recovers the exact bounded word.
+
+`eval_transport` consumes ONLY the existing explicit `global.fixed.Keccak`
+contract and the checked fixed_keccak_bytes law. It relates actual source
+execution to the existing intrinsic typed keccakBytes/wordBytes observation.
+It does not execute an intrinsic heap hash expression, certify a canonical
+source/target heap relation, implement Keccak/a decoder/precompile, or prove
+SourceSpec, compiler body selection, ABI/layout/linkage/runtime/bytecode adequacy.
+The fixture's globals retain their existing mock ledger/precompile boundaries.
+
+SourceKeccakControls uses the same populated source machine, preserving every
+previous observation plus old heap object0, new object1 and next2. Binary
+[0,255,128], empty and33-byte inputs execute under both pipelines with complete
+result bytes and state. The standard empty hash word and wrong-input/output
+controls are retained; wrong_source_output rejects an actual successful source
+run returning32zero bytes. Zero horizon is exact timeout with unchanged input,
+not revert/divergence. A wrong unchanged-heap state is independently rejected.
+All558 starting axiom sets are unchanged;19 new exact standard sets make577.
+
+Every original parent remains PARTIAL: G20 source callable/body/type/parameter/
+result/getter/function-reference/readonly applications; G21 nested/reference/
+calldata/slice/custom-error/catch and canonical decoding; G22.01 source self/
+external call/admission/runtime frames; G22.02 source callback/reentrancy;
+G22.03 source new/try-new/body; G22.04 linkage/function-value/storage mapping;
+G22.05 source/world/runtime/admission composition; G23 effecting hash arguments,
+general transient/layout, erased-emit argument execution and G16–G22 composition;
+BackfillA source frame/layout applications; BackfillB source/V07 applications.
+Existing complete histories, snapshots, controls and premises are unchanged.
+
+Independent finder/skeptic reviews found no semantic defect in the allocation
+or explicit hash premise. The skeptic requested a negative actual source-output
+control (added), and both required exact Audit/dependency guards in the reused
+runtime (added). Reviewers used no builds/Lean servers. Final checks/artifact
+reviews are recorded in the additive handoff. Per-file MCP and get_goal remain
+unavailable; no goal transition was attempted.
+
+Mandatory Decision/default/full/literal-wrapper validation remains unresolved.
+All earlier FAILED125 attempts, especially the fully warm published Decision78278
+with320certifiedimports/noDecision.olean, are preserved. No unchanged retry,
+owner edit, guard/verdict/async change or budget increase was performed.
+Suite139309 PASS262jobs is component evidence only. Raw docs/global pins remain
+FAIL1; complete public-base NEW0 and frozen-base regressions remain separate.
+
+Next investigated independent clause: the actual Source.execS emit branch
+executes evalConvArgs and encodeVals before its static guard/log prepend.
+Erasure must preserve argument/encoding effects and exact failure, and may erase
+only the approved log observation. Existing EmitControls checks typed target
+operations and resolved syntax, not this independent source execution. This
+application remains genuinely unfinished; it is not claimed exhausted.
+
+Final registered closure180303 PASS in18.440870596s, aggregate sampledRSS60870656,
+reported cgrouppeak34881536; stopped runtime identity/cleanup/source/config
+bindings verified. Core+controls177907 PASS is retained separately. Binding577
+exactsets/67coreclosure modules; positive evidence and23corruption cases; wrapper
+positive+9extension corruptions and14profile corruptions; runtimecontrols PASS.
+Trust1047sources/246sites/0findings; strict491automatic/61budget/11refuted/0pending;
+layers172core/0elaborator; orphans1032reachable/0orphan; ownedwhitespace PASS.
+Raw docs and pins task/public exit1 with identical complete83findings/359notes;
+PUBLIC NEW0 PASS, frozen comparisonFAIL retained. No mandatory gate was retried.
