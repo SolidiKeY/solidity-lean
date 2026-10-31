@@ -1,6 +1,7 @@
 # V16 compiler correctness, transactions and specification transfer
 
-Status: partial backfill; full lane blocked on unpublished concrete prerequisites.
+Status: independent backfill extended through recovery checkpoints; full lane
+blocked on unpublished concrete prerequisites and pending full-lane validation.
 Base: `2fe1f8932f96be15b00df03ba2cde46f64a87758`.
 Branch: `codex/solidity-v12-v17-20261031/v16-correctness-transfer`.
 Repository: `/workspace/solidity-lean`.
@@ -23,8 +24,8 @@ The [G01 contracts](roadmap-g01-interfaces.md), [G03 ledger](roadmap-g03-ledger.
 | G50.02 | Blocked: actual deployment, call, rollback and reachable adversarial transaction composition. The decoded invariant below is only a conditional consequence. |
 | G51.01 | Open: calculus rule consumers with exact SolKey correspondence and unchanged Fml.inTarget/verdicts. No reserved rule or closer repaired. |
 | G51.02 | Blocked: concrete box/diamond/callback/loop/spec consumers of G49/G50, with matching SolKey correspondence. |
-| Backfill A | Partial: finite-prefix stability, observation/resource and decoded-world invariant transport proved. Actual transaction induction, additional relational composition controls and full inhabited divergence/failure/event controls remain open. |
-| Backfill B | Partial: scoped axiom pins, inhabited success/revert, no-failure loop and negative failure-bound controls, and two-pass identity-certificate combination control. Full constructor/feature accounting and box/diamond/callback/loop transfer witnesses remain open. |
+| Backfill A | Independent transaction/reachability induction, exact finite-prefix/certificate composition, history-premise adequacy and actual event/outcome/local-divergence controls are now implemented. Full-profile source/runtime applications remain blocked; see recovery evidence. |
+| Backfill B | Actual constructor/G03/dependency/trust accounting and scoped box/diamond/spec consumers with success/exhaustion countercontrols are implemented. Concrete callback/loop/runtime/deployment specification transfer remains blocked. Accounting closes no compiler feature. |
 
 Exact prerequisite evidence: [source-s05.md](source-s05.md), sections
 "Well-formedness and progress interfaces" and "Handoff", explicitly leaves
@@ -178,3 +179,68 @@ The Backfill A transaction-induction and relational-composition obligations now
 have independent generic results and actual controls. Event-bearing G01 session
 controls, richer scoped spec consumers, machine accounting and full gates are
 next; neither backfill nor any G48–G51 parent is marked complete here.
+
+## Recovery checkpoints 3–4: scoped specification consumers and accounting
+
+SessionControls reuses the actual published Source.PS and sessionFrom at its
+explicit address, in an explicitly allowed environment. It proves completion
+and two events; NEW composed_observation rejects erasure and wrong credit events,
+and NEW composed_safety rejects an invalid empty-event invariant. No replacement
+Lang or execution semantics is introduced. The existing sample uses toyFixed,
+so this is not a pinned-Keccak/full-SourceSpec or full-profile witness. G07's toy
+Lang emits no events; that exact missing definition prevents an event-bearing
+G07 execution. SourceSpec remains unpublished, not repaired or assumed here.
+
+Specifications supplies arbitrary-context typed box postconditions, diamond
+success ONLY with explicit exclusion of the existing exhaustion alternative,
+actual admitted commit from diamond/entry/payment evidence, and a consumer from
+published function-box invariants through NEW backward reachability induction.
+SpecificationControls supplies actual success/commit and exhaustion negatives;
+its True/identity invariant application is explicitly a smoke test, not a
+nontrivial application specification. Callback/loop and final runtime/deployment
+consumers remain prerequisites; Fml.inTarget, rules, verdicts and SolKey maps
+remain unchanged. HashHistory consumes the full approved HashPremise to obtain
+tail and cross-preimage obligations. The singleton Bool counterexample refutes
+joining independent local premises; it asserts no Keccak collision.
+
+The metadata extractor under tests/roadmap-v16 queries actual Lean environment
+inductive constructors, all V16 theorem statements, direct type/body constants
+and transitive collectAxioms results. ScopedAudit also prints actual axioms for
+all 67 current theorem declarations. The 295-family/1428-constructor universe is
+all Solidity inductives in this checked import closure, not an asserted complete
+Solidity source profile. Read-only G03 accounting includes all 175 features,
+41 combinations, 98 symbolic combinations and eight G48–G51 checkpoints. Every
+one of its 1750 leaf/parent obligations remains explicitly OPEN. No constructor
+or feature is discharged by mentioning a generic theorem. Actual statements,
+assumed PublicCorrectness, domain/certificate premises, per-run guards, need
+computability and missing prerequisites stay visible. No global ledger/pin edit.
+
+Independent finder and skeptic reviews found two accounting defects in the first
+draft: old successful metadata could be relabeled with current revision hashes,
+and the structural-only boundary string was unchecked. Both are fixed. The
+locked runner now records execution-time BEFORE/AFTER exact head, complete Lean
+source-tree digest, owned sources, extractor, ledger, toolchain, original config,
+runner and accounting hashes; a changed or stale binding is rejected. The report
+validates its full schema and exact boundary. Negative tests cover missing actual
+constructors/combinations/statements, contradictory claims, wrong revisions,
+changed trust outputs, assumed-correctness witnesses, erased prerequisites,
+stale/unbound re-snapshots and altered full-profile prose. These are structural
+checks supplementing kernel proofs, not a correctness proof or trust attestation.
+
+Raw first proof failures are retained (a case-split equality mismatch and a
+rewrite through opaque Prefix.Le; fixed with equality reflexivity and a direct
+prefix-length argument). Scoped consumers and controls then passed focused/import
+checks. The complete raw axiom audit passed with only the standard propext,
+Classical.choice and Quot.sound set; no new axioms or proof budgets. All original
+checkpoint artifacts remain intact. Each recovery checkpoint's command logs,
+reviews, measurements, committed head and handoff live under
+/workspace/scratch/v16-recovery-201ebab8.
+
+The runner now supports the actual run-lean.sh full gate by an exported Bash lake
+function via a task-owned BASH_ENV file. Every nested Lake call uses the same
+alternate TOML, with explicit -j1 for all libraries and executables. Original
+tracked configs stay unchanged; LEAN_NUM_THREADS=1, the asserted 12GiB/no-swap
+Docker cap, OS headroom and writer lock remain enforced. Full-gate timeout is
+5400 seconds, the existing G02 bound. RSS and actual Lean/compiler process counts
+are sampled, not inferred from thread flags. The full gate outcome is pending
+until its actual final log; no permission to relax any required gate is implied.

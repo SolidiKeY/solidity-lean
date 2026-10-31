@@ -892,3 +892,8 @@ import Solidity.Roadmap.V16.TransportControls
 import Solidity.Roadmap.V16.Relational
 import Solidity.Roadmap.V16.Transactions
 import Solidity.Roadmap.V16.TransactionControls
+
+import Solidity.Roadmap.V16.HashHistory
+import Solidity.Roadmap.V16.SessionControls
+import Solidity.Roadmap.V16.Specifications
+import Solidity.Roadmap.V16.SpecificationControls
