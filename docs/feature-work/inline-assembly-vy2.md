@@ -1222,3 +1222,54 @@ Layers233core/0elaboratorreach,1057reachable/0orphan, trust1072sources/246sites/
 ACTUAL exit1 with same48exact-base findings/zero delta; markdown base1/head1/new0.
 Both independent final reviews clear. Complete external196calls preserve ALL
 preceding fields, and all81/14/33/55/89/103/121/157/149negative suites pass.
+
+
+## Dynamic full-width array writeback (2026-10-31)
+
+New [DynamicUintMemory](../../Solidity/Yul/Views/DynamicUintMemory.lean) decodes
+actual Source.Data dynamic uint256 arrays from their length word and all element
+words, without a decoder/fuel/size cap. Constructive encode/decode and exact raw
+re-encode laws preserve every byte, including residual/tail bytes. Fixed-length
+writeback keeps its header guard and proves unchanged WHOLE heap/state identity,
+valid same-shape Placement and actual all-initial-H owner MemOK. Real found data
+and Placement derive length/window bounds. Full-width words retain all256bits.
+
+[RetainedDynamicUint](../../Solidity/Yul/Views/RetainedDynamicUint.lean) adds a
+separate size-changing component, using the existing actual RetainedAllocation
+lineage and original full owned extent. It constructs the new current shape,
+valid Placement and retained history; proves types/next/boundedness, unrelated
+cells, original address/free choices, other shapes and full other-region bytes.
+No capacity is inferred from gaps/free pointers; shrink does not erase tails.
+Compatibility with fixed-length successes is proved. None is unsupported
+preparation, never Yul refusal/no-op/deallocation or a compiler verdict. Owner
+representations, Placement and all full memory obligation signatures are intact.
+
+[Controls](../../Solidity/Yul/Views/DynamicUintControls.lean) inhabit actual
+heterogeneous source heaps with two full-width arrays, unrelated bytes and a
+static array containing two aliases to the first dynamic array. They cover
+unchanged identity,3→0→3, retained maximum-word tails/nonzero gaps, old fixed API
+negative regrowth and beyond-original-extent preparation, actual all-H MemOK,
+real Source.lengthOf/readLoc/nested reads, actual evalE alias lengths at EVERY
+horizon≥2 and exact timeouts at0/1, and disjoint source/physical update orders.
+wordList_inside/disjoint_commute and dynamicUint_disjoint_commute prove whole
+physical equality from actual separated windows, not assumed result equality.
+
+[DynamicUint.sol](../../tests/yul-views/DynamicUint.sol) and its lane-owned
+strict adapter compare complete34-word ABI envelopes for9ordered calls per
+pinned legacy/viaIR pipeline: initial, all-element changes/maxword, zero shrink,
+partial/full retained-tail regrowth, both disjoint orders, revert and fresh call.
+The153negative controls discriminate missing/reordered calls, lengths/pointers/
+words/aliases/tails/free/zero/other objects, bytes and deployment failures.
+All preceding report fields and196calls remain EXACTLY identical; cumulative214.
+Compiler/EVM evidence is separate from kernel/source/compiler/Yul correctness.
+Evidence and exact signatures/axioms/gates/reviews are versioned at
+`/workspace/vy2-evidence/dynamic-uint/`; prior4243hashes verified before writes.
+
+Queue remains Y04/Y05/Y06 and BackfillA/B PARTIAL, concreteY09.02 BLOCKED.
+Dynamic full-width supported preparation is not universal aggregate/writeback,
+whole memory/dirty/narrow/shared-zero/interior/dynamic ownership, full-store/path/
+hash, allocator provenance/refinement, V10/V11 agreement instances or actual
+VY1/source/compiler/calculus/joint closure. Existing owner MemOK/World/Bridge
+interfaces are available and reused. Original oversized-MemOK counterexample
+boundary, YQ1–YQ7 and exclusions are unchanged. Persistent goal remains BLOCKED
+unchanged; no goal tool exposed, no transition made. No new semantic question.

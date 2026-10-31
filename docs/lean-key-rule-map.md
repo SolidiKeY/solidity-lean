@@ -1054,3 +1054,13 @@ Actual typed found objects/declared indices/Placement/real candidate ownership
 and explicit coverage for pointer completeness remain premises. No SolKey taclet,
 generic raw struct/whole-memory or dirty/shared-zero semantics, Y09.02 notation/
 printing or full source/compiler/calculus coverage claim.
+
+
+VY2 dynamic full-width array preparation (Lean-only, YQ5):
+`decodeDynamicUint_encode/reencode`, `dynamicUintWriteback_unchanged`,
+`dynamicUintState_MemOK`, `retainedDynamicUint_result_history`,
+`retainedDynamicUintState_MemOK` and `dynamicUint_disjoint_commute` are kernel
+preparation laws, not installed Yul calculus rules/taclets. Their real found-data,
+Placement/retained-origin/capacity and initial-MemOK premises are retained.
+Concrete Y09.02 rule/notation/printer/source composition stays open; see
+[VY2](feature-work/inline-assembly-vy2.md#dynamic-full-width-array-writeback-2026-10-31).

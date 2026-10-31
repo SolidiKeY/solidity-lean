@@ -332,3 +332,14 @@ revert/fresh with149negative controls. See [lane record](inline-assembly-vy2.md#
 and `/workspace/vy2-evidence/static-uint/HANDOFF.md`. Selected support is not
 universal whole-memory/dirty/shared-zero/source/compiler/calculus closure;
 full VY2 and both backfills remain unfinished, goal blocked unchanged.
+
+
+### VY2 dynamic uint256 writeback handoff (2026-10-31)
+
+Concrete fixed-length and retained-original-extent dynamic array writeback,
+actual current Placement/all-H MemOK, exact residual/tails and source alias
+controls, plus18ordered pinned pipeline calls/153negative controls. See
+[lane record](inline-assembly-vy2.md#dynamic-full-width-array-writeback-2026-10-31)
+and `/workspace/vy2-evidence/dynamic-uint/HANDOFF.md`. Full lane/both backfills
+remain unfinished, including simultaneous general aggregate/source integration;
+this component does not promote admission or replace full obligations.
