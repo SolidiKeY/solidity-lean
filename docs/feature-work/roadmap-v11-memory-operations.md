@@ -3814,3 +3814,65 @@ inherited+875owned,0unsafe; coordinator additive proposal is not a globalpass.
 All original queue parents remain partial/blocked, existing goal BLOCKED unchanged.
 Further actual member-to-child index/write/delete applications remain to investigate;
 C50 proves reached local selection, not general struct-child content execution.
+
+
+### C51: actual struct-member-selected child indexing and mutation
+
+SourceStructChild consumes INITIAL SourceBoolStructAt: the SAME existing
+logical child comes from the actual named intrinsic field and Source declaration
+member position/type. Source member/index location and read/assignment syntax
+execute independently; published PtrFrag.field/readArray/writeArray compose the
+whole symbolic-word code. Root alignment, mapFree, MemOK, StateRepr and admitted
+core target operand valIn/eval agreements remain explicit. No desired reached
+representation, global address injection or new interpreter/compiler is supplied.
+
+Actual mutation derives parent/primitive-tag/pointer framing from typed struct
+versus array identity and actual Source object types. ALL other intrinsic objects
+frame; Source framing covers DIFFERENT addresses. Distinct logical identities
+collapsing to one Source address are not silently treated as disjoint. Selected
+child correspondence/MemOK, locals/ex/events/logs/fnLocals, stack and allocator
+follow actual operations; no deep-copy/liveness/physical-byte claim follows.
+
+Controls use the existing independent populated fixture under both pipelines:
+actual C49 reference assignment then C50 member selection, followed by actual
+member-index assignment/statement on the REACHED state. Whole three-operation
+word append and four complete word vectors show RIGHT FTF->TTF while LEFT TFF,
+old alias0, tag7, neighbour99, cursor48 and stack42 remain. Source prefix calls
+and final statement are explicit; this is not a three-statement Source RItems
+composition theorem. Wrong initial child/stale member and skipped/wrong-child
+mutation negatives discriminate the new result. Source panic bytes, intrinsic
+None and symbolic-word revert remain separate observations; low-horizon read
+timeout has no fabricated successful suffix/rollback.
+
+Arbitrary runtime valid-index member reads execute before/after actual reference
+assignment, including index32 WHEN valid. A separate actual runtime endpoint
+location/assignment failure covers empty children too: valid-index quantification
+alone would be vacuous there. Finder review identified this distinction; the
+explicit endpoint application fixes it. No public payload/depth cutoff exists
+beyond existing intrinsic validity. General word certificates retain real space/
+ownership; no fixed fixture layout is claimed for arbitrary runtime lengths.
+
+Focused guarded177jobs passes13 new exact standard-trio laws/controls. Earlier
+failed reductions, one original-budget heartbeat stop and guard-rejected
+elaboration-generated sorryAx attempts remain raw evidence; no budget/trust
+shortcut was used. Per-file Lean MCP unavailable; existing serial capped closure
+used. All C50 fixtures/guards unchanged except import/append. Fifty-one partial
+component checkpoints do not close G32-G35 or Backfill A/B. Physical bytes, all-
+profile construction/target failure, general reference graphs/paths/delete, ABI/
+storage/deep-copy/emitted loops/reserved copying/final V10-Source-target remain
+open. Existing goal BLOCKED unchanged, no exhaustion/completion assertion.
+
+C51 final guarded177/full1093default/262Suite/SolKey377/131 exit0; fresh
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs/cacheOFF pass. Strict/complete
+fixtures/trust/layer/orphan/lane/script corruption pass;888standardpins112modules,
+13 new exact standard-trio laws/controls. Independent finder/skeptic source
+reviews PASS after fixing the runtime-empty coverage distinction. Full aggregate
+RSS1631452KiB, new max/OOM/kill events0; cumulative historicalpeak separate.
+All2765 C50 seal records verified unchanged; entire C50 control prefix unchanged.
+Raw docs1 retains83 complete public-identical findings, separate publiczero-new0;
+frozen no-newFAIL11incoming. Raw inventory1 remains1247unrecorded=359public
+inherited+888owned,0unsafe; precise additive proposals do not make globalpass.
+Existing goal remains BLOCKED unchanged; all original queue parents unfinished.
+Next supported investigation: actual delete through the named member-selected
+child using published Source.deleteLoc and existing word primitive-write/default
+certificates. C51 assignment does not discharge that general deletion/path task.

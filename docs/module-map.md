@@ -1328,3 +1328,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceStructControls.lean` | Independently inhabited nonzero struct/child fixtures, full Source/intrinsic/word views, shared/self/no-op aliases, layout/type/fuel negatives and arbitrary runtime child read transport. |
 
 | `Solidity/Backend/MemoryOps/SourceStructAlias.lean` | Actual Source struct-member selected local rebinding, intrinsic alias path and whole published word field-read/local-store certificate; reached-state composition with named-field mutation. |
+
+| `Solidity/Backend/MemoryOps/SourceStructChild.lean` | Actual Source named-member-selected Bool-child location/read/assignment and published whole pointer-path word certificates; initial finite observer derives mutation/frame and exact Source bounds. |

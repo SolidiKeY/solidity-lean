@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructChild
 import Solidity.Backend.MemoryOps.SourceStructAlias
 import Solidity.Backend.MemoryOps.SourceStructAssignment
 import Solidity.Evm.Correct
@@ -635,5 +636,300 @@ theorem member_alias_negative_views (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms member_alias_negative_views
+
+
+private abbrev XΓ : Source.RCtx := [.int .u256,.bool]++SΓ
+private def withArgs (y : Source.EMState E SΓ) (k : PrimTy.uint.Denote) (v : Bool) : Source.EMState E XΓ :=
+  (.cons (sourceUint k) (.cons (.bool v) y.1),y.2)
+private def xroot : Source.Idx XΓ SS := .there (.there sroot)
+private def xi : Source.Idx XΓ (.int .u256) := .here
+private def xv : Source.Idx XΓ .bool := .there .here
+private def zeroWord : Val C Γ .uint := .simple (.lit 0 rfl)
+private def trueWord : Val C Γ .bool := .simple (.bool true)
+private def k0 : PrimTy.uint.Denote := indexValue ⟨0,by decide⟩
+private theorem withArgs_memOK (y : Source.EMState E SΓ) (k : PrimTy.uint.Denote) (v : Bool)
+    (hm : Source.MemOK E SH y) : Source.MemOK E SH (withArgs y k v) := by
+  exact ⟨⟨hm.1.1,⟨trivial,⟨trivial,hm.1.2⟩⟩⟩,hm.2⟩
+
+/-- Actual member-index reads before and after the actual reference assignment.
+The same Source syntax and target code see materially different selected data. -/
+theorem member_child_reads (p : Roadmap.Pipeline) :
+    (Source.evalE (G p) F0 3 (sourceStructChildRead layout xroot xi)).run (withArgs sy k0 true)=
+      (.ok (.val (.bool true)),withArgs sy k0 true) ∧
+    (Source.evalE (G p) F0 3 (sourceStructChildRead layout xroot xi)).run (withArgs reached k0 true)=
+      (.ok (.val (.bool false)),withArgs reached k0 true) ∧
+    run (structChildReadCode (C := C) 1 root "items" zeroWord) machine=.ok (machine.push w[1]) 0 ∧
+    run (structChildReadCode (C := C) 1 root "items" zeroWord) target=.ok (target.push w[0]) 0 := by
+  have hinit : SourceBoolStructAt (withArgs sy k0 true) 2 hp parent addresses layout := initial_at.same_heaps rfl rfl
+  obtain ⟨z,m',hw,he,hs,hi,hc,hr,hm,hrepr,hl,hstack,ht,halloc,htag,hchild,hchildren,hsource,heffects⟩ :=
+    SourceBoolStructAt.resolved_assign_word layout (G p) F0 0 σ parent right addresses initial_at right_at
+      sroot srhs root rhs rfl rfl rfl rfl (by decide) SH source_memOK initial_repr
+  have hknown : (Source.writeLoc (E := E) (Γ := SΓ) F0 2 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run sy=(.ok (),reached) := by
+    obtain ⟨ht,hw⟩ := source_struct_write sy 2 dn layout.source_types u7 0 1 initial_at.parent
+    exact hw
+  have hz : z=reached := congrArg Prod.snd (hw.symm.trans hknown)
+  subst z
+  change m'=target at ht
+  subst m'
+  have hreach : SourceBoolStructAt (withArgs reached k0 true) 2 out parent addresses layout := hr.same_heaps rfl rfl
+  have ha := hinit.read_child_word layout (G p) F0 0 σ parent addresses xroot xi root zeroWord k0 true
+    rfl rfl rfl rfl (by decide) (by change hp.index left .dyn k0=some true; simp only [Heap.index,Heap.get,Objs.get,hp,left,k0,indexValue,Int.toNat_natCast,MObj.elems_dyn];rfl) initial_repr rfl
+  have hb := hreach.read_child_word layout (G p) F0 0 (σ.withHeap out) parent addresses xroot xi root zeroWord k0 false
+    rfl rfl rfl rfl (by decide) (by change out.index right .dyn k0=some false; simp only [out,Heap.index,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,parent,right,k0,indexValue,Int.toNat_natCast,MObj.elems_dyn];rfl) hrepr rfl
+  exact ⟨ha.1,hb.1,ha.2,hb.2⟩
+
+private def selectedAgain : Source.EMState E SΓ := (reached.1.set srhs (.memRef rfl 1),reached.2)
+private def selectedState := (σ.withHeap out).setLocal rhs (some right)
+private def selectedMachine := writeMachine target 3 w[24]
+private def selectedCode := structSelectedAliasCode 1 rhs root "items"
+private def mutatedHp := out.set right (MObj.setElem .dyn (out.get right) 0 true)
+private def mutatedSource : Source.EMState E XΓ :=
+  ((withArgs selectedAgain k0 true).1,{selectedAgain.2 with heap := selectedAgain.2.heap.write 1 (sourceBoolMemory [true,true,false]) (by rfl)})
+private def mutatedMachine := writeMachine selectedMachine 25 w[1]
+private def childTerm : Source.RExpr E XΓ .bool := sourceStructChildAssign layout xroot xi xv
+private def childCode := structChildWriteCode (C := C) 1 root "items" zeroWord trueWord
+
+/-- Actual assignment, reached member selection, then member-index mutation.
+The old LEFT local remains LEFT; the selected RIGHT leaf alone changes. -/
+theorem reached_member_child_write (p : Roadmap.Pipeline) :
+    (Source.evalE (G p) F0 3 term).run sy=(.ok (.val (.memRef rfl 1)),reached) ∧
+    (Source.evalE (G p) F0 3 (sourceStructSelectedAlias layout srhs sroot)).run reached=(.ok (.val (.memRef rfl 1)),selectedAgain) ∧
+    run (code++selectedCode++childCode) machine=.ok mutatedMachine 0 ∧
+    (Source.evalE (G p) F0 4 childTerm).run (withArgs selectedAgain k0 true)=(.ok (.val (.bool true)),mutatedSource) ∧
+    (Source.execS (G p) F0 5 XΓ.length none (.expr childTerm : Source.RStmt E [] false .body XΓ XΓ)
+      (withArgs selectedAgain k0 true).1).run (.nil,selectedAgain.2)=(.ok (.normal mutatedSource.1),(.nil,mutatedSource.2)) ∧
+    Stmt.run selectedState (.assignMem (.index .dyn (.loc (.field (.var root (by decide)) "items" layout.child_type)) zeroWord) (.val trueWord))=
+      .ok ⟨selectedState.withHeap mutatedHp,List.prefix_refl _⟩ ∧
+    SourceBoolStructAt mutatedSource 2 mutatedHp parent addresses layout ∧ Source.MemOK E SH mutatedSource ∧
+    StateRepr 1 1 8 (Frag.init Γ) (selectedState.withHeap mutatedHp) base mutatedMachine ∧
+    [MObj.elems .dyn (hp.get left),MObj.elems .dyn (hp.get right),MObj.elems .dyn (out.get left),MObj.elems .dyn (out.get right),
+      MObj.elems .dyn (mutatedHp.get left),MObj.elems .dyn (mutatedHp.get right)]=
+      [[true,false,false],[false,true,false],[true,false,false],[false,true,false],[true,false,false],[true,true,false]] ∧
+    [cells machine,cells target,cells selectedMachine,cells mutatedMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[1],w[1],w[0],w[7],w[24]]] ∧
+    mutatedSource.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ ∧
+    mutatedSource.2.heap.get 1=some ⟨SB,sourceBoolMemory [true,true,false]⟩ ∧
+    mutatedSource.2.heap.get 2=some ⟨SS,data 1⟩ ∧
+    [sy.1.get soldAlias,reached.1.get soldAlias,selectedAgain.1.get soldAlias]=[.memRef rfl 0,.memRef rfl 0,.memRef rfl 0] ∧
+    [(TEnv.get oldAlias σ.env).map HRef.id,(TEnv.get oldAlias selectedState.env).map HRef.id]=[some 0,some 0] ∧
+    mutatedHp.field parent layout.tag_type=u7 ∧ (mutatedHp.field parent layout.child_type).id=1 ∧
+    mutatedSource.2.ex=sy.2.ex ∧ mutatedSource.2.events=sy.2.events ∧ mutatedSource.2.logs=sy.2.logs ∧
+    mutatedMachine.stack=[w[42]] ∧ StructAllocatorRepr mutatedHp base 8 ⟨48,by decide⟩ mutatedMachine := by
+  obtain ⟨z,m',hw,he,hs,hi,hc,hr,hm,hrepr,hl,hstack,ht,halloc,htag,hchild,hchildren,hsource,heffects⟩ :=
+    SourceBoolStructAt.resolved_assign_word layout (G p) F0 0 σ parent right addresses initial_at right_at
+      sroot srhs root rhs rfl rfl rfl rfl (by decide) SH source_memOK initial_repr
+  have hknown : (Source.writeLoc (E := E) (Γ := SΓ) F0 2 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run sy=(.ok (),reached) := by
+    obtain ⟨ht,hw⟩ := source_struct_write sy 2 dn layout.source_types u7 0 1 initial_at.parent
+    exact hw
+  have hz : z=reached := congrArg Prod.snd (hw.symm.trans hknown)
+  subst z
+  change m'=target at ht
+  subst m'
+  obtain ⟨he₁,hs₁,hi₁,hc₁,hr₁,hselected,hm₁,hrepr₁,hsh,hth,hget,htget,hstack₁,halloc₁⟩ :=
+    SourceBoolStructAt.selected_alias_word layout (G p) F0 0 (σ.withHeap out) parent addresses hr
+      srhs sroot rhs root rfl rfl (by decide) SH hm hrepr
+  have hqr : (σ.withHeap out).heap.field parent layout.child_type=right := by rfl
+  simp only [hqr] at he₁ hs₁ hi₁ hc₁ hr₁ hselected hm₁ hrepr₁ hsh hth hget htget hstack₁ halloc₁
+  have hrx : SourceBoolStructAt (withArgs selectedAgain k0 true) 2 selectedState.heap parent addresses layout := hr₁.same_heaps rfl rfl
+  have hqrSelected : selectedState.heap.field parent layout.child_type=right := hqr
+  have hrget : selectedState.heap.get right=hp.get right := hchildren right
+  have hkSelected : k0.1.toNat<selectedState.heap.len (selectedState.heap.field parent layout.child_type) .dyn := by
+    rw [hqrSelected]
+    change k0.1.toNat<(MObj.elems .dyn (selectedState.heap.get right)).length
+    rw [hrget]
+    simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn,k0,indexValue,Int.toNat_natCast,List.length_cons,List.length_nil]
+    decide
+  obtain ⟨out',z',target',hw',hwrite',he',hs',hi',hc',hr',hm',hrepr',hl',hstack',halloc',hp',ho',hso',hex',hev',hlog',hfn'⟩ :=
+    hrx.assign_child_word layout (G p) F0 0 selectedState parent addresses xroot xi xv root zeroWord trueWord k0 true
+      rfl rfl rfl rfl rfl rfl (by decide) hkSelected SH (withArgs_memOK _ _ _ hm₁) hrepr₁ rfl rfl
+  have ho : out'=mutatedHp := Option.some.inj (hw'.symm.trans (show selectedState.heap.writeAddr (.index (selectedState.heap.field parent layout.child_type) .dyn k0) true=some mutatedHp from by
+      rw [hqrSelected]
+      simp only [Heap.writeAddr,Heap.setIndex]
+      rw [if_pos (by simpa only [hqrSelected] using hkSelected)]
+      rfl))
+  subst out'
+  have hz' : z'=mutatedSource := by
+    obtain ⟨ht,hw⟩ := source_bool_write (withArgs selectedAgain k0 true) 1 [false,true,false] (by rfl) 0 (by decide) true
+    have hwr : (Source.writeLoc (E := E) (Γ := XΓ) F0 3 (.mem (τ := .bool) 1 0) (.bool true)).run (withArgs selectedAgain k0 true)=(.ok (),mutatedSource) := hw
+    rw [hqrSelected] at hwrite'
+    exact congrArg Prod.snd (hwrite'.symm.trans hwr)
+  subst z'
+  have ht' : target'=mutatedMachine := by
+    let ptr := [.mload (cellOf 1 root)]++readFieldCode (fieldOffset (structDef S) "items")
+    have hp : PtrFrag 1 (fieldPath root) ptr := .field _ _ _ (.local root (by decide))
+    have hpath : (fieldPath root).mvalT selectedState=.ok right := by
+      simp only [fieldPath,MPath.mvalT,MLoc.addrT,Heap.readAddr,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+      rfl
+    have hptr := hp.run_of_eval (hrepr₁.push w[1]) hpath
+    change run ptr (selectedMachine.push w[1])=.ok ((selectedMachine.push w[1]).push (.val (base right.id))) 0 at hptr
+    have hraw : run (writeArrayCode (base right.id)) ((selectedMachine.push w[1]).push w[0])=.ok mutatedMachine 0 := by
+      obtain ⟨_,_,hc,_⟩ | ⟨hn,_⟩ := writeArray_correct (hrepr₁.heap.arrays right) ⟨0,by decide⟩ true w[1] rfl
+      · exact hc
+      · have hwKnown : selectedState.heap.writeAddr (.index right .dyn k0) true=some mutatedHp := by
+          rw [←hqrSelected];exact hw'
+        change selectedState.heap.writeAddr (.index right .dyn k0) true=none at hn
+        rw [hwKnown] at hn;cases hn
+    have hcalc : run childCode selectedMachine=.ok mutatedMachine 0 := by
+      change run ((compileVal 1 trueWord)++ptr++compileVal 1 zeroWord++writeArrayStackCode) selectedMachine=_
+      rw [List.append_assoc,List.append_assoc,run_append_ok (show run (compileVal 1 trueWord) selectedMachine=.ok (selectedMachine.push w[1]) 0 from rfl),
+        run_append_ok hptr,run_append_ok (show run (compileVal 1 zeroWord) ((selectedMachine.push w[1]).push (.val (base right.id)))=
+          .ok (((selectedMachine.push w[1]).push (.val (base right.id))).push w[0]) 0 from rfl)]
+      rw [writeArrayStackCode,arrayStack_append_eq (selectedMachine.push w[1]) (base right.id) ⟨0,by decide⟩ _
+        (selectedState.heap.len_dyn_lt right) (hrepr₁.heap.arrays right).length,←writeArrayCode]
+      exact hraw
+    exact (Evm.Out.ok.inj (hc'.symm.trans hcalc)).1
+  subst target'
+  refine ⟨he,he₁,?_,he',hs',hi',hr',hm',hrepr',?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,hstack',?_⟩
+  · exact (run_append_ok (run_append_ok hc |>.trans hc₁)).trans hc'
+  · simp only [mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    rfl
+  · rfl
+  · exact halloc' _ (by decide) (halloc₁ _ (by decide) (halloc _ (by decide) initial_allocator))
+
+
+private def endpointWord : Val C Γ .uint := .simple (.lit 3 (by decide))
+private def k3 : PrimTy.uint.Denote := indexValue ⟨3,by decide⟩
+
+/-- Exact Source index panic, intrinsic failure and symbolic-word reversion
+are separate observations. No target panic bytes or rollback is asserted. -/
+theorem member_child_failure_views (p : Roadmap.Pipeline) :
+    (Source.evalLoc (G p) F0 3 (sourceStructChildLoc layout xroot xi)).run (withArgs sy k3 true)=
+      (.error (.revert (Source.panicData .index)),withArgs sy k3 true) ∧
+    (Source.evalE (G p) F0 4 childTerm).run (withArgs sy k3 true)=
+      (.error (.revert (Source.panicData .index)),withArgs sy k3 true) ∧
+    (∀ n,n≤2 → (Source.evalE (G p) F0 n (sourceStructChildRead layout xroot xi)).run (withArgs sy k0 true)=
+      (.error .timeout,withArgs sy k0 true)) ∧
+    hp.writeAddr (.index left .dyn k3) true=none ∧
+    run (structChildWriteCode (C := C) 1 root "items" endpointWord trueWord) machine=.revert ∧
+    MObj.elems .dyn (out.get right)≠MObj.elems .dyn (mutatedHp.get right) ∧
+    MObj.elems .dyn ((out.set left (MObj.setElem .dyn (out.get left) 0 true)).get right)≠
+      MObj.elems .dyn (mutatedHp.get right) ∧
+    (Source.evalE (G p) F0 3 (sourceStructChildRead layout xroot xi)).run (withArgs reached k0 true)≠
+      (.ok (.val (.bool true)),withArgs reached k0 true) := by
+  have hr : SourceBoolStructAt (withArgs sy k3 true) 2 hp parent addresses layout := initial_at.same_heaps rfl rfl
+  have hb := hr.child_bounds (G p) F0 0 xroot xi xv k3 true rfl rfl rfl (by
+    change (MObj.elems .dyn (hp.get left)).length≤k3.1.toNat
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn,k3,indexValue,Int.toNat_natCast,List.length_cons,List.length_nil]
+    decide)
+  have hn : hp.writeAddr (.index left .dyn k3) true=none := by
+    have hcond : ¬k3.1.toNat<(MObj.elems .dyn (hp.get left)).length := by
+      simp only [k3,indexValue,Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn,List.length_cons,List.length_nil]
+      decide
+    unfold Heap.writeAddr Heap.setIndex
+    exact if_neg hcond
+  have hnσ : σ.heap.writeAddr (.index left .dyn k3) true=none := hn
+  have hpath : (fieldPath root).mvalT σ=.ok left := by
+    simp only [fieldPath,MPath.mvalT,MLoc.addrT,Heap.readAddr,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    rfl
+  have hi : TRun.assignMem (.index .dyn (fieldPath root) endpointWord) (.val trueWord) σ=.error .revert := by
+    simp only [TRun.assignMem,MSrc.mvalT,MLoc.addrT,hpath,
+      show trueWord.evalT σ=.ok true from rfl,show endpointWord.evalT σ=.ok k3 from rfl,
+      hnσ,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+  have hptrCert : PtrFrag 1 (fieldPath root)
+      ([.mload (cellOf 1 root)]++readFieldCode (fieldOffset (structDef S) "items")) := .field _ _ _ (.local root (by decide))
+  have hc := hptrCert.writeArray initial_repr endpointWord trueWord (compileVal 1 endpointWord) (compileVal 1 trueWord)
+    (fun h' => Evm.val_sim endpointWord h'.core rfl) (Evm.val_sim trueWord initial_repr.core rfl)
+  rw [hi] at hc
+  have hrun : run (structChildWriteCode (C := C) 1 root "items" endpointWord trueWord) machine=.revert := by
+    rcases hc with ⟨o,_,he,_⟩ | ⟨_,hc⟩
+    · cases he
+    · exact hc
+  refine ⟨hb.1,hb.2,source_struct_child_low_horizon layout (G p) F0 _ xroot xi,?_,hrun,?_,?_,?_⟩
+  · exact hn
+  · simp only [mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    change ([false,true,false] : List Bool)≠[true,true,false]
+    decide
+  · simp only [mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    change ([false,true,false] : List Bool)≠[true,true,false]
+    decide
+  · rw [(member_child_reads p).2.1]
+    intro he
+    cases he
+
+/-- All runtime-valid indices of arbitrary initial child lists execute actual
+member-index syntax. The second family consumes the REAL reference-write result. -/
+theorem member_child_runtime_reads (p : Roadmap.Pipeline) (xs ys : List Bool)
+    (hx : xs.length<2^256) (hy : ys.length<2^256) :
+    (∀ j : Fin xs.length, (Source.evalE (G p) F0 3 (sourceStructChildRead layout xroot xi)).run
+      (withArgs (runtimeSource xs ys) (indexValue ⟨j.val,by have h := j.isLt;change j.val<2^256;omega⟩) true)=
+        (.ok (.val (.bool xs[j.val])),withArgs (runtimeSource xs ys) (indexValue ⟨j.val,by have h := j.isLt;change j.val<2^256;omega⟩) true)) ∧
+    ∃ z : Source.EMState E SΓ,
+      (Source.writeLoc (E := E) (Γ := SΓ) F0 0 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run (runtimeSource xs ys)=(.ok (),z) ∧
+      (∀ j : Fin ys.length,(Source.evalE (G p) F0 3 (sourceStructChildRead layout xroot xi)).run
+        (withArgs z (indexValue ⟨j.val,by have h := j.isLt;change j.val<2^256;omega⟩) true)=
+          (.ok (.val (.bool ys[j.val])),withArgs z (indexValue ⟨j.val,by have h := j.isLt;change j.val<2^256;omega⟩) true)) := by
+  let hp := runtimeHp xs ys hx hy
+  have hinit : SourceBoolStructAt (runtimeSource xs ys) 2 hp parent addresses layout := by
+    refine ⟨rfl,?_⟩
+    unfold SourceBoolMemoryAt
+    simp only [hp,runtimeHp,Heap.get,Objs.get,left,MObj.elems_dyn];rfl
+  constructor
+  · intro j
+    have hr : SourceBoolStructAt (withArgs (runtimeSource xs ys) (indexValue ⟨j.val,by have h := j.isLt;change j.val<2^256;omega⟩) true) 2 hp parent addresses layout := hinit.same_heaps rfl rfl
+    apply hr.eval_child_read (G p) F0 0 xroot xi _ _ rfl rfl
+    change (MObj.elems .dyn (hp.get left))[j.val]?=some xs[j.val]
+    simpa only [hp,runtimeHp,Heap.get,Objs.get,left,MObj.elems_dyn] using
+      (List.getElem?_eq_some_iff.mpr ⟨j.isLt,rfl⟩ : xs[j.val]?=some xs[j.val])
+  · obtain ⟨z,hw,hr,hm,hleft,hright⟩ := runtime_children xs ys hx hy
+    obtain ⟨ht,hknown⟩ := source_struct_write (runtimeSource xs ys) 2 dn layout.source_types u7 0 1 hinit.parent
+    have hz : z.1=(runtimeSource xs ys).1 := congrArg (fun x : Except Source.Halt Unit × Source.EMState E SΓ => x.2.1) (hw.symm.trans hknown)
+    refine ⟨z,hw,?_⟩
+    intro j
+    have hrx : SourceBoolStructAt (withArgs z (indexValue ⟨j.val,by have h := j.isLt;change j.val<2^256;omega⟩) true) 2 (hp.setField parent layout.child_type right) parent addresses layout := hr.same_heaps rfl rfl
+    apply hrx.eval_child_read (G p) F0 0 xroot xi _ _ (by change z.1.get sroot=_;rw [hz];rfl) rfl
+    change (MObj.elems .dyn ((hp.setField parent layout.child_type right).get right))[j.val]?=some ys[j.val]
+    simpa only [hp,runtimeHp,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,parent,right,MObj.elems_dyn] using
+      (List.getElem?_eq_some_iff.mpr ⟨j.isLt,rfl⟩ : ys[j.val]?=some ys[j.val])
+
+
+/-- Actual exact-end rejection for arbitrary runtime lengths, including an
+EMPTY selected child. Unlike valid-index quantification this executes a call. -/
+theorem member_child_runtime_endpoint (p : Roadmap.Pipeline) (xs ys : List Bool)
+    (hx : xs.length<2^256) (hy : ys.length<2^256) :
+    let k := indexValue ⟨xs.length,hx⟩
+    let y := withArgs (runtimeSource xs ys) k true
+    (Source.evalLoc (G p) F0 3 (sourceStructChildLoc layout xroot xi)).run y=
+      (.error (.revert (Source.panicData .index)),y) ∧
+    (Source.evalE (G p) F0 4 childTerm).run y=(.error (.revert (Source.panicData .index)),y) := by
+  dsimp only
+  let hp := runtimeHp xs ys hx hy
+  have hinit : SourceBoolStructAt (runtimeSource xs ys) 2 hp parent addresses layout := by
+    refine ⟨rfl,?_⟩
+    unfold SourceBoolMemoryAt
+    simp only [hp,runtimeHp,Heap.get,Objs.get,left,MObj.elems_dyn];rfl
+  have hr : SourceBoolStructAt (withArgs (runtimeSource xs ys) (indexValue ⟨xs.length,hx⟩) true) 2 hp parent addresses layout := hinit.same_heaps rfl rfl
+  apply hr.child_bounds (G p) F0 0 xroot xi xv _ true rfl rfl rfl
+  change (MObj.elems .dyn (hp.get left)).length≤(indexValue ⟨xs.length,hx⟩).1.toNat
+  simp only [hp,runtimeHp,Heap.get,Objs.get,left,MObj.elems_dyn,indexValue,Int.toNat_natCast]
+  exact Nat.le_refl _
+
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_child_reads' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_child_reads
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.reached_member_child_write' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reached_member_child_write
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_child_failure_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_child_failure_views
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_child_runtime_reads' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_child_runtime_reads
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_child_runtime_endpoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_child_runtime_endpoint
 
 end Solidity.Backend.MemoryOps.SourceStructControls
