@@ -1197,3 +1197,15 @@ At the root, the notation's own tests:
 | `Backend/Environment/Composition.lean` | Constructed intrinsic Val certificates, exact target concatenation/stack order, materialization/hash adapters and typed source-sequence fallback. |
 | `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
 | `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
+
+| V13 independent preparation module | Purpose |
+|---|---|
+| `Backend/AbiWorld/ErrorLayout.lean` | Arbitrary-length published error-codec padding, exact offset/length/payload observations and packet noninterference. |
+| `Backend/AbiWorld/ErrorRoundtrip.lean` | Existing machine-numeral agreement and arbitrary representable Error(string) roundtrip. |
+| `Backend/AbiWorld/ErrorControls.lean` | Kernel boundary, malformed, nested and noncanonical error-returndata controls. |
+| `Backend/AbiWorld/ErrorEmission.lean` | Published REVERT emitter adapter and intrinsic catch decoding, with architectural bounds. |
+| `Backend/AbiWorld/WorldFrames.lean` | Published typed source-world separation, heterogeneous journal rollback and prefix observation transport. |
+| `Backend/AbiWorld/Controls.lean` | Inhabited multiword emitter/catch and actual persistent/transient mutation/rollback combinations. |
+| `Backend/AbiWorld/PublishedCallControls.lean` | Signature-polymorphic published static/role/callee refusals and inhabited self-address/library combinations; no compiled-call claim. |
+| `Backend/AbiWorld/PublishedLayout.lean` | Arbitrary published source ABI layout lengths, offsets, payloads, concatenation and noninterference, with explicit canonical static widths. |
+| `Backend/AbiWorld/PublishedLayoutControls.lean` | Empty, mixed, boundary, nested-packet and cursor-wrap kernel controls. |

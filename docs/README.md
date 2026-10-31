@@ -102,3 +102,4 @@ history is in git.
 | Preparation lane | Document |
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
+| V13 ABI/world independent preparation (parent open) | [roadmap-v13-abi-world.md](feature-work/roadmap-v13-abi-world.md) |
