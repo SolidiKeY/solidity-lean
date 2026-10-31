@@ -1286,3 +1286,78 @@ proof/summary-parser failures retained (parser fixes only, not altered verdicts)
 Code commit f765cde0344fb4199b439e96b157aff6307c04d1. Serial-j1/12GiB/no-swap/
 writer lock/caches retained; no owner representation or budget change. Versioned
 handoff records exact signatures, resources and gates.
+
+
+## Simultaneous heterogeneous struct writeback (2026-10-31)
+
+[AggregateWriteback](../../Solidity/Yul/Views/AggregateWriteback.lean) decodes
+ALL declared members of an actual Source.DataList using parameter-only List
+recursion. Supported member types are canonical bool, full-width uint256 and
+actual owned memory references. OrdinaryMemberType is an explicit component
+type list, NOT a residual Yul fragment or substitute for original coverage.
+uintValueOfWord_inverse covers every actual typed uint256, not only literals.
+Pointer decoding reuses real typed child candidates; members remain pointer
+words and children separate, including aliases. No opaque inverse/preservation/
+read law is accepted as a structure field. No second source state/AST/IR exists.
+
+Derived laws: per-member actual RefOK/MemoryElement; typed DataListOK, actual
+MemoryFields/read representation from successful decoding; encode/decode with
+real supported types, owned source images and candidate coverage; exact whole
+ByteView re-encoding; actual ObjectWord reads; declared-size/full other-region/
+reserved-word preservation. Actual Heap.write constructs output Placement
+with original address/shape/free and preserves every other cell/types/next/
+boundedness. Unchanged WHOLE heap/state identity is proved. structStateWriteback
+runs actual Source.heapPut and returns its ENTIRE Except/state result. Its
+MemOK theorem preserves EVERY original H on both successes AND source errors,
+using all actual owner EMOK/HeapShaped/HeapInner conjuncts. Missing/wrong-type
+source roots are not silently turned into successful writes.
+
+[Controls](../../Solidity/Yul/Views/AggregateWritebackControls.lean) change a
+real Box bool/maximum uint/two bytes pointers simultaneously; both pointers
+retarget a real nonUTF8 string child, retain the dynamic-array member, and actual
+Source.readLoc→bytesOfRV observes both aliases at EVERY horizon. A following
+actual child Heap.write is seen by both aliases and preserves all-H MemOK.
+Controls include unchanged whole state, same-shape Placement, all other roots,
+nonzero gaps/free/zero words, invalid129/missing-owned candidates and canonical
+bool2 preparation failure, plus actual Source.heapPut type-error/state behavior.
+None means unsupported preparation; no original dirty/bool/shared-zero/interior
+case is silently cleaned, refused at admission or assigned no-op semantics.
+
+[AggregateWriteback.sol](../../tests/yul-views/AggregateWriteback.sol) imports
+the unchanged MixedHeap fixture and independently checks complete42-word ABI
+observations for6orderedcalls per pinned legacy/viaIR pipeline: initial, all
+fields, reversed order, shared-child update, revert and fresh call.153strict
+mutations discriminate pointer/header/offset/bool/maxword/child/alias/other/
+padding/free/zero/bytes/failure/deployment/inventory changes. All previous214
+calls and report fields are EXACTLY identical; cumulative226. External finite
+compiler/EVM evidence remains separate from source/Yul/compiler correspondence.
+Exact receipts/signatures/axioms/reviews/gates are versioned under
+`/workspace/vy2-evidence/aggregate-writeback/`.
+
+Full Y04/Y05/Y06 and BackfillA/B remain PARTIAL; actual Y09.02 BLOCKED. Generic
+all-member supported structs improve component coverage, not universal narrow/
+dirty/shared-zero/interior/pointer/dynamic object/whole memory/storage/hash/
+allocator provenance/refinement/source/compiler/calculus closure or concrete
+V10/V11 agreement instances. Actual available owner interfaces are reused;
+missing Yul producer adequacy is not assumed. Original oversized-MemOK boundary,
+YQ1–YQ7, exclusions and full obligation signatures are unchanged. Goal BLOCKED
+unchanged; no goal tool/transition or new semantic question. Initial proof and
+default-heartbeat timeout logs are retained; compositional proofs replace the
+expensive image reduction without raising any budget.
+
+Aggregate checkpoint validation: per-file/focused55jobs/fullwrapper1047default+
+262suite/131matchedannotations exit0; scoped1325declarations/740theorem reports
+standard axioms only. Layers238core/0elaboratorreach,1062reachable/0orphan, trust
+1077sources/246sites/0findings and strict491automatic/61budgeted/11refuted/0pending
+pass. Real Lean4.24.0/Lake5.0.0-src+797c613 and passing2jobKeySort recorded in the
+preceding same-runtime checkpoint. Docs ACTUAL exit1 with identical48missing+
+37ambiguous base references; zero delta comparison passes; markdownbase1/head1/
+new0. Both independent read-only reviews clear. Complete226orderedcalls retain
+every preceding field; all old suites plus153aggregate negatives pass.
+
+The1.528s exploratory proof/reference overlap is explicitly recorded in evidence,
+not a claim of perfectly serial exploration; failed proof log retained. No
+concurrent Lean processes/MCP/server, resource event or budget increase; final
+affected/full/scoped gates serial. Writer lock/12GiB/no-swap/caches preserved.
+This checkpoint follows committed dynamic-array validation1c85e49f68b71d0548c4f6bd91b7a710269f0e8a;
+final full SHA/patch/bundle/resources/checksums are in the versioned handoff.

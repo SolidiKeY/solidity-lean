@@ -343,3 +343,15 @@ controls, plus18ordered pinned pipeline calls/153negative controls. See
 and `/workspace/vy2-evidence/dynamic-uint/HANDOFF.md`. Full lane/both backfills
 remain unfinished, including simultaneous general aggregate/source integration;
 this component does not promote admission or replace full obligations.
+
+
+### VY2 simultaneous struct writeback handoff (2026-10-31)
+
+Constructive actual declared DataList member decoding, whole-state unchanged,
+actual heapPut full Except/state/all-initial-H MemOK and Placement/residual laws;
+canonical bool/fulluint/real owned pointers, including shared children. See
+[lane record](inline-assembly-vy2.md#simultaneous-heterogeneous-struct-writeback-2026-10-31)
+and `/workspace/vy2-evidence/aggregate-writeback/HANDOFF.md`. Both pinned pipelines
+retain all prior214calls and add12/153negative controls. Full lane/both backfills
+remain unfinished; no admission, full writeback or source/compiler/calculus
+closure follows from these supported components.

@@ -904,3 +904,4 @@ import Solidity.Yul.Views.ByteHeapRealizationControls
 import Solidity.Yul.Views.MixedHeapControls
 import Solidity.Yul.Views.WordWritebackControls
 import Solidity.Yul.Views.DynamicUintControls
+import Solidity.Yul.Views.AggregateWritebackControls

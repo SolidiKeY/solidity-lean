@@ -1064,3 +1064,13 @@ preparation laws, not installed Yul calculus rules/taclets. Their real found-dat
 Placement/retained-origin/capacity and initial-MemOK premises are retained.
 Concrete Y09.02 rule/notation/printer/source composition stays open; see
 [VY2](feature-work/inline-assembly-vy2.md#dynamic-full-width-array-writeback-2026-10-31).
+
+
+VY2 simultaneous struct preparation (Lean-only, YQ5):
+`decodeMemoryMember_encode`, `decodeMemoryFields_encode/representation`,
+`structHeapWriteback_unchanged`, `structStateWriteback_unchanged/MemOK`,
+`decodedStruct_raw_reencode/source_word`, `structFields_other_region/reserved`
+are preparation theorems with real typed found-data/Placement/canonical member/
+owned candidate coverage/initial-H premises. No taclet or concrete Yul calculus
+rule/notation/printer/source adequacy is claimed; original Y09.02 remains open.
+See [VY2](feature-work/inline-assembly-vy2.md#simultaneous-heterogeneous-struct-writeback-2026-10-31).
