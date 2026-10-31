@@ -75,7 +75,7 @@ def read_bound(root, name, sha):
     return data
 
 
-def validate(record, evidence_root, current, gate, gate_row=None):
+def validate(record, evidence_root, current, gate, gate_row=None, live_outputs=True):
     e.require(type(record['exit']) is int, 'invalid provenance exit')
     e.require(type(record['schema']) is int and record['schema']==3,'unsupported provenance schema')
     check_outcomes(record)
@@ -148,6 +148,7 @@ def validate(record, evidence_root, current, gate, gate_row=None):
         e.require(all(p in record['buildEnd']['files'] for p in TARGETS[gate][1]), 'unmatched mandatory artifact')
         # Live files must match recorded outputs; no artifact/cache copies are exported.
         for kind in ('buildEnd', 'cacheEnd'):
+            if not live_outputs:continue
             e.require(inventory(Path(record[kind]['path'])) == record[kind], 'live artifacts/cache differ')
     return record['exit'] == 0
 

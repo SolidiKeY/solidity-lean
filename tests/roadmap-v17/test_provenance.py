@@ -178,6 +178,12 @@ class ProvenanceTests(unittest.TestCase):
             bad[field]['path']=str(self.root/'unrelated'/('a'*64))
             with self.assertRaisesRegex(ValueError,'location'): self.validate(bad)
 
+    def test_historical_consistency_does_not_weaken_live_default(self):
+        self.assertTrue(self.validate())
+        artifact=self.build/'lib/lean/Solidity/Evm/Compiler.olean';artifact.write_bytes(b'changed current artifact')
+        with self.assertRaisesRegex(ValueError,'live artifacts/cache differ'):self.validate()
+        self.assertTrue(p.validate(self.clean,self.root,self.current,self.clean['gate'],live_outputs=False))
+
     def test_nonzero_mandatory_pair_gate(self):
         self.warm.update(exit=1,commandExit=1,executionExit=1)
         with self.assertRaisesRegex(ValueError,'nonzero mandatory'): self.pair()

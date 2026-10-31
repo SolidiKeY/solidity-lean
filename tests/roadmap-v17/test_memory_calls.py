@@ -28,21 +28,26 @@ class MemoryCallsControls(unittest.TestCase):
         raw=m.query_bytes();self.assertIn(m.name_term('Solidity.Evm.Compiler.Compilation.memoryCalls').encode(),raw);self.assertIn(b'wrong_code_rejected',raw);self.assertIn(b'private_frame_rejected',raw)
         self.assertIn(b'KernelQuery.extract #[request] includeValues',raw)
     def test_failed_or_missing_producer_cannot_reach_frames(self):
-        fake=SimpleNamespace(p=SimpleNamespace(validate=lambda *a:False))
+        fake=SimpleNamespace(p=SimpleNamespace(validate=lambda *a,**kw:False))
         with patch.object(m,'load_kernel',return_value=fake),patch.object(m,'observation') as observed:
             with self.assertRaisesRegex(ValueError,'missing producer'):m.verify({},Path('/tmp'),{})
             with self.assertRaisesRegex(ValueError,'failed producer'):m.verify({},Path('/tmp'),{},producer={},producer_directory=Path('/tmp'))
             observed.assert_not_called()
-        fake.p.validate=lambda record,*a:record['exit']==0
+        fake.p.validate=lambda record,*a,**kw:record['exit']==0
         with patch.object(m,'load_kernel',return_value=fake),patch.object(m,'observation') as observed:
             with self.assertRaisesRegex(ValueError,'failed observation'):m.verify({'exit':125},Path('/tmp'),{},producer={'exit':0},producer_directory=Path('/tmp'))
             observed.assert_not_called()
     def test_producer_import_and_installed_continuity_guards(self):
         producer={'exit':0,'buildEnd':{'files':{'module':'hash'}},'cacheEnd':{'key':'same'},'installedAfter':{'lib':'hash'}}
         record={'exit':0,'buildStart':copy.deepcopy(producer['buildEnd']),'cacheStart':copy.deepcopy(producer['cacheEnd']),'installedBefore':copy.deepcopy(producer['installedAfter']),'log':'log','logSha256':'hash'}
-        fake=SimpleNamespace(p=SimpleNamespace(validate=lambda *a:True,read_bound=lambda *a:b'fixture'))
+        fake=SimpleNamespace(p=SimpleNamespace(validate=lambda *a,**kw:True,read_bound=lambda *a:b'fixture'))
         with patch.object(m,'load_kernel',return_value=fake),patch.object(m,'observation',side_effect=RuntimeError('positive guards reached')):
             with self.assertRaisesRegex(RuntimeError,'positive guards'):m.verify(record,Path('/tmp'),{},producer,Path('/tmp'))
+            previous={'before':{},'after':{},'exit':0,'buildEnd':record['buildStart'],'cacheEnd':{'log':'updated by first query'}}
+            chained=copy.deepcopy(record);chained['cacheStart']=previous['cacheEnd']
+            with self.assertRaisesRegex(RuntimeError,'positive guards'):m.verify(chained,Path('/tmp'),{},producer,Path('/tmp'),previous=previous)
+            previous['exit']=125
+            with self.assertRaisesRegex(ValueError,'predecessor'):m.verify(chained,Path('/tmp'),{},producer,Path('/tmp'),previous=previous)
             for field in ['buildStart','cacheStart','installedBefore']:
                 bad=copy.deepcopy(record);bad[field]={}
                 with self.subTest(field=field),self.assertRaises(ValueError):m.verify(bad,Path('/tmp'),{},producer,Path('/tmp'))

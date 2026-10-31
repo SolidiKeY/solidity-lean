@@ -98,12 +98,15 @@ def headline_axioms(raw):
     if set(rows)!=names:raise ValueError('missing headline axiom output')
     return rows
 
-def verify(record,directory,current,producer=None,producer_directory=None):
+def verify(record,directory,current,producer=None,producer_directory=None,previous=None):
     k=load_kernel()
     if producer is None or producer_directory is None:raise ValueError('missing producer build receipt')
-    if k.p.validate(producer,producer_directory,current,'warm-memory-calls') is not True:raise ValueError('failed producer build')
+    if k.p.validate(producer,producer_directory,current,'warm-memory-calls',live_outputs=False) is not True:raise ValueError('failed producer build')
     if k.p.validate(record,directory,current,'warm-memory-calls-observation') is not True:raise ValueError('failed observation gate')
-    if producer['buildEnd']!=record['buildStart'] or producer['cacheEnd']!=record['cacheStart']:raise ValueError('producer/query artifact continuity differs')
+    predecessor=producer if previous is None else previous
+    if previous is not None:
+        if previous['before']!=current or previous['after']!=current or previous['exit']!=0:raise ValueError('stale/failed replay predecessor')
+    if predecessor['buildEnd']!=record['buildStart'] or predecessor['cacheEnd']!=record['cacheStart']:raise ValueError('producer/query artifact continuity differs')
     if producer['installedAfter']!=record['installedBefore']:raise ValueError('producer/query installed inputs differ')
     raw=k.p.read_bound(directory,record['log'],record['logSha256']);obs=observation(raw)
     meta=frame(raw,'V17_MEMORY_KERNEL_BEGIN','V17_MEMORY_KERNEL_END')
@@ -133,7 +136,7 @@ def verify(record,directory,current,producer=None,producer_directory=None):
         imports.add(module)
         if module.startswith('Solidity.'):
             rel='lib/lean/'+module.replace('.','/')+'.olean'
-            if path.resolve()!=(ROOT/'.lake/build'/rel).resolve() or record['buildEnd']['files'].get(rel)!=k.p.resources.hash_file(path):raise ValueError('unbound warm import')
+            if path.resolve()!=(ROOT/'.lake/build'/rel).resolve() or record['buildEnd']['files'].get(rel)!=k.p.resources.hash_file(path) or producer['buildEnd']['files'].get(rel)!=record['buildEnd']['files'].get(rel):raise ValueError('unbound warm import')
         else:
             if path.is_relative_to('/opt/v17-toolchain'):path=prefix/path.relative_to('/opt/v17-toolchain')
             if str(path.resolve()) not in installed:raise ValueError('unbound installed input')
@@ -160,7 +163,7 @@ if __name__=='__main__':
             first=verify(r,args.report.parent,current,producer,args.producer.parent)
             if k.p.collect(SimpleNamespace(gate='warm-memory-calls-observation',out=args.replay_out))!=0:raise ValueError('live observation replay failed')
             replay=k.e.load(args.replay_out/'provenance.json')
-            second=verify(replay,args.replay_out,k.e.snapshot(ROOT),producer,args.producer.parent)
+            second=verify(replay,args.replay_out,k.e.snapshot(ROOT),producer,args.producer.parent,previous=r)
             exact_replay(first,second)
             args.out.write_text(json.dumps({'verified':first,'replay':second,'exactObservationReplay':True,'semanticPremisesDischarged':False,'releaseClosed':False},indent=2)+'\n')
             print(json.dumps({'declarations':len(first['metadata']['rows']),'constructorObserved':first['observation']['isMemoryCalls'],'frame':first['observation']['requiredFrame'],'allocationCost':first['observation']['allocationCost'],'semanticPremisesDischarged':False,'releaseClosed':False}))

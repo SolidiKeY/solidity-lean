@@ -608,3 +608,15 @@ repopulating inactive artifact pages during inventories. The potentially slower
 bookkeeping was announced and hashing history inspected; byte-equivalence, tail,
 fallback and changed-input controls pass. No proof, expression or time budget,
 cache bytes, source semantics or global status was changed by this IO repair.
+
+
+The producer/query/replay receipts form a strict input/output chain. Mutable cache
+input logs may change during a query, so a past producer receipt is checked for
+internal consistency, then every actual imported project artifact must still
+match the producer's output hash. The next operation's full build/cache start
+must match its predecessor's end. The ordinary provenance validator and all
+original gate/aggregation callers retain live-output checks by default; no CLI
+option weakens them. Installed input manifests and full verified wrappers must
+match across the live replay. This is not clean/cache equivalence. Changed cache
+logs encountered by resource advice are retained as discrepancies and skipped;
+no stale hash is used to authorize advice or proof evidence.
