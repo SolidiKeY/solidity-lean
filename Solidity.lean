@@ -953,3 +953,5 @@ import Solidity.Backend.MemoryOps.SourceMemoryControls
 import Solidity.Backend.MemoryOps.SourceTargetControls
 
 import Solidity.Backend.MemoryOps.SourceAliasControls
+
+import Solidity.Backend.MemoryOps.SourceNestedMemoryControls

@@ -1304,3 +1304,6 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceAlias.lean` | Actual Source local reference assignment and published intrinsic/word alias rebinding: parallel initial-pointer identity, unchanged heaps, MemOK and complete reference-array ownership. |
 | `Solidity/Backend/MemoryOps/SourceAliasControls.lean` | Independently inhabited nested reference parents/shared Boolean child, material destination identity/pointer change, retained alias, exact tables/reads/word vectors, allocator/self-alias/horizon controls. |
+
+| `Solidity/Backend/MemoryOps/SourceNestedMemory.lean` | Initial actual Source parent/Boolean-child table correspondence, published reference-array word observations, and derived alias-rebinding transport; arbitrary runtime lists/shared children and precise bounds. |
+| `Solidity/Backend/MemoryOps/SourceNestedMemoryControls.lean` | Independently inhabited different/shared Boolean children and old/new/empty reference parents; actual reached Source alias/nested reads, complete word vectors, stale/wrong-child, self-alias, runtime-list and endpoint controls. |

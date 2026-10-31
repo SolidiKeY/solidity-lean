@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-one. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3218,3 +3218,72 @@ allocator preservation and precise parallel-identity/graph-relation boundary
 with no remaining defect. All old seals/rawfailures retained. Existing goal
 BLOCKEDunchanged; authorizedturn progress is not goalreactivation/completion.
 Original fullqueue remains partialblocked, no exhaustion/wholelane claim.
+
+
+### C41 — initial aligned nested memory and actual alias observations
+
+C40 deliberately kept Source and target initial identities independent. The new
+`SourceNestedMemory` adapter supplies an INITIAL relation for the supported
+existing dynamic memory parent-reference-array → Boolean-child shape:
+`SourceBoolRefsAt` requires the actual Source heap parent table to contain the
+actual intrinsic parent's selected child addresses, and actual Boolean child
+contents for every selected child. It permits arbitrary runtime list lengths,
+repeated/shared children and empty parents. It assumes no global address
+injectivity, final representation, stagewise preservation or liveness. Distinct
+Boolean observations derive local address separation (`child_address_ne`).
+
+Nineteen laws derive actual Source length/index/read and resolved nested evalE
+observations, exact parent/child bounds, and matching published RefArrayStateRepr
+parent-pointer/Boolean cells and readArrayCode results for the SAME selected
+child. `alias_word` executes existing source_alias_word and derives the reached
+nested relation from unchanged Source/intrinsic heaps, with actual Source expr
+and statement, intrinsic rebindMem, symbolic-word alias run, MemOK, ownership,
+stack tail and allocator preservation. The two word load observations are
+SEPARATE published loads, not a compiled nested-expression program.
+
+Eight controls independently inhabit old=[left], new=[left,right,left], empty=[],
+left=[true,false,false], right=[false,true,false] using real Source allocRef and
+published full reference-array word ownership. Both pipeline values are quantified
+in actual alias/nested evalE controls: rebinding selects right/false; stale old
+binding fails at parent index1; choosing left gives true. Complete initial Source
+tables, intrinsic arrays, identities, before/after word cells, shared identities,
+untouched neighbour/free-pointer/stack are retained. Self-alias, exact endpoints,
+actual resolved nested child failure and an arbitrary-list actual Source initial
+witness are included; only intrinsic array validity bounds are required.
+
+Independent read-only finder and skeptic preliminary reviews found no core defect;
+both requested the now-added actual nested child-endpoint syntax control. No
+reserved Source/Evm owner file or existing fixture vector was edited. All 27 new
+public laws/controls have exact standard-only axiom guards. Per-file Lean MCP is
+unavailable; bounded serial focused closure is used. C41 failures remain in unique
+logs (dependent elimination/type annotation/opaque-heap/self-alias extensionality
+repairs); no failed theorem or sorryAx is a deliverable.
+
+Resource preflight retained the 512MiB reserve and forecast 96MiB source/warm
+outputs/logs/compact exports against 1537122304 available bytes. Existing capped
+runtime child12GiB/swap0 and parent16GiB remain unchanged. Actual child CPU quota
+is unlimited (parent4 CPUs), so ALL C41 heavy execs additionally use taskset -c0
+for inherited one-CPU affinity, alongside LEAN_NUM_THREADS1/Lean-j1. Optional
+artifact cache stays OFF. Cumulative historical memory.max1051/session peak12GiB
+are not per-exec measurements; new commands record their own RSS/event deltas.
+
+This is finite supported initial observation and unchanged-heap alias transport,
+not arbitrary recursive Source graphs, mutation alias reflection, physical bytes,
+ABI, emitted nested paths, compiler/EVM testing or full-lane closure. Every original
+G32/G33/G34/G35.01-.06 and Backfill A/B remains partial/blocked as before; reserved
+memory-storage and final V10/Source/target prerequisites remain open. Raw global
+docs/inventory failures and eleven incoming frozen-base docs findings are not
+waived. Existing goal remains BLOCKED, unchanged by this authorized turn.
+
+C41 final guarded159jobs/full1080default/262Suite/SolKey377/131 exit0.
+Fresh Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs pass. Strict automatic,
+complete fixture, layer/orphan/trust, script syntax/corruption and scoped
+787standardpins/99modules pass. Final full sampled aggregateRSS1550404KiB,
+233472bytes disk growth, zero new memory.max/OOM/kill events. Raw docs1 has
+complete83findings identical to published baseline; frozen no-new remainsFAIL
+11incoming, ownednew0. Raw inventory1:1146unrecorded=359publicinherited+787owned,
+0unsafe. Exact owned proposals are external additive evidence, not globalpass.
+Both independent source reviewers accepted proofs/controls and requested a
+cumulative heading correction (fixed forty-one); their requested direct nested
+child-endpoint control passed. A guard-format mismatch failure is retained;
+all final exact axiom sets passed. Existing fixture vectors remain unmodified.
