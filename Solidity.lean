@@ -909,3 +909,4 @@ import Solidity.Backend.InternalFlow.MixedLoopPrefixes
 import Solidity.Backend.InternalFlow.EvaluatedRevert
 import Solidity.Backend.InternalFlow.EvaluatedRevertChecks
 import Solidity.Backend.InternalFlow.PublishedDirectCalls
+import Solidity.Backend.InternalFlow.TupleCalls

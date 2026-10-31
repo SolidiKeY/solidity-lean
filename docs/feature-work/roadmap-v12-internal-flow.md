@@ -1117,3 +1117,166 @@ all intermediate failed checks remain; final green gates do not rewrite them.
 Final documentation exits and complete exact-base comparisons, exact source
 hashes and independent artifact reviews are recorded with the new committed
 checkpoint's handoff. Full300s/TestSuite/sort obligations remain incomplete.
+
+
+### Direct primitive multi-result export (continuation 9)
+
+This Work1/G37.01 and Backfill A checkpoint closes the LOCAL missing direct
+CallRet.rets export consumer for the actual Binders interface. It does not
+close the whole original assignment, change the reserved MemoryCalls producer,
+or change public Compiler.compile admission. The initial public refusal is
+reproduced by public_refusal/public_refusal_unchanged on an inhabited call.
+
+Actual source-type boundary: Scope.Binders has only nil and snoc of PrimTy,
+producing .val p :: rs. There is NO memory/storage-reference binder constructor.
+Binders.defaultsT returns TEnv C H rs at FIXED H; CallRet.enterT.rets appends
+those primitive defaults with identity heap extension. Tuple entry therefore
+allocates ZERO objects. Single CallRet.mem remains a different constructor
+whose default entry allocates a real object. no_memory_binder and
+no_storage_binder prove the actual tuple type obstruction, rather than assuming
+an uninhabited mixed-reference fixture. The exact reference-binder failed Lean
+command and both type mismatches are retained in reference-binder-refusal.log
+and unsupported-reference-binders.lean under continuation9 evidence.
+
+A future reference-tuple producer needs reserved source Binders constructors
+AND actual allocating default-entry transport, not uints pretending to be
+references or a new AST. In particular fixed-H defaultsT cannot manufacture a
+fresh HRef into an empty heap. An allocating interface would have to return an
+actual Out C σ.H (rs ++ ps) from a State C ps, exposing the heap extension and
+per-result default allocation order, then be linked to CallRet.enterT.rets and
+its frame laws. Such a representation/profile change needs its actual source
+owner and G0 handling. No such signature, exclusion or premise is assumed or
+approved by this checkpoint. Storage/function-value tuple categories likewise
+are not silently included in primitive Binders coverage.
+
+Backend/InternalFlow/TupleCalls.lean implements:
+
+* expand: actual Args.declsThen, Binders.declsThen and scoped weakened body,
+  exactly as the published Stmt.runSt_callRets theorem. Args remain evaluated
+  in their caller context and original order; defaults and private body/parameter
+  removal are the existing intrinsic operations. expand_runSt consumes that
+  theorem, and expand_runR recovers the exact Out extension/outcome, preserving
+  every original error class and payload rather than only successful states.
+* exportCode/resultFrag: arbitrary Binders arity and ALL current primitive kinds,
+  with increasing-address mload/mstore result export. This is a real instruction
+  list, not a replacement evaluator. compact is proved by Binders induction,
+  including nil and ps=[]; it preserves reached StateRepr, caller tail/pointers,
+  actual post-body heap, stack, every cell outside the export destination range
+  and the published allocator representation. The reached local-frame bound
+  provides space. Allocator framing retains the genuine 0<b condition.
+* tupleReturn: a genuine Calls.Statement over the actual original Stmt.call.
+  It consumes the published compiler's actual expanded-program Calls.Program
+  and appends the proved export code. need/cost/allocates/zeroCost come from that
+  real certificate; return copying allocates nothing. StateRepr, expanded room
+  and reached AllocationInput remain real prerequisites, not desired simulation
+  assumptions. Exact source equivalence identifies the actual original call's
+  Out with the represented target endpoint. Failure uses run_append_revert,
+  so export does not execute after bare failure.
+* compileTuple: an owned direct-tuple entrypoint delegating the ENTIRE expansion
+  to Calls.compile. It returns none for other statements or unsupported expanded
+  bodies. It does not add automatic nested-tuple lowering, unbounded recursion
+  or a new public Compiler branch. Both an admitted tuple and refused nonempty
+  revertData body are checked. Public Compiler.compile still refuses the tuple;
+  that earlier guard remains true and is not relabeled green.
+
+The standalone tests/internal-flow/TupleMemoryCalls.lean witness executes a
+REAL prefix with old0=[7,11], distinct old1=[23,29,31], aliases0/0 and scalar42.
+Its evaluated parameters are memory0 then scalar42 (frame innermost order42/0).
+The result binders are declared uint lo, uint hi, bool flag, with intrinsic
+context [flag,hi,lo]. The callee writes19 through its evaluated old reference,
+computes lo=seed-25=17, hi=lo+12=29 and flag=hi>lo=true, allocates scratch2=[99,101]
+and privately rebinds its parameter to scratch2. All real binders are retained
+in Input/BodyCtx; the explicit intrinsic driver does not claim frontend lowering
+or discard hidden temporaries to fit a chosen frame.
+
+Complete ordered snapshots pin prefix/entry/body/export/next-use objects,
+lengths, contents, all result values and all caller aliases/scalar. Heap sizes
+are2/2/3/3/3, explicitly showing no tuple entry allocation. Declared result order
+is lo/hi/flag; context head order is flag/hi/lo; physical exported cells5/6/7 hold
+17/29/1. Before export the source result cells are7/8/9; private parameter/seed
+are5/6, private scratch10. Actual low-first export overwrites only5..7. Stack77,
+sentinel99 and stale scratch/source cells outside the live context are pinned;
+binder dropping is not physical zeroization. The caller then requires flag,
+sets its scalar to100*lo+hi=1729 and writes lo through its old alias, yielding
+old0=[19,17] while unrelated old1 remains[23,29,31]. Prefix cursor263 advances to266
+and remains266. Needs are4/10/10/7; allocations7/3/0. An actual high-first bad
+instruction control executes successfully but corrupts lo to1 via overlap,
+producing [1,29,1], rather than relying on a failed Input premise.
+
+represented_stages obtains ALL three reached representations and execution
+witnesses from actual prefix/call/next code. GrowsAllocator.nextInput produces
+the real call/checked-program capacity; no midpoint is supplied. The owned
+Calls.Program is embedded in the existing checked Compilation.memoryCalls
+constructor, with actual pushFree proof and public memoryCalls_input/correct.
+This is explicitly NOT a claim that Compiler.compile returned that certificate.
+Exact target code and actual source/target states pin both sorted result order
+and caller-tail preservation. Wrong same-typed result order/destination, private
+reference escape, old/unrelated content, composed cost and cursor all have
+successful baselines and rejecting observations. withinM.view remains false
+for the mutating body, preserving its old noninterference exclusion.
+
+Ready original Work5 preparation continues through an ACTUAL tuple bare-failure
+control with valid reached prefix representation. The body reverts before its
+syntactically present allocation: exact reached cost0, source bare revert and
+actual target revert are proved. No failed State or rollback is reconstructed.
+A byte-payload variant retains actual revertWith[7] and is REFUSED by the owned
+selector. expand_runR preserves arbitrary original errors, but the target
+certificate only covers the actual compiled fragment; panic, exhausted,
+diverge and nonempty byte paths are not collapsed into ordinary revert.
+
+Independent finder/skeptic read-only source reviews found no mathematical,
+hypothesis, coupling or ownership defect. Finder requested clearer copy-order
+prose; that comment is corrected. No Lean/server/builds were used by reviewers.
+48 final scoped reports are pinned by a NEW tuple guard. The existing27 and42
+fixture guards remain unchanged; new guard growth preserves every earlier new
+pin. Empty-tuple selector and zero-parameter copy controls pass. Additive root
+import/module-map registration keeps the new core module below elaborators;
+all fixture elaboration stays outside core. No producer/reserved source edit,
+AST/evaluator, axiom/sorry/native_decide/implemented_by, raised heartbeat/depth,
+changed profile/Fml.inTarget/verdict/exclusion/SolKey mapping or goal write.
+
+Remaining ENTIRE original queue (not reset by this checkpoint):
+
+| Item | Scoped progress and actual remaining producer/integration |
+|---|---|
+| Work1/G37.01 | PARTIAL: all actual primitive Binders arities now have a proved owned direct-call target adapter and real three-result endpoint. Public compiler tuple admission/integration remains with its owner; reference tuple syntax/default allocation is unrepresentable in current Binders; single storage/general recursive runtime frames remain open. |
+| Work2/G37.02 | PARTIAL/BLOCKED: primitive result-count induction is not runtime recursion. Existing finite direct-call/unrolling/prefix proofs remain; uncapped intrinsic/runtime target recursive simulation and lowering remain absent/refused. Independent unbounded Source semantics is published and unchanged. |
+| Work3/G37.03 | BLOCKED: ordinary direct tuples are not dependent full-signature function-value dispatch. Its actual frame/lowering producer and restricted existing owner remain untouched. |
+| Work4/G36.01-.03 | PARTIAL/BLOCKED: ordinary supported blocks/branches and old finite mixed-loop controls remain; general mixed heap/storage push/pop/shrink/allocation loops, break/continue/early-return transport and V14 application remain open. |
+| Work5/G38 | PARTIAL/BLOCKED: actual tuple bare failure now consumes the new frame adapter, with unreachable allocation cost0. Arbitrary bytes/panic/return/unwind and actual word-to-Slice byte/frame/journal/whole-world coupling are not discharged. |
+| Work6/G39 | PARTIAL/BLOCKED: no new transaction reset/transient/persistent root/world/callback application is implied by memory-only tuple transport. Existing intrinsic and projected laws remain. |
+| Backfill A | PARTIAL: new arbitrary primitive result export supplements actual alias/content/renaming/prefix/finite-recursion work. Full reference/signature/runtime coverage and mandatory integration/validation remain. |
+| Backfill B | PARTIAL: existing projected/nested byte/finite-loop evidence plus actual tuple bare-failure preparation remain partial; full unwind/rollback/root/world coverage and validation remain. |
+
+For integration, importing this module into MemoryCalls itself would be cyclic
+because it consumes MemoryCalls; the reserved owner must arrange an appropriate
+shared layer/registration or consume the owned selector from an acyclic compiler
+entrypoint. No reserved import/branch is changed here. Global automatic tuple
+admission is not silently claimed from the manually checked artifact.
+
+Original full run-lean.sh exit124 at fixed300s and unreached TestSuite/sort remain
+FAILED/incomplete; it is not repeated. No-build exit3 is inventory only. Raw docs
+exit1 and COMPLETE exact-base no-new comparisons remain separate. All new raw
+diagnostic failures and the expected reference-binder type-refusal command are
+retained. Final per-file/import/runtime/guard/script/structural/doc outputs,
+independent artifact reviews and exact committed bindings are recorded in NEW
+continuation9; all nine earlier sealed checkpoint sets are preserved.
+
+
+Continuation9 actual scoped gates: Lean4.24.0
+(797c613eb9b6d4ec95db23e3e00af9ac6657f24b), Lake5.0.0-src+797c613; dedicated
+KeySort successful2jobs, RUNTIME_GATE_PASS only. Final owned/published-control
+import closure198jobs passes. All17 owned modules and THREE fixtures pass the
+serial20file sweep in92.642s, below its unchanged120s bound. Final tuple selector,
+source/target and failure controls pass20.912s; separate exact guards pass48 new,
+42 prior mutation and27 prior single-call reports. Altered/missing/duplicated/
+error-bearing tuple guard controls reject as intended. Layer/import/orphan/trust
+checks pass (17owned,1015reachable,1030sources/246sites, zero findings). All nine
+prior seals verify unchanged109/84/91/86/114/90/34/7/7 entries. Only17 verified
+stopped continuation9 CIDs were removed, retaining one cache and about14GiB disk
+headroom. No OOM, time-bound or proof-budget increase was used this checkpoint;
+intermediate syntax/type/proof errors and the intended binder type-refusal keep
+their actual exit1 logs. Original full124/300s, no-build3 and raw docs1 failures
+remain. Final complete docs comparisons, committed source/cache hashes,
+independent source/artifact reviews and original/checkpoint patches/bundle/
+checksums are bound in the new continuation9 handoff and evidence.

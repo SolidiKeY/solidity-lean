@@ -1218,3 +1218,4 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/EvaluatedRevert.lean` | Actual typed payload/call result to checked/local failure emission, preserving normalized bytes and refusing lossy halt-class interpretation. |
 | `Backend/InternalFlow/EvaluatedRevertChecks.lean` | Evaluated 134-byte word/heap payload through nested calls and scoped prefix, checked byte/stack/root observations, empty/class/evaluation/headroom controls. |
 | `Backend/InternalFlow/PublishedDirectCalls.lean` | Consumers of published direct memory-call endpoint, exact frame export, allocator and bare-revert proofs. |
+| `Backend/InternalFlow/TupleCalls.lean` | Checked direct primitive-tuple call expansion/export for arbitrary binder arity, real instruction compaction/frame proof, and explicit reference-binder type boundaries. |

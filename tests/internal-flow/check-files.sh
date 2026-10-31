@@ -14,3 +14,7 @@ lake env lean -j1 --tstack=131072 "$file" > "$out/final-PublishedMemoryCalls-dia
 file=tests/internal-flow/MutatingMemoryCalls.lean
 echo "lake env lean -j1 --tstack=131072 $file"
 lake env lean -j1 --tstack=131072 "$file" > "$out/final-MutatingMemoryCalls-diagnostics.log" 2>&1
+
+file=tests/internal-flow/TupleMemoryCalls.lean
+echo "lake env lean -j1 --tstack=131072 $file"
+lake env lean -j1 --tstack=131072 "$file" > "$out/final-TupleMemoryCalls-diagnostics.log" 2>&1
