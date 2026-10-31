@@ -1002,3 +1002,11 @@ separation/successful outputs/default availability as applicable. The finite
 agreement instance is constructed; supplied scalar codecs retain individual
 inverse laws. These have no SolKey taclets and are not Y09.02 statement rules,
 notation/printers, source admission or whole-store/compiler closure.
+
+VY2 heap preparation (Lean-only, YQ5): `heapByteWriteback_encode`,
+`heapByteWriteback_unchanged`, `heapByteWriteback_types_next`,
+`heapByteResult_choices`, `bytesObject_other_object`, `bytesObject_reserved`,
+`heapByteStateWriteback_MemOK` and `heapByteStateStep_preserves` use actual typed
+Heap/EMState and owner MemOK. Real allocated-object/type/Placement/header/size
+and nonoverlap premises remain explicit. No SolKey taclet, all-assembly rule,
+Y09.02 notation/printing, full heap realization or compiler closure is claimed.

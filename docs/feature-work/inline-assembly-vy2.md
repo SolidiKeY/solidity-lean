@@ -711,3 +711,102 @@ V12/V13/V15/V16 joint gates. Goal remains blocked unchanged; get_goal unavailabl
 no create/reset/reactivation/completion/stop transition. Approved YQ1–YQ7 remain
 in the scope record; questions=[]. Prior3417-entry artifacts/manifests and all
 older raw failures are preserved under finite-paths/prior-* before refresh.
+
+### Actual selected heap bytes/string checkpoint (2026-10-31)
+
+HeapByteWriteback now decodes physical bytes/string objects into actual
+Source.Heap.write at the selected object's original logical identity and exact
+declared type. It reuses ByteObjects' existing decoders; no second state/value IR,
+opaque writeback/inverse premise, arbitrary decoder cap or owner rewrite. The
+original allocated object/get proof and actual valid Placement are explicit inputs.
+The selected preparation retains the original length header, so the original
+Placement's exact shape remains valid. Changed payloads update the real typed
+object; unchanged header/payload returns the WHOLE original heap by proved heap
+extensionality. Every other cell, all types, next and boundedness are preserved.
+Alias/get laws, decode/encode and exact physical re-encoding preserve residual and
+padding bytes. None on header mismatch is unsupported selected preparation, NOT
+Yul refusal/no-op or semantics for required raw header/growth cases.
+
+HeapBytePlacement/Composition construct valid placement for actual successful
+outputs, retaining original address/shape/free choices and all reserved-area,
+capacity, distinctness and separation obligations. Length bounds derive from the
+actual Placement's ends/free bound. No alignment requirement added. Same-sized
+canonical patches preserve the exact free-pointer and zero words, every other
+nonoverlapping object's live region and decoder; the latter retains its real
+correct-header premise. Actual Heap.write operations at distinct identities
+commute, with concrete writeback calls in both orders. Full allocated padding is
+not silently cleaned. No allocation is performed or refinement theorem claimed.
+
+HeapByteMemOK proves transport of ACTUAL owner Source.MemOK for every initial
+heap typing H, using existing HeapOK/HeapShaped/HeapInner/LocalsOK laws. Actual
+owner definitions are AVAILABLE in Source/State.lean and Source/WellTyped.lean;
+there is no Source/Heap.lean module. withSourceHeap updates the actual typed
+EMState, retaining locals/world/observations/other state. The selected relation
+heapByteStateStep is defined by implemented writeback; heapByteStateStep_preserves
+proves the existing PreservesMemOK contract for that relation, not all assembly.
+It does not instantiate whole MemoryWritebackObligations or MemoryLayoutObligations.
+
+Controls use actual Heap.alloc for bytes3, string33 and unrelated bytes3. They
+inhabit changed/unchanged whole heaps, same-identity bytes/string aliases, actual
+source reads through BOTH local alias values at EVERY horizon, actual initial/
+output MemOK and two successful state writebacks. Non-UTF8 ff string bytes are
+preserved. Other-cell/type/next/bounds, forward/reverse changes, nonzero a5 padding/
+gaps, exact reserved words and unaligned placement choices are controlled.
+Ordinary allocated empty and31/32/33-byte families prove writeback/unchanged and
+exact free/padding boundaries; Fin34 is a finite test family, never a decoder cap.
+Shared zero-slot empties remain separate. Initial direct normalization exceeded
+default recursion depth; replaced by existing codec/frame proofs, no limit raised.
+All raw syntax/inference/normalization failures retained. G0/history21067a47 and
+owner invariant interfaces inspected; checking-cost warning preceded the local
+helpers. Only parameter-only Bool is matched in new computational selectors.
+
+Pinned HeapBytes.sol adds10 ordered calls/pipeline, with independently specified
+18-word ABI-byte envelopes: complete length/payload words, typed bytes/string
+alias reads, unrelated object, padding/gaps, exact free/zero words and ordinary
+empty/31/32/33 boundaries, plus exact explicit revert and fresh-call observation.
+Both solc0.8.38/Osaka legacy/via-IR pass; unchanged100m gas/5m steps and optimizer
+disabled. Full return bytes, constructor exception/bytes/runtime hash/length,
+pipeline inventory and89 fail-closed mutations pass. Raw header3→4 succeeds in
+both pipelines and is EXPLICITLY OPEN in the same-length kernel preparation;
+its None does not establish an exclusion/refusal/no-op. Initial free0x80 and the
+explicit384/256-byte object/boundary allocations explain observed512/384 pointers;
+retained IR/code hashes and exact observations are specific compiler evidence,
+not a source allocation discipline or refinement proof.
+
+All earlier16 physical vectors, four upstream fixtures/13 calls/four deployments,
+nine writeback, five residual and ten finite calls per pipeline retain order and
+expectations; all81/14/33/55 earlier negative controls still pass. Kernel proofs,
+compiled golden controls and external compiler/EVM tests remain separate. No
+frontend/manifest promotion or Source/Yul/compiler correspondence follows.
+
+Per-file CLI diagnostics (Lean MCP unavailable), focused39 jobs and final full
+wrapper exit0:1024 default/262 suite jobs,131 matched annotations. Exact768 public
+signatures/413 theorem axiom reports pass with only propext,Quot.sound,
+Classical.choice. Actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613, mandatory KeySort exit0,2 jobs before RUNTIME_GATE_PASS
+prerequisite claim. Strict automatic exact-base/head exit0 and equal outputs.
+Same hard aggregate12GiB/no swap, serial-j1/LEAN_NUM_THREADS=1, writer lock and
+actual OS/RSS/disk monitor/caches. Independent read-only finder/skeptic reviews
+used no Lean/server/build/tests. Their inhabited-state/alias-read control gap was
+fixed and re-reviewed; no remaining confirmed findings. Exact commands, static/
+trust/docs results, revisions and preserved artifacts: heap-bytes/HANDOFF.md in
+`/workspace/vy2-evidence` and cumulative HANDOFF.md.
+
+Full queue remains unfinished. Y05 is PARTIAL: selected ordinary fixed-shape
+bytes/string writeback and actual selected-step MemOK are done; complete heap
+view/realization, raw header/size changes (even within rounded extent), growth,
+shared-zero empties, dirty word/pointer-bearing/nested aggregates, reserved-word
+mutation semantics, actual assembly integration and allocator refinement remain
+open. MemoryWritebackObligations.realize still quantifies ∀H s, MemOK E H s →∃m,
+view s m; MemOK alone gives no EVM placement/capacity bound on arbitrary logical
+byte lists. MemoryLayoutObligations.realize receives a valid Placement but still
+owes ALL object/word/byte reads, not just selected objects. We neither weaken
+those signatures nor fake whole-memory instances. Concrete V11 compiler layout
+agreement and full assembly MemOK composition still require actual producer
+interfaces. Y04/Y06 and Backfills A/B remain partial; concrete Y09.02 remains
+blocked. Existing Source.World/memory-call/Bridge and owner MemOK definitions
+are present, not substitutes for missing VY1/source/calculus/compiler and
+V10/V11/V12/V13/V15/V16 joint obligations. Goal blocked unchanged; get_goal absent;
+no create/reset/reactivation/completion/stop transition. Approved YQ1–YQ7 remain
+in scope; questions=[]. Original3540 manifest/artifacts verified and preserved
+under heap-bytes/prior-*; older failures/caches retained.

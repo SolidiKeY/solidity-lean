@@ -255,3 +255,18 @@ signatures/axioms and wrapper1017/262+131 pass after independent read-only revie
 Y04/Y05/Y06/Backfills A/B stay partial, concrete Y09.02 blocked and goal unchanged.
 Exact revisions, raw gate failures/comparisons and cumulative/versioned artifacts:
 `/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 actual selected heap-object handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) constructs ordinary allocated bytes/string physical
+writeback into actual Source.Heap, exact whole-heap identity and unchanged types/
+next/bounds/other cells, original Placement transport and nonoverlap/residual/
+reserved laws. It proves ACTUAL owner Source.MemOK transport for selected steps,
+with inhabited source states and real reads through bytes/string alias locals.
+Same-header-length preparation is not full heap/Y05 support: raw header growth
+succeeds in both compiler pipelines and remains explicitly open in this model.
+New ten-call exact-byte fixture and89 negatives pass, all previous observations/
+controls preserved.768/413 signatures/axioms and wrapper1024/262+131 pass after
+independent reviews/fixes. Full Y04/Y05/Y06/Backfills A/B stay partial, concrete
+Y09.02 and original goal blocked. Exact heads/gates/limitations/versioned artifacts:
+`/workspace/vy2-evidence/HANDOFF.md`.
