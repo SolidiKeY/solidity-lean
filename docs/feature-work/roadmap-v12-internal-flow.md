@@ -808,3 +808,42 @@ result-coupling, class, machine-hook and projected-restoration boundaries above.
 Final staged diff/artifact review and actual full head/base/source hashes are
 bound in the external continuation handoff. All original Work1–6/A/B and the
 mandatory full gate remain unfinished; no whole-lane completion is claimed.
+
+
+### Automatic continuation: producer reinspection and Work2 qualification
+
+At clean implementation head86577b388a1a0d438a3454585a343608ad98e5c9,
+read-only reinspection confirmed that Failure/Observe already publishes the
+qualified assertion/require and encoded-result observation component laws.
+Adding another wrapper would duplicate completed reserved work without producing
+the missing target runtime/frame representation. No generic panic-code mapping
+or whole-State rollback is added. Checked memory compiler StateRepr/AllocationInput
+interfaces and limited compiler paths are acknowledged; their existence is not
+denied by the core-fragment refusal controls.
+
+Independent finder review corrected an overbroad Work2 blocker description:
+the INDEPENDENT unbounded source semantics is ALREADY PUBLISHED in
+`Solidity/Source/Eval.lean` (horizon family, including callInternal) and
+`Solidity/Source/Semantics.lean` (sessionAt_consistent/sourceLang).
+The horizon-zero timeout is not itself program behaviour, and that family has
+no fixed loop/internal-recursion completion cutoff. External callAddr/envLoop
+depth-limit failure branches remain unchanged. The still-missing V12 obligation
+is its lowering/uncapped intrinsic-runtime interface and target recursive-frame
+simulation. The separate scoped intrinsic recDepth/recUnroll use in
+`Solidity/Syntax/Scoped.lean` and `Solidity/Syntax/Elab/Arms.lean` remains;
+changing1024 or repackaging finite controls cannot prove that connection.
+Earlier references to a missing source-recursion producer must be read with
+this qualification: existing independent source semantics is reused read only,
+not reassigned, absent or being recreated.
+
+All original Work1–6 and Backfills A/B remain partial/blocked as mapped above.
+No new Lean source, theorem, representation assumption, profile/refusal/verdict,
+reserved implementation or proof budget is changed. No unchanged heavy gate is
+repeated; the original full300s exit124 and readiness-only no-build exit3 remain.
+This is a documentation correction with separate exact-base documentation
+comparisons and independent finder/skeptic review, not an empty marker commit
+or another proof/completion claim. Its versioned blocker audit is under
+/workspace/scratch/v12-flow-calls/continuation-6-blocker-audit; all prior sealed
+sets remain untouched. Stopping the existing goal as blocked is requested only through the automatic
+continuation's goal context, without recreation/reset or a competing continuation;
+the actual stop result is recorded in that audit.
