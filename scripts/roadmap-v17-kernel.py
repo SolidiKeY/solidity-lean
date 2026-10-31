@@ -277,6 +277,9 @@ def collect(req, out):
     (out/'request.json').write_bytes(canonical(req))
     try:
         before=e.snapshot(ROOT); closure=source_closure(req['module']); installed=tool_inputs(before)
+        headroom=int(next(l.split()[1] for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:')))*1024
+        disk=os.statvfs(ROOT); free=disk.f_bavail*disk.f_frsize
+        e.require(headroom>=2*1024**3 and free>=1024**3,'headroom/disk guard')
     except (OSError,ValueError,subprocess.SubprocessError) as err:
         failure={'schema':1,'exit':2,'phase':'preflight','request':req,'error':str(err),'releaseClosed':False,'semanticPremisesDischarged':False}
         (out/'record.json').write_text(json.dumps(failure,indent=2)+'\n'); return failure
@@ -324,6 +327,7 @@ def collect(req, out):
             proc.kill()
             try: proc.wait(timeout=2)
             except subprocess.TimeoutExpired: errors.append({'phase':'attach cleanup','error':'unreaped client'}); code=125
+    command_exit=code
     try: after=e.snapshot(ROOT)
     except (OSError,ValueError,subprocess.SubprocessError) as err: after={'error':str(err)}; code=125
     try: installed_after=tool_inputs(before)
@@ -338,14 +342,19 @@ def collect(req, out):
     record={'schema':1,'directory':str(out),'before':before,'after':after,'request':req,'sourceClosure':closure,
             'templateSha256':e.digest(TEMPLATE.read_bytes()),'querySha256':e.digest((out/'Query.lean').read_bytes()),
             'pipelineSha256':e.digest((out/'pipeline.sh').read_bytes()),'dockerArgvSha256':e.digest((out/'docker-argv.json').read_bytes()),
-            'installedBefore':installed,'installedAfter':installed_after,'exit':code,'elapsedSeconds':elapsed,'containerName':container,
+            'headroomBytes':headroom,'diskFreeBytes':free,'commandExit':command_exit,'installedBefore':installed,'installedAfter':installed_after,'exit':code,'elapsedSeconds':elapsed,'containerName':container,
             'sampleFormat':p.SAMPLE_FORMAT,'freshStartAbsent':True,'samples':samples,'errors':errors,'result':result,'releaseClosed':False,'semanticPremisesDischarged':False}
     record['attachments']={str(path.relative_to(out)):e.digest(path.read_bytes()) for path in out.rglob('*') if path.is_file()}
+    if record['exit']==0:
+        try: validate_record(record,before)
+        except (ValueError,KeyError,TypeError,OSError,RecursionError,subprocess.SubprocessError) as err:
+            record['errors'].append({'phase':'collection integrity','error':str(err)}); record['exit']=125
     (out/'record.json').write_text(json.dumps(record,indent=2)+'\n')
     return record
 
 
 def check_runtime(r, current, out):
+    e.require(r['headroomBytes']>=2*1024**3 and r['diskFreeBytes']>=1024**3,'insufficient recorded headroom/disk')
     e.require(r['freshStartAbsent'] is True and r['sampleFormat']==p.SAMPLE_FORMAT,'missing fresh execution/runtime evidence')
     e.require(0<r['elapsedSeconds']<=305,'execution budget exceeded')
     mandatory={'request.json','Query.lean','Axioms.lean','pipeline.sh','docker-argv.json','execution.sh','command.stdout','query.stdout','query.stderr','axioms.stdout','axioms.stderr','memoryMax','swapMax','memoryPeak','realLeanSha256','lakeSha256','leanVersion','lakeVersion','leanNumThreads'}
@@ -369,6 +378,7 @@ def check_runtime(r, current, out):
 
 
 def validate_record(r, current):
+    e.require(r['commandExit']==0 and type(r['commandExit']) is int,'nonzero command exit')
     e.require(r['schema']==1 and r['exit']==0 and type(r['exit']) is int, 'missing/nonzero extraction gate')
     e.require(r['before']==r['after']==current, 'stale source/revision/toolchain extraction')
     e.require(r['installedBefore']==r['installedAfter']==tool_inputs(current), 'changed installed import inputs')
@@ -410,6 +420,7 @@ def main():
         old=e.load(args.record); req=validate_record(old,e.snapshot(ROOT))
         replay=collect(req,args.out)
         e.require(replay['exit']==0,'live replay failed')
+        validate_record(replay,e.snapshot(ROOT))
         # Absolute fresh import paths differ between runs; declarations must match exactly.
         e.require(old['result']['rows']==replay['result']['rows'],'live declaration replay differs')
         result=match_claims(e.load(args.claims),replay['result']); print(json.dumps(result)); return 0

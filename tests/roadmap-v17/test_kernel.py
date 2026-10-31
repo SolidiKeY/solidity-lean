@@ -2,6 +2,7 @@
 import copy
 import importlib.util
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 spec=importlib.util.spec_from_file_location('kernel',ROOT/'scripts/roadmap-v17-kernel.py')
@@ -53,4 +54,17 @@ class KernelControls(unittest.TestCase):
         self.assertIn(b'import Solidity.KeySort',raw); self.assertIn(b'le_trans',raw)
         other=self.req(); other['declarations'][0]['kind']='definition'
         self.assertNotEqual(raw,k.query_bytes(other))
+class BindingControls(unittest.TestCase):
+    def record(self):
+        return dict(schema=1,exit=0,commandExit=0,before={'revision':'a'},after={'revision':'a'},installedBefore={'tool':'hash'},installedAfter={'tool':'hash'},request=KernelControls().req(),directory='/workspace/scratch/example',containerName='roadmap-v17-'+'a'*32,sourceClosure={'order':[],'modules':{}},templateSha256=k.e.digest(k.TEMPLATE.read_bytes()),querySha256=k.e.digest(k.query_bytes(KernelControls().req())),pipelineSha256='bad',attachments={})
+    def test_changed_revision_tool_source_query(self):
+        for field,value in [('before',{'revision':'other'}),('after',{'revision':'other'}),('installedAfter',{}),('installedBefore',{}),('sourceClosure',{}),('querySha256','bad'),('templateSha256','bad'),('commandExit',1),('exit',1)]:
+            r=self.record(); r[field]=value
+            with self.subTest(field=field),patch.object(k,'tool_inputs',return_value={'tool':'hash'}),patch.object(k,'source_closure',return_value={'order':[],'modules':{}}),self.assertRaises(ValueError):
+                k.validate_record(r,{'revision':'a'})
+    def test_runtime_rejects_missing_and_unknown_measurements(self):
+        r=dict(headroomBytes=2*1024**3,diskFreeBytes=1024**3,freshStartAbsent=True,sampleFormat=k.p.SAMPLE_FORMAT,elapsedSeconds=1,sourceClosure={'order':[]},attachments={})
+        with self.assertRaises(ValueError): k.check_runtime(r,{},Path('/workspace/scratch/example'))
+        r['headroomBytes']=0
+        with self.assertRaises(ValueError): k.check_runtime(r,{},Path('/workspace/scratch/example'))
 if __name__=='__main__': unittest.main()
