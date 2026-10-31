@@ -69,3 +69,9 @@ import SolidityBridge.RoadmapV15.EnvironmentReferenceControls
 
 import SolidityBridge.RoadmapV15.BalanceReference
 import SolidityBridge.RoadmapV15.BalanceReferenceControls
+
+import SolidityBridge.ExternalEvm.TryMemory
+import SolidityBridge.ExternalEvm.TryMemoryCode
+import SolidityBridge.ExternalEvm.TryMemoryDriver
+import SolidityBridge.RoadmapV15.CompiledStoreCheckpoint
+import SolidityBridge.RoadmapV15.CompiledStoreControls

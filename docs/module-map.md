@@ -1248,3 +1248,11 @@ pass. This is pure encoding/observation evidence, not machine correspondence.
 |---|---|
 | `Bridge/SolidityBridge/RoadmapV15/BalanceReference.lean` | Three actual numeric BALANCE observation/backend/supplied-reference consumers; low160bit addressing and full accessed-account state update; no driver/gas/Osaka/world closure. |
 | `Bridge/SolidityBridge/RoadmapV15/BalanceReferenceControls.lean` | High-bit/nonzero/distinct/absent/max-operand, accessed-account/map frame, complete stack, underflow/zero-fuel controls and three axiom audits. |
+
+| Module | Role |
+|---|---|
+| `Bridge/SolidityBridge/ExternalEvm/TryMemory.lean` | Exact read-only published4165de13 producer: actual MSTORE, frame, expansion and base-cost components; opaque serialization retained. |
+| `Bridge/SolidityBridge/ExternalEvm/TryMemoryCode.lean` | Exact read-only published4165de13 producer: complete legacy/viaIR runtime inputs and byte/size facts, not compiler correctness or entry reachability. |
+| `Bridge/SolidityBridge/ExternalEvm/TryMemoryDriver.lean` | Exact read-only published4165de13 producer: actual decode/fetch/positive-fuel step and zero-fuel components, separate from X admissibility. |
+| `Bridge/SolidityBridge/RoadmapV15/CompiledStoreCheckpoint.lean` | Five checked concrete PC4 decode/gate/supplied/fetched/X-continuation consumers, discharged9+3 charge; no reachability/padding/whole-execution/Osaka closure. |
+| `Bridge/SolidityBridge/RoadmapV15/CompiledStoreControls.lean` | Both actual complete runtime inputs, exact checkpoint tuple, gas12/11/8, static/underflow/zero-fuel/wrong-opcode and distinct-code controls; five axiom audits. |

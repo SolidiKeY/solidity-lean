@@ -1249,3 +1249,83 @@ remain partial and all150 opcode rows OPEN. Next newly enabled original consumer
 work will inspect the already-genuinely-published TryMemory/Code/Driver sources;
 these were previously unavailable only because their reference imports could
 not be checked. No prerequisite is counted proved merely from its publication.
+
+
+## Published fetched-store checkpoint (cd80b3fc continuation)
+
+After BALANCE checkpointd36f35db06238076d269b15fd56531ebb348a401, the restored
+imports enabled checking three previously inspected genuine published producers.
+Only the exact byte-identical files from the already-fetched normal-origin
+commit4165de133bafd522ab18099e18cad489bb1aa7d6 were incorporated:
+[TryMemory.lean](../../Bridge/SolidityBridge/ExternalEvm/TryMemory.lean),
+[TryMemoryCode.lean](../../Bridge/SolidityBridge/ExternalEvm/TryMemoryCode.lean),
+[TryMemoryDriver.lean](../../Bridge/SolidityBridge/ExternalEvm/TryMemoryDriver.lean).
+All56 vendor dependency files match that publication; only its VENDOR.md narrative
+differs from the inherited checkout, and that reserved document is untouched.
+The initial stricter all-file comparison stopped on that documentation mismatch;
+the failure and exact subsequent semantic-source comparison are retained.
+No master merge, unmerged dependency, producer repair, pin/toolchain upgrade or
+source/profile/budget change occurred. All three per-file kernel checks pass;
+Code took46.174s with942108672byte cgroup peak, within original300s/12GiB limits.
+Publication, Git blobs, SHA256 values, normal-origin fetch and frozen-base ancestry
+are recorded in bridge-cd80b3fc/trymemory-publication.json. Independent finder and
+skeptic verified the exact incorporation and boundaries read only.
+
+[CompiledStoreCheckpoint.lean](../../Bridge/SolidityBridge/RoadmapV15/CompiledStoreCheckpoint.lean)
+proves five new public consumer laws: `compiled_store_decode`,
+`compiled_store_gate`, `compiled_store_supplied`, `compiled_store_fetched`, and
+`compiled_store_driver`. The existing Pipeline type selects the two complete
+published runtime inputs. The explicit checkpoint is positioned atPC4 with empty
+memory/activeWords0, stack[64,128], gas12 and permissive static flag; arbitrary
+seed world/account/context fields otherwise remain. These are constructed
+checkpoint inputs, not a restriction on admitted source/compiler profiles or
+proof of entry reachability/installation. The actual driver's complete gate is
+discharged, using9 expansion plus3 base gas, without any gas-success/simulation
+premise. The actual whole fetched/supplied result retains the real vendor mstore
+serialization/padding expression. One actual X continuation follows with positive
+fuel; it asserts neither final success nor observation/source/transaction/trace
+agreement. No physical padding/read-value/allocator witness is inferred.
+
+[CompiledStoreControls.lean](../../Bridge/SolidityBridge/RoadmapV15/CompiledStoreControls.lean)
+preserves the complete result tuple(pc5,gas0,activeWords3,execLength20,stack[])
+for both real runtime inputs and checks actual code/account/caller identity,
+12-gas gate success,11-gas base refusal,8-gas expansion refusal, actual underflow,
+zero fuel and wrongMSTORE8 opcode. Static-context MSTORE remains legal; no profile
+exclusion is added. Full code lengths1673/1965 remain distinct. All five headline
+axiom reports are only propext/Classical.choice/Quot.sound. The total public checked
+consumer-law count is108 (92previous+8environment+3BALANCE+5checkpoint); private
+word-charge/control helpers are excluded from that count.
+
+Proof iteration failures are retained: record-layout and explicit finite-word
+subtraction/let-normalization errors were fixed without changed statements or
+budgets. The first new control eagerly reduced a whole runtime/state expression;
+only its task-owned container was stopped with exit137 after45.877s before the
+12GiB cap. A pre-stop cgroup peak snapshot was10475413504bytes; aggregate sampled
+Lean/Lake RSS peak was11555598336bytes, with final cgroup reading unavailable due
+to that stop. No final peak is manufactured. The same complete expected tuple is
+now proved by explicit small projection and published size/expansion lemmas;
+controls pass with296423424byte cgroup peak and unchanged limits. Both independent
+finder/skeptic reviews cleared actual statements, hypotheses, non-vacuity,
+complete state/controls, exact source ownership and scope; neither ran Lean/builds.
+
+G46.02/G46.06 gain one actual fetched/gated checkpoint only. EntryPC0 reachability,
+installed-code/source association, physical returned bytes/padding/allocation,
+compiler paths/calldata, whole-driver resources and approved Osaka/full V13/V14
+account/call/create/transaction/finite-infinite trace composition remain open.
+All150 opcode rows and their secondary clauses remain OPEN. No approved hash
+premise, original refusal, expected observation or compiler pipeline was changed.
+QOFF2 is fulfilled and mandatory Bridge closure is now checked, but full-source
+historical5400s exit124 and original semantic goal remain blocked independently.
+
+
+Fetched-store checkpoint gate/handoff: final mandatory four-target Bridge build
+passes2157jobs in65.717s, cgroup peak1081344000bytes,12GiB/no swap,
+no monitor violation. Layer/orphan/trust/whitespace pass; raw docs remains exit1
+with separate complete-class/multiplicity no-new comparisons against frozen and
+published baselines. Separate independent read-only producer-incorporation and
+consumer finder/skeptic reviews clear; all108 public consumer laws are checked.
+No producer theorem is counted as a new owned consumer. Full original lane and
+unchanged persistent goal remain blocked; all150 opcode rows remain OPEN.
+Next available metadata work consumes committed selectors/address-function
+packing against actual reference immediate reading and supplied PUSH dispatch;
+no missing producer is silently replaced or assumed discharged.
