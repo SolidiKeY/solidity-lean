@@ -430,6 +430,8 @@ import Solidity.Evm.MemoryCompound
 import Solidity.Evm.MemoryCapture
 import Solidity.Evm.MemoryCompile
 import Solidity.Evm.Compiler
+import Solidity.Evm.MemoryCalls
+import Solidity.Evm.MemoryCallExamples
 import Solidity.Roadmap.Contracts
 import Solidity.Roadmap.Frontend
 import Solidity.Roadmap.Evm
