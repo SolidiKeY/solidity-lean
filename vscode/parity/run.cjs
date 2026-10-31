@@ -43,7 +43,7 @@ function shortSummary(report) {
     '', '| Target | Workers requested | Cache requested | Trials | Failures | Initial median ms | Initial p95 ms | Peak RSS median bytes |',
     '|---|---:|---|---:|---:|---:|---:|---:|'];
   for(const s of report.summary) lines.push(`| ${s.target} | ${s.workers} | ${s.cache} | ${s.trials} | ${s.failures} | ${s.metrics.initialVerificationMs?.median?.toFixed(1)??'unmeasured'} | ${s.metrics.initialVerificationMs?.p95?.toFixed(1)??'unmeasured'} | ${s.peakRssBytes.median??'unmeasured'} |`);
-  lines.push('','Local backend has no verification worker/cache setting. Requested values are recorded as unsupported, never treated as applied.',
+  lines.push('','Local workers bound concurrent files (1–4). Within-file obligations remain serial. Local exact-snapshot caching is always enabled; Dafny cache policy names do not select equivalent local policies.',
     '', '## Parallel scaling','', '| Target | Cache | Workers | Speedup | Efficiency |','|---|---|---:|---:|---:|',
     ...(report.parallelScaling||[]).map(s=>`| ${s.target} | ${s.cache} | ${s.workers} | ${s.speedup?.toFixed(3)??'unsupported'} | ${s.efficiency?.toFixed(3)??'unsupported'} |`));
   const grouped=new Map();
@@ -64,10 +64,11 @@ async function launch(config,options) {
     'solidityLean.backendPath':repo,'solidityLean.nodePath':process.execPath,'solidityLean.timeoutMs':options.operationTimeoutMs};
   settings['files.autoSave']='off';settings['telemetry.telemetryLevel']='off';settings['update.mode']='none';
   settings['git.enabled']=false;settings['workbench.secondarySideBar.defaultVisibility']='hidden';
+  if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']='never';}
   mkdirSync(join(config.workspace,'.vscode'),{recursive:true});
   writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
-  const hostConfig={...config,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off'&&config.target==='dafny',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
+  const hostConfig={...config,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
   const logfile=openSync(join(config.dir,'editor.log'),'w');
@@ -155,8 +156,8 @@ async function launch(config,options) {
       !error&&exitCode===0&&['passed','passed-with-gaps'].includes(result?.status)?result.status:'broken',exitCode,error,
     wallMs:performance.now()-start,result,resources:{...resources,samples:undefined},artifacts:config.dir,
     renderer:{...(rendererCapture||{captured:false,reason:'Host did not reach renderer capture'}),inputProbe:probe||{status:'unexamined'}},
-    protocol:config.target==='local'?{status:'missing',transport:'CLI JSON',reason:'No LSP endpoint in this extension'}:protocol(options.trace==='off'?null:config.trace),
-    applied:config.target==='local'?{workers:null,cache:null,reason:'Local extension has no worker or verification cache configuration'}:{workers:config.workers,cache:config.cache}};
+    protocol:protocol(options.trace==='off'?null:config.trace),
+    applied:config.target==='local'?{workers:config.workers,cache:'exact snapshot and persistent Lean document',reason:'The local cache does not implement Dafny caching-policy levels'}:{workers:config.workers,cache:config.cache}};
   if(result?.initialCompletedSinceHostMs!==undefined)run.result.metrics.processLaunchThroughVerificationMs=result.startedWallTime-launchedWallTime+result.initialCompletedSinceHostMs;
   if(result?.metrics?.activationMs!==undefined)run.result.metrics.processLaunchThroughActivationMs=result.startedWallTime-launchedWallTime+result.metrics.activationMs;
   const logs=join(portable,'user-data/logs');
@@ -184,7 +185,7 @@ async function main(args=process.argv.slice(2)) {
     dotnetVersion:options.dotnet?spawnSync(resolve(options.dotnet),['--list-runtimes'],{encoding:'utf8',timeout:10000}).stdout?.trim():null,
     leanVersion:spawnSync('lean',['--version'],{encoding:'utf8',timeout:10000}).stdout?.trim()||null,
     cpuQuota:process.platform==='linux'&&existsSync('/sys/fs/cgroup/cpu.max')?readFileSync('/sys/fs/cgroup/cpu.max','utf8').trim():null,
-    sourceFiles:Object.fromEntries(['vscode/src/extension.cjs','vscode/src/backend.cjs','vscode/parity/run.cjs','vscode/parity/host.cjs','vscode/parity/core.cjs','vscode/parity/observe.cjs','vscode/parity/renderer.cjs','vscode/parity/workloads.cjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(repo,path))).digest('hex')])),
+    sourceFiles:Object.fromEntries(['vscode/src/extension.cjs','vscode/src/backend.cjs','vscode/src/rpc.cjs','vscode/src/lsp-client.cjs','vscode/src/lsp-server.cjs','vscode/src/lsp-worker.cjs','vscode/src/lean-session.cjs','vscode/src/worker-pool.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','scripts/solc-ast.mjs','vscode/parity/run.cjs','vscode/parity/host.cjs','vscode/parity/core.cjs','vscode/parity/observe.cjs','vscode/parity/renderer.cjs','vscode/parity/workloads.cjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(repo,path))).digest('hex')])),
     memoryLimit:process.platform==='linux'&&existsSync('/sys/fs/cgroup/memory.max')?readFileSync('/sys/fs/cgroup/memory.max','utf8').trim():null},runs,summary:[],comparisons:[],
     limitations:['Equivalent constant-return obligations cover a shared semantic fragment, not general theorem-prover equivalence.',
       'No OS page-cache eviction is attempted. Process-cold and live-server warm timings are separate.',

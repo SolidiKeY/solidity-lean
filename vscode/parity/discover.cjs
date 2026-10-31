@@ -98,7 +98,11 @@ function assess(feature) {
     [/counterExample/,'counterexamples'],[/cancelVerifySymbol/,'cancellation'],[/verifySymbol/,'initial-verification'],[/launch-and-concurrency|verificationVirtualCores/,'concurrent-files-and-requests'],
     [/automaticVerification/,'configuration-and-save'],[/verificationCachingPolicy/,'incremental-verification'],[/compilation-status|compilation\/status/,'initial-verification']];
   for(const [pattern,scenario]of map)if(pattern.test(id)) {status='partial';scenarios.push(scenario);reason='Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.';}
-  if(feature.kind==='custom-protocol') {status='missing';reason='Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.';}
+  if(feature.kind==='custom-protocol') {status='missing';reason='Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.';}
+  const implemented=/handler:Dafny(Definition|References|Rename|Completion|SignatureHelp|DocumentSymbol)Handler|commands:dafny.restartServer|behavior:(gutter-status|compilation-status|status-bar-actions|language-editing-configuration|launch-and-concurrency|cache-invalidation-and-migration|parse-resolution-verification-diagnostics|member-and-attribute-completion)|grammars:|languages:/.test(id);
+  if(implemented){status='partial';reason='Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.';
+    scenarios.push(/restartServer/.test(id)?'server-restart':/cache/.test(id)?'warm-snapshot-cache':/Handler|completion/.test(id)?'language-services-callsite':'initial-verification');
+    local.push('vscode/src/lsp-server.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','vscode/src/worker-pool.cjs');}
   return {...feature,assessment:{status,reason,localSource:local,scenarioIds:scenarios,testEvidence:[]}};
 }
 function validate(inventory) {

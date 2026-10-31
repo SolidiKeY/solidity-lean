@@ -874,10 +874,14 @@
         "vscode/src/model.cjs",
         "vscode/test/host.cjs",
         "vscode/src/counterexample.cjs",
-        "vscode/test/counterexample.test.cjs"
+        "vscode/test/counterexample.test.cjs",
+        "vscode/src/lsp-server.cjs",
+        "vscode/src/language-services.cjs",
+        "vscode/src/worker-pool.cjs",
+        "vscode/test/lsp-real.test.cjs"
       ],
-      "assessment": "The Solidity Lean extension provides verify/discover/cancel, optional save verification, Test Explorer, diagnostics, hover, exact source IDs/ranges/hashes and stale-result suppression. Opt-in entry audits show vacuous proofs, and exact-goal refutations display certified model prestates. Completion/navigation and positioned execution traces remain open.",
-      "next": "Add completion/navigation and further source-associated language services using explicit compiler evidence."
+      "assessment": "The Solidity Lean extension provides a persistent LSP for exact unsaved snapshots, compiler-backed completion/navigation/signatures/rename, diagnostics, hover, gutters, Testing and automatic verification. Lean proof workers retain import environments; exact reports are cached with source/options/dependency identities. Opt-in entry audits and certified model prestates remain supported. Formatting, project services, positioned execution traces and full Dafny parity remain open.",
+      "next": "Extend receiver-aware completion, project ownership/includes, formatting, code actions and positioned traces; within-file proof scheduling remains serial."
     },
     {
       "id": "plugins-backends",

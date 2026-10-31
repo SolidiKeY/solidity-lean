@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "recorded": "2026-10-31T18:31:43.169Z",
+  "integrationBase": "4165de133bafd522ab18099e18cad489bb1aa7d6",
+  "node": "v24.19.0",
+  "offline": {
+    "command": "node --test --test-concurrency=1 vscode/test/*.test.cjs scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs scripts/solc-ast-hashes.test.mjs",
+    "tests": 90,
+    "pass": 89,
+    "fail": 0,
+    "skipped": 1,
+    "cancelled": 0,
+    "skipReason": "Real backend suite is explicitly invoked separately."
+  },
+  "realLsp": {
+    "command": "LEAN_NUM_THREADS=1 SOLIDITY_LEAN_REAL_BACKEND=$PWD node --test vscode/test/lsp-real.test.cjs",
+    "tests": 11,
+    "pass": 11,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "nativeEditorHost": {
+    "passed": true,
+    "checks": [
+      "activation",
+      "command",
+      "backend process",
+      "Test Explorer items",
+      "hover",
+      "diagnostics",
+      "precondition audit diagnostics",
+      "certified model prestate diagnostics",
+      "escaped model hover",
+      "edit invalidation",
+      "real solc + Lean proof",
+      "real pending obligation",
+      "real declaration ranges",
+      "real finite membership proof",
+      "real impossible entry certificate",
+      "real possible entry certificate",
+      "vacuous proof diagnostic",
+      "real exact-goal refutation certificate",
+      "real model argument source mapping",
+      "real model diagnostic and hover",
+      "real tuple-annotated safety proof",
+      "real invalid tuple component diagnostic",
+      "real tuple result hover",
+      "real lexical shadowing proof",
+      "real renamed witness source positions",
+      "real shadowed function diagnostic and hover",
+      "real default-diamond tuple VC proof",
+      "real equal tuple pending diagnostic",
+      "real tuple diamond proof and pending hovers",
+      "real tuple diamond Test Explorer statuses",
+      "real filtered membership proof and pending sibling",
+      "real reserved quantifier capture rejection",
+      "real mixed-failure retained source ranges",
+      "real filtered diagnostics and hovers",
+      "real filtered Test Explorer statuses"
+    ]
+  },
+  "leanApiBuild": {
+    "command": "LEAN_NUM_THREADS=1 lake build Solidity.Frontend.Testing",
+    "jobs": 263,
+    "peakRssBytes": 3629551616,
+    "code": 0,
+    "resourceGuard": {
+      "maxRssBytes": 4294967296,
+      "minAvailableBytes": 12884901888,
+      "scope": "Sampled process-tree guard; user systemd service is unavailable."
+    }
+  },
+  "sourceSha256": {
+    "scripts/solc-ast.mjs": "8faa760d1b5d9a48444a47aebb2a57ab358f7ec78d2497c37d3e686bc4224d6e",
+    "vscode/src/backend.cjs": "3c57560d87123777906b665dc67a6f1e114512fa7b1965db763bd61e301c20b0",
+    "vscode/src/counterexample.cjs": "ec05fff2b9eee381e42e049762b8b1810a4d492813df082169ec0ed2bd29c2ba",
+    "vscode/src/editor-services.cjs": "bcd7f98d10cd33362938ecba46e7951e10805c60ed744eaeb8fced368d6ac0a8",
+    "vscode/src/extension.cjs": "14dd5eae95e2a721ce76c7254935c41ccae9d25bf09fae95dd727bf0365c72f1",
+    "vscode/src/language-services.cjs": "1cdf9e80a86ef88be2e48d076ba549fa19d5e0b3f87ce68b60c0867eb32fae50",
+    "vscode/src/lean-session.cjs": "238f1d2c8126f4049e47b6399ce581adc3a563c9f6e17ec7efb600499169e99d",
+    "vscode/src/lsp-client.cjs": "ea2e93cb2efd0cd9f47ce6112d260ca43a7c655a00c980987dd5a8eb9f2f3d59",
+    "vscode/src/lsp-server.cjs": "6eb4e97813872ab079b5c84290cd97e3f55adde8e243798dbbf599de4875cfbd",
+    "vscode/src/lsp-worker.cjs": "7ca4323e3f2b952d3c4fc0472d22c32354c6976a00329fa9a338effa074de350",
+    "vscode/src/model.cjs": "978b27e3577a51ca43de904eac97bdc97a625abf06a5ee151a2b49224645f5c2",
+    "vscode/src/rpc.cjs": "259c146bb78ad42ab4fc3071f3e09688157601073c59067bde49b4a9293a2b80",
+    "vscode/src/worker-pool.cjs": "61d70e2b9400a88ea172e1b3ffa7d663905fa158a2e6365a5da933f1bcda88fc"
+  }
+}

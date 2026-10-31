@@ -81,7 +81,9 @@ import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const args = process.argv.slice(2);
+/** Shared compiler boundary for the CLI and persistent editor workers. */
+export function compileFixture(options = {}) {
+const args = options.args ?? [];
 const legacyFixture = args.includes("--legacy-fixture");
 const optionOf = (flag, fallback) => {
   const i = args.indexOf(flag);
@@ -99,8 +101,7 @@ const SOURCE_PATH = isAbsolute(SOURCE) ? SOURCE
 const UNIT = SOURCE.split("/").pop();
 
 const fail = (msg) => {
-  console.error(`solc-ast: ${msg}`);
-  process.exit(1);
+  throw new Error(`solc-ast: ${msg}`);
 };
 if (args.includes("--source") && !OUT_ARG) {
   fail("--source needs --out: the default is the TestSuite fixture");
@@ -146,7 +147,7 @@ const pin = compilerPins.find(p => p.version === version && p.sha256 === soljson
 if (!legacyFixture && !pin) fail("modern provenance requires a supported exact compiler pin");
 if (legacyFixture && (args.includes("--via-ir") || args.includes("--evm-version")))
   fail("--legacy-fixture cannot record pipeline/settings overrides");
-const bytes = readFileSync(SOURCE_PATH);
+const bytes = options.sourceBytes === undefined ? readFileSync(SOURCE_PATH) : Buffer.from(options.sourceBytes);
 let source;
 try { source = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes); }
 catch { fail("source is not valid UTF-8"); }
@@ -162,7 +163,11 @@ const input = {
 };
 const output = JSON.parse(compile(JSON.stringify(input), 0, 0));
 const errors = (output.errors || []).filter((e) => e.severity === "error");
-if (errors.length) fail(errors.map((e) => e.formattedMessage || e.message).join("\n"));
+if (errors.length) {
+  const error = new Error(errors.map((e) => e.formattedMessage || e.message).join("\n"));
+  error.diagnostics = output.errors;
+  throw error;
+}
 const ast = output.sources?.[UNIT]?.ast;
 if (!ast) fail("solc produced no AST");
 
@@ -452,5 +457,12 @@ if (args.includes("--compare-cache")) {
   if (!compared) console.log("solc-ast: solkey has no cached output for this source (run solkey on it once)");
 }
 
-console.log(`solc-ast: ${OUT} (${text.length} bytes, hash ${hash}, solc ${version})`);
-if (cacheDiffers) process.exit(1);
+if (!options.quiet) console.log(`solc-ast: ${OUT} (${text.length} bytes, hash ${hash}, solc ${version})`);
+if (cacheDiffers) throw new Error('solc-ast: cached AST differs');
+return {fixture, rawAst:ast, text, hash, diagnostics:output.errors ?? [], compiler:{version,sha256:soljsonSha}};
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try { compileFixture({args:process.argv.slice(2)}); }
+  catch (error) { console.error(error.message); process.exitCode = 1; }
+}

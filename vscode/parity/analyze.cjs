@@ -46,7 +46,7 @@ function build(paths,invalidatedPaths=[]) {
     uiDifference[run.target]={commands:run.result?.observations.commands||[],decorationTypeCount:run.result?.observations.decorations?.length,
       editorCount:run.renderer?.editorCount,accessibilityNodes:run.renderer?.accessibilityNodes,
       visibleStateArtifact:relative(repo,join(run.artifacts,'visible-state.json'))};
-    serverCapabilities[run.target]=run.target==='local'?{status:'missing',transport:'CLI JSON'}:run.result?.observations.serverCapabilities;
+    serverCapabilities[run.target]=run.result?.observations.serverCapabilities||{status:'unexamined'};
   }}
   const sizes=[...new Set(datasets.map(d=>d.options.obligations))].join(', ');
   const latencyRatios=datasets.filter(d=>d.options.suite==='benchmark').flatMap(dataset=>dataset.summary.filter(r=>r.target==='dafny').flatMap(reference=>{
@@ -68,19 +68,21 @@ function build(paths,invalidatedPaths=[]) {
     datasets,invalidatedDatasets,latencyRatios,diagnosticDifference:diagnostics,saveEditRace,uiDifference,serverCapabilities,
     interpretation:[`The paired workloads use ${sizes} constant-return functions; the incremental case adds one function.`,
       'Fresh process/profile startup and live-server incremental verification are separate. OS caches were not flushed.',
-      'The local backend does not apply worker/cache settings. Its repeated configurations are controls, not local scaling.',
-      'Solver overlap is derived from distinct process CPU deltas, not task counts or async calls.',
+      'The local LSP bounds concurrent files with 1–4 workers. Within-file proofs remain serial. Exact-snapshot cache hits and changed-buffer checks are separate; Dafny cache policies have no equivalent local selector.',
+      'Solver overlap is derived from distinct process CPU deltas, not task counts or async calls. A native Lean LSP can include server and file-worker processes; CPU-active Lean processes are not a proof-worker count.',
       'Dafny owns a Boogie engine per project; Boogie 3.5.5 applies VcsCores using a per-engine semaphore. Requested workers are not a global server-wide solver cap.',
-      'Cancellation remains acknowledgement-only; complex proofs, renderer paint latency and single-declaration assertion-split scaling remain unexamined.',
+      'The editor cancellation metric measures acknowledgement; separate real LSP tests check worker termination. Complex proofs, renderer paint latency and single-declaration assertion-split scaling remain unexamined.',
       'Three measurement repetitions give descriptive medians and nearest-rank p95, not a stable tail-latency estimate.']};
 }
-function markdown(baseline) {
+function markdown(baseline,jsonName='baseline.json') {
   const lines=['# Measured editor baseline','',`Recorded ${baseline.generated}. Full parity is **not established**.`,
     '',`${baseline.counts.launches} isolated editor launches; ${baseline.counts.measuredTrials} measured trials; ${baseline.counts.warmups} warmups; ${baseline.counts.broken} broken launches.`,
     '', '| Dataset | Target | Workers requested | Cache requested | n | Initial median / p95 ms | Incremental median / p95 ms |',
     '|---|---|---:|---|---:|---:|---:|'];
   const format=metric=>metric?.median===null||metric?.median===undefined?'unmeasured':`${metric.median.toFixed(1)} / ${metric.p95.toFixed(1)}`;
   for(const dataset of baseline.datasets)for(const row of dataset.summary)lines.push(`| ${dataset.label} | ${row.target} | ${row.workers} | ${row.cache} | ${row.trials} | ${format(row.metrics.initialVerificationMs)} | ${format(row.metrics.incrementalVerificationMs)} |`);
+  lines.push('', '| Dataset | Target | Workers | Exact-snapshot cache median / p95 ms | Two-file median / p95 ms |', '|---|---|---:|---:|---:|');
+  for(const dataset of baseline.datasets)for(const row of dataset.summary)lines.push(`| ${dataset.label} | ${row.target} | ${row.workers} | ${format(row.metrics.warmVerificationMs)} | ${format(row.metrics.crossFileVerificationMs)} |`);
   lines.push('','| Dataset | Workers requested | Cache requested | Local / Dafny initial latency | Local / Dafny incremental latency |','|---|---:|---|---:|---:|',
     ...baseline.latencyRatios.map(r=>`| ${r.dataset} | ${r.workers} | ${r.cache} | ${r.initialLocalOverDafny?.toFixed(2)??'unmeasured'}× | ${r.incrementalLocalOverDafny?.toFixed(2)??'unmeasured'}× |`),
     '', 'Ratios include frontend and process architecture differences. They do not compare pure solver execution speed.');
@@ -94,7 +96,7 @@ function markdown(baseline) {
     '', '## Scope and interpretation','',...baseline.interpretation.map(s=>'- '+s),
     '', '## Artifacts','',...baseline.datasets.map(d=>`- ${d.path}: ${d.status}; source hashes, exact configuration and raw trial references are retained in the JSON baseline.`),
     ...baseline.invalidatedDatasets.map(d=>`- Invalidated ${d.path}: ${d.broken} failed starts across ${d.launches} attempts. ${d.reason}`),
-    '', 'The [machine-readable baseline](baseline.json) retains individual timings, dispersion, timeout rates, resource activity, scenario classifications, protocol summaries and feature evidence. Raw traces and renderer artifacts are referenced under `.cache/editor-parity/`; rerun the [harness](../../docs/dafny-editor-parity.md) when those workspace artifacts are unavailable.','');
+    '', 'The [machine-readable baseline]('+jsonName+') retains individual timings, dispersion, timeout rates, resource activity, scenario classifications, protocol summaries and feature evidence. Raw traces and renderer artifacts are referenced under `.cache/editor-parity/`; rerun the [harness](../../docs/dafny-editor-parity.md) when those workspace artifacts are unavailable.','');
   return lines.join('\n');
 }
 function main(args=process.argv.slice(2)) {
@@ -105,7 +107,7 @@ function main(args=process.argv.slice(2)) {
   while(args.includes('--invalidated')){const i=args.indexOf('--invalidated');if(!args[i+1])throw new Error('Missing invalidated report');invalidated.push(args[i+1]);args.splice(i,2);}
   if(!args.length||args.some(p=>!existsSync(p)))throw new Error('Missing input reports');
   const baseline=build(args,invalidated);mkdirSync(dirname(output),{recursive:true});
-  writeFileSync(output,JSON.stringify(baseline,null,2)+'\n');writeFileSync(join(dirname(output),'baseline.md'),markdown(baseline));
+  writeFileSync(output,JSON.stringify(baseline,null,2)+'\n');writeFileSync(output.replace(/\.json$/,'.md'),markdown(baseline,basename(output)));
   process.stdout.write(output+'\n');
 }
 module.exports={activity,build,markdown};
