@@ -516,6 +516,42 @@ additional independent condition for TestSuite/full-script validation. The
 hashes, producer traces, effective options and reviewer conclusions. No semantic,
 proof, resource, time or search budget changed.
 
+**Published-base preservation check (2026-10-31).** Fresh published master is
+`89ce50152255d6dc82ab733cecacb903b91e948e`. An isolated task branch reapplies
+the reconciled changes; both older exported candidates remain preserved. All
+177 repository sources in the memory-call controls' import closure are
+byte-identical to the October 30 candidate and intersect none of the newly
+published changes. Four additional imports belong to the Lean toolchain. The
+initial naive regex count of 182 also included a token from prose; it is not
+the source-module count. All published root registrations survive, with just
+the two call modules added. No compiler, call proof, fixture or expected
+observation changed, and unchanged proof/EVM controls were not rerun. This is
+source-preservation evidence, not a new kernel validation of the broader base.
+
+The restored same VM reconfirmed Lean 4.24.0 (`797c613`), Lake 5.0.0-src+797c613
+and the actual KeySort build: exit 0, two jobs, 0.304 seconds, peak group RSS
+48,553,984 bytes. Changed-base orphan, layer, strict automation and trust-lint
+gates passed under the same guard (combined 10.666 seconds, peak RSS
+305,029,120 bytes; 1,013 sources, 246 inventoried trust sites, zero findings).
+The documentation-path gate fails with 48 missing references, exactly the
+same byte-for-byte output and exit 1 as an unmodified published-base checkout.
+This expanded published debt is distinct from the older 20-reference baseline;
+it includes archived-log references and prospective inline-assembly paths.
+The first baseline command accidentally ran in the candidate; its separate
+failed log is retained, and the actual baseline was then checked correctly.
+
+Both earlier 300-second default/trust timeouts remain open: this publication
+provides no measured repair to their unchanged pending frontend/printer
+prerequisites, while root/audit imports expand. No unchanged expensive gate
+was retried and no prerequisites were prewarmed. The published Derived17 file
+is still the migration checkpoint; the memory-loops repair is still unavailable.
+The next required condition is a genuine published performance/cache/procedure
+change accounting for cumulative gate work, plus publication of that independent
+repair for TestSuite/full-script validation. Two independent read-only reviews
+found no own-scope compatibility defect. Full original-assignment completion
+remains false; exact source hashes and current/baseline checks are retained in
+`compat1031-status.json` with the cumulative delivery.
+
 **Out of the construction fallback**: construction of structs
 with reference members, other uncertified reference-member default layouts, copies other
 than the primitive-member storage-root clause (including memory back to
