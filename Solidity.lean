@@ -896,3 +896,4 @@ import Solidity.Yul.Views.PackedControls
 import Solidity.Yul.Views.NestedControls
 import Solidity.Yul.Views.ScalarWritebackControls
 import Solidity.Yul.Views.ResidualControls
+import Solidity.Yul.Views.FiniteResidualControls

@@ -993,3 +993,12 @@ VY2 residual preparation (Lean-only, YQ5): `residualUndoN_run`,
 fixed-ownership residual journal with actual Source frames. No SolKey taclets or
 Y09.02 statement/calculus/printing claim; ownership completeness and actual Yul
 execution/physical-view agreement remain integration obligations.
+
+VY2 finite preparation (Lean-only, YQ5): `finiteEncode_view`,
+`finiteWriteback_result_view`, `finiteWriteback_encode`,
+`finiteEncode_after_writeback`, `finiteWriteback_perm`, `finiteEncode_residual`
+and `finiteEncode_registered_residual` use actual path-indexed codecs, real
+separation/successful outputs/default availability as applicable. The finite
+agreement instance is constructed; supplied scalar codecs retain individual
+inverse laws. These have no SolKey taclets and are not Y09.02 statement rules,
+notation/printers, source admission or whole-store/compiler closure.

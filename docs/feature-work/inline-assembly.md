@@ -240,3 +240,18 @@ calls and33 negative controls after independent review fixes. Existing fixtures,
 writeback vectors and budgets preserved. Kernel544/287 and wrapper1012/262+131
 pass. Full Y04–Y09.02 and Backfills A/B stay unfinished; goal blocked unchanged.
 Exact committed head and cumulative/versioned artifacts: `/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 finite-path writeback handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) constructs finite heterogeneous canonical writeback
+into actual Source.Storage, with real pairwise path/physical separation and
+constructed finite agreement instance. Encoded views, unchanged administrative
+identity, reconstruction/residual laws, permutation and actual source batches
+are proved. Residual keys now derive from the same fixed registrations; combined
+actual source/residual frames are controlled. Finite ownership is not whole-store
+coverage or dirty/heap/Yul integration. New ten-call pinned fixture and55 negative
+controls pass both pipelines; existing fixtures/controls preserved.659/348 scoped
+signatures/axioms and wrapper1017/262+131 pass after independent read-only reviews.
+Y04/Y05/Y06/Backfills A/B stay partial, concrete Y09.02 blocked and goal unchanged.
+Exact revisions, raw gate failures/comparisons and cumulative/versioned artifacts:
+`/workspace/vy2-evidence/HANDOFF.md`.

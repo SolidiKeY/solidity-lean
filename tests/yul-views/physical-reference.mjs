@@ -7,6 +7,7 @@ import {compiler} from '../../scripts/evm-reference/generated.mjs';
 import {replayPhysicalFixtures} from './physical-upstream.mjs';
 import {replayWriteback} from './writeback-reference.mjs';
 import {replayResidual} from './residual-reference.mjs';
+import {replayFinite} from './finite-reference.mjs';
 import {replayBytecode,INITIAL_GAS,STEP_LIMIT} from '../../scripts/evm-reference/replay.mjs';
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const [compilerPath,outPath]=process.argv.slice(2);
@@ -43,7 +44,8 @@ for(const viaIR of [false,true]){
 const upstream=await replayPhysicalFixtures(compile);
 const writeback=await replayWriteback(compile);
 const residual=await replayResidual(compile);
-const report={residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
+const finite=await replayFinite(compile);
+const report={finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
  sourceSha256:sha(source),lockSha256:sha(readFileSync(new URL('../../scripts/evm-reference/package-lock.json',import.meta.url))),
  fork:'osaka',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,reports};
 writeFileSync(resolve(outPath),JSON.stringify(report,null,2)+'\n');
@@ -51,4 +53,5 @@ console.log(reports.map(r=>`${r.viaIR?'viaIR':'legacy'}: ${r.status}`).join('\n'
 for(const f of upstream.results)console.log(f.path+': '+f.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('writeback: '+writeback.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('residual: '+residual.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
-process.exitCode=residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;
+console.log('finite: '+finite.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
+process.exitCode=finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;

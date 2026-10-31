@@ -615,3 +615,99 @@ no create/reset/reactivation/completion or stop transition attempted this turn.
 Approved YQ1–YQ7 (scope decision record) unchanged; questions=[]. Exact revisions,
 raw gate commands/exits, static/no-new-findings outcomes and absolute versioned
 patch/bundle/handoff/checksum paths are in `/workspace/vy2-evidence/HANDOFF.md`.
+
+### Constructive finite typed-path checkpoint (2026-10-31)
+
+FinitePaths extends singleton preparation to a finite heterogeneous collection
+over actual Source.Storage. ScalarPath carries the actual path-indexed existing
+codec, StorageWidth proof and bounded slot/field. finiteSeparated requires real
+pairwise distinct source paths and physical slot/field separation. No aggregate
+inverse or result-view law is supplied as a field; the existing scalar codec's
+individual inverse remains an input. finiteEncode and finiteWriteback construct
+actual encodings/typed changes in order. Kernel laws derive represented-path
+views/decoded reads, encode/writeback identity, exact unchanged original-store
+identity, re-encoding reconstruction, unrelated cells/reads, bounded unowned-byte
+and padding preservation. Writeback permutation/reversal and idempotence are
+proved. A failed canonical member anywhere gives None for the entire preparation;
+this is unsupported preparation, never Yul refusal/no-op/dirty-bit semantics.
+
+finiteScalarObligations constructs the existing agreement interface for the finite
+member subtype. Real default availability and chosen slot/location equality are
+explicit inputs, plus actual separation; realization encodes into the caller's
+arbitrary residual map. No complete source-path-to-HashedLayout agreement or
+aggregate adequacy is assumed. FiniteWorld validates all payloads before producing
+actual Source.Op.account/transient updates of CURRENT typed storage. Successful
+requests derive actual result/view/unrelated-path/unchanged-store and journal
+laws. An unchanged store can still produce a source journal entry; no claim of
+unchanged full ExecState or EVM opcode counts follows.
+
+FiniteControls inhabits three real paths with bool and uint16 sharing slot7 at
+offsets0/1, plus uint256 in slot8. Controls cover empty versus explicit-default
+administrative identity, changed ordered values, reversed agreement, repeated
+writeback, unrelated typed value55, nonzero a5 residual/padding, complete word
+goldens, failure at the last reversed-list member, duplicate-path separation
+refusal, actual source operations and caller-prefix/inner revert/child commit/
+outer revert/transaction reset. Heterogeneous actual transient batch controls
+prove rollback and all three typed reset defaults. Nonzero transient snapshots
+are within-transaction witnesses, not transaction-initial reachability claims.
+
+FiniteResidual derives the residual ownership predicate from actual persistent/
+transient finite registrations. Intrinsic residual keys therefore imply slot
+exclusion from those collections; concrete finite encoders preserve those entire
+unowned slots. FiniteResidualControls connects actual heterogeneous source batches
+and these residual keys through the existing actual Source-frame companion,
+including changed residual words, nested/outer rollback and reset. This is fixed
+REGISTRATION ownership, not completeness over all possible source paths. Owned
+padding/dirty-bit journaling, dynamic/mapping/hash region separation and full
+physical-source adequacy remain unproved. No Source/World/Heap owner code changed;
+G0/history21067a47 reviewed and checking-cost warning preceded the new parameter-
+only record/list recursion. No proof/fuel/node/test/gas budget increased.
+
+New Finite.sol observes10 calls per pipeline. Independent expected words follow
+bool byte0, uint16 bytes1..2 and next-slot uint256. Both pinned solc0.8.38/Osaka
+legacy/via-IR pipelines pass, optimizer disabled,100m gas/5m steps unchanged.
+All eight returned values and exact ABI bytes are checked: represented fields,
+unrelated typed field/physical word, full residual sentinel and transient flag.
+Forward/reverse/repeated/default/dirty2 and inner/outer/transaction controls retain
+their original order. Exact constructor exception/bytes/runtime hash, pipeline
+inventory and layout labels/slots/offsets/widths are validated.55 fail-closed
+mutations include missing/reordered calls/pipelines, wrong results/bytes/state,
+resource failures posing as revert, constructor and metadata corruption.
+An initial seed-literal length typo failed solc; source/reports and failed control
+run are preserved, then corrected to exact32-byte seeds without changing expected
+results. This fixture checks residual99 PRESERVATION; changed residual journaling
+is covered by earlier Residual.sol and finite kernel controls, not by this fixture.
+
+Original16 physical vectors, four upstream fixtures/13 calls/four deployments per
+pipeline, nine writeback and five residual calls remain unchanged and passing.
+Their81/14/33 negative controls still pass. External tests are separate from
+kernel laws, compiled goldens and actual frontend/compiler correspondence; no
+admission/exclusion/manifest promotion or Y09.02 completion follows.
+
+Per-file CLI diagnostics (MCP absent), focused38 jobs,659 exact public signatures/
+348 theorem axiom reports pass. Only propext/Quot.sound/Classical.choice; raw failed
+attempts retained. Actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613; mandatory KeySort exit0 with2 jobs precedes this checkpoint's
+RUNTIME_GATE_PASS prerequisite claim. Final required wrapper exit0:1017 default/
+262 suite jobs,131 matched sort annotations. Strict automatic gate exact-base/head
+exit0 with equal outputs:491 automatic,61 budgeted,11 refuted,0 manual/pending.
+Hard aggregate12GiB/no swap, serial-j1/LEAN_NUM_THREADS=1, writer lock and actual
+OS/RSS/disk monitoring/caches preserved. Independent read-only finder/skeptic
+reviews used no Lean/server/build/tests. Wording clarified scalar versus aggregate
+inverse inputs; final reviews have no remaining confirmed findings. Exact static/
+trust/docs comparisons, command exits, full committed revision and artifact paths
+are in `/workspace/vy2-evidence/finite-paths/HANDOFF.md` and cumulative HANDOFF.md.
+
+Entire queue stays unfinished: Y04 partial (finite canonical preparation only;
+whole-store/dirty/dynamic/path/hash agreement open), Y05 partial (actual heap/
+MemOK/allocation refinement/V11 instance open), Y06 partial (actual Yul/source/
+admission/compiler connection open), Y09.02 blocked (actual producer source/
+calculus interface, rules/notation/printers/final composition open). Backfills A/B
+both partial. Arbitrary Source.Storage layouts do not supply declared physical
+coverage or a representation for raw dirty bits; those cannot be inferred from
+this finite collection. Actual World/memory-call/Bridge prerequisites are present,
+not substitutes for missing VY1/MemOK/V10/V11/Yul compiler/calculus interfaces and
+V12/V13/V15/V16 joint gates. Goal remains blocked unchanged; get_goal unavailable;
+no create/reset/reactivation/completion/stop transition. Approved YQ1–YQ7 remain
+in the scope record; questions=[]. Prior3417-entry artifacts/manifests and all
+older raw failures are preserved under finite-paths/prior-* before refresh.
