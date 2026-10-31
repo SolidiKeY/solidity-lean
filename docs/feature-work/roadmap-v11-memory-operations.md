@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty-eight. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-nine. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3706,3 +3706,72 @@ Raw docs1 COMPLETE83publicfindings byte-identical; frozen no-newFAIL11incoming,
 ownednew0. Global inventory1:1207unrecorded=359publicinherited+848owned,0unsafe,
 notglobalpass. Original goal BLOCKED unchanged, all Work/Backfill parents partial
 or blocked. No Source/physical-byte/general graph/compiler/EVM completion claim.
+
+
+### C49 — initial named struct layout and reached reference-field assignment
+
+Continued original G32/G34/BackfillB using actual published Source.Resolved.member,
+Source.evalE/evalLoc.member, Source.memSet Data.struct/DataList.setNth and existing
+Heap.setField/MFields/MemoryRefWrite. Prior SourceBoolRefsAt covers a reference-array
+parent, not named typed struct fields. New SourceBoolStructLayout checks actual
+E.structFields names/positions/types against actual intrinsic named structDef;
+SourceBoolStructAt independently observes existing Source Data.struct/DataList,
+primitive uint tag and selected Boolean child contents. It is not a compiler or
+postpreservation relation. The supported shape is exactly tag:uint at position0
+and child:bool[] at position1, not an admitted-source restriction.
+
+Actual Source member reads, setNth pointer write and resolved RHS-first assignment
+expression/statement derive reached correspondence from INITIAL layout, parent/
+new-child tables, local alignment, Source MemOK and existing word StateRepr.
+The published intrinsic MPath.var mapFree premise is EXPLICIT, not assumed from
+an unavailable whole profile theorem. Heap.setField supplies the typed pointer
+update; published writeReference_correct, StateRepr.setReference,
+RefFieldsRepr.setReference and StructAllocatorRepr.setReference supply whole word
+code/ownership/stack/allocator. No pointer/compiler/allocator/reference-constructor
+implementation or Source/Evm owner code is changed or duplicated.
+
+Derived frames retain primitive tag, ALL intrinsic Boolean child objects and ALL
+initially represented Source Boolean aliases, including the old deselected child;
+Source locals/ex(world/transient/storage/journal)/events/logs/fnLocals remain fixed.
+Struct-vs-Boolean table types derive needed address separation; no global injection
+or graph liveness hypothesis appears. Existing struct allocator ownership supplies
+its real live-interval framing; unlike array parents no extra invented cursor
+premise is needed here. This does not prove all-profile allocation/capacity failure.
+
+The populated actual Source declaration FlagBox and intrinsic spelled struct have
+tag7, old TFF child and new FTF child, distinct addresses/IDs and shared parent
+locals. Both pipelines execute member assignment, primitive/child reads and whole
+word code; published PtrFrag.field runs follow initial16->reached24 through root
+and retained self alias. A second actual assignment through that self alias stores
+the already current pointer. Complete initial/intermediate/final Source tables,
+logical IDs/leaf vectors and16 wordcells retain tag7, both children, neighbour99,
+freepointer48, stack42 and actual allocator. Heap.next stays3, no deep-copy claim.
+Wrong declaration names/positions and field types cannot supply typed member
+evidence; raw wrong-type/missing-field reads are Source stuck, NOT fabricated
+index panic/word revert. Low horizons0..2 are actual Source timeout observations.
+
+runtime_children independently builds actual initial Source/intrinsic tables and
+MemOK for arbitrary xs/ys with existing intrinsic length<2^256 validity, executes
+the pointer write and proves EVERY valid read of both old/new child arrays. Empty
+and element32 cases are covered by the runtime quantification without a payload/
+depth cutoff. Universal fixed word layout is not claimed: the general word theorem
+retains actual space/ownership premises. No physical-byte/ABI/Source-graph/emitted
+copy correctness follows from these typed logical and symbolic-word observations.
+
+Per-file Lean MCP unavailable; serial focused closure175jobs passes20 new exact
+standard-trio axiom guards. Earlier namespace/typed cast/record/source declaration/
+proof elaboration/guard-format failures retained. Source/word core stays below
+elaborators, all old fixtures/guards unchanged. Full original G32/G33/G34/G35.01-.06
+and both Backfill queues remain partial/blocked; no goal completion/exhaustion.
+
+
+C49 final175guarded/full1091default/262Suite/SolKey377/131 exit0; actual fresh
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs/cacheOFF pass. Strict/completefixtures/
+layer/orphan/trust/script corruption and868standardpins110modules pass. Both
+independent source reviews PASS, no confirmed remaining defect. Full aggregate
+RSS1569540KiB,disk258048bytes,new max/OOM/kill events0; historical cumulative
+peaks/events separate. All2643 old seal records verified; entire old Source nested
+controls/guards unchanged. Raw docs1 COMPLETE83publicfindings byte-identical,
+frozen no-newFAIL11incoming,ownednew0; global inventory1:1227unrecorded=
+359publicinherited+868owned,0unsafe,notglobalpass. Original goal BLOCKED unchanged;
+whole Work/Backfill scope partial/blocked, no independent-exhaustion assertion.

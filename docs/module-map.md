@@ -1322,3 +1322,7 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean` | RHS-first resolved parent-slot Source expression/statement, intrinsic assignment and whole existing word sequence; bounds/horizon and locally live allocator framing. |
 
 | `Solidity/Backend/MemoryOps/SourceReferenceSequence.lean` | Actual Source RItems/intrinsic Prog/whole word append for parent redirection then reached child deletion, deriving the new selection/capacity/frames and exact late rejection without a suffix heap. |
+
+| `Solidity/Backend/MemoryOps/SourceStructMemory.lean` | INITIAL actual Source declaration/name-position layout and typed two-field struct/Bool-child correspondence; real member reads and setNth/setField old-alias/context transport. |
+| `Solidity/Backend/MemoryOps/SourceStructAssignment.lean` | Actual resolved Source struct-member assignment and published whole named-field word write/state/allocator certificates, with explicit mapFree and fuel scope. |
+| `Solidity/Backend/MemoryOps/SourceStructControls.lean` | Independently inhabited nonzero struct/child fixtures, full Source/intrinsic/word views, shared/self/no-op aliases, layout/type/fuel negatives and arbitrary runtime child read transport. |
