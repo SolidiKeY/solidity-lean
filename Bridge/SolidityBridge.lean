@@ -42,3 +42,5 @@ import SolidityBridge.RoadmapV15.CumulativeTransport
 import SolidityBridge.RoadmapV15.ConsumerControls
 import SolidityBridge.RoadmapV15.PublishedWorldTransport
 import SolidityBridge.RoadmapV15.PublishedWorldControls
+import SolidityBridge.RoadmapV15.HaltObservation
+import SolidityBridge.RoadmapV15.HaltObservationControls

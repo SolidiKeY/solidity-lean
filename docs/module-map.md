@@ -1210,3 +1210,5 @@ At the root, the notation's own tests:
 | `Bridge/SolidityBridge/RoadmapV15/ConsumerControls.lean` | Signed/truncation/byte boundary, region and nested-checkpoint consumer controls. |
 | `Bridge/SolidityBridge/RoadmapV15/PublishedWorldTransport.lean` | Published typed world/transaction normalization, prefix and observation consumers; no pinned-EVM claim. |
 | `Bridge/SolidityBridge/RoadmapV15/PublishedWorldControls.lean` | Real funded-factory, creation-collision, persistent observation and exact halt/result controls. |
+| `Bridge/SolidityBridge/RoadmapV15/HaltObservation.lean` | Exact G06 completed-halt observer, existing payload/terminal and finite-result consumers. |
+| `Bridge/SolidityBridge/RoadmapV15/HaltObservationControls.lean` | Exact bytes, exceptional/empty-revert distinction, finite-prefix and noncompletion controls. |

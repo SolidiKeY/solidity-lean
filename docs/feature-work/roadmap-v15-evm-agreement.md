@@ -42,8 +42,8 @@ recreated or imported from an unmerged branch.
 | 4 / G46.06 | Open. No actual pinned transition/resource adequacy composition. Exact stack, memory, gas, fuel and approved abstraction clauses remain obligations. |
 | 4 / G47 | Blocked on integrated V13/V14 interfaces and actual Osaka account execution. CALL/STATICCALL, arbitrary permitted callees, CREATE/initcode, RETURN/REVERT, persistent/transient/balance rollback, transaction validity/upfront fees, precompiles and finite/infinite traces remain unproved. A payment-acceptance Boolean is not substituted. |
 | 5 / dependencies | Local availability and an actual failed Azure cache request are recorded below; reference-word imports requested 860 files and downloaded 0 after CONNECT 403 failures. No dependency or toolchain was upgraded. |
-| Backfill A | Partial: existing G01 finite-prefix order, consistency, completion and resource-indexed noncompletion observation transport proved. Published assembler/failure/scalar word/byte encoding and inhabited signed/truncation/boundary transport are now proved in recovery; full pinned-reference transition integration remains open; no actual infinite EVM execution is constructed. |
-| Backfill B | Partial: approved hash-premise suffix/membership and published local-checkpoint observation/relation transport proved. Published intrinsic world rollback consumers are proved in recovery below; production ledger/nonce/log and bytecode/world composition, actual execution-prefix linkage and application to actual opcode transitions remain open. The secondary obligation checklist is now explicit and tested in recovery; all recorded proofs remain open. |
+| Backfill A | Partial: existing G01 finite-prefix order, consistency, completion and resource-indexed noncompletion observation transport proved. Published assembler/failure/scalar word/byte encoding and inhabited signed/truncation/boundary transport are now proved in recovery; exact G06 completed-halt observations now instantiate finite-prefix transport below; full pinned-reference transition integration remains open; no actual infinite EVM execution is constructed. |
+| Backfill B | Partial: approved hash-premise suffix/membership and published local-checkpoint observation/relation transport proved. Published intrinsic world rollback consumers are proved in recovery below; production ledger/nonce/log and bytecode/world composition, actual execution-prefix linkage and application to actual opcode transitions remain open. The secondary obligation checklist is now explicit and tested in recovery; all opcode semantic discharge obligations remain open. |
 
 V11 → V12 → V13 → V14 → V15 → V16 → V17 is still serial for full completion.
 This checkout has G01/G06 abstract contracts and component results, not a
@@ -118,7 +118,11 @@ ledger/manifest was edited. Coordinator reconciliation: attach the backfill and
 accounting evidence to G46.05/G46.06/G47, retaining every open proof status.
 No feature closes.
 
-## Runtime and checks
+## Initial preparation runtime and checks (4511898e)
+
+This historical table predates the recovery checks below; it does not report the
+current full-gate outcome. The recovery retains the raw cold full-gate timeout
+and compares both missing and ambiguous documentation findings.
 
 Evidence directory: `/workspace/v15-evm-agreement-evidence`.
 The VM enclosing cgroup limit is 16 GiB, host swap zero. systemd is not PID 1,
@@ -482,3 +486,58 @@ bytes. Follow-up review results and final import/structural/doc checks are retai
 with the handoff; full lane obligations remain open.
 
 World checkpoint handoff: separate follow-up finder and skeptic cleared the corrected actual transient-owner controls and nine conditional consumer laws. Final focused owned closure passed (world-reviewed-closure.log, peak cgroup 200,577,024 bytes). Structural, trust, orphan and whitespace checks pass; full docs still fails with 46 missing/37 ambiguous, with zero added findings against exact base. The wider core import closure is running, not counted passed; cold full timeout and full Bridge/cache/Osaka/V13/V14 prerequisites remain open. Evidence is /workspace/v15-evm-agreement-evidence/recovery-201ebab8; exact committed-head patch/bundle/handoff will be exported under /workspace/v15-evm-agreement-artifacts/recovery-201ebab8. Final finder identified one further available G06 halt-observation consumer, retained as the next Backfill A checkpoint.
+
+
+## Recovery checkpoint: exact G06 halt observation consumer
+
+The final finder identified one further independently available Backfill A item:
+consume the published G06 Halt.observe instead of leaving prefix maps entirely
+arbitrary. The new owned modules are
+`Bridge/SolidityBridge/RoadmapV15/HaltObservation.lean` and
+`Bridge/SolidityBridge/RoadmapV15/HaltObservationControls.lean`.
+They depend only on published core definitions and the owned prefix transport.
+The existing G06 observer fixes the Bool and all return/revert bytes; the new
+conversion and its canonical representative introduce no execution semantics.
+
+| Declaration | Exact premise/result boundary |
+|---|---|
+| `outcomeOfHalt_section` | Every existing Outcome round trips through its canonical completed-halt representative. |
+| `haltOfOutcome_observe` | Every G06 halt retains its exact existing Bool/byte observation after conversion and canonicalization. |
+| `outcomeOfHalt_eq_iff` | Two converted Outcomes are equal iff their existing G06 observations are equal; no further observation is discarded. |
+| `outcomeOfHalt_success_iff` | Success with exact bytes d iff the original halt is success d, consuming the owner's success characterization. |
+| `outcomeOfHalt_revert_iff` | Failure with exact d iff original revert d, or exceptional with d empty; equality of halt constructors is not asserted. |
+| `input_halt_payload` | Every published failure/return Input retains its existing bytes, including the owner's panic/reason encoders unchanged. |
+| `input_halt_terminal` | Its canonical observation's success bit agrees with the actual existing Input terminal's RETURN-versus-other classification. |
+| `halt_prefix_completed` | Given p.final = some h, conversion retains every existing Event and the exact converted final payload. No execution/consistency premise is fabricated. |
+| `finite_intrinsic_halt_observation` | Requires the owner's inputOfResult t = some i; its existing ResultObserves proof transports through the canonical observer round trip. No EVM dispatch witness is inferred. |
+
+Controls use nonempty success/revert data, wrong-byte and success-bit negatives,
+exceptional versus nonempty revert, distinct exceptional/empty-revert halt
+constructors, exact panic/custom payloads, and the owner's rejection of exhausted
+or diverging intrinsic results. A nonempty concrete G01 call/answer prefix and
+resource-indexed proper extension instantiate the existing finite completion,
+consistency and noncompletion transports with the same admissibility predicate.
+These are observation fixtures, not actual finite/infinite EVM executions.
+Separate static finder and skeptic reviews found no premise, observation or
+ownership defect. Focused kernel/control checks pass in halt-fixed.log with all
+nine axiom reports (only propext/Quot.sound where used; other reports have no
+axioms), peak cgroup 163,303,424 bytes. An ambiguous empty-list type in one
+control was fixed with an explicit Bytes annotation, without statement or budget
+changes; halt-initial.log retains the raw failure. The noncompletion predicate
+also has an explicit positive resource witness. Follow-up review and full owned
+closure results are recorded with the final handoff.
+
+The reference encoding obligation remains exact and open: published EvmYul
+fromBytesBigEndian/fromByteArrayBigEndian and uInt256OfByteArray must be related
+to the existing compiler big-endian readers, and the reverse of EvmYul toBytes!
+(which is little-endian and right-padded) must agree with the exact 32-byte
+compiler encoding. Width, length, truncation/modulo and padding clauses cannot
+be omitted. These declarations live in the unchanged pinned reference word
+module, whose existing Mathlib import closure is cache-blocked (860 requested,
+0 downloaded, CONNECT 403). The available core encoder/reader consumers above
+are proved separately; neither these pending reference equations nor Osaka
+transition correspondence is silently counted discharged.
+
+The separate pending core import-closure target now passed: timeout 5400 lake build +Solidity, 970 jobs in 4,921.916 seconds, peak cgroup 9,834,909,696 bytes and sampled aggregate Lean/Lake RSS 9,214,480,384 bytes, swap cap 0. This does not relabel the earlier failed cold full command or validate the external Bridge umbrella. TestSuite/native/sort phases remain separately accountable. The latest lightweight authorized endpoint probe still fails CONNECT 403 (curl exit 56); cache-host-probe-final.log retains the raw result.
+
+Halt checkpoint handoff: independent follow-up finder and skeptic cleared the actual staged proofs, hypotheses, inhabited/negative controls, ownership and evidence. All ten owned modules and their import closure pass in owned-final-closure.log, including all 46 scoped axiom reports; peak cgroup 224,415,744 bytes. The layer/orphan/trust/owned-structural/whitespace gates pass. Raw docs still fails with 46 missing and 37 ambiguous findings; halt-docs-comparison.json reports zero additions of either class, with multiplicities. All150 opcode rows retain open obligations and empty dischargedByV15. The temporary runtime configuration is removed before this commit. Exact-head exports and final remaining-phase results belong in /workspace/v15-evm-agreement-artifacts/recovery-201ebab8; raw recovery evidence remains /workspace/v15-evm-agreement-evidence/recovery-201ebab8. G46/G47 and the full lane remain unfinished.
