@@ -5,7 +5,7 @@ import {machine}from'../evm-reference/replay.mjs';
 import {Account,createAddressFromString,hexToBytes}from'../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js';
 import {observeMachine,capturedMachine,validateCapture,validateCallCapture,compareState}from'./capture.mjs';
 import {execute,checkedCompiler,compileRecord,checkStateOracles,controlFailures}from'./harness.mjs';
-const out=mkdtempSync('/workspace/vy5-composition/oracles-20261031/capture-tests-');chmodSync(out,0o755);console.log('state/memory test evidence: '+out);
+const out=mkdtempSync('/workspace/vy5-composition/physical-20261031/capture-tests-');chmodSync(out,0o755);console.log('state/memory test evidence: '+out);
 const save=(name,obj)=>writeFileSync(out+'/'+name+'.json',JSON.stringify(obj,null,2)+'\n');
 const self='0x'+'34'.repeat(20),external='0x'+'56'.repeat(20),caller='0x'+'12'.repeat(20),word=n=>'0x'+BigInt(n).toString(16).padStart(64,'0');
 async function raw(runtime,balance=0n){const {vm,observer}=await capturedMachine(),a=createAddressFromString(self);await vm.evm.stateManager.putAccount(a,new Account(1n,balance));await vm.evm.stateManager.putCode(a,hexToBytes(runtime));return{vm,observer,a};}

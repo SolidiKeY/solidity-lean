@@ -206,14 +206,14 @@ export function compareState(c,oracle,aliases={}) {
   const value=c[e.phase]?.[resolve(e.address)]?.[e.kind];if(!plain(value))return{status:'blocked',reason:'missing slot-map evidence'};
   if(!isDeepStrictEqual(value,e.value))differences.push('slotMap/'+e.phase+'/'+e.address+'/'+e.kind);
  }
- const frameFields=['kind','address','caller','codeAddress','createdAddress','depth','parent','delegatecall','isStatic','value','inputSignature','exception','bytes'];
+ const frameFields=['kind','address','caller','codeAddress','createdAddress','depth','parent','delegatecall','isStatic','value','input','inputSignature','exception','bytes'];
  if(oracle.frames) {
   if(!oracle.frames.length)return{status:'blocked',reason:'empty frame oracle'};
   if(c.frames.length!==oracle.frames.length)differences.push('frame-count');
   for(const [index,e]of oracle.frames.entries()) {
    if(!keys(e,['frame','fields'])||e.frame!==index||!plain(e.fields)||!['kind','address','caller','depth','parent','exception'].every(k=>Object.hasOwn(e.fields,k)))return{status:'blocked',reason:'malformed/partial frame oracle'};
    for(const [k,v]of Object.entries(e.fields)) {
-    if(!frameFields.includes(k)||['address','caller','codeAddress','createdAddress'].includes(k)&&!(v===null&&['codeAddress','createdAddress'].includes(k))&&!validAddress(v)||k==='kind'&&!['call','create'].includes(v)||['depth','parent'].includes(k)&&!(k==='parent'&&v===null)&&!number(v)||['delegatecall','isStatic'].includes(k)&&typeof v!=='boolean'||k==='value'&&(typeof v!=='string'||!/^\d+$/.test(v))||k==='exception'&&![null,'revert','out of gas','stack overflow'].includes(v)||k==='bytes'&&!BYTES.test(v)||k==='inputSignature'&&(typeof v!=='string'||!/^\w+\(\)$/.test(v)))return{status:'blocked',reason:'malformed frame field oracle'};
+    if(!frameFields.includes(k)||['address','caller','codeAddress','createdAddress'].includes(k)&&!(v===null&&['codeAddress','createdAddress'].includes(k))&&!validAddress(v)||k==='kind'&&!['call','create'].includes(v)||['depth','parent'].includes(k)&&!(k==='parent'&&v===null)&&!number(v)||['delegatecall','isStatic'].includes(k)&&typeof v!=='boolean'||k==='value'&&(typeof v!=='string'||!/^\d+$/.test(v))||k==='exception'&&![null,'revert','out of gas','stack overflow'].includes(v)||['bytes','input'].includes(k)&&!BYTES.test(v)||k==='inputSignature'&&(typeof v!=='string'||!/^\w+\(\)$/.test(v)))return{status:'blocked',reason:'malformed frame field oracle'};
     const f=c.frames[e.frame];if(!f)return{status:'blocked',reason:'missing requested frame'};
     const actual=['bytes','exception'].includes(k)?f.output[k]:k==='inputSignature'?f.input:f[k];
     const expected=['address','caller','codeAddress','createdAddress'].includes(k)?(v===null?null:resolve(v)):k==='inputSignature'?hex(keccak_256(new TextEncoder().encode(v)).slice(0,4)):v;

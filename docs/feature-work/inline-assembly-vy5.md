@@ -495,3 +495,126 @@ joint Y10/G48–G51 kernel/import closure still need actual VY1–VY4/V16 and re
 owner interfaces. No axiom/sorry, weakened theorem/premise or generic proof wrapper
 is introduced. YQ1–YQ7 authorization and canonical-rethrow exception are preserved;
 no new semantic/profile question is established.
+
+## Physical and ordered-state backfill — 2026-10-31
+
+This reviewed checkpoint follows `be8a5a17f1eb7e0e61e833bab979e56fe04f461f`
+in the same assigned VM/branch. All earlier artifacts and checksum manifests
+are preserved. New full committed identity and exact commands are exported after
+commit in `/workspace/vy5-composition/physical-20261031/handoff.json`. The existing
+full-assignment goal remains user/auditor-confirmed blocked and untouched;
+get_goal is not exposed. No new goal/status transition is assumed.
+
+Source-derived expectations were saved before new EVM execution in
+`physical-20261031/before-execution-physical21.json`,
+`before-additional-execution.json` and `before-execution-pinned.json`.
+The [expanded registry](../../tests/yul-composition/upstream-state-oracles.json)
+contains39 sources, each with its original source hash, full ordered source-plan
+hash, explicit call assertions and pending-domain boundaries. No expected values
+were copied from VM slots, addresses, code or returns. Frozen registry hashes
+and required IDs reject stale/missing registrations.
+
+The new physical controls cover all four storage-access variants and the mapping
+pointer case. Packed uint16 x/y use slot0 at offsets0/2, z uses slot1; storage
+array a aliases length slot0; a struct behind a separator uses slot1. Ordered
+writes/readbacks preserve7. Separator slots are asserted zero only where actual
+source getters access them, never by filling unavailable state. Mapping pointers
+return roots0/1/2 and offset0 without reading mapping contents.
+
+MCOPY cases derive destination bytes from the original literal input and
+EIP5656 temporary-buffer semantics, covering both overlap directions, in-place,
+non-overlap and zero-length copy. Only the semantic RETURN-relative ABI byte
+window is compared; no absolute allocation address or arbitrary final compiler
+memory is equated. Zero-copy optimizer elimination is allowed by the source
+semantics: the oracle does not invent an MCOPY opcode-count requirement. Wrong
+forward-overlap results and changed bytes fail while reported return bytes/logs
+are kept unchanged; missing memory/phase/frame evidence blocks.
+
+All currently unselected transient_storage_* sources and the inline transient
+Yul-function case now have finite assertions. Tests distinguish transient slot1
+from packed slot0, shared state across8ordered selfcalls, reset between configured
+top-level calls, constructor/runtime phases, persistent versus transient stores,
+internal reentry rollback and caller-owned delegatecall effects. Exact nested
+self-call selectors/arguments and return words are independently predicted.
+The CREATE2 low-level case explicitly leaves target identity/code/target-owned
+state pending; only independently known self nonce/slot/window assertions are
+counted. The unsalted selfdestruct case predicts children from self nonces1/2 and
+checks the stored address, known child state and transient42 before cleanup.
+Newly created-child deletion after an unavailable next boundary is not inferred.
+These are runCall/frame/explicit cleanup controls, not runTx, fees, native-world
+or transaction-finalization proofs.
+
+Productive source-derived backfill continued beyond that physical subset with
+18 function/stack/control/calldata cases: multi-result assignment and nested
+functions, ASCII bytes32 padding, sum45, break/continue/nested loops, factorial
+witnesses0..4, if/switch/leave, the condition-sideeffect loop and three calldata
+array cases. The sideeffect loop independently predicts ordered slot0 prevalues
+0/2/4 and postvalues2/4/2. Fixed memory offset0 is asserted only for explicit
+source Yul return(0,n); other ABI windows remain RETURN-relative. Calldata offsets
+0x44/0x84 follow the source input encoding, not a memory-allocation policy.
+
+Review found a real request-binding gap: duplicated requestData/capture fields
+could be changed together. The adapter now reconstructs runtime selector plus
+full arguments from the pinned source plan. Constructor argument suffixes and
+initcode-prefix SHA256 must match the pre-EVM compiler receipt. This hash is
+receipt linkage, not an expected state/address derived from observed code.
+Coordinated selector/argument/initcode mutants with unchanged outputs now fail.
+Each call also binds value, ordinal and actual capture transaction; per-call
+missing data cannot erase an earlier definite mismatch. No source semantics,
+expected verdict, admission exclusion or proof premise was weakened.
+
+Final `physical-final` exits0: **131 JavaScript tests, two Python tests**;
+80 fixtures/248 runtime profiles (required defaults plus named metadata profiles) retain **227 byte/log matches and21
+older-fork blocks**. **39 upstream sources /121 profiles /275 ordered calls** now
+have finite independent assertions. **106 working profiles** still lack such
+oracles, and selected partial domains remain separately pending. Seven original
+local controls retain28 profile matches. The separate416 compiler probes still
+partition72 matches,eight intended mutants,four diagnostic matches,304 pending
+and28 blocked. Complete original source/settings/plan/profile/input hashes,
+ordered calls and actual bytes/failure/logs/metrics/gas telemetry/cleanup are
+unchanged. The [coverage ledger](../../tests/yul-composition/observation-coverage.json)
+records the exact per-profile assertions and pending domains. Captures remain
+674 transactions/838 frames/765 regions; AST presence is16 feature rows with
+**zero kernel obligations closed**.
+
+Both independent read-only finder and skeptic reviewed source, new derivations
+and final accounting without Lean server/builds. The intermediate authoring
+function-boundary mistake was caught before execution, preserved, corrected,
+and syntax-checked; its authoring-process exit0 is not a kernel/runtime gate.
+Raw failed cache/absence probes and shell edits are retained in the new evidence.
+The passing final scripts are separate from those raw operations.
+
+Published master was inspected by immutable-object fetch and git show only,
+without ref/worktree/index integration. Initial readback was
+`93920309f5c800c9ce4809bc74700ed4fde65fb2`; it advanced during audit to
+`4165de133bafd522ab18099e18cad489bb1aa7d6` (published memory integration). The
+stale-commit audit exited1 and was preserved; the new exports were inspected
+again read-only. Both snapshots have no core Solidity/Yul or
+SolcJson/Yul exports or Yul imports in its public root; InlineAssembly still
+recognizes canonical rethrow only. Existing pure Scalar composition exports are
+present, but are not assembly correctness interfaces. Thus actual assembly
+Y01–Y09/VY1–VY4 and V16 joint coverage/correctness exports remain unavailable;
+this does not assert that general prerequisite lanes are wholly absent. Raw
+commands, exact exports/excerpts and fetch outcomes are in
+`physical-20261031/owner-export-readback.json`, `owner-export-readback-latest.json`
+and `published-master.json`. Published try/memory components are available; no
+claim is made that their general owner lanes are missing, and none was integrated.
+
+Heavy gates ran serially under the existing writer lock, one CPU,
+LEAN_NUM_THREADS=1 and aggregate12GiB Docker memory with equal memory-swap limit
+(no swap allowance). Final sampled RSS1,041,383,424 bytes; minimum OS availability
+16,780,316,672 bytes; zero OOM/resource stop, more than13GiB disk headroom. Original
+step/gas/proof/node/test budgets are unchanged. No Lean source/import changed,
+so inherited KeySort exit0/two jobs and full-policy exit0 remain attributed to
+the earlier tested tree; no new kernel gate is claimed. Actual Lean4.24.0 commit
+797c613 and Lake5.0.0-src+797c613 are retained. Historical docs/G03 exit1 failures
+are preserved against the exact base, with new links checked separately.
+
+Work2 and BackfillA/B improve through these external controls but remain partial:
+unselected and explicitly pending state domains, whole-world/source/target/
+storage/memory/returndata correspondence remain open. Work1/3, all24 proof
+obligations, six constructor combinations, G01 amendments and final joint
+Y10/G48–G51 kernel/import closure still require actual assembly-compatible owner
+interfaces. No other-worker integration, shared engine/parser/lockfile rewrite,
+fixture/verdict change, axiom/sorry, budget increase or publication occurred.
+YQ1–YQ7 and canonical-rethrow behavior remain intact; questions remain empty.

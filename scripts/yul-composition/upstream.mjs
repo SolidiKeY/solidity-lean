@@ -4,7 +4,7 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
-import {compareUpstreamState} from './oracles.mjs';
+import {compareUpstreamState,independentRequest} from './oracles.mjs';
 import {capturedMachine,validateCapture,validateCallCapture} from './capture.mjs';
 import {parseFixture,withPreamble,runtimePipelines,revertBytes,abiType,evmCompatible} from '../solidity-upstream.mjs';
 import {INITIAL_GAS,STEP_LIMIT} from '../evm-reference/replay.mjs';
@@ -221,7 +221,8 @@ export function validateFixtureEvidence(result,directory) {
    const state=compareUpstreamState(result,v,HOST.sender);if(!isDeepStrictEqual(state,v.stateComparison)||!['match','pending'].includes(state.status))throw Error('missing/stale or incorrect upstream state comparison');
    validateCapture(v.deployment?.capture);if(v.deployment.capture.transaction!==1)throw Error('deployment capture transaction');
    const d=v.deployment,a=d?.actual;
-   validateCallCapture(d.capture,a,{transaction:1,input:d.requestData,value:plan.calls[0].constructor?plan.calls[0].value:'0',caller:HOST.sender,to:null});
+   const deploymentCall=plan.calls[0].constructor?plan.calls[0]:{constructor:true,calldata:[]};
+   validateCallCapture(d.capture,a,{transaction:1,input:independentRequest(deploymentCall,d.requestData,v.creationSha256),value:plan.calls[0].constructor?plan.calls[0].value:'0',caller:HOST.sender,to:null});
    if(!a?.metrics||!Number.isSafeInteger(a.metrics.steps)||a.metrics.steps<0||a.metrics.steps>STEP_LIMIT)throw Error('invalid deployment metrics');
    if(plan.calls[0].constructor) {
     const o=observations?.[0];
@@ -239,7 +240,7 @@ export function validateFixtureEvidence(result,directory) {
    if(!o.actual?.metrics||!Number.isSafeInteger(o.actual.metrics.steps)||o.actual.metrics.steps<0||o.actual.metrics.steps>STEP_LIMIT)throw Error('missing/invalid execution metrics');
    validateCapture(o.capture);if(o.capture.transaction!==o.transaction)throw Error('call capture transaction');
    const c=plan.calls[i];
-   validateCallCapture(o.capture,o.actual,{transaction:o.transaction,input:o.requestData,value:c.value,caller:HOST.sender,to:c.constructor?null:v.deployment.address});
+   validateCallCapture(o.capture,o.actual,{transaction:o.transaction,input:independentRequest(c,o.requestData,v.creationSha256),value:c.value,caller:HOST.sender,to:c.constructor?null:v.deployment.address});
    if(!c||o.index!==i||o.signature!==c.signature||o.inputBytes!==hex(c.calldata)||o.value!==c.value)throw Error('changed/dropped/reordered call evidence');
    if(o.transaction!==i+(plan.calls[0].constructor?1:2))throw Error('transaction sequence mismatch');
    const comparison=compareCall(c,o.actual,v.deployment?.address??null,{creation:c.constructor});

@@ -199,3 +199,16 @@ eight intended mutants remain. Unselected state expectations and all concrete
 Y10/G48–G51 proof obligations stay pending. New committed identities/artifacts:
 `/workspace/vy5-composition/oracles-20261031/handoff.json`; earlier manifests remain
 preserved and the existing goal remains blocked.
+
+### VY5 physical and ordered-state backfill — 2026-10-31
+
+The [lane backfill record](inline-assembly-vy5.md#physical-and-ordered-state-backfill--2026-10-31)
+and [coverage ledger](../../tests/yul-composition/observation-coverage.json)
+record source-derived storage pointers, MCOPY, ordered transient/cleanup and
+additional control/calldata assertions.39 upstream sources cover121 runtime
+profiles/275 calls;106 working profiles remain unselected, and CREATE2 target/
+deferred cleanup domains stay explicit.227 byte/log matches,21 fork blocks and
+eight intended mutants are unchanged. Published-master owner exports were read
+without integration; all concrete Y10/G48–G51 proofs remain pending. New committed
+identities/artifacts: `/workspace/vy5-composition/physical-20261031/handoff.json`.
+Earlier artifacts are preserved and the original goal remains blocked.

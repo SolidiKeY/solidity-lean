@@ -6,7 +6,7 @@ import {parseFixture,semanticVectors}from'../solidity-upstream.mjs';
 import {checkedCompiler,compileRecord,ROOT}from'./harness.mjs';
 import {parseExpectations,parseLog,profilesFor,exactObservation,compareCall,runFixture,replay,validateFixtureEvidence,osakaCompatible}from'./upstream.mjs';
 const directory='/workspace/vy5-composition/corpus';
-const out=mkdtempSync('/workspace/vy5-composition/oracles-20261031/upstream-tests-');chmodSync(out,0o755);console.log('test evidence: '+out);
+const out=mkdtempSync('/workspace/vy5-composition/physical-20261031/upstream-tests-');chmodSync(out,0o755);console.log('test evidence: '+out);
 const compileRaw=checkedCompiler('/workspace/vy5-composition/soljson-v0.8.38+commit.1835d247.js');
 let counter=0;const compile=input=>compileRecord(compileRaw,input,join(out,'compile-'+counter++)).output;
 const path=name=>'test/libsolidity/semanticTests/inlineAssembly/'+name;

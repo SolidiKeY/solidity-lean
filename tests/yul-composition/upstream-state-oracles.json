@@ -176,7 +176,8 @@
           ]
         }
       }
-    ]
+    ],
+    "callPlanSha256": "ea96fb0fa9791afaa7a7cfa7344f8d52c4336f1961697cf865d4c32c317fb3de"
   },
   {
     "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_memory_access.sol",
@@ -227,7 +228,8 @@
           ]
         }
       }
-    ]
+    ],
+    "callPlanSha256": "d40aff9fee5f8d3c6f5783131f5b780a8b0c890e2e78ba67b04307280b7a9ce9"
   },
   {
     "path": "test/libsolidity/semanticTests/inlineAssembly/optimize_memory_store_multi_block.sol",
@@ -319,7 +321,8 @@
           ]
         }
       }
-    ]
+    ],
+    "callPlanSha256": "3f932a38fcb45c7bf32aa6fc92783728c00904202200f6d547c501165dfe6b5d"
   },
   {
     "path": "test/libsolidity/semanticTests/inlineAssembly/optimize_memory_store_multi_block_bugreport.sol",
@@ -385,7 +388,8 @@
           ]
         }
       }
-    ]
+    ],
+    "callPlanSha256": "af1bf636b151d11021975d1304c52e2ce82ff118441885055c43876960e4587f"
   },
   {
     "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_creation.sol",
@@ -462,6 +466,4677 @@
           ]
         }
       }
-    ]
+    ],
+    "callPlanSha256": "5be70348cafcf5ee5fc99b28480ffddb3b8b570f7db10d702f6dd53f9876d730"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access.sol",
+    "sourceSha256": "72b34ef92677d0c27abadf3dba27b5fe04f9cc3e6d43b06cccccec21fa55aa8c",
+    "premises": [
+      "uint16 x/y pack into slot0, offsets0/2; uint256 z occupies slot1. f writes7 to z; later getter reads7. No assertion for untouched packed slot0.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "z()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000007",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "2991da181985f97a37a1bc6bdf4b003107a3d7228a29ace281d5092c8ac3680b"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_inside_function.sol",
+    "sourceSha256": "365755dc50a1c1a3414c6dff1d194e1abb36eb162a5b05407bcae3971cb91faa",
+    "premises": [
+      "uint16 x/y pack into slot0, offsets0/2; uint256 z occupies slot1. f writes7 to z; later getter reads7. No assertion for untouched packed slot0.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "z()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000007",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "2991da181985f97a37a1bc6bdf4b003107a3d7228a29ace281d5092c8ac3680b"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_local_var.sol",
+    "sourceSha256": "3f8bf32d52813bd0af2fce8885399995395b22794f5c1b46d08af97ab0cd5096",
+    "premises": [
+      "Dynamic uint256[] a root slot0 contains length; storage local x aliases a, offset0; SSTORE0=7 changes a.length to7, not array elements.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000007",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "e457d67473c6c5e0acfd654ecce184e73a31ae110cde19ac7fa09e4f098056e5"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_via_pointer.sol",
+    "sourceSha256": "5bcf8c9730a68586a21fe6d17a28007098b30c493b5a70634688cee073de33b4",
+    "premises": [
+      "separator slot0; struct a.contents slot1; separator2 slot2. Storage pointer aliases a at slot1, writes7. Zero separator values checked only when getters actually access those slots.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "a()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000007",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "separator()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "separator2()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "00449b205c69634789d5b442ff71aca0d15e8f52581bd664035f1a4a7ef8a521"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/slot_access_via_mapping_pointer.sol",
+    "sourceSha256": "ae1e78ecb262cea9cba58ceba8c4f785fad95a9ab00a4bc413a15a752f99d903",
+    "premises": [
+      "Mapping roots m0/m1/m2 occupy0/1/2. Returning .slot/.offset reads no mapping values; calls i0/1/2 return exact roots and offset0, no persistent accesses/writes.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "f21cb313bb24bd5e4224d5e3fca75d76175afb95f5735997b5ca8eccb23a519d"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy.sol",
+    "sourceSha256": "d2c6a31a65f068e42c01de3644c07aef0e6cd9e039e75f47a7a10b1ca87b78f8",
+    "premises": [
+      "Source length32 copied to dst, 8zero bytes, src middle16 bytes at offset8, 8zero bytes. Result predicted from source pattern, RETURN-relative ABI only; no fixed src/dst allocation address.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(bytes)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000776655443322110000112233445566770000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "dfd1847054f38ddda92e6b949c193e20e7eb8fe51084b0eff56d04128069ff85"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy_empty.sol",
+    "sourceSha256": "41b2efade8cfa99cdf640956aca15f36cc973c1a29cc77eca5f8581b7f73679b",
+    "premises": [
+      "Four length-zero MCOPY operations leave all32 input bytes unchanged. Require ABI memory window unchanged; optimizer may eliminate zero copies, so no opcode count/execution premise.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "mcopy_zero(bytes)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020ffeeddccbbaa9988776655443322110000112233445566778899aabbccddeeff",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "2413221f705adfd25461c161d883c3db2fea25711d067c8aaf6962afe0da9a0c"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy_overlap.sol",
+    "sourceSha256": "a2a8dd19fe362e75375986e0b2744047b48cd4a5b016f25a551085a707bfdf97",
+    "premises": [
+      "Source literal96bytes(22x8..ddx8); EIP5656 temporary-buffer copy, not sequential forward/backward overwrite. Independently compute all5 dst/src/length results before output. RETURN-relative ABI windows preserve allocation freedom.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "mcopy_to_right_overlap()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 160,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000602222222222222222333333333333333344444444444444445555555555555555444444444444444455555555555555556666666666666666777777777777777788888888888888889999999999999999ccccccccccccccccdddddddddddddddd",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "mcopy_to_left_overlap()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 160,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000060222222222222222233333333333333336666666666666666777777777777777788888888888888889999999999999999aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbccccccccccccccccdddddddddddddddd",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "mcopy_in_place()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 160,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000006022222222222222223333333333333333444444444444444455555555555555556666666666666666777777777777777788888888888888889999999999999999aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbccccccccccccccccdddddddddddddddd",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "mcopy_to_right_no_overlap()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 160,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000602222222222222222333333333333333344444444444444445555555555555555666666666666666677777777777777774444444444444444555555555555555566666666666666667777777777777777ccccccccccccccccdddddddddddddddd",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "mcopy_to_left_no_overlap()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 160,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000602222222222222222333333333333333388888888888888889999999999999999aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbb88888888888888889999999999999999aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbccccccccccccccccdddddddddddddddd",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "8e7a312eb2738e1f750693ee39bc8152e89516fd62a49a2caa92473b1d1b1311"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+    "sourceSha256": "b0b3e80b80c3340af421165b0e0b91843fb54b20f0e1af7d4b9c8047eb94e21e",
+    "premises": [
+      "Transient uint16 x/y pack in transient slot0 offset0/2; transient uint256 z uses slot1. Inner Yul function writes7 to transient1, returns offset2; function returns7; actual top-level cleanup resets transient1 to0.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000007",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000007"
+                }
+              ],
+              "count": 1
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000007",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "e457d67473c6c5e0acfd654ecce184e73a31ae110cde19ac7fa09e4f098056e5"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_multiple_transactions.sol",
+    "sourceSha256": "0585c51dfcab5a902c1e2fe67a22b5edf4565f710f4441282c97ac3840238cdc",
+    "premises": [
+      "Ordered g,f,g,h,g start each configured top-level message with transient0; f writes42,h writes99/returns99, following reads0. Engine cleanup/beginFrame is observed explicitly, not labelled runTx.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "h()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000063",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000063"
+                }
+              ],
+              "count": 1
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000063",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "be8adb1b00c11f99537760c5a9298ef1b6a46cad83fc4244e24df986fb7c2c6a"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_multiple_calls_different_transactions.sol",
+    "sourceSha256": "ee1873557e47d7abe579f825fdef441d6d4dde4a953b99ed51b39bf9ad844ddd",
+    "premises": [
+      "Each test executes8ordered selfcalls: get0=0,get42=0,set0=21,get0=21,get42=0,set42=131,get0=21,get42=131. Same state shared inside one call; both slots reset between the2top-level calls. Exact inputs/frames are independently predicted.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "test()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000015",
+              "count": 1
+            },
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000083",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000015"
+                },
+                {
+                  "address": "self",
+                  "slot": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000083"
+                }
+              ],
+              "count": 1
+            }
+          ],
+          "frames": [
+            {
+              "frame": 0,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "caller",
+                "depth": 0,
+                "parent": null,
+                "exception": null,
+                "bytes": "0x"
+              }
+            },
+            {
+              "frame": 1,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            },
+            {
+              "frame": 2,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a000000000000000000000000000000000000000000000000000000000000002a"
+              }
+            },
+            {
+              "frame": 3,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x",
+                "isStatic": false,
+                "delegatecall": false,
+                "input": "0x1ab06ee500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000015"
+              }
+            },
+            {
+              "frame": 4,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000015",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            },
+            {
+              "frame": 5,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a000000000000000000000000000000000000000000000000000000000000002a"
+              }
+            },
+            {
+              "frame": 6,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x",
+                "isStatic": false,
+                "delegatecall": false,
+                "input": "0x1ab06ee5000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000083"
+              }
+            },
+            {
+              "frame": 7,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000015",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            },
+            {
+              "frame": 8,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000083",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a000000000000000000000000000000000000000000000000000000000000002a"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "signature": "test()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000015",
+              "count": 1
+            },
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000083",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000015"
+                },
+                {
+                  "address": "self",
+                  "slot": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000083"
+                }
+              ],
+              "count": 1
+            }
+          ],
+          "frames": [
+            {
+              "frame": 0,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "caller",
+                "depth": 0,
+                "parent": null,
+                "exception": null,
+                "bytes": "0x"
+              }
+            },
+            {
+              "frame": 1,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            },
+            {
+              "frame": 2,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a000000000000000000000000000000000000000000000000000000000000002a"
+              }
+            },
+            {
+              "frame": 3,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x",
+                "isStatic": false,
+                "delegatecall": false,
+                "input": "0x1ab06ee500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000015"
+              }
+            },
+            {
+              "frame": 4,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000015",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            },
+            {
+              "frame": 5,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a000000000000000000000000000000000000000000000000000000000000002a"
+              }
+            },
+            {
+              "frame": 6,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x",
+                "isStatic": false,
+                "delegatecall": false,
+                "input": "0x1ab06ee5000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000083"
+              }
+            },
+            {
+              "frame": 7,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000015",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            },
+            {
+              "frame": 8,
+              "fields": {
+                "kind": "call",
+                "address": "self",
+                "caller": "self",
+                "depth": 1,
+                "parent": 0,
+                "exception": null,
+                "bytes": "0x0000000000000000000000000000000000000000000000000000000000000083",
+                "isStatic": true,
+                "delegatecall": false,
+                "input": "0x9507d39a000000000000000000000000000000000000000000000000000000000000002a"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "4ee4101bc442022c3a2fcce0fe04d7999dbb688bb820d73facee8d2d2ec30932"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_reset_between_creation_runtime.sol",
+    "sourceSha256": "242350734bab6f58b068f7945e548f9b269d56b7de2015ae139b190da3b2c353",
+    "premises": [
+      "Constructor put/read42 then cleanup; runtime f starts0 (would revert on42). Both phases have explicit ordered captures, no inferred transaction finalization.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "constructor()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "5bfb9ea19d51f17d888e9e4bac3ff5f076e6433564cae33836cdc88a88e41574"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_sanity_checks.sol",
+    "sourceSha256": "529081b175c954819391ccd1ab31571de2b8cfee0bd0d1743b448045ebf7eaba",
+    "premises": [
+      "f writes persistent42 and transient21; g sees persistent42, fresh scratchmemory0 and resettransient0. Do not assert arbitrary final compiler scratch from f.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000015",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000015"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "99e9186bf80b1188358b9707c82575418330a2017c09549f60812aa1c1e5c627"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_simple_reentrancy_lock.sol",
+    "sourceSha256": "a684d20ae9f802d40b0170920457f76a3c2545f7580456c54921f2bbd7d00121",
+    "premises": [
+      "false branch acquires1/releases0; true internal reentry sees1 and reverts. Final transient0, message rollback is distinct from next-call cleanup; no nested EVM message invented for internal Solidity call.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(bool)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            },
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(bool)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            },
+            {
+              "kind": "revert",
+              "frame": 0,
+              "count": 1
+            },
+            {
+              "kind": "transient.revert",
+              "frame": 0,
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "0c285e1458dd3af0b26b78a621bcd55673dc78913331e733bec2a0ac5f0e2261"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_low_level_calls.sol",
+    "sourceSha256": "274011f18f2e9fe9b7da7e09bf7d87c62a102b4b5c3e0d6040c55042b2a552e4",
+    "premises": [
+      "Four source functions each CREATE2 one child, increment self nonce1..5 with value0. Delegatecall writes caller-owned transient5→6; ordinary/static targets do not overwrite caller-owned5. Final selftransient0 and ABItrue. Static illegal target write is checked by original byte/failure plan, not an invented zero native state.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "CREATE2 target address/initcode/code and target-owned transient values remain pending independent identity/owner contract; not derived from observed code/address.",
+      "Only known self account/slot and top-level semantic window assertions are claimed.",
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "testDelegateCall()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "2"
+              }
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "fields": {
+                "nonce": "1",
+                "balance": "0"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000005",
+              "count": 1
+            },
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000006",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000006"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "testCall()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "3"
+              }
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "fields": {
+                "nonce": "2",
+                "balance": "0"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000005",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000005"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "tloadAllowedStaticCall()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "4"
+              }
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "fields": {
+                "nonce": "3",
+                "balance": "0"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000005",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x0000000000000000000000000000000000000000000000000000000000000005"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "tstoreNotAllowedStaticCall()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "5"
+              }
+            },
+            {
+              "address": "self",
+              "phase": "pre",
+              "fields": {
+                "nonce": "4",
+                "balance": "0"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "bc6235b0a52bd8ad83a8f76e406e7f1577438d60302b189b4bd87e50802f92da"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_selfdestruct.sol",
+    "sourceSha256": "7cc27bb86089e1b36d35a55c827bda0cfb219d419c760d938d6dc872036aabc4",
+    "premises": [
+      "D constructor creates C using nonce1, stores its address in slot0. destroy uses prior-call C (EIP6780 code survives), TSTORE42 persists through selfdestruct until top cleanup. createAndDestroy creates C at nonce2 and stores its address; same-message get still returns42. Captures are before deferred next-boundary deletion, not runTx finalization.",
+      "Independent values derived from unchanged source before VM output. Slots asserted only after actual source access; touched-domain state only."
+    ],
+    "pendingDomains": [
+      "Deletion of newly created child after unavailable subsequent transaction boundary remains pending; no deletion/finalization inferred.",
+      "Untouched/native worlds and source correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "constructor()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "2"
+              }
+            },
+            {
+              "address": "child",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0",
+                "hasCode": true
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "address:child"
+            }
+          ]
+        }
+      },
+      {
+        "signature": "destroy()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "2"
+              }
+            },
+            {
+              "address": "child",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0",
+                "hasCode": true
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "address:child"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "address:child"
+            },
+            {
+              "address": "child",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "child",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "child",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "child",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "createAndDestroy()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "3"
+              }
+            },
+            {
+              "address": "child2",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "nonce": "1",
+                "balance": "0",
+                "hasCode": true
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "address:child"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "address:child2"
+            },
+            {
+              "address": "child2",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "child2",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "address": "child2",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "child2",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "3c76512094e0bc6071331e1f63deae007349bfefea69de6fd4c14fb4122eb190"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call.sol",
+    "sourceSha256": "5fe63f40eb1637c29af197f24d89a914c495501e165fa821086231e4c5c2e89e",
+    "premises": [
+      "asmfun(1,2,3) assigns1,2,7; direct mstore0/32/64 then return(0,96). No Solidity ABI epilogue after assembly return.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000007",
+              "count": 1,
+              "regionOffset": "0"
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "6e96740873a71511b5027b9f830147b10eff47decd74ec6f1d7b28a42218830e"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call2.sol",
+    "sourceSha256": "cd053332f4e6ed75efb8b5c6c7a137c35fdb810899d99a7f74efb83dbc2af329",
+    "premises": [
+      "Outer local d=16, asmfun returns1,2,7; direct memory0,32,64,96 then return0,128.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 128,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000010",
+              "count": 1,
+              "regionOffset": "0"
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "4ba73b18cfb189ea7088a91d4e13041a1d7ea2524f3562115be58d1945d0e4c6"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_embedded_function_call.sol",
+    "sourceSha256": "d506d3beb3fd71deb18b0ddf55c3ee94f5088b0638dd651caac347ad51d0f37c",
+    "premises": [
+      "Nested g(r)=r*r; asmfun(1,2,3) gives1,4,7 and lexical outer d16; direct return0,128.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 128,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000010",
+              "count": 1,
+              "regionOffset": "0"
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "99273229e15882aeb4f152b37da148dd650e5500fd451ce5a13bbd7019b893bb"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call_assignment.sol",
+    "sourceSha256": "6c914d67a4e4698a2217f99821b54ce51c0e3da20295fc5b83683379fb73d126",
+    "premises": [
+      "Declared uninitialized locals receive multi-result assignment1,2,7; direct mstore/return0,96.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000007",
+              "count": 1,
+              "regionOffset": "0"
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "6e96740873a71511b5027b9f830147b10eff47decd74ec6f1d7b28a42218830e"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_write_to_stack.sol",
+    "sourceSha256": "f407169e44d0d2d53ac2fe44c4aacd2483b899d6f1209aca3fc0c45eaaec6dfb",
+    "premises": [
+      "r7 and bytes32 ASCIIabcdef right-padded; exact ABI two-word window.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 64,
+              "bytes": "0x00000000000000000000000000000000000000000000000000000000000000076162636465660000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "ecc142c9d4056e5035959307a762350d9ae58fc8f2ff1a2e05d74050fba696b0"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_read_and_write_stack.sol",
+    "sourceSha256": "07e9f353c95aaf4cae602cc99f85086bb7c9cb70fd5b2f1494b0873e65ea1a40",
+    "premises": [
+      "Solidity loop x0..9 adds each x to r; triangular sum45.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002d",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "f633db2915d21ebdc9d728a3cf876be18f0ee034c0da5baaaaac6806c2c5748c"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/for_loop_break.sol",
+    "sourceSha256": "10ccac0851079f5fe4a304354866ccb16f267f2a60356e8e488b19119547af87",
+    "premises": [
+      "Body and post each increment i; i0→2→4→6 then break before either increment.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000006",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "aad3a47d260c0ba5ee7ed3acf80f6d446464a167374e929f0bffd9d91c715fe4"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/for_loop_continue.sol",
+    "sourceSha256": "0b107fdc8b90c0784ff481186a874bf00b5883d0d9ebf49dd8c234e5439ccdba",
+    "premises": [
+      "Continue skips even i; five odd iterations add1 to k, post increment still runs.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000005",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "6a1b256ccb76f695667a1baad6ce27a9c8ae0823450a4b0ee1bd79179f9d24c1"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/for_loop_nested.sol",
+    "sourceSha256": "22c81ce86fa3ec45f40eeff5c0ee2bbae550f65b0cead65cebb72452de2e6afa",
+    "premises": [
+      "Inputs0,1,2,4: outer break sets2; inner continue executes post i17/x9 then outerpost18; innerbreak skips post and outer advances to10; x4 body i90 then outerpost91.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000012",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000000a",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000005b",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "0b4692fbbb246e4d5ccd726a898cb35328f9c2e443fcd987bf1d6c96a1f5f96b"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_for.sol",
+    "sourceSha256": "76b71a3ffc74baacc3b7703f9fe9a2aed90df1aca2996b35e09ed0e05e66e635",
+    "premises": [
+      "Finite source factorial inputs0..4; zero/one1 and successive products2,6,24. No word overflow in these witnesses.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000006",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000018",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "3d4f508fa2523f598a67a522009f0ce60b82e628581efcf524e148b01ca12751"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_recursion.sol",
+    "sourceSha256": "7a9eae19476bb40fb1c06bc075e18bb21c346f8cc63e4acbdd29698055eba9c8",
+    "premises": [
+      "Finite source factorial inputs0..4; zero/one1 and successive products2,6,24. No word overflow in these witnesses.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000006",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000018",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "3d4f508fa2523f598a67a522009f0ce60b82e628581efcf524e148b01ca12751"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_for2.sol",
+    "sourceSha256": "11514b27570ee4585236986fd256e6f82351cc79b11fa20f020dbc0c692f1c59",
+    "premises": [
+      "Each call resets st0. Condition sideeffect(2) always runs: a0 and2 one evaluation st2; a1 body then postd3 then second condition st4. Ordered prestate0,2,4; post2,4,2.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000002"
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000003",
+              "count": 1
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000002"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000004"
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000004"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000002"
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "3c1a5bfd41896ac02cc8d159ec74286712e328c123fe99f841409cd0de14ecda"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_if.sol",
+    "sourceSha256": "5503ec8734a5807250e45a175f38b8a75ec88a4738212007b0104512df980d8b",
+    "premises": [
+      "gt(a,1) gives2 only for inputs2,3; zero-initialized result otherwise.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "24ea5c837c479c0f590c1ad472545e02da3b83cde78b3fe0df10707d4c15d081"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_switch.sol",
+    "sourceSha256": "7355708dd71a4240ed8eca1a20c61e83af809399372de97a4015c760498b6dfa",
+    "premises": [
+      "Switch cases1→8,2→9,default2 for0,3.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000008",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000009",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      },
+      {
+        "signature": "f(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "efed5493f0cfe1644dd5430e6353d71e6f1125c77c199d470a431aac3e221117"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/leave.sol",
+    "sourceSha256": "a45400765e92e994d7409982bf89431cbffeac4f608000c42a1b74790e48a3f8",
+    "premises": [
+      "Yul leave returns t2 before t9; local function only, whole source frame returns ABI2.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "fa85eb90e41ef7358fc21fabc30896f42077f7124bdf7956f9b4eb6fa6494b4b"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_assign_dynamic.sol",
+    "sourceSha256": "26e6caa1b45fde3903c364ec55b72da79210ae9ef1138fc60c77e77cd1a5f49c",
+    "premises": [
+      "x.offset=0x44,x.length2 selects4calldata words8,7,6,5; dynamic ABI returns head32,length2 and two fixed pairs. Pointer is calldata offset, not allocation address.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256[2][])",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 192,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000005",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "49b5c6b98e9fe13114e03d8dec5d32782e7f298d4447d2911691f6351b984667"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_assign_static.sol",
+    "sourceSha256": "67d885c621a9fcc73680e813294d8a9dafd5de7fc0c43516d727dc065f6382eb",
+    "premises": [
+      "x=0x24 skips initial word0 after selector; copies next4calldata words8,7,6,5 to fixed-array return.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256[2][2])",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 128,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000005",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "654192726af03ce81a4b50f0d6723faff8ddb8b17a88391415b6b6892717de90"
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_read.sol",
+    "sourceSha256": "754df716a7f347556639a19a7677674497feb8335342fd69e26974b31c12236e",
+    "premises": [
+      "Canonical dynamic head32,length2 gives x.offset4+32+32=0x44; second fixed pair at0x44+64=0x84. No host allocation discipline.",
+      "Values/slots derived from unchanged source before additional EVM execution; only semantic RETURN windows, no arbitrary final compiler memory equality."
+    ],
+    "pendingDomains": [
+      "Untouched/native worlds and universal source/target correspondence"
+    ],
+    "calls": [
+      {
+        "signature": "f(uint256[2][])",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000004400000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000084",
+              "count": 1
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ]
+        }
+      }
+    ],
+    "callPlanSha256": "10d889e8c73d14ddb595c22e803b459ee0a26f38203e40fc58180c43f7831a5f"
   }
 ]
