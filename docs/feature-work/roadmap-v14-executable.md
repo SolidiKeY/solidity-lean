@@ -557,3 +557,48 @@ No local-value or simulation oracle occurs. Five guarded axiom pins pass.
 Final separate finder/skeptic found no proof defect. Their actual log mapping,
 real module-path extensions and external handoff link-base corrections are
 applied before checkpoint commit/export.
+
+
+## Recovery checkpoint: actual constructor attempts after a paid prefix
+
+Completeness review correctly identified usable published `World.tryCreate`
+and `ContractWorldCertificates` interfaces. [CreationAttempt](../../Solidity/Backend/Executable/CreationAttempt.lean)
+consumes them without adding source/target semantics. `prefix_caught` requires
+an actual prefix success, mutable context and actual constructor failure with
+specified bytes; it proves the outer atomic result retains the genuine paid
+world and exact constructor data through an arbitrary observation function.
+`prefix_argument_failure` requires actual prefix success only: argument failure
+never enters constructor catch, so outer atomic returns the earlier checkpoint.
+For arbitrary THalt this is result algebra, not a completed Step for divergence
+or model exhaustion; the inhabited controls use completed reverts.
+
+Actual one-unit payment takes sender3→2 and installed recipient0→1. A new closed
+constructor at a different checked address executes `revertData ca/fe`; its
+catch retains both funded balances and the earlier account, with no failed
+account installed. Constructor context value is zero (ordinary default), not
+a proof of constructor value-payment lowering. The actual empty constructor
+also succeeds and supplies `World.create_installs` and exact fresh address.
+A subsequent success continuation returns77failure unchanged, distinct from
+constructorca/fe and argumentab. The latter stays outside catch even when
+catchable; an actual paid-prefix argument failure restores the outer world.
+`operation_consistency` consumes the published **world-result erasure**
+certificate and actual `Operation.tryCreate_caught`; exact bytes are proved
+independently, not recovered from erased results. Six guarded headline/control
+axiom outputs contain standard Lean subsets only.
+
+Initial syntax/namespace and whole-world product-eta recursion failures are
+retained; explicit existing run witnesses and product case analysis fix them
+without raising budgets. Source/new/try-new lowering, nonce/address production,
+constructor source/runtime identity and pinned EVM rollback remain OPEN.
+Separate read-only finder/skeptic found no proof defect; their erasure-wording,
+axiom-pin and arbitrary-THalt caveat refinements are implemented.
+
+| Checkpoint6 command | Actual result and evidence |
+|---|---|
+| `lake -f v14-runtime.lakefile.toml build Solidity.Backend.Executable.CreationAttempt` | PASS36jobs; `/workspace/v14-recovery-evidence/creation-attempt-pins.log` |
+| Fresh `lake -f v14-runtime.lakefile.toml env lean -j1 --tstack=131072 Solidity/Backend/Executable/CreationAttempt.lean`,180second limit | PASS,1worker662MiB/noOOM; `/workspace/v14-recovery-evidence/creation-attempt-fresh.log` |
+| Lane/layer/orphan/trust/whitespace/docs static commands | `/workspace/v14-recovery-evidence/checkpoint6-checks.json`; raw docs46/exit1 and separate exact-base no-new gate |
+
+The next independent preparation consumes actual linking/immutable patch
+locations within owned selected runtime payloads; no reserved implementation
+or global ledger is changed. The full original queue remains binding.

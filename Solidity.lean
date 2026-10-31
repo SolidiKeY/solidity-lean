@@ -901,3 +901,5 @@ import Solidity.Backend.Executable.WorldPrefixChecks
 
 import Solidity.Backend.Executable.LocalFrame
 import Solidity.Backend.Executable.LocalFrameChecks
+
+import Solidity.Backend.Executable.CreationAttempt

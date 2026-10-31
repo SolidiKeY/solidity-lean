@@ -1213,3 +1213,5 @@ At the root, the notation's own tests:
 
 | `Backend/Executable/LocalFrame.lean` | Uniform typed caller-local DUP reads and local-derived scalar composition; general runtime-frame producer open. |
 | `Backend/Executable/LocalFrameChecks.lean` | Distinct locals, shifted DUP3, wrong-index/order and physical-headroom controls. |
+
+| `Backend/Executable/CreationAttempt.lean` | Actual paid-prefix constructor try/catch, argument/continuation boundaries and fresh-account controls. |
