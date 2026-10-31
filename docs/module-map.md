@@ -1206,3 +1206,5 @@ At the root, the notation's own tests:
 | `Backend/Executable/ScalarSequence.lean` | Published scalar selection consumer: intrinsic source equations, exact staged stacks over a typed caller frame, derived capacity, total bytes and roundtrip; runtime producer remains open. |
 | `Backend/Executable/ScalarSequenceResources.lean` | Existing Closed/Binary/Checked invocation prefix laws consumed in a real checked-test follow-up, exact intermediate words, DUP peaks, spill bounds and emitted bytes. |
 | `Backend/Executable/ScalarSequenceChecks.lean` | Populated distinct caller locals, wrapping subtraction/signed comparison, first/test boundaries, full bytes, wrong-order and intermediate-capacity negatives. |
+| `Backend/Executable/ScalarArtifact.lean` | Derived placement of actual 104/175-byte scalar encodings behind nonempty constructor prefixes; exact return/revert, runtime/argument slices and separate typed/numeric observations. |
+| `Backend/Executable/ScalarArtifactChecks.lean` | Both payload sizes, separate protected creation/scalar tails, source/capacity/byte conjunction and return/revert argument contamination controls. |

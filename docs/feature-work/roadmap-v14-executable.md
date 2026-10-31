@@ -375,3 +375,66 @@ new invocation semantics. `typed_combination`, `reverse_order` and
 `checked_combination` are closed kernel controls, not new hypotheses.
 The final independent guard review's stale six-module README count was changed
 to the count-independent "owned modules" before commit.
+
+
+## Recovery checkpoint: scalar payload and constructor composition
+
+[ScalarArtifact](../../Solidity/Backend/Executable/ScalarArtifact.lean) continues
+backfill A after the scalar/guard checkpoint, rather than stopping at that
+commit/export. It consumes the exact 104/175-byte scalar encodings and existing
+creation prefix/wrapper proofs read only. `runtimeCode` merely chooses those
+two already proved actual programs; it is not a new AST or instruction selector.
+`runtime_length` derives both payload lengths, `placement` derives PUSH1 lengths
+and offset16 from the six-byte existing copy prefix and ten-byte wrapper.
+No caller-provided layout or success oracle supplies these equalities.
+
+`constructor_exec` executes both actual nonempty prefix segments and the exit
+wrapper, returning or reverting the complete selected payload while protecting
+a separate `List Creation.StackWord`. It does not coerce that tail into
+`Scalar.Stack`, identify runners, or execute the returned runtime instructions.
+`front_length`, `image_length`, `runtime_slice` and `arguments_slice` fix all
+byte intervals. `decode_runtime` is exactly the existing encoder roundtrip.
+`typed_payload`, for the base 104-byte variant only, retains the source, numeric execution, derived scalar capacity,
+actual constructor-return and same-byte roundtrip facts as separate conjuncts;
+it explicitly does not turn their conjunction into fetched-runtime agreement.
+
+`excludes_argument_bytes` and `excludes_revert_arguments` consume deterministic
+actual executions to exclude contamination by any nonempty argument suffix on
+both result paths. `excludes_wrong_tag` distinguishes return and revert even
+for the same complete payload. [Controls](../../Solidity/Backend/Executable/ScalarArtifactChecks.lean)
+inhabit both payload sizes, success/revert with nonempty arguments, protected
+creation words11/22 and separate typed scalar caller words-7/99, exact total
+image length193 for the checked payload plus two arguments, argument start191,
+and the retained scalar-capacity conjunction. These are constructor byte-slice
+observations, not account installation or source constructor lowering.
+
+Exact premises: `constructor_exec` needs only its actual checked/base choice,
+typed operands, success/revert flag, argument bytes and creation tail;
+`placement` is constructed, never assumed. Interval/length/decoding theorems
+are unconditional on those inputs. `typed_payload` additionally retains the
+previous two source short-circuit refusals and operation result equations,
+actual typed caller state/spill and the exact1019 spill bound. The two argument
+negatives require positive argument length only for the impossible-contamination
+claim. No source profile, failure observation, Fml target or budget changed.
+
+Focused import closure passes80jobs with seven guarded artifact/control axiom
+reports using only standard Lean axioms. A first concrete drop191 control hit
+the unchanged recursion-depth limit when reducing the whole payload length;
+rewriting with `runtime_length` fixed it and its raw failure is retained.
+Independent read-only finder and skeptic found no soundness/layout/ownership
+defect. Their refinements were implemented: preserve the capacity conjunct and
+add a failed-constructor argument-contamination control. Fresh diagnostics,
+static/docs gates, final reviews and actual commit head are recorded in the
+checkpoint handoff. Full original Work/Backfill and fetched/pinned/source/world
+obligations remain open. Concrete world-operation prefix/iteration backfill
+continues after this checkpoint; it will reuse existing operations/fold laws,
+not introduce a new loop semantics.
+
+
+Checkpoint3 final reviews accepted the source/layout/model/ownership fixes.
+The handoff now states that `excludes_wrong_tag` has no external run premise
+(it uses the internally derived `constructor_exec` proof), and both document
+and handoff qualify `typed_payload` as the base104-byte variant only. Actual
+constructor/layout facts still cover both104/175-byte payloads. Focused80jobs,
+fresh two-file diagnostics, seven pins and static gates pass; real guard11/0;
+raw docs exit1/46 is unchanged and separate no-new comparison passes.

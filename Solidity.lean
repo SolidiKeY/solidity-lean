@@ -894,3 +894,5 @@ import Solidity.Backend.Executable.PaymentCheckpointChecks
 import Solidity.Backend.Executable.ScalarSequence
 import Solidity.Backend.Executable.ScalarSequenceResources
 import Solidity.Backend.Executable.ScalarSequenceChecks
+import Solidity.Backend.Executable.ScalarArtifact
+import Solidity.Backend.Executable.ScalarArtifactChecks
