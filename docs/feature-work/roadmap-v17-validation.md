@@ -462,3 +462,10 @@ published declarations successfully at its historical committed revision.
 Final same-head extraction, replay, actual declaration refusal controls, full
 control-suite output and independent evidence review belong to the external
 checkpoint handoff, avoiding a post-validation source-tree change.
+
+A further finder pass required preserving the actually observed command exit
+before cleanup can alter supervisory status, and explicitly comparing old/live
+replay revision, tree, configuration and installed import-input snapshots even
+when declaration rows coincide. Both were corrected; dedicated replay mutation
+controls cover a matching baseline and changed bindings. These are provenance
+checks, not additional semantic proof assumptions.

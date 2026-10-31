@@ -292,7 +292,7 @@ def collect(req, out):
     argv=p.docker_create_argv(out,before,container,command)
     (out/'docker-argv.json').write_bytes(canonical(argv)); (out/'execution.sh').write_text(p.execution_script(out,command,Path(before['runtime']['lake']['path'])))
     p.UNRESOLVED.write_bytes(canonical({'container':container,'revision':before['revision']}))
-    cid=None; proc=None; code=125; samples=[]; errors=[]; begin=time.monotonic()
+    cid=None; proc=None; code=125; command_exit=None; samples=[]; errors=[]; begin=time.monotonic()
     def remaining():
         left=300-(time.monotonic()-begin)
         if left<=0: raise subprocess.TimeoutExpired('kernel extraction deadline',300)
@@ -305,7 +305,8 @@ def collect(req, out):
             proc=subprocess.Popen(['docker','--host=unix:///var/run/docker.sock','start','-a',cid],env=env,stdout=log,stderr=subprocess.STDOUT)
             while True:
                 state=p.docker('inspect','--format','{{.State.Status}}',cid,timeout=remaining()).stdout.decode().strip()
-                if state in ('exited','dead'): code=proc.wait(timeout=remaining()); break
+                if state in ('exited','dead'):
+                    command_exit=proc.wait(timeout=remaining()); code=command_exit; break
                 if state=='running':
                     try: top=p.docker('top',cid,'-ww','-eo','pid,stat,comm,rss,args',timeout=remaining()).stdout.decode()
                     except subprocess.CalledProcessError:
@@ -327,7 +328,6 @@ def collect(req, out):
             proc.kill()
             try: proc.wait(timeout=2)
             except subprocess.TimeoutExpired: errors.append({'phase':'attach cleanup','error':'unreaped client'}); code=125
-    command_exit=code
     try: after=e.snapshot(ROOT)
     except (OSError,ValueError,subprocess.SubprocessError) as err: after={'error':str(err)}; code=125
     try: installed_after=tool_inputs(before)
@@ -407,6 +407,12 @@ def match_claims(claims, live):
     return {'declarationEvidenceMatched':True,'semanticPremisesDischarged':False,'releaseClosed':False}
 
 
+def match_replay(old, replay):
+    e.require(replay['before']==replay['after']==old['before']==old['after'],'replay revision/source/tool/config differs')
+    e.require(replay['installedBefore']==replay['installedAfter']==old['installedBefore']==old['installedAfter'],'replay installed inputs differ')
+    e.require(old['result']['rows']==replay['result']['rows'],'live declaration replay differs')
+
+
 def main():
     a=argparse.ArgumentParser(description=__doc__)
     a.add_argument('mode',choices=['collect','verify']); a.add_argument('--request',type=Path); a.add_argument('--record',type=Path); a.add_argument('--claims',type=Path); a.add_argument('--out',type=Path,required=True)
@@ -422,7 +428,7 @@ def main():
         e.require(replay['exit']==0,'live replay failed')
         validate_record(replay,e.snapshot(ROOT))
         # Absolute fresh import paths differ between runs; declarations must match exactly.
-        e.require(old['result']['rows']==replay['result']['rows'],'live declaration replay differs')
+        match_replay(old,replay)
         result=match_claims(e.load(args.claims),replay['result']); print(json.dumps(result)); return 0
 
 

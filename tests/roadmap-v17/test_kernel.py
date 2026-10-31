@@ -114,4 +114,11 @@ class OutputControls(unittest.TestCase):
             with self.subTest(key=key),self.assertRaises(ValueError): k.normalize_output(bad,req,out,closure,{},Path('/tools'))
         payload['imports']=[{'module':'Solidity.KeySort','olean':'/stale/Solidity/KeySort.olean'}]
         with self.assertRaisesRegex(ValueError,'stale/unexpected'): k.normalize_output(payload,req,out,closure,{},Path('/tools'))
+class ReplayControls(unittest.TestCase):
+    def test_exact_replay_binding(self):
+        old=dict(before={'revision':'a'},after={'revision':'a'},installedBefore={'tool':'hash'},installedAfter={'tool':'hash'},result={'rows':[]})
+        k.match_replay(old,copy.deepcopy(old))
+        for key,value in [('before',{'revision':'other'}),('after',{'revision':'other'}),('installedBefore',{}),('installedAfter',{}),('result',{'rows':['forged']})]:
+            replay=copy.deepcopy(old); replay[key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError): k.match_replay(old,replay)
 if __name__=='__main__': unittest.main()
