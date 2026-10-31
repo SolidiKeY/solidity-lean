@@ -1267,3 +1267,6 @@ At the root, the notation's own tests:
 
 | `Solidity/Lowering/V08/SourceCustomErrorFailures.lean` | Actual custom-error argument/encoding failure boundaries. |
 | `Solidity/Lowering/V08/SourceCustomErrorFailureControls.lean` | Populated source panic, rethrow and aggregate-encoding-gap controls. |
+
+| `Solidity/Lowering/V08/SourceAbi.lean` | Actual source ABI expression allocation and existing byte observations. |
+| `Solidity/Lowering/V08/SourceAbiControls.lean` | Populated binary/dynamic/static ABI argument and allocation controls. |

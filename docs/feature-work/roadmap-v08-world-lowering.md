@@ -2915,3 +2915,51 @@ registration fixed it, retaining raw47missing log separately. Finaldocs46missing
 frozen+11/+345 and mandatory125/default/full/literal holds unchanged. All prior
 seals/raw logs persist; exact final head and compact additive artifacts are in
 the checkpoint handoff. No goal identity/objective/status reset or completion.
+
+
+## G21 actual ABI expression checkpoint (2026-10-31)
+
+`Solidity/Lowering/V08/SourceAbi.lean` proves actual evalE.abiEncode composition
+from individual evalArgs/encodeVals steps and actual result allocation at the
+reached heap.next. Literal encode/encodePacked reads raw literal bytes directly,
+allocating ONLY its result. Existing natWordBytes/pad32 and Error-payload byte
+observations apply without a new length/admission bound. No intrinsic general
+tuple encoder exists in the consumed interfaces; no emitter/decoder is added.
+
+`Solidity/Lowering/V08/SourceAbiControls.lean` uses the complete old populated
+machine: balances93/7, code0/nonce1, persistent/transient true, journal3, oldheap0,
+events/logs/functionlocals. Empty/binary[0,255,128]/33-byte inputs retain all
+fields and allocate object1/next2. Actual mixed arguments evaluate binary,
+assignfalse/readfalse,33bytes,then real hash allocation1; result bytes allocate2/
+next3 and callerlocalsfalse. Both pipelines/static modes/packing modes execute.
+Standard320bytes and packed70bytes retain full outcomes; full offset words160/
+224 versus reordered160/256 and actual wrong-order/packing/pointer/skippedhash/
+locals controls discriminate real runs. Horizon6 retains localfalse then times
+out BEFORE hash allocation; no source admission cutoff or rollback is inferred.
+
+Primitive word and layout-prefix facts avoid repeated cryptographic reduction
+under unchanged200000heartbeats. All747 prior exact sets unchanged;33 new checked
+sets make780. Final143656 PASS139jobs55.816887555s; old failed attempts retained.
+Independent finder/skeptic requested full offset-word and actual-run negatives;
+these are added. A reported duplicate conjunct was withdrawn after identifying
+overlapping read output. No observations/statements/premises/proof budgets weakened.
+
+Space: old540MBreserve preserved. Native Git v4 index encoding retains identical
+staged entries/debug metadata/cached diff and all source hashes, without global
+configuration/cleanup. Evidence uses a checksummed directory, compact lossless
+case records and explicit ordered original/owned patch series referencing old
+sealed segments plus this checkpoint. All prior snapshots, seals, raw failures and caches are retained.
+Initial18MiB forecast/revised21MiB forecasts are estimates, not enforced guards.
+All44 old checker cases remain verbatim;4 new source-binding cases make48.
+
+Every original G20,G21,G22.01-.05,G23 and BackfillA/B remains PARTIAL. Missing
+canonical SourceSpec/V07/type/layout/ABI/body/linkage/runtime-frame/bytecode/
+admission and reserved getter/ref/readonly/decoder applications stay explicit.
+Aggregate encoder stuck and general nested/calldata/catch/signature gaps remain.
+Mandatory Decision/full125 and literal/default/executable-refresh holds are not
+waived or retried unchanged; raw docs/pins1 and frozen-base increases persist,
+with public equality separately checked. Kernel components are not compiler/EVM
+adequacy. Independent work is NOT exhausted; new checks require safe disk headroom.
+Existing blocked goal untouched; get_goal/LeanMCP unavailable. Exact commit,
+commands/exits, remaining queue, resources/reviews and indexed evidence appear
+in the compact additive handoff; no whole-lane completion is claimed.
