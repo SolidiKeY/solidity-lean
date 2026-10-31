@@ -353,10 +353,7 @@ through `access_calldata_tail` (`tailRef`). -/
 def celem (I : Input) : Nat → (e : Shape) → Nat → Nat → Except Fail (Val e)
   | 0, _, _, _ => .error .fuel
   | f + 1, e, base, src =>
-    if e.dynamic then
-      match tailRef I e base src with
-      | .ok r => cval I f e r.1 r.2
-      | .error x => .error x
+    if e.dynamic then (tailRef I e base src).bind fun r => cval I f e r.1 r.2
     else cval I f e src 0
   termination_by structural fuel _ _ _ => fuel
 
