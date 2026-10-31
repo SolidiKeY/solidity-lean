@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty-four. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-five. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3470,3 +3470,55 @@ FAIL11incoming/ownednew0. Raw inventory1:1176unrecorded=359inherited+817owned,
 0unsafe,notglobalpass. Independent finder/skeptic source reviews pass all eight
 laws/six meaningful controls with no confirmedremainingdefect. Every earlier
 vector/guard/seal/failure retained. Existing goal remains BLOCKED unchanged.
+
+
+### C45 — actual reached nested-write program composition
+
+Continued original G34/BackfillB after sealing C44. SourceNestedSequence consumes
+C44 plus existing SourceSequence RItems/Prog composition and Heap.len_writeAddr.
+Two public laws execute the SECOND nested assignment at the FIRST actual Source,
+intrinsic and word output. Derive the second parent lookup/alias footprint from
+the first parent-field frame, second bounds from original bounds plus actual
+length preservation, Source local alignment from unchanged locals, and carry
+Source MemOK/finite observer/full RefArrayStateRepr. No second initial-state run
+or desired reached relation is assumed. Source RItems horizon+7 executes first
+stmt horizon+6 and second horizon+5; intrinsic Prog and appended whole word code
+execute the same pair. Actual primitive write and machine-prefix identities are
+exposed. Final locals/parent/stack and existing allocator are preserved.
+
+Late-invalid-second law derives the REACHED rejection using the same interfaces,
+including actual prefix heap/Source state/word machine and its observer/MemOK.
+The actual Source error globals contain the changed prefix. Intrinsic/word
+reversion provides no successful suffix heap; no Source/EVM rollback equivalence
+or halt/returndata representation is invented.
+
+Three controls retain every prior fixture/vector/guard verbatim. With current
+parent index2 selecting the repeated left child, actual writes at child1 then
+child2 give TFF→TTF→TTT, while rightFTF and all parent IDs, neighbour/free-pointer/
+stack stay framed. Actual RItems, Prog, both word stages and concatenation have
+complete ordered Source tables, child vectors and 22-cell word vectors; the
+cursor48 allocator instance is applied. Executing the actual SECOND operation
+on the INITIAL state instead gives TFT and a different word18, proving it cannot
+replace reached-state composition. This is a frozen INITIAL STATE negative,
+not frozen RHS recapture: the pure local RHS remains true. A separate nonempty
+changed TFF→TFT prefix followed by child endpoint3 rejection verifies Source
+error state and both intrinsic/word failures, without fabricating a suffix.
+
+Scope remains two actual writes to the same selected child, arbitrary existing
+runtime bounds/indices and sufficient initial local alias footprint, pure local
+operands and the finite parent→Bool-child observer. Not arbitrary programs,
+recursive Source graphs, physical bytes, ABI/deep-copy/emitted loops/wholepipeline.
+Original G32/G33/G34/G35.01-.06 and Backfill A/B remain partial/blocked, no queue
+exhaustion or goal completion. Same runtime/caches/caps/CPU0/threads1/Lean-j1,
+cacheOFF and all proof/fuel/node/test/time budgets unchanged. New focused proofs
+pass without changing existing semantics or expected observations.
+
+C45 guarded169/full1084default/262Suite/SolKey377/131 exit0, fresh actual versions
+and KeySort2jobs/cacheOFF pass. Strict automatic/completefixtures/layer/orphan/
+trust/script syntax+corruption/822standardpins103modules pass. Full sampled
+aggregateRSS1633328KiB,disk229376bytes,new max/OOM/kill events0. Raw docs1 remains
+COMPLETE83publicfindings byte-identical; frozen no-newFAIL11incoming,ownednew0.
+Raw inventory1:1181unrecorded=359inherited+822owned,0unsafe,notglobalpass.
+Both independent read-only finder/skeptic source reviews pass without confirmed
+remaining defect. Frozen INITIAL STATE wording verified; oldvectors/seals/raw
+failures preserved. No new C45 Lean attempt failed; original goal BLOCKEDunchanged.

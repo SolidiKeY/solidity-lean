@@ -2,6 +2,7 @@ import Solidity.Backend.MemoryOps.SourceNestedMemory
 import Solidity.Backend.MemoryOps.SourceNestedSelect
 import Solidity.Backend.MemoryOps.SourceNestedMutation
 import Solidity.Backend.MemoryOps.SourceNestedAssignment
+import Solidity.Backend.MemoryOps.SourceNestedSequence
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -1060,5 +1061,185 @@ theorem nested_ordered_prefixes (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms nested_ordered_prefixes
+
+
+private def p45y : Source.EMState E0 NSΓ := (ny.1.set nsi (sourceUint (indexValue ⟨2,by decide⟩)),ny.2)
+private def p45s := ns.setLocal ni (indexValue ⟨2,by decide⟩)
+private def p45m := writeMachine nm 5 w[2]
+private theorem p45mem : Source.MemOK E0 SH p45y :=
+  ⟨⟨nmem.1.1,Source.LocalsOK.set ny.1 nsi nmem.1.2 trivial⟩,nmem.2⟩
+private theorem p45repr : RefArrayStateRepr 1 1 8 nf p45s base p45m :=
+  ⟨nrepr.state.setVal ni (indexValue ⟨2,by decide⟩) w[2] (ReprV.uint_of rfl),nrepr.arrays.localWrite 5 (by decide) w[2]⟩
+private theorem p45at : SourceBoolRefsAt p45y 3 p45s.heap fresh addresses := fresh_at.same_heaps rfl rfl
+private theorem p45parent : p45s.heap.index fresh .dyn (indexValue ⟨2,by decide⟩)=some left := by
+  change hp.index fresh .dyn (indexValue ⟨2,by decide⟩)=some left
+  simp only [Heap.index,indexValue,Int.toNat_natCast,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+private def p45out := nh.set left (MObj.setElem .dyn (nh.get left) 2 true)
+private def p45ym : Source.EMState E0 NSΓ := (p45y.1,{p45y.2 with heap := p45y.2.heap.write 0 (sourceBoolMemory [true,true,false]) (by rfl)})
+private def p45z : Source.EMState E0 NSΓ := (p45ym.1,{p45ym.2 with heap := p45ym.2.heap.write 0 (sourceBoolMemory [true,true,true]) (by rfl)})
+private def p45mm := writeMachine p45m 18 w[1]
+private def p45target := writeMachine p45mm 19 w[1]
+private def p45term2 : Source.RExpr E0 NSΓ .bool := sourceNestedAssign nsroot nsi nsi .here
+private def p45code2 : List Instr := nestedWriteCode (C := C) 1 nroot ni ni .here
+private def p45items : Source.RItems E0 [] false .body NSΓ NSΓ := .stmt (.expr nterm) (.stmt (.expr p45term2) .nil)
+private def p45prog : Prog C NΓ NΓ := .cons (nestedStmt nroot ni nj .here) (.cons (nestedStmt nroot ni ni .here) .nil)
+private theorem p45src1 : (Source.writeLoc (E := E0) (Γ := NSΓ) F0 4 (.mem 0 1) (.bool true)).run p45y=(.ok (),p45ym) := by
+  have hh : p45y.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ := rfl
+  obtain ⟨_,hw⟩ := source_bool_write p45y 0 [true,false,false] hh 1 (by decide) true
+  exact hw
+private theorem p45src2 : (Source.writeLoc (E := E0) (Γ := NSΓ) F0 3 (.mem 0 2) (.bool true)).run p45ym=(.ok (),p45z) := by
+  have hh : p45ym.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,true,false]⟩ := Source.Heap.write_get _ _ _ (by rfl)
+  obtain ⟨_,hw⟩ := source_bool_write p45ym 0 [true,true,false] hh 2 (by decide) true
+  exact hw
+
+/-- Two meaningful writes retain BOTH changes. The second Source/intrinsic/word
+operation is actually reached after the first, including repeated child alias. -/
+theorem nested_reached_pair_views (p : Roadmap.Pipeline) :
+    (Source.execS (Source.SemanticsExamples.G0 p) F0 6 NSΓ.length none
+      (.expr nterm : Source.RStmt E0 [] false .body NSΓ NSΓ) p45y.1).run (.nil,p45y.2)=(.ok (.normal p45ym.1),(.nil,p45ym.2)) ∧
+    (Source.execS (Source.SemanticsExamples.G0 p) F0 5 NSΓ.length none
+      (.expr p45term2 : Source.RStmt E0 [] false .body NSΓ NSΓ) p45ym.1).run (.nil,p45ym.2)=(.ok (.normal p45z.1),(.nil,p45z.2)) ∧
+    (Source.execItems (Source.SemanticsExamples.G0 p) F0 7 NSΓ.length none p45items p45y.1).run (.nil,p45y.2)=
+      (.ok (.normal p45z.1),(.nil,p45z.2)) ∧
+    Prog.run p45s p45prog=.ok ⟨p45s.withHeap p45out,List.prefix_refl _⟩ ∧
+    run ncode p45m=.ok p45mm 0 ∧ run p45code2 p45mm=.ok p45target 0 ∧ run (ncode++p45code2) p45m=.ok p45target 0 ∧
+    SourceBoolRefsAt p45ym 3 nh fresh addresses ∧ SourceBoolRefsAt p45z 3 p45out fresh addresses ∧
+    Source.MemOK E0 SH p45ym ∧ Source.MemOK E0 SH p45z ∧
+    [MObj.elems .dyn (hp.get left),MObj.elems .dyn (nh.get left),MObj.elems .dyn (p45out.get left)]=
+      [[true,false,false],[true,true,false],[true,true,true]] ∧
+    [MObj.elems .dyn (p45out.get right)]=[[false,true,false]] ∧
+    [(MObj.elems .dyn (p45out.get fresh)).map HRef.id]=[[0,1,0]] ∧
+    [p45y.2.heap.get 0,p45ym.2.heap.get 0,p45z.2.heap.get 0]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [true,true,true]⟩] ∧
+    [cells p45m,cells p45mm,cells p45target]=
+      [[w[48],w[32],w[32],w[36],w[1],w[2],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]],
+       [w[48],w[32],w[32],w[36],w[1],w[2],w[99],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]],
+       [w[48],w[32],w[32],w[36],w[1],w[2],w[99],w[3],w[1],w[1],w[1],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]]] ∧
+    p45z.1=p45y.1 ∧ p45target.stack=[w[42]] ∧ StructAllocatorRepr (p45s.withHeap p45out).heap base 8 ⟨48,by decide⟩ p45target := by
+  obtain ⟨mid,out,ym,z,mm,target,ho₁,ho₂,hw₁,hw₂,hs₁,hs₂,hitems,hprog,hc₁,hc₂,hcode,hr₁,hr₂,hm₁,hm₂,_,_,hy₁,hy₂,_,hstack,ha,hmm,htarget⟩ :=
+    resolved_nested_pair_word (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi nsj nsi .here .here p45s
+      nroot ni nj ni .here .here fresh left ⟨2,by decide⟩ ⟨1,by decide⟩ ⟨2,by decide⟩ true true addresses p45at
+      rfl rfl rfl rfl rfl rfl rfl rfl rfl rfl rfl rfl p45parent
+      (by change 1<hp.len left .dyn;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+      (by change 2<hp.len left .dyn;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+      (by intro t ht hne;exact hne) SH p45mem p45repr
+  have hmid : mid=nh := Option.some.inj (ho₁.symm.trans nheaprun)
+  subst mid
+  have hh : nh.writeAddr (.index left .dyn (indexValue ⟨2,by decide⟩)) true=some p45out := by
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+    exact if_pos (by simp only [nh,Heap.get_set_same,MObj.elems_setElem,List.length_set];simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+  have hout : out=p45out := Option.some.inj (ho₂.symm.trans hh)
+  have hym : ym=p45ym := congrArg Prod.snd (hw₁.symm.trans p45src1)
+  subst ym
+  have hz : z=p45z := congrArg Prod.snd (hw₂.symm.trans p45src2)
+  subst z;subst out;subst mm;subst target
+  refine ⟨hs₁,hs₂,hitems,hprog,hc₁,hc₂,hcode,hr₁,hr₂,hm₁,hm₂,?_,?_,?_,rfl,rfl,hy₂,hstack,?_⟩
+  · simp only [p45out,nh,Heap.get_set_same,MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+  · simp only [p45out,nh,Heap.get_set_ne hp left right (by decide),Heap.get_set_ne nh left right (by decide)]
+    simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn];rfl
+  · simp only [p45out,Heap.get_set_ne nh left fresh (by decide),nh,Heap.get_set_ne hp left fresh (by decide)]
+    simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+  · exact ha ⟨48,by decide⟩ (by decide) (nallocator.localWrite 5 (by decide) (by decide) w[2])
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_reached_pair_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_reached_pair_views
+
+
+private def pfrozen := hp.set left (MObj.setElem .dyn (hp.get left) 2 true)
+private def pfrozenY : Source.EMState E0 NSΓ := (p45y.1,{p45y.2 with heap := p45y.2.heap.write 0 (sourceBoolMemory [true,false,true]) (by rfl)})
+private def pfrozenM := writeMachine p45m 19 w[1]
+private theorem pfrozenRun : p45s.heap.writeAddr (.index left .dyn (indexValue ⟨2,by decide⟩)) true=some pfrozen := by
+  change hp.writeAddr (.index left .dyn (indexValue ⟨2,by decide⟩)) true=some pfrozen
+  simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+  exact if_pos (by simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+
+/-- Actually executing the second call on INITIAL input loses the first write.
+This discriminates reached-state composition from frozen/independent runs. -/
+theorem nested_frozen_second_negative (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 p45term2).run p45y=(.ok (.val (.bool true)),pfrozenY) ∧
+    Stmt.run p45s (nestedStmt nroot ni ni .here)=.ok ⟨p45s.withHeap pfrozen,List.prefix_refl _⟩ ∧
+    run p45code2 p45m=.ok pfrozenM 0 ∧
+    [MObj.elems .dyn (pfrozen.get left),MObj.elems .dyn (p45out.get left)]=[[true,false,true],[true,true,true]] ∧
+    [pfrozenY.2.heap.get 0,p45z.2.heap.get 0]=
+      [some ⟨SB,sourceBoolMemory [true,false,true]⟩,some ⟨SB,sourceBoolMemory [true,true,true]⟩] ∧
+    [pfrozenM.mem 18,p45target.mem 18]=[w[0],w[1]] ∧ pfrozenM≠p45target := by
+  obtain ⟨out,z,ho,hs,_,he,_,hi,hc,_,_,_,_,_,_⟩ :=
+    SourceBoolRefsAt.resolved_nested_assign_word (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi nsi .here p45s
+      nroot ni ni .here fresh left ⟨2,by decide⟩ ⟨2,by decide⟩ true addresses p45at
+      rfl rfl rfl rfl rfl rfl rfl rfl p45parent
+      (by change 2<hp.len left .dyn;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+      (by intro t ht hne;exact hne) SH p45mem p45repr
+  have hout : out=pfrozen := Option.some.inj (ho.symm.trans pfrozenRun)
+  have hsrc : (Source.writeLoc (E := E0) (Γ := NSΓ) F0 3 (.mem 0 2) (.bool true)).run p45y=(.ok (),pfrozenY) := by
+    have hh : p45y.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ := rfl
+    obtain ⟨_,hw⟩ := source_bool_write p45y 0 [true,false,false] hh 2 (by decide) true
+    exact hw
+  have hz : z=pfrozenY := congrArg Prod.snd (hs.symm.trans hsrc)
+  subst out;subst z
+  refine ⟨he,hi,hc,?_,rfl,rfl,?_⟩
+  · simp only [pfrozen,p45out,nh,Heap.get_set_same,MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+  · intro heq
+    have h := congrArg (fun x : Machine => x.mem 18) heq
+    change w[0]=w[1] at h
+    cases h
+
+private def pey : Source.EMState E0 NSΓ := (p45y.1.set nsj (sourceUint (indexValue ⟨3,by decide⟩)),p45y.2)
+private def pes := p45s.setLocal nj (indexValue ⟨3,by decide⟩)
+private def pem := writeMachine p45m 4 w[3]
+private theorem perepr : RefArrayStateRepr 1 1 8 nf pes base pem :=
+  ⟨p45repr.state.setVal nj (indexValue ⟨3,by decide⟩) w[3] (ReprV.uint_of rfl),p45repr.arrays.localWrite 4 (by decide) w[3]⟩
+private theorem pemem : Source.MemOK E0 SH pey :=
+  ⟨⟨p45mem.1.1,Source.LocalsOK.set p45y.1 nsj p45mem.1.2 trivial⟩,p45mem.2⟩
+private def peym : Source.EMState E0 NSΓ := (pey.1,{pey.2 with heap := pey.2.heap.write 0 (sourceBoolMemory [true,false,true]) (by rfl)})
+private def pemm := writeMachine pem 19 w[1]
+private def peitems : Source.RItems E0 [] false .body NSΓ NSΓ := .stmt (.expr p45term2) (.stmt (.expr nterm) .nil)
+private def peprog : Prog C NΓ NΓ := .cons (nestedStmt nroot ni ni .here) (.cons (nestedStmt nroot ni nj .here) .nil)
+
+/-- A materially changed successful prefix is retained in the actual Source
+error state. Intrinsic/word rejection has no fabricated successful suffix heap. -/
+theorem nested_late_error_views (p : Roadmap.Pipeline) :
+    (Source.execS (Source.SemanticsExamples.G0 p) F0 6 NSΓ.length none
+      (.expr p45term2 : Source.RStmt E0 [] false .body NSΓ NSΓ) pey.1).run (.nil,pey.2)=(.ok (.normal peym.1),(.nil,peym.2)) ∧
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 4 nterm).run peym=(.error (.revert (Source.panicData .index)),peym) ∧
+    (Source.execItems (Source.SemanticsExamples.G0 p) F0 7 NSΓ.length none peitems pey.1).run (.nil,pey.2)=
+      (.error (.revert (Source.panicData .index)),(.nil,peym.2)) ∧
+    Prog.run pes peprog=.error .revert ∧ run p45code2 pem=.ok pemm 0 ∧ run ncode pemm=.revert ∧
+    run (p45code2++ncode) pem=.revert ∧ SourceBoolRefsAt peym 3 pfrozen fresh addresses ∧ Source.MemOK E0 SH peym ∧
+    [MObj.elems .dyn (pfrozen.get left),MObj.elems .dyn (pfrozen.get right)]=[[true,false,true],[false,true,false]] ∧
+    [pey.2.heap.get 0,peym.2.heap.get 0]=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [true,false,true]⟩] ∧
+    [cells pem,cells pemm]=
+      [[w[48],w[32],w[32],w[36],w[3],w[2],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]],
+       [w[48],w[32],w[32],w[36],w[3],w[2],w[99],w[3],w[1],w[0],w[1],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]]] := by
+  have hr : SourceBoolRefsAt pey 3 pes.heap fresh addresses := fresh_at.same_heaps rfl rfl
+  obtain ⟨mid,ym,mm,ho,hw,hs,he,hitems,hprog,hc₁,hc₂,hcode,hr',hm,_,_,hmm⟩ :=
+    resolved_nested_pair_child_error (Source.SemanticsExamples.G0 p) F0 0 nsroot nsi nsi nsj .here .here pes
+      nroot ni ni nj .here .here fresh left ⟨2,by decide⟩ ⟨2,by decide⟩ ⟨3,by decide⟩ true true addresses hr
+      rfl rfl rfl rfl rfl rfl rfl rfl rfl rfl rfl rfl p45parent
+      (by change 2<hp.len left .dyn;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+      (by change hp.len left .dyn≤3;simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+      (by intro t ht hne;exact hne) SH pemem perepr
+  have hmid : mid=pfrozen := Option.some.inj (ho.symm.trans pfrozenRun)
+  have hw' : (Source.writeLoc (E := E0) (Γ := NSΓ) F0 4 (.mem 0 2) (.bool true)).run pey=(.ok (),peym) := by
+    have hh : pey.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ := rfl
+    obtain ⟨_,hw⟩ := source_bool_write pey 0 [true,false,false] hh 2 (by decide) true
+    exact hw
+  have hym : ym=peym := congrArg Prod.snd (hw.symm.trans hw')
+  subst mid;subst ym;subst mm
+  refine ⟨hs,he,hitems,hprog,hc₁,hc₂,hcode,hr',hm,?_,rfl,rfl⟩
+  simp only [pfrozen,Heap.get_set_same,Heap.get_set_ne hp left right (by decide),MObj.elems_setElem]
+  simp only [Heap.get,Objs.get,hp,left,right,MObj.elems_dyn];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_frozen_second_negative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_frozen_second_negative
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.nested_late_error_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms nested_late_error_views
 
 end Solidity.Backend.MemoryOps.SourceNestedMemoryControls
