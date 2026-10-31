@@ -147,12 +147,12 @@ function summarize(runs) {
 function scaling(summary) {
   return summary.map(row=>{
     const baseline=summary.find(s=>s.target===row.target&&s.cache===row.cache&&s.suite===row.suite&&s.workers===1);
-    const metric=row.target==='local'?'crossFileVerificationMs':'initialVerificationMs';
+    const metric='initialVerificationMs';
     const latency=row.metrics[metric]?.median,base=baseline?.metrics[metric]?.median;
     return {target:row.target,cache:row.cache,workers:row.workers,baselineWorkers:1,
       speedup:base&&latency?base/latency:null,
       efficiency:base&&latency?base/latency/row.workers:null,
-      scope:row.target==='dafny'?'End-to-end within-file declaration workload; frontend serialization and startup are included.':'End-to-end two-file workload; workers bound files, not obligations within a file.'};
+      scope:row.target==='dafny'?'End-to-end within-file declaration workload; frontend serialization and startup are included.':'End-to-end within-file function workload; listing and worker startup are included.'};
   });
 }
 function protocol(tracePath) {

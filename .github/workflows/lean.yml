@@ -86,7 +86,7 @@ jobs:
           SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
           LEAN_NUM_THREADS: '1'
         run: |
-          node --test vscode/test/lsp-real.test.cjs
+          node --test --test-concurrency=1 vscode/test/lsp-real.test.cjs vscode/test/project.test.cjs
           xvfb-run -a node vscode/test/run-host.cjs
       - name: Build and test the command line interface
         run: |

@@ -674,9 +674,9 @@ test("reference parameters preserve locations, copies and initialized source inp
   for (const fn of ["storageAndMemory", "nestedStorageReturn", "allocationArgument", "initializedInput"]) {
     assert.equal(status[fn], "proved", fn);
   }
-  // Executable kernel regressions cover the copy's evaluation order. Symbolic
-  // closure of that larger update remains open.
-  assert.equal(status.copiesBeforeEffects, "pending");
+  // The copy is captured before mutate(): r retains 1 while storage becomes 9.
+  // The current backend closes this executable evaluation-order obligation.
+  assert.equal(status.copiesBeforeEffects, "proved");
 });
 
 test("quantified consequents parse and omitted specification bodies stay local", () => {
@@ -1063,7 +1063,9 @@ test("finite nominal declarations and nested tuples retain identity, snapshots a
   assert.deepEqual(failures.errors, []);
   const refused = Object.fromEntries(failures.results.map(r => [r.function, r.status]));
   assert.equal(refused.nestedEffect, 'unsupported');
-  assert.equal(refused.indexedRead, 'unsupported');
+  // The indexed read is lowered and fails its bounds check; its ordinary
+  // diamond is pending rather than a frontend-admission gap.
+  assert.equal(refused.indexedRead, 'pending');
 });
 
 

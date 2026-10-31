@@ -268,6 +268,30 @@ contract FilteredHost {
         'the backend compiler error remains visible as well as the per-function diagnostic');
       checks.push('real filtered membership proof and pending sibling', 'real reserved quantifier capture rejection',
         'real mixed-failure retained source ranges', 'real filtered diagnostics and hovers', 'real filtered Test Explorer statuses');
+      const projectRoot=join(root,'project');mkdirSync(projectRoot);
+      const projectMain=join(projectRoot,'Main.sol'),projectLib=join(projectRoot,'Lib.sol'),projectOther=join(projectRoot,'Other.sol');
+      const library='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34; library Lib {function identity(uint x) internal pure returns(uint) {return x;}}';
+      const mainText='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34; import "./Lib.sol"; contract ProjectMain {function works() public pure {assert(Lib.identity(3)==3);}}';
+      writeFileSync(projectMain,mainText);writeFileSync(projectLib,library);writeFileSync(projectOther,'// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34; import "./Lib.sol"; contract ProjectOther {function f() public pure returns(uint) {return Lib.identity(4);}}');
+      const mainDocument=await vscode.workspace.openTextDocument(projectMain);await vscode.window.showTextDocument(mainDocument);
+      const imported=await api.verify(mainDocument);assert.deepEqual(imported.errors,[]);assert.equal(imported.results.find(r=>r.function==='works').status,'proved');
+      const call=mainDocument.positionAt(mainText.indexOf('identity(3)')+2);
+      const definitions=await vscode.commands.executeCommand('vscode.executeDefinitionProvider',mainDocument.uri,call);assert.ok(definitions.some(l=>l.uri.fsPath===projectLib));
+      const symbols=await vscode.commands.executeCommand('vscode.executeWorkspaceSymbolProvider','ProjectOther');assert.ok(symbols.some(s=>s.location.uri.fsPath===projectOther));
+      const edits=await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider',mainDocument.uri,{tabSize:2,insertSpaces:true});assert.ok(edits.length);
+      const member=mainDocument.positionAt(mainText.indexOf('identity(3)'));
+      const completion=await vscode.commands.executeCommand('vscode.executeCompletionItemProvider',mainDocument.uri,member);assert.ok(completion.items.some(i=>i.label==='identity'));assert.ok(!completion.items.some(i=>i.label==='works'));
+      const rename=await vscode.commands.executeCommand('vscode.executeDocumentRenameProvider',mainDocument.uri,call,'renamed');assert.equal(rename.get(vscode.Uri.file(projectLib)).length,1);assert.ok(rename.get(vscode.Uri.file(projectOther)).length);
+      const fixSource=join(projectRoot,'Fixes.sol');writeFileSync(fixSource,'pragma solidity ^0.8.34; contract Fixes {function f(uint unused) public pure returns(uint) {uint local=1; return 2;}}');
+      const fixDocument=await vscode.workspace.openTextDocument(fixSource);await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider',fixDocument.uri);
+      const fixes=await vscode.commands.executeCommand('vscode.executeCodeActionProvider',fixDocument.uri,new vscode.Range(fixDocument.positionAt(0),fixDocument.positionAt(fixDocument.getText().length)),'quickfix');
+      assert.ok(fixes.some(a=>a.title.includes('SPDX')));assert.ok(fixes.some(a=>a.title.includes('unused parameter')));assert.ok(fixes.some(a=>a.title.includes('unused local')));
+      const libDocument=await vscode.workspace.openTextDocument(projectLib),mainVersion=mainDocument.version;
+      const dirty=new vscode.WorkspaceEdit();dirty.replace(libDocument.uri,new vscode.Range(libDocument.positionAt(0),libDocument.positionAt(library.length)),library.replace('return x;','return x+1;'));assert.equal(await vscode.workspace.applyEdit(dirty),true);
+      const until=Date.now()+5000;while(api.reports.has(mainDocument.uri.toString())&&Date.now()<until)await new Promise(r=>setTimeout(r,20));
+      assert.equal(api.reports.has(mainDocument.uri.toString()),false);assert.equal(api.controller.items.get(mainDocument.uri.toString()),undefined);assert.equal(mainDocument.version,mainVersion);
+      const dirtyReport=await api.verify(mainDocument);assert.equal(dirtyReport.results.find(r=>r.function==='works').status,'pending');
+      checks.push('real project import proof and foreign definition','real workspace symbols and receiver completion','real compiler-validated formatting and cross-file rename','real SPDX and unused declaration quick fixes','real dependency edit clears report and Testing items');
     }
     if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: true, checks }));
   } catch (error) {

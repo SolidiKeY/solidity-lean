@@ -23,8 +23,8 @@ The production local extension now starts `vscode/src/lsp-server.cjs` and
 synchronizes versioned in-memory Solidity buffers over standard LSP stdio.
 A separate compiler worker retains the pinned solc WASM module. A bounded pool
 of 1–4 proof workers each keeps one Lean language server and generated document
-alive, reusing imported modules on edits. Workers parallelize files; contracts
-and obligations within a file remain serial. The server uses the existing
+alive, reusing imported modules on edits. Workers parallelize exact function selections and files; assertions within one
+function remain serial. The server uses the existing
 `solc_import` and `#solkey_test` commands and kernel-checked certificates.
 It retains source hashes, compiler pins, import-gap diagnostics and counterexample
 validation. Dependency changes invalidate live sessions and checked reports.
@@ -32,9 +32,9 @@ validation. Dependency changes invalidate live sessions and checked reports.
 The server provides completion, definitions, references, symbols, signatures,
 highlights, guarded rename, versioned diagnostics and verification notifications.
 The extension adds syntax, gutters, status and Testing integration. Completion
-uses a broad lexical fallback for incomplete code; full receiver-aware completion,
-workspace symbols, formatting, code actions, project includes and assertion-level
-parallel scheduling remain open. See [the implementation record](feature-work/solidity-lsp.md).
+uses a broad lexical fallback for incomplete code; complex receiver inference, full specification refactoring and assertion-level
+parallel scheduling remain open. Formatting, quick fixes, workspace symbols,
+project imports and cross-file rename are implemented. See [the implementation record](feature-work/solidity-lsp.md).
 
 Dafny uses `vscode-languageclient`, its language server, Boogie verification
 tasks, and Z3. The pinned server serializes VC translation through
@@ -103,10 +103,10 @@ benchmark datasets separate. Target order alternates between repetitions.
 The CI runner selects a smaller available-memory reserve explicitly for its
 host; `--memory-reserve-mib` and `--memory-max-mib` record those choices.
 
-Local worker settings are applied to concurrent files (maximum four).
+Local worker settings are applied to concurrent functions/files (maximum four).
 The local exact-snapshot proof cache is always enabled; Dafny cache-policy names
-do not select equivalent local policies. Local scaling uses the two-file metric,
-while Dafny scaling uses the within-file declaration metric. These scopes must
+do not select equivalent local policies. Scaling uses the within-file declaration/function metric; cross-file measurements
+are retained separately. These scopes must
 remain distinct. Use `--targets local` or `--targets dafny` for isolated debugging.
 `--trace off` disables raw protocol recording for an observer-overhead control.
 
@@ -244,7 +244,7 @@ new Markdown links and diff whitespace checks. The current Lean API built all
 and one expected failure in Dafny, and one proof plus one kernel-certified
 refutation with local counterexample search enabled.
 
-## Current persistent LSP validation
+## Version 0.4 persistent LSP validation
 
 The [LSP baseline](../tests/editor-parity/lsp-baseline.md) and
 [validation record](../tests/editor-parity/lsp-validation.json) cover the current
@@ -254,3 +254,12 @@ median changed-buffer verification was 5.17 s versus Dafny's 247 ms; unchanged
 local cache hits took 100 ms. These are different operations. The
 [implementation record](feature-work/solidity-lsp.md#measured-editor-results)
 explains warm-session evidence, cross-file scaling and remaining proof costs.
+
+## Version 0.5 compiler/project validation
+
+The [project/compiler report](../tests/editor-parity/compiler-project-baseline.md)
+records 20 successful launches and current function scheduling. Local incremental
+medians were 5.07 s with one worker and 3.51 s with two; initial latency remained
+about 6.4 s. This workload still trails Dafny. See the
+[implementation record](feature-work/compiler-project-services.md) for exact
+compiler scope, semantic refusals, editor services and validation evidence.

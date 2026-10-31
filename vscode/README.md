@@ -58,7 +58,7 @@ To build an installable package from this directory:
 
 ```sh
 npx @vscode/vsce package
-code --install-extension solidity-lean-0.4.0.vsix
+code --install-extension solidity-lean-0.5.0.vsix
 ```
 
 ## Tests
@@ -76,7 +76,7 @@ Run `lake build Solidity.Frontend.Testing` first. The real stdio LSP regression
 also runs with:
 
 ```sh
-LEAN_NUM_THREADS=1 SOLIDITY_LEAN_REAL_BACKEND="$PWD" node --test vscode/test/lsp-real.test.cjs
+LEAN_NUM_THREADS=1 SOLIDITY_LEAN_REAL_BACKEND="$PWD" node --test vscode/test/lsp-real.test.cjs vscode/test/project.test.cjs
 ```
 
 It checks unsaved buffers, warm Lean reuse, compiler-backed language services,
@@ -115,16 +115,33 @@ provides syntax highlighting, completion, definitions, references, document
 symbols, signature help, highlights and guarded rename, plus proof diagnostics,
 Testing results, gutters and status. Rename refuses declaration collisions and
 specification-text references that need manual updates. Completion falls back to
-live-text declarations for incomplete code; receiver-type filtering, workspace
-symbols, formatting and code actions remain open.
+live-text types for incomplete code. Receiver members, library extensions, workspace
+symbols, compiler-validated formatting and quick fixes are built in. Quick fixes
+offer explicit SPDX choices and safe unused declaration edits; documented or
+specification-only parameters are preserved. Cross-file rename recompiles every
+edited root and refuses stale or ambiguous edits. Specification-text renames
+still require a manual update.
 
 Each proof worker keeps a Lean language server and generated document alive,
 reusing imported modules across edits. `solidityLean.workers` bounds concurrent
-files from 1 to 4 (default 1); proofs within a file remain serial. Compiler
+functions and files from 1 to 4 (default 1). Multiple workers use the checked
+obligation list to schedule exact function signatures. Assertions within one
+function remain serial; mixed audited/non-ready reports retain the sequential
+audit path. Compiler
 analysis has a separate worker. Exact checked reports are cached for unchanged
 source, selection, proof options and backend generation. Changed source still
 requires a proof; this cache is not Dafny's assertion-level cache. Compiler pins,
 backend sources and Lean artifact identities invalidate sessions and reports.
+Imports use original source units, exact dependency digests and unsaved buffers.
+`solidityLean.includePaths` adds allowed import roots; `solidityLean.remappings`
+accepts Solidity prefix/context remappings. Dependency edits clear stale reports
+and Testing items even when the importing buffer itself is unchanged.
+
+Multi-file contract-local specifications are supported for units without file
+globals or enum/struct/UDVT declarations. Other multi-file specification namespaces,
+loop annotations and compiler-code constants remain explicit proof-admission gaps.
+Language services remain available for valid Solidity outside the proof profile.
+See [the project/compiler record](../docs/feature-work/compiler-project-services.md).
 Cancellation terminates active proof workers and their Lean children; new work
 starts replacement workers. **Restart Language Server** clears sessions and
 caches. Lean source files retain the Lean extension's proof-authoring tools.

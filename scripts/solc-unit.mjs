@@ -22,7 +22,8 @@ export const COMPILERS = [
 
 /** Keep strings and ordinary comments out of NatSpec detection. solc drops
 loop NatSpec, so this check runs on source text before that information is lost. */
-export function hasUnitSpecifications(source) {
+export function unitSpecificationSpans(source) {
+  const spans=[];
   for (let i=0;i<source.length;) {
     if (source[i]==='"' || source[i]==="'") {
       const quote=source[i++];
@@ -32,15 +33,40 @@ export function hasUnitSpecifications(source) {
       }
     } else if (source.startsWith('//',i)) {
       const end=source.indexOf('\n',i), stop=end<0?source.length:end;
-      if (source[i+2]==='/' && source.slice(i,stop).includes('@custom:key')) return true;
+      if (source[i+2]==='/' && source.slice(i,stop).includes('@custom:key')) spans.push([i,stop]);
       i=stop;
     } else if (source.startsWith('/*',i)) {
       const end=source.indexOf('*/',i+2), stop=end<0?source.length:end+2;
-      if (source[i+2]==='*' && source.slice(i,stop).includes('@custom:key')) return true;
+      if (source[i+2]==='*' && source.slice(i,stop).includes('@custom:key')) spans.push([i,stop]);
       i=stop;
     } else i++;
   }
-  return false;
+  return spans;
+}
+export const hasUnitSpecifications=source=>unitSpecificationSpans(source).length>0;
+
+/** Contract-owned scalar specifications use the existing declaring-contract
+ * namespace. Global/nominal namespaces and dropped loop comments remain gated. */
+export function checkUnitSpecifications(output,sources){
+  const entries=Object.entries(sources),specified=entries.some(([,s])=>hasUnitSpecifications(s.content));
+  if(!specified)return;
+  const refuse=()=>{throw new Error('solidity.compilationUnitSpecifications: only contract-local specifications without file globals or nominal declarations are admitted; loop annotations require a source-local adapter');};
+  const nominal=new Set(['EnumDefinition','StructDefinition','UserDefinedValueTypeDefinition']);
+  const visit=(node,action)=>{if(!node||typeof node!=='object')return;action(node);for(const value of Object.values(node))if(value&&typeof value==='object'){if(Array.isArray(value))value.forEach(n=>visit(n,action));else visit(value,action);}};
+  for(const [name]of entries){const ast=output.sources[name].ast;
+    if(ast.nodes.some(n=>n.nodeType==='VariableDeclaration'))refuse();
+    visit(ast,n=>{if(nominal.has(n.nodeType))refuse();});
+  }
+  for(const [name,input]of entries){
+    const ast=output.sources[name].ast,allowed=ast.nodes.filter(n=>n.nodeType==='ContractDefinition').flatMap(c=>[c,...c.nodes.filter(n=>n.nodeType==='FunctionDefinition')]);
+    const spans=allowed.filter(n=>n.documentation?.text?.includes('@custom:key')).map(n=>{
+      const [start,size,file]=n.documentation.src.split(':').map(Number);if(file!==output.sources[name].id)refuse();return [start,start+size];
+    });
+    for(const [start,end]of unitSpecificationSpans(input.content)){
+      const byteStart=Buffer.byteLength(input.content.slice(0,start)),byteEnd=Buffer.byteLength(input.content.slice(0,end));
+      if(!spans.some(([a,b])=>a<=byteStart&&byteEnd<=b))refuse();
+    }
+  }
 }
 
 /** All src offsets are bytes in their own compiler source, including Unicode. */
@@ -79,8 +105,6 @@ export function compilationUnitFixture({output,sources,mainSource,settings,pin,s
     const input=sources[name], unit=output.sources[name];
     if (Object.keys(input).some(k=>k!=='content') || typeof input.content!=='string')
       throw new Error('only explicit UTF-8 source content is admitted');
-    if (hasUnitSpecifications(input.content))
-      throw new Error('solidity.compilationUnitSpecifications: source specifications require file-local lexical resolution');
     if (!Number.isSafeInteger(unit.id) || unit.id<0 || ids.has(unit.id))
       throw new Error('missing or duplicate compiler source identity');
     ids.add(unit.id);
@@ -92,6 +116,7 @@ export function compilationUnitFixture({output,sources,mainSource,settings,pin,s
       acceptedPragmas:unit.ast.nodes.filter(n=>n.nodeType==='PragmaDirective').map(n=>n.literals),
       ast:normaliseUnit(unit.ast,input.content,unit.id)};
   });
+  checkUnitSpecifications(output,sources);
   const byName=new Map(sourceUnits.map(u=>[u.name,u]));
   const visit=node=>{
     if (!node || typeof node!=='object') return;

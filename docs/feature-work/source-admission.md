@@ -187,11 +187,13 @@ tested against real compiler output.
 
 ### Deliberate remaining refusals
 
-- Multi-source NatSpec containing @custom:key and any loopSpec field:
-  solidity.compilationUnitSpecifications. Source comments are checked before
+- Multi-source specifications outside direct contracts/member functions, file-level
+  globals, nominal declarations and any loopSpec field:
+  solidity.compilationUnitSpecifications. Contract-local specifications over units
+  without file globals or enum/struct/UDVT declarations are now admitted through
+  structural ownership checks in Lean. Source comment spans are checked before
   solc can discard loop NatSpec. Strings and ordinary comments remain data.
-  A file-local specification namespace adapter is required before admitting
-  these claims; foreign constants/enums must not silently change a claim.
+  [Project support](compiler-project-services.md) records scope and regressions.
 - Inheritance in a legacy-pipeline unit with mixed requested ABI coders:
   solidity.compilationUnitAbiModes. The declaring-source entry decoder needs
   an adapter; viaIR keeps its effective ABI-v2 behavior.
