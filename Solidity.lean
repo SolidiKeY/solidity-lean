@@ -909,3 +909,5 @@ import Solidity.Lowering.V08.SourceEmit
 import Solidity.Lowering.V08.SourceEmitControls
 import Solidity.Lowering.V08.SourceCallable
 import Solidity.Lowering.V08.SourceCallableControls
+import Solidity.Lowering.V08.SourceDispatch
+import Solidity.Lowering.V08.SourceDispatchControls

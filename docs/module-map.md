@@ -1258,3 +1258,6 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/SourceCallable.lean` | Actual source callable initialization, selected body, checked frame, return extraction and caller-local/failure boundaries. |
 | `Lowering/V08/SourceCallableControls.lean` | Populated two-argument/one-result source calls, declaration discrimination, exact contexts, order/local retention and failure controls. |
+
+| `Lowering/V08/SourceDispatch.lean` | Published source free/outside-linearization selection and body lookup laws. |
+| `Lowering/V08/SourceDispatchControls.lean` | Actual free/internal-library ambient context calls, real competing body, repeated reached calls, full state and independent intrinsic observations. |

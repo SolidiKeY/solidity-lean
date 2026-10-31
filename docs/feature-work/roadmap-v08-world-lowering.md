@@ -2646,3 +2646,96 @@ A next independently useful G20/G22.04 clause is actual nonvirtual free/library
 selection through published dispatchFn, with supplied source bodies and exact
 caller context. This is separate from canonical compiler/linkage and modifier
 lowering; no claim independent clauses are exhausted at the callable checkpoint.
+
+
+## Free/library source selection and reached repeated calls (2026-10-31)
+
+After the reviewed/committed/sealed callable checkpoint bf705c0d, original
+G20/G22.04/BackfillB work continues independently. SourceDispatch proves actual
+published dispatchFn identity for scope=None and for a scope outside the ACTUAL
+(E.linearize caller).getD[caller] chain. The consequent body lookup laws do not
+assume body preservation or canonical parsing/linking. Both fnSig branches are
+covered, and no compiler/modifier implementation is duplicated.
+
+SourceDispatchControls supplies actual contract C, library L, library-function
+and free-function member declarations, real signatures(two bool parameters and
+two heterogeneous address/uint256 returns), library role metadata and actual
+C3 chain[C]. Actual runMods/callInternal initialize return slots, execute a real
+binary hash allocation, read ambient sender/value and return the complete typed
+tuple(1,7) under both pipelines. All old populated machine observations remain:
+balances93/7, code0/nonce1, persistent/transient true, journal3, object0[0,255],
+events/oldlogs and functionlocals; actual added object1[0,255,128]/next2 and full
+raw outcomes are checked. Actual changed frame sender=self/value0 yields(2,0).
+A same-name caller-scope decoy with a genuinely different body also yields(2,0),
+so wrong virtual redirection of the library declaration is discriminated by
+actual executions. Full context retains this2/sender1/value7/staticfalse/C/
+checkedtrue/depth0. Actual source internal calls leave both paid balances93/7;
+wrong-extra-charge86 is rejected. Internal ambient msg.value is not a second
+payment or an external nonpayable-entry admission.
+
+The actual library call is then executed at the REACHED free-call state, not
+at the original input. Both exact statuses/results and both boundary states
+are retained. The second call allocates object2/next3 while preserving object0,
+object1, complete ex/events/logs/fnLocals and shared transient scratch=true.
+The wrong internal-call transient-reset control rejects none. These are internal
+source calls, not transaction boundaries; no reset is inserted between them.
+General source transaction/reset-to-intrinsic frame/layout composition stays open.
+
+The complete actual Source result is supplemented by an ordered observation
+[sender,value,timestamp,this,selfBalance]=[1,7,12345,2,7], using existing typed
+unRet/toVals/getAt/word observers. It does NOT replace raw outcomes/full states.
+Existing typed intrinsic environment expressions on an explicitly projected
+state agree on sender/value; an independently executed ordinary PAID intrinsic
+contextEntry retains its full vector93/7/3/9 and[1,7,12345,2,7]. This is observation
+transport, NOT actual compiled-library execution, deployed-library/code identity,
+World.libraryCall linkage, canonical SourceSpec/runtime-frame/body/layout/ABI
+adequacy or an arbitrary target world equality. Source library role metadata is
+separate from deployment; no library account/storage/hash is invented. Supplied
+resolved program bodies and mock ledger/globals retain the earlier boundaries.
+
+All656 prior exact standard axiom sets are unchanged;37 new checked declarations
+make693. The old historical Keccak/Emit positive fixtures remain SHA-bound and
+reject the extended Audit. Callable's historical positive remains exact prior
+Audit+oneimport and rejects differing current Audit; its label is clarified.
+The new additive Dispatch runner retains original command/targets/runtime/cache/
+config/source guards and pins six prior modules to checked35093; only two new
+modules and the exact fourth Audit import are admitted. No source/owner edits,
+new interpreter, decoder, payload emitter, axiom/sorry/native shortcut, source
+profile/target/exclusion or proof/fuel/node/test/time/resource increase.
+
+Resource disclosure: second-checkpoint32MiB STORAGE PLANNING estimate was revised
+PROACTIVELY to40MiB in a new budget-reestimate record because retained diagnostics
+and corruption fixtures consumed more than forecast. The initial record is
+preserved; it was not an enforced runtime guard. Both checkpoints remain within
+the original96MiB turn planning envelope and ample measured OS/disk headroom.
+Actual12GiB/no-swap/CPU1/16GiBparent/serialLean-j1/600s guards remain unchanged.
+
+Every original G20,G21,G22.01-.05,G23 and BackfillA/B parent stays PARTIAL. G20
+canonical declaration/body/argument/result/type/layout/inherited/getter/ref/readonly
+applications; G21 nested/reference/calldata/slice/custom-error/catch/canonicalABI;
+G22 source calls/callbacks/creation/library/function-value/world/runtime/admission;
+G23 actual target erased-args/general hash/transient/layout and G16–G22 composition;
+BackfillA/B Source/V07/frame/layout applications remain open. No independent
+exhaustion or whole-source/bytecode/compiler/EVM adequacy is claimed. Mandatory
+full/Decision125 failures and literal-wrapper hold persist with no identical
+retry. Rawdocs/pins failures remain separate from public NEW0/frozen increases.
+
+Final registered60048 PASS18.392024251s, sampledaggregateRSS58572800,
+reportedcgrouppeak35028992; allcurrent source/config/runtime/cleanup bindings.
+Inventory693exactsets/70coreclosure; currentpositive+35corruptions. Historical
+Keccak9,Emit9+12,Callable9+16 andDispatch9+20 fixture/certificate controls PASS;
+allproductionguards unchanged. Trust1053/246/0; strict491/61budget/11refuted/
+0pending; layers172/0; orphans1038/0; ownedwhitespace0. Rawdocs/task/public1/1
+with83equalfindings, pins1/1 with359equalnotes; PUBLIC NEW0 PASS separately;
+frozen+11/+345 FAIL retained. Decision321/priorSuite260dependency sources
+unchanged, no retry. Finalstatic/export storage forecast further recorded
+ADDITIVELY as48MiB (not runtimeguard): retained Docker stdout grows alongside
+raw logs, so allow18MiB remaining before checks/export. Both checkpoints remain
+within original96MiB turn forecast; all old estimate records remain intact.
+Next investigated G21 application: actual execS.revertError evaluates/encodes
+arguments before returning selector++bytes. Unlike Source.selector's UTF8
+signature input, Glob.selector uses asciiBytes. Exact input-byte equality must
+be justified for a canonical signature; do not silently assume it or add an ASCII
+source-profile cap. Concrete ASCII declarations can discharge it, while general
+canonical signature/representation applications remain open. No exclusion or
+semantic choice is inferred from this investigation.

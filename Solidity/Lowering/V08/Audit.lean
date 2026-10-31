@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.SourceDispatchControls
 import Solidity.Lowering.V08.SourceCallableControls
 import Solidity.Lowering.V08.SourceEmitControls
 import Solidity.Lowering.V08.SourceKeccakControls

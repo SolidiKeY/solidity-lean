@@ -65,3 +65,10 @@ for module in ['SourceCallable','SourceCallableControls']:
  result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
  result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
 print('PASS: source callable evidence corruption controls rejected')
+
+for module in ['SourceDispatch','SourceDispatchControls']:
+ path='Solidity/Lowering/V08/'+module+'.lean'
+ assert path in original['source_sha256']
+ result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
+ result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
+print('PASS: source dispatch evidence corruption controls rejected')

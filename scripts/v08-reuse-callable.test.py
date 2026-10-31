@@ -40,7 +40,7 @@ exec(compile(tree,str(p),'exec'),ns);sys.argv=saved
 generated=ns['source'];ast.parse(generated)
 for guard in ["wall_limit_seconds = 600", "'--memory', '12g'", "'--memory-swap', '12g'", "'-e', 'LAKE_CACHE_DIR=', '-e', 'LAKE_ARTIFACT_CACHE=false'", "cmd=docker+['start','--attach',previous['container']]", "cmd[-1]=previous['command'][-1]", "validate_extension(previous,ordered", "assert configuration_before==previous['runtime_configuration']['sha256']", "if module!='Solidity.Lowering.V08.Audit': assert digest_if_file", "wrapper_sha256=", "current_closure=ordered"]:
  assert guard in generated,guard
-print('PASS: SHA-bound prior Audit plus exact callable prefix; current positive; '+str(len(cases))+' corruption controls; exact generated cache/resource/command/source/config guards; no Docker/Lean/start/write')
+print('PASS: SHA-bound prior Audit plus exact callable prefix; fixed positive fixture; differing current Audit rejected; '+str(len(cases))+' corruption controls; exact generated cache/resource/command/source/config guards; no Docker/Lean/start/write')
 
 # Prior checked Keccak modules are read-only inputs to this additive extension.
 function=next(x for x in ast.parse(p.read_text()).body if isinstance(x,ast.FunctionDef) and x.name=='validate_prior')
