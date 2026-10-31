@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty-one. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-two. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3287,3 +3287,57 @@ Both independent source reviewers accepted proofs/controls and requested a
 cumulative heading correction (fixed forty-one); their requested direct nested
 child-endpoint control passed. A guard-format mismatch failure is retained;
 all final exact axiom sets passed. Existing fixture vectors remain unmodified.
+
+
+### C42 — actual selected-child reference rebinding
+
+Continued original G34/BackfillB after C41 rather than stopping at its seal.
+Published MemoryRefArrayPaths/Statements already proves RefPtrFrag.index,
+run_of_eval and rebind, including actual index failure. `SourceNestedSelect`
+consumes those existing certificates read-only, composing their existing code
+with one local store; it introduces no path compiler, decoder, interpreter or
+value/state layer. Six public laws connect actual independent Source
+`dst = parent[index]` evaluation and statement execution to the actual intrinsic
+rebindMem indexed path and a SINGLE existing word pointer-path/load/store run.
+This improves on C41's separate observation loads, without claiming a compiled
+arbitrary nested read program or the complete compiler pipeline.
+
+Inputs are INITIAL SourceBoolRefsAt, Source parent/index local alignment,
+actual intrinsic parent index Some child, Source MemOK and published full
+RefArrayStateRepr/valIn fragment support. The selected payload is computed by the
+actual Source table and intrinsic path; no final relation, conversion or graph
+correctness premise is supplied. Derive reached Source child and parent observer,
+MemOK, intrinsic/Source destination bindings, full word ownership, stack and
+allocator. Bounds derive Source RHS failure before the local write, intrinsic
+revert and actual whole word code revert separately. Insufficient horizons0..2
+are actual timeouts for pure local operands; no proof/fuel budget is enlarged.
+
+Three controls extend the SAME independently inhabited C41 fixture with one old
+Boolean reference local pointing at left. Both pipelines execute actual indexed
+selection of newParent[1], changing that local left→right and pointer16→24, then
+derive the actual selected false read versus retained left true. Source expr and
+statement, intrinsic indexed rebind, whole word sequence, complete C41 cells,
+new local/parent/child pointer cells, heaps, neighbour and stack are checked.
+Endpoint parent index3 rejects with old local/pointer unchanged; actual fixture
+horizons0..2 time out. All C41 and older observation vectors/guards remain
+verbatim. Arbitrary runtime lengths/indices remain those of the generic typed
+interfaces; this concrete fixture is not an admission restriction.
+
+Initial C42 implicit-contract/method-receiver errors are retained as actual
+failed focused logs. Exact standard-only axiom guards, final gates and separate
+read-only finder/skeptic source/artifact reviews are required. General reference
+mutation alias reflection, physical bytes, all-profile constructors/target
+failures, deep copy/ABI/storage/emitted loops/recursive Source graphs, reserved
+memory-storage and final V10/Source/target remain open; queues partial/blocked,
+no exhaustion or whole-lane claim. Existing blocked goal is unchanged.
+
+C42 final guarded164jobs/full1081default/262Suite/SolKey377/131 exit0.
+Fresh Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs and actual cacheOFF confirmed.
+Strict automatic,complete fixtures,layers/orphans/trust,script syntax/corruption,
+796standardpins/100modules pass. Full sampled aggregateRSS1563564KiB,
+225280bytes disk growth,zero new memory.max/OOM/kill events. Parent16GiB and
+child12GiB/swap0 remain unchanged; actual all heavy execs taskset-c0/threads1/j1.
+Raw docs1 remains complete83publicfindings identical; frozen no-newFAIL11incoming,
+ownednew0. Raw inventory1:1155unrecorded=359inherited+796owned,0unsafe,notgreen.
+Both independent read-only source reviews passed without confirmed defects;
+C42 heading forty-two verified. No original queue/goal completion or exhaustion.

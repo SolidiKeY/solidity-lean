@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.SourceNestedMemory
+import Solidity.Backend.MemoryOps.SourceNestedSelect
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -487,5 +488,104 @@ theorem runtime_initial_nested (rs : List (HRef H B)) (hlen : rs.length<2^256) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms stale_binding
+
+
+private abbrev SelectSΓ : Source.RCtx := SB::SΓ
+private def selectSource : Source.EMState E0 SelectSΓ := (.cons (.memRef rfl 0) sy.1,sy.2)
+private def selectState := σ.push (t := .mem B) (some left)
+private def selectMachine := writeMachine machine 6 w[16]
+private def selectFrag := frag.push (.mem B) .ok
+private def selectSrcRoot : Source.Idx SelectSΓ SR := .there ssrc
+private def selectSrcIndex : Source.Idx SelectSΓ (.int .u256) := .there si
+private def selectRoot : Idx (.mem B::Γ) (.mem R) := .there tsrc
+private def selectIndex : Idx (.mem B::Γ) (.val .uint) := .there (.there .here)
+private def selectedSource : Source.EMState E0 SelectSΓ := (selectSource.1.set .here (.memRef rfl 1),selectSource.2)
+private def selectedState := selectState.setLocal (.here : Idx (.mem B::Γ) (.mem B)) (some right)
+private def selectedMachine := writeMachine selectMachine 6 w[24]
+private def selectedTerm : Source.RExpr E0 SelectSΓ SB := sourceSelectedAlias .here selectSrcRoot selectSrcIndex
+private def selectedCode : List Instr := selectedAliasCode (C := C) 1 .here selectRoot selectIndex
+private theorem select_memOK : Source.MemOK E0 SH selectSource :=
+  ⟨⟨source_memOK.1.1,⟨⟨SB,rfl,rfl⟩,source_memOK.1.2⟩⟩,source_memOK.2⟩
+private theorem select_at : SourceBoolRefsAt selectSource 3 selectState.heap fresh addresses := fresh_at.same_heaps rfl rfl
+private theorem select_repr : RefArrayStateRepr 1 1 8 selectFrag selectState base selectMachine :=
+  ⟨initial_repr.state.consMem left (by decide),initial_repr.arrays.localWrite 6 (by decide) w[16]⟩
+
+/-- Actual indexed reference selection, not just a parent-local pointer alias:
+the Source RHS and published typed word path choose the SAME different child. -/
+theorem selected_child_rebind (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 3 selectedTerm).run selectSource=
+      (.ok (.val (.memRef rfl 1)),selectedSource) ∧
+    (Source.execS (Source.SemanticsExamples.G0 p) F0 4 SelectSΓ.length none
+      (.expr selectedTerm : Source.RStmt E0 [] false .body SelectSΓ SelectSΓ) selectSource.1).run (.nil,selectSource.2)=
+      (.ok (.normal selectedSource.1),(.nil,selectedSource.2)) ∧
+    Stmt.run selectState (.rebindMem .here (.alias (.loc (.index .dyn (.var selectRoot rfl) (.simple (.local selectIndex))))))=
+      .ok ⟨selectedState,List.prefix_refl _⟩ ∧ run selectedCode selectMachine=.ok selectedMachine 0 ∧
+    Source.MemOK E0 SH selectedSource ∧ SourceBoolMemoryAt selectedSource 1 selectedState.heap right .dyn ∧
+    SourceBoolRefsAt selectedSource 3 selectedState.heap fresh addresses ∧
+    RefArrayStateRepr 1 1 8 selectFrag selectedState base selectedMachine ∧
+    [selectSource.1.get .here,selectedSource.1.get .here]=[.memRef rfl 0,.memRef rfl 1] ∧
+    [(TEnv.get .here selectState.env).map HRef.id,(TEnv.get .here selectedState.env).map HRef.id]=[some 0,some 1] ∧
+    (Source.readLoc (E := E0) (Γ := SelectSΓ) F0 (τ := .bool) (.mem 1 0)).run selectedSource=
+      (.ok (.bool false),selectedSource) ∧
+    (Source.readLoc (E := E0) (Γ := SelectSΓ) F0 (τ := .bool) (.mem 0 0)).run selectedSource=
+      (.ok (.bool true),selectedSource) ∧
+    cells selectedMachine=cells machine ∧
+    [selectMachine.mem 6,selectedMachine.mem 6,selectedMachine.mem 38,selectedMachine.mem 25,selectedMachine.mem 17]=
+      [w[16],w[24],w[24],w[0],w[1]] ∧ selectedMachine.stack=[w[42]] ∧
+    selectedSource.2.heap=selectSource.2.heap ∧ selectedState.heap=hp := by
+  obtain ⟨he,hs,hi,hc,hm,hchild,hr,hd,ht,hrepr,hstack,ha⟩ :=
+    SourceBoolRefsAt.selected_alias_word (Source.SemanticsExamples.G0 p) F0 0 selectSource .here selectSrcRoot selectSrcIndex
+      3 (uintOfNat 1) rfl rfl SH select_memOK selectState .here selectRoot selectIndex fresh right rfl rfl
+      addresses select_at parent_one select_repr rfl
+  have hold : SourceBoolMemoryAt selectedSource 0 selectedState.heap left .dyn := by
+    unfold SourceBoolMemoryAt
+    simp only [selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+  exact ⟨he,hs,hi,hc,hm,hchild,hr,hrepr,rfl,rfl,
+    (hchild.read_iff F0 (uintOfNat 0) false).mpr right_zero,
+    (hold.read_iff F0 (uintOfNat 0) true).mpr left_zero,rfl,rfl,hstack,rfl,rfl⟩
+
+private def failedSelectSource : Source.EMState E0 SelectSΓ :=
+  (selectSource.1.set selectSrcIndex (sourceUint (uintOfNat 3)),selectSource.2)
+private def failedSelectState := selectState.setLocal selectIndex (uintOfNat 3)
+private def failedSelectMachine := writeMachine selectMachine 4 w[3]
+private theorem failed_select_repr : RefArrayStateRepr 1 1 8 selectFrag failedSelectState base failedSelectMachine :=
+  ⟨select_repr.state.setVal selectIndex (uintOfNat 3) w[3] (ReprV.uint_of rfl),
+    select_repr.arrays.localWrite 4 (by decide) w[3]⟩
+/-- Endpoint RHS failure leaves the actual initial local selection unchanged;
+Source panic, intrinsic revert and word revert are separate observations. -/
+theorem selected_child_bounds (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 3 selectedTerm).run failedSelectSource=
+      (.error (.revert (Source.panicData .index)),failedSelectSource) ∧
+    Stmt.run failedSelectState (.rebindMem .here (.alias (.loc (.index .dyn (.var selectRoot rfl) (.simple (.local selectIndex))))))=
+      .error .revert ∧ run selectedCode failedSelectMachine=.revert ∧
+    failedSelectSource.1.get .here=.memRef rfl 0 ∧ failedSelectMachine.mem 6=w[16] := by
+  have hr : SourceBoolRefsAt failedSelectSource 3 failedSelectState.heap fresh addresses := fresh_at.same_heaps rfl rfl
+  have h := SourceBoolRefsAt.selected_alias_word_bounds (Source.SemanticsExamples.G0 p) F0 0 failedSelectSource .here selectSrcRoot selectSrcIndex
+    3 (uintOfNat 3) rfl rfl failedSelectState .here selectRoot selectIndex fresh rfl rfl addresses hr
+    (by simp only [failedSelectState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,uintOfNat];decide)
+    failed_select_repr rfl
+  exact ⟨h.1,h.2.1,h.2.2,rfl,rfl⟩
+
+
+/-- Both pipelines reject insufficient horizons before the selected alias can
+change its old child pointer. This tests the general bound on the actual fixture. -/
+theorem selected_child_low_horizon (p : Roadmap.Pipeline) :
+    ∀ n, n≤2 → (Source.evalE (Source.SemanticsExamples.G0 p) F0 n selectedTerm).run selectSource=
+      (.error .timeout,selectSource) :=
+  source_selected_alias_low_horizon (Source.SemanticsExamples.G0 p) F0 selectSource .here selectSrcRoot selectSrcIndex
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.selected_child_low_horizon' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms selected_child_low_horizon
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.selected_child_rebind' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms selected_child_rebind
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.selected_child_bounds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms selected_child_bounds
 
 end Solidity.Backend.MemoryOps.SourceNestedMemoryControls
