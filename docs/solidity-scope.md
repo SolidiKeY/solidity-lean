@@ -396,3 +396,18 @@ loops and adds a warning naming the loop, with no new option. These answers
 close no proof obligation and grant no broader scope. Decisions c, c-prime,
 d, e3-prime and e3-double-prime remain in force: undecidable or unprovable
 classes remain unknown; exact validity and hash premises remain unchanged.
+
+## Automation lane approvals (2026-10-31)
+
+For batch `solidity-automation-20261031`, VA1 records the exact human
+answers supplied in the originating chat and repeated in the worker launch:
+
+- AQ1 (start M7-next and the M8 leftovers): "Yes, start both lanes".
+- AQ2 (keep literal-loop unrolling and warn): "Yes, keep unrolling and warn".
+
+This authorizes VA1 AU01/AU02 and VA2 AU03/AU04 in isolated checkouts.
+VA1 owns Decision theorem/coverage/residue, AU02 pipelines, Decision example
+splits and M7-next documentation. It does not authorize AU05/AU06, compiler
+work, publication, pushing or merging. Decisions c, c′, d, e3′ and e3″ and
+the existing validity/hash premises remain unchanged. This approval record
+is setup evidence, not an implementation or validation claim.
