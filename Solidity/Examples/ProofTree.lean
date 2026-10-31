@@ -53,6 +53,16 @@ local instance : InContract := ⟨StandardExample⟩
 section Scoped
 open scoped Scoped
 
+/-! ## Proof-size command owned by the tool module -/
+
+/-- info: 8 node(s), 1 branch(es), 0 open, largest leaf 25 term node(s) -/
+#guard_msgs in
+#proof_size dl!{ ⟨ uint x = 0; if (a == 1) { x = x + 1; } else { x = 0; }; ⟩ x <= 1 }
+
+/-- info: 1 node(s), 1 branch(es), 1 open, largest leaf 3 term node(s) -/
+#guard_msgs in
+#proof_size dl!{ 0 = 1 }
+
 /-! ## The tree
 
 `a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1`: the parameter's `∀`,

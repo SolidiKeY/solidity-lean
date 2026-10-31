@@ -694,9 +694,14 @@ def assertH (g : MVarId) (n : Lean.Name) (p e : Expr) : MetaM (FVarId × MVarId)
   (← g.assert n p e).intro1P
 
 /-- `t` as a base and an integer offset (`b + k`, `b - k`, a literal `k`,
-else `t + 0`). -/
+else `t + 0`). Normalized `Int.ofNat` and `Int.negSucc` literals
+are read as literals too, so signed joins retain their offsets. -/
 def affine (t : Expr) : Option Expr × Int :=
   let lit? (e : Expr) : Option Int := do
+    if e.isAppOfArity ``Int.ofNat 1 then
+      return Int.ofNat (← e.appArg!.rawNatLit?)
+    if e.isAppOfArity ``Int.negSucc 1 then
+      return Int.negSucc (← e.appArg!.rawNatLit?)
     if e.isAppOfArity ``OfNat.ofNat 3 then
       return ((← (e.getArg! 1).rawNatLit?) : Int)
     if e.isAppOfArity ``Neg.neg 3 && (e.getArg! 2).isAppOfArity ``OfNat.ofNat 3 then
@@ -828,6 +833,9 @@ partial def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]
   if X.isAppOfArity ``ite 5 then return ← cases ``CloseS.isSome_ite
   if X.isAppOfArity ``Option.some 2 then return (← observing? g.refl).isSome
   if X.isAppOfArity ``Option.none 1 then
+    -- A sibling side goal does not inherit binders introduced in the main
+    -- branch by `introFront`. Only facts in this goal may be read.
+    let hyps := hyps.filter (← getLCtx).contains
     let mut keep := hyps
     for h in hyps do
       for f in (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds do
@@ -886,6 +894,7 @@ def closeArith (g : MVarId) (bounds : Bounds) (prems : Array FVarId) : TacticM B
   if ← g.isAssigned then return false
   let (hs, g) ← g.intros
   g.withContext do
+    let prems := prems.filter (← getLCtx).contains
     let mut keep := prems ++ hs
     for h in hs do
       for f in (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds do
@@ -902,7 +911,7 @@ def settle (gs : List MVarId) (hs : List FVarId) (bounds : Bounds) (prems : Arra
   let some gMain := gs.getLast? | throwError "sol_close_join_steps: no goal"
   for gS in gs.dropLast do
     unless (← closeSide gS bounds prems) || (← closeArith gS bounds prems) do
-      throwError "sol_close_join_steps: a value is not shown to return"
+      throwError "sol_close_join_steps: a value is not shown to return\n{MessageData.ofGoal gS}"
   let mut gM := gMain
   let mut bounds := bounds
   for h in hs do
