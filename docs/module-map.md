@@ -1252,3 +1252,6 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/SourceKeccak.lean` | Actual resolved literal Keccak execution, exact heap allocation and explicitly pinned intrinsic byte/word observation. |
 | `Lowering/V08/SourceKeccakControls.lean` | Populated binary, empty and 33-byte executions, both pipelines, complete machine and actual wrong-output controls. |
+
+| `Lowering/V08/SourceEmit.lean` | Actual emit argument/encoding/static/failure boundaries, log-only erasure and exact intrinsic word encoding observations. |
+| `Lowering/V08/SourceEmitControls.lean` | Declared event, populated source machine, allocation/local argument order, panic/static/timeout and malformed encoding controls. |

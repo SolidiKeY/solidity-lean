@@ -905,3 +905,5 @@ import Solidity.Lowering.V08.SourceFailures
 import Solidity.Lowering.V08.SourceFailureControls
 import Solidity.Lowering.V08.SourceKeccak
 import Solidity.Lowering.V08.SourceKeccakControls
+import Solidity.Lowering.V08.SourceEmit
+import Solidity.Lowering.V08.SourceEmitControls

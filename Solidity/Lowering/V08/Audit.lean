@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.SourceEmitControls
 import Solidity.Lowering.V08.SourceKeccakControls
 import Solidity.Lowering.V08.SourceFailureControls
 import Solidity.Lowering.V08.SourceEnvironmentControls

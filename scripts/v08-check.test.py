@@ -51,3 +51,10 @@ for module in ['SourceKeccak','SourceKeccakControls']:
  result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
  result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
 print('PASS: actual Source Keccak evidence corruption controls rejected')
+
+for module in ['SourceEmit','SourceEmitControls']:
+ path='Solidity/Lowering/V08/'+module+'.lean'
+ assert path in original['source_sha256']
+ result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
+ result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
+print('PASS: source emit evidence corruption controls rejected')

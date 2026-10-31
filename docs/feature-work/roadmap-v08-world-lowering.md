@@ -2459,3 +2459,97 @@ Trust1047sources/246sites/0findings; strict491automatic/61budget/11refuted/0pend
 layers172core/0elaborator; orphans1032reachable/0orphan; ownedwhitespace PASS.
 Raw docs and pins task/public exit1 with identical complete83findings/359notes;
 PUBLIC NEW0 PASS, frozen comparisonFAIL retained. No mandatory gate was retried.
+
+
+## Actual source emit arguments, encoding and failure boundaries (2026-10-31)
+
+The owned SourceEmit module now factors the PUBLISHED execS emit branch into
+actual evalConvArgs, actual encodeVals, static check, and log prepend, in that
+order. exec_success/exec_static/exec_argument_failure/exec_encoding_failure use
+individual step-run premises, never an assumed whole execution/preservation
+result. Every exact resulting Source.St and error is retained; EM.sub restores
+the outer L0 while returning argument locals on success. Static failure retains
+the encoding-final state; no rollback is inferred without an enclosing frame.
+The log-only observation eraseLogs keeps ex/world/transient/journal, heap,
+events and function locals. logged_payload_injective preserves exact bytes.
+three_static/three_words_transport consume the existing independent ABI and
+intrinsic word observers; no encoder/decoder or interpreter is added.
+
+SourceEmitControls declares actual event nodes and proves event membership in
+its supplied declaration environment. It reproduces EVERY old populated vector:
+sender/self93/7, selfnonce1/codeSome0, saved/scratch true, journal3, oldheapobject0,
+events/call bytes and oldlogs, functionlocals true and inputlocal true. The real
+argument trace is literal binary hash allocation, local=false, dependent read
+false; the reordered trace reads true before assigning false. Complete ordered
+Vals and encoded bytes are checked, although both traces end at the same locals
+and nonlog state. Actual execS runs differ in exact log bytes. Successful log
+erasure retains allocation/object1/next2. Static rejection follows successful
+argument+encoding execution, keeps oldlogs and allocation. A real divisionzero
+argument after allocation yields exact nonempty panic0x12 BEFORE static refusal
+under either static mode and both pipelines; intrinsic_panic_observation uses
+existing independent source/intrinsic encoders. Zero statement horizon and a
+positive statement horizon with zero argument horizon are timeout, not revert
+or divergence. All bounds are constructor-specific sufficient horizons, never
+public source admission/length cutoffs.
+
+An additional DELIBERATELY MALFORMED memory-reference negative first completes
+actual argument evaluation, then fails in actual encodeVals with exact stuck
+"dangling memory reference" before static checking. It is not an admitted
+SourceSpec machine or a positive heap-validity claim. It inhabits the general
+encoding-failure boundary without replacing the valid populated positive cases.
+
+These are actual independent Source executions plus exact intrinsic HASH/ABI
+BYTE observations, NOT a proof of actual erased intrinsic target-body execution,
+canonical Source/V07/layout/body/ABI relation, SourceSpec/admission, compiler,
+frame/linkage/bytecode or external solc/EVM adequacy. The published global Keccak
+pin remains explicit in the hash-byte observation. Existing EmitControls target
+execution remains separate. The approved log exclusion in solidity-scope does
+not erase argument/encoding effects, failure or events. All prior577 exact axiom
+sets remain unchanged;37 new checked declarations make614 standard sets.
+
+Every original parent remains PARTIAL: G20 callable declaration/body/parameter/
+result/type/layout/getter/function-reference/readonly applications; G21 nested/
+reference/calldata/slice/custom-error/catch and canonical decoding; G22.01 source
+external/self-call/frame/admission; G22.02 source callback/reentrancy; G22.03
+source new/try-new/body/admission; G22.04 source linkage/function-value/storage;
+G22.05 source/world/runtime/admission composition; G23 actual target erased-emit
+argument translation, general effecting hash/transient/layout and G16–G22
+composition; BackfillA source frame/layout and BackfillB source/V07 applications.
+Missing/reserved interfaces remain prerequisites, not preservation assumptions.
+Independent work is not claimed exhausted by this checkpoint.
+
+Review corrections: undefined simp typo and monad-run normalization fixed;
+log erasure direct rfl hit original heartbeat limit, replaced with the already
+proved small generic erasure law. No limit was raised. Both read-only reviews
+requested an inhabited encoding-failure application (added as explicit malformed
+negative) and certificate config/tool checks (added). Reviewers use no builds or
+Lean servers. Final artifact review is separate. Per-file Lean MCP/get_goal are
+unavailable; existing blocked goal unchanged.
+
+Operational additive disclosure is saved outside all old seals. Keccak measured
+growth68911104 exceeded estimate67108864 by1802240bytes; the estimate was NOT an
+enforced resource guard. No sealed record was rewritten. This checkpoint starts
+at729522176 available bytes with96MiB conservative growth estimate, same stopped
+runtime and warm outputs,12GiB/no-swap/CPU1 under16GiBparent, serial Lean-j1 and
+LEAN_NUM_THREADS1, original600s/proof/fuel/node/test limits/cache-off unchanged.
+Mandatory full/Decision failures and literal-wrapper hold remain: no identical
+retry or reserved Decision edit. Rawdocs/globalpins exits1 remain failures;
+complete public-base NEW0 comparisons are separate from frozen-base regressions.
+
+Final registered closure14531 PASS18.331969510s, sampled aggregateRSS60600320,
+reported cgrouppeak37191680; exact source/config/runtime bindings/cleanup verified.
+Binding614precisesets/68coreclosure; current positive evidence+27corruptions;
+additive runner9extension+12priorcertificate corruptions; runtime/profile tests
+PASS. Trust1049sources/246sites/0findings; strict491/61budget/11refuted/0pending;
+layers172core/0elaborator; orphans1034reachable/0orphan; ownedwhitespace0.
+Historical Keccak-only currentroot guard test FAIL1 (expected exact Audit mismatch)
+is retained; separate exact committed aa640 Audit fixture compatibility PASS.
+Rawdocs task/public1/1 with identical83completefindings and globalpins1/1 with
+identical359notes; PUBLIC NEW0 PASS, frozen+11/+345 FAIL retained. Decision321
+and priorSuite260 requested dependency source hashes unchanged; no retry/waiver.
+Next inspected source callable boundary is callInternal at Eval:1248. It selects
+G.prog.body via dispatchFn, builds typed parameters/returns and runs runMods.
+No V07 argument/body/modifier/heap translation to intrinsic Entry is published in
+the consumed tree; that application cannot be discharged by supplied target
+results or another interpreter. This investigation is not a claim all further
+independent Work/Backfill is exhausted. Whole assignment and goal stay blocked.
