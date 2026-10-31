@@ -970,3 +970,29 @@ addition or omission relative to publication. This is a separate no-new-finding
 pass, never a passing raw docs gate or zero global delta against frozen base.
 Post-incorporation full gate is pending at this checkpoint. New evidence:
 `/workspace/v14-creation-frame-evidence`; prior sealed exports remain untouched.
+
+
+### Creation-frame checkpoint11 full validation and handoff
+
+The post-incorporation `./run-lean.sh` gate passed exit0 on committed Lean source
+`233df942f10ef4076a69a4e3e10b724ecfacd470`:1039 default jobs,262 TestSuite jobs,
+377taclets/131read-bearing/131covered exact SolKey annotations. Actual wall9211.8s;
+peak aggregate Lean/Lake RSS11029MiB, anonymous10299MiB, one Lean worker;
+minimum host MemAvailable6062MiB. Child memory.peak12884901888bytes reached the
+12GiB cap; max-events1561 records allocation/reclaim pressure. OOM/oom_kill/
+oom_group_kill all0, swap.max0; no cap, proof, fuel, node or test budget changed.
+Disk after build23GiB free, same build/cache tree. Full raw log and sampler:
+`/workspace/v14-creation-frame-evidence/full.log` and `full-measure/summary.json`.
+
+Checkpoint11 handoff/export:
+`/workspace/v14-creation-frame-artifacts/checkpoint11/HANDOFF.md` binds frozenbase,
+publication/incorporation, tested source and export HEAD. Its original.patch
+includes exact published incorporation; lane.patch isolates owned changes.
+The branch bundle carries the verified history required by the structural guard;
+a source-only patch does not carry that incorporation ancestry. Prior sealed
+exports remain unchanged. Raw docs exit1/48missing37ambiguous and inherited+2
+versus frozen remain failed/debt evidence; separate no-new-versus-publication
+comparison passes. This checkpoint closes the independent typed creation-frame
+consumer and its checks/reviews, not any parent G43/G36/G44/G45 obligation.
+The next available independent backfill consumes actual constructor arguments;
+it is not included in this tested source or checkpoint's proof claims.
