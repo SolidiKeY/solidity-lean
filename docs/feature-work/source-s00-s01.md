@@ -400,7 +400,7 @@ infinity.
 | implicit, to `fixedMxN` | exact at `N` digits and in range (`Q.toFixed?`) | `Q.toFixed?_exact`, `Q.toFixed?_inRange` |
 | explicit, to `fixedMxN` | truncated toward zero; out of range a compile error (`Q.toFixedExplicit?`) | `Q.toFixedExplicit?_of_toFixed?` (implicit is the exact case), `Q.toFixedExplicit?_none` |
 | explicit, to an integer | integral and in range (`Q.toIntExplicit?`) | — |
-| implicit, to `bytesN` | zero, or a hex literal of exactly `2N` digits (`NumLit.fitsBytes`) | — |
+| implicit, to `bytesN` | zero, or a hex literal of exactly `2N` digits (since Q1: the literal's type `STy.hexConst q N`, `Syn.hexLen?`; see [source-s02.md](source-s02.md#uniqueness)) | `Unique.hex_to_bytes2`, `hex_to_bytes4_refused`, `zero_to_bytes4` |
 
 ### Types and conversions
 
@@ -475,7 +475,8 @@ variable, which overload, which builtin), and `Typed.toR` elaborates it into
 the resolved form below. The rules:
 
 - constants at their exact rational (`const`; not a checksummed address
-  literal, which is `litAddress`), hex literals at `bytesN` (`litBytes`);
+  literal, which is `litAddress`), hex literals of `2N` digits at their
+  value with bytes length `N` (`litBytes`, `STy.hexConst`, since Q1);
 - literals; locals by position (`loc`) and state variables and constants by
   declaration (`state`); `this`; parentheses; tuples at their components'
   mobile types;
@@ -629,7 +630,7 @@ exist yet.
 | `tooBig_illTyped`, `fits_wellTyped` | `uint8 x = 300;` is ill typed in every body; `uint8 x = 255;` is well typed |
 | `shl18_folded`, `shlTooBig_illTyped` | `1 << 8` has only its folded type, so `uint8 x = 1 << 8;` is ill typed in every body |
 | `bareReturn_refused`, `twoCtors_illFormed`, `noVisibility_illFormed` | `return;` in a function with returns; two constructors; a contract function without visibility |
-| `Typed.lit_num` | a number literal is a rational, a `bytesN` or an address |
+| `Typed.lit_num` | a number literal is a rational, a hexadecimal constant (`hexConst`) or an address |
 | `msgValue_refused`, `gasleft_untyped` | `msg.value` in a non-payable public body, and `gasleft()`, have no derivation |
 | `diamond_linearize`, `cycle_rejected` | C3 |
 | `local_shadows`, `gasleft_excluded`, `blockNumber_excluded` | resolution |

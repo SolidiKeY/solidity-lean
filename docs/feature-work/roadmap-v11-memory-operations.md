@@ -75,17 +75,17 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint thirty. Earlier checkpoint
+Current cumulative accounting through checkpoint thirty-one. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
 |---|---|---|
 | G32 | partial | Intrinsic heap-object framing/noninterference components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
-| G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
-| G34 | partial | Typed slice coordinate/read/overwrite adapters and identity controls proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
+| G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors; supported actual Source Boolean allocation and MemOK preservation now checked. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
+| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
 | G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
 | G35.02 | blocked | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
-| G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved, including actual ordered two-transfer composition and local commutation. General families/reference construction, calldata-to-storage, ABI decoding, independent Source execution and target transport remain. |
+| G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved, including actual ordered two-transfer composition and local commutation. General families/reference construction, calldata-to-storage, ABI decoding, general Source copy/program execution and target transport remain. |
 | G35.04 | partial | Actual intrinsic shallow overwrite, original-heap snapshot and overlap/framing laws proved. Target emitter, language alias/deep-copy classification and fresh deep-copy transport remain. |
 | G35.05 | partial | Published finite map-free recursive Mirrors are transported through actual multi-generation builder/snapshot operations with typed generation separation. Source/type-graph/cycle/mapping/shadow coverage and emitted traversal/deep-copy realization remain; no fixed cutoff is introduced. |
 | G35.06 | blocked | Requires all preceding copies plus V10/source/target composition; no V07–V10 unpublished lane imported. |
@@ -359,7 +359,7 @@ Focused closure passes 88 jobs; all eleven new axiom outputs are guarded and
 contain only the standard allowlist. Reserved single-write code, byte-memory,
 copy-loop and reference-construction modules are unchanged.
 
-### Remaining published-interface blockers
+### Historical published-interface blockers at the original frozen base
 
 The exact pinned `Evm/MemoryObjects.lean` relations use `Machine.mem : Nat → Word`,
 one word per element and dynamic headers. `MemoryObjectCompile.StmtFrag` and
@@ -370,7 +370,7 @@ and missing generated panic check. `AllocationInput` and `GrowsAllocator` in `Ev
 them or count operation-side naturality as exact allocation-failure compilation.
 
 `Source/State.lean` publishes immutable decoded tables and typed array fields,
-but `Source/TypingExamples.lean` explicitly defers source slice execution to S02.
+but `Source/TypingExamples.lean` at that original revision deferred source slice execution to S02.
 The Boolean structural observation here is not that missing judgment. Thus
 calldata ABI/source/revert/storage transport remains open. Existing
 `Semantics/RecursiveStorage/Legacy.lean` explicitly realizes finite layouts and
@@ -2613,3 +2613,76 @@ loops open; G35.05 general recursive Source graphs/maps/shadows/cycles/emitted
 traversal open; G35.06 reserved-copy/V10/Source/target composition blocked.
 Backfill A/B advanced, not complete/exhausted. No new admission shape or profile
 restriction, no external compiler/EVM validation or whole-assignment claim.
+
+
+### Checkpoint31: published prerequisites and independent Source memory
+
+Original assignment/base fb379ae20f10e2c92113453ddd9d40d8f2efbe09 retained as ancestor.
+ParentC30a8ae632c994157445db289394dbdd60c7640ec98 is preserved. User authorized
+synchronization with published origin/master2fe1f8932f96be15b00df03ba2cde46f64a87758;
+FETCH_HEAD and origin/master matched exactly. Merge only on isolated assigned
+branch; no push/default-branch merge/PR/unpublished import. Three mechanical
+append conflicts in Solidity.lean/docsREADME/modulemap retained BOTH blocks.
+Independent finder/skeptic sync reviews checked incoming owner blobs identical to
+publication and all84 preexisting owned modules identical to C30. Existing live
+checkout is not in prior absolute-path seals; runtimeTOML remains untracked.
+
+New Source.Eval/Machine/WellTyped/ValueProgress/ExprProgress/StmtProgress are REAL
+published independent semantics/progress. The OLD blanket assertion that execution
+is unavailable is superseded. Their docs retain partial Source coverage: value/
+call-fragment progress has explicit fragment/domain/call premises, NotStuck allows
+bounds panic, and MemOK needs reference typing/top shape/bare inner values. This
+checkpoint uses actual memory-operation execution and published allocRef_mem',
+not an assertion of whole SourceSpec/Source slice compiler completeness.
+
+SourceMemory defines only a typed local INITIAL object representation and a
+Source.Data array constructor, no new heap/value/evaluator/allocator. source_bool_read
+and source_bool_bounds prove actual Source.memElem run results and unchanged state;
+read_iff relates actual Source.readLoc(.mem) to the intrinsic typed index. Bounds
+are the actual .revert(panicData.index), not Option rejection re-labelled halt.
+schedule_read_iff composes actual independent Source reads at computed INITIAL
+origin with actual reached runCaptures final observations. source_bool_alloc is
+actual published Source.allocRef execution; source_bool_alloc_memOK consumes
+allocRef_mem' with DataOK/Top/Inner discharged for bare Bool elements. copy_schedule
+connects this Source observation to C30's ACTUAL recursive mapFree copy builder
+and arbitrary reached old-root recaptures: final complete Mirrors AND read iff
+are conclusions. Initial local representation, actualSome and mapFree remain
+explicit; no desired final relation/evaluator equality/fresh Source graph premise.
+This is observation transport, NOT compilation of a Source copy loop or bytecode.
+
+Controls construct Source states ONLY as actual allocRef outputs. Independently
+inhabited MemOK/SourceBoolMemoryAt precede the intrinsic copy. Arbitrary n/copies
+(existing n+3<2^256 validity only) exercise nonprimitive recursive copies, actual
+reached0→1 then changed1→2 captures, complete initial/copied/final TFF→TFF→TTT
+vectors with runtime false tails, untouched neighborFT, actual Source origin0true
+and wrong-frozen-origin1false. Source state remains unchanged during reads; the
+Source copy program is NOT claimed to execute. Empty Source allocation/read,
+exact runtime endpoint Source panic + intrinsicNone, wrong type and dangling
+Source stuck controls distinguish the failure mechanisms. Element32 uses36old
+Source/target elements and actual nonprimitive builder/schedule; large-tree
+family remains generic. A literal tree34 witness exceeded200000heartbeats; kept
+raw failure, used direct general bridge with small nonprimitive tree for same
+old-element32 observations, no budget change. Every failed elaboration retained.
+Thirteen new public laws/controls pinned to exact standard-only axiom sets.
+
+Storage preflight originally555655168bytes; exactpublic fetch ~7MiB. User allowed
+narrow stopped task cache-layer maintenance. Audited ten v11-builder-controls
+containers: STOPPED,SizeRw0,diff only mount placeholders, source/evidence/cache
+externalworkspacebind. Preserved10logs/state/mount/diff metadata before removing
+only those10IDs; reclaimed~1.7GiB, runningruntime/images/all source/cache/seals
+untouched. No globalprune/newcontainer/relocation/limit change. Same12GiB/no-swap
+child under16GiB parent, OS headroom, serial Lean-j1/LEAN_NUM_THREADS1, cacheOFF
+actualexec andTOML; sourceprogress25jobs and newguardedclosure use existing warm
+outputs. Full new-public gate forecast1GiB plus128MiBlogs/artifacts/safety, reserve
+512MiB; >2.1GiB available after focused closure. Per-file MCP/get_goal unavailable;
+existing assignment unchanged, no goal recreation/reactivation/completion.
+
+G32 physical bytes/target frames, G33 all-profile/target allocation failures,
+G34 general path/write/rebinding/delete compilation, G35.01 deep Source/target
+copy/liveness, G35.02 reserved memory-storage, G35.03 general reference/ABI/storage
+copy execution, G35.04 fresh memory deep-copy/emitted loops, G35.05 recursive Source
+graphs and G35.06 full V10/Source/target chain remain OPEN. New source availability
+is consumed for the supported local read/allocation case; earlier holds are not
+repeated as a blanket excuse. Backfill A/B advanced, not exhausted or complete.
+
+C31 final synchronized gate:1067 default jobs,262 TestSuite jobs, final SolKey377/131, wrapper exit0. Peak sampled aggregate Lean/Lake RSS11432472KiB, cumulative child peak12884901888bytes, memory.max event delta479, OOM/kill deltas0. The existing cap was reached and enforced; no limit/budget change. Complete strict timing check is recorded separately. Raw docs exit1/current83findings exactly equal new public baseline;11incoming findings relative original frozen72 remain a FAILED original no-new gate, not V11 regressions. Global inventory exit1:1037unrecorded=359public inherited+678owned,0unsafe; scoped678standardpins/86modules pass independently. Global whitespace exit2 matches public inherited Source/Horizon debt; owned-vs-public whitespace passes.

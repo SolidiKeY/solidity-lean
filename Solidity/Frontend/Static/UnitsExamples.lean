@@ -36,7 +36,7 @@ def mkUnit : List (Syn .top) → Syn .unit
 
 /-! ## An import cycle -/
 
-def cycle : Program := ⟨[
+def cycle : UnitSet := ⟨[
   ("a.sol", mkUnit [.importPath "./b.sol" Option.none, emptyContract "A"]),
   ("b.sol", mkUnit [.importPath "./a.sol" Option.none, emptyContract "B"])]⟩
 
@@ -50,7 +50,7 @@ theorem cycle_ok : UnitsOK cycle [] := unitsOK_iff.mp (by decide)
 
 /-! ## A diamond: one identity along two routes -/
 
-def diamond : Program := ⟨[
+def diamond : UnitSet := ⟨[
   ("d.sol", mkUnit [emptyContract "D"]),
   ("b.sol", mkUnit [.importPath "d.sol" Option.none]),
   ("c.sol", mkUnit [.importPath "d.sol" Option.none]),
@@ -62,7 +62,7 @@ theorem diamond_ok : UnitsOK diamond [] := unitsOK_iff.mp (by decide)
 
 /-! ## A clash, an alias, a missing unit -/
 
-def clash : Program := ⟨[
+def clash : UnitSet := ⟨[
   ("x.sol", mkUnit [emptyContract "T"]),
   ("y.sol", mkUnit [emptyContract "T"]),
   ("a.sol", mkUnit [.importPath "x.sol" Option.none, .importPath "y.sol" Option.none])]⟩
@@ -74,7 +74,7 @@ theorem clash_refused : ¬ UnitsOK clash [] := fun h => by
   revert e
   decide
 
-def aliased : Program := ⟨[
+def aliased : UnitSet := ⟨[
   ("x.sol", mkUnit [emptyContract "T"]),
   ("a.sol", mkUnit [.importSymbols (.importAlias "T" (Option.some "U")) .nil "x.sol"])]⟩
 
@@ -82,7 +82,7 @@ theorem alias_renames : aliased.globals [] "a.sol" "U" = [.decl ⟨"x.sol", 0⟩
 
 theorem alias_hides_original : aliased.globals [] "a.sol" "T" = [] := by decide
 
-def missing : Program := ⟨[("a.sol", mkUnit [.importPath "nowhere.sol" Option.none])]⟩
+def missing : UnitSet := ⟨[("a.sol", mkUnit [.importPath "nowhere.sol" Option.none])]⟩
 
 /-- **Negative control**: an import of an absent unit. -/
 theorem missing_refused : ¬ UnitsOK missing [] := fun h => by
@@ -92,7 +92,7 @@ theorem missing_refused : ¬ UnitsOK missing [] := fun h => by
 
 /-- **Negative control**: `import {Nope} from "x.sol"` names no declaration
 of `x.sol` (solc error 2904). -/
-def missingSym : Program := ⟨[
+def missingSym : UnitSet := ⟨[
   ("x.sol", mkUnit [emptyContract "T"]),
   ("a.sol", mkUnit [.importSymbols (.importAlias "Nope" Option.none) .nil "x.sol"])]⟩
 
@@ -103,7 +103,7 @@ theorem missingSym_refused : ¬ UnitsOK missingSym [] := fun h => by
 
 /-- **Negative control**: `a.sol` takes `y` from `b.sol` as `x`, `b.sol`
 takes `x` from `a.sol` as `y`: the aliases denote nothing. -/
-def aliasCycle : Program := ⟨[
+def aliasCycle : UnitSet := ⟨[
   ("a.sol", mkUnit [.importSymbols (.importAlias "y" (Option.some "x")) .nil "b.sol"]),
   ("b.sol", mkUnit [.importSymbols (.importAlias "x" (Option.some "y")) .nil "a.sol"])]⟩
 
@@ -127,7 +127,7 @@ def u8P : Syn .param := .param (.elem (.int false 8 (by decide))) Option.none (O
 
 /-- Free functions `f(bool)` and `f(uint8)` from two units overload in a
 third. -/
-def freeOverloads : Program := ⟨[
+def freeOverloads : UnitSet := ⟨[
   ("x.sol", mkUnit [freeFn boolP]),
   ("y.sol", mkUnit [freeFn u8P]),
   ("a.sol", mkUnit [.importPath "x.sol" Option.none, .importPath "y.sol" Option.none])]⟩
@@ -138,7 +138,7 @@ theorem freeOverloads_both :
     freeOverloads.globals [] "a.sol" "f" = [.decl ⟨"x.sol", 0⟩, .decl ⟨"y.sol", 0⟩] := by decide
 
 /-- **Negative control**: a free function and an event named `f` in one scope. -/
-def fnEvent : Program := ⟨[
+def fnEvent : UnitSet := ⟨[
   ("x.sol", mkUnit [freeFn boolP]),
   ("y.sol", mkUnit [freeEvent]),
   ("a.sol", mkUnit [.importPath "x.sol" Option.none, .importPath "y.sol" Option.none])]⟩
@@ -149,7 +149,7 @@ theorem fnEvent_refused : ¬ UnitsOK fnEvent [] := fun h => by
   decide
 
 /-- `import "x.sol" as N;` binds `N` to the unit, re-exported by `import "a.sol"`. -/
-def namespaced : Program := ⟨[
+def namespaced : UnitSet := ⟨[
   ("x.sol", mkUnit [emptyContract "T"]),
   ("a.sol", mkUnit [.importPath "x.sol" (Option.some "N")]),
   ("b.sol", mkUnit [.importPath "a.sol" Option.none])]⟩
@@ -161,14 +161,14 @@ theorem namespace_binds :
 /-! ## Paths -/
 
 theorem remapped :
-    Program.target [{ pre := "lib/", target := "vendor/lib/" }] "src/a.sol" "lib/x.sol" =
+    UnitSet.target [{ pre := "lib/", target := "vendor/lib/" }] "src/a.sol" "lib/x.sol" =
       "vendor/lib/x.sol" := by decide
 
-theorem relative_parent : Program.target [] "src/a/b.sol" "../x.sol" = "src/x.sol" := by decide
+theorem relative_parent : UnitSet.target [] "src/a/b.sol" "../x.sol" = "src/x.sol" := by decide
 
 /-- The longer context wins over the longer prefix. -/
 theorem remap_context :
-    Program.target [{ context := "src/", pre := "lib/", target := "ctx/" },
+    UnitSet.target [{ context := "src/", pre := "lib/", target := "ctx/" },
       { pre := "lib/x", target := "long/" }] "src/a.sol" "lib/x.sol" = "ctx/x.sol" := by decide
 
 /-! ## Shadowing -/
@@ -181,7 +181,7 @@ def uintVar (x : String) : Syn (.part false) :=
 def shadowUnit : Syn .unit := mkUnit [emptyContract "T",
   .contract false "C" .none .nil (.cons (uintVar "T") .nil)]
 
-def shadow : Program := ⟨[("a.sol", shadowUnit)]⟩
+def shadow : UnitSet := ⟨[("a.sol", shadowUnit)]⟩
 
 /-- Inside `C`, `T` is the member: it shadows the file-level contract (solc
 warns, 2519, and resolves to the member). -/
