@@ -51,3 +51,17 @@ whole original execution. This publication is a partial checkpoint.
 Exact commands, stdout, resource footers, reviews, old preserved exports and
 validation JSON: `/workspace/next10-diamond-try-evidence/publish-master`.
 Actual push receipt and verified remote SHA are recorded there after publication.
+
+### Remote advancement during publication
+
+After the checks above, master advanced to
+`93920309f5c800c9ce4809bc74700ed4fde65fb2` with 13 memory Bridge/test/documentation
+files. The intermediate merge `c565d731aa7df51737d81f68bb4d53aff0bf5115` is
+retained. The later root-import conflict keeps both the published Memory,
+MemoryRefinement and MemoryComposition modules and the task TryMemoryDriver.
+Core task code and the inspected source-runner/tests are unchanged, so the
+fresh core checks above retain exactly that scope; a full Bridge pass is still
+not claimed. Published MemoryBytes supplies conditional byte laws, explicitly
+without installing an opaque-zero-allocator contract as an axiom. These new
+prerequisites have not been adopted into original try/source correspondence.
+The final static/doc comparison uses this later published master as baseline.
