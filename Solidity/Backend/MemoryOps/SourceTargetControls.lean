@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceAssignment
 import Solidity.Backend.MemoryOps.SourceDeclaration
 import Solidity.Backend.MemoryOps.SourceIndexedDelete
 import Solidity.Backend.MemoryOps.SourceDeleteTarget
@@ -457,5 +458,110 @@ theorem resolved_declaration_timeouts (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms resolved_declaration_timeouts
+
+
+private abbrev AΓ : Source.RCtx := .bool::SΓ
+private def assignSource (k : PrimTy.uint.Denote) (v : Bool) : Source.EMState E0 AΓ :=
+  (.cons (.bool v) (indexedSource k).1,sy.2)
+private def assignState (k : PrimTy.uint.Denote) (v : Bool) := (indexedState k).push (t := .val .bool) v
+private def assignMachine (k : Nat) (v : Bool) := writeMachine (indexedMachine k) 3 (.val (bword v))
+private abbrev aroot : Source.Idx AΓ (.array .memory .bool none) := .there sroot
+private abbrev aindex : Source.Idx AΓ (.int .u256) := .there sindex
+private def assignTerm : Source.RExpr E0 AΓ .bool := sourceIndexedAssign aroot aindex .here
+private def assignCode := writeLocalCode (C := C) 1 (.there (.there .here) : Idx [.val .bool,.val .uint,.mem B] (.mem B))
+  (.simple (.local (.there .here))) (.simple (.local .here))
+private theorem assign_memOK (k : PrimTy.uint.Denote) (v : Bool) : Source.MemOK E0 SH (assignSource k v) :=
+  ⟨⟨(indexed_memOK k).1.1,⟨trivial,(indexed_memOK k).1.2⟩⟩,(indexed_memOK k).2⟩
+private theorem assign_repr_one : StateRepr 1 1 8
+    (((Frag.init Γ).push (.val .uint) .ok).push (.val .bool) .ok)
+    (assignState (uintOfNat 1) true) base (assignMachine 1 true) := by
+  have h := initial_repr.consVal (uintOfNat 1) w[1] (ReprV.uint_of rfl) (by decide)
+  exact h.consVal (p := .bool) true w[1] rfl (by decide)
+private theorem assign_code_run (m : Machine) (hptr : m.mem 1=w[16]) (hi : m.mem 2=w[1])
+    (hv : m.mem 3=w[1]) (hlen : m.mem 16=w[3]) : run assignCode m=.ok (writeMachine m 18 w[1]) 0 := by
+  change run ([.mload 3] ++ ([.mload 1] ++ ([.mload 2] ++ writeArrayStackCode))) m=_
+  rw [run_append_ok (show run [.mload 3] m=.ok (m.push w[1]) 0 from by
+    change Out.ok (m.push (m.mem 3)) 0=_
+    rw [hv])]
+  rw [run_append_ok (show run [.mload 1] (m.push w[1])=.ok ((m.push w[1]).push w[16]) 0 from by
+    change Out.ok ((m.push w[1]).push (m.mem 1)) 0=_
+    rw [hptr])]
+  rw [run_append_ok (show run [.mload 2] ((m.push w[1]).push w[16])=
+    .ok (((m.push w[1]).push w[16]).push w[1]) 0 from by
+      change Out.ok (((m.push w[1]).push w[16]).push (m.mem 2)) 0=_
+      rw [hi])]
+  have ha := arrayAddrStack_run (m.push w[1]) ⟨16,by decide⟩ ⟨1,by decide⟩ 3 (by decide)
+    (by simpa only [Machine.push,wmod_of_lt (by decide : 3<W)] using hlen)
+  rw [if_pos (by decide : (1 : Nat)<3)] at ha
+  rw [writeArrayStackCode,run_append_ok ha]
+  simp only [run,Machine.push,exec_cons_zero,Instr.step,wmod_of_lt (by decide : 18<W),
+    Out.ok_bind,exec_nil,writeMachine]
+
+/-- RHS and index are real locals; writing true at index1 materially differs
+from delete/default, a wrong zero index, and a stale/ignored RHS value. -/
+theorem resolved_runtime_assignment (p : Roadmap.Pipeline) :
+    ∃ (out : Heap H) (z : Source.EMState E0 AΓ) (target : Machine),
+      (Source.evalE (Source.SemanticsExamples.G0 p) F0 3 assignTerm).run (assignSource (uintOfNat 1) true)=
+        (.ok (.val (.bool true)),z) ∧
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 4 AΓ.length none
+        (.expr assignTerm : Source.RStmt E0 [] false .body AΓ AΓ) (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+          (.ok (.normal (assignSource (uintOfNat 1) true).1),(.nil,z.2)) ∧
+      run assignCode (assignMachine 1 true)=.ok target 0 ∧
+      SourceBoolMemoryAt z 0 out r .dyn ∧ Source.MemOK E0 SH z ∧ z.1=(assignSource (uintOfNat 1) true).1 ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems .dyn (out.get r)]=[[true,false,false],[true,true,false]] ∧
+      (Source.readLoc (E := E0) (Γ := AΓ) F0 (τ := .bool) (.mem 0 1)).run z=(.ok (.bool true),z) ∧
+      z.1.get (.there (.there (.there .here)))=.memRef rfl 0 ∧
+      [target.mem 0,target.mem 1,target.mem 2,target.mem 3,target.mem 5,target.mem 16,target.mem 17,target.mem 18,target.mem 19]=
+        [w[20],w[16],w[1],w[1],w[99],w[3],w[1],w[1],w[0]] ∧
+      target.stack=[w[42]] ∧ target.mem 18≠w[0] := by
+  have hr : SourceBoolMemoryAt (assignSource (uintOfNat 1) true) 0 (assignState (uintOfNat 1) true).heap r .dyn := represented
+  have hk : (uintOfNat 1).1.toNat<(assignState (uintOfNat 1) true).heap.len r .dyn := by
+    simp only [assignState,indexedState,State.push,σ,Heap.len,Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+    decide
+  obtain ⟨out,z,target,hw,he,hs,hi,hcode,hrep,hm,hmem,hl,hstack,ha⟩ :=
+    resolved_assign_word (Source.SemanticsExamples.G0 p) F0 0 (assignState (uintOfNat 1) true) r hr
+      aroot aindex .here (.there (.there .here)) (.there .here) .here (uintOfNat 1) true
+      rfl rfl rfl rfl rfl rfl hk assign_repr_one SH (assign_memOK _ _)
+  have hv : MObj.elems .dyn (out.get r)=[true,true,false] := by
+    change hp.setIndex r .dyn (uintOfNat 1) true=some out at hw
+    simp only [Heap.setIndex] at hw
+    have hk' : (uintOfNat 1).1.toNat<(MObj.elems .dyn (hp.get r)).length := hk
+    rw [if_pos hk'] at hw
+    rw [←Option.some.inj hw,Heap.get_set_same,MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+    rfl
+  have ht : target=writeMachine (assignMachine 1 true) 18 w[1] := by
+    have hc := assign_code_run (assignMachine 1 true) rfl rfl rfl rfl
+    have heq := hc.symm.trans hcode
+    cases heq
+    rfl
+  refine ⟨out,z,target,he,hs,hcode,hrep,hmem,hl,?_,?_,?_,?_,hstack,?_⟩
+  · rw [hv];simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+  · have hh : z.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [true,true,false]⟩ := by rw [←hv];exact hrep
+    exact source_bool_read z 0 _ hh 1 (by decide)
+  · rw [hl];rfl
+  · rw [ht];rfl
+  · rw [ht];exact by decide
+
+theorem resolved_assignment_endpoint (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 3 assignTerm).run (assignSource (uintOfNat 3) true)=
+      (.error (.revert (Source.panicData .index)),assignSource (uintOfNat 3) true) ∧
+      run assignCode (assignMachine 3 true)=.revert := by
+  have hr : SourceBoolMemoryAt (assignSource (uintOfNat 3) true) 0 (assignState (uintOfNat 3) true).heap r .dyn := represented
+  have h := initial_repr.consVal (uintOfNat 3) w[3] (ReprV.uint_of rfl) (by decide)
+  have hm := h.consVal (p := .bool) true w[1] (show ReprV .bool true w[1] from rfl) (by decide : 1+([.val .uint,.mem B].length+1)≤8)
+  exact resolved_assign_word_bounds (Source.SemanticsExamples.G0 p) F0 0 (assignState (uintOfNat 3) true) r hr
+    aroot aindex .here (.there (.there .here)) (.there .here) .here (uintOfNat 3) true
+    rfl rfl rfl rfl rfl rfl (by
+      simp only [assignState,indexedState,State.push,σ,Heap.len,Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+      decide) hm
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.resolved_runtime_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms resolved_runtime_assignment
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.resolved_assignment_endpoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms resolved_assignment_endpoint
 
 end Solidity.Backend.MemoryOps.SourceTargetControls

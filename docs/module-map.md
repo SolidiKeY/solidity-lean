@@ -1297,3 +1297,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceIndexedDelete.lean` | Actual resolved Source local-index deletion expression/statement, intrinsic deletion and published word code; explicit initial local/heap alignment, bounds and MemOK. |
 
 | `Solidity/Backend/MemoryOps/SourceDeclaration.lean` | Actual resolved Source default-declaration statement, fresh local MemOK and existing intrinsic/word allocator composition; explicit initial capacities and low-horizon observations. |
+
+| `Solidity/Backend/MemoryOps/SourceAssignment.lean` | Actual resolved Source indexed Boolean assignment with local RHS/index, intrinsic statement and published word write; initial alignment, MemOK, complete frames and separate bounds observations. |

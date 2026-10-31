@@ -75,14 +75,14 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint thirty-seven. Earlier checkpoint
+Current cumulative accounting through checkpoint thirty-eight. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
 |---|---|---|
 | G32 | partial | Intrinsic heap-object framing/noninterference and supported Source primitive delete-to-symbolic-word frame components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
 | G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors; supported actual Source Boolean allocation/zero-default and resolved declaration with a fresh typed local, intrinsic and word fresh-root/old-object framing, and enlarged-context MemOK preservation now checked. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
-| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads, single-element read/write-to-intrinsic-copy and primitive delete-to-clearT transitions plus resolved Source local-index deletion expression/statement to actual intrinsic/word execution proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
+| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads, single-element read/write-to-intrinsic-copy and primitive delete-to-clearT transitions plus resolved Source local-index deletion and Boolean assignment expression/statements to actual intrinsic/word execution proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
 | G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
 | G35.02 | blocked | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
 | G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved, including actual ordered two-transfer composition and local commutation. General families/reference construction, calldata-to-storage, ABI decoding, general Source copy/program execution and target transport remain. |
@@ -3020,3 +3020,60 @@ Both independent source reviews accepted final guards/proof/control/scope; finde
 caught stale cumulative-checkpoint heading, corrected to37 with supported source
 syntax/typed-local additions. No remaining source defect. Original wholelane
 and externalcompiler/EVM obligations remain unfinished; seals retained.
+
+## Checkpoint thirty-eight: resolved indexed assignment with actual RHS
+
+Reproduced original G34/Backfill gap: C32 handles source location writes and
+C36 handles resolved delete, but no owned result executed RExpr.assign. The
+existing published Source evaluator reads RHS first, then receiver/index, then
+writeLoc; the existing word writeLocalCode emits RHS, pointer, index. New
+SourceAssignment composes exactly these operations, with INITIAL local RHS,
+index and receiver alignment. No alternate assignment evaluator/IR/typed state,
+conversion, payload oracle or emitter added. Local operands are pure: this
+does NOT establish arbitrary effectful RHS/LHS order equivalence.
+
+resolved_assign_word derives actual Source evalE and execS expression statement,
+actual intrinsic Stmt.assignMem and published word writeLocal_correct run,
+writeAddr success, final SourceBoolMemoryAt/MemOK/typed locals/word StateRepr/
+stack/allocator. Initial SourceMemOK/heap relation, wordStateRepr/localalignment
+and actual runtime index bound stay explicit. Helper actual write-run premise
+is discharged by headline using published writeAddr/Sourcewrite adapter. Source
+MemOK preservation consumes published writeLoc_memOK, not assumed preservation.
+Bounds derive actual Source location panic and word revert separately from
+initial runtime values, not returndata encoding or Source rollback semantics.
+
+Inhabited bothpipeline controls add real uint index1 and Bool RHStrue locals to
+oldTFF target/Source state with repeated Source aliases. Actual Source expression
+returns true and expression statement normal oldlocals; intrinsic TFF→TTF and
+actual other-alias read1true derived from reachedheap. Complete word positions
+[0,1,2,3,5,16,17,18,19] become[20,16,1,1,99,3,1,1,0], stack42 preserved. This
+materially distinguishes ignored/stale false RHS, default/deletezero and wrong
+constantindex0. Runtime endpoint3 independently inhabits StateRepr and directly
+applies resolved_assign_word_bounds for BOTH Sourcepanic and compiledrevert.
+All older source/constructor/delete/copy/reference/32/endpoint fixtures retained.
+
+Core01 monad/implicitcontract/pure reductions and core02 redundant solved-goal
+tactic failures retained; core03 passes147jobs. Controls01 missing explicit
+primitive Bool type on published consVal was fixed without changing statements;
+controls02 passes161jobs, six new public exact standard-only guards. Same idle
+capped warm serial cacheOFF runtime, preflight1601703936bytes,96MiB forecast/
+unchanged512MiBreserve. No budgets/profile/refusal/predicate/axiom changes.
+
+Original G32/G33/G34/G35.01/.03/.04/.05 and both Backfills remain partial; G35.02
+reserved memory-storage and G35.06 final chain blocked. Physical bytes/general
+representation, all-profile constructors/checked target allocation failures,
+general reference paths/rebinding/delete and ABI/reference/storage/freshdeepcopy/
+emitted traversal/recursive Source graphs/whole Source-V10-target chain remain
+unfinished. No external compiler/EVM or wholelane claim. Public source progress
+interfaces are consumed read-only; complete SourceSpec/admission not inferred.
+
+C38 final guarded161jobs/full1075default/262Suite/SolKey377/131 exit0.
+Strict automatic, complete fixture, layer/orphan/trust, lane735standardpins/
+94modules and script-corruption controls pass. Final sampled aggregateRSS
+1605780KiB,225280bytes warm disk growth, zero new memory.max/OOM/kill events.
+Raw docs1 matches complete83public findings; frozen no-new remainsFAIL11incoming.
+Raw globalinventory1:1094unrecorded=359publicinherited+735owned,0unsafe.
+Independent finder and skeptic accepted final six guards/proof/controls/docs and
+pure-local scope with no confirmed defect. All prior seals/failures retained.
+All original queue parents stay partial/blocked; no wholelane, externalcompiler/
+EVM or independent-queue-exhaustion claim.
