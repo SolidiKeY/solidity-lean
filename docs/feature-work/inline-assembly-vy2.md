@@ -1273,3 +1273,16 @@ VY1/source/compiler/calculus/joint closure. Existing owner MemOK/World/Bridge
 interfaces are available and reused. Original oversized-MemOK counterexample
 boundary, YQ1–YQ7 and exclusions are unchanged. Persistent goal remains BLOCKED
 unchanged; no goal tool exposed, no transition made. No new semantic question.
+
+Dynamic checkpoint validation: focused53jobs/fullwrapper1045default+262suite/
+131matchedannotations exit0. Actual Lean4.24.0/Lake5.0.0-src+797c613 and KeySort
+2jobs exit0. Scoped1271declarations/701theorems have standard axioms only.
+Layers236core/0elaboratorreach,1060reachable/0orphans, trust1075sources/246sites/
+0findings, strict491automatic/61budgeted/11refuted/0pending pass. Docs ACTUAL
+exit1 with same48missing/37ambiguous exact-base references; zero-delta comparison
+passes, markdownbase1/head1/new0. Both independent read-only reviews found no
+confirmed defects; corrected an adapter comment about local defaults. Initial
+proof/summary-parser failures retained (parser fixes only, not altered verdicts).
+Code commit f765cde0344fb4199b439e96b157aff6307c04d1. Serial-j1/12GiB/no-swap/
+writer lock/caches retained; no owner representation or budget change. Versioned
+handoff records exact signatures, resources and gates.
