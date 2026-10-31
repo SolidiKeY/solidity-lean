@@ -4,6 +4,23 @@ pragma solidity 0.8.38;
 // Reference-only controls. No claim of Lean frontend admission.
 contract Physical {
     bool public flag;
+    struct PackedScalars { int8 signedValue; bytes2 pair; bool enabled; }
+    PackedScalars private packed;
+    function() external returns (uint) private callback;
+    function packedScalarFields() external returns (uint raw) {
+        assembly ("memory-safe") { sstore(packed.slot, 0x556600000000) }
+        packed.signedValue = -1;
+        packed.pair = 0x1234;
+        packed.enabled = true;
+        assembly ("memory-safe") { raw := sload(packed.slot) }
+    }
+    function externalFunctionPacking() external returns (bool) {
+        callback = this.wordRoundtrip;
+        uint raw;
+        assembly ("memory-safe") { raw := sload(callback.slot) }
+        uint expected = (uint(uint160(address(this))) << 32) | uint32(this.wordRoundtrip.selector);
+        return raw == expected;
+    }
     function wordRoundtrip() external pure returns (uint x) {
         assembly ("memory-safe") { mstore(0x80, 0x12345678) x := mload(0x80) }
     }

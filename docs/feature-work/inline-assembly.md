@@ -169,3 +169,17 @@ statement soundness remain open. Separate finder/skeptic findings and checks
 are in the lane record. Committed revision, exact commands/outcomes/resources,
 raw failures, patch/bundle and checksum paths are in
 `/workspace/vy2-evidence/HANDOFF.md` on this VM.
+
+
+### VY2 canonical scalar codec handoff (2026-10-31)
+
+The lane's next preparation checkpoint adds concrete integer/fixed/address/
+contract/enum/UDVT/bytesN/external-function canonical codecs over Source.Val,
+proves their inverses and connects them to typed byte/residual regions. Signed
+bounds, enum refusals, packing combinations and residual controls are inhabited.
+Pinned solc raw-storage witnesses pass both pipelines. Final full gate passes
+999/262 jobs and131 sort annotations; audit covers222 declarations/109 theorems.
+Separate finder/skeptic reviews report no confirmed findings.
+See [VY2](inline-assembly-vy2.md) for exact premises, evidence and remaining
+full-lane dependencies; no admission row or whole-layout instance is claimed.
+Full committed revision/patch/bundle/checksums remain in the VM handoff.

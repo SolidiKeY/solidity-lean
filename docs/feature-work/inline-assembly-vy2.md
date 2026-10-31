@@ -212,3 +212,75 @@ Review records are `finder-review.md` and `skeptic-review.md` in the evidence di
 The preparation checkpoint leaves every original Y04/Y05/Y06/Y09.02 concrete
 closure obligation in the queue above open. No permission question is needed;
 missing owner interfaces/instances are dependency obligations, not semantic approvals.
+
+
+### Canonical scalar codec checkpoint (2026-10-31)
+
+Continues the preparation revision `7e03d333113fcd81e37057132f8f703bf1cf1615`.
+`ScalarCodecs` supplies concrete canonical codecs over the existing intrinsically
+typed Source.Val: all valid signed/unsigned integer widths, scaled fixed-point
+integers, addresses/contracts, bounded enums, underlying UDVTs, bytesN and
+external functions. Bool codecs can be placed at any fitting offset.
+No source state, storage layout owner, frontend or manifest changed.
+
+Exact additional premises and representation:
+
+- `intField_modulus` uses the actual IntTy validity (byte multiple, 8–256 bits).
+  `intPayload_bound` and `read_intPayload` require the real source lo/hi range.
+  Negative values add the width modulus; signed reads subtract it at the sign
+  threshold. Field offsets must fit. Fixed point reuses this on its scaled
+  integer; no claim of solc fixed-point admission follows.
+- `fixedBytesCodec` requires the existing positive 1–32 byte source width and
+  fitting offset. The packed numeric payload is right-aligned within its field,
+  with big-endian bytes, unlike ABI's left-aligned word. General
+  `scalar_beValue_bound` and `scalar_beBytes_value` prove the byte bounds/inverse.
+- Addresses/contracts are 20 bytes; `enumCodec` requires enumSize≤256 and rejects
+  invalid canonical members. UDVTs require a concrete codec for their actual
+  declared underlying type. External functions are 24 bytes: address<<32 plus
+  four-byte selector. Internal function code offsets remain a separate owner
+  obligation, not an invented address codec.
+- `ScalarCodec.bytesBE` in ScalarBytes turns each concrete identity into an
+  existing ByteCodec with its decode-after-encode proof. The Regions owner/address
+  map must still supply actual physical byte order and separation; this does
+  not equate low-end storage offsets with increasing byte-memory addresses.
+- ScalarControls includes signed8 and signed256 boundaries, unsigned distinction,
+  scaled negative fixed, maximum address, nonzero contract/function payloads,
+  enum refusal, bytes ordering, actual underlying UDVT and packed signed/bytes/bool
+  update with high residual preservation. A signed codec also inhabits the
+  existing byte/residual region framework. These are canonical logical-value
+  components, not raw dirty-bit writeback or whole-layout instances.
+
+Per-file diagnostics and focused build passed; the external-function inverse
+initially needed explicit rewrite normalization (raw third.log exit1 retained).
+No theorem premise, expected verdict or budget changed. Focused closure:23 jobs,
+exit0. Full registered tree: `./run-lean.sh`, exit0,999 default jobs,262 TestSuite
+jobs,131 read-bearing annotations matched. Complete signature/axiom audit:222
+public declarations,109 theorems, only the three standard Lean axioms.
+The original KeySort/version/resource prerequisites remain unchanged; all heavy
+checks serial with -j1 in the same enforced12GiB/no-swap container and monitored
+OS/RSS/disk bounds. No simultaneous Lean server/build. New raw logs are under
+`/workspace/vy2-evidence/scalar-codecs`.
+
+The unchanged pinned reference helper ran12 scalar vectors per pipeline,
+legacy and via-IR, Osaka, optimizer disabled, exit0. Two new external controls
+check the packed word0x5566011234ff (signed8=-1, bytes2=0x1234, bool=true,
+residual0x5566) and external-function address/selector formula. Existing expected
+vectors and execution budgets are unchanged. Kernel inverse laws and these
+external witnesses do not prove compiler/layout agreement for all programs.
+Earlier upstream adapter failures and exact-base doc failures remain retained.
+
+Independent finder and skeptic reviewed scalar code and external controls
+read-only, without Lean/server/build, and found no confirmed defect. Their
+requested external layout evidence was added and passed; review records are
+in the new evidence subdirectory. Final static/docs comparisons and committed
+head/artifact checksums are in HANDOFF.md.
+
+Queue impact: further discharges independent Backfill A concrete canonical
+scalar preparation and its connection to residual laws. Every Y04/Y05/Y06/Y09.02
+final integration item in the queue remains open. VY1 Syntax/Static/Words files
+are absent; no effect AST/state adapter can be connected without inventing that
+owner's interface. Actual source values remain range-indexed (for example uint8
+cannot contain a dirty larger raw value), so whole writeback needs the agreed
+physical/source overlay and owner integration, not silent cleaning in these codecs.
+Actual MemOK is available but no assembly preservation instance is proved.
+No additional permission or semantic decision is requested.

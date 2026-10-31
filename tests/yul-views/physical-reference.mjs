@@ -14,7 +14,8 @@ const source=readFileSync(new URL('./Physical.sol',import.meta.url),'utf8');
 const expected=[['wordRoundtrip()', '0x12345678'],['lowByte()', '0xcd'],
  ['overlapRight()', '0x00010001020304050809'],['overlapLeft()', '0x02030405060706070809'],
  ['calldataTail()', '0'],['emptyHash()', '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'],
- ['residualSlots()', '49']];
+ ['residualSlots()', '49'], ['packedScalarFields()', '0x5566011234ff'],
+ ['externalFunctionPacking()', '1']];
 const vectors=expected.map(([signature,value])=>({signature,args:[],failure:false,expected:[BigInt(value).toString()]}));
 // Dirty local/storage observations are external compiler evidence, not codec proofs.
 vectors.push({signature:'dirtyLocal()',args:[],failure:false,expected:['1193046','86']},
