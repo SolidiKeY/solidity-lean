@@ -102,3 +102,4 @@ history is in git.
 | Preparation lane | Document |
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
+| V14 executable consumers and open lane obligations | [roadmap-v14-executable.md](feature-work/roadmap-v14-executable.md) |

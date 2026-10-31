@@ -885,3 +885,9 @@ import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.SignedPower
 import Solidity.Backend.Scalar.SignedPowerPost
 import Solidity.Backend.Scalar.SignedPowerPrefix
+import Solidity.Backend.Executable.Prefix
+import Solidity.Backend.Executable.PrefixChecks
+import Solidity.Backend.Executable.Assembly
+import Solidity.Backend.Executable.AssemblyChecks
+import Solidity.Backend.Executable.PaymentCheckpoint
+import Solidity.Backend.Executable.PaymentCheckpointChecks

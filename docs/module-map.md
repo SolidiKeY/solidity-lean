@@ -1197,3 +1197,9 @@ At the root, the notation's own tests:
 | `Backend/Environment/Composition.lean` | Constructed intrinsic Val certificates, exact target concatenation/stack order, materialization/hash adapters and typed source-sequence fallback. |
 | `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
 | `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
+| `Backend/Executable/Prefix.lean` | Existing creation-prefix composition and protected stack suffixes, exact constructor-byte outcomes; independent V14 backfill only. |
+| `Backend/Executable/PrefixChecks.lean` | Two nonempty constructor segments, empty/nonempty runtime, suffix and failure-byte controls. |
+| `Backend/Executable/Assembly.lean` | Actual base-zero assembler/runtime-byte constructor consumer with exact decoder roundtrip and resolved targets. |
+| `Backend/Executable/AssemblyChecks.lean` | Actual assembled backedge/constructor combination and wrong creation/runtime-coordinate negative. |
+| `Backend/Executable/PaymentCheckpoint.lean` | Existing-world caught/uncaught send laws, effectful prefix rollback, actual create/send-prefix and handle observations. |
+| `Backend/Executable/PaymentCheckpointChecks.lean` | Actual create/failed-receive/transfer rollback, distinct instances, resource and exact-byte controls. |
