@@ -1196,3 +1196,56 @@ Full-source5400s historical exit124 remains failed/pending; no rerun or waiver.
 All100 checked laws are partial consumer progress; all150 opcode rows stay OPEN.
 Next independent original item is operandful BALANCE, preserving actual target
 accessed-account effects. Full remaining G46/G47 obligations above are unchanged.
+
+
+## Operandful BALANCE checkpoint (cd80b3fc continuation)
+
+Following committed environment checkpoint289f36f974ff8e6cf71edec503b5848999ff4a8b,
+[BalanceReference.lean](../../Bridge/SolidityBridge/RoadmapV15/BalanceReference.lean)
+proves `environment_balance_value`, `environment_balance_backend`, and
+`environment_balance_reference`. These connect the existing backend account
+truncation and local selection to the actual reference `State.balance`, including
+absent-account zero and its actual accessed-account update. The reference theorem
+retains the complete target state and arbitrary tail, using positive fuel and
+zero charged gas. It does not establish warm/cold gas sufficiency, X admissibility,
+fetched code, Osaka agreement, compiler reachability, arbitrary callee/account
+execution or source-world/transaction preservation. No new interpreter, journal,
+account semantics, payment Boolean or simulation premise is introduced.
+
+[BalanceReferenceControls.lean](../../Bridge/SolidityBridge/RoadmapV15/BalanceReferenceControls.lean)
+uses operand2^160+7 to read actual account7 balance29, distinct account11 balance31,
+absent accounts, and the maximum256bit operand (not maximum stored balance).
+It checks complete ordered observations[29,31,0,0], rejects wrong zero/caller
+balances, witnesses accessed-account insertion for present and absent accounts,
+retains the actual account map and nonempty[258,513] tail, and checks backend and
+reference underflow plus zero-fuel refusal. All three scoped axiom reports are
+only propext/Classical.choice/Quot.sound. Focused source/controls pass; the total
+checked inventory is103, zero original encoding proposals remain uncompiled.
+
+Separate independent read-only finder and skeptic reviews cleared the actual
+statements/definitions, complete state/tail, controls and ownership; neither ran
+Lean/server/builds. Their only clarification was to distinguish maximum operand
+from maximum stored balance, as above. Initial clean-check preparation stopped
+before source creation because three task-test Python bytecode files remained
+untracked; only those generated files were removed, and the preparation failure
+is recorded separately. No semantic failure, expected value or budget was waived.
+
+G46.04 remains partial despite these six instruction families: broader metadata,
+actual gas/stack/fetched-driver/fork adequacy and source-world/account composition
+remain open. All150 opcode rows and secondary obligations remain OPEN. G46.01,
+G46.02, G46.03, G46.05, G46.06/G47 and both Backfill queues retain the exact
+outstanding clauses in the environment checkpoint and final handoff. Full-source
+historical5400s exit124, network403, docs rawexit1 and the lost earlier unsealed
+retry evidence remain retained/disclosed, independently of the passing Bridge
+closure. No goal state or authority changed.
+
+
+BALANCE checkpoint gate/handoff: focused source and controls pass; final mandatory
+four-target Bridge closure passes2152jobs in7.149s, cgroup peak350277632bytes,
+12GiB/no swap, no guard violation. Layer/orphan/trust/whitespace pass. Global docs
+remains rawexit1 with complete no-new comparisons separately against frozen and
+published baselines. Both independent read-only source reviews clear;103 laws
+remain partial and all150 opcode rows OPEN. Next newly enabled original consumer
+work will inspect the already-genuinely-published TryMemory/Code/Driver sources;
+these were previously unavailable only because their reference imports could
+not be checked. No prerequisite is counted proved merely from its publication.

@@ -1243,3 +1243,8 @@ pass. This is pure encoding/observation evidence, not machine correspondence.
 |---|---|
 | `Bridge/SolidityBridge/RoadmapV15/EnvironmentReference.lean` | Eight backend/reference environment selection, actual supplied-opcode, ordered-byte and explicit source-representation consequences; no Osaka/driver/transaction closure. |
 | `Bridge/SolidityBridge/RoadmapV15/EnvironmentReferenceControls.lean` | Distinct nonzero/absent accounts, timestamp wrap, stack, ordered-byte, wrong-value/endian/length and inhabited/mismatched intrinsic-source controls; eight axiom audits. |
+
+| Module | Role |
+|---|---|
+| `Bridge/SolidityBridge/RoadmapV15/BalanceReference.lean` | Three actual numeric BALANCE observation/backend/supplied-reference consumers; low160bit addressing and full accessed-account state update; no driver/gas/Osaka/world closure. |
+| `Bridge/SolidityBridge/RoadmapV15/BalanceReferenceControls.lean` | High-bit/nonzero/distinct/absent/max-operand, accessed-account/map frame, complete stack, underflow/zero-fuel controls and three axiom audits. |

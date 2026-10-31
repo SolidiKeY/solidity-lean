@@ -66,3 +66,6 @@ import SolidityBridge.RoadmapV15.ReferenceObservationControls
 
 import SolidityBridge.RoadmapV15.EnvironmentReference
 import SolidityBridge.RoadmapV15.EnvironmentReferenceControls
+
+import SolidityBridge.RoadmapV15.BalanceReference
+import SolidityBridge.RoadmapV15.BalanceReferenceControls
