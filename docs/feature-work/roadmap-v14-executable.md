@@ -602,3 +602,52 @@ axiom-pin and arbitrary-THalt caveat refinements are implemented.
 The next independent preparation consumes actual linking/immutable patch
 locations within owned selected runtime payloads; no reserved implementation
 or global ledger is changed. The full original queue remains binding.
+
+
+## Recovery checkpoint: linking and immutable selected payloads
+
+Completeness review identified unused published linking/immutable interfaces.
+[PatchedPayload](../../Solidity/Backend/Executable/PatchedPayload.lean) constructs
+actual bounded20-byte library data at offset46 inside the second PUSH32 and
+32-byte immutable data at offset1 inside the first. `compatible_regions`
+derives the actual disjoint intervals1..32 and46..65. `linked_runtime` proves
+the resolver's42 changes exactly the selected left literal; `immutable_runtime`
+proves arbitrary typed b changes exactly the selected right literal. The full
+patched104-byte runtime equals `encode (ScalarSequence.code libraryWord b)`;
+this is not arbitrary patched bytes or only a length/wrapper consequence.
+
+`installs_selected` consumes `combined_installs` with that exact equality;
+`decode_selected` is the same-encoder roundtrip. `immutable_read` consumes
+`ImmutableTable.read` for the actual full32-byte immediate. `args_unchanged`
+retains constructor arguments, while `excludes_arguments` derives the stronger
+actual return-contamination negative from deterministic execution and nonempty
+argument length. No source/machine simulation premise is assumed. These facts
+are unconditional for arbitrary typed b/argument bytes, except the explicit
+nonempty-argument premise on that negative.
+
+LinkTable origin here is **lane-authored template metadata inside PUSH32**,
+not `tableOfAssembly` or assembler-generated PUSH20/reference provenance.
+The fixed42 fixture resolver is not a proved deployed-library/session identity.
+Source immutable declaration/value agreement, actual linked-instance identity,
+general artifact-table production and fetched execution remain OPEN.
+
+[Controls](../../Solidity/Backend/Executable/PatchedPayloadChecks.lean) combine
+actual42-5=37 signed comparison/negation over populated caller words, exact
+constructor return, opcode bytes at0/33/66, nonempty args and contamination
+refusal, cross-kind commutation, individually bounded but overlapping regions,
+missing address, unresolved-template refusal and out-of-bounds immutable refusal.
+Six scoped guarded headline/control axiom outputs use standard Lean subsets.
+Initial missing import cache and whole-table conversion timeout are retained;
+published interval compatibility avoids the timeout without raising budgets.
+Separate read-only finder/skeptic found no proof defect; their precise link
+provenance caveat and stronger argument-return negative are implemented.
+
+| Checkpoint7 command | Evidence |
+|---|---|
+| `lake -f v14-runtime.lakefile.toml build Solidity.Backend.Executable.PatchedPayloadChecks` | PASS84jobs; `/workspace/v14-recovery-evidence/patched-payload-pins.log` |
+| Fresh `lake -f v14-runtime.lakefile.toml env lean -j1 --tstack=131072` on PatchedPayload and PatchedPayloadChecks, each180second limit | Fresh2files PASS,1worker681MiB/noOOM; `/workspace/v14-recovery-evidence/patched-payload-fresh.log` |
+| Static lane/layer/orphan/trust/whitespace/docs commands | `/workspace/v14-recovery-evidence/checkpoint7-checks.json`; raw docs46/1 kept separate from exact-base no-new |
+
+Next preparation repairs the overbroad Source import guard boundary to admit
+published pure independent source semantics and consumes actual source journal
+and initializer prefix laws read only; it does not change reserved source code.

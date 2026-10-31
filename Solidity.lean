@@ -903,3 +903,6 @@ import Solidity.Backend.Executable.LocalFrame
 import Solidity.Backend.Executable.LocalFrameChecks
 
 import Solidity.Backend.Executable.CreationAttempt
+
+import Solidity.Backend.Executable.PatchedPayload
+import Solidity.Backend.Executable.PatchedPayloadChecks
