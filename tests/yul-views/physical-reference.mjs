@@ -9,6 +9,7 @@ import {replayWriteback} from './writeback-reference.mjs';
 import {replayResidual} from './residual-reference.mjs';
 import {replayFinite} from './finite-reference.mjs';
 import {replayHeapBytes} from './heap-bytes-reference.mjs';
+import {replayMixedHeap} from './mixed-heap-reference.mjs';
 import {replayRetainedHeap} from './retained-heap-reference.mjs';
 import {replayHeapResize} from './heap-resize-reference.mjs';
 import {replayBytecode,INITIAL_GAS,STEP_LIMIT} from '../../scripts/evm-reference/replay.mjs';
@@ -51,7 +52,8 @@ const finite=await replayFinite(compile);
 const heapBytes=await replayHeapBytes(compile);
 const heapResize=await replayHeapResize(compile);
 const retainedHeap=await replayRetainedHeap(compile);
-const report={retainedHeap,heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
+const mixedHeap=await replayMixedHeap(compile);
+const report={mixedHeap,retainedHeap,heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
  sourceSha256:sha(source),lockSha256:sha(readFileSync(new URL('../../scripts/evm-reference/package-lock.json',import.meta.url))),
  fork:'osaka',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,reports};
 writeFileSync(resolve(outPath),JSON.stringify(report,null,2)+'\n');
@@ -63,4 +65,5 @@ console.log('finite: '+finite.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.s
 console.log('heapBytes: '+heapBytes.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('heapResize: '+heapResize.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('retainedHeap: '+retainedHeap.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
-process.exitCode=retainedHeap.status==='working'&&heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;
+console.log('mixedHeap: '+mixedHeap.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
+process.exitCode=mixedHeap.status==='working'&&retainedHeap.status==='working'&&heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;

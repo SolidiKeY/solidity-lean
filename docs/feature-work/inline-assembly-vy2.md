@@ -1051,3 +1051,96 @@ layers224core/0elaboratorreach, orphans1048reachable/0orphan, trust1063sources/
 pass. Global docs exit1 same48findings; markdown base1/head1/new0. No preceding
 fixture/API/owner source changed. Separate read-only reviews cover final
 retained/oversized controls and exact scope. Every raw failed attempt retained.
+
+
+## Mixed ordinary aggregate/pointer views (2026-10-31)
+
+Continued ORIGINAL Y05/Backfill A/B from clean
+`2b1079eb79ea40d804172f64df0104985a11e984`, pinned base
+`0b078cefaf7daad79007b87b72df64eb6936420f`, assigned branch/VM unchanged.
+Exact committed head and gates are in `/workspace/vy2-evidence/mixed-heap/HANDOFF.md`.
+New lane modules [AggregateMemoryWords](../../Solidity/Yul/Views/AggregateMemoryWords.lean),
+[AggregateMemoryObjects](../../Solidity/Yul/Views/AggregateMemoryObjects.lean),
+[MemoryImages](../../Solidity/Yul/Views/MemoryImages.lean),
+[MixedHeapView](../../Solidity/Yul/Views/MixedHeapView.lean) and
+[MixedMemoryMemOK](../../Solidity/Yul/Views/MixedMemoryMemOK.lean) construct
+ordinary word-per-member structs, static arrays without headers and dynamic
+arrays with length headers, alongside existing bytes/string images.
+
+MemoryElement scalar words use the existing Source.Val.word; pointer words
+require actual child heap typing and memShape compatibility. Addresses and
+array header ranges derive from real typed contents, valid Placement ends and
+its bounded free word. Child contents are SEPARATE heap objects; aliases share
+the same pointer, never inline nested copies. MemoryFields/MemoryObjectWords
+are intrinsic constructor serialization witnesses about actual Data/DataList,
+not a second state, AST or untyped intermediate. No assumed inverse/read or
+preservation theorem is a structure field. Word-list and heap-entry recursion
+is parameter-only; indexed images use explicit constructor eliminators, not
+new equation-compiled indexed matches. G0/speed history reviewed, owner source
+representations untouched; control check3.5seconds then3.8seconds with actual
+Env declarations (not a general performance claim). No proof/fuel/node budget
+raised; initial deep nested evaluation replaced with compositional read laws.
+
+wordList_read/residual/unchanged, MemoryObjectWords.read/fits,
+MemoryImage.encode_reads/fits/reads_congr/unchanged/source_word/source_byte,
+encodeMixedHeap_reads/reserved/residual/unchanged/source_word/source_byte prove
+exact physical and actual source-layout agreement with explicit typed snapshot,
+finite distinct coverage, valid placement and canonical element premises.
+MemoryElement.refOK, MemoryFields.dataOK/allVal and actual mixedHeap owner
+invariants derive DataOK/Top/Inner from constructors. These remain supported
+read/view components, not universal realization/writeback or dirty-word cleanup.
+Standalone Data.val roots have NO existing HasMemoryShape constructor;
+no_value_memory_shape records that exact boundary without inventing a shape,
+new exclusion or altered API. Scalar/pointer MEMBERS are implemented. Dirty
+owned words, shared zero-slot empties, unsupported representations and full
+source/Yul/compiler/allocator/calculus closure remain original open work.
+
+[Controls](../../Solidity/Yul/Views/MixedHeapControls.lean) inhabit actual Env
+Box declarations and a six-object typed Heap: bytes child, nonUTF8 string,
+uint256[2], heterogeneous bool/uint/two aliased bytes pointers/dynamic-array
+pointer struct, dynamic bytes-pointer array with two aliases to the same child,
+and unrelated bytes. Exact word/header/pointer/padding/free/zero, physical
+struct→array→child chain, actual initial owner MemOK and source local bytes/string
+alias reads at EVERY horizon are proved. Missing/wrong-shape ownership,
+wrong pointer bits/member type are negative controls; legal bytes/string child
+shape alias is positive. Physical nested-chain reads are NOT a source Expr/Yul
+execution/composition theorem. Actual observed free1888 has a valid alternate
+Placement and actual source-word preservation; kernel initial free1664 is a
+separate valid choice. No silent allocation normalization/refinement assertion.
+
+[MixedHeap.sol](../../tests/yul-views/MixedHeap.sol) reserves1536bytes BEFORE
+named uint[2]/Box return defaults; these temporary defaults add64+160bytes.
+The observed pre-output free word is exactly128+1536+224=1888; output storage
+is allocated later. Proper bytes ABI envelope and ALL40payload words are
+independently specified, including pointers, headers, six gap words, aliases,
+child/scalar writes in both orders, retarget to nonUTF8 string child, explicit
+revert and fresh calls. Both pinned solc0.8.38/Osaka pipelines pass8ordered calls
+and157negative controls (77mutations per pipeline+3inventory), fixed inventory
+assertions. All previous report fields/168calls and prior controls remain
+unchanged; no shared helper, gas100m/steps5m, fork exclusion or old expectation
+modified. Initial draft raw report is BROKEN in both pipelines due named-return
+allocation order; raw source/report/log retained, fixture source corrected;
+not relabeled pass. This evidence is external-only, not frontend admission or
+kernel compiler/source correspondence. Rule-map rows are Lean-only per YQ5.
+
+Independent finder/skeptic read-only reviews (no Lean/server/build/tests) found
+no confirmed mathematical/G0/fixture defect; stale reference comment fixed.
+Final exact gates/signatures/resources/reviews and checkpoint artifacts are in
+mixed-heap/HANDOFF.md. Full Y04/Y05/Y06 and Backfills A/B remain PARTIAL,
+Y09.02 BLOCKED. Whole-store/path/hash/dynamic/dirty ownership, universal memory/
+writeback, allocator provenance/refinement, shared-zero/nested source execution,
+V10/V11 instances and actual VY1/source/compiler/calculus/final closure remain.
+Owner MemOK/World/ContractWorld/Bridge interfaces ARE available, not adequacy.
+The oversized_actual_MemOK/no_ordinary_placement boundary is unchanged: it
+refutes only unqualified owner-MemOK→ordinary-Placement inference, not existing
+placement-parameterized MemoryLayout.realize, arbitrary MemoryWriteback relations
+or a proved reachable execution. No capacity premise/semantic choice assumed.
+YQ1–YQ7 and manifest statuses unchanged. Goal blocked unchanged, get_goal absent,
+no goal transition/new VM/thread/model/worker merge/push/owner repair; questions=[].
+
+Final mixed checkpoint validation: per-file CLI/focused47jobs/fullwrapper1039
++262jobs/131matchedannotations exit0; actual Lean4.24.0/Lake5.0.0-src+797c613,
+KeySort2jobs exit0. Scoped1106declarations/600theorem reports standard axioms.
+Layers230core/0elaboratorreach,1054reachable/0orphan, trust1069sources/246sites/
+0findings, strict491automatic/61budgeted/11refuted/0pending pass. Raw docs exit1
+same48findings, markdown base1/head1/new0. Final independent reviews clear.

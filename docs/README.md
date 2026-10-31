@@ -104,4 +104,4 @@ history is in git.
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
 
-- [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical codecs, finite storage/selected byte-heap writeback and retained-allocation resizing/supported byte-heap views, registered residual journals, actual selected-step MemOK and outstanding concrete integration.
+- [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical codecs, finite storage/selected byte-heap writeback and retained-allocation resizing/supported byte and mixed aggregate heap views, registered residual journals, actual selected-step MemOK and outstanding concrete integration.

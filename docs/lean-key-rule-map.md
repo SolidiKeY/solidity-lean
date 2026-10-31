@@ -1035,3 +1035,12 @@ VY2 byte-heap view preparation (Lean-only, YQ5): `encodeByteHeap_reads`,
 supported ordinary-byte/string view/update/read laws. Actual typed Heap.get
 witnesses, valid Placement and distinct finite coverage are explicit premises.
 No SolKey taclet, full-memory or Y09.02 calculus/printing/composition claim.
+
+
+VY2 mixed ordinary view preparation (Lean-only, YQ5): wordList_read/unchanged,
+MemoryObjectWords.read/fits, MemoryImage.source_word/source_byte and
+encodeMixedHeap_reads/residual/unchanged/source_word/source_byte are concrete
+scalar/owned-pointer/struct/static-array/dynamic-array/bytes/string layout laws.
+Actual typed constructors, real child ownership and valid placement/distinct
+supported coverage are explicit; no SolKey taclet, dirty cleanup, universal
+writeback, Y09.02 notation/printing or full source/compiler/calculus closure.

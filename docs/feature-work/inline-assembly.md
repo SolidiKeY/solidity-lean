@@ -308,3 +308,15 @@ provably lacks ordinary Placement; no obligation signature or scope changed.
 See [VY2 realization](inline-assembly-vy2.md#constructive-supported-byte-heap-realization-2026-10-31)
 and `/workspace/vy2-evidence/heap-realization/HANDOFF.md`. Universal realization,
 source/assembly/allocator/compiler/calculus closure and full VY2 remain open.
+
+
+### VY2 mixed ordinary aggregate view handoff (2026-10-31)
+
+New intrinsic constructor witnesses serialize actual scalar/pointer struct and
+static/dynamic array members alongside bytes/string images. Real child typing,
+placement-derived bounds, supported covered-heap source layout reads, actual
+owner invariants and six-object alias controls are constructive. Both pipelines
+compare complete pointer/header/alias/ABI observations with157negative controls;
+initial broken fixture evidence preserved. See [lane checkpoint](inline-assembly-vy2.md#mixed-ordinary-aggregatepointer-views-2026-10-31)
+and `/workspace/vy2-evidence/mixed-heap/HANDOFF.md`. Universal realization,
+writeback/allocation/source/compiler/calculus closure and full VY2 remain open.
