@@ -37,3 +37,6 @@ import SolidityBridge.ExternalEvm.Assembly.PopChecks
 import SolidityBridge.RoadmapV15.PrefixTransport
 import SolidityBridge.RoadmapV15.PremiseTransport
 import SolidityBridge.RoadmapV15.Controls
+import SolidityBridge.RoadmapV15.WordByteTransport
+import SolidityBridge.RoadmapV15.CumulativeTransport
+import SolidityBridge.RoadmapV15.ConsumerControls

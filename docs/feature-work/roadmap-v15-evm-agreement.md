@@ -41,9 +41,9 @@ recreated or imported from an unmerged branch.
 | 3 / G46.05 | Open. Hash-region membership transport is proved below. Actual memory-preimage/cryptographic observation consumers and existing decoder/precompile agreement remain prerequisites. No global injectivity is introduced. |
 | 4 / G46.06 | Open. No actual pinned transition/resource adequacy composition. Exact stack, memory, gas, fuel and approved abstraction clauses remain obligations. |
 | 4 / G47 | Blocked on integrated V13/V14 interfaces and actual Osaka account execution. CALL/STATICCALL, arbitrary permitted callees, CREATE/initcode, RETURN/REVERT, persistent/transient/balance rollback, transaction validity/upfront fees, precompiles and finite/infinite traces remain unproved. A payment-acceptance Boolean is not substituted. |
-| 5 / dependencies | Local availability recorded below; external cache access was not tested and is not claimed blocked. No dependency or toolchain was upgraded. |
-| Backfill A | Partial: existing G01 finite-prefix order, consistency, completion and resource-indexed noncompletion observation transport proved. Pinned-EVM word/byte encodings and signed/truncation/boundary controls are still open; no actual infinite EVM execution is constructed. |
-| Backfill B | Partial: approved hash-premise suffix/membership and published local-checkpoint observation/relation transport proved. Transaction-world rollback, ledger/nonce/log composition, actual execution-prefix linkage and application to each opcode and exact secondary obligation accounting remain open. |
+| 5 / dependencies | Local availability and an actual failed Azure cache request are recorded below; reference-word imports requested 860 files and downloaded 0 after CONNECT 403 failures. No dependency or toolchain was upgraded. |
+| Backfill A | Partial: existing G01 finite-prefix order, consistency, completion and resource-indexed noncompletion observation transport proved. Published assembler/failure/scalar word/byte encoding and inhabited signed/truncation/boundary transport are now proved in recovery; full pinned-reference transition integration remains open; no actual infinite EVM execution is constructed. |
+| Backfill B | Partial: approved hash-premise suffix/membership and published local-checkpoint observation/relation transport proved. Transaction-world rollback, ledger/nonce/log composition, actual execution-prefix linkage and application to actual opcode transitions remain open. The secondary obligation checklist is now explicit and tested in recovery; all recorded proofs remain open. |
 
 V11 → V12 → V13 → V14 → V15 → V16 → V17 is still serial for full completion.
 This checkout has G01/G06 abstract contracts and component results, not a
@@ -95,8 +95,9 @@ The Bridge manifest pins Mathlib `f897ebcf72cd16f89ab4577d0c826cd14afaafc7`
 (v4.24.0), CSLib `e1fea784d55eae30275c205291f12a1b4868eed3` and lean-auto
 `36d85bf6372f1a35fb5487325d1ef965b33c6296`. At inspection Mathlib has source
 and 5 oleans, CSLib has source and 0 oleans, and lean-auto source is absent.
-This is availability evidence, not an external cache/network denial. No external
-packages were fetched. The small Docker runtime image was fetched separately.
+This initial snapshot was availability evidence only. Recovery later tested the
+actual pinned cache endpoint and received CONNECT 403 failures, recorded below.
+No external packages were fetched. The small Docker runtime image was fetched separately.
 
 The vendored interpreter still declares `TargetSchedule := "Cancun"` in
 `Bridge/vendor/EvmYul/Wheels.lean`. The existing assembler record documents
@@ -176,9 +177,9 @@ partial preparation; the persistent goal must be blocked rather than completed
 while the prerequisites and obligations above remain missing.
 
 
-## Preparation checkpoint handoff
+## Initial preparation checkpoint handoff (4511898e)
 
-This commit packages partial backfill only; G46.01 is not marked passed and the
+The initial commit packages partial backfill only; G46.01 is not marked passed and the
 work queue has not advanced past its missing actual Osaka prerequisite. Nine
 transport theorems are kernel-checked in the core dependency environment, with
 explicit premises and scoped axiom output. Independent controls now directly
@@ -249,3 +250,154 @@ Separate follow-up finder and skeptic reviews cleared this documentation/account
 checkpoint after inspecting the actual staged diff and evidence. All 12 script
 tests pass; the corrected complete-log comparison has zero added missing or
 ambiguous findings. G46/G47 semantic obligations and final gates remain open.
+
+
+## Recovery checkpoint: word/byte and cumulative consumers
+
+New owned modules consume existing definitions without editing reserved code:
+`Bridge/SolidityBridge/RoadmapV15/WordByteTransport.lean`,
+`Bridge/SolidityBridge/RoadmapV15/CumulativeTransport.lean` and
+`Bridge/SolidityBridge/RoadmapV15/ConsumerControls.lean`.
+The core still imports no Bridge module. Only Bridge/module-map append-only
+registration changes accompany these new modules.
+
+### Exact statements and premises
+
+All names below are in `SolidityBridge.RoadmapV15`.
+
+| Theorem | Exact consumer contract/premises |
+|---|---|
+| `digits_toBytesBE` | Existing failure digits equal existing assembler vector bytes, for every length and number. No bound or implicit padding. |
+| `readImmediate_ofBytesBE` | Existing failure and assembler byte readers are identical. |
+| `keccak_ofBytesBE` | The existing Keccak Nat-byte reader on mapped UInt8 bytes equals the assembler reader; this is byte-integer conversion, not hash equality/injectivity. |
+| `encoded_bytes_injective` | Equal encoded bytes at the same explicit width imply equal input numbers, with both numbers below 256^width. |
+| `pushed_immediate_toNat` | Existing scalar BitVec and failure-slice Fin immediate readers have equal Nat observations on every byte list. |
+| `word32_immediate`, `word32_pushed` | Full 32-byte assembler encoding round-trips an existing 256-bit word through those existing readers. |
+| `bounded_immediate` | Width <=32 and number <256^width yield exact numeric decoding; no truncated-code or implicit-pad claim. |
+| `signed_word_bytes`, `unsigned_word_bytes` | Existing intrinsic int/uint value encoding, 32-byte representation and scalar reader retain the original signed/unsigned value; reuse the published typed encoding theorems. |
+| `typed_bytes_toWord` | Scalar encoding bytes equal bytes of the existing intrinsic ABI-word observation, consuming `Scalar.encodeValue_toWord` unchanged. |
+| `word32_bytes_injective` | Equal full-width byte observations imply equality of existing words; consume `word32_immediate`. |
+| `unsigned_cleanup_bytes`, `signed_cleanup_bytes` | Compose published local width-cleanup code/proof with explicit word bytes, preserving arbitrary stack tail. No actual gas/resource simulation is supplied. |
+| `written_immediate_bytes`, `written_immediate_suffix` | Existing local byte writes/readback observe exactly the encoded interval; a suffix written after it cannot become padding inside it. Reuse the published byte-memory lemmas unchanged. |
+| `hashPremise_append_iff` | Exactly equivalently decompose the approved cumulative HashPremise into two component premises plus its cross-preimage CollisionFree clause and cross-region non-overlap clause. Same Fixed/hash/region length/roots throughout; repeats allowed. |
+| `hashPremise_append_comm` | Query-list segment permutation transports the same approved premise; no assertion that executions commute. |
+| `checkpoint_relation_nested` | Compose existing local finish/restore under arbitrary inner/outer outcomes, given related live state and both related restored snapshots. No world/nonce/log/balance preservation is inferred. |
+
+The first sixteen word/byte theorems and three cumulative/checkpoint theorems
+have scoped axiom output in `consumers-final.log`. The only axioms reported are
+Lean's `propext`, `Classical.choice` and `Quot.sound`, in the exact subsets shown
+there; there is no new axiom, sorry, native-decide or implementation hook.
+The new numeric statements are consequences of the existing local scalar and
+failure slices, not direct EVMYul dispatch agreements. The reserved external
+`Solidity.Evm.External.encode`/`decode` and arithmetic/Widths/byte-memory adapters
+remain unchanged. The vendored full reference still declares Cancun; this work
+does not resolve CLZ, truncated-PUSH behavior, gas/fuel or full Osaka execution.
+
+Actual EVM consumers must still establish selected input/output intervals,
+compiler representation and padding, 160-bit account correspondence, stack
+bounds, memory expansion, exact gas/failure and fuel-prefix clauses. Local
+Nat-addressed memory laws are not an assertion of resource adequacy. The
+cumulative equivalence only re-expresses the approved premise: individual
+transaction premises alone still do not suffice. Linking recorded query lists
+to actual production prefixes, and transaction/nonce/log rollback, remains with
+the production interfaces and is not replaced by local journals.
+
+### Controls and bounded checks
+
+Controls directly apply the new consequences to nonempty `[1,2]` encodings,
+nonzero words, maximum uint256, signed -1/minimum/maximum int256, 8-bit unsigned
+truncation (257 to 1), sign boundaries 127/128/255, framed stack tails, byte
+endianness, zero-width/empty encoding, wrong offset, insufficient-width loss and
+the difference between `[1]` and right-padded `[1,0]`. A real-Keccak sane fixture
+with nonempty repeated preimages inhabits the cumulative equivalence. Negative
+controls separately show that two collision-free singleton segments can collide
+when joined and that distinct collision-free hashes can have overlapping
+positive-length regions. Arbitrary nested success/revert outcomes transport
+observations across distinct local journal representations; wrong restored
+snapshots remain distinguishable.
+
+The published prerequisite closure (`Scalar.Widths`, `Scalar.Typed`,
+`Failure.Immediate`) passed 23 build jobs under the existing serial cap,
+peak cgroup 587,501,568 bytes. Per-file focused checks pass. Initial controls hit
+unchanged heartbeat/recursion limits while elaborating large definitional
+normalizations; explicit published rewrite lemmas and Nat-to-Int casts removed
+that work, without increasing any budget or weakening any boundary. Original
+failures remain in `word-bytes-initial.log` and `consumer-controls-initial.log`.
+The final control/axiom command passed, peak cgroup 224,301,056 bytes, before the
+two trivial empty-encoding controls were added; final validation is recorded
+separately below. Full Bridge/default/TestSuite gates remain distinct obligations.
+
+
+### Recovery cache gate and review fixes
+
+The existing pinned Mathlib cache executable was invoked for the exact eleven
+Mathlib imports of the vendored `EvmYul.UInt256` module, using current source
+paths and the existing source/toolchain cache. Under the same 12 GiB/no-swap
+cap, normal configured Docker proxy and verified TLS trust, it requested 860
+cache files: **0 downloaded, 860 failed**, exit 1, with `CONNECT tunnel failed,
+response 403`. Raw output is `reference-cache.log`; command, duration and RSS
+are in `reference-cache.json`. A separate lightweight host request to the same
+Azure endpoint also failed CONNECT 403 (`http_code=000`), confirming the error
+is not specific to the inner container. Runtime status still reported connected
+and enforced policy; that status did not establish successful endpoint access.
+No proxy bypass, alternate fork, upgrade, vendor edit or unmerged prerequisite
+fetch was attempted. The unchanged failed cache gate will not be repeated.
+
+The precise cache-dependent closure remains `EvmYul.UInt256` and the existing
+external `encode`/`decode`/numeric adapters; its Mathlib oleans are not available.
+CSLib has no built oleans and configured lean-auto source remains absent.
+Full Bridge execution/import confirmation remains pending. Independently, a
+production Osaka `Roadmap.Evm.Pinned`/`Certificate` and V13/V14 assembly/world
+interfaces are required before G46/G47 can close. The current vendor pin is
+Cancun, not a proof of `Certificate.pin` at the approved Osaka pin. These are
+separate blockers; restoring cache access alone would not close the lane.
+
+Both proof reviewers found no soundness, premise or ownership defect. They
+requested a genuinely distinct-preimage cumulative positive, nontrivial query
+segment permutation and direct cross-region failure through the equivalence.
+Those controls now use explicitly labeled non-production Fixed fixtures with
+two-slot regions at 4 and 8 (disjoint), or 4 and 5 (overlapping), with one root
+at 0. They instantiate the exact generic approved premise shape, without any
+claim that these fixtures compute Keccak. The separate actual-Keccak repeated
+query fixture remains. An inhabited intrinsic maximum uint256 now directly
+uses `unsigned_word_bytes`. The appended module-map table formatting is fixed.
+The reviewed control/axiom check passed at peak cgroup 160,821,248 bytes; all
+nineteen scoped axiom reports are retained in `consumer-controls-reviewed.log`.
+
+
+### Reviewed consumer checkpoint and repository cold gate
+
+Separate follow-up finder and skeptic reviews cleared both the word/byte and
+cumulative/checkpoint areas after inspecting the actual diff, hypotheses,
+non-vacuity and evidence. The final owned six-module import closure passed,
+including all original nine and new nineteen scoped axiom reports. Peak cgroup
+224,215,040 bytes. Structural/layer/orphan/trust and 12 accounting tests passed.
+The full documentation checker still exits 1 with the same 46 missing and 37
+ambiguous findings as exact base; complete-log comparison reports zero added
+findings of either class, with multiplicities retained.
+
+One cold repository command, `timeout 5400 ./run-lean.sh`, **failed with exit
+124 at its unchanged outer guard**, after 806/981 reported default-build jobs.
+TestSuite and sort-check phases were not reached. The log contains no Lean
+error marker before termination; it is nevertheless a failed gate, never a
+passing build. Raw output and metadata are `repository-gate.log` and
+`repository-gate.json`. Peak process-group cgroup memory 12,652,908,544 bytes;
+sampled aggregate Lean/Lake RSS 9,693,794,304 bytes; swap cap 0. The 12 GiB cap
+was not increased. Successful source/toolchain-keyed cache artifacts are kept;
+no duplicate build tree was made. No unchanged broad heavy gate was repeated.
+
+Exact-base comparison (`core-input-base-comparison.log`) verifies that core
+Lean sources, root imports/executables, Lake/toolchain/run scripts and the listed
+AST/sort fixtures are byte-identical to the frozen base. This identifies the
+cold check's unchanged inputs; it is not a baseline runtime result and does not
+waive the timeout or mark the mandatory gate green. Remaining bounded targets
+and full Bridge confirmation are still open.
+
+QNET1 was answered: the human authorized restoring normal access to the existing
+configured Azure endpoint and then rechecking the pinned cache. Available Cloud
+Environment tools expose status/diagnostics only, with no configuration setter;
+diagnostic metadata returned no records. Restoration was not applied by this
+worker. A later lightweight authorized probe still returned CONNECT 403, with
+runtime specification revision 1 unchanged. The authorization persists; a runtime
+owner must repair actual endpoint access before another heavy cache request.
+No new VM, package/fork switch, proxy bypass or additional permission is sought.
