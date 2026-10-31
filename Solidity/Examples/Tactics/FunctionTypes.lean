@@ -357,4 +357,178 @@ def Late2 : Contract := contract!{
 /-- error: Solidity elaboration failed: double is taken as a value only outside the contract's functions, and a function declared before it calls through a function value: name it as a value in the contract -/
 #guard_msgs in #check sol[Late2]{ uint y = apply(double, 1); }
 
+/-! ## 6 · Memory- and storage-array arguments
+
+A function type with a memory- or storage-array parameter of a plain value
+element, `function (uint[] memory) returns (uint)`, spells its parameter with
+its location (`uint[]memory`, `uint[]storage`, `FunDecl.sigTy?`); only
+functions whose parameter is an array of that element at that location are
+candidates. A storage operand of a storage parameter is captured as an alias. The dispatch captures each
+argument once, left to right (`fnDispatch`): a memory operand as the
+reference itself, so the callee's writes reach the caller, and a storage
+operand as a copy taken at its position, before a later argument runs. The
+tag is read after the arguments, as solc's legacy pipeline reads the callee. -/
+
+def MemArgs : Contract := contract!{
+  uint calls;
+  uint[] values;
+  function (uint[] memory) returns (uint) op;
+  function sum2(uint[] memory xs) returns (uint r) { r = xs[0] + xs[1]; }
+  function bump(uint[] memory xs) returns (uint r) {
+    calls = calls + 1; xs[0] = xs[0] + 10; r = xs[0];
+  }
+  function scalar(uint x) returns (uint r) { r = x; }
+  function stored(uint[] storage xs) returns (uint r) { xs[0] = xs[0] + 5; r = xs[0]; }
+  function bytesArg(bytes memory xs) returns (uint r) { r = xs.length; }
+  function narrow(uint8[] memory xs) returns (uint r) { r = xs[0]; }
+  function pair(uint[] memory xs, uint k) returns (uint r) { r = xs[0] * 100 + k; }
+  function setFirst() returns (uint) { values[0] = 9; return 1; }
+  function setOp(bool b) { op = b ? bump : sum2; }
+  function viaParam(function (uint[] memory) returns (uint) h, uint[] memory xs)
+      returns (uint r) { r = h(xs); }
+  Token tok;
+  function tokPlus(Token memory t) returns (uint r) { t.value = t.value + 1; r = t.value; }
+  function tokStored(Token storage t) returns (uint r) { t.value = t.value + 7; r = t.value; }
+  function tokOther(Account memory a) returns (uint r) { r = a.balance; }
+}
+
+local instance : InContract := ⟨MemArgs⟩
+
+/-- The signatures: the location is kept, so storage, `bytes` and scalar
+parameters are not memory-array candidates; a narrow element keeps its width. -/
+example : (MemArgs.funs.map fun (n, d) => (n, FunDecl.sigTy? MemArgs d)) =
+    [("sum2", some "function(uint[]memory)returns(uint)"),
+     ("bump", some "function(uint[]memory)returns(uint)"),
+     ("scalar", some "function(uint)returns(uint)"),
+     ("stored", some "function(uint[]storage)returns(uint)"), ("bytesArg", none),
+     ("narrow", some "function(uint8[]memory)returns(uint)"),
+     ("pair", some "function(uint[]memory,uint)returns(uint)"),
+     ("setFirst", some "function()returns(uint)"),
+     ("setOp", some "function(bool)"),
+     ("viaParam", some "function(function(uint[]memory)returns(uint),uint[]memory)returns(uint)"),
+     ("tokPlus", some "function(Tokenmemory)returns(uint)"),
+     ("tokStored", some "function(Tokenstorage)returns(uint)"),
+     ("tokOther", some "function(Accountmemory)returns(uint)")] := rfl
+
+/-- The dispatch of `h(xs)` as the elaborator writes it: the argument is
+captured as a memory local, then each candidate of the exact signature is a
+branch, `bump` and `sum2` (not `scalar` nor `narrow`); an unassigned tag reverts. -/
+example : Prog.toStr [] (sol[MemArgs]{ uint[] memory xs = new uint[](2);
+    function (uint[] memory) returns (uint) h = bump; uint r = h(xs); }) = "" := rfl
+
+/-- Aliasing: `bump` writes through the caller's array. -/
+private def memAlias := sol[MemArgs]{
+  uint[] memory xs = new uint[](2); xs[0] = 1; xs[1] = 2;
+  function (uint[] memory) returns (uint) h = bump;
+  uint r = h(xs);
+  assert(r == 11); assert(xs[0] == 11); assert(calls == 1);
+}
+
+theorem memAlias_run : (Prog.run (State.init MemArgs) memAlias).toOption.isSome = true := by
+  decide +kernel
+
+/-- The direct call observes the same: the dispatch's arm for `bump`'s tag
+is this call on the captured argument (`DispatchArm.chain_tag`). -/
+private def memDirect := sol[MemArgs]{
+  uint[] memory xs = new uint[](2); xs[0] = 1; xs[1] = 2;
+  uint r = bump(xs);
+  assert(r == 11); assert(xs[0] == 11); assert(calls == 1);
+}
+
+theorem memDirect_run : (Prog.run (State.init MemArgs) memDirect).toOption.isSome = true := by
+  decide +kernel
+
+/-- A storage operand is copied: `bump` leaves `values` unchanged. -/
+private def memCopy := sol[MemArgs]{
+  values.push(1); values.push(2);
+  function (uint[] memory) returns (uint) h = bump;
+  uint r = h(values);
+  assert(r == 11); assert(values[0] == 1);
+}
+
+theorem memCopy_run : (Prog.run (State.init MemArgs) memCopy).toOption.isSome = true := by
+  decide +kernel
+
+/-- Argument order: `values` is copied before `setFirst()` writes it. -/
+private def memOrder := sol[MemArgs]{
+  values.push(1);
+  function (uint[] memory, uint) returns (uint) h = pair;
+  uint r = h(values, setFirst());
+  assert(r == 101); assert(values[0] == 9);
+}
+
+theorem memOrder_run : (Prog.run (State.init MemArgs) memOrder).toOption.isSome = true := by
+  decide +kernel
+
+/-- Both branches of a stored value, and a value passed as a parameter. -/
+private def memBranches := sol[MemArgs]{
+  uint[] memory xs = new uint[](2); xs[0] = 3; xs[1] = 4;
+  setOp(false); uint a = op(xs);
+  setOp(true); uint b = op(xs);
+  uint c = viaParam(sum2, xs);
+  assert(a == 7); assert(b == 13); assert(xs[0] == 13); assert(c == 17);
+}
+
+theorem memBranches_run :
+    (Prog.run (State.init MemArgs) memBranches).toOption.isSome = true := by
+  decide +kernel
+
+/-- A storage-array argument is an alias: `stored` writes `values`. -/
+private def storAlias := sol[MemArgs]{
+  values.push(1);
+  function (uint[] storage) returns (uint) h = stored;
+  uint r = h(values);
+  assert(r == 6); assert(values[0] == 6);
+}
+
+theorem storAlias_run : (Prog.run (State.init MemArgs) storAlias).toOption.isSome = true := by
+  decide +kernel
+
+/-- A struct argument is nominal and keeps its location: `tokPlus` writes
+the caller's memory struct, `tokStored` the storage one; `tokOther` (an
+`Account`) is no candidate of `function (Token memory)`. -/
+private def structArgs := sol[MemArgs]{
+  Token memory t; t.value = 1;
+  function (Token memory) returns (uint) h = tokPlus;
+  uint r = h(t);
+  assert(r == 2); assert(t.value == 2);
+  tok.value = 1;
+  function (Token storage) returns (uint) g = tokStored;
+  uint s = g(tok);
+  assert(s == 8); assert(tok.value == 8);
+  Token memory c = tok; uint u = h(c);
+  assert(u == 9); assert(tok.value == 8);
+}
+
+theorem structArgs_run :
+    (Prog.run (State.init MemArgs) structArgs).toOption.isSome = true := by
+  decide +kernel
+
+/-- An `Account` function's tag is no candidate of `function (Token memory)`. -/
+theorem structWrongNominal : ¬ (⊨ᶠ dl{ ⟨ Token memory t;
+    function (Token memory) returns (uint) h = tokOther; uint r = h(t); ⟩ true }) :=
+  fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
+
+/-- An unassigned value reverts, as a deleted one does. -/
+theorem memUnassigned : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1); uint r = op(xs); ⟩ true }) :=
+  fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
+
+/-- The false observation that the callee's write is not visible fails. -/
+theorem memNoCopy : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1);
+    function (uint[] memory) returns (uint) h = bump; uint r = h(xs); assert(xs[0] == 0); ⟩ true }) :=
+  fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
+
+/-- A scalar function's tag is not a memory-array candidate: the dispatch
+has no branch for it and reverts. -/
+theorem memWrongCandidate : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1);
+    function (uint[] memory) returns (uint) h = scalar; uint r = h(xs); ⟩ true }) :=
+  fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
+
+/-- In every typed state where `bump` returns (its counter may overflow),
+the callee's write reaches the caller's array. -/
+theorem memAlias_valid : ⊨ᶠ dl{ [ uint[] memory xs = new uint[](1);
+    function (uint[] memory) returns (uint) h = bump; uint r = h(xs); ] xs[0] == 10 && r == 10 } := by
+  sol_symex
+  sol_close
+
 end Solidity.Examples.Tactics.FunctionTypes

@@ -137,18 +137,85 @@ def fnTyOf? (Γ : ECtx) (h : String) : Option String :=
     | some _ => none
     | none => fnRow? C.widths h).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))
 
+/-- The structs a type names, through arrays and mappings (`fuel` bounds the
+type's depth; the table's types are finite). -/
+def structsIn : Nat → Ty → List Name
+  | 0, _ => []
+  | _, .prim _ => []
+  | _, .ref (.struct t) => [t]
+  | f + 1, .ref (.array E) | f + 1, .ref (.fixed E _) => structsIn f E
+  | f + 1, .ref (.mapping _ V) => structsIn f V
+
+/-- The struct `s` does not reach itself through its members. A search that
+exhausts its bound counts as recursive (refused, as recursive type graphs are
+outside finite dispatch). -/
+def structNonrec (s : Name) : Bool :=
+  go 64 [] ((structDef s).flatMap fun (_, T) => structsIn 16 T)
+where
+  go : Nat → List Name → List Name → Bool
+    | _, _, [] => true
+    | 0, _, _ => false
+    | f + 1, seen, t :: rest =>
+      if t == s then false
+      else if seen.contains t then go f seen rest
+      else go f (t :: seen) (rest ++ (structDef t).flatMap fun (_, T) => structsIn 16 T)
+
+/-- A function type's struct parameter component at a location
+(`Pmemory`, `Pstorage`; `FunDecl.sigTy?`): the struct, nominal (its name in
+the table), nonrecursive and, in memory, free of mappings; whether it is a
+storage reference. -/
+def fnRefStruct? (c : String) : Option (String × Bool) := do
+  let (loc, storage) ← if c.endsWith "storage" then some ("storage", true)
+    else if c.endsWith "memory" then some ("memory", false) else none
+  let s := c.dropRight loc.length
+  guard (!s.isEmpty && !s.endsWith "]" && !fnTy? s && !(structDef s).isEmpty && structNonrec s)
+  guard (storage || structMapFree s)
+  pure (s, storage)
+
 /-- The signature of the function `d`, as a function type spelled
-(`canonFnTy`), retaining the supported memory-byte return location. -/
+(`canonFnTy`), retaining the supported memory-byte return location and the
+location of a memory or storage array parameter of a plain value element
+(`uint[] memory`, spelled `uint[]memory`; `uint[]storage`). Other reference
+parameters (calldata, nested, nominal), and an
+element with a marker row (`bytesN`, an enum, a string, a function), have no
+spelling, so no dispatch lists the function. -/
 def FunDecl.sigTy? (d : FunDecl) : Option String := do
   let comp (k : String) : Ty → Option String
     | .prim p => some ((fnRow? d.widths k).getD (declTyName d.widths k p))
     | .ref R => do
-      guard (d.retMem && !d.retStorage && d.rets.any (·.1 == k) && R == bytesR)
-      guard (lookupBy (k ++ "[]#bytes") d.widths == some 1)
-      guard (!(d.widths.any fun (n, _) => n == k ++ "#string"))
-      pure "bytesmemory"
+      guard (d.retMem && !d.retStorage && d.rets.any (·.1 == k))
+      if lookupBy (k ++ "[]#bytes") d.widths == some 1 then
+        guard (R == bytesR)
+        guard (!(d.widths.any fun (n, _) => n == k ++ "#string"))
+        pure "bytesmemory"
+      else
+        -- a memory array of a plain value element (`fnRefElem?`)
+        let .array (.prim p) := R | none
+        let e := k ++ "[]"
+        guard (!(d.widths.any fun (w, _) =>
+          w.startsWith (k ++ "#") || (w.startsWith (e ++ "#") && w != e ++ "#address")))
+        pure (declTyName d.widths e p ++ "[]memory")
   let ps ← d.params.mapM fun (n, T) => do
-    if T matches .ref _ then none else comp n T
+    match T with
+    | .prim _ => comp n T
+    | .ref (.array (.prim p)) =>
+      let loc ← match lookupBy n d.paramLocs with
+        | some .memory => some "[]memory"
+        | some .storage => some "[]storage"
+        | _ => none
+      let k := n ++ "[]"
+      guard (!(d.widths.any fun (w, _) =>
+        w.startsWith (n ++ "#") || (w.startsWith (k ++ "#") && w != k ++ "#address")))
+      pure (declTyName d.widths k p ++ loc)
+    | .ref (.struct st) =>
+      let loc ← match lookupBy n d.paramLocs with
+        | some .memory => some "memory"
+        | some .storage => some "storage"
+        | _ => none
+      let c := st ++ loc
+      guard ((fnRefStruct? c).isSome)
+      pure c
+    | .ref _ => none
   let rs ← d.rets.mapM fun (n, T) => comp n T
   pure (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1) (fnTyStr ps rs false))
 
@@ -192,6 +259,23 @@ def isRecursiveC (f : String) : Bool := (reachableC C f).contains f
 /-- The functions mutually recursive with `f`, through values too. -/
 def recPartnersC (f : String) : List String :=
   (reachableC C f).filter fun g => (reachableC C g).contains f
+
+/-- A function type's array parameter component at a location
+(`uint[]memory`, `uint[]storage`; `FunDecl.sigTy?`): its element's spelling,
+a plain value type, and whether it is a storage reference. -/
+def fnRefElem? (c : String) : Option (String × Bool) := do
+  let (loc, storage) ← if c.endsWith "[]memory" then some ("[]memory", false)
+    else if c.endsWith "[]storage" then some ("[]storage", true) else none
+  let e := c.dropRight loc.length
+  guard (!fnTy? e && (lookupBy e C.enums).isNone && (bytesTy? e).isNone)
+  guard ((PrimTy.ofName? e).isSome || (narrowTy? e).isSome)
+  pure (e, storage)
+
+/-- Whether a function type's return component is a memory reference the
+dispatch binds (`fnMemoryDispatch`): `bytes memory` or a memory array of a
+plain value element (`fnRefElem?`). -/
+def fnMemRet (r : String) : Bool :=
+  r == "bytesmemory" || (fnRefElem? C r).any (!·.2)
 
 /-- A function type's component as a value: its primitive type and width. -/
 def fnCompTy? (c : String) : Option (PrimTy × Nat) :=

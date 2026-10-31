@@ -43,7 +43,7 @@ partial def modifyTree (f : Json → Json) : Json → Json
 
 // Run the real import command for specification and native-model checks.
 // This deliberately uses Import's private production callbacks through solc_import.
-function productionCheck(source, body) {
+function productionCheck(source, body, options = '') {
   const dir = mkdtempSync(join(tmpdir(), 'solidity-production-dispatch-'));
   try {
     const input = join(dir, 'FiniteDispatch.sol');
@@ -57,7 +57,7 @@ function productionCheck(source, body) {
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
     writeFileSync(check, `import Solidity.Tools.Upstream
 open Solidity Solidity.Frontend
-solc_import "FiniteDispatch.ast.json" hash 0x${hash.toString(16)} as Imported.C testing
+solc_import "FiniteDispatch.ast.json" hash 0x${hash.toString(16)} as Imported.C testing${options}
 ${body}
 `);
     execFileSync('lake', ['--quiet', '--no-build', 'lean', check, '--', '--tstack=131072'],
@@ -376,12 +376,17 @@ test('abstract virtual reference identity resolves to its concrete body without 
 });
 
 test('memory-return admission refuses unsupported argument and external ABI paths', () => {
+  // A scalar argument beside the memory-byte return is admitted since lane
+  // CF2 (finite-dispatch.md, "Reference arguments"); a byte argument and an
+  // external memory return stay refused.
   scopeCheck(`contract C {
     function target(uint x) internal pure returns(bytes memory) { return new bytes(x); }
     function entry() public pure {
       function(uint) internal pure returns(bytes memory) h = target; h(1);
     }
-  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "a scalar argument beside a memory-byte return was not admitted")`);
   scopeCheck(`contract C {
     function target(bytes memory x) internal pure returns(bytes memory) { return x; }
     function entry() public pure {
@@ -412,4 +417,177 @@ test('a concrete base candidate with missing body metadata is not erased as abst
     if J.kind node == "FunctionDefinition" && J.str? node "name" == some "target" &&
         ((J.arr node "baseFunctions").toOption.getD []).isEmpty then
       put (put node "implemented" (.bool true)) "body" .null else node) ast`);
+});
+
+// Internal function values with a memory- or storage-array parameter. The observations are
+// the pinned compiler's (scripts/check-function-value-references.mjs, legacy
+// and viaIR, optimizer off and on); the legacy schedule is the default.
+const referenceSource = readFileSync('tests/solc/FunctionValueReferences.sol', 'utf8')
+  .replace(/^\/\/ SPDX[^\n]*\npragma[^\n]*\n/, '').replace(/FunctionValueReferences/g, 'C');
+const panic51 = [0x4e, 0x48, 0x7b, 0x71, ...Array(31).fill(0), 0x51];
+const panic01 = [0x4e, 0x48, 0x7b, 0x71, ...Array(31).fill(0), 0x01];
+function referenceVectors(viaIR) {
+  // viaIR copies a storage argument after every argument (901); the model
+  // copies at the argument's position for direct and dispatched calls alike
+  // (finite-dispatch.md, "Recorded deviations"), so only legacy replays it.
+  const order = viaIR ? [] : [['argumentOrder()', [], ['101', '9']],
+    ['argumentOrderDirect()', [], ['101', '9']]];
+  const callee = viaIR ? ['402'] : ['4002'];
+  const cases = [
+    ['aliasing()', [], ['11', '11', '1']],
+    ['storageCopy()', [], ['11', '1', '2']],
+    ...order,
+    ['calleeOrder()', [], callee],
+    ['branches(bool)', ['true'], ['13']],
+    ['branches(bool)', ['false'], ['7']],
+    ['unassigned()', [], panic51],
+    ['deleted()', [], panic51],
+    ['narrow()', [], ['200']],
+    ['storageAlias()', [], ['6', '6']],
+    ['storageOrder()', [], ['901', '9']],
+    ['arrayReturn(bool)', ['true'], ['106', '106', '1']],
+    ['arrayReturn(bool)', ['false'], ['5', '110', '1']],
+    ['bytesReturn()', [], ['3', '65']],
+    ['structMemory()', [], ['2', '2', '43']],
+    ['structStorage()', [], ['8', '8']],
+    ['nominalQ()', [], ['9']],
+    ['falseObservation()', [], panic01],
+  ];
+  return cases.map(([signature, args, expected]) => {
+    const failure = typeof expected[0] === 'number';
+    return `Lean.Json.mkObj [("signature", Lean.toJson (${JSON.stringify(signature)} : String)),
+      ("args", Lean.toJson (${JSON.stringify(args)} : List String)),
+      ("failure", Lean.toJson ${failure}),
+      ("expected", Lean.toJson (${JSON.stringify(failure ? [] : expected)} : List String))` +
+      (failure ? `, ("revertBytes", Lean.toJson (${JSON.stringify(expected)} : List Nat))]` : ']');
+  }).join(',\n    ');
+}
+function referenceReplay(viaIR) {
+  return `#guard Imported.C.report.all fun r => r.status == .elaborated
+#eval (do
+  let data := Lean.Json.mkObj [("vectors", Lean.toJson [
+    ${referenceVectors(viaIR)}])]
+  let report := Solidity.Tools.Upstream.replay Imported.C Imported.C.report data
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)`;
+}
+
+test('memory-array arguments alias, copy and dispatch as the compiler does (legacy)', () => {
+  productionCheck(referenceSource, referenceReplay(false));
+});
+
+test('memory-array arguments under the viaIR schedule read the callee first', () => {
+  productionCheck(referenceSource, referenceReplay(true), ' evalOrder .viaIR');
+});
+
+function refused(name) {
+  return `unless (row ${JSON.stringify(name)}).any (fun (r : SolcFun) =>
+      r.body.toOption.isNone || r.sourceScope.diagnostic?.isSome) do
+    throw (IO.userError "an unsupported reference signature was admitted for ${name}")`;
+}
+
+test('reference-array dispatch admits exact candidates and keeps their locations', () => {
+  scopeCheck(`contract C {
+    function target(uint[] memory xs) internal pure returns(uint) { return xs[0]; }
+    function stored(uint[] storage xs) internal view returns(uint) { return xs[0]; }
+    uint[] values;
+    function entry() public view {
+      uint[] memory xs = new uint[](1);
+      function(uint[] memory) internal pure returns(uint) h = target;
+      assert(h(xs) == 0);
+      function(uint[] storage) internal view returns(uint) g = stored;
+      g(values);
+    }
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "memory-array dispatch was not admitted")`);
+});
+
+test('memory-array dispatch refuses an address/uint element collision', () => {
+  scopeCheck(`contract C {
+    function addrs(address[] memory xs) internal pure returns(uint) { return xs.length; }
+    function uints(uint[] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      uint[] memory xs = new uint[](1);
+      function(uint[] memory) internal pure returns(uint) h = uints;
+      h(xs);
+    }
+  }`, diagnostic('entry', 'solidity.functionDispatch'));
+});
+
+test('other reference signatures remain refused', () => {
+  const cases = [
+    // a recursive struct
+    `struct R { uint x; R[] kids; }
+    function target(R memory r) internal pure returns(uint) { return r.x; }
+    function entry() public pure {
+      R memory r;
+      function(R memory) internal pure returns(uint) h = target; h(r);
+    }`,
+    // an external struct parameter
+    `struct S { uint a; }
+    function target(S memory s) public pure returns(uint) { return s.a; }
+    function entry() public view {
+      S memory s;
+      function(S memory) external view returns(uint) h = this.target; h(s);
+    }`,
+    // a struct return
+    `struct S { uint a; }
+    function target() internal pure returns(S memory s) { s.a = 1; }
+    function entry() public pure {
+      function() internal pure returns(S memory) h = target; h();
+    }`,
+    // a nominal element
+    `struct S { uint a; }
+    function target(S[] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      S[] memory xs = new S[](1);
+      function(S[] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a byte element
+    `function target(bytes1[] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      bytes1[] memory xs = new bytes1[](1);
+      function(bytes1[] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a nested array
+    `function target(uint[][] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      uint[][] memory xs = new uint[][](1);
+      function(uint[][] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a calldata reference
+    `function target(uint[] calldata xs) internal pure returns(uint) { return xs.length; }
+    function entry(uint[] calldata xs) external pure {
+      function(uint[] calldata) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a storage mapping
+    `mapping(uint => uint) m;
+    function target(mapping(uint => uint) storage xs) internal view returns(uint) { return xs[0]; }
+    function entry() public view {
+      function(mapping(uint => uint) storage) internal view returns(uint) h = target; h(m);
+    }`,
+    // a storage-array return
+    `uint[] values;
+    function target() internal view returns(uint[] storage) { return values; }
+    function entry() public view {
+      function() internal view returns(uint[] storage) h = target; h();
+    }`,
+    // several memory returns
+    `function target() internal pure returns(bytes memory, bytes memory) { return (hex"61", hex"62"); }
+    function entry() public pure {
+      function() internal pure returns(bytes memory, bytes memory) h = target; h();
+    }`,
+    // a memory return beside a scalar return
+    `function target() internal pure returns(bytes memory, uint) { return (hex"61", 1); }
+    function entry() public pure {
+      function() internal pure returns(bytes memory, uint) h = target; h();
+    }`,
+    // an external memory-array return
+    `function target() public pure returns(uint[] memory xs) { xs = new uint[](1); }
+    function entry() public view {
+      function() external view returns(uint[] memory) h = this.target; h();
+    }`,
+  ];
+  for (const body of cases) scopeCheck(`contract C {\n${body}\n}`, refused('entry'));
 });

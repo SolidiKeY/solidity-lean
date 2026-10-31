@@ -2,8 +2,8 @@
 
 Source admission of ordinary internal and own-external function-value calls
 with scalar or function parameters and returns, plus the restricted internal
-`bytes memory` return below. Only source extraction and
-dependency closure are involved: the program, interpreter, calculus and proof
+reference parameters and memory returns below. Source extraction, dependency
+closure and the elaborator's dispatch are involved: the interpreter, calculus and proof
 system are unchanged. This is an executable extraction boundary, not a proof of
 source/native simulation or of extractor completeness.
 
@@ -16,11 +16,13 @@ source/native simulation or of extractor completeness.
   native function-value representation ignores them. A native key may map
   address to uint, so key equality alone never admits a call: every
   native-compatible candidate must also have the exact source signature.
-- **Internal memory-byte return.** A zero-argument internal function may return
-  exactly one `bytes memory` value. The signature retains that memory kind;
-  reference arguments, mixed/multiple memory returns and external memory
-  returns remain refused. `scripts/finite-dispatch.test.mjs` covers receiver
-  effects, invalid/unused tags and inherited overrides for this fragment.
+- **Internal memory return.** An internal function type may return exactly
+  one `bytes memory` value or one memory array of a word, `bool` or `address`
+  element, beside any admitted parameters (lane CF2; before it, only
+  zero-argument `bytes memory`). The signature retains that memory kind;
+  several returns with a memory one, and external memory returns, remain
+  refused. `scripts/finite-dispatch.test.mjs` covers receiver effects,
+  invalid/unused tags and inherited overrides for this fragment.
 - **Candidates.** Own, inherited and imported free/library functions, each with
   its declaration ID and model name, plus receive/fallback entries (refused
   when they match, below) and synthesized getters
@@ -44,11 +46,20 @@ source/native simulation or of extractor completeness.
   Controls are in `Examples/Tactics/FunctionTypes.lean` (self call at address 7;
   a native self at `2^200`; the same state cleaned to zero and reverting).
 
+- **Internal reference arguments.** An internal function type may take
+  memory or storage arrays of a word, `bool` or `address` element
+  (`function(uint[] memory, uint) internal returns (uint)`) and nonrecursive
+  structs in memory or storage, nominally (`function(P storage)`), beside
+  scalar parameters. See "Reference arguments" below.
+
 ## Refused (`solidity.functionDispatch`), and why
 
-- Reference signatures outside the zero-argument internal `bytes memory`
-  return above, nominal signatures, unknown type metadata, and missing candidate
-  or override identities. Reference arguments retain their refusal boundary.
+- Reference signatures outside the internal memory returns and reference
+  arguments above (calldata, `bytes`/`string`/`bytesN`/enum/function/nested
+  or nominal array elements, recursive structs, storage or struct returns,
+  several returns with a memory one, any reference in an external
+  signature), unknown type metadata, and missing candidate or override
+  identities.
 - A native-compatible receive/fallback entry: Solidity cannot name it as a
   function value.
 - Source-kind collisions among native-compatible candidates (address versus
@@ -111,3 +122,162 @@ node --test --test-name-pattern='function types:' scripts/test-solidity.test.mjs
 
 Every malformed-data case goes through the real `solc_import` command and its
 specification callbacks.
+
+## Reference arguments
+
+Lane CF2, checkpoints 1–3: internal function values whose parameters include
+memory or storage arrays of a plain value element (1, 2) or nonrecursive
+structs in memory or storage (3), and whose one return may be a memory
+reference beside arguments (3).
+
+### Base refusal (reproduced on `aaa9db5`)
+
+`function(uint[] memory) internal returns (uint)` was refused at three
+points: the finite-dispatch scan (`inspectCall` reads the unknown
+`uint256[]memory` component as unresolved), the declaration reader (`tyText`,
+`Frontend/SolcJson/Body.lean`: "a function type with a reference parameter")
+and the elaborator (`fnDispatch`: "h(…): a function type with a uint[]
+parameter or return is not modelled"; pinned in
+`Examples/Tactics/FunctionTypes.lean` §5). Reading
+`contract C { function target(uint[] memory xs) internal returns (uint) {…}
+function entry() public { …; function(uint[] memory) internal returns (uint) h
+= target; h(xs); } }` with `readContract … (scanSource := Admission.scan …)`
+on the base gave
+
+```
+target: diag=none body=ok
+entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupported "solidity.functionDispatch: this call needs a finite set of typed dispatch targets" 8
+```
+
+### Supported
+
+- **Signature.** `FunDecl.sigTy?` spells a parameter `T[] memory` or
+  `T[] storage` whose element is a value type without a marker row (no
+  `bytesN`, enum, string or function element) as `T[]memory`/`T[]storage`,
+  and a struct parameter as its table name and location (`Tokenmemory`,
+  `Tokenstorage`; `fnRefStruct?`: nonrecursive by `structNonrec`, mapping-free
+  in memory). A single return `T[] memory` is spelled `T[]memory`, beside the
+  existing `bytesmemory`. `canonFnTy` reads an array element as a value
+  component does (`uint256`/`address` are `uint`). Calldata, `bytes`,
+  nested, nominal-element or recursive references keep no spelling, so no
+  dispatch lists them. The source side (`FiniteDispatch.Ty.memoryArray`,
+  `storageArray`, `nominal`) parses the same components and requires the
+  exact source signature as before: an `address[]`/`uint[]` collision in the
+  native key is refused. A struct's native key is its source name
+  (`struct C.P`), not its shape, so `P` and a same-shaped `Q` stay distinct
+  (`nominalQ`).
+- **Capture and aliasing.** `fnDispatch` and `fnMemoryDispatch` capture each
+  argument once, left to right (`dispatchCaptures`): a memory reference as a
+  memory local (`fnRefElem?`, `fnRefStruct?`): a memory operand is the
+  reference itself, so the callee's writes are visible to the caller; a
+  storage operand is copied at its position. A storage reference is captured
+  as a storage alias of its path, so the callee writes the caller's storage.
+  Each branch is the ordinary internal call of its candidate on the captured
+  names (`hoistCallArgs` keeps the stable capture without a second copy).
+- **Memory returns.** `fnMemoryDispatch` binds one shared memory destination
+  of the return's type in every branch, now after the argument captures; a
+  zero-argument dispatch keeps its original capture of the tag first.
+- **Callee order.** solc's legacy code reads the callee value after the
+  arguments, its IR pipeline before them (EVM observation `calleeOrder`).
+  Under `evalOrder .viaIR` the tag is captured before the arguments; the
+  legacy schedule keeps the original order. This applies to scalar dispatch
+  too.
+- **Unassigned values.** A zero or deleted tag reaches the final branch:
+  `Panic(0x51)` bytes in a self-call or failure-retaining frame, otherwise a
+  revert.
+
+### Recorded deviations
+
+- Legacy code calling a *deleted storage* function value jumps to an
+  invalid destination (an exceptional halt without data); viaIR raises
+  `Panic(0x51)`. The model fails in both and keeps the `Panic(0x51)` bytes.
+  A local unassigned value panics in both pipelines.
+- Under viaIR, solc copies a storage argument to memory after all arguments
+  ran (`argumentOrder`: `901`, legacy `101`). The model copies at the
+  argument's position in both schedules, for direct calls
+  (`argumentOrderDirect`, pre-existing) and dispatched calls alike, so the
+  dispatch stays identical to the direct call. The viaIR replay leaves these
+  two vectors out.
+
+### Tests
+
+- `Examples/Tactics/FunctionTypes.lean` §6: candidate signatures (storage,
+  `bytes`, scalar, narrow and struct controls), the printed dispatch,
+  kernel-checked runs (memory aliasing and the same observation by the
+  direct call, storage copy, storage alias, struct arguments in memory and
+  storage, branches, argument order), unassigned, wrong-candidate,
+  wrong-nominal and false-observation refutations, and a
+  `sol_symex`/`sol_close` proof over every typed state.
+- `scripts/finite-dispatch.test.mjs`: replay of
+  `tests/solc/FunctionValueReferences.sol` through `solc_import` in both
+  schedules; admission of exact memory and storage candidates and of a
+  scalar argument beside a memory-byte return; refusal of address/uint
+  element collisions, recursive structs, external struct parameters,
+  struct returns, nominal, byte and nested array elements, calldata
+  references, storage mappings, storage-array returns, several returns with
+  a memory one and external memory-array parameters and returns.
+- `scripts/dispatch-signatures.test.mjs`: the parsed source components keep
+  location and nominal identity; calldata, byte, nested and function
+  elements stay unparsed.
+- `scripts/check-function-value-references.mjs SOLJSON MODULES_DIR [cancun|osaka]`:
+  the pinned solc 0.8.34 on ethereumjs 10.1.3, legacy/viaIR × optimizer
+  off/on (76 executions per EVM version; cancun and osaka both pass), the
+  source of every expected observation above.
+
+## Dispatch correctness
+
+Lane CF2, checkpoint 4. `fnDispatch` builds its chain with
+`DispatchArm.chain` (`Syntax/DispatchChain.lean`): one arm per candidate,
+guard `tag == tᵢ` with the candidate's tag `tᵢ` (distinct: positions in
+`Contract.funs`), body the elaboration of the ordinary internal call `gᵢ(y…)`
+on the captured arguments (`elabScope Γ [call g]`, the same path a direct call
+`gᵢ(y…)` takes), then the unassigned-value failure. `Semantics/Dispatch.lean`
+proves, for every chain and state:
+
+- `DispatchArm.chain_select`: the first arm whose guard holds runs (its
+  locals popped), every earlier guard being false;
+- `DispatchArm.chain_none`: with every guard false, the failure runs;
+- `DispatchArm.chain_tag`: with guards `tag == tᵢ` evaluating to
+  `decide (v = tᵢ)`, a run whose tag value is `tᵢ` (no earlier arm with that
+  tag) is the run of arm `i`'s body, the direct call of candidate `i`.
+
+All three are over `Stmt.runC` (equal to `Stmt.run` by `Stmt.runR_eq`) and
+pinned with `#print axioms` (`propext`, `Classical.choice`, `Quot.sound`)
+in the module and in `TrustAudit.lean`. The memory-return dispatch
+(`fnMemoryDispatch`) is written as raw `if … else if …` and elaborates to the
+same nested `ite` shape, so the lemmas apply to it after unfolding; it does
+not construct `DispatchArm.chain` itself. That the arm body is the direct
+call is by construction (both are `elabCall` on the same callee and names),
+not a theorem about the elaborator, which is `partial`; kernel-checked runs
+compare the two on inhabited inputs (`memAlias_run` and `memDirect_run` in
+`Examples/Tactics/FunctionTypes.lean`).
+
+### For lane-soundness (`roadmap-l3-20261030/lane-soundness`)
+
+The Source layer has no dispatched call: `RExpr.call d h args` names a
+static declaration (`Source/Resolved.lean`). To extend
+`Elaborated.callInternal_call_ns`'s frame and its `hdec` premise to calls
+through internal function values, that lane needs:
+
+1. a resolved call through a value of type `.fn false ps rs m`, whose target
+   declaration is read from the value at run time, and an unassigned value
+   that halts with `Panic(0x51)` (not `stuck`);
+2. `hdec` per candidate: every value of that type the program can hold names
+   a declaration of the unit. The extractor's candidate set
+   (`FiniteDispatch.inspectCall`: every native-compatible source function,
+   overrides resolved, with no pruning) is the finite superset to state it
+   over;
+3. the signature premise with data locations: a candidate's `fnSig` equals
+   the function type's `(ps, rs)` exactly, locations included
+   (`inspectCall` requires `target.source = some expected`, and
+   `Ty.memoryArray`/`Ty.storageArray` keep the location), not only up to
+   `Decl.sameRets`;
+4. the frame for reference parameters: a memory parameter is bound to the
+   caller's heap reference (alias, no copy, unless the operand is in
+   storage, which is copied at its position under the legacy schedule), and
+   a storage parameter to the caller's storage pointer;
+5. the callee-order schedule: under `evalOrder .viaIR` the tag is read before
+   the arguments.
+
+These touch `Solidity/Source/**`, which this lane does not edit.
+

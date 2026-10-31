@@ -1,4 +1,5 @@
 import Solidity.Syntax.Elab.Arms
+import Solidity.Syntax.DispatchChain
 
 /-!
 # The elaborator's recursion
@@ -259,6 +260,37 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
     prepared := prepared ++ [a]
   pure (P, prepared)
 
+/-- The captures before an internal dispatch: the callee's tag first under
+the source-order schedule (solc's IR pipeline reads the callee value before
+the arguments, the legacy one after them; `tests/solc/FunctionValueReferences.sol`,
+`calleeOrder`), then each argument once, left to right, at its formal type.
+All operands are evaluated before dispatch, including total reads whose value
+a later argument can change and failing member reads; the formal type
+supplies the contextual type of a literal expression. A memory-array argument
+is captured as a memory local: the reference itself for a memory operand (the
+callee's writes reach the caller, as Solidity passes memory by reference), a
+copy of a storage operand. A storage-array argument is a storage alias of its
+path. A struct argument (`fnRefStruct?`) is captured likewise at its location. Returns the statements, the tag's name and the captured arguments. -/
+partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (args : List RawExpr) :
+    ElabM (List RawStmt × RawExpr × List RawExpr) := do
+  let mut pre : List RawStmt := []
+  let mut tag := h
+  if C.evalOrder.binaryLeftToRight || !h.isPure then
+    let t := toString (← freshCapture "se")
+    pre := [.decl (.named ty) t (some h)]
+    tag := .name t
+  let mut as : List RawExpr := []
+  for (a, c) in args.zip ps do
+    let y := toString (← freshCapture "se")
+    pre := pre ++ [match fnRefElem? C c, fnRefStruct? c with
+      | some (e, false), _ => .declMemory (.array (.named e)) y (some a)
+      | some (e, true), _ => .declStorage (.array (.named e)) y (some a)
+      | none, some (st, false) => .declMemory (.named st) y (some a)
+      | none, some (st, true) => .declStorage (.named st) y (some a)
+      | none, none => .decl (.named c) y (some a)]
+    as := as ++ [.name y]
+  pure (pre, tag, as)
+
 /-- **A call through a function value** `h(a)`, `h` of the function type
 `ty` (`fnTyOf?`): its arguments captured once, left to right,
 then a dispatch over the functions of `ty`, `if (h == 1) { r = g₁(a); } else
@@ -275,8 +307,10 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   unless ps.length == args.length do
     throw s!"{h} takes {ps.length} arguments, not {args.length}"
   -- a reference parameter or return: no function's signature is spelled so
-  -- (`FunDecl.sigTy?`), so the dispatch would list none
-  if let some c := (ps ++ rs).find? fun c => (fnCompTy? C c).isNone then
+  -- (`FunDecl.sigTy?`), so the dispatch would list none; a memory or storage
+  -- array of a plain value element (`fnRefElem?`) is the reference parameter spelled
+  if let some c := (ps.filter fun c => (fnRefElem? C c).isNone && (fnRefStruct? c).isNone) ++ rs |>.find? fun c =>
+      (fnCompTy? C c).isNone then
     throw s!"{h}(…): a function type with a {c} parameter or return is not modelled \
       (docs/semantic-gaps.md, \"Function types\")"
   let scope := (← read).funs
@@ -288,15 +322,7 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
       else if taken.contains g then
         throw s!"{h}(…) may call {g}, which is not declared before this function: \
           declare the functions of type {ty} first"
-  let mut pre : List RawStmt := []
-  let mut as : List RawExpr := []
-  for (a, c) in args.zip ps do
-    -- All operands are evaluated before dispatch, including total reads
-    -- whose value a later argument can change and failing member reads.
-    -- The formal type supplies the contextual type of a literal expression.
-    let y := toString (← freshCapture "se")
-    pre := pre ++ [.decl (.named c) y (some a)]
-    as := as ++ [.name y]
+  let (pre, tag, as) ← dispatchCaptures (.name h) ty ps args
   let call (g : String) : RawStmt := match res with
     | some (x, _) => .assign (.name (toString x)) (.call g as)
     | none => .call (.name g) as
@@ -308,27 +334,39 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
     let Γ ← nctx
     -- A self-call transports exact bytes, so Panic(0x51) is independent
     -- of the transaction oracle's fallback code for an unclassified panic.
-    let mut disp : Stmt C Γ.ctx Γ.ctx :=
+    let fail : Stmt C Γ.ctx Γ.ctx :=
       if (← read).selfFrame || (← read).retainFailureData then .revertData [.bytes (Semantics.encodePanic 0x51)]
       else .revert
-    for (g, t) in cands.reverse do
-      let c ← checkIn C Γ .bool (.binop .eqB (.name h) (.num t))
+    -- One arm per candidate, in tag order (`DispatchArm.chain`, whose runs
+    -- `Semantics/Dispatch.lean` characterises per tag).
+    let mut arms : List (DispatchArm C Γ.ctx) := []
+    for (g, t) in cands do
+      let c ← checkIn C Γ .bool (.binop .eqB tag (.num t))
       let body ← elabScope Γ [call g]
-      disp := .ite c body.2 (.cons disp .nil)
-    pure (P ++ [.of Γ disp])
+      arms := arms ++ [{ cond := c, body := body.2 }]
+    pure (P ++ [.of Γ (DispatchArm.chain arms fail)])
   modify fun (_, k) => (Γ0, k)
   pure P
 
 
-/-- Internal zero-argument memory-byte dispatch uses the same source tags and
-scope checks as scalar dispatch. The shared destination is intrinsically a
-memory reference, and each branch binds the selected call's returned alias;
+/-- Internal memory-return dispatch (`bytes memory` or `T[] memory`, one
+return) uses the same source tags, scope checks and argument captures as
+scalar dispatch (`dispatchCaptures`). The shared destination is intrinsically
+a memory reference, and each branch binds the selected call's returned alias;
 no storage copy or scalar encoding of the returned reference is introduced. -/
 partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
     ElabM (SProg C × RawExpr) := do
-  let some ([], ["bytesmemory"], false) := fnParts? ty
-    | throw "memory dispatch needs an internal zero-argument bytes-memory signature"
-  unless args.isEmpty do throw "memory dispatch takes no arguments"
+  let some (ps, [r], false) := fnParts? ty
+    | throw "memory dispatch needs an internal signature with one memory return"
+  let dstTy : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
+    match fnRefElem? C r with
+    | some (e, false) => pure (.array (.named e))
+    | _ => throw s!"memory dispatch returns a {r}, not a memory reference"
+  unless ps.length == args.length do
+    throw s!"memory dispatch takes {ps.length} arguments, not {args.length}"
+  if let some c := ps.find? fun c =>
+      (fnRefElem? C c).isNone && (fnRefStruct? c).isNone && (fnCompTy? C c).isNone then
+    throw s!"memory dispatch: a function type with a {c} parameter is not modelled"
   let scope := (← read).funs
   let taken := fnTaken C
   let mut cands : List (String × Nat) := []
@@ -337,14 +375,18 @@ partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
       if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
       else if taken.contains g then
         throw s!"memory dispatch may call {g}, which is not declared before this function"
-  let tag := toString (← freshCapture "se")
+  -- A zero-argument dispatch keeps its original capture of the tag first.
+  let (pre, tag, as) ← if args.isEmpty then do
+      let t := toString (← freshCapture "se")
+      pure ([.decl (.named ty) t (some h)], RawExpr.name t, [])
+    else dispatchCaptures h ty ps args
   let dst := toString (← freshCapture "mv")
-  let P ← elabStmtsP [.decl (.named ty) tag (some h), .declMemory (.named "bytes") dst none]
+  let P ← elabStmtsP (pre ++ [.declMemory dstTy dst none])
   let failure := if (← read).selfFrame || (← read).retainFailureData then
       RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
   let dispatch := cands.foldr (fun (g, t) rest =>
-    RawStmt.ite (.binop .eqB (.name tag) (.num t))
-      [.assign (.name dst) (.call g [])] [rest]) failure
+    RawStmt.ite (.binop .eqB tag (.num t))
+      [.assign (.name dst) (.call g as)] [rest]) failure
   let Q ← elabStmtsP [dispatch]
   pure (P ++ Q, .name dst)
 
@@ -459,7 +501,13 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
       pure ((fnTyOf? C (← ctx) f).map fun ty => (RawExpr.name f, ty, args))
     else pure none
   if let some (h, ty, actuals) := dynamic then
-    unless R == bytesR do throw "memory function value returns a different reference type"
+    let some (_, [r], false) := fnParts? ty | throw "memory function value of several returns"
+    let expected : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
+      match fnRefElem? C r with
+      | some (e, false) => pure (.array (.named e))
+      | _ => throw s!"memory function value returns a {r}"
+    let (T, _) ← ElabM.lift (elabTyW C expected)
+    unless T == .ref R do throw "memory function value returns a different reference type"
     let (P, _) ← fnMemoryDispatch h ty actuals
     let (r, _) :: Γ ← nctx | throw "internal: memory dispatch did not export its reference"
     let ⟨hm⟩ ← ElabM.lift (memOk R)

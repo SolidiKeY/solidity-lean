@@ -14,6 +14,7 @@ import Solidity.SpecSyntax
 import Solidity.Syntax
 import Solidity.Scope
 import Solidity.Syntax.Scoped
+import Solidity.Syntax.DispatchChain
 import Solidity.Syntax.Checked
 import Solidity.Syntax.CheckedExact
 import Solidity.Syntax.PushSource
@@ -43,6 +44,7 @@ import Solidity.Semantics.Lifetime
 import Solidity.Semantics.Transient
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
+import Solidity.Semantics.Dispatch
 import Solidity.Semantics.RunFrame
 import Solidity.Semantics.DeferredSource
 import Solidity.Semantics.DeferredCallback
