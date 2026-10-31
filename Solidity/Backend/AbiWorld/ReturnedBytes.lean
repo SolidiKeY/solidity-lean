@@ -143,12 +143,11 @@ arbitrary noncanonical calldata offsets or other packets must be refused. -/
 theorem error_not_panic (bs : List UInt8) :
     Semantics.decodePanic (Source.errorData bs) = none := by
   rw [PublishedLayout.source_error_bytes]
-  have hn : (Semantics.encodeError bs).length ≠ 36 := by
-    have hl : (Semantics.encodeError bs).length = 68 + (Semantics.pad32 bs).length := by
-      simp only [Semantics.encodeError, List.length_append, Semantics.errorSelector,
-        List.length_cons, List.length_nil, word_length]
-    omega
-  simp only [Semantics.decodePanic, hn, and_false, ite_false]
+  have hs : (Semantics.encodeError bs).take 4 = Semantics.errorSelector := by
+    simp only [Semantics.encodeError, List.append_assoc]
+    exact List.take_left' (by decide +kernel)
+  have hn : Semantics.errorSelector ≠ Semantics.panicSelector := by decide +kernel
+  simp only [Semantics.decodePanic, hs, hn, false_and, ite_false]
 
 /-- Zero pushes is an actual field of the published memory-call certificate. -/
 theorem memory_call_pushes_zero {C : Contract} {Γ Δ : Ctx} {b : Nat} {F : Frag Γ}

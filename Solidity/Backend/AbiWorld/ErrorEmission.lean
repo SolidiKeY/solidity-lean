@@ -42,7 +42,9 @@ theorem panic_roundtrip (code : Semantics.Word) :
   have hl : (Semantics.encodePanic code.1.toNat).length = 36 := by
     simp only [Semantics.encodePanic, List.length_append, Semantics.panicSelector,
       List.length_cons, List.length_nil, word_length]
-  simp only [Semantics.decodePanic, hs, hl, and_self, ite_true, hd, hr, dif_pos hn]
+  have ht : (Semantics.wordBytes code.1.toNat).take 32 = Semantics.wordBytes code.1.toNat :=
+    List.take_of_length_le (by rw [word_length]; exact Nat.le_refl _)
+  simp only [Semantics.decodePanic, hs, hl, Nat.le_refl, and_self, ite_true, hd, ht, hr, dif_pos hn]
   apply congrArg some
   apply Subtype.ext
   exact Int.toNat_of_nonneg hc.1

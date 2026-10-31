@@ -944,3 +944,5 @@ import Solidity.Backend.AbiWorld.CompiledMemoryCalls
 import Solidity.Backend.AbiWorld.ReturnedBytes
 import Solidity.Backend.AbiWorld.ReturnedBytesPrefix
 import Solidity.Backend.AbiWorld.ReturnedBytesControls
+import Solidity.Backend.AbiWorld.LibraryFrameTransport
+import Solidity.Backend.AbiWorld.LibraryFrameControls

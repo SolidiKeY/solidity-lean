@@ -734,3 +734,136 @@ reviews found no ownership, preservation or closure issues; neither ran Lean.
 This is source integration only: consumer proofs and changed-source gates remain
 pending. The original goal stays blocked; G40–G42 and Backfill A/B remain partial
 or blocked as documented above, never closed by this integration.
+
+
+### Library continuation consumer (audit dff2fe2b)
+
+`LibraryFrameTransport.resume_live` preserves the complete dependent live
+snapshot (heap typing, heap, typed environment and transaction). Storage and
+balance come from the actual selected world; the already-settled ledger becomes
+empty. `tail_refresh`, `execute_success` and `execute_caught` consume actual
+prefix execution, argument evaluation, prefix settlement, installed operation,
+return decoding and catchability. They do not assume the desired simulation.
+Preservation is uniform at continuation entry; arbitrary tails may mutate old
+objects. The concrete supplied tails preserve their old aliases after execution.
+`failed_tail_checkpoint` concerns the actual ContractWorld atomic checkpoint.
+There is no published map relating ContractWorld worlds to Source.ExecState
+journal states while preserving libraryCall/finish: the separate WorldFrames
+journal rollback theorem is not silently applied to this representation.
+
+`LibraryFrameControls` discharges the premises with actual intrinsic programs:
+a prefix writes caller saved=9, pays 3 to address10, allocates [161,0,178],
+binds two aliases of ID0 and keeps scalar77. A real installed library writes
+caller saved=12 on success; its own saved remains0. A completed revert keeps
+the actual prefix saved=9. The selected typed tail updates marker12/18 and pays2.
+Both paths finish with caller95/recipient5, demonstrating settled prefix3 plus
+tail2, not a repeated prefix payment. `live_actual` instantiates the uniform
+snapshot result at this populated caller. `caught_application` uses the actual
+operation reduction through published library_frame. RawLibrary.total is
+explicitly discharged by a total raw extractor; the actual Binders.decodeT
+returns primitive12 and the complete ordered unconsumed [0,254].
+
+`packet_actual`, `observe_packet` and `reason_execution` transport arbitrary
+complete failure bytes through the real library operation and actual typed tail,
+then consume the existing Source/Error agreement and CatchKind decoder. Controls
+cover custom bytes [222,173,0,255], canonical Error, accepted unpadded Error and
+truncated Error; no packet is reconstructed after catching. Real failing typed
+programs distinguish argument failure, successful-call decoding failure, caller
+tail failure and catch-tail failure. Wrong role/address/static operations remain
+refused. `failed_tail_atomic` restores the actual original world after a failed
+caller tail, distinctly from a caught callee preserving the settled prefix.
+`packet_prefix_associative` consumes the existing owned observation-prefix law
+on actual caught bytes and explicitly supplied caller observations; it supplies
+no resource-indexed execution trace or journal/world simulation.
+
+Independent read-only finder/skeptic reviews inspected actual source, premises,
+non-vacuity and ownership without Lean/server/builds. Confirmed findings were
+fixed: Error decoding now directly observes transported packets, constant-error
+tail fixtures became real Prog.run bodies, and observation composition actually
+uses WorldFrames while the absent journal relation remains explicit. Both final
+source re-reviews found no blocking issue. Actual headline axiom sets are pinned
+locally with guard_msgs: only propext or propext/Classical.choice/Quot.sound.
+No global trust pin, semantic producer, expected verdict or proof budget was
+edited by this consumer checkpoint.
+
+Local-control reconciliation blocker: the user relayed the prior human decision
+`call_ce385a5125ae4d06b1e976f6c1561935` (question1, coordinator chat
+`01a18291-8b61-7ce2-914f-36d4242e0b88`) approving the narrow decoder correction
+published as `aca22c9396011005a528bb39b29a57ecc5520770`. Decoder approval is not
+requested again. Git blame identifies the exact-length-negative at
+`Controls.panic_boundary_controls` as introduced locally by V13 in `53fedb657`,
+not an original Solidity fixture requirement. Published producer documentation
+records both original pipelines/native receipts, and its kernel controls prove
+suffix independence, unsigned bounds and genuine malformed refusals. Raw producer
+receipts are not present on this VM; no new local native replay is claimed.
+
+The relay explicitly does not authorize changing this retained V13 control.
+`Q-PANIC-CONTROL` therefore requests only the prepared local-control reconciliation:
+replace the obsolete suffix rejection with exact code1 acceptance, preserve zero/
+max cases and all existing genuine negatives, and add truncated35-byte, missing-word
+and wrong-selector negatives. The concrete patch is external and unapplied;
+both independent reviewers confirmed its local scope without granting authority.
+Original fixtures, expectations/verdicts, source/default profiles, pins and the
+decoder remain untouched. No decoder rollback/compatible-closure request remains.
+
+Two existing owned proofs were adapted without changing statements or premises:
+`ErrorEmission.panic_roundtrip` now takes the complete32-byte word explicitly;
+`ReturnedBytes.error_not_panic` uses distinct selectors instead of obsolete length
+reasoning. Both retain their scoped allowed axiom sets. The initial bounded full
+`./run-lean.sh` ended exit1 after5038.87 seconds, reporting Controls and ReturnedBytes.
+Its raw failure and resource data remain separate from subsequent successful repair
+checks: ReturnedBytes MCP strict success and focused closure199 jobs PASS. The
+full run reached its hard12GiB cap (253 max events), swap0, no OOM/kill; sampled
+aggregate peak RSS9097008KiB. No time/proof/resource budget was increased.
+Dependent final gates stay blocked pending the precise local-control decision.
+
+| Original obligation | Current status and remaining producer |
+|---|---|
+| Work1 G40 | Partial preparation only; every in-profile aggregate decoder/entry dispatch and noncanonical/refusal compilation remain open. |
+| Work2 G41 | Partial: actual catch consumers, Error/Panic/layout laws and represented returned-byte observer exist; uniform aggregate result/error emission and cross-call target decoding remain open. |
+| Work3 G42.01 self calls | Blocked final application: no complete V12 target/world plus ABI transport chain. Intrinsic self-call consumers remain preparation. |
+| Work3 G42.02 external calls | Blocked: arbitrary permitted target callees, CALL/RETURNDATA, exact target exceptions and world transport are unavailable. |
+| Work4 G42.03 callbacks | Blocked: arbitrary target reentrancy/callback frame relation unavailable; source journal/frame preparation is not that theorem. |
+| Work4 G42.04 libraries | Partial: actual published caller-storage continuation consumed with uniform live entry snapshot and inhabited execution; aggregate ABI and compiled library-world endpoint unavailable. |
+| Work4 G42.05 external function values | Blocked: address/selector target dispatch and all-signature/static composition missing; reserved owners unchanged. |
+| Work5 G42.06 composition | Partial preparation: actual library selection/atomic checkpoint and observation concatenation; no full constructor/resource-indexed target call-mode/ABI/world/rollback composition. |
+| Backfill A | Partial: arbitrary layout/offset/length/noninterference and returned-array packet observers plus malformed/noncanonical controls; no uniform aggregate codec/emitter closure. |
+| Backfill B | Partial: typed library live frame/world selection, actual prefix and exactly-once settlement controls, checkpoint/observation laws; journal-world relation, arbitrary target callee/callback and final composition remain open. |
+
+Changed-source final gates and artifact reviews are recorded in the new external
+handoff/evidence seal; the original persistent goal remains blocked and untouched.
+
+
+Final source finder/skeptic re-review also inspected the unchanged-statement
+ReturnedBytes proof repair and found no weakened theorem, hidden premise or
+ownership breach. The skeptic's confirmed stale documentation finding was fixed:
+the local-control question now replaces the obsolete decoder-compatible-closure
+request. All initial full failures, intermediate diagnostics and historical seals
+remain retained; no failed gate is relabeled green.
+
+
+Terminal validation account: Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2 jobs
+passed. Root MCP returned nonpartial failure/diagnostics_unavailable with failed
+dependencies (including retained Controls); root is not certified clean. Independent
+SolkeyTestSuite build retained timeout124 at180.12 seconds under its unchanged
+180-second bound; it was not retried. The pinned sort gate passed:377 taclets,
+131 read-bearing, table covers131. Initial full gate remains exit1/5038.87 seconds;
+after the unchanged-statement ReturnedBytes repair, focused import closure passed
+199 jobs. A further whole-root gate is pending the required local-control decision,
+not silently treated as passing. The original goal stays blocked and untouched.
+
+Static evidence:17 owned modules/0 forbidden imports;180 core modules/0 layer
+violations;1049 reachable/0 orphans;trust1064 sources/248 inventoried sites/0 findings;
+49 published Node source/IR adapter fixture tests pass, not native EVM tests.
+Original pinned TestSuite static parity passes564=552derived+11refuted+1excluded,
+0pending/0divergent,2skip. All30 prior seal entries verify. Doc raw exits remain1:
+current/published85 findings (48missing37ambiguous), frozen83 (46missing37ambiguous).
+Complete finding-line/multiplicity comparison isolates the two published inline-
+assembly missing paths, no removals; frozen no-new FAIL and publication equality
+PASS remain separate. All17 owned registrations and10 relative doc links resolve.
+
+Proposed coordinator G03 reconciliation only: attach the new local evidence to
+G41, G42.04 and G42.06/BackfillB; retain every original parent as incomplete and
+all original signatures/refusals/observations. No generated ledger/coverage status
+or global TrustAudit pin was edited. No native_decide/sorry/new axiom, proof-budget
+increase, new profile, historical runner, push/default-branch merge or PR.
