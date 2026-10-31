@@ -343,3 +343,36 @@ An upstream hash/symbol change requires a new review and explicit ledger
 updates; the checker never assigns newly discovered syntax a default scope.
 The normal CI check verifies generated-file consistency without downloading
 upstream sources.
+
+## Inline assembly decisions (2026-10-31)
+
+The human requested one CloudVM per lane VY1–VY5 to solve the inline assembly
+extension, reopening assembly through tiers A–C. The coordinator asked:
+
+> For all five assembly lanes, approve these proposed semantics: refuse gas/msize/pc and own-code inspection; allow nondeterministic valid allocation addresses with a refinement theorem; preserve dirty high bits as solc does in each pipeline; mark Yul calculus rules as Lean-only; expose both Yul logs and Solidity emit as observations; and refuse non-memory-safe assembly blocks? Your request covers reopening assembly through tiers A–C.
+
+The human answered exactly:
+
+> Approve these choices for all five lanes
+
+- YQ1: authorize tiers A–C through all five lanes.
+- YQ2: keep gas/msize/pc and own-code codesize/codecopy refused at admission.
+- YQ3: nondeterministic allocation addresses satisfying documented layout;
+  prove refinement and amend G01's contract explicitly.
+- YQ4: preserve dirty high bits according to solc in each pipeline; record
+  pipeline differences rather than silently cleaning or refusing them.
+- YQ5: accept Lean-only Yul rules, explicitly marked in the rule map.
+- YQ6: expose Yul logs and Solidity emit together as observations; amend G01.
+- YQ7: refuse non-memory-safe blocks. Preserve the existing canonical rethrow
+  behavior as the documented pre-existing exception.
+
+These are implementation directions, not evidence of implemented support. The
+current manifest continues to report actual admission; affected exclusion rows
+are reopened only by reviewed implementation with its evidence and decision
+reference. Compiler-dependent observations remain excluded. Dependency gates,
+existing worker ownership and validation still apply. The original launch
+request did not authorize merging or pushing this new batch. On 2026-10-31,
+the human subsequently requested inspection and integration of completed work
+from Codex Cloud VMs, worktrees and branches, with delivery to `origin/master`.
+That authorizes serial integration after the existing reviews and validation;
+it does not establish that any assembly implementation is complete.
