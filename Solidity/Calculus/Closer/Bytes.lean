@@ -775,12 +775,45 @@ theorem Facts.reModP_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy} (t : LTm C
   | uint => exact Facts.reMod_eval hF t
   | _ => rfl
 
+/-- A numeric literal zero, at the operand's own primitive type. -/
+def zeroDivisor {p : PrimTy} (y : LTm C (.val p)) : Bool :=
+  match y.litV? with
+  | some v => match p, v with
+    | .uint, v => v.1 == 0
+    | .int, v => v.1 == 0
+    | .bool, _ => false
+  | none => false
+
+/-- A zero divisor evaluates the numerator before failing. -/
+theorem zeroDivisor_eval {p : PrimTy} (h : BinOp.div.accepts p = true)
+    (x y : LTm C (.val p)) (hz : zeroDivisor y = true) :
+    (LTm.seq x (.err (s := .val p))).eval g ν =
+      (LTm.app2 (.binop .div h) x y).eval g ν := by
+  unfold zeroDivisor at hz
+  split at hz
+  · rename_i v hv
+    obtain rfl := LTm.eq_of_litV? hv
+    cases p with
+    | bool => cases h
+    | uint | int =>
+      change (v.val == 0) = true at hz
+      have h0 : v.val = 0 := eq_of_beq hz
+      rw [LTm.eval_seq, LTm.eval_app2, Op2.eval_eq_evalM]
+      cases x.eval g ν with
+      | none => rfl
+      | some a =>
+        show none = (if v.val = 0 then none else _).bind _
+        rw [if_pos h0]
+        rfl
+  · cases hz
+
 /-- A binary symbol folded: on literals, `a == a`, `a != a` on a term that
 returns, `a == b`/`a != b` on terms apart (`Facts.apart`), `x == true`/
 `x == false` as `x`/`!x` (`eqBoolLit`), `x < x + c` (`Facts.ltSucc`), a
 comparison of terms whose ranges decide it, `(a + b) - b` and
 `(a - b) + b` (`Facts.cancel`, `Facts.cancelAdd`), `(a * k + c) / k`
-(`Facts.cancelDiv`), `2 * y` as `y + y` (`isTwo`), and bytes reassembled
+(`Facts.cancelDiv`), division by a literal zero after evaluating its numerator,
+`2 * y` as `y + y` (`isTwo`), and bytes reassembled
 (`bitsAdd`, `bitsMod`, `bitsShr`). -/
 def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
     LTm C s :=
@@ -827,9 +860,10 @@ def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y :
   | .binop .mul h, x, y =>
     if isTwo x then Decide.fold2 (.binop .add h) y y else Decide.fold2 (.binop .mul h) x y
   | .binop .div h, x, y =>
-    match F.cancelDiv x y with
-    | some t => t
-    | none => Decide.fold2 (.binop .div h) x y
+    if zeroDivisor y then F.seqN x .err
+    else match F.cancelDiv x y with
+      | some t => t
+      | none => Decide.fold2 (.binop .div h) x y
   | .binop .mod h, x, y =>
     match bitsMod x y with
     | some t => t
@@ -969,9 +1003,12 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
     case div =>
       simp only [Facts.fold2]
       split
-      · rename_i t ht
-        exact Facts.cancelDiv_eval hF h ht
-      · exact Decide.fold2_eval g ν _ x y
+      · rename_i hz
+        exact (Facts.seqN_eval hF x .err).trans (zeroDivisor_eval h x y hz)
+      · split
+        · rename_i t ht
+          exact Facts.cancelDiv_eval hF h ht
+        · exact Decide.fold2_eval g ν _ x y
     case mod =>
       simp only [Facts.fold2]
       split

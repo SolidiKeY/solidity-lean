@@ -1104,21 +1104,36 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
   let hoistAssign := @ElabRec.hoistAssign C rc
   let hoistArgs := @ElabRec.hoistArgs C rc
   let hoistCallArgs := @ElabRec.hoistCallArgs C rc
+  -- The memory evaluation below must stay eager, including allocation and
+  -- its failure boundaries. Retain a literal's exact Error payload as well,
+  -- so a self-call's catch need not forget it after that evaluation.
+  let literalReason (m : RawExpr) : ElabM (Option String) := do
+    unless (← read).selfFrame || (← read).retainFailureData do return none
+    let some bs := m.bytesLit? | return none
+    unless bs.all (· < 256) do return none
+    return String.fromUTF8? ⟨bs.toArray.map UInt8.ofNat⟩
   match s0 with
   | .revertReason m => do
+    let reason ← literalReason m
     let (P, m) ← hoist m
+    if let some text := reason then
+      let (Q, _) ← rc.abiMemBytes m
+      return (P ++ Q, .revertMsg text)
     pure (P, .revertReason m)
   | .revertRaw m => do
     let (P, m) ← hoist m
     pure (P, .revertRaw m)
   | .requireReason c m => do
+    let reason ← literalReason m
     -- The condition must finish before the reason's allocation or effects.
     let (P, c) ← hoist c
     let (Pc, c) ← forceArg C c
     let (Q, m) ← hoist m
     let x := toString (← freshCapture "mv")
     let R ← rc.elabStmtsP [.declMemory (.named "string") x (some m)]
-    pure (P ++ Pc ++ Q ++ R, .requireReason c (.name x))
+    pure (P ++ Pc ++ Q ++ R, match reason with
+      | some text => .requireMsg c text
+      | none => .requireReason c (.name x))
   | .pushOpAssign op b r => do
     let (P, r) ← hoist r
     let (Pc, r) ← if b.hasIncDec then captureExpr C r else pure ([], r)

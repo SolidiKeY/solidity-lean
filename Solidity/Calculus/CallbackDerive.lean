@@ -175,11 +175,13 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   -- `rfl` would unroll its frames) or a `{havoc}` (`Proves` has no rule for
   -- it). An explicit try calls back too, so avoid an ordinary-proof
   -- attempt on every capture before it: the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`)
-  let φi ← instantiateMVars φ0
-  let containsGuard ← containsTransferNormality φi
-  let noPlain := containsGuard || (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Stmt.tryCall || e.isConstOf ``Fml.havoc ||
+  -- Classify the formula's actual head. In particular, invPost with no
+  -- break condition discards its continuation; scanning the unreduced
+  -- application can mistake a discarded try/havoc for a live callback.
+  let φ ← whnf (← instantiateMVars φ0)
+  let containsGuard ← containsTransferNormality φ
+  let noPlain := containsGuard || (φ.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Stmt.tryCall || e.isConstOf ``Fml.havoc ||
     e.isConstOf ``Fml.grow).isSome
-  let φ ← whnf φ0
   let rest : Array (Array (TSyntax `tactic)) ← match φ.getAppFn.constName? with
     | some ``Fml.havoc => pure #[#[← ap ``ProvesC.havocIntro]]
     | some ``Fml.grow => pure #[#[← ap ``ProvesC.growIntro]]
