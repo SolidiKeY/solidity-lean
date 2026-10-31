@@ -1329,3 +1329,90 @@ unchanged persistent goal remain blocked; all150 opcode rows remain OPEN.
 Next available metadata work consumes committed selectors/address-function
 packing against actual reference immediate reading and supplied PUSH dispatch;
 no missing producer is silently replaced or assumed discharged.
+
+
+## Metadata immediate consumer checkpoint (cd80b3fc continuation)
+
+Following401b337d029ccd945084bee4078ee606a09dd220,
+[MetadataReference.lean](../../Bridge/SolidityBridge/RoadmapV15/MetadataReference.lean)
+adds four public checked consumer laws: `metadata_reference_read`,
+`metadata_selector_reference`, `metadata_abi_reference`, and
+`metadata_function_reference`. The existing Fin33width and Fin(256^width)value
+remain intrinsic. The actual reference uInt256OfByteArray reads the backend's
+exact ordered bytes; numeric canonical selectors feed actual supplied PUSH4,
+left-aligned ABIbytes4 feeds PUSH32, and existing address/selector packing feeds
+PUSH24. Whole result states, arbitrary stack tails and PC increments5/33/25 are
+retained. Selector backend pushStep correctness is part of the first dispatch
+law. No new decoder/function representation or metadata resolver is introduced.
+Canonical metadata refusal, raw msg.sig admission and declaration/code association
+remain unchanged; no fetched-byte/resource/X/Osaka or source correctness follows.
+
+[MetadataReferenceControls.lean](../../Bridge/SolidityBridge/RoadmapV15/MetadataReferenceControls.lean)
+checks complete emitted5/33/25byte lists for selector0x01020304 and receiver7,
+full32byte reference observations at both alignments, wrong endian/length/alignment,
+width0 and full32-byte width maximum256bit value, nonempty258/513stack tails,
+missing canonical metadata/constructor refusal, missing immediate and zero fuel.
+All four headline axiom reports are only propext/Classical.choice/Quot.sound.
+Focused proofs/controls pass. Total checked public consumer laws:112; private
+helpers/control witnesses are excluded. Both independent finder/skeptic source,
+hypothesis, non-vacuity, ownership and full-observation reviews clear read only.
+The initial Array/List coercion and finite-width rewrite errors were corrected
+by using the actual reader's data projection and explicit Fin constructors,
+without changed statements or limits. A brief executor disconnect lost only its
+process handle; the saved actual exit1/log/json were inspected on the same
+expected checkout/head before continuing. No completion was inferred from it.
+
+The final source/Bridge gate is revisited for a diagnosed changed build cause:
+the original cold5400s run stopped after806/981jobs, whereas its remaining core
+971job closure, native targets and262job TestSuite subsequently passed in saved
+separate bounded runs. This recovery has now built/replayed the complete core
+and newly restored external closure in actual four-target Bridge builds. Those
+materialized shared products change the original cold-gate condition; this is
+not an unchanged timeout retry or a larger budget. The original exit124 and
+separate historic outputs remain immutable. A fresh bounded run uses the same
+5400s global/300s per-file/12GiB/no-swap limits and task-local exact config copies
+that only add-j1/--tstack131072. It checks default source targets, TestSuite,
+all four Bridge targets and actual SolKey annotations; no result is assumed.
+
+G46.01-.06/G47 remain incomplete, all150 opcode rows/secondary clauses OPEN.
+Metadata decoder/code association and production compiler paths, physical
+read-value/padding/allocator/calldata, approved hash/crypto target adapters,
+actual Osaka/fork/resource/general V13/V14 and account/call/create/transaction/
+finite-infinite trace composition remain explicit prerequisites. The six
+supplied environment/balance instruction families, three supplied metadata PUSH
+forms and concrete one-store fetched driver checkpoint do not close those.
+
+
+Metadata/final checkpoint gate/handoff: actual `timeout 5400 ./run-lean.sh --bridge`
+PASSES in8.666s with982default-target jobs,262TestSuite jobs,2160Bridge jobs (all
+four configured targets), and actual SolKey377parsed/131read-bearing/131covered
+annotations match. Cgroup peak383291392bytes, memory.max12884901888/swap.max0;
+no guard violation. The prior cold exit124 remains historical failure, not a
+current failure or waived gate. Runtime copies preserve original configuration
+and package pins; root/Bridge command dispatch only selects their exact task-local
+configs with weak-j1/tstack flags. Layer/orphan/trust/whitespace and original32
+mutation checks pass; all150 raw opcode rows still OPEN, source accounting never
+certifies execution. Global docs remains rawexit1 with46missing/37ambiguous;
+complete finding/multiplicity comparisons against frozen and published baselines
+have zero additions. The newly meaningful consumer milestones were independently
+reviewed read only, without reviewer Lean/server/builds. Final exact-head artifacts
+and post-seal checks are separate from these kernel/structural gates.
+
+The original full goal remains BLOCKED by semantic producer/composition work,
+not a cache or current import-gate failure: G46.01 actual Osaka numeric/control;
+G46.02 physical read-value/allocator/padding/compiler paths/calldata and general
+memory/driver resources; G46.03 symbolic persistent/transient slots; G46.04 general
+metadata decoder/compiled-code/source-world association and resources; G46.05
+actual target hash/crypto/precompile agreement under only approved per-run
+CollisionFree/RegionsDisjoint; G46.06/G47 general approved Osaka/resource and
+production V13/V14 arbitrary-callee/account/call/create/return/revert/fee/nonce/log/
+rollback/transaction/finite-infinite trace composition. BackfillA/B retain the
+same outstanding execution clauses; their112 checked consumer laws, existing
+prefix/hash/checkpoint helpers and150-row exact obligation accounting do not
+close the lane. PaddingCorrect has no inhabitant supplied; no allocator axiom or
+approval is requested. QOFF1/QOFF2 archive supplies are fulfilled; endpoint403
+repair remains unverified, but it no longer blocks the checked mandatory imports.
+Historical raw failures and the disclosed lost early unsealed retry text/timing
+remain retained/explicit; that retention requirement is not called passed.
+
+Final runtime review: independent finder corrected the metadata boundary unit from32bit-width to32-byte width (256bits); actual theorem/controls were already correct. Both runtime reviewers verified the complete gate log, exact configs and null monitoring violation; no other finding. Final artifact reviews follow the committed-head export separately.

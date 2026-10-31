@@ -1256,3 +1256,8 @@ pass. This is pure encoding/observation evidence, not machine correspondence.
 | `Bridge/SolidityBridge/ExternalEvm/TryMemoryDriver.lean` | Exact read-only published4165de13 producer: actual decode/fetch/positive-fuel step and zero-fuel components, separate from X admissibility. |
 | `Bridge/SolidityBridge/RoadmapV15/CompiledStoreCheckpoint.lean` | Five checked concrete PC4 decode/gate/supplied/fetched/X-continuation consumers, discharged9+3 charge; no reachability/padding/whole-execution/Osaka closure. |
 | `Bridge/SolidityBridge/RoadmapV15/CompiledStoreControls.lean` | Both actual complete runtime inputs, exact checkpoint tuple, gas12/11/8, static/underflow/zero-fuel/wrong-opcode and distinct-code controls; five axiom audits. |
+
+| Module | Role |
+|---|---|
+| `Bridge/SolidityBridge/RoadmapV15/MetadataReference.lean` | Four bounded actual reference-reader/canonical selector/ABI/packed-function supplied-PUSH consequences, preserving widths/alignment/tails/PC; no resolver/fetch/resources/Osaka closure. |
+| `Bridge/SolidityBridge/RoadmapV15/MetadataReferenceControls.lean` | Complete emitted/reference lists, width0/32max, alignment/endian/length negatives, intrinsic receiver, metadata/argument/fuel refusal and four axiom audits. |

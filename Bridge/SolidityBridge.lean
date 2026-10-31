@@ -75,3 +75,6 @@ import SolidityBridge.ExternalEvm.TryMemoryCode
 import SolidityBridge.ExternalEvm.TryMemoryDriver
 import SolidityBridge.RoadmapV15.CompiledStoreCheckpoint
 import SolidityBridge.RoadmapV15.CompiledStoreControls
+
+import SolidityBridge.RoadmapV15.MetadataReference
+import SolidityBridge.RoadmapV15.MetadataReferenceControls
