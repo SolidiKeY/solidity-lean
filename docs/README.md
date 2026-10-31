@@ -102,3 +102,5 @@ history is in git.
 | Preparation lane | Document |
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
+
+- [V16 correctness and transfer](feature-work/roadmap-v16-correctness.md): conditional transport backfill, controls and unresolved compiler-composition prerequisites.

@@ -885,3 +885,6 @@ import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.SignedPower
 import Solidity.Backend.Scalar.SignedPowerPost
 import Solidity.Backend.Scalar.SignedPowerPrefix
+
+import Solidity.Roadmap.V16.Transport
+import Solidity.Roadmap.V16.TransportControls
