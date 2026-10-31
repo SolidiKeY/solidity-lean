@@ -215,6 +215,26 @@ class ProvenanceTests(unittest.TestCase):
             proc.kill.assert_called_once()
             self.assertTrue(p.UNRESOLVED.exists())
 
+    def test_created_running_exited_monitor_uses_required_pid_column(self):
+        with tempfile.TemporaryDirectory() as external:
+            out=Path(external)/'collection'
+            (self.root/'lakefile.toml').write_bytes(b'config')
+            proc=MagicMock(); proc.poll.return_value=0; proc.wait.return_value=0
+            states=iter([b'created',b'running',b'exited'])
+            def docker(*args,**kwargs):
+                self.assertGreater(kwargs.get('timeout',0),0)
+                if args[0]=='create': return SimpleNamespace(stdout=b'owned-container')
+                if args[0]=='inspect': return SimpleNamespace(stdout=next(states))
+                if args[0]=='top':
+                    self.assertEqual(args[-1],'pid,comm,rss')
+                    return SimpleNamespace(stdout=b'PID COMMAND RSS\n1 lean 10\n')
+                return SimpleNamespace(stdout=b'')
+            with patch.object(p,'ROOT',self.root), patch.object(p.e,'snapshot',return_value=self.current), \
+                 patch('shutil.which',return_value='/usr/bin/true'), patch.object(p,'docker',side_effect=docker), \
+                 patch.object(p.subprocess,'Popen',return_value=proc):
+                self.assertEqual(p.collect(SimpleNamespace(out=out,gate='warm-compiler')),0)
+            self.assertEqual(e.load(out/'samples.json'),[{'rssBytes':10240,'leanWorkers':1}])
+
     def test_unresolved_container_refuses_another_collection(self):
         p.UNRESOLVED.write_text(json.dumps({'container':'roadmap-v17-'+'a'*32}))
         with patch.object(p,'docker',return_value=SimpleNamespace(stdout=b'running')):

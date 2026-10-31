@@ -297,3 +297,12 @@ No upgrade, re-pin, replacement generator, fixture/assertion change or callback
 exclusion occurred. The next bounded actual operation is the published
 `solcases` target; its outcome and any subsequent same-revision published runner
 execution must remain separate from synthetic controls and all universal proofs.
+
+The first actual collector smoke at `d64ec9c63aa4cfd8dee82b6c577e037ce71f97e8`
+retained exit 125 before the build began: Docker rejected monitor output without
+a PID column (`Couldn't find PID field in ps output`). Its raw structured
+failure remains in `/workspace/scratch/v17-recovery/generator-build`. Container
+and configuration cleanup completed. The monitor now requests PID/command/RSS,
+with an added created→running→exited lifecycle regression. Retrying this changed
+collector is not repeating an unchanged failed Lean operation. No build failure
+was relabeled or erased.

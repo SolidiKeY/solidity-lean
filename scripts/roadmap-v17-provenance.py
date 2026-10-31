@@ -221,13 +221,13 @@ def collect(args):
                     code = proc.wait(timeout=remaining()); break
                 if state == 'running':
                     try:
-                        top = docker('top',cid,'-eo','comm,rss',timeout=remaining()).stdout.decode().splitlines()[1:]
+                        top = docker('top',cid,'-eo','pid,comm,rss',timeout=remaining()).stdout.decode().splitlines()[1:]
                     except subprocess.CalledProcessError:
                         # Re-inspect a possible rapid exit, retaining the error if still running.
                         if docker('inspect','--format','{{.State.Status}}',cid,timeout=remaining()).stdout.decode().strip() == 'running': raise
                         continue
-                    entries = [line.split() for line in top if len(line.split()) == 2]
-                    samples.append({'rssBytes':sum(int(x[1])*1024 for x in entries), 'leanWorkers':sum(x[0]=='lean' for x in entries)})
+                    entries = [line.split() for line in top if len(line.split()) == 3]
+                    samples.append({'rssBytes':sum(int(x[2])*1024 for x in entries), 'leanWorkers':sum(x[1]=='lean' for x in entries)})
                 elif state != 'created':
                     raise ValueError('unexpected container state: ' + state)
                 remaining(); time.sleep(0.05)
