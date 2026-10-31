@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "scope": "Source-bound metadata for finite recognizer controls only. Separate Lean kernel/axiom gate required; no assembly composition coverage.",
+  "file": "tests/yul-composition/RethrowControls.lean",
+  "sourceSha256": "a24cb0978c8c4f485f460be6565c77a7b55344dac769cb65c4ed94b4166da417",
+  "proofs": [
+    {
+      "declaration": "Solidity.Yul.Composition.RethrowControls.extra_statement",
+      "signature": "memoryRethrow? [dataDecl] (block [stmt 32, stmt 32] [ref 7, ref 7]) = none",
+      "kind": "finite-recognizer-refusal"
+    },
+    {
+      "declaration": "Solidity.Yul.Composition.RethrowControls.different_names",
+      "signature": "memoryRethrow? [dataDecl] (block [stmt 32 \"other\"] [ref 7, ref 7]) = none",
+      "kind": "finite-recognizer-refusal"
+    },
+    {
+      "declaration": "Solidity.Yul.Composition.RethrowControls.malformed",
+      "signature": "memoryRethrow? [dataDecl] (Json.mkObj []) = none",
+      "kind": "finite-recognizer-refusal"
+    }
+  ],
+  "runtimeGuards": 7,
+  "dependency": {
+    "file": "Solidity/Frontend/SolcJson/Body.lean",
+    "sha256": "5cec4f4e367d697899fca3f9adcb989cf92c744e50d0a7be2904f3a6f3389a76"
+  },
+  "assemblyObligationsClosed": []
+}

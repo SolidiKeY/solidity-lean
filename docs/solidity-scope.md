@@ -343,3 +343,25 @@ An upstream hash/symbol change requires a new review and explicit ledger
 updates; the checker never assigns newly discovered syntax a default scope.
 The normal CI check verifies generated-file consistency without downloading
 upstream sources.
+
+
+## Inline assembly decisions (2026-10-31)
+
+The human authorized reopening tiers A–C through lanes VY1–VY5 and answered
+exactly: **“Approve these choices for all five lanes”**. This supersedes the
+assembly proposal's pending YQ1–YQ7 wording, while preserving earlier decisions
+outside this authorized extension. Authorization does not establish support.
+
+| ID | Approved direction |
+|---|---|
+| YQ1 | Reopen inline assembly tiers A–C through all five lanes. |
+| YQ2 | Refuse `gas`, `msize`, `pc` and own-code `codesize`/`codecopy` at admission. Compiler-dependent observations remain excluded. |
+| YQ3 | Permit nondeterministic valid allocation addresses satisfying the documented layout; require a refinement theorem and explicit G01 amendment (VY2). |
+| YQ4 | Preserve dirty high bits as solc does in each pipeline; record differences rather than silently cleaning or refusing them. |
+| YQ5 | Accept Yul calculus rules as explicitly marked Lean-only extensions without SolKey taclets. |
+| YQ6 | Observe Yul logs and Solidity `emit` together; require the G01 amendment (VY4). |
+| YQ7 | Refuse non-memory-safe assembly, preserving the pre-existing canonical whole-buffer rethrow exception. |
+
+Affected manifest exclusion rows describe actual admission until reviewed
+implementation supplies its evidence. VY5's [composition backfill](feature-work/inline-assembly-vy5.md)
+changes no admission, observations, feature status, proof budget or prerequisite.

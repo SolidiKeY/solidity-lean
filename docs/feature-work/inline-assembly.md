@@ -147,3 +147,18 @@ that growth is counted in VY3/VY4, not in V10–V15.
 
 None yet. Each checkpoint appends its handoff here (revision, theorems and
 premises, checks, remaining obligations).
+
+
+### VY5 partial backfill handoff (2026-10-31)
+
+The [VY5 lane record](inline-assembly-vy5.md) and
+[G03 assembly extension](../../tests/yul-composition/ledger.json) record pinned
+inventory/extraction, both-pipeline compiler/reference probes, combination and
+negative controls, exact pending child/dependency rows and independent reviews.
+Base `0b078cefaf7daad79007b87b72df64eb6936420f`; branch
+`codex/solidity-inline-assembly5-20261031/vy5-composition`.
+Full committed head and artifacts are in `/workspace/vy5-composition/handoff.json`.
+Y10/G48–G51 concrete composition, complete G52 observations and final joint
+proof closure remain pending actual V16/VY3/VY4 and other recorded inputs.
+The authorization is recorded in [scope](../solidity-scope.md#inline-assembly-decisions-2026-10-31);
+the older proposal status above is historical, not a revocation of YQ1–YQ7.

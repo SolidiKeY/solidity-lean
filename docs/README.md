@@ -103,3 +103,8 @@ history is in git.
 | Preparation lane | Document |
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
+
+
+| Assembly lane | Document |
+|---|---|
+| VY5 composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |
