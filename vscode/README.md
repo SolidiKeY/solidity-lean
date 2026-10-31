@@ -103,3 +103,13 @@ internal sandbox to be disabled.
 This extension provides source verification results. General Solidity completion,
 navigation and syntax highlighting can come from another Solidity language
 extension. Lean source files retain the Lean extension's proof-authoring tools.
+
+## Dafny differential tests
+
+The optional real-editor comparison harness runs equivalent Solidity and Dafny
+verification scenarios, records editor/LSP observations, and measures repeated
+latency and worker-count trials. See
+[the harness guide](../docs/dafny-editor-parity.md) for pinned dependencies,
+commands, report formats and known gaps. `npm run parity:check` validates the
+source inventory offline; `npm test` includes harness regression tests. This
+comparison does not establish full feature or solver parity.

@@ -12,7 +12,7 @@ function createExtension(vscode, context, backend = runBackend) {
   const diagnostics = vscode.languages.createDiagnosticCollection('solidity-lean');
   const controller = vscode.tests.createTestController('solidityLean', 'Solidity Lean');
   const output = vscode.window.createOutputChannel('Solidity Lean');
-  const active = new Map(), reports = new Map(), metadata = new Map();
+  const active = new Map(), saving = new Map(), reports = new Map(), metadata = new Map();
   let discoveryVersion = 0;
   const key = uri => uri.toString();
   const isSolidity = doc => doc?.uri.scheme === 'file' && extname(doc.uri.fsPath).toLowerCase() === '.sol';
@@ -25,9 +25,10 @@ function createExtension(vscode, context, backend = runBackend) {
     return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false), counterexamples: cfg.get('counterexamples', false) };
   }
   function cancel(uri) {
-    if (uri) active.get(key(uri))?.abort();
+    if (uri) { saving.delete(key(uri)); active.get(key(uri))?.abort(); }
     else {
       discoveryVersion++;
+      saving.clear();
       for (const job of active.values()) job.abort();
     }
   }
@@ -76,8 +77,23 @@ function createExtension(vscode, context, backend = runBackend) {
     if (!vscode.workspace.isTrusted) throw new Error('Verification requires a trusted workspace');
     if (!isSolidity(doc)) throw new Error('Open a Solidity file on disk to verify');
     const cancellationVersion = discoveryVersion;
-    if (doc.isDirty && !(await doc.save())) throw new Error('Save the Solidity file before verification');
-    if (cancellationVersion !== discoveryVersion || options.token?.isCancellationRequested) return null;
+    const request = {}, requestId = key(doc.uri);
+    saving.set(requestId, request);
+    try {
+      const superseded = () => saving.get(requestId) !== request || cancellationVersion !== discoveryVersion || options.token?.isCancellationRequested || doc.isClosed;
+      let attempts = 0;
+      while (doc.isDirty) {
+        const saved = await doc.save();
+        if (superseded()) return null;
+        if (!saved) throw new Error('Save the Solidity file before verification');
+        // VS Code can resolve a joined save for an older buffer snapshot.
+        // Complete the current save before capturing the backend's source hash.
+        if (++attempts >= 3 && doc.isDirty) throw new Error('The Solidity file is still changing; retry verification after saving');
+      }
+      // Edits, closure, cancellation or a newer request can supersede this
+      // request while VS Code is saving, before an active backend exists.
+      if (superseded()) return null;
+    } finally { if (saving.get(requestId) === request) saving.delete(requestId); }
     const config = settings(doc);
     const id = key(doc.uri), version = doc.version, text = doc.getText();
     cancel(doc.uri);

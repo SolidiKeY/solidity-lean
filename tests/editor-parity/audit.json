@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "fullParityEstablished": false,
+  "upstream": {
+    "extension": "1a329b121ef66f2c8be8ca2c28eda437040042eb",
+    "server": "fcb2042d6d043a2634f0854338c08feeaaaf4ae2"
+  },
+  "independentDiscovery": {
+    "method": "A separate read-only reviewer inspected upstream source, manifest, documentation and tests before reading the first inventory.",
+    "initialEntries": 71,
+    "reconciledEntries": 88,
+    "addedFamilies": [
+      "Runtime-only status-bar command",
+      "Project discovery, ownership, includes and solver options",
+      "Parse, resolution and verification diagnostic distinctions",
+      "Member and attribute completion",
+      "Language editing configuration",
+      "Assertion-batch hover costs",
+      "Testing exclusions and queued/running/stale transitions",
+      "Cache migration, fairness and resource contention",
+      "Concurrent interactions and thread retention",
+      "Plugin handlers, startup failures and assertion splitting"
+    ],
+    "evidence": "docs/dafny-editor-features.json",
+    "limitation": "Source discovery does not establish local runtime support. No additional runtime passes were awarded by the audit."
+  },
+  "finderReview": [
+    {
+      "finding": "Successful exit could reuse stale host evidence",
+      "resolution": "Per-launch identity and structured result validation",
+      "regression": "offline parity launcher rejects stale success"
+    },
+    {
+      "finding": "Detached verifier could survive normal editor exit",
+      "resolution": "Terminate sampled owned survivors with PID/start-time identity checks before starting another trial",
+      "regression": "a normal editor exit cannot leave a sampled detached verifier in the next trial"
+    },
+    {
+      "finding": "Scenario timeouts were hidden by aggregate broken status",
+      "resolution": "Preserve timeout status and timeout rate",
+      "regression": "a scenario timeout survives a successful editor exit in machine summaries"
+    },
+    {
+      "finding": "Missing and empty observations counted as passes",
+      "resolution": "Separate partial, missing and unexamined outcomes; require actual counterexample evidence"
+    },
+    {
+      "finding": "Final renderer capture could outlive a trial",
+      "resolution": "Track and await the capture task; label screenshots as end-of-run observations"
+    },
+    {
+      "finding": "Instrumentation changed execFile custom promisify behavior",
+      "resolution": "Preserve original identities except the observed spawn function",
+      "regression": "child-process observation preserves custom promisify semantics and excludes unrelated extensions"
+    },
+    {
+      "finding": "Long artifact paths could exceed the Unix socket-path limit",
+      "resolution": "Store editor state under a short temporary root and retain failed attempts",
+      "regression": "long artifact paths do not become long editor IPC/profile paths"
+    }
+  ],
+  "extensionFix": {
+    "finding": "An edit or newer request during an asynchronous save could let an obsolete request start verification",
+    "resolution": "Track pending-save request identities, invalidate them on edits/closure/cancellation/new requests, bound save retries, and require a clean buffer",
+    "source": "vscode/src/extension.cjs",
+    "tests": "vscode/test/extension.test.cjs",
+    "preservedInvariant": "Exact backend/editor source-hash equality remains mandatory",
+    "remainingBoundary": "VS Code 1.108 can report a newer buffer clean after writing older bytes. The live scenario records both hashes and uses explicit editor Save for recovery; automatic persistence recovery remains partial."
+  },
+  "concurrencyAddendum": {
+    "repository": "boogie-org/boogie",
+    "version": "3.5.5",
+    "commit": "d90c6c9ef7e0e244cef55ddd0557e28a1a1301d8",
+    "source": "Source/ExecutionEngine/ExecutionEngine.cs:55",
+    "finding": "Each ExecutionEngine creates its own checker pool and VcsCores semaphore. Dafny ProjectManager.GetBoogie owns an engine per project, so whole-server multi-project activity is not a global worker-count cap.",
+    "runtimeScope": "CPU-active process counts cover the entire suite, including concurrent projects, cancellation and restart; they do not establish exact simultaneous instructions."
+  },
+  "remainingWork": [
+    "General completion, navigation, rename, formatting and code actions in the local extension",
+    "Dafny custom LSP methods, gutter and positioned model traces",
+    "Persistent local verification caches and configurable within-file worker scheduling",
+    "Solver-quiescence cancellation, complex long-running proofs and assertion-split scaling",
+    "Comprehensive project, configuration, restart and visual-theme scenarios"
+  ]
+}
