@@ -2739,3 +2739,87 @@ be justified for a canonical signature; do not silently assume it or add an ASCI
 source-profile cap. Concrete ASCII declarations can discharge it, while general
 canonical signature/representation applications remain open. No exclusion or
 semantic choice is inferred from this investigation.
+
+
+## Actual custom-error execution and signature inputs (2026-10-31)
+
+After source callable and free/library checkpoints, original G21 independent
+work continues. SourceCustomErrors executes the PUBLISHED execS.revertError
+argument-conversion then encoding then selector++data halt boundary. Individual
+actual step equations are explicit, with complete exact final state; no target
+preservation, new interpreter, decoder or generic payload emitter. The branch
+has no emit-style static empty-revert guard. Effects/errors outside this fragment
+and catch/runtime/SourceSpec composition remain open.
+
+A concrete current representation gap is reproduced: Glob.selector hashes
+asciiBytes of signature characters, while Source.selector hashes String UTF8.
+selector_of_bytes bridges to existing Semantics.customSelector/selectorBytes
+ONLY with independent input-byte equality and the existing global.fixed.Keccak
+contract. It never assumes the desired hash/output equality or injectivity.
+Concrete Bad(bytes32,bool,bool) uses a kernel ByteArray unfolding proof to
+establish the UTF8 bytes and exact input equality. A pure non-ASCII input
+counterexample shows why that premise cannot simply disappear; this does not
+claim an admitted Unicode identifier or introduce an ASCII source-profile cap.
+General canonical signature/admission/representation evidence remains required.
+
+SourceCustomErrorControls retains every old populated observation and actual
+member error declaration. Real binary hash allocation, local=false and dependent
+readfalse execute under both pipelines/static modes, followed by real encodeVals.
+Raw error data is exactly4selectorbytes+96orderedstaticABIbytes(length100), with
+oldheap0/newheap1/next2 and complete ex/events/logs/fnLocals retained. The error
+outer locals are L0; the actual argument step's changed locals and complete typed
+values are separately checked. Actual reordered arguments yield different actual
+custom-error payloads via shared-prefix cancellation, without any collision
+assumption. Static true still returns this nonempty custom payload rather than
+plain revert. Real argument divisionzero after allocation returns panic0x12
+before payload construction; zero and insufficient argument horizons are timeout.
+No direct wrong-signature hash-noncollision control, general nested/reference/
+calldata/slice/custom-error catch decoder, or actual target body emission is
+claimed. The selector-only intrinsic observation keeps actual source ABI data;
+canonical all-type/body/frame/layout transport remains open.
+
+All693 prior precise axiom sets remain unchanged;26 new kernel-checked sets make
+719. Registered76535 PASS51.336456357s, aggregate sampledRSS1286197248,
+reported cgrouppeak623230976; actual Lean4.24.0/Lake5.0.0-src+797c613 and passing
+lake build Solidity.KeySort2jobs retained. Original200000heartbeat failures in
+broad contradiction search were fixed by targeting the explicit Nat100≠0 fact;
+no proof/time budget increased. UTF8 literal kernel reduction follows the
+existing ByteArray pattern, no native shortcut or trusted implementation.
+
+The full corruption suite runs ALL40 ORIGINAL AST cases, mutations and expected
+outcomes unchanged through the unchanged production checker. Only check's I/O
+is streamed as the identical expanded JSON to/dev/stdin; persistent exact seed
+SHA, type-sensitive delta/replay-byte equality, expanded SHA and raw output
+preserve complete reproducibility without40redundant full JSON copies. The
+initial generated-string syntax failure remains exit1 in its original log;
+corrected replay executes all40 cases(positive+39rejections). No test/guard/case/
+target omission. Both reviewers inspected this harness before execution; final
+provenance includes harness/originaltest/checker/seed and everycompactfixture.
+This is transient test input, not moving source/toolchain/cache onto tmpfs.
+
+Every original G20,G21,G22.01-.05,G23 and bothBackfills stayPARTIAL. Actual source
+fragments now exist and are used, but SourceSpec/canonicalV07/type/layout/ABI/
+body/linkage/runtime-frame/bytecode/admission, reserved getter/ref/readonly/decoder
+and general Source/world applications remain open. Mandatory full/Decision125,
+literal-wrapper and rawglobaldocs/pins failures remain honest; no identical
+retry or new scope/exclusion/premise approval. No source/profile/Fml.inTarget,
+axiom, fuel/node/test/time/resource change, externalcompiler/EVM adequacy or
+independent-exhaustion claim. Existing blocked goal unchanged; get_goal/LeanMCP
+unavailable. Third24MiB storage forecast remains within original96MiB turn
+forecast, same stoppedruntime/warmoutputs, cacheoff and12GiB/no-swap/CPU1/serial
+Lean-j1/600s bounds. All old files/seals/failing logs are preserved.
+
+Final binding719precisesets/71coreclosure PASS; ALL40 streamed corruption cases
+(positive+39rejects), currentcustomwrapper9+24priorcertcorruptions and every
+historical/currentfixture/profile/runtime suite PASS. Initial harness parser
+FAIL1 remains separately recorded; generated-code raw string fix and exact
+JSON replay checks PASS. Trust1055sources/246sites/0findings; strict491/61budget/
+11refuted/0pending; layers172/0; orphans1040/0; ownedwhitespace0. Rawdocs task/
+public1/1 with83equalfindings, rawpins1/1 with359equalnotes, separatePUBLIC NEW0
+PASS andfrozen+11/+345 FAIL retained. Decision321/Suite260 dependency sources
+remainunchanged; no identicalmandatoryretry. No new evidence discharges full/
+default/literal-wrapper gates, SourceSpec or canonical source-to-Entry contracts.
+Remaining ready G21 work includes general argument/encoding failure composition,
+direct wrong-selector concrete controls and supported nested/reference/catch
+applications; canonical signature/type/layout/source-world certificates stay
+prerequisites. These three checkpoints do not exhaust the original assignment.

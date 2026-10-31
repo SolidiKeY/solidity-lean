@@ -72,3 +72,10 @@ for module in ['SourceDispatch','SourceDispatchControls']:
  result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
  result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
 print('PASS: source dispatch evidence corruption controls rejected')
+
+for module in ['SourceCustomErrors','SourceCustomErrorControls']:
+ path='Solidity/Lowering/V08/'+module+'.lean'
+ assert path in original['source_sha256']
+ result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
+ result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
+print('PASS: source custom-error evidence corruption controls rejected')

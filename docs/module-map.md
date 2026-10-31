@@ -1261,3 +1261,6 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/SourceDispatch.lean` | Published source free/outside-linearization selection and body lookup laws. |
 | `Lowering/V08/SourceDispatchControls.lean` | Actual free/internal-library ambient context calls, real competing body, repeated reached calls, full state and independent intrinsic observations. |
+
+| `Lowering/V08/SourceCustomErrors.lean` | Actual custom-error execution and selector transport with explicit independent signature input-byte equality. |
+| `Lowering/V08/SourceCustomErrorControls.lean` | Populated exact custom-error payload/order/static/panic/timeout controls and concrete UTF-8 signature checks. |

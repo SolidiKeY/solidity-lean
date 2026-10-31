@@ -911,3 +911,5 @@ import Solidity.Lowering.V08.SourceCallable
 import Solidity.Lowering.V08.SourceCallableControls
 import Solidity.Lowering.V08.SourceDispatch
 import Solidity.Lowering.V08.SourceDispatchControls
+import Solidity.Lowering.V08.SourceCustomErrors
+import Solidity.Lowering.V08.SourceCustomErrorControls
