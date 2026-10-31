@@ -852,3 +852,13 @@ pass;12 opcode-accounting plus18 reference-boundary tests pass. Raw docs exits
 remain1: current/frozen46missing37ambiguous; publication48missing37ambiguous.
 Complete class/multiplicity comparisons add zero findings against either
 baseline. This is a no-new-findings pass, not a global documentation pass.
+
+Artifact review refinements: the independent finder verified the actual committed
+patches, bundle/ref, source snapshot and theorem inventory. The skeptic corrected
+two export metadata descriptions: this lane supplies no PaddingCorrect inhabitant
+or negation proof, so the new handoff states only that no published/supplied
+witness is available; G46/G47 names are work-package IDs, while feature IDs come
+from the actual existing opcode-obligation/G03-ledger report (168 entries, all
+coverage obligations still open). These artifact corrections change no theorem,
+profile, approved premise, ledger or proof status. Final seal follows the reviewed
+exact-head export; archive/checksum verification is a separate gate.
