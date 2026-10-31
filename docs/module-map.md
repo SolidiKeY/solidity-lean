@@ -1220,3 +1220,6 @@ At the root, the notation's own tests:
 | `Backend/Executable/PatchedPayloadChecks.lean` | Actual patched numeric behavior, opcode/args, overlap, unresolved/missing-link and bounds controls. |
 
 | `Backend/Executable/SourceJournal.lean` | Published independent source-journal funded transfer, nested/committed rollback composition and typed controls. |
+
+| `Backend/Executable/SourceInitializers.lean` | Published source initializer/argument/collection prefixes preserve exact full EM state and halt. |
+| `Backend/Executable/SourceInitializerChecks.lean` | Existing inheritance initializer fixture cuts/order, successful source deploy tags, static and argument failure controls. |

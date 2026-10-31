@@ -121,18 +121,21 @@ test("comment markers in quoted identifiers cannot hide declarations", () => {
 
 
 test("published pure source-world reads are permitted but reserved writes are not", () => {
-  const world = "Solidity.Source.World", state = "Solidity.Source.State";
-  const sources = new Map([[name, `import ${world}\n`], [world, `import ${state}\n`], [state, ""]]);
-  const graph = new Map([[name, [world]], [world, [state]], [state, []]]);
-  assert.equal(analyzeSources(sources, `import ${name}\n`, graph).failures.length, 0);
+  for (const world of ["Solidity.Source.World", "Solidity.Source.Semantics", "Solidity.Source.SemanticsExamples"]) {
+    const state = "Solidity.Source.State";
+    const sources = new Map([[name, `import ${world}\n`], [world, `import ${state}\n`], [state, ""]]);
+    const graph = new Map([[name, [world]], [world, [state]], [state, []]]);
+    assert.equal(analyzeSources(sources, `import ${name}\n`, graph).failures.length, 0);
+  }
   assert.ok(scopeFindings(["Solidity/Source/World.lean"]).length);
 });
 test("allowed source dependencies cannot hide forbidden raw imports in filtered graphs", () => {
   for (const bad of ["Bridge.Hidden", "Solidity.Frontend.Hidden", "Lean.Elab", "Solidity.Source.Unpublished"]) {
-    const world = "Solidity.Source.World";
-    const sources = new Map([[name, `import ${world}\n`], [world, `import ${bad}\n`]]);
-    const filtered = new Map([[name, [world]], [world, []]]);
-    assert.ok(analyzeSources(sources, `import ${name}\n`, filtered).failures.some(x => x.includes("forbidden raw dependency")), bad);
+    for (const world of ["Solidity.Source.World", "Solidity.Source.Semantics"]) {
+      const sources = new Map([[name, `import ${world}\n`], [world, `import ${bad}\n`]]);
+      const filtered = new Map([[name, [world]], [world, []]]);
+      assert.ok(analyzeSources(sources, `import ${name}\n`, filtered).failures.some(x => x.includes("forbidden raw dependency")), bad);
+    }
   }
 });
 test("published source graph edges remain independently checked", () => {

@@ -29,3 +29,23 @@ the actual guard helpers, including a real isolated Git rename/untracked census;
 zero modules and skipped scans are failures, not passing controls. The source
 scanner conservatively refuses unsupported owned interpolation/quoted-identifier
 forms; it is independent of the Solidity admission profile.
+
+
+Further recovery targets, checked serially with the same runtime configuration,
+are `Solidity.Backend.Executable.ScalarArtifactChecks`,
+`Solidity.Backend.Executable.WorldPrefixChecks`,
+`Solidity.Backend.Executable.LocalFrameChecks`,
+`Solidity.Backend.Executable.CreationAttempt`,
+`Solidity.Backend.Executable.PatchedPayloadChecks`,
+`Solidity.Backend.Executable.SourceJournal` and
+`Solidity.Backend.Executable.SourceInitializerChecks`. Source semantics are
+permitted read-only through an exact pure dependency allowlist; all raw and
+published edges and reserved-write boundaries remain checked. The guard tests
+now pass17/17 (with multiple approved-root cases), zero skips. Run filesystem
+fixture tests with write access to their temporary directory.
+
+Source-journal installation is an account update, not Source.deploy; the
+initializer controls separately execute existing source deploy and preserve
+legacy/viaIR order. Standalone base-argument metadata is not Program.Derived
+or constructor argument lowering. Published source fixtures use toyFixed;
+no Keccak, account-byte or pinned-EVM agreement follows from these controls.

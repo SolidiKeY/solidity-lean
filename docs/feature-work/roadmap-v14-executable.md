@@ -718,3 +718,76 @@ pre-rollback committed state has source nonce9 and six journal entries. This
 makes the later-write leg nontrivial; rollback still restores the earlier
 complete source state. Guard finder/skeptic accepted the exact pure closure,
 read-only ownership boundary and17/17 meaningful no-skip regressions.
+
+
+## Recovery checkpoint: actual source initializer and argument prefixes
+
+[SourceInitializers](../../Solidity/Backend/Executable/SourceInitializers.lean)
+consumes existing `runInits`, `giveArgs`, `collectArgs` and the existing EM
+monad. `inits_append`, `arguments_append`, `collect_append` are unconditional
+finite-prefix equalities over the original intrinsic resolved lists. They
+preserve all actual source-state effects; no second evaluator is introduced.
+`inits_success` consumes the exact actual successful prefix equation and feeds
+its complete Locals×St to the suffix. `inits_failure` and `arguments_failure`
+consume an exact actual failure equation and retain both complete state and
+Halt without executing the suffix. Rollback, completion and compiler
+simulation are separate obligations; arbitrary Halt includes source timeout.
+
+[Controls](../../Solidity/Backend/Executable/SourceInitializerChecks.lean)
+reuse the published A/B inheritance fixture read only. Both initializer lists
+are nonempty; A then B stores1/1 while B then A stores1/0. The actual successful
+intermediate source state discharges the general cut law. A static first
+initializer actually reverts empty, blocks the nonempty suffix and leaves both
+values zero. Successful source deployment result tags are now proved for BOTH
+legacy and viaIR at the existing20horizon, and actual code/nonce installation
+is observed. The reused storage observations distinguish legacy1 from viaIR2;
+they are no longer described as success witnesses without checking result tags.
+
+Positive standalone base-argument metadata is zero-parameter, records baseA
+once and skips the duplicate. It is explicitly not asserted equal to
+GAB.prog.baseArgs nor evidence of Program.Derived/source argument lowering.
+A deliberately bad-arity typed standalone negative evaluates division-zero
+arguments before the later parameter-shape refusal; its exact panic bytes and
+full source state block the suffix. These are component negatives, not admitted
+constructor witnesses or new profile exclusions. The nonempty base-collection
+prefix also consumes its published-program list law. Existing source fixtures
+use toyFixed: no Keccak, library/session or EVM deployment agreement is claimed.
+
+Ten guarded headline/control axiom outputs retain standard Lean subsets.
+Initial missing cache, redundant split steps, ExceptT representation and
+Except-equality decision failures remain in raw logs. Actual bind-continuation
+state transport and kernel-checked status projections fix them without raising
+recursion, heartbeats, horizons, fuel, search or test budgets. Cold published
+source closures stayed serial under the cap (605MiB and1264MiB sampled peaks,
+zero OOM), with original raw failures retained.
+
+The guard allowlist now exactly matches the pure published Source.SemanticsExamples
+closure:22 Source modules,26 total including the four existing pure Hash/Keccak/
+Roadmap dependencies. Source.Elaborated is a typed pure representation;
+Source.Elaborate, Frontend, Lean.Elab and unknown Source remain forbidden.
+Every raw and published edge and reserved-write fence still runs. Regression
+cases now cover World, Semantics and SemanticsExamples reads and hidden bad
+edges behind both World and Semantics; no scan/test is skipped. This is import
+audit, not compiler source admission. Independent separate proof and guard
+finder/skeptic reviews found no defect; their successful-deployment-tag and
+standalone/toy-fixture caveats are implemented.
+
+| Checkpoint9 command | Evidence |
+|---|---|
+| `lake -f v14-runtime.lakefile.toml build Solidity.Backend.Executable.SourceInitializerChecks` | PASS29jobs; `/workspace/v14-recovery-evidence/source-initializer-pins.log` |
+| Fresh `lake -f v14-runtime.lakefile.toml env lean -j1 --tstack=131072` on SourceInitializers and SourceInitializerChecks, each180second limit | Fresh2files PASS,1worker392MiB/noOOM; `/workspace/v14-recovery-evidence/source-initializer-fresh.log` |
+| `node --test tests/v14-executable/guard.test.mjs` | PASS17/17,0skips; `/workspace/v14-recovery-evidence/initializer-guard-tests.log` |
+| Static lane/layer/orphan/trust/whitespace/docs commands | `/workspace/v14-recovery-evidence/checkpoint9-checks.json`; raw docs46/1 distinct from exact-base no-new |
+
+All Work/Backfill obligations remain as in the queue. Existing Source.construct/
+deploy and old Bridge loop transport are published; missing relations are the
+actual compiler/frame/world and NEW Backend-output decoder/layout/state
+producers, not absent source semantics or permission to replace reserved code.
+The final unchanged repository gate follows this checkpoint after the identified
+independent recovery work; missing parent proofs are never counted discharged.
+
+
+Checkpoint9 raw closure/allowlist equality is separately checked in
+`/workspace/v14-recovery-evidence/initializer-source-closure.json` (PASS26/22,
+no forbidden closure modules). Actual focused29jobs and fresh2file checks pass;
+source-init/deployment and base-argument boundaries above remain distinct.

@@ -908,3 +908,6 @@ import Solidity.Backend.Executable.PatchedPayload
 import Solidity.Backend.Executable.PatchedPayloadChecks
 
 import Solidity.Backend.Executable.SourceJournal
+
+import Solidity.Backend.Executable.SourceInitializers
+import Solidity.Backend.Executable.SourceInitializerChecks

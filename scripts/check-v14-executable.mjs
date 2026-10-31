@@ -83,10 +83,10 @@ export function rawImports(source) {
   }
   return imports;
 }
-// Published pure Source.World closure is a permitted read-only dependency.
+// Published pure source semantics/control closure is a permitted read-only dependency.
 // Reserved Source files stay outside writable scope; every raw/transitive edge
 // is still checked. This is an import audit, not a source-profile restriction.
-const publishedSource = new Set(["World", "State", "Types", "Const", "Syntax"].map(n => `Solidity.Source.${n}`));
+const publishedSource = new Set(["Const", "Ctor", "Decls", "Elaborated", "Eval", "Examples", "Ledger", "Machine", "Observe", "Resolve", "Resolved", "Semantics", "SemanticsExamples", "State", "Syntax", "Types", "Typing", "TypingExamples", "Upstream", "Value", "WellFormed", "World"].map(n => `Solidity.Source.${n}`));
 export function forbidden(module) {
   return /^Lean\./.test(module) || /^(?:Bridge|SolidityBridge|Mathlib|Std)(?:\.|$)/.test(module) ||
     /^Solidity\.(?:Frontend|Tools)(?:\.|$)/.test(module) ||
