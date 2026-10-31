@@ -270,19 +270,8 @@ def name_ast(n):
     return value
 
 
-def resource_snapshot():
-    host=int(next(l.split()[1] for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:')))*1024
-    # This managed VM exposes the enclosing cgroup-v2 limit at its namespace root.
-    e.require(Path('/proc/self/cgroup').read_text().strip()=='0::/','unsupported enclosing cgroup layout')
-    limit=int(Path('/sys/fs/cgroup/memory.max').read_text().strip())
-    used=int(Path('/sys/fs/cgroup/memory.current').read_text().strip())
-    return {'hostMemAvailableBytes':host,'enclosingCgroupLimitBytes':limit,'enclosingCgroupCurrentBytes':used,'headroomBytes':min(host,limit-used)}
-
-
-def check_headroom(r):
-    host=r['hostMemAvailableBytes']; limit=r['enclosingCgroupLimitBytes']; used=r['enclosingCgroupCurrentBytes']
-    e.require(all(type(x) is int and x>=0 for x in (host,limit,used)) and used<=limit,'invalid enclosing memory measurements')
-    e.require(r['headroomBytes']==min(host,limit-used) and r['headroomBytes']>=p.CAP+2*1024**3,'insufficient effective headroom/OS reserve')
+resource_snapshot = p.resource_snapshot
+check_headroom = p.check_headroom
 
 
 def collect(req, out):

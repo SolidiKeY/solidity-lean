@@ -17,8 +17,12 @@ ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('v17_evidence', ROOT / 'scripts/roadmap-v17-evidence.py')
 e = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(e)
+rspec = importlib.util.spec_from_file_location('v17_resources', ROOT / 'scripts/roadmap-v17-resources.py')
+resources = importlib.util.module_from_spec(rspec); rspec.loader.exec_module(resources)
+resource_snapshot = resources.resource_snapshot
+check_headroom = resources.check_headroom
 UNRESOLVED = Path('/workspace/scratch/v17-unresolved-container.json')
-CAP = 12 * 1024**3
+CAP = resources.CAP
 BUDGET = {'processSeconds': 300, 'suiteModuleSeconds': 300, 'leanNumThreads': 1}
 SAMPLE_FORMAT = 'pid-stat-comm-rss-args/native-v2'
 IMAGE = 'debian@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3'
@@ -57,8 +61,10 @@ def read_bound(root, name, sha):
 
 def validate(record, evidence_root, current, gate, gate_row=None):
     e.require(type(record['exit']) is int, 'invalid provenance exit')
+    e.require(type(record['schema']) is int and record['schema']==3,'unsupported provenance schema')
+    check_outcomes(record)
     e.require(Path(record['collectionDirectory']).resolve() == evidence_root.resolve(), 'wrong collection directory')
-    e.require(record['schema'] == 2 and record['gate'] == gate, 'wrong provenance gate')
+    e.require(type(record['schema']) is int and record['schema'] == 3 and record['gate'] == gate, 'wrong provenance gate')
     e.require(record['before'] == record['after'] == current, 'source/toolchain/input changed or mismatched')
     e.require(record['budgets'] == BUDGET, 'changed budget/threads')
     e.require(record['configurationSha256'] == record['configurationAfterSha256'] == current['serialConfigSha256'], 'changed configuration')
@@ -98,6 +104,7 @@ def validate(record, evidence_root, current, gate, gate_row=None):
     runtime = e.loads(read_bound(evidence_root, record['runtime'], record['runtimeSha256']))
     e.require(runtime['entrypointHashes'] == {tool: e.digest(launcher_bytes(tool)) for tool in e.BUILD_TOOL_NAMES}, 'unwrapped runtime entrypoint')
     e.require(runtime['toolHashes'] == {k: v['sha256'] for k, v in current['buildTools'].items()}, 'observed build tool mismatch')
+    e.require(all(type(runtime[k]) is int for k in ('memoryMax','swapMax','memoryPeak')),'invalid runtime memory measurements')
     e.require(runtime['memoryMax'] == CAP and runtime['swapMax'] == 0, 'missing/wrong cap or swap')
     e.require(runtime['realLeanSha256'] == current['runtime']['lean']['sha256'] and
               runtime['lakeSha256'] == current['runtime']['lake']['sha256'] and runtime['leanVersion'] == current['runtime']['lean']['version'] and runtime['lakeVersion'] == current['runtime']['lake']['version'] and runtime['leanNumThreads'] == '1', 'runtime binary mismatch')
@@ -105,7 +112,9 @@ def validate(record, evidence_root, current, gate, gate_row=None):
     e.require(record['sampleFormat'] == SAMPLE_FORMAT, 'unsupported process sample format')
     samples = e.loads(read_bound(evidence_root, record['samples'], record['samplesSha256']))
     e.require(samples and all(type(s['rssBytes']) is int and s['rssBytes'] >= 0 and type(s['leanWorkers']) is int and 0 <= s['leanWorkers'] <= 1 and type(s['leanSupervisors']) is int and s['leanSupervisors'] >= 0 and all(type(s.get(k)) is int and s[k] >= 0 for k in ('leanZombies', 'leanTransitions')) and type(s['unclassifiedLeanWorkers']) is int and s['unclassifiedLeanWorkers'] == 0 and s.get('unknownLeanProcesses') == [] for s in samples), 'missing/parallel execution samples')
-    e.require(record['headroomBytes'] >= 2 * 1024**3 and record['diskFreeBytes'] >= 1024**3, 'insufficient recorded headroom/disk')
+    check_headroom(record)
+    e.require(type(record['diskFreeBytes']) is int and record['diskFreeBytes'] >= 1024**3,'insufficient recorded disk')
+    e.require(e.loads(read_bound(evidence_root,record['errors'],record['errorsSha256'])) == record['phaseErrors'],'changed phase errors')
     e.require(0 < record['elapsedSeconds'] <= BUDGET['processSeconds'] + 5, 'execution budget exceeded')
     execution = read_bound(evidence_root, record['executionScript'], record['executionScriptSha256'])
     e.require(execution == execution_script(evidence_root.resolve(), record['command'], Path(current['runtime']['lake']['path'])).encode(), 'changed execution script')
@@ -248,6 +257,25 @@ def ensure_no_unresolved():
     UNRESOLVED.unlink()
 
 
+def final_exit(execution, cleanup, validation):
+    return next((code for code in (execution,cleanup,validation) if code!=0),0)
+
+
+def check_outcomes(r):
+    raw=r['commandExit']
+    e.require(raw is None or type(raw) is int and raw>=0,'invalid raw command exit')
+    e.require(all(type(r[k]) is int and r[k]>=0 for k in ('executionExit','cleanupExit','validationExit')),'invalid phase exit')
+    attach=r['attachExit']
+    e.require(attach is None or type(attach) is int,'invalid attach exit')
+    if r['executionExit']==0:
+        e.require(raw==0 and attach==0,'raw/attach/execution exit disagreement')
+    if raw is not None and raw!=0: e.require(r['executionExit']!=0,'nonzero command labeled pass')
+    if attach is not None and attach!=0: e.require(r['executionExit']!=0,'nonzero transport labeled pass')
+    e.require(r['exit']==final_exit(r['executionExit'],r['cleanupExit'],r['validationExit']),'overall/phase exit disagreement')
+    e.require(isinstance(r['phaseErrors'],list) and all(isinstance(x,dict) and isinstance(x.get('phase'),str) and isinstance(x.get('error'),str) for x in r['phaseErrors']),'missing/malformed phase errors')
+    e.require(r['exit']!=0 or not r['phaseErrors'],'errors contradict successful collection')
+
+
 def collect(args):
     ensure_no_unresolved()
     out = args.out.resolve()
@@ -260,9 +288,9 @@ def collect(args):
     start_build, start_cache = inventory(build), inventory(cache)
     mode = 'clean' if args.gate.startswith('clean-') else 'warm'
     if mode == 'clean': e.require(not start_build['files'] and not start_cache['files'], 'refusing nonempty clean start; no cache/build deletion performed')
-    headroom = int(next(l.split()[1] for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:'))) * 1024
+    resource_fields = resource_snapshot(); check_headroom(resource_fields)
     disk = os.statvfs(ROOT); free = disk.f_bavail * disk.f_frsize
-    e.require(headroom >= 2 * 1024**3 and free >= 1024**3, 'headroom/disk guard')
+    e.require(free >= 1024**3, 'disk guard')
     cfg = serial_config(ROOT); (out / 'configuration.toml').write_bytes(cfg)
     serializers = {}
     for tool in e.BUILD_TOOL_NAMES:
@@ -279,7 +307,7 @@ def collect(args):
     (out/'execution.sh').write_text(script)
     container_name = 'roadmap-v17-' + uuid.uuid4().hex
     UNRESOLVED.write_text(json.dumps({'container':container_name,'revision':before['revision']}))
-    cid = None; proc = None; samples = []; errors = []; begin = time.monotonic(); code = 125
+    cid = None; proc = None; samples = []; errors = []; begin = time.monotonic(); code = 125; command_exit = None; attach_exit = None; cleanup_exit = 0; validation_exit = 0
     def remaining():
         left = BUDGET['processSeconds'] - (time.monotonic() - begin)
         if left <= 0: raise subprocess.TimeoutExpired('V17 build deadline', 300)
@@ -296,7 +324,12 @@ def collect(args):
             while True:
                 state = docker('inspect','--format','{{.State.Status}}',cid,timeout=remaining()).stdout.decode().strip()
                 if state in ('exited','dead'):
-                    code = proc.wait(timeout=remaining()); break
+                    raw_exit=docker('inspect','--format','{{.State.ExitCode}}',cid,timeout=remaining()).stdout.decode().strip()
+                    e.require(re.fullmatch(r'0|[1-9][0-9]*',raw_exit),'invalid container command exit')
+                    command_exit=int(raw_exit)
+                    attach_exit=proc.wait(timeout=remaining())
+                    code=command_exit if command_exit else (attach_exit if attach_exit is not None and attach_exit>=0 else 125)
+                    break
                 if state == 'running':
                     try:
                         top = docker('top',cid,'-ww','-eo','pid,stat,comm,rss,args',timeout=remaining()).stdout.decode()
@@ -313,46 +346,66 @@ def collect(args):
         code = 124 if isinstance(error,subprocess.TimeoutExpired) else 125
     finally:
         execution_elapsed = time.monotonic() - begin
+        execution_exit = code
         try:
             docker('rm','-f',container_name,timeout=5)
             UNRESOLVED.unlink(missing_ok=True)
         except (OSError,subprocess.SubprocessError) as error:
             if missing_container(error): UNRESOLVED.unlink(missing_ok=True)
             else:
-                errors.append({'phase':'container cleanup','error':str(error),'stderr':str(getattr(error,'stderr',None))}); code = 125
+                errors.append({'phase':'container cleanup','error':str(error),'stderr':str(getattr(error,'stderr',None))}); cleanup_exit = 125
         finally:
             if proc and proc.poll() is None:
                 proc.kill()
                 try: proc.wait(timeout=2)
-                except subprocess.TimeoutExpired: errors.append({'phase':'attach cleanup','error':'client did not reap'})
-            config_after = e.digest(config.read_bytes()) if config.exists() else None
-            config.unlink(missing_ok=True)
+                except subprocess.TimeoutExpired: errors.append({'phase':'attach cleanup','error':'client did not reap'}); cleanup_exit=125
+            config_after = None
+            try:
+                config_after = e.digest(config.read_bytes()) if config.exists() else None
+                config.unlink(missing_ok=True)
+            except OSError as error:
+                errors.append({'phase':'configuration cleanup','error':str(error)}); cleanup_exit=125
     try: after = e.snapshot(ROOT)
     except (OSError,ValueError,subprocess.SubprocessError) as error:
-        after = {'error':str(error)}; errors.append({'phase':'after snapshot','error':str(error)}); code = 125
-    (out/'execution-errors.json').write_text(json.dumps(errors,indent=2))
+        after = {'error':str(error)}; errors.append({'phase':'after snapshot','error':str(error)}); validation_exit = 125
     def observed(name, default=''):
         path=out/name
-        return path.read_text().strip() if path.exists() else default
-    runtime = {'entrypointHashes': {tool: observed('entrypoint-' + tool).split(' ')[0] for tool in e.BUILD_TOOL_NAMES}, 'toolHashes': {tool: observed('tool-' + tool).split(' ')[0] for tool in e.BUILD_TOOL_NAMES}, 'memoryMax':int(observed('memoryMax','-1')), 'swapMax':int(observed('swapMax','-1')),
-               'memoryPeak':int(observed('memoryPeak','0')),
+        try: return path.read_text().strip() if path.exists() else default
+        except OSError as error:
+            errors.append({'phase':'runtime observation','error':str(error)}); return default
+    def observed_int(name,default):
+        raw=observed(name,str(default))
+        if not re.fullmatch(r'-?[0-9]+',raw):
+            errors.append({'phase':'runtime observation','error':'malformed '+name}); return default
+        return int(raw)
+    runtime = {'entrypointHashes': {tool: observed('entrypoint-' + tool).split(' ')[0] for tool in e.BUILD_TOOL_NAMES}, 'toolHashes': {tool: observed('tool-' + tool).split(' ')[0] for tool in e.BUILD_TOOL_NAMES}, 'memoryMax':observed_int('memoryMax',-1), 'swapMax':observed_int('swapMax',-1),
+               'memoryPeak':observed_int('memoryPeak',0),
                'realLeanSha256':observed('realLeanSha256').split(' ')[0], 'lakeSha256':observed('lakeSha256').split(' ')[0],
                'image':IMAGE,'leanVersion':observed('leanVersion'),'lakeVersion':observed('lakeVersion'),'leanNumThreads':observed('leanNumThreads')}
+    if any(x['phase']=='runtime observation' for x in errors): validation_exit=125
+    (out/'execution-errors.json').write_text(json.dumps(errors,indent=2))
     (out/'runtime.json').write_text(json.dumps(runtime))
     (out/'samples.json').write_text(json.dumps(samples))
     if not (out/'build.log').exists(): (out/'build.log').write_text('Execution failed before build start.\n')
-    record = {'schema':2,'sampleFormat':SAMPLE_FORMAT,'containerName':container_name,'dockerArgv':'docker-argv.json','dockerArgvSha256':e.digest((out/'docker-argv.json').read_bytes()) if (out/'docker-argv.json').exists() else None,'serializers':serializers,'buildTools':runtime_tools(before),'collectionDirectory':str(out),'gate':args.gate,'mode':mode,'command':command,'before':before,'after':after,
+    record = {'schema':3,'sampleFormat':SAMPLE_FORMAT,'containerName':container_name,'dockerArgv':'docker-argv.json','dockerArgvSha256':e.digest((out/'docker-argv.json').read_bytes()) if (out/'docker-argv.json').exists() else None,'serializers':serializers,'buildTools':runtime_tools(before),'collectionDirectory':str(out),'gate':args.gate,'mode':mode,'command':command,'before':before,'after':after,
               'budgets':BUDGET,'configuration':'configuration.toml','configurationSha256':e.digest(cfg),'configurationAfterSha256':config_after,
               'launcher':'lean-launcher','launcherSha256':e.digest(launcher_bytes()),
               'runtime':'runtime.json','runtimeSha256':e.digest((out/'runtime.json').read_bytes()),
               'samples':'samples.json','samplesSha256':e.digest((out/'samples.json').read_bytes()),
-              'log':'build.log','logSha256':e.digest((out/'build.log').read_bytes()),'exit':code,
-              'headroomBytes':headroom,'diskFreeBytes':free,'elapsedSeconds':execution_elapsed,
+              'log':'build.log','logSha256':e.digest((out/'build.log').read_bytes()),'commandExit':command_exit,'attachExit':attach_exit,'executionExit':execution_exit,'cleanupExit':cleanup_exit,'validationExit':validation_exit,'phaseErrors':errors,'errors':'execution-errors.json','errorsSha256':e.digest((out/'execution-errors.json').read_bytes()),'exit':final_exit(execution_exit,cleanup_exit,validation_exit),
+              **resource_fields,'diskFreeBytes':free,'elapsedSeconds':execution_elapsed,
               'executionScript':'execution.sh','executionScriptSha256':e.digest((out/'execution.sh').read_bytes()),
               'buildStart':start_build,'cacheStart':start_cache,'buildEnd':inventory(build),'cacheEnd':inventory(cache),
               'releaseClosed':False}
+    if record['exit']==0:
+        try: validate(record,out,before,args.gate)
+        except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError) as error:
+            record['validationExit']=125; errors.append({'phase':'validation','error':str(error)})
+            record['exit']=final_exit(execution_exit,cleanup_exit,125)
+            (out/'execution-errors.json').write_text(json.dumps(errors,indent=2))
+            record['errorsSha256']=e.digest((out/'execution-errors.json').read_bytes())
     (out/'provenance.json').write_text(json.dumps(record,indent=2)+'\n')
-    return code
+    return record['exit']
 
 
 def main():

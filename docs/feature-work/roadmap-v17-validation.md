@@ -476,3 +476,31 @@ cgroup limit/current usage separately, uses their minimum remaining capacity,
 and requires the full 12 GiB execution cap plus 2 GiB OS reserve before launch.
 Unsupported cgroup layouts fail closed. Earlier host-only records remain raw
 historical evidence; the corrected runtime path requires a fresh bound run.
+
+### Shared build resource and raw-exit repair
+
+The build and kernel collectors now share the narrowly owned
+`scripts/roadmap-v17-resources.py` helper. Both require finite, strictly typed
+host/cgroup measurements, effective availability sufficient for the 12 GiB cap
+plus 2 GiB OS reserve, and the supported namespace-root cgroup-v2 layout.
+Malformed/unlimited measurements fail closed. Build disk and cache requirements,
+serial admission wrappers, no-swap cap and 300s bounds remain unchanged.
+
+New build provenance uses schema 3; old records are never migrated or relabeled.
+It distinguishes actual container `commandExit` from Docker client `attachExit`,
+execution supervision, cleanup and validation outcomes. Collection success requires
+complete provenance validation and no phase errors. Nonzero raw commands remain
+nonzero when cleanup also fails. Config cleanup/runtime observation failures retain
+the observed raw exit in failed records. Schema-2 records are unsupported by this
+new consumer, while their original raw bytes and historical failed verdicts remain
+sealed evidence.
+
+Separate read-only finder and skeptic reviews required actual container exit
+inspection (rather than attach status), guarded config cleanup and malformed
+runtime measurements, and contradiction rejection for success with phase errors.
+These findings were corrected with positive-baseline and collector failure controls.
+The new external checkpoint handoff records the final control count and justified
+warm compiler/frontend attempts after reviewed commit and resource preflight.
+Warm observations never establish clean-start or full cache equivalence. This
+repair closes no semantic premise or any of the 457 still-open feature rows;
+all original G52–G55 and backfill limitations remain binding.
