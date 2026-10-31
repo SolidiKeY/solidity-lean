@@ -57,3 +57,25 @@ class CreationControls(unittest.TestCase):
         for value in [{'schema':1,'rows':[],'imports':[],'releaseClosed':False},{'schema':1,'rows':[],'imports':[],'releaseClosed':True}]:
             raw=('V17_CREATION_KERNEL_BEGIN\n'+json.dumps(value)+'\nV17_CREATION_KERNEL_END\n').encode()
             with self.assertRaises(ValueError):c.metadata(raw)
+
+    def test_synchronized_parser_claim_is_not_authentication(self):
+        first=self.row();changed=copy.deepcopy(first)
+        # Coordinated forged expected and actual bytes can be internally consistent.
+        # Only actual authenticated execution and complete wrapper replay authenticate.
+        for name in ['legacy','ordinary','viaIR','expectedLegacy','expectedIR']:changed[name][0][0]=17
+        for name in ['nativeLegacy','nativeIR']:changed[name]['observed'][0]['returnBytes'][0]=17
+        self.assertEqual(c.observation(self.raw(changed)),changed)
+        with self.assertRaises(ValueError):c.load_memory().exact_replay(first,changed)
+    def test_archive_wrong_source_hash_and_member_reject(self):
+        profile=c.publication_identity();header=profile['fixtures']['tests/solc/CreationTry.ast.json']['header']
+        self.assertTrue(c.archived_source(header)['originalSourceAuthenticated'])
+        for key,value in [('source','wrong.sol'),('sourceSha256','0'*64)]:
+            bad=copy.deepcopy(header);bad[key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError):c.archived_source(bad)
+
+    def test_wrapped_axiom_output_is_complete_and_exact(self):
+        expected={'A':['Classical.choice','Quot.sound','propext']}
+        raw=b"V17_CREATION_KERNEL_END\n'A' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n"
+        self.assertEqual(c.axiom_prints(raw,expected),expected)
+        for bad in [raw[:-3],raw+raw,raw+b"'A' depends on axioms: []\n",raw.replace(b'Quot.sound',b'sorryAx'),raw+b'unknown output\n',b'V17_CREATION_KERNEL_END\n']:
+            with self.subTest(bad=bad[-50:]),self.assertRaises(ValueError):c.axiom_prints(bad,expected)

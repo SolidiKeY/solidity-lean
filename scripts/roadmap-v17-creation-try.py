@@ -30,6 +30,31 @@ def query_bytes():
     return source.encode()
 
 
+def archived_source(header):
+    """Read one member of the existing published snapshot; never unpack it."""
+    import tarfile
+    m=load_memory();k=m.load_kernel()
+    manifest_path=ROOT/'tests/upstream/snapshot.json'
+    published=subprocess.check_output(['git','show',PUBLICATION+':tests/upstream/snapshot.json'],cwd=ROOT,timeout=30)
+    if manifest_path.read_bytes()!=published:raise ValueError('snapshot manifest differs from publication')
+    manifest=k.e.loads(published)
+    if manifest['version']!=1 or manifest['commit']!='1835d247de183f23e7b0e2bc4a50732af525b77c' or manifest['tag']!='v0.8.38':raise ValueError('wrong published snapshot pin')
+    member='test/libsolidity/semanticTests/tryCatch/create.sol'
+    if header['source']!='.lake/upstream/solidity/'+member:raise ValueError('wrong original source identity')
+    archive=k.e.local_file(manifest_path.parent,manifest['archive'])
+    archive_sha=k.p.resources.hash_file(archive)
+    if archive_sha!=manifest['archiveSha256']:raise ValueError('corrupt pinned source archive')
+    rows=[x for x in manifest['files'] if x['path']==member]
+    if len(rows)!=1 or rows[0]['sha256']!=header['sourceSha256']:raise ValueError('wrong snapshot/source hash')
+    with tarfile.open(archive,'r:gz') as tar:
+        matches=[x for x in tar.getmembers() if x.name==member]
+        if len(matches)!=1 or not matches[0].isfile() or matches[0].size!=rows[0]['bytes']:raise ValueError('missing/duplicate/nonregular source member')
+        source=tar.extractfile(matches[0]).read()
+    if len(source)!=rows[0]['bytes'] or hashlib.sha256(source).hexdigest()!=header['sourceSha256']:raise ValueError('corrupt original source bytes')
+    if k.p.resources.hash_file(archive)!=archive_sha or manifest_path.read_bytes()!=published:raise ValueError('source archive inputs changed')
+    return {'archive':str(archive.relative_to(ROOT)),'archiveSha256':archive_sha,'manifestSha256':hashlib.sha256(published).hexdigest(),'member':rows[0],'originalSourceAuthenticated':True,'readOnlyNoExtraction':True}
+
+
 def publication_identity():
     files={};fixtures={}
     paths=['Solidity/Examples/Tactics/CreationTrySource.lean','Solidity/Examples/Tactics/CreationTrySourceIR.lean','Solidity/Frontend/CreationTryImport.lean','Solidity/Tools/CreationTryReplay.lean','Solidity/Semantics/CreationTryFrame.lean','scripts/creation-try-adapter.mjs','tests/solc/CreationTry.ast.json','tests/solc/CreationTryIR.ast.json']
@@ -42,7 +67,7 @@ def publication_identity():
             document=load_memory().load_kernel().e.loads(actual)
             h=document['header']; source=ROOT/h['source']
             if source.exists() and hashlib.sha256(source.read_bytes()).hexdigest()!=h['sourceSha256']:raise ValueError('local original source differs')
-            fixtures[name]={'header':h,'astSha256':hashlib.sha256(json.dumps(document['ast'],sort_keys=True,separators=(',',':')).encode()).hexdigest(),'localOriginalSourceAvailable':source.exists()}
+            fixtures[name]={'header':h,'astSha256':hashlib.sha256(json.dumps(document['ast'],sort_keys=True,separators=(',',':')).encode()).hexdigest(),'localOriginalSourceAvailable':source.exists(),'sourceEvidence':archived_source(h)}
     if fixtures['tests/solc/CreationTry.ast.json']['header']['settings']['viaIR'] is not False or fixtures['tests/solc/CreationTryIR.ast.json']['header']['settings']['viaIR'] is not True:raise ValueError('wrong pipeline identity')
     return {'publication':PUBLICATION,'sourceFiles':files,'fixtures':fixtures,'scope':'Complete published creation fixture only, not whole admitted source profile','externalEvmDifferentialRun':False,'gasCreateAddressNonceEquivalence':False}
 
@@ -72,6 +97,22 @@ def observation(raw):
     return v
 
 
+def axiom_prints(raw,expected):
+    """Accept Lean's actual whitespace wrapping, never extra/truncated prints."""
+    text=raw.decode()
+    marker='V17_CREATION_KERNEL_END\n'
+    if text.count(marker)!=1:raise ValueError('missing/duplicate metadata terminator')
+    text=text.split(marker,1)[1]
+    pattern=re.compile(r"'([^']+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])")
+    found={};cursor=0
+    for match in pattern.finditer(text):
+        if text[cursor:match.start()].strip() or match[1] in found:raise ValueError('unexpected/duplicate axiom print')
+        found[match[1]]=sorted(x.strip() for x in (match[2] or '').split(',') if x.strip())
+        cursor=match.end()
+    if text[cursor:].strip() or found!=expected:raise ValueError('missing/changed/truncated axiom prints')
+    return found
+
+
 def metadata(raw):
     m=load_memory();k=m.load_kernel()
     meta=m.frame(raw,'V17_CREATION_KERNEL_BEGIN','V17_CREATION_KERNEL_END')
@@ -83,14 +124,7 @@ def metadata(raw):
         m.check_value_evidence(row,k)
         if type(row['binderCount']) is not int or row['binderCount']<0 or row['propositionBinders']!=sorted(set(row['propositionBinders'])) or any(type(i) is not int or not 0<=i<row['binderCount'] for i in row['propositionBinders']):raise ValueError('invalid proposition binders')
         if row['axioms']!=sorted(set(row['axioms'])) or not set(row['axioms'])<={'Classical.choice','propext','Quot.sound'}:raise ValueError('unapproved declaration axiom')
-    axioms={}
-    for line in raw.decode().splitlines():
-        if not line.startswith("'"+LEGACY):continue
-        match=re.fullmatch(r"'([^']+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])",line)
-        if match is None or match[1] in axioms:raise ValueError('bad/duplicate axiom print')
-        axioms[match[1]]=sorted(x.strip() for x in (match[2] or '').split(',') if x.strip())
-    expected={r['name']:r['axioms'] for r in meta['rows'] if r['kind']=='theorem'}
-    if axioms!=expected:raise ValueError('missing/changed axiom prints')
+    axiom_prints(raw,{r['name']:r['axioms'] for r in meta['rows'] if r['kind']=='theorem'})
     return meta
 
 
