@@ -1975,6 +1975,12 @@ def captureBefore (e : RawExpr) (later : List RawExpr) : ElabM (SProg C × RawEx
   let checks := (← read).overflow.isSome && later.any (hasNarrow C (← ctx))
   if later.any (·.hasIncDec) || checks then captureExpr C e else pure ([], e)
 
+/-- A checked unsigned power whose failure bytes are observable. This only
+requests the existing guarded lowering; conditional arms stay conditional. -/
+def powerDataNeeded (sc : ElabScope) (Γ : ECtx) (e : RawExpr) : Bool :=
+  (sc.selfFrame || sc.retainFailureData) && !sc.unchecked && sc.overflow.isNone &&
+    e.any (fun | .binop .pow a _ => (intTyOf C Γ a).all (fun (p, _) => p == .uint) | _ => false)
+
 end Elab
 
 end Solidity

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd /home/guilherme/projects/solidity-lean
+export LEAN_NUM_THREADS=1
+export INTEG_CONFIG="$PWD/.cloud-integration.toml"
+export LAKE_CACHE_DIR="$PWD/.lake/refactor-cache/cloud-integration-20261028"
+export SOLKEY_EXAMPLES="$PWD/tests/migration/solkey/keyext.solidity.examples"
+export SOLKEY_RULES="$PWD/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+export SOLC_REFERENCE=/tmp/solidity-cloud-results-20261028/soljson-v0.8.38+commit.1835d247.js
+mkdir -p "$LAKE_CACHE_DIR"
+lake() { /home/guilherme/.elan/bin/lake -f "$INTEG_CONFIG" "$@"; }
+export -f lake
+printf 'START %s\n' "$(date -Is)"
+lean --version
+/home/guilherme/.elan/bin/lake --version
+./run-lean.sh
+lake build solcases
+printf 'LEAN_GATES_PASS %s\n' "$(date -Is)"

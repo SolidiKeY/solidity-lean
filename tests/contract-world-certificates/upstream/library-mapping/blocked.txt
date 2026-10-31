@@ -1,0 +1,1 @@
+test/libsolidity/semanticTests/libraries/external_call_with_storage_mapping_parameter.sol	lean-runtime	transaction/block/self-address or cross-contract host behavior not adapted

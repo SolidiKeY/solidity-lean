@@ -1,5 +1,8 @@
 # Transient storage: source integration and composed execution
 
+Latest increment (2026-10-28): closed source factory targets and explicit typed
+frame composition are recorded under “Step 8” below; feature status remains partial.
+
 Current follow-up (2026-10-27): ordinary source declarations now retain their
 transaction-local region in the existing typed logical root product. Reset,
 projection/disjointness, source/call/rollback and opt-in owner/delegate controls
@@ -333,3 +336,112 @@ the seven retained assembly/physical-layout fixtures above and general source
 world dispatch; the existing manual typed owner/delegate interface has only the
 explicit opt-in transaction adapter described here. Do not infer full fixture
 compatibility or universal compiler correctness from the 21 passing cases.
+
+
+## Step 8: closed source factory targets and typed frame composition (2026-10-28)
+
+Branch `codex/transient-world-step8` starts from current `origin/master`
+`f4dee4a29c2e208b36db4a4161a4723c735cd775` in the attached saved cloud
+configuration. No other task checkout or branch was used. Runtime: Lean 4.24.0
+(commit `797c613`), Lake 5.0.0-src+797c613. The KeySort smoke build passed.
+
+The new pinned `TransientFactory.sol` fixture reproduced the named refusal
+`solidity.worldFactory.constructor: transient state needs the shared world
+transaction interface` on that master. The unchanged admission command and
+expected diagnostic were kernel-checked before the implementation. This was a
+remaining gap; the existing primitive/function-tag source cases were not
+reimplemented. Before/after records are in `tests/upstream/step08-transient-world/`.
+
+`World.transact` in the existing `Semantics/TransientWorld.lean` now accepts a
+typed composition `World contracts → TRes (World contracts × α)`. It resets each
+installed owner's certified transient roots once on entry, runs the whole
+composition, commits its actual returned world/result on success, and discards
+transient cells on exit. An uncaught halt restores the normalized entry world,
+including code, funding and all completed descendants' writes. Every halt is
+preserved exactly; exhaustion and divergence never become successful outcomes.
+The commit/failure equations and success witness are general kernel proofs.
+`World.resetTransient_storage?` preserves the installed identity check;
+`World.resetTransient_persistent` lifts the existing reset law to every typed
+persistent path of every owner, including aggregate paths.
+
+The only behavioral edit to the shared frontend removes the transient-target
+check in `WorldCreation.inspectClosed`. Constructor certification, actual imported
+constructor elaboration, declaration closure, stateless factory-owner checks,
+static creation refusal, environment premises and nested-call refusals remain.
+Raw generated `run` is still a frame operation: clients explicitly select one
+outer `World.transact` for a whole composition. No wrapper invokes reset between
+sibling or nested frames. `Operation.run`, `Step`, `Reachable`, the ordinary graph
+representation and the step-6 wrappers are untouched. There is no new statement,
+rule, notation case, dependency, axiom or proof-limit override.
+
+`Examples/Tactics/TransientWorldSource.lean` runs the actual imported constructor
+and method bodies independently for legacy and viaIR fixtures. Controls require
+real successful constructor/sibling runs, owner isolation, dirty entry reset,
+exit reset with persistent retention, successive transactions, caught creation
+rollback, uncaught constructor rollback, ancestor source revert, rollback of an
+already installed owner, static creation refusal, false-assertion panic, exact
+resource halts and the retained named transient-owner refusal. The bodies are
+kernel-executable; source-imported programs use the repository's existing
+noncomputable declaration convention, rather than a new native representation.
+
+`scripts/check-transient-world-vectors.mjs` is an optional independent reference:
+it compiles the pinned source and `TransientWorldScenario.sol` with SHA-checked
+solc 0.8.38 and runs eleven successive signed Cancun transactions on one VM per
+pipeline. Actual child constructors execute through CREATE. Every return/revert
+byte is retained, including the false source assertion's exact panic payload.
+These compiler/EVM observations are separate from kernel proofs; no compiler
+correctness theorem or general lowering of the reference scenario is claimed.
+
+Finder review identified two coverage gaps (dirty entry and a preexisting owner's
+rollback); both controls were added. Independent skeptic review and final gate
+results are recorded in the accompanying evidence/handoff. Neither reviewer uses
+the Lean server.
+
+Remaining scope is explicit: general multi-statement source-world dispatch,
+transient factory owners, dynamic/alias-sensitive source frames and computed
+static bodies remain refused. Invalid transient reference declarations retain
+compiler/importer rejection. This increment makes no delegatecall, assembly,
+physical layout, gas, environment-policy or observable-log change. Existing
+linked-library frames and their ownership tests remain in force. The feature
+status stays `partial`; the seven historical assembly/layout fixtures remain
+excluded. Step 6 owns creation Reachable wrappers and general world calls;
+the recursive lane owns the ordinary graph migration.
+
+
+### Step 8 completed validation and handoff
+
+The actual current combined `./run-lean.sh` finished with exit 0: 686 library jobs,
+259 frozen TestSuite jobs and all 377 taclets/131 read-bearing annotations matched.
+Elapsed time was 10,448.088 seconds. A real Docker cgroup enforced 12 GiB memory
+and zero swap over the same attached checkout; charged memory peaked at exactly
+12 GiB, with 1,303 reclaim/limit events and zero OOM/kills. The earlier address-space
+attempt and interrupted observer driver are blocked evidence. The original Docker
+worker survived the driver loss and was collected to its durable terminal result;
+the separate historical 453-job image build is not counted.
+
+All 26 affected Node tests passed. Fresh bounded checks of the core/source files,
+both-pipeline frozen-master refusals, all 27 new named theorem axiom audits and
+22 signed compiler/EVM observations passed. Five general laws use only `propext`;
+concrete controls use only `propext`, `Classical.choice` and `Quot.sound`. Legacy
+and viaIR controls match independently. No statement, taclet, dependency or proof
+limit was added or weakened.
+
+Two upstream regression fixtures (constructor initialization and tuple assignment)
+match every retained vector in both pipelines. The multi-frame getter fixture is
+still **blocked** by the existing host-adapter guard before pipeline scheduling;
+this increment does not establish ordinary general source-world dispatch. Its
+original source and expectations are retained unchanged in the new evidence.
+
+Current source trust is clean (715 sources, 240 inventoried sites, zero findings),
+as is starting master (714 sources, the same 240 sites, zero findings). Historical
+25-finding reports do not describe this baseline. The doc-path gate still fails on
+20 preexisting missing citations in unchanged files, independently verified against
+starting master. Inventory, orphan, layer and automatic gates pass.
+
+The reviewable branch is `codex/transient-world-step8`. Exact commands, fixture
+rows, source/expectation bytes, hashes, timings, memory counters, axiom sets,
+blocked attempts, shared-file edits and read-only review results are retained in
+[the step-8 handoff](../../tests/upstream/step08-transient-world/README.md).
+General source-world lowering, transient owners, alias-sensitive frames, computed
+static bodies and excluded semantics remain precisely the refusals listed there.
+No push or merge was performed.

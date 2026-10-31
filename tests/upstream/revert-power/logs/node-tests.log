@@ -1,0 +1,33 @@
+CGROUP_MAX=12884901888 SWAP_MAX=0
+✔ fixture boundaries preserve sources and ignore expectation text as Solidity (2.098964ms)
+✔ external sources and duplicate source units cannot silently disappear (0.642221ms)
+✔ preamble follows the native harness without rewriting fixture source (0.152451ms)
+✔ diagnostics retain exact order, messages, source names and byte offsets (0.318631ms)
+✔ EVM constraints are checked rather than ignored or retargeted (0.674941ms)
+✔ implicit and explicit upstream pipeline defaults both require two interpreter modes (0.365483ms)
+✔ runtime vectors retain every call and compare ABI words exactly (1.371354ms)
+✔ signed words are decoded and encoded with canonical ABI extension (0.190158ms)
+✔ noncanonical and truncated inputs retain raw bytes for typed decoder replay (1.865161ms)
+✔ aggregate vectors retain offsets, lengths, bytes and exact tuple schemas (1.39889ms)
+✔ unsupported gas, logs, revert data and extra observations prevent success (0.793991ms)
+✔ a second constructor cannot accidentally retain the first deployment state (0.336399ms)
+✔ partitions are exhaustive and unknown/notRun results cannot pass (0.195136ms)
+✔ isolated retries retain completed modes and cannot change conclusive results (0.725377ms)
+✔ multiple retries of one fixture preserve every contributing report (15.082199ms)
+✔ exact failure data retains raw selector bytes and complete signed ABI words (1.458656ms)
+✔ concurrent snapshot publication retains complete bytes; reuse rejects drift (2993.624172ms)
+✔ native parameter alignment, quoted commas/hash and byte escapes are exact (1.292665ms)
+✔ v1 raw vectors require canonical-prefix replay without dropping suffix bytes (0.272702ms)
+✔ original named-error sequences retain every selector, word and dynamic observation (497.78573ms)
+✔ original numeric failure sequences retain exact panic codes and fixed-byte padding (508.895458ms)
+✔ original aggregate custom errors retain complete arrays, nested offsets and call order (391.348097ms)
+✔ compound array decoder vectors retain dimensions, all calls and raw suffixes (502.21661ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5024.325393
+CGROUP_PEAK_BYTES=300789760 ELAPSED_SECONDS=5 EXIT=0

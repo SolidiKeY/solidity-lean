@@ -9,6 +9,13 @@ records `compile_correct`. The pinned solc is 0.8.38 (`1835d247`, the
 [upstream corpus](solidity-upstream-tests.md) and the
 [feature inventory](solidity-feature-inventory.md)); older fixtures use 0.8.34.
 
+The [full compiler roadmap](coverage-plan.md) separately requires a checked
+source frontend, complete backend and executable-EVM proof for this repository's
+compiler. The external solc comparison square below remains a compatibility
+validation boundary: completing our compiler proof does not certify solc's
+optimizer or its emitted bytecode. The roadmap includes an independent source
+semantics and EVM bridge; the current fragment theorem does not provide them.
+
 ## The chain of trust
 
 ```
@@ -93,7 +100,17 @@ against revm/evmone or Ethereum's `GeneralStateTests`; `compileStmt` against
 the helpers they mirror. The stipend is not modelled (a refusal stands for
 it).
 
-**D. A generated differential harness.** Lean generates a program, prints it
+**D. A generated differential harness (bounded increment implemented).**
+`lake exe solcases` and `scripts/evm-reference/generated.mjs` now execute
+160 intrinsically typed closed programs/start states against pinned solc and
+EthereumJS in legacy/viaIR, optimizer off/on. Exact outputs, panic/revert
+bytes and both declared roots after success/rollback are compared. Concrete
+parser/printer and literal-arithmetic regressions are kernel checked. See
+[implementation and evidence](feature-work/generated-differential.md) for
+commands, scope, refusals and remaining D/E work. This does not establish
+universal printer or solc correctness. The remaining full target follows.
+
+Lean generates a program, prints it
 as Solidity, a Node harness compiles it under legacy and via-IR, with and
 without the optimizer, runs it on an EVM, decodes storage by
 `--storage-layout`, and diffs with `Prog.runT`. Needs a printer from `Stmt C`

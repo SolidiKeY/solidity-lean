@@ -945,6 +945,7 @@ partial def viewF (ns : List Expr) (e : Expr) : PrM (List Expr × Expr) := do
     if isUp n && e.getAppNumArgs > 0 then return ← viewF ns.tail e.appArg!
   let e ← whnf e
   if e.isAppOfArity ``Fml.bind 6 then
+    if (← whnf (e.getArg! 4)).isConstOf ``LTy.kint then return (ns, e)
     if let some w := (← read).wheres then
       let t ← whnf (e.getArg! 4)
       if t.isAppOfArity ``LTy.mem 1 then w.hidden.modify (·.push (e.getArg! 3, t.appArg!))
@@ -957,7 +958,8 @@ partial def viewF (ns : List Expr) (e : Expr) : PrM (List Expr × Expr) := do
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
 def isConnectiveS (ns : List Expr) (e : Expr) : PrM Bool := do
   let (_, e') ← viewF ns e
-  if e'.isAppOfArity ``Fml.imp 4 || e'.isAppOfArity ``Fml.all 5 then return true
+  if e'.isAppOfArity ``Fml.imp 4 || e'.isAppOfArity ``Fml.all 5 ||
+      e'.isAppOfArity ``Fml.allocAll 5 || e'.isAppOfArity ``Fml.bind 6 then return true
   return e'.isAppOfArity ``Fml.and 4
 
 /-- `¬(¬φ ∧ ¬ψ)`, which `φ ∨ ψ` spells: `φ` and `ψ`, with their names. -/
@@ -1043,6 +1045,16 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
         | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
     `(dl_fml| $(← ppTermS ns a):dl_term = $(← ppTermS ns b):dl_term)
   | Fml.wellFormed _ _ t => `(dl_fml| wt($(← ppSTermS ns t):dl_term))
+  | Fml.bind _ _ m x t φ =>
+    unless ← isDefEq t (mkConst ``LTy.kint) do return ← escape
+    let some xi ← ppVar? x | escape
+    let body ← ppFmlS (x :: ns) φ
+    let m ← whnf m
+    if m.isConstOf ``Modality.box then
+      `(dl_fml| ∀ given[box] kint $xi:ident; $body:dl_fml)
+    else if m.isConstOf ``Modality.diamond then
+      `(dl_fml| ∀ given[diamond] kint $xi:ident; $body:dl_fml)
+    else `(dl_fml| ∀ given kint $xi:ident; $body:dl_fml)
   | Fml.all _ _ x p φ =>
     let x := x.consumeMData
     let some xi ← ppVar? x | escape
@@ -1051,8 +1063,8 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
   | Fml.allocAll _ _ x A φ =>
     let x := x.consumeMData
     let some xi ← ppVar? x | escape
-    unless ← isDefEq A (mkConst ``bytesR) do return ← escape
-    `(dl_fml| ∀ fresh bytes $xi:ident; $(← ppFmlS (x :: ns) φ):dl_fml)
+    let T ← if ← isDefEq A (mkConst ``bytesR) then `(sol_ty| bytes) else ppTy.ppRef A
+    `(dl_fml| ∀ fresh $T:sol_ty $xi:ident; $(← ppFmlS (x :: ns) φ):dl_fml)
   | Fml.and _ _ φ ψ =>
     if let some ((na, a), (nb, b)) ← iffPartsS ns e then
       return ← `(dl_fml| $(← ppFmlS na a):dl_fml ↔ $(← ppFmlS nb b):dl_fml)

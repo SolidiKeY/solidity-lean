@@ -1,0 +1,125 @@
+{
+  "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "upstreamCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "scope": "All original fixture text and expectation rows retained. Both required pipelines remain blocked; no compiler/EVM or Lean runtime agreement is claimed.",
+  "fixtures": [
+    {
+      "label": "dynamic-create",
+      "path": "test/libsolidity/semanticTests/functionCall/creation_function_call_with_args.sol",
+      "sourceSha256": "49188572f88bd727ca967578bb2a6a4b9160530a87e24cabfd4b83b6eb5bd8eb",
+      "fixtureText": "contract C {\n    uint public i;\n    constructor(uint newI) {\n        i = newI;\n    }\n}\ncontract D {\n    C c;\n    constructor(uint v) {\n        c = new C(v);\n    }\n    function f() public returns (uint r) {\n        return c.i();\n    }\n}\n// ----\n// constructor(): 2 ->\n// gas irOptimized: 138893\n// gas irOptimized code: 53400\n// gas legacy: 145569\n// gas legacy code: 95600\n// gas legacyOptimized: 138297\n// gas legacyOptimized code: 54600\n// gas ssaCFGOptimized: 138459\n// gas ssaCFGOptimized code: 49000\n// f() -> 2\n",
+      "settings": {},
+      "originalExpectations": [
+        "constructor(): 2 ->",
+        "gas irOptimized: 138893",
+        "gas irOptimized code: 53400",
+        "gas legacy: 145569",
+        "gas legacy code: 95600",
+        "gas legacyOptimized: 138297",
+        "gas legacyOptimized code: 54600",
+        "gas ssaCFGOptimized: 138459",
+        "gas ssaCFGOptimized code: 49000",
+        "f() -> 2"
+      ],
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "pipelines": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked-before-Lean-replay",
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+          "observations": null
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked-before-Lean-replay",
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+          "observations": null
+        }
+      ],
+      "result": {
+        "path": "test/libsolidity/semanticTests/functionCall/creation_function_call_with_args.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      "modelSha256": "fd6d78023dd0a10e372afcd9b84e840d81d412e55351b6f34dd772639968486d"
+    },
+    {
+      "label": "library-mapping",
+      "path": "test/libsolidity/semanticTests/libraries/external_call_with_storage_mapping_parameter.sol",
+      "sourceSha256": "b0f58db4932da6182cca0e6bf0d310f11d3d30ce160fa05f8abfecb4c1e46a6c",
+      "fixtureText": "library L {\n    function f(mapping(uint256 => uint256) storage _a) external returns (uint256) {\n        return _a[0] * _a[1];\n    }\n}\n\ncontract C {\n    mapping(uint256 => uint256) x;\n\n    function g(uint256 _value) external returns (uint256) {\n        x[0] = x[1] = _value;\n        return L.f(x);\n    }\n}\n// ----\n// library: L\n// g(uint256): 4 -> 16\n",
+      "settings": {},
+      "originalExpectations": [
+        "library: L",
+        "g(uint256): 4 -> 16"
+      ],
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "pipelines": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked-before-Lean-replay",
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+          "observations": null
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked-before-Lean-replay",
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+          "observations": null
+        }
+      ],
+      "result": {
+        "path": "test/libsolidity/semanticTests/libraries/external_call_with_storage_mapping_parameter.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      "modelSha256": "fd6d78023dd0a10e372afcd9b84e840d81d412e55351b6f34dd772639968486d"
+    },
+    {
+      "label": "try-create",
+      "path": "test/libsolidity/semanticTests/tryCatch/create.sol",
+      "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
+      "fixtureText": "contract Reverts {\n    constructor(uint) { revert(\"test message.\"); }\n}\ncontract Succeeds {\n    constructor(uint) { }\n}\n\ncontract C {\n    function f() public returns (bool created, string memory txt) {\n        uint i = 3;\n        try new Reverts(i) returns (Reverts r) {\n            created = (address(r) != address(0));\n            txt = \"success\";\n        } catch Error(string memory s) {\n            txt = s;\n        }\n    }\n    function g() public returns (bool created, string memory txt) {\n        uint i = 8;\n        try new Succeeds(i) returns (Succeeds r) {\n            created = (address(r) != address(0));\n            txt = \"success\";\n        } catch Error(string memory s) {\n            txt = s;\n        }\n    }\n}\n// ====\n// EVMVersion: >=byzantium\n// ----\n// f() -> false, 0x40, 13, \"test message.\"\n// g() -> true, 0x40, 7, \"success\"\n",
+      "settings": {
+        "EVMVersion": ">=byzantium"
+      },
+      "originalExpectations": [
+        "f() -> false, 0x40, 13, \"test message.\"",
+        "g() -> true, 0x40, 7, \"success\""
+      ],
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "pipelines": [
+        {
+          "pipeline": "legacy",
+          "status": "blocked-before-Lean-replay",
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+          "observations": null
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "blocked-before-Lean-replay",
+          "reason": "transaction/block/self-address or cross-contract host behavior not adapted",
+          "observations": null
+        }
+      ],
+      "result": {
+        "path": "test/libsolidity/semanticTests/tryCatch/create.sol",
+        "stage": "lean-runtime",
+        "status": "blocked",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      "modelSha256": "fd6d78023dd0a10e372afcd9b84e840d81d412e55351b6f34dd772639968486d"
+    }
+  ]
+}

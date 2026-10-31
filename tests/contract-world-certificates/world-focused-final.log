@@ -1,0 +1,175 @@
+⚠ [2/11] Replayed Solidity.AST
+warning: Solidity/AST.lean:354:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [7/12] Built Solidity.Language.Features (14s)
+✔ [9/16] Built Solidity.Frontend.Source (3.3s)
+✔ [10/16] Built Solidity.Frontend.SolcJson.Body (15s)
+✔ [12/16] Built Solidity.Frontend.SolcJson.Admission (3.1s)
+✔ [13/19] Built Solidity.Frontend.SolcJson.Getters (1.9s)
+✔ [14/20] Built Solidity.Frontend.SolcJson.Contract (29s)
+✔ [17/33] Built Solidity.Frontend.SolcJson (782ms)
+⚠ [18/33] Replayed Solidity.Syntax.Quote
+warning: Solidity/Syntax/Quote.lean:424:39: unused variable `ps`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [28/33] Replayed Solidity.Syntax.Elab.Arms
+warning: Solidity/Syntax/Elab/Arms.lean:1354:11: unused variable `n`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [33/52] Built Solidity.Frontend.Import (7.9s)
+⚠ [49/52] Replayed Solidity.Semantics.ContractWorld
+warning: Solidity/Semantics/ContractWorld.lean:171:0: automatically included section variable(s) unused in theorem `Solidity.ContractWorld.World.finish_accounts`:
+  [DecidableEq K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [DecidableEq K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: Solidity/Semantics/ContractWorld.lean:246:34: This simp argument is unused:
+  bind
+
+Hint: Omit it from the simp argument list.
+  simp only [he, b̵i̵n̵d̵,̵ ̵Except.bind] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:246:40: This simp argument is unused:
+  Except.bind
+
+Hint: Omit it from the simp argument list.
+  simp only [he, bind,̵ ̵E̵x̵c̵e̵p̵t̵.̵b̵i̵n̵d̵] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:248:23: This simp argument is unused:
+  bind
+
+Hint: Omit it from the simp argument list.
+  simp only [he, b̵i̵n̵d̵,̵ ̵Except.bind] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:248:29: This simp argument is unused:
+  Except.bind
+
+Hint: Omit it from the simp argument list.
+  simp only [he, bind,̵ ̵E̵x̵c̵e̵p̵t̵.̵b̵i̵n̵d̵] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:254:38: This simp argument is unused:
+  bind
+
+Hint: Omit it from the simp argument list.
+  simp only [hf, b̵i̵n̵d̵,̵ ̵Except.bind] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:254:44: This simp argument is unused:
+  Except.bind
+
+Hint: Omit it from the simp argument list.
+  simp only [hf, bind,̵ ̵E̵x̵c̵e̵p̵t̵.̵b̵i̵n̵d̵] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:256:27: This simp argument is unused:
+  bind
+
+Hint: Omit it from the simp argument list.
+  simp only [hf, b̵i̵n̵d̵,̵ ̵Except.bind] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:256:33: This simp argument is unused:
+  Except.bind
+
+Hint: Omit it from the simp argument list.
+  simp only [hf, bind,̵ ̵E̵x̵c̵e̵p̵t̵.̵b̵i̵n̵d̵] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:264:8: automatically included section variable(s) unused in theorem `_private.Solidity.Semantics.ContractWorld.0.Solidity.ContractWorld.World.deployFrame_ok`:
+  [DecidableEq K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [DecidableEq K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: Solidity/Semantics/ContractWorld.lean:284:36: This simp argument is unused:
+  bind
+
+Hint: Omit it from the simp argument list.
+  simp only [hf, b̵i̵n̵d̵,̵ ̵Except.bind] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:284:42: This simp argument is unused:
+  Except.bind
+
+Hint: Omit it from the simp argument list.
+  simp only [hf, bind,̵ ̵E̵x̵c̵e̵p̵t̵.̵b̵i̵n̵d̵] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:286:25: This simp argument is unused:
+  bind
+
+Hint: Omit it from the simp argument list.
+  simp only [hf, b̵i̵n̵d̵,̵ ̵Except.bind] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:286:31: This simp argument is unused:
+  Except.bind
+
+Hint: Omit it from the simp argument list.
+  simp only [hf, bind,̵ ̵E̵x̵c̵e̵p̵t̵.̵b̵i̵n̵d̵] at run
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Semantics/ContractWorld.lean:371:0: automatically included section variable(s) unused in theorem `Solidity.ContractWorld.World.tryCreate_argument_failure`:
+  [DecidableEq K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [DecidableEq K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: Solidity/Semantics/ContractWorld.lean:387:0: automatically included section variable(s) unused in theorem `Solidity.ContractWorld.atomic_failure`:
+  [DecidableEq K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [DecidableEq K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+ℹ [50/52] Replayed Solidity.Semantics.ContractWorldCertificates
+info: Solidity/Semantics/ContractWorldCertificates.lean:170:0: 'Solidity.ContractWorld.World.paidRun_certificate' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Semantics/ContractWorldCertificates.lean:171:0: 'Solidity.ContractWorld.Operation.tryCreate_certificate' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Semantics/ContractWorldCertificates.lean:172:0: 'Solidity.ContractWorld.Operation.tryCreate_uncaught' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Semantics/ContractWorldCertificates.lean:173:0: 'Solidity.ContractWorld.Reachable.of_certificate' depends on axioms: [propext, Classical.choice, Quot.sound]
+✔ [51/52] Built Solidity.Frontend.WorldImport (3.5s)
+ℹ [52/52] Built Solidity.Examples.Tactics.ContractWorldSource (7.6s)
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:253:0: 'Solidity.Examples.Tactics.ContractWorldSource.Direct.run_certificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:254:0: 'Solidity.Examples.Tactics.ContractWorldSource.Tried.run_certificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:255:0: 'Solidity.Examples.Tactics.ContractWorldSource.Linked.run_certificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:256:0: 'Solidity.Examples.Tactics.ContractWorldSource.Tried.run_reachable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:257:0: 'Solidity.Examples.Tactics.ContractWorldSource.source_catch_reachable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:297:0: 'Solidity.Examples.Tactics.ContractWorldSource.source_direct_operation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:298:0: 'Solidity.Examples.Tactics.ContractWorldSource.source_linked_operation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:325:0: 'Solidity.Examples.Tactics.ContractWorldSource.source_factory' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:326:0: 'Solidity.Examples.Tactics.ContractWorldSource.source_creation_try' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:327:0: 'Solidity.Examples.Tactics.ContractWorldSource.source_creation_try_success' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Examples/Tactics/ContractWorldSource.lean:328:0: 'Solidity.Examples.Tactics.ContractWorldSource.source_linked_library' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+Build completed successfully (52 jobs).
+
+real	1m27.494s
+user	1m23.258s
+sys	0m4.076s
+cgroup memory.peak=842190848

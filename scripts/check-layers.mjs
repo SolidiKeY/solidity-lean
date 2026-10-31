@@ -15,12 +15,20 @@ const CORE = [
   /^Solidity\.(KeySort|Eqns|AST|TypeGraph|Scope|SpecSyntax|Hashes|Keccak|ERC7201|Secp256k1|RevertBytes|Syntax|Semantics|Signature|Update)$/,
   /^Solidity\.Syntax\.(Raw|Grammar|Contract|Scoped|Checked|Inlined|PushSource|Join)$/,
   /^Solidity\.(Semantics|Typing|Theory)\./,
-  /^Solidity\.Calculus\.(Fml|Rules|RuleSyntax|RuleKit|KeyTaclets|Step|Arms|Blocks|Taclet|Proves|Logic|Preconditions|FiniteMembership|FilteredMembership|Hyp|Correct|FirstOrder|Transient|Lifetime|ContractWorld)$/,
+  /^Solidity\.Calculus\.(Fml|Rules|RuleSyntax|RuleKit|KeyTaclets|Step|Arms|Blocks|Taclet|Proves|Logic|Preconditions|FiniteMembership|FilteredMembership|Hyp|Correct|FirstOrder|Transient|Lifetime|ContractWorld|PaymentWitness|PaymentConditions)$/,
   /^Solidity\.Calculus\.(Sound.*|StmtSound|ProvesSound|PremiseSound|UpdRuleScoped|UpdateRules|TermLib\.Rules)$/,
   /^Solidity\.Calculus\.RuleSyntax\./,
-  /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary)$/,
+  /^Solidity\.Roadmap\./, // The roadmap's contracts are statements below the elaborator.
+  /^Solidity\.Hash\.CollisionBound$/,
+  /^Solidity\.Backend\.(Opcode|Jumpdest|Assembler|Control)$/,
+  /^Solidity\.Hash\.Adaptive$/,
+  /^Solidity\.Storage\.HashedLayout$/,
+  /^Solidity\.Storage\.HashedKeccak$/,
+  /^Solidity\.Storage\.HashedSeparation$/,
+  /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|LoopInvariantWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary|KIntTwoAnchors)$/,
 ];
 const ELABORATOR = [
+  /^Solidity\.Tools\.SolCases$/, // External-source printer stays outside the core.
   /^Solidity\.Syntax\.(Elab|Quote|Splice)(\.|$)/,
   /^Solidity\.Calculus\.(Print[^.]*|Surface[^.]*|TacticSyntax|Quote|NamedTerm)(\.|$)/,
 ];

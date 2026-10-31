@@ -1,0 +1,48 @@
+BLOCKED ATTEMPTS, NOT PASSING EVIDENCE
+The source and its scalar/count postconditions were not weakened.
+Nested quantifiers and a symbolic mapping-prefix post were exploratory additions.
+Their source functions remain in both ASTs; failed declarations are not shipped.
+
+Per-file command: lake env lean -j1 --tstack=131072 Solidity/Examples/Tactics/QuantifiedDiamond.lean
+Default declaration budget: 200000 heartbeats (unchanged).
+
+step12-proofs.log
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:37:12: error: (deterministic) timeout at `«tactic execution»`, maximum number of heartbeats (200000) has been reached
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:44:0: error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:107:12: error: (deterministic) timeout at `«tactic execution»`, maximum number of heartbeats (200000) has been reached
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:114:0: error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached
+elapsedSeconds=115
+peakCgroupBytes=745357312
+memoryLimitBytes=12884901888
+swapLimitBytes=0
+
+step12-proofs-staged.log
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:36:2: error: sol_close_quantified: the quantified fallback left the original goal open
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:45:4: error: failed to compile definition, compiler IR check failed at `Solidity.Examples.Tactics.QuantifiedDiamond.fillGoal._closed_4`. Error: depends on declaration 'Solc.QuantifiedDiamond.fill', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:52:2: error: failed to compile definition, compiler IR check failed at `_tmp._closed_4✝`. Error: depends on declaration 'Solidity.Examples.Tactics.QuantifiedDiamond.fillGoal', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:53:2: error: sol_close_quantified: the quantified fallback left the original goal open
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:112:2: error: sol_close_quantified: the quantified fallback left the original goal open
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:121:4: error: failed to compile definition, compiler IR check failed at `Solidity.Examples.Tactics.QuantifiedDiamond.fillGoalIR._closed_4`. Error: depends on declaration 'SolcIR.QuantifiedDiamond.fill', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:128:2: error: failed to compile definition, compiler IR check failed at `_tmp._closed_4✝`. Error: depends on declaration 'Solidity.Examples.Tactics.QuantifiedDiamond.fillGoalIR', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/QuantifiedDiamond.lean:129:2: error: sol_close_quantified: the quantified fallback left the original goal open
+elapsedSeconds=73
+peakCgroupBytes=530591744
+memoryLimitBytes=12884901888
+swapLimitBytes=0
+
+The first per-process address-space-limited TermSize attempt stopped with
+"failed to create thread" at about 1 GiB RSS. It was blocked, not a proof result.
+Subsequent checks use Docker cgroup v2 memory.max=12884901888,
+memory.swap.max=0, with LEAN_NUM_THREADS=1 and explicit -j1.
+Systemd user scopes are unavailable. A reconnect interrupted one parent lock;
+the task's own container was stopped and the lock moved inside the container.
+Interrupted runs and container-name cleanup conflicts are not passing checks.
+
+Exact advanced goals (both Solc.QuantifiedDiamond and SolcIR.QuantifiedDiamond):
+  nested: Fml.Valid N.nested.problem, sol_symex; sol_close (default 200000)
+  nested staged: sol_symex; sol_close_quantified (left original goal open)
+  mapping prefix: wt(storage) -> < fill(); > (forall uint q; q < 3 -> values[q] == 7)
+  mapping source-call elaboration: whnf budget exhausted at 200000.
+The directly named imported Prog was also unavailable to the native evaluator;
+that optional attempt is not a kernel-checked mapping-post theorem.
+Source SHA-256: 44475906db14c7f30dc7714fd1eaba26ac9a6bb7fa8fdb4b46d4db7d4b19483f

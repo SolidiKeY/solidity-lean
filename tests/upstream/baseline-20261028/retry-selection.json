@@ -1,0 +1,788 @@
+{
+  "metadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+    "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+    "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "filter": null,
+    "timeoutMs": 120000,
+    "batchSize": 16
+  },
+  "queuedModeJobs": 1761,
+  "batches": [
+    {
+      "firstJobIndex": 32,
+      "firstUncheckpointedFixture": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_3d_v2.sol",
+      "failedModes": [
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_3d_v2.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_3d_v2.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_dynamic_bytes_v2.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_dynamic_bytes_v2.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_length_v2.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ]
+      ],
+      "followerCandidates": [
+        "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_dynamic_bytes_v2.sol",
+        "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_length_v2.sol"
+      ]
+    },
+    {
+      "firstJobIndex": 64,
+      "firstUncheckpointedFixture": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_array_and_calldata_static_array.sol",
+      "failedModes": [
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_array_and_calldata_static_array.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_array_and_calldata_static_array.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_arrays.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_arrays.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_dynamic_v2.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_dynamic_v2.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_static_v2.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_static_v2.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/member_array_dynamic2_v2.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/member_array_dynamic2_v2.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ]
+      ],
+      "followerCandidates": [
+        "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_arrays.sol",
+        "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_dynamic_v2.sol",
+        "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_static_v2.sol",
+        "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/member_array_dynamic2_v2.sol"
+      ]
+    },
+    {
+      "firstJobIndex": 240,
+      "firstUncheckpointedFixture": "test/libsolidity/semanticTests/array/create_memory_array_too_large.sol",
+      "failedModes": [
+        [
+          "test/libsolidity/semanticTests/array/create_memory_array_too_large.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/create_memory_array_too_large.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/create_memory_byte_array.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/create_memory_byte_array.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/create_multiple_dynamic_arrays.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/create_multiple_dynamic_arrays.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/delete_memory_array.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/delete_memory_array.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/delete_on_array_of_structs.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/delete_on_array_of_structs.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/delete_storage_array.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/delete_storage_array.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/delete/memory_bytes_delete_element.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 137,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ]
+      ],
+      "followerCandidates": [
+        "test/libsolidity/semanticTests/array/create_memory_byte_array.sol",
+        "test/libsolidity/semanticTests/array/create_multiple_dynamic_arrays.sol",
+        "test/libsolidity/semanticTests/array/delete/delete_memory_array.sol",
+        "test/libsolidity/semanticTests/array/delete/delete_on_array_of_structs.sol",
+        "test/libsolidity/semanticTests/array/delete/delete_storage_array.sol",
+        "test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol",
+        "test/libsolidity/semanticTests/array/delete/memory_bytes_delete_element.sol"
+      ]
+    },
+    {
+      "firstJobIndex": 256,
+      "firstUncheckpointedFixture": "test/libsolidity/semanticTests/array/external_array_args.sol",
+      "failedModes": [
+        [
+          "test/libsolidity/semanticTests/array/external_array_args.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/fixed_arrays_in_storage.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/fixed_arrays_in_storage.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/fixed_bytes_length_access.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/fixed_bytes_length_access.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/array/fixed_out_of_bounds_array_access.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ]
+      ],
+      "followerCandidates": [
+        "test/libsolidity/semanticTests/array/fixed_arrays_in_storage.sol",
+        "test/libsolidity/semanticTests/array/fixed_bytes_length_access.sol",
+        "test/libsolidity/semanticTests/array/fixed_out_of_bounds_array_access.sol"
+      ]
+    },
+    {
+      "firstJobIndex": 352,
+      "firstUncheckpointedFixture": "test/libsolidity/semanticTests/builtinFunctions/erc7201_equivalent_solidity_spec_comptime.sol",
+      "failedModes": [
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/erc7201_equivalent_solidity_spec_comptime.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/erc7201_equivalent_solidity_spec_comptime.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ]
+      ],
+      "followerCandidates": [
+        "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol"
+      ]
+    },
+    {
+      "firstJobIndex": 384,
+      "firstUncheckpointedFixture": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_with_zero_last_byte_of_inner_hash_comptime.sol",
+      "failedModes": [
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_with_zero_last_byte_of_inner_hash_comptime.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_with_zero_last_byte_of_inner_hash_comptime.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/iterated_keccak256_with_bytes.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/iterated_keccak256_with_bytes.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/keccak256.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/keccak256.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/keccak256_empty.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/keccak256_empty.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/builtinFunctions/keccak256_multiple_arguments.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ]
+      ],
+      "followerCandidates": [
+        "test/libsolidity/semanticTests/builtinFunctions/iterated_keccak256_with_bytes.sol",
+        "test/libsolidity/semanticTests/builtinFunctions/keccak256.sol",
+        "test/libsolidity/semanticTests/builtinFunctions/keccak256_empty.sol",
+        "test/libsolidity/semanticTests/builtinFunctions/keccak256_multiple_arguments.sol"
+      ]
+    },
+    {
+      "firstJobIndex": 992,
+      "firstUncheckpointedFixture": "test/libsolidity/semanticTests/literals/denominations_in_array_sizes.sol",
+      "failedModes": [
+        [
+          "test/libsolidity/semanticTests/literals/denominations_in_array_sizes.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/literals/denominations_in_array_sizes.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/literals/escape.sol",
+          "legacy",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ],
+        [
+          "test/libsolidity/semanticTests/literals/escape.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 120000
+          }
+        ]
+      ],
+      "followerCandidates": [
+        "test/libsolidity/semanticTests/literals/escape.sol"
+      ]
+    },
+    {
+      "firstJobIndex": 1152,
+      "firstUncheckpointedFixture": "test/libsolidity/semanticTests/operators/userDefined/all_possible_user_defined_value_types_with_operators.sol",
+      "failedModes": [
+        [
+          "test/libsolidity/semanticTests/operators/userDefined/all_possible_user_defined_value_types_with_operators.sol",
+          "viaIR",
+          {
+            "command": "lake",
+            "exitCode": null,
+            "signal": "SIGKILL",
+            "errorCode": "ETIMEDOUT",
+            "timedOut": true,
+            "timeoutMs": 120000
+          }
+        ]
+      ],
+      "followerCandidates": []
+    }
+  ],
+  "fixtures": [
+    "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_dynamic_bytes_v2.sol",
+    "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_length_v2.sol",
+    "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_dynamic_arrays.sol",
+    "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_dynamic_v2.sol",
+    "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/mediocre_static_v2.sol",
+    "test/libsolidity/semanticTests/abicoder/calldataDecoding/struct/member_array_dynamic2_v2.sol",
+    "test/libsolidity/semanticTests/array/create_memory_byte_array.sol",
+    "test/libsolidity/semanticTests/array/create_multiple_dynamic_arrays.sol",
+    "test/libsolidity/semanticTests/array/delete/delete_memory_array.sol",
+    "test/libsolidity/semanticTests/array/delete/delete_on_array_of_structs.sol",
+    "test/libsolidity/semanticTests/array/delete/delete_storage_array.sol",
+    "test/libsolidity/semanticTests/array/delete/memory_arrays_delete.sol",
+    "test/libsolidity/semanticTests/array/delete/memory_bytes_delete_element.sol",
+    "test/libsolidity/semanticTests/array/fixed_arrays_in_storage.sol",
+    "test/libsolidity/semanticTests/array/fixed_bytes_length_access.sol",
+    "test/libsolidity/semanticTests/array/fixed_out_of_bounds_array_access.sol",
+    "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol",
+    "test/libsolidity/semanticTests/builtinFunctions/iterated_keccak256_with_bytes.sol",
+    "test/libsolidity/semanticTests/builtinFunctions/keccak256.sol",
+    "test/libsolidity/semanticTests/builtinFunctions/keccak256_empty.sol",
+    "test/libsolidity/semanticTests/builtinFunctions/keccak256_multiple_arguments.sol",
+    "test/libsolidity/semanticTests/literals/escape.sol"
+  ],
+  "policy": "One replay per uncheckpointed follower candidate, both required modes; original first uncheckpointed fixture remains blocked. First is not a proven root cause. No limit is raised and no resource retry loop is used.",
+  "freshRunRequired": true,
+  "freshRunAttested": true,
+  "provenance": {
+    "report": {
+      "path": "/workspace/solidity-lean/tests/upstream/baseline-20261028/results/results.json",
+      "sha256": "5ed1efe289e805d7b9bbcc92fdacd879485d46fa2a593e88eab526b2849b5960"
+    },
+    "summary": {
+      "path": "/workspace/solidity-lean/tests/upstream/baseline-20261028/results/summary.json",
+      "sha256": "3b007abe0ecaa9ca0bd312a258ab3bf3e1eaa2d6256b296ef02524924508ea87"
+    },
+    "snapshot": {
+      "path": "/workspace/solidity-lean/tests/upstream/snapshot.json",
+      "sha256": "8aa1a5fb5fc7c3527a7328f0dca786e52dd3bb8360e3f1dfbb9fb8d754041095"
+    },
+    "selector": {
+      "path": "/workspace/solidity-lean/scripts/solidity-baseline-retries.py",
+      "sha256": "67c8a8547da08611d691545b884083ca740c715a6c626aef56c4180a937abb36"
+    }
+  }
+}

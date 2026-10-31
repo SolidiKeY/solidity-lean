@@ -1,0 +1,16 @@
+passed: lake -f lakefile.step12.toml build Solidity.Solkey.QuantifiedDiamond Solidity.Examples.Tactics.QuantifiedDiamond (clean incremental import/proof build)
+  exit=0; elapsed=53s; peakCgroupBytes=476798976
+passed: lake -f lakefile.step12.toml env lean -j1 --tstack=131072 Solidity/Examples/Tactics/Loops.lean
+  exit=0; elapsed=54s; peakCgroupBytes=1711493120
+passed: lake -f lakefile.step12.toml build Solidity.Frontend.Testing Solidity.Tools.Upstream
+  exit=0; elapsed=229s; peakCgroupBytes=1285672960
+partial: node /tmp/step12-replay.mjs (all eight functions, both pinned ASTs, #solkey_test)
+  exit=2; elapsed=280s; peakCgroupBytes=614768640
+passed: node scripts/solidity-upstream.mjs run --compiler /tmp/step12-soljson-v0.8.38.js --filter semanticTests/viaYul/loops/ --out tests/upstream/step12-quantified-diamond/upstream-after
+  exit=0; elapsed=5s; peakCgroupBytes=483913728
+passed: node --test --test-concurrency=1 scripts/lex-metrics.test.mjs scripts/source-shadowing.test.mjs scripts/solc-ast-hashes.test.mjs scripts/solidity-upstream.test.mjs
+  exit=0; elapsed=288s; peakCgroupBytes=1140154368
+passed: ./run-lean.sh (temporary -j1 configuration through Lake launcher)
+  exit=0; elapsed=1s; peakCgroupBytes=379379712
+passed: lean --version; lake --version; lake build Solidity.KeySort; per-file lean -j1 --tstack=131072 on every edited core module and imported proof file
+  exit=0; elapsed=251s; peakCgroupBytes=1747165184

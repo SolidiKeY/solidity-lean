@@ -173,6 +173,10 @@ inductive RawFml where
   | cmp (op : BinOp) (a b : RawTerm)
   /-- `∀ uint x; φ` -/
   | all (p : PrimTy) (x : String) (φ : RawFml)
+  /-- `∀ given kint x; φ`, over unbounded KeY integers at modality `m`. -/
+  | kbind (m : Modality) (x : String) (φ : RawFml)
+  /-- `∀ fresh T x; φ`, for a reference type `T`. -/
+  | allocAll (T : RawTy) (x : String) (φ : RawFml)
   | not (φ : RawFml)
   | and (φ ψ : RawFml)
   | imp (φ ψ : RawFml)
@@ -231,6 +235,7 @@ def isSelfBalance (t : TSyntax `dl_term) (f : Ident) : Bool :=
 
 partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| $n:num) => `(RawTerm.num $n)
+  | `(dl_term| -$n:num) => `(RawTerm.app "intLiteral" [RawTerm.num $n])
   | `(dl_term| $x:ident) => do
       let root :: flds := nameParts x.getId | Macro.throwError "empty identifier"
       let (base, flds) ← match flds with
@@ -261,6 +266,8 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
     `(RawTerm.arith BinOp.and $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| $a:dl_term || $b:dl_term) => do
     `(RawTerm.arith BinOp.or $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| ( $a:dl_term > $b:dl_term )) => do
+    `(RawTerm.cmp BinOp.gt $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| ( $a:dl_term == $b:dl_term )) => do
     `(RawTerm.cmp BinOp.eqB $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| ( $t:dl_term )) => expandTerm t
@@ -393,9 +400,15 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
       let φ ← expandFml r φ
       let ψ ← expandFml r ψ
       `(RawFml.and (RawFml.imp $φ $ψ) (RawFml.imp $ψ $φ))
-  | stx@`(dl_fml| ∀ fresh $_:ident $_:ident; $_:dl_fml) =>
-      Macro.throwErrorAt stx "`∀ fresh bytes r; φ` is what `catchDataBox` leaves for another \
-        contract's data, not a formula to write (`Fml.allocAll`)"
+  | `(dl_fml| ∀ given[box] kint $x:ident; $φ:dl_fml) => do
+      `(RawFml.kbind Modality.box $(quote (x.getId.toString false)) $(← expandFml r φ))
+  | `(dl_fml| ∀ given[diamond] kint $x:ident; $φ:dl_fml) => do
+      `(RawFml.kbind Modality.diamond $(quote (x.getId.toString false)) $(← expandFml r φ))
+  | `(dl_fml| ∀ given kint $x:ident; $φ:dl_fml) => do
+      let m := r.either.getD (mkCIdent ``Modality.box)
+      `(RawFml.kbind $m $(quote (x.getId.toString false)) $(← expandFml r φ))
+  | `(dl_fml| ∀ fresh $T:sol_ty $x:ident; $φ:dl_fml) => do
+      `(RawFml.allocAll $(← expandTy T) $(quote (x.getId.toString false)) $(← expandFml r φ))
   | stx@`(dl_fml| { havoc } $_:dl_fml) =>
       Macro.throwErrorAt stx "`{ havoc }` is what a callback rule leaves, not a formula to write: \
         `dl[C]{ … }` is read scoped, over the typed run (`Prog.run`)"
@@ -501,7 +514,7 @@ def RawFml.names : RawFml → List String × List String
   | .wt t => (t.names, [])
   | .peq a b | .pne a b => (a.names ++ b.names, [])
   | .cmp _ a b => (a.names ++ b.names, [])
-  | .all _ x φ =>
+  | .all _ x φ | .allocAll _ x φ | .kbind _ x φ =>
     let (u, d) := φ.names
     (u.filter (· != x), d)
   | .not φ => φ.names
@@ -523,7 +536,7 @@ def RawFml.names : RawFml → List String × List String
 /-- The names a formula's updates bind to no path (`x := unset`): aliases,
 so no `uint` parameters. -/
 def RawFml.unsets : RawFml → List String
-  | .all _ _ φ | .not φ | .modal _ _ φ | .decl _ φ => φ.unsets
+  | .all _ _ φ | .allocAll _ _ φ | .kbind _ _ φ | .not φ | .modal _ _ φ | .decl _ φ => φ.unsets
   | .and φ ψ | .imp φ ψ => φ.unsets ++ ψ.unsets
   | .upd _ U φ =>
     U.filterMap (fun | .assign x (.name "unset") => some x | _ => none) ++ φ.unsets
@@ -549,7 +562,7 @@ over a KeY `int` (`isKintIn`). -/
 def RawFml.kintLeaves (ks : List String) : RawFml → List String
   | .eq a b | .cmp _ a b =>
     if a.isKintIn ks || b.isKintIn ks then a.arithLeaves ++ b.arithLeaves else []
-  | .all _ _ φ | .not φ | .upd _ _ φ | .modal _ _ φ | .decl _ φ => φ.kintLeaves ks
+  | .all _ _ φ | .allocAll _ _ φ | .kbind _ _ φ | .not φ | .upd _ _ φ | .modal _ _ φ | .decl _ φ => φ.kintLeaves ks
   | .and φ ψ | .imp φ ψ => φ.kintLeaves ks ++ ψ.kintLeaves ks
   | _ => []
 
@@ -568,7 +581,7 @@ def RawFml.kintParams (φ : RawFml) (free : List String) : List String :=
 
 /-- The statements of every program in a formula. -/
 def RawFml.stmts : RawFml → List RawStmt
-  | .not φ | .upd _ _ φ | .all _ _ φ | .decl _ φ => φ.stmts
+  | .not φ | .upd _ _ φ | .all _ _ φ | .allocAll _ _ φ | .kbind _ _ φ | .decl _ φ => φ.stmts
   | .and φ ψ | .imp φ ψ => φ.stmts ++ ψ.stmts
   | .modal _ P φ => P ++ φ.stmts
   | _ => []
@@ -706,6 +719,10 @@ def pathIn (R : Readers C) (s p : RawTerm) : Except String (NPTerm C) :=
 /-- A term at the value sort. -/
 def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NTerm C)
   | .num n => pure (.num n)
+  | .app "intLiteral" [.num n] =>
+    if h : PrimTy.int.inRange (-(n : Int)) = true then
+      pure (.lit (p := .int) ⟨-(n : Int), h⟩)
+    else throw "signed literal is outside int256"
   | .name "true" => pure (.bool true)
   | .name "false" => pure (.bool false)
   | .name x =>
@@ -743,6 +760,15 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NTerm C)
   | .app "defVal" [.name "uint"] => pure (.lit (PrimTy.dflt .uint))
   | .app "defVal" [.name "int"] => pure (.lit (PrimTy.dflt .int))
   | .app "defVal" [.name "bool"] => pure (.lit (PrimTy.dflt .bool))
+  | .app f [m, i] => do
+    let some k := HashKind.ofName? f | throw s!"`{f}(…)` is not a value term"
+    let m ← R.mem m
+    let i ← R.ident i
+    pure (NTm.syn s!"{f}({m.key}, {i.key})" s!"{f}({m.text}, {i.text})" fun Γ => do
+      let m' ← m.check .mem Γ
+      match ← i.resolve Γ with
+      | ⟨.ident _, i'⟩ => pure ⟨_, .app2 (.hash k) m' i'⟩
+      | ⟨s, _⟩ => useError i.text s "a memory reference")
   | .app f _ => throw s!"`{f}(…)` is not a value term"
   | .env k => pure (.env k)
 

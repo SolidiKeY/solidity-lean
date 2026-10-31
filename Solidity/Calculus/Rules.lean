@@ -946,8 +946,7 @@ inductive Taclet (C : Contract) (k : Nat) :
   ends need not decrease it.  The head's update reads `dec` under the
   diamond, so the variant must return where the invariant holds. -/
   | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
-      (hf : Prog.frame body = some (xs, hv) := by side_cond)
-      (hq : qs = [] := by side_cond) :
+      (hf : Prog.frame body = some (xs, hv) := by side_cond) :
       dl{ ⟨ /// @custom:key invariant inv
           /// @custom:key decreases dec
           while (cond) body; ⟩ ⇝
@@ -1156,12 +1155,10 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
           while (cond) body; ]⟩ ⇝ false }
 
   /-- A loop with an invariant and no variant closes to `false` under the
-  diamond: nothing says it ends.  solkey unwinds it instead.  So does one
-  whose invariant has a quantified clause (`LoopQ`), which only the box rule
-  reads. -/
+  diamond: nothing says it ends. solkey unwinds it instead. -/
   | whileNoVariantDiamond {cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)}
       (hf : (Prog.frame body).isSome = true := by side_cond)
-      (hd : (dec.isNone || !qs.isEmpty) = true := by side_cond) :
+      (hd : dec.isNone = true := by side_cond) :
       dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv
           while (cond) body; ⟩ ⇝ false }
   /-- An argument that is not simple is captured into a fresh local first,

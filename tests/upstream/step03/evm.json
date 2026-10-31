@@ -1,0 +1,773 @@
+{
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8",
+  "results": [
+    {
+      "pipeline": "legacy",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.bytecode.object",
+              "evm.methodIdentifiers"
+            ]
+          }
+        }
+      },
+      "inputSha256": "9aab0e5e1b6ef7f7b922871c5b3ff5c35860b603c9379333dce7c992e5ddae7d",
+      "creationSha256": "47ea98b71cc7e9547ee5d3f1210830a8bd7db9c4aadf7434067b96ee8e0846ee",
+      "deployment": {
+        "signature": "constructor",
+        "failed": false,
+        "values": [],
+        "returnData": "0x",
+        "exception": null,
+        "gasUsed": "2659283",
+        "steps": 17,
+        "maxStack": 4,
+        "runtimeCodeSha256": "00be4b3476ca59ea927e29f7663561944f69c3542970de9337ab755184ab4d11",
+        "runtimeCodeBytes": 13282
+      },
+      "observed": [
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "copies(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "3394",
+          "steps": 1022,
+          "maxStack": 25
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "endpoints(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "1776",
+          "steps": 536,
+          "maxStack": 22
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "passing(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "1719",
+          "steps": 511,
+          "maxStack": 22
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "returned(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "1981",
+          "steps": 592,
+          "maxStack": 24
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "storageCopy(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "71985",
+          "steps": 1558,
+          "maxStack": 42
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "empty(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "829",
+          "steps": 249,
+          "maxStack": 16
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "inlineCopy(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "6203",
+          "steps": 1883,
+          "maxStack": 28
+        },
+        {
+          "inputWords": [
+            "32",
+            "2",
+            "5",
+            "6",
+            "5",
+            "6"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "independent(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "2323",
+          "steps": 693,
+          "maxStack": 22
+        },
+        {
+          "inputWords": [
+            "64",
+            "288",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10",
+            "1",
+            "3",
+            "4"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "rebound(uint8[2][],uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "2218",
+          "steps": 671,
+          "maxStack": 26
+        },
+        {
+          "inputWords": [
+            "32",
+            "1",
+            "-128",
+            "127"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "signed(int8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "1676",
+          "steps": 499,
+          "maxStack": 22
+        },
+        {
+          "inputWords": [
+            "96",
+            "192",
+            "288",
+            "1",
+            "1",
+            "0",
+            "1",
+            "8233507321867270975858166353462000283756074959440384344846684898023608156160",
+            "77707700756018121199403007380174299244608569268486597397146362339050710368256",
+            "1",
+            "17",
+            "18"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "kinds(bool[2][],bytes2[2][],address[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "4403",
+          "steps": 1339,
+          "maxStack": 31
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": "0x",
+          "expectedValues": [],
+          "signature": "invalidRange(uint8[2][])",
+          "failed": true,
+          "values": [],
+          "returnData": "0x",
+          "exception": "revert",
+          "gasUsed": "22686",
+          "steps": 174,
+          "maxStack": 16
+        },
+        {
+          "inputWords": [],
+          "expectedFailureData": null,
+          "expectedValues": [
+            "0"
+          ],
+          "signature": "getMarker()",
+          "failed": false,
+          "values": [
+            "0"
+          ],
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "exception": null,
+          "gasUsed": "2455",
+          "steps": 103,
+          "maxStack": 12
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000032",
+          "expectedValues": [],
+          "signature": "rowBounds(uint8[2][])",
+          "failed": true,
+          "values": [],
+          "returnData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000032",
+          "exception": "revert",
+          "gasUsed": "1130",
+          "steps": 342,
+          "maxStack": 21
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+          "expectedValues": [],
+          "signature": "falsePost(uint8[2][])",
+          "failed": true,
+          "values": [],
+          "returnData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+          "exception": "revert",
+          "gasUsed": "1590",
+          "steps": 475,
+          "maxStack": 22
+        },
+        {
+          "inputWords": [
+            "32",
+            "1",
+            "255",
+            "0"
+          ],
+          "expectedFailureData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+          "expectedValues": [],
+          "signature": "narrowFailure(uint8[2][])",
+          "failed": true,
+          "values": [],
+          "returnData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+          "exception": "revert",
+          "gasUsed": "1336",
+          "steps": 403,
+          "maxStack": 20
+        }
+      ],
+      "invalidDynamicElementSource": "rejected",
+      "invalidAddressIntegerConversion": "rejected"
+    },
+    {
+      "pipeline": "viaIR",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.bytecode.object",
+              "evm.methodIdentifiers"
+            ]
+          }
+        }
+      },
+      "inputSha256": "649ae35c51ba212c0c469bc3b8fd3a5db422757ba0b17ac4b4745b42ddbe8630",
+      "creationSha256": "e31b55f04410459cb18d2b286f0cd7dcac23987793ac39c685eb2316ccb5b6db",
+      "deployment": {
+        "signature": "constructor",
+        "failed": false,
+        "values": [],
+        "returnData": "0x",
+        "exception": null,
+        "gasUsed": "2769457",
+        "steps": 22,
+        "maxStack": 4,
+        "runtimeCodeSha256": "11d672a294167f4e085c2988fd95418ccfbd382bfa240eaf2057bb9ff4405bdb",
+        "runtimeCodeBytes": 13832
+      },
+      "observed": [
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "copies(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "10738",
+          "steps": 2897,
+          "maxStack": 40
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "endpoints(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "4823",
+          "steps": 1293,
+          "maxStack": 30
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "passing(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "4215",
+          "steps": 1118,
+          "maxStack": 31
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "returned(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "5165",
+          "steps": 1394,
+          "maxStack": 34
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "storageCopy(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "72791",
+          "steps": 1635,
+          "maxStack": 35
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "empty(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "1689",
+          "steps": 445,
+          "maxStack": 17
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "inlineCopy(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "20499",
+          "steps": 5529,
+          "maxStack": 42
+        },
+        {
+          "inputWords": [
+            "32",
+            "2",
+            "5",
+            "6",
+            "5",
+            "6"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "independent(uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "5662",
+          "steps": 1523,
+          "maxStack": 30
+        },
+        {
+          "inputWords": [
+            "64",
+            "288",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10",
+            "1",
+            "3",
+            "4"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "rebound(uint8[2][],uint8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "4530",
+          "steps": 1215,
+          "maxStack": 36
+        },
+        {
+          "inputWords": [
+            "32",
+            "1",
+            "-128",
+            "127"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "signed(int8[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "4283",
+          "steps": 1139,
+          "maxStack": 33
+        },
+        {
+          "inputWords": [
+            "96",
+            "192",
+            "288",
+            "1",
+            "1",
+            "0",
+            "1",
+            "8233507321867270975858166353462000283756074959440384344846684898023608156160",
+            "77707700756018121199403007380174299244608569268486597397146362339050710368256",
+            "1",
+            "17",
+            "18"
+          ],
+          "expectedFailureData": null,
+          "expectedValues": [],
+          "signature": "kinds(bool[2][],bytes2[2][],address[2][])",
+          "failed": false,
+          "values": [],
+          "returnData": "0x",
+          "exception": null,
+          "gasUsed": "11231",
+          "steps": 3047,
+          "maxStack": 38
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": "0x",
+          "expectedValues": [],
+          "signature": "invalidRange(uint8[2][])",
+          "failed": true,
+          "values": [],
+          "returnData": "0x",
+          "exception": "revert",
+          "gasUsed": "23500",
+          "steps": 367,
+          "maxStack": 18
+        },
+        {
+          "inputWords": [],
+          "expectedFailureData": null,
+          "expectedValues": [
+            "0"
+          ],
+          "signature": "getMarker()",
+          "failed": false,
+          "values": [
+            "0"
+          ],
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "exception": null,
+          "gasUsed": "2719",
+          "steps": 164,
+          "maxStack": 10
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000032",
+          "expectedValues": [],
+          "signature": "rowBounds(uint8[2][])",
+          "failed": true,
+          "values": [],
+          "returnData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000032",
+          "exception": "revert",
+          "gasUsed": "2536",
+          "steps": 691,
+          "maxStack": 30
+        },
+        {
+          "inputWords": [
+            "32",
+            "3",
+            "3",
+            "4",
+            "5",
+            "6",
+            "9",
+            "10"
+          ],
+          "expectedFailureData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+          "expectedValues": [],
+          "signature": "falsePost(uint8[2][])",
+          "failed": true,
+          "values": [],
+          "returnData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+          "exception": "revert",
+          "gasUsed": "3646",
+          "steps": 974,
+          "maxStack": 34
+        },
+        {
+          "inputWords": [
+            "32",
+            "1",
+            "255",
+            "0"
+          ],
+          "expectedFailureData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+          "expectedValues": [],
+          "signature": "narrowFailure(uint8[2][])",
+          "failed": true,
+          "values": [],
+          "returnData": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+          "exception": "revert",
+          "gasUsed": "2722",
+          "steps": 738,
+          "maxStack": 28
+        }
+      ],
+      "invalidDynamicElementSource": "rejected",
+      "invalidAddressIntegerConversion": "rejected"
+    }
+  ]
+}

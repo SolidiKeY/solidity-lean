@@ -1,0 +1,9 @@
+some (Solidity.THalt.panic)
+some (Solidity.THalt.panic)
+some (Solidity.THalt.panic)
+some (Solidity.THalt.panic)
+some (Solidity.THalt.panic)
+some (Solidity.THalt.panic)
+some (Solidity.THalt.panic)
+some (Solidity.THalt.panic)
+{"command": ["lake", "env", "lean", "-j1", "--tstack=131072", ".lake/revert-task/ConditionalBefore.lean"], "exit": 0, "elapsed": 17.100650692000045, "peak_group_rss": 866197504}

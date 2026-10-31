@@ -1,0 +1,703 @@
+{
+  "version": 1,
+  "timestampUTC": "2026-10-28T03:23:19.815748+00:00",
+  "repository": "SolidiKeY/solidity-lean",
+  "branch": "feature/step12-quantified-diamond",
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "validatedCodeCommit": "2d12fc532758e9f86dfeca5786a5a973dc40122d",
+  "featureStatus": "partial",
+  "scope": "ordinary deterministic scalar diamond loops with LoopQ clauses",
+  "environment": {
+    "id": "ccarenv_b64_Y2NhcmVudl9iOTgzYTg5NTk0NzQ4MTkxOWM1MjgxNDFjZTMyN2IwNQ",
+    "cwd": "/workspace/solidity-lean",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "runtimeChecked": true
+  },
+  "resources": {
+    "memoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "parentMemoryMaxBytes": 17179869184,
+    "LEAN_NUM_THREADS": 1,
+    "leanArgs": [
+      "--tstack=131072",
+      "-j1"
+    ],
+    "enforcement": "Docker cgroup v2; writer flock held inside container",
+    "measurement": "memory.peak, including charged page cache; not aggregate process RSS",
+    "proofBudgetsChanged": false,
+    "loopFuelChanged": false
+  },
+  "gates": [
+    {
+      "command": "lake -f lakefile.step12.toml build Solidity.Solkey.QuantifiedDiamond Solidity.Examples.Tactics.QuantifiedDiamond (clean incremental import/proof build)",
+      "status": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 53,
+      "peakCgroupBytes": 476798976,
+      "rawLogSha256": "600625d2009572e9c490406a7dc85273b93c226f7b40b29e82708dad34f1d246",
+      "log": "kernel-build.txt"
+    },
+    {
+      "command": "lake -f lakefile.step12.toml env lean -j1 --tstack=131072 Solidity/Examples/Tactics/Loops.lean",
+      "status": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 54,
+      "peakCgroupBytes": 1711493120,
+      "rawLogSha256": "774804d3a8366266468393dc934dad99dbf411b7e089a77dd2c9911f3277ec98",
+      "log": "step12-loops-pin.log"
+    },
+    {
+      "command": "lake -f lakefile.step12.toml build Solidity.Frontend.Testing Solidity.Tools.Upstream",
+      "status": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 229,
+      "peakCgroupBytes": 1285672960,
+      "rawLogSha256": "d3f1b0cc5872dff5ebfe275d3599dd8bc64090bd3a0beec6b40ccb46d93a9e07",
+      "log": "step12-apis.log"
+    },
+    {
+      "command": "node /tmp/step12-replay.mjs (all eight functions, both pinned ASTs, #solkey_test)",
+      "status": "partial",
+      "exitCode": 2,
+      "elapsedSeconds": 280,
+      "peakCgroupBytes": 614768640,
+      "rawLogSha256": "ea00e751bf464c6897322d83551f6ccf2fe7e5b79aeb5b4cf8753fb3f7ac2611",
+      "log": "step12-runner.log"
+    },
+    {
+      "command": "node scripts/solidity-upstream.mjs run --compiler /tmp/step12-soljson-v0.8.38.js --filter semanticTests/viaYul/loops/ --out tests/upstream/step12-quantified-diamond/upstream-after",
+      "status": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 5,
+      "peakCgroupBytes": 483913728,
+      "rawLogSha256": "58865873c83a629a942353322246d58f582b4ae1ad14f9da46d786a0dd926ba1",
+      "log": "step12-upstream.log"
+    },
+    {
+      "command": "node --test --test-concurrency=1 scripts/lex-metrics.test.mjs scripts/source-shadowing.test.mjs scripts/solc-ast-hashes.test.mjs scripts/solidity-upstream.test.mjs",
+      "status": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 288,
+      "peakCgroupBytes": 1140154368,
+      "rawLogSha256": "ea29f5125376f6b345c938247067508f6edfe0c715fe95a8f1e1c4c409d1f428",
+      "log": "step12-node.log"
+    },
+    {
+      "command": "./run-lean.sh (temporary -j1 configuration through Lake launcher)",
+      "status": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 1,
+      "peakCgroupBytes": 379379712,
+      "rawLogSha256": "f32059706623d5f102d4bd61a08a300de783877fcaf1539689868b63bb5c5c7f",
+      "log": "full-build-passed.txt"
+    },
+    {
+      "command": "lean --version; lake --version; lake build Solidity.KeySort; per-file lean -j1 --tstack=131072 on every edited core module and imported proof file",
+      "status": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 251,
+      "peakCgroupBytes": 1747165184,
+      "rawLogSha256": "2ab4b1af1b725955c0a47de2a60270b1748043dab0cf97de563ef69db3372089",
+      "log": "per-file-passed.txt"
+    }
+  ],
+  "nodeTests": {
+    "passed": 37,
+    "failed": 0
+  },
+  "upstreamObservations": 28,
+  "upstream": [
+    {
+      "path": "test/libsolidity/semanticTests/viaYul/loops/break.sol",
+      "status": "working",
+      "pipelines": [
+        {
+          "pipeline": "legacy",
+          "status": "working",
+          "observed": [
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "working",
+          "observed": [
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/viaYul/loops/continue.sol",
+      "status": "working",
+      "pipelines": [
+        {
+          "pipeline": "legacy",
+          "status": "working",
+          "observed": [
+            {
+              "values": [
+                "11"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "11"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "5"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "working",
+          "observed": [
+            {
+              "values": [
+                "11"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "11"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "5"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/viaYul/loops/return.sol",
+      "status": "working",
+      "pipelines": [
+        {
+          "pipeline": "legacy",
+          "status": "working",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "working",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/viaYul/loops/simple.sol",
+      "status": "working",
+      "pipelines": [
+        {
+          "pipeline": "legacy",
+          "status": "working",
+          "observed": [
+            {
+              "values": [
+                "1024"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1024"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "3"
+              ],
+              "signature": "i()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [],
+              "signature": "j()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "pipeline": "viaIR",
+          "status": "working",
+          "observed": [
+            {
+              "values": [
+                "1024"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "1024"
+              ],
+              "signature": "g()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "h()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [
+                "3"
+              ],
+              "signature": "i()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            },
+            {
+              "values": [],
+              "signature": "j()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sourceReplay": {
+    "legacy": [
+      {
+        "function": "count",
+        "status": "proved",
+        "reason": "",
+        "elapsedMs": 10696,
+        "tag": "diamond"
+      },
+      {
+        "function": "forCount",
+        "status": "proved",
+        "reason": "",
+        "elapsedMs": 11866,
+        "tag": "diamond"
+      },
+      {
+        "function": "nested",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 28231,
+        "tag": "diamond"
+      },
+      {
+        "function": "undefinedVariant",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 31708,
+        "tag": "diamond"
+      },
+      {
+        "function": "fill",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 23928,
+        "tag": "diamond"
+      },
+      {
+        "function": "falsePost",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 15074,
+        "tag": "diamond"
+      },
+      {
+        "function": "constantVariant",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 13735,
+        "tag": "diamond"
+      },
+      {
+        "function": "nonterminating",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 2795,
+        "tag": "diamond"
+      }
+    ],
+    "viaIR": [
+      {
+        "function": "count",
+        "status": "proved",
+        "reason": "",
+        "elapsedMs": 10732,
+        "tag": "diamond"
+      },
+      {
+        "function": "forCount",
+        "status": "proved",
+        "reason": "",
+        "elapsedMs": 12001,
+        "tag": "diamond"
+      },
+      {
+        "function": "nested",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 28020,
+        "tag": "diamond"
+      },
+      {
+        "function": "undefinedVariant",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 31871,
+        "tag": "diamond"
+      },
+      {
+        "function": "fill",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 23308,
+        "tag": "diamond"
+      },
+      {
+        "function": "falsePost",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 16070,
+        "tag": "diamond"
+      },
+      {
+        "function": "constantVariant",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 11284,
+        "tag": "diamond"
+      },
+      {
+        "function": "nonterminating",
+        "status": "pending",
+        "reason": "open proof goals",
+        "elapsedMs": 2212,
+        "tag": "diamond"
+      }
+    ]
+  },
+  "axioms": {
+    "Solidity.Examples.Tactics.QuantifiedDiamond.count": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.quantified_post": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.quantified_post_false": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.quantified_postIR": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.quantified_post_falseIR": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.count_successIR": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.fill_successIR": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.count_success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.fill_success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.QuantifiedDiamond.nonterminating_diverges": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Premise.sound_whileInvDiamond": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.invFml_up_holds": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "sharedFilesChanged": [
+    "Solidity.lean",
+    "Solidity/Calculus/Blocks.lean",
+    "Solidity/Calculus/Proves.lean",
+    "Solidity/Calculus/RuleExists.lean",
+    "Solidity/Calculus/Rules.lean",
+    "Solidity/Calculus/SoundLoops.lean",
+    "Solidity/Calculus/Taclet.lean",
+    "Solidity/Calculus/TermSize.lean",
+    "Solidity/Examples/Tactics/Loops.lean",
+    "Solidity/Language/Features.lean",
+    "docs/lean-key-rule-map.md",
+    "docs/loops.md",
+    "docs/module-map.md",
+    "docs/solidity-feature-inventory.md",
+    "docs/solidity-features.json"
+  ],
+  "sharedFrontendFilesChanged": [],
+  "staticGates": {
+    "layers": "152 core modules, zero reach elaborator",
+    "orphans": "703 reachable, zero orphaned",
+    "trust": "717 sources, 240 inventoried sites, zero findings",
+    "automatic": "491 automatic, 61 with step budget, 11 refuted, zero pending",
+    "inventory": "212 features; generated files current"
+  },
+  "baselineFailures": {
+    "ruleText": {
+      "count": 9,
+      "unchangedFromStartingCommit": true
+    },
+    "docPaths": {
+      "missing": 20,
+      "unchangedFromStartingCommit": true,
+      "location": "external citations and historical group03/group10 validation reports"
+    }
+  },
+  "remaining": [
+    "nested quantified invariant automation pending",
+    "symbolic quantified mapping-prefix post unproved",
+    "quantified tuple diamonds remain refused",
+    "existing no-frame memory/callback and missing-variant refusals remain",
+    "ordinary modal validity accepts exhaustion; successful-run certificates here are concrete State.init witnesses"
+  ],
+  "assurance": {
+    "kernel": "generic rule soundness, typing/weakening, bounded size, imported positive and false posts, concrete success and universal spin divergence",
+    "compiler": "pinned solc 0.8.38 AST analysis with separate legacy/viaIR provenance",
+    "runtime": "all 28 upstream typed-interpreter observations match immutable upstream expectations",
+    "nativeEVM": "not run; no EVM equivalence claim"
+  },
+  "interruptedFullGateAttempt": {
+    "command": "./run-lean.sh",
+    "status": "interrupted-no-terminal-result",
+    "exitCode": null,
+    "cause": "not established",
+    "elapsedSeconds": null,
+    "peakCgroupBytes": null,
+    "rawLogSha256": "a44ef8dcb30762c239fe3b3f40b6de3e2ab004cb60dddf0d05ec305a09330b2a",
+    "log": "full-build-interrupted.txt"
+  },
+  "frozenSort": {
+    "status": "passed",
+    "parsedTaclets": 377,
+    "readBearingTaclets": 131,
+    "tableCoverage": 131
+  },
+  "failedSnapshotGateAttempt": {
+    "command": "./run-lean.sh (confirmed display-only binder-order mismatch)",
+    "status": "failed-snapshot",
+    "exitCode": 1,
+    "elapsedSeconds": 2745,
+    "peakCgroupBytes": 9316597760,
+    "rawLogSha256": "97f6a000714f5a51bb0f14e9a7fa714fd5cc8870900c8e31113440e711b3b740",
+    "log": "full-build-failed-snapshot.txt"
+  },
+  "blockedFullGateAttempt": {
+    "command": "./run-lean.sh (first full build, original one-hour cap)",
+    "status": "blocked-timeout",
+    "exitCode": 124,
+    "elapsedSeconds": 3600,
+    "peakCgroupBytes": 8592580608,
+    "rawLogSha256": "0bb3192c176c5fa290ae610d4e073c32beb1de7d6fda768cbf6f2d191402c7b9",
+    "log": "full-build-blocked-3600.txt"
+  },
+  "totalMeasuredGateSeconds": 7506,
+  "maxMeasuredGateCgroupBytes": 9316597760,
+  "timingNote": "Total is measured selected gates and known failed/blocked attempts; interrupted duration is unknown and excluded. Final full run reused validated cached artifacts.",
+  "staticAuditLog": "static-checks.json",
+  "staticLauncherCorrections": [
+    "Initial lightweight runner did not locate Node until supplied the existing explicit PATH.",
+    "Repository shell checks were invoked through Bash because their executable bit is absent. Neither launcher error is a passing gate."
+  ]
+}

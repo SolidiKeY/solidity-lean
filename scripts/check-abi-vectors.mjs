@@ -36,12 +36,12 @@ for (const [label, body] of typeCases) {
 const source = fileURLToPath(new URL('../tests/abi-0.8.38/Features.sol', import.meta.url));
 const out = JSON.parse(compile(JSON.stringify({ language: 'Solidity',
   sources: { 'Features.sol': { content: readFileSync(source, 'utf8') } },
-  settings: { evmVersion: 'cancun', optimizer: { enabled: true },
+  settings: { evmVersion: 'osaka', optimizer: { enabled: true },
     outputSelection: { '*': { '*': ['abi', 'evm.deployedBytecode.object'] } } } }), 0, 0));
 assert.deepEqual((out.errors ?? []).filter(e => e.severity === 'error'), []);
 const c = out.contracts['Features.sol'].ABIConformance;
 const iface = new Interface(c.abi);
-const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Cancun }) });
+const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Osaka }) });
 const code = hexToBytes('0x' + c.evm.deployedBytecode.object);
 let count = 0;
 async function call(name, args, expected, fail = false) {

@@ -1,0 +1,88 @@
+[
+  {
+    "command": [
+      "node",
+      "scripts/check-layers.mjs"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.142,
+    "logSha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858",
+    "output": "152 core modules, 0 reach the elaborator\n"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-orphans.mjs"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.114,
+    "logSha256": "2b91ef98b08c7ff4a1a0bae5e955450d963f127afa78b2eba8d2a2d3c1fbf20e",
+    "output": "703 reachable, 0 orphaned, 0 not allowed\n"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/check-trust.sh"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 3.714,
+    "logSha256": "6e801ad36d78ef23489d00c3c4de489a077338c074ab2b505296746a6b2f1089",
+    "output": "trust: 717 sources, 240 inventoried implementation/recovery sites, 0 findings\n"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-automatic.mjs",
+      "--strict"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.052,
+    "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+    "output": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending\n"
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/solidity-feature-audit.py",
+      "--check"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.045,
+    "logSha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+    "output": "212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}\n783 upstream symbols classified; generated files current\n"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/check-rule-text.sh"
+    ],
+    "exitCode": 1,
+    "elapsedSeconds": 0.04,
+    "logSha256": "819a97c14d096ae56bafeb19dc95027053db9f304f6597489deb99de3267bc7b",
+    "output": "LeanTaclet.tryCallSelfBox: not a dl{ } line\nLeanTaclet.tryCallSelfDiamond: not a dl{ } line\nLeanTaclet.revertDataBox: not a dl{ } line\nLeanTaclet.revertDataDiamond: not a dl{ } line\nLeanTaclet.catchDataBox: not a dl{ } line\nLeanTaclet.catchDataDiamond: not a dl{ } line\nLeanTaclet.recursiveCallUnfold: not a dl{ } line\nLeanTaclet.loopLexErase: not a dl{ } line\nLeanTaclet.internalCallSummary: not a dl{ } line\n"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/check-doc-paths.sh"
+    ],
+    "exitCode": 1,
+    "elapsedSeconds": 3.28,
+    "logSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+    "summary": "20 missing archived/external references, unchanged baseline",
+    "log": "static-doc-paths.stdout.b64",
+    "encoding": "base64; decode before comparing SHA256"
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.017,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "output": ""
+  }
+]

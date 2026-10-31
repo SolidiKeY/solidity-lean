@@ -217,7 +217,9 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     match_expr v' with
     | Subtype.mk _ _ n _ =>
       let some n ← intOf? n | escapeS e
-      `(dl_term| $(Syntax.mkNumLit (toString n)):num)
+      if n < 0 then
+        `(dl_term| -$(Syntax.mkNumLit (toString (-n))):num)
+      else `(dl_term| $(Syntax.mkNumLit (toString n)):num)
     | Bool.true => `(dl_term| true)
     | Bool.false => `(dl_term| false)
     | _ => escapeS e
@@ -230,6 +232,10 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
         || pp.sol.pushArithmetic.get (← getOptions)
         || (sym == "&&" || sym == "||") && t.isConstOf ``PrimTy.bool do return ← escapeS e
     mkBinTerm sym (← ppTermS ns a) (← ppTermS ns b)
+  | .sym ``Op2.zcmp #[op, _] #[a, b] =>
+    unless (← whnf op).isConstOf ``BinOp.gt do return ← escapeS e
+    let some (a, b) ← ppKPairS ns a b | escapeS e
+    `(dl_term| ($a:dl_term > $b:dl_term))
   | .sym ``Op2.zbin #[op, _] #[a, b] =>
     let some sym ← termOpSym? op | escapeS e
     let some (a, b) ← ppKPairS ns a b | escapeS e

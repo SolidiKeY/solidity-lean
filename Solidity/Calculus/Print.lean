@@ -16,7 +16,8 @@ module only walks the formula, with the names of its context beside it.
 
 What has no KeY text prints as KeY would have it: a frame's statements
 follow the program, a block's end is `}`, and a capture's end, a pop of an
-update and a hidden binder (`Fml.bind`) print as nothing.
+update and a hidden non-integer binder (`Fml.bind`) print as nothing.
+Unbounded integer binders retain their modality explicitly.
 
 The contract is passed as the expression `c` that names it
 (`mkConst ``StandardExample`), as the quoters take it.
@@ -67,9 +68,10 @@ def Frames.items (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Me
   | _, _, .drop h κ => κ.items (h.names ns)
 
 /-- The formula as it prints: the one under an update that prints as nothing
-(only pops) or under a hidden binder. -/
+(only pops) or under a hidden non-integer binder. -/
 def Fml.visible : {Γ : Ctx} → Fml C Γ → (Δ : Ctx) × Fml C Δ
   | Γ, φ@(.upd _ U ψ) => if U.hasElem then ⟨Γ, φ⟩ else Fml.visible ψ
+  | Γ, φ@(.bind _ _ .kint _) => ⟨Γ, φ⟩
   | _, .bind _ _ _ φ => Fml.visible φ
   | Γ, φ => ⟨Γ, φ⟩
 
@@ -84,7 +86,7 @@ def Tm.sameAt {Γ : Ctx} {s s' : Srt} (ns : List Var) (a : Tm C Γ s) (a' : Tm C
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
 def Fml.isConnective {Γ : Ctx} (φ : Fml C Γ) : Bool :=
   match (Fml.visible φ).2 with
-    | .and .. | .imp .. | .all .. => true
+    | .and .. | .imp .. | .all .. | .allocAll .. | .bind .. => true
     | _ => false
 
 /-- The literal `true`. -/
@@ -162,8 +164,14 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
   | .anon xs ψ =>
     return (s!"\{ anon({", ".intercalate (xs.map fun x => toString (x.2.name ns))}) } {← arg ns ψ 50}",
       1024)
+  | .bind m x .kint ψ =>
+    let μ := match m with | .box => "box" | .diamond => "diamond"
+    return (s!"∀ given[{μ}] kint {x}; {← sub (x :: ns) ψ 25}", 25)
   | .bind _ x _ ψ => Fml.showP (x :: ns) ψ
-  | .allocAll x _ ψ => return (s!"∀ fresh bytes {x}; {← sub (x :: ns) ψ 25}", 25)
+  | .allocAll x R ψ =>
+    let T ← if R == bytesR then pure "bytes"
+      else fmtCat `sol_ty (← ppTy.ppRef (toExpr R))
+    return (s!"∀ fresh {T} {x}; {← sub (x :: ns) ψ 25}", 25)
   | .grow ψ => return (s!"\{ grow } {← arg ns ψ 50}", 1024)
   | .modal m P κ ψ =>
     let items := (← showStmts c ns P) ++ (← κ.items c (P.outNames ns))

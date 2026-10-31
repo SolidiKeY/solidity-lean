@@ -1,0 +1,185 @@
+{
+  "command": [
+    "env",
+    "-u",
+    "DOCKER_HOST",
+    "-u",
+    "DOCKER_CONTEXT",
+    "-u",
+    "DOCKER_TLS",
+    "-u",
+    "DOCKER_TLS_VERIFY",
+    "-u",
+    "DOCKER_CERT_PATH",
+    "docker",
+    "--host=unix:///var/run/docker.sock",
+    "inspect",
+    "solidity-baseline-lifetime-root",
+    "solidity-baseline-lifetime-overlay",
+    "solidity-baseline-value-runtime",
+    "solidity-baseline-value-runtime-corrected",
+    "solidity-baseline-value-runtime-final",
+    "solidity-baseline-value-final-gates",
+    "--format",
+    "{\"name\":{{json .Name}},\"state\":{{json .State}},\"memory\":{{.HostConfig.Memory}},\"memorySwap\":{{.HostConfig.MemorySwap}},\"nanoCpus\":{{.HostConfig.NanoCpus}},\"network\":{{json .HostConfig.NetworkMode}},\"image\":{{json .Config.Image}},\"command\":{{json .Config.Cmd}}}"
+  ],
+  "exitCode": 0,
+  "runs": [
+    {
+      "name": "/solidity-baseline-lifetime-root",
+      "state": {
+        "Dead": false,
+        "Error": "",
+        "ExitCode": 1,
+        "FinishedAt": "2026-10-28T13:06:34.939159144Z",
+        "OOMKilled": false,
+        "Paused": false,
+        "Pid": 0,
+        "Restarting": false,
+        "Running": false,
+        "StartedAt": "2026-10-28T13:06:17.267487089Z",
+        "Status": "exited"
+      },
+      "memory": 12884901888,
+      "memorySwap": 12884901888,
+      "nanoCpus": 1000000000,
+      "network": "none",
+      "image": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1; python3 scripts/solidity-baseline-lifetime-root.py .lake/upstream/value-entry-runtime-20261028"
+      ]
+    },
+    {
+      "name": "/solidity-baseline-lifetime-overlay",
+      "state": {
+        "Dead": false,
+        "Error": "",
+        "ExitCode": 0,
+        "FinishedAt": "2026-10-28T13:07:32.60125089Z",
+        "OOMKilled": false,
+        "Paused": false,
+        "Pid": 0,
+        "Restarting": false,
+        "Running": false,
+        "StartedAt": "2026-10-28T13:07:29.233748955Z",
+        "Status": "exited"
+      },
+      "memory": 12884901888,
+      "memorySwap": 12884901888,
+      "nanoCpus": 1000000000,
+      "network": "none",
+      "image": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1; python3 .lake/upstream/value-entry-runtime-20261028/complete-overlay.py"
+      ]
+    },
+    {
+      "name": "/solidity-baseline-value-runtime",
+      "state": {
+        "Dead": false,
+        "Error": "",
+        "ExitCode": 1,
+        "FinishedAt": "2026-10-28T13:10:13.915749069Z",
+        "OOMKilled": false,
+        "Paused": false,
+        "Pid": 0,
+        "Restarting": false,
+        "Running": false,
+        "StartedAt": "2026-10-28T13:10:07.600431005Z",
+        "Status": "exited"
+      },
+      "memory": 12884901888,
+      "memorySwap": 12884901888,
+      "nanoCpus": 1000000000,
+      "network": "none",
+      "image": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1; python3 scripts/solidity-baseline-value-runtime.py"
+      ]
+    },
+    {
+      "name": "/solidity-baseline-value-runtime-corrected",
+      "state": {
+        "Dead": false,
+        "Error": "",
+        "ExitCode": 0,
+        "FinishedAt": "2026-10-28T13:11:38.358797163Z",
+        "OOMKilled": false,
+        "Paused": false,
+        "Pid": 0,
+        "Restarting": false,
+        "Running": false,
+        "StartedAt": "2026-10-28T13:11:18.873879888Z",
+        "Status": "exited"
+      },
+      "memory": 12884901888,
+      "memorySwap": 12884901888,
+      "nanoCpus": 1000000000,
+      "network": "none",
+      "image": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1; python3 scripts/solidity-baseline-value-runtime.py"
+      ]
+    },
+    {
+      "name": "/solidity-baseline-value-runtime-final",
+      "state": {
+        "Dead": false,
+        "Error": "",
+        "ExitCode": 0,
+        "FinishedAt": "2026-10-28T13:13:49.853369584Z",
+        "OOMKilled": false,
+        "Paused": false,
+        "Pid": 0,
+        "Restarting": false,
+        "Running": false,
+        "StartedAt": "2026-10-28T13:13:29.951475121Z",
+        "Status": "exited"
+      },
+      "memory": 12884901888,
+      "memorySwap": 12884901888,
+      "nanoCpus": 1000000000,
+      "network": "none",
+      "image": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1; python3 scripts/solidity-baseline-value-runtime.py"
+      ]
+    },
+    {
+      "name": "/solidity-baseline-value-final-gates",
+      "state": {
+        "Dead": false,
+        "Error": "",
+        "ExitCode": 0,
+        "FinishedAt": "2026-10-28T13:23:06.106184853Z",
+        "OOMKilled": false,
+        "Paused": false,
+        "Pid": 0,
+        "Restarting": false,
+        "Running": false,
+        "StartedAt": "2026-10-28T13:22:33.711401014Z",
+        "Status": "exited"
+      },
+      "memory": 12884901888,
+      "memorySwap": 12884901888,
+      "nanoCpus": 1000000000,
+      "network": "none",
+      "image": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1; python3 tests/upstream/baseline-20261028/value-runtime/final-gates.py"
+      ]
+    }
+  ]
+}

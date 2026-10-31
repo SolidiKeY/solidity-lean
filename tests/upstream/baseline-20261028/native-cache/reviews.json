@@ -1,0 +1,27 @@
+{
+  "finder": {
+    "agent": "/root/baseline_finder",
+    "mode": "independent read-only; no Lean or writes",
+    "result": "approved cache split, actual first-five native evidence, exact501file hashes and indexed statistics"
+  },
+  "skeptic": {
+    "agent": "/root/baseline_skeptic",
+    "mode": "independent read-only; no Lean or writes",
+    "result": "approved501file archive, native phases/refusal causes, negative controls and no-build/config-free reproduction; cache guard hardening verified"
+  },
+  "fixedFindings": [
+    "Required setup/direct-import/toolchain/complete root-map checks added so a missing setup cannot pass cache audit vacuously.",
+    "Earlier active StatePartsScoped snapshot was not a failure; retained log records it built.",
+    "Broad receiver-call/mutation refusal narrowed after107/207 native controls passed.",
+    "Refused whole batches have zero observations; separately retained positive companions provide runtime evidence.",
+    "Native observations distinguished from stale Testing proof listing, kernel postcondition proofs and external EVM evidence.",
+    "Historical document hashes labeled snapshot provenance; reports were not regenerated."
+  ],
+  "reviewedHashes": {
+    "tests/upstream/baseline-20261028/native-cache/matrix.json": "572974bb3c542aa4b64405b5ac998c38361bf2254df40e5ba3f6af3c0c815879",
+    "tests/upstream/baseline-20261028/native-cache/README.md": "231d39660ed1fc93a4d7134de85ba3ad104d3d37a22a5e6fdf1138abad2ae32e",
+    "tests/upstream/baseline-20261028/native-cache/evidence.tar.gz": "9d4d3e3755b6dca957d2386a7ce403cb8c707f6ba064163ef47e729a852f920c",
+    "scripts/solidity-baseline-cache-audit.py": "bbb47147ec9309835cc20a329d5dc806a004986b6635508a0812d6f79a7412b2",
+    "scripts/run-solidity-baseline-native.sh": "656aa4e750dc344491db064aa0d48d357d585c78b28fd4c856fc7da4cbec3abd"
+  }
+}

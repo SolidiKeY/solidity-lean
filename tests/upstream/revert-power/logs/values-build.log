@@ -1,0 +1,7 @@
+⚠ [3/17] Replayed Solidity.AST
+warning: Solidity/AST.lean:354:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [17/17] Built Solidity.Syntax.Elab.Values (17s)
+Build completed successfully (17 jobs).
+{"command": ["lake", "-f", "lakefile.revert-task.toml", "build", "Solidity.Syntax.Elab.Values"], "exit": 0, "elapsed": 18.170200041000044, "peak_group_rss": 967680000}

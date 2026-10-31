@@ -1,0 +1,12 @@
+Error: unknown/missing option: code=0
+    at main (file:///workspace/solidity-lean/scripts/solidity-upstream.mjs:508:37)
+    at file:///workspace/solidity-lean/scripts/solidity-upstream.mjs:578:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+/workspace/.setup/world-upstream.sh: line 13: code: unbound variable
+
+real	0m0.047s
+user	0m0.030s
+sys	0m0.018s
+cgroup memory.peak=16719872

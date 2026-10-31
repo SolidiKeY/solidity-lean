@@ -1,0 +1,195 @@
+{
+  "stages": {
+    "file-hashes": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lean",
+        "-j1",
+        "--run",
+        "tests/upstream/baseline-20261028/native-cache/FileHashes.lean",
+        "tests/upstream/baseline-20261028/native-cache/hash-jobs.json",
+        "tests/upstream/baseline-20261028/native-cache/file-hashes.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.5632017290008662,
+      "maxChildRssKiB": 255180,
+      "userSeconds": 0.317499,
+      "systemSeconds": 0.218637,
+      "cgroupMemoryPeakBytes": 89116672,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "native-boundaries": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "node",
+        "scripts/solidity-baseline-native-boundaries.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 10.330670155002736,
+      "maxChildRssKiB": 742456,
+      "userSeconds": 6.580242,
+      "systemSeconds": 3.230011,
+      "cgroupMemoryPeakBytes": 258269184,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "native-remaining": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "600",
+        "node",
+        "scripts/solidity-baseline-native.mjs",
+        "ScalarMatrixValid",
+        "SourceLiterals",
+        "NominalStruct",
+        "PushedMember",
+        "PushedMemberPositive",
+        "TryContinue",
+        "TryContinuePositive",
+        "HexArrayExplicit",
+        "ExactRethrow",
+        "WrongRethrow",
+        "ComputedRevert",
+        "SpecBindings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 106.3860563019989,
+      "maxChildRssKiB": 764444,
+      "userSeconds": 78.550505,
+      "systemSeconds": 24.288946,
+      "cgroupMemoryPeakBytes": 278052864,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "native-priority": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "600",
+        "node",
+        "scripts/solidity-baseline-native.mjs",
+        "NativePositive",
+        "SourceIdentifiers",
+        "CommentRanges",
+        "ConstantsEnums",
+        "SourceTypes",
+        "BadClause",
+        "CommentSpecPositive"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 70.41712058799749,
+      "maxChildRssKiB": 754076,
+      "userSeconds": 50.0328,
+      "systemSeconds": 18.132329,
+      "cgroupMemoryPeakBytes": 278417408,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "native-preflight": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/baseline-20261028/native-cache/NativePreflight.lean",
+        "--",
+        "--tstack=131072",
+        "-j1"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.900003710998135,
+      "maxChildRssKiB": 697392,
+      "userSeconds": 1.015215,
+      "systemSeconds": 0.756927,
+      "cgroupMemoryPeakBytes": 219697152,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    },
+    "native-compound": {
+      "command": [
+        "timeout",
+        "-k",
+        "10",
+        "120",
+        "node",
+        "scripts/solidity-baseline-native.mjs",
+        "PushedMemberMutation"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 11.290686697997444,
+      "maxChildRssKiB": 749240,
+      "userSeconds": 6.9769,
+      "systemSeconds": 3.9583779999999997,
+      "cgroupMemoryPeakBytes": 260132864,
+      "cgroupMemoryEvents": {
+        "low": "0",
+        "high": "0",
+        "max": "0",
+        "oom": "0",
+        "oom_kill": "0",
+        "oom_group_kill": "0"
+      },
+      "cgroupMemoryMaxBytes": 12884901888
+    }
+  },
+  "timedStageSeconds": 200.88773918299557,
+  "peakNativeCgroupBytes": 278417408,
+  "memoryCapBytes": 12884901888,
+  "swap": "none",
+  "leanNumThreads": 1,
+  "explicitLeanArgs": [
+    "-j1",
+    "--tstack=131072"
+  ],
+  "noProjectBuilds": true,
+  "originalPerformance": "Cold124 at546/685 peak8195923968bytes and warm-unrun unchanged; prior900s APIrefresh124 remains historical blocked evidence."
+}

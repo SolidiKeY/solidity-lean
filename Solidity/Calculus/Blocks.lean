@@ -862,28 +862,28 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
     -- whileClose
     | none => .done false
     | some (xs, hv) =>
-      match m, dec, qs with
+      match m, dec with
       -- whileInvariantBox
-      | .box, _, _ =>
+      | .box, _ =>
         .inv (invFml I qs) (loopBreak brk c) xs hv
           (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
           (.isBool (.pvV (p := .bool) .here) true) (.isBool (.pvV (p := .bool) .here) false)
           .refl (.push .refl) body (invFml I qs)
       -- whileInvariantDiamond
-      | .diamond, some d, [] =>
+      | .diamond, some d =>
         let U : Upd C Γ (.val .bool :: .val .uint :: Γ) :=
           (Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k) (.val (p := .bool) c.lower)
         let d' : Tm C (.val .bool :: .val .uint :: Γ) (.val .uint) := (d.up.up).lower
         let post : Fml C (.val .uint :: Γ) :=
-          .and (.isBool I.up.lower true)
+          .and (invFml I.up (qs.map LoopQ.up))
             (.upd .diamond (Upd.nil.decl (fse k) (.val (p := .bool) c.up.lower))
               (.imp (.isBool (.pvV (p := .bool) .here) true)
                 (.and (.isBool (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) d') true)
                   (.isBool (.app2 (.binop .lt (p := .uint) rfl) d' (.pvV (p := .uint) (.there .here))) true))))
-        .inv (.isBool I.lower true) none xs hv U
+        .inv (invFml I qs) none xs hv U
           (.isBool (.pvV (p := .bool) .here) true) (.isBool (.pvV (p := .bool) .here) false)
           (.push .refl) (.push .refl) (body.wk up).2.2 post
-      -- whileNoVariantDiamond: no variant, or a quantified clause (Lean only)
-      | .diamond, _, _ => .done false
+      -- whileNoVariantDiamond: no variant (Lean only)
+      | .diamond, none => .done false
 
 end Solidity

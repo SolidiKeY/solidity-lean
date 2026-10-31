@@ -1,0 +1,242 @@
+[
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.inlineCopy_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.copies_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.independent_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.rebound_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.kinds_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.invalidRange_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.rowBounds_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.falsePost_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.narrowFailure_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.endpoints_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.passing_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.returned_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.storageCopy_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.empty_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.legacy.signed_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.inlineCopy_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.copies_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.independent_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.rebound_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.kinds_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.invalidRange_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.rowBounds_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.falsePost_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.narrowFailure_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.endpoints_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.passing_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.returned_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.storageCopy_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.empty_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  {
+    "theorem": "Solidity.Examples.Tactics.SliceReferenceCopies.viaIR.signed_run",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  }
+]

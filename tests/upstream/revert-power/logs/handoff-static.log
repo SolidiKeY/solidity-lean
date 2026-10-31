@@ -1,0 +1,15 @@
+CGROUP_MAX=12884901888 SWAP_MAX=0
++ node scripts/check-layers.mjs
+152 core modules, 0 reach the elaborator
++ node scripts/check-orphans.mjs
+701 reachable, 0 orphaned, 0 not allowed
++ node scripts/check-automatic.mjs --strict
+check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending
++ bash scripts/check-trust.sh
+trust: 715 sources, 240 inventoried implementation/recovery sites, 0 findings
++ python3 scripts/solidity-feature-audit.py --check
+212 features: {'model': 151, 'abstract': 23, 'exclude': 30, 'upstream': 8}
+783 upstream symbols classified; generated files current
++ bash scripts/check-testsuite.sh
+ENOENT: no such file or directory, open '/workspace/.setup/solkey.pin.json'
+CGROUP_PEAK_BYTES=167305216 ELAPSED_SECONDS=6 EXIT=1

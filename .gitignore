@@ -2,3 +2,4 @@
 .venv/
 .gen/
 .claude/settings.local.json
+.cache/

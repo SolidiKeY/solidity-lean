@@ -24,6 +24,8 @@ memory member or element (`at(k)`, `size`), `storeSt`/`selectSt`/`self` in the
 ledger's update; `pp.sol.key` prints them. -/
 declare_syntax_cat dl_term
 syntax:max num : dl_term
+/-- A negative signed primitive literal, without an arithmetic operation. -/
+syntax:max "-" num : dl_term
 syntax:max ident : dl_term
 syntax:max dl_term:max "." ident : dl_term
 syntax:max dl_term:max "[" dl_term "]" : dl_term
@@ -63,6 +65,8 @@ syntax:max "(" dl_term ")" : dl_term
 /-- `(a == b)`: a comparison as a `bool` term. Parenthesised, since a bare `==`
 after `:=` is the update `x := a == b`. -/
 syntax:max "(" dl_term " == " dl_term ")" : dl_term
+/-- A Boolean ordering observation used as a term. -/
+syntax:max "(" dl_term " > " dl_term ")" : dl_term
 /-- `(c ? a : b)`: a conditional value, `a` where `c` holds and `b` where it
 fails (KeY's `\if (c) \then (a) \else (b)`), what a joined `if` sets a local
 to (`ifElseJoin`). -/
@@ -150,10 +154,14 @@ syntax:55 dl_term:56 " > " dl_term:56 : dl_fml
 syntax:55 dl_term:56 " >= " dl_term:56 : dl_fml
 /-- `∀ uint a; φ`: KeY's `\forall`, over the values of a primitive type. -/
 syntax:25 "∀ " ident ident "; " dl_fml:25 : dl_fml
-/-- `∀ fresh bytes r; φ`: `φ` for every fresh memory object of any contents
-(`Fml.allocAll`, Lean only): what `catchDataBox` leaves for another
-contract's data; printed, not written. -/
-syntax:25 "∀ " &"fresh" ident ident "; " dl_fml:25 : dl_fml
+/-- `∀ fresh uint[] r; φ`: `φ` for every fresh memory object of the
+written reference type and arbitrary contents (`Fml.allocAll`). -/
+syntax:25 "∀ " &"fresh" sol_ty ident "; " dl_fml:25 : dl_fml
+/-- A hidden binder of unbounded KeY integers, at the reading modality. -/
+syntax:25 "∀ " &"given" &"kint" ident "; " dl_fml:25 : dl_fml
+/-- Explicit hidden-binder modalities preserve mixed-modality ASTs. -/
+syntax:25 "∀ " &"given" "[box]" &"kint" ident "; " dl_fml:25 : dl_fml
+syntax:25 "∀ " &"given" "[diamond]" &"kint" ident "; " dl_fml:25 : dl_fml
 /-- `∃ uint a; φ`: `¬(∀ uint a; ¬φ)`. -/
 syntax:25 "∃ " ident ident "; " dl_fml:25 : dl_fml
 syntax:50 dl_fml:55 " && " dl_fml:50 : dl_fml

@@ -1,0 +1,21 @@
+{
+  "checkout": "/workspace/solidity-lean",
+  "branch": "baseline/current-master-20261028",
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "leanVersion": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+  "lakeVersion": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+  "smoke": {
+    "command": [
+      "lake",
+      "build",
+      "Solidity.KeySort"
+    ],
+    "exitCode": 0,
+    "observedOutput": "Build completed successfully (2 jobs)."
+  },
+  "managedEnvironmentId": "ccarenv_b64_Y2NhcmVudl9mNjQxMmFkYWVhYTQ4MTkxYTFiMjVjYWQzNDkzNzJjOQ",
+  "sourceConfigurationId": "2b5c5391-0738-4da9-8acc-99dd89f04e4d~cecfg_6adc9c634c9481a3b462f748c24a047a",
+  "vmCgroupMemoryMaxBytes": 17179869184,
+  "bound": "Docker cgroup v2, 12 GiB, no swap, one CPU; Lean threads 1 with explicit -j1",
+  "scope": "Diagnostic evidence, not a universal semantic or compiler/EVM proof."
+}

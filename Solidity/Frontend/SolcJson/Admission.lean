@@ -1,4 +1,5 @@
 import Solidity.Frontend.SolcJson.Body
+import Solidity.Frontend.SourceUnits
 
 /-!
 # Admission of solc source
@@ -246,6 +247,9 @@ def header (constantIds : List Int) (j : Json) : Json :=
       if J.kind j == "FunctionDefinition" || J.kind j == "ModifierDefinition" then
         !["body", "modifiers"].contains key
       else if J.kind j == "ContractDefinition" || J.kind j == "SourceUnit" then key != "nodes"
+      -- Import aliases are compiler-resolved names, not evaluated expressions.
+      -- Their foreign Identifier has deliberately empty typeDescriptions.
+      else if J.kind j == "ImportDirective" then key != "symbolAliases"
       else if J.kind j == "VariableDeclaration" then
         key != "value" || (J.id? j).any constantIds.contains
       else true).map fun (key, value) =>
@@ -300,6 +304,13 @@ private def validateNode (provenance : Provenance) (j : Json) : Except Diagnosti
         (bytesTy? name).isSome || ["address payable", "bytes", "string"].contains name ||
         name.startsWith "fixed" || name.startsWith "ufixed" do
       throw (diagnostic j .invalidAst `solidity.typeValidation s!"unrecognized elementary type {name}")
+  -- In profile since G00 Q6 but unimplemented: refuse every node the scan tags
+  -- `fixedPoint`, so that an unused declaration is not dropped silently.
+  let commonType := ((J.opt j "commonType").bind (J.str? · "typeString")).getD ""
+  let fixedName := if J.kind j == "ElementaryTypeName" then (J.str? j "name").getD "" else ""
+  if [fixedName, commonType].any fun t => t.startsWith "fixed" || t.startsWith "ufixed" then
+    throw (diagnostic j .missingImplementation `solidity.fixedPoint
+      "fixed-point types are in the profile but not implemented" (some .fixedPoint))
   if J.kind j == "FunctionCall" &&
       !["functionCall", "typeConversion", "structConstructorCall"].contains ((J.str? j "kind").getD "") then
     throw (diagnostic j .invalidAst `solidity.callKind "unknown function call kind")
@@ -336,7 +347,7 @@ private def walk (provenance : Provenance) (declarations : List Json) :
     Nat → Json → Bool → Except Diagnostic Found
   | 0, j, _ => throw (diagnostic j .invalidAst `solidity.astDepth "AST depth bound exhausted")
   | fuel + 1, j, payment => do
-    validateNode provenance j
+    validateNode (provenance.atNode j) j
     let resolvedOperator ← match operatorAlias? declarations j with
       | .ok call => pure call
       | .error gap => throw (diagnostic j .invalidAst `solidity.operatorAliases

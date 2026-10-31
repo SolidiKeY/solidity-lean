@@ -1,0 +1,34 @@
+Solidity/Examples/Tactics/SelfPowerData.lean:23:12: error: failed to compile definition, compiler IR check failed at `cutoffP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.cutoff', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:28:12: error: failed to compile definition, compiler IR check failed at `multiplyP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.multiply', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:33:12: error: failed to compile definition, compiler IR check failed at `declarationP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.declaration', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:38:12: error: failed to compile definition, compiler IR check failed at `nestedCodeP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.nestedCode', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:43:12: error: failed to compile definition, compiler IR check failed at `internalCodeP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.internalCode', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:48:12: error: failed to compile definition, compiler IR check failed at `narrowCodeP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.narrowCode', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:53:12: error: failed to compile definition, compiler IR check failed at `fitP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.fit', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:58:41: error: Type mismatch
+  Imported.Legacy.SelfPowerData.shortcuts
+has type
+  Prog Imported.Legacy.SelfPowerData [] [LTy.val PrimTy.uint, LTy.val PrimTy.uint]
+but is expected to have type
+  Prog C [] []
+Solidity/Examples/Tactics/SelfPowerData.lean:61:53: error: Tactic `decide` failed for proposition
+  (Except.toOption (Prog.runF 1000 shortcutsP initial)).isSome = true
+because its `Decidable` instance
+  instDecidableEqBool (Except.toOption (Prog.runF 1000 shortcutsP initial)).isSome true
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match (Except.toOption (Prog.runF 1000 shortcutsP initial)).isSome, true with
+  | false, false => isTrue ⋯
+  | false, true => isFalse ⋯
+  | true, false => isFalse ⋯
+  | true, true => isTrue ⋯
+Solidity/Examples/Tactics/SelfPowerData.lean:63:12: error: failed to compile definition, compiler IR check failed at `uncheckedCodeP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.uncheckedCode', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:68:12: error: failed to compile definition, compiler IR check failed at `rawDataP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.rawData', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:78:12: error: failed to compile definition, compiler IR check failed at `wrongCodeP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.wrongCode', which has no executable code; consider marking definition as 'noncomputable'
+Solidity/Examples/Tactics/SelfPowerData.lean:83:12: error: failed to compile definition, compiler IR check failed at `wrongRawP`. Error: depends on declaration 'Imported.Legacy.SelfPowerData.wrongRaw', which has no executable code; consider marking definition as 'noncomputable'
+'Solidity.Examples.Tactics.SelfPowerData.Legacy.cutoff_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.SelfPowerData.Legacy.multlibc++abi: terminating due to uncaught exception of type lean::exception: failed to create thread
+{"command": ["lake", "env", "lean", "-j1", "--tstack=131072", "Solidity/Examples/Tactics/SelfPowerData.lean"], "exit": 134, "elapsed": 18.12091448299998, "peak_group_rss": 1720496128}

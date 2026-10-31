@@ -1,0 +1,20 @@
+'Solidity.Examples.Tactics.SelfPowerData.Legacy.cutoff_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.SelfPowerData.Legacy.multiply_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.SelfPowerData.Legacy.rawData_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Examples.Tactics.SelfPowerData.Legacy.wrongCode_panics' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+Solidity/Examples/Tactics/SelfPowerData.lean:130:4: error: [Error pretty printing: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information]
+'Solidity.Examples.Tactics.SelfPowerData.IR.cutoff_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Examples.Tactics.SelfPowerData.IR.multiply_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Examples.Tactics.SelfPowerData.IR.rawData_returns' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Examples.Tactics.SelfPowerData.IR.wrongCode_panics' depends on axioms: [propext, Classical.choice, Quot.sound]
+{"command": ["lake", "env", "lean", "-j1", "--tstack=131072", "Solidity/Examples/Tactics/SelfPowerData.lean"], "exit": 1, "elapsed": 26.057511503999876, "peak_group_rss": 1554620416}

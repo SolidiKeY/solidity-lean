@@ -15,6 +15,11 @@ node scripts/evm-reference/replay.mjs \
   --out .lake/upstream/recursive-reference.json
 ```
 
+The replay and payment regression tests also accept the repository-local
+`.lake/soljson/` cache or `SOLJSON_DIR`; `SOLC_REFERENCE` takes precedence.
+See [payment test setup](../../docs/solidity-upstream-tests.md#reproduce) for
+the exact compiler filenames, unchanged hashes and source-test prerequisites.
+
 `--filter` requires one exact pinned semantic-fixture path. The archive and all
 11,622 source files are verified before execution. The compiler bytes and full
 version are checked. Each required legacy/viaIR pipeline compiles independently
@@ -68,3 +73,50 @@ admission. It does not enable a historical profile or alter panic decoding.
 
 
 Linked-try replay admits the exact validated library directive, deploys the real library then links/deploys the caller on the same machine using pinned compiler linkReferences. It records actual code/delegate context and full return/revert bytes, including prerequisite receipts on failed checks. This is separate compiled-bytecode evidence; no historical profile or general library/ABI admission is enabled.
+## Generated typed differential cases
+
+After `source /workspace/.setup/activate.sh` (or selecting Lean 4.24.0):
+
+```sh
+lake build solcases Solidity.Examples.SolCases
+lake exe solcases 0
+SOLC_REFERENCE=/absolute/path/to/soljson-v0.8.38+commit.1835d247.js \
+  node --test scripts/evm-reference/generated.test.mjs
+node scripts/evm-reference/generated.mjs --compiler /absolute/path/to/soljson-v0.8.38+commit.1835d247.js --seed 0 --out .lake/generated/seed-0.json
+```
+
+The exact pinned compiler hash/version is checked before execution. The optional
+`--index N` selects one reproducible case. All four legacy/viaIR × optimizer
+off/on variants always run. A failed case shrinks within its template and
+boundary pool using regenerated Lean expectations; any mismatch cause is
+retained, without claiming cause-preserving minimization. Reports preserve
+sources, bytecode, layout, full adapted observations and hashes. Unknown syntax,
+layout, exceptions or logs are blocked. No JavaScript arithmetic model supplies
+expected results. See [scope and evidence](../../docs/feature-work/generated-differential.md).
+
+Payment-specific replay is additive: `payment-replay.mjs --compiler FILE --filter
+EXACT_PINNED_PATH --out FILE` uses the same pinned compiler/snapshot and unchanged
+100-million gas / five-million instruction ceilings. It retains constructor or
+empty-calldata funding, actual CREATE and receive frames, ordered return/revert
+bytes, and every original gas row across required and named optimized profiles.
+Gas follows the pinned EVMHost and ExecutionFramework accounting; failed creation
+with nonempty output is blocked because its deposit accounting differs from this
+engine. Unknown settings/observations and host limits stay blocked. It records
+executed frame steps, runtime hashes, compiler inputs and dependency provenance.
+
+This tool supplies independent compiled-bytecode observations, never Lean source
+coverage, a callback theorem or a compiler correctness proof. It does not modify
+the existing `replay.mjs` host policy or the core payment/callback semantics.
+Run `node --test --test-concurrency=1 scripts/evm-reference/{replay,payment-replay}.test.mjs`
+with `SOLC_REFERENCE` pointing to the pinned compiler. Keep caches and `TMPDIR`
+on disk and run under the documented writer lock and aggregate resource cap.
+
+
+The upstream source runner uses the payment adapter only after complete-shape
+validation in Lean. Whole payment-fixture success requires fresh provenance-
+matched reference evidence for both pipelines, every functional observation and
+any gas rows; an unmetered typed source match alone stays pending. The SDK is
+therefore needed to finish those payment rows, while the Lean core remains
+independent of it. Install from this package's lockfile with npm ci --ignore-scripts.
+The source witnesses reproduce with scripts/payment-source-fixtures.mjs --check
+and SOLC_REFERENCE pointing to the pinned0.8.38 compiler.

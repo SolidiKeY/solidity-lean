@@ -305,3 +305,14 @@ test('compound array decoder vectors retain dimensions, all calls and raw suffix
 test('retries cannot mix self-try host adapters',()=>{
   assert.throws(()=>compatible({selfTryAdapterSha256:'a'},{selfTryAdapterSha256:'b'}),/selfTryAdapterSha256/);
 });
+
+
+test('retries preserve every runtime adapter and payment reference identity',()=>{
+  for (const key of ['selfTryAdapterSha256','creationTryAdapterSha256','libraryTryAdapterSha256',
+      'compilationUnitAdapterSha256','compilerCodeAdapterSha256','paymentSourceAdapterSha256',
+      'paymentReferenceSha256','paymentReferenceEngineSha256','paymentReferenceLockSha256']) {
+    assert.doesNotThrow(()=>compatible({[key]:'same'},{[key]:'same'}));
+    assert.throws(()=>compatible({[key]:'original'},{[key]:'changed'}),new RegExp(key));
+    assert.throws(()=>compatible({[key]:'present'},{}),new RegExp(key));
+  }
+});

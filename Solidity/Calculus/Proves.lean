@@ -106,7 +106,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
       | .auto | .unwind (_ + 1) => true
       | .unwind 0 => false
       | .invLex .. => false
-      | .inv _ dec _ qs => body.frame.isSome && (m == .box || (dec.isSome && qs.isEmpty)))
+      | .inv _ dec _ _ => body.frame.isSome && (m == .box || dec.isSome))
     (block := fun _ => true)
     (pushOpAssign := fun _ _ _ b r => !r.isSimple || b.isSimple)
     (pushIncDec := fun _ _ b => b.isSimple)
@@ -184,10 +184,8 @@ theorem LeanTaclet.keyStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C �
     show ((Args.capture _).isNone && !(CallRet.sumOK _ _ _)) = false
     rw [← CallRet.summary?_isSome, hs]; simp only [Option.isSome_some, Bool.not_true, Bool.and_false]
   | whileNoVariantDiamond _ hd =>
-    cases ‹Option (Val C Γ .uint)› <;> cases ‹List (LoopQ C Γ)› <;>
-      simp_all only [Stmt.keyStep, Option.isNone, Option.isSome, List.isEmpty, Bool.false_eq_true,
-        Bool.false_or, Bool.or_false, Bool.and_false, Bool.and_true, Bool.not_true,
-        Bool.not_false, Bool.true_or] <;> rfl
+    cases ‹Option (Val C Γ .uint)› <;>
+      simp_all only [Stmt.keyStep, Option.isNone, Option.isSome, Bool.false_eq_true] <;> rfl
   | _ => rfl
 
 /-- The default proof of a step rule's `hR`: `RuleSet.admits` of a closed

@@ -232,6 +232,18 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
   | .all p x φ, Γ => inScope do
     modify fun (Γe, k) => (setBy x (.val p) Γe, k)
     pure (.all (Var.ofName x) p (← elabFmlC taken posts φ ((Var.ofName x, .val p) :: Γ)))
+  | .kbind m x φ, Γ => inScope do
+    modify fun (Γe, k) => (setBy x .kint Γe, k)
+    pure (.bind m (Var.ofName x) .kint
+      (← elabFmlC taken posts φ ((Var.ofName x, .kint) :: Γ)))
+  | .allocAll T x φ, Γ => inScope do
+    let .ref R ← ElabM.lift (match T with
+      | .named "bytes" => pure (.ref bytesR)
+      | _ => elabTy C T) |
+      throw s!"`{x}`: a fresh memory object requires a reference type"
+    modify fun (Γe, k) => (setBy x (.mem R) Γe, k)
+    pure (.allocAll (Var.ofName x) R
+      (← elabFmlC taken posts φ ((Var.ofName x, .mem R) :: Γ)))
   | .not φ, Γ => do pure (.not (← inScope (elabFmlC taken posts φ Γ)))
   | .and φ ψ, Γ => do
     pure (.and (← inScope (elabFmlC taken posts φ Γ)) (← inScope (elabFmlC taken posts ψ Γ)))
@@ -375,6 +387,16 @@ def elabKeyFml : RawFml → ElabM LineKey
   | .all p x φ => inScope do
     modify fun (Γ, k) => (setBy x (.val p) Γ, k)
     pure (.all (Var.ofName x) p (← elabKeyFml φ))
+  | .kbind _ x φ => inScope do
+    modify fun (Γ, k) => (setBy x .kint Γ, k)
+    pure (.anon [Var.ofName x] (← elabKeyFml φ))
+  | .allocAll T x φ => inScope do
+    let .ref R ← ElabM.lift (match T with
+      | .named "bytes" => pure (.ref bytesR)
+      | _ => elabTy C T) |
+      throw s!"`{x}`: a fresh memory object requires a reference type"
+    modify fun (Γ, k) => (setBy x (.mem R) Γ, k)
+    pure (.anon [Var.ofName x] (← elabKeyFml φ))
   | .not φ => do pure (.not (← inScope (elabKeyFml φ)))
   | .and φ ψ => do pure (.and (← inScope (elabKeyFml φ)) (← inScope (elabKeyFml ψ)))
   | .imp φ ψ => do pure (.imp (← inScope (elabKeyFml φ)) (← inScope (elabKeyFml ψ)))

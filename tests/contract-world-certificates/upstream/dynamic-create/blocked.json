@@ -1,0 +1,8 @@
+[
+  {
+    "path": "test/libsolidity/semanticTests/functionCall/creation_function_call_with_args.sol",
+    "stage": "lean-runtime",
+    "status": "blocked",
+    "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+  }
+]

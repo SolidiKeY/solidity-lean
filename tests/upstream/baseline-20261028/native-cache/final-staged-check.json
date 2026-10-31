@@ -1,0 +1,10 @@
+{
+  "command": [
+    "bash",
+    "scripts/check-doc-paths.sh"
+  ],
+  "exitCode": 1,
+  "originalMissingReferences": 20,
+  "originalDiagnosticsByteIdentical": true,
+  "logSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+}

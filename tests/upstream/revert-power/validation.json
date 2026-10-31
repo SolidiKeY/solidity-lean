@@ -1,0 +1,1016 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-28T05:42:09.447670+00:00",
+  "repository": "SolidiKeY/solidity-lean",
+  "branch": "codex/revert-payload-settings",
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "implementationCommit": "64bfd02e4f6388ac022c5189a33273e18ed834c3",
+  "combinedGate": {
+    "status": "blocked",
+    "command": "bash ./run-lean.sh",
+    "exitCode": 124,
+    "elapsedSeconds": 1800,
+    "lastCompletedJob": 680,
+    "totalLibraryJobs": 686,
+    "lastCompletedModule": "Solidity.Examples.DecisionHashes",
+    "activeModuleAtDeadline": "Solidity.Examples.Decision",
+    "activeModuleUnchangedFromStartingMaster": true,
+    "testSuiteBuild": "not reached",
+    "sortCheck": "not reached",
+    "additionalFullRetries": 0,
+    "diagnosis": "No reported code/test error; unchanged Examples/Decision.lean remained active at timeout. No build/container/Lean server survived; writer lock released. Single authorized continuation completed, no further full retry."
+  },
+  "scope": "Focused verified coherent step-4 increment; combined validation blocked; feature inventory remains partial. No universal source/compiler or generated-loop equivalence theorem.",
+  "implemented": {
+    "panicCode": "0x11",
+    "cases": [
+      "default checked unsigned power in self-call frames",
+      "declaration/assignment/return/nested/internal-call paths",
+      "selected short-circuit and ternary arms",
+      "array index with earlier base/operand failure priority"
+    ],
+    "newRevertStringsSettings": []
+  },
+  "runtime": {
+    "environmentId": "ccarenv_b64_Y2NhcmVudl8wNTZhOGYxMGU5NDQ4MTkxYmRlZDcwMmU3MzlhMDNkZg",
+    "activation": "/workspace/.setup/activate.sh",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "hardMemoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "threads": 1,
+    "leanFlag": "-j1",
+    "commandTimeBoundSeconds": 1800,
+    "dockerImage": "ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c",
+    "sameAttachedCheckoutAndToolchain": true
+  },
+  "validationTiming": {
+    "recordedCommandSeconds": 10502.447023996,
+    "fullBuildAttemptSeconds": [
+      1800,
+      1800,
+      1800,
+      1800,
+      1800
+    ]
+  },
+  "kernel": {
+    "theorems": 40,
+    "returnedConclusions": 34,
+    "specificPanicConclusions": 6,
+    "loopFuel": 1000,
+    "axioms": {
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.cutoff_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.multiply_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.declaration_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.nestedCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.internalCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.narrowCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.fit_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.shortcuts_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.uncheckedCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.rawData_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.priority_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.wrongCode_panics": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.wrongRaw_panics": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.shortcutFailures_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.priorityWrong_panics": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.nestedPriority_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.andCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.orCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.ternaryCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.Legacy.indexCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.cutoff_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.multiply_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.declaration_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.nestedCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.internalCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.narrowCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.fit_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.shortcuts_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.uncheckedCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.rawData_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.priority_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.wrongCode_panics": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.wrongRaw_panics": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.shortcutFailures_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.priorityWrong_panics": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.nestedPriority_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.andCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.orCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.ternaryCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "Solidity.Examples.Tactics.SelfPowerData.IR.indexCode_returns": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "exhaustionCannotPass": true
+  },
+  "compilerEvm": {
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "fixtures": [
+      {
+        "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+        "pipeline": "legacy",
+        "compilerEvmObservations": 4,
+        "compilerEvmStatus": "passed"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+        "pipeline": "viaIR",
+        "compilerEvmObservations": 4,
+        "compilerEvmStatus": "passed"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+        "pipeline": "legacy",
+        "compilerEvmObservations": 8,
+        "compilerEvmStatus": "passed"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+        "pipeline": "viaIR",
+        "compilerEvmObservations": 8,
+        "compilerEvmStatus": "passed"
+      },
+      {
+        "path": "tests/solc/SelfPowerData.sol",
+        "pipeline": "legacy",
+        "compilerEvmObservations": 29,
+        "compilerEvmStatus": "passed"
+      },
+      {
+        "path": "tests/solc/SelfPowerData.sol",
+        "pipeline": "viaIR",
+        "compilerEvmObservations": 29,
+        "compilerEvmStatus": "passed"
+      }
+    ],
+    "astOptimizerEnabled": false,
+    "referenceOptimizerEnabled": true,
+    "evmVersion": "cancun",
+    "report": "tests/upstream/revert-power/compiler-evm.json",
+    "reportSha256": "4942376c22d1db8d32ace4d5a1fb36042361fe7632741abae13f84b41eaf3dab",
+    "externalPackageLockSha256": "4a5a844809e8806acfbc134aabcb4dd89039f9e2c15c631a0f07e03f82b7d390"
+  },
+  "originalUpstreamModelResults": [
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "unadapted fixture setting: revertStrings=debug"
+    }
+  ],
+  "beforeAfter": {
+    "nativeMasterProbe": {
+      "commit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+      "source": "tests/upstream/revert-power/Before.lean.txt",
+      "before": [
+        "THalt.panic",
+        "THalt.panic"
+      ],
+      "after": [
+        "returned",
+        "returned"
+      ],
+      "beforeLog": "tests/upstream/revert-power/logs/before.log",
+      "afterLog": "tests/upstream/revert-power/logs/after.log"
+    },
+    "conditionalIndexProbe": {
+      "phase": "After basic self/binary repair, before conditional/index lowering; identical pinned source/AST inputs across this before/after comparison.",
+      "source": "tests/upstream/revert-power/ConditionalBefore.lean.txt",
+      "before": [
+        "THalt.panic",
+        "THalt.panic",
+        "THalt.panic",
+        "THalt.panic",
+        "THalt.panic",
+        "THalt.panic",
+        "THalt.panic",
+        "THalt.panic"
+      ],
+      "after": [
+        "returned",
+        "returned",
+        "returned",
+        "returned",
+        "returned",
+        "returned",
+        "returned",
+        "returned"
+      ],
+      "beforeLog": "tests/upstream/revert-power/logs/conditional-before.log",
+      "afterLog": "tests/upstream/revert-power/logs/conditional-after.log"
+    }
+  },
+  "sharedFilesChanged": [
+    "Solidity.lean",
+    "Solidity/Language/Features.lean",
+    "Solidity/Syntax/Elab/Arms.lean",
+    "Solidity/Syntax/Elab/Stmt.lean",
+    "Solidity/Syntax/Elab/Values.lean",
+    "docs/feature-work/calls-exceptions.md",
+    "docs/module-map.md",
+    "docs/solc-alignment.md",
+    "docs/solidity-feature-inventory.md",
+    "docs/solidity-features.json"
+  ],
+  "implementationFileSha256": {
+    "Solidity.lean": "ff6e5fe52cedc780fb172e6ac92bfd59026dd9bde8594a26d9bf0231a0a4026e",
+    "Solidity/Language/Features.lean": "8148cad54845ff04113b58db5b28a2422a938844ae4725243bf1ac17c0abcd26",
+    "Solidity/Syntax/Elab/Arms.lean": "53e23ca26b2c92ce8a8c9ad32924c990ca490e63a0e66d6172521727b37446e4",
+    "Solidity/Syntax/Elab/Stmt.lean": "0880ee065427f9a58260c5fc6d85b808c28442f67be28c1974e6864654225145",
+    "Solidity/Syntax/Elab/Values.lean": "c37aa311a2ea36f30edd9a30ef6a057bcf0cbf5429a06d7ef2ce5138906dc1cb",
+    "docs/feature-work/calls-exceptions.md": "98e28465c9160fb3ba0342ff84ac6ae65143e503b697548d82aa79ad1950d55c",
+    "docs/module-map.md": "f17d8b5769c630d6b0c3167417a2d41283943cf49d53b18cd49fea3e56adadfc",
+    "docs/solc-alignment.md": "2b0235e6325ec3ea2da1f2823681ea9ed8babfd20e140ae6b363e16329bcd461",
+    "docs/solidity-feature-inventory.md": "c3fd6bb8714df54754c9562ab61b92eb1bb5269bb8380b31e548aa2eed7cc561",
+    "docs/solidity-features.json": "fa51d7729c864ae80076588c12398c9a63b9cc0fde6922635be0fa4751b4b198",
+    "Solidity/Examples/Tactics/SelfPowerData.lean": "5e4db4e91488571dcafe5b9304849cd37bfe50f95bd616b5be2970b2ac8088c8",
+    "tests/solc/SelfPowerData.sol": "2beb24644735494d57481f96e810600b4b59d6bdfee301c7153f85a18c886d79",
+    "tests/solc/SelfPowerData.legacy.ast.json": "4f377599d8364b9e5a848280faea2ad26c60227feb7533030c604c72545677d9",
+    "tests/solc/SelfPowerData.viaIR.ast.json": "ae40eb9cc5893b1f7fd2311fbab2c17a05827cec9bd69ec29cc2a10019ff16d0",
+    "scripts/check-self-power-data.mjs": "e509f96022399f71380b83946602d1d77bd5a221babfa3bc25da444896abdba8"
+  },
+  "reviews": {
+    "finder": "Independent read-only; no Lean server/checks; no remaining confirmed code defect. Found branch/index bypasses and documentation placement/wording, all fixed. Final handoff audit verified every recorded log/implementation SHA and precise blocked/pass claims.",
+    "skeptic": "Independent read-only; no Lean server/checks; no remaining confirmed code defect. Restricted root scope and preserved earlier failure/shortcut evaluation; finite-proof/compiler boundaries explicit. Final handoff audit verified all recorded hashes, gate failures and soundness/settings boundaries."
+  },
+  "remaining": [
+    "Signed-power magnitude-overflow payload precision remains limited; no general signed-power data extension.",
+    "Explicit checked/ignoringOverflow modes retain their existing policies.",
+    "Allocation panic 0x41 is not implemented; THalt.exhausted and gas/fuel policy unchanged.",
+    "Malformed-storage 0x22 remains excluded low-level corruption; no new 0x00 case claimed.",
+    "No explicit default/strip/debug/verbose-debug revertStrings settings admitted; omitted default unchanged.",
+    "Original panic fixture is blocked by unchanged host adapter; debug fixture is blocked by revertStrings=debug. Neither is counted as model agreement.",
+    "Callbacks, external aggregate world returns, environment/log scope, delegatecall and physical layout remain unchanged."
+  ],
+  "documentationAudit": {
+    "missing": 20,
+    "ambiguous": 6,
+    "status": "preexisting failure retained",
+    "unchangedCitingFiles": [
+      "Solidity/Eqns.lean",
+      "Solidity/Examples/Notation.lean",
+      "scripts/latex-chains.sh",
+      "tests/upstream/group03-validation.json",
+      "tests/upstream/group10-validation.json"
+    ]
+  },
+  "checks": [
+    {
+      "log": "tests/upstream/revert-power/logs/after-deps.log",
+      "sha256": "c683d93e90e588fe075160abdb5b94a5037afd820af26a902e8393cd483e99f8",
+      "command": [
+        "lake",
+        "-f",
+        "lakefile.revert-task.toml",
+        "build",
+        "Solidity.Frontend.Import",
+        "Solidity.Semantics.RevertMemory"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 105.95736510500001,
+      "prototypePeakGroupRssBytes": 1022500864,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/after.log",
+      "sha256": "2a4d0e0e0a619ff7bf9d4b0d0da57a7a124b5326c18959526c77563f2287763d",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        ".lake/revert-task/Before.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.35001777399998,
+      "prototypePeakGroupRssBytes": 801828864,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/baseline-build.log",
+      "sha256": "1a41d3c9074317a437ef7abdcd50f2a8ac4594df819c4f7d90f739037b2462d9",
+      "command": [
+        "lake",
+        "-f",
+        "lakefile.revert-task.toml",
+        "build",
+        "Solidity.Syntax.Elab"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 209.274901483,
+      "prototypePeakGroupRssBytes": 1075613696,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/baseline-deps.log",
+      "sha256": "514928fc1eda16d4cd06bba4a45969a6c23f6d26edcf553569fc3c828366658f",
+      "command": [
+        "lake",
+        "-f",
+        "lakefile.revert-task.toml",
+        "build",
+        "Solidity.Syntax.Splice",
+        "Solidity.Semantics.RunFuel"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 123.56472296200002,
+      "prototypePeakGroupRssBytes": 1108033536,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/before.log",
+      "sha256": "b0a671e6efc8c216e2d222ec6decc7d41148e109a33a4e352a88dc7399942532",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        ".lake/revert-task/Before.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.779949366999972,
+      "prototypePeakGroupRssBytes": 793546752,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/cgroup-diagnostics.log",
+      "sha256": "604e47efde2acba7fe5aeab8b6d740dd9d47af2d9853809f07e91a6035a294fe",
+      "exitCode": 0,
+      "elapsedSeconds": 55,
+      "peakCgroupBytes": 2039087104,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "passed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/cgroup-proofs.log",
+      "sha256": "bf6eb794d5100b120f52bd1a8df011d5c17b5e4647962fe6b099a44a8037b8ae",
+      "exitCode": 0,
+      "elapsedSeconds": 41,
+      "peakCgroupBytes": 1191362560,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "passed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/cgroup-runtime-pre-version-fix.log",
+      "sha256": "15a8355fc0997b8fc6b0ae2e49367e3a80be3013aba302c3ae226a56b52ea30c",
+      "exitCode": 0,
+      "elapsedSeconds": 1,
+      "peakCgroupBytes": 25325568,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "invalid_runtime_gate_masked_version_failure"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/cgroup-runtime-setup-failure.log",
+      "sha256": "ea47c107502fa73a036e48370bac56951f872beac0ec94f02fc5779cdb186363",
+      "status": "setup_failure_or_unmeasured"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/cgroup-runtime.log",
+      "sha256": "613513eab8c735a10d31630d3f4ba306671c181281188e0c4c602f3b08b7712d",
+      "exitCode": 0,
+      "elapsedSeconds": 0,
+      "peakCgroupBytes": 25133056,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "passed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/conditional-after.log",
+      "sha256": "02816e598b7957bfe6fc2ef79fa3fd7cf4645c6fad7ba7d65cc2d3cb1a2d031e",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        ".lake/revert-task/ConditionalBefore.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 18.562426862000166,
+      "prototypePeakGroupRssBytes": 881745920,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/conditional-before.log",
+      "sha256": "fd1d638fb365828798cda5bcd4a139c96c8368647fa349dd4d5702d282853aef",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        ".lake/revert-task/ConditionalBefore.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 17.100650692000045,
+      "prototypePeakGroupRssBytes": 866197504,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/conditional-return-before.log",
+      "sha256": "d5338f512ea19d08be3957438d6d5919a1f1a7bb24833caea83857359ba7817c",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        ".lake/revert-task/ConditionalBefore.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 14.662986479999972,
+      "prototypePeakGroupRssBytes": 868204544,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/diagnostics-final-elab.log",
+      "sha256": "fd1a7111ff542cb22d7ee2bed8cf1c18cf6b4da3ddc21a869559e9812a64369d",
+      "command": [
+        ".venv/bin/python",
+        ".lake/revert-task/diagnose.py",
+        "Solidity/Syntax/Elab/Values.lean",
+        "Solidity/Syntax/Elab/Arms.lean",
+        "Solidity/Syntax/Elab/Stmt.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 198.430065539,
+      "prototypePeakGroupRssBytes": 50503680,
+      "status": "prototype_command_completed",
+      "metricCaveat": "Prototype process-group RSS omits LSP descendants that create sessions; strict final cgroup diagnostics supersede it."
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/diagnostics-proofs.log",
+      "sha256": "2f6fd948d759ac318464f30a461e85023ecc3d71fc04727450a1354ed985895e",
+      "command": [
+        ".venv/bin/python",
+        ".lake/revert-task/diagnose.py",
+        "Solidity/Examples/Tactics/SelfPowerData.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 33.41209201399988,
+      "prototypePeakGroupRssBytes": 50507776,
+      "status": "prototype_command_completed",
+      "metricCaveat": "Prototype process-group RSS omits LSP descendants that create sessions; strict final cgroup diagnostics supersede it."
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/diagnostics-stmt2.log",
+      "sha256": "a33dba1dc72b96cf8e9271b3b38fd051ddca332e8c285eef859ac8fcb2c545ed",
+      "command": [
+        ".venv/bin/python",
+        ".lake/revert-task/diagnose.py",
+        "Solidity/Syntax/Elab/Stmt.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 10.88411648300007,
+      "prototypePeakGroupRssBytes": 50491392,
+      "status": "prototype_command_completed",
+      "metricCaveat": "Prototype process-group RSS omits LSP descendants that create sessions; strict final cgroup diagnostics supersede it."
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/diagnostics.log",
+      "sha256": "836a7a975d8d2d3918d0c114a6d893c21863061c7817cf31346507a8dbf564cb",
+      "command": [
+        ".venv/bin/python",
+        ".lake/revert-task/diagnose.py",
+        "Solidity/Syntax/Elab/Arms.lean",
+        "Solidity/Syntax/Elab/Stmt.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 146.13104806299998,
+      "prototypePeakGroupRssBytes": 50499584,
+      "status": "prototype_command_completed",
+      "metricCaveat": "Prototype process-group RSS omits LSP descendants that create sessions; strict final cgroup diagnostics supersede it."
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/doc-paths.log",
+      "sha256": "58eb451d5d3fc607de6c83f72b1d836c62dd800cb037974475860548244ef745",
+      "exitCode": 1,
+      "elapsedSeconds": 5,
+      "peakCgroupBytes": 7122944,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "preexisting_documentation_failure"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/evm-final.log",
+      "sha256": "52fffc30a10ee4a3b4566ffb6d4c88a966f4cb632f16c4e1b9cb5af732636578",
+      "command": [
+        "node",
+        "scripts/check-self-power-data.mjs",
+        "/workspace/.setup/revert-reference/soljson-v0.8.38.js",
+        "/workspace/.setup/revert-reference/node_modules",
+        "tests/upstream/revert-power/compiler-evm.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 6.335090132000005,
+      "prototypePeakGroupRssBytes": 385830912,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/evm-strict.log",
+      "sha256": "fa8fe8940fc515d47df5af1121210d9f1e74cc34e55d691cd275a1762468cba0",
+      "exitCode": 0,
+      "elapsedSeconds": 8,
+      "peakCgroupBytes": 378269696,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "passed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/evm.log",
+      "sha256": "1980823e00d806fd023f6f0755a11d301c4a5cf52276dcc301a20938eaac36c7",
+      "command": [
+        "node",
+        "scripts/check-self-power-data.mjs",
+        "/workspace/.setup/revert-reference/soljson-v0.8.38.js",
+        "/workspace/.setup/revert-reference/node_modules",
+        "tests/upstream/revert-power/compiler-evm.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.399120962999973,
+      "prototypePeakGroupRssBytes": 405037056,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/evm2.log",
+      "sha256": "c087bb5badedeff6ec7774c6a550f91e23e3cc8877aa642c84204e8add24e947",
+      "command": [
+        "node",
+        "scripts/check-self-power-data.mjs",
+        "/workspace/.setup/revert-reference/soljson-v0.8.38.js",
+        "/workspace/.setup/revert-reference/node_modules",
+        "tests/upstream/revert-power/compiler-evm.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.007443524000109,
+      "prototypePeakGroupRssBytes": 408743936,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/final-narrow-build.log",
+      "sha256": "cf85a05158af06f4be6afaf748e0bd35d01d7039221d9da820f40e302a36b9fa",
+      "command": [
+        "lake",
+        "-f",
+        "lakefile.revert-task.toml",
+        "build",
+        "Solidity.Examples.Tactics.SelfPowerData",
+        "Solidity.Tools.Upstream"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 168.00496696899995,
+      "prototypePeakGroupRssBytes": 1703165952,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/full-run-cold-blocked.log",
+      "sha256": "ee484e4235eed583493e02a9c8884f97b1fe8695cba1fe288d424d9dc492d56e",
+      "exitCode": 124,
+      "elapsedSeconds": 1800,
+      "peakCgroupBytes": 8371159040,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "blocked"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/full-run-final.log",
+      "sha256": "d4065e896deedb364b1e7bf78b059656dd0360f38e6e332b0d5f99f9a408f64f",
+      "exitCode": 124,
+      "elapsedSeconds": 1800,
+      "peakCgroupBytes": 8600182784,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "blocked"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/full-run-resume-blocked.log",
+      "sha256": "c32b3f9f92f2ec232c8c81a739ac99a1ed69db5397ed1339ece710ef338cf60f",
+      "exitCode": 124,
+      "elapsedSeconds": 1800,
+      "peakCgroupBytes": 7843344384,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "blocked"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/full-run-resume2-blocked.log",
+      "sha256": "6b12db01ba6012886db6d8c25195a055233e4edae9a9059212cb4ccac669815c",
+      "exitCode": 124,
+      "elapsedSeconds": 1800,
+      "peakCgroupBytes": 9916473344,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "blocked"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/full-run-warm-blocked.log",
+      "sha256": "e5f938a7be736f80af894bd5c646a9fbabfe95a14aa6a3cd850e44baae8a1af3",
+      "exitCode": 124,
+      "elapsedSeconds": 1800,
+      "peakCgroupBytes": 4282904576,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "blocked"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/narrow-build.log",
+      "sha256": "021e402776db39b72723556e0e6549dd96a30e8a9fb9b1ef1483f8a57e731591",
+      "command": [
+        "lake",
+        "-f",
+        "lakefile.revert-task.toml",
+        "build",
+        "Solidity.Examples.Tactics.SelfPowerData"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 60.15460369200014,
+      "prototypePeakGroupRssBytes": 1718431744,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/node-tests.log",
+      "sha256": "293ba743fdbc0560ee4b3bffca4d257026e549aab0a6d27fae8c6024c2f6676f",
+      "exitCode": 0,
+      "elapsedSeconds": 5,
+      "peakCgroupBytes": 300789760,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "passed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/probe.log",
+      "sha256": "f65eaaae5c2a975808ccb304d2988bffb64fe4a025fc3054df01d0f2ae506066",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        ".lake/revert-task/Probe.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 8.215701076000187,
+      "prototypePeakGroupRssBytes": 860864512,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/probe2.log",
+      "sha256": "1d0bea50b3a21e79d2c3f5ea93d5a9076ac1b00d114c54512bc5606f6a7d5096",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        ".lake/revert-task/Probe.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 12.347768119000193,
+      "prototypePeakGroupRssBytes": 856801280,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/proofs.log",
+      "sha256": "a8d4c6110182e7137bc158ee88697e9d8c5a7ae47d9db41cc7e5d49ece6bf27a",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "Solidity/Examples/Tactics/SelfPowerData.lean"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 32.69660758000009,
+      "prototypePeakGroupRssBytes": 1199980544,
+      "status": "failed_prototype"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/proofs2.log",
+      "sha256": "e69bc0c9d562493120a2dbc66c13807160c14256a2323ad65dc64a853d15e7c9",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "Solidity/Examples/Tactics/SelfPowerData.lean"
+      ],
+      "exitCode": 134,
+      "elapsedSeconds": 18.12091448299998,
+      "prototypePeakGroupRssBytes": 1720496128,
+      "status": "blocked_prototype_resource_stop"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/proofs3.log",
+      "sha256": "99406f1c5606d10436b63dba5e42d34d73f3552717340cf8ee4db2759b399611",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "Solidity/Examples/Tactics/SelfPowerData.lean"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 24.826753088999908,
+      "prototypePeakGroupRssBytes": 1632157696,
+      "status": "failed_prototype"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/proofs4.log",
+      "sha256": "34ecb289ca3d2cbb4fbb81c981e6bf840e8d39c9d9ffa8edc32fcd29dc3b2b7f",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "--tstack=131072",
+        "Solidity/Examples/Tactics/SelfPowerData.lean"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 26.057511503999876,
+      "prototypePeakGroupRssBytes": 1554620416,
+      "status": "failed_prototype"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/public-trust.log",
+      "sha256": "8322ba102dab4c570cca26e8db76c3bdfca31592c6741cad8aa739038107541d",
+      "exitCode": 0,
+      "elapsedSeconds": 102,
+      "peakCgroupBytes": 1221824512,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "passed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/static-checks.log",
+      "sha256": "cbb73ab1d9edc143075081679abeae70f343b5dd190edc7d051bfa584fdcfec9",
+      "exitCode": 0,
+      "elapsedSeconds": 6,
+      "peakCgroupBytes": 167505920,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "passed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/upstream-debug.log",
+      "sha256": "51d91574858007784c56cc2628aea91e830819577da8f47b084f61f310879c58",
+      "exitCode": 1,
+      "elapsedSeconds": 2,
+      "peakCgroupBytes": 260898816,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "blocked"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/upstream-panic.log",
+      "sha256": "3b7c29fa96e9bf7614f049d0e6563dfb2a2f1de36653eb9f1dd0a3feda99dc60",
+      "exitCode": 1,
+      "elapsedSeconds": 4,
+      "peakCgroupBytes": 275648512,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "blocked"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/values-build.log",
+      "sha256": "b8a319d07ac3704bd6dc3e2a3c15d29376bbaf3ba92c9c87527bfaeefd8904df",
+      "command": [
+        "lake",
+        "-f",
+        "lakefile.revert-task.toml",
+        "build",
+        "Solidity.Syntax.Elab.Values"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 18.170200041000044,
+      "prototypePeakGroupRssBytes": 967680000,
+      "status": "prototype_command_completed"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/handoff-static-permission-failure.log",
+      "sha256": "5216a06f52ab764900eb0e97353f52b182be2d3b9b6d008d1e524f121966af11",
+      "exitCode": 126,
+      "elapsedSeconds": 0,
+      "peakCgroupBytes": 63295488,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "command_setup_failure"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/handoff-static.log",
+      "sha256": "744215b3b1c3e42a68ea4c4dca8dbbde53ef64423327c2a69cd9d6e158b26f7c",
+      "exitCode": 1,
+      "elapsedSeconds": 6,
+      "peakCgroupBytes": 167305216,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "command_setup_failure"
+    },
+    {
+      "log": "tests/upstream/revert-power/logs/handoff-parity.log",
+      "sha256": "ce0359a067f8832a603667d443d8b5803d11ab48d566f87d7a6f7537f12736ae",
+      "exitCode": 0,
+      "elapsedSeconds": 1,
+      "peakCgroupBytes": 40562688,
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "status": "passed"
+    }
+  ],
+  "commands": {
+    "activation": "source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1",
+    "keySort": "lake -f lakefile.revert-task.toml build Solidity.KeySort",
+    "focused": "lake -f lakefile.revert-task.toml build Solidity.Examples.Tactics.SelfPowerData Solidity.Tools.Upstream",
+    "kernel": "lake env lean -j1 --tstack=131072 Solidity/Examples/Tactics/SelfPowerData.lean",
+    "full": "bash ./run-lean.sh",
+    "publicAxioms": "lake env lean -j1 --tstack=131072 TrustAudit.lean",
+    "compilerEvm": "node scripts/check-self-power-data.mjs /workspace/.setup/revert-reference/soljson-v0.8.38.js /workspace/.setup/revert-reference/node_modules tests/upstream/revert-power/compiler-evm.json",
+    "node": "node --test scripts/solidity-upstream.test.mjs",
+    "upstreamPanic": "node scripts/solidity-upstream.mjs run --compiler /workspace/.setup/revert-reference/soljson-v0.8.38.js --filter tryCatch/panic.sol --out tests/upstream/revert-power/upstream-panic --batch-size 1",
+    "upstreamDebug": "node scripts/solidity-upstream.mjs run --compiler /workspace/.setup/revert-reference/soljson-v0.8.38.js --filter revertStrings/empty_v2.sol --out tests/upstream/revert-power/upstream-debug --batch-size 1",
+    "finalStatic": "bash -c \"set -ex; node scripts/check-layers.mjs; node scripts/check-orphans.mjs; node scripts/check-automatic.mjs --strict; bash scripts/check-trust.sh; python3 scripts/solidity-feature-audit.py --check; bash scripts/check-testsuite.sh\"",
+    "finalFrozenParity": "bash scripts/check-testsuite.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+  },
+  "missingAssignedValidation": [
+    "Terminal default library build success (680/686 completed).",
+    "Terminal lake build SolkeyTestSuite success; static parity check is not a replacement.",
+    "Terminal check-solkey.sh sort check success."
+  ],
+  "resourceCaveat": "Early prototype probes used per-process address limits and an RSS watchdog. Final runtime/kernel/MCP/Node/static/public-trust/EVM checks and blocked combined attempts use the enforceable Docker cgroup. All earlier 1800-second full-build stops remain blocked; there is no terminal combined success or cold-fit claim.",
+  "finalStaticSetupFailures": "Initial direct check-trust.sh invocation failed because file lacked execute permission; bash invocation passed. Initial parity invocation followed setup SOLKEY_EXAMPLES to a missing pin; explicit repository frozen --solkey passed. Both failed logs retained; no mode/config changes."
+}

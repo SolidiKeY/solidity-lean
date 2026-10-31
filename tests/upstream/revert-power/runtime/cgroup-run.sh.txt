@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH \
+  docker --host=unix:///var/run/docker.sock run --rm --memory=12g --memory-swap=12g --cpus=1 --user=1000:1000 \
+  --mount type=bind,src=/workspace,dst=/workspace \
+  --mount type=bind,src=/usr,dst=/usr,readonly \
+  --mount type=bind,src=/opt/codex,dst=/opt/codex,readonly \
+  --mount type=bind,src=/etc/alternatives,dst=/etc/alternatives,readonly \
+  --mount type=bind,src=/etc/ssl/certs,dst=/etc/ssl/certs,readonly \
+  --mount type=bind,src=/home/agent,dst=/home/agent \
+  --env PATH --env HOME --workdir /workspace/solidity-lean \
+  ubuntu@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c \
+  /bin/bash /workspace/solidity-lean/.lake/revert-task/container-supervisor.sh "$@"

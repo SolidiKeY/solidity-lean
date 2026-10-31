@@ -1,0 +1,2 @@
+70 exact-byte compiler/EVM observations passed in legacy and viaIR
+{"command": ["node", "scripts/check-self-power-data.mjs", "/workspace/.setup/revert-reference/soljson-v0.8.38.js", "/workspace/.setup/revert-reference/node_modules", "tests/upstream/revert-power/compiler-evm.json"], "exit": 0, "elapsed": 5.007443524000109, "peak_group_rss": 408743936}

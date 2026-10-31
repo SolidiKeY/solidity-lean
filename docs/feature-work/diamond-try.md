@@ -1491,3 +1491,6 @@ Constructed closed carrier proofs and the approved modern5M pre-attempt facility
 Post-carrier source-construction frontier (design only): [generic original f and local36 derivation](diamond-try-source-construction-design.md). Carrier/Args/call/catch proofs are now completed; original P4/P5b/P8 remain open.
 
 Actual pinned-EVM MSTORE/decoder/step components: [proofs and remaining byte/source/resource laws](diamond-try-evm-memory.md). Source/native12/8 strictEXIT1 and P4/P5b/P8 remain open; no vendor interface or admission adoption.
+
+
+[User-requested partial checkpoint publication and merge validation](diamond-try-publish.md) records the later explicit push authorization and the retained incomplete gates.

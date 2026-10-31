@@ -1,0 +1,152 @@
+{
+  "startingCommit": "29b73d0ec4534d8fd6ca4e74f11e8008803bfc24",
+  "branch": "baseline/current-master-20261028",
+  "sameSavedVm": "ccarenv_b64_Y2NhcmVudl9mNjQxMmFkYWVhYTQ4MTkxYTFiMjVjYWQzNDkzNzJjOQ",
+  "sourceBase": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "preservedAncestorExitCodes": {
+    "66629757": 0,
+    "13edcbe4": 0,
+    "c4a5a2f1": 0,
+    "38871aee": 0,
+    "29b73d0e": 0
+  },
+  "status": "complete-bounded-value-entry-diagnostic",
+  "valueEntryDiagnosticComplete": true,
+  "historicalNativeValidationComplete": "false fields preserved; no whole-corpus or40-question completeness promotion",
+  "rootRefresh": {
+    "onlyRoot": "Solidity.Semantics.Lifetime",
+    "compileCount": 1,
+    "rootSourceSha256": "eb29f29d37a336cc0815e6cfa4baec5f3889c4941ba0c299e0415ba9644cca78",
+    "privateRootArtifacts": {
+      "overlay/Solidity/Semantics/Lifetime.olean": {
+        "sha256": "7e8700d1ffeb7121a8b34ec4ac72a1c0d3b14f70bae7fb7a5ba31b43ba877fc8",
+        "bytes": 870472
+      },
+      "overlay/Solidity/Semantics/Lifetime.c": {
+        "sha256": "254418b2c22f0dc29f51721e21482cb58fda975d303fad4300d1ce1eae115f39",
+        "bytes": 26480
+      },
+      "overlay/Solidity/Semantics/Lifetime.ilean": {
+        "sha256": "d3c68e1be131b93a3181296ca299adefd2dc6f0bed7fc2597928b63b9cd90d5c",
+        "bytes": 39344
+      }
+    },
+    "compileExit": 0,
+    "compileSeconds": 3.5535425240013865,
+    "currentDependencies": 27,
+    "existingNativeClosure": 76,
+    "privateOverlayOleans": 77,
+    "sharedSnapshotsUnchanged": 309,
+    "noDependencyBuild": true,
+    "noNativeObjectLinkNeeded": true,
+    "initialPreflightLayoutFailureRetained": true
+  },
+  "fixtures": {
+    "ValueEntry": {
+      "source": "inputs/ValueEntry.sol",
+      "sourceSha256": "271a98c5e6245b9fef7f4760d0f1eabacf7f0775de2f41e9a9899c6a33439705",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "typedImportRowsPerMode": 7,
+      "matchingTransactionsPerMode": 8,
+      "helperAbiRefusalsPerMode": 1
+    },
+    "unchangedScalarNegative": {
+      "source": "native-cache NativePositive",
+      "expected": 8,
+      "actual": 7,
+      "perMode": "broken: runtime expectation mismatch: identifiers()",
+      "inputArchiveHashesUnchanged": true
+    }
+  },
+  "runtimeVerification": "verification.json; final checks/verification.json;5corrupted-evidence controls rejected; actual observations are native typed interpreter evidence, not concrete kernel trace proofs or EVM execution.",
+  "theoremAxiomChecks": {
+    "unchangedLifetimeRootProofsKernelChecked": true,
+    "System_run_ok": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "World_enter_zero": [
+      "propext"
+    ],
+    "Step_rollback": "existing constructor type printed; actual concrete transaction traces not claimed kernel-proved",
+    "noSemanticTheoremSourceEdits": true,
+    "noNewSorryOrAxioms": true
+  },
+  "failurePolicy": "System.run errors return no World; driver retains prior World.atTime under existing Step.rollback relation. No restored-world return or independently fabricated payment guard.",
+  "remainingLimits": [
+    "Environment spendable funding is an explicit assumption checked by the diagnostic, not enforced by Lifetime.",
+    "System.run returns no world on error; immutable prior World.atTime follows existing Step.rollback policy, not a concretely kernel-proved trace.",
+    "No generated-EVM or universal source/compiler dispatcher proof.",
+    "No nonzero-argument ABI decoding coverage is inferred.",
+    "Testing proof closure remains stale; no full/cold/warm build repeated."
+  ],
+  "originalCorpus": {
+    "fixtures": 9660,
+    "working": 4135,
+    "broken": 196,
+    "blocked": 5329,
+    "allOriginalInputsObservationsVerdictsRequiredPipelinesUnchanged": true,
+    "originalVariantAssociationsAdded": 0,
+    "originalTypedImportModes": 40,
+    "originalReplayResults": 38,
+    "originalMatchingObservations": 122,
+    "originalNamedRefusalBatches": 12
+  },
+  "performance": {
+    "recordedRootAndNativeElapsedSeconds": 59.90926780003065,
+    "peakAggregateRootNativeBytes": 828518400,
+    "finalGatesElapsedSeconds": 32.07917172500311,
+    "finalGatesPeakAggregateBytes": 382468096,
+    "hardMemoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "zeroOom": true,
+    "rootTimeoutSeconds": 900,
+    "diagnosticTimeoutSeconds": 120,
+    "cold": {
+      "exit": 124,
+      "seconds": 5400,
+      "progress": "546/685",
+      "peakBytes": 8195923968
+    },
+    "priorNarrowBuild": {
+      "exit": 124,
+      "seconds": 900.006376623,
+      "peakBytes": 2342395904
+    },
+    "warm": "unrun",
+    "missingMeasurement": "Initial standalone verifier archive-lookup failure elapsed/peak unmeasured; not invented."
+  },
+  "finalGates": {
+    "expectedExitsMatch": true,
+    "pythonNativeTests": 15,
+    "nodeUpstreamTests": 23,
+    "inventory": "212features/783symbols unchanged",
+    "docPathExit": 1,
+    "docPathMissingReferences": 20,
+    "docOutputByteIdenticalToHistorical": true,
+    "archiveFilesChecked": 75
+  },
+  "sharedEdits": [
+    "tests/upstream/baseline-20261028/README.md"
+  ],
+  "sharedFrontendEdits": [],
+  "newArtifacts": [
+    "scripts/run-solidity-baseline-value.sh",
+    "scripts/solidity-baseline-lifetime-root.py",
+    "scripts/solidity-baseline-value-runtime.py",
+    "scripts/solidity-baseline-value-verify.py",
+    "tests/upstream/baseline-20261028/value-runtime/*"
+  ],
+  "archive": {
+    "path": "evidence.tar.gz",
+    "sha256": "6596c9a76b8ba29a9f2c4375ea9dc2f1e9352c8e200c081eed6fa42aeaf4258c",
+    "bytes": 1561207,
+    "regularFiles": 75
+  },
+  "reproduction": "Final launcher combines individually executed steps and reviewed overlay fix; not rerun end-to-end because that would repeat successful root compilation. Existing results can be verified without Lean/build.",
+  "excludedScope": "No Testing/ProveChunked/general closer13, semantic implementation, D1/D2, scope/log/environment policy changes, EVM layout/gas/delegatecall/assembly implementation, dependencies/config/credential changes, merges/pushes or external messages."
+}

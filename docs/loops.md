@@ -65,9 +65,9 @@ Specifications are `///` lines directly above the loop,
 `/// @custom:key invariant <expr>` (several conjoined) and
 `/// @custom:key decreases <term>` (at most one), in the function-spec
 expression language; in Lean an invariant is a program expression, or a
-quantified clause `\forall T x; a -> c` (`RawInv`, `LoopQ`), which the box
-rule reads as `∀` (`invFml`, solkey's `\getInvariant`) and under which the
-diamond rule closes to `false` (`whileNoVariantDiamond`, Lean only); `LoopLowering` moves them to the `while` it produces, so
+quantified clause `\forall T x; a -> c` (`RawInv`, `LoopQ`), which both box and ordinary scalar-diamond
+rules read as universal formulas (`invFml`). A scalar diamond still requires
+a defined decreasing variant; `LoopLowering` moves them to the `while` it produces, so
 the invariant of a `for` or `do … while` holds at the head of that `while`,
 also on the iteration a `return` ends.  Under the box an iteration that
 `break`s goes on to the rest of the program instead (solkey `473da8944c`'s
@@ -305,9 +305,10 @@ unwindings would be a failure of the program rather than of the bound.
 `Stmt` carrying one would make `Stmt`, `Term` and `Fml` one mutual
 inductive. A boolean program expression is effect-free and lowered exactly
 (`Val.lower_evalT`, `Calculus/LowerRun.lean`). Quantified clauses
-`\forall T x; a -> c` are `LoopQ` (`Val`s under binders), which the box rule
-reads as `∀` (`invFml`); under the diamond a quantified invariant closes to
-`false` (`whileNoVariantDiamond`).
+`\forall T x; a -> c` are `LoopQ` (`Val`s under binders), which the box and ordinary scalar-diamond rules
+read as `∀` (`invFml`). The diamond shifts every clause under its typed
+variant snapshot; `invFml_up_holds` proves that this preserves its reading.
+A missing scalar variant still closes to `false` (`whileNoVariantDiamond`).
 
 ## Decision 4: the invariant rule and its soundness (built)
 
@@ -470,7 +471,7 @@ rewriting the compiler proof. Loops would also unblock the compiler's gaps
 | **L2** Typing (the loop cases of `Typing/`, by `TLoop.run_induct`) | built |
 | **L3** Unwinding (`whileUnwind`, `loopExit`) | built |
 | **L4** Invariant rules (`whileInvariantBox`, `whileInvariantDiamond`, `Fml.anonHavoc`, `Calculus/SoundLoops.lean`) | built; the diamond is slow in the closer |
-| **L5** Quantified invariants | partly: `\forall T x; a -> c` clauses (`LoopQ`) under the box; open: quantified invariants under the diamond, and the solkey examples that need them (Ballot's `winningProposal`, BlindAuction; also blocked on `bytes32`, events) |
+| **L5** Quantified invariants | partly: `\\forall T x; a -> c` clauses (`LoopQ`) under box and ordinary scalar diamonds; open: default nested/mapping-prefix automation, quantified tuple diamonds, and the solkey examples (Ballot's `winningProposal`, BlindAuction; also blocked on other features) |
 | **L6** Callbacks | built under the box (`ProvesC.invBox`, `ProvesC.loopExit`, unwinding; `docs/options.md`); no diamond over a loop that calls back can be sound |
 | **L7** EVM | built with a structured loop instruction (above) |
 
@@ -550,3 +551,113 @@ solkey's four open loop ports are `tests/solc/OpenLoops.sol`
 - `multiArrayFillByPushLoops`: open; `nests.push()` recycles a `Nest` whose
   `d` is a dangling array of unknown length, so the later loops' guards
   read unknown lengths. It needs a closer for exposed slots.
+
+## Step 12: ordinary scalar quantified diamonds (2026-10-28)
+
+Branch `feature/step12-quantified-diamond` starts at current origin/master
+`f4dee4a29c2e208b36db4a4161a4723c735cd775`. The before proof in
+`tests/upstream/step12-quantified-diamond/before.txt` reproduces the precise
+refusal: every nonempty `LoopQ` list became `false` despite a scalar variant
+and an admitted frame. Historical inventory/corpus counts were not treated as
+current measurements.
+
+The existing `whileInvariantDiamond` now carries `invFml I qs` initially,
+at each abstract head, and after the body. Its postcondition shifts every
+clause under the fresh uint snapshot. `Calculus/LoopInvariantWk.lean` proves
+this preserves the Theory reading for arbitrary typed embeddings, including
+nested quantifier binders. The existing soundness proof carries that complete
+invariant through `TLoop.run_variant_or`. Head definedness, condition coverage,
+body success/exhaustion policy and conditional variant decrease are unchanged.
+No syntax representation, statement constructor or closer was added; existing
+annotation/schema notation and printers already retain the clauses. The
+`Taclet.toStep`, rule-existence replay, rule-set admission and term-size bound
+were extended consistently. The existing size constants were retained.
+
+`tests/solc/QuantifiedDiamond.sol` is retained as separately pinned solc 0.8.38
+legacy/viaIR ASTs. `Solkey/QuantifiedDiamond.lean` checks both imports and declares all
+eight obligations; `Examples/Tactics/QuantifiedDiamond.lean` proves, in each
+pipeline, the count and for/continue diamonds, the nonempty postcondition
+`∀ uint q; q < 3 → q < r`, and its false companion with witness `q = 2`.
+Concrete `State.init` fuel-4 certificates for count and fill are lifted by
+`Prog.runF_approx` to actual successful unbounded runs. They are concrete
+witnesses, not all-state termination theorems. The imported infinite loop
+has an actual divergence theorem for every initial state. All headline axiom
+sets are subsets of `propext`, `Classical.choice`, `Quot.sound`.
+
+The compiler artifacts record **AST analysis**, not native EVM execution.
+The modal theorems still accept exhaustion; the separate successful-run
+witnesses exclude it. Constant and undefined metrics are annotation/VC
+refusal controls: those source programs terminate because execution erases
+annotations. The undefined metric `3-r + 0/(3-r)` decreases at every live
+head and becomes undefined at exit, isolating the head-definedness requirement.
+
+**Still open.** The retained nested-quantifier source and a symbolic mapping
+prefix postcondition exceeded the default declaration budget or remained open
+with the existing quantified closer. Their attempted proofs are blocked in
+`tests/upstream/step12-quantified-diamond/blocked-attempts.txt`; no failed
+proof or stronger mapping claim is shipped. `fill_success` establishes only
+successful concrete execution. General closer work remains step 13. Quantified
+tuple diamonds, bodies without the existing frame (memory/callback restrictions),
+and scalar annotations without a variant retain their existing boundaries.
+Break/return policy, continue/for lowering and callback readings are unchanged.
+
+**Review.** Independent read-only finder and skeptic reviews used no Lean
+server. Confirmed fixes restored an accidental unrelated match edit, extended
+rule-set admission/replay, and included shifted clauses in the unchanged size
+bound. Further review corrected the IR contract selector, required symmetric
+pipeline proofs, isolated undefinedness at exit, and distinguished concrete
+success, compiler analysis and still-blocked automation. Final inspection found
+no additional soundness/control defect.
+
+**Validation.** The clean import/proof build passed in 53 seconds with a
+476,798,976-byte cgroup peak. The hard limit was 12 GiB with no swap, one Lean
+thread and explicit `-j1`; the writer lock is held inside the check container.
+`kernel-build.txt` preserves the output. Layer, orphan, trust and automatic
+checks passed before final integration. The optional rule-text checker has
+nine findings, exactly identical to the starting commit. Source replay,
+upstream regressions and final gates are recorded separately in the evidence
+directory as they complete; pending/resource-stopped checks are not passes.
+
+Final integration found one printer-only regression: removing the obsolete
+clause-empty premise reordered inferred implicit binders in the displayed
+rule type. The existing Loops snapshot now records that binder order; its
+logical statement and all expected program results are unchanged.
+
+### Final step-12 validation
+
+The handoff is a **partial scalar increment**, not completion of every loop
+or specification gap. `tests/upstream/step12-quantified-diamond/validation.json`
+records commands, measured bounds, every source row and upstream observation,
+axiom sets and shared-file edits. No shared `Frontend/` source was edited.
+
+- Both compiler modes: `count` and `forCount` proved; nested/fill remain pending.
+- Both modes retain all four controls as pending source obligations. False-post
+  and infinite-loop behavior is independently certified by the kernel theorems.
+- Upstream break/continue/return/simple: four fixtures, eight required modes,
+  all 28 original observations match, with unchanged fuel 1000.
+- Affected Node tests: 37 pass, zero failures.
+- The first full build hit its 3600-second cap in OpenLoops and remains
+  blocked (peak 8,592,580,608 bytes). A warm-cache retry used the same cap,
+  finishing with only the confirmed binder-order snapshot mismatch (exit 1,
+  2745 seconds, peak 9,316,597,760 bytes). That failed log is also retained.
+  The next attempt stopped without a terminal result after Derived14; its cause
+  is unknown. A fresh process/container/lock inspection confirmed no surviving
+  worker before resuming from cached artifacts. The interrupted log is retained.
+- Full `./run-lean.sh` and a fresh per-file kernel replay pass under 12 GiB,
+  zero swap, `LEAN_NUM_THREADS=1` and explicit `-j1`.
+- Frozen sort annotations match all 131 read-bearing taclets out of 377 parsed.
+- Layer, orphan, trust, automatic and inventory-generation checks pass.
+  The optional rule-text and repository-wide document scanners retain their
+  exact baseline findings (nine constructors, twenty archived/external refs).
+
+Runtime/compiler observations are separate from kernel soundness. All source,
+compiler and snapshot hashes are retained. No timeout, resource stop or pending
+advanced goal is counted as passing. The before proof and blocked-attempt record
+remain intact. Launcher/configuration text in the evidence directory documents
+the session-specific resource wrapper; it adds no core dependency.
+
+Final evidence-only finder and skeptic reviews verified log hashes, terminal
+results, exact partial rows and shared edits. The finder requested portable
+copies of five logs and the baseline document scan; these are retained.
+The document scan is encoded to avoid adding duplicate historical citations
+to its own input. No additional soundness or scope finding remained.

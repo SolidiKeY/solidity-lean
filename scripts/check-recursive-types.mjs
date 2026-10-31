@@ -18,7 +18,7 @@ const source = readFileSync(fileURLToPath(new URL('../tests/recursive-0.8.38/Rec
 const copySource = readFileSync(fileURLToPath(new URL('../tests/recursive-0.8.38/RecursiveCopy.sol',import.meta.url)),'utf8');
 function build(content, viaIR=false) {
   return JSON.parse(compile(JSON.stringify({language:'Solidity',sources:{'RecursiveTypes.sol':{content}},
-    settings:{viaIR,optimizer:{enabled:true},evmVersion:'cancun',
+    settings:{viaIR,optimizer:{enabled:true},evmVersion:'osaka',
       outputSelection:{'*':{'*':['abi','evm.deployedBytecode.object'],'':['ast']}}}}),0,0));
 }
 const bad = [
@@ -47,7 +47,7 @@ for (const viaIR of [false,true]) {
   assert.deepEqual((out.errors??[]).filter(e=>e.severity==='error'),[]);
   const c=out.contracts['RecursiveTypes.sol'].RecursiveTypesConformance;
   const iface=new Interface(c.abi);
-  const vm=await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Cancun})});
+  const vm=await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Osaka})});
   const address=createAddressFromString('0x'+'1'.repeat(40));
   await vm.stateManager.putAccount(address,new Account());
   const code=hexToBytes('0x'+c.evm.deployedBytecode.object);
@@ -75,7 +75,7 @@ for (const viaIR of [false,true]) {
     ['ordinarySubtree',[31n,37n]]
   ]) {
     // A fresh account per vector keeps source-only/destination-only histories independent.
-    const vm=await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Cancun})});
+    const vm=await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Osaka})});
     const address=createAddressFromString('0x'+'2'.repeat(40));
     await vm.stateManager.putAccount(address,new Account());
     const r=await vm.evm.runCode({code,to:address,data:hexToBytes(iface.encodeFunctionData(name,[])),gasLimit:30000000n});

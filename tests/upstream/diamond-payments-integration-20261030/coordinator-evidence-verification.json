@@ -1,0 +1,335 @@
+{
+  "version": 1,
+  "repair_head": "9641c774b4bf088dfe82c4f5d7cd731040906f88",
+  "scope": "Separate coordinator evidence and fresh exact-commit recomputation; no extension of original175manifest, historical execution claim, approval, or global gate pass",
+  "context_manifest": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/repair-contexts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/616cae7d7f64b8ae733455cac84e2f3392fb6dc91c6e3ead13066e026564706b/manifest.json",
+  "context_manifest_sha256": "616cae7d7f64b8ae733455cac84e2f3392fb6dc91c6e3ead13066e026564706b",
+  "identity": {
+    "environmentId": "ccarenv_b64_Y2NhcmVudl80YTIwNzJmZTFkNjQ4MTkxYjNlNWU3NzU5NmVmZDg0NQ",
+    "slug": "diamond-payments",
+    "source_base": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+    "source_commit": "20bbb1071e12d6e0765c885434df3defc7477b92",
+    "threadId": "01a18298-b467-7720-ae4b-3a6c2d1c5068"
+  },
+  "identity_matches_supplement": true,
+  "context_files_verified": 11,
+  "supplement_artifacts_reverified": 7,
+  "original_records_reverified": 175,
+  "original_archive_members_reverified": 177,
+  "original_source_coverage_unchanged": true,
+  "extra_baseline_original_manifest_covered": false,
+  "original_historical_baseline_execution_authenticated": false,
+  "documentation": {
+    "scope": "Fresh repair-worker exact committed-tree comparison; not an original historical run or a combined gate",
+    "base": {
+      "commit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+      "tree": "3386c8295f3cb764f7a8fe4e87118427431aab62",
+      "verified_committed_blobs": 1741,
+      "exit_code": 1,
+      "findings": [
+        "ambiguous: Solidity/Examples/Notation.lean cites \u0060RuleSyntax.lean\u0060 (2 files share that name)",
+        "ambiguous: scripts/latex-chains.sh cites \u0060Storage.lean\u0060 (3 files share that name)",
+        "ambiguous: tests/upstream/group03-validation.json cites \u0060Decide.lean\u0060 (2 files share that name)",
+        "ambiguous: tests/upstream/group03-validation.json cites \u0060Problems.lean\u0060 (2 files share that name)",
+        "ambiguous: tests/upstream/group03-validation.json cites \u0060ProofTree.lean\u0060 (4 files share that name)",
+        "ambiguous: tests/upstream/group03-validation.json cites \u0060Storage.lean\u0060 (3 files share that name)",
+        "missing:   Solidity/Eqns.lean cites \u0060Mathlib/Tactic/Eqns.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060Main.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060Widget.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060lakefile.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060test/basic.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060test/subscript.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060test/widget_basic.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Foundations/Logic/InferenceSystem.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Foundations/Logic/LogicalEquivalence.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Foundations/Syntax/Congruence.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Foundations/Syntax/Context.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Logics/Propositional/Defs.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Logics/Propositional/NaturalDeduction/Basic.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Main.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Mathlib/Tactic/Eqns.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Widget.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060lakefile.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060test/basic.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060test/subscript.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060test/widget_basic.lean\u0060"
+      ],
+      "log": "base.log",
+      "log_sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "scanner_sha256": "ba63940ffbc6a15787a009681fed35d327f9b7d352e0a137c79e4a75790316f8"
+    },
+    "source": {
+      "commit": "20bbb1071e12d6e0765c885434df3defc7477b92",
+      "tree": "299f250a872c7354f8bd2422bb5a126bec267dd8",
+      "verified_committed_blobs": 1767,
+      "exit_code": 1,
+      "findings": [
+        "ambiguous: Solidity/Examples/Notation.lean cites \u0060RuleSyntax.lean\u0060 (2 files share that name)",
+        "ambiguous: scripts/latex-chains.sh cites \u0060Storage.lean\u0060 (3 files share that name)",
+        "ambiguous: tests/upstream/group03-validation.json cites \u0060Decide.lean\u0060 (2 files share that name)",
+        "ambiguous: tests/upstream/group03-validation.json cites \u0060Problems.lean\u0060 (2 files share that name)",
+        "ambiguous: tests/upstream/group03-validation.json cites \u0060ProofTree.lean\u0060 (4 files share that name)",
+        "ambiguous: tests/upstream/group03-validation.json cites \u0060Storage.lean\u0060 (3 files share that name)",
+        "missing:   Solidity/Eqns.lean cites \u0060Mathlib/Tactic/Eqns.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060Main.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060Widget.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060lakefile.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060test/basic.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060test/subscript.lean\u0060",
+        "missing:   tests/upstream/group03-validation.json cites \u0060test/widget_basic.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Foundations/Logic/InferenceSystem.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Foundations/Logic/LogicalEquivalence.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Foundations/Syntax/Congruence.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Foundations/Syntax/Context.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Logics/Propositional/Defs.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Cslib/Logics/Propositional/NaturalDeduction/Basic.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Main.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Mathlib/Tactic/Eqns.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060Widget.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060lakefile.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060test/basic.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060test/subscript.lean\u0060",
+        "missing:   tests/upstream/group10-validation.json cites \u0060test/widget_basic.lean\u0060"
+      ],
+      "log": "source.log",
+      "log_sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "scanner_sha256": "ba63940ffbc6a15787a009681fed35d327f9b7d352e0a137c79e4a75790316f8"
+    },
+    "identical_findings": 26,
+    "new_findings": [],
+    "global_gate_passed": false,
+    "original_source_and_extra_baseline_findings_match": true,
+    "missing_each": 20,
+    "ambiguous_each": 6,
+    "baseline_debt_identity_verified": true,
+    "provenance": "Extra baseline bytes are separately pinned retrievals; exact-commit recomputation establishes unchanged findings, not an original historical execution"
+  },
+  "source_resource_scope": {
+    "frozen_prompt_sha256": "3598d459a259b7df2e914ea6b43e7098627785f2be17fb7ac0906127a9e373ad",
+    "memory_max_bytes": 12884901888,
+    "swap_max_bytes": 0,
+    "lean_j": 1,
+    "lean_threads": 1,
+    "os_headroom_required": true,
+    "extra_local_12GiB_reserve_applies_to_source_VM": false,
+    "summary_reported_mem_available_bytes": 8598601728,
+    "full_resource_samples": 1058,
+    "continuous_host_MemAvailable_samples_available": false,
+    "note": "Cgroup usage is not host MemAvailable; no continuous-headroom proof is inferred. Source requirements are unchanged."
+  },
+  "local_required_os_reserve_bytes": 12884901888,
+  "retained_build": {
+    "exit": 0,
+    "seconds": 2189.997,
+    "sampled_peak_bytes": 12884570112,
+    "retained_group_cumulative_peak_bytes": 12884901888,
+    "memory_events": "low 0\nhigh 0\nmax 1624\noom 0\noom_kill 0\noom_group_kill 0\n"
+  },
+  "retained_gate_exits": {
+    "orphans": 0,
+    "layers": 0,
+    "automatic": 0,
+    "trust": 0,
+    "inventory": 0,
+    "source-fixtures-reproduce": 0,
+    "script-tests": 0,
+    "trust-audit": 0,
+    "corpus": 0,
+    "doc-paths": 1,
+    "diff": 0
+  },
+  "paired_reports_reinspected": [
+    {
+      "name": "send",
+      "source_sha256": "7149591502b165dd7118a12e66dba07ec976b1de95ff527e5084f1365ca1e755",
+      "source_pipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "reference_profiles": [
+        "legacy",
+        "viaIR",
+        "irOptimized",
+        "legacyOptimized"
+      ],
+      "ordered_observations": 8,
+      "retained_status": "working"
+    },
+    {
+      "name": "uncalled",
+      "source_sha256": "b0ee1cc2e9eefc29e88106391e126020225424af158e2b89ba980a55767ac5a5",
+      "source_pipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "reference_profiles": [
+        "legacy",
+        "viaIR"
+      ],
+      "ordered_observations": 1,
+      "retained_status": "working"
+    },
+    {
+      "name": "transfer",
+      "source_sha256": "99e31542e17ffb6e9052197736e47a693f30ad1e14a72daa23906d4c59cbe14e",
+      "source_pipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "reference_profiles": [
+        "legacy",
+        "viaIR"
+      ],
+      "ordered_observations": 4,
+      "retained_status": "working"
+    }
+  ],
+  "evidence_verified": true,
+  "original_validation_verified": false,
+  "original_validation_verified_note": "Recorded evidence and unchanged documentation findings are verified. Required documentation still exited 1; this is not an all-gates-passing validation.",
+  "evidence_prerequisites_remaining": [],
+  "integration_passed": false,
+  "current_combined_gates": "Coordinator must run; previous checks and reviews do not approve this repair",
+  "independent_reviews": {
+    "finder": {
+      "task": "/root/evidence_finder_fresh",
+      "result": "No findings after final textual recheck. Verified context/original archive hashes, matching identity, Git trees/blob counts/scanner hashes and provenance/resource boundaries. Initial retrieval counts and old validation/reviews are correctly labeled historical. Read-only; no Lean, builds, scanner execution or writes."
+    },
+    "skeptic": {
+      "task": "/root/evidence_skeptic_fresh",
+      "result": "No remaining confirmed defect or new semantic decision. Independently recomputed scanner behavior from all3508 exact committed Git blobs, reproducing both logs with26identicalfindings, zero new, exits1/1. Verified digests and seven unchanged Lean hashes; stale top-level prerequisite cleared and historical fields labeled. Read-only; no Lean/builds/writes."
+    },
+    "fixed_finding": "Cleared stale top-level missing_original_evidence and labeled original retrieval counts and earlier validation/reviews historical.",
+    "scope": "Evidence repair only; not approval of combined candidate or validation gates."
+  },
+  "lean_source_edited": false,
+  "lean_checks_run": false,
+  "external_index_written": false,
+  "commit_created": false,
+  "archive": "coordinator-evidence.tar.gz",
+  "archive_sha256": "27ca82682ac38c94efc9f774a97a9cc07ffd2cadafd1d37cff01b6ea93ca2992",
+  "archive_index": [
+    {
+      "name": "context/manifest.json",
+      "size": 6071,
+      "sha256": "616cae7d7f64b8ae733455cac84e2f3392fb6dc91c6e3ead13066e026564706b"
+    },
+    {
+      "name": "context/0-original-resume-doc-paths-baseline.log",
+      "size": 2318,
+      "sha256": "337e44ec8c79fe4a88ff4b2b898b8d65e538fc016470e962650196963260a72e"
+    },
+    {
+      "name": "context/1-original-resume-doc-paths-comparison.json",
+      "size": 1919,
+      "sha256": "7a3269d6383d5f7b8073ce80c21d2bf52e2214dd218c26e3166beb5b7483f6a8"
+    },
+    {
+      "name": "context/2-authenticated-source-doc-paths-final.log",
+      "size": 2265,
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "name": "context/3-investigation-b8355e59-controller-handoff.json",
+      "size": 8641,
+      "sha256": "d987a14ad2b21a57325c5221260e9a0b55a2e8a6620841e228262dcaf6351678"
+    },
+    {
+      "name": "context/4-investigation-b8355e59-docs-comparison.json",
+      "size": 6159,
+      "sha256": "dcf4b4ab1ffd1d8fe50f01697b2ac7412b022ffee9fc993321ba457468f17e7e"
+    },
+    {
+      "name": "context/5-comparison.json",
+      "size": 6027,
+      "sha256": "53ceb956aea462632fe60cebf3619ac5ee29b3587f12a7e53feb0c8722829033"
+    },
+    {
+      "name": "context/6-base.log",
+      "size": 2265,
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "name": "context/7-source.log",
+      "size": 2265,
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "name": "context/8-verify-current-docs.py",
+      "size": 2174,
+      "sha256": "d8d63f28ac01d434938116ba9be7ec268465aeed15d6155cd7d8304cda6cfbe4"
+    },
+    {
+      "name": "context/9-investigation-b8355e59-payments-verification.json",
+      "size": 2941,
+      "sha256": "3f8ddb1f98f23f2554edec8a846056d62b401ed032317442b8cda3a4b015ff07"
+    },
+    {
+      "name": "context/10-diamond-payments.txt",
+      "size": 6132,
+      "sha256": "3598d459a259b7df2e914ea6b43e7098627785f2be17fb7ac0906127a9e373ad"
+    },
+    {
+      "name": "repair-recomputation/comparison.json",
+      "size": 5913,
+      "sha256": "a494e3de5669b2c26d58db424e28a02d9cab49150e5d0e1b898be0870904c167"
+    },
+    {
+      "name": "repair-recomputation/base.log",
+      "size": 2265,
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "name": "repair-recomputation/source.log",
+      "size": 2265,
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+    },
+    {
+      "name": "repair-recomputation/verify-pinned-documentation.py",
+      "size": 3508,
+      "sha256": "d4d446ae7979cdbaa7b10dfdb890ffd694b366537c26d339f7975f6c6e8e7402"
+    },
+    {
+      "name": "repair-recomputation/repair-evidence.py",
+      "size": 14512,
+      "sha256": "89d0f931f00a66766113b51447371cea1d9af9ba9700127a5d1fae40ee7296a0"
+    },
+    {
+      "name": "repair-reviews/finder.txt",
+      "size": 318,
+      "sha256": "9b8add87c4e5adb6ee05e2dbccbda651591aab5bb0b01e5ecdf8c32255037e68"
+    },
+    {
+      "name": "repair-reviews/skeptic.txt",
+      "size": 357,
+      "sha256": "fbc3f8c70f2bdae9f72ef2c8c03991a57c4fd4aa5bd85a7cb50df75b4b168070"
+    },
+    {
+      "name": "repair-checks/current-doc-paths.log",
+      "size": 7528,
+      "sha256": "1905b6529ffff68bf2ee9256f84952fd8a19e0df94a434b3b052c11638142f2a"
+    },
+    {
+      "name": "repair-checks/focused-checks.json",
+      "size": 221,
+      "sha256": "001514f5d60ff9865ae47f4564c2568a09cf1d5bf64875ae0bea112a8bfca4c0"
+    }
+  ],
+  "review_launch_failures": {
+    "inherited_context_finder": "invalid thread-store request: no rollout found",
+    "inherited_context_skeptic": "invalid thread-store request: no rollout found",
+    "resolution": "Both fresh-context independent reviews completed successfully."
+  },
+  "focused_checks": {
+    "git_diff_check": 0,
+    "documentation": {
+      "exit": 1,
+      "missing": 46,
+      "ambiguous": 37,
+      "payment_findings": []
+    },
+    "lean_files_unchanged": true,
+    "lean_checks_run": false,
+    "full_build_run": false
+  }
+}

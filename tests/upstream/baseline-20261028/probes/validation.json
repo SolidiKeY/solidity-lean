@@ -1,0 +1,233 @@
+{
+  "recordedAt": "2026-10-28T07:54:55.643571+00:00",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-probe-index.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.19399123800030793,
+      "wait4MaxRssKiB": 25320,
+      "log": "check-00.log.gz",
+      "uncompressedLogSha256": "07e9432e79c3782871fbadf49666049ca8fbdb9cf757ce011edd9af79b88a29c"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-probe-index.test.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.2971508230002655,
+      "wait4MaxRssKiB": 31284,
+      "log": "check-01.log.gz",
+      "uncompressedLogSha256": "b4e598e913e18f1f8212c068807eb3f6a7708e3f57e58fcbae3c6f57b924d2fa"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/solidity-baseline-probe-verify.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.08999461300118128,
+      "wait4MaxRssKiB": 40084,
+      "log": "check-02.log.gz",
+      "uncompressedLogSha256": "3efdf82ea66365ef10fc387bba19cbffa5a852f4b0381b8d254cc772d30f111c"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "scripts/solidity-baseline-probe.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.03621319599915296,
+      "wait4MaxRssKiB": 26368,
+      "log": "check-03.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "scripts/solidity-baseline-reader-metadata.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.030695015000674175,
+      "wait4MaxRssKiB": 26360,
+      "log": "check-04.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "scripts/run-solidity-baseline-probes.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.005458445000840584,
+      "wait4MaxRssKiB": 6628,
+      "log": "check-05.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-attribution.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.6541285200000857,
+      "wait4MaxRssKiB": 73040,
+      "log": "check-06.log.gz",
+      "uncompressedLogSha256": "7ad2ce2b43e4c5940eeac29af15fb281db41f749f5e7af62d1362e95d67f1337"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-attribution.test.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.7558375819971843,
+      "wait4MaxRssKiB": 80904,
+      "log": "check-07.log.gz",
+      "uncompressedLogSha256": "d795427cd812d0eca58bd23f4b73184ba07d8a5daa55e4013d19042eaba30fe3"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline.test.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.15579137999884551,
+      "wait4MaxRssKiB": 20176,
+      "log": "check-08.log.gz",
+      "uncompressedLogSha256": "1490b0b77360fbe459344d5a0a818f96f3c0b8fce1b64dd161d1044ef610306b"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-baseline-retries.test.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.09539965400108485,
+      "wait4MaxRssKiB": 14848,
+      "log": "check-09.log.gz",
+      "uncompressedLogSha256": "888a0c0ed615e57d32cf72be501b0c355f33b8613c81dfdaa99db33d7959487e"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.929560123997362,
+      "wait4MaxRssKiB": 71980,
+      "log": "check-10.log.gz",
+      "uncompressedLogSha256": "c6d2c7ee54123abf1584ce730a99a9705dad59373cc145d55166b7d066783af2"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.06635045800067019,
+      "wait4MaxRssKiB": 12928,
+      "log": "check-11.log.gz",
+      "uncompressedLogSha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.15877556299892603,
+      "wait4MaxRssKiB": 79092,
+      "log": "check-12.log.gz",
+      "uncompressedLogSha256": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.2019842260015139,
+      "wait4MaxRssKiB": 92288,
+      "log": "check-13.log.gz",
+      "uncompressedLogSha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.062471860997902695,
+      "wait4MaxRssKiB": 39744,
+      "log": "check-14.log.gz",
+      "uncompressedLogSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.832837431000371,
+      "wait4MaxRssKiB": 182036,
+      "log": "check-15.log.gz",
+      "uncompressedLogSha256": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 5.3687667029989825,
+      "wait4MaxRssKiB": 6660,
+      "log": "check-16.log.gz",
+      "uncompressedLogSha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "historicalMissing": 20,
+      "originalDiagnosticsByteIdentical": true
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.006860557998152217,
+      "wait4MaxRssKiB": 6672,
+      "log": "check-17.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.0090419859989197,
+      "wait4MaxRssKiB": 6704,
+      "log": "check-18.log.gz",
+      "uncompressedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "elapsedSeconds": 17.95598230700125,
+  "maxWait4JobRssKiB": 182036,
+  "resourceInterpretation": "These are lightweight read-only Python/Node/shell checks; wait4 peak is per reaped job, not an aggregate cgroup peak. Actual Lean stage cgroup peaks/stops are in evidence.tar.gz logs/*.json.",
+  "nativeValidation": "blocked, no new Lean job in these final checks",
+  "originalCoreAndCorpus": "unchanged",
+  "newTheoremAxiomAudit": "N/A; generated IO diagnostic wrappers add no semantic theorem or axiom. Static trust inventory only."
+}
