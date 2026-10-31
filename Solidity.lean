@@ -900,3 +900,6 @@ import Solidity.Backend.AbiWorld.PublishedLayoutControls
 import Solidity.Backend.AbiWorld.CatchTransport
 import Solidity.Backend.AbiWorld.CatchControls
 import Solidity.Backend.AbiWorld.CompiledMemoryCalls
+import Solidity.Backend.AbiWorld.ReturnedBytes
+import Solidity.Backend.AbiWorld.ReturnedBytesPrefix
+import Solidity.Backend.AbiWorld.ReturnedBytesControls

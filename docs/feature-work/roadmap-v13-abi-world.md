@@ -563,3 +563,159 @@ command logs, independent artifact reviews, checksums and every queue/backfill
 status. The compiled consumer's kernel obligations pass, but the checkpoint
 retains the inherited frozen-base documentation failure and the entire original
 assignment/goal remains BLOCKED on the still-open prerequisites above.
+
+
+## Uniform returned-array observation
+
+Investigated recovery d8d43e28-abba-48a8-aa41-6ad1f87c6bc5 resumes this same
+VM/thread/branch at clean73b8070a0319f6103c7a9cfb2442d9b71c8397d7, preserving
+all earlier commits, one cache, sealed manifests and raw failures. No prerequisite
+was fetched/merged, no producer/semantic/global-pin/profile file changed, and no
+goal write, reset, recreation or failed-context retry occurred. The user reports
+published master93920309f5c800c9ce4809bc74700ed4fde65fb2; the local tracking ref
+still points to the already integrated91e94ab5 and that newer object is absent.
+No new publication is needed for the actual ArrayRepr/StateRepr consumed here.
+
+ReturnedBytes is a partial observation of ACTUAL word-cell memory: byteCell
+rejects symbolic slots and values at least256; cells reads every cell in order;
+arrayBytes uses the observed header; localBytes follows the actual local pointer.
+These definitions are not an ABI decoder, a new EVM evaluator or byte-addressed
+memory semantics. ArrayRepr supplies exact header/length/every element/no-wrap;
+StateRepr supplies actual pointer, full heap/struct representation and frame.
+ByteRange is only a premise for converting this actual uint-array to bytes,
+NEVER compiler/source admission. The total helper payload would modulo-convert
+outside ByteRange, so it is not a successful observation there; payload_values
+proves every natural value exact under ByteRange, and payload_length proves no
+dropped elements. Empty arrays observe some[] rather than none.
+
+array_complete and local_complete have no fixed length/base. independent_addresses
+and interval_noninterference cover arbitrary represented bases and changes outside
+the complete header/element interval. error_observations reuses the actual
+Source.errorData/source_error_bytes, existing encodeError/catch_error and owned
+layout laws for exact offset4 word32, length at36, complete payload at68 and ALL
+zero padding. error_not_panic retains actual packet class. compiled_return
+consumes public Compilation.correct/memoryCalls_input through completed_transport;
+it retains actual source success, target execution, stack, FULL StateRepr,
+BaseExtends and exact GrowsAllocator. Its explicit no-payment and ByteRange/get
+premises are discharged below, not counted as compiler/world assumptions.
+memory_call_pushes_zero uses the actual public certificate pushFree field to
+normalize the stack index without forcing a symbolic program.
+
+ReturnedBytesPrefix executes a real compiled setup: saved=9, marker42, distinct
+older object0 containing[161,178], nonempty machine stack77 and sentinel cell127=99.
+prefix_ready/nonempty_entry derive the caller StateRepr and allocator from actual
+Calls.Program.sound/source execution. Entry heap length is1; oldRef0 is genuinely
+inhabited. prefixCursor retains the EXACT producer-cost expression in its type;
+prefix_resources separately proves cost3/cursor259. This is not empty-entry
+BaseExtends passed off as nonempty world evidence.
+
+ReturnedBytesControls instantiates six actual public compiler certificates and
+successful source runs: lengths0,3,31,32,33(alias return), and33(private escape).
+nonempty_applications supplies all six from that executed prefix, preserving
+EVERY old typed address and specifically the inhabited object0 address. Every
+Application includes final StructAllocatorRepr and complete ErrorFacts in addition
+to actual target run/stack/state/base/growth/bytes/catch. The argument and returned
+reference alias in the first five; private escaping object3 is distinct from
+argument1 and old object0. A post-call first-byte write changes both argument
+and return in alias cases, but only the return in the escape case. Original
+argument/returned bytes include all intervening zeros and last255; expected
+return is[7,zeros...,255] when nonempty. Logical private binders are popped;
+physical private cells need not be cleared.
+
+Public complete_payloads, finite_source_observations, finite_packet_facts,
+finite_resources, finite_packet_sizes and observed_error_packets expose full
+ordered payloads, every Error offset/length/padding/catch observation, old data,
+alias/escape identities, scalar42/store9 and actual stack/sentinel observations.
+Expanded need is6 for each stage. Reached costs are2,5,33,34,35,69 and final
+cursors261,264,292,293,294,328 after prefix259. Packet lengths are68,100,100,100,
+132,132, with padding0,29,1,0,31,31. Uniform theorems remain distinct from these
+finite inhabited controls; no uniform compiler admission for aggregate signatures
+is claimed from selecting these fixtures.
+
+Positive target_baseline precedes wrong_length_pointer_order, invalid_cell_observations
+and wrong_catch_and_offset_claims. Wrong numeric headers can yield shorter valid
+bytes, and a pointer to old object0 legitimately yields[161,178]; the controls
+reject WRONG complete-payload claims rather than pretend every malformed header
+or pointer returns none. Reordered cells change ordered data; invalid range or
+symbolic cells refuse observation. Error/Panic class, raw-vs-reason and encoded
+offset64-vs32 claims remain distinct. The actual compiled_word300_observation
+starts from the same nonempty prefix, has successful public compiler Input/run/
+StateRepr/old-address/allocator evidence, returns raw words[7,300,0], proves
+ByteRange false and the NEW uniform observer none. The older fixed3 accepted300
+controls remain unchanged and checked too. No silent UInt8 truncation is used.
+
+Resource failures are retained, not waived. Three combined/fixture worker OOM
+kills occurred at the enforced12GiB cap; raw MCP worker errors and cgroup events
+are saved. A later automatic11GiB guard stop and a manual task-owned stop after
+10.63GB avoided further OOMs. No other session was killed. The expensive steps
+were dependent allocator-cost rewriting and fully unfolding SAME-reference
+state equality. Keeping the producer-cost cursor expression, splitting the new
+prefix module and proving finite reference IDs then applying PUBLIC HRef.heq_of_id
+preserve the SAME allocator/ref claims. All six cases then passed near1.10GB and
+final controls incl actual300 near1.48GB, under unchanged memory/time/heartbeat/
+depth/fuel/node budgets. Raw earlier failures and intermediate drafts stay evidence,
+not committed proof substitutes. No old source/helper was refactored or deleted.
+
+Scope remains G41/BackfillA/B preparation: a logical observation-to-existing-Error
+codec theorem is NOT emitted byte encoding, a word-memory-to-byte-machine execution
+relation, aggregate ABI signature compilation, external CALL/RETURNDATA or callback/
+world transport. All missing producers/signatures/refusals remain. G40 blocked;
+G41 partial; G42.01-.02 blocked; G42.03 partial journal preparation; G42.04-.05
+blocked; G42.06 partial prefix preparation; BackfillA/B partial with this new
+uniform/inhabited consumer. Full source lowering, arbitrary permitted external
+callees/recursion, transient/world sharing and resource-indexed composition stay
+open. The exact-base documentation no-new gate still fails by the two inherited
+inline-assembly path references; its raw exit1 and reserved-owner repair request
+remain binding. Goal remains blocked and untouched, questions=[].
+
+
+### Uniform consumer final gates and handoff
+
+Final source/premise/nonvacuity/ownership/doc/pin finder and skeptic reviews both
+PASS; literal actual300-to-NEW-observer linkage was added after review and passed.
+Reports are finder-source-review.md and skeptic-source-review.md in NEW evidence
+/workspace/scratch/v13-returned-bytes-d8d43e28-evidence. Neither reviewer edited or
+ran Lean/server/builds. Actual final guarded source hashes are in those reports.
+Final staged gate/handoff and committed sealed-artifact reviews follow separately.
+
+| Command/gate | Actual outcome and evidence |
+|---|---|
+| `lean --version`, `lake --version`, explicit `lake build Solidity.KeySort` | Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake5.0.0-src+797c613; KeySort exit0/2jobs. Actual versions/keysort logs precede RUNTIME_GATE_PASS. |
+| Each new file MCP, interactive=false/severity=error/timeout_s45, outer120 | PASS complete empty errors/dependencies; uniform-mcp-final, prefix-mcp-final, controls-mcp-final logs/exits; sampled cgroup-current peaks825282560/1076367360/1388744704bytes. |
+| `lake build Solidity.Backend.AbiWorld.ReturnedBytesControls`, timeout180 | PASS188jobs before/after guarded pins; controls-build-02 and focused-final logs. Actual axiom output/sets retained; pure array laws only propext/Quot.sound, compiler/source facts add Classical.choice. |
+| `timeout 5400 bash ./run-lean.sh` | PASSexit0/3.135seconds cached,998default jobs/262TestSuite jobs/frozen377taclets131read-bearing/table covers131 and annotations match exact rulefile. final-run-lean.log/json/exit. |
+| Root MCP after full gate | PASS complete empty errors/dependencies; root-mcp log/exit/resource. |
+| `node scripts/check-layers.mjs`, `node scripts/check-orphans.mjs`, `bash scripts/check-trust.sh`, owned import checker | PASS172core/0meta;1013reachable/0orphans;1028sources/246inventory/0findings;15ownedmodules/0forbidden imports. |
+| Diff whitespace, owned8paths/append-only registrations, all old12modules+reserved producers unchanged, trust/budget scan and owned relative links | PASS; static.json/diff.log. No semantics/pins/profile/global ledger changed. |
+| `bash scripts/check-doc-paths.sh --strict`, current/exact verified frozen snapshot | Both RAW FAILexit1. Current85findings(48missing/37ambiguous), frozen83(46missing/37ambiguous). FROZEN no-new gate remains FAIL2, never green. |
+| Separate own-change no-new comparison to accepted73b8070a checkpoint | PASSzero new findings. Exact inherited inline-assembly references remain unchanged; static.json retains separate statuses. |
+| Three prior sealed manifests | PASS5original+8recovery+9memory-call entries. All old manifests/artifacts remain untouched; separate checksum logs. |
+
+Final full gate sampled aggregate peakRSS583024KiB across3samples; brief peaks
+may be missed and shared mappings may count more than once. Actual full cgroup
+peak1425731584bytes/max12884901888/swap.max0/OOM0. Final successful MCP/runtime
+resource observations are distinct from the THREE earlier worker OOM kills and
+two preemptive stops described above; none is relabeled green. Existing serial
+LEAN_NUM_THREADS=1/explicit lean-j1/12GiB hard cap/no swap/OS headroom and one
+source-toolchain cache were retained. Raw initial/current diagnostics, failed
+focused attempt, exact budget failures and successful changed-source gates all
+remain in evidence. No unchanged failing heavy gate was repeated or bound raised.
+
+All ready original-scope work in this checkpoint is the uniform represented
+return observation and actual nonempty compiled applications/controls. The source
+word-to-byte-addressed Failure-machine/emitted encoder, general aggregate codec,
+external CALL/RETURNDATA, arbitrary permitted world/callback/library transport,
+complete source lowering and full resource-indexed call composition remain absent
+prerequisites, not hypotheses counted as discharged. The protected inline-assembly
+doc repair request remains as recorded earlier. This checkpoint/full original
+assignment remains PARTIAL/BLOCKED because original obligations and exact-base
+doc gate remain open. No new semantic choice is requested, questions=[].
+
+Commit the reviewed owned consumer/handoff section on the existing task branch;
+seal a NEW artifact set under
+/workspace/scratch/v13-returned-bytes-d8d43e28-artifacts. Its HANDOFF.md records
+full final head/frozen base/accepted prior73/published interface91/repository,
+original/full patch, consumer-only patch, Git bundle, exact theorem premises and
+all Work/Backfill dispositions, raw evidence/reviews/checksums. No old manifest
+is rewritten. No push, merge, PR or goal write/retry/reset/reactivation is made.
+The original blocked goal is preserved under the explicit recovery instruction.
