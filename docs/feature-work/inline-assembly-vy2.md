@@ -1492,3 +1492,75 @@ preceding same-runtime checkpoint. All current heavy job intervals serial;
 previous1.528s recovery overlap preserved. Writer lock/hard12GiB/no-swap/caches/
 OS+aggregateRSS monitoring retained. Full original lane and both backfills stay
 unfinished; no goal transition, premise/exclusion or owner representation change.
+
+
+## Canonical scalar memory extension (2026-10-31)
+
+Before proof design, pinned solc0.8.38 Osaka legacy/viaIR
+[MemoryScalarWords](../../tests/yul-views/MemoryScalarWords.sol) checks signed8/24
+min/-1/0/max, uint8/24, address/contract/enum, bytes3/31. Signed MEMORY words are
+sign extended, uint/address/enum right aligned, bytesN LEFT aligned; matches
+actual Source.Val.word and differs from storage bytesN payload alignment. Full
+16word ABI/status/deployment audit retained under
+`/workspace/vy2-evidence/memory-scalars/`. Initial address-checksum syntax error
+preserved; source literal syntax fixed, independently specified values unchanged.
+
+[MemoryScalarCodec](../../Solidity/Yul/Views/MemoryScalarCodec.lean) constructs
+actual typed canonical scalar candidates, validates their ENTIRE Source.Val.word
+against input, proves decode-after-encode and exact successful raw reencode,
+RefOK for every H. Signed/unsigned integer widths, bool, address/contract,
+bytesN1..32 and enum supported. bytesN inversion uses actual byte/numeric laws,
+not storage alignment. Enum completeness has REAL premise enumSize≤2^256 for an
+arbitrary Layout (valid solc enums are≤256); otherwise word wrapping is not
+injective. This component premise does not weaken any whole obligation or
+introduce an admission exclusion. Fixed-point/UDVT/function cases remain open.
+
+[CanonicalMemory](../../Solidity/Yul/Views/CanonicalMemory.lean) is a parallel
+adapter: original decodeMemoryMember/OrdinaryMemberType and ALL original array/
+struct/retained APIs/controls remain byte-identical. New concrete canonical
+decoder falls back to existing owned-pointer decoder; soundness and supported
+roundtrip DERIVE actual MemoryElement/RefOK. Callback Nat/List folds have no
+assumed law fields; proved equality when instantiated with legacy decoder.
+Canonical instances prove actual typed arrays/DataList from successful reads;
+full heap/state unchanged, output Placement/other cells/types/next/boundedness,
+raw byte reencode and complete Source.heapPut Except/state/every original H
+owner MemOK use existing concrete machinery. No untyped AST/state/IR, opaque
+inverse/read/safety/Placement premise or proof budget increase.
+
+[CanonicalRetained](../../Solidity/Yul/Views/CanonicalRetained.lean) connects
+those actual decoded scalar arrays to original typed retained allocation history
+and actual Heap.write/heapPut, exact current shape/output Placement/history,
+other cells/types/next/boundedness, all-initial-H MemOK including source errors,
+encode/unchanged laws. Capacity is real original extent; existing raw/reserved/
+region/placement laws reused. No gap/free inferred ownership or allocator theorem.
+[Controls](../../Solidity/Yul/Views/MemoryScalarControls.lean) inhabit actual
+ScalarBox/array/bytes heaps and owner MemOK: signed/address/bytes3 struct updates,
+all-element signed arrays/aliases/disjoint orders, unchanged whole state, bytes3
+2→0→2 retained tails/shape/history/alias length reads, source error, narrow dirty/
+wrong bytesN alignment controls, enum/contract/u24 boundaries and old pointer
+behavior. None is unsupported CANONICAL preparation, never Yul refusal/no-op/
+deallocation/cleaning semantics. Dirty high bits remain original open transport.
+
+[ScalarMemoryOps](../../tests/yul-views/ScalarMemoryOps.sol) independently checks
+complete38word envelopes for fixed/dynamic scalar arrays, structs, both update
+orders, zero/partial/full regrowth, repeated reads/other roots/padding/free/zero,
+revert/fresh in both pipelines.The external fixture repeats reads through b, not an independent alias; actual
+two-alias evidence above is kernel-side.99scalar audit +155operation strict negatives;
+all preceding254report fields/calls identical, cumulative282. Compiler/EVM finite
+observations remain separate from kernel/source/compiler/allocator adequacy.
+Original oversized-MemOK boundary, YQ1–YQ7/exclusions and whole obligations
+unchanged. Y04/Y05/Y06 and both backfills PARTIAL, concreteY09.02 BLOCKED;
+whole-store/memory/dirty/sharedzero/interior/allocator/V10/V11/source/compiler/
+calculus/joint closure still mandatory. Goal BLOCKED unchanged, get_goal absent,
+no goal transition/new semantic question/owner edit or unpublished integration.
+
+Canonical scalar checkpoint validation: per-file/focused68jobs/fullwrapper
+1055default+262suite/131annotations exit0; actual Lean4.24.0/Lake5.0.0-src+797c613,
+KeySort2jobs0. Scoped1598declarations/880theorem reports standard axioms only.
+Strict/trust/layers/orphans and all old suites plus99/155new negatives pass.
+Docs ACTUAL exit1, identical48missing/37ambiguous base lines, zero delta separate
+PASS; markdownbase1/head1/new0. Independent finder clear; skeptic scope finding
+fixed (external repeats b reads, real alias evidence kernel-side) and follow-up
+clear. Source/owner/old decoder APIs unchanged, no budgets raised. Serial-j1/
+12GiB/no-swap/writer lock/monitor/caches maintained. Versioned handoff records
+exact signatures/resources/commands/committed SHA. Full original lane remains open.

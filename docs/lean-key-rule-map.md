@@ -1092,3 +1092,12 @@ component theorems with actual original/current Placement+typed history,
 canonical owned-member decoding/coverage and original-H premises. No concrete
 Yul rule/taclet/notation/printer or source/compiler composition claimed;
 [Y09.02 remains open](feature-work/inline-assembly-vy2.md#retained-array-element-family-resizing-2026-10-31).
+
+
+VY2 canonical scalar-memory extension (Lean-only preparation/YQ5):
+`decodeCanonicalScalar_encode/word/refOK`, `decodeExtendedMemoryMember_sound/encode`,
+`decodeCanonicalArray_sound/reads`, `decodeCanonicalFields_representation/reads`,
+`canonicalArrayState_MemOK`, `canonicalStructState_MemOK`, `canonicalRetainedState_MemOK`
+are concrete component laws, with actual typed/canonical/layout/ownership and
+original-H premises. No installed Yul rule/notation/printer/calculus/source
+composition claimed. [VY2](feature-work/inline-assembly-vy2.md#canonical-scalar-memory-extension-2026-10-31).

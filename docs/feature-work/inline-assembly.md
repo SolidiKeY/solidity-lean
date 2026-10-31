@@ -377,3 +377,14 @@ shrink/regrow/alias/tail controls. [Lane record](inline-assembly-vy2.md#retained
 16orderedcalls/195negatives; every prior238reportfield/call unchanged. Full lane/
 both backfills remain unfinished; no admission/universal writeback/allocator/
 source/compiler/calculus closure inferred.
+
+
+### VY2 canonical scalar-memory handoff (2026-10-31)
+
+Pinned pre-proof audit establishes canonical signed/width/address/bytesN memory
+alignment against actual Source.Val.word. Constructive inverse/RefOK and parallel
+canonical array/struct/retained adapters reuse actual Heap/Placement/owner MemOK,
+keeping all old decoder APIs untouched. [Lane record](inline-assembly-vy2.md#canonical-scalar-memory-extension-2026-10-31),
+`/workspace/vy2-evidence/memory-scalars/HANDOFF.md`. Both pipelines preserve all
+prior254calls and add28/99+155negative controls. Full lane remains unfinished;
+no dirty cleanup, new admission exclusion or compiler/source adequacy inferred.
