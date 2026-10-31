@@ -44,3 +44,7 @@ import SolidityBridge.RoadmapV15.PublishedWorldTransport
 import SolidityBridge.RoadmapV15.PublishedWorldControls
 import SolidityBridge.RoadmapV15.HaltObservation
 import SolidityBridge.RoadmapV15.HaltObservationControls
+import SolidityBridge.ExternalEvm.Memory
+import SolidityBridge.ExternalEvm.MemoryBytes
+import SolidityBridge.ExternalEvm.MemoryRefinement
+import SolidityBridge.ExternalEvm.MemoryComposition

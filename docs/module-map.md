@@ -1212,3 +1212,7 @@ At the root, the notation's own tests:
 | `Bridge/SolidityBridge/RoadmapV15/PublishedWorldControls.lean` | Real funded-factory, creation-collision, persistent observation and exact halt/result controls. |
 | `Bridge/SolidityBridge/RoadmapV15/HaltObservation.lean` | Exact G06 completed-halt observer, existing payload/terminal and finite-result consumers. |
 | `Bridge/SolidityBridge/RoadmapV15/HaltObservationControls.lean` | Exact bytes, exceptional/empty-revert distinction, finite-prefix and noncompletion controls. |
+| `Bridge/SolidityBridge/ExternalEvm/Memory.lean` | Actual memory dispatch and fixed/dynamic macros; single-read stack agreement, exact paired store updates, and active-extent counterexample. The primitive/macro layer for the bounded refinement below. |
+| `Bridge/SolidityBridge/ExternalEvm/MemoryBytes.lean` | Pure 32-byte encoding, conditional actual serialization and in-bounds byte write/readback/frame laws; explicit opaque allocator contract. |
+| `Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean` | Persistent preallocated numeric-cell/byte relation, all four actual core/macro simulations, independently inhabited input, composed readback and alignment controls. |
+| `Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean` | Arbitrarily populated pure two-cell inputs; actual fixed/dynamic store/load program compositions, persistent postrelation, exact stack tails and nonzero-neighbor frame controls. |

@@ -621,3 +621,39 @@ review results, proof/testing boundaries and unfinished work. This checkpoint
 and its report do not mark the persistent full assignment complete.
 
 Separate final read-only finder and skeptic reviews cleared the validation/handoff section and actual component diff, retaining full-lane incompleteness. A fresh availability check corrected stale historical lean-auto wording: all three actual source repository HEADs match their configured pins, with CSLib/auto/Mathlib olean counts 0/0/5. Both follow-ups cleared that correction. Actual exported-artifact/head/checksum review is retained externally after export; no Lean server or builds were used by reviewers.
+
+
+## Publication recovery 7499c0a3: read-only memory producers
+
+The origin master observation is 93920309f5c800c9ce4809bc74700ed4fde65fb2.
+The audited previous owned checkpoint is 6ef28db20af0a73597e492bb1e5555f95440856c;
+the frozen base and assigned branch are unchanged. The actual local remote ref
+was older, so the exact genuine published commit was fetched from configured
+origin, with its remote-master observation and incorporated ancestry retained.
+No master merge or unmerged worker fetch was performed. Only the four published
+memory source blobs are incorporated, byte-for-byte, with append-only Bridge
+and module-map registration. No core, vendor, dependency/toolchain pin, source
+profile or other owner's implementation is edited. Other published core/editor/
+CI/document changes are not part of this selective producer consumption.
+
+`Bridge/SolidityBridge/ExternalEvm/MemoryBytes.lean` publishes encoding_spec:
+for every actual EvmYul.UInt256, pure encoding has exactly 32 bytes and the actual
+fromByteArrayBigEndian reader returns its toNat. This theorem has **no
+PaddingCorrect premise**. The bytes_list/list_bytes laws are also available as
+source. In contrast, serialize_eq/serialize, readback/store/refinement and
+composition retain explicit allocator and preallocated-capacity conditions.
+PaddingCorrect has no published inhabitant and is not assumed or axiomatized by
+V15. Represents covers preallocated numeric cells; the supplied-opcode runner
+charges zero gas and proves neither fetched-bytecode/driver adequacy nor Osaka,
+resource, arbitrary-account or transaction correspondence.
+
+Exact source blob identities and publication/ancestry evidence are retained at
+/workspace/v15-evm-agreement-evidence/publication-7499c0a3. Existing sealed exports
+and every historical failed gate remain unchanged. Narrow external import/cache
+availability and the owned encoding consumer are assessed in this recovery;
+publication alone does not claim a new kernel or full Bridge pass. No cache
+fetch, CONNECT probe, giant cold external closure or failed full gate is repeated.
+
+The first offline per-file producer check (producer-import.log/json) fails before elaboration: unknown module prefix EvmYul. No newly published producer is kernel-checked in this VM. Current total .olean counts are Mathlib/CSLib/auto 6/0/1; library-output counts are 5/0/0, with the Mathlib five belonging only to its cache tool. Configuration oleans do not supply the missing EVM/Mathlib closure. The bounded process cap is 12 GiB with swap 0; peak for this failed narrow check is 60,473,344 bytes. The existing cache 0/860 CONNECT403 failure and original cold full exit124 remain retained, not rerun or waived. The exact checked Core byte-encoding helpers and candidate reference consumer are the next assigned Backfill A work.
+
+Producer checkpoint handoff: separate independent read-only finder and skeptic verified all four source blobs against the genuine published commit, its frozen-base ancestry, append-only registration, exact hypothesis/driver boundaries and the actual failed import. Both clear source-only incorporation, not kernel compatibility or lane completion. Layer/whitespace checks pass; raw docs still exits1 with the same46 missing/37 ambiguous findings and zero additions in the separate exact-base comparison. Source publication does not resolve the authorized but still unperformed cache endpoint repair. The next checkpoint continues the original Backfill A encoding consumer, rather than ending at this source-only checkpoint.
