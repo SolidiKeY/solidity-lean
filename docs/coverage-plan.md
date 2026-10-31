@@ -564,6 +564,17 @@ checker applies them through `PROPOSED_PACKAGES` until they land. A lane
 that still finishes early takes backfill items or the next ready lane's
 first group, and the coordinator merges the lane in parts.
 
+### Proposed: inline assembly (2026-10-31)
+
+Inline assembly (Yul) stays an approved exclusion (G00 Q1). A proposal to cover
+it, in ten groups Y01–Y10 and five lanes VY1–VY5 (tier A, words only: VY1;
+tier B, physical storage/memory/inputs: VY2–VY3; tier C, raw calls, creation
+and logs: VY4–VY5), is in [inline-assembly.md](feature-work/inline-assembly.md).
+No VY lane starts before the user answers its decisions YQ1–YQ7. If VY2 is
+approved, its storage and memory layout definitions (Y04, Y05) must be
+integrated before V10 and V11 start, or those lanes inherit the agreement
+obligation.
+
 ### Backfill queue
 
 These items are ready now, are independent of the lane order, and are owned
