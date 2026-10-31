@@ -114,6 +114,16 @@ async function run() {
       return snapshot(doc);
     });
     if (!doc) throw new Error('Initial document failed to open');
+    if(target==='local'&&api.service){
+      const client=await api.service.open(doc);result.observations.serverCapabilities=client.capabilities;
+      await scenario('warm-snapshot-cache',async()=>{
+        const before=await client.peer.request('solidityLean/stats',{}),start=performance.now();
+        const cached=await api.verify(doc);metrics.warmVerificationMs=performance.now()-start;
+        const after=await client.peer.request('solidityLean/stats',{});
+        assert.ok(after.cacheHits>before.cacheHits,'unchanged snapshot reuses checked proof results');
+        return {workerPid:cached.backend?.workerPid,leanServerPid:cached.backend?.leanServerPid,cacheHits:after.cacheHits};
+      });
+    }
     const initialEvents=events.filter(e=>e.ms>=initialStart-started);
     const useful=initialEvents.find(e=>e.kind==='symbolStatus' && e.data.namedVerifiables.some(s=>s.status>=4) || e.kind==='diagnostics' && e.data.diagnostics.length>0);
     metrics.firstUsefulFeedbackMs=useful?useful.ms-(initialStart-started):metrics.initialVerificationMs;
@@ -137,12 +147,28 @@ async function run() {
         if(id==='hover') assert.ok(response.value?.length,'expected verification hover');
         const value=id==='hover'?response.value?.map(h=>({range:h.range,contents:h.contents.map(c=>typeof c==='string'?c:{value:c.value,language:c.language,isTrusted:c.isTrusted})})):response.value;
         const present=Array.isArray(response.value)?response.value.length>0:response.value?.items?response.value.items.length>0:!!response.value;
-        return {status:id==='hover'?'passed':target==='local'?'missing':'unexamined',present,value,
+        return {status:id==='hover'?'passed':target==='local'&&!api.service?'missing':'unexamined',present,value,
           scope:id==='hover'?'verified declaration hover':'Discovery probe at declaration; dedicated trigger/call-site tests are required.'};
       });
     }
+    if(config.suite==='full'&&target==='local')await scenario('language-services-callsite',async()=>{
+      const path=file('language-services');
+      const body='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Services { function helper(uint a, uint b) public pure returns(uint) {return a+b;} function caller() public pure returns(uint) {return helper(1,2);} }\n';
+      writeFileSync(path,body);const languageDoc=await vscode.workspace.openTextDocument(path);
+      const offset=body.lastIndexOf('helper('),point=languageDoc.positionAt(offset+2);
+      const definition=await request('vscode.executeDefinitionProvider',languageDoc,point,[]);
+      assert.ok(definition.value?.length,'call-site definition');
+      const references=await request('vscode.executeReferenceProvider',languageDoc,point,[]);assert.ok(references.value?.length>=2);
+      const completion=await request('vscode.executeCompletionItemProvider',languageDoc,point,[]);assert.ok(completion.value?.items.some(i=>i.label==='helper'));
+      const signature=await request('vscode.executeSignatureHelpProvider',languageDoc,languageDoc.positionAt(offset+'helper(1,'.length),[]);
+      assert.equal(signature.value?.activeParameter,1);assert.match(signature.value.signatures[0].label,/helper/);
+      const rename=await vscode.commands.executeCommand('vscode.executeDocumentRenameProvider',languageDoc.uri,point,'renamed');
+      assert.equal(rename.get(languageDoc.uri).length,2);
+      return {status:'partial',definitions:definition.value.length,references:references.value.length,renameEdits:rename.get(languageDoc.uri).length,
+        scope:'Actual local compiler-backed providers at a call site. Cross-language semantic parity is unexamined.'};
+    });
     if(config.suite==='full')await scenario('symbols-and-formatting',async()=>({
-      status:target==='local'?'missing':'partial',
+      status:target==='local'&&!api.service?'missing':'partial',
       symbols:await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider',doc.uri),
       formatting:await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider',doc.uri,{tabSize:2,insertSpaces:true})
     }));
@@ -170,6 +196,12 @@ async function run() {
       const saving=api.verify(doc).catch(e=>{if(e.code==='CANCELLED')return null;throw e;});
       await replace(doc,workload(target,config.obligations+2,false)+'\n// edited during save\n');
       const old=await saving;assert.equal(old,null,'edit supersedes a request still awaiting save');
+      if(api.service){
+        const disk=readFileSync(doc.uri.fsPath,'utf8');
+        await verify(doc,config.obligations+2);assert.equal(snapshot(doc).diagnostics.length,0);
+        assert.equal(readFileSync(doc.uri.fsPath,'utf8'),disk,'in-memory verification must not overwrite the saved source');
+        return {state:snapshot(doc),inMemory:true};
+      }
       const hash=text=>createHash('sha256').update(text).digest('hex');
       const saveBoundary={version:doc.version,isDirty:doc.isDirty,bufferHash:hash(doc.getText()),diskHash:hash(readFileSync(doc.uri.fsPath))};
       // VS Code can mark the new buffer clean after persisting an older snapshot.
@@ -238,8 +270,8 @@ async function run() {
       return snapshot(saved);
     });
     await scenario('server-restart',async()=>{
-      if(target==='local') return {status:'missing',reason:'CLI backend has no restart command or persistent LSP server'};
-      const start=performance.now();await vscode.commands.executeCommand('dafny.restartServer');
+      if(target==='local'&&!api.service) return {status:'missing',reason:'CLI backend has no restart command or persistent LSP server'};
+      const start=performance.now();await vscode.commands.executeCommand(target==='local'?'solidityLean.restartServer':'dafny.restartServer');
       metrics.restartMs=performance.now()-start;
       const restarted=await open('restarted',1);await verify(restarted,1);return snapshot(restarted);
     });

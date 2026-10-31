@@ -1,0 +1,11 @@
+{
+  "scope": "new direct evidence/design user queue, not replay of accepted continuations",
+  "priorOsakaTurn": "01a18cfa-3ab3-72a1-9478-89895ef9a811",
+  "priorOsakaReceiptAccepted": true,
+  "priorM1DesignReceiptsAccepted": true,
+  "authority": "current user explicit accepted/terminal confirmation",
+  "base": "af34584f93b36286ec063fa948bc1685923411a4",
+  "runtimeCompilerLeanInvocations": 0,
+  "heldCancunAnswer": "pending, no answer assumed",
+  "oldRejectionsExportsAndReceiptsUntouched": true
+}

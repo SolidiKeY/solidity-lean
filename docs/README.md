@@ -9,6 +9,7 @@ history is in git.
 | Document | Holds |
 |---|---|
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
+| [feature-work/solidity-lsp.md](feature-work/solidity-lsp.md) | Persistent Solidity LSP, warm Lean workers, editor services, validation and remaining limits. |
 | [dafny-editor-parity.md](dafny-editor-parity.md) | Real Dafny/Solidity Lean editor comparison harness, feature discovery, measurements and completeness limits. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Typed loop measures, finite membership, entry audits, certified source witnesses and editor integration. |
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |

@@ -719,3 +719,18 @@ original/full patch, consumer-only patch, Git bundle, exact theorem premises and
 all Work/Backfill dispositions, raw evidence/reviews/checksums. No old manifest
 is rewritten. No push, merge, PR or goal write/retry/reset/reactivation is made.
 The original blocked goal is preserved under the explicit recovery instruction.
+
+### Published library boundary integration (audit dff2fe2b)
+
+Integrated exact published `9b24b57311b8daf0d4cd01b52bf420fd024c1d3a`
+into the isolated lane, preserving all prior owned files. LibraryTryFrame SHA256
+is `4ac1544e54f9cd52628283fac73c64cf4d8dd799a75e158f35f4819b0a67cb85`.
+The attempted older introducing-revision merge conflicted in reserved files;
+its raw conflict evidence was saved and that task-owned attempt aborted.
+The exact supplied publication includes the existing memory-call prerequisite
+and merged without conflicts. No reserved producer was repaired by this lane.
+Independent read-only library_integration_finder and library_integration_skeptic
+reviews found no ownership, preservation or closure issues; neither ran Lean.
+This is source integration only: consumer proofs and changed-source gates remain
+pending. The original goal stays blocked; G40–G42 and Backfill A/B remain partial
+or blocked as documented above, never closed by this integration.

@@ -1,0 +1,130 @@
+{
+  "files": [
+    {
+      "file": "scripts/evm-reference/replay.mjs",
+      "sha256": "26fc8345c3ec9e3eb26640281ecc29c446f6208419fece2e452f53f5df469ff0",
+      "copy": "scripts__evm-reference__replay.mjs"
+    },
+    {
+      "file": "scripts/evm-reference/package.json",
+      "sha256": "d105ac0296bdb1702134577f341d390f017a6fb0e3c905d7b5045de31f3b863e",
+      "copy": "scripts__evm-reference__package.json"
+    },
+    {
+      "file": "scripts/evm-reference/package-lock.json",
+      "sha256": "fd223698b68dd5cf9dc1b59589c61da6c0131c3f68af65f7c26a3d5ac0498829",
+      "copy": "scripts__evm-reference__package-lock.json"
+    },
+    {
+      "file": ".lake/upstream/solidity/test/EVMHost.cpp",
+      "sha256": "a5f9c40b2a268f21be3e6c82aee68f2df79c4a161a041c4b62afa4f123375982",
+      "copy": ".lake__upstream__solidity__test__EVMHost.cpp"
+    },
+    {
+      "file": ".lake/upstream/solidity/test/EVMHost.h",
+      "sha256": "114a118d2a7cfcd4f200ef39098d1b468cbcf6599be9619b8ba0bf3c3d282a64",
+      "copy": ".lake__upstream__solidity__test__EVMHost.h"
+    },
+    {
+      "file": ".lake/upstream/solidity/test/evmc/mocked_host.hpp",
+      "sha256": "1cba95db2e5593376a32babaa731ef523e7f498da250104ee4fa45e0b5a44584",
+      "copy": ".lake__upstream__solidity__test__evmc__mocked_host.hpp"
+    },
+    {
+      "file": ".lake/upstream/solidity/test/ExecutionFramework.cpp",
+      "sha256": "20aaee0ca741afd6812a90b27631138f2bfb8daae67cb5b4cabf106463fec06a",
+      "copy": ".lake__upstream__solidity__test__ExecutionFramework.cpp"
+    },
+    {
+      "file": ".lake/upstream/solidity/test/ExecutionFramework.h",
+      "sha256": "cbd2acb8607ecfdfc9ff728f61b221f5cec8976956cc4e1518996e94f12c7a8e",
+      "copy": ".lake__upstream__solidity__test__ExecutionFramework.h"
+    },
+    {
+      "file": ".lake/upstream/solidity/test/libsolidity/SemanticTest.cpp",
+      "sha256": "053285d39e24bcf8e38b4462fc281142d66194daed9b7c8ab88b03299b1c129b",
+      "copy": ".lake__upstream__solidity__test__libsolidity__SemanticTest.cpp"
+    },
+    {
+      "file": ".lake/upstream/solidity/test/libsolidity/SolidityExecutionFramework.h",
+      "sha256": "845a970b222e31f0507c21f03ad00beb94d147f9c8645162632da8c80cdb9870",
+      "copy": ".lake__upstream__solidity__test__libsolidity__SolidityExecutionFramework.h"
+    },
+    {
+      "file": ".lake/upstream/solidity/test/libsolidity/SolidityExecutionFramework.cpp",
+      "sha256": "e060a474b6c9d366768568082facf571c0b01403cf0d47066f8cafaff0e1c907",
+      "copy": ".lake__upstream__solidity__test__libsolidity__SolidityExecutionFramework.cpp"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/constructors.js",
+      "sha256": "b9a35a0c0036b572e725ce309c11c7c492c848f47438a96a3b91d4ecbd0a02fb",
+      "copy": "evm__dist__esm__constructors.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/statemanager/dist/esm/simpleStateManager.js",
+      "sha256": "f0ed9a71aa368cdbb7365b7dddc90c317750555cc4e0cec8a9524708f5c96920",
+      "copy": "statemanager__dist__esm__simpleStateManager.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/evm.js",
+      "sha256": "e978f659e72aeb8ee22ebc4559bafb37e4760b0557512224f734b5b46da22f46",
+      "copy": "evm__dist__esm__evm.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/interpreter.js",
+      "sha256": "27106c4194446a01eb6207a2c5158e13eb242fc6cbb7e180d4b937cd87ba6499",
+      "copy": "evm__dist__esm__interpreter.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/message.js",
+      "sha256": "3686f4c11921ec87aff344d1bc13f7f6495280073afda0ecce805b4ba8ca822b",
+      "copy": "evm__dist__esm__message.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/index.js",
+      "sha256": "f46e7b7ad9d6e74d482b0b3058b1cb6f4281f301770887c4ca531fc3dbf11514",
+      "copy": "evm__dist__esm__index.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/params.js",
+      "sha256": "cf2a8f597f38308f922b51248ddc25a630f9c7a95da82941e8ec20e2c6ac1eb2",
+      "copy": "evm__dist__esm__params.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/opcodes/EIP7928.js",
+      "sha256": "1294c92cc0f875dda60bfc81c610aef82e8800fbea8f6da4f73a7f36b48f289a",
+      "copy": "evm__dist__esm__opcodes__EIP7928.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/opcodes/util.js",
+      "sha256": "a9ae8a7bd71c0580762e4185aa7a8ed784474f2b043693f45831df225fdf9cff",
+      "copy": "evm__dist__esm__opcodes__util.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/journal.js",
+      "sha256": "664ee68ebc39fb3a1c0ec6aabf4de45eb7fc856be2d9213a7b828ec16b04780d",
+      "copy": "evm__dist__esm__journal.js"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/util/dist/esm/account.js",
+      "sha256": "6926b9afe99108e17ebe97c972ad37ae8da84f65c6598b99a4159d45aa467611",
+      "copy": "util__dist__esm__account.js"
+    },
+    {
+      "file": "GasMeter.h",
+      "url": "https://raw.githubusercontent.com/argotorg/solidity/1835d247de183f23e7b0e2bc4a50732af525b77c/libevmasm/GasMeter.h",
+      "sha256": "b61952528e98910d2fd888d09f6096edcae77d7a981e1c1d3b267a39200ba006",
+      "provenance": "HTTPS exact-commit supplemental file, absent from test-only archive; not imported into checkout"
+    },
+    {
+      "file": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/memory.js",
+      "sha256": "d5203f84ad27c8463386b62cc1150d18a322c52ea228fe9f9550c49fc605d83e",
+      "copy": "evm__dist__esm__memory.js"
+    }
+  ],
+  "runTxInstalled": false,
+  "runTxExportedByPinnedEVM": false,
+  "publishedMasterReadOnly": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+  "historicalEngineInstantiated": false,
+  "historicalFixtureExecuted": false
+}

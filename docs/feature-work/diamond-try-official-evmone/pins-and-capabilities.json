@@ -1,0 +1,15 @@
+{
+  "tag": "v0.22.0",
+  "tagObject": "5a1a55f15e936a78e33902d7de79f6e5aa959167",
+  "commit": "1ea75472f771999a9430d35f382ca0117b495e41",
+  "EVMC_ABI_VERSION": 13,
+  "EVMC_HEADER_SHA256": "16d6440c6114c0b2699884fa23778405be1b98044ee3d6b65b2f9eee5db2c39f",
+  "matchesPinnedSolidityHeader": true,
+  "evmcIndependentSubmoduleCommit": null,
+  "evmcKind": "vendored source directory, not an evmc entry in .gitmodules",
+  "buildPerformed": false,
+  "backendLoaded": false,
+  "historicalExecuted": false,
+  "supportedAbortInterfaceEstablished": false,
+  "publishedOwnershipSnapshot": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09"
+}

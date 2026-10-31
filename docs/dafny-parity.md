@@ -66,7 +66,7 @@ facility must not be conflated.
 | `audit-vacuity-dead-code` | tooling | partial | [UserGuide.md:418](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/UserGuide.md#L418) | Axiom checks remain. Entry-condition auditing now retains kernel-checked certificates of impossibility or possibility tied to the original scoped obligation; bounded failure is unknown. CLI and editor auditing are opt-in and impossible/unknown checks cannot pass strict suites. Constructor reachability and general dead-code analysis remain open. **Next:** Extend assurance to constructor reachability and unreachable branches; entry possibility alone does not establish a successful execution. |
 | `unit-tests-generation` | tooling | partial | [UserGuide.md:601](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/UserGuide.md#L601) | Source verification runners and checked fixtures exist. General Dafny-style coverage-guided test generation is not implemented. **Next:** Export certified counterexamples as reproducible regression inputs. |
 | `cli-project-artifacts` | tooling | partial | [UserGuide.md:850](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/UserGuide.md#L850) | Lake artifacts, source runners and JSON reports exist. A stable editor/CLI protocol is a separate integration contract. **Next:** Preserve report status, source identity and configuration semantics across clients. |
-| `ide-language-services` | tooling | partial | [VSCodeIDE.md:3](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/VSCodeIDE.md#L3) | The Solidity Lean extension provides verify/discover/cancel, optional save verification, Test Explorer, diagnostics, hover, exact source IDs/ranges/hashes and stale-result suppression. Opt-in entry audits show vacuous proofs, and exact-goal refutations display certified model prestates. Completion/navigation and positioned execution traces remain open. **Next:** Add completion/navigation and further source-associated language services using explicit compiler evidence. |
+| `ide-language-services` | tooling | partial | [VSCodeIDE.md:3](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/VSCodeIDE.md#L3) | The Solidity Lean extension provides a persistent LSP for exact unsaved snapshots, compiler-backed completion/navigation/signatures/rename, diagnostics, hover, gutters, Testing and automatic verification. Lean proof workers retain import environments; exact reports are cached with source/options/dependency identities. Opt-in entry audits and certified model prestates remain supported. Formatting, project services, positioned execution traces and full Dafny parity remain open. **Next:** Extend receiver-aware completion, project ownership/includes, formatting, code actions and positioned traces; within-file proof scheduling remains serial. |
 | `plugins-backends` | notApplicable | notApplicable | [Plugins.md:1](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Plugins.md#L1) | Lean metaprogramming and optional Bridge provide extension points. Dafny compiler backends for other languages are not Solidity requirements. **Next:** Keep the core dependency-free; place optional adapters in separate packages. |
 
 ## Semantic boundaries that affect a port
@@ -125,9 +125,9 @@ quick fixes, completion/navigation, counterexamples, ghost highlighting and
 verification gutter status. Those are a tool inventory, not evidence that the
 corresponding Solidity extension is complete.
 
-The audited baseline contains Lean editor configuration and a tested LSP site
-exporter, with no Solidity extension package. Any extension added after that
-baseline needs its own implementation and test evidence. Useful checks include:
+The initial audit predates the Solidity extension. The current persistent LSP
+and real editor evidence are recorded in [the implementation record](feature-work/solidity-lsp.md)
+and [editor comparison](dafny-editor-parity.md). Required checks include:
 
 - UTF-8 solc byte offsets converted to UTF-16 editor positions, including non-ASCII text.
 - Unsaved documents and suppression of results for an obsolete document version.

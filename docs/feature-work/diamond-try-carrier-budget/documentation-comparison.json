@@ -1,0 +1,9 @@
+{
+  "currentExit": 1,
+  "baselineExit": 1,
+  "baseline": "cancun-envelope/doc-paths.log",
+  "current": "carrier-budget/doc-paths.log",
+  "completePreFooterOutputIdentical": true,
+  "missing": 20,
+  "newFindings": 0
+}

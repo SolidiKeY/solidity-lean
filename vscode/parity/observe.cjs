@@ -50,7 +50,7 @@ function observe(vscode, record, extensionPath, tracePath) {
   const original = Module._load;
   const spawnObserved=(...args)=>{
     const child=childProcess.spawn(...args);
-    if(tracePath&&args[1]?.includes('server')&&child.stdin&&child.stdout) {
+    if(tracePath&&(args[1]?.includes('server')||args[1]?.some(a=>typeof a==='string'&&a.endsWith('lsp-server.cjs')))&&child.stdin&&child.stdout) {
       const parser=direction=>{
         const frames=new LspFrames();
         frames.on('message',message=>appendFileSync(tracePath,JSON.stringify({time:Date.now(),direction,message})+'\n'));
