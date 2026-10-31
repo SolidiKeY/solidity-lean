@@ -900,3 +900,6 @@ import Solidity.Backend.InternalFlow.AllocationFrame
 import Solidity.Backend.InternalFlow.AllocationFrameChecks
 
 import Solidity.Backend.InternalFlow.RecursiveUnroll
+
+import Solidity.Backend.InternalFlow.ScopedLoopFrame
+import Solidity.Backend.InternalFlow.MixedLoopPrefixes

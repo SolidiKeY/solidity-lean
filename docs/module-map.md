@@ -1211,3 +1211,5 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/AllocationFrame.lean` | Actual allocation-only memory-result call consumer of published withinM frames, composed extension, heap contents and caller/result export. |
 | `Backend/InternalFlow/AllocationFrameChecks.lean` | Two actual allocating calls with nonempty aliased contents, branch/block unwind, global frames and excluded old-alias write controls. |
 | `Backend/InternalFlow/RecursiveUnroll.lean` | Published finite recursive unrolling return/frame consumer; actual nested allocating recursive calls, typed aliases, exact export and cutoff exhaustion controls. |
+| `Backend/InternalFlow/ScopedLoopFrame.lean` | Actual finite scoped loop prefixes: withinM-derived heap/local frames with exact allocation extension and local unwind. |
+| `Backend/InternalFlow/MixedLoopPrefixes.lean` | Two actual mixed-state iterations and ordered horizons, concrete old/scratch contents, later exact-byte failure/absorption, admitted-prefix witness and preserved target/admission refusals. |

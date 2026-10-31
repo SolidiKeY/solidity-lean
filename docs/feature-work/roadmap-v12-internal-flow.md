@@ -519,3 +519,137 @@ Both read-only source reviewers clear the corrected have/firstScratch types,
 actual recursive controls, guarded proofs, ownership and finite-scope wording.
 Final actual diff/handoff/artifact reviews and committed hash bindings are
 recorded in the external HANDOFF; full Work1–6/A/B completion remains open.
+
+
+### Continuation 4: multi-iteration mixed-state prefixes (partial Backfill B/Work4)
+
+Generic names below live in Solidity.Backend.InternalFlow; concrete control
+names live in Solidity.Backend.InternalFlow.MixedLoopPrefixes.
+
+`scopedLoopBody` is exactly the existing TRun.loop body lambda: execute actual
+Prog.runR, drop body.ext locals and compose previous.ext.trans out.ext. It does
+not evaluate loops or replace semantics. `scoped_body_frame` consumes one actual
+successful body execution, syntactic withinM admission and the prior frame/local
+agreement. `scoped_loop_prefix_frame` discharges that prior invariant from the
+initial reflexive frame by induction over actual TLoop.iterN. Its only semantic
+premise is a running or successfully completed finite prefix; body frames come
+from published Prog.run_frameM, local/heap composition from published laws.
+No desired preservation equation is a premise of the prefix theorem. The
+condition's existing Val.evalT does not return a mutated state; no extra
+condition-admission certificate is claimed. Heap framing holds for admitted μ;
+TGFrameM storage/net/balance preservation is conditional on μ ≠ nonpayable.
+
+The actual mixed body has two successful iterations: increment persistent p and
+transient t, storage push followed by TWO pops, increment the caller counter,
+allocate scratch[0,0], then let TRun.loop unwind that scratch local. Initial
+caller has nonempty memory[7,11], TWO aliases to it, counter9, untouched17,
+persistent7/transient9, live storage array[13,17] and nonzero transaction values.
+Complete selected Observation projections at horizons0/1/2/3 are ordered and
+pinned: heap sizes1/2/3/3; counter9/10/11/11; p7/8/9/9; t9/11/13/13; live storage
+length2/1/0/0 and shadow length0/2/3/3, live/shadow contents, alias IDs/contents,
+untouched scalar, sender/value/balance. Horizons0/1/2 are running, horizon3 is
+successful completion. These are observations of actual runs, not a new G01
+event semantics or an equality of the whole world. `horizon_split` uses the
+existing loop_prefix_continue at the nonzero split1+2. `actual_loop` consumes
+published run_of_iterN, not a bounded replacement of TLoop.run.
+
+The existing predicate is narrower than this mixed body: published Stmt.within
+in Calculus/Blocks assigns false to push/pop, and Stmt.withinM in RunFrameMem
+also assigns false to both, EVEN at nonpayable. `mixed_body_rejected` preserves
+that actual refusal. No generic frame theorem is instantiated with this false
+premise, no reserved predicate is repaired and no assumption hides the gap.
+The mixed witness's `concrete_old_heap` instead exhausts every typed reference
+in its actual singleton initial heap and proves Heap.Keeps for all those old
+objects; this is a concrete consequence, not a general mixed-loop frame law.
+`mixed_alias_transport` proves both exact dependent references along second.ext.
+`exact_second_extension_and_unwind` pins the composed extension and body-local
+export. Fresh scratch identities1/2, transported first scratch and both surviving
+scratch contents are proved. Canonical typed refs plus explicit congruence avoid
+repeated whole-run dependent inference. Earlier unchanged200000-heartbeat
+failures remain raw evidence; no proof budget was raised.
+
+A SEPARATE actual two-iteration allocation/counter body is withinM-admitted.
+`allocation_prefix` proves its actual finite execution, excluding extraction
+fallback; `admitted_prefix_frame`, `admitted_old_heap`, `admitted_alias_transport`
+and its complete selected observations instantiate the generic consumer without
+an oracle. This admitted witness does not stand in for the mixed push/pop body.
+Old-alias-write rejection controls remain in AllocationFrameChecks; no writes
+through the old memory object are admitted or inferred noninterfering here.
+
+The failing variant executes a successful first horizon with all first-state
+observations, then the second body actually reverts after its mixed changes
+with bytes de-ad-22-00. `second_body_failure` and `failure_second_horizon` retain
+THalt.revertWith and those exact bytes. Ordered failing horizons0/1/2/3 and
+`failure_absorbs` (every n≥2) use the existing semantics/iterN_done_le.
+`actual_failing_loop` derives the mathematical loop result via run_of_iterN.
+Wrong order, old content, fresh identity, premature transient reset and wrong
+payload are rejected; failure is distinguished from exhaustion/divergence.
+TRes.error carries NO successful State: no state rollback, source catch,
+whole-world unwind or compiler-failure simulation is inferred. A real successful
+State.glob.transactionEntry control keeps persistent9, resets transient13→0
+and heap3→0, while internal iterations retain transient11/13 before that boundary.
+
+#### Remaining producer/dependency map after this checkpoint
+
+| Original obligation | Published obstruction/evidence | Required producer/application, still open |
+|---|---|---|
+| Work1/G37.01 | Existing Gap proofs keep Evm.argsIn memory/storage-argument refusals and CallRetIn reference-result refusal; Evm/Compile remains inline/value based. | V11 integrated mixed heap/storage representation, target runtime frame/stack transport and old internal-call owner's exports; no reserved edits here. |
+| Work2/G37.02 | Syntax/Scoped still has recUnroll/recBase/recDepth1024; Syntax/Elab/Arms uses that cutoff; Evm.inFrag callRec is none. | Source/lowering owner's unbounded recursive execution interface plus target recursive-frame simulation; finite controls and prefix algebra do not discharge it. |
+| Work3/G37.03 | Solidity.Source.Val.internalFn retains dependent ps/rs/m, while current core target lacks the needed general runtime frame theorem. | Published full-signature dispatch/lowering linked to that frame theorem; restricted function-ref-args owner remains untouched. |
+| Work4/G36.01 | Intrinsic statements use existing blocks/branches and lowered loop flags; no break/continue/early-return semantics was invented. | Reserved source/structured lowering plus exact target alias/frame transport and final structured simulation. |
+| Work4/G36.02 | Blocks.within/RunFrameMem.withinM reject push/pop; Evm/Compile.inFrag loop requires pushes=0 and no shrink. New mixed_target_refused proves this exact witness is refused for every Frag/LoopAnn. | Published old memory-loop/V11 mixed-state allocation/shrink representation and general target loop simulation; scoped admitted-only frame and concrete observations do not close it. |
+| Work4/G36.03 | Existing TRun.loop/prefix consumers expose only intrinsic execution/frame observations here. | Payment/call-loop final interface/application remains open; V14 final proof is not undertaken. |
+| Work5/G38 | Failure.Local execute/save/return/failure components are published, but TRes.error contains no failed State. Prior rootJournal consumers are projected roots only. | Actual statement/target-state-to-local-emission frame/unwind adapter and full rollback coupling; arbitrary callbacks/world composition stays V13/V15. |
+| Work6/G39 | State.transactionEntry/resetTransient are consumed unchanged; no arbitrary target call-world coupling is supplied. | Target root/reset/local sharing/rollback representation and V13/V15 self-call/callback applications, retaining distinct persistent/transient roots. |
+| Backfill A | Prior typed call/return/alias/content and finite recursion controls remain useful partial evidence. | Remaining target-frame extension/composition and full original coverage, not promoted to closure. |
+| Backfill B | New admitted-prefix frame and concrete multi-iteration mixed/failure/reset controls add independent evidence. | General mixed-state local unwind/transient composition and missing target/world applications remain open. |
+
+No prerequisite branch was fetched/imported/cherry-picked; all reserved sources
+stay read only. These are missing producer obligations, not a human semantic
+choice or a request to approve a premise/exclusion. No global G03/status or
+Fml.inTarget/profile/refusal/SolKey change. Original full run-lean.sh exit124 at
+fixed300s remains FAIL/incomplete, TestSuite/sort unreached, not repeated or
+extended. Prior no-build exit3 stays inventory only. Normal/strict raw docs
+failures remain visible separately from complete exact-base no-new comparisons.
+No integrated prerequisite changed to justify rerunning the unchanged full gate.
+
+Continuation4 evidence/artifacts use /workspace/scratch/v12-flow-calls/continuation-4;
+all four prior sealed sets remain untouched. Existing goal remains independently
+confirmed blocked (audit fcc30e9b-129f-4eb0-a1cd-596534287c3c); no goal write,
+reset/reactivation/recreation or competing continuation is attempted this turn.
+Separate read-only finder/skeptic source reviews found no mathematical/ownership
+defect and requested precise admitted-only/concrete-only/selected-observation/
+no-rollback wording, retained above. Guarded/focused/static/checksum outcomes,
+actual versions/resources, final diff/artifact reviews and full committed hash
+bindings are recorded below or in the exact-head external handoff.
+
+
+Continuation4 checkpoint gates: `lake build
+Solidity.Backend.InternalFlow.ScopedLoopFrame
+Solidity.Backend.InternalFlow.MixedLoopPrefixes` passes79jobs in12.385s,
+sampled aggregate RSS937128KiB, cgroup peak515620864B (`cp5-focused`).
+Final `bash tests/internal-flow/check-files.sh <evidence>/guarded-files` passes
+all13files in32.825s,RSS918276KiB,peak309661696B (`cp5-final-files`). Its exact
+per-file commands are `lake env lean -j1 --tstack=131072 <owned-file>`; no Lean
+MCP diagnostics are exposed, so the repository lean-verify CLI fallback is used.
+All48new public theorem axiom pins are guarded and pass (only propext,
+Classical.choice, Quot.sound or proper subsets). Tests retain120s bounds,
+LEAN_NUM_THREADS=1 and explicit-j1, canonical writer lock, enforced aggregate
+12884901888B memory/swap0, serial heavy work and the existing cache. Early typing
+and default200000-heartbeat failures remain cp5-controls-* raw logs; no budget
+increase. `lean --version; lake --version; lake build Solidity.KeySort` passes
+2jobs in1.749s:Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613 (`cp5-runtime`),
+runtime gate only. Layer/import/orphan/trust/diff gates pass172core/0elaborator,
+13owned/0findings,1009reachable/0orphans,1024sources/246trust sites/0findings.
+Normal/strict docs raw exits1 persist; BOTH complete outputs equal exact frozen
+base byte-for-byte, separately passing zero additions (static.json).
+All prior109/84/91/86checksum entries verify unchanged. Stopped containers created
+by cp5 were verified against exact owned CID/name records and removed by CID,
+without force/prune or deleting old containers/caches/evidence. This reclaimed
+3.64GB and restored about15.1GB available at that measurement; cleanup records
+and each gate's disk/RSS/cgroup measurements are retained. No cold full build.
+Read-only finder/skeptic source/diff reviews found no mathematical/ownership
+defect. Skeptic corrected a module-as-namespace prose reference to the exact
+Solidity.Source.Val.internalFn declaration. Both final artifact reviews and
+exact committed source hashes are retained in the external continuation handoff.
+Full Work1–6/A/B and mandatory full validation remain unfinished.
