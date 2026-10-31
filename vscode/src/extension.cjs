@@ -8,11 +8,12 @@ const { validateCounterexample } = require('./counterexample.cjs');
 const hash = text => createHash('sha256').update(text, 'utf8').digest('hex');
 
 /** Injectable VS Code boundary; production and tests exercise the same controller. */
-function createExtension(vscode, context, backend = runBackend) {
+function createExtension(vscode, context, backend = runBackend, service = null) {
   const diagnostics = vscode.languages.createDiagnosticCollection('solidity-lean');
   const controller = vscode.tests.createTestController('solidityLean', 'Solidity Lean');
   const output = vscode.window.createOutputChannel('Solidity Lean');
-  const active = new Map(), saving = new Map(), reports = new Map(), metadata = new Map();
+  const active = new Map(), saving = new Map(), reports = new Map(), metadata = new Map(), documents = new Map();
+  let editorServices;
   let discoveryVersion = 0;
   const key = uri => uri.toString();
   const isSolidity = doc => doc?.uri.scheme === 'file' && extname(doc.uri.fsPath).toLowerCase() === '.sol';
@@ -22,9 +23,12 @@ function createExtension(vscode, context, backend = runBackend) {
     const workspace = vscode.workspace.getWorkspaceFolder(doc.uri)?.uri.fsPath;
     const configured = cfg.get('backendPath', '');
     if (!configured && !workspace) throw new Error('Set solidityLean.backendPath to the Solidity Lean repository directory');
-    return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false), counterexamples: cfg.get('counterexamples', false) };
+    const automatic = cfg.get('verifyOnSave', false) ? 'onsave' : cfg.get('automaticVerification', 'never');
+    return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false), counterexamples: cfg.get('counterexamples', false),
+      workers: cfg.get('workers', 1), automaticVerification: {onchange:'change',onsave:'save',never:'never'}[automatic] || 'never' };
   }
   function cancel(uri) {
+    service?.cancel(uri);
     if (uri) { saving.delete(key(uri)); active.get(key(uri))?.abort(); }
     else {
       discoveryVersion++;
@@ -36,6 +40,7 @@ function createExtension(vscode, context, backend = runBackend) {
     cancel(uri);
     diagnostics.delete(uri);
     reports.delete(key(uri));
+    editorServices?.clear(uri);
     const item = controller.items.get(key(uri));
     if (item) {
       item.children.forEach(child => metadata.delete(child.id));
@@ -44,7 +49,7 @@ function createExtension(vscode, context, backend = runBackend) {
     }
   }
   function showError(error) {
-    if (error.code === 'CANCELLED') return;
+    if (error.code === 'CANCELLED' || [-32800,-32801].includes(error.code)) return;
     output.appendLine(error.message);
     vscode.window.showErrorMessage(`Solidity Lean: ${error.message}`);
   }
@@ -55,7 +60,7 @@ function createExtension(vscode, context, backend = runBackend) {
       diag.source = 'Solidity Lean'; diag.code = d.code;
       return diag;
     });
-    diagnostics.set(doc.uri, converted);
+    if (!service) diagnostics.set(doc.uri, converted);
     const fileId = key(doc.uri);
     let file = controller.items.get(fileId);
     if (!file) { file = controller.createTestItem(fileId, vscode.workspace.asRelativePath(doc.uri), doc.uri); controller.items.add(file); }
@@ -73,16 +78,27 @@ function createExtension(vscode, context, backend = runBackend) {
     for (const id of previous) if (!items.some(item => item.id === id)) metadata.delete(id);
     file.children.replace(items);
   }
+  function accept(doc, report, config, options = {}) {
+    if (report.results.some(row => resolve(row.source) !== resolve(doc.uri.fsPath))) throw new Error('Verifier report refers to a different source file');
+    const hashes = new Set([hash(doc.getText()), hash('\uFEFF' + doc.getText())]);
+    if (report.results.some(row => !hashes.has(row.sourceHash))) throw new Error('Verifier source hash does not match the open file; use a current backend and save the file');
+    for (const row of report.results) validateCounterexample(row);
+    if ((!config.counterexamples || options.listing) && report.results.some(row => row.status === 'refuted')) throw new Error('Verifier returned unrequested certified model prestate evidence');
+    const existing = reports.get(key(doc.uri));
+    const merged = options.function && existing ? {...report,results:[...existing.results.filter(old => !report.results.some(row => row.contract === old.contract && (row.signature || row.function) === (old.signature || old.function))),...report.results]} : report;
+    publish(doc, merged);
+  }
   async function verify(doc, options = {}) {
     if (!vscode.workspace.isTrusted) throw new Error('Verification requires a trusted workspace');
     if (!isSolidity(doc)) throw new Error('Open a Solidity file on disk to verify');
+    documents.set(key(doc.uri), doc);
     const cancellationVersion = discoveryVersion;
     const request = {}, requestId = key(doc.uri);
     saving.set(requestId, request);
     try {
       const superseded = () => saving.get(requestId) !== request || cancellationVersion !== discoveryVersion || options.token?.isCancellationRequested || doc.isClosed;
       let attempts = 0;
-      while (doc.isDirty) {
+      while (!service && doc.isDirty) {
         const saved = await doc.save();
         if (superseded()) return null;
         if (!saved) throw new Error('Save the Solidity file before verification');
@@ -103,22 +119,9 @@ function createExtension(vscode, context, backend = runBackend) {
     if (options.token?.isCancellationRequested) abort.abort();
     try {
       output.appendLine(`${options.listing ? 'Discovering' : 'Verifying'} ${doc.uri.fsPath}`);
-      const report = await backend({ ...config, source: doc.uri.fsPath, listing: options.listing, contract: options.contract, function: options.function, signal: abort.signal });
+      const report = await backend({ ...config, ...(service ? {document:doc} : {}), source: doc.uri.fsPath, listing: options.listing, contract: options.contract, function: options.function, signal: abort.signal });
       if (abort.signal.aborted || active.get(id) !== abort || doc.version !== version || doc.getText() !== text || doc.isClosed) return null;
-      if (report.results.some(row => resolve(row.source) !== resolve(doc.uri.fsPath))) throw new Error('Verifier report refers to a different source file');
-      // VS Code removes an initial UTF-8 BOM from getText(); the compiler hashes bytes.
-      const hashes = new Set([hash(text), hash('\uFEFF' + text)]);
-      if (report.results.some(row => !hashes.has(row.sourceHash))) throw new Error('Verifier source hash does not match the open file; use a current backend and save the file');
-      for (const row of report.results) validateCounterexample(row);
-      if ((!config.counterexamples || options.listing) && report.results.some(row => row.status === 'refuted'))
-        throw new Error('Verifier returned unrequested certified model prestate evidence');
-      // An individual test updates only its own row, retaining sibling obligations.
-      const existing = reports.get(id);
-      const merged = options.function && existing ? {
-        ...report,
-        results: [...existing.results.filter(old => !report.results.some(row => row.contract === old.contract && (row.signature || row.function) === (old.signature || old.function))), ...report.results]
-      } : report;
-      publish(doc, merged);
+      accept(doc, report, config, options);
       for (const row of report.results) output.appendLine(model.detail(row));
       for (const error of report.errors) output.appendLine(`Error: ${error.reason}`);
       return report;
@@ -191,12 +194,24 @@ function createExtension(vscode, context, backend = runBackend) {
     vscode.commands.registerCommand('solidityLean.list', () => activeCommand(true)),
     vscode.commands.registerCommand('solidityLean.cancel', () => cancel()),
     vscode.workspace.onDidSaveTextDocument(doc => {
-      if (isSolidity(doc) && vscode.workspace.getConfiguration('solidityLean', doc.uri).get('verifyOnSave', false)) verify(doc).catch(showError);
+      if (service && isSolidity(doc)) service.save(doc);
+      else if (isSolidity(doc) && vscode.workspace.getConfiguration('solidityLean', doc.uri).get('verifyOnSave', false)) verify(doc).catch(showError);
     }),
-    vscode.workspace.onDidChangeTextDocument(event => { if (event.contentChanges.length) clear(event.document.uri); }),
-    vscode.workspace.onDidCloseTextDocument(doc => clear(doc.uri)),
+    vscode.workspace.onDidChangeTextDocument(event => {
+      if (event.contentChanges.length) {clear(event.document.uri);if(service && isSolidity(event.document)) {documents.set(key(event.document.uri),event.document);service.open(event.document).catch(showError);}}
+    }),
+    vscode.workspace.onDidCloseTextDocument(doc => {clear(doc.uri);documents.delete(key(doc.uri));service?.close(doc.uri);}),
     vscode.languages.registerHoverProvider({ scheme: 'file', pattern: '**/*.sol' }, {
-      provideHover(doc, position) {
+      provideHover(doc, position, token) {
+        if (service) {
+          const controller=new AbortController(),registration=token?.onCancellationRequested(()=>controller.abort());
+          if(token?.isCancellationRequested)controller.abort();
+          return service.request('textDocument/hover', doc, {position}, {signal:controller.signal}).then(result => {
+          if (!result) return null;
+          const markdown=new vscode.MarkdownString();markdown.appendText(result.contents.value);
+          return new vscode.Hover(markdown,toRange(result.range));
+        }).catch(error => {if(![-32800,-32801].includes(error.code))showError(error);return null;}).finally(()=>registration?.dispose());
+        }
         const matches = reports.get(key(doc.uri))?.results.filter(row => toRange(model.rangeOf(row)).contains(position));
         // A synthesized constructor spans the contract. Prefer the function
         // declaration under the cursor to that broader deployment result.
@@ -209,7 +224,42 @@ function createExtension(vscode, context, backend = runBackend) {
     }),
     { dispose: () => cancel() }
   );
-  return { verify, cancel, controller, diagnostics, reports };
+  if(service) {
+    editorServices=require('./editor-services.cjs').install(vscode,context,service,showError);
+    const open=doc=>{if(isSolidity(doc)){documents.set(key(doc.uri),doc);service.open(doc).catch(showError);}};
+    const receive=params=>{
+      const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version||hash(doc.getText())!==params.sourceHash)return;
+      try{accept(doc,params.report,settings(doc),params.selection);}catch(error){showError(error);}
+    };
+    const receiveDiagnostics=params=>{
+      const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version)return;
+      diagnostics.set(doc.uri,params.diagnostics.map(row=>{const d=new vscode.Diagnostic(toRange(row.range),row.message,row.severity-1);d.source=row.source;d.code=row.code;return d;}));
+    };
+    service.on('report',receive);service.on('diagnostics',receiveDiagnostics);service.on('serverError',showError);service.on('log',message=>output.appendLine(message));
+    context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(open),
+      vscode.commands.registerCommand('solidityLean.restartServer',async()=>{cancel();for(const doc of documents.values())clear(doc.uri);await service.restart();for(const doc of documents.values())open(doc);}),
+      vscode.workspace.onDidChangeConfiguration(event=>{if(event.affectsConfiguration('solidityLean')){cancel();for(const doc of documents.values())clear(doc.uri);service.restart().then(()=>{for(const doc of documents.values())open(doc);}).catch(showError);}}),
+      {dispose(){service.removeListener('report',receive);service.removeListener('diagnostics',receiveDiagnostics);service.removeListener('serverError',showError);}});
+    for(const doc of vscode.workspace.textDocuments)open(doc);
+  }
+  let disposed=false;
+  return { verify, cancel, controller, diagnostics, reports, service,
+    async dispose(){if(disposed)return;disposed=true;cancel();for(const item of context.subscriptions)item.dispose();await service?.dispose();} };
 }
-function activate(context) { return createExtension(require('vscode'), context); }
-module.exports = { activate, createExtension };
+let runtime;
+function activate(context) {
+  const vscode=require('vscode');
+  const configuration=doc=>{
+    if(!vscode.workspace.isTrusted)throw new Error('Language services require a trusted workspace');
+    const cfg=vscode.workspace.getConfiguration('solidityLean',doc.uri),workspace=vscode.workspace.getWorkspaceFolder(doc.uri)?.uri.fsPath;
+    const configured=cfg.get('backendPath','');if(!configured&&!workspace)throw new Error('Set solidityLean.backendPath to the repository directory');
+    return {backendPath:resolve(workspace||'.',configured||'.'),nodePath:cfg.get('nodePath','node'),timeoutMs:cfg.get('timeoutMs',600000),workers:cfg.get('workers',1),
+      automaticVerification:cfg.get('verifyOnSave',false)?'save':({onchange:'change',onsave:'save',never:'never'}[cfg.get('automaticVerification','never')]||'never'),
+      counterexamples:cfg.get('counterexamples',false),auditPreconditions:cfg.get('auditPreconditions',false)};
+  };
+  const service=new (require('./lsp-client.cjs').LanguageServers)(configuration);
+  const api=createExtension(vscode,context,args=>service.verify(args),service);
+  context.subscriptions.push({dispose:()=>service.dispose()});runtime=api;return api;
+}
+function deactivate(){return runtime?.dispose();}
+module.exports = { activate, deactivate, createExtension };

@@ -1094,6 +1094,72 @@ At the root, the notation's own tests:
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
 
+## External try execution evidence
+
+| Module | What it defines |
+|---|---|
+| `Semantics/ExternalTryWitness.lean` | Exact external oracle/decoder equations and normal-return witnesses for all four try alternatives; caller-failure controls. |
+| `Counterexamples/DiamondTry.lean` | A reached try admits a caller revert, refuting its universal callback diamond under either payment flag. |
+| `Examples/Tactics/ExternalTryWitness.lean` | Source-shaped explicit-oracle controls, ordered storage observations, caller failures and callback refusal. |
+
+### Deterministic try formula witnesses
+
+| Module | Defines |
+|---|---|
+| `Calculus/Sound/ExternalTryWitness.lean` | State-indexed deterministic diamond transport from explicit normal try and allocated catch-data witnesses; no validity or callback promotion. |
+| `Examples/Tactics/ExternalTryFormula.lean` | Concrete success/catch formulas, allocated raw/reason payloads, explicit frame transport and refusal controls. |
+| `Examples/Tactics/ExternalTryUniversal.lean` | Countermodel over the actual original source-domain builders: no universal normal-try family, deterministic validity or callback source-profile validity for the quoted Probe. |
+
+### Explicit conditional try outcomes
+
+| Module | Defines |
+|---|---|
+| `Semantics/TryConditions.lean` | Exact full-result self/oracle and payload-catch conditions, with argument-prefix success/failure transport. |
+| `Semantics/TryCreateConditions.lean` | Exact creation-try conditions over the unchanged typed world interface. |
+| `Calculus/Sound/TryConditions.lean` | Guarded ordinary formula transport for all results/frames and exact normal-or-exhausted diamond account. |
+| `Examples/Tactics/TryConditions.lean` | Arbitrary-state explicitly guarded source success, certified failure boundaries and typed/runtime replay-context refusals. |
+
+
+### Native self-try entry return bridge
+
+| Module | Defines |
+|---|---|
+| `Semantics/EntryReturn.lean` | Conditional source/serializer call composition, exact heap/reference/caller capture, failures and bounded-to-ordinary execution agreement. |
+| `Tools/EntryReturn.lean` | Exact-declaration, original-prefix-scope entry-only serializer for a primitive prefix plus one source-marked bytes/string memory result, or one return-only external-void function value. |
+| `Examples/Tactics/EntryReturn.lean` | Actual native bridge quotations, bytes/once-only kernel snapshots, normal ordinary witnesses and negative admission/input controls. |
+| `Examples/Tactics/EntryReturnFlow.lean` | Legacy loop-return, alias-mutation, modifier-continuation and default-memory kernel controls. |
+| `Examples/Tactics/EntryReturnFlowIR.lean` | The same controls under existing viaIR modifier frames, with safe kernel declaration factoring for the large quotation. |
+| `Examples/Tactics/EntryReturnMetadata.lean` | Signed narrow and fixed-byte return metadata, exact order and empty memory kernel control. |
+| `Examples/Tactics/EntryReturnFunction.lean` | Output-only external-function address/selector, bytes24 padding, order and once-only kernel witnesses in both evaluation modes; function-input refusals remain. |
+
+### Creation-try caller continuations
+
+| Module | Defines |
+|---|---|
+| `Semantics/CreationTryFrame.lean` | Typed pending caller/creation/handler/tail composition over existing World operations, exact failure and allocation laws, universal bounded-to-ordinary approximation. |
+| `Frontend/CreationTryImport.lean` | Complete-declaration, identity-resolved stateless unpaid creation-try source compiler with actual constructor, local argument, returned handle and Error payload branches. |
+| `Tools/CreationTryReplay.lean` | Bounded native creation source observations with explicit checked runtime context, actual typed world threading and refusal controls. |
+| `Examples/Tactics/CreationTrySource.lean` | Complete original creation source outputs, ordinary transport, argument/rollback/installation/wrong-byte kernel controls and malformed replay controls. |
+| `Examples/Tactics/CreationTrySourceIR.lean` | Separately compiled viaIR original creation source with both ordered output kernel witnesses. |
+
+
+### Linked library try source continuation
+
+| Module | Owning role |
+|---|---|
+| `Semantics/LibraryTryFrame.lean` | Installed library try boundary with total raw extraction, outer decoder, exact caller resume/context/storage/ledger laws and ordinary transport. |
+| `Frontend/LibraryTryImport.lean` | Complete checked library/caller declarations and exact scalar/storage-formal mapping into caller-typed programs. |
+| `Tools/LibraryTryReplay.lean` | Explicit concrete linked runtime context, canonical Boolean input, once-only world execution and caller-storage observations. |
+| `Examples/Tactics/LibraryTrySource.lean` | Original ordered outputs, ordinary-reading equality and actual prefix storage witnesses. |
+| `Examples/Tactics/LibraryTryControls.lean` | Wrong role/identity/frame, decoder/input/static refusals, exact storage alias and atomic rollback controls. |
+| `Examples/Tactics/LibraryTrySourceIR.lean` | Separately compiled via-IR original linked source with all ordered output certificates. |
+
+M1 try producer side witnesses: `Evm/TryByteImage.lean` bounds scalar-frame
+byte images and overlap/snapshots; `Evm/TryByteCapture.lean` reuses typed
+allocation and raw halt; `Evm/TryPanicProducer.lean` computes the source-linked
+36-byte component. `Examples/Tactics/TryPanicProducer.lean` keeps constructed-call
+controls distinct. See [bounded milestone](feature-work/diamond-try-m1.md); none
+admits physical assembly or proves target-byte/original-callee transport.
 | `Semantics/ContractWorldCertificates.lean` | Published paid-run/source-wrapper operation certificates, reused unchanged from origin/master cc155f36. |
 | `Semantics/PaymentWorld.lean` | Typed stipend source frames over actual world calls; send completed-failure handling, transfer exact halt transport, no-op/funding and atomic rollback laws. |
 | `Frontend/PaymentPlan.lean` | Complete declaration-resolved creation/send and initializer/receive/transfer/getter source shapes; unknown effects and full-gas calls refused. |

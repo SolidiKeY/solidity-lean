@@ -19,14 +19,22 @@ VS Code, Dafny, .NET, solc, and Lean. No new production dependency is needed.
 The optional harness requires Node 22 or later for its built-in WebSocket client;
 the production extension's Node requirement is unchanged.
 
-The local extension invokes `scripts/test-solidity.mjs` through
-`vscode/src/backend.cjs`. The runner compiles Solidity, discovers scoped
-obligations, and asks Lean to construct kernel-checked certificates. Its loops
-over sources, contracts and proof batches are sequential. Independently invoked
-files can create distinct CLI processes. The extension publishes a complete
-report when that CLI returns. It has no Solidity LSP server, persistent solver,
-verification-cache control, or worker-count setting. Lean's own language server
-is a separate product surface and is not substituted for this extension.
+The production local extension now starts `vscode/src/lsp-server.cjs` and
+synchronizes versioned in-memory Solidity buffers over standard LSP stdio.
+A separate compiler worker retains the pinned solc WASM module. A bounded pool
+of 1–4 proof workers each keeps one Lean language server and generated document
+alive, reusing imported modules on edits. Workers parallelize files; contracts
+and obligations within a file remain serial. The server uses the existing
+`solc_import` and `#solkey_test` commands and kernel-checked certificates.
+It retains source hashes, compiler pins, import-gap diagnostics and counterexample
+validation. Dependency changes invalidate live sessions and checked reports.
+
+The server provides completion, definitions, references, symbols, signatures,
+highlights, guarded rename, versioned diagnostics and verification notifications.
+The extension adds syntax, gutters, status and Testing integration. Completion
+uses a broad lexical fallback for incomplete code; full receiver-aware completion,
+workspace symbols, formatting, code actions, project includes and assertion-level
+parallel scheduling remain open. See [the implementation record](feature-work/solidity-lsp.md).
 
 Dafny uses `vscode-languageclient`, its language server, Boogie verification
 tasks, and Z3. The pinned server serializes VC translation through
@@ -95,11 +103,12 @@ benchmark datasets separate. Target order alternates between repetitions.
 The CI runner selects a smaller available-memory reserve explicitly for its
 host; `--memory-reserve-mib` and `--memory-max-mib` record those choices.
 
-The settings requested for the local backend's workers and verification caches
-are recorded as unsupported. Measurements for these configurations must not be
-presented as local worker scaling. Use `--targets local` or `--targets dafny` for
-isolated debugging. `--trace off` disables raw Dafny protocol recording for an
-observer-overhead control.
+Local worker settings are applied to concurrent files (maximum four).
+The local exact-snapshot proof cache is always enabled; Dafny cache-policy names
+do not select equivalent local policies. Local scaling uses the two-file metric,
+while Dafny scaling uses the within-file declaration metric. These scopes must
+remain distinct. Use `--targets local` or `--targets dafny` for isolated debugging.
+`--trace off` disables raw protocol recording for an observer-overhead control.
 
 ## Scenarios and observations
 
@@ -121,21 +130,19 @@ the real backend. Instrumentation observes the target extension's real VS Code
 objects; unrelated built-in extension registrations are excluded.
 
 Empty completion/navigation/signature responses at a declaration are discovery
-observations, not capability passes. Dedicated trigger-position, call-site,
-rename and refactoring scenarios remain unexamined. The counterexample checks
-require positioned Dafny evidence or a certified local model prestate, but do
-not establish witness equivalence. Cancellation records acknowledgement latency;
-solver quiescence and long-running proof cancellation remain partial. The local
-restart capability is explicitly missing.
+observations, not capability passes. A dedicated local call-site scenario checks
+actual completion, definition, references, signatures and rename through VS Code;
+raw real-LSP tests additionally check current versions, qualified references and
+invalid identifiers. Cross-language semantic equivalence remains unexamined.
+Counterexample checks require positioned Dafny evidence or a certified local model
+prestate, but do not establish witness equivalence. Editor cancellation records
+acknowledgement latency; real LSP tests also check old Lean process quiescence.
+Both targets exercise actual server restart.
 
-The save/edit regression exposed two separate boundaries. The extension now
-invalidates requests superseded while saving, including requests whose save
-returns false, and requires a clean buffer before launching. Unit regressions
-cover edits, newer requests, unsuccessful saves and joined saves. In VS Code
-1.108.0, a racing save can also mark a newer buffer clean after persisting older
-bytes. The host records buffer/disk hashes and uses an explicit editor Save before
-checking recovery. That case remains partial: automatic persistence recovery is
-open, and the extension's exact source-hash rejection remains intact.
+Production verification now reads the exact open buffer without saving it.
+The save/edit regression checks that the superseded request is discarded, the
+latest buffer verifies and the saved Solidity source remains unchanged. Legacy
+CLI-controller tests retain their explicit fixture injection and saved-file checks.
 
 The independent source audit also found project ownership/includes and solver
 options; parse/resolution/verification diagnostic distinctions; expanded related
@@ -161,8 +168,8 @@ Each live output contains:
 
 Raw protocol normalization replaces only explicit workspace roots. It retains
 diagnostic severity, ranges, text, versions, ordering and statuses. Cross-language
-API observations are compared separately; a CLI report is never fabricated into
-an LSP transcript. Meaningful mismatches remain visible even when expected.
+API observations are compared separately; verification reports are never fabricated into
+LSP transcripts. Meaningful mismatches remain visible even when expected.
 
 Targets run sequentially, with warmups excluded from summary statistics.
 Fresh processes and profiles measure process-cold startup while retaining OS
@@ -203,7 +210,7 @@ review rediscovered upstream features before reading the first inventory,
 adding the missing runtime command and the explicit families described above.
 Neither review used the Lean server or established extra runtime passes.
 
-## Measured validation
+## Historical CLI baseline
 
 The [baseline report](../tests/editor-parity/baseline.md) and
 [JSON evidence](../tests/editor-parity/baseline.json) retain 46 valid editor
@@ -227,8 +234,8 @@ significant cache-policy improvement. The trace-disabled control had similar
 initial timing; no observer-overhead correction was applied. The full suite
 retains the native diagnostic difference: Dafny errors on an unproved false
 postcondition, while local open goals are warnings until certified model evidence
-is requested. Completion/navigation, custom LSP/gutter behavior and the other
-inventory gaps remain explicit.
+is requested. These measurements describe the former CLI implementation, before the persistent
+LSP. See the implementation record for current measurements and remaining gaps.
 
 Validation passed 71 Node tests, the 88-entry source inventory and immutable-source
 reconciliation, the existing 36-family language audit, workflow YAML parsing,
@@ -236,3 +243,14 @@ new Markdown links and diff whitespace checks. The current Lean API built all
 263 required targets. The reduced paired fixture produced one verified function
 and one expected failure in Dafny, and one proof plus one kernel-certified
 refutation with local counterexample search enabled.
+
+## Current persistent LSP validation
+
+The [LSP baseline](../tests/editor-parity/lsp-baseline.md) and
+[validation record](../tests/editor-parity/lsp-validation.json) cover the current
+implementation after integration with master. All 18 editor launches passed
+without broken scenarios; gaps remain classified separately. One-worker local
+median changed-buffer verification was 5.17 s versus Dafny's 247 ms; unchanged
+local cache hits took 100 ms. These are different operations. The
+[implementation record](feature-work/solidity-lsp.md#measured-editor-results)
+explains warm-session evidence, cross-file scaling and remaining proof costs.

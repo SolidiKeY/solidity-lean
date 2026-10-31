@@ -1,0 +1,62 @@
+[
+  {
+    "file": "Solidity/Evm/TryByteImage.lean",
+    "processExit": 0,
+    "result": {
+      "partial": false,
+      "still_elaborating_lines": null,
+      "success": true,
+      "timed_out": false,
+      "items": [],
+      "failed_dependencies": []
+    }
+  },
+  {
+    "file": "Solidity/Evm/TryByteCapture.lean",
+    "processExit": 0,
+    "result": {
+      "partial": false,
+      "still_elaborating_lines": null,
+      "success": true,
+      "timed_out": false,
+      "items": [],
+      "failed_dependencies": []
+    }
+  },
+  {
+    "file": "Solidity/Evm/TryPanicProducer.lean",
+    "processExit": 0,
+    "result": {
+      "partial": false,
+      "still_elaborating_lines": null,
+      "success": true,
+      "timed_out": false,
+      "items": [],
+      "failed_dependencies": []
+    }
+  },
+  {
+    "file": "Solidity/Examples/Tactics/TryPanicProducer.lean",
+    "processExit": 0,
+    "result": {
+      "partial": false,
+      "still_elaborating_lines": null,
+      "success": true,
+      "timed_out": false,
+      "items": [],
+      "failed_dependencies": []
+    }
+  },
+  {
+    "file": "Solidity.lean",
+    "processExit": 0,
+    "result": {
+      "partial": false,
+      "still_elaborating_lines": null,
+      "success": true,
+      "timed_out": false,
+      "items": [],
+      "failed_dependencies": []
+    }
+  }
+]

@@ -1,0 +1,5 @@
+Independent read-only finder/skeptic review, 2026-10-30.
+Finder: inspected draft against actual retained Slice/Correct/Unwind headers, local Args/CallRet/call, litBytes/alloc.map(st)/block definitions. No concrete finding. G38 subset versus G46 open, map(st) versus full Out, scoped fixed36 versus source association, local adapter absent published, and retained original observations accurately distinguished.
+Skeptic: inspected typed proposal/source-association boundary and actual headers/local definitions. No concrete finding. No assumed desired hcall, no global f substitution, source early-return/tail and constructive nonvacuity obligations retained.
+Final tightening: both reviewed explicit source-index0 versus AST141/C140, args=args36/body=carrier36 equalities, uninhabited source association, and no TTx installed-code registry. No new finding.
+Neither ran scripts, Lean server, builds, compiler, fixtures or EVM, or wrote files. Reviews do not certify subsequent integrity commands or any source/target execution.

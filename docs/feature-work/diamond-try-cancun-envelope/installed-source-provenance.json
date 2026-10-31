@@ -1,0 +1,44 @@
+[
+  {
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/vm/dist/cjs/constructors.js",
+    "sha256": "045cd2ccb30048a489c57a755468275274bbda9d65a60c89c81b4a12f62beb87",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/installed-@ethereumjs__vm__dist__cjs__constructors.js",
+    "sourceClaim": "observed installed CommonJS source only, not executed or asserted identical to official npm tarball"
+  },
+  {
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/vm/dist/cjs/types.d.ts",
+    "sha256": "5de73252bcef8a33e24b469b260f31d3db824ccf4052f5dcc12e630142fddbbc",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/installed-@ethereumjs__vm__dist__cjs__types.d.ts",
+    "sourceClaim": "observed installed CommonJS source only, not executed or asserted identical to official npm tarball"
+  },
+  {
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/evm/dist/cjs/index.js",
+    "sha256": "039d6009444e4bee56dbd80163b3c48c14decf49fd555856ad572fb91faf284e",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/installed-@ethereumjs__evm__dist__cjs__index.js",
+    "sourceClaim": "observed installed CommonJS source only, not executed or asserted identical to official npm tarball"
+  },
+  {
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/evm/dist/cjs/constructors.js",
+    "sha256": "f6a4c4c669f506b2392340ff59f4ae2e9acd42cca88d9c777a63cafaf3dbea22",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/installed-@ethereumjs__evm__dist__cjs__constructors.js",
+    "sourceClaim": "observed installed CommonJS source only, not executed or asserted identical to official npm tarball"
+  },
+  {
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/evm/dist/cjs/types.d.ts",
+    "sha256": "80c9469eb0e0ce83e3523729e995247a8b4a6ef8a8b0d3deea22045ceae09ece",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/installed-@ethereumjs__evm__dist__cjs__types.d.ts",
+    "sourceClaim": "observed installed CommonJS source only, not executed or asserted identical to official npm tarball"
+  },
+  {
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/evm/dist/cjs/interpreter.js",
+    "sha256": "7a28938cf72c934e5f17cfe4a0a48c731c324625db0deea859f47b3c6ec71535",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/installed-@ethereumjs__evm__dist__cjs__interpreter.js",
+    "sourceClaim": "observed installed CommonJS source only, not executed or asserted identical to official npm tarball"
+  },
+  {
+    "path": "/workspace/next10-diamond-try-evidence/universal/reference/node_modules/@ethereumjs/evm/dist/cjs/evm.js",
+    "sha256": "14b0644a17f6a3e321451da2adc84c43c4cecee34c1f930060b40cd00e60291f",
+    "snapshot": "/workspace/next10-diamond-try-evidence/cancun-envelope/installed-@ethereumjs__evm__dist__cjs__evm.js",
+    "sourceClaim": "observed installed CommonJS source only, not executed or asserted identical to official npm tarball"
+  }
+]

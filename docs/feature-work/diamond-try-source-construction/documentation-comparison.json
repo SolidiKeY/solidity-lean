@@ -1,0 +1,11 @@
+{
+  "currentExit": 1,
+  "baseExit": 1,
+  "baseCommit": "a67fa5d8eea431d2363b023b0dd3654d440bfb4c",
+  "baselineActualRetainedLog": "/workspace/next10-diamond-try-evidence/carrier-budget/doc-paths.log",
+  "baselineLogSHA256": "43582676f78a17b39f4421554ea9480b12a1d9c3fb395d7de302ee3117fcac7e",
+  "currentLogSHA256": "85c7cefde7e751c4b33581c0cf1a258421becc4887b51cd8411f0241e4bbe614",
+  "completePreResourceFooterOutputIdentical": true,
+  "missing": 20,
+  "newFindings": 0
+}

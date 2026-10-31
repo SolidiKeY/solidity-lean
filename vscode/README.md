@@ -1,6 +1,6 @@
 # Solidity Lean Verification
 
-Verify saved Solidity files with the repository's compiler frontend and
+Verify open Solidity buffers with the repository's compiler frontend and
 kernel-checked Lean proofs. Run **Solidity Lean: Verify File** from the Command
 Palette. **Discover Obligations** lists functions without attempting proofs.
 The Testing view can run a file or an individual overloaded function.
@@ -9,7 +9,7 @@ Pending obligations appear as warnings: they are open proof goals, not certified
 counterexamples. Import gaps, interrupted runs and backend errors remain visible.
 Hover over a function to see its result and obligation reading. Edits clear
 obsolete results and cancel verification. **Cancel Verification** stops active
-jobs; verify-on-save is optional and disabled initially.
+jobs. Automatic verification after edits is enabled by default.
 
 Enable `solidityLean.auditPreconditions` to check that specified functions have
 possible entry states. A proved postcondition with an impossible entry is shown
@@ -39,13 +39,14 @@ Install Node.js 18 or later and the Lean/Lake version in the repository's
 Follow the repository's compiler setup in
 [docs/solidity-testing.md](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/solidity-testing.md),
 including the pinned soljson compiler and `SOLKEY_ROOT` when needed. The
-extension uses that existing runner; it does not install compilers.
+extension shares the existing compiler frontend and Lean proof commands; it does not install compilers.
 
 Open the Solidity Lean repository as a trusted workspace, or set
 `solidityLean.backendPath` to its directory. Set `solidityLean.nodePath` when
-Node is not on PATH. `solidityLean.timeoutMs` bounds the whole verification job
-(default 600000 ms); `solidityLean.verifyOnSave` enables automatic checking.
-Verification saves a modified file before compiling it.
+Node is not on PATH. `solidityLean.timeoutMs` bounds verification (default 600000 ms).
+`solidityLean.automaticVerification` selects `onchange` (default), `onsave`, or
+`never`; the older `verifyOnSave` setting selects save verification when enabled.
+Verification uses the exact in-memory buffer without saving it.
 
 To try the source extension, launch a development host:
 
@@ -57,7 +58,7 @@ To build an installable package from this directory:
 
 ```sh
 npx @vscode/vsce package
-code --install-extension solidity-lean-0.3.0.vsix
+code --install-extension solidity-lean-0.4.0.vsix
 ```
 
 ## Tests
@@ -71,7 +72,16 @@ node --test --test-name-pattern='editor reports' scripts/test-solidity.test.mjs
 
 The first command checks controller behavior and real child processes with a
 fixture backend. The second requires the configured compiler and built Lean API.
-Run `lake build Solidity.Frontend.Testing` first.
+Run `lake build Solidity.Frontend.Testing` first. The real stdio LSP regression
+also runs with:
+
+```sh
+LEAN_NUM_THREADS=1 SOLIDITY_LEAN_REAL_BACKEND="$PWD" node --test vscode/test/lsp-real.test.cjs
+```
+
+It checks unsaved buffers, warm Lean reuse, compiler-backed language services,
+cache identity, certified counterexamples, stale results, cancellation and
+bounded concurrent workers.
 
 The editor-host entry point uses the real VS Code API with a fixture backend:
 
@@ -100,9 +110,24 @@ the host's fresh JSON success report as well as a successful process exit.
 Set `VSCODE_TEST_NO_SANDBOX=1` only when the test environment requires Electron's
 internal sandbox to be disabled.
 
-This extension provides source verification results. General Solidity completion,
-navigation and syntax highlighting can come from another Solidity language
-extension. Lean source files retain the Lean extension's proof-authoring tools.
+The extension runs one persistent Solidity LSP per backend configuration. It
+provides syntax highlighting, completion, definitions, references, document
+symbols, signature help, highlights and guarded rename, plus proof diagnostics,
+Testing results, gutters and status. Rename refuses declaration collisions and
+specification-text references that need manual updates. Completion falls back to
+live-text declarations for incomplete code; receiver-type filtering, workspace
+symbols, formatting and code actions remain open.
+
+Each proof worker keeps a Lean language server and generated document alive,
+reusing imported modules across edits. `solidityLean.workers` bounds concurrent
+files from 1 to 4 (default 1); proofs within a file remain serial. Compiler
+analysis has a separate worker. Exact checked reports are cached for unchanged
+source, selection, proof options and backend generation. Changed source still
+requires a proof; this cache is not Dafny's assertion-level cache. Compiler pins,
+backend sources and Lean artifact identities invalidate sessions and reports.
+Cancellation terminates active proof workers and their Lean children; new work
+starts replacement workers. **Restart Language Server** clears sessions and
+caches. Lean source files retain the Lean extension's proof-authoring tools.
 
 ## Dafny differential tests
 

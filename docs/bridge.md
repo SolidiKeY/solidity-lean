@@ -1559,6 +1559,7 @@ lake exe rulecheck --seed 42 --samples 1000
   theorem. The closer helper and actual modality should continue to be
   distinguished in any public wp API.
 
+Actual pinned-EVM MSTORE/decoder/step components: [proofs and remaining byte/source/resource laws](feature-work/diamond-try-evm-memory.md). Source/native12/8 strictEXIT1 and P4/P5b/P8 remain open; no vendor interface or admission adoption.
 
 ### Historical cumulative validation checkpoint ce54e121 (2026-10-29)
 

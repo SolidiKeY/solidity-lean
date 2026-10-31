@@ -777,6 +777,47 @@ import Solidity.Tools.Upstream
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport
 import Solidity.Syntax.Numeric
+
+import Solidity.Counterexamples.DiamondTry
+import Solidity.Semantics.ExternalTryWitness
+import Solidity.Examples.Tactics.ExternalTryWitness
+import Solidity.Calculus.Sound.ExternalTryWitness
+import Solidity.Examples.Tactics.ExternalTryFormula
+import Solidity.Examples.Tactics.ExternalTryUniversal
+import Solidity.Semantics.TryConditions
+import Solidity.Semantics.TryCreateConditions
+import Solidity.Calculus.Sound.TryConditions
+import Solidity.Examples.Tactics.TryConditions
+import Solidity.Semantics.EntryReturn
+import Solidity.Tools.EntryReturn
+import Solidity.Examples.Tactics.EntryReturn
+import Solidity.Examples.Tactics.EntryReturnFlow
+import Solidity.Examples.Tactics.EntryReturnFlowIR
+import Solidity.Examples.Tactics.EntryReturnMetadata
+import Solidity.Examples.Tactics.EntryReturnFunction
+
+import Solidity.Semantics.CreationTryFrame
+import Solidity.Frontend.CreationTryImport
+import Solidity.Tools.CreationTryReplay
+import Solidity.Examples.Tactics.CreationTrySource
+import Solidity.Examples.Tactics.CreationTrySourceIR
+
+import Solidity.Semantics.LibraryTryFrame
+import Solidity.Frontend.LibraryTryImport
+import Solidity.Tools.LibraryTryReplay
+import Solidity.Examples.Tactics.LibraryTrySource
+import Solidity.Examples.Tactics.LibraryTryControls
+import Solidity.Examples.Tactics.LibraryTrySourceIR
+
+-- Bounded physical-byte producer/capture witnesses; no source admission.
+import Solidity.Evm.TryByteImage
+import Solidity.Evm.TryByteCapture
+import Solidity.Evm.TryPanicProducer
+import Solidity.Examples.Tactics.TryPanicProducer
+
+-- Closed constructed-call witnesses only; no original-source admission.
+import Solidity.Evm.TryPanicCarrier
+import Solidity.Examples.Tactics.TryPanicCarrier
 import Solidity.Examples.Tactics.SelfPowerData
 
 import Solidity.Calculus.LoopInvariantWk
