@@ -892,3 +892,6 @@ import Solidity.Backend.InternalFlow.RootAdapter
 import Solidity.Backend.InternalFlow.Gap
 import Solidity.Backend.InternalFlow.Controls
 import Solidity.Backend.InternalFlow.MixedLoopChecks
+
+import Solidity.Backend.InternalFlow.MemoryCallTransport
+import Solidity.Backend.InternalFlow.NestedRootEmission

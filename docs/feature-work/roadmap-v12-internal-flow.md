@@ -189,3 +189,154 @@ No external EVM/compiler tests for a complete runtime-frame backend were
 possible because that backend is not published; kernel controls are not a
 substitute. No scope question is pending; no exclusion or premise is approved
 or weakened by this checkpoint.
+
+## Continuation checkpoint: allocating calls and nested projected emissions
+
+The human-authorized continuation starts at clean committed checkpoint
+`d0b7ff1075467a1582de5de3105b2498f586fda2` on the same branch, with the same
+frozen base. The previous sections/evidence describe that preserved checkpoint.
+This increment fills two investigated independent backfill gaps; it does not
+complete either entire Backfill A/B or any general target Work queue theorem.
+Original artifacts/checksums and raw failures remain untouched at their prior
+absolute paths. New evidence/exports use
+`/workspace/scratch/v12-flow-calls/continuation-1`.
+
+### Backfill A: actual memory-result allocation and body growth
+
+`MemoryCallTransport.lean` executes the published `TRun.call`, `CallRet.enterT`,
+`Prog.runR` and `State.allocDefaultG`; it defines no new call evaluator.
+The caller has an older allocated array reference and two same-typed scalar
+locals (9,11). Actual nonempty memory arguments evaluate to the older reference.
+The result-entry allocation grows the heap 1→2 and has identity1. The actual
+body declares a temporary (heap2→3, identity2), binds that reference into its
+result slot, and exits the temporary's scope. `actual_call` is an application
+of `call_return` with proved `arguments_evaluate` and `body_evaluates`, not a
+new simulation assumption. `returned.ext` is exactly
+`entry.ext.trans bodyOut.ext` at the real dependent heap typing.
+
+`returned_environment` and `exported_tail` retain the new result reference,
+weaken the older caller reference along that composition, and keep both scalar
+locals. `body_old_argument` directly reads the transported reference argument.
+`old_reference_composition`, `entry_and_body_identities`, `growth_phases` and
+`call_observation` pin composition, separate identities1/2, heap lengths1/2/3,
+and the actual result2/old0/scalars9,11. `swapped_fresh_old_rejected` rejects
+swapping result/caller references. A second actual scalar-result call allocates
+in its body and writes7 into the first scalar destination while retaining11
+and old reference0; `wrong_same_typed_destination` rejects writing the other
+same-typed scalar slot.
+
+Reusable `memory_call_caller_reads` is quantified over the actual dependent
+`CallRet.mem` signatures, arbitrary caller context, result/parameter/body
+contexts and body output. Its only execution premises are actual successful
+argument evaluation and actual body execution. It proves the full exported
+caller tail and every typed caller read weakened along the composed extension.
+It makes no claim that older heap object contents were preserved by the body.
+No target frame/operand-stack transport, recursive compilation or dispatch is
+proved by these intrinsic laws.
+
+### Backfill B: nested local emission consumer
+
+`nestedRootEmission` sequences two actual `Failure.Local.execute` calls with
+`save` on actual `rootJournal` projections, retaining the intermediate journal
+and both observed outcomes. It neither calls nor restates the reserved generic
+`Local.nested_failure`, and assumes no desired restoration/continuation equation.
+`nested_root_return` proves the inner failure restores its prefix-entry snapshot
+and the subsequent actual outer RETURN keeps those roots and updates the
+restored middle machine's byte memory. `nested_root_failure` proves the same
+intermediate restoration followed by a later outer failure restoring the
+outer-entry roots and original caller machine. Both quantify over actual typed
+region roots, three stores and three machines; their side conditions are only
+`Fits a di`, `Fits b do'`, deep stack headroom and restored middle stack
+headroom. Repeated snapshots/bytes are allowed by the general law; controls
+instantiate all snapshots and inner/outer payloads distinctly.
+
+The inhabited controls use persistent `uint` and transient `int` roots:
+outer(1,-2), prefix(7,-9), deep(11,-13), constructed by actual typed store
+updates. They use three different dirty memories and nonempty stacks, inner
+bytes de-ad-00 and outer bytes be-ef-01-ff. `success_execution` and
+`failure_execution` prove actual nonempty results. `success_roots_and_bytes`,
+`success_memory_and_stack`, `failure_roots_and_bytes` and
+`failure_memory_and_stack` check both snapshot stages, exact class/byte lists,
+restored memory, precise outer write/exterior marker and retained stack tail.
+Negatives `no_early_outer_restore`, `no_deep_transient_commit`,
+`outer_failure_cannot_keep_prefix`, `return_is_not_revert` and
+`inner_bytes_are_not_outer_bytes` reject the requested confusions.
+These are local projected-root consumers, not source catch, whole-State
+rollback, arbitrary callees, new world semantics or compiler simulation.
+
+### Continuation gates, reviews and cache strategy
+
+Fresh per-file CLI checks and guarded axiom checks pass for every new theorem;
+only the standard propext/Classical.choice/Quot.sound subset occurs.
+`cp2-memory-guarded.log` and `cp2-nested-guarded.log` retain clean outputs.
+Focused import closure passes72jobs (`cp2-focused.log/json`):4.516s,
+sampled aggregate RSS806196KiB, cgroup peak367263744B. Actual Lean4.24.0 and
+Lake5.0.0-src+797c613 plus fresh KeySort2jobs pass are in `cp2-runtime.log`.
+The existing canonical-lock/owned-CID runner still enforces actual-j1,
+LEAN_NUM_THREADS=1,12GiB and swap.max0. No proof/fuel/node/test budget changed.
+A syntax-only reserved-word failure is retained as `cp2-nested-1.log`; its
+consequent error-generated axiom output is not a deliverable or a passing gate.
+
+Both independent read-only source reviewers found no semantic/ownership issue.
+Their confirmed signature/comment findings were fixed: explicit dependent
+result types, direct theorem invocation instead of an untyped local have,
+and an explicit body argument read. Final source/artifact follow-ups and static
+checks are recorded in the continuation evidence and external handoff; neither
+reviewer invokes Lean servers/builds. New paths and registrations remain owned.
+
+`tests/internal-flow/cache-inventory.py` records the actual compiler/configuration
+and transitive-source fingerprint plus owned artifact/trace hashes, without
+rewriting/materializing caches or certifying compilation from those hashes.
+The same existing `.lake` tree is reused; no duplicate build tree/cache is made.
+The initial `cache-inventory.json` reports8owned modules/72source closure.
+Skeptic detected a later docstring-only source SHA change; that initial report
+is retained as historical. `cache-inventory-final.json` refreshes every source
+and artifact hash after the final exact-source focused gate; it is checked
+against the committed source before export. Read-only `lake --no-build build`
+exits3 in1.415s and reports pending default dependencies (`cp2-cache-no-build.log`).
+This is a cache-readiness inventory, not full validation. The initial artifact
+report write was denied by the read-only shell sandbox; its failure is retained
+and the authorized report write succeeds without changing any cache/source.
+
+No new reserved prerequisite/interface was published here. The original full
+`./run-lean.sh` exit124 at its fixed300-second bound remains **FAIL/incomplete**,
+with TestSuite/sort not reached. It is not repeated, its budget is not extended,
+and no targets are removed. A future integrated prerequisite may justify a
+bounded named-target cache checkpoint followed by the unchanged full gate;
+this inventory itself supplies no justification or missing premise.
+Raw normal/strict documentation failures remain failures; exact-frozen-base
+no-new-findings is still a separately checked gate.
+
+All original Work1–6/G37/G36/G38/G39 obligations and remaining Backfills A/B
+listed above stay open. The new requested independent memory-call and nested
+emission constructions are implemented/proved/controlled, but the original lane
+still needs its reserved general target/runtime/recursion/dispatch/loop owners
+and mandatory full validation. No feature verdict, Fml.inTarget, refusal,
+observation, invariant, exclusion, source tag or global ledger is changed.
+The continuation handoff/patch/bundle and checksum manifest are exported under
+`/workspace/scratch/v12-flow-calls/continuation-1/artifacts`; they record the
+actual new committed head and retain links to the sealed original checkpoint.
+
+### Continuation checkpoint handoff
+
+The final exact-source focused command is
+`lake build Solidity.Backend.InternalFlow.MemoryCallTransport Solidity.Backend.InternalFlow.NestedRootEmission`:
+pass72jobs,3.044s,sampled RSS772088KiB,cgroup peak362106880B
+(`cp2-final-focused.log/json`). The fresh eight-file serial sweep passes in
+11.514s,RSS787864KiB,cgroup peak183005184B (`cp2-final-files.log/json`,
+`final-*-diagnostics.log`). All28new theorem axiom checks are guarded and pass.
+Static gates pass172core/0elaborator,8owned/0import-or-trust findings,
+1004reachable/0orphans,1019sources/246trust sites/0findings. Normal and strict
+raw docs checks still exit1 on the exact same46findings; both separate
+exact-base no-new-findings comparisons pass (`static.json`). Original109
+checksum entries verify and their manifest hash is unchanged.
+
+Final source reviews cleared the mathematical/ownership/convention findings.
+The cache fingerprint refresh addresses skeptic's last evidence finding;
+all72recorded current-source hashes match. Source, review and hash evidence
+are in the continuation directory, not overwriting original failures.
+The exact frozen-base cumulative patch, this-checkpoint incremental patch,
+verified bundle, owning document, external HANDOFF and SHA256SUMS are exported
+only after these checks/reviews and the actual commit. External HANDOFF records
+the final full head; no empty marker commit is needed. Full original lane/A/B
+completion remains blocked as recorded above, not inferred from this checkpoint.

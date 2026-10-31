@@ -1206,3 +1206,5 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/RootAdapter.lean` | Actual typed persistent/transient root projections at the published local byte-emission checkpoint, plus intrinsic transaction reset laws. |
 | `Backend/InternalFlow/Controls.lean` | Inhabited reference calls, genuine heap growth, wrong-frame/root controls, exact-byte adapters and axiom pins. |
 | `Backend/InternalFlow/MixedLoopChecks.lean` | Actual intrinsic loop combining storage shrink, persistent/transient mutation, memory allocation and local unwind. |
+| `Backend/InternalFlow/MemoryCallTransport.lean` | Actual memory-result call with entry/body heap growth, preserved caller/argument references and scalar-destination controls; generic typed caller-local read transport. |
+| `Backend/InternalFlow/NestedRootEmission.lean` | Two actual local emissions retaining inner-entry projected roots, exact bytes, outer return/failure and three-snapshot memory/stack controls. |
