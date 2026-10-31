@@ -1755,11 +1755,12 @@ Focused import-union, module-path, local Markdown-link, conflict-marker and
 whitespace checks pass. The repository-wide documentation-path check exits 1:
 46 missing references are independently reproduced in unchanged HEAD files;
 two more are independently reproduced in the unchanged incoming
-`docs/feature-work/inline-assembly.md`, which cites the absent
-`Solidity/Frontend/SolcJson/Yul.lean` and `Solidity/Yul/Syntax.lean`. These
-incoming references remain a documentation finding for the coordinator; neither
-resolved document introduces a missing Lean-file reference. A whole-index
-whitespace check also reports existing staged issues outside these three files
+[inline-assembly roadmap](feature-work/inline-assembly.md#groups), which cites
+the planned Y01 syntax and SolcJson admission modules. Those incoming roadmap
+references remain baseline documentation findings. This merge-review paragraph
+originally repeated both absent paths, introducing the two additional findings
+repaired below. A whole-index whitespace check also reports existing staged
+issues outside these three files
 (`ExprExamples`, `Infer`, `Horizon`, `TrustAudit` and `ParseCorpus`); those files
 were preserved. The focused three-file whitespace check passes.
 
@@ -1773,3 +1774,26 @@ diagnostics, independent reviews and all required combined gates. This repair
 is left staged and uncommitted; no publication or combined-validation pass is
 claimed. Historical primary-cgroup and fallback evidence retains its original
 scope and rejection history.
+
+### Documentation regression repair (2026-10-31)
+
+Attempt 7 validated candidate `d7bbf532c7adc2e8a1f3ec28c1c0ff7519eb58e6`
+against base `89ce50152255d6dc82ab733cecacb903b91e948e`: all 14 executable
+gates exited 0, but the documentation comparison found two new missing-path
+references in the merge-review paragraph above. That paragraph now links to
+the existing Y01 roadmap instead of repeating its absent planned module paths,
+and corrects its earlier claim that it introduced no findings.
+
+The unchanged `scripts/check-doc-paths.sh` exits 1 with 48 missing and 37
+ambiguous references, exactly the retained baseline finding set; only output
+ordering differs. Both candidate-only findings are removed, with no baseline
+finding removed or added. The local roadmap link and its `groups` anchor
+resolve, and `git diff --check` passes. Focused logs and the baseline comparison
+are retained under `.lake/doc-path-repair-20261031/`. This documentation-only
+repair requires no Lean diagnostics. The coordinator must rerun combined
+validation on the repaired tree; the retained executable results belong to
+the earlier candidate. Historical resource failures and scope claims above
+are preserved.
+
+Independent read-only finder and skeptic reviews found no confirmed defect
+in this documentation repair; neither used the Lean server.
