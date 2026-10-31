@@ -885,3 +885,10 @@ import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.SignedPower
 import Solidity.Backend.Scalar.SignedPowerPost
 import Solidity.Backend.Scalar.SignedPowerPrefix
+
+import Solidity.Backend.InternalFlow.FrameLaws
+import Solidity.Backend.InternalFlow.PrefixLaws
+import Solidity.Backend.InternalFlow.RootAdapter
+import Solidity.Backend.InternalFlow.Gap
+import Solidity.Backend.InternalFlow.Controls
+import Solidity.Backend.InternalFlow.MixedLoopChecks

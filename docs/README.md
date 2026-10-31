@@ -102,3 +102,7 @@ history is in git.
 | Preparation lane | Document |
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
+
+| V12 preparation | Document |
+|---|---|
+| Internal runtime calls, flow and transient execution (partial; prerequisites open) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
