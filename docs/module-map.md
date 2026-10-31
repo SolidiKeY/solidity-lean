@@ -1320,3 +1320,5 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceReferenceWrite.lean` | Actual Source parent reference-slot replacement, derived finite observer and all old Boolean alias/context frames, consuming published full word reference-array write ownership. |
 | `Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean` | RHS-first resolved parent-slot Source expression/statement, intrinsic assignment and whole existing word sequence; bounds/horizon and locally live allocator framing. |
+
+| `Solidity/Backend/MemoryOps/SourceReferenceSequence.lean` | Actual Source RItems/intrinsic Prog/whole word append for parent redirection then reached child deletion, deriving the new selection/capacity/frames and exact late rejection without a suffix heap. |

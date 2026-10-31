@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceReferenceSequence
 import Solidity.Backend.MemoryOps.SourceReferenceAssignment
 import Solidity.Backend.MemoryOps.SourceNestedMemory
 import Solidity.Backend.MemoryOps.SourceNestedSelect
@@ -1591,5 +1592,176 @@ theorem reference_redirect_runtime (n : Nat) (hn : n+1<2^256) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms reference_redirect_runtime
+
+
+private def r48items : Source.RItems E0 [] false .body SelectSΓ SelectSΓ :=
+  .stmt (.expr r47term) (.stmt (.expr r47delete) .nil)
+private def r48prog : Prog C (.mem B::Γ) (.mem B::Γ) :=
+  .cons (referenceStmt selectRoot r47ti .here) (.cons (nestedDeleteStmt selectRoot r47ti selectIndex) .nil)
+
+/-- A real Source RItems/intrinsic Prog/whole word program, with second pointer
+selection derived from the first write, not a pair of initial-state runs. -/
+theorem reference_program_views (p : Roadmap.Pipeline) :
+    (Source.execItems (Source.SemanticsExamples.G0 p) F0 7 SelectSΓ.length none r48items selectedSource.1).run (.nil,selectedSource.2)=
+      (.ok (.normal r47dy.1),(.nil,r47dy.2)) ∧
+    Prog.run selectedState r48prog=.ok ⟨selectedState.withHeap r47dh,List.prefix_refl _⟩ ∧
+    run (r47code++r47deleteCode) selectedMachine=.ok r47dm 0 ∧
+    SourceBoolRefsAt r47dy 3 r47dh fresh addresses ∧ Source.MemOK E0 SH r47dy ∧
+    [(MObj.elems .dyn (hp.get fresh)).map HRef.id,(MObj.elems .dyn (r47h.get fresh)).map HRef.id,
+      (MObj.elems .dyn (r47dh.get fresh)).map HRef.id]=[[0,1,0],[1,1,0],[1,1,0]] ∧
+    [MObj.elems .dyn (hp.get left),MObj.elems .dyn (hp.get right),
+      MObj.elems .dyn (r47h.get left),MObj.elems .dyn (r47h.get right),
+      MObj.elems .dyn (r47dh.get left),MObj.elems .dyn (r47dh.get right)]=
+      [[true,false,false],[false,true,false],[true,false,false],[false,true,false],[true,false,false],[false,false,false]] ∧
+    [cells selectedMachine,cells r47m,cells r47dm]=
+      [[w[48],w[32],w[32],w[36],w[1],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]],
+       [w[48],w[32],w[32],w[36],w[1],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[24],w[24],w[16],w[0]],
+       [w[48],w[32],w[32],w[36],w[1],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[0],w[0],w[1],w[16],w[3],w[24],w[24],w[16],w[0]]] ∧
+    r47dh.index left .dyn (indexValue ⟨0,by decide⟩)=some true ∧
+    r47dh.index right .dyn (indexValue ⟨0,by decide⟩)=some false ∧
+    StructAllocatorRepr r47dh base 8 ⟨48,by decide⟩ r47dm := by
+  obtain ⟨_,_,_,_,hmem,hchild,hr,hrepr,tail⟩ := selected_child_rebind p
+  obtain ⟨mid,out,ym,z,mm,target,ho₁,hw₁,hq₂,ho₂,hw₂,hs₁,hs₂,hitems,hprog,hc₁,hc₂,hcode,hr₁,hr₂,hm₁,hm₂,ht₁,ht₂,hy₁,hy₂,hparent,hstack,halloc,hmm,htarget⟩ :=
+    resolved_reference_delete_sequence (Source.SemanticsExamples.G0 p) F0 0 selectSrcRoot r47si selectSrcIndex .here
+      selectedState selectRoot r47ti selectIndex .here fresh right ⟨0,by decide⟩ ⟨1,by decide⟩ addresses hr hchild
+      rfl rfl rfl rfl rfl rfl rfl rfl
+      (by simp only [selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide)
+      (by simp only [selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn];decide)
+      (by intro t _ ht;exact ht) SH hmem hrepr
+  have hmid : mid=r47h := Option.some.inj (ho₁.symm.trans (by
+    simp only [selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.length_cons,List.length_nil,Nat.zero_lt_succ,↓reduceIte];rfl))
+  subst mid
+  have hknown₁ : (Source.writeLoc (E := E0) (Γ := SelectSΓ) F0 4 (.mem (τ := SB) 3 0) (.memRef rfl 1)).run selectedSource=(.ok (),r47y) := by
+    obtain ⟨ht,hw⟩ := source_refs_write selectedSource 3 addresses [left,right,left]
+      (by simpa only [selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] using hr.parent) 0 (by decide) right
+    exact hw
+  have hym : ym=r47y := congrArg Prod.snd (hw₁.symm.trans hknown₁)
+  subst ym
+  have hout : out=r47dh := Option.some.inj (ho₂.symm.trans (by
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
+    exact if_pos (by simp only [r47h,Heap.get_set_ne hp fresh right (by decide),MObj.elems_dyn,Heap.get,Objs.get,hp,right];decide)))
+  subst out
+  have hknown₂ : (Source.writeLoc (E := E0) (Γ := SelectSΓ) F0 3 (.mem (τ := .bool) 1 1) (.bool false)).run r47y=(.ok (),r47dy) := by
+    obtain ⟨ht,hw⟩ := source_bool_write r47y 1 [false,true,false] (by rfl) 1 (by decide) false
+    exact hw
+  have hz : z=r47dy := congrArg Prod.snd (hw₂.symm.trans hknown₂)
+  subst z
+  change mm=r47m at hmm
+  subst mm
+  change target=r47dm at htarget
+  subst target
+  refine ⟨hitems,hprog,hcode,hr₂,hm₂,?_,?_,rfl,?_,?_,halloc ⟨48,by decide⟩ (by decide) (reference_redirect_allocator p).1
+    (by simp only [selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.len,Heap.get,Objs.get,hp,fresh,base,MObj.elems_dyn];decide)⟩
+  · simp only [r47dh,r47h,Heap.get,Heap.set,Objs.get,Objs.set,hp,fresh,left,right,MObj.elems_dyn,MObj.setElem_dyn];rfl
+  · simp only [r47dh,r47h,Heap.get,Heap.set,Objs.get,Objs.set,hp,fresh,left,right,MObj.elems_dyn,MObj.setElem_dyn];rfl
+  · simp only [r47dh,r47h,Heap.index,Heap.get,Heap.set,Objs.get,Objs.set,hp,fresh,left,right,MObj.elems_dyn,MObj.setElem_dyn,indexValue,Int.toNat_natCast];rfl
+  · simp only [r47dh,r47h,Heap.index,Heap.get,Heap.set,Objs.get,Objs.set,hp,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,indexValue,Int.toNat_natCast];rfl
+
+private def r48badSource : Source.EMState E0 SelectSΓ :=
+  (selectedSource.1.set selectSrcIndex (sourceUint (indexValue ⟨3,by decide⟩)),selectedSource.2)
+private def r48badState := selectedState.setLocal selectIndex (indexValue ⟨3,by decide⟩)
+private def r48badMachine := writeMachine selectedMachine 4 w[3]
+private def r48badMid : Source.EMState E0 SelectSΓ :=
+  (r48badSource.1,{r48badSource.2 with heap := r48badSource.2.heap.write 3 (pdata [right,right,left]) (by rfl)})
+private def r48badMidMachine := writeMachine r48badMachine 37 w[24]
+
+/-- Invalid second child index follows a genuinely successful redirection.
+Source error globals retain that reached parent; intrinsic/word report revert
+without inventing a successful suffix heap or rollback relation. -/
+theorem reference_program_late_rejection (p : Roadmap.Pipeline) :
+    (Source.execItems (Source.SemanticsExamples.G0 p) F0 7 SelectSΓ.length none r48items r48badSource.1).run (.nil,r48badSource.2)=
+      (.error (.revert (Source.panicData .index)),(.nil,r48badMid.2)) ∧
+    Prog.run r48badState r48prog=.error .revert ∧
+    run r47code r48badMachine=.ok r48badMidMachine 0 ∧
+    run r47deleteCode r48badMidMachine=.revert ∧ run (r47code++r47deleteCode) r48badMachine=.revert ∧
+    SourceBoolRefsAt r48badMid 3 r47h fresh addresses ∧ Source.MemOK E0 SH r48badMid ∧
+    (Source.readLoc (E := E0) (Γ := SelectSΓ) F0 (τ := SB) (.mem 3 0)).run r48badMid=
+      (.ok (.memRef rfl 1),r48badMid) ∧
+    [r48badMachine.mem 4,r48badMidMachine.mem 4,r48badMachine.mem 37,r48badMidMachine.mem 37,
+      r48badMidMachine.mem 26,r47dm.mem 26,r48badMidMachine.mem 17,r48badMidMachine.mem 7,r48badMidMachine.mem 0]=
+      [w[3],w[3],w[16],w[24],w[1],w[0],w[1],w[99],w[48]] ∧
+    [cells r48badMachine,cells r48badMidMachine]=
+      [[w[48],w[32],w[32],w[36],w[3],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0]],
+       [w[48],w[32],w[32],w[36],w[3],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[24],w[24],w[16],w[0]]] ∧
+    [MObj.elems .dyn (hp.get left),MObj.elems .dyn (hp.get right),MObj.elems .dyn (r47h.get left),MObj.elems .dyn (r47h.get right)]=
+      [[true,false,false],[false,true,false],[true,false,false],[false,true,false]] ∧
+    r48badMid.2.ex=r48badSource.2.ex ∧ r48badMidMachine.stack=[w[42]] := by
+  obtain ⟨_,_,_,_,hmem,hchild,hr,hrepr,tail⟩ := selected_child_rebind p
+  have hrb : SourceBoolRefsAt r48badSource 3 r48badState.heap fresh addresses := hr.same_heaps rfl rfl
+  have hvb : SourceBoolMemoryAt r48badSource 1 r48badState.heap right .dyn := hchild
+  have hmb : Source.MemOK E0 SH r48badSource := by
+    have hk := Source.writeLoc_memOK (E := E0) (Γ := SelectSΓ) (H := SH) F0 0
+      (.local selectSrcIndex) (sourceUint (D := E0.layout) (indexValue ⟨3,by decide⟩)) selectedSource ⟨hmem,Source.Val.refOK_of_loc (τ := .int .u256) rfl _⟩
+    have hw : (Source.writeLoc (E := E0) (Γ := SelectSΓ) F0 0 (.local selectSrcIndex)
+      (sourceUint (D := E0.layout) (indexValue ⟨3,by decide⟩))).run selectedSource=(.ok (),r48badSource) := rfl
+    rw [hw] at hk;exact hk
+  have htb : RefArrayStateRepr 1 1 8 selectFrag r48badState base r48badMachine :=
+    ⟨hrepr.state.setVal selectIndex (indexValue ⟨3,by decide⟩) w[3] (ReprV.uint_of rfl),hrepr.arrays.localWrite 4 (by decide) w[3]⟩
+  obtain ⟨mid,ym,mm,ho,hw,hq,hs,herr,hitems,hprog,hc₁,hc₂,hcode,hr',hm',ht',hy,hmm⟩ :=
+    resolved_reference_delete_late_error (Source.SemanticsExamples.G0 p) F0 0 selectSrcRoot r47si selectSrcIndex .here
+      r48badState selectRoot r47ti selectIndex .here fresh right ⟨0,by decide⟩ ⟨3,by decide⟩ addresses hrb hvb
+      rfl rfl (source_locals_get_set _ _ _) rfl rfl rfl rfl rfl
+      (by simp only [r48badState,selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide)
+      (by simp only [r48badState,selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn];decide) SH hmb htb
+  have hmid : mid=r47h := Option.some.inj (ho.symm.trans (by
+    simp only [r48badState,selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.length_cons,List.length_nil,Nat.zero_lt_succ,↓reduceIte];rfl))
+  subst mid
+  have hknown : (Source.writeLoc (E := E0) (Γ := SelectSΓ) F0 4 (.mem (τ := SB) 3 0) (.memRef rfl 1)).run r48badSource=(.ok (),r48badMid) := by
+    obtain ⟨ht,hs⟩ := source_refs_write r48badSource 3 addresses [left,right,left]
+      (by simpa only [r48badState,selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] using hrb.parent) 0 (by decide) right
+    exact hs
+  have hym : ym=r48badMid := congrArg Prod.snd (hw.symm.trans hknown)
+  subst ym
+  change mm=r48badMidMachine at hmm
+  subst mm
+  refine ⟨hitems,hprog,hc₁,hc₂,hcode,hr',hm',hr'.parent_read F0 0 right (by rw [r47h,Heap.get_set_same,MObj.elems_setElem];simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl),rfl,rfl,?_,rfl,rfl⟩
+  simp only [r47h,Heap.get,Heap.set,Objs.get,Objs.set,hp,fresh,left,right,MObj.elems_dyn,MObj.setElem_dyn]
+
+
+/-- Source horizon6 completes the first redirection but times out in the
+reached delete. The unfuelled word program still succeeds: no timeout/revert or
+rollback equivalence is fabricated from the bounded Source evaluator. -/
+theorem reference_program_reached_timeout (p : Roadmap.Pipeline) :
+    (Source.execS (Source.SemanticsExamples.G0 p) F0 5 SelectSΓ.length none
+      (.expr r47term : Source.RStmt E0 [] false .body SelectSΓ SelectSΓ) selectedSource.1).run (.nil,selectedSource.2)=
+      (.ok (.normal r47y.1),(.nil,r47y.2)) ∧
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 3 r47delete).run r47y=(.error .timeout,r47y) ∧
+    (Source.execItems (Source.SemanticsExamples.G0 p) F0 6 SelectSΓ.length none r48items selectedSource.1).run (.nil,selectedSource.2)=
+      (.error .timeout,(.nil,r47y.2)) ∧
+    (Source.readLoc (E := E0) (Γ := SelectSΓ) F0 (τ := SB) (.mem 3 0)).run r47y=(.ok (.memRef rfl 1),r47y) ∧
+    run (r47code++r47deleteCode) selectedMachine=.ok r47dm 0 := by
+  obtain ⟨_,_,_,_,hmem,hchild,hr,hrepr,tail⟩ := selected_child_rebind p
+  obtain ⟨out,z,ho,hw,he,hs,hi,hc,hr',hm',ht',hl,hparent,hchildren,hsource,heffects⟩ :=
+    hr.resolved_reference_assign_word (Source.SemanticsExamples.G0 p) F0 1 selectedState fresh right addresses hchild
+      selectSrcRoot r47si .here selectRoot r47ti .here ⟨0,by decide⟩ rfl rfl rfl rfl rfl rfl
+      (by simp only [selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide) SH hmem hrepr
+  have hknown : (Source.writeLoc (E := E0) (Γ := SelectSΓ) F0 3 (.mem (τ := SB) 3 0) (.memRef rfl 1)).run selectedSource=(.ok (),r47y) := by
+    obtain ⟨ht,hw'⟩ := source_refs_write selectedSource 3 addresses [left,right,left]
+      (by simpa only [selectedState,selectState,State.setLocal,State.push,σ,σ1,σ0,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] using hr.parent) 0 (by decide) right
+    exact hw'
+  have hz : z=r47y := congrArg Prod.snd (hw.symm.trans hknown)
+  subst z
+  have htimeout := source_nested_delete_low_horizon (Source.SemanticsExamples.G0 p) F0 r47y
+    selectSrcRoot r47si selectSrcIndex 3 (by decide)
+  have hstmtError := source_expr_statement_error (Source.SemanticsExamples.G0 p) F0 3 SelectSΓ.length r47delete r47y r47y .timeout htimeout
+  have hitems := source_items_pair_error (Source.SemanticsExamples.G0 p) F0 0 SelectSΓ.length _ _ selectedSource r47y r47y .timeout hs hstmtError
+  obtain ⟨_,_,_,_,hpost,tail⟩ := reference_redirect_views p
+  exact ⟨hs,htimeout,hitems,hpost.parent_read F0 0 right
+    (by rw [r47h,Heap.get_set_same,MObj.elems_setElem];simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl),
+    (reference_redirect_then_delete p).2.2.1⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.reference_program_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reference_program_views
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.reference_program_late_rejection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reference_program_late_rejection
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceNestedMemoryControls.reference_program_reached_timeout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reference_program_reached_timeout
 
 end Solidity.Backend.MemoryOps.SourceNestedMemoryControls

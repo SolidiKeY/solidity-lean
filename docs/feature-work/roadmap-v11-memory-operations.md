@@ -75,7 +75,7 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint forty-seven. Earlier checkpoint
+Current cumulative accounting through checkpoint forty-eight. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
@@ -3646,3 +3646,63 @@ All2506 prior seal records verified unchanged. Every earlier fixture body/guard
 verbatim verified. Finder/skeptic source mathematical PASS and comment fix applied;
 committed artifact review follows. Original goal BLOCKED, all original queues
 partial/blocked, no independent-exhaustion or external compiler/EVM test claim.
+
+
+### C48 — actual parent-redirection/nested-delete programs and reached rejection
+
+Continued original G34/BackfillB after committed/sealed C47 rather than stopping
+at its separate operation witnesses. SourceReferenceSequence consumes the SAME
+actual resolved assignment and nested delete certificates to prove Source RItems
+execution, intrinsic Prog and complete appended word code from INITIAL facts.
+The second selected identity is derived from the first actual list.set/get_self,
+its child capacity from the first real Boolean object frame, and its footprint
+from initial membership-in-set. No initial-parent pointer is frozen as the second
+selection, no desired postrelation or stagewise preservation is assumed.
+
+INITIAL parent/new-child correspondence, pure aligned locals, actual first bound
+and new-child bound, MemOK/full word state are explicit. Successful child mutation
+uses the same sufficient INITIAL local selected-footprint condition; transport
+includes the newly installed self alias. This condition is not necessary in all
+no-op/removed-child cases and is not a source restriction. Actual late child-bound
+error needs NO such footprint because it does not mutate the child. Source
+statements use horizons n+6 and n+5, RItems n+7, matching published fuel-consuming
+cons rules; intrinsic Prog and word append use their actual reached states.
+
+The final finite observer/MemOK/full word representation, parent fields and old
+locals/stack are derived. Allocator composition preserves the explicit initial
+live-parent interval<=cursor bound (the older allocator does not own reference
+parents). The populated control directly applies THIS returned composed allocator
+clause to the inhabited cursor48 initial allocator, not a supplied final frame.
+
+Three controls quantify BOTH pipelines and retain every earlier control/body/
+vector/guard verbatim. Real RItems/prog redirection then right-child clear preserves
+left and parent[1,1,0], checks all INITIAL/redirected/final leaf vectors and all
+22 wordcells/neighbour/freepointer/RHS/stack. A true invalid second index3 follows
+successful pointer16->24 redirection, exposes redirected Source globals and full
+initial/reached word/leaf vectors, but no successful suffix heap. A separate
+horizon6 control actually completes redirection then times out in reached delete;
+the unfuelled word program still succeeds. Timeout, panic, intrinsic/word revert
+and successful execution are deliberately DISTINCT observed results, with no
+fabricated timeout/revert/rollback equivalence or changed budget.
+
+Generic2laws and3controls exact standard-only guards pass in173-job closure.
+Per-file Lean MCP unavailable; first allocator heap-equality and control uint
+RefOK/ReprV failures retained, final successful checks use unchanged bounds.
+Same runtime/caches/12GiB-noswap/CPU0/threads1/j1/cacheOFF, no reset/newgoal/runtime,
+owner edits or integration. Original G32/G33/G34/G35.01-.06 and BackfillA/B remain
+partial/blocked. This is finite Bool-reference parent program composition, not
+arbitrary graph/delete/reference-copy/physical-byte/ABI/emitted loop/whole Source
+or Source-V10-target closure. No independent-exhaustion claim.
+
+
+C48 final173guarded/full1088default/262Suite/SolKey377/131 exit0; fresh actual
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs/cacheOFF pass. Strict automatic,
+completefixtures, layer/orphan/trust, script corruption and848standardpins107mods
+pass. Full aggregateRSS1569740KiB,disk245760bytes,new max/OOM/kill events0;
+cumulative historical session peaks/events retained separately. Both source
+finder/skeptic PASS, allocator-control suggestion applied, no confirmed remaining
+defect. All2591 C47 seals verified unchanged and previous control prefix exact.
+Raw docs1 COMPLETE83publicfindings byte-identical; frozen no-newFAIL11incoming,
+ownednew0. Global inventory1:1207unrecorded=359publicinherited+848owned,0unsafe,
+notglobalpass. Original goal BLOCKED unchanged, all Work/Backfill parents partial
+or blocked. No Source/physical-byte/general graph/compiler/EVM completion claim.

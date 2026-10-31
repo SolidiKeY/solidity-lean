@@ -958,3 +958,5 @@ import Solidity.Backend.MemoryOps.SourceNestedMemoryControls
 
 import Solidity.Backend.MemoryOps.SourceReferenceWrite
 import Solidity.Backend.MemoryOps.SourceReferenceAssignment
+
+import Solidity.Backend.MemoryOps.SourceReferenceSequence
