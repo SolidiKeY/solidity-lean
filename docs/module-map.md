@@ -1208,3 +1208,5 @@ At the root, the notation's own tests:
 | `Bridge/SolidityBridge/RoadmapV15/WordByteTransport.lean` | Published word/byte encoding, typed ABI observation and width-cleanup consumer transport. |
 | `Bridge/SolidityBridge/RoadmapV15/CumulativeTransport.lean` | Exact cumulative hash-region premise decomposition and nested local checkpoint transport. |
 | `Bridge/SolidityBridge/RoadmapV15/ConsumerControls.lean` | Signed/truncation/byte boundary, region and nested-checkpoint consumer controls. |
+| `Bridge/SolidityBridge/RoadmapV15/PublishedWorldTransport.lean` | Published typed world/transaction normalization, prefix and observation consumers; no pinned-EVM claim. |
+| `Bridge/SolidityBridge/RoadmapV15/PublishedWorldControls.lean` | Real funded-factory, creation-collision, persistent observation and exact halt/result controls. |

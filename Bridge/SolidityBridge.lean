@@ -40,3 +40,5 @@ import SolidityBridge.RoadmapV15.Controls
 import SolidityBridge.RoadmapV15.WordByteTransport
 import SolidityBridge.RoadmapV15.CumulativeTransport
 import SolidityBridge.RoadmapV15.ConsumerControls
+import SolidityBridge.RoadmapV15.PublishedWorldTransport
+import SolidityBridge.RoadmapV15.PublishedWorldControls

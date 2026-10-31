@@ -43,7 +43,7 @@ recreated or imported from an unmerged branch.
 | 4 / G47 | Blocked on integrated V13/V14 interfaces and actual Osaka account execution. CALL/STATICCALL, arbitrary permitted callees, CREATE/initcode, RETURN/REVERT, persistent/transient/balance rollback, transaction validity/upfront fees, precompiles and finite/infinite traces remain unproved. A payment-acceptance Boolean is not substituted. |
 | 5 / dependencies | Local availability and an actual failed Azure cache request are recorded below; reference-word imports requested 860 files and downloaded 0 after CONNECT 403 failures. No dependency or toolchain was upgraded. |
 | Backfill A | Partial: existing G01 finite-prefix order, consistency, completion and resource-indexed noncompletion observation transport proved. Published assembler/failure/scalar word/byte encoding and inhabited signed/truncation/boundary transport are now proved in recovery; full pinned-reference transition integration remains open; no actual infinite EVM execution is constructed. |
-| Backfill B | Partial: approved hash-premise suffix/membership and published local-checkpoint observation/relation transport proved. Transaction-world rollback, ledger/nonce/log composition, actual execution-prefix linkage and application to actual opcode transitions remain open. The secondary obligation checklist is now explicit and tested in recovery; all recorded proofs remain open. |
+| Backfill B | Partial: approved hash-premise suffix/membership and published local-checkpoint observation/relation transport proved. Published intrinsic world rollback consumers are proved in recovery below; production ledger/nonce/log and bytecode/world composition, actual execution-prefix linkage and application to actual opcode transitions remain open. The secondary obligation checklist is now explicit and tested in recovery; all recorded proofs remain open. |
 
 V11 → V12 → V13 → V14 → V15 → V16 → V17 is still serial for full completion.
 This checkout has G01/G06 abstract contracts and component results, not a
@@ -401,3 +401,84 @@ worker. A later lightweight authorized probe still returned CONNECT 403, with
 runtime specification revision 1 unchanged. The authorization persists; a runtime
 owner must repair actual endpoint access before another heavy cache request.
 No new VM, package/fork switch, proxy bypass or additional permission is sought.
+
+
+## Recovery checkpoint: published world and transaction API consumers
+
+The frozen base already publishes partial intrinsic world APIs in
+`Solidity/Semantics/ContractWorldCertificates.lean` and
+`Solidity/Semantics/TransientWorld.lean`. These were consumed READ ONLY after
+inspection, rather than treating every world component as missing. They are not
+the missing production V13/V14 assembly/world correspondence: their own contract
+retains supplied Entry/Library bodies, external-response tables, source admission
+and opt-in transaction selection. They have typed accounts/storage, funds,
+timestamp and code roles, with a logical transient-region boundary; they do not
+provide nonce/log state or the full Osaka account/transaction semantics.
+
+New `Bridge/SolidityBridge/RoadmapV15/PublishedWorldTransport.lean` contains only
+consequences of those existing definitions/results and the owned word-byte law.
+No new World, Operation, interpreter, source IR or payment-acceptance oracle is
+defined. Its exact nine declarations (same V15 namespace) are:
+
+| Theorem | Exact premises and conclusion |
+|---|---|
+| `world_failure_balance_bytes` | An actual frame errors at w.resetTransient; the failed boundary retains the original world's exact 32-byte intrinsic balance observations. |
+| `world_failure_accounts` | Same actual failure evidence; accounts are the original accounts mapped through the published storage transient reset, not falsely equated to arbitrary unnormalized input stores. |
+| `world_sequence_failure` | Actual first.run w = ok mid and second.run mid = error e; the existing sequence errors with exactly e. |
+| `world_transaction_prefix_failure` | Actual first.run w.resetTransient = ok mid and result-valued tail mid = error e; the existing outer boundary returns w.resetTransient with the exact halt e. |
+| `world_transaction_prefix_success` | The same actual prefix and successful result-valued suffix; commits next.resetTransient and the exact returned value. The suffix receives mid, never mid.resetTransient. |
+| `world_operation_transaction_failure` | The same two operation-run premises at the normalized entry; the existing operation transaction returns the normalized input and unchanged halt. Exhaustion/divergence are not converted to completed steps. |
+| `world_failure_persistent` | Actual frame failure plus an intrinsic SRef whose root is not declared transient; persistent path observations equal the input world's observations. Transient roots are expressly not covered by that preservation premise. |
+| `world_caught_creation_tail` | Mutable context, actual creation error and the owner's catchable=true condition; the suffix resumes at the exact creation input world, which may already include a paid caller prefix. |
+| `world_argument_failure_tail` | A supplied argument-evaluation error stays outside the creation catch and prevents the suffix, preserving all halt/revert data. |
+
+No admission, execution or representation premise is silently discharged. The
+nine new scoped axiom reports in `world-controls-initial.log` contain only the
+standard Lean axioms in their reported subsets. All statements pass focused
+kernel checking. The initial syntax error used Lean's reserved keyword prefix
+as a binder; renaming the binder fixed it with no statement or budget change,
+and `world-initial.log` is retained.
+
+`Bridge/SolidityBridge/RoadmapV15/PublishedWorldControls.lean` reuses the old
+owner's actual successful funded factory run, unchanged. Controls prove its
+prefix installs code and changes balances before a later failure, and apply
+the new sequence/transaction laws to restore the proper entry observations.
+They retain nonempty returned/revert bytes, preserve a persistent path in an
+actually installed account, and use a real creation collision in that world to
+inhabit the creation-catch law. Argument revert/exhaustion propagates outside
+the catch; exhausted/diverging halts are not catchable. The persistent-path
+condition is unavailable for the published scratch transient root. The failed
+suffix uses the existing guard operation as a test failure, not as an oracle
+for whether a callee accepts payment. No reserved test program is rewritten.
+Peak cgroup in the initial world consumer/control check: 173,264,896 bytes.
+
+Full EVM nonce/log/transient numeric-slot correspondence, permitted arbitrary
+callees, exact resources and source/bytecode/Bridge trace linkage are still open.
+These stronger available component laws do not close G46, G47 or the lane.
+
+
+Published-world reviews: both independent read-only reviewers found no theorem,
+premise or ownership defect, but identified a genuine control gap: the original
+factory has no transient declarations. Stronger controls now create a typed owner
+from the published transient Cell, run an actual Entry body that writes scratch
+17 and persistent saved 23, and feed its actual successful intermediate world
+to a result-valued suffix. That suffix reads scratch 17 through the published
+SVal.beq fold. A prematurely normalized intermediate world observes false,
+so it cannot satisfy the tested success/failure suffix premises. Direct
+applications of both prefix consumers pass. Outer success clears scratch but
+retains saved 23; outer failure returns the original normalized world. A second
+failure begins from the occupied non-normalized intermediate account, directly
+uses world_failure_accounts, and proves the mapped normalized account differs
+from its raw input while saved 23 survives. No indexed-family matcher, new
+storage/world interpreter or callee-payment Boolean was added. The balance-byte
+docstring now accurately limits its conclusion to balance bytes; exact halts
+are stated by the separate result theorem.
+
+The initial additional control used an unavailable simplification lemma; the
+actual reduction rule fixed it without budget changes. Raw failure and corrected
+pass are world-transient-controls.log and world-transient-controls-fixed.log.
+The corrected check includes all nine axiom reports, peak cgroup 185,012,224
+bytes. Follow-up review results and final import/structural/doc checks are retained
+with the handoff; full lane obligations remain open.
+
+World checkpoint handoff: separate follow-up finder and skeptic cleared the corrected actual transient-owner controls and nine conditional consumer laws. Final focused owned closure passed (world-reviewed-closure.log, peak cgroup 200,577,024 bytes). Structural, trust, orphan and whitespace checks pass; full docs still fails with 46 missing/37 ambiguous, with zero added findings against exact base. The wider core import closure is running, not counted passed; cold full timeout and full Bridge/cache/Osaka/V13/V14 prerequisites remain open. Evidence is /workspace/v15-evm-agreement-evidence/recovery-201ebab8; exact committed-head patch/bundle/handoff will be exported under /workspace/v15-evm-agreement-artifacts/recovery-201ebab8. Final finder identified one further available G06 halt-observation consumer, retained as the next Backfill A checkpoint.
