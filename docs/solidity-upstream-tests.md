@@ -146,6 +146,24 @@ in `.lake/entrypoints-repair/test-solidity-focused-host.log` and
 `.lake/entrypoints-repair/test-solidity-focused-details.log`. The coordinator owns
 rebuilding and rerunning the combined gates.
 
+Attempt 5 reached all source tests (57 passed, 11 failed). The modern full-source
+TestSuite import failed while compiling its source-declaration metadata as one
+large literal, followed by missing-executable-code errors. `Frontend/Import.lean`
+now applies the existing bounded list segmentation to that metadata before
+native compilation, as it already does for function tables and reports.
+A temporary probe in that edited file imported the exact pinned 0.8.34 modern
+TestSuite AST, including `Triple => FixedTriple`; MCP diagnostics completed
+without errors and evaluating the report length returned 617. The probe was
+removed, and final per-file MCP diagnostics are empty. This checks import and
+compilation; it does not establish the full source-suite gate. An attempted
+no-build proof probe stopped at the edited Import artifact being out of date.
+Other failed source assertions remain unchanged; the retained declarations
+record documents the separate proof/admission gaps and stale pending-copy
+expectation. No status, input, observation, invariant or budget was relaxed.
+Read-only finder and skeptic reviews confirmed that segmentation preserves
+list heads, order and lookup behavior. The coordinator owns artifact rebuilding
+and combined validation; the retained `annotate : Expr` finding is already fixed.
+
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
 node scripts/solidity-upstream.mjs verify

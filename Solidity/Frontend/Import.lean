@@ -704,7 +704,9 @@ def elabSolcImport : CommandElab := fun stx => do
   let ctStx ← if c.sourceDecls.isEmpty then pure ctStx else do
     let metadataName ← liftTermElabM do
       let name ← mkFreshUserName (N ++ `_sourceDecls)
-      let value : Expr := toExpr c.sourceDecls
+      -- Modern imports retain every source declaration, including the full
+      -- testing table. Bound native compilation just as for functions/reports.
+      let value : Expr ← compileListSegments N (toExpr c.sourceDecls)
       let valueTy : Expr ← inferType value
       addAndCompile <| .defnDecl {
         name
