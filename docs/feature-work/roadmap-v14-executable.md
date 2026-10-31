@@ -1,4 +1,4 @@
-# V14 executable consumers: independent backfill, lane blocked
+# V14 executable consumers and open lane obligations
 
 Batch `solidity-v12-v17-20261031`, lane `v14-payments-bytecode`.
 Assigned base: `2fe1f8932f96be15b00df03ba2cde46f64a87758`.
@@ -116,11 +116,11 @@ are guarded in the owned modules and use only standard Lean axioms.
 | 3: G44.01 | Open: independent source initializer/inheritance order, argument evaluation/ABI and constructor failure transport through the integrated lowering/compiler chain. |
 | 3: G44.02 | Published installation/linking/immutable component reused read only; consumer proofs above return exact runtime bytes. Source/runtime interface, immutable declaration/value identity and full artifact-table composition remain open. |
 | 3: G44.03 | Open: source new/try-new, nonce-derived address, account/state/payment installation and failed-creation rollback composition. Existing world controls are preparation, not that proof. |
-| 4: G45.01–.02 | Open: actual scalar instruction and typed stack/frame expansion adapters using published Scalar and Evm primitives, including stack headroom. No parallel copy of reserved Scalar/Evm work was made. |
+| 4: G45.01–.02 | Partial independent consumer now includes selected multi-operation scalar execution over an encoded typed caller frame and derived exact headroom. General source/local/frame producer and fetched-runtime adapters remain open; no Scalar/Evm implementation was duplicated. |
 | 4: G45.03 | Published structured label proofs remain read only; execution transport of structured branch/LOOP and actual backedge execution are open. |
 | 5: G45.04–.05 | Reused assembler/byte proofs named above; offset/link layout, PUSH-data handling and `decode_encode` do not prove pinned decoder/step agreement. Reserved Bridge adapter remains untouched. |
 | 5: G45.06 | Open: selection/stack/control/assembly/encoding composition against actual executable runtime-byte behavior; resources, decoder agreement and integration premises are undischarged. |
-| Backfill A | Partial useful preparation: actual finite prefixes, suffix transport and assembled-runtime constructor consequence. General typed frame/layout and relocation/creation composition still need integrated producers; no parent closure. |
+| Backfill A | Partial useful preparation now also includes selected scalar sequence/capacity composition over populated typed caller frames. Actual finite prefixes, suffix transport and assembled-runtime constructor consequences are retained. General runtime frame/layout and relocation/creation composition still need their actual producers; no parent closure. |
 | Backfill B | Partial useful preparation: checkpoint/prefix algebra, actual create/send/transfer rollback and byte/fresh-handle controls. Full effectful loop-prefix and source constructor/payment observations remain open. |
 | Reserved lanes V11–V17 | V11–V13 are blocking predecessors; V15–V17 are successors, not V14 prerequisites. No reserved work was reassigned and no unmerged branch imported. Coordinator integration of published predecessor interfaces is required before serial lane closure. |
 
@@ -220,3 +220,158 @@ preserves the first installed-account observation; `creationTry` is included
 in the feature-ID reconciliation list; and V15–V17 are correctly identified
 as successors rather than V14 prerequisites. Both reviews also require actual
 committed head/artifact/checksum values in the external handoff before export.
+
+
+## Recovery checkpoint: scalar sequences and guard
+
+This continues the original frozen assignment on the same VM/branch from
+`bb10f6f6e2a304479b9885ea1ebd4683fc436b2e`; the earlier checkpoint and original
+artifacts are preserved. Available owned independent work was not exhausted
+at that checkpoint. Predecessor absence does not waive any implementation,
+proof, backfill or validation obligation and does not authorize weaker scope.
+
+[ScalarSequence](../../Solidity/Backend/Executable/ScalarSequence.lean) consumes
+actual published `selectBinary`, `selectUnary`, `ClosedCertificate.binary` and
+operator certificates. It does not implement or rename their instruction
+selection. The real sequence emits right literal, left literal, SUB, a
+word-preserving selected uint-to-int cast, DUP1, signed-zero literal, SWAP1,
+selected SLT and selected Boolean ISZERO. Binary LEFT is on top; casting emits
+no opcode. The saved signed result and protected caller tail survive the later
+comparison. Both original `shortT = none` source premises are explicit in
+`source_result`/`typed_result`; operand definedness witnesses are equations
+of existing intrinsic operations, not assumed simulations.
+
+The caller frame encodes two actual `State C [.val .int, .val .uint]` locals
+via existing `TEnv.get` and `encodeValue`, followed by a word spill. The exact
+source/target result is composed for this sequence with those two protected
+cells. The OPEN producer obligation is to show a real general runtime calling
+convention supplies precisely this representation, and to cover arbitrary
+intrinsic local/reference frames; that is not a premise silently discharged
+by constructing an encoded frame. This fragment does not restrict the final
+admitted profile. It changes no intrinsic AST, state, formula or semantics.
+
+`stages` exposes exact operand/result words at the eight named boundaries;
+`first_boundary` exposes the first physical PUSH separately. `heights` proves
+the complete physical instruction-height trace. The exact peak is entry+3,
+so `frame_capacity_iff` derives that the two frame cells leave at most 1019
+spill words, not merely a safe exit height. `typed_result` combines actual
+source evaluation, full numeric execution and that derived capacity.
+`emitted_bytes` gives every PUSH32 payload and opcode in order, `bytes_length`
+gives 104, and `decode_bytes` is the total encoder roundtrip.
+
+[ScalarSequenceResources](../../Solidity/Backend/Executable/ScalarSequenceResources.lean)
+consumes existing `ClosedInvocation.prefix_safe`, `BinaryInvocation.prefix_safe`
+and `CheckedInvocation.testPrefix_safe`, with their invocation capacities
+proved here from the actual instructions/typed frame lengths. Their
+implementations are not duplicated. Its concrete continuation pushes right
+then left operands above the earlier Boolean/signed results, then executes
+the selected existing checked-add overflow test. `followup_boundaries` exposes
+both intervening materialization stacks; `test_boundaries` exposes the entry
+and exact words after each of the five actual test instructions. The two DUP2
+operations create entry+6 peaks while exit is only entry+5. The exact spill
+bound is therefore 1016 with this caller frame. Complete emitted payload/test
+bytes and encoder roundtrip cover all 175 bytes, not only the last opcode.
+This test returns a real failure flag; no compiled panic branch is claimed.
+
+[Controls](../../Solidity/Backend/Executable/ScalarSequenceChecks.lean) inhabit
+an actual typed state with caller words -7 and 99. SUB 3-5 wraps, the selected
+cast reads -2, SLT with zero is true, and ISZERO is false, retaining -2 and
+both caller words. Reversed operand emission produces a different Boolean
+and saved value. Controls expose actual first/operand/DUP boundaries, full
+concrete bytes and the eight-word checked DUP peak. Populated caller frames
+with 1020/1017 spill words violate the exact intermediate bounds even though
+the respective final heights fit 1024. A separate impossible closed invocation
+confirms a successful unbounded numeric run cannot justify physical capacity.
+
+These are numeric-slice/encoding consequences. `Scalar.run` is gasless;
+`decode_encode` is not a pinned EVM decoder theorem; the creation runner does
+not execute these scalar opcodes or jumps. No relation between those runners
+is defined by fiat. Fetched runtime/Osaka, source/frame producer, full payment/
+world asymmetry, effectful loops, source constructors and executable-byte
+correspondence all remain open as recorded in the work queue above.
+
+### Guard repair and regression evidence
+
+The [lane guard](../../scripts/check-v14-executable.mjs) now uses a nonempty
+recursive filesystem census including untracked/nested owned Lean sources,
+requires exact noncommented root registration, and inspects both raw reachable
+imports and the published graph. Missing raw dependencies and unsupported
+lexical forms fail closed. Raw `meta`/`public`/`all` header forms are read even
+when the shared graph filters them. The inherited plain-Lean bootstrap is
+permitted only through the frozen AST/Eqns edges; new owned Lean/meta imports
+are rejected. Git scope combines tracked changes with untracked files and
+uses `--no-renames` so a reserved deletion cannot disappear behind an owned
+rename destination. Registrations remain append-only.
+
+The scanner is a conservative structural guard, not a complete Lean parser
+or compiler admission checker. Owned brace-bearing/interpolated strings and
+quoted identifiers require a future explicit term/token-aware trust scanner
+and currently fail closed; this does not alter Solidity's admitted profile.
+Reserved imported source is not rewritten. Normal/raw/character literals and
+nested comments are masked independently to avoid hiding actual declarations.
+Axiom tokens are rejected regardless of declaration modifiers/attributes.
+
+[Fourteen Node regressions](../../tests/v14-executable/guard.test.mjs) cover
+zero census; empty/commented/duplicate registration; raw forbidden edges hidden
+by filtered/missing graph nodes; raw transitive and published edges; nested
+untracked owned trust escapes; private/attributed/inline axioms; meta headers;
+zero-hash raw backslashes; ordinary harmless strings; embedded interpolation
+terms including comment-separated/non-bang forms; quoted-identifier comment
+markers; and a real temporary Git rename/untracked-file census. No regression
+passes via a skipped scan. Identifier-only import continuation refusal is a
+conservative defense: Lean 4.24 imports one identifier per command.
+
+### Recovery theorem premises and gates
+
+| Result | Exact premises / boundary |
+|---|---|
+| `ScalarSequence.stages`, `first_boundary` | Existing typed numeric operands, source operation result/refusal equations for staged SUB/cast/comparison; first boundary needs no source-result premise. Actual numeric execution is derived. |
+| `source_result`, `typed_result` | Both exact short-circuit refusal equations, existing operator result equations and actual typed state/frame. Spill room is derived from exact instructions; no desired target run is assumed. |
+| `heights`, `capacity_iff`, `frame_capacity_iff` | Unconditional exact trace and arithmetic equivalences for this actual program. |
+| `stage_prefixes` | Derived Closed/Binary invocation capacities, actual successful prefix equation, existing published prefix laws. |
+| `checked_stages`, `followup_boundaries` | Earlier source-result witnesses and real published checked test, with exact earlier-result protected tail. |
+| `test_boundaries` | Arbitrary existing typed uint operands and tail; each actual test-prefix run is proved. |
+| `checked_heights`, `checked_capacity_iff`, `checked_frame_capacity_iff` | Exact selected test opcodes and frame lengths; no supplied capacity oracle. |
+| `checked_prefix_safe` | Derived invocation capacity and actual successful checked-test prefix; existing law consumed. |
+| `emitted_bytes`, `checked_emitted_bytes`, `bytes_length`, `decode_bytes`, `checked_bytes_length`, `checked_decode_bytes` | Actual total encodings; no fetched-byte semantics or pinned decoder agreement. |
+
+The resumed KeySort gate passes under memory.max=12884901888,
+memory.swap.max=0, `LEAN_NUM_THREADS=1` and explicit `-j1`; actual versions
+remain Lean 4.24.0 and Lake 5.0.0-src+797c613. The cold scalar closure used one
+Lean worker, peak aggregate RSS 7903 MiB, cgroup sampled peak 8434 MiB, minimum
+host MemAvailable 8708 MiB and zero OOM events. Its initial owned height proof
+failed; the raw failure is retained. Later focused checks pass with unchanged
+budgets. A symbolic-byte `rfl` attempt exhausted the existing 200000 heartbeat
+budget and was replaced with explicit encoder equations, not a higher budget.
+Axiom pins retain exactly standard Lean axiom subsets; long printed messages
+use whitespace-lax guards without weakening the axiom lists.
+
+Fresh per-file diagnostics, focused import closure, final real guard and
+regression outcomes, static/docs gates, independent proof-versus-guard reviews
+and the actual checkpoint head are recorded in the recovery handoff/evidence.
+The 46 historical docs findings stay raw exit 1, compared with the exact base;
+no unchanged failed full gate is repeated. The full assignment is not complete
+merely because this independent checkpoint or export exists. Further concrete
+assigned constructor/payload consumer work follows this checkpoint.
+
+
+Recovery checkpoint validation: fresh CLI checks pass on all three new Lean
+files; scalar import closure passes 71 jobs; all headline pins pass; Node
+regressions pass 14/14 with zero skipped; real guard passes 9 owned modules,
+zero findings; layer/orphan/trust/whitespace/owned-link gates pass. Raw docs
+checker is exit 1 with the same 46 findings and byte-identical exact-base
+output; the separate no-new gate passes. Full repository and lane completion
+gates remain open. Recovery evidence is `/workspace/v14-recovery-evidence`;
+checkpoint handoff/export is under `/workspace/v14-recovery-artifacts/checkpoint2`.
+
+
+Other public recovery facts: `instructions` fixes the selected physical program;
+`frame_length` fixes the two actual frame cells; `frame_capacity` needs only the
+explicit spill-length bound proved sufficient by `frame_capacity_iff`;
+`frame_prefix_safe` additionally consumes a real prefix split/run equation.
+`subtractionInvocation`, `comparisonInvocation` and `followupInvocation` are
+constructed existing invocation objects with those derived capacities, not
+new invocation semantics. `typed_combination`, `reverse_order` and
+`checked_combination` are closed kernel controls, not new hypotheses.
+The final independent guard review's stale six-module README count was changed
+to the count-independent "owned modules" before commit.

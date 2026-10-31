@@ -891,3 +891,6 @@ import Solidity.Backend.Executable.Assembly
 import Solidity.Backend.Executable.AssemblyChecks
 import Solidity.Backend.Executable.PaymentCheckpoint
 import Solidity.Backend.Executable.PaymentCheckpointChecks
+import Solidity.Backend.Executable.ScalarSequence
+import Solidity.Backend.Executable.ScalarSequenceResources
+import Solidity.Backend.Executable.ScalarSequenceChecks

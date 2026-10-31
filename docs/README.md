@@ -103,3 +103,4 @@ history is in git.
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
 | V14 executable consumers and open lane obligations | [roadmap-v14-executable.md](feature-work/roadmap-v14-executable.md) |
+| V14 scalar/frame composition and guard recovery | [roadmap-v14-executable.md](feature-work/roadmap-v14-executable.md#recovery-checkpoint-scalar-sequences-and-guard) |

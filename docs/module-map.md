@@ -1203,3 +1203,6 @@ At the root, the notation's own tests:
 | `Backend/Executable/AssemblyChecks.lean` | Actual assembled backedge/constructor combination and wrong creation/runtime-coordinate negative. |
 | `Backend/Executable/PaymentCheckpoint.lean` | Existing-world caught/uncaught send laws, effectful prefix rollback, actual create/send-prefix and handle observations. |
 | `Backend/Executable/PaymentCheckpointChecks.lean` | Actual create/failed-receive/transfer rollback, distinct instances, resource and exact-byte controls. |
+| `Backend/Executable/ScalarSequence.lean` | Published scalar selection consumer: intrinsic source equations, exact staged stacks over a typed caller frame, derived capacity, total bytes and roundtrip; runtime producer remains open. |
+| `Backend/Executable/ScalarSequenceResources.lean` | Existing Closed/Binary/Checked invocation prefix laws consumed in a real checked-test follow-up, exact intermediate words, DUP peaks, spill bounds and emitted bytes. |
+| `Backend/Executable/ScalarSequenceChecks.lean` | Populated distinct caller locals, wrapping subtraction/signed comparison, first/test boundaries, full bytes, wrong-order and intermediate-capacity negatives. |

@@ -1,6 +1,6 @@
 # V14 independent consumer controls
 
-The six modules under `Solidity/Backend/Executable/` contain the kernel proofs
+The owned modules under `Solidity/Backend/Executable/` contain the kernel proofs
 and controls. See the [owned lane document](../../docs/feature-work/roadmap-v14-executable.md)
 for their exact premises and the open G43/G36.03/G44/G45 obligations.
 
@@ -20,3 +20,12 @@ boundaries. It is not a proof or an external compiler/EVM test. Creation byte
 execution returns runtime bytes; the world fixtures independently execute the
 existing unmetered API. No theorem here connects those two models or closes
 compiled payment, source constructor, runtime-jump or pinned-decoder agreement.
+
+
+Recovery scalar checks additionally build
+`Solidity.Backend.Executable.ScalarSequenceChecks` using the same bounded
+session configuration. `node --test tests/v14-executable/guard.test.mjs` exercises
+the actual guard helpers, including a real isolated Git rename/untracked census;
+zero modules and skipped scans are failures, not passing controls. The source
+scanner conservatively refuses unsupported owned interpolation/quoted-identifier
+forms; it is independent of the Solidity admission profile.
