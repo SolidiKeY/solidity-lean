@@ -75,14 +75,14 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint thirty-two. Earlier checkpoint
+Current cumulative accounting through checkpoint thirty-three. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
 |---|---|---|
 | G32 | partial | Intrinsic heap-object framing/noninterference components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
 | G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors; supported actual Source Boolean allocation and MemOK preservation now checked. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
-| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads and single-element read/write-to-intrinsic-copy transitions proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
+| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads, single-element read/write-to-intrinsic-copy and primitive delete-to-clearT transitions proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
 | G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
 | G35.02 | blocked | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
 | G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved, including actual ordered two-transfer composition and local commutation. General families/reference construction, calldata-to-storage, ABI decoding, general Source copy/program execution and target transport remain. |
@@ -2738,3 +2738,53 @@ with no defect; neighbor framing explicitly intrinsic-only. Raw docs1 exactly
 public baseline83 findings, original no-new remainsFAIL for11incoming; raw global
 inventory1:1046unrecorded=359publicinherited+687owned,0unsafe. Reserved inventories
 unchanged. Complete gate/resource/review receipts and additive proposals retained.
+
+## Checkpoint thirty-three: independent Source delete and intrinsic clearT
+
+Original G34/BackfillA-B investigation found published Source.deleteLoc obtains
+its primitive default via zeroVal, while actual intrinsic TRun.clearT uses
+PrimTy.dflt through Heap.writeAddr. SourceDelete connects these EXISTING
+operations. write_addr reuses C32 exact Source write, deriving actual intrinsic
+address write and final local representation from initial lookup and bounds.
+delete_addr uses the actual Boolean default, no supplied payload. clearT further
+proves the ACTUAL typed-state intrinsic transition σ.withHeap out with identity
+context extension, rather than only an arbitrary resulting relation. Initial
+representation, valid intrinsic uint index and positive existing Source fuel
+(fuel+1) are explicit. Published deleteLoc_memOK is consumed on actual success.
+No final relation/MemOK/desired preservation is a premise.
+
+Controls reuse independently allocated Source state and MemOK. Actual first
+Source copy0→1 plus intrinsic checked capture materially changes TFFtail→TTFtail;
+actual Source delete and intrinsic clearT then yield TFFtail. Complete Source
+changed/final object contents, full three intrinsic vectors, neighborFT before/
+after, typed local uint7 and OLD memory aliasr, both reached MemOK, innerreadtrue
+thenfalse, and stale-true negative are retained. Runtime n remains uncapped
+beyond existing intrinsic n+3<2^256. Fuel0 at the actual changed state TIMEOUTS
+before write; positive-fuel endpoint panics with actual intrinsic writeAddrNone.
+Timeout is not mapped to OptionNone or invented rollback. All prior element32,
+nonprimitive builder, snapshot and bounds controls remain unchanged. Eight new
+public laws/controls have exact standard-only guards.
+
+Focused failed checks retained opaque len/address-match and definitional heap
+equality proof issues, repaired without statement/observation/budget changes.
+Same idle runtime/lock/cacheOFF/serial-j1/12GiB-no-swap child/16GiBparent and512MiB
+reserve; available1.70GiB before64MiB warm route forecast. No source/cache/seal
+deletion, new container or fuel/proof/node/time/TestSuite budget increase.
+
+This advances actual independent primitive memory delete/path transport; it does
+not compile resolved Source syntax, implement reserved reference deletion, prove
+physical bytes or emitted target semantics. G32 physical representation, G33
+all-profile defaults/target failure, G34 general paths/reference rebinding/delete/
+stale aliases and target execution, G35.01 Source/target deep-copy/liveness,
+G35.02 reserved copy, G35.03 general ABI/reference/storage, G35.04 fresh deep copy/
+emitted loops, G35.05 recursive Source graphs and G35.06 final composition remain
+open. BackfillA/B advanced, not complete or exhausted.
+
+C33 final guarded110jobs, full1069default/262TestSuite/SolKey377/131 exit0.
+Strict automatic, complete fixture, layer/orphan/trust, lane695standardpins/
+88modules and script corruption pass. Final warm gate225280bytes disk growth,
+aggregateRSS1545204KiB, no new memory.max/OOM/kill events. Raw docs1 still complete
+public83byteequal, originalfrozenno-newFAIL11incoming; globalinventory1 remains
+1054unrecorded=359publicinherited+695owned,0unsafe. These remain failed global
+gates; coordinator additive reconciliation proposed only. Independent source
+finder/skeptic accepted with no defect. All previous seals retained.

@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.SourceWrite
+import Solidity.Backend.MemoryOps.SourceDelete
 import Solidity.Source.SemanticsExamples
 
 namespace Solidity.Backend.MemoryOps.SourceMemoryControls
@@ -279,6 +279,93 @@ theorem source_write_boundary32 :
     change (MObj.elems .dyn (out.get r))[(uintOfNat 32).1.toNat]?=some true
     rw [hu]; exact hv
   · rw [checkedCaptureOverwrite_frame _ _ _ _ _ _ _ _ _ ho neighbor (by decide),neighbor_elems]
+
+private abbrev DΓ : Ctx := [.val .uint,.mem B]
+private def deleteState (input : Heap H) : State StandardExample DΓ :=
+  {storage := Storage.init _,H := H,heap := input,env := (uintOfNat 7,(some r,()))}
+private theorem write_values (input output : Heap H) (i : PrimTy.uint.Denote) (v : Bool)
+    (hi : i.1.toNat<input.len r .dyn)
+    (ho : input.writeAddr (.index r .dyn i) v=some output) :
+    MObj.elems .dyn (output.get r)=(MObj.elems .dyn (input.get r)).set i.1.toNat v := by
+  simp only [Heap.writeAddr,Heap.setIndex] at ho
+  simp only [Heap.len] at hi
+  rw [if_pos hi] at ho
+  have he := Option.some.inj ho
+  rw [←he,Heap.get_set_same,MObj.elems_setElem]
+
+/-- Material delete AFTER a real reached Source copy, including actual intrinsic
+clearT and unchanged typed locals. The source timeout remains a separate result. -/
+theorem source_deleted_after_copy (n : Nat) (hn : n+3<2^256) :
+    ∃ (mid out : Heap H) (z₁ z₂ : Source.EMState E0 []),
+      checkedCaptureOverwrite (hp n hn) r .dyn r .dyn 0 1 1=some mid ∧
+      (sourceBoolCopy F0 0 0 0 1).run (sy n)=(.ok (),z₁) ∧
+      mid.writeAddr (.index r .dyn (uintOfNat 1)) (PrimTy.dflt .bool)=some out ∧
+      TRun.clearT (deleteState mid) (.index r .dyn (uintOfNat 1)) rfl=
+        .ok ⟨(deleteState mid).withHeap out,List.prefix_refl _⟩ ∧
+      (Source.deleteLoc (E := E0) (Γ := []) F0 1 (τ := .bool) (.mem 0 1)).run z₁=(.ok (),z₂) ∧
+      [MObj.elems .dyn ((hp n hn).get r),MObj.elems .dyn (mid.get r),MObj.elems .dyn (out.get r)]=
+        [initial n,[true,true,false]++List.replicate n false,initial n] ∧
+      [z₁.2.heap.get 0,z₂.2.heap.get 0]=
+        [some ⟨.array .memory .bool none,sourceBoolMemory ([true,true,false]++List.replicate n false)⟩,
+         some ⟨.array .memory .bool none,sourceBoolMemory (initial n)⟩] ∧
+      MObj.elems .dyn (mid.get neighbor)=[false,true] ∧ MObj.elems .dyn (out.get neighbor)=[false,true] ∧
+      ((deleteState mid).withHeap out).env=(uintOfNat 7,(some r,())) ∧
+      Source.MemOK E0 emptyTy z₁ ∧ Source.MemOK E0 emptyTy z₂ ∧
+      (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 1)).run z₁=(.ok (.bool true),z₁) ∧
+      (Source.readLoc (E := E0) (Γ := []) F0 (τ := .bool) (.mem 0 1)).run z₂=(.ok (.bool false),z₂) ∧
+      (Source.deleteLoc (E := E0) (Γ := []) F0 0 (τ := .bool) (.mem 0 1)).run z₁=(.error .timeout,z₁) ∧
+      (MObj.elems .dyn (out.get r))[1]?≠some true := by
+  have h0 := allocated_source n hn
+  have hs : 0<(hp n hn).len r .dyn := by rw [size]; omega
+  have hd : 1<(hp n hn).len r .dyn := by rw [size]; omega
+  obtain ⟨mid,z₁,hm,hcopy,hr₁⟩ := h0.2.2.copy F0 0 0 1 hs hd
+  have hv₁ : MObj.elems .dyn (mid.get r)=[true,true,false]++List.replicate n false := by
+    rw [singleton_values _ _ 0 1 hs hd hm];simp only [old_elems];rfl
+  have hu : (uintOfNat 1).1.toNat=1 := by rw [uintOfNat_val (by decide)];rfl
+  have hi : (uintOfNat 1).1.toNat<mid.len r .dyn := by
+    rw [hu];simp only [Heap.len,hv₁,List.length_append,List.length_cons,List.length_nil,List.length_replicate];omega
+  obtain ⟨out,z₂,ho,hclear,hdelete,hr₂⟩ := SourceBoolMemoryAt.clearT (deleteState mid) r .dyn hr₁ F0 0 (uintOfNat 1) hi
+  have hv₂ : MObj.elems .dyn (out.get r)=initial n := by
+    rw [write_values _ _ _ _ hi ho,hu,hv₁];rfl
+  have hz : (Source.deleteLoc (E := E0) (Γ := []) F0 1 (τ := .bool) (.mem 0 1)).run z₁=(.ok (),z₂) := by simpa only [hu] using hdelete
+  have hm₁ := h0.2.2.copy_memOK F0 0 0 1 hs hcopy emptyTy h0.2.1
+  have hm₂ := source_bool_delete_memOK z₁ z₂ emptyTy hm₁ F0 1 0 1 hz
+  have hn₁ := checkedCaptureOverwrite_frame _ _ _ _ _ _ _ _ _ hm neighbor (by decide)
+  have hn₂ : out.get neighbor=mid.get neighbor := by
+    change mid.writeAddr (.index r .dyn (uintOfNat 1)) false=some out at ho
+    simp only [Heap.writeAddr,Heap.setIndex] at ho
+    have hib : (uintOfNat 1).1.toNat<(MObj.elems .dyn (mid.get r)).length := hi
+    rw [if_pos hib] at ho
+    rw [←Option.some.inj ho,Heap.get_set_ne _ r neighbor (by decide)]
+  refine ⟨mid,out,z₁,z₂,hm,hcopy,ho,hclear,hz,?_,?_,?_,?_,rfl,hm₁,hm₂,?_,?_,source_bool_delete_timeout z₁ F0 0 1,?_⟩
+  · rw [old_elems,hv₁,hv₂]
+  · rw [show z₁.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory (MObj.elems .dyn (mid.get r))⟩ from hr₁,
+      show z₂.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory (MObj.elems .dyn (out.get r))⟩ from hr₂,hv₁,hv₂]
+  · rw [hn₁,neighbor_elems]
+  · rw [hn₂,hn₁,neighbor_elems]
+  · have he : z₁.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory ([true,true,false]++List.replicate n false)⟩ := by rw [←hv₁];exact hr₁
+    exact source_bool_read z₁ 0 _ he 1 (by simp only [List.length_append,List.length_cons,List.length_nil,List.length_replicate];omega)
+  · have he : z₂.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory (initial n)⟩ := by rw [←hv₂];exact hr₂
+    exact source_bool_read z₂ 0 _ he 1 (by simp only [initial,List.length_append,List.length_cons,List.length_nil,List.length_replicate];omega)
+  · rw [hv₂];change (some false : Option Bool)≠some true;decide
+
+theorem source_delete_endpoint (n : Nat) (hn : n+3<2^256) :
+    (Source.deleteLoc (E := E0) (Γ := []) F0 1 (τ := .bool) (.mem 0 (n+3))).run (sy n)=
+      (.error (.revert (Source.panicData .index)),sy n) ∧
+    (hp n hn).writeAddr (.index r .dyn (uintOfNat (n+3))) (PrimTy.dflt .bool)=none ∧
+    (Source.deleteLoc (E := E0) (Γ := []) F0 0 (τ := .bool) (.mem 0 (n+3))).run (sy n)=(.error .timeout,sy n) := by
+  have hu : (uintOfNat (n+3)).1.toNat=n+3 := by rw [uintOfNat_val hn];rfl
+  have hb := (represented n hn).delete_bounds F0 0 (uintOfNat (n+3)) (by rw [hu,size];exact Nat.le_refl _)
+  exact ⟨by simpa only [hu] using hb.1,hb.2,source_bool_delete_timeout (sy n) F0 0 (n+3)⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceMemoryControls.source_deleted_after_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms source_deleted_after_copy
+/-- info: 'Solidity.Backend.MemoryOps.SourceMemoryControls.source_delete_endpoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms source_delete_endpoint
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceMemoryControls.source_written_copies' depends on axioms: [propext,
  Classical.choice,

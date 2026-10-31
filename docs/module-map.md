@@ -1286,3 +1286,5 @@ At the root, the notation's own tests:
 | `Backend/MemoryOps/SourceMemoryControls.lean` | Actual Source allocator states with MemOK, runtime copied/scheduled observations, wrong-origin/type/dangling negatives and empty/endpoint/element32 controls |
 
 | `Solidity/Backend/MemoryOps/SourceWrite.lean` | Actual independent Source Boolean read/write transition and checked intrinsic singleton capture, reached representation, MemOK and separate bounds outcomes. |
+
+| `Solidity/Backend/MemoryOps/SourceDelete.lean` | Actual Source primitive memory delete, intrinsic writeAddr/clearT, final local representation, MemOK and separate timeout/bounds outcomes. |
