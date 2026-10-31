@@ -270,3 +270,16 @@ controls preserved.768/413 signatures/axioms and wrapper1024/262+131 pass after
 independent reviews/fixes. Full Y04/Y05/Y06/Backfills A/B stay partial, concrete
 Y09.02 and original goal blocked. Exact heads/gates/limitations/versioned artifacts:
 `/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 bounded heap-resize handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) adds separate footprint-bounded bytes/string resizing
+into actual Source.Heap, preserving the fixed API and proving old-domain
+compatibility. Actual output Placement updates selected shape, retaining
+addresses/free/other objects and deriving bounds/separation; real MemOK, aliases,
+shrink-tail and two-object composition are proved/controlled. Historical capacity
+and larger growth remain open, not refusals. Twelve new exact22-word observations
+and103 negatives pass both pipelines; all old fixtures/controls unchanged.
+859/470 signatures/axioms and wrapper1029/262+131 pass after independent reviews.
+Entire Y04/Y05/Y06/Backfills A/B stay partial, Y09.02 and goal blocked unchanged.
+Exact revisions/gates/full obligations/versioned artifacts: `/workspace/vy2-evidence/HANDOFF.md`.

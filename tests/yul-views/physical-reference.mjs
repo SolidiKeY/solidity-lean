@@ -9,6 +9,7 @@ import {replayWriteback} from './writeback-reference.mjs';
 import {replayResidual} from './residual-reference.mjs';
 import {replayFinite} from './finite-reference.mjs';
 import {replayHeapBytes} from './heap-bytes-reference.mjs';
+import {replayHeapResize} from './heap-resize-reference.mjs';
 import {replayBytecode,INITIAL_GAS,STEP_LIMIT} from '../../scripts/evm-reference/replay.mjs';
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const [compilerPath,outPath]=process.argv.slice(2);
@@ -47,7 +48,8 @@ const writeback=await replayWriteback(compile);
 const residual=await replayResidual(compile);
 const finite=await replayFinite(compile);
 const heapBytes=await replayHeapBytes(compile);
-const report={heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
+const heapResize=await replayHeapResize(compile);
+const report={heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
  sourceSha256:sha(source),lockSha256:sha(readFileSync(new URL('../../scripts/evm-reference/package-lock.json',import.meta.url))),
  fork:'osaka',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,reports};
 writeFileSync(resolve(outPath),JSON.stringify(report,null,2)+'\n');
@@ -57,4 +59,5 @@ console.log('writeback: '+writeback.variants.map(v=>`${v.viaIR?'viaIR':'legacy'}
 console.log('residual: '+residual.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('finite: '+finite.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('heapBytes: '+heapBytes.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
-process.exitCode=heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;
+console.log('heapResize: '+heapResize.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
+process.exitCode=heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;

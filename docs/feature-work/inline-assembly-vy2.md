@@ -810,3 +810,92 @@ V10/V11/V12/V13/V15/V16 joint obligations. Goal blocked unchanged; get_goal abse
 no create/reset/reactivation/completion/stop transition. Approved YQ1–YQ7 remain
 in scope; questions=[]. Original3540 manifest/artifacts verified and preserved
 under heap-bytes/prior-*; older failures/caches retained.
+
+### Bounded size-changing heap checkpoint (2026-10-31)
+
+HeapByteResize adds a SEPARATE actual bytes/string Heap.write implementation.
+The existing fixed-length API, guard, controls and signatures are unchanged;
+heapByteResize_fixed_compat proves equality on the old same-header domain. The
+new guard compares the new header's rounded MemoryShape footprint with the
+selected object's ACTUAL input Placement footprint. Existing unbounded decoders
+are reused only after this check. No arbitrary decoder/fuel/test cap, cleaning,
+Source representation change or opaque inverse/result-view premise. Any new
+length fitting that original input footprint is supported, including shrink,
+empty and same-rounded-extent growth. None remains unsupported preparation,
+never Yul admission/refusal/no-op or a proof of all memory-safe semantics.
+
+HeapByteResizePlacement constructs the actual output Placement: addresses/free
+choice retained, only the selected shape updated to decoded length. Actual
+Heap.write keeps occupancy, exact declared type/identity, all other cells/types,
+next and boundedness. New starts/ends/distinctness/separation derive from old
+placement facts and the checked size bound; all other shapes/physical regions
+remain original. Source.MemOK transport for every initial H uses the real owner
+invariants. Exact successful header/live-byte/read and physical re-encoding laws
+are proved. Canonical shrinking encoders retain formerly live tail bytes in the
+residual; raw header stores preserve exact reserved/free/zero words. Neighbor
+header/payload/decoder laws retain their necessary correct-header premise, not
+an assertion that arbitrary raw memory operations were safe. Two-object actual
+resizes in both orders and combined actual-state MemOK are controlled.
+
+Controls inhabit raw3→4 growth exposing old padding a5,3→1 and3→0 shrink,
+nonUTF8 string33→32, ordinary31→32/33→32/33→64 boundaries, and real source states/
+MemOK/alias reads at every horizon. Unrelated cells, neighbors, tail/padding/gaps,
+fixed guard failures and exact retained placement choices are checked.32→33 is
+an actual beyond-input-footprint None witness. Fin34 only bounds inherited
+boundary witnesses; it is not a decoder/model cap. Raw normalization failures
+were replaced by explicit header/placement laws with no budget increase.
+
+Important exact limitation: Placement.shape describes current logical shape,
+not historical allocated capacity. After3→0, output shape is bytes0 (size32),
+address128/free512 retained, and historical_capacity_not_recovered proves that
+feeding that minimal output placement to a later header4 request gives None,
+even though the original bytes3 footprint was64. This is NOT deallocation or a
+Yul refusal. Threading real allocation-capacity/history evidence is still open;
+we do not keep a false old shape, invent a second state or weaken typed/placement
+obligations. No new human semantic decision is inferred from this interface limit.
+
+New HeapResize.sol imports the frozen HeapBytes.sol unchanged. Twelve new ordered
+calls/pipeline observe22 ABI words each: all headers/live payload words, newly
+exposed padding, preserved formerly live tails, both typed aliases' lengths/reads,
+unrelated object/gaps, exact free/zero words, explicit revert and a fresh call.
+All expected bytes specified independently and checked in both pinned solc0.8.38/
+Osaka legacy/via-IR pipelines.103 fail-closed mutations require exact constructor/
+exception/hash/length/inventory/ABI/value/tail/alias/failure behavior. A raw65-byte
+header beyond the selected33-byte object's96-byte footprint ALSO succeeds
+externally and remains explicitly OPEN here; its prep None is not an exclusion.
+The pool's384-byte allocation and free512 are specific fixture observations,
+not a source allocator discipline or allocation refinement proof.
+
+All old physical/upstream/writeback/residual/finite/heap fixtures, deployment/
+failure observations, expectations/order and81/14/33/55/89 negative controls
+remain unchanged/passing. Parent heap APIs and fixture hashes checked against
+33530fa39cd00a0601046c2a2ecab50eb1a8fb93. No fork/observation/premise/target predicate
+weakened.100m gas/5m steps/proof/node/test budgets unchanged. Kernel laws and
+external compiler/EVM evidence remain separate; no frontend/manifest promotion.
+
+Per-file CLI fallback (no Lean MCP), focused44 jobs and final full wrapper exit0:
+1029 default/262 suite jobs,131 matched annotations. Exact859 public signatures/
+470 theorem axiom reports pass, only propext/Quot.sound/Classical.choice. Actual
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake5.0.0-src+797c613;
+mandatory KeySort2 jobs exit0 before RUNTIME_GATE_PASS prerequisite claim.
+Strict automatic exact-base/head exit0 and equal outputs. Hard aggregate12GiB/
+no swap, serial-j1/LEAN_NUM_THREADS=1, actual OS/RSS/disk monitoring/writer lock/
+caches retained. G0/history reviewed; only local typed helpers, no owner rewrite.
+Independent finder/skeptic reviewed read-only without Lean/server/build/tests;
+no confirmed semantic/G0 finding, requested over-capacity control included, final
+review clear. Raw failed attempts retained. Exact static/trust/doc comparisons,
+commands/exits/full revisions and versioned artifacts: heap-resize/HANDOFF.md in
+`/workspace/vy2-evidence` and cumulative HANDOFF.md.
+
+Full queue: Y04/Y05/Y06 and Backfills A/B remain PARTIAL, concrete Y09.02 BLOCKED.
+Y05 now includes bounded size changes but still lacks historical capacity,
+larger/cross-boundary growth, shared-zero empties, dirty word/pointer/nested
+representations, whole-memory realization/owner agreement, full assembly MemOK,
+actual source/Yul embedding and allocator refinement. MemoryWritebackObligations,
+MemoryLayoutObligations and PreservesMemOK signatures unchanged. Actual owner
+MemOK/World/memory-call/Bridge definitions are present, not substitutes for missing
+VY1/source/assembly/allocation/V10/V11/compiler/calculus and V12/V13/V15/V16 final
+interfaces/gates. Goal remains blocked unchanged; get_goal unavailable; no goal
+transition/create/reset/reactivation/completion. Approved YQ1–YQ7 preserved;
+questions=[]. Original3666 manifest/artifacts verified and retained under
+heap-resize/prior-*; all previous code/raw failures/caches remain.

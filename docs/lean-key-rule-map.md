@@ -1010,3 +1010,10 @@ VY2 heap preparation (Lean-only, YQ5): `heapByteWriteback_encode`,
 Heap/EMState and owner MemOK. Real allocated-object/type/Placement/header/size
 and nonoverlap premises remain explicit. No SolKey taclet, all-assembly rule,
 Y09.02 notation/printing, full heap realization or compiler closure is claimed.
+
+VY2 bounded resize preparation (Lean-only, YQ5): `heapByteResize_fixed_compat`,
+`heapByteResize_encode`, `heapByteResize_live_view`, `heapByteResize_result_choices`,
+`bytesObject_shrink_tail`, `bytesObject_resize_other_object` and
+`heapByteResizeState_preserves` derive actual typed output/read/placement/MemOK
+laws with real input footprint and separation facts. No SolKey taclet, all-block
+semantics, Y09.02 notation/printing, full realization or compiler closure claim.

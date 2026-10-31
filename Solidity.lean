@@ -898,3 +898,4 @@ import Solidity.Yul.Views.ScalarWritebackControls
 import Solidity.Yul.Views.ResidualControls
 import Solidity.Yul.Views.FiniteResidualControls
 import Solidity.Yul.Views.HeapByteBoundaries
+import Solidity.Yul.Views.HeapByteResizeBoundaries
