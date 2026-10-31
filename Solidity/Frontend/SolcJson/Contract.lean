@@ -1472,10 +1472,11 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       let original ← J.str? p "name"
       let renamed ← lookupBy id (renames stateVars f)
       pure (original, renamed)
-    let fspecResult := resolvedSpec.mapM fun c => do
+    let fspecResults : List (Except String KeyClause) := resolvedSpec.map fun c => do
       let text ← rewriteSpec c.kind (specRenamesOf parameters)
         (specRenamesOf (bindingsOf "returnParameters")) c.text
       pure { c with text }
+    let fspecResult := fspecResults.mapM id
     let fspec := fspecResult.toOption.getD []
     -- what would change the function's meaning, or its constant's name
     let kind := kindOf f
@@ -1563,11 +1564,21 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     -- Keep syntax errors distinct from unsupported source features. The test
     -- API can diagnose a selection with no well-formed specification without
     -- turning a usable mixed report into a whole-contract import failure.
-    let sourceScope := if testing then match fspecResult with
-      | .error reason => (Source.ScopeScan.rejected [] {
+    -- The storage-only frame parser cannot parse ledger applications. Keep
+    -- independent syntax errors, but classify that known gap separately.
+    let syntaxError := (rawSpec.zip fspecResults).findSome? fun (clause, result) =>
+      if ledgerAssignable clause then none else match result with
+        | .error reason => some reason
+        | .ok _ => none
+    let sourceScope := if testing then match syntaxError with
+      | some reason => (Source.ScopeScan.rejected [] {
           kind := .invalidAst, name := `solidity.specificationSyntax,
           reason, line := J.line f }).append sourceScope
-      | .ok _ => sourceScope
+      | none => if rawSpec.any ledgerAssignable then (Source.ScopeScan.rejected [] {
+        kind := .missingImplementation, name := `solidity.ledgerAssignable,
+        reason := "ledger locations in assignable clauses are not modelled",
+        line := J.line f }).append sourceScope
+        else sourceScope
       else sourceScope
     let selection := if (J.id? f).any (fun id => (lookupBy id functionAliases).getD id == id)
       then SourceSelection.selected else .retained

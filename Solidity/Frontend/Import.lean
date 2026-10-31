@@ -762,6 +762,22 @@ def elabSolcImport : CommandElab := fun stx => do
         -- no info trees: the server would keep every expansion, all at this command
         let r ← liftTermElabM <| withEnableInfoTree false <| withoutErrToSorry do
           tryCatchRuntimeEx (withCurrHeartbeats do
+              -- Keep the source calldata origins when lowering a standalone
+              -- testing body. The synthetic memory parameter declarations
+              -- precede the body; running sliceViews over them would erase
+              -- those origins as ordinary lexical declarations.
+              let cd := f.params.filterMap fun (x, t) =>
+                if t.endsWith " calldata" then some x else none
+              let needsViews := (s.find? fun stx =>
+                [``solSlice, ``solSliceFrom, ``solSliceTo, ``solSliceAll,
+                  ``solCalldataLocal].contains stx.getKind).isSome
+              let s ← if cd.isEmpty || !needsViews then pure s else liftMacroM do
+                match (⟨s⟩ : Term) with
+                | `(sol_raw!{ $[$stmts:sol_stmt;]* }) =>
+                  let ps : Array Term ← (stmts.extract 0 f.params.length).mapM Solidity.expandStmt
+                  let bs : Array Term ← (stmts.extract f.params.length stmts.size).mapM Solidity.expandStmt
+                  `([$ps,*] ++ RawStmt.sliceViews [$bs,*] $(quote cd))
+                | _ => Macro.throwError "expected the standalone imported body"
               let e ← elabTermEnsuringType s rawTy
               synthesizeSyntheticMVarsNoPostponing
               let e ← instantiateMVars e

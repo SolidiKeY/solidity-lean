@@ -184,6 +184,39 @@ Read-only finder and skeptic reviews confirmed that segmentation preserves
 list heads, order and lookup behavior. The coordinator owns artifact rebuilding
 and combined validation; the retained `annotate : Expr` finding is already fixed.
 
+The next attempt-5 repair preserves standalone testing calldata origins after
+the synthetic parameter declarations. It uses the original slice/local-alias
+macro trigger set and the existing lexical slice pass; the read-only
+`calldataCheck` and original parameter premises remain unchanged. A temporary
+probe of the exact modern Calldata fixture now elaborates `localAlias`, while
+`writesCopy` retains its original refusal. This is admission evidence, not a
+proof of the complete Calldata source test.
+
+Ledger assignable clauses now retain their specific missing-implementation
+diagnostic instead of a storage-frame parser error. Per-clause parser results
+still preserve independent malformed nonledger clauses as
+`solidity.specificationSyntax`. A probe of the exact NetAssignable source
+checks all three ledger refusals, both alone and with an independent simulated
+ensures-parser error. Final per-file MCP diagnostics pass for both edited
+modules. Temporary probes were removed from production source; local diagnostic
+logs remain in `.lake/entrypoints-repair/`.
+
+Read-only finder and skeptic reviews found a diagnostic-masking defect in the
+first ledger patch; the per-clause treatment above fixes it. Both final reviews
+have no remaining findings. No semantic rule, observation, input premise,
+invariant, test assertion or proof budget changed. This does not close gate 23:
+its expected-proved bounds/try/catch failures still require proof repairs, and
+the retained stronger copy proof and policy/admission status mismatches need an
+explicit decision about their stale assertions. No such assertion changes were
+made. The coordinator owns rebuilding and the complete combined rerun.
+
+A focused `indexOutOfRange` probe, using the original testing strategy and
+budgets, completes with an open leaf: `i >= 4` precedes `se9 := i < 4`,
+`se8 := (se9 ? 1 : 0)` and `se3 := se4 / se8`. The bounds failure remains
+in the lowered program; this is an unfinished proof of the failed update,
+not evidence for changing the source expectation. Its diagnostic log is
+`.lake/entrypoints-repair/fixed-bytes-probe-diagnostics.log`.
+
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
 node scripts/solidity-upstream.mjs verify
