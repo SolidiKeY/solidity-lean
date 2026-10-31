@@ -1,6 +1,6 @@
 # VA2 AU03/AU04 handoff
 
-Status: runtime recovered; AU03 supporting notation/measurement controls checked. AU03 walk/closer and AU04 sharing remain incomplete.
+Status: runtime recovered; AU03 warning and supporting notation/measurement controls checked. Dependent joined walks, broader closer work and AU04 sharing remain incomplete.
 
 Repository: `/workspace/va2-sharing`. Branch:
 `codex/solidity-automation-20261031/va2-sharing`. Exact base:
@@ -270,3 +270,109 @@ Final bounded full gates, timed automatic gate, independent reviews for each
 remaining checkpoint, exact final patch/bundle/evidence/checksums remain due.
 The existing persistent goal stays incomplete; no competing goal was created.
 No push, merge, PR or tag publication.
+
+## AU03 warning checkpoint: keep unrolling and name the loop
+
+AQ2 is implemented as a diagnostic at elaboration/import boundaries. The
+original pure program elaboration, loop lowering, `.auto`/unwind choices,
+semantics and theorem verdicts are unchanged. No option or invariant was added.
+This is the warning portion of AU03; the multi-assignment walk checkpoint is
+still incomplete.
+
+`Syntax/LoopWarnings.lean` classifies literal comparisons (signed literals and
+units included), reversed/countdown bounds, member subjects and conjunctions.
+It does not infer termination or treat a disjunction as a bound. An invariant,
+quantified invariant or explicit unwind suppresses only its own loop's notice;
+nested unannotated loops remain visible. Direct loops retain their syntax span.
+Called bodies use the callee and stable raw statement/block path at the call's
+source location. Only statically reachable bodies are scanned, once each,
+including modifier, constructor and initializer callees; unused DSL functions
+remain silent. Constructor reachability includes indirect calls too.
+
+Splice emits notices once before program elaboration. Notation emits before
+modality retries/dual readings and stops the outer syntax scan at embedded Lean
+formula holes. It queries called bodies via the existing elaboration evaluator,
+returning a quoted string; there is no new unsafe/trust site. Import emits before
+loop lowering for each actual row and separately for constructors, sharing a
+body/path deduplication set. Imported rows have synthetic parameter/return
+prefixes; only those prefixes are dropped from diagnostic paths. Imported source
+locals may already have source-adapter aliases (for example solcLocal153), which
+are reported honestly rather than relabeled as original source names.
+
+A canonical-callee-only first implementation missed uncalled imported rows:
+those rows need not occur in C.funs. The actual failed control is retained in
+`mcp-loop-notices-import-names.log`; direct original-row scanning fixes it.
+The constructor review also found that constructor-only imports bypass the
+function-row loop; the separate constructor hook fixes that actual omission.
+No expected verdict was edited. Diagnostic pins were corrected only to the
+actual existing source aliases and correct AST contract namespace suffixes.
+
+`Examples/Tactics/LoopNotices.lean` covers direct while/for/do loops, signed and
+reversed guards, units, symbolic/no-condition/disjunction silence, every
+annotation form, nesting, repeated/transitive/recursive calls, modifier bodies,
+unused callees, constructors, constructor initializer calls, symbolic modality
+readings and actual pinned imports. A constructor-only Solidity fixture under
+`tests/automation` was generated with the already available pinned solc 0.8.34
+and existing generator, under the same hard bound/network-none runner. No
+compiler/dependency was installed; no compiler-lane API or source profile was
+changed. Its FNV pin is `0xa7ef25dc4cfa9c6d`. This is a diagnostic/import test,
+not a compiler correctness proof.
+
+The positive diamond theorem proves the loop returns two (so a divergent box
+cannot pass vacuously); the negative theorem kernel-refutes return three.
+`lean_verify` on exactResult and wrongResult reports precisely propext,
+Classical.choice, Quot.sound (`mcp-warning-axioms.log`). Optional MCP source
+scanning was disabled for this axiom-only check; the separate trust/source gate
+covers that boundary. Pure classifiers/metatests and imported AST generation
+are tooling controls, not soundness certificates for a compiler.
+
+### Warning gates, measurements and reviews
+
+- Full per-file MCP diagnostics passed for helper, Splice, Notation, Import and
+  LoopNotices; final controls are in `mcp-warning-controls-and-positions.log`.
+  The archived direct-source probe emits distinct warning positions 6:3 and 7:3
+  (`VA2LoopWarningLocations.lean.txt`); it was removed after capture.
+- `bounded.py warning-checkpoint-build build` targeting PolySize, LoopNotices
+  and LoopsImport passed 238 jobs in 48.61 s wall. Sampled visible-process RSS
+  peak: 1,517,824 KiB; cgroup memory peak: 623,562,752 bytes. Hard memory/swap
+  values were asserted before execution. LoopNotices checked in 3.3 s;
+  existing LoopsImport checked in 20 s with its original theorem verdicts.
+- PolySize's existing complete size pins pass unchanged. Its file check was
+  20 s versus the frozen-base cold run's rounded 21 s: no slowdown observed
+  in this single comparison, not a statistical performance claim. Walk and
+  leaf sizes remain separately measured as in the earlier baseline table.
+- A focused paired source-import probe used the exact frozen-base importer
+  source and the current importer on the same pinned Loops AST, with shared
+  current dependencies. File checks were 1.0 s before and 1.1 s after; the
+  combined bounded build passed 39 jobs in 3.16 s wall, sampled RSS peak
+  745,520 KiB, cgroup peak 180,883,456 bytes. This isolates importer overhead;
+  it is not a second full frozen-base package build. The temporary source
+  copies/probes are archived as .lean.txt, then removed from the checkout.
+- Exact commands/results, including failed intermediate fixtures, are in work
+  `.log`/`.json` files. The generator command/result is
+  `warning-ctor-fixture-generate.log`: existing compiler version
+  0.8.34+commit.80d5c536.Emscripten.clang, 3948-byte AST, correct FNV pin.
+
+Independent read-only finder and skeptic, neither using Lean/server/builds,
+reviewed this checkpoint. Their countdown/compound guard, constructor/import,
+initializer, hygiene, source-path and missing-uncalled-row findings were fixed
+and exercised by actual controls. Both final source reviews report no confirmed
+remaining blocking defect; performance/affected gates above subsequently passed.
+Evidence transcription: `work/reviews-warning.md`. Scope is still the warning
+portion only. Root/helper/example registrations and module-map rows are narrow
+additions; Rules.lean and VA1 files are untouched.
+
+Remaining AU03/AU04 obligations in the previous whole-assignment list still
+apply, except the warning implementation/control/PolySize remeasure portion is
+now checked. Full final run-lean, complete import/TestSuite timing/strict gates,
+final trust/axiom audits and remaining independent proof reviews are still due.
+The full persistent goal remains incomplete. No push/merge/PR/tag.
+
+Warning checkpoint static gates: `node scripts/check-automatic.mjs --strict`
+passed (491 automatic, 61 budgeted, 0 manual; 11 refuted; 0 pending).
+`bash scripts/check-trust.sh` passed (1051 sources, 248 inventoried sites,
+0 findings); no temporary benchmark sources remain. `git diff --check` passed.
+`bash scripts/check-doc-paths.sh` remains failed with 48 references; its raw
+output is byte-identical to the exact frozen-base result. The comparison
+passed; the underlying checker was not relabeled pass. Full final gates and
+unimplemented AU03/AU04 items remain pending.

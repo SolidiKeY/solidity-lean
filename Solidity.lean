@@ -22,6 +22,7 @@ import Solidity.Syntax.Join
 import Solidity.Syntax.Elab
 import Solidity.Syntax.Elab.SliceCopy
 import Solidity.Syntax.Quote
+import Solidity.Syntax.LoopWarnings
 import Solidity.Syntax.Splice
 import Solidity.FreshNames
 import Solidity.Semantics
@@ -261,6 +262,7 @@ import Solidity.Examples.Tactics.TermTaclets
 import Solidity.Examples.Tactics.Branch
 import Solidity.Examples.Tactics.Join
 import Solidity.Examples.Tactics.JoinControls
+import Solidity.Examples.Tactics.LoopNotices
 import Solidity.Examples.Tactics.LongContext
 import Solidity.Examples.Tactics.PolySize
 import Solidity.Examples.Tactics.CallSummary

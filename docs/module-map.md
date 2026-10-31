@@ -187,6 +187,7 @@ commands; it never enters the core import graph.
 | `Syntax/Elab/Arms.lean` | `ElabRec` and the large arms that take it (`hoistWith`, `abiEncodeWith`, `elabCallRetWith`, `hoistStmtWith`, `elabStmtPWith`, `elabStmt1With`). |
 | `Syntax/Elab/Stmt.lean` | The `mutual` block that ties the arms (`elabRec`): statements, calls, blocks. |
 | `Syntax/Quote.lean` | The scoped syntax quoted (`Prog.quote`, `Idx` as `here`/`there`, proofs `Eq.refl`), contexts shared and the term hash-conses (`quoteShared`); `Prog.define` declares a block for the kernel to check. |
+| `Syntax/LoopWarnings.lean` | AU03 literal-loop diagnostic classification and source spans; reachable callee/constructor/initializer paths, annotations suppress only the annotated loop; no change to unrolling. |
 | `Syntax/Splice.lean` | The elaborator's entry points (`elabProgS`, `elabProgAtS`, `ctorProgS`), imported-source name provenance, `sol[C]{…}`/`sol{…}` (the scoped block, quoted and hash-consed), and their pins (a local out of scope or at another type an elaboration error). |
 | `FreshNames.lean` | `FreshNames.ofTable`: the examples' names for the rules' fresh variables, one table per example; `FreshNames.clashes`. |
 | `SpecSyntax.lean` | The specification language (`SolSpec.g4`: `SpecExpr`, `spec!(…)`), fixed unsigned literals `uint(n)`, and a function's clauses (`FunSpec`). |
@@ -1002,6 +1003,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/StorageSuite.lean`, `Examples/Tactics/StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
 | `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert` (a check: `[ assert(false); ] true` is not valid). |
 | `Examples/Tactics/Join.lean` | The join after a conditional (`ifElseJoin`): `n` sequential `if (c) { x = x + 1; }` in `5n + 3` nodes and one leaf, pinned; the M6 family proved. |
+| `Examples/Tactics/LoopNotices.lean` | Located literal-loop warnings with annotation/nesting/callee/import controls and unchanged diamond-result/refutation certificates; a pinned constructor-only source fixture. |
 | `Examples/Tactics/JoinControls.lean` | Conditional-term notation, lazy branch evaluation, signed-offset reader controls and inhabited false bounds (AU03). |
 | `Examples/Tactics/LongContext.lean` | Kernel long-array certificate with a supplied local in a nonempty peeled context; true supplied-candidate and missing-argument refusal controls. |
 | `Examples/Tactics/PolySize.lean` | The size of symbolic execution (`docs/automation.md`, M8): `#proof_size` (nodes, branches, open goals, the largest leaf in `Fml.tmSize`) of sequential `if`s that both assign, literal-bounded loops under their invariants, and the two combined, pinned for small `k`. |
