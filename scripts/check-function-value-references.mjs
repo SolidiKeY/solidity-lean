@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Optional source reference for internal function values with memory-array
 // arguments (docs/feature-work/finite-dispatch.md). Core Lean remains dependency-free.
-// Usage: node scripts/check-memory-internal-calls.mjs SOLJSON MODULES_DIR [cancun|osaka]
+// Usage: node scripts/check-function-value-references.mjs SOLJSON MODULES_DIR [cancun|osaka]
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -37,6 +37,8 @@ const vectors = [
   ['branches', [true], [13n]],
   ['branches', [false], [7n]],
   ['unassigned', [], '4e487b71' + '0'.repeat(62) + '51'],
+  ['unassignedStored', [], '4e487b71' + '0'.repeat(62) + '51'],
+  ['calleeOrderScalar', [], {legacy:[12n], viaIR:[11n]}],
   ['deleted', [], '4e487b71' + '0'.repeat(62) + '51'],
   ['narrow', [], [200n]],
   ['storageAlias', [], [6n, 6n]],
@@ -49,6 +51,7 @@ const vectors = [
   ['nominalQ', [], [9n]],
   ['falseObservation', [], '4e487b71' + '0'.repeat(62) + '01'],
 ];
+const zeroStorageValue = ['deleted', 'unassignedStored'];
 const observations = [];
 for (const viaIR of [false, true]) for (const optimizer of [false, true]) {
   const out = JSON.parse(compile(JSON.stringify({language:'Solidity',
@@ -66,10 +69,11 @@ for (const viaIR of [false, true]) for (const optimizer of [false, true]) {
       code:hexToBytes('0x' + c.evm.deployedBytecode.object),
       data:hexToBytes(iface.encodeFunctionData(name,args)),gasLimit:30000000n});
     let observed;
-    if (typeof expected === 'string' && !viaIR && expected.endsWith('51') &&
+    if (typeof expected === 'string' && !viaIR && zeroStorageValue.includes(name) &&
         result.exceptionError?.error?.startsWith('invalid JUMP')) {
-      // Legacy codegen jumps to an unassigned *storage* function value's
-      // zero tag: an exceptional halt without data. viaIR raises Panic(0x51).
+      // Legacy codegen jumps to a zero *storage* function value (never
+      // assigned or deleted): an exceptional halt without data. viaIR raises
+      // Panic(0x51), as both pipelines do for an unassigned local value.
       // Both are failures; the model retains the Panic(0x51) bytes.
       observed = 'invalid JUMP';
     } else if (typeof expected === 'string') {

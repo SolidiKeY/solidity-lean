@@ -395,13 +395,14 @@ def MemArgs : Contract := contract!{
 local instance : InContract := ⟨MemArgs⟩
 
 /-- The signatures: the location is kept, so storage, `bytes` and scalar
-parameters are not memory-array candidates; a narrow element keeps its width. -/
+parameters are not memory-array candidates; a narrow element is not spelled
+(its width rows are not carried by a capture), so it is no candidate. -/
 example : (MemArgs.funs.map fun (n, d) => (n, FunDecl.sigTy? MemArgs d)) =
     [("sum2", some "function(uint[]memory)returns(uint)"),
      ("bump", some "function(uint[]memory)returns(uint)"),
      ("scalar", some "function(uint)returns(uint)"),
      ("stored", some "function(uint[]storage)returns(uint)"), ("bytesArg", none),
-     ("narrow", some "function(uint8[]memory)returns(uint)"),
+     ("narrow", none),
      ("pair", some "function(uint[]memory,uint)returns(uint)"),
      ("setFirst", some "function()returns(uint)"),
      ("setOp", some "function(bool)"),
@@ -424,6 +425,7 @@ private def memAlias := sol[MemArgs]{
   assert(r == 11); assert(xs[0] == 11); assert(calls == 1);
 }
 
+/-- `h(xs)` with `h = bump`: the run returns, its asserts `r == 11`, `xs[0] == 11` hold. -/
 theorem memAlias_run : (Prog.run (State.init MemArgs) memAlias).toOption.isSome = true := by
   decide +kernel
 
@@ -435,6 +437,7 @@ private def memDirect := sol[MemArgs]{
   assert(r == 11); assert(xs[0] == 11); assert(calls == 1);
 }
 
+/-- `bump(xs)` called directly on the same input: the same asserts hold. -/
 theorem memDirect_run : (Prog.run (State.init MemArgs) memDirect).toOption.isSome = true := by
   decide +kernel
 
@@ -446,6 +449,7 @@ private def memCopy := sol[MemArgs]{
   assert(r == 11); assert(values[0] == 1);
 }
 
+/-- `h(values)` with `h = bump`: the storage operand is copied, `values[0] == 1`. -/
 theorem memCopy_run : (Prog.run (State.init MemArgs) memCopy).toOption.isSome = true := by
   decide +kernel
 
@@ -457,6 +461,7 @@ private def memOrder := sol[MemArgs]{
   assert(r == 101); assert(values[0] == 9);
 }
 
+/-- `h(values, setFirst())`: `values` is copied before `setFirst()` writes it, `r == 101`. -/
 theorem memOrder_run : (Prog.run (State.init MemArgs) memOrder).toOption.isSome = true := by
   decide +kernel
 
@@ -469,6 +474,7 @@ private def memBranches := sol[MemArgs]{
   assert(a == 7); assert(b == 13); assert(xs[0] == 13); assert(c == 17);
 }
 
+/-- `op(xs)` after `setOp(false)` and `setOp(true)`, and `viaParam(sum2, xs)`. -/
 theorem memBranches_run :
     (Prog.run (State.init MemArgs) memBranches).toOption.isSome = true := by
   decide +kernel
@@ -481,6 +487,7 @@ private def storAlias := sol[MemArgs]{
   assert(r == 6); assert(values[0] == 6);
 }
 
+/-- `h(values)` with `h = stored`: the storage alias is written, `values[0] == 6`. -/
 theorem storAlias_run : (Prog.run (State.init MemArgs) storAlias).toOption.isSome = true := by
   decide +kernel
 
@@ -500,16 +507,21 @@ private def structArgs := sol[MemArgs]{
   assert(u == 9); assert(tok.value == 8);
 }
 
+/-- `h(t)`, `g(tok)`, `h(c)`: struct arguments by reference at their location. -/
 theorem structArgs_run :
     (Prog.run (State.init MemArgs) structArgs).toOption.isSome = true := by
   decide +kernel
 
-/-- An `Account` function's tag is no candidate of `function (Token memory)`. -/
+/-- Model-only behaviour on a program solc rejects (`h = tokOther` is a
+type error there): an `Account` function's tag has no arm in a
+`function (Token memory)` dispatch, so the call reverts. -/
 theorem structWrongNominal : ¬ (⊨ᶠ dl{ ⟨ Token memory t;
     function (Token memory) returns (uint) h = tokOther; uint r = h(t); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
-/-- An unassigned value reverts, as a deleted one does. -/
+/-- A never-assigned storage function value reverts. solc's IR pipeline
+raises `Panic(0x51)`; its legacy pipeline jumps to an invalid destination
+(finite-dispatch.md, "Recorded deviations"): both are failures. -/
 theorem memUnassigned : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1); uint r = op(xs); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
@@ -518,8 +530,10 @@ theorem memNoCopy : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1);
     function (uint[] memory) returns (uint) h = bump; uint r = h(xs); assert(xs[0] == 0); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
-/-- A scalar function's tag is not a memory-array candidate: the dispatch
-has no branch for it and reverts. -/
+/-- Model-only behaviour on a program solc rejects (`h = scalar` is a type
+error there): the elaborator does not type-check a function value's
+assignment, and the dispatch has no arm for a scalar function's tag, so the
+call reverts. -/
 theorem memWrongCandidate : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1);
     function (uint[] memory) returns (uint) h = scalar; uint r = h(xs); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)

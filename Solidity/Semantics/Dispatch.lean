@@ -6,9 +6,10 @@ import Solidity.Syntax.DispatchChain
 
 A finite dispatch (`DispatchArm.chain`) runs exactly the first arm whose
 guard holds, its locals popped, and the failure statement when no guard
-holds. Specialised to the elaborator's guards, `tag == tᵢ` over distinct
-candidate tags, a run with tag value `tᵢ` is the run of candidate `i`'s
-ordinary internal call: the dispatched call and the direct call agree per tag
+holds. For guards that evaluate as `tag == tᵢ` over candidate tags, a run
+with tag value `tᵢ` runs arm `i` (`chain_tag`). Two links to the elaborator
+are by construction, not proved here: that `fnDispatch`'s guards evaluate so,
+and that arm `i`'s body is the direct call of candidate `i`
 (`docs/feature-work/finite-dispatch.md`, "Dispatch correctness").
 -/
 
@@ -66,11 +67,10 @@ theorem chain_none {Γ : Ctx} (as : List (DispatchArm C Γ)) (fail : Stmt C Γ �
     rw [chain_miss b as fail σ (hall b (List.mem_cons_self ..))]
     exact ih fun b' hb' => hall b' (List.mem_cons_of_mem _ hb')
 
-/-- **Per-tag dispatch correctness.** Arms guarded by `tag == tᵢ`
+/-- **Per-tag selection.** Arms guarded by `tag == tᵢ`
 (`guard`: in `σ` each guard of the chain is the comparison of the tag's value `v`
 with the arm's candidate tag `tagOf`): when `v` is the tag of arm `a`, and no
-earlier arm has that tag, the dispatch runs `a`'s body, the direct internal
-call of `a`'s candidate. -/
+earlier arm has that tag, the dispatch runs `a`'s body. -/
 theorem chain_tag {Γ : Ctx} (σ : State C Γ) (tagOf : DispatchArm C Γ → Nat) (v : Nat)
     (pre : List (DispatchArm C Γ)) (a : DispatchArm C Γ) (post : List (DispatchArm C Γ))
     (fail : Stmt C Γ Γ)
@@ -89,6 +89,9 @@ end DispatchArm
 
 /-- info: 'Solidity.DispatchArm.chain_tag' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms DispatchArm.chain_tag
+
+/-- info: 'Solidity.DispatchArm.chain_select' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms DispatchArm.chain_select
 
 /-- info: 'Solidity.DispatchArm.chain_none' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms DispatchArm.chain_none

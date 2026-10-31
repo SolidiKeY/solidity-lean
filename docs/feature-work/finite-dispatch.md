@@ -152,76 +152,102 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
 ### Supported
 
 - **Signature.** `FunDecl.sigTy?` spells a parameter `T[] memory` or
-  `T[] storage` whose element is a value type without a marker row (no
-  `bytesN`, enum, string or function element) as `T[]memory`/`T[]storage`,
-  and a struct parameter as its table name and location (`Tokenmemory`,
-  `Tokenstorage`; `fnRefStruct?`: nonrecursive by `structNonrec`, mapping-free
-  in memory). A single return `T[] memory` is spelled `T[]memory`, beside the
+  `T[] storage` whose element is a 256-bit word, `bool` or `address` as
+  `T[]memory`/`T[]storage` (`fnRefElem?`), and a struct parameter as its
+  written name and location (`Tokenmemory`, `Tokenstorage`; `fnRefStruct?`:
+  the struct `Contract.structName?` resolves, nonrecursive by
+  `structNonrec`, mapping-free in memory). The written name is the part of
+  the table name before its members (`structDisplay`), so the key is
+  nominal. A single return `T[] memory` is spelled `T[]memory`, beside the
   existing `bytesmemory`. `canonFnTy` reads an array element as a value
   component does (`uint256`/`address` are `uint`). Calldata, `bytes`,
-  nested, nominal-element or recursive references keep no spelling, so no
-  dispatch lists them. The source side (`FiniteDispatch.Ty.memoryArray`,
-  `storageArray`, `nominal`) parses the same components and requires the
-  exact source signature as before: an `address[]`/`uint[]` collision in the
-  native key is refused. A struct's native key is its source name
-  (`struct C.P`), not its shape, so `P` and a same-shaped `Q` stay distinct
-  (`nominalQ`).
-- **Capture and aliasing.** `fnDispatch` and `fnMemoryDispatch` capture each
-  argument once, left to right (`dispatchCaptures`): a memory reference as a
+  narrow, `bytesN`, enum, function, nested or struct elements and recursive
+  structs keep no spelling, so no dispatch lists them. The source side
+  (`FiniteDispatch.Ty.memoryArray`, `storageArray`, `nominal`) parses the
+  same components and requires the exact source signature as before: an
+  `address[]`/`uint[]` collision in the native key is refused. A struct's
+  native key is its source name (`struct C.P`, read only after the literal
+  `struct ` keyword), not its shape: a same-shaped struct's function is not
+  a candidate and its body is not scanned (`struct candidates are nominal`
+  in `scripts/finite-dispatch.test.mjs`; `C.P`/`C.Q` keys in
+  `scripts/dispatch-signatures.test.mjs`).
+- **Capture and aliasing.** The arguments of a call through a function value
+  are not hoisted by the caller (`hoistCallArgs`, the expression path in
+  `Arms.lean`): `fnDispatch` and `fnMemoryDispatch` capture each argument
+  once, left to right (`dispatchCaptures`), a later call argument running
+  after an earlier operand's capture. A memory reference is captured as a
   memory local (`fnRefElem?`, `fnRefStruct?`): a memory operand is the
   reference itself, so the callee's writes are visible to the caller; a
   storage operand is copied at its position. A storage reference is captured
   as a storage alias of its path, so the callee writes the caller's storage.
   Each branch is the ordinary internal call of its candidate on the captured
   names (`hoistCallArgs` keeps the stable capture without a second copy).
+- **Calldata.** A calldata operand (or a memory name bound to one) passed to
+  a memory parameter of a function value is refused (`calldataCheck` with
+  the names of function type): solc copies it, the capture would share it.
+  Through a callee that is not a name, any calldata-rooted argument is.
 - **Memory returns.** `fnMemoryDispatch` binds one shared memory destination
-  of the return's type in every branch, now after the argument captures; a
+  of the return's type in every branch, after the argument captures; a
   zero-argument dispatch keeps its original capture of the tag first.
 - **Callee order.** solc's legacy code reads the callee value after the
-  arguments, its IR pipeline before them (EVM observation `calleeOrder`).
-  Under `evalOrder .viaIR` the tag is captured before the arguments; the
-  legacy schedule keeps the original order. This applies to scalar dispatch
-  too.
+  arguments, its IR pipeline before them (EVM observations `calleeOrder`,
+  `calleeOrderScalar`). Under `evalOrder .viaIR` a named callee's tag is
+  captured before the arguments; under the legacy schedule after them. This
+  applies to scalar dispatch too (`calleeOrderScalar`).
 - **Unassigned values.** A zero or deleted tag reaches the final branch:
   `Panic(0x51)` bytes in a self-call or failure-retaining frame, otherwise a
   revert.
 
 ### Recorded deviations
 
-- Legacy code calling a *deleted storage* function value jumps to an
-  invalid destination (an exceptional halt without data); viaIR raises
-  `Panic(0x51)`. The model fails in both and keeps the `Panic(0x51)` bytes.
-  A local unassigned value panics in both pipelines.
+- Legacy code calling a zero *storage* function value (never assigned,
+  `unassignedStored`, or deleted, `deleted`) jumps to an invalid destination,
+  an exceptional halt without data; viaIR raises `Panic(0x51)`. The model
+  fails in both and keeps the `Panic(0x51)` bytes. A local unassigned value
+  panics in both pipelines (`unassigned`). The EVM script accepts the legacy
+  halt only for those two storage vectors.
 - Under viaIR, solc copies a storage argument to memory after all arguments
-  ran (`argumentOrder`: `901`, legacy `101`). The model copies at the
+  ran (`argumentOrder`: `901`, legacy `101`); this holds for storage
+  structs passed to memory struct parameters too. The model copies at the
   argument's position in both schedules, for direct calls
-  (`argumentOrderDirect`, pre-existing) and dispatched calls alike, so the
-  dispatch stays identical to the direct call. The viaIR replay leaves these
-  two vectors out.
+  (`argumentOrderDirect`, pre-existing) and dispatched calls alike. The
+  viaIR replay leaves the two order vectors out, so the model's viaIR copy
+  point is unpinned.
+- A callee that is not a name (`fs[i](…)`, `s.f(…)`, `choose(b)(…)`) is
+  evaluated before the arguments in both schedules (`callValue`,
+  pre-existing): under the legacy schedule solc evaluates it after them.
+- The elaborator does not type-check a function value's assignment
+  (`h = scalar` for a `function(uint[] memory)` local); solc rejects such
+  programs. The dispatch then has no arm for that tag and reverts
+  (`memWrongCandidate`, `structWrongNominal`: model-only behaviour).
 
 ### Tests
 
 - `Examples/Tactics/FunctionTypes.lean` §6: candidate signatures (storage,
-  `bytes`, scalar, narrow and struct controls), the printed dispatch,
-  kernel-checked runs (memory aliasing and the same observation by the
-  direct call, storage copy, storage alias, struct arguments in memory and
-  storage, branches, argument order), unassigned, wrong-candidate,
-  wrong-nominal and false-observation refutations, and a
-  `sol_symex`/`sol_close` proof over every typed state.
+  `bytes`, scalar, narrow and struct controls), the printed dispatch (which
+  arms are listed), kernel-checked runs (memory aliasing and, separately,
+  the same asserts by the direct call; storage copy, storage alias, struct
+  arguments in memory and storage, branches, argument order), the
+  unassigned and false-observation refutations, model-only refutations on
+  ill-typed assignments, and a `sol_symex`/`sol_close` proof over every
+  typed state.
 - `scripts/finite-dispatch.test.mjs`: replay of
   `tests/solc/FunctionValueReferences.sol` through `solc_import` in both
-  schedules; admission of exact memory and storage candidates and of a
-  scalar argument beside a memory-byte return; refusal of address/uint
-  element collisions, recursive structs, external struct parameters,
-  struct returns, nominal, byte and nested array elements, calldata
-  references, storage mappings, storage-array returns, several returns with
-  a memory one and external memory-array parameters and returns.
+  schedules (its `narrow()` refused); admission of exact memory and storage
+  candidates and of a scalar argument beside a memory-byte return; nominal
+  struct candidates; refusal (by the dispatch diagnostic or the reader's
+  function-type refusal, checked by name) of address/uint element
+  collisions, external struct parameters, struct returns, struct, byte and
+  nested array elements, calldata references, storage mappings,
+  storage-array returns, several returns with a memory one and external
+  memory-array parameters and returns; elaborator refusal of a recursive
+  struct; refusal of calldata passed to a function value's memory parameter.
 - `scripts/dispatch-signatures.test.mjs`: the parsed source components keep
   location and nominal identity; calldata, byte, nested and function
   elements stay unparsed.
 - `scripts/check-function-value-references.mjs SOLJSON MODULES_DIR [cancun|osaka]`:
   the pinned solc 0.8.34 on ethereumjs 10.1.3, legacy/viaIR × optimizer
-  off/on (76 executions per EVM version; cancun and osaka both pass), the
+  off/on (84 executions per EVM version; cancun and osaka both pass), the
   source of every expected observation above.
 
 ## Dispatch correctness
@@ -230,27 +256,28 @@ Lane CF2, checkpoint 4. `fnDispatch` builds its chain with
 `DispatchArm.chain` (`Syntax/DispatchChain.lean`): one arm per candidate,
 guard `tag == tᵢ` with the candidate's tag `tᵢ` (distinct: positions in
 `Contract.funs`), body the elaboration of the ordinary internal call `gᵢ(y…)`
-on the captured arguments (`elabScope Γ [call g]`, the same path a direct call
+on the captured arguments (`elabScope Γ [call g]`, the path a direct call
 `gᵢ(y…)` takes), then the unassigned-value failure. `Semantics/Dispatch.lean`
 proves, for every chain and state:
 
 - `DispatchArm.chain_select`: the first arm whose guard holds runs (its
   locals popped), every earlier guard being false;
 - `DispatchArm.chain_none`: with every guard false, the failure runs;
-- `DispatchArm.chain_tag`: with guards `tag == tᵢ` evaluating to
-  `decide (v = tᵢ)`, a run whose tag value is `tᵢ` (no earlier arm with that
-  tag) is the run of arm `i`'s body, the direct call of candidate `i`.
+- `DispatchArm.chain_tag`: for guards that evaluate to `decide (v = tᵢ)`,
+  a run whose tag value is `tᵢ` (no earlier arm with that tag) runs arm `i`.
 
 All three are over `Stmt.runC` (equal to `Stmt.run` by `Stmt.runR_eq`) and
 pinned with `#print axioms` (`propext`, `Classical.choice`, `Quot.sound`)
-in the module and in `TrustAudit.lean`. The memory-return dispatch
-(`fnMemoryDispatch`) is written as raw `if … else if …` and elaborates to the
-same nested `ite` shape, so the lemmas apply to it after unfolding; it does
-not construct `DispatchArm.chain` itself. That the arm body is the direct
-call is by construction (both are `elabCall` on the same callee and names),
-not a theorem about the elaborator, which is `partial`; kernel-checked runs
-compare the two on inhabited inputs (`memAlias_run` and `memDirect_run` in
-`Examples/Tactics/FunctionTypes.lean`).
+in the module and in `TrustAudit.lean`.
+
+What is not proved: (1) that the elaborated guards
+(`checkIn … (.binop .eqB tag (.num t))`) evaluate to `decide (v = tᵢ)`;
+(2) that an arm's body is the direct call of its candidate: both are
+`elabCall` on the same callee and names, by construction of the elaborator,
+which is `partial`. `memAlias_run`/`memDirect_run` check the same asserts
+for the dispatched and the direct call on one input; no theorem relates the
+two runs. `fnMemoryDispatch` writes raw `if … else if …` and is not
+`DispatchArm.chain`; the lemmas do not cover it.
 
 ### For lane-soundness (`roadmap-l3-20261030/lane-soundness`)
 
@@ -280,4 +307,52 @@ through internal function values, that lane needs:
    the arguments.
 
 These touch `Solidity/Source/**`, which this lane does not edit.
+
+## Review (lane CF2)
+
+Read-only finder and skeptic reviews (no Lean server) of checkpoints 1–4,
+with the confirmed findings and their fixes:
+
+- Finder 1 (confirmed by the import replay): for a function-value callee the
+  caller hoisted call arguments before `dispatchCaptures`, so a later
+  `setFirst()` ran before an earlier storage operand's copy, and before the
+  viaIR tag capture. Fixed: such arguments are no longer hoisted
+  (`hoistCallArgs`, the expression path in `Arms.lean`).
+- Finder 2: calldata passed to a function value's memory parameter was
+  shared. Fixed: refused in `calldataCheck` (both the elaborator's and the
+  import's call).
+- Finder 3: a user-defined value type named `struct…` parsed as a struct
+  after whitespace removal. Fixed: the nominal case needs the `struct `
+  keyword.
+- Finder 4 / skeptic 9: a non-name callee is evaluated first under both
+  schedules. Pre-existing; recorded above.
+- Finder 6: `bytes1[] memory` spells as `bytes memory` in the elaborator.
+  Pre-existing; a dead arm at worst (the frontend never admits a `bytes1[]`
+  candidate), not fixed.
+- Finder 7 / import replay: narrow element captures lost their width rows
+  (`narrow()` failed to elaborate). Fixed by refusing narrow elements on
+  both sides.
+- Import replay: imported struct names are table encodings
+  (`P{…}`); the keys now use the written name (`structDisplay`) and
+  `Contract.structName?`.
+- Import replay: a memory return beside arguments had no shape
+  (`exprShape`); fixed.
+- Finder 8, skeptic 11–12: stale docstrings, missing theorem docstrings,
+  the `chain_select` pin and the script's usage line; fixed.
+- Skeptic 1: the printed-dispatch example was a placeholder; filled from the
+  elaborator's output.
+- Skeptic 2–3: the docs claimed more than `chain_tag` proves and covered
+  `fnMemoryDispatch`; reworded (above, and in the module docstring and the
+  module map).
+- Skeptic 4: nominal evidence; the admission test with a same-shaped poison
+  struct function was added.
+- Skeptic 5: wrong-candidate refutations are on ill-typed programs;
+  labelled model-only.
+- Skeptic 6–7: refusal tests now require the dispatch diagnostic or the
+  reader's function-type refusal; the external memory-array parameter case
+  was added; the recursive struct moved to an elaborator-level check.
+- Skeptic 8: the legacy invalid-jump escape is limited to zero storage
+  values, and a never-assigned storage vector was added.
+- Skeptic 10: the storage-copy deviation names structs and says the viaIR
+  copy point is unpinned.
 

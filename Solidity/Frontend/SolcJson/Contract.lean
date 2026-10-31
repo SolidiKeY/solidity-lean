@@ -263,8 +263,9 @@ namespace FiniteDispatch
 
 /-- Dispatch components retain the source ABI kind. Word and byte widths
 are bounded in the representation; a word's width is eight times `width + 1`.
-Other references (storage, calldata, nested, nominal elements) and nominal types
-deliberately have no admitted case yet. -/
+Internal memory/storage arrays of a 256-bit word, `bool` or `address`, and
+structs by source name at a location, are the admitted references; calldata,
+nested, narrow, byte or nominal-element arrays have no case. -/
 inductive Ty where
   | bool
   | word (signed : Bool) (width : Fin 32)
@@ -293,7 +294,7 @@ partial def Ty.native : Ty → String
   | .memoryBytes => "bytesmemory"
   | .memoryArray elem => elem.native ++ "[]memory"
   | .storageArray elem => elem.native ++ "[]storage"
-  | .nominal name storage => s!"struct {name}{if storage then "storage" else "memory"}"
+  | .nominal name storage => s!"struct#{name}{if storage then "storage" else "memory"}"
   | .bytes width => s!"bytes{width.val + 1}"
   | .function external parameters returns =>
     fnTyStr (parameters.map Ty.native) (returns.map Ty.native) external
@@ -319,12 +320,15 @@ def parseType : Nat → String → Option Ty
     -- solc's type strings spell these reserved qualifiers as separate words.
     -- Nominal names are never recognized by the scalar cases below.
     let source := (((source.replace " pure" "").replace " view" "").replace " payable" "").replace " internal" ""
+    -- solc spells a struct `struct C.P`: keep that keyword's separator, so
+    -- a type named `structP` (a user-defined value type) is never a struct
+    let source := source.replace "struct " "struct#"
     let source := String.mk (source.toList.filter (!Char.isWhitespace ·))
     if source == "bytesmemory" then return .memoryBytes
-    if source.startsWith "struct" then
+    if source.startsWith "struct#" then
       let some (suffix, storage) := [("memory", false), ("storagepointer", true),
           ("storageref", true), ("storage", true)].find? (source.endsWith ·.1) | none
-      let name := (source.drop 6).dropRight suffix.length
+      let name := (source.drop 7).dropRight suffix.length
       guard (!name.isEmpty && name.all fun c => c.isAlphanum || c == '_' || c == '$' || c == '.')
       return .nominal name storage
     -- a memory or storage array of a word, bool or address; never a byte,
@@ -334,7 +338,12 @@ def parseType : Nat → String → Option Ty
         ("[]storageref", true), ("[]storage", true)].find? (source.endsWith ·.1) then
       let elem ← parseType fuel (source.dropRight suffix.length)
       match elem with
-      | .bool | .word .. | .address =>
+      | .bool | .address =>
+        return if storage then .storageArray elem else .memoryArray elem
+      -- a 256-bit word only: the elaborator's capture carries no narrow width
+      | .word signed width =>
+        guard (width.val == 31)
+        let elem := Ty.word signed width
         return if storage then .storageArray elem else .memoryArray elem
       | _ => none
     if source == "bool" then return .bool
@@ -408,8 +417,9 @@ private def sourceComponent (fuel : Nat) (p : Json) : Option Ty :=
   parseType fuel source
 
 /-- Build native signatures from the same type spelling the body reader
-emits, preserving exact source signatures separately. Reference parameters
-make `native = none`, as in `FunDecl.sigTy?`. Nominal scalar erasures can have
+emits, preserving exact source signatures separately. A reference parameter
+outside the admitted arrays and structs makes `native = none`, as in
+`FunDecl.sigTy?`; a struct's native key is its source name. Nominal scalar erasures can have
 a native key but no source type, so a matching call is refused. -/
 def candidate (structs : Structs) (id : Int) (modelName : String) (declaration : Json) : Candidate :=
   let fuel := declaration.compress.length + 1

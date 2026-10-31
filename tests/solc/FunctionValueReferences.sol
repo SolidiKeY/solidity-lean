@@ -11,6 +11,8 @@ contract FunctionValueReferences {
     P stored;
     function(uint[] memory) internal returns (uint) op;
     function(uint[] memory, uint) internal returns (uint) op2;
+    function(uint[] memory) internal returns (uint) never;
+    function(uint) internal returns (uint) sop;
 
     function sum2(uint[] memory xs) internal pure returns (uint) { return xs[0] + xs[1]; }
     function bump(uint[] memory xs) internal returns (uint) { calls++; xs[0] += 10; return xs[0]; }
@@ -30,6 +32,9 @@ contract FunctionValueReferences {
     function bumpP(P memory p) internal pure returns (uint) { p.a += 1; return p.a; }
     function sumQ(Q memory q) internal pure returns (uint) { return q.a + q.b; }
     function bumpStoredP(P storage p) internal returns (uint) { p.a += 7; return p.a; }
+    function sopA(uint x) internal pure returns (uint) { return x + 1; }
+    function sopB(uint x) internal pure returns (uint) { return x + 2; }
+    function swapSop() internal returns (uint) { sop = sopB; return 10; }
     function narrowFirst(uint8[] memory xs) internal pure returns (uint) { return xs[0]; }
 
     function aliasing() public returns (uint, uint, uint) {
@@ -78,6 +83,16 @@ contract FunctionValueReferences {
         function(uint[] memory) internal returns (uint) h;
         uint[] memory xs = new uint[](1);
         return h(xs);
+    }
+
+    function unassignedStored() public returns (uint) {
+        uint[] memory xs = new uint[](1);
+        return never(xs);
+    }
+
+    function calleeOrderScalar() public returns (uint) {
+        sop = sopA;
+        return sop(swapSop());
     }
 
     function deleted() public returns (uint) {

@@ -210,6 +210,12 @@ with only value parameters retain the ordinary capture policy. -/
 partial def hoistCallArgs (f : String) (args : List RawExpr) :
     ElabM (SProg C × List RawExpr) := do
   let funs := (← read).funs
+  -- A call through a function value captures its own arguments, in order and
+  -- at their formal types, after the tag under the source-order schedule
+  -- (`dispatchCaptures`); hoisting a later call argument here would run it
+  -- before an earlier storage operand is copied.
+  if f != "constructor" && funs.all (·.1 != f) && (fnTyOf? C (← ctx) f).isSome then
+    return ([], args)
   let d := if f == "constructor" then C.ctor else lookupBy f funs
   let some d := d | return ← hoistArgs args
   unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args
@@ -282,7 +288,7 @@ partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (arg
   let mut as : List RawExpr := []
   for (a, c) in args.zip ps do
     let y := toString (← freshCapture "se")
-    pre := pre ++ [match fnRefElem? C c, fnRefStruct? c with
+    pre := pre ++ [match fnRefElem? C c, fnRefStruct? C c with
       | some (e, false), _ => .declMemory (.array (.named e)) y (some a)
       | some (e, true), _ => .declStorage (.array (.named e)) y (some a)
       | none, some (st, false) => .declMemory (.named st) y (some a)
@@ -309,7 +315,7 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   -- a reference parameter or return: no function's signature is spelled so
   -- (`FunDecl.sigTy?`), so the dispatch would list none; a memory or storage
   -- array of a plain value element (`fnRefElem?`) is the reference parameter spelled
-  if let some c := (ps.filter fun c => (fnRefElem? C c).isNone && (fnRefStruct? c).isNone) ++ rs |>.find? fun c =>
+  if let some c := (ps.filter fun c => (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone) ++ rs |>.find? fun c =>
       (fnCompTy? C c).isNone then
     throw s!"{h}(…): a function type with a {c} parameter or return is not modelled \
       (docs/semantic-gaps.md, \"Function types\")"
@@ -365,7 +371,7 @@ partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
   unless ps.length == args.length do
     throw s!"memory dispatch takes {ps.length} arguments, not {args.length}"
   if let some c := ps.find? fun c =>
-      (fnRefElem? C c).isNone && (fnRefStruct? c).isNone && (fnCompTy? C c).isNone then
+      (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
     throw s!"memory dispatch: a function type with a {c} parameter is not modelled"
   let scope := (← read).funs
   let taken := fnTaken C

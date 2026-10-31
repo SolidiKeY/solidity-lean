@@ -137,6 +137,19 @@ def fnTyOf? (Γ : ECtx) (h : String) : Option String :=
     | some _ => none
     | none => fnRow? C.widths h).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))
 
+/-- A function type's array parameter component at a location
+(`uint[]memory`, `uint[]storage`; `FunDecl.sigTy?`): its element's spelling,
+a plain value type, and whether it is a storage reference. -/
+def fnRefElem? (c : String) : Option (String × Bool) := do
+  let (loc, storage) ← if c.endsWith "[]memory" then some ("[]memory", false)
+    else if c.endsWith "[]storage" then some ("[]storage", true) else none
+  let e := c.dropRight loc.length
+  -- a 256-bit word, `bool` or `address` element; a narrow element's width
+  -- rows are not carried by the capture, so it is refused
+  guard (!fnTy? e && (lookupBy e C.enums).isNone && (bytesTy? e).isNone)
+  guard (PrimTy.ofName? e).isSome
+  pure (e, storage)
+
 /-- The structs a type names, through arrays and mappings (`fuel` bounds the
 type's depth; the table's types are finite). -/
 def structsIn : Nat → Ty → List Name
@@ -161,15 +174,19 @@ where
       else go f (t :: seen) (rest ++ (structDef t).flatMap fun (_, T) => structsIn 16 T)
 
 /-- A function type's struct parameter component at a location
-(`Pmemory`, `Pstorage`; `FunDecl.sigTy?`): the struct, nominal (its name in
-the table), nonrecursive and, in memory, free of mappings; whether it is a
-storage reference. -/
+(`Pmemory`, `Pstorage`; `FunDecl.sigTy?`): the struct by its written name,
+nominal (`Contract.structName?`), nonrecursive and, in memory, free of
+mappings; whether it is a storage reference. -/
 def fnRefStruct? (c : String) : Option (String × Bool) := do
   let (loc, storage) ← if c.endsWith "storage" then some ("storage", true)
     else if c.endsWith "memory" then some ("memory", false) else none
   let s := c.dropRight loc.length
-  guard (!s.isEmpty && !s.endsWith "]" && !fnTy? s && !(structDef s).isEmpty && structNonrec s)
-  guard (storage || structMapFree s)
+  guard (!s.isEmpty && !s.endsWith "]" && !fnTy? s)
+  -- the struct the written name names in `C` (`Contract.structName?`), by
+  -- its table name, which spells its written name before its members
+  let e ← C.structName? s
+  guard (!(structDef e).isEmpty && structNonrec e)
+  guard (storage || structMapFree e)
   pure (s, storage)
 
 /-- The signature of the function `d`, as a function type spelled
@@ -194,7 +211,9 @@ def FunDecl.sigTy? (d : FunDecl) : Option String := do
         let e := k ++ "[]"
         guard (!(d.widths.any fun (w, _) =>
           w.startsWith (k ++ "#") || (w.startsWith (e ++ "#") && w != e ++ "#address")))
-        pure (declTyName d.widths e p ++ "[]memory")
+        let c := declTyName d.widths e p ++ "[]memory"
+        guard ((fnRefElem? C c).isSome)
+        pure c
   let ps ← d.params.mapM fun (n, T) => do
     match T with
     | .prim _ => comp n T
@@ -206,14 +225,18 @@ def FunDecl.sigTy? (d : FunDecl) : Option String := do
       let k := n ++ "[]"
       guard (!(d.widths.any fun (w, _) =>
         w.startsWith (n ++ "#") || (w.startsWith (k ++ "#") && w != k ++ "#address")))
-      pure (declTyName d.widths k p ++ loc)
+      let c := declTyName d.widths k p ++ loc
+      guard ((fnRefElem? C c).isSome)
+      pure c
     | .ref (.struct st) =>
       let loc ← match lookupBy n d.paramLocs with
         | some .memory => some "memory"
         | some .storage => some "storage"
         | _ => none
-      let c := st ++ loc
-      guard ((fnRefStruct? c).isSome)
+      -- the written name, which the struct's table name spells first
+      -- (`structDisplay`); it must name this struct in `C`
+      let c := Semantics.structDisplay st ++ loc
+      guard ((fnRefStruct? C c).isSome && C.structName? (Semantics.structDisplay st) == some st)
       pure c
     | .ref _ => none
   let rs ← d.rets.mapM fun (n, T) => comp n T
@@ -259,17 +282,6 @@ def isRecursiveC (f : String) : Bool := (reachableC C f).contains f
 /-- The functions mutually recursive with `f`, through values too. -/
 def recPartnersC (f : String) : List String :=
   (reachableC C f).filter fun g => (reachableC C g).contains f
-
-/-- A function type's array parameter component at a location
-(`uint[]memory`, `uint[]storage`; `FunDecl.sigTy?`): its element's spelling,
-a plain value type, and whether it is a storage reference. -/
-def fnRefElem? (c : String) : Option (String × Bool) := do
-  let (loc, storage) ← if c.endsWith "[]memory" then some ("[]memory", false)
-    else if c.endsWith "[]storage" then some ("[]storage", true) else none
-  let e := c.dropRight loc.length
-  guard (!fnTy? e && (lookupBy e C.enums).isNone && (bytesTy? e).isNone)
-  guard ((PrimTy.ofName? e).isSome || (narrowTy? e).isSome)
-  pure (e, storage)
 
 /-- Whether a function type's return component is a memory reference the
 dispatch binds (`fnMemoryDispatch`): `bytes memory` or a memory array of a
@@ -930,8 +942,8 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
       | _ => []
     | none =>
       let ty := if f == callValueName then as.head?.bind (fnTyOfExpr C Γ) else fnTyOf? C Γ f
-      if (ty.bind fnParts?).any (fun (ps, rs, ext) =>
-          !ext && ps.isEmpty && rs == ["bytesmemory"]) then dynBytesRows else []
+      if (ty.bind fnParts?).any (fun (_, rs, ext) =>
+          !ext && rs == ["bytesmemory"]) then dynBytesRows else []
   | e => placeShape C Γ e
 
 /-- An assignment expression keeps its mapping target's declared shape.
