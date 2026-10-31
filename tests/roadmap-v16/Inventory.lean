@@ -18,12 +18,28 @@ run_cmd do
           ("name", toJson n.toString), ("constructors", toJson (info.ctors.map Name.toString))])
   let mut theorems : Array Json := #[]
   for (n, info) in env.constants.toList do
-    if (`Solidity.Roadmap.V16).isPrefixOf n then
+    if (`Solidity.Roadmap.V16).isPrefixOf ((privateToUserName? n).getD n) then
       if let .thmInfo _ := info then
         let axs ← collectAxioms n
         let ty ← liftTermElabM do return (← Meta.ppExpr info.type).pretty
+        let premises ← liftTermElabM do
+          Meta.forallBoundedTelescope info.type (some info.type.getNumHeadForalls) fun xs _ => do
+            let mut rows : Array Json := #[]
+            let mut rawType := info.type
+            for x in xs do
+              let decl ← x.fvarId!.getDecl
+              let ty ← Meta.ppExpr decl.type
+              let rawDomain := rawType.consumeMData.bindingDomain!
+              rawType := rawType.consumeMData.bindingBody!
+              rows := rows.push (Json.mkObj [
+                ("name", toJson decl.userName.toString), ("type", toJson ty.pretty),
+                ("isProp", toJson (← Meta.isProp decl.type)),
+                ("closedExpr", toJson (reprStr rawDomain)),
+                ("constants", toJson (decl.type.getUsedConstants.toList.map Name.toString))])
+            return rows
         theorems := theorems.push (Json.mkObj [
-          ("name", toJson n.toString), ("type", toJson ty),
+          ("name", toJson n.toString), ("ownerName", toJson ((privateToUserName? n).getD n).toString),
+          ("type", toJson ty), ("premises", .arr premises),
           ("typeConstants", toJson (info.type.getUsedConstants.toList.map Name.toString)),
           ("dependencies", toJson (info.getUsedConstantsAsSet.toList.map Name.toString)),
           ("axioms", toJson (axs.toList.map Name.toString))])

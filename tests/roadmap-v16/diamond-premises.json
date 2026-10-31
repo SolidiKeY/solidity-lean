@@ -1,0 +1,773 @@
+{
+  "format": "Lean4.24 closed head-binder Expr repr plus full printed types/constants; no semantic closure claim",
+  "producerRevision": "91e94ab57305ca055127934fd9e68fe9ea5e6be3",
+  "theorems": {
+    "Solidity.Roadmap.V16.memory_call_not_exhausted": [
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Contract []",
+        "constants": [
+          "Solidity.Contract"
+        ],
+        "isProp": false,
+        "name": "C",
+        "type": "Solidity.Contract"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "b",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "L",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "frame",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Γ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Δ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Frag []) (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Evm.Frag"
+        ],
+        "isProp": false,
+        "name": "F",
+        "type": "Solidity.Evm.Frag Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Prog []) (Lean.Expr.bvar 6)) (Lean.Expr.bvar 2))\n  (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Prog"
+        ],
+        "isProp": false,
+        "name": "P",
+        "type": "Solidity.Prog C Γ Δ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation []) (Lean.Expr.bvar 7))\n          (Lean.Expr.bvar 6))\n        (Lean.Expr.bvar 3))\n      (Lean.Expr.bvar 2))\n    (Lean.Expr.bvar 1))\n  (Lean.Expr.bvar 0)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation"
+        ],
+        "isProp": false,
+        "name": "compiled",
+        "type": "Solidity.Evm.Compiler.Compilation b F P"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app (Lean.Expr.const `Eq [Lean.Level.succ (Lean.Level.zero)]) (Lean.Expr.const `Bool []))\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.isMemoryCalls []) (Lean.Expr.bvar 8))\n                (Lean.Expr.bvar 7))\n              (Lean.Expr.bvar 4))\n            (Lean.Expr.bvar 3))\n          (Lean.Expr.bvar 2))\n        (Lean.Expr.bvar 1))\n      (Lean.Expr.bvar 0)))\n  (Lean.Expr.const `Bool.true [])",
+        "constants": [
+          "Eq",
+          "Bool",
+          "Solidity.Evm.Compiler.Compilation.isMemoryCalls",
+          "Bool.true"
+        ],
+        "isProp": true,
+        "name": "path",
+        "type": "compiled.isMemoryCalls = true"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.State []) (Lean.Expr.bvar 9)) (Lean.Expr.bvar 5)",
+        "constants": [
+          "Solidity.State"
+        ],
+        "isProp": false,
+        "name": "σ",
+        "type": "Solidity.State C Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.forallE\n  (Lean.Name.mkNum `a._@._internal._hyg 0)\n  (Lean.Expr.const `Nat [])\n  (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n  (Lean.BinderInfo.default)",
+        "constants": [
+          "Nat",
+          "Fin",
+          "Solidity.Evm.W"
+        ],
+        "isProp": false,
+        "name": "base",
+        "type": "Nat → Fin Solidity.Evm.W"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Evm.Machine []",
+        "constants": [
+          "Solidity.Evm.Machine"
+        ],
+        "isProp": false,
+        "name": "m",
+        "type": "Solidity.Evm.Machine"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app\n                  (Lean.Expr.app\n                    (Lean.Expr.app\n                      (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.Input []) (Lean.Expr.bvar 12))\n                      (Lean.Expr.bvar 11))\n                    (Lean.Expr.bvar 8))\n                  (Lean.Expr.bvar 7))\n                (Lean.Expr.bvar 6))\n              (Lean.Expr.bvar 5))\n            (Lean.Expr.bvar 4))\n          (Lean.Expr.bvar 10))\n        (Lean.Expr.bvar 9))\n      (Lean.Expr.bvar 1))\n    (Lean.Expr.bvar 2))\n  (Lean.Expr.bvar 0)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation.Input"
+        ],
+        "isProp": true,
+        "name": "input",
+        "type": "compiled.Input L frame base σ m"
+      }
+    ],
+    "Solidity.Roadmap.V16.memory_call_capacity": [
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Contract []",
+        "constants": [
+          "Solidity.Contract"
+        ],
+        "isProp": false,
+        "name": "C",
+        "type": "Solidity.Contract"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "b",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "L",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "frame",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Γ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Δ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Frag []) (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Evm.Frag"
+        ],
+        "isProp": false,
+        "name": "F",
+        "type": "Solidity.Evm.Frag Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Prog []) (Lean.Expr.bvar 6)) (Lean.Expr.bvar 2))\n  (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Prog"
+        ],
+        "isProp": false,
+        "name": "P",
+        "type": "Solidity.Prog C Γ Δ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation []) (Lean.Expr.bvar 7))\n          (Lean.Expr.bvar 6))\n        (Lean.Expr.bvar 3))\n      (Lean.Expr.bvar 2))\n    (Lean.Expr.bvar 1))\n  (Lean.Expr.bvar 0)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation"
+        ],
+        "isProp": false,
+        "name": "compiled",
+        "type": "Solidity.Evm.Compiler.Compilation b F P"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app (Lean.Expr.const `Eq [Lean.Level.succ (Lean.Level.zero)]) (Lean.Expr.const `Bool []))\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.isMemoryCalls []) (Lean.Expr.bvar 8))\n                (Lean.Expr.bvar 7))\n              (Lean.Expr.bvar 4))\n            (Lean.Expr.bvar 3))\n          (Lean.Expr.bvar 2))\n        (Lean.Expr.bvar 1))\n      (Lean.Expr.bvar 0)))\n  (Lean.Expr.const `Bool.true [])",
+        "constants": [
+          "Eq",
+          "Bool",
+          "Solidity.Evm.Compiler.Compilation.isMemoryCalls",
+          "Bool.true"
+        ],
+        "isProp": true,
+        "name": "path",
+        "type": "compiled.isMemoryCalls = true"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.State []) (Lean.Expr.bvar 9)) (Lean.Expr.bvar 5)",
+        "constants": [
+          "Solidity.State"
+        ],
+        "isProp": false,
+        "name": "σ",
+        "type": "Solidity.State C Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.forallE\n  (Lean.Name.mkNum `a._@._internal._hyg 0)\n  (Lean.Expr.const `Nat [])\n  (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n  (Lean.BinderInfo.default)",
+        "constants": [
+          "Nat",
+          "Fin",
+          "Solidity.Evm.W"
+        ],
+        "isProp": false,
+        "name": "base",
+        "type": "Nat → Fin Solidity.Evm.W"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Evm.Machine []",
+        "constants": [
+          "Solidity.Evm.Machine"
+        ],
+        "isProp": false,
+        "name": "m",
+        "type": "Solidity.Evm.Machine"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app\n                  (Lean.Expr.app\n                    (Lean.Expr.app\n                      (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.Input []) (Lean.Expr.bvar 12))\n                      (Lean.Expr.bvar 11))\n                    (Lean.Expr.bvar 8))\n                  (Lean.Expr.bvar 7))\n                (Lean.Expr.bvar 6))\n              (Lean.Expr.bvar 5))\n            (Lean.Expr.bvar 4))\n          (Lean.Expr.bvar 10))\n        (Lean.Expr.bvar 9))\n      (Lean.Expr.bvar 1))\n    (Lean.Expr.bvar 2))\n  (Lean.Expr.bvar 0)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation.Input"
+        ],
+        "isProp": true,
+        "name": "input",
+        "type": "compiled.Input L frame base σ m"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W [])",
+        "constants": [
+          "Fin",
+          "Solidity.Evm.W"
+        ],
+        "isProp": false,
+        "name": "cursor",
+        "type": "Fin Solidity.Evm.W"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.const `Solidity.Evm.Memory.StructAllocatorRepr [])\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app (Lean.Expr.const `Solidity.State.H []) (Lean.Expr.bvar 14))\n                (Lean.Expr.bvar 10))\n              (Lean.Expr.bvar 4)))\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app (Lean.Expr.const `Solidity.State.heap []) (Lean.Expr.bvar 14))\n              (Lean.Expr.bvar 10))\n            (Lean.Expr.bvar 4)))\n        (Lean.Expr.bvar 3))\n      (Lean.Expr.bvar 11))\n    (Lean.Expr.bvar 0))\n  (Lean.Expr.bvar 2)",
+        "constants": [
+          "Solidity.Evm.Memory.StructAllocatorRepr",
+          "Solidity.State.H",
+          "Solidity.State.heap"
+        ],
+        "isProp": true,
+        "name": "allocator",
+        "type": "Solidity.Evm.Memory.StructAllocatorRepr σ.heap base frame cursor m"
+      }
+    ],
+    "Solidity.Roadmap.V16.memory_call_diamond": [
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Contract []",
+        "constants": [
+          "Solidity.Contract"
+        ],
+        "isProp": false,
+        "name": "C",
+        "type": "Solidity.Contract"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "b",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "L",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "frame",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Γ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Δ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Frag []) (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Evm.Frag"
+        ],
+        "isProp": false,
+        "name": "F",
+        "type": "Solidity.Evm.Frag Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Prog []) (Lean.Expr.bvar 6)) (Lean.Expr.bvar 2))\n  (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Prog"
+        ],
+        "isProp": false,
+        "name": "P",
+        "type": "Solidity.Prog C Γ Δ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation []) (Lean.Expr.bvar 7))\n          (Lean.Expr.bvar 6))\n        (Lean.Expr.bvar 3))\n      (Lean.Expr.bvar 2))\n    (Lean.Expr.bvar 1))\n  (Lean.Expr.bvar 0)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation"
+        ],
+        "isProp": false,
+        "name": "compiled",
+        "type": "Solidity.Evm.Compiler.Compilation b F P"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app (Lean.Expr.const `Eq [Lean.Level.succ (Lean.Level.zero)]) (Lean.Expr.const `Bool []))\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.isMemoryCalls []) (Lean.Expr.bvar 8))\n                (Lean.Expr.bvar 7))\n              (Lean.Expr.bvar 4))\n            (Lean.Expr.bvar 3))\n          (Lean.Expr.bvar 2))\n        (Lean.Expr.bvar 1))\n      (Lean.Expr.bvar 0)))\n  (Lean.Expr.const `Bool.true [])",
+        "constants": [
+          "Eq",
+          "Bool",
+          "Solidity.Evm.Compiler.Compilation.isMemoryCalls",
+          "Bool.true"
+        ],
+        "isProp": true,
+        "name": "path",
+        "type": "compiled.isMemoryCalls = true"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.State []) (Lean.Expr.bvar 9)) (Lean.Expr.bvar 5)",
+        "constants": [
+          "Solidity.State"
+        ],
+        "isProp": false,
+        "name": "σ",
+        "type": "Solidity.State C Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.forallE\n  (Lean.Name.mkNum `a._@._internal._hyg 0)\n  (Lean.Expr.const `Nat [])\n  (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n  (Lean.BinderInfo.default)",
+        "constants": [
+          "Nat",
+          "Fin",
+          "Solidity.Evm.W"
+        ],
+        "isProp": false,
+        "name": "base",
+        "type": "Nat → Fin Solidity.Evm.W"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Evm.Machine []",
+        "constants": [
+          "Solidity.Evm.Machine"
+        ],
+        "isProp": false,
+        "name": "m",
+        "type": "Solidity.Evm.Machine"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Spec []) (Lean.Expr.bvar 12)) (Lean.Expr.bvar 7)",
+        "constants": [
+          "Solidity.Spec"
+        ],
+        "isProp": false,
+        "name": "φ",
+        "type": "Solidity.Spec C Δ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app\n                  (Lean.Expr.app\n                    (Lean.Expr.app\n                      (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.Input []) (Lean.Expr.bvar 13))\n                      (Lean.Expr.bvar 12))\n                    (Lean.Expr.bvar 9))\n                  (Lean.Expr.bvar 8))\n                (Lean.Expr.bvar 7))\n              (Lean.Expr.bvar 6))\n            (Lean.Expr.bvar 5))\n          (Lean.Expr.bvar 11))\n        (Lean.Expr.bvar 10))\n      (Lean.Expr.bvar 2))\n    (Lean.Expr.bvar 3))\n  (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation.Input"
+        ],
+        "isProp": true,
+        "name": "input",
+        "type": "compiled.Input L frame base σ m"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Spec.sat []) (Lean.Expr.bvar 14)) (Lean.Expr.bvar 10))\n    (Lean.Expr.bvar 4))\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app (Lean.Expr.const `Solidity.Spec.diamond []) (Lean.Expr.bvar 14))\n          (Lean.Expr.bvar 10))\n        (Lean.Expr.bvar 9))\n      (Lean.Expr.bvar 7))\n    (Lean.Expr.bvar 1))",
+        "constants": [
+          "Solidity.Spec.sat",
+          "Solidity.Spec.diamond"
+        ],
+        "isProp": true,
+        "name": "diamond",
+        "type": "Solidity.Spec.sat σ (Solidity.Spec.diamond P φ)"
+      }
+    ],
+    "Solidity.Roadmap.V16.memory_call_diamond_iff": [
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Contract []",
+        "constants": [
+          "Solidity.Contract"
+        ],
+        "isProp": false,
+        "name": "C",
+        "type": "Solidity.Contract"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "b",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "L",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "frame",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Γ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Δ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Frag []) (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Evm.Frag"
+        ],
+        "isProp": false,
+        "name": "F",
+        "type": "Solidity.Evm.Frag Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Prog []) (Lean.Expr.bvar 6)) (Lean.Expr.bvar 2))\n  (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Prog"
+        ],
+        "isProp": false,
+        "name": "P",
+        "type": "Solidity.Prog C Γ Δ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation []) (Lean.Expr.bvar 7))\n          (Lean.Expr.bvar 6))\n        (Lean.Expr.bvar 3))\n      (Lean.Expr.bvar 2))\n    (Lean.Expr.bvar 1))\n  (Lean.Expr.bvar 0)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation"
+        ],
+        "isProp": false,
+        "name": "compiled",
+        "type": "Solidity.Evm.Compiler.Compilation b F P"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app (Lean.Expr.const `Eq [Lean.Level.succ (Lean.Level.zero)]) (Lean.Expr.const `Bool []))\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.isMemoryCalls []) (Lean.Expr.bvar 8))\n                (Lean.Expr.bvar 7))\n              (Lean.Expr.bvar 4))\n            (Lean.Expr.bvar 3))\n          (Lean.Expr.bvar 2))\n        (Lean.Expr.bvar 1))\n      (Lean.Expr.bvar 0)))\n  (Lean.Expr.const `Bool.true [])",
+        "constants": [
+          "Eq",
+          "Bool",
+          "Solidity.Evm.Compiler.Compilation.isMemoryCalls",
+          "Bool.true"
+        ],
+        "isProp": true,
+        "name": "path",
+        "type": "compiled.isMemoryCalls = true"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.State []) (Lean.Expr.bvar 9)) (Lean.Expr.bvar 5)",
+        "constants": [
+          "Solidity.State"
+        ],
+        "isProp": false,
+        "name": "σ",
+        "type": "Solidity.State C Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.forallE\n  (Lean.Name.mkNum `a._@._internal._hyg 0)\n  (Lean.Expr.const `Nat [])\n  (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n  (Lean.BinderInfo.default)",
+        "constants": [
+          "Nat",
+          "Fin",
+          "Solidity.Evm.W"
+        ],
+        "isProp": false,
+        "name": "base",
+        "type": "Nat → Fin Solidity.Evm.W"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Evm.Machine []",
+        "constants": [
+          "Solidity.Evm.Machine"
+        ],
+        "isProp": false,
+        "name": "m",
+        "type": "Solidity.Evm.Machine"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Spec []) (Lean.Expr.bvar 12)) (Lean.Expr.bvar 7)",
+        "constants": [
+          "Solidity.Spec"
+        ],
+        "isProp": false,
+        "name": "φ",
+        "type": "Solidity.Spec C Δ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app\n                  (Lean.Expr.app\n                    (Lean.Expr.app\n                      (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.Input []) (Lean.Expr.bvar 13))\n                      (Lean.Expr.bvar 12))\n                    (Lean.Expr.bvar 9))\n                  (Lean.Expr.bvar 8))\n                (Lean.Expr.bvar 7))\n              (Lean.Expr.bvar 6))\n            (Lean.Expr.bvar 5))\n          (Lean.Expr.bvar 11))\n        (Lean.Expr.bvar 10))\n      (Lean.Expr.bvar 2))\n    (Lean.Expr.bvar 3))\n  (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation.Input"
+        ],
+        "isProp": true,
+        "name": "input",
+        "type": "compiled.Input L frame base σ m"
+      }
+    ],
+    "Solidity.Roadmap.V16.memory_call_diamond_cursor": [
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Contract []",
+        "constants": [
+          "Solidity.Contract"
+        ],
+        "isProp": false,
+        "name": "C",
+        "type": "Solidity.Contract"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "b",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "L",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Nat []",
+        "constants": [
+          "Nat"
+        ],
+        "isProp": false,
+        "name": "frame",
+        "type": "Nat"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Γ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Ctx []",
+        "constants": [
+          "Solidity.Ctx"
+        ],
+        "isProp": false,
+        "name": "Δ",
+        "type": "Solidity.Ctx"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Frag []) (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Evm.Frag"
+        ],
+        "isProp": false,
+        "name": "F",
+        "type": "Solidity.Evm.Frag Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Prog []) (Lean.Expr.bvar 6)) (Lean.Expr.bvar 2))\n  (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Prog"
+        ],
+        "isProp": false,
+        "name": "P",
+        "type": "Solidity.Prog C Γ Δ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation []) (Lean.Expr.bvar 7))\n          (Lean.Expr.bvar 6))\n        (Lean.Expr.bvar 3))\n      (Lean.Expr.bvar 2))\n    (Lean.Expr.bvar 1))\n  (Lean.Expr.bvar 0)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation"
+        ],
+        "isProp": false,
+        "name": "compiled",
+        "type": "Solidity.Evm.Compiler.Compilation b F P"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app (Lean.Expr.const `Eq [Lean.Level.succ (Lean.Level.zero)]) (Lean.Expr.const `Bool []))\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.isMemoryCalls []) (Lean.Expr.bvar 8))\n                (Lean.Expr.bvar 7))\n              (Lean.Expr.bvar 4))\n            (Lean.Expr.bvar 3))\n          (Lean.Expr.bvar 2))\n        (Lean.Expr.bvar 1))\n      (Lean.Expr.bvar 0)))\n  (Lean.Expr.const `Bool.true [])",
+        "constants": [
+          "Eq",
+          "Bool",
+          "Solidity.Evm.Compiler.Compilation.isMemoryCalls",
+          "Bool.true"
+        ],
+        "isProp": true,
+        "name": "path",
+        "type": "compiled.isMemoryCalls = true"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.State []) (Lean.Expr.bvar 9)) (Lean.Expr.bvar 5)",
+        "constants": [
+          "Solidity.State"
+        ],
+        "isProp": false,
+        "name": "σ",
+        "type": "Solidity.State C Γ"
+      },
+      {
+        "closedExpr": "Lean.Expr.forallE\n  (Lean.Name.mkNum `a._@._internal._hyg 0)\n  (Lean.Expr.const `Nat [])\n  (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n  (Lean.BinderInfo.default)",
+        "constants": [
+          "Nat",
+          "Fin",
+          "Solidity.Evm.W"
+        ],
+        "isProp": false,
+        "name": "base",
+        "type": "Nat → Fin Solidity.Evm.W"
+      },
+      {
+        "closedExpr": "Lean.Expr.const `Solidity.Evm.Machine []",
+        "constants": [
+          "Solidity.Evm.Machine"
+        ],
+        "isProp": false,
+        "name": "m",
+        "type": "Solidity.Evm.Machine"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Spec []) (Lean.Expr.bvar 12)) (Lean.Expr.bvar 7)",
+        "constants": [
+          "Solidity.Spec"
+        ],
+        "isProp": false,
+        "name": "φ",
+        "type": "Solidity.Spec C Δ"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app\n                  (Lean.Expr.app\n                    (Lean.Expr.app\n                      (Lean.Expr.app (Lean.Expr.const `Solidity.Evm.Compiler.Compilation.Input []) (Lean.Expr.bvar 13))\n                      (Lean.Expr.bvar 12))\n                    (Lean.Expr.bvar 9))\n                  (Lean.Expr.bvar 8))\n                (Lean.Expr.bvar 7))\n              (Lean.Expr.bvar 6))\n            (Lean.Expr.bvar 5))\n          (Lean.Expr.bvar 11))\n        (Lean.Expr.bvar 10))\n      (Lean.Expr.bvar 2))\n    (Lean.Expr.bvar 3))\n  (Lean.Expr.bvar 1)",
+        "constants": [
+          "Solidity.Evm.Compiler.Compilation.Input"
+        ],
+        "isProp": true,
+        "name": "input",
+        "type": "compiled.Input L frame base σ m"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app (Lean.Expr.app (Lean.Expr.const `Solidity.Spec.sat []) (Lean.Expr.bvar 14)) (Lean.Expr.bvar 10))\n    (Lean.Expr.bvar 4))\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app (Lean.Expr.const `Solidity.Spec.diamond []) (Lean.Expr.bvar 14))\n          (Lean.Expr.bvar 10))\n        (Lean.Expr.bvar 9))\n      (Lean.Expr.bvar 7))\n    (Lean.Expr.bvar 1))",
+        "constants": [
+          "Solidity.Spec.sat",
+          "Solidity.Spec.diamond"
+        ],
+        "isProp": true,
+        "name": "diamond",
+        "type": "Solidity.Spec.sat σ (Solidity.Spec.diamond P φ)"
+      },
+      {
+        "closedExpr": "Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W [])",
+        "constants": [
+          "Fin",
+          "Solidity.Evm.W"
+        ],
+        "isProp": false,
+        "name": "cursor",
+        "type": "Fin Solidity.Evm.W"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app (Lean.Expr.const `LT.lt [Lean.Level.zero]) (Lean.Expr.const `Nat []))\n      (Lean.Expr.const `instLTNat []))\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app (Lean.Expr.const `OfNat.ofNat [Lean.Level.zero]) (Lean.Expr.const `Nat []))\n        (Lean.Expr.lit (Lean.Literal.natVal 0)))\n      (Lean.Expr.app (Lean.Expr.const `instOfNatNat []) (Lean.Expr.lit (Lean.Literal.natVal 0)))))\n  (Lean.Expr.bvar 15)",
+        "constants": [
+          "LT.lt",
+          "Nat",
+          "instLTNat",
+          "OfNat.ofNat",
+          "instOfNatNat"
+        ],
+        "isProp": true,
+        "name": "positive",
+        "type": "0 < b"
+      },
+      {
+        "closedExpr": "Lean.Expr.app\n  (Lean.Expr.app\n    (Lean.Expr.app\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.const `Solidity.Evm.Memory.StructAllocatorRepr [])\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app (Lean.Expr.const `Solidity.State.H []) (Lean.Expr.bvar 17))\n                (Lean.Expr.bvar 13))\n              (Lean.Expr.bvar 7)))\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app (Lean.Expr.const `Solidity.State.heap []) (Lean.Expr.bvar 17))\n              (Lean.Expr.bvar 13))\n            (Lean.Expr.bvar 7)))\n        (Lean.Expr.bvar 6))\n      (Lean.Expr.bvar 14))\n    (Lean.Expr.bvar 1))\n  (Lean.Expr.bvar 5)",
+        "constants": [
+          "Solidity.Evm.Memory.StructAllocatorRepr",
+          "Solidity.State.H",
+          "Solidity.State.heap"
+        ],
+        "isProp": true,
+        "name": "allocator",
+        "type": "Solidity.Evm.Memory.StructAllocatorRepr σ.heap base frame cursor m"
+      }
+    ]
+  }
+}

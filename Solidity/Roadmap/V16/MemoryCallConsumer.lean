@@ -136,4 +136,92 @@ theorem memory_call_cursor {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
   have next := grows cursor positive allocator space
   exact ⟨m', base', ht, stack, repr, baseExtension, next, next.arrays.free.cell⟩
 
+/-- The actual checked memory-call certificate excludes the existing exhausted
+outcome. This is not an assumption about all source executions or diamonds. -/
+theorem memory_call_not_exhausted {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} (input : compiled.Input L frame base σ m) :
+    P.run σ ≠ .error .exhausted := by
+  intro exhausted
+  have impossible := (memory_call_failure compiled path input exhausted).1
+  cases impossible
+
+/-- Reached AllocationInput supplies capacity at any actual represented entry
+cursor. Cursor equality is obtained from its machine cell, not assumed. -/
+theorem memory_call_capacity {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} (input : compiled.Input L frame base σ m) (cursor : Fin W)
+    (allocator : Memory.StructAllocatorRepr σ.heap base frame cursor m) :
+    cursor.val + compiled.allocationCost σ < W := by
+  have capacity := ((compiled.memoryCalls_input path L frame base σ m).1 input).2.2
+  rcases capacity with zero | ⟨_, other, represented, space⟩
+  · rw [zero, Nat.add_zero]
+    exact cursor.isLt
+  · have eq : cursor = other := Evm.Word.val.inj
+      (allocator.arrays.free.cell.symm.trans represented.arrays.free.cell)
+    subst other
+    exact space
+
+/-- The unchanged approved diamond becomes genuine source AND target success on
+this actual finite certificate path. No source-success/notExhausted/target-run
+premise is supplied; the certificate discharges exhaustion. -/
+theorem memory_call_diamond {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {φ : Spec C Δ} (input : compiled.Input L frame base σ m)
+    (diamond : Spec.sat σ (.diamond P φ)) :
+    ∃ o m' base', P.run σ = .ok o ∧ run compiled.code m = .ok m' 0 ∧
+      m'.stack = m.stack ∧ Memory.StateRepr L b frame compiled.frag o.st base' m' ∧
+      Memory.BaseExtends σ.H base base' ∧
+      Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m o.st base' m' ∧
+      Spec.sat o.st φ := by
+  obtain ⟨o, source, post⟩ := spec_diamond_success diamond
+    (memory_call_not_exhausted compiled path input)
+  obtain ⟨m', base', target, stack, repr, baseExtension, grows⟩ :=
+    memory_call_success compiled path input source
+  exact ⟨o, m', base', source, target, stack, repr, baseExtension, grows, post⟩
+
+/-- Scoped equivalence with the full actual source/target/post witness. The
+reverse direction uses only the existing successful diamond reading. -/
+theorem memory_call_diamond_iff {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {φ : Spec C Δ} (input : compiled.Input L frame base σ m) :
+    Spec.sat σ (.diamond P φ) ↔
+    ∃ o m' base', P.run σ = .ok o ∧ run compiled.code m = .ok m' 0 ∧
+      m'.stack = m.stack ∧ Memory.StateRepr L b frame compiled.frag o.st base' m' ∧
+      Memory.BaseExtends σ.H base base' ∧
+      Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m o.st base' m' ∧
+      Spec.sat o.st φ := by
+  constructor
+  · exact memory_call_diamond compiled path input
+  · rintro ⟨o, _, _, source, _, _, _, _, _, post⟩
+    simpa only [Spec.sat, source] using post
+
+/-- Diamond transport also retains exact reached allocator observations. Capacity
+is DERIVED from Input; only the actual entry allocator and positive frame base
+are requested, with no desired source/target run premise. -/
+theorem memory_call_diamond_cursor {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {φ : Spec C Δ} (input : compiled.Input L frame base σ m)
+    (diamond : Spec.sat σ (.diamond P φ)) (cursor : Fin W) (positive : 0 < b)
+    (allocator : Memory.StructAllocatorRepr σ.heap base frame cursor m) :
+    ∃ o m' base', ∃ space : cursor.val + compiled.allocationCost σ < W,
+      P.run σ = .ok o ∧ run compiled.code m = .ok m' 0 ∧ m'.stack = m.stack ∧
+      Memory.StateRepr L b frame compiled.frag o.st base' m' ∧
+      Memory.BaseExtends σ.H base base' ∧
+      Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m o.st base' m' ∧
+      Spec.sat o.st φ ∧ Memory.StructAllocatorRepr o.st.heap base' frame
+        ⟨cursor.val + compiled.allocationCost σ, space⟩ m' ∧
+      m'.mem 0 = .val ⟨cursor.val + compiled.allocationCost σ, space⟩ := by
+  obtain ⟨o, m', base', source, target, stack, repr, baseExtension, grows, post⟩ :=
+    memory_call_diamond compiled path input diamond
+  have space := memory_call_capacity compiled path input cursor allocator
+  have next := grows cursor positive allocator space
+  exact ⟨o, m', base', space, source, target, stack, repr, baseExtension, grows,
+    post, next, next.arrays.free.cell⟩
+
 end Solidity.Roadmap.V16

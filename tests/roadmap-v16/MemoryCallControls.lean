@@ -1,3 +1,4 @@
+import Solidity.Roadmap.V16.SpecificationControls
 import Solidity.Roadmap.V16.MemoryCallConsumer
 import Lean
 import Solidity.Evm.MemoryCallExamples
@@ -364,6 +365,114 @@ theorem wrong_revert_data : ¬ Backend.Failure.ResultObserves (fun _ => [])
     (failureProgram.run initial) (.revert [9]) :=
   Backend.Failure.wrong_observation failure_observation (by decide +kernel)
 
+theorem remaining_diamond : Spec.sat callerEntry.st (.diamond remainingCalls markerPost) := by
+  simpa only [Spec.sat, remaining_source] using remaining_post
+
+theorem whole_diamond : Spec.sat initial (.diamond program markerPost) := by
+  simpa only [Spec.sat, source_success] using source_post
+
+/-- The NEW diamond consumer, at the actual CONSTRUCTED populated input, supplies
+source success and machine/post witnesses without asking for source success. -/
+theorem populated_diamond : ∃ m₁ base₁ m₂ base₂,
+    run prefixCompiled.code machine = .ok m₁ 0 ∧
+    remainingCompiled.Input 1 128 base₁ callerEntry.st m₁ ∧
+    remainingCalls.run callerEntry.st = .ok remainingOutput ∧
+    run remainingCompiled.code m₁ = .ok m₂ 0 ∧ m₂.stack = [w[77]] ∧
+    StateRepr 1 1 128 remainingCompiled.frag remainingOutput.st base₂ m₂ ∧
+    BaseExtends callerEntry.st.H base₁ base₂ ∧
+    GrowsAllocator 1 128 (remainingCompiled.allocationCost callerEntry.st)
+      callerEntry.st base₁ m₁ remainingOutput.st base₂ m₂ ∧
+    Spec.sat remainingOutput.st markerPost ∧
+    m₂.mem (cellOf 1 callerIndex) = m₂.mem (cellOf 1 sharedIndex) ∧
+    m₂.mem (cellOf 1 callerIndex) = .val (base₁ entryRef.id) ∧
+    m₂.mem (cellOf 1 escapedIndex) = .val (base₂ returnedRef.id) ∧
+    StructAllocatorRepr remainingOutput.st.heap base₂ 128 (wmod 268) m₂ ∧ m₂.mem 0 = w[268] := by
+  obtain ⟨m₁, base₁, runPrefix, initialStack, input, allocator⟩ := populated_input
+  obtain ⟨o, m₂, base₂, space, source, target, stack, repr, baseExtension, grows, post, next, cursor⟩ :=
+    memory_call_diamond_cursor remainingCompiled remaining_path input remaining_diamond
+      (wmod 258) (by decide) allocator
+  have eq : o = remainingOutput := Except.ok.inj (source.symm.trans remaining_source)
+  subst o
+  have alias := memory_call_alias repr callerIndex sharedIndex retainedRef
+    remaining_aliases.1 remaining_aliases.2.1
+  obtain ⟨r, hr, pointer⟩ := repr.pointers callerIndex
+  have eq : r = retainedRef := Option.some.inj (hr.symm.trans remaining_aliases.1)
+  subst r
+  have retained := pointer.trans (congrArg Evm.Word.val (baseExtension entryRef))
+  obtain ⟨r, hr, escaped⟩ := repr.pointers escapedIndex
+  have eq : r = returnedRef := Option.some.inj (hr.symm.trans remaining_aliases.2.2)
+  subst r
+  have allocated : StructAllocatorRepr remainingOutput.st.heap base₂ 128 (wmod 268) m₂ := by
+    simpa only [remaining_cost] using next
+  have exactCursor : m₂.mem 0 = w[268] := by
+    simpa only [remaining_cost] using cursor
+  exact ⟨m₁, base₁, m₂, base₂, runPrefix, input, source, target,
+    stack.trans initialStack, repr, baseExtension, grows, post, alias, retained,
+    escaped, allocated, exactCursor⟩
+
+/-- Keep the COMPLETE existing ordered source-array and target-word snapshots,
+now tied to the actual target witness produced by NEW diamond transport. -/
+theorem diamond_complete_observations : ∃ o m' base',
+    program.run initial = .ok o ∧ run compiled.code machine = .ok m' 0 ∧
+    m'.stack = [w[77]] ∧ StateRepr 1 1 128 compiled.frag o.st base' m' ∧
+    BaseExtends initial.H bases base' ∧
+    GrowsAllocator 1 128 (compiled.allocationCost initial) initial bases machine o.st base' m' ∧
+    Spec.sat o.st markerPost ∧
+    sourceArrays (.ok o) [(0, 0), (3, 0), (3, 1), (4, 0), (6, 0)] = some [7, 17, 33, 0, 44, 11] ∧
+    targetWords (.ok m' 0) [0, 127, 1, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267] =
+      some [77, 268, 99, 42, 1, 17, 0, 0, 2, 33, 0, 1, 44, 0, 1, 11] := by
+  obtain ⟨o, m', base', source, target, stack, repr, baseExtension, grows, post⟩ :=
+    memory_call_diamond compiled compiled_path input_inhabited whole_diamond
+  have sources := source_arrays
+  rw [source] at sources
+  have targets := ordered_words
+  rw [target] at targets
+  exact ⟨o, m', base', source, target, stack, repr, baseExtension, grows, post, sources, targets⟩
+
+/-- Exact existing callee empty revert has real Input, but even the true-post
+source diamond is rejected by NEW success transport. -/
+theorem failure_diamond_rejected : ¬ Spec.sat initial (.diamond failureProgram .tt) := by
+  intro diamond
+  obtain ⟨o, _, _, source, _⟩ := memory_call_diamond failureCompiled (by decide +kernel)
+    Solidity.Evm.Memory.CallExamples.calleeFailure_input diamond
+  rw [failure_source] at source
+  cases source
+
+theorem diamond_false_post_rejected : ¬ Spec.sat initial (.diamond program (.not markerPost)) := by
+  intro diamond
+  obtain ⟨o, _, _, source, _, _, _, _, _, post⟩ :=
+    memory_call_diamond compiled compiled_path input_inhabited diamond
+  have eq : o = sourceOutput := Except.ok.inj (source.symm.trans source_success)
+  subst o
+  exact post source_post
+
+/-- A true source diamond does not provide a missing frame or allocation input. -/
+theorem diamond_does_not_supply_frame :
+    Spec.sat initial (.diamond program markerPost) ∧ ¬ compiled.Input 1 11 bases initial machine :=
+  ⟨whole_diamond, expanded_frame_refused⟩
+
+theorem diamond_does_not_supply_capacity : Spec.sat initial (.diamond program markerPost) ∧
+    ¬ compiled.Input 1 128 bases initial (publishedCall% tooFull) :=
+  ⟨whole_diamond, reached_allocation_refused⟩
+
+/-- Reuse the already proved genuine exhausted diamond. No source-success law
+for arbitrary diamonds follows, and the existing semantics remain unchanged. -/
+theorem general_diamond_not_success :
+    Spec.sat SpecificationControls.entryState
+      (.diamond (Prog.recBase : Prog TransactionControls.contract [] []) .tt) ∧
+    ¬ ∃ o, (Prog.recBase : Prog TransactionControls.contract [] []).run
+      SpecificationControls.entryState = .ok o :=
+  ⟨SpecificationControls.exhausted_diamond,
+    fun ⟨o, source⟩ => SpecificationControls.exhausted_has_no_success o source⟩
+
+/-- The certificate-derived exclusion cannot be applied to that exhausted case
+without its real Input. This is not a new exclusion in source admission. -/
+theorem exhausted_case_not_admitted {b L frame : Nat} {F : Frag []}
+    (candidate : Compiler.Compilation (C := TransactionControls.contract) b F .recBase)
+    (path : candidate.isMemoryCalls = true) (base : Nat → Fin W) (m : Machine) :
+    ¬ candidate.Input L frame base SpecificationControls.entryState m :=
+  fun input => memory_call_not_exhausted candidate path input rfl
+
 end Solidity.Roadmap.V16.MemoryCallControls
 
 #print axioms Solidity.Roadmap.V16.MemoryCallControls.compiled_path
@@ -416,6 +525,17 @@ end Solidity.Roadmap.V16.MemoryCallControls
 #print axioms Solidity.Roadmap.V16.MemoryCallControls.failure_observation
 #print axioms Solidity.Roadmap.V16.MemoryCallControls.wrong_revert_data
 
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.remaining_diamond
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.whole_diamond
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.populated_diamond
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.diamond_complete_observations
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.failure_diamond_rejected
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.diamond_false_post_rejected
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.diamond_does_not_supply_frame
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.diamond_does_not_supply_capacity
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.general_diamond_not_success
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.exhausted_case_not_admitted
+
 /-! Actual checked test closure and definition dependencies; read-only metadata. -/
 open Lean Elab Command in
 run_cmd do
@@ -428,21 +548,36 @@ run_cmd do
           ("name", toJson n.toString), ("constructors", toJson (info.ctors.map Name.toString))])
   let mut theorems : Array Json := #[]
   for (n, info) in env.constants.toList do
-    if (`Solidity.Roadmap.V16).isPrefixOf n then
+    if (`Solidity.Roadmap.V16).isPrefixOf ((privateToUserName? n).getD n) then
       if let .thmInfo _ := info then
         let axs ← collectAxioms n
         let ty ← liftTermElabM do return (← Meta.ppExpr info.type).pretty
+        let premises ← liftTermElabM do
+          Meta.forallBoundedTelescope info.type (some info.type.getNumHeadForalls) fun xs _ => do
+            let mut rows : Array Json := #[]
+            let mut rawType := info.type
+            for x in xs do
+              let decl ← x.fvarId!.getDecl
+              let ty ← Meta.ppExpr decl.type
+              let rawDomain := rawType.consumeMData.bindingDomain!
+              rawType := rawType.consumeMData.bindingBody!
+              rows := rows.push (Json.mkObj [
+                ("name", toJson decl.userName.toString), ("type", toJson ty.pretty),
+                ("isProp", toJson (← Meta.isProp decl.type)),
+                ("closedExpr", toJson (reprStr rawDomain)),
+                ("constants", toJson (decl.type.getUsedConstants.toList.map Name.toString))])
+            return rows
         theorems := theorems.push (Json.mkObj [
-          ("name", toJson n.toString), ("type", toJson ty),
+          ("name", toJson n.toString), ("ownerName", toJson ((privateToUserName? n).getD n).toString),
+          ("type", toJson ty), ("premises", .arr premises),
           ("typeConstants", toJson (info.type.getUsedConstants.toList.map Name.toString)),
           ("dependencies", toJson (info.getUsedConstantsAsSet.toList.map Name.toString)),
           ("axioms", toJson (axs.toList.map Name.toString))])
   let mut definitions : Array Json := #[]
   for (n, info) in env.constants.toList do
-    if (`Solidity.Roadmap.V16.MemoryCallControls).isPrefixOf n ||
-        (`Solidity.Roadmap.V16.MemoryCallPublished).isPrefixOf n then
+    if (`Solidity.Roadmap.V16).isPrefixOf ((privateToUserName? n).getD n) then
       if let .defnInfo _ := info then
         definitions := definitions.push (Json.mkObj [
-          ("name", toJson n.toString),
+          ("name", toJson n.toString), ("ownerName", toJson ((privateToUserName? n).getD n).toString),
           ("dependencies", toJson (info.getUsedConstantsAsSet.toList.map Name.toString))])
   logInfo m!"V16-INVENTORY {(Json.mkObj [("definitions", .arr definitions), ("modules", toJson (env.header.moduleNames.toList.map Name.toString)), ("inductives", .arr inductives), ("theorems", .arr theorems)]).compress}"

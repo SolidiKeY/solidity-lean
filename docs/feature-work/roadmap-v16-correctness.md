@@ -579,3 +579,142 @@ checksums and absolute paths are exported under /workspace/scratch/v16-published
 The original sealed artifact directories remain unchanged. Final artifact
 finder/skeptic reviews are recorded there separately from source reviews.
 No push, default-branch merge, reserved-owner repair, new goal or goal reset.
+
+
+## Diamond recovery after sealed21c9: scoped compiler/specification consumers
+
+The original blocked goal and frozen scope remain binding. No goal reset,
+reactivation, source delivery or G48–G51 completion is claimed. Prior21c9,
+published91e94ab57305ca055127934fd9e68fe9ea5e6be3, all76new/110prior/30original
+sealed artifacts and raw124/137failures are preserved. Evidence for this recovery
+uses the separate /workspace/scratch/v16-diamond-recovery directory.
+
+The five NEW MemoryCallConsumer consequences are memory_call_not_exhausted,
+memory_call_capacity, memory_call_diamond, memory_call_diamond_iff and
+memory_call_diamond_cursor. The first derives non-exhaustion from the actual
+memoryCalls certificate's exact failure classification; it is not an extra
+assumption. The capacity lemma obtains the bound at the actual entry cursor
+from AllocationInput (or cost0 and Fin's bound), equating represented cursors
+through their shared machine cell. It does not assume a desired capacity result.
+
+memory_call_diamond consumes only the actual compiler memoryCalls path, full
+Input and unchanged Spec.sat diamond to derive exact source success, target
+success at PC0, complete stack-tail preservation, StateRepr, BaseExtends,
+GrowsAllocator with actual reached cost and the source postcondition. It accepts
+no source-success, notExhausted or desired-target-run premise. The scoped iff
+relates that approved diamond reading to the complete actual source/target/post
+witness under the same genuine path/Input. The cursor consequence also derives
+capacity internally, retaining only its necessary positive-base and actual
+entry-allocator premises. No Spec.sat/calculus/closer/semantics/producer change.
+
+Ten NEW controls reuse the sealed populated caller/suffix and exact producer
+fixtures: remaining_diamond, whole_diamond, populated_diamond,
+diamond_complete_observations, failure_diamond_rejected,
+diamond_false_post_rejected, diamond_does_not_supply_frame,
+diamond_does_not_supply_capacity, general_diamond_not_success and
+exhausted_case_not_admitted. Actual suffix Input is still CONSTRUCTED by the
+existing certified prefix. NEW diamond transport supplies its successful runs
+and postcondition, preserving marker42, non-vacuous old-reference address,
+shared aliases, returned callee-local escape, stack77 and cursor268. The full
+existing source-array and target-word vectors, including untouched entries and
+sentinel99 in their original order, are rewritten through the NEW run witnesses;
+no cells/events are selectively dropped or fabricated.
+
+The existing callee's exact empty revert has genuine Input but rejects even a
+true-post diamond through NEW transport. A false marker post is rejected too.
+True source diamonds still do not supply missing frame or allocator admission.
+The existing SpecificationControls recBase exhausted diamond is reused unchanged:
+it is genuinely true and has no successful run. That exhausted entry cannot
+inhabit this finite memoryCalls path's Input. This is an incompatibility derived
+from the existing certificate, not a new source exclusion or exhaustion reading.
+Recursive/external and full-profile coverage/progress remain OPEN prerequisites.
+
+Both independent read-only proof/control reviewers found no proof or ownership
+defect. The first focused run failed on a dependent existential binder's syntax;
+it was fixed and the raw exit1 retained. Subsequent core and actual populated
+control checks passed. No heartbeat/fuel/node/stack/test/time increase, axiom,
+sorry, native_decide or implemented_by shortcut was introduced. Existing
+explicit-context/irreducible certificate sharing and the same cache are reused.
+No Lean MCP diagnostics tool is available; the permitted serial capped CLI
+fallback supplies per-file checks. Actual Lean4.24.0(commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b)
+and Lake5.0.0-src+797c613 are retained; fresh KeySort passed2jobs under12GiB/no-swap.
+
+### Exact premise and dependency accounting
+
+Test-only metadata now exports each declaration's actual bounded head telescope,
+proposition status, full closed binder Expr representation, printed type and
+constants. Bounded extraction does not unfold a negative RESULT into a fictitious
+extra premise. The reviewed owned diamond-premises.json pins all complete rows
+for the five new lemmas. It is versioned structural accounting supplementing
+kernel proofs, not a semantic trust attestation or a new axiom.
+
+Independent finder and skeptic reviews confirmed a first-draft audit gap:
+binder names/Prop flags/constant membership would accept Input∧desiredTarget or
+diamond∧sourceSuccess inside the SAME binder. Complete expression/type-row pins
+now reject those strengthenings, changed arguments with identical constant sets,
+hidden oracle parameters and assumed capacity/source/target/exhaustion premises.
+The same-name conjunction and helper corruption controls directly exercise the
+validator rather than only mutating a final report schema. Both reviewers cleared
+the fixes. No conditional preservation premise is silently counted as constructed.
+
+Metadata retains ALL imported V16 facts, including unrelated decoded_invariant
+with its explicit PublicCorrectness premise. Because reusing the genuine
+exhausted control imports that older theorem, the no-PublicCorrectness check now
+walks the actual memory-call consumer/control dependency closure rather than
+rejecting an unrelated imported conditional law. All public/private owned
+helper declarations are captured via privateToUserName; a missing reached owned
+node fails closed. Core/private aliases containing PublicCorrectness are rejected.
+The unrelated conditional theorem remains visible outside that proof closure
+and in global OPEN accounting. This is not a waiver for an actual consumer.
+
+Fresh core accounting has107actual theorem entries, now including private owned
+helpers; the controls closure has175theorem entries and173reached proof/helper
+nodes. All2207constructor/G03/stage obligations remain OPEN. All26legacy and
+35extended audit tests pass, including exact same-binder/type, hidden-oracle,
+input replacement, missing/private helper and unrelated-conditional-retention
+controls. Existing scoped axiom checks and actual metadata use only the standard
+propext/Classical.choice/Quot.sound allowance or none.
+
+Mandatory proportionate checks subsequently passed as recorded below. The exact-frozen-base documentation
+failure85vs83, including the two reserved planned Yul citations, remains binding;
+those citations are neither edited nor waived. Final committed head, theorem
+premises/axioms, raw gates, separate read-only reviews, patches/bundle and checksums
+will be exported in this recovery's separate evidence directory.
+
+
+### Diamond checkpoint committed handoff
+
+Full run-lean PASSED996default jobs/262kernel jobs/377taclets with131annotations
+matched, exit0. Peak4115083264bytes under the unchanged12GiB/no-swap cap;
+maxLean1/maxCompiler0, sampled aggregate RSS2348808KiB. Strict automation passed
+at300seconds/module for26retained timing rows from unchanged TestSuite sources;
+491automatic+61step-budget,0manual,11refuted,0pending. Complete pinned TestSuite
+passed564=552derived+11refuted+1excluded,0pending,2skip. Layers185/0inversions;
+orphans1011/0orphan/0notallowed; trust1026sources/246sites/0findings;
+noncircular1260modules/0violations. The required raw docs and exact-frozen-base
+no-new-findings gates still FAIL85vs83 on the same two published reserved planned
+Yul citations; no new V16 citation finding, no waiver or reserved repair.
+
+Separate read-only finder/skeptic reviews passed proof and control milestones.
+They found and cleared the same-binder audit-strengthening gap after complete
+closed-expression/type pins and direct adversarial tests were added. All public
+and private reached owned helpers are included; missing metadata fails closed.
+Final core metadata107includes private helpers, control closure175and reached
+proof/helper closure173;26legacy+35extended audit tests pass. These are scoped
+proof/accounting results, not complete compiler coverage or a source delivery.
+
+All original G48–G51 stages and2207constructor/feature obligations remain OPEN.
+SourceSpec/admission/lowering/full-profile progress, complete backend feature
+composition, recursive/external execution, byte-EVM/Osaka/resources, deployment,
+rollback/adversarial StateExport and final matching SolKey applications remain
+unresolved. This checkpoint implements the investigated diamond consumer while
+remaining PARTIAL because required documentation validation fails.
+
+One further independently executable ORIGINAL G51.02 consequence is the box
+consumer retaining the genuine empty-revert alternative; a box cannot generally
+yield success because it accepts that failure even with a false postcondition.
+It can be consumed into a success/post-or-exact-revert witness without a separate
+source-success premise. That assigned scoped backfill is taken only after this
+checkpoint's gates, reviews, commit and handoff, without altering box semantics.
+Exact committed head and immutable artifacts are recorded externally under
+/workspace/scratch/v16-diamond-recovery; the blocked goal is not reset/reactivated.
