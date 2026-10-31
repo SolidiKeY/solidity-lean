@@ -43,7 +43,7 @@ function shortSummary(report) {
     '', '| Target | Workers requested | Cache requested | Trials | Failures | Initial median ms | Initial p95 ms | Peak RSS median bytes |',
     '|---|---:|---|---:|---:|---:|---:|---:|'];
   for(const s of report.summary) lines.push(`| ${s.target} | ${s.workers} | ${s.cache} | ${s.trials} | ${s.failures} | ${s.metrics.initialVerificationMs?.median?.toFixed(1)??'unmeasured'} | ${s.metrics.initialVerificationMs?.p95?.toFixed(1)??'unmeasured'} | ${s.peakRssBytes.median??'unmeasured'} |`);
-  lines.push('','Local workers bound concurrent files (1–4). Within-file obligations remain serial. Local exact-snapshot caching is always enabled; Dafny cache policy names do not select equivalent local policies.',
+  lines.push('','Local workers bound concurrent functions and files (1–4). Assertions within one function remain serial. Local exact-snapshot caching is always enabled; Dafny cache policy names do not select equivalent local policies.',
     '', '## Parallel scaling','', '| Target | Cache | Workers | Speedup | Efficiency |','|---|---|---:|---:|---:|',
     ...(report.parallelScaling||[]).map(s=>`| ${s.target} | ${s.cache} | ${s.workers} | ${s.speedup?.toFixed(3)??'unsupported'} | ${s.efficiency?.toFixed(3)??'unsupported'} |`));
   const grouped=new Map();
@@ -185,7 +185,7 @@ async function main(args=process.argv.slice(2)) {
     dotnetVersion:options.dotnet?spawnSync(resolve(options.dotnet),['--list-runtimes'],{encoding:'utf8',timeout:10000}).stdout?.trim():null,
     leanVersion:spawnSync('lean',['--version'],{encoding:'utf8',timeout:10000}).stdout?.trim()||null,
     cpuQuota:process.platform==='linux'&&existsSync('/sys/fs/cgroup/cpu.max')?readFileSync('/sys/fs/cgroup/cpu.max','utf8').trim():null,
-    sourceFiles:Object.fromEntries(['vscode/src/extension.cjs','vscode/src/backend.cjs','vscode/src/rpc.cjs','vscode/src/lsp-client.cjs','vscode/src/lsp-server.cjs','vscode/src/lsp-worker.cjs','vscode/src/lean-session.cjs','vscode/src/worker-pool.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','scripts/solc-ast.mjs','vscode/parity/run.cjs','vscode/parity/host.cjs','vscode/parity/core.cjs','vscode/parity/observe.cjs','vscode/parity/renderer.cjs','vscode/parity/workloads.cjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(repo,path))).digest('hex')])),
+    sourceFiles:Object.fromEntries(['vscode/src/extension.cjs','vscode/src/backend.cjs','vscode/src/rpc.cjs','vscode/src/lsp-client.cjs','vscode/src/lsp-server.cjs','vscode/src/lsp-worker.cjs','vscode/src/lean-session.cjs','vscode/src/worker-pool.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','vscode/src/project.cjs','vscode/src/solidity-text.cjs','scripts/source-locations.mjs','scripts/test-solidity.mjs','scripts/solc-ast.mjs','vscode/parity/run.cjs','vscode/parity/host.cjs','vscode/parity/core.cjs','vscode/parity/observe.cjs','vscode/parity/renderer.cjs','vscode/parity/workloads.cjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(repo,path))).digest('hex')])),
     memoryLimit:process.platform==='linux'&&existsSync('/sys/fs/cgroup/memory.max')?readFileSync('/sys/fs/cgroup/memory.max','utf8').trim():null},runs,summary:[],comparisons:[],
     limitations:['Equivalent constant-return obligations cover a shared semantic fragment, not general theorem-prover equivalence.',
       'No OS page-cache eviction is attempted. Process-cold and live-server warm timings are separate.',

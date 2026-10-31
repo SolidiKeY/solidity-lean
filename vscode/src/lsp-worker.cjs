@@ -4,6 +4,7 @@ const {join}=require('node:path');
 const {pathToFileURL}=require('node:url');
 const {createHash}=require('node:crypto');
 const {LeanSession}=require('./lean-session.cjs');
+const projects=require('./project.cjs');
 
 let session,compiler,locations;
 function checkpointRows(path,contract,contracts=[]){
@@ -24,15 +25,20 @@ async function execute(task){
   compiler??=await import(pathToFileURL(join(root,'scripts/solc-ast.mjs')).href);
   locations??=await import(pathToFileURL(join(root,'scripts/source-locations.mjs')).href);
   if(task.action==='analyze') {
-    const compiled=compiler.compileFixture({args:['--source',source,'--out',join(directory,'source.ast.json'),'--no-wrapper'],sourceBytes:Buffer.from(text,'utf8'),quiet:true});
+    const project=task.project??projects.snapshot(source,text,task.settings,task.documents);
+    const compiled=compiler.compileFixture({args:['--source',source,'--out',join(directory,'source.ast.json'),'--no-wrapper'],sourceBytes:Buffer.from(text,'utf8'),project,analysisOnly:true,quiet:true});
     return compiled;
   }
   const {compiled,options={}}=task;
-  if(createHash('sha256').update(text).digest('hex')!==compiled.fixture.header.sourceSha256)throw new Error('Compiler snapshot hash mismatch');
+  if(createHash('sha256').update(text).digest('hex')!==(compiled.sourceHash??compiled.fixture?.header.sourceSha256))throw new Error('Compiler snapshot hash mismatch');
+  if(compiled.proofGap)return {results:[],errors:[{source,stage:'admission',reason:compiled.proofGap}]};
   writeFileSync(join(directory,'source.ast.json'),compiled.text);
   const results=[],errors=[];
-  const contracts=compiled.fixture.ast.nodes.filter(n=>n.nodeType==='ContractDefinition'&&(!options.contract||n.name===options.contract));
-  const locate=locations.sourceLocations(compiled.fixture.ast,Buffer.from(text));
+  const primary=compiled.primaryAst??compiled.fixture.ast;
+  const allAsts=compiled.fixture.sourceUnits?.map(u=>u.ast)??[primary];
+  const allContracts=allAsts.flatMap(a=>a.nodes).filter(n=>n.nodeType==='ContractDefinition');
+  const contracts=primary.nodes.filter(n=>n.nodeType==='ContractDefinition'&&(!options.contract||n.name===options.contract));
+  const locate=locations.sourceLocations(primary,Buffer.from(text));
   session??=new LeanSession(root,directory);
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
@@ -44,14 +50,14 @@ async function execute(task){
     const diagnostics=await session.check(wrapper,options.timeoutMs??60000);
     for(const diagnostic of diagnostics)if(importDiagnostic(diagnostic))
       errors.push({source,contract:contract.name,stage:'lean',reason:diagnostic.message});
-    const checkpoint=checkpointRows(output,contract,compiled.fixture.ast.nodes.filter(n=>n.nodeType==='ContractDefinition'));
+    const checkpoint=checkpointRows(output,contract,allContracts);
     if(checkpoint)for(const row of checkpoint) {
-      const inherited=compiled.fixture.ast.nodes.filter(n=>n.nodeType==='ContractDefinition'&&(contract.linearizedBaseContracts||[]).includes(n.id))
+      const inherited=allContracts.filter(n=>(contract.linearizedBaseContracts||[]).includes(n.id))
         .flatMap(n=>n.nodes).find(n=>n.nodeType==='FunctionDefinition'&&n.id===row.sourceId);
-      const range=locate(contract.name,row)||(inherited?locations.sourceRange(Buffer.from(text),inherited.src):null);
+      const range=locate(contract.name,row)||(inherited?locations.sourceRange(Buffer.from(text),inherited.src,Number(primary.src.split(':').at(-1))):null);
       results.push({...row,source,contract:contract.name,
-      sourceHash:compiled.fixture.header.sourceSha256,...(range?{range}:{}),
-      ...(row.counterexample?{counterexample:locations.sourceWitness(compiled.fixture.ast,contract.name,row)}:{})});
+      sourceHash:compiled.sourceHash??compiled.fixture.header.sourceSha256,...(range?{range}:{}),
+      ...(row.counterexample?{counterexample:locations.sourceWitness(primary,contract.name,row)}:{})});
     }
     else if(!errors.length)throw new Error('Lean completed without a verification checkpoint');
   }
