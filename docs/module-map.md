@@ -1299,3 +1299,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceDeclaration.lean` | Actual resolved Source default-declaration statement, fresh local MemOK and existing intrinsic/word allocator composition; explicit initial capacities and low-horizon observations. |
 
 | `Solidity/Backend/MemoryOps/SourceAssignment.lean` | Actual resolved Source indexed Boolean assignment with local RHS/index, intrinsic statement and published word write; initial alignment, MemOK, complete frames and separate bounds observations. |
+
+| `Solidity/Backend/MemoryOps/SourceSequence.lean` | Actual reached Source RItems, intrinsic program and word-code sequencing for indexed assignment/delete in both orders; derived second bounds, exact prefix failure, horizon and typed frame laws. |

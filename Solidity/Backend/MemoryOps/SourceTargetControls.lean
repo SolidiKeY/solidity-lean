@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceSequence
 import Solidity.Backend.MemoryOps.SourceAssignment
 import Solidity.Backend.MemoryOps.SourceDeclaration
 import Solidity.Backend.MemoryOps.SourceIndexedDelete
@@ -563,5 +564,366 @@ theorem resolved_assignment_endpoint (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms resolved_assignment_endpoint
+
+
+private abbrev AΔ : Ctx := [.val .bool,.val .uint,.mem B]
+private abbrev otherAlias : Source.Idx AΓ (.array .memory .bool none) := .there (.there (.there .here))
+private def seqDelete : Source.RExpr E0 AΓ (.tuple []) := sourceIndexedDelete aroot aindex
+private def seqItems : Source.RItems E0 [] false .body AΓ AΓ := .stmt (.expr assignTerm) (.stmt (.expr seqDelete) .nil)
+private def reverseItems : Source.RItems E0 [] false .body AΓ AΓ := .stmt (.expr seqDelete) (.stmt (.expr assignTerm) .nil)
+private def seqDeleteCode : List Instr := deleteLocalCode 1 (.there (.there .here) : Idx AΔ (.mem B))
+  (compileVal 1 (.simple (.local (.there .here)) : Val C AΔ .uint))
+private def seqProgram : Prog C AΔ AΔ := .cons
+  (.assignMem (.index .dyn (.var (.there (.there .here)) rfl) (.simple (.local (.there .here)))) (.val (.simple (.local .here))))
+  (.cons (.deleteMem (.loc (.index .dyn (.var (.there (.there .here)) rfl) (.simple (.local (.there .here))))) rfl) .nil)
+private def reverseProgram : Prog C AΔ AΔ := .cons
+  (.deleteMem (.loc (.index .dyn (.var (.there (.there .here)) rfl) (.simple (.local (.there .here))))) rfl)
+  (.cons (.assignMem (.index .dyn (.var (.there (.there .here)) rfl) (.simple (.local (.there .here)))) (.val (.simple (.local .here)))) .nil)
+private def seqCells (m : Machine) : List Word := [m.mem 0,m.mem 1,m.mem 2,m.mem 3,m.mem 5,m.mem 16,m.mem 17,m.mem 18,m.mem 19]
+private theorem one_valid : (uintOfNat 1).1.toNat<(assignState (uintOfNat 1) true).heap.len r .dyn := by
+  simp only [assignState,indexedState,State.push,σ,Heap.len,Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+  decide
+private theorem delete_cell_run (m : Machine) (c : Nat) (k : Fin W) (hk : k.val<3)
+    (hptr : m.mem 1=w[16]) (hi : m.mem c=.val k) (hlen : m.mem 16=w[3]) :
+    run ([.push w[0]] ++ ([.mload 1] ++ ([.mload c] ++ writeArrayStackCode))) m=
+      .ok (writeMachine m (16+1+k.val) w[0]) 0 := by
+  rw [run_append_ok (show run [.push w[0]] m=.ok (m.push w[0]) 0 from rfl)]
+  rw [run_append_ok (show run [.mload 1] (m.push w[0])=.ok ((m.push w[0]).push w[16]) 0 from by
+    change Out.ok ((m.push w[0]).push (m.mem 1)) 0=_
+    rw [hptr])]
+  rw [run_append_ok (show run [.mload c] ((m.push w[0]).push w[16])=
+    .ok (((m.push w[0]).push w[16]).push (.val k)) 0 from by
+      change Out.ok (((m.push w[0]).push w[16]).push (m.mem c)) 0=_
+      rw [hi])]
+  have ha := arrayAddrStack_run (m.push w[0]) ⟨16,by decide⟩ k 3 (by decide)
+    (by simpa only [Machine.push,wmod_of_lt (by decide : 3<W)] using hlen)
+  rw [if_pos hk] at ha
+  rw [writeArrayStackCode,run_append_ok ha]
+  have haddr : 16+1+k.val<W := by
+    have hw : 20<W := by decide
+    omega
+  simp only [run,Machine.push,exec_cons_zero,Instr.step,wmod_of_lt haddr,Out.ok_bind,exec_nil,writeMachine]
+private theorem seq_delete_run (m : Machine) (hptr : m.mem 1=w[16]) (hi : m.mem 2=w[1]) (hlen : m.mem 16=w[3]) :
+    run seqDeleteCode m=.ok (writeMachine m 18 w[0]) 0 :=
+  delete_cell_run m 2 ⟨1,by decide⟩ (by decide) hptr hi hlen
+
+/-- Actual reached sequence and its complete ordered observations; both declared
+pipelines use the same independently inhabited initial heap and locals. -/
+theorem reached_assignment_delete (p : Roadmap.Pipeline) :
+    ∃ (mid out : Heap H) (ym z : Source.EMState E0 AΓ) (mm target : Machine),
+      (assignState (uintOfNat 1) true).heap.writeAddr (.index r .dyn (uintOfNat 1)) true=some mid ∧
+      mid.writeAddr (.index r .dyn (uintOfNat 1)) false=some out ∧
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 5 AΓ.length none (.expr assignTerm : Source.RStmt E0 [] false .body AΓ AΓ)
+        (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=(.ok (.normal (assignSource (uintOfNat 1) true).1),(.nil,ym.2)) ∧
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 4 AΓ.length none (.expr seqDelete : Source.RStmt E0 [] false .body AΓ AΓ)
+        ym.1).run (.nil,ym.2)=(.ok (.normal ym.1),(.nil,z.2)) ∧
+      (Source.execItems (Source.SemanticsExamples.G0 p) F0 6 AΓ.length none seqItems (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+        (.ok (.normal (assignSource (uintOfNat 1) true).1),(.nil,z.2)) ∧
+      Prog.run (assignState (uintOfNat 1) true) seqProgram=.ok ⟨(assignState (uintOfNat 1) true).withHeap out,List.prefix_refl _⟩ ∧
+      run assignCode (assignMachine 1 true)=.ok mm 0 ∧ run seqDeleteCode mm=.ok target 0 ∧
+      run (assignCode ++ seqDeleteCode) (assignMachine 1 true)=.ok target 0 ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems .dyn (mid.get r),MObj.elems .dyn (out.get r)]=
+        [[true,false,false],[true,true,false],[true,false,false]] ∧
+      [seqCells (assignMachine 1 true),seqCells mm,seqCells target]=
+        [[w[20],w[16],w[1],w[1],w[99],w[3],w[1],w[0],w[0]],[w[20],w[16],w[1],w[1],w[99],w[3],w[1],w[1],w[0]],[w[20],w[16],w[1],w[1],w[99],w[3],w[1],w[0],w[0]]] ∧
+      SourceBoolMemoryAt ym 0 mid r .dyn ∧ SourceBoolMemoryAt z 0 out r .dyn ∧
+      Source.MemOK E0 SH ym ∧ Source.MemOK E0 SH z ∧ z.1=(assignSource (uintOfNat 1) true).1 ∧
+      (Source.evalLoc (Source.SemanticsExamples.G0 p) F0 2
+        (.indexArray (.local otherAlias) (by decide) (.local aindex) rfl)).run z=(.ok (.mem 0 1),z) ∧
+      (Source.readLoc (E := E0) (Γ := AΓ) F0 (τ := .bool) (.mem 0 1)).run z=(.ok (.bool false),z) ∧
+      target.stack=[w[42]] := by
+  have hr : SourceBoolMemoryAt (assignSource (uintOfNat 1) true) 0 (assignState (uintOfNat 1) true).heap r .dyn := represented
+  obtain ⟨mid,out,ym,z,mm,target,hw1,hw2,hs1,hs2,hs,hi,hc1,hc2,hc,hr1,hr2,hm1,hm2,hmem1,hmem2,hy1,hy2,hstack,ha⟩ :=
+    resolved_assign_delete_word (Source.SemanticsExamples.G0 p) F0 0 (assignState (uintOfNat 1) true) r hr
+      aroot aindex aindex .here (.there (.there .here)) (.there .here) (.there .here) .here
+      (uintOfNat 1) (uintOfNat 1) true rfl rfl rfl rfl rfl rfl rfl rfl one_valid one_valid assign_repr_one SH (assign_memOK _ _)
+  have hv1 : MObj.elems .dyn (mid.get r)=[true,true,false] := by
+    rw [indexedWrite_elems _ _ _ _ _ _ hw1]
+    simp only [assignState,indexedState,State.push,σ,Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+    rfl
+  have hv2 : MObj.elems .dyn (out.get r)=[true,false,false] := by
+    rw [indexedWrite_elems _ _ _ _ _ _ hw2,hv1];rfl
+  have hm : mm=writeMachine (assignMachine 1 true) 18 w[1] := by
+    have hc0 := assign_code_run (assignMachine 1 true) rfl rfl rfl rfl
+    have he := hc0.symm.trans hc1
+    cases he;rfl
+  have ht : target=writeMachine (writeMachine (assignMachine 1 true) 18 w[1]) 18 w[0] := by
+    have hc0 := seq_delete_run mm (by rw [hm];rfl) (by rw [hm];rfl) (by rw [hm];rfl)
+    have he := hc0.symm.trans hc2
+    cases he
+    rw [hm]
+  have hk : (uintOfNat 1).1.toNat<out.len r .dyn := by
+    change (uintOfNat 1).1.toNat<(MObj.elems .dyn (out.get r)).length
+    rw [hv2];decide
+  refine ⟨mid,out,ym,z,mm,target,hw1,hw2,hs1,hs2,hs,hi,hc1,hc2,hc,?_,?_,hr1,hr2,hmem1,hmem2,hy2,?_,?_,hstack⟩
+  · rw [hv1,hv2];simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+  · rw [hm,ht];rfl
+  · exact hr2.eval_index_loc (Source.SemanticsExamples.G0 p) F0 0 otherAlias aindex (uintOfNat 1)
+      (by rw [hy2];rfl) (by rw [hy2];rfl) hk
+  · have hh : z.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [true,false,false]⟩ := by rw [←hv2];exact hr2
+    exact source_bool_read z 0 _ hh 1 (by decide)
+
+/-- Actual reached sequence and its complete ordered observations; both declared
+pipelines use the same independently inhabited initial heap and locals. -/
+theorem reached_delete_assignment (p : Roadmap.Pipeline) :
+    ∃ (mid out : Heap H) (ym z : Source.EMState E0 AΓ) (mm target : Machine),
+      (assignState (uintOfNat 1) true).heap.writeAddr (.index r .dyn (uintOfNat 1)) false=some mid ∧
+      mid.writeAddr (.index r .dyn (uintOfNat 1)) true=some out ∧
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 5 AΓ.length none (.expr seqDelete : Source.RStmt E0 [] false .body AΓ AΓ)
+        (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=(.ok (.normal (assignSource (uintOfNat 1) true).1),(.nil,ym.2)) ∧
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 4 AΓ.length none (.expr assignTerm : Source.RStmt E0 [] false .body AΓ AΓ)
+        ym.1).run (.nil,ym.2)=(.ok (.normal ym.1),(.nil,z.2)) ∧
+      (Source.execItems (Source.SemanticsExamples.G0 p) F0 6 AΓ.length none reverseItems (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+        (.ok (.normal (assignSource (uintOfNat 1) true).1),(.nil,z.2)) ∧
+      Prog.run (assignState (uintOfNat 1) true) reverseProgram=.ok ⟨(assignState (uintOfNat 1) true).withHeap out,List.prefix_refl _⟩ ∧
+      run seqDeleteCode (assignMachine 1 true)=.ok mm 0 ∧ run assignCode mm=.ok target 0 ∧
+      run (seqDeleteCode ++ assignCode) (assignMachine 1 true)=.ok target 0 ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems .dyn (mid.get r),MObj.elems .dyn (out.get r)]=
+        [[true,false,false],[true,false,false],[true,true,false]] ∧
+      [seqCells (assignMachine 1 true),seqCells mm,seqCells target]=
+        [[w[20],w[16],w[1],w[1],w[99],w[3],w[1],w[0],w[0]],[w[20],w[16],w[1],w[1],w[99],w[3],w[1],w[0],w[0]],[w[20],w[16],w[1],w[1],w[99],w[3],w[1],w[1],w[0]]] ∧
+      SourceBoolMemoryAt ym 0 mid r .dyn ∧ SourceBoolMemoryAt z 0 out r .dyn ∧
+      Source.MemOK E0 SH ym ∧ Source.MemOK E0 SH z ∧ z.1=(assignSource (uintOfNat 1) true).1 ∧
+      (Source.evalLoc (Source.SemanticsExamples.G0 p) F0 2
+        (.indexArray (.local otherAlias) (by decide) (.local aindex) rfl)).run z=(.ok (.mem 0 1),z) ∧
+      (Source.readLoc (E := E0) (Γ := AΓ) F0 (τ := .bool) (.mem 0 1)).run z=(.ok (.bool true),z) ∧
+      target.stack=[w[42]] := by
+  have hr : SourceBoolMemoryAt (assignSource (uintOfNat 1) true) 0 (assignState (uintOfNat 1) true).heap r .dyn := represented
+  obtain ⟨mid,out,ym,z,mm,target,hw1,hw2,hs1,hs2,hs,hi,hc1,hc2,hc,hr1,hr2,hm1,hm2,hmem1,hmem2,hy1,hy2,hstack,ha⟩ :=
+    resolved_delete_assign_word (Source.SemanticsExamples.G0 p) F0 0 (assignState (uintOfNat 1) true) r hr
+      aroot aindex aindex .here (.there (.there .here)) (.there .here) (.there .here) .here
+      (uintOfNat 1) (uintOfNat 1) true rfl rfl rfl rfl rfl rfl rfl rfl one_valid one_valid assign_repr_one SH (assign_memOK _ _)
+  have hv1 : MObj.elems .dyn (mid.get r)=[true,false,false] := by
+    rw [indexedWrite_elems _ _ _ _ _ _ hw1]
+    simp only [assignState,indexedState,State.push,σ,Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+    rfl
+  have hv2 : MObj.elems .dyn (out.get r)=[true,true,false] := by
+    rw [indexedWrite_elems _ _ _ _ _ _ hw2,hv1];rfl
+  have hm : mm=writeMachine (assignMachine 1 true) 18 w[0] := by
+    have hc0 := seq_delete_run (assignMachine 1 true) rfl rfl rfl
+    have he := hc0.symm.trans hc1
+    cases he;rfl
+  have ht : target=writeMachine (writeMachine (assignMachine 1 true) 18 w[0]) 18 w[1] := by
+    have hc0 := assign_code_run mm (by rw [hm];rfl) (by rw [hm];rfl) (by rw [hm];rfl) (by rw [hm];rfl)
+    have he := hc0.symm.trans hc2
+    cases he
+    rw [hm]
+  have hk : (uintOfNat 1).1.toNat<out.len r .dyn := by
+    change (uintOfNat 1).1.toNat<(MObj.elems .dyn (out.get r)).length
+    rw [hv2];decide
+  refine ⟨mid,out,ym,z,mm,target,hw1,hw2,hs1,hs2,hs,hi,hc1,hc2,hc,?_,?_,hr1,hr2,hmem1,hmem2,hy2,?_,?_,hstack⟩
+  · rw [hv1,hv2];simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+  · rw [hm,ht];rfl
+  · exact hr2.eval_index_loc (Source.SemanticsExamples.G0 p) F0 0 otherAlias aindex (uintOfNat 1)
+      (by rw [hy2];rfl) (by rw [hy2];rfl) hk
+  · have hh : z.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [true,true,false]⟩ := by rw [←hv2];exact hr2
+    exact source_bool_read z 0 _ hh 1 (by decide)
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.reached_assignment_delete' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reached_assignment_delete
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.reached_delete_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reached_delete_assignment
+
+
+private abbrev DΓ : Source.RCtx := (.int .u256)::AΓ
+private abbrev DΔ : Ctx := (.val .uint)::AΔ
+private def disjointSource (j : PrimTy.uint.Denote) : Source.EMState E0 DΓ :=
+  (.cons (sourceUint j) (assignSource (uintOfNat 1) true).1,sy.2)
+private def disjointState (j : PrimTy.uint.Denote) := (assignState (uintOfNat 1) true).push (t := .val .uint) j
+private def disjointMachine (j : Nat) := writeMachine (assignMachine 1 true) 4 (.val (wmod j))
+private def disjointItems : Source.RItems E0 [] false .body DΓ DΓ :=
+  .stmt (.expr (sourceIndexedAssign (.there aroot) (.there aindex) (.there .here)))
+    (.stmt (.expr (sourceIndexedDelete (.there aroot) .here)) .nil)
+private def disjointProgram : Prog C DΔ DΔ := .cons
+  (.assignMem (.index .dyn (.var (.there (.there (.there .here))) rfl) (.simple (.local (.there (.there .here))))) (.val (.simple (.local (.there .here)))))
+    (.cons (.deleteMem (.loc (.index .dyn (.var (.there (.there (.there .here))) rfl) (.simple (.local .here)))) rfl) .nil)
+private def disjointDeleteCode := deleteLocalCode 1 (.there (.there (.there .here)) : Idx DΔ (.mem B))
+  (compileVal 1 (.simple (.local .here) : Val C DΔ .uint))
+private def disjointCells (m : Machine) : List Word := [m.mem 0,m.mem 1,m.mem 2,m.mem 3,m.mem 4,m.mem 5,m.mem 16,m.mem 17,m.mem 18,m.mem 19]
+private theorem disjoint_memOK (j : PrimTy.uint.Denote) : Source.MemOK E0 SH (disjointSource j) :=
+  ⟨⟨(assign_memOK (uintOfNat 1) true).1.1,⟨trivial,(assign_memOK (uintOfNat 1) true).1.2⟩⟩,(assign_memOK (uintOfNat 1) true).2⟩
+private theorem disjoint_zero_repr : StateRepr 1 1 8
+    ((((Frag.init Γ).push (.val .uint) .ok).push (.val .bool) .ok).push (.val .uint) .ok)
+    (disjointState (uintOfNat 0)) base (disjointMachine 0) :=
+  assign_repr_one.consVal (uintOfNat 0) w[0] (ReprV.uint_of rfl) (by decide)
+private theorem disjoint_three_repr : StateRepr 1 1 8
+    ((((Frag.init Γ).push (.val .uint) .ok).push (.val .bool) .ok).push (.val .uint) .ok)
+    (disjointState (uintOfNat 3)) base (disjointMachine 3) :=
+  assign_repr_one.consVal (uintOfNat 3) w[3] (ReprV.uint_of rfl) (by decide)
+
+/-- The second runtime index differs from the first; it deletes an initially
+true neighbour while retaining the actual first assignment's changed cell. -/
+theorem reached_disjoint_cells (p : Roadmap.Pipeline) :
+    ∃ (mid out : Heap H) (ym z : Source.EMState E0 DΓ) (mm target : Machine),
+      (disjointState (uintOfNat 0)).heap.writeAddr (.index r .dyn (uintOfNat 1)) true=some mid ∧
+      mid.writeAddr (.index r .dyn (uintOfNat 0)) false=some out ∧
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 5 DΓ.length none
+        (.expr (sourceIndexedAssign (.there aroot) (.there aindex) (.there .here)) : Source.RStmt E0 [] false .body DΓ DΓ)
+        (disjointSource (uintOfNat 0)).1).run (.nil,sy.2)=(.ok (.normal (disjointSource (uintOfNat 0)).1),(.nil,ym.2)) ∧
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 4 DΓ.length none
+        (.expr (sourceIndexedDelete (.there aroot) .here) : Source.RStmt E0 [] false .body DΓ DΓ)
+        ym.1).run (.nil,ym.2)=(.ok (.normal ym.1),(.nil,z.2)) ∧
+      (Source.execItems (Source.SemanticsExamples.G0 p) F0 6 DΓ.length none disjointItems (disjointSource (uintOfNat 0)).1).run (.nil,sy.2)=
+        (.ok (.normal (disjointSource (uintOfNat 0)).1),(.nil,z.2)) ∧
+      Prog.run (disjointState (uintOfNat 0)) disjointProgram=.ok ⟨(disjointState (uintOfNat 0)).withHeap out,List.prefix_refl _⟩ ∧
+      run assignCode (disjointMachine 0)=.ok mm 0 ∧ run disjointDeleteCode mm=.ok target 0 ∧
+      run (assignCode ++ disjointDeleteCode) (disjointMachine 0)=.ok target 0 ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems .dyn (mid.get r),MObj.elems .dyn (out.get r)]=
+        [[true,false,false],[true,true,false],[false,true,false]] ∧
+      [disjointCells (disjointMachine 0),disjointCells mm,disjointCells target]=
+        [[w[20],w[16],w[1],w[1],w[0],w[99],w[3],w[1],w[0],w[0]],
+         [w[20],w[16],w[1],w[1],w[0],w[99],w[3],w[1],w[1],w[0]],
+         [w[20],w[16],w[1],w[1],w[0],w[99],w[3],w[0],w[1],w[0]]] ∧
+      SourceBoolMemoryAt ym 0 mid r .dyn ∧ SourceBoolMemoryAt z 0 out r .dyn ∧ Source.MemOK E0 SH z ∧ z.1=(disjointSource (uintOfNat 0)).1 ∧
+      (Source.readLoc (E := E0) (Γ := DΓ) F0 (τ := .bool) (.mem 0 0)).run z=(.ok (.bool false),z) ∧
+      (Source.readLoc (E := E0) (Γ := DΓ) F0 (τ := .bool) (.mem 0 1)).run z=(.ok (.bool true),z) ∧ target.stack=[w[42]] := by
+  have hr : SourceBoolMemoryAt (disjointSource (uintOfNat 0)) 0 (disjointState (uintOfNat 0)).heap r .dyn := represented
+  obtain ⟨mid,out,ym,z,mm,target,hw1,hw2,hs1,hs2,hs,hi,hc1,hc2,hc,hr1,hr2,hm1,hm2,hmem1,hmem2,hy1,hy2,hstack,ha⟩ :=
+    resolved_assign_delete_word (Source.SemanticsExamples.G0 p) F0 0 (disjointState (uintOfNat 0)) r hr
+      (.there aroot) (.there aindex) .here (.there .here) (.there (.there (.there .here))) (.there (.there .here)) .here (.there .here)
+      (uintOfNat 1) (uintOfNat 0) true rfl rfl rfl rfl rfl rfl rfl rfl one_valid (by
+        simp only [disjointState,assignState,indexedState,State.push,σ,Heap.len,Heap.get,Objs.get,hp,r,MObj.elems_dyn];decide)
+      disjoint_zero_repr SH (disjoint_memOK _)
+  have hv1 : MObj.elems .dyn (mid.get r)=[true,true,false] := by
+    rw [indexedWrite_elems _ _ _ _ _ _ hw1]
+    simp only [disjointState,assignState,indexedState,State.push,σ,Heap.get,Objs.get,hp,r,MObj.elems_dyn];rfl
+  have hv2 : MObj.elems .dyn (out.get r)=[false,true,false] := by
+    rw [indexedWrite_elems _ _ _ _ _ _ hw2,hv1];rfl
+  have hm : mm=writeMachine (disjointMachine 0) 18 w[1] := by
+    have he := (assign_code_run (disjointMachine 0) rfl rfl rfl rfl).symm.trans hc1
+    cases he;rfl
+  have ht : target=writeMachine (writeMachine (disjointMachine 0) 18 w[1]) 17 w[0] := by
+    have hc0 := delete_cell_run mm 4 ⟨0,W_pos⟩ (by decide) (by rw [hm];rfl) (by rw [hm];rfl) (by rw [hm];rfl)
+    have he := hc0.symm.trans hc2
+    cases he
+    rw [hm]
+    rfl
+  have hh : z.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [false,true,false]⟩ := by rw [←hv2];exact hr2
+  refine ⟨mid,out,ym,z,mm,target,hw1,hw2,hs1,hs2,hs,hi,hc1,hc2,hc,?_,?_,hr1,hr2,hmem2,hy2,
+    source_bool_read z 0 _ hh 0 (by decide),source_bool_read z 0 _ hh 1 (by decide),hstack⟩
+  · rw [hv1,hv2];simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+  · rw [hm,ht];rfl
+
+/-- The first assignment genuinely succeeds and changes the heap; endpoint
+rejection is in the actual reached second operation, with no suffix heap. -/
+theorem reached_endpoint_failure (p : Roadmap.Pipeline) :
+    ∃ (mid : Heap H) (ym : Source.EMState E0 DΓ) (mm : Machine),
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 5 DΓ.length none
+        (.expr (sourceIndexedAssign (.there aroot) (.there aindex) (.there .here)) : Source.RStmt E0 [] false .body DΓ DΓ)
+        (disjointSource (uintOfNat 3)).1).run (.nil,sy.2)=(.ok (.normal (disjointSource (uintOfNat 3)).1),(.nil,ym.2)) ∧
+      run assignCode (disjointMachine 3)=.ok mm 0 ∧
+      (Source.execItems (Source.SemanticsExamples.G0 p) F0 6 DΓ.length none disjointItems (disjointSource (uintOfNat 3)).1).run (.nil,sy.2)=
+        (.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      Prog.run (disjointState (uintOfNat 3)) disjointProgram=.error .revert ∧
+      run disjointDeleteCode mm=.revert ∧ run (assignCode ++ disjointDeleteCode) (disjointMachine 3)=.revert ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems .dyn (mid.get r)]=[[true,false,false],[true,true,false]] ∧
+      [disjointCells (disjointMachine 3),disjointCells mm]=
+        [[w[20],w[16],w[1],w[1],w[3],w[99],w[3],w[1],w[0],w[0]],
+         [w[20],w[16],w[1],w[1],w[3],w[99],w[3],w[1],w[1],w[0]]] ∧
+      SourceBoolMemoryAt ym 0 mid r .dyn ∧ Source.MemOK E0 SH ym ∧
+      (Source.readLoc (E := E0) (Γ := DΓ) F0 (τ := .bool) (.mem 0 1)).run ym=(.ok (.bool true),ym) := by
+  have hr : SourceBoolMemoryAt (disjointSource (uintOfNat 3)) 0 (disjointState (uintOfNat 3)).heap r .dyn := represented
+  obtain ⟨mid,ym,mm,hw,hs,hc1,hsfail,hifail,hcfail,hc,hr1,hmem,hy⟩ :=
+    resolved_assign_delete_reject (Source.SemanticsExamples.G0 p) F0 0 (disjointState (uintOfNat 3)) r hr
+      (.there aroot) (.there aindex) .here (.there .here) (.there (.there (.there .here))) (.there (.there .here)) .here (.there .here)
+      (uintOfNat 1) (uintOfNat 3) true rfl rfl rfl rfl rfl rfl rfl rfl one_valid (by
+        simp only [disjointState,assignState,indexedState,State.push,σ,Heap.len,Heap.get,Objs.get,hp,r,MObj.elems_dyn];decide)
+      disjoint_three_repr SH (disjoint_memOK _)
+  have hv : MObj.elems .dyn (mid.get r)=[true,true,false] := by
+    rw [indexedWrite_elems _ _ _ _ _ _ hw]
+    simp only [disjointState,assignState,indexedState,State.push,σ,Heap.get,Objs.get,hp,r,MObj.elems_dyn];rfl
+  have hm : mm=writeMachine (disjointMachine 3) 18 w[1] := by
+    have he := (assign_code_run (disjointMachine 3) rfl rfl rfl rfl).symm.trans hc1
+    cases he;rfl
+  have hh : ym.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [true,true,false]⟩ := by rw [←hv];exact hr1
+  refine ⟨mid,ym,mm,hs,hc1,hsfail,hifail,hcfail,hc,?_,?_,hr1,hmem,source_bool_read ym 0 _ hh 1 (by decide)⟩
+  · rw [hv];simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+  · rw [hm];rfl
+
+/-- Horizon5 completes a material first assignment, then times out while
+resolving the deletion. This is not rollback or a target gas observation. -/
+theorem reached_horizon_timeout (p : Roadmap.Pipeline) :
+    ∃ (mid : Heap H) (ym : Source.EMState E0 AΓ) (mm : Machine),
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 4 AΓ.length none (.expr assignTerm : Source.RStmt E0 [] false .body AΓ AΓ)
+        (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=(.ok (.normal (assignSource (uintOfNat 1) true).1),(.nil,ym.2)) ∧
+      (Source.execItems (Source.SemanticsExamples.G0 p) F0 5 AΓ.length none seqItems (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+        (.error .timeout,(.nil,ym.2)) ∧
+      (Source.execItems (Source.SemanticsExamples.G0 p) F0 0 AΓ.length none seqItems (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+        (.error .timeout,(.nil,sy.2)) ∧
+      run assignCode (assignMachine 1 true)=.ok mm 0 ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems .dyn (mid.get r)]=[[true,false,false],[true,true,false]] ∧
+      SourceBoolMemoryAt ym 0 mid r .dyn ∧ Source.MemOK E0 SH ym ∧
+      (Source.readLoc (E := E0) (Γ := AΓ) F0 (τ := .bool) (.mem 0 1)).run ym=(.ok (.bool true),ym) := by
+  have hr : SourceBoolMemoryAt (assignSource (uintOfNat 1) true) 0 (assignState (uintOfNat 1) true).heap r .dyn := represented
+  obtain ⟨mid,ym,mm,hw,he,hs,hi,hc,hr1,hm1,hmem,hy,hstack,ha⟩ :=
+    resolved_assign_word (Source.SemanticsExamples.G0 p) F0 0 (assignState (uintOfNat 1) true) r hr
+      aroot aindex .here (.there (.there .here)) (.there .here) .here (uintOfNat 1) true
+      rfl rfl rfl rfl rfl rfl one_valid assign_repr_one SH (assign_memOK _ _)
+  have hshort := source_indexed_delete_horizon_two (Source.SemanticsExamples.G0 p) F0 ym aroot aindex
+  have hs2 := source_expr_statement_error (Source.SemanticsExamples.G0 p) F0 2 AΓ.length seqDelete ym ym .timeout hshort
+  have htail : (Source.execItems (Source.SemanticsExamples.G0 p) F0 4 AΓ.length none
+      (.stmt (.expr seqDelete) .nil : Source.RItems E0 [] false .body AΓ AΓ) ym.1).run (.nil,ym.2)=(.error .timeout,(.nil,ym.2)) := by
+    rw [Source.execItems,Source.Hoare.run_bind,hs2]
+  have hs' : (Source.execS (Source.SemanticsExamples.G0 p) F0 4 AΓ.length none
+      (.expr assignTerm : Source.RStmt E0 [] false .body AΓ AΓ) (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+      (.ok (.normal ym.1),(.nil,ym.2)) := by simpa only [hy] using hs
+  have hseq : (Source.execItems (Source.SemanticsExamples.G0 p) F0 5 AΓ.length none seqItems (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+      (.error .timeout,(.nil,ym.2)) := by
+    rw [seqItems,Source.execItems,Source.Hoare.run_bind,hs']
+    change (Source.execItems (Source.SemanticsExamples.G0 p) F0 4 AΓ.length none
+      (.stmt (.expr seqDelete) .nil : Source.RItems E0 [] false .body AΓ AΓ) ym.1 >>= fun o => Source.EM.lift (o.up AΓ)).run (.nil,ym.2)=_
+    rw [Source.Hoare.run_bind,htail]
+  have hv : MObj.elems .dyn (mid.get r)=[true,true,false] := by
+    rw [indexedWrite_elems _ _ _ _ _ _ hw]
+    simp only [assignState,indexedState,State.push,σ,Heap.get,Objs.get,hp,r,MObj.elems_dyn];rfl
+  have hh : ym.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [true,true,false]⟩ := by rw [←hv];exact hr1
+  refine ⟨mid,ym,mm,hs,hseq,rfl,hc,?_,hr1,hmem,source_bool_read ym 0 _ hh 1 (by decide)⟩
+  rw [hv];simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.reached_disjoint_cells' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reached_disjoint_cells
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.reached_endpoint_failure' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reached_endpoint_failure
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.reached_horizon_timeout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reached_horizon_timeout
+
+
+/-- Same input, different executed order: final alias observations and word
+outputs differ. This is a real noncommutation control, not an evaluator oracle. -/
+theorem sequence_order_counterexample (p : Roadmap.Pipeline) :
+    ∃ (zf zr : Source.EMState E0 AΓ) (mf mr : Machine),
+      (Source.execItems (Source.SemanticsExamples.G0 p) F0 6 AΓ.length none seqItems (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+        (.ok (.normal (assignSource (uintOfNat 1) true).1),(.nil,zf.2)) ∧
+      (Source.execItems (Source.SemanticsExamples.G0 p) F0 6 AΓ.length none reverseItems (assignSource (uintOfNat 1) true).1).run (.nil,sy.2)=
+        (.ok (.normal (assignSource (uintOfNat 1) true).1),(.nil,zr.2)) ∧
+      run (assignCode ++ seqDeleteCode) (assignMachine 1 true)=.ok mf 0 ∧
+      run (seqDeleteCode ++ assignCode) (assignMachine 1 true)=.ok mr 0 ∧
+      (Source.readLoc (E := E0) (Γ := AΓ) F0 (τ := .bool) (.mem 0 1)).run zf=(.ok (.bool false),zf) ∧
+      (Source.readLoc (E := E0) (Γ := AΓ) F0 (τ := .bool) (.mem 0 1)).run zr=(.ok (.bool true),zr) ∧
+      mf.mem 18=w[0] ∧ mr.mem 18=w[1] ∧ mf.mem 18≠mr.mem 18 := by
+  obtain ⟨_,_,_,zf,_,mf,_,_,_,_,hsf,_,_,_,hcf,_,hwf,_,_,_,_,_,_,hrf,_⟩ := reached_assignment_delete p
+  obtain ⟨_,_,_,zr,_,mr,_,_,_,_,hsr,_,_,_,hcr,_,hwr,_,_,_,_,_,_,hrr,_⟩ := reached_delete_assignment p
+  have hf := congrArg (fun rows : List (List Word) => rows[2]?.bind (fun row => row[7]?)) hwf
+  have hr := congrArg (fun rows : List (List Word) => rows[2]?.bind (fun row => row[7]?)) hwr
+  simp only [seqCells,List.getElem?_cons_succ,List.getElem?_cons_zero,Option.bind_some] at hf hr
+  have hf' : mf.mem 18=w[0] := Option.some.inj hf
+  have hr' : mr.mem 18=w[1] := Option.some.inj hr
+  refine ⟨zf,zr,mf,mr,hsf,hsr,hcf,hcr,hrf,hrr,hf',hr',?_⟩
+  rw [hf',hr']
+  decide
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.sequence_order_counterexample' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms sequence_order_counterexample
 
 end Solidity.Backend.MemoryOps.SourceTargetControls

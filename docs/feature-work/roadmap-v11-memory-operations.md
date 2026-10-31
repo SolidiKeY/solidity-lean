@@ -75,14 +75,14 @@ These are kernel proofs, not bounded external EVM/compiler tests.
 
 ## Queue and ownership accounting
 
-Current cumulative accounting through checkpoint thirty-eight. Earlier checkpoint
+Current cumulative accounting through checkpoint thirty-nine. Earlier checkpoint
 narratives retain their historical observations and gate outcomes.
 
 | Item | Status | Remaining obligation / owner boundary |
 |---|---|---|
 | G32 | partial | Intrinsic heap-object framing/noninterference and supported Source primitive delete-to-symbolic-word frame components here; typed heap-to-byte representation and final separation transport still need the reserved byte-memory bridge and actual target interfaces. |
 | G33 | partial | Old-slice allocation/default-construction extension and fresh-vs-alias identity proved using published constructors; supported actual Source Boolean allocation/zero-default and resolved declaration with a fresh typed local, intrinsic and word fresh-root/old-object framing, and enlarged-context MemOK preservation now checked. All-type construction/defaults, exact target allocation failures and stack/frame transport remain; reference constructors stay with reserved owners. |
-| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads, single-element read/write-to-intrinsic-copy and primitive delete-to-clearT transitions plus resolved Source local-index deletion and Boolean assignment expression/statements to actual intrinsic/word execution proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
+| G34 | partial | Typed slice coordinate/read/overwrite adapters, identity controls and actual supported Source memory reads, single-element read/write-to-intrinsic-copy and primitive delete-to-clearT transitions plus resolved Source local-index deletion and Boolean assignment expression/statements plus actual reached RItems/intrinsic-program/word sequencing proved. General paths/rebinding/delete, stale aliases and nonprimitive source/target compilation remain; existing MemoryCompile/MemoryObjects queues untouched. |
 | G35.01 | partial | Published intrinsic multi-object storage copying and recursive Mirrors are consumed; interleaved builder/snapshot mirror frames are proved here. Source/target compiler, physical representation and full liveness composition remain. |
 | G35.02 | blocked | Memory-storage-copy owner retains implementation, tail clearing and mapping obligations. |
 | G35.03 | partial | Actual decoded Boolean/uint256 table-to-existing-memory transfer, exact runtime guards, ordered reads, frames and growth are proved, including actual ordered two-transfer composition and local commutation. General families/reference construction, calldata-to-storage, ABI decoding, general Source copy/program execution and target transport remain. |
@@ -3077,3 +3077,76 @@ Independent finder and skeptic accepted final six guards/proof/controls/docs and
 pure-local scope with no confirmed defect. All prior seals/failures retained.
 All original queue parents stay partial/blocked; no wholelane, externalcompiler/
 EVM or independent-queue-exhaustion claim.
+
+## Checkpoint thirty-nine: actual reached statement sequencing
+
+Reproduced the investigated G34/BackfillB gap: C38 proves one resolved assignment
+and C36 one delete, not an RItems program consuming their actual intermediate.
+Existing execItems cons spends one semantic horizon per item; the first statement
+in these certificates runs at horizon+5, second at horizon+4, entire list at
+horizon+6. No budget/admission/fuel-depth restriction is introduced. Actual
+Source.execItems, intrinsic Prog.run_cons_ok and word run_append_ok are composed,
+with no new AST/interpreter/emitter/state semantics.
+
+resolved_assign_delete_word and resolved_delete_assign_word derive both executed
+steps and actual complete Source RItems/intrinsic Prog/word concatenation. The
+SECOND certificate receives first reached SourceBoolMemoryAt/MemOK, intrinsic
+withHeap and word StateRepr. Both bounds are INITIAL inputs; the reached second
+bound is DERIVED from actual first writeAddr success/typed length preservation.
+Initial locals alignment transports through derived unchanged locals. Final
+local heap relation/MemOK/word StateRepr/aliases/stack and allocator compose; no
+final relation, stagewise preservation or independent initial-state second run
+is assumed. indexedWrite_elems/frame use EXISTING intrinsic typed operations,
+quantified primitive/reference element families and arbitrary other object types.
+They preserve structural fields, not deep child-content liveness or byte memory.
+
+resolved_assign_delete_reject derives actual successful changed prefix followed
+by second endpoint failure. Source error retains the ACTUAL reached prefix globals;
+intrinsic program errors and word sequence reverts, with no unexecuted suffix
+heap fabricated. Panic payload and word revert are separate observations, not
+returndata/ABI/rollback equivalence. Generic actual-statement success/error
+composition helpers are discharged in these concrete operation applications.
+
+Both declared pipelines execute same-cell TFF→TTF→TFF versus TFF→TFF→TTF from
+the SAME input, with real uint-index and Bool-RHS locals. Each control exposes
+both writeAddrSome and Source statement Some steps plus Source RItems, intrinsic
+program and each reached/concatenated word run. Complete heap and word vectors
+are retained; otherAlias actually resolves to mem(0,1) and reads final false/true.
+sequence_order_counterexample derives actual noncommutation (word18=0 vs1), not
+a final-agreement premise. Distinct runtime deletion index0 gives TFF→TTF→FTF
+while retaining assignment at1, untouched locals/header/sentinel99/stack42.
+Endpoint3 follows a successful TTF prefix and exposes exact Source/intrinsic/word
+rejections plus prefix heap/word vectors. Horizon5 likewise completes material
+assignment then times out resolving delete, whereas0 times out before writing.
+Source timeout is not target gas/failure/rollback. Pure local operands only; no
+arbitrary effectful RHS/LHS ordering or whole compiler claim.
+
+Core01 opaque withHeap length rewrite was repaired by exposing the actual heap;
+core02/03/04 pass. Controls01 nested tactic layout and controls03 Fin0/address17
+equality failures retained, fixed without changing observations. Controls05
+strengthened statements with explicit actual prefix runs, eliminating unused
+existential; controls06 passes162jobs. Eighteen new public exact standard-only
+guards, same capped serial cacheOFF runtime, preflight1581473792bytes/96MiB
+warm source/build/log/export forecast and unchanged512MiB reserve. Separate
+preliminary finder/skeptic accepted actual reached sequencing/horizons/failures/
+nonvacuity/purelocal scope without defect; final guarded/full/artifact receipts
+remain separately recorded.
+
+The existing goal is BLOCKED and unchanged by this authorized recovery turn;
+no goal reset/reactivation/completion or competing continuation. Original G32–G35
+and BackfillA/B remain partial/blocked. All-profile constructors/checked target
+failures, general paths/reference rebinding/delete, physical bytes, ABI/reference/
+storage/freshdeepcopy/recursive Source graphs, reserved memory-storage and final
+V10/Source/target chain remain open. Raw docs/inventory failures are retained;
+public-zero-new and frozen-base11incoming comparison stay distinct.
+
+C39 final guarded162jobs/full1076default/262Suite/SolKey377/131 exit0.
+Strict automatic, complete fixture, layer/orphan/trust, lane753standardpins/
+95modules and script-corruption controls pass. Final sampled aggregateRSS
+1692392KiB,229376bytes warm disk growth, zero new memory.max/OOM/kill events.
+Raw docs1 matches complete83public findings; frozen no-new remainsFAIL11incoming.
+Raw globalinventory1:1112unrecorded=359publicinherited+753owned,0unsafe.
+Separate final finder/skeptic source reviews accepted 18exactguards, explicit
+actual stageSome witnesses and same-input ordercounterexample with no defect.
+Goal remains blocked, this authorized implementation turn is not reactivation.
+Original queues and all prior seals/failures preserved; no wholelane claim.
