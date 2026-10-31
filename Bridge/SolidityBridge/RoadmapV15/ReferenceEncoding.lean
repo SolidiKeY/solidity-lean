@@ -1,37 +1,20 @@
+import SolidityBridge.RoadmapV15.ReferenceReader
 import SolidityBridge.ExternalEvm.MemoryBytes
 import SolidityBridge.ExternalEvm
 import SolidityBridge.RoadmapV15.EncodingUniqueness
 import SolidityBridge.RoadmapV15.HaltObservation
 
 /-!
-Complete source proposal consuming the genuine published reference encoding and
-existing numeric adapter. LOCAL KERNEL VALIDATION IS BLOCKED at external imports;
-these declarations are not counted as checked results. See the owning V15 report.
+Thirteen encoding proposals consuming the published reference encoding and
+existing numeric adapter remain blocked at the memory/external imports. The two
+reader laws now live in the checked narrow ReferenceReader module; this file is
+not counted as kernel-checked. See the owning V15 report.
 Only pure encoding is used: no allocator contract, actual toByteArray serialization,
 preallocated read/store refinement, supplied-opcode run or driver is asserted.
 -/
 namespace SolidityBridge.RoadmapV15
 open Solidity Solidity.Backend
 open Solidity.Evm.External.Memory (encoding encoding_spec bytes_list list_bytes)
-
-private theorem reference_little_reader (rs : List UInt8) :
-    EvmYul.fromBytes' rs = ofBytesBE rs.reverse := by
-  induction rs with
-  | nil => rfl
-  | cons b rs ih =>
-    change b.toNat + 256 * EvmYul.fromBytes' rs = ofBytesBE (b :: rs).reverse
-    rw [List.reverse_cons, ofBytesBE_append_singleton, ih]
-    omega
-
-/-- Actual reference reader agrees with the existing backend byte order. -/
-theorem reference_big_reader (bs : List UInt8) :
-    EvmYul.fromBytesBigEndian bs = ofBytesBE bs := by
-  change EvmYul.fromBytes' bs.reverse = ofBytesBE bs
-  simpa only [List.reverse_reverse] using reference_little_reader bs.reverse
-
-theorem reference_array_reader (bs : ByteArray) :
-    EvmYul.fromByteArrayBigEndian bs = ofBytesBE bs.toList :=
-  reference_big_reader bs.toList
 
 /-- Full ordered-byte equality, derived from the producer's two exact clauses.
 This is stronger than simply re-exporting the producer's numeric round trip. -/

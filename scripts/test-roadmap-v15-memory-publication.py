@@ -5,9 +5,15 @@ p=Path(__file__).with_name("roadmap-v15-memory-publication.py")
 spec=importlib.util.spec_from_file_location("v15_memory",p);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 class PublicationControls(unittest.TestCase):
  def setUp(self):
-  self.sources=m.published_sources();self.consumer=(m.ROOT/"Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean").read_text()
+  self.sources=m.published_sources();self.consumer=m.consumer_source()
   self.report=m.classify_sources(self.sources,self.consumer)
  def test_actual_sources_and_open_report(self):m.verify_blobs(self.sources);m.validate_report(self.report)
+ def test_missing_moved_reader(self):
+  consumer=self.consumer.replace("theorem reference_big_reader", "theorem omitted_reader",1)
+  with self.assertRaises(ValueError):m.classify_sources(self.sources,consumer)
+ def test_duplicate_moved_reader(self):
+  consumer=self.consumer+"\ntheorem reference_big_reader (bs : List UInt8) : True := by trivial\n"
+  with self.assertRaises(ValueError):m.classify_sources(self.sources,consumer)
  def test_published_blob_drift(self):
   self.sources["MemoryBytes"]+="\n"
   with self.assertRaises(ValueError):m.verify_blobs(self.sources)

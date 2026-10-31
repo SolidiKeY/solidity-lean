@@ -862,3 +862,113 @@ from the actual existing opcode-obligation/G03-ledger report (168 entries, all
 coverage obligations still open). These artifact corrections change no theorem,
 profile, approved premise, ledger or proof status. Final seal follows the reviewed
 exact-head export; archive/checksum verification is a separate gate.
+
+
+## Offline-cache reference-reader checkpoint (8dc66c8f recovery)
+
+Recovery parent is4788e69db46fbd8b4e738b55c048952a84d66e7a on the unchanged
+assigned branch/frozen base. The coordinator's partial offline restoration is a
+real changed prerequisite: the actual pinned cache unpack reports853files,
+exit0, memory.max12884901888/swap.max0/peak709640192. Its raw log/JSON are
+preserved in the new evidence directory. The supplied transfer bundle's reported
+SHA256 is0aaa29a1189090a6302cc783a6542cb5acce5a40e8d8e5cc364f237fde7e792d;
+coordinator payload reviews and chunk transport are upstream evidence, while
+this VM's unpack/source checks are local evidence. No source, pin, toolchain,
+profile, proxy or policy change is inferred.853archives do not establish all860
+original requests, the actual reference import closure, or a kernel theorem.
+
+The smallest actual pinned source check exposed missing Batteries.CodeAction.
+Deprecated, Aesop.Search.Expansion.Norm and five Mathlib dependencies. Each was
+compiled serially from the unchanged pinned source under the existing300s
+per-file cap and12GiB/no-swap limit. Actual EvmYul.UInt256 then kernel-checked.
+Three more small Mathlib modules for the larger memory imports also compiled;
+no reserved source was edited and no conflicting cache product overwritten.
+The reference MemoryBytes/ExternalEvm source closure still requires684 absent
+Mathlib-cache modules (plus source-built vendor/CSLib adapters). This is not a
+request to build that large closure cold. The pinned Cache.Hashing.getHashMemo
+API identified exact module/source-SHA256/LTAR names, recorded in
+/workspace/v15-evm-agreement-evidence/offline-reference-8dc66c8f/missing-cache-request.json
+with its checksum. For example Mathlib.Data.List.Lookmap requires
+734d5b5f3d64b709.ltar. QOFF1 asks the coordinator for matching existing host
+archives; normal proxy restoration is neither claimed nor reprobed.
+
+The two original reader statements/proof bodies were moved unchanged from
+`Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean` into
+`Bridge/SolidityBridge/RoadmapV15/ReferenceReader.lean`, importing only actual
+EvmYul.UInt256 and the already-checked backend encoding transport. Public names
+reference_big_reader/reference_array_reader and transitive import compatibility
+are preserved. This is an owned import-closure factoring, not a reserved adapter
+repair or duplicate reference semantics. Both laws now kernel-check.
+
+`Bridge/SolidityBridge/RoadmapV15/ReferenceWordObservation.lean` adds five checked
+consumer laws: reference_backend_bounded, reference_word_toNat,
+image_reference_reader, image_reference_word and image_reference_signed.
+The first keeps exact width and value<256^width; the actual UInt256 constructor's
+modulo is discharged only using a full bounded backend word. The image laws
+consume actual published snapshot/store32 and existing intrinsic uint/toWord/
+BitVec representations. Offsets/spans remain natural and capacity-bounded;
+ScalarFrame remains a producer image field, never a compiler-profile exclusion.
+The signed theorem explicitly uses BitVec's signed observation after the actual
+reference reader. No reference signed-operation execution, allocator/FFI witness,
+physical MSTORE, gas, stack/driver adequacy or Osaka agreement is asserted.
+
+`Bridge/SolidityBridge/RoadmapV15/ReferenceReaderControls.lean` passes actual
+reader/UInt256 and inhabited image controls: distinct nonzero258/513, exact
+complete32-byte lists, leading-zero/empty numeric collisions versus unequal
+lists, wrong endian/31/33-byte lengths/word order, insufficient one-byte width,
+modulo overflow, unsigned maximum, signed-1/minimum, unsigned8/signed8 cleanup,
+unaligned overlapping last writer, exact upper capacity and full State/FrameKey
+preservation. Seven #print axioms reports pass: two readers use propext/Quot.sound;
+five observation laws also use existing Classical.choice. No new axiom, sorry,
+native_decide, implemented_by or budget increase was introduced. Focused import
+closure passes. Runtime output prints Lean4.24.0 commit797c613 and
+Lake5.0.0-src+797c613 followed by KeySort2jobs passing before RUNTIME_GATE_PASS.
+
+The source-only publication checker now loads the moved readers together with
+the remaining encoding source, still requiring all15 original names exactly
+once. Its status explicitly says it cannot certify kernel checking, rather than
+incorrectly labeling the now-checked readers uncompiled. Missing/duplicate moved
+reader mutations are rejected;20 publication controls pass alongside the12
+opcode-accounting controls. Separate independent read-only finder/skeptic source
+reviews found no proof, premise, nonvacuity, ownership or observation-scope defect.
+Final docs/registration/handoff and artifact reviews follow before sealing.
+
+Evidence limitation discovered and corrected: the new dependency driver reused
+two early unsealed retry filenames when its counter restarted. The earlier
+Nat.Find raw error is separately retained; the earlier Unbundled.Defs per-attempt
+raw text/timing was overwritten. The first failed closure report was captured
+before replacement and preserved. Future filenames/reports use unique run IDs.
+This is disclosed in logging-correction.txt, not relabeled a passing gate or
+reconstructed by rerunning failures. All previous-turn sealed artifacts and
+original raw full/cache/docs failures remain intact.
+
+Full queue remains unfinished.71 consumer laws are checked (64prior, two moved
+original readers, five new observation laws);13 original encoding proposals and
+the old full ReferenceEncodingControls module remain uncompiled. G46.01 still
+needs actual Osaka numeric/control correspondence; G46.02 needs the remaining
+reference encoding/memory/calldata compiler/driver/resource clauses; G46.03 needs
+symbolic persistent/transient path composition; G46.04-.05 actual environment/
+hash/crypto observations remain open under approved per-run premises only.
+G46.06/G47 still require productionV13/V14, actual driver/resources/arbitrary
+callee/account/call/create/return/revert/transaction/rollback/fee/nonce/log and
+finite/infinite trace composition. Backfill A/B are partial; all150 opcode rows
+and every secondary obligation remain OPEN. No global hash injectivity, desired
+simulation, payment Boolean or local journal closes those obligations.
+
+The existing goal is unchanged; get_goal is not exposed and no goal mutation,
+reset/reactivation/recreation/completion or competing continuation was made.
+No unchanged network403 probe/cache fetch or whole5400s failed gate was repeated.
+The historical cold full gate exit124 remains failed and fullBridge gate pending.
+New raw evidence is under
+/workspace/v15-evm-agreement-evidence/offline-reference-8dc66c8f; cumulative
+exact-head patch/bundle/handoff/checksums will be exported under
+/workspace/v15-evm-agreement-artifacts/offline-reference-8dc66c8f, preserving prior
+seals. Immediate cache action is QOFF1 matching existing host archives; it adds
+no pin/profile/toolchain or source-scope change. Completion is not claimed.
+
+Precommit handoff review correction: finder and skeptic independently caught
+stale inherited queue metadata saying15 pending readers/encodings and18 source
+mutation tests. The draft now says13 remaining encoding declarations plus the
+old full controls, and20 source tests. No proof/profile/status premise changed.
+Both reviews require the disclosed retry-log loss to remain a limitation, not
+a passing retention claim.

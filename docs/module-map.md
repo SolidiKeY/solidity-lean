@@ -1223,3 +1223,6 @@ At the root, the notation's own tests:
 | `Solidity/Evm/TryByteImage.lean` | Exact published scalar-frame pure byte-image producer; natural bounds/capacity, not physical EVM execution. |
 | `Bridge/SolidityBridge/RoadmapV15/ByteImageTransport.lean` | Complete ordered store/snapshot bytes to backend encoding, readback, signed/narrow consumers and state/key framing. |
 | `Bridge/SolidityBridge/RoadmapV15/ByteImageControls.lean` | Inhabited unaligned, overlap/disjoint, signed/truncation/boundary and wrong-byte-order/length controls. |
+| `Bridge/SolidityBridge/RoadmapV15/ReferenceReader.lean` | Checked actual pinned reference list/array readers versus backend byte order; two original laws moved unchanged to narrow imports. |
+| `Bridge/SolidityBridge/RoadmapV15/ReferenceWordObservation.lean` | Checked bounded reader, actual UInt256 constructor and typed image/signed observation consumers; no physical execution claim. |
+| `Bridge/SolidityBridge/RoadmapV15/ReferenceReaderControls.lean` | Checked actual reader/word/image boundary, endian/length/order, signed/narrow and seven theorem-axiom controls. |

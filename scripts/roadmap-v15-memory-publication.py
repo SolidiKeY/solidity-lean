@@ -22,6 +22,12 @@ def git_blob(text):
 def published_sources(root=ROOT):
  # Decode raw UTF-8 without universal-newline translation: provenance is bytes.
  return {m:(root/"Bridge/SolidityBridge/ExternalEvm"/(m+".lean")).read_bytes().decode("utf-8") for m in BLOBS}
+def consumer_source(root=ROOT):
+ # Readers have a narrow actual UInt256 import; encoding retains memory imports.
+ # This concatenation validates all original names, never kernel certification.
+ directory=root/"Bridge/SolidityBridge/RoadmapV15"
+ return "\n".join((directory/(m+".lean")).read_bytes().decode("utf-8")
+   for m in ["ReferenceReader","ReferenceEncoding"])
 def verify_blobs(sources):
  if set(sources)!=set(BLOBS):raise ValueError("missing/duplicate publication module")
  for m,s in sources.items():
@@ -72,13 +78,13 @@ def classify_sources(sources,consumer):
   representation="preallocated numeric cells, bounded active/physical extent; no symbolic slots/growth",
   runner="supplied opcodes, positive evaluator fuel and zero charged gas; no fetched-bytecode/X driver",
   otherUnconditionalSource=["load_preserves (representation/index premises)","load_state_frame (representation/index premises)","populated_represents (pure initial representation only)"],
-  consumers=[dict(name=n,localKernel="pending external imports") for n in names],
+  consumers=[dict(name=n,localKernel="not certified by source accounting") for n in names],
   allocatorWitness="none supplied or assumed",driverDischarged=False,osakaDischarged=False,transactionDischarged=False)
 def validate_report(report):
  require(report["allocatorWitness"]=="none supplied or assumed","invented allocator witness")
  require(all(not report[x] for x in ["driverDischarged","osakaDischarged","transactionDischarged"]),"false parent discharge")
  require([x["name"] for x in report["consumers"]]==CONSUMERS,"missing/duplicate consumer report")
- require(all(x["localKernel"]=="pending external imports" for x in report["consumers"]),"source accounting promoted to kernel pass")
+ require(all(x["localKernel"]=="not certified by source accounting" for x in report["consumers"]),"source accounting promoted to kernel pass")
  expected={(m,n) for m,ns in CONDITIONAL.items() for n in ns}
  require({(x["module"],x["declaration"]) for x in report["conditionalResults"]}==expected,"omitted conditional producer")
  require(len(report["conditionalResults"])==len(expected),"duplicate conditional producer")
@@ -87,6 +93,6 @@ def validate_report(report):
   require(row["allocatorClause"]==expectedClause and row["status"]=="open; no allocator witness","allocator obligation discharged/omitted/replaced")
 if __name__=="__main__":
  sources=published_sources();verify_blobs(sources)
- consumer=(ROOT/"Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean").read_text()
+ consumer=consumer_source()
  report=classify_sources(sources,consumer);validate_report(report)
  print(json.dumps(report,indent=2))

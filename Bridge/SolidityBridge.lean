@@ -55,3 +55,7 @@ import SolidityBridge.RoadmapV15.ReferenceEncodingControls
 
 import SolidityBridge.RoadmapV15.ByteImageTransport
 import SolidityBridge.RoadmapV15.ByteImageControls
+
+import SolidityBridge.RoadmapV15.ReferenceReader
+import SolidityBridge.RoadmapV15.ReferenceWordObservation
+import SolidityBridge.RoadmapV15.ReferenceReaderControls
