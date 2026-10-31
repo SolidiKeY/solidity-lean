@@ -497,3 +497,53 @@ VY1/source/calculus/compiler joint closure remain unfinished. Actual prerequisit
 interfaces remain absent in this tree, consistent with the user's published-tree
 investigation; no other worker fetched or merged. Goal remains blocked, never
 recreated/reset/reactivated. No new human semantic decision; questions=[].
+
+### Canonical typed writeback checkpoint (2026-10-31)
+
+New ScalarWriteback constructs writeback over actual Source.Storage, including a
+concrete singleton ScalarStorageObligations instance. A codec, actual path/slot,
+StorageWidth proof and available typed default are explicit inputs. Canonical
+validation checks decode then re-encode; no assumed inverse/result-view law is
+added. On unchanged encoded input the original store is returned, preserving
+none versus explicit-default cells. Changed successful inputs write exactly the
+selected typed path. Unrelated paths, disjoint component reads and unowned bytes
+(including nonzero padding) are preserved under real bounds/separation premises.
+The arbitrary residual-map encoder reconstructs an unchanged physical view.
+
+ScalarWorld constructs actual Source.Op.account/transient callbacks over current
+storage. Controls inhabit bool fields at slot7 offsets0/1 and transient slot0:
+empty/default identity, changed/repeated/disjoint writes, invalid canonical decode,
+caller prefix with inner revert, successful child followed by outer revert, and
+endTx keeping persistent values while resetting transient storage/journal. These
+are source-owned controls, not integration of the still-missing raw residual-slot
+journal. No Source representation or compiler was rewritten (history21067a47 read).
+Dirty bool2 is explicitly outside canonical preparation; None is unsupported
+preparation input, never a Yul no-op/refusal or proof of required dirty semantics.
+
+Nine new ordered pinned-solc observations per pipeline include raw dirty bool2,
+nonzero a5 padding, default/changed/disjoint writes and source-frame behavior.
+Actual storage/transient layout assertions match slot7/offset0,1 and slot0.
+Both legacy/via-IR pass with unchanged100m gas/5m steps. Original16 vectors,
+four fixtures/13 calls/four deployments per pipeline and81 controls still pass.
+New14 controls reject wrong/missing failure observations; explicit revert must be
+reported as revert, never out-of-gas/stack failure. Exact pipeline inventory is
+asserted following independent finder/skeptic review. Final reviews have no
+remaining finding, without Lean/server/build/test use by reviewers.
+
+Per-file/focused gates pass; initial missing-olean audit failure is preserved,
+then complete signature/axiom audit489 declarations/260 theorems passes with only
+propext, Quot.sound, Classical.choice. Mandatory wrapper exit0:1010 default jobs,
+262 suite jobs,131 sort annotations matched. Actual Lean4.24.0 commit797c613 and
+Lake5.0.0-src+797c613; mandatory KeySort2 jobs exit0 before RUNTIME_GATE_PASS.
+Same12GiB hard/no-swap runtime, serial-j1, OS/RSS/disk monitor and writer lock.
+Raw evidence and all earlier failures remain in `/workspace/vy2-evidence/scalar-writeback`.
+
+Backfill A/B advance; full Y04/Y05/Y06 remain partial and concrete Y09.02 blocked.
+Whole-store/heap/dirty writeback, raw residual journals, actual assembly MemOK,
+allocation refinement, V10/V11 concrete agreements and VY1/source/calculus/compiler
+closure remain open. Existing World/memory-call/Bridge prerequisites are present;
+missing Yul correctness interfaces are not supplied by those components. Approved
+YQ1–YQ7 remain in the scope decision record; no new decision or admission promotion.
+Goal remains blocked; get_goal is unavailable and no goal transition is attempted.
+Exact final committed head, gates/static comparisons and cumulative artifacts are
+recorded in `/workspace/vy2-evidence/HANDOFF.md` (prior versions retained).

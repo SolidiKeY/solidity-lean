@@ -894,3 +894,4 @@ import Solidity.Yul.Views.ReadControls
 import Solidity.Yul.Views.ScalarControls
 import Solidity.Yul.Views.PackedControls
 import Solidity.Yul.Views.NestedControls
+import Solidity.Yul.Views.ScalarWritebackControls

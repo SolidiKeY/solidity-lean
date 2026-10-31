@@ -214,3 +214,16 @@ fixes. This is bounded canonical Backfill A, not full Y04–Y09.02 completion;
 source/MemOK/dirty/journal/compiler/allocator/calculus dependencies remain open.
 Cumulative revision, evidence, prior-artifact preservation and checksum paths:
 `/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 canonical scalar writeback handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) now constructs a bounded singleton physical writeback
+over actual Source.Storage and actual account/transient operations. Original-cell
+administrative identity, unrelated paths, residual bytes and actual source-frame
+controls are proved/tested. Canonical preparation does not model dirty values;
+raw bool2 remains observable in both pinned pipelines. Nine additional ordered
+observations,14 fail-closed controls, original fixtures/81 controls,489/260 axiom
+reports and wrapper1010/262+131 pass after independent reviews. This is Backfill
+progress, not full Y04–Y09.02 closure; raw residual journaling and source/heap/
+MemOK/allocator/compiler/calculus integration remain open. Cumulative evidence:
+`/workspace/vy2-evidence/HANDOFF.md`.
