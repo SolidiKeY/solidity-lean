@@ -132,3 +132,49 @@ Evidence directory: `/workspace/scratch/v16-correctness-transfer-evidence`.
 The external handoff records final base/head, exact command lines, raw failures,
 review follow-ups, patch/bundle paths and SHA-256 checksums. This is a partial
 reviewable checkpoint, not a completion of G48, G49, G50, G51 or either backfill.
+
+## Recovery checkpoint 2: independent relational and lifetime induction
+
+The auditor explicitly authorized continuing independent backfill after the
+first partial checkpoint. Its artifacts and commit remain unchanged.
+New Relational results compose actual Refines relations with identical middle
+resource predicates and exact completed Prefix equality. composed_need states
+the exact nested certificate bound; composed_completion retains actual Cert,
+full middle-domain closure, Allowed, Admissible, Forward and Guard. No arbitrary
+guarded transitivity, source simulation or computability premise is invented.
+
+Transactions inducts over the existing intrinsic Lifetime.Trace and Reachable.
+trace_transport retains the ordered mapped event list (arbitrary event maps
+may erase information; exact observations need a concrete correspondence).
+reachable_transport requires actual target constructor/step evidence.
+reachable_invariant requires BACKWARD target initialization/step coverage plus
+a source invariant and state-predicate reflection, quantifying every target step.
+trace_invariant propagates an existing invariant through actual traces.
+These are generic induction consequences, not deployment/runtime correctness.
+The published intrinsic lifetime model is deterministic, not callback havoc.
+
+TransactionControls inhabits actual deployT, Prog.run, successful commit,
+revertWith [9] rollback and wait through the existing definitions. The rollback
+run proves exact revert bytes separately: Lifetime.Event does not expose them.
+An actual nonempty commit/rollback/wait trace exercises trace_transport with a
+proved identity step relation; wrong ordered labels are refuted. Wrong revert
+bytes are refuted through NEW completion_at_need. An invalid timestamp invariant
+is refuted through NEW trace_invariant on the actual wait-bearing trace.
+The local no-failure divergence witness uses exactly Admissible ∧ Forward for
+G07's existing loop, and supplies an inhabited resource. Global failure bounds
+are retained; the original unconditional-divergence negative control still holds.
+
+Separate read-only finder and skeptic reviews found no proof mismatch. Finder
+required branch/ancestry/status rereading AFTER acquiring the writer lock; fixed.
+Both reviewers flagged that alternate-config injection only covers direct Lake
+commands: the runner now rejects arbitrary scripts/direct Lean and requires
+explicit -j1 for lake env lean. Docker limits are asserted before execution.
+No new Lean diagnostic MCP tools were available. Focused/import-closure checks
+passed for Relational, Transactions and TransactionControls; raw axiom outputs,
+final structural/doc checks and measured memory are in the recovery evidence.
+Only inherited AST unused-variable warnings were observed, without reserved edits.
+
+The Backfill A transaction-induction and relational-composition obligations now
+have independent generic results and actual controls. Event-bearing G01 session
+controls, richer scoped spec consumers, machine accounting and full gates are
+next; neither backfill nor any G48–G51 parent is marked complete here.

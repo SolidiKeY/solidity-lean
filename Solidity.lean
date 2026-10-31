@@ -888,3 +888,7 @@ import Solidity.Backend.Scalar.SignedPowerPrefix
 
 import Solidity.Roadmap.V16.Transport
 import Solidity.Roadmap.V16.TransportControls
+
+import Solidity.Roadmap.V16.Relational
+import Solidity.Roadmap.V16.Transactions
+import Solidity.Roadmap.V16.TransactionControls

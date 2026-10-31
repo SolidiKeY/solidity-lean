@@ -1201,3 +1201,5 @@ At the root, the notation's own tests:
 ## V16 independent transport backfill
 
 `Solidity/Roadmap/V16/Transport.lean` proves conditional resource, event and decoded-world transport over G01. `Solidity/Roadmap/V16/TransportControls.lean` reuses the G07 toy semantics for controls and scoped axiom pins. Full compiler composition remains open.
+
+V16 recovery adds `Solidity/Roadmap/V16/Relational.lean` (exact prefix/certificate composition), `Solidity/Roadmap/V16/Transactions.lean` (published lifetime induction) and `Solidity/Roadmap/V16/TransactionControls.lean` (actual commit/rollback/wait and local divergence controls).
