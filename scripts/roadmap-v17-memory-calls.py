@@ -98,17 +98,40 @@ def headline_axioms(raw):
     if set(rows)!=names:raise ValueError('missing headline axiom output')
     return rows
 
-def verify(record,directory,current,producer=None,producer_directory=None,previous=None):
-    k=load_kernel()
+def verify_stage(k,record,directory,current,producer,producer_directory,previous,producer_gate,query_gate):
     if producer is None or producer_directory is None:raise ValueError('missing producer build receipt')
-    if k.p.validate(producer,producer_directory,current,'warm-memory-calls',live_outputs=False) is not True:raise ValueError('failed producer build')
-    if k.p.validate(record,directory,current,'warm-memory-calls-observation') is not True:raise ValueError('failed observation gate')
+    if k.p.validate(producer,producer_directory,current,producer_gate,live_outputs=False) is not True:raise ValueError('failed producer build')
+    if k.p.validate(record,directory,current,query_gate) is not True:raise ValueError('failed observation gate')
     predecessor=producer if previous is None else previous
     if previous is not None:
         if previous['before']!=current or previous['after']!=current or previous['exit']!=0:raise ValueError('stale/failed replay predecessor')
     if predecessor['buildEnd']!=record['buildStart'] or predecessor['cacheEnd']!=record['cacheStart']:raise ValueError('producer/query artifact continuity differs')
     if producer['installedAfter']!=record['installedBefore']:raise ValueError('producer/query installed inputs differ')
-    raw=k.p.read_bound(directory,record['log'],record['logSha256']);obs=observation(raw)
+    raw=k.p.read_bound(directory,record['log'],record['logSha256'])
+    return raw
+
+
+def verify_imports(k,meta,record,current,producer,required_import):
+    # Warm import paths must be exact current build artifacts, never mislabeled fresh.
+    installed=k.tool_inputs(current);imports=set()
+    prefix=Path(current['runtime']['lean']['path']).parent.parent
+    for item in meta['imports']:
+        module=item['module'];path=Path(item['olean'])
+        if module in imports:raise ValueError('duplicate imported module')
+        imports.add(module)
+        if module.startswith('Solidity.'):
+            rel='lib/lean/'+module.replace('.','/')+'.olean'
+            if path.resolve()!=(ROOT/'.lake/build'/rel).resolve() or record['buildEnd']['files'].get(rel)!=k.p.resources.hash_file(path) or producer['buildEnd']['files'].get(rel)!=record['buildEnd']['files'].get(rel):raise ValueError('unbound warm import')
+        else:
+            if path.is_relative_to('/opt/v17-toolchain'):path=prefix/path.relative_to('/opt/v17-toolchain')
+            if str(path.resolve()) not in installed:raise ValueError('unbound installed input')
+    if required_import not in imports:raise ValueError('missing producer import')
+
+
+def verify(record,directory,current,producer=None,producer_directory=None,previous=None):
+    k=load_kernel()
+    raw=verify_stage(k,record,directory,current,producer,producer_directory,previous,'warm-memory-calls','warm-memory-calls-observation')
+    obs=observation(raw)
     meta=frame(raw,'V17_MEMORY_KERNEL_BEGIN','V17_MEMORY_KERNEL_END')
     if set(meta)!={'schema','rows','imports','releaseClosed'} or type(meta['schema']) is not int or meta['schema']!=1 or meta['releaseClosed'] is not False or len(meta['rows'])!=16:raise ValueError('missing checked metadata')
     requested={(name,module,kind) for module,name,kind in PUBLIC_REQUESTS};private_seen=set();seen=set()
@@ -127,20 +150,7 @@ def verify(record,directory,current,producer=None,producer_directory=None,previo
     correct=next(r for r in meta['rows'] if r['name']=='Solidity.Evm.Compiler.Compilation.correct')
     if correct.get('valueOmitted') is not True or correct['value'] is not None:raise ValueError('missing explicit full-value extraction boundary')
     if any(r.get('valueOmitted',False) for r in meta['rows'] if r is not correct):raise ValueError('unexpected omitted value')
-    # Warm import paths must be exact current build artifacts, never mislabeled fresh.
-    installed=k.tool_inputs(current);imports=set()
-    prefix=Path(current['runtime']['lean']['path']).parent.parent
-    for item in meta['imports']:
-        module=item['module'];path=Path(item['olean'])
-        if module in imports:raise ValueError('duplicate imported module')
-        imports.add(module)
-        if module.startswith('Solidity.'):
-            rel='lib/lean/'+module.replace('.','/')+'.olean'
-            if path.resolve()!=(ROOT/'.lake/build'/rel).resolve() or record['buildEnd']['files'].get(rel)!=k.p.resources.hash_file(path) or producer['buildEnd']['files'].get(rel)!=record['buildEnd']['files'].get(rel):raise ValueError('unbound warm import')
-        else:
-            if path.is_relative_to('/opt/v17-toolchain'):path=prefix/path.relative_to('/opt/v17-toolchain')
-            if str(path.resolve()) not in installed:raise ValueError('unbound installed input')
-    if 'Solidity.Evm.MemoryCallExamples' not in imports:raise ValueError('missing producer import')
+    verify_imports(k,meta,record,current,producer,'Solidity.Evm.MemoryCallExamples')
     axiom_rows=headline_axioms(raw)
     return {'metadataComplete':False,'missingValueEvidence':['Solidity.Evm.Compiler.Compilation.correct'],'headlineAxioms':axiom_rows,'installedInputs':record['installedBefore'],'observation':obs,'metadata':meta,'profile':publication_identity(),'sourceSnapshot':current,
             'intrinsicCodeSha256':hashlib.sha256(obs['intrinsicCode'].encode()).hexdigest(),

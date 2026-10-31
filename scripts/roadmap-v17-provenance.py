@@ -38,6 +38,14 @@ TARGETS.update({'warm-' + k[6:]: v for k, v in list(TARGETS.items()) if k.starts
 TARGETS['warm-memory-calls']=(['Solidity.Evm.MemoryCallExamples'],['lib/lean/Solidity/Evm/MemoryCallExamples.olean'])
 TARGETS['warm-memory-calls-observation']=([],['lib/lean/Solidity/Evm/MemoryCallExamples.olean'])
 
+TARGETS['warm-creation-try']=(['Solidity.Examples.Tactics.CreationTrySourceIR'],['lib/lean/Solidity/Examples/Tactics/CreationTrySource.olean','lib/lean/Solidity/Examples/Tactics/CreationTrySourceIR.olean'])
+TARGETS['warm-creation-try-observation']=([],TARGETS['warm-creation-try'][1])
+
+def creation_query_bytes():
+    spec=importlib.util.spec_from_file_location('v17_creation_try',ROOT/'scripts/roadmap-v17-creation-try.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    return module.query_bytes()
+
 
 def memory_query_bytes():
     spec=importlib.util.spec_from_file_location('v17_memory_calls',ROOT/'scripts/roadmap-v17-memory-calls.py')
@@ -47,6 +55,8 @@ def memory_query_bytes():
 
 def gate_command(gate,out):
     prefix=['lake','-f','roadmap-v17-runtime.lakefile.toml']
+    if gate=='warm-creation-try-observation':
+        return prefix+['env','lean','-j1','--tstack=131072','--root='+str(out),str(out/'CreationTryQuery.lean')]
     if gate=='warm-memory-calls-observation':
         return prefix+['env','lean','-j1','--tstack=131072','--root='+str(out),str(out/'MemoryCallsQuery.lean')]
     return prefix+['build',*TARGETS[gate][0]]
@@ -98,8 +108,10 @@ def validate(record, evidence_root, current, gate, gate_row=None, live_outputs=T
     argv = e.loads(read_bound(evidence_root, record['dockerArgv'], record['dockerArgvSha256']))
     e.require(argv == docker_create_argv(evidence_root.resolve(), current, record['containerName'], record['command']), 'changed Docker spawn configuration')
     e.require(record['command'] == gate_command(gate,evidence_root.resolve()), 'wrong build command')
-    if gate in ('warm-memory-calls','warm-memory-calls-observation'):
+    if gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation'):
         e.require(record['installedBefore']==record['installedAfter']==resources.tool_inputs(current),'changed installed observation inputs')
+    if gate=='warm-creation-try-observation':
+        e.require((evidence_root/'CreationTryQuery.lean').read_bytes()==creation_query_bytes(),'changed creation try query bytes')
     if gate=='warm-memory-calls-observation':
         e.require((evidence_root/'MemoryCallsQuery.lean').read_bytes()==memory_query_bytes(),'changed memory call query bytes')
     e.require(record['mode'] in ('clean', 'warm'), 'unknown cache mode')
@@ -309,7 +321,7 @@ def collect(args):
     start_build, start_cache = inventory(build), inventory(cache)
     mode = 'clean' if args.gate.startswith('clean-') else 'warm'
     if mode == 'clean': e.require(not start_build['files'] and not start_cache['files'], 'refusing nonempty clean start; no cache/build deletion performed')
-    installed_before = resources.tool_inputs(before) if args.gate in ('warm-memory-calls','warm-memory-calls-observation') else None
+    installed_before = resources.tool_inputs(before) if args.gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation') else None
     resource_fields = resource_snapshot(); check_headroom(resource_fields)
     disk = os.statvfs(ROOT); free = disk.f_bavail * disk.f_frsize
     e.require(free >= 1024**3, 'disk guard')
@@ -326,6 +338,7 @@ def collect(args):
     e.require(lean.parent == lake.parent, 'non-collocated Lean/Lake toolchain')
     command = gate_command(args.gate,out)
     if args.gate=='warm-memory-calls-observation': (out/'MemoryCallsQuery.lean').write_bytes(memory_query_bytes())
+    if args.gate=='warm-creation-try-observation': (out/'CreationTryQuery.lean').write_bytes(creation_query_bytes())
     script = execution_script(out, command, lake)
     (out/'execution.sh').write_text(script)
     container_name = 'roadmap-v17-' + uuid.uuid4().hex

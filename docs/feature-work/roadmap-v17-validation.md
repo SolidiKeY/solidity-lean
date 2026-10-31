@@ -620,3 +620,12 @@ option weakens them. Installed input manifests and full verified wrappers must
 match across the live replay. This is not clean/cache equivalence. Changed cache
 logs encountered by resource advice are retained as discrepancies and skipped;
 no stale hash is used to authorize advice or proof evidence.
+
+
+## Published creation-try consumer preparation
+
+Published master `4165de133bafd522ab18099e18cad489bb1aa7d6` is incorporated into the isolated V17 branch, preserving all V17 commits and prior seals. The owned consumer [roadmap-v17-creation-try.py](../../scripts/roadmap-v17-creation-try.py) and above-core [query](../../scripts/roadmap-v17-creation-try-query.lean) reuse the bounded kernel extractor, authenticated warm build/query/replay receipts and the published native creation-try adapter. Original extraction defaults and all node/depth/process/resource budgets remain unchanged.
+
+The sixteen requested declarations include full statements/values for the legacy ordered output, bounded-to-ordinary correspondence, ordinary execution, wrong reason refusal, collision, rollback/installation and argument facts, the separate viaIR output, their actual observation definitions, the published ABI `expected` definition and native `replay`. Expected byte lists are obtained from the checked producer equality statements; observations execute the actual published programs and replay. Pipeline/settings/AST/source-header identities and explicit accounts/funding are retained. A missing local original Solidity file is reported as unavailable rather than independently authenticated by its header.
+
+This is fixture-level preparation only. Native source replay, intrinsic kernel witnesses and external solc/EVM/gas/CREATE address-model equivalence are distinct. No entire profile exclusion or feature match follows. All 457 ledger rows, original Source/V11–V16, strict/corpus/TestSuite, default/full/clean-cache and final trust/release obligations remain open. The historical Compiler9 timeout and `Compilation.correct` omitted full value remain limitations. Initial 148 controls passed; live gates and independent final checkpoint reviews are pending. New evidence goes to `/workspace/scratch/v17-creation-try`; prior seals remain untouched.
