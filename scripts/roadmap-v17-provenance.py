@@ -35,6 +35,22 @@ TARGETS = {
 }
 TARGETS.update({'warm-' + k[6:]: v for k, v in list(TARGETS.items()) if k.startswith('clean-')})
 
+TARGETS['warm-memory-calls']=(['Solidity.Evm.MemoryCallExamples'],['lib/lean/Solidity/Evm/MemoryCallExamples.olean'])
+TARGETS['warm-memory-calls-observation']=([],['lib/lean/Solidity/Evm/MemoryCallExamples.olean'])
+
+
+def memory_query_bytes():
+    spec=importlib.util.spec_from_file_location('v17_memory_calls',ROOT/'scripts/roadmap-v17-memory-calls.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    return module.query_bytes()
+
+
+def gate_command(gate,out):
+    prefix=['lake','-f','roadmap-v17-runtime.lakefile.toml']
+    if gate=='warm-memory-calls-observation':
+        return prefix+['env','lean','-j1','--tstack=131072','--root='+str(out),str(out/'MemoryCallsQuery.lean')]
+    return prefix+['build',*TARGETS[gate][0]]
+
 
 def serial_config(root):
     return (root / 'lakefile.toml').read_bytes().replace(
@@ -81,7 +97,9 @@ def validate(record, evidence_root, current, gate, gate_row=None):
     e.require(re.fullmatch(r'roadmap-v17-[0-9a-f]{32}', record['containerName']), 'wrong collection container identity')
     argv = e.loads(read_bound(evidence_root, record['dockerArgv'], record['dockerArgvSha256']))
     e.require(argv == docker_create_argv(evidence_root.resolve(), current, record['containerName'], record['command']), 'changed Docker spawn configuration')
-    e.require(record['command'] == ['lake', '-f', 'roadmap-v17-runtime.lakefile.toml', 'build', *TARGETS[gate][0]], 'wrong build command')
+    e.require(record['command'] == gate_command(gate,evidence_root.resolve()), 'wrong build command')
+    if gate=='warm-memory-calls-observation':
+        e.require((evidence_root/'MemoryCallsQuery.lean').read_bytes()==memory_query_bytes(),'changed memory call query bytes')
     e.require(record['mode'] in ('clean', 'warm'), 'unknown cache mode')
     e.require(record['mode'] == ('clean' if gate.startswith('clean-') else 'warm'), 'warm result labeled clean')
     repository = Path(current['repository']).resolve()
@@ -302,7 +320,8 @@ def collect(args):
     e.require(not config.exists(), 'runtime config collision')
     lean = Path(__import__('shutil').which('lean')).resolve(); lake = Path(__import__('shutil').which('lake')).resolve()
     e.require(lean.parent == lake.parent, 'non-collocated Lean/Lake toolchain')
-    command = ['lake', '-f', config.name, 'build', *TARGETS[args.gate][0]]
+    command = gate_command(args.gate,out)
+    if args.gate=='warm-memory-calls-observation': (out/'MemoryCallsQuery.lean').write_bytes(memory_query_bytes())
     script = execution_script(out, command, lake)
     (out/'execution.sh').write_text(script)
     container_name = 'roadmap-v17-' + uuid.uuid4().hex

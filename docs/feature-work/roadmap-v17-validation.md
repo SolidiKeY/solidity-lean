@@ -558,3 +558,30 @@ Read-only cache advice changes no disk artifact and cannot substitute for the
 unchanged production guard passing. Actual positive declaration matches, if
 obtained, still discharge no semantic premise or feature row; all original
 G52–G55, Backfill A/B and missing integrated source/V11–V16 obligations remain.
+
+### Published direct-memory internal calls
+
+Published component `91e94ab57305ca055127934fd9e68fe9ea5e6be3` is consumed
+using its first-parent patch only, preserving producer files byte-for-byte and
+all V17 commits. This supplies the checked `Compilation.memoryCalls` branch,
+expanded frame and reached allocation cost. It does not close source lowering,
+recursive target calls, external byte transport, gas or any parent feature row.
+
+The owned above-core memory-call query reuses published examples and their
+inhabited endpoint/negative-frame proofs, without editing private producer values.
+It discovers their checked constant identities in the exact published module.
+The existing kernel metadata encoder is reused for full checked type/value,
+dependency and axiom observations, including the changed Compiler.correct.
+Finite source alias/target observations and wrong-code/alias/frame controls are
+kernel checked; executable observations are retained separately. Source/program
+constant, intrinsic instruction representation and fixture/profile hashes remain
+bound. These are intrinsic instruction observations, not bytecode adequacy.
+
+The existing bounded provenance runner gains two explicit warm targets: the
+published example build and the owned observation query. Query bytes are checked
+against the canonical owned source. These warm current-source checks do not
+weaken or replace the fresh Compiler extractor that timed out. A replay must
+match exact code/output/alias/frame/allocation observations. The producer's
+optional external reference uses solc0.8.34; V17's approved differential pin
+remains0.8.38, with no substitution or dependency change. Actual gate outcomes,
+reviews and all still-open G52–G55/Backfill obligations are in the new handoff.
