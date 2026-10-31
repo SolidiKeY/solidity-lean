@@ -547,3 +547,71 @@ YQ1–YQ7 remain in the scope decision record; no new decision or admission prom
 Goal remains blocked; get_goal is unavailable and no goal transition is attempted.
 Exact final committed head, gates/static comparisons and cumulative artifacts are
 recorded in `/workspace/vy2-evidence/HANDOFF.md` (prior versions retained).
+
+### Typed residual companion checkpoint (2026-10-31)
+
+ResidualJournal adds a constructive fixed-domain companion alongside actual
+Source.ExecState, without changing Source/World or creating untyped state/IR.
+ResidualKey carries bounded address/word and a proof of nonownership in the
+supplied persistent/transient ownership family. The journal saves actual old
+words; undo/run, repeated-write restoration, unrelated-key preservation and mark
+rollback are proved without assumed inverse laws. ResidualCompanion keeps actual
+Source.Op lists and separate typed residual write lists; their independent runs
+commute. ResidualFrame contains the actual Source.CallFrame and residual mark.
+Combined rollback restores both components, including inner revert retaining
+caller prefix and child commit remaining undoable by the outer frame. endTx uses
+actual source endTx and clears transient residual cells/both journals while
+preserving persistent source state and residual cells.
+
+This is a concrete residual mechanics component, **not** a full physical source
+representation. Ownership is fixed supplied input, not proved completeness or
+hash separation for every source path. Controls register the existing bool slots7
+and0, with unowned99/100 and actual typed scalar source operations. No conclusion
+about arbitrary other source paths follows. Owned-slot padding/dirty bits, dynamic
+ownership, full physical view/writeback adequacy and proper static-mode/source/Yul
+execution integration remain open. The nonzero transient165 snapshot is a general
+within-transaction witness, not transaction-initial reachability. G0/history review
+preceded implementation; only parameter-only families are matched and existing
+source representation/history21067a47 is preserved. No checking budget was raised.
+
+New Residual.sol explicitly seeds transient165 within the transaction and checks
+five ordered calls per pipeline: nested revert retaining prefix, child commit then
+outer revert, persistent read/reset, successful child and next-transaction reset.
+Every result checks raw source-owned word, unowned persistent99, transient99,
+logical transient flag and untouched100. Exact constructor error/return bytes and
+runtime hash are checked. Independent finder/skeptic found a constructor transcript
+validation gap; fixed with three mutations per pipeline. Final33 controls assert
+exact pipeline inventory and reject dropped/reordered calls, wrong bytes/state,
+wrong exception/resource failures and bad deployment. All original16 vectors,
+four fixtures/13 calls/four deployments and81 controls per aggregate run remain
+unchanged; prior nine writeback calls and14 controls remain passing too. External
+solc0.8.38/Osaka legacy/via-IR evidence is separate from kernel proofs and supplies
+no compiler correspondence or frontend admission.100m gas/5m steps unchanged.
+
+Per-file diagnostics (CLI fallback; MCP unavailable) and focused33 jobs exit0.
+Complete544 public signatures/287 theorem axiom reports pass, only propext,
+Quot.sound, Classical.choice. Final full wrapper exit0:1012 default/262 suite jobs,
+131 annotations match. Actual Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613;
+mandatory KeySort exit0,2 jobs before RUNTIME_GATE_PASS. Strict automatic proof gate
+base/head both exit0:491 automatic,61 with step budget,11 refuted,0 manual/pending;
+outputs equal. Hard12GiB/no-swap, serial-j1/LEAN_NUM_THREADS=1, writer lock and actual
+OS/RSS/disk monitor preserved. Raw failed attempts remain in residual-journal and
+scalar-writeback evidence. Independent read-only finder/skeptic reviews used no
+Lean/server/build/tests; no remaining confirmed finding after fixes.
+
+Queue: canonical selected-path actual writeback and fixed-domain residual mechanics
+advance original Backfills A/B; neither backfill nor any full work item is complete.
+Y04 partial: whole-store/dirty values, complete ownership/path/hash layout and
+physical/source integration pending. Y05 partial: actual heap/assembly MemOK and
+nondeterministic allocation refinement/actual V11 agreement pending. Y06 partial:
+existing raw inputs/hash/environment preparation not actual Yul/source admission
+or compiler proof. Y09.02 blocked: concrete VY1 source semantics/calculus interface,
+notation/printers and full composition absent. V10/V11 agreement instances and
+V04b/V12/V13/V15/V16 final dependency obligations remain precise owner inputs;
+existing source World, memory-call and Bridge components are present prerequisites,
+not substitutes for the missing Yul correctness interfaces. No other branch/owner
+was changed or fetched. Goal remains blocked unchanged; get_goal is unavailable;
+no create/reset/reactivation/completion or stop transition attempted this turn.
+Approved YQ1–YQ7 (scope decision record) unchanged; questions=[]. Exact revisions,
+raw gate commands/exits, static/no-new-findings outcomes and absolute versioned
+patch/bundle/handoff/checksum paths are in `/workspace/vy2-evidence/HANDOFF.md`.

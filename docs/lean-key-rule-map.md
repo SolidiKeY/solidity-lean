@@ -981,8 +981,15 @@ These have no SolKey taclet and do not discharge Y09.02 statement soundness,
 notation/printers, source admission or whole-state/compiler closure.
 
 VY2 canonical preparation (Lean-only, YQ5): `canonicalPathWriteback_unchanged`,
-`canonicalPathWriteback_other_cell`, `preserveScalarWrite_commute` and
+`canonicalPathWriteback_cell_other`, `preserveScalarWrite_commute` and
 `patchScalarSlot_unowned_byte` operate on actual Source.Storage with canonical
 codec, typed path and real separation/bounds. `accountWrite_actual_storage` and
 `transientWrite_actual_storage` construct actual source operations. These are
 preparation laws without SolKey taclets, not Y09.02 statement soundness/rules.
+
+VY2 residual preparation (Lean-only, YQ5): `residualUndoN_run`,
+`residualRollback_run`, `companionRollback_run`, `companionRollback_inner`,
+`companionRollback_outer_commit` and `companionEndTx_transient` combine a concrete
+fixed-ownership residual journal with actual Source frames. No SolKey taclets or
+Y09.02 statement/calculus/printing claim; ownership completeness and actual Yul
+execution/physical-view agreement remain integration obligations.

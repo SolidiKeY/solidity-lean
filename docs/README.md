@@ -104,4 +104,4 @@ history is in git.
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
 
-- [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical view laws, explicit owner agreements, and outstanding concrete integration.
+- [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical codecs, canonical typed writeback, fixed-domain residual journals and outstanding concrete integration.

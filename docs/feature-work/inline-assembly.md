@@ -227,3 +227,16 @@ reports and wrapper1010/262+131 pass after independent reviews. This is Backfill
 progress, not full Y04–Y09.02 closure; raw residual journaling and source/heap/
 MemOK/allocator/compiler/calculus integration remain open. Cumulative evidence:
 `/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 fixed-domain residual journal handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) constructs an intrinsically unowned-slot journal
+beside actual typed Source state/frames. Actual source operations and residual
+old-word undo compose through nested rollback, outer revert after child commit
+and persistent/transient reset, with nontrivial controls. Fixed ownership is an
+input, not whole-store coverage; owned dirty/padding bits and dynamic paths/Yul
+integration remain open. Both pinned pipelines pass five new ordered state-rich
+calls and33 negative controls after independent review fixes. Existing fixtures,
+writeback vectors and budgets preserved. Kernel544/287 and wrapper1012/262+131
+pass. Full Y04–Y09.02 and Backfills A/B stay unfinished; goal blocked unchanged.
+Exact committed head and cumulative/versioned artifacts: `/workspace/vy2-evidence/HANDOFF.md`.
