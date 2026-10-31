@@ -1217,3 +1217,4 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/MixedLoopPrefixes.lean` | Two actual mixed-state iterations and ordered horizons, concrete old/scratch contents, later exact-byte failure/absorption, admitted-prefix witness and preserved target/admission refusals. |
 | `Backend/InternalFlow/EvaluatedRevert.lean` | Actual typed payload/call result to checked/local failure emission, preserving normalized bytes and refusing lossy halt-class interpretation. |
 | `Backend/InternalFlow/EvaluatedRevertChecks.lean` | Evaluated 134-byte word/heap payload through nested calls and scoped prefix, checked byte/stack/root observations, empty/class/evaluation/headroom controls. |
+| `Backend/InternalFlow/PublishedDirectCalls.lean` | Consumers of published direct memory-call endpoint, exact frame export, allocator and bare-revert proofs. |

@@ -847,3 +847,133 @@ or another proof/completion claim. Its versioned blocker audit is under
 sets remain untouched. Stopping the existing goal as blocked is requested only through the automatic
 continuation's goal context, without recreation/reset or a competing continuation;
 the actual stop result is recorded in that audit.
+
+
+### Published ordinary memory-call consumer (continuation 7)
+
+This checkpoint supersedes earlier missing-memory-call-producer statements for
+ordinary direct void, primitive-result and memory-result calls ONLY. Published
+revision91e94ab57305ca055127934fd9e68fe9ea5e6be3 was incorporated as first-parent
+published cherry-pick5db3bb36fa9f48a59630b6f9692424f50d4c68b4. All previous V12
+commits and frozen-base ancestry are preserved. No unmerged worker revision or
+manual reserved implementation repair was used. The historical core-only
+argsIn/CallRetIn refusals remain true of their particular paths; they do NOT
+refuse the new unified Compiler fallback.
+
+`Backend/InternalFlow/PublishedDirectCalls.lean` consumes actual published
+Calls.Statement.sound and Calls.Program.sound. statement_endpoint identifies
+the producer endpoint with the supplied ACTUAL successful intrinsic Out;
+program_endpoint does the same for finite program composition. call_endpoint
+uses the existing call_return equation and actual Args.evalT/body.runR premises
+to identify that endpoint's exact composed entry/body extension, exported
+results and transported caller tail. Private argument/body locals are dropped
+by the existing dependent CallRet.leaveT/TEnv.take/TEnv.drop execution equation,
+not a new evaluator. Genuine StateRepr, expanded-frame need and reached-cost
+AllocationInput premises remain explicit; none assumes the desired simulation.
+The output carries StateRepr, the unchanged protected stack, BaseExtends for all
+old typed identities and GrowsAllocator for the precise reached cost. Stable
+addresses do NOT imply unchanged contents for arbitrary mutating callees.
+statement_revert consumes only bare ordinary revert. Payload, panic, exhausted
+and diverge distinctions are retained; no THalt.data=[] shortcut is used.
+
+The standalone lane fixture tests/internal-flow/PublishedMemoryCalls.lean keeps
+elaboration outside the owned core import closure. Its real source program has
+scalar42, a length2 caller object containing7/11, two aliases and a callee-local
+length2 object containing33. A parameter is privately rebound to another object
+containing44. The returned local escapes; old caller references/scalar survive.
+All generated frontend temporary locals remain in the ACTUAL typed context and
+ordered endpoint observations; they are not silently discarded to fit an
+invented frame. Source identities, exact cost9, target cursor265, protected
+stack77/sentinel99 and complete ordered pointer/content observations are pinned.
+The public Compiler.memoryCalls_input/Compilation.correct branch is instantiated,
+with isMemoryCalls/usesMemory true and old isMemory false.
+
+A SEPARATE nonempty_call_endpoint produces its intermediate StateRepr by running
+a real prefix through Calls.Program.sound; no intermediate representation is
+assumed. Its inhabited caller heap has one nonempty object, aliases0/0 and
+scalar42. Prefix cost3 and call cost4 are discharged. The call's actual evaluated
+argument is old identity0, and actual body execution allocates the escaping
+identity2 while dropping private locals. AllocationInput is transferred using
+GrowsAllocator.nextInput. The target and source export observations retain both
+old aliases,7/11 contents and scalar42, with cursor263 and returned length2 zeros.
+The whole-program endpoint starts with an empty heap, but this separate call-stage
+BaseExtends ranges over an inhabited nonempty heap. The fixture tests private
+rebinding isolation, not a general old-object-content-mutation frame theorem.
+Existing AllocationFrameChecks retains its actual old-alias-write/withinM
+rejection and noninterference controls unchanged.
+
+Negative controls reject swapped old/fresh pointers and scalar destinations;
+caller_frame_insufficient fails the theorem's expanded-frame input bound, NOT a
+claimed runtime rejection. A successful prefix followed by actual bare revert
+is compiled to target revert. A nonempty intrinsic payload [7] retains its
+revertWith class and is REFUSED by the direct memory-call producer; existing
+byte-emission consumers therefore cannot yet be composed through this path.
+
+Independent finder and skeptic source reviews found no mathematical/ownership
+issue and requested explicit fixture signatures and a nonempty represented
+call-boundary control. Both are added. They verified that the representation
+and next-allocation input are produced by real prefix execution, and required
+precise distinctions between base-address stability/content preservation,
+failed frame premises/runtime rejection and finite expansion/unbounded recursion.
+Final skeptic review caught a temporary-local offset in the swap negative: it now
+samples cells2/3/6, including the actual returned pointer, rather than three old
+pointer cells. This confirmed control finding is fixed.
+Final gate commands, guarded actual axiom reports, resource readings and artifact
+review are recorded in the new continuation7 handoff/evidence, never over the
+seven earlier sealed sets. Lane check-files now includes the standalone fixture;
+cache keys additionally hash that fixture and its actual import closure.
+
+Updated original queue accounting (all parents remain unfinished):
+
+| Obligation | Newly available consumption and exact remaining boundary |
+|---|---|
+| Work1 / G37.01 | Ordinary direct memory-call representation is NOW published and consumed, with inhabited nonempty call-stage arguments, locals, escaping result, exact frame/cost/stack/address evidence. General storage/tuple/reference frame cases and runtime recursive frames remain unavailable: Calls.atHeight refuses storage/rets/callRec; preserve those producer refusals and reserved owners. |
+| Work2 / G37.02 | Finite ordinary direct-call bridge now consumes actual producer soundness and exact Out. Structural finite embedded-body expansion has no public height search cutoff, but it is not arbitrary unbounded recursion. Missing source lowering/uncapped intrinsic runtime/target recursive-call simulation remains; independent unbounded Source semantics is already published and unchanged. |
+| Work3 / G37.03 | Full dependent-signature function-value dispatch still needs its published lowering linked to general frame transport. Ordinary named direct calls do not supply that producer; restricted function-ref-args owner stays untouched. |
+| Work4 / G36.01-.03 | New direct-call producer supports its existing blocks/branches. General mixed push/pop/shrink/allocation loop compilation, break/continue/early-return transport and V14 payment/call-loop application remain open; existing withinM restrictions and concrete mixed-loop controls are unchanged. |
+| Work5 / G38 | Bare ordinary call failure now reaches actual target revert. Nonempty revertData is refused by this new compiler path. Still needed: a producer coupling Evm.Machine word memory/frame to Failure.Slice.Machine byte memory/protected interval, qualified panic/ABI-return lowering, actual root/frame unwind and world rollback. Existing evaluated/local byte proofs do not infer a lost State from TRes.error. |
+| Work6 / G39 | Existing transient reset/root/local projected laws remain. New StateRepr includes its existing core store relation; no new transient transaction reset/callback/whole-world coupling follows from it. Distinct target transient/persistent root and boundary adapters plus V13/V15 applications remain open. |
+| Backfill A | Additional real target producer consumer and nonempty call-stage controls pass; extension/prefix/result/finite-recursion work is partial evidence, not discharge of the entire original backfill or unbounded recursion. |
+| Backfill B | Existing nested projected emissions/mixed finite loop/evaluated payload consumers remain partial. General unwind/rollback/mixed-location and final world applications are not newly discharged. |
+
+The new source-keyed cache strategy retains one existing .lake tree. Bounded
+cold import chunks refresh only declared prerequisites; original raw timeouts
+remain visible. The first per-file test detected stale October24 Elab.olean
+(join duplication, then obsolete Blk); Lake refreshed the declared Splice
+closure without editing reserved sources or importing cached unmerged code.
+The mandatory original full run-lean.sh exit124 at300s remains FAILED/incomplete,
+TestSuite/sort unreached; old no-build exit3 remains inventory only. No full
+rerun, target removal or budget increase is used. Normal/strict documentation
+raw exit1 and complete exact-base no-new comparisons are separate gates. This
+checkpoint is partial, does not close the persistent goal and requests no new
+semantic premise, exclusion or human scope decision.
+
+
+Continuation7 verified gate record: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613; dedicated lake build Solidity.KeySort reports successful2jobs.
+The source-call prerequisite passed75jobs; adapter/public Compiler passed158jobs;
+complete owned/published-control import closure passed197jobs in44.320s.
+All16owned files plus standalone fixture passed per-file diagnostics in55.710s;
+the review-corrected swap fixture passed again in15.925s. The separate Python
+axiom guard accepts all27 exact observed sets (26 canonical three-axiom sets
+and axiom-free noRef); altered/missing-report guard negatives reject as intended.
+Layer/import/orphan/trust checks pass:172 core modules,16 owned,1014 reachable,
+1029 sources/246 inventoried sites, zero findings. These are SCOPED gates, not
+full validation. The largest sampled aggregate RSS among new gates was
+1,788,260KiB and maximum recorded cgroup peak1,687,433,216B; each capped gate
+records memory.max12884901888 and memory.swap.max0. No overlapping Lean builds,
+new heartbeat limits, swap or duplicate build tree was used. Eighteen verified
+stopped continuation7 containers only were removed, restoring about14GiB disk
+headroom; caches, previous containers/evidence and all prior manifests remain.
+The first cold import gates retain exits124 at120s, a missing-import fallback
+exit1, stale elaboration-cache failure and fixture-development failures; later
+passes do not relabel them green. All command arguments and decisive output,
+source/toolchain hashes and bounded resource measurements are in continuation7
+rather than overwriting any earlier evidence. Final exact-base docs comparisons,
+review records, complete queue/handoff and artifact checksums accompany the head.
+
+Normal and strict docs gates actually returned1 with46 missing references; BOTH
+complete outputs are byte-identical to the exact frozen-base outputs, so the
+SEPARATE no-new-findings comparisons pass. All seven previous checksum manifests
+verify unchanged (109/84/91/86/114/90/34 entries). The original full300s failure,
+no-build exit3, new cold gate failures and raw doc failures remain in evidence.

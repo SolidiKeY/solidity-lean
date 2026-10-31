@@ -18,7 +18,10 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 owned = sorted(".".join(p.with_suffix("").parts) for p in Path("Solidity/Backend/InternalFlow").glob("*.lean"))
 closure = set()
+fixtures = {str(p): digest(p) for p in sorted(Path("tests/internal-flow").glob("*.lean"))}
 pending = list(owned)
+for fixture in fixtures:
+    pending += re.findall(r"^import\s+(Solidity(?:\.[A-Za-z_0-9]+)*)", Path(fixture).read_text(), re.M)
 while pending:
     module = pending.pop()
     if module in closure:
@@ -33,7 +36,7 @@ versions = subprocess.check_output([str(args.toolchain / "bin/lean"), "--version
 configs = {str(p): digest(p) for p in map(Path, ["lean-toolchain", "lakefile.toml", "lake-manifest.json"]) if p.is_file()}
 sources = {m: digest(Path(m.replace(".", "/") + ".lean")) for m in sorted(closure)}
 key_inputs = {"actual_lean_version": versions, "compiler_binary_sha256": digest(args.toolchain / "bin/lean"),
-              "configuration_sha256": configs, "source_sha256": sources,
+              "configuration_sha256": configs, "source_sha256": sources, "fixture_sha256": fixtures,
               "runtime_flags": ["-j1", "--tstack=131072"]}
 key = hashlib.sha256(json.dumps(key_inputs, sort_keys=True).encode()).hexdigest()
 artifacts = {}
