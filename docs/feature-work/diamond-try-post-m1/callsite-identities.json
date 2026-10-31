@@ -1,0 +1,20 @@
+{
+  "sourceUnit": "original.sol",
+  "sourceIndex": 0,
+  "ASTSourceUnitNode": 141,
+  "contract": 140,
+  "callee": 7,
+  "calleeParameter": 2,
+  "caller": 105,
+  "try": 103,
+  "call": 79,
+  "member": 77,
+  "receiver": 76,
+  "argument": 78,
+  "panicBinder": 87,
+  "signature": "f(uint256)",
+  "selector": "b3de648b",
+  "callerSignature": "c()",
+  "callerSelector": "c3da42b8",
+  "proofStatus": "retained AST/source provenance, not kernel original-body or bytecode adequacy"
+}

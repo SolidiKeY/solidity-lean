@@ -554,7 +554,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "declarations", spelling := "library L",
       scope := .model, current := .limited,
       requirement := r#"Inline resolvable pure/internal library calls; externally linked library execution additionally requires an explicit world/storage-context abstraction."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 74 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 74 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "Solidity/Semantics/LibraryTryFrame.lean", "Solidity/Frontend/LibraryTryImport.lean", "Solidity/Examples/Tactics/LibraryTrySource.lean", "Solidity/Examples/Tactics/LibraryTryControls.lean", "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"] }
   | .inheritance =>
     { category := "declarations", spelling := "is A(args), B; diamond inheritance",
       scope := .model, current := .limited,
@@ -949,12 +949,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "statements", spelling := "try externalCall/new C returns(...) {...} catch...",
       scope := .abstract, current := .limited,
       requirement := r#"Separate callee failure from caller argument/return-decoding failures; typed contract creation needs the world abstraction."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 500 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 500 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Semantics/LibraryTryFrame.lean", "Solidity/Frontend/LibraryTryImport.lean", "Solidity/Examples/Tactics/LibraryTrySource.lean", "Solidity/Examples/Tactics/LibraryTryControls.lean", "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"] }
   | .catchClauses =>
     { category := "statements", spelling := "catch Error(string); Panic(uint); (bytes); catch {...}",
       scope := .model, current := .limited,
       requirement := r#"Dispatch by valid revert bytes, handle malformed payloads and preserve caller/callee rollback boundaries."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 504 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 504 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Semantics/LibraryTryFrame.lean", "Solidity/Frontend/LibraryTryImport.lean", "Solidity/Examples/Tactics/LibraryTrySource.lean", "Solidity/Examples/Tactics/LibraryTryControls.lean", "Solidity/Examples/Tactics/LibraryTrySourceIR.lean", "Solidity/Semantics/RevertData.lean", "Solidity/Calculus/DataIn.lean", "Solidity/Examples/Tactics/TryConditions.lean"] }
   | .revertStatement =>
     { category := "statements", spelling := "revert E(args); revert(); revert(reason)",
       scope := .model, current := .limited,
@@ -1178,8 +1178,8 @@ def Feature.info : Feature → FeatureInfo
   | .creationTry =>
     { category := "calls", spelling := "try new C(args) returns(C c)",
       scope := .abstract, current := .limited,
-      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/ContractWorldCertificates.lean"] }
+      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported. The narrow stateless unpaid Error(string) source continuation now compiles actual local arguments, constructor/handle and caller branches; its conditional kernel correspondence and original creation fixture replay do not establish general world/source or callback validity. Existing source wrappers also emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean", "Solidity/Semantics/ContractWorldCertificates.lean", "Solidity/Semantics/CreationTryFrame.lean", "Solidity/Frontend/CreationTryImport.lean", "Solidity/Examples/Tactics/CreationTrySource.lean", "Solidity/Examples/Tactics/CreationTrySourceIR.lean"] }
   | .callbackSemantics =>
     { category := "calls", spelling := "reentrancy during modeled external calls",
       scope := .abstract, current := .limited,

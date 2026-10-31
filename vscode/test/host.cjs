@@ -18,18 +18,24 @@ async function run() {
     writeFileSync(script, `import {readFileSync,writeSync} from 'node:fs';import {createHash} from 'node:crypto';const source=process.argv.at(-1);const hash=createHash('sha256').update(readFileSync(source)).digest('hex');writeSync(1,JSON.stringify({results:[{source,sourceHash:hash,contract:'C',function:'f',signature:'f()',status:${JSON.stringify(status)},range:{start:{line:0,character:13},end:{line:0,character:35}},reason:${JSON.stringify(status === 'pending' ? 'open proof goals' : '')},...${JSON.stringify(audit)},...${JSON.stringify(witness)}}],errors:[]}));`);
   }
   const config = vscode.workspace.getConfiguration('solidityLean');
-  const keys = ['backendPath', 'nodePath', 'verifyOnSave', 'auditPreconditions', 'counterexamples'];
+  const keys = ['backendPath', 'nodePath', 'verifyOnSave', 'automaticVerification', 'auditPreconditions', 'counterexamples'];
   const previous = Object.fromEntries(keys.map(key => [key, config.inspect(key)?.globalValue]));
+  let api;
   try {
     await config.update('backendPath', root, vscode.ConfigurationTarget.Global);
     await config.update('nodePath', process.env.SOLIDITY_LEAN_NODE_EXECUTABLE || 'node', vscode.ConfigurationTarget.Global);
     await config.update('verifyOnSave', false, vscode.ConfigurationTarget.Global);
+    await config.update('automaticVerification', 'never', vscode.ConfigurationTarget.Global);
     await config.update('auditPreconditions', false, vscode.ConfigurationTarget.Global);
     await config.update('counterexamples', false, vscode.ConfigurationTarget.Global);
     const extension = vscode.extensions.getExtension('SolidiKeY.solidity-lean');
     assert.ok(extension, 'extension package must be installed in the development host');
-    const api = await extension.activate();
-    assert.ok(api.controller, 'activation creates a real TestController');
+    const production = await extension.activate();
+    assert.ok(production.controller, 'activation creates a real TestController');
+    await production.dispose();
+    // Controller/CLI transport fixtures are explicit injections, never a hidden
+    // fallback in the persistent production language server.
+    api = require('../src/extension.cjs').createExtension(vscode,{subscriptions:[]});
     const document = await vscode.workspace.openTextDocument(source);
     await vscode.window.showTextDocument(document);
     backend('proved');
@@ -67,7 +73,9 @@ async function run() {
     const checks = ['activation', 'command', 'backend process', 'Test Explorer items', 'hover', 'diagnostics', 'precondition audit diagnostics', 'certified model prestate diagnostics', 'escaped model hover', 'edit invalidation'];
     if (process.env.SOLIDITY_LEAN_REAL_BACKEND) {
       await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
+      await api.dispose();
       await config.update('backendPath', process.env.SOLIDITY_LEAN_REAL_BACKEND, vscode.ConfigurationTarget.Global);
+      api = require('../src/extension.cjs').activate({subscriptions:[]});
       const realSource = join(root, 'Real.sol');
       writeFileSync(realSource, 'pragma solidity ^0.8.34;\ncontract Real { function passes() public pure { assert(true); } function staysOpen() public pure { assert(false); }\n/// @custom:key ensures \\in uint (\\result; 1, 2)\nfunction choice() public pure returns(uint) { return 1; } }\n');
       const realDocument = await vscode.workspace.openTextDocument(realSource);
@@ -220,8 +228,8 @@ contract FilteredHost {
       assert.equal(filtered.results.length, 3, 'a malformed sibling must not erase completed obligations');
       const filteredRows = new Map(filtered.results.map(row => [row.function, row]));
       assert.deepEqual([...filteredRows.keys()].sort(), ['captureResult', 'pendingChoice', 'provesChoice']);
-      assert.ok(filtered.errors.some(error => error.stage === 'lean' && error.tool?.exitCode === 1),
-        'the compiler failure must propagate alongside retained sibling rows');
+      assert.ok(filtered.errors.some(error => error.stage === 'lean' && typeof error.reason === 'string' && error.reason.length > 0),
+        'native Lean diagnostics must propagate alongside retained sibling rows');
       const filteredDiagnostics = vscode.languages.getDiagnostics(filteredDocument.uri).filter(d => d.source === 'Solidity Lean');
       const filteredItems = [...api.controller.items.get(filteredDocument.uri.toString()).children].map(([, item]) => item);
       assert.equal(filteredItems.length, 3);
@@ -267,6 +275,7 @@ contract FilteredHost {
     throw error;
   } finally {
     await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
+    await api?.dispose();
     for (const key of keys) await config.update(key, previous[key], vscode.ConfigurationTarget.Global);
     rmSync(root, { recursive: true, force: true });
   }

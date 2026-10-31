@@ -1,0 +1,457 @@
+{
+  "kind": "boundedM1 intrinsic computed producer/capture, not original-source completion",
+  "parent": "32c900fb64ec88cdfa2616d2d109ac48244f8672",
+  "reviewedDesign": "7ec3983ce4606cb39a48cbd2fb8ebd8e690685f1",
+  "approvalCall": "call_8fd0594a249440a4ae6b4375a89b805b item0",
+  "codeGates": [
+    {
+      "label": "headroom",
+      "command": [
+        "bash",
+        "-c",
+        "test \"$LEAN_NUM_THREADS\" = 1 && ! flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock true && lean --version && /workspace/.setup/tools/lean-4.24.0-linux/bin/lake --version && df -h /workspace && free -m && test -f lakefile.next10.toml"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 2.697,
+      "commandSeconds": 1,
+      "peakAggregateRssKiB": 17752,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 19193856,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "source-link-confirmed",
+      "command": [
+        "python3",
+        "/workspace/next10-diamond-try-evidence/m1-producer/source-link-check.py"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.794,
+      "commandSeconds": 1,
+      "peakAggregateRssKiB": 17844,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 19369984,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "inventory",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.692,
+      "commandSeconds": 1,
+      "peakAggregateRssKiB": 18012,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 10690560,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "full",
+      "command": [
+        "bash",
+        "./run-lean.sh"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 6.913,
+      "commandSeconds": 6,
+      "peakAggregateRssKiB": 1423296,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 431243264,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "corpus",
+      "command": [
+        "bash",
+        "scripts/check-corpus.sh",
+        "--solkey",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 14.428,
+      "commandSeconds": 13,
+      "peakAggregateRssKiB": 4962772,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 1151365120,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "frozen",
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh",
+        "--complete",
+        "--solkey",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.66,
+      "commandSeconds": 1,
+      "peakAggregateRssKiB": 17632,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 40923136,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "orphans",
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.619,
+      "commandSeconds": 1,
+      "peakAggregateRssKiB": 18452,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 63500288,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "layers",
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.755,
+      "commandSeconds": 1,
+      "peakAggregateRssKiB": 17736,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 63168512,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "automatic",
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.733,
+      "commandSeconds": 1,
+      "peakAggregateRssKiB": 17076,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 20688896,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "trust",
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 5.691,
+      "commandSeconds": 5,
+      "peakAggregateRssKiB": 192488,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 165728256,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "axioms-confirmation",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "-j1",
+        "/workspace/next10-diamond-try-evidence/m1-producer/Axioms-confirmation.lean"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 21.262,
+      "commandSeconds": 21,
+      "peakAggregateRssKiB": 1635548,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 204169216,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    },
+    {
+      "label": "doc-paths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1,
+      "expectedExit": 1,
+      "seconds": 3.639,
+      "commandSeconds": 3,
+      "peakAggregateRssKiB": 23904,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 9138176,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": false
+    },
+    {
+      "label": "whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.781,
+      "commandSeconds": 1,
+      "peakAggregateRssKiB": 15836,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 4657152,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0,
+      "gatePassed": true
+    }
+  ],
+  "focusedDiagnostics": [
+    {
+      "file": "Solidity/Evm/TryByteImage.lean",
+      "processExit": 0,
+      "result": {
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    },
+    {
+      "file": "Solidity/Evm/TryByteCapture.lean",
+      "processExit": 0,
+      "result": {
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    },
+    {
+      "file": "Solidity/Evm/TryPanicProducer.lean",
+      "processExit": 0,
+      "result": {
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    },
+    {
+      "file": "Solidity/Examples/Tactics/TryPanicProducer.lean",
+      "processExit": 0,
+      "result": {
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    },
+    {
+      "file": "Solidity.lean",
+      "processExit": 0,
+      "result": {
+        "partial": false,
+        "still_elaborating_lines": null,
+        "success": true,
+        "timed_out": false,
+        "items": [],
+        "failed_dependencies": []
+      }
+    }
+  ],
+  "axioms": {
+    "expected": 290,
+    "actuallyPrinted": 290,
+    "newM1Theorems": 73,
+    "retainedTaskTheoremsFreshlyReaudited": 217,
+    "allowed": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "allStandardOnly": true
+  },
+  "provenance": {
+    "originalPipelines": 2,
+    "wholeAstNegativeControls": 14,
+    "bundleNegativeControls": 8,
+    "newCompilerRuns": 0,
+    "newReferenceRuns": 0
+  },
+  "deferredAfterAutomaticApprovalRejection": {
+    "combinedDriver": "gates.py",
+    "launched": false,
+    "status": "automatic approval review rejected",
+    "reason": "The gate driver includes native/reference fixture execution, including evm-reference/replay.mjs, despite the retained explicit prohibition on historical runner/backend build, load, or execution; M1 approval does not override that boundary. Do not bypass this rejection through a workaround or indirect execution.",
+    "deferredNoRun": [
+      "source-admission",
+      "script-tests",
+      "vectors88",
+      "native-family",
+      "reference-malformed_panic"
+    ],
+    "changedBudgets": false,
+    "historicalExecution": false,
+    "native12working8blockedStrictExit1": "retained, not a new replay"
+  },
+  "originalNativeFamily": {
+    "working": 12,
+    "blocked": 8,
+    "strictExit": 1,
+    "evidence": "retained panic-decoder/native-family, not rerun"
+  },
+  "originalReferenceFamily": {
+    "working": 18,
+    "blockedHistorical": 2,
+    "nativeReferenceOrderedComparisons": 66,
+    "referenceFrozenOrderedComparisons": 140,
+    "evidence": "retained, not rerun"
+  },
+  "docPaths": {
+    "baselineCommit": "32c900fb64ec88cdfa2616d2d109ac48244f8672",
+    "baseExit": 1,
+    "currentExit": 1,
+    "identicalFindings": 20,
+    "newFindings": 0
+  },
+  "priorEvidenceChecksumsVerified": 2234,
+  "peakAggregateRssKiB": 4962772,
+  "peakCgroupBytes": 1331539968,
+  "hardMemoryMax": 12884901888,
+  "hardSwapMax": 0,
+  "noMaxOrOomEvents": true,
+  "P4Implemented": false,
+  "P5bImplemented": false,
+  "P8Implemented": false,
+  "D3OrTargetChanged": false,
+  "defaultCallbackOrProfileChanged": false,
+  "backendActivity": false,
+  "originalAssignmentComplete": false,
+  "finalStaticChecks": [
+    {
+      "label": "final-inventory",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "expected": 0,
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17268,
+      "peakBytes": 10534912,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "final-doc-paths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "expected": 1,
+      "exit": 1,
+      "seconds": 3,
+      "peakAggregateRssKiB": 25848,
+      "peakBytes": 9232384,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "final-whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "expected": 0,
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 14980,
+      "peakBytes": 4685824,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    }
+  ],
+  "fixturePermissionQuestion": "pending user response: compatible Osaka-only validation excluding both pre-Byzantium fixtures; no permission inferred from elapsed time",
+  "temporaryLakeConfig": "created only after asserting absent; identical to retained runtime-lakefile.toml, removed after final Lean checks; tracked/user configuration unchanged"
+}

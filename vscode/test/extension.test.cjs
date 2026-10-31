@@ -110,6 +110,39 @@ test('suppresses results from modified documents', async () => {
   assert.equal(signal.aborted, true); finish(); assert.equal(await promise, null);
   assert.equal(env.diagnosticMap.size, 0); assert.equal(env.controller.items.size, 0);
 });
+for (const saved of [true,false]) test(`an edit during ${saved?'completed':'interrupted'} save prevents a superseded request from launching a backend`, async () => {
+  let release, calls = 0;
+  const env = setup(async (_, env) => { calls++; return {results:[row(env)],errors:[]}; });
+  env.doc.isDirty = true;
+  env.doc.save = () => new Promise(resolve => { release = resolve; });
+  const old = env.api.verify(env.doc); await settle();
+  env.doc.version++; env.doc.text += '// newer';
+  env.events.change({document:env.doc,contentChanges:[{}]});
+  release(saved);
+  assert.equal(await old,null); assert.equal(calls,0); assert.equal(env.api.reports.size,0);
+  env.doc.isDirty = false;
+  await env.api.verify(env.doc);assert.equal(calls,1);
+});
+test('an unsuccessful save still reports an error for a current request',async()=>{
+  const env=setup();env.doc.isDirty=true;env.doc.save=async()=>false;
+  await assert.rejects(env.api.verify(env.doc),/Save the Solidity file/);
+});
+test('a joined save must leave the current buffer clean before a backend starts',async()=>{
+  let saves=0,calls=0;
+  const env=setup(async(_,env)=>{calls++;assert.equal(env.doc.isDirty,false);return {results:[row(env)],errors:[]};});
+  env.doc.isDirty=true;
+  env.doc.save=async()=>{saves++;if(saves===2)env.doc.isDirty=false;return true;};
+  await env.api.verify(env.doc);assert.equal(saves,2);assert.equal(calls,1);
+});
+test('new verification requests supersede older requests still saving the same file', async () => {
+  let release, calls = 0;
+  const env = setup(async (_, env) => { calls++; return {results:[row(env)],errors:[]}; });
+  env.doc.isDirty = true;
+  env.doc.save = () => new Promise(resolve => { release = resolve; });
+  const old = env.api.verify(env.doc);await settle();
+  env.doc.isDirty = false;await env.api.verify(env.doc);
+  release(true);assert.equal(await old,null);assert.equal(calls,1);
+});
 test('rejects stale source hashes and reports for another source', async () => {
   const env = setup(async (_, env) => ({ results: [row(env, { sourceHash: '0'.repeat(64) })], errors: [] }));
   await assert.rejects(env.api.verify(env.doc), /source hash/);

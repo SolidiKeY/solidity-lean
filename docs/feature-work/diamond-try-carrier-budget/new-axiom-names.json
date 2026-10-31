@@ -1,0 +1,22 @@
+[
+  "Solidity.Evm.TryPanicCarrier.inner_halt",
+  "Solidity.Evm.TryPanicCarrier.carrier36_halt",
+  "Solidity.Evm.TryPanicCarrier.args36_eval",
+  "Solidity.Evm.TryPanicCarrier.empty_entry",
+  "Solidity.Evm.TryPanicCarrier.call_halt",
+  "Solidity.Evm.TryPanicCarrier.catch_halt",
+  "Solidity.Evm.TryPanicCarrier.both_tags",
+  "Solidity.Evm.TryPanicCarrier.call_at_halt",
+  "Solidity.Evm.TryPanicCarrier.zero_receiver",
+  "Solidity.Evm.TryPanicCarrier.external_empty",
+  "Solidity.Evm.TryPanicCarrier.data_transport",
+  "Solidity.Examples.Tactics.TryPanicCarrier.live_both",
+  "Solidity.Examples.Tactics.TryPanicCarrier.entry_frame",
+  "Solidity.Examples.Tactics.TryPanicCarrier.entry_parameter_not_caller_return",
+  "Solidity.Examples.Tactics.TryPanicCarrier.other_argument",
+  "Solidity.Examples.Tactics.TryPanicCarrier.wrong_bytes",
+  "Solidity.Examples.Tactics.TryPanicCarrier.live_capture_ids",
+  "Solidity.Examples.Tactics.TryPanicCarrier.live_data_scope",
+  "Solidity.Examples.Tactics.TryPanicCarrier.normal_return",
+  "Solidity.Examples.Tactics.TryPanicCarrier.live_normal_both"
+]

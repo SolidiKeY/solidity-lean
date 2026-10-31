@@ -1,14 +1,16 @@
-# Inline assembly (Yul): proposed extension
+# Inline assembly (Yul): authorized extension
 
-Status (2026-10-31): **proposal, not started.** `inlineAssembly` is an approved
-exclusion ([G00 Q1](../solidity-scope.md#user-decisions-2026-10-29)); only the
-whole-buffer rethrow `assembly { revert(add(data,32), mload(data)) }` is
+Status (2026-10-31): **implementation authorized for VY1–VY5; not yet implemented.**
+The human approved tiers A–C and YQ1–YQ7 in the
+[decision record](../solidity-scope.md#inline-assembly-decisions-2026-10-31).
+`inlineAssembly` remains excluded by current admission until implementation
+and validation replace that behavior; only the whole-buffer rethrow `assembly { revert(add(data,32), mload(data)) }` is
 recognized (`canonicalRethrow`, `memoryRethrow?` in
 `Solidity/Frontend/SolcJson/Body.lean`). This document plans the groups and
-lanes that would cover inline assembly. **No lane starts before the user
-answers the [decisions](#decisions-needed-before-any-lane) and they are recorded
-in [solidity-scope.md](../solidity-scope.md).** A worker must not reopen an
-exclusion or change a manifest status on its own.
+lanes to cover inline assembly. The decisions below are approved; the exact
+human answer is recorded in [solidity-scope.md](../solidity-scope.md#inline-assembly-decisions-2026-10-31).
+Workers may implement the authorized extension, but must keep manifest status
+honest and preserve all prerequisite gates.
 
 Pinned references (solc 0.8.38, commit `1835d247de183f23e7b0e2bc4a50732af525b77c`):
 `docs/assembly.rst`, `docs/yul.rst`, `docs/internals/layout_in_storage.rst`,
@@ -120,7 +122,7 @@ groups, eight to ten hours each.
 | Lane | Checkpoints, in order | Starts after | Tier |
 |---|---|---|---|
 | VY1 | Y01, Y02, Y03, Y09.01 | YQ1–YQ5 answered; V04 integrated | A |
-| VY2 | Y04, Y05, Y06, Y09.02 | VY1; before V10/V11 start | B |
+| VY2 | Y04, Y05, Y06, Y09.02 | VY1; V10/V11 inherit layout agreement obligations | B |
 | VY3 | Y08.01, Y08.02 | V12 (Y08.01), V15 (Y08.02); backfill until then | B |
 | VY4 | Y07.01, Y07.02, Y09.03 | VY2, V13 (G42); YQ6 answered | C |
 | VY5 | Y10 | V16, VY3, VY4 | C |
@@ -131,9 +133,13 @@ lanes start first, add "agrees with Y04/Y05's layout" to their checkpoints.
 G27, G32, G46 and G47 grow by the corresponding opcode and view obligations;
 that growth is counted in VY3/VY4, not in V10–V15.
 
-## Decisions needed before any lane
+## Decision questions and original recommendations
 
-| ID | Question | Recommendation |
+The table preserves the original proposal recommendations. The human approved
+all five lanes and the choices in the [decision record](../solidity-scope.md#inline-assembly-decisions-2026-10-31),
+including tiers A–C together for YQ1. These questions are no longer pending.
+
+| ID | Question | Original recommendation |
 |---|---|---|
 | YQ1 | Reopen `inlineAssembly`, and which tier? | Tier A now; tiers B and C as separate decisions after VY1. |
 | YQ2 | Keep `gas`, `msize`, `pc` and own-code `codesize`/`codecopy` excluded? | Yes: refuse at admission. |
@@ -143,7 +149,23 @@ that growth is counted in VY3/VY4, not in V10–V15.
 | YQ6 | Logs become observations (tier C): extend G01's event type for Solidity `emit` too? | Yes, both at once, or tier C keeps `log*` refused. |
 | YQ7 | Non-`memory-safe` blocks? | Refuse: via-IR's stack-to-memory mover depends on the flag. |
 
+## Coordination review (2026-10-31)
+
+Separate read-only finder and skeptic reviews checked the five lane assignments,
+the complete Y01–Y10 child coverage, intrinsic and ownership constraints,
+dependency gates, compact persistent goals and exact human authorization.
+Neither used the Lean server. Both found stale proposal/pending wording in the
+navigation and coverage summaries; it was corrected. The decision table now
+labels its recommendations as historical. No implementation or runtime gate is
+claimed by this preparation review.
+
+The publication finder and skeptic reviews also checked the pending documentation
+against all five frozen lane assignments and verified the decision links. They
+found stale proposal wording in the title and a VY2 prerequisite that assumed
+V10/V11 had not started; both were corrected. The scope record now distinguishes
+the original launch authorization from the subsequent integration authorization.
+
 ## Handoffs
 
-None yet. Each checkpoint appends its handoff here (revision, theorems and
+No implementation handoffs yet. Each checkpoint appends its handoff here (revision, theorems and
 premises, checks, remaining obligations).

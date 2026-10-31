@@ -32,6 +32,7 @@ jobs:
       - name: Check Dafny inventory and editor integration
         run: |
           node scripts/check-dafny-features.mjs
+          node vscode/parity/discover.cjs --check
           node --test scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs vscode/test/*.test.cjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
       # the printers or the tactic front ends, even transitively.
@@ -84,7 +85,9 @@ jobs:
           SOLIDITY_LEAN_REAL_BACKEND: ${{ github.workspace }}
           SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
           LEAN_NUM_THREADS: '1'
-        run: xvfb-run -a node vscode/test/run-host.cjs
+        run: |
+          node --test vscode/test/lsp-real.test.cjs
+          xvfb-run -a node vscode/test/run-host.cjs
       - name: Build and test the command line interface
         run: |
           export SOLKEY_ROOT="$RUNNER_TEMP/solidity-cli-solkey"

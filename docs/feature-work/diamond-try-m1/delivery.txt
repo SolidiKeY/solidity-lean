@@ -1,0 +1,1 @@
+M1 approval delivered in this active original thread by user, explicit call_8fd0594a249440a4ae6b4375a89b805b item0. No new coordinator dispatch/receipt issued by worker; accepted/uncertain reconciler records remain coordinator-owned, no replay or helper mutation. Actual retained clean HEAD32c900fb verified before edits. P4/P5b/P8 excluded.

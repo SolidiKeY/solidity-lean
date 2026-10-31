@@ -1,0 +1,16 @@
+{
+  "publishedCommit": "8445c3fc203144251b9d1fc9181f7f61a8189522",
+  "jsonPath": "/dependencies/modules/G46.02",
+  "G46.02": {
+    "cells": 71,
+    "modules": [],
+    "lines": 0,
+    "oversized": [
+      "71 owned cells > 60"
+    ],
+    "split": "(a) MLOAD/MSTORE/MSTORE8 against the byte-addressed representation; (b) CALLDATALOAD/CALLDATACOPY against the calldata representation; (c) memory expansion and its resource bound; (d) RETURN/REVERT byte ranges"
+  },
+  "vmOwner": "V15",
+  "R31": "roadmap-g04-restrictions.md:153, byte-addressed final bridge still required",
+  "newPublishedAdjacentOwner": "G38 failure-emission, not G46.02 completion"
+}
