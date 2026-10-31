@@ -996,3 +996,51 @@ comparison passes. This checkpoint closes the independent typed creation-frame
 consumer and its checks/reviews, not any parent G43/G36/G44/G45 obligation.
 The next available independent backfill consumes actual constructor arguments;
 it is not included in this tested source or checkpoint's proof claims.
+
+
+## Constructor argument consumer (checkpoint12)
+
+`Backend/Executable/CreationArguments.lean` consumes published
+`CreationTryFrame.constructorArg` and `argument_binding`, without modifying
+constructor, source, frontend or world implementations. `actual_argument`
+reads caller local41; the existing closure binds that word into a typed
+constructor local and `RevPart.word` produces its exact ABI word in the actual
+constructor failure. A second real constructor run at42 produces word42,
+excluding a hardwired payload. `binding` at `State.init C` is explicitly a
+standalone component witness; `actual_constructor_failure` separately runs the
+real world-entered frame. No general source constructor/ABI lowering follows.
+
+`argument_to_catch`, `argument_dependent_payload` and `paid_argument_catch`
+compose the actual read, argument-dependent constructor failure and typed raw
+catch after the real paid prefix. The catch allocates32actual bytes and drops
+its local, preserving old object0bytes7/8, aliases0/0 and caller local41.
+`selected_wrong_payload_refused` compares the actual heap payload with word42;
+`raw_is_not_error_reason` separates these raw ABI words from decoded Error data.
+The separate preceding CreationFrame fixture still exercises genuine Error
+boom decoding; these are different payload/handler observations.
+
+`arithmetic_argument_failure` evaluates actual typed41/0 after the proved
+`no_short_circuit` condition. Existing intrinsic `TRes.ofOpt none` returns bare
+`.revert`, not `.panic` or an EVM panic-byte payload. The initial external draft
+expected panic; the first diagnostic/refusal inspection corrected that claim,
+without changing semantics, refusals or budgets. Raw failed diagnostic remains.
+`evaluated_argument_bypasses`/`paid_argument_rollback` propagate that exact
+argument halt outside catch and restore outer `created`. The raw handler would
+complete normally on that halt, making bypass observable. It would also
+complete on77, whereas `argument_tail_failure` preserves exact selected-tail77
+and `paid_tail_rollback` restores `created`; tail failure is not re-caught.
+All public results have concrete discharged evaluation/creation/branch premises
+and19 scoped standard-axiom outputs. No paid execute/finish, source lowering,
+byte CREATE, gas or fetched-runtime relation is supplied. G44.01/G44.03 and
+Backfill B gain independent transport; the complete original queue remains
+partial/blocked as recorded above. Final gates/reviews follow below.
+
+Checkpoint12 fresh per-file diagnostics and focused/import build passed65jobs
+with19 scoped axiom pins under the unchanged180s focused limits and12GiB/no-swap
+runtime. Separate independent read-only finder/skeptic reviews accepted actual
+source/doc after the positive paid-prefix, selected wrong-payload and normally
+completing handler controls. Neither ran Lean/server/builds. The initial draft's
+panic expectation is corrected to the actual intrinsic bare revert, with raw
+failed exit retained in `arguments-first.log`; final diagnostics pass. A new
+incremental full gate is required for this added import; checkpoint11's full
+pass alone does not validate this new source.

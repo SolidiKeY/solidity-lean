@@ -56,3 +56,8 @@ old aliases, heap-dependent tail, exact outer rollback and handle observation.
 The fixed incorporation baseline preserves the frozen assignment identity;
 behavioral guard tests cover ancestry/parent rejection and post-baseline edits.
 These are intrinsic semantics, with no paid execute/finish or EVM claim.
+
+`Solidity.Backend.Executable.CreationArguments` additionally checks actual
+caller41→typed constructor binder→raw ABI-word failure/catch heap, wrong42,
+positive paid prefix and actual41/0 argument refusal/tail rollback. Intrinsic
+`TRes.ofOpt none` is bare revert; no EVM panic-byte correspondence is claimed.

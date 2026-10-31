@@ -956,3 +956,5 @@ import Solidity.Backend.Executable.SourceInitializers
 import Solidity.Backend.Executable.SourceInitializerChecks
 
 import Solidity.Backend.Executable.CreationFrame
+
+import Solidity.Backend.Executable.CreationArguments

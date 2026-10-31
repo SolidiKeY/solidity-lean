@@ -1298,3 +1298,5 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Backend/Executable/SourceInitializerChecks.lean` | Existing inheritance initializer fixture cuts/order, successful source deploy tags, static and argument failure controls. |
 
 | `Backend/Executable/CreationFrame.lean` | Intrinsic paid-prefix creation catch allocation, caller aliases and resumed typed tail; no paid ledger reconciliation or EVM simulation |
+
+| `Backend/Executable/CreationArguments.lean` | Actual typed constructor argument binding, argument-dependent raw failure/catch heap and evaluated-argument/tail rollback; no source lowering/EVM claim |
