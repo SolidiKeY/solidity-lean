@@ -77,7 +77,7 @@ Namespace: `SolidityBridge.RoadmapV15`.
 source representation. `mapPrefix` only maps the existing prefix's events and
 optional final observation. Neither arbitrary observation maps nor local journal
 observations are asserted to be the approved EVM/public observation map.
-`Controls.lean` includes nonempty prefixes, exact bytes `[0,255]`, completed versus
+`Bridge/SolidityBridge/RoadmapV15/Controls.lean` includes nonempty prefixes, exact bytes `[0,255]`, completed versus
 noncompleted families, differing persistent/transient snapshots, success commit,
 nested rollback, differing-snapshot rejection, cross-transaction collision
 rejection and positive/negative root-region controls. These controls do not cover
@@ -105,16 +105,17 @@ Its shared arithmetic fragments cannot silently stand for an Osaka transition
 or full account/transaction correspondence. This lane may not rewrite the
 vendored or reserved reference implementation.
 
-`scripts/roadmap-v15-obligations.py` reads the published backend opcode table
-and emits 150 individual byte/mnemonic rows, each explicitly open for V15,
-with a primary accounting area and G46.06 composition obligation. This is primary
-routing only: exact secondary clauses (for example RETURN/REVERT byte ranges
-and EXTCODECOPY/RETURNDATACOPY memory) remain open. This is not
-a new semantics, an opcode coverage claim or a decision that every opcode is
-emitted by the admitted source profile. Its output also lists the 168 existing
-G03 feature IDs whose EVM owners include this lane; no global ledger or manifest
-was edited. Coordinator reconciliation: attach this backfill evidence to
-G46.05/G46.06/G47, retaining every existing open status. No feature closes.
+`scripts/roadmap-v15-obligations.py` reads and validates the published backend
+opcode table and its bounded-family formulas, then emits 150 individual
+byte/mnemonic rows with explicit open primary/secondary obligation clauses.
+The recovery section below describes the expanded schema. The original commit's
+primary-routing-only schema was insufficient and is retained only in the old
+exported artifact. This report is not a semantics, opcode coverage certificate
+or decision that every opcode is emitted by the admitted profile. It also lists
+the 168 existing G03 feature IDs whose EVM owners include this lane. No global
+ledger/manifest was edited. Coordinator reconciliation: attach the backfill and
+accounting evidence to G46.05/G46.06/G47, retaining every open proof status.
+No feature closes.
 
 ## Runtime and checks
 
@@ -192,3 +193,59 @@ V13/V14 and Osaka reference interfaces read only, then return to G46.01 and each
 subsequent queue checkpoint. This does not authorize rewriting the vendored
 Cancun semantics or reserved components. Until those prerequisites are supplied,
 the goal is blocked rather than complete. No push, merge or PR was performed.
+
+
+## Auditor recovery 201ebab8: documentation comparison correction
+
+The earlier no-new-findings comparison considered missing references only. It
+missed an owned ambiguous basename citation: the frozen base had 37 ambiguous
+findings and the first checkpoint had 38, although both had 46 missing paths.
+That historical claim was incomplete. The ambiguous citation now uses the
+explicit owned path. Original failing logs and exported artifacts are retained;
+new evidence is under `/workspace/v15-evm-agreement-evidence/recovery-201ebab8`.
+The recovery comparison checks both missing and ambiguous findings, including
+multiplicities, against the exact frozen-base log. The global checker still
+fails on inherited missing references; only a separate zero-new-regressions
+comparison may pass.
+
+
+### Recovery checkpoint: secondary opcode accounting
+
+The owned accounting script now records explicit open obligation clauses for each
+of the 150 byte/mnemonic pairs, not only a primary group. Common clauses preserve
+actual decoding/fork, intrinsic representation, stack capacity/operand order,
+resource/fuel/failure and continuation obligations. Secondary clauses cover
+word padding, source/destination byte intervals and expansion; calldata/code
+zero padding versus returndata bounds failures; RETURN/REVERT extraction before
+rollback; persistent/transient paths; account/metadata/static permission;
+KECCAK/code hash bytes and approved region premises; call input/output buffers,
+actual callee frame execution, forwarded gas/stipend/depth/funds, precompiles,
+world rollback/session observations; CREATE initcode/address/hash/result buffer;
+LOG and SELFDESTRUCT lifecycle obligations when admitted code emits them.
+Every clause remains open. This checklist does not implement transitions, certify
+semantics, decide source admission or discharge any G46/G47 proof. All clauses
+must be checked against the production Osaka interface when it is published.
+
+`python3 scripts/test-roadmap-v15-obligations.py` passes 12 tests, including
+mutations removing rows/secondary clauses, duplicating rows/clauses, swapping
+bytes without creating duplicate bytes, and falsely marking a row discharged.
+Positive combination controls cover every CALL-family member and distinct copy
+source/destination obligations. Documentation regression controls detect new
+ambiguities even when missing counts match, and preserve finding multiplicities.
+The report also continues to record actual pinned dependency/cache availability.
+
+
+Recovery accounting reviews: separate read-only finder and skeptic identified
+unchecked indexed-family formulas, acceptance of incomplete checker logs and
+missing explicit storage-refund accounting. Those are fixed: family shapes and
+bounds are validated with drift mutations; both input logs must carry valid
+completed checker summaries and recorded exits, with fatal/truncated controls;
+SSTORE original/current/new values, warm/cold/refund journals and transient reset
+are explicit open clauses. The skeptic also identified the obsolete current
+schema description, corrected above. No Lean server or builds were used by
+reviewers. Final follow-up results are retained in the new evidence directory.
+
+Separate follow-up finder and skeptic reviews cleared this documentation/accounting
+checkpoint after inspecting the actual staged diff and evidence. All 12 script
+tests pass; the corrected complete-log comparison has zero added missing or
+ambiguous findings. G46/G47 semantic obligations and final gates remain open.
