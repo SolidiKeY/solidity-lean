@@ -6,6 +6,7 @@
 import {isDeepStrictEqual} from 'node:util';
 import {machine} from '../evm-reference/replay.mjs';
 import {createHash} from 'node:crypto';
+import {keccak_256} from '../evm-reference/node_modules/@noble/hashes/sha3.js';
 import {createAddressFromString,hexToBytes,bytesToHex} from '../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js';
 const hex=bytesToHex,word=b=>'0x'+hex(b).slice(2).padStart(64,'0');
 const address=a=>a.toString().toLowerCase();
@@ -61,8 +62,8 @@ export function observeMachine(vm,{seeds=['0x'+'12'.repeat(20)]}={},fresh) {
  }
  function operation(kind,a=null,key=null,value=null) {
   if(!tx)return;
-  const frame=stack.at(-1)?.id??null,id=[kind,a,key].join('/');
-  const access=tx.accesses[id]??={kind,address:a,slot:key,count:0};access.count++;
+  const frame=stack.at(-1)?.id??null,id=[kind,a,key,frame].join('/');
+  const access=tx.accesses[id]??={kind,address:a,slot:key,frame,count:0};access.count++;
   if(!kind.startsWith('get')&&kind!=='transient.get')tx.operations.push({sequence:tx.operations.length,frame,kind,address:a,slot:key,value});
  }
  for(const k of methods)sm[k]=async function(...args) {
@@ -102,7 +103,9 @@ export function observeMachine(vm,{seeds=['0x'+'12'.repeat(20)]}={},fresh) {
  event('afterMessage',async r=>{
   const f=stack.at(-1);if(!f)throw Error('orphan afterMessage');const e=r.execResult;
   if(!(e.returnValue instanceof Uint8Array))throw Error('missing frame output');
-  f.output={exception:e.exceptionError?.error??null,bytes:hex(e.returnValue)};f.createdAddress=r.createdAddress?address(r.createdAddress):null;
+  f.output={exception:e.exceptionError?.error??null,bytes:hex(e.returnValue)};
+  if(Array.isArray(e.logs)) {f.output.logStatus='captured';f.output.logs=e.logs.map(l=>{if(!Array.isArray(l)||l.length!==3||!(l[0]instanceof Uint8Array)||l[0].length!==20||!Array.isArray(l[1])||!l[1].every(t=>t instanceof Uint8Array&&t.length===32)||!(l[2]instanceof Uint8Array))throw Error('malformed frame logs');return{emitter:hex(l[0]),topics:l[1].map(hex),data:hex(l[2])};});}
+  else {if(f.steps)throw Error('missing executed-frame logs');f.output.logStatus='not-provided';f.output.logReason='No interpreter log array exposed';}f.createdAddress=r.createdAddress?address(r.createdAddress):null;
   if(f.createdAddress)await touch(f.createdAddress);
   if(e.runState) {
    const size=Number(e.runState.memoryWordCount)*32;
@@ -160,6 +163,7 @@ export function validateCapture(c) {
   for(const a of Object.keys(f.pre))for(const kind of ['persistent','transient'])if(!isDeepStrictEqual(Object.keys(f.pre[a][kind]).sort(),Object.keys(f.post[a][kind]).sort()))throw Error('missing frame slot domain');
   if(!['call','create'].includes(f.kind)||typeof f.delegatecall!=='boolean'||typeof f.isStatic!=='boolean'||!(f.codeAddress===null||ADDRESS.test(f.codeAddress))||!(f.createdAddress===null||ADDRESS.test(f.createdAddress))||f.kind==='call'&&f.createdAddress!==null)throw Error('missing/malformed frame context');
   if(!number(f.steps)||!ADDRESS.test(f.caller)||!(f.address===null||ADDRESS.test(f.address))||!BYTES.test(f.input)||!/^\d+$/.test(f.value)||!plain(f.output)||!BYTES.test(f.output.bytes)||!(f.output.exception===null||typeof f.output.exception==='string'))throw Error('malformed frame evidence');
+  if(f.output.logStatus==='captured'){if(!Array.isArray(f.output.logs)||!f.output.logs.every(l=>l&&ADDRESS.test(l.emitter)&&Array.isArray(l.topics)&&l.topics.every(t=>WORD.test(t))&&BYTES.test(l.data)))throw Error('missing/malformed frame logs');}else if(f.output.logStatus!=='not-provided'||f.steps!==0||typeof f.output.logReason!=='string')throw Error('missing frame logs');
   const m=f.memory;if(!m)throw Error('missing memory');
   if(m.status==='captured'){if(!number(m.allocatedBytes)||m.allocatedBytes%32||!BYTES.test(m.bytes)||hexToBytes(m.bytes).length!==m.allocatedBytes||m.phase!=='after-interpreter')throw Error('malformed final memory');}
   else if(m.status!=='not-executed'||f.steps!==0||typeof m.reason!=='string')throw Error('missing executed memory');
@@ -167,10 +171,18 @@ export function validateCapture(c) {
   if(!Array.isArray(f.regions))throw Error('missing memory regions');let step=0;
   for(const r of f.regions){if(!number(r.step)||r.step<=step||r.step>f.steps||!number(r.pc)||r.phase!=='before-opcode'||!/^\d+$/.test(r.offset)||!/^\d+$/.test(r.length)||!number(r.allocatedBytes)||!BYTES.test(r.bytes)||hexToBytes(r.bytes).length!==r.allocatedBytes||!/^(LOG[0-4]|RETURN|REVERT)$/.test(r.opcode))throw Error('malformed/reordered memory region');step=r.step;}
  }
+ for(const o of c.operations)if(o.kind==='transient.clear'&&(!plain(o.value)||!Object.entries(o.value).every(([a,v])=>ADDRESS.test(a)&&plain(v)&&Object.entries(v).every(([k,b])=>WORD.test(k)&&typeof b==='string'&&BYTES.test(b)&&hexToBytes(b).length<=32))))throw Error('malformed transient clear payload');
  const root=c.frames[0];
  if(root.caller!==c.request.caller||root.input!==c.request.input||root.value!==c.request.value||root.kind!==(c.request.to?'call':'create')||c.request.to&&root.address!==c.request.to||!isDeepStrictEqual(root.post,c.post))throw Error('inconsistent root request/world');
  for(const [i,o]of c.operations.entries())if(o.sequence!==i||!(o.frame===null||c.frames[o.frame])||typeof o.kind!=='string'||!(o.address===null||domains.includes(o.address))||!(o.slot===null||WORD.test(o.slot)))throw Error('malformed/reordered state operation');
- for(const a of c.accesses)if(!number(a.count)||!a.count||typeof a.kind!=='string'||!(a.address===null||domains.includes(a.address))||!(a.slot===null||WORD.test(a.slot)))throw Error('malformed access evidence');
+ for(const a of c.accesses)if(!(a.frame===null||c.frames[a.frame])||!number(a.count)||!a.count||typeof a.kind!=='string'||!(a.address===null||domains.includes(a.address))||!(a.slot===null||WORD.test(a.slot)))throw Error('malformed access evidence');
+ for(const a of [...c.accesses,...c.operations])if(a.address!==null&&a.frame!==null)for(const phase of ['pre','post'])if(!c.frames[a.frame][phase][a.address])throw Error('accessed account missing from frame domain');
+ for(const a of [...c.accesses,...c.operations])if(a.slot!==null) {
+  const kind=['getStorage','putStorage'].includes(a.kind)?'persistent':['transient.get','transient.put'].includes(a.kind)?'transient':null;
+  const domain=c.domain.find(d=>d.address===a.address);
+  if(!kind||!domain?.[kind].includes(a.slot))throw Error('accessed slot missing from declared domain');
+  if(a.frame!==null)for(const phase of ['pre','post'])if(!Object.hasOwn(c.frames[a.frame][phase][a.address]?.[kind]??{},a.slot))throw Error('accessed slot missing from frame domain');
+ }
  return c;
 }
 /** Independent controlled-fixture assertions; exact fields/regions only.
@@ -178,16 +190,53 @@ export function validateCapture(c) {
 export function compareState(c,oracle,aliases={}) {
  try {validateCapture(c);}catch(e){return{status:'blocked',reason:e.message};}
  if(oracle===null||oracle===undefined)return {status:'pending',reason:'no independent state/memory oracle'};
- if(!plain(oracle)||Object.keys(oracle).some(k=>!['accounts','slots','memory','buffers'].includes(k))||!['accounts','slots','memory','buffers'].some(k=>Array.isArray(oracle[k])&&oracle[k].length)||['accounts','slots','memory','buffers'].some(k=>oracle[k]!==undefined&&!Array.isArray(oracle[k])))return{status:'blocked',reason:'malformed/empty state oracle'};
+ if(!plain(oracle)||Object.keys(oracle).some(k=>!['accounts','slots','memory','buffers','slotMaps','frames','logs','installations','operations'].includes(k))||!['accounts','slots','memory','buffers','slotMaps','frames','logs','installations','operations'].some(k=>Array.isArray(oracle[k])&&oracle[k].length)||['accounts','slots','memory','buffers','slotMaps','frames','logs','installations','operations'].some(k=>oracle[k]!==undefined&&!Array.isArray(oracle[k])))return{status:'blocked',reason:'malformed/empty state oracle'};
  const differences=[],resolve=a=>aliases[a]??a;
  const validAddress=a=>typeof a==='string'&&ADDRESS.test(resolve(a));
  const keys=(o,allowed)=>plain(o)&&Object.keys(o).every(k=>allowed.includes(k));
  for(const e of oracle.accounts??[]) {
   if(!keys(e,['phase','address','fields'])||!['pre','post'].includes(e.phase)||!validAddress(e.address)||!plain(e.fields)||!Object.keys(e.fields).length)return{status:'blocked',reason:'malformed/empty account oracle'};
-  for(const [k,v]of Object.entries(e.fields))if(!['exists','balance','nonce','code','codeSha256'].includes(k)||(k==='exists'?typeof v!=='boolean':k==='code'?!BYTES.test(v):k==='codeSha256'?!/^[0-9a-f]{64}$/.test(v):typeof v!=='string'||!/^\d+$/.test(v)))return{status:'blocked',reason:'malformed account field oracle'};
+  for(const [k,v]of Object.entries(e.fields))if(!['exists','balance','nonce','code','codeSha256','hasCode'].includes(k)||(['exists','hasCode'].includes(k)?typeof v!=='boolean':k==='code'?!BYTES.test(v):k==='codeSha256'?!/^[0-9a-f]{64}$/.test(v):typeof v!=='string'||!/^\d+$/.test(v)))return{status:'blocked',reason:'malformed account field oracle'};
  }
  for(const e of oracle.slots??[])if(!keys(e,['phase','address','kind','slot','value'])||!['pre','post'].includes(e.phase)||!validAddress(e.address)||!['persistent','transient'].includes(e.kind)||!WORD.test(e.slot)||!WORD.test(e.value))return{status:'blocked',reason:'malformed slot oracle'};
- for(const e of oracle.memory??[])if(!keys(e,['frame','depth','exception','at','offset','bytes','count'])||e.frame===undefined&&e.depth===undefined||e.frame!==undefined&&!number(e.frame)||e.depth!==undefined&&!number(e.depth)||e.count!==undefined&&(!number(e.count)||!e.count)||e.exception!==undefined&&![null,'revert','out of gas','stack overflow'].includes(e.exception))return{status:'blocked',reason:'malformed memory selector'};
+ for(const e of oracle.memory??[])if(!keys(e,['frame','depth','exception','at','offset','bytes','count','occurrence','relativeOffset','windowLength','regionOffset'])||e.frame===undefined&&e.depth===undefined||e.frame!==undefined&&!number(e.frame)||e.depth!==undefined&&!number(e.depth)||e.count!==undefined&&(!number(e.count)||!e.count)||e.exception!==undefined&&![null,'revert','out of gas','stack overflow'].includes(e.exception))return{status:'blocked',reason:'malformed memory selector'};
+ for(const e of oracle.memory??[])if(e.occurrence!==undefined&&(!number(e.occurrence)||!number(e.count)||e.count<1||e.occurrence>=e.count)||e.relativeOffset!==undefined&&typeof e.relativeOffset!=='boolean'||e.windowLength!==undefined&&!number(e.windowLength)||e.regionOffset!==undefined&&(typeof e.regionOffset!=='string'||!/^\d+$/.test(e.regionOffset)))return{status:'blocked',reason:'malformed memory window selector'};
+ for(const e of oracle.slotMaps??[])if(!keys(e,['phase','address','kind','value'])||!['pre','post'].includes(e.phase)||!validAddress(e.address)||!['persistent','transient'].includes(e.kind)||!plain(e.value)||!Object.entries(e.value).every(([k,v])=>WORD.test(k)&&WORD.test(v)))return{status:'blocked',reason:'malformed slot-map oracle'};
+ for(const e of oracle.slotMaps??[]) {
+  const value=c[e.phase]?.[resolve(e.address)]?.[e.kind];if(!plain(value))return{status:'blocked',reason:'missing slot-map evidence'};
+  if(!isDeepStrictEqual(value,e.value))differences.push('slotMap/'+e.phase+'/'+e.address+'/'+e.kind);
+ }
+ const frameFields=['kind','address','caller','codeAddress','createdAddress','depth','parent','delegatecall','isStatic','value','inputSignature','exception','bytes'];
+ if(oracle.frames) {
+  if(!oracle.frames.length)return{status:'blocked',reason:'empty frame oracle'};
+  if(c.frames.length!==oracle.frames.length)differences.push('frame-count');
+  for(const [index,e]of oracle.frames.entries()) {
+   if(!keys(e,['frame','fields'])||e.frame!==index||!plain(e.fields)||!['kind','address','caller','depth','parent','exception'].every(k=>Object.hasOwn(e.fields,k)))return{status:'blocked',reason:'malformed/partial frame oracle'};
+   for(const [k,v]of Object.entries(e.fields)) {
+    if(!frameFields.includes(k)||['address','caller','codeAddress','createdAddress'].includes(k)&&!(v===null&&['codeAddress','createdAddress'].includes(k))&&!validAddress(v)||k==='kind'&&!['call','create'].includes(v)||['depth','parent'].includes(k)&&!(k==='parent'&&v===null)&&!number(v)||['delegatecall','isStatic'].includes(k)&&typeof v!=='boolean'||k==='value'&&(typeof v!=='string'||!/^\d+$/.test(v))||k==='exception'&&![null,'revert','out of gas','stack overflow'].includes(v)||k==='bytes'&&!BYTES.test(v)||k==='inputSignature'&&(typeof v!=='string'||!/^\w+\(\)$/.test(v)))return{status:'blocked',reason:'malformed frame field oracle'};
+    const f=c.frames[e.frame];if(!f)return{status:'blocked',reason:'missing requested frame'};
+    const actual=['bytes','exception'].includes(k)?f.output[k]:k==='inputSignature'?f.input:f[k];
+    const expected=['address','caller','codeAddress','createdAddress'].includes(k)?(v===null?null:resolve(v)):k==='inputSignature'?hex(keccak_256(new TextEncoder().encode(v)).slice(0,4)):v;
+    if(!isDeepStrictEqual(actual,expected))differences.push('frame/'+e.frame+'/'+k);
+   }
+  }
+ }
+ for(const e of oracle.logs??[]) {
+  if(!keys(e,['frame','expected'])||!number(e.frame)||!Array.isArray(e.expected)||!e.expected.every(l=>keys(l,['emitter','topics','data'])&&validAddress(l.emitter)&&Array.isArray(l.topics)&&l.topics.every(t=>WORD.test(t))&&BYTES.test(l.data)))return{status:'blocked',reason:'malformed log oracle'};
+  const f=c.frames[e.frame];if(f?.output.logStatus!=='captured')return{status:'blocked',reason:'missing frame log evidence'};
+  if(!isDeepStrictEqual(f.output.logs,e.expected.map(l=>({...l,emitter:resolve(l.emitter)}))))differences.push('logs/'+e.frame);
+ }
+ for(const e of oracle.installations??[]) {
+  if(!keys(e,['frame','address'])||!number(e.frame)||!validAddress(e.address))return{status:'blocked',reason:'malformed installation oracle'};
+  const f=c.frames[e.frame],a=resolve(e.address),installed=f?.post[a]?.code,final=c.post[a]?.code;
+  if(!f||installed===undefined||final===undefined)return{status:'blocked',reason:'missing installation evidence'};
+  if(f.kind!=='create'||f.createdAddress!==a||f.output.exception!==null||f.output.bytes==='0x'||installed!==f.output.bytes||final!==installed)differences.push('installation/'+e.frame);
+ }
+ for(const e of oracle.operations??[]) {
+  if(!keys(e,['kind','frame','address','slot','value','contains','count'])||!['putStorage','transient.put','transient.clear','revert','transient.revert'].includes(e.kind)||!number(e.count)||!e.count||e.frame!==undefined&&!number(e.frame)||e.address!==undefined&&!validAddress(e.address)||e.slot!==undefined&&!WORD.test(e.slot)||e.value!==undefined&&!WORD.test(e.value)||e.contains!==undefined&&(!Array.isArray(e.contains)||!e.contains.length||!e.contains.every(x=>keys(x,['address','slot','value'])&&validAddress(x.address)&&WORD.test(x.slot)&&WORD.test(x.value))))return{status:'blocked',reason:'malformed operation oracle'};
+  const matches=c.operations.filter(o=>o.kind===e.kind&&(e.frame===undefined||o.frame===e.frame)&&(e.address===undefined||o.address===resolve(e.address))&&(e.slot===undefined||o.slot===e.slot)&&(e.value===undefined||o.value===e.value)&&(!e.contains||e.contains.every(x=>typeof o.value?.[resolve(x.address)]?.[x.slot]==='string'&&BYTES.test(o.value[resolve(x.address)][x.slot])&&word(hexToBytes(o.value[resolve(x.address)][x.slot]))===x.value)));
+  if(matches.length!==e.count)differences.push('operations/'+e.kind);
+ }
  for(const e of oracle.buffers??[])if(!keys(e,['frame','bytes'])||!number(e.frame)||!BYTES.test(e.bytes))return{status:'blocked',reason:'malformed returndata oracle'};
  for(const e of oracle.buffers??[]) {
   const buffer=c.frames[e.frame]?.lastCallReturnData;
@@ -197,18 +246,24 @@ export function compareState(c,oracle,aliases={}) {
  for(const e of oracle.accounts??[]) {
   const w=e.phase==='pre'?c.pre:e.phase==='post'?c.post:null,a=w?.[resolve(e.address)];
   if(!a)return {status:'blocked',reason:'missing requested account/phase'};
-  for(const [k,v]of Object.entries(e.fields))if(!Object.hasOwn(a,k))return{status:'blocked',reason:'missing account field'};else if(!isDeepStrictEqual(a[k],v))differences.push(e.phase+'/'+e.address+'/'+k);
+  for(const [k,v]of Object.entries(e.fields))if(k==='hasCode'?!isDeepStrictEqual(a.code!=='0x',v):!Object.hasOwn(a,k)) {if(k==='hasCode')differences.push(e.phase+'/'+e.address+'/'+k);else return{status:'blocked',reason:'missing account field'};}else if(k!=='hasCode'&&!isDeepStrictEqual(a[k],v))differences.push(e.phase+'/'+e.address+'/'+k);
  }
  for(const e of oracle.slots??[]) {
   const w=e.phase==='pre'?c.pre:e.phase==='post'?c.post:null,v=w?.[resolve(e.address)]?.[e.kind]?.[e.slot];
   if(v===undefined)return{status:'blocked',reason:'missing requested slot'};if(v!==e.value)differences.push(e.phase+'/'+e.address+'/'+e.kind+'/'+e.slot);
  }
  for(const e of oracle.memory??[]) {
-  if(!number(e.offset)||!BYTES.test(e.bytes)||e.bytes==='0x'||!(e.at==='final'||/^(LOG[0-4]|RETURN|REVERT)$/.test(e.at)))return{status:'blocked',reason:'malformed memory oracle'};
+  if(!number(e.offset)||!BYTES.test(e.bytes)||e.bytes==='0x'&&!(e.windowLength===0&&e.relativeOffset===true)||!(e.at==='final'||/^(LOG[0-4]|RETURN|REVERT)$/.test(e.at)))return{status:'blocked',reason:'malformed memory oracle'};
   const frames=c.frames.filter(f=>(e.frame===undefined||f.id===e.frame)&&(e.depth===undefined||f.depth===e.depth)&&(e.exception===undefined||f.output.exception===e.exception));
   const regions=frames.flatMap(f=>e.at==='final'&&f.memory.status==='captured'?[f.memory]:f.regions.filter(r=>r.opcode===e.at));
   if(!regions.length)return{status:'blocked',reason:'missing requested memory frame/region'};
-  if(regions.length!==(e.count??1)||!regions.every(r=>hex(hexToBytes(r.bytes).slice(e.offset,e.offset+hexToBytes(e.bytes).length))===e.bytes))differences.push('memory/'+e.at+'/'+e.offset);
+  if(regions.length!==(e.count??1)){differences.push('memory-count/'+e.at);continue;}
+  const selected=e.occurrence===undefined?regions:[regions[e.occurrence]];
+  for(const r of selected) {
+   if(e.windowLength!==undefined&&r.length!==String(e.windowLength)||e.regionOffset!==undefined&&r.offset!==e.regionOffset){differences.push('memory-operands/'+e.at);continue;}
+   const start=e.offset+(e.relativeOffset?Number(r.offset):0);if(!number(start)||start+hexToBytes(e.bytes).length>r.allocatedBytes)return{status:'blocked',reason:'missing captured memory window'};
+   if(hex(hexToBytes(r.bytes).slice(start,start+hexToBytes(e.bytes).length))!==e.bytes)differences.push('memory/'+e.at+'/'+(e.occurrence??'all'));
+  }
  }
  return {status:differences.length?'mismatch':'match',differences};
 }
@@ -217,6 +272,7 @@ export function compareState(c,oracle,aliases={}) {
 export function validateCallCapture(c,actual,expected={}) {
  validateCapture(c);
  const root=c.frames[0];
+ if(root.output.logStatus!=='captured'||!isDeepStrictEqual(root.output.logs,actual?.rawLogs??actual?.logs))throw Error('capture/log result mismatch');
  if(!actual||!actual.metrics||root.output.bytes!==actual.returnData||root.output.exception!==actual.exception||actual.failed!==(actual.exception!==null)||c.frames.reduce((n,f)=>n+f.steps,0)!==actual.metrics.steps)throw Error('capture/result mismatch');
  for(const [key,value]of Object.entries(expected))if((key==='transaction'?c.transaction:c.request[key])!==value)throw Error('capture/call identity mismatch: '+key);
  return c;

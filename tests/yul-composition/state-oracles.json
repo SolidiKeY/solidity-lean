@@ -31,7 +31,11 @@
           "bytes": "0x000000000000000000000000000000000000000000000000000000000000002a"
         }
       ]
-    }
+    },
+    "phase": "runtime",
+    "premises": [
+      "Unchanged fixture source and original expected outcomes; fresh reference machine, caller nonce0, zero call value, runCall without transaction fee accounting."
+    ]
   },
   {
     "id": "try-catch",
@@ -57,7 +61,11 @@
           "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
         }
       ]
-    }
+    },
+    "phase": "runtime",
+    "premises": [
+      "Unchanged fixture source and original expected outcomes; fresh reference machine, caller nonce0, zero call value, runCall without transaction fee accounting."
+    ]
   },
   {
     "id": "modifiers",
@@ -83,7 +91,11 @@
           "value": "0x0000000000000000000000000000000000000000000000000000000000000003"
         }
       ]
-    }
+    },
+    "phase": "runtime",
+    "premises": [
+      "Unchanged fixture source and original expected outcomes; fresh reference machine, caller nonce0, zero call value, runCall without transaction fee accounting."
+    ]
   },
   {
     "id": "constructors",
@@ -107,6 +119,318 @@
           "kind": "persistent",
           "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
           "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      ]
+    },
+    "phase": "runtime",
+    "premises": [
+      "Unchanged fixture source and original expected outcomes; fresh reference machine, caller nonce0, zero call value, runCall without transaction fee accounting."
+    ]
+  },
+  {
+    "id": "mixed-logs",
+    "phase": "runtime",
+    "sourceSha256": "f6f0fc2a174ca1adced3e9f9e8004aee20b352c66965fb05e0641b31acb9e932",
+    "premises": [
+      "Assembly mstore(0,42),LOG0(0,32) precedes anonymous Solidity E(43). Each log encodes exactly one word; emitter is C, no storage/value writes. Addresses of compiler ABI buffers need not agree."
+    ],
+    "oracle": {
+      "accounts": [
+        {
+          "address": "self",
+          "phase": "post",
+          "fields": {
+            "exists": true,
+            "balance": "0",
+            "nonce": "1",
+            "hasCode": true
+          }
+        }
+      ],
+      "slotMaps": [
+        {
+          "address": "self",
+          "phase": "post",
+          "kind": "persistent",
+          "value": {}
+        }
+      ],
+      "logs": [
+        {
+          "frame": 0,
+          "expected": [
+            {
+              "emitter": "self",
+              "topics": [],
+              "data": "0x000000000000000000000000000000000000000000000000000000000000002a"
+            },
+            {
+              "emitter": "self",
+              "topics": [],
+              "data": "0x000000000000000000000000000000000000000000000000000000000000002b"
+            }
+          ]
+        }
+      ],
+      "memory": [
+        {
+          "frame": 0,
+          "at": "LOG0",
+          "count": 2,
+          "occurrence": 0,
+          "relativeOffset": true,
+          "windowLength": 32,
+          "offset": 0,
+          "bytes": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        },
+        {
+          "frame": 0,
+          "at": "LOG0",
+          "count": 2,
+          "occurrence": 1,
+          "relativeOffset": true,
+          "windowLength": 32,
+          "offset": 0,
+          "bytes": "0x000000000000000000000000000000000000000000000000000000000000002b"
+        }
+      ]
+    }
+  },
+  {
+    "id": "new-constructor",
+    "phase": "runtime",
+    "sourceSha256": "effd565ac252177a61ef8f47b8f69d4cf5f7b4f7fb58fe19226fdf50caef8135",
+    "premises": [
+      "Fresh C starts nonce1 (EIP161); first CREATE uses RLP(C,1), increments C to2; value0; D starts nonce1, stores42 in slot0; x() getter staticcall returns42. CREATE formula is predicted before execution, not read from createdAddress."
+    ],
+    "oracle": {
+      "accounts": [
+        {
+          "address": "self",
+          "phase": "pre",
+          "fields": {
+            "nonce": "1",
+            "balance": "0"
+          }
+        },
+        {
+          "address": "self",
+          "phase": "post",
+          "fields": {
+            "nonce": "2",
+            "balance": "0",
+            "exists": true,
+            "hasCode": true
+          }
+        },
+        {
+          "address": "caller",
+          "phase": "pre",
+          "fields": {
+            "nonce": "1",
+            "balance": "1000000000000000000000000000000"
+          }
+        },
+        {
+          "address": "caller",
+          "phase": "post",
+          "fields": {
+            "nonce": "2",
+            "balance": "1000000000000000000000000000000"
+          }
+        },
+        {
+          "address": "child",
+          "phase": "pre",
+          "fields": {
+            "exists": false,
+            "nonce": "0",
+            "balance": "0",
+            "code": "0x"
+          }
+        },
+        {
+          "address": "child",
+          "phase": "post",
+          "fields": {
+            "exists": true,
+            "nonce": "1",
+            "balance": "0",
+            "hasCode": true
+          }
+        }
+      ],
+      "slots": [
+        {
+          "address": "child",
+          "phase": "pre",
+          "kind": "persistent",
+          "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "address": "child",
+          "phase": "post",
+          "kind": "persistent",
+          "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "fields": {
+            "kind": "call",
+            "address": "self",
+            "caller": "caller",
+            "depth": 0,
+            "parent": null,
+            "exception": null,
+            "bytes": "0x000000000000000000000000000000000000000000000000000000000000002a"
+          }
+        },
+        {
+          "frame": 1,
+          "fields": {
+            "kind": "create",
+            "address": "child",
+            "caller": "self",
+            "createdAddress": "child",
+            "depth": 1,
+            "parent": 0,
+            "exception": null,
+            "value": "0"
+          }
+        },
+        {
+          "frame": 2,
+          "fields": {
+            "kind": "call",
+            "address": "child",
+            "codeAddress": "child",
+            "caller": "self",
+            "depth": 1,
+            "parent": 0,
+            "isStatic": true,
+            "delegatecall": false,
+            "inputSignature": "x()",
+            "exception": null,
+            "bytes": "0x000000000000000000000000000000000000000000000000000000000000002a"
+          }
+        }
+      ],
+      "installations": [
+        {
+          "frame": 1,
+          "address": "child"
+        }
+      ]
+    }
+  },
+  {
+    "id": "constructor-failure",
+    "phase": "deployment",
+    "sourceSha256": "456893d76f6339eeb8df18009fa58b916e13c22dea5d07f7c16ee82adaf20536",
+    "premises": [
+      "Fresh root CREATE uses RLP(caller,0); runCall increments caller nonce outside message checkpoint. revert(0,0) returns empty bytes/logs and rolls back candidate account/code/storage. Candidate createdAddress returned by engine is diagnostic; no runTx deletion/finalization is asserted."
+    ],
+    "oracle": {
+      "accounts": [
+        {
+          "address": "self",
+          "phase": "pre",
+          "fields": {
+            "exists": false,
+            "nonce": "0",
+            "balance": "0",
+            "code": "0x"
+          }
+        },
+        {
+          "address": "self",
+          "phase": "post",
+          "fields": {
+            "exists": false,
+            "nonce": "0",
+            "balance": "0",
+            "code": "0x"
+          }
+        },
+        {
+          "address": "caller",
+          "phase": "pre",
+          "fields": {
+            "nonce": "0",
+            "balance": "1000000000000000000000000000000"
+          }
+        },
+        {
+          "address": "caller",
+          "phase": "post",
+          "fields": {
+            "nonce": "1",
+            "balance": "1000000000000000000000000000000"
+          }
+        }
+      ],
+      "slotMaps": [
+        {
+          "address": "self",
+          "phase": "post",
+          "kind": "persistent",
+          "value": {}
+        },
+        {
+          "address": "self",
+          "phase": "post",
+          "kind": "transient",
+          "value": {}
+        }
+      ],
+      "logs": [
+        {
+          "frame": 0,
+          "expected": []
+        }
+      ],
+      "frames": [
+        {
+          "frame": 0,
+          "fields": {
+            "kind": "create",
+            "address": "self",
+            "createdAddress": "self",
+            "caller": "caller",
+            "depth": 0,
+            "parent": null,
+            "exception": "revert",
+            "bytes": "0x",
+            "value": "0"
+          }
+        }
+      ],
+      "memory": [
+        {
+          "frame": 0,
+          "at": "REVERT",
+          "count": 1,
+          "relativeOffset": true,
+          "windowLength": 0,
+          "regionOffset": "0",
+          "offset": 0,
+          "bytes": "0x"
+        }
+      ],
+      "operations": [
+        {
+          "kind": "revert",
+          "frame": 0,
+          "count": 1
+        },
+        {
+          "kind": "transient.revert",
+          "frame": 0,
+          "count": 1
         }
       ]
     }

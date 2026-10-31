@@ -1,0 +1,467 @@
+[
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/slot_access.sol",
+    "sourceSha256": "7dbfe31b5976ee94c194baa2264a1ffa3c497c7cfab7132bd15a56ff665191a5",
+    "premises": [
+      "Mapping root0; data().slot explicitly keccak256(word1||word0), a at base,b at base+1. Ordered set4 changes a from0 to4, b remains0.",
+      "Fresh isolated reference machine/host account setup; CREATE(self)=RLP(sender,0) for this engine, not a C++ host-address correspondence claim."
+    ],
+    "calls": [
+      {
+        "signature": "get()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "mapping1",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        }
+      },
+      {
+        "signature": "mappingAccess(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "mapping1",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "mapping1next",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        }
+      },
+      {
+        "signature": "set(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "mapping1",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000004"
+            }
+          ]
+        }
+      },
+      {
+        "signature": "get()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "mapping1",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000004"
+            }
+          ]
+        }
+      },
+      {
+        "signature": "mappingAccess(uint256)",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "mapping1",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000004"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "mapping1next",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_memory_access.sol",
+    "sourceSha256": "99060126b0b6186cbe2937222b52387f21e2fce62454b7616ce8db5ea4c4fc46",
+    "premises": [
+      "Length5 byte array payload overwritten by mstore(x+32,ASCII32bytes); ABI returns offset32,length5,ASCII12345 padded. Compare only RETURN-relative window, no pointer identity.",
+      "Fresh isolated reference machine/host account setup; CREATE(self)=RLP(sender,0) for this engine, not a C++ host-address correspondence claim."
+    ],
+    "calls": [
+      {
+        "signature": "test()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 96,
+              "bytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000053132333435000000000000000000000000000000000000000000000000000000",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/optimize_memory_store_multi_block.sol",
+    "sourceSha256": "6d1c699dfd6b2e006e253b660652e5bf091a7fa92948b443df720409c24b7b09",
+    "premises": [
+      "f scratch mstore/mload returns0x42;g increases FMP by32 and returns true. Source has no persistent writes. RETURN-relative ABI windows only; no absolute allocation discipline asserted.",
+      "Fresh isolated reference machine/host account setup; CREATE(self)=RLP(sender,0) for this engine, not a C++ host-address correspondence claim."
+    ],
+    "calls": [
+      {
+        "signature": "f()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000042",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "signature": "g()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "RETURN",
+              "offset": 0,
+              "relativeOffset": true,
+              "windowLength": 32,
+              "bytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/optimize_memory_store_multi_block_bugreport.sol",
+    "sourceSha256": "9309b80d5fd62e8074efdf83b90acb7ad6bfce579422b1d984b6ba8297241595",
+    "premises": [
+      "x starts0,set5;reads sum10. mstore(1,0x123456789abcdef) produces exact original two-word LOG0 window at0. No observed value used as expected oracle.",
+      "Fresh isolated reference machine/host account setup; CREATE(self)=RLP(sender,0) for this engine, not a C++ host-address correspondence claim."
+    ],
+    "calls": [
+      {
+        "signature": "test()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": [
+                {
+                  "emitter": "self",
+                  "topics": [],
+                  "data": "0x000000000000000000000000000000000000000000000000000123456789abcdef00000000000000000000000000000000000000000000000000000000000000"
+                }
+              ]
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000005"
+            }
+          ],
+          "memory": [
+            {
+              "frame": 0,
+              "at": "LOG0",
+              "relativeOffset": true,
+              "regionOffset": "0",
+              "windowLength": 64,
+              "count": 1,
+              "offset": 0,
+              "bytes": "0x000000000000000000000000000000000000000000000000000123456789abcdef00000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_creation.sol",
+    "sourceSha256": "607ae272b9c6b463d375646d73a95187d2dcc42365d924bdd14a40831d436ae5",
+    "premises": [
+      "Constructor TSTORE0=42,TLOAD verifies42. EIP1153/top-level engine cleanup resets it; expect actual put42 and pre-clear payload42, final0. No runTx finalization assertion.",
+      "Fresh isolated reference machine/host account setup; CREATE(self)=RLP(sender,0) for this engine, not a C++ host-address correspondence claim."
+    ],
+    "calls": [
+      {
+        "signature": "constructor()",
+        "oracle": {
+          "accounts": [
+            {
+              "address": "self",
+              "phase": "post",
+              "fields": {
+                "exists": true,
+                "balance": "0",
+                "nonce": "1"
+              }
+            }
+          ],
+          "logs": [
+            {
+              "frame": 0,
+              "expected": []
+            }
+          ],
+          "slots": [
+            {
+              "address": "self",
+              "phase": "pre",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "transient",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "slotMaps": [
+            {
+              "address": "self",
+              "phase": "post",
+              "kind": "persistent",
+              "value": {}
+            }
+          ],
+          "operations": [
+            {
+              "kind": "transient.put",
+              "frame": 0,
+              "address": "self",
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000002a",
+              "count": 1
+            },
+            {
+              "kind": "transient.clear",
+              "contains": [
+                {
+                  "address": "self",
+                  "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "value": "0x000000000000000000000000000000000000000000000000000000000000002a"
+                }
+              ],
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

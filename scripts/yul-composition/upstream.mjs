@@ -4,6 +4,7 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
+import {compareUpstreamState} from './oracles.mjs';
 import {capturedMachine,validateCapture,validateCallCapture} from './capture.mjs';
 import {parseFixture,withPreamble,runtimePipelines,revertBytes,abiType,evmCompatible} from '../solidity-upstream.mjs';
 import {INITIAL_GAS,STEP_LIMIT} from '../evm-reference/replay.mjs';
@@ -181,7 +182,7 @@ export async function runFixture(path,directory,compile,scanPolicy) {
     const artifact=output.contracts[fixture.mainSource][contract];
     let creates=false;walk(ast,n=>{if(n.nodeType==='NewExpression'||n.nodeType==='YulFunctionCall'&&['create','create2'].includes(n.functionName?.name))creates=true;});
     if(creates&&plan.calls.some(c=>artifact.abi.some(d=>d.type==='function'&&`${d.name}(${d.inputs.map(abiType).join(',')})`===c.signature&&d.outputs.some(o=>o.type==='address'))))throw Error('concrete creation-address oracle not adapted to upstream nonce convention');
-    v.creationSha256=sha(Buffer.from(artifact.evm.bytecode.object,'hex'));v.runtimeTemplateSha256=sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex'));Object.assign(v,await replay(artifact,plan));v.stateComparison={status:'pending',reason:'Original upstream expectations specify bytes/failure/logs; independent complete state/memory oracle absent'};
+    v.creationSha256=sha(Buffer.from(artifact.evm.bytecode.object,'hex'));v.runtimeTemplateSha256=sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex'));Object.assign(v,await replay(artifact,plan));v.stateComparison=compareUpstreamState(result,v,HOST.sender);
    }catch(e){v.reason=e.message;v.stack=e.stack;}
   }
  }catch(e){result.reason=e.message;result.stack=e.stack;}
@@ -214,9 +215,10 @@ export function validateFixtureEvidence(result,directory) {
    const input=fixtureInput(original,profile);
    if(!isDeepStrictEqual(input.settings,v.settings)||sha(JSON.stringify(input))!==v.inputSha256)throw Error('changed compiler settings/input hash');
   }
+  const requiredState=compareUpstreamState(result,v,HOST.sender);if(['blocked','mismatch'].includes(requiredState.status))throw Error('required upstream state control incomplete or wrong');
   const observations=v.observed;
   if(v.status==='working') {
-   if(v.stateComparison?.status!=='pending')throw Error('unproved upstream state comparison');
+   const state=compareUpstreamState(result,v,HOST.sender);if(!isDeepStrictEqual(state,v.stateComparison)||!['match','pending'].includes(state.status))throw Error('missing/stale or incorrect upstream state comparison');
    validateCapture(v.deployment?.capture);if(v.deployment.capture.transaction!==1)throw Error('deployment capture transaction');
    const d=v.deployment,a=d?.actual;
    validateCallCapture(d.capture,a,{transaction:1,input:d.requestData,value:plan.calls[0].constructor?plan.calls[0].value:'0',caller:HOST.sender,to:null});

@@ -1,14 +1,16 @@
 {
   "schema": 1,
   "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
-  "previousCheckpoint": "5d2025cfae09794e8f70784fca51d83da2f5239c",
-  "scope": "External touched-domain state/frame memory/register capture and independently controlled oracle comparisons only; no source/correspondence proof or untouched-world equivalence.",
+  "previousCheckpoint": "c8a35ef7134a6d3966d4afd2b7b531881141d6d1",
+  "scope": "Finite source-derived external state/window assertions and API-touched capture only; not whole-world/source correspondence.",
   "sourceHashes": {
-    "scripts/yul-composition/capture.mjs": "c6310778af6b8ebfc3ad5a9bb4191bc3aad2254497c0442b7af10a5617c36bb2",
-    "tests/yul-composition/state-oracles.json": "083c5a4aa64cf53579aa03c1fa4e469fc19b6b358054b803104c661df633cbb6"
+    "scripts/yul-composition/capture.mjs": "1ba884fa92dd9a5385d3613c8404e5543594c106ec27c8bac485eb9b48661728",
+    "scripts/yul-composition/oracles.mjs": "4277d6e0ec8c36fa49ef7edb32ea6d8d244bae41b321e812f56d1fa3850cd9b1",
+    "tests/yul-composition/state-oracles.json": "44782a1ec3dc372ee6228df202f0d9f5908350157b9402945bdd25ab839248b3",
+    "tests/yul-composition/upstream-state-oracles.json": "7d86a43e299005d43c52b5889a79ccb2082c6543eba1bee5ecd91574845df8d5"
   },
-  "originalReferenceReportSha256": "0183a26c65468d780c31e74a7fd1ed127d601eb43b9f96f9cd36555cef6c678c",
-  "originalReferenceProjection": "Exact unchanged fixture/profile/settings/inputHash/status/orderedCalls/failure/bytes/logs/metrics/gasTelemetry/cleanup evidence",
+  "originalReferenceReportSha256": "dc8a1a68fcdef255608bed1fe8a1cea1f04a8738ca5fe724cdf775615cc7108c",
+  "originalReferenceProjection": "Exact unchanged fixtures/settings/input hashes/profile statuses/ordered calls/actual bytes,failure,logs,metrics,gas telemetry/cleanup",
   "upstreamByteLogCounts": {
     "blocked": 21,
     "working": 227
@@ -28,101 +30,235 @@
       "id": "modifiers",
       "pipeline": "legacy",
       "optimized": false,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "modifiers",
       "pipeline": "legacy",
       "optimized": true,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "modifiers",
       "pipeline": "viaIR",
       "optimized": false,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "modifiers",
       "pipeline": "viaIR",
       "optimized": true,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "try-catch",
       "pipeline": "legacy",
       "optimized": false,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "try-catch",
       "pipeline": "legacy",
       "optimized": true,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "try-catch",
       "pipeline": "viaIR",
       "optimized": false,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "try-catch",
       "pipeline": "viaIR",
       "optimized": true,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "constructors",
       "pipeline": "legacy",
       "optimized": false,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "constructors",
       "pipeline": "legacy",
       "optimized": true,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "constructors",
       "pipeline": "viaIR",
       "optimized": false,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "constructors",
       "pipeline": "viaIR",
       "optimized": true,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "memory-storage-logs",
       "pipeline": "legacy",
       "optimized": false,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "memory-storage-logs",
       "pipeline": "legacy",
       "optimized": true,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "memory-storage-logs",
       "pipeline": "viaIR",
       "optimized": false,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     },
     {
       "id": "memory-storage-logs",
       "pipeline": "viaIR",
       "optimized": true,
-      "status": "match"
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "constructor-failure",
+      "pipeline": "legacy",
+      "optimized": false,
+      "status": "match",
+      "phase": "deployment",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "constructor-failure",
+      "pipeline": "legacy",
+      "optimized": true,
+      "status": "match",
+      "phase": "deployment",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "constructor-failure",
+      "pipeline": "viaIR",
+      "optimized": false,
+      "status": "match",
+      "phase": "deployment",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "constructor-failure",
+      "pipeline": "viaIR",
+      "optimized": true,
+      "status": "match",
+      "phase": "deployment",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "mixed-logs",
+      "pipeline": "legacy",
+      "optimized": false,
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "mixed-logs",
+      "pipeline": "legacy",
+      "optimized": true,
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "mixed-logs",
+      "pipeline": "viaIR",
+      "optimized": false,
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "mixed-logs",
+      "pipeline": "viaIR",
+      "optimized": true,
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "new-constructor",
+      "pipeline": "legacy",
+      "optimized": false,
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "new-constructor",
+      "pipeline": "legacy",
+      "optimized": true,
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "new-constructor",
+      "pipeline": "viaIR",
+      "optimized": false,
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
+    },
+    {
+      "id": "new-constructor",
+      "pipeline": "viaIR",
+      "optimized": true,
+      "status": "match",
+      "phase": "runtime",
+      "executionKind": "runCall"
     }
   ],
+  "upstreamStateProfiles": {
+    "not-executed": 21,
+    "pending": 212,
+    "match": 15
+  },
+  "upstreamStateCalls": 30,
   "kernelObligationsClosed": 0,
-  "wholeUpstreamStateComparison": "pending independent expected source/target state oracles",
+  "wholeUpstreamStateComparison": "Finite5fixture assertions cover15profiles/30calls;212workingprofiles still lack independent state oracles; no total-state proof.",
   "fixtures": [
     {
       "path": "test/libsolidity/semanticTests/inlineAssembly/basefee_berlin_function.sol",
@@ -137,7 +273,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -148,7 +286,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -159,7 +299,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         }
       ]
     },
@@ -176,7 +318,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -187,7 +331,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -198,7 +344,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         }
       ]
     },
@@ -215,7 +363,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -226,7 +376,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -237,7 +389,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -254,7 +408,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -265,7 +421,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -276,7 +434,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -293,7 +453,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -304,7 +466,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -315,7 +479,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         }
       ]
     },
@@ -332,7 +498,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -343,7 +511,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -354,7 +524,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -371,7 +543,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -382,7 +556,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -393,7 +569,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -410,7 +588,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -421,7 +601,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -432,7 +614,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -449,7 +633,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -460,7 +646,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -471,7 +659,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -488,7 +678,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -499,7 +691,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -510,7 +704,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -527,7 +723,9 @@
           "frames": 7,
           "memoryFrames": 7,
           "lastCallBufferFrames": 7,
-          "independentStateComparison": "pending"
+          "frameLogs": 7,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -538,7 +736,9 @@
           "frames": 7,
           "memoryFrames": 7,
           "lastCallBufferFrames": 7,
-          "independentStateComparison": "pending"
+          "frameLogs": 7,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -549,7 +749,9 @@
           "frames": 7,
           "memoryFrames": 7,
           "lastCallBufferFrames": 7,
-          "independentStateComparison": "pending"
+          "frameLogs": 7,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -566,7 +768,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -577,7 +781,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -588,7 +794,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -605,7 +813,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -616,7 +826,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -627,7 +839,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -644,7 +858,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -655,7 +871,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -666,7 +884,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -683,7 +903,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -694,7 +916,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -705,7 +929,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -722,7 +948,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -733,7 +961,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -744,7 +974,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -761,7 +993,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -772,7 +1006,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -783,7 +1019,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -800,7 +1038,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -811,7 +1051,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -822,7 +1064,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         }
       ]
     },
@@ -839,7 +1083,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -850,7 +1096,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -861,7 +1109,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -878,7 +1128,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -889,7 +1141,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -900,7 +1154,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -917,7 +1173,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -928,7 +1186,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -939,7 +1199,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         }
       ]
     },
@@ -956,7 +1218,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -967,7 +1231,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -978,7 +1244,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -995,7 +1263,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1006,7 +1276,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1017,7 +1289,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1034,7 +1308,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1045,7 +1321,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1056,7 +1334,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1073,7 +1353,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1084,7 +1366,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1095,7 +1379,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1112,7 +1398,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1123,7 +1411,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1134,7 +1424,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1151,7 +1443,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1162,7 +1456,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1173,7 +1469,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1190,7 +1488,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1201,7 +1501,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1212,7 +1514,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1229,7 +1533,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1240,7 +1546,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1251,7 +1559,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1268,7 +1578,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1279,7 +1591,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1290,7 +1604,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1307,7 +1623,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1318,7 +1636,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1329,7 +1649,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1346,7 +1668,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1357,7 +1681,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1368,7 +1694,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1385,7 +1713,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1396,7 +1726,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1407,7 +1739,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1424,7 +1758,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1435,7 +1771,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1446,7 +1784,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1463,7 +1803,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1474,7 +1816,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1485,7 +1829,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1502,7 +1848,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1513,7 +1861,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1524,7 +1874,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1541,7 +1893,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1552,7 +1906,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1563,7 +1919,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1580,7 +1938,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1591,7 +1951,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1602,7 +1964,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1619,7 +1983,16 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ir",
@@ -1630,7 +2003,16 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ssaCFGOptimized",
@@ -1641,7 +2023,16 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         }
       ]
     },
@@ -1658,7 +2049,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1669,7 +2062,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1680,7 +2075,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1697,7 +2094,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1708,7 +2107,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1719,7 +2120,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1736,7 +2139,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1747,7 +2152,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1758,7 +2165,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1775,7 +2184,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1786,7 +2197,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1797,7 +2210,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1814,7 +2229,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1825,7 +2242,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1836,7 +2255,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1853,7 +2274,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1864,7 +2287,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1875,7 +2300,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1892,7 +2319,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1903,7 +2332,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1914,7 +2345,9 @@
           "frames": 5,
           "memoryFrames": 5,
           "lastCallBufferFrames": 5,
-          "independentStateComparison": "pending"
+          "frameLogs": 5,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1931,7 +2364,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1942,7 +2377,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1953,7 +2390,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -1970,7 +2409,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -1981,7 +2422,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -1992,7 +2435,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2009,7 +2454,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2020,7 +2467,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2031,7 +2480,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2048,7 +2499,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2059,7 +2512,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2070,7 +2525,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2087,7 +2544,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2098,7 +2557,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2109,7 +2570,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2126,7 +2589,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2137,7 +2602,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2148,7 +2615,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2165,7 +2634,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2176,7 +2647,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2187,7 +2660,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2204,7 +2679,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2215,7 +2692,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2226,7 +2705,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2243,7 +2724,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2254,7 +2737,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2265,7 +2750,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "irOptimized",
@@ -2276,7 +2763,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "legacyOptimized",
@@ -2287,7 +2776,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2304,7 +2795,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2315,7 +2808,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2326,7 +2821,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2343,7 +2840,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2354,7 +2853,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2365,7 +2866,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2382,7 +2885,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2393,7 +2898,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2404,7 +2911,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2421,7 +2930,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2432,7 +2943,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2443,7 +2956,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2460,7 +2975,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2471,7 +2988,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2482,7 +3001,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2499,7 +3020,22 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ir",
@@ -2510,7 +3046,22 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ssaCFGOptimized",
@@ -2521,7 +3072,22 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "f()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "g()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         }
       ]
     },
@@ -2538,7 +3104,16 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ir",
@@ -2549,7 +3124,16 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ssaCFGOptimized",
@@ -2560,7 +3144,16 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "test()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         }
       ]
     },
@@ -2577,7 +3170,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2588,7 +3183,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2599,7 +3196,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2616,7 +3215,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2627,7 +3228,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2638,7 +3241,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2655,7 +3260,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2666,7 +3273,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2677,7 +3286,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2694,7 +3305,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2705,7 +3318,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2716,7 +3331,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2733,7 +3350,40 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "get()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "mappingAccess(uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "set(uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "get()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "mappingAccess(uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ir",
@@ -2744,7 +3394,40 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "get()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "mappingAccess(uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "set(uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "get()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "mappingAccess(uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ssaCFGOptimized",
@@ -2755,7 +3438,40 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "get()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 1,
+              "signature": "mappingAccess(uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 2,
+              "signature": "set(uint256)",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 3,
+              "signature": "get()",
+              "status": "match",
+              "differences": []
+            },
+            {
+              "index": 4,
+              "signature": "mappingAccess(uint256)",
+              "status": "match",
+              "differences": []
+            }
+          ]
         }
       ]
     },
@@ -2772,7 +3488,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2783,7 +3501,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2794,7 +3514,9 @@
           "frames": 4,
           "memoryFrames": 4,
           "lastCallBufferFrames": 4,
-          "independentStateComparison": "pending"
+          "frameLogs": 4,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2811,7 +3533,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2822,7 +3546,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2833,7 +3559,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2850,7 +3578,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2861,7 +3591,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2872,7 +3604,9 @@
           "frames": 0,
           "memoryFrames": 0,
           "lastCallBufferFrames": 0,
-          "independentStateComparison": "not-executed"
+          "frameLogs": 0,
+          "independentStateComparison": "not-executed",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2889,7 +3623,16 @@
           "frames": 1,
           "memoryFrames": 1,
           "lastCallBufferFrames": 1,
-          "independentStateComparison": "pending"
+          "frameLogs": 1,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "constructor()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ir",
@@ -2900,7 +3643,16 @@
           "frames": 1,
           "memoryFrames": 1,
           "lastCallBufferFrames": 1,
-          "independentStateComparison": "pending"
+          "frameLogs": 1,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "constructor()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         },
         {
           "name": "ssaCFGOptimized",
@@ -2911,7 +3663,16 @@
           "frames": 1,
           "memoryFrames": 1,
           "lastCallBufferFrames": 1,
-          "independentStateComparison": "pending"
+          "frameLogs": 1,
+          "independentStateComparison": "match",
+          "independentStateCalls": [
+            {
+              "index": 0,
+              "signature": "constructor()",
+              "status": "match",
+              "differences": []
+            }
+          ]
         }
       ]
     },
@@ -2928,7 +3689,9 @@
           "frames": 18,
           "memoryFrames": 18,
           "lastCallBufferFrames": 18,
-          "independentStateComparison": "pending"
+          "frameLogs": 18,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -2939,7 +3702,9 @@
           "frames": 18,
           "memoryFrames": 18,
           "lastCallBufferFrames": 18,
-          "independentStateComparison": "pending"
+          "frameLogs": 18,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -2950,7 +3715,9 @@
           "frames": 18,
           "memoryFrames": 18,
           "lastCallBufferFrames": 18,
-          "independentStateComparison": "pending"
+          "frameLogs": 18,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "irOptimized",
@@ -2961,7 +3728,9 @@
           "frames": 18,
           "memoryFrames": 18,
           "lastCallBufferFrames": 18,
-          "independentStateComparison": "pending"
+          "frameLogs": 18,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "legacyOptimized",
@@ -2972,7 +3741,9 @@
           "frames": 18,
           "memoryFrames": 18,
           "lastCallBufferFrames": 18,
-          "independentStateComparison": "pending"
+          "frameLogs": 18,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -2989,7 +3760,9 @@
           "frames": 19,
           "memoryFrames": 19,
           "lastCallBufferFrames": 19,
-          "independentStateComparison": "pending"
+          "frameLogs": 19,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -3000,7 +3773,9 @@
           "frames": 19,
           "memoryFrames": 19,
           "lastCallBufferFrames": 19,
-          "independentStateComparison": "pending"
+          "frameLogs": 19,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -3011,7 +3786,9 @@
           "frames": 19,
           "memoryFrames": 19,
           "lastCallBufferFrames": 19,
-          "independentStateComparison": "pending"
+          "frameLogs": 19,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -3028,7 +3805,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -3039,7 +3818,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -3050,7 +3831,9 @@
           "frames": 6,
           "memoryFrames": 6,
           "lastCallBufferFrames": 6,
-          "independentStateComparison": "pending"
+          "frameLogs": 6,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -3067,7 +3850,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -3078,7 +3863,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -3089,7 +3876,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -3106,7 +3895,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -3117,7 +3908,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -3128,7 +3921,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -3145,7 +3940,9 @@
           "frames": 11,
           "memoryFrames": 11,
           "lastCallBufferFrames": 11,
-          "independentStateComparison": "pending"
+          "frameLogs": 11,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -3156,7 +3953,9 @@
           "frames": 11,
           "memoryFrames": 11,
           "lastCallBufferFrames": 11,
-          "independentStateComparison": "pending"
+          "frameLogs": 11,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -3167,7 +3966,9 @@
           "frames": 11,
           "memoryFrames": 11,
           "lastCallBufferFrames": 11,
-          "independentStateComparison": "pending"
+          "frameLogs": 11,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "irOptimized",
@@ -3178,7 +3979,9 @@
           "frames": 11,
           "memoryFrames": 11,
           "lastCallBufferFrames": 11,
-          "independentStateComparison": "pending"
+          "frameLogs": 11,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "legacyOptimized",
@@ -3189,7 +3992,9 @@
           "frames": 11,
           "memoryFrames": 11,
           "lastCallBufferFrames": 11,
-          "independentStateComparison": "pending"
+          "frameLogs": 11,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -3206,7 +4011,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -3217,7 +4024,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -3228,7 +4037,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -3245,7 +4056,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -3256,7 +4069,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -3267,7 +4082,9 @@
           "frames": 2,
           "memoryFrames": 2,
           "lastCallBufferFrames": 2,
-          "independentStateComparison": "pending"
+          "frameLogs": 2,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     },
@@ -3284,7 +4101,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ir",
@@ -3295,7 +4114,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "ssaCFGOptimized",
@@ -3306,7 +4127,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "irOptimized",
@@ -3317,7 +4140,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         },
         {
           "name": "legacyOptimized",
@@ -3328,7 +4153,9 @@
           "frames": 3,
           "memoryFrames": 3,
           "lastCallBufferFrames": 3,
-          "independentStateComparison": "pending"
+          "frameLogs": 3,
+          "independentStateComparison": "pending",
+          "independentStateCalls": []
         }
       ]
     }

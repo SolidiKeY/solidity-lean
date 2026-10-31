@@ -388,3 +388,110 @@ Baseline docs/G03 exit1 failures are preserved; scoped new paths and ownership
 are checked without repairing unrelated history. Existing YQ1–YQ7 decisions,
 admission refusals and canonical-rethrow exception remain unchanged. No new
 semantic/profile decision is needed for this external observation checkpoint.
+
+## Finite state oracles — 2026-10-31
+
+This reviewed checkpoint continues `c8a35ef7134a6d3966d4afd2b7b531881141d6d1`
+in the same VM/branch. All earlier patch/bundle/handoff/evidence manifests remain
+unchanged. New committed head, commands and checksums are recorded after commit
+at `/workspace/vy5-composition/oracles-20261031/handoff.json`. The existing
+full-assignment goal stays blocked, without reset/recreation/reactivation.
+
+Independent expectations were recorded before the new control executions in
+`oracles-20261031/before-execution-premises.json`. The unchanged fixture sources
+and original expected verdicts remain authoritative. The
+[seven-row local registry](../../tests/yul-composition/state-oracles.json) and
+[five-fixture upstream registry](../../tests/yul-composition/upstream-state-oracles.json)
+carry source hashes and explicit premises; frozen registry hashes, required IDs,
+call order and recomputation reject missing/stale/forged matches. The
+[oracle module](../../scripts/yul-composition/oracles.mjs) predicts identities
+before execution: self is CREATE(fixed caller,nonce0), child is CREATE(self,nonce1).
+Tests independently check the short RLP/Keccak formulas. Neither createdAddress,
+storage contents nor getter output supplies an expected address/value.
+
+The three added existing local controls are:
+
+- **mixed-logs:** Yul LOG0 emits word42, followed by Solidity anonymous E(word43),
+  both from independently predicted self. Two ordered, length32 memory windows
+  are checked at their actual LOG0 offsets. No absolute buffer address or
+  cross-pipeline pointer equality is assumed.
+- **new-constructor:** C starts nonce1; its single zero-value CREATE uses nonce1,
+  advances C to2 and creates D with nonce1,balance0,slot0=42. Exact ordered frames
+  include creation then the x() static getter returning42. Created runtime bytes
+  must actually be installed at the predicted child; this is a finite installation
+  relation, not a compiler correctness proof. Creator/caller balances and nonces,
+  pre/post child state and getter identity are checked in all four profiles.
+- **constructor-failure:** the deployment-phase `runCall` reverts with empty
+  bytes/logs. The predicted candidate retains no account/code or known slots;
+  persistent/transient journal rollback and REVERT(0,0) frame/memory evidence are
+  required. The caller nonce advances0→1 outside the message checkpoint in this
+  genuine runner. The returned candidate address is explicitly distinct from a
+  retained deployed account. No `runTx`, fee accounting, account-deletion or
+  unavailable transaction-finalization behavior is inferred.
+
+Together with the previous four controls, all seven match **28 compiler profiles**
+(legacy/viaIR, optimizer off/on). Wrong child address/slot/nonce/balance/code,
+missing getter/installation/phase, retained failed-candidate effects, reordered
+logs, malformed/missing memory and stale source/registry evidence fail. Mutations
+preserve equal return bytes/logs where appropriate, so a byte-only result cannot
+stand in for an independent state assertion.
+
+Selected upstream source-derived assertions now match **15 profiles /30 calls**:
+slot_access (keccak256(word1||word0), ordered a=0→4,b=0),
+inline_assembly_memory_access (ABI bytes5=ASCII12345),
+optimize_memory_store_multi_block (f=0x42,g=true, RETURN-relative windows),
+optimize_memory_store_multi_block_bugreport (x=5 and original64-byte LOG0 window),
+and transient_storage_creation (put/read42, explicit pre-clear42, final transient0).
+These are finite selected assertions;212 working upstream profiles still have
+pending independent state oracles. Seven older-fork fixtures retain21 blocked
+profiles. Memory checks use semantic LOG/RETURN windows and preserve allocation
+freedom. The reference engine's CREATE convention is explicit; this does not
+prove its address convention agrees with the pinned C++ host.
+
+Raw frame logs now have explicit captured/not-provided status and are bound to
+separately recorded output logs. Account and slot access evidence is indexed by
+frame and must occur in both corresponding worlds and declared slot domains;
+coordinated snapshot/domain deletion no longer passes. A nested third-party
+BALANCE regression checks the account-only case. Definite mismatches dominate
+later missing-state blocks. Required selected controls cannot silently disappear
+by changing their status to blocked.
+
+The first new focused run retained a real failure: transient toJSON represents
+42 as minimal bytes `0x2a`, not a padded word. The adapter now validates/decodes
+that raw payload only for comparison, retaining the original raw bytes and
+unchanged expected word42. Wrong0x2b mismatches; malformed payload blocks. No
+expected value was changed to match an output. Read-only finder and skeptic
+reviews accepted the fixes and final scope; raw failed and passing exits remain.
+
+Final `oracles-final` exits0: **91 JavaScript tests and two Python tests**;
+80 fixtures/248 profiles retain **227 byte/log matches and21 fork blocks**.
+The separate416 compiler probes still contain72 matches,eight intended mutant
+mismatches,four diagnostic matches,304 pending and28 blocked. Original
+source/settings/input hashes, ordered calls, failure/bytes/logs, metrics/gas
+telemetry and cleanup evidence match the previous checkpoint exactly. The
+[coverage ledger](../../tests/yul-composition/observation-coverage.json) records
+all finite state matches separately;674 transactions/838 frames and765 memory
+regions remain captured. AST presence covers16 manifest rows and closes **zero**
+proof obligations.
+
+Heavy gates ran serially with the existing writer lock, one CPU,
+LEAN_NUM_THREADS=1, aggregate12GiB Docker memory and equal memory-swap limit
+(no swap allowance). Final sampled RSS1,029,709,824 bytes, minimum OS availability
+16,783,130,624 bytes, zero OOM/resource stop; more than15GiB disk headroom remained.
+Gas/step/proof/test budgets are unchanged. No shared engine/parser/dependency lock,
+fixture source/expected verdict, admission rule, Yul owner implementation or
+G03 obligation changed. Lean source/imports are unchanged, so no new kernel pass
+is claimed; the inherited KeySort exit0/two jobs and full-policy exit0 remain
+attributed to their tested earlier tree. Actual Lean4.24.0 commit797c613 and
+Lake5.0.0-src+797c613 are retained. Docs/G03 exit1 baseline evidence remains;
+new links and zero-new-findings are checked without unrelated historical edits.
+
+Work2/BackfillB now include independent finite state oracles for the three
+requested locals and five selected upstream sources. Work2 and BackfillA/B
+remain partial: unselected upstream state expectations, untouched/native worlds
+and universally quantified source/target/storage/memory/returndata correspondence
+are open. Work1/3, all24 obligations, six combinations, G01 amendments and final
+joint Y10/G48–G51 kernel/import closure still need actual VY1–VY4/V16 and recorded
+owner interfaces. No axiom/sorry, weakened theorem/premise or generic proof wrapper
+is introduced. YQ1–YQ7 authorization and canonical-rethrow exception are preserved;
+no new semantic/profile question is established.

@@ -186,3 +186,16 @@ older-fork blocks. Source/correspondence and Y10/G48–G51 proofs remain pending
 Original checkpoints/artifacts are preserved; new full committed identity,
 commands, reviews and checksums are in
 `/workspace/vy5-composition/observations-20261031/handoff.json`.
+
+### VY5 finite state oracles — 2026-10-31
+
+The [finite-oracle lane record](inline-assembly-vy5.md#finite-state-oracles--2026-10-31)
+and [coverage ledger](../../tests/yul-composition/observation-coverage.json)
+record seven independently specified local fixtures (28 profile matches) and
+five pinned upstream fixtures (15 profile/30 call matches). CREATE identities are
+predicted from nonce inputs; log windows and failed deployment use explicit
+frame/phase/runCall boundaries. The227 byte/log matches,21 older-fork blocks and
+eight intended mutants remain. Unselected state expectations and all concrete
+Y10/G48–G51 proof obligations stay pending. New committed identities/artifacts:
+`/workspace/vy5-composition/oracles-20261031/handoff.json`; earlier manifests remain
+preserved and the existing goal remains blocked.

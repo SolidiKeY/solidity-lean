@@ -5,7 +5,7 @@ import {machine}from'../evm-reference/replay.mjs';
 import {Account,createAddressFromString,hexToBytes}from'../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js';
 import {observeMachine,capturedMachine,validateCapture,validateCallCapture,compareState}from'./capture.mjs';
 import {execute,checkedCompiler,compileRecord,checkStateOracles,controlFailures}from'./harness.mjs';
-const out=mkdtempSync('/workspace/vy5-composition/observations-20261031/tests-');chmodSync(out,0o755);console.log('state/memory test evidence: '+out);
+const out=mkdtempSync('/workspace/vy5-composition/oracles-20261031/capture-tests-');chmodSync(out,0o755);console.log('state/memory test evidence: '+out);
 const save=(name,obj)=>writeFileSync(out+'/'+name+'.json',JSON.stringify(obj,null,2)+'\n');
 const self='0x'+'34'.repeat(20),external='0x'+'56'.repeat(20),caller='0x'+'12'.repeat(20),word=n=>'0x'+BigInt(n).toString(16).padStart(64,'0');
 async function raw(runtime,balance=0n){const {vm,observer}=await capturedMachine(),a=createAddressFromString(self);await vm.evm.stateManager.putAccount(a,new Account(1n,balance));await vm.evm.stateManager.putCode(a,hexToBytes(runtime));return{vm,observer,a};}
@@ -70,7 +70,7 @@ test('malformed/vacuous oracles are blocked rather than exceptions or matches',(
 });
 test('frame worlds and capture/result identity cannot be dropped or swapped',()=>{
  for(const mutate of [c=>{c.frames[0].pre={};c.frames[0].post={};},c=>delete c.frames[0].post[self].persistent[word(0)],c=>c.frames[0].input='0x01']){const c=structuredClone(storageCapture);mutate(c);assert.throws(()=>validateCapture(c));}
- const actual={failed:false,exception:null,returnData:word(42),metrics:storageResult.metrics};validateCallCapture(storageCapture,actual,{transaction:1,value:'7',to:self,input:'0x',caller});
+ const actual={failed:false,exception:null,returnData:word(42),metrics:storageResult.metrics,logs:storageCapture.frames[0].output.logs};validateCallCapture(storageCapture,actual,{transaction:1,value:'7',to:self,input:'0x',caller});
  for(const mutate of [a=>a.returnData=word(41),a=>a.exception='revert',a=>a.metrics.steps++]){const a=structuredClone(actual);mutate(a);assert.throws(()=>validateCallCapture(storageCapture,a));}
  assert.throws(()=>validateCallCapture(storageCapture,actual,{transaction:2}));
 });
@@ -85,7 +85,7 @@ test('transient preinstallation domain is seeded through public toJSON before re
  assert.equal(r.capture.pre[self].transient[word(7)],word(99));assert.equal(r.capture.post[self].transient[word(7)],word(0));save('transient-preinstalled',r.capture);
 });
 test('required source-bound state oracle rows cannot disappear or silently become pending',()=>{
- const raw=readFileSync('tests/yul-composition/state-oracles.json','utf8'),rows=checkStateOracles(raw);assert.equal(rows.length,4);
+ const raw=readFileSync('tests/yul-composition/state-oracles.json','utf8'),rows=checkStateOracles(raw);assert.equal(rows.length,7);
  for(const bad of [rows.slice(1),[...rows,rows[0]],rows.map(r=>({...r,sourceSha256:'bad'}))])assert.throws(()=>checkStateOracles(JSON.stringify(bad)));
  assert(controlFailures([{id:'memory-storage-logs',kind:'combination',status:'match'}],true).some(s=>s.includes('state comparison')));
 });

@@ -6,7 +6,9 @@ import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
-import {capturedMachine,validateCapture,validateCallCapture,compareState} from './capture.mjs';
+import {capturedMachine,validateCapture,validateCallCapture} from './capture.mjs';
+import {checkStateOracles,STATE_ORACLE_IDS,compareLocalState} from './oracles.mjs';
+export {checkStateOracles} from './oracles.mjs';
 import {parseFixture,withPreamble,evmCompatible,runtimePipelines} from '../solidity-upstream.mjs';
 export const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 export const PIN='1835d247de183f23e7b0e2bc4a50732af525b77c';
@@ -128,12 +130,6 @@ export function checkException(exception,stage='runtime') {
 export function diagnosticsMatch(errors,expected) {
   return isDeepStrictEqual(errors.map(e=>({type:e.type,code:e.errorCode,message:e.message})),expected);
 }
-const STATE_ORACLE_IDS=['constructors','memory-storage-logs','modifiers','try-catch'];
-export function checkStateOracles(raw) {
- if(sha(raw)!=='083c5a4aa64cf53579aa03c1fa4e469fc19b6b358054b803104c661df633cbb6')throw Error('missing/stale state oracle registration');
- const rows=JSON.parse(raw);if(!isDeepStrictEqual(rows.map(r=>r.id).sort(),STATE_ORACLE_IDS))throw Error('missing/duplicate state oracle');
- return rows;
-}
 /** Reference engine only. No source-state/target relation is asserted. */
 export async function execute(artifact,fixture) {
   const {hexToBytes,bytesToHex}=await import('../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js');
@@ -145,7 +141,8 @@ export async function execute(artifact,fixture) {
     const e=deployment.result.execResult;
     const exception=e.exceptionError?.error??null;
     checkException(exception,'deployment');
-    return {deploymentCapture:deployment.capture,observed:{capture:deployment.capture,metrics:deployment.metrics,failed:!!e.exceptionError,exception,returnData:bytesToHex(e.returnValue),logs:(e.logs??[]).map(([emitter,topics,data])=>({emitter:bytesToHex(emitter),topics:topics.map(bytesToHex),data:bytesToHex(data)}))}};
+    const record={phase:'deployment',executionKind:'runCall',deployment:{candidateAddress:address?.toString()??null,runtimeInstalled:false},deploymentCapture:deployment.capture,observed:{capture:deployment.capture,metrics:deployment.metrics,failed:!!e.exceptionError,exception,returnData:bytesToHex(e.returnValue),logs:(e.logs??[]).map(([emitter,topics,data])=>({emitter:bytesToHex(emitter),topics:topics.map(bytesToHex),data:bytesToHex(data)}))}};
+    return {...record,stateComparison:compareLocalState(fixture,record)};
   }
   if(deployment.result.execResult.exceptionError || !address) throw Error('reference deployment failed');
   const installed=bytesToHex(await vm.evm.stateManager.getCode(address));
@@ -177,10 +174,8 @@ export async function execute(artifact,fixture) {
   observed.rawLogs=(e.logs??[]).map(([emitter,topics,data])=>({emitter:bytesToHex(emitter),topics:topics.map(bytesToHex),data:bytesToHex(data)}));
   observed.storage={};
   for(const [slot,value]of Object.entries(capture.post[address.toString()]?.persistent??{}))observed.storage[BigInt(slot).toString()]=value;
-  const oracle=checkStateOracles(readFileSync(join(ROOT,'tests/yul-composition/state-oracles.json'),'utf8')).find(o=>o.id===fixture.id);
-  if(oracle&&oracle.sourceSha256!==sha(fixture.source))throw Error('stale state oracle source');
-  const stateComparison=compareState(capture,oracle?.oracle,{self:address.toString(),caller:'0x'+'12'.repeat(20)});
-  return {stateComparison,deploymentCapture:deployment.capture,deployment:{address:address.toString(),runtimeSha256:sha(deployment.result.execResult.returnValue),metrics:deployment.metrics},targetMutation,observed};
+  const record={phase:'runtime',executionKind:'runCall',deploymentCapture:deployment.capture,deployment:{address:address.toString(),runtimeSha256:sha(deployment.result.execResult.returnValue),metrics:deployment.metrics},targetMutation,observed};
+  return {...record,stateComparison:compareLocalState(fixture,record)};
 }
 const LOCAL_IDS=["loops", "modifiers", "try-catch", "unchecked", "constructors", "libraries", "always-revert", "incorrect-opcode", "compiler-dependent", "non-memory-safe", "unsupported-callcode", "dirty-bits", "allocation", "memory-storage-logs", "malformed-import", "constructor-failure", "dirty-bits-cleaned", "try-body", "try-error", "try-bytes", "try-panic", "mixed-logs", "new-constructor", "always-revert-target"];
 const LOCAL_POSITIVE=["loops", "modifiers", "try-catch", "unchecked", "constructors", "libraries", "always-revert", "non-memory-safe", "dirty-bits", "memory-storage-logs", "constructor-failure", "dirty-bits-cleaned", "try-body", "try-error", "try-bytes", "try-panic", "mixed-logs", "new-constructor"];
@@ -209,8 +204,8 @@ export function controlFailures(results,requireExecution=false) {
   for(const r of results) {
     if(r.stateComparison&&['mismatch','blocked'].includes(r.stateComparison.status))failures.push(r.id+': state oracle did not match');
     if(requireExecution&&STATE_ORACLE_IDS.includes(r.id)) {
-      const oracle=checkStateOracles(readFileSync(join(ROOT,'tests/yul-composition/state-oracles.json'),'utf8')).find(o=>o.id===r.id);
-      const comparison=compareState(r.observed?.capture,oracle.oracle,{self:r.deployment?.address,caller:'0x'+'12'.repeat(20)});
+      const fixture=json(join(ROOT,'tests/yul-composition/fixtures.json')).find(f=>f.id===r.id);
+      const comparison=compareLocalState(fixture,r);
       if(comparison.status!=='match'||!isDeepStrictEqual(comparison,r.stateComparison))failures.push(r.id+': missing/stale required state comparison');
     }
     if(requireExecution&&r.kind==='combination'&&[...LOCAL_POSITIVE,'incorrect-opcode','always-revert-target','allocation'].includes(r.id)&&!r.observed?.capture)failures.push(r.id+': missing required capture');
@@ -299,6 +294,7 @@ export async function run({compiler,out,corpus,executeReference=false,optimizerA
     fixturesSha256:sha(readFileSync(join(ROOT,'tests/yul-composition/fixtures.json'))),
     adapterSha256:sha(readFileSync(join(ROOT,'scripts/solidity-upstream.mjs'))),
     upstreamWrapperSha256:sha(readFileSync(join(ROOT,'scripts/yul-composition/upstream.mjs'))),
+    oracleModuleSha256:sha(readFileSync(join(ROOT,'scripts/yul-composition/oracles.mjs'))),upstreamStateOraclesSha256:sha(readFileSync(join(ROOT,'tests/yul-composition/upstream-state-oracles.json'))),
     stateOraclesSha256:sha(readFileSync(join(ROOT,'tests/yul-composition/state-oracles.json'))),captureSha256:sha(readFileSync(join(ROOT,'scripts/yul-composition/capture.mjs'))),
     referenceEngineSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/replay.mjs'))),
     referenceHost:{engine:'@ethereumjs/evm 10.1.3',hardfork:'osaka',initialGas:'100000000',stepLimit:5000000,allowUnlimitedContractSize:true,allowUnlimitedInitCodeSize:true},
