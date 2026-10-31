@@ -970,3 +970,12 @@ roundtrips under successful encoding and nonwrapping extent; `encode_residual`/
 `slot_residual_byte` preserve unowned bytes; `encode_unchanged` requires matching
 canonical owned bytes, supplied constructively by `encode_matches` after encoding.
 These are component laws, not Y09.02 statement/calculus rules or source admission.
+
+
+Further VY2 Lean-only preparation (YQ5): `component_owned_reads_preserved`,
+`component_decode_preserved`, `composed_roundtrip`/`composed_residual`, and their
+physical corollaries use actual outputs/disjointness and real bounds. Nested
+`structArray_physical_roundtrip`/`arrayStruct_physical_roundtrip` and encoded
+residual/unchanged laws construct actual source contents with declared indices.
+These have no SolKey taclet and do not discharge Y09.02 statement soundness,
+notation/printers, source admission or whole-state/compiler closure.

@@ -19,7 +19,7 @@ is introduced. G27/V10 and G32/V11 remain owners of compiler agreements.
 
 | Item | Implemented preparation | Remaining concrete obligation |
 | --- | --- | --- |
-| Y04 | Existing HashedLayout slot interpretation; intrinsic field widths; read/update/low/high/unchanged/bounded-word arithmetic; typed canonical codec/region reconstruction; residual bytes and raw slot updates; actual source reset/rollback controls | Nested/dynamic/mapping/source-path layouts and whole-store codecs, dirty/noncanonical owned bits, derived source view instance and typed writeback, persistent/transient residual journal/reset, VY1 sload/sstore/tload/tstore composition, V10 agreement instance |
+| Y04 | Existing HashedLayout slot interpretation; intrinsic field widths; read/update/low/high/unchanged/bounded-word arithmetic; typed canonical codec/region reconstruction; residual bytes and raw slot updates; actual source reset/rollback controls | Further nested/dynamic/mapping/source-path layouts and whole-store codecs, dirty/noncanonical owned bits, derived source view instance and typed writeback, persistent/transient residual journal/reset, VY1 sload/sstore/tload/tstore composition, V10 agreement instance |
 | Y05 | Byte operations; both general word roundtrips; snapshot mcopy including overlap; documented object-size/placement contracts and inhabited two-object allocation choices; reserved-area control; exact actual V04b MemOK preservation obligation | Full logical heap-byte view/writeback and V11 agreement; VY1 memory-safe semantics preserving actual MemOK; integrated nondeterministic allocator and full G01 refinement/resource-adequacy amendment; Gate G0 and speed measurements before any source representation change |
 | Y06 | Raw byte input, size/word-length premise, zero-padding and copying; approved Fixed hash and congruence; typed universally supplied environment values, blockhash window/blob index semantics; executable hash vectors | Source/Yul builtin integration and corresponding Solidity rows with source/session sharing proofs; raw input bounds in final semantics; fork-aware admission; compiler/source/EVM composition |
 | Y09.02 | Lean-only equational preparation table in rule map | Actual VY1 terms/statements and source integration, dl/tm syntax, printers, sound statement/update rules and source-level combinations |
@@ -399,3 +399,101 @@ source effects; Y05 for whole memory/allocator/MemOK; Y06 for actual source/Yul
 builtins and rows; Y09.02 for intrinsic terms/notation/printers/calculus composition.
 VY1 remains absent; applicable V10/V11 and VY3/VY4/VY5 joint V12/V13/V15/V16 closure
 is not imported. Questions=[]; no new human semantic choice is required.
+
+
+### Disjoint and fixed nested component checkpoint (2026-10-31)
+
+Continues exact revision `5149e2d540ab7b786bbf8ded4b55de8ce98e79d4` on the same
+branch, VM and pinned base. Existing codecs/ownership/widths/source values retain
+their meanings. No prerequisite owner, AST, Source state, allocator or manifest
+changed. New code uses intrinsic existing Data/DataList and actual declaration
+indices, with explicit recursor elimination; recursion matches only Nat.
+Source history (`21067a47` intrinsic state) and Gate G0 were inspected first;
+possible recursive checking cost was announced before implementation. No source
+representation refactor, exemption, proof-budget increase or second untyped IR.
+
+`ComponentComposition` proves both directions of the reusable owned-read/decode
+frame law via explicit disjointness (including its symmetric form), using actual
+successful encoder outputs. `composed_roundtrip`, `composed_residual` and physical
+Word-map corollaries retain real outputs and nonwrapping Fits/bounds. Exact
+unchanged composition uses both canonical matches; it does not need an invented
+disjointness premise when both writes already leave the same view unchanged.
+`disjoint_at_nextSlot` and `disjoint_at_roundSlot` derive useful separation from
+computed ends, not from a desired final conclusion. Rounding bounds/alignment
+and unowned-byte frame laws preserve inter-slot and trailing padding.
+
+`StructArray` constructs fixed arrays of heterogeneous actual Source.Data.struct
+contents. Each public Word-based entry starts aligned; each element's computed
+end rounds up for its successor. Low-level helpers also accept arbitrary Nat
+coordinates and do not assert alignment without that entry condition. Encoder/
+decoder contents remain DataList indexed by the declaration's actual field types.
+Positive declared length, actual Data.array length equality and total computed
+extent≤32*2^256 are explicit at the physical API. Reference-only outer values or
+struct elements return none. No reference is silently read as its contents.
+Roundtrip, owned bounds, head/tail separation, residual, match transfer and exact
+unchanged re-encoding of actual successful physical outputs are proved.
+
+`ArrayStruct` constructs a nontrivial struct containing a fixed scalar array and
+an actual heterogeneous struct member. Its schema contains real source field
+list equality, positive array length and existing scalar/flat-inner codec inputs;
+**no aggregate inverse or whole-store agreement is assumed**. Both parts are
+extracted from actual Source.Data, length equality follows the source constructor,
+and decoding constructs the actual declaration-indexed object. The fixed array
+packs normally; the next aggregate begins at its rounded end. The outer end is
+rounded too. Physical roundtrip/residual/unchanged proofs derive canonical owned
+matches from actual encodings, then compose the existing byte/Word inverse under
+the actual total bound. `castDataFields_back` accounts for declared-index transport.
+
+NestedControls inhabits the real declarations with uint24[12] plus five-field
+struct and three distinct heterogeneous structs. Computed extents64/128/192,
+slot rollover, nonzero a5 internal/trailing padding, output re-encoding identity,
+actual typed decode, reference refusal, checked wrong length, incompatible source
+type/length indices and wrapping extent refusal are included. Invalid source
+indices remain intrinsically unconstructible; the checked length boundary returns
+none rather than manufacturing an ill-typed Data value. Further fixed-nesting
+shapes, pointers/source paths, dynamic/mapping/hash separation and dirty owned
+bits remain additional work, not newly approved exclusions.
+
+Full5/7-word goldens include every4/6-component slot and an untouched sentinel.
+They are **compiled #guard controls**, separate from universal kernel proofs.
+The first attempt to calculate padding through the entire encoded view hit the
+default recursion-depth limit; it was replaced with kernel residual/bounds proofs
+and small ownership checks, without increasing the limit. Other normalization/
+induction failures remain raw. A local recursive decision instance did not reduce;
+that attempt was replaced with actual per-element extent reasoning. Final per-file
+nested controls2.28s, focused31 jobs exit0; no checking-speed claim beyond recorded
+command timings.
+
+Two new owned solc methods perform real typed assignments and return all physical
+words plus sentinel words, initialized to a5. Fourteen earlier owned vectors retain
+their expectations/order; total16 per pipeline now pass. The four original pinned
+upstream fixtures still execute13 calls and4 deployments per pipeline in order;
+all81 fail-closed controls still pass, including real SSTORE detection. Pinned
+solc0.8.38 commit1835d247, Osaka, legacy/via-IR, optimizer disabled,100m gas/5m steps
+unchanged. Exact complete raw words match the compiled Lean goldens in both
+pipelines. This is external/compiler evidence, not source admission/correspondence.
+The old failed shared replay outputs and superseded empty-root claim remain intact.
+
+Independent finder and skeptic reviewed all new areas read-only without Lean/
+server/build/tests. No mathematical defect found. Skeptic's two documentation
+findings were fixed: qualify low-level alignment and add the previously missing
+full-slot goldens. Final followup found no remaining confirmed finding. Records
+are `/workspace/vy2-evidence/nested-components/*-review.md`.
+
+Final wrapper exit0:1007 default/262 TestSuite jobs,131 sort annotations matched.
+Actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and
+Lake5.0.0-src+797c613; mandatory KeySort exit0,2 jobs before RUNTIME_GATE_PASS.
+Complete signature/axiom audit407 public declarations/213 theorems, only the three
+standard axioms. Initial audit extractor dropped '?' suffixes; failed input/output
+preserved, corrected extractor and final audit pass. All checks serial -j1 in the
+same enforced12GiB/no-swap runtime with OS/RSS/disk monitoring and caches. Final
+exact-base static/docs outcomes and exact committed head/artifacts are in HANDOFF.md.
+
+Queue accounting: this advances original Backfill A with concrete disjoint and
+fixed nested composition, not an opaque owner agreement. Backfill B actual
+journals/instances remain open. Full Y04/Y05/Y06/Y09.02, whole-store/heap/dirty
+writeback, actual assembly MemOK, allocator/refinement, V10/V11 instances and
+VY1/source/calculus/compiler joint closure remain unfinished. Actual prerequisite
+interfaces remain absent in this tree, consistent with the user's published-tree
+investigation; no other worker fetched or merged. Goal remains blocked, never
+recreated/reset/reactivated. No new human semantic decision; questions=[].

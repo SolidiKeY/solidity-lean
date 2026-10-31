@@ -198,3 +198,19 @@ Finder/skeptic findings (indexed match and unsupported storage-root observation)
 were fixed and independently reviewed. Exact premises, proof/external boundaries,
 remaining full Y04–Y09.02 dependencies and cumulative artifact paths are in
 [VY2](inline-assembly-vy2.md) and `/workspace/vy2-evidence/HANDOFF.md`.
+
+
+### VY2 disjoint and fixed nested handoff (2026-10-31)
+
+The next [VY2](inline-assembly-vy2.md) checkpoint proves disjoint composition of
+existing encoders and constructs two fixed nested forms over actual Source.Data/
+DataList: struct with fixed scalar array plus struct, and fixed array of
+heterogeneous structs. Real next-slot alignment/bounds, actual outputs, exact
+residual and unchanged-view proofs are retained. Full5/7-word computational
+goldens and pinned solc observations agree; prior ordered fixtures/81 controls
+remain passing. Kernel audit407/213 and wrapper1007/262+131 pass.
+Independent reviews found no remaining confirmed finding after documentation
+fixes. This is bounded canonical Backfill A, not full Y04–Y09.02 completion;
+source/MemOK/dirty/journal/compiler/allocator/calculus dependencies remain open.
+Cumulative revision, evidence, prior-artifact preservation and checksum paths:
+`/workspace/vy2-evidence/HANDOFF.md`.

@@ -98,4 +98,49 @@ contract Physical {
             x := add(sload(999), tload(999))
         }
     }
+    struct NestedFixed { uint24[12] array; Heterogeneous inner; }
+    NestedFixed private nested;
+    uint private nestedSentinel;
+    Heterogeneous[3] private many;
+    uint private manySentinel;
+    function nestedFixedWords() external returns (uint[5] memory out) {
+        out = [uint(0), 0, 0, 0, 0];
+        assembly ("memory-safe") {
+            for { let i := 0 } lt(i, 5) { i := add(i, 1) } {
+                sstore(add(nested.slot, i), 0xa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5)
+            }
+        }
+        for (uint i = 0; i < 12; ++i) nested.array[i] = uint24(i + 1);
+        nested.inner.signedValue = -1;
+        nested.inner.pair = 0x1020;
+        nested.inner.owner = address(0x112233);
+        nested.inner.wide = -2;
+        nested.inner.enabled = true;
+        for (uint i = 0; i < 5; ++i) {
+            uint w;
+            assembly ("memory-safe") { w := sload(add(nested.slot, i)) }
+            out[i] = w;
+        }
+    }
+    function structArrayWords() external returns (uint[7] memory out) {
+        out = [uint(0), 0, 0, 0, 0, 0, 0];
+        assembly ("memory-safe") {
+            for { let i := 0 } lt(i, 7) { i := add(i, 1) } {
+                sstore(add(many.slot, i), 0xa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5)
+            }
+        }
+        for (uint i = 0; i < 3; ++i) {
+            many[i].signedValue = -1 - int8(uint8(i));
+            many[i].pair = bytes2((uint16(16 + i) << 8) | uint16(32 + i));
+            many[i].owner = address(uint160(0x112233 + i));
+            many[i].wide = -2 - int128(uint128(i));
+            many[i].enabled = i % 2 == 0;
+        }
+        for (uint i = 0; i < 7; ++i) {
+            uint w;
+            assembly ("memory-safe") { w := sload(add(many.slot, i)) }
+            out[i] = w;
+        }
+    }
+
 }
