@@ -1208,3 +1208,5 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/MixedLoopChecks.lean` | Actual intrinsic loop combining storage shrink, persistent/transient mutation, memory allocation and local unwind. |
 | `Backend/InternalFlow/MemoryCallTransport.lean` | Actual memory-result call with entry/body heap growth, preserved caller/argument references and scalar-destination controls; generic typed caller-local read transport. |
 | `Backend/InternalFlow/NestedRootEmission.lean` | Two actual local emissions retaining inner-entry projected roots, exact bytes, outer return/failure and three-snapshot memory/stack controls. |
+| `Backend/InternalFlow/AllocationFrame.lean` | Actual allocation-only memory-result call consumer of published withinM frames, composed extension, heap contents and caller/result export. |
+| `Backend/InternalFlow/AllocationFrameChecks.lean` | Two actual allocating calls with nonempty aliased contents, branch/block unwind, global frames and excluded old-alias write controls. |

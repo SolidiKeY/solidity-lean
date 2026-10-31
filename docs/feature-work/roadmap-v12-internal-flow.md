@@ -340,3 +340,85 @@ verified bundle, owning document, external HANDOFF and SHA256SUMS are exported
 only after these checks/reviews and the actual commit. External HANDOFF records
 the final full head; no empty marker commit is needed. Full original lane/A/B
 completion remains blocked as recorded above, not inferred from this checkpoint.
+
+
+### Continuation 2: allocation-only content noninterference (partial Backfill A)
+
+`Solidity.Backend.InternalFlow.memory_call_allocation_frame` consumes actual `Args.evalT`,
+`Prog.runR` and `CallRet.mem.enterT`/`TRun.call`. Premises are the dependent
+argument evaluation and body execution equations, `args.readsIn μ = true`,
+`Prog.withinM μ body = true`, and the reference type's default/map-free guards.
+It derives the body frame from published `Prog.run_frameM`, composes published
+`CallRet.enterT_frameM` with it at exactly `entry.ext.trans out.ext`, and exports
+`Heap.Keeps` for every caller object together with caller tail/result equations.
+There is no assumed preservation equation. These are intrinsic local consumers,
+not target runtime frames, arbitrary mutating callees or recursive compilation.
+Heap content framing holds for each admitted μ; storage/net/selfBalance framing
+is conditional on μ ≠ nonpayable in TGFrameM, while tx framing is unconditional.
+Concrete controls use view and explicitly prove persistent/transient/tx framing.
+
+`AllocationFrameChecks.actual_two_calls` executes two successive intrinsic
+calls, each with result-entry and body allocation. The first copies stored
+[13,17]; the second allocates [0,0,0]. Both use a true branch, block and temporary
+local unwind. Initial caller object [7,11] has two aliases, with scalar locals
+9/11, persistent/transient roots7/9 and nonzero transaction observations.
+Initial, intermediate and final contents, scalar/global observations, fresh
+identities2/4 and heap sizes1/2/3/4/5 are pinned. The frame proof derives Keeps
+for all old objects, and the second frame includes the first returned object.
+Countercontrols reject wrong old contents, swapped fresh identities and early
+transient reset. An actual write through the old alias changes both aliases to
+[99,11]; published withinM rejects that body even at nonpayable. The predicate
+and all reserved sources remain unchanged. Existing scalar-destination controls
+remain registered. Every new theorem has a guarded axiom pin.
+
+Early per-file failures (dependent context annotations and redundant address
+projection normalization) remain raw evidence. The stale published-import
+artifact conflict is retained too: bounded Lake import-closure rebuilding in
+the existing cache resolved it without reserved source edits. No generic memory
+frame law was reimplemented or strengthened. No representation refactor occurred.
+Separate read-only finder/skeptic reviews inspect actual source and final diff;
+results and any corrections are recorded in the external continuation handoff.
+
+Original Work1/G37.01 target frames, Work2/G37.02 unbounded recursion, Work3/
+G37.03 dispatch, Work4/G36 structured/general mixed-loop simulation, Work5/G38
+whole statement/frame failure composition and Work6/G39 callback/world transient
+applications remain open against their reserved prerequisites. Backfill A remains
+partial despite this content consumer; Backfill B remains partial with the prior
+local projected-root consumer, not whole-State/world rollback. No theorem here
+closes source recursion/cutoff, general target frames/dispatch or general loops.
+Original full run-lean.sh exit124 at fixed300 seconds and no-build exit3 remain
+failures/inventory, not rerun or relabeled; TestSuite/sort were not reached there.
+Raw normal/strict docs failures remain separate from exact-base no-new findings.
+There is no changed prerequisite justifying repeating the unchanged full gate.
+New source checks and keyed cache inventory use the same existing cache and
+budgets. Original sealed artifact sets are preserved. New exports are under
+/workspace/scratch/v12-flow-calls/continuation-2/artifacts, with exact base/head,
+command logs, source hashes, reviews, patch, bundle, handoff and checksums.
+
+
+Continuation2 checkpoint gates: `lake build
+Solidity.Backend.InternalFlow.AllocationFrame
+Solidity.Backend.InternalFlow.AllocationFrameChecks` passes77jobs in10.553s,
+sampled aggregate RSS863020KiB, cgroup peak427331584B. Final serial
+`bash tests/internal-flow/check-files.sh <evidence>/guarded-files` passes all10
+files in19.337s, RSS827388KiB, peak222924800B; its individual commands are
+`lake env lean -j1 --tstack=131072 <owned-file>`. All29new guarded axiom pins
+pass (only propext/Classical.choice/Quot.sound as printed, some smaller sets).
+Per-file MCP is unavailable; these CLI diagnostics follow the repository
+lean-verify workflow fallback. Both checks use the existing 120-second cap,
+LEAN_NUM_THREADS=1, explicit -j1, enforced12884901888B memory/swap0 and writer
+lock; no concurrent heavy checks. Lean4.24.0 commit797c613, Lake5.0.0-src+797c613
+and `lake build Solidity.KeySort` pass2jobs in0.902s (runtime gate only).
+`node scripts/check-layers.mjs`, `node tests/internal-flow/check-imports.mjs`,
+`node scripts/check-orphans.mjs`, `bash scripts/check-trust.sh` and
+`git diff --cached --check` pass:172core/0elaborator,10owned/0findings,
+1006reachable/0orphans,1021sources/246trust sites/0findings.
+`bash scripts/check-doc-paths.sh` and its `--strict` variant exit1;
+complete outputs equal the frozen-base outputs byte-for-byte, separately
+passing zero-new-findings. Original sealed manifests verify unchanged.
+Evidence is /workspace/scratch/v12-flow-calls/continuation-2/evidence;
+cp3-final-focused, cp3-final-files, cp3-runtime and static.json record exact
+commands/outcomes. Finder and skeptic found no proof/control/ownership defect;
+both identified the erroneous module-qualified theorem name in prose, now
+corrected, and skeptic requested this explicit gate summary. No full gate
+claim follows from these scoped passes.
