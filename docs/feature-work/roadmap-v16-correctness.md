@@ -1,23 +1,24 @@
 # V16 compiler correctness, transactions and specification transfer
 
 Status: independent backfill extended through recovery checkpoints; full lane
-blocked on unpublished concrete prerequisites; scoped final validation passed.
+blocked on remaining concrete prerequisites; published memory-call consumer added, final gates recorded below.
 Base: `2fe1f8932f96be15b00df03ba2cde46f64a87758`.
 Branch: `codex/solidity-v12-v17-20261031/v16-correctness-transfer`.
 Repository: `/workspace/solidity-lean`.
 
-No final G48–G51 contract is proved. No existing reserved implementation is
-changed. The only shared changes are append-only module/document registration.
+No final G48–G51 contract is proved. No reserved implementation is authored or
+repaired here. Published integration is recorded separately below; V16-authored
+shared edits are append-only module/document registration.
 The [G01 contracts](roadmap-g01-interfaces.md), [G03 ledger](roadmap-g03-ledger.md),
 [G04 restrictions](roadmap-g04-restrictions.md) and
-[scope decisions](../solidity-scope.md) remain binding and unchanged.
+[scope decisions](../solidity-scope.md) remain binding; this lane does not change them.
 
 ## Work and backfill accounting
 
 | Item | State and remaining obligation |
 |---|---|
 | G48 | Blocked: actual independent SourceSpec/admission/lowering instances and full-profile progress are not published; source handoff explicitly leaves SourceSpec open. No new premise is counted as discharged. |
-| G49.01 | Open: compose actual expression/statement/call/pass certificates over every approved intrinsic constructor, without residual fragments. No backend implementation changed here. |
+| G49.01 | Partial: actual published memory-call result and populated-input specification/alias/allocator consumers are proved below. Total expression/statement/call/pass composition over the complete approved profile remains OPEN; no producer implementation is repaired here. |
 | G49.02 | Blocked: final source lowering and integrated V12–V15 runtime byte/pinned-EVM prerequisites are required. No Bridge application added. |
 | G49.03 | Open: full-profile coverage, failure preservation, resource progress, traces and non-vacuity. Toy controls below do not establish compiler coverage. |
 | G50.01 | Blocked: actual V14/V15 constructor/creation/runtime-installation composition. |
@@ -405,3 +406,176 @@ This integration itself establishes no new consumer theorem or build success.
 New bounded checks and artifact evidence use a fresh directory:
 /workspace/scratch/v16-published-2de14d52. The existing source/toolchain cache and
 all original raw failures remain intact. Full final import validation is pending.
+
+
+### Actual published compiler/specification consumer
+
+MemoryCallConsumer consumes Compiler.Compilation.memoryCalls and the actual
+Memory.Calls.Program.sound, not a hypothesized preservation oracle. Its eight
+named theorems are memory_call_result, memory_call_rep_iff, memory_call_success,
+memory_call_spec, memory_call_failure, memory_call_alias, memory_call_small_frame
+and memory_call_cursor. The exact printed statements, dependencies and axioms
+are retained in fresh revision-bound metadata. Input preserves Memory.StateRepr,
+b+requiredFrame≤frame and the reached AllocationInput. Successful output retains
+its exact source Out, target run with residual PC0, complete protected stack,
+StateRepr, BaseExtends and GrowsAllocator. Source box/specification and actual
+success remain explicit premises, inhabited in the controls.
+
+The broad public Agrees alternatives for panic/payment/divergence are not
+silently removed. The selected producer's stronger GrowingResult has represented
+success or exact empty revert; memory_call_failure proves that actual failure
+class, rather than mapping arbitrary panic, divergence or revert data to it.
+Source failure-byte observations remain distinct from the word-machine halt.
+The actual payload-bearing source call retains [0xde,0xad] and its public
+word-compiler refusal. No G01 event list, byte-EVM success or Osaka/resource claim.
+
+Test-only MemoryCallControls reuses the published callerOwnership program and
+compiled certificate through references to their existing private constants.
+The fixture elaborator emits only mkConst of the expected pinned declaration;
+it supplies no new semantics or trusted proof. The core never imports Lean,
+Syntax.Splice, the fixture adapter or producer examples. A missing private
+constant fails closed; the audit checks exact published producer bytes/revision.
+No duplicate contract/function/call implementation is introduced.
+
+The instantiated whole-program baseline checks shared mutation17, escaped
+local33, separately rebound parameter44, later allocation11 and marker42;
+protected stack77 and untouched sentinel99 retain their order. Actual target
+words are checked in their published address order. Wrong output/alias/cursor,
+undersized frame, exhausted allocation, failure class and revert data controls
+reject their respective false observations. The actual frame bound for this
+whole-program certificate is12; the negative uses11. The escaped object's
+header is cell260 and its first element cell261. Earlier incorrect test
+expectations are retained as raw failures, not weakened producer contracts.
+
+The stronger populated witness structurally cuts the EXISTING intrinsic program
+after its first3statements. This is typed syntax selection, not a new AST or
+execution relation. The published Calls.compile prefix certificate constructs a
+real machine run, caller context2, heap1 and allocator256→258. The remaining
+actual calls are compiled through public Compiler.compile with a proved exact
+prefix-fragment equality. Their real Input is derived from prefix soundness,
+private frame bound and reached capacity; it is not assumed.
+
+populated_spec applies NEW memory_call_spec to that actual populated input,
+actual successful suffix source run and nontrivial marker42 source box.
+populated_alias_escape applies NEW success/alias transport: the pre-existing
+caller reference0 retains its base address (a NONVACUOUS BaseExtends instance),
+shared alias cells agree, returned callee-local reference3 is represented,
+protected stack77 survives, and exact reached cost10 advances258→268. The prefix
+cost is2; the whole-program reached cost12. populated_mutation proves the real
+caller value5→17, escaped33 and separate rebound44 from the reused executions.
+The prefix is certified using the published internal Calls.compile API; only the
+remainingCalls result is claimed to be the public compiler's output.
+
+Both independent read-only finder/skeptic reviews passed the consumer, populated
+controls, private-constant adapter and accounting. They used no Lean/server/build
+or tests. Initial source failures are retained: namespace and keyword mistakes,
+quoted private-name inspection, inferred Option.get heartbeat exhaustion,
+dependent signature/equality/expected-value mistakes, and typed structural-cut
+motives. No sorry, axiom, native_decide, implemented_by or budget increase remains.
+
+The first deep populated-input check exited137 at the enforced12GiB cap. Its raw
+log and peak remain populated-input-second.log. Before changing declaration
+sharing, the producer history914181a1 and its documented irreducible-certificate
+performance convention were inspected. Explicit intrinsic contexts and shared
+irreducible certificates then checked successfully at unchanged budgets. No
+reserved performance repair, no cache deletion and no repeated unchanged failed
+heavy operation. Focused successful logs retain actual RSS/cgroup measurements.
+
+### Accounting and remaining validation boundary
+
+Fresh core metadata now includes the actual Compiler.Compilation.memoryCalls
+constructor:99V16 theorem entries and2207explicit OPEN constructor/G03/stage
+obligations. No previously open obligation is promoted to closed. The separate
+controls closure records113actual theorem entries, including49named test
+controls and generated proof auxiliaries. Both closure boundaries are explicit.
+All new consumer/control axiom outputs use only the standard allowance or none.
+The existing26accounting tests and new17memory-call audit tests pass. The first
+read-only-sandbox attempt at the existing temporary-file tests failed because
+no writable temporary directory was available; the separately logged permitted
+run passed, without changing tests or their assertions.
+
+roadmap-v16-memory-call-audit.py binds producer91e94ab57305ca055127934fd9e68fe9ea5e6be3,
+its three exact producer files, current head/Lean tree, actual constructor,
+compiler/certificate origins, populated statements/dependencies/axioms and
+OPEN stage/constructor status. Negative controls reject wrong revision/head,
+producer bytes, missing emitter/constructor/statement, assumed PublicCorrectness,
+erased premises, fabricated events, altered trust and false closure. This is
+structural accounting supplementing kernel proofs, not coverage discharge.
+
+Applicable layers/orphans/trust/noncircular checks passed. The new full
+run-lean confirmation subsequently PASSED as recorded below.
+All earlier exit124 failures and the sealed35df checkpoint remain immutable.
+The optional external source-reference script's pinned soljson is present with
+its expected SHA256, but ethereumjs VM/common/util and ethers are not installed
+in current resolution paths. No dependency upgrade/install is authorized here;
+no external EVM run is claimed. This does not replace the pinned EVM/runtime
+bridge prerequisites or make source reference tests kernel proofs.
+
+The exact-frozen-base documentation gate currently FAILS with48missing paths
+and37ambiguities (85complete findings), versus46+37 at the frozen base. Both new
+findings originate verbatim in the published inline-assembly plan, line106:
+its planned Solidity/Yul/Syntax.lean and Solidity/Frontend/SolcJson/Yul.lean do
+not exist. The raw checker exit1 and complete set comparison are retained.
+No-green waiver: even though the difference is published upstream, exact-base
+no-new findings has NOT passed. The plan remains reserved/read-only. Requested
+owner-side documentation patch: label those future paths as planned text that
+is not an existing-module citation, or publish the actual owned modules; no
+placeholder module or checker exclusion is introduced by V16.
+
+G48 SourceSpec/admission/lowering and full-profile progress remain unavailable.
+G49.01 now has this actual ordinary-memory-call application; complete constructor
+and feature-combination composition remains open. G49.02–03 still require pinned
+byte/runtime EVM transport and full coverage/failure/progress without residual
+fragment domains. Recursive/external execution, Osaka/resources, creation/runtime
+installation, rollback/adversarial StateExport and final matching SolKey/G51
+applications remain owner prerequisites. This is a useful concrete scoped backend
+specification consequence, not full source/compiler/deployment correctness. The
+original blocked goal is preserved; recovery does not reset or reactivate it.
+
+
+### Published recovery committed handoff section
+
+The mandatory new full run-lean gate PASSED:996default jobs,262kernel
+SolkeyTestSuite jobs,377parsed taclets/131read-bearing/131covered annotations,
+exit0. The same12GiB/no-swap wrapper sampled at most1Lean worker and0compiler
+workers; full-gate cgroup peak5383692288bytes, sampled aggregate RSS3260928KiB.
+No proof, stack, node, fuel, TestSuite or5400-second full timeout increase.
+The prior populated cap failure137 and both earlier full failures124 remain
+separate failed evidence. Final source digest is compared against the passing
+full gate after committing this handoff; the entire assignment is NOT complete.
+
+Strict automation passed at the original300seconds/module bound:26actual timing
+rows for unchanged TestSuite sources,491automatic+61step-budget proofs,0manual,
+11refuted,0pending. Complete pinned TestSuite audit passed:564=552derived+11refuted
++0pending+0divergent+1excluded;2skip. Source file equality versus sealed35df is
+recorded explicitly for reused timing rows, alongside the current full kernel
+check. Layers185core/0inversions; orphans1011reachable/0orphaned/0notallowed;
+trust1026sources/246inventoried sites/0findings; noncircular1260modules/0violations.
+The raw documentation gate and exact-frozen-base no-new-findings gate still
+FAIL on the two published planned Yul-path citations described above. Those
+required gates are not relabeled green; this recovery checkpoint is PARTIAL
+with implementation/proofs checked and that owner-side validation blocker open.
+
+Coordinator-only ledger reconciliation proposal (no global ledger edit): attach
+scoped evidence for feature IDs functions, internalCalls, memoryLocation,
+memoryAliasing, newMemory and assignment. Attach empty/payload failure/refusal
+controls under revertStatement, revertBuiltin and revertPayloads. The relevant
+existing G03 combinations are17(mixed core/memory programs) and32(calls with
+storage/memory reference arguments and tuple returns). These large combinations
+remain OPEN: this witness covers neither all storage references/tuple returns,
+nor recursive/external execution, all operators or all approved feature mixes.
+R09 and every other remaining restriction/profile exclusion is not globally
+removed. All2207current constructor/G03/stage obligations remain OPEN, including
+Compiler.Compilation.memoryCalls; its consumer is scoped evidence, not coverage.
+
+Integration commit7630134a6287c34d88f739f37a67fdade5769366 preserves sealed prior
+head35df1dc09d5b47c9d3ef1f472a8049300f3b12b2 and published prerequisite91e94ab57305ca055127934fd9e68fe9ea5e6be3.
+All V16-authored changes after that merge are confined to the new consumer,
+owned tests/audit/document and append-only registration. Published upstream
+history is distinguished from V16-authored edits in the patch/bundle handoff.
+Final committed head, exact theorem statements/axioms, actual commands/outcomes,
+raw failures, complete doc finding arrays/provenance, reviewed ownership,
+checksums and absolute paths are exported under /workspace/scratch/v16-published-2de14d52.
+The original sealed artifact directories remain unchanged. Final artifact
+finder/skeptic reviews are recorded there separately from source reviews.
+No push, default-branch merge, reserved-owner repair, new goal or goal reset.

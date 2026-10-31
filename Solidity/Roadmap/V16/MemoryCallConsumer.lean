@@ -1,0 +1,139 @@
+import Solidity.Evm.Compiler
+import Solidity.Roadmap.V16.Specifications
+
+/-!
+Scoped consumers of the published ordinary-memory-call compiler certificate.
+The actual Input retains state/frame/reached allocation obligations. Program.sound
+has only represented success or exact empty revert; the public Agrees union is
+not narrowed by assuming a desired target run. No byte-EVM/source-profile claim.
+-/
+namespace Solidity.Roadmap.V16
+open Solidity.Evm
+
+/-- The actual memory-call constructor supplies the stronger published relation. -/
+theorem memory_call_result {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} (input : compiled.Input L frame base σ m) :
+    Memory.GrowingResult L b frame (compiled.allocationCost σ) compiled.frag σ base m
+      (P.run σ) (run compiled.code m) := by
+  cases compiled with
+  | core _ _ => cases path
+  | memory _ => cases path
+  | referenceArrays _ => cases path
+  | objects _ => cases path
+  | construction _ => cases path
+  | memoryCalls out _ => exact out.sound input.1 input.2.1 input.2.2
+
+/-- Unpack the successful public representation without losing base extension
+or the exact reached allocator cost. -/
+theorem memory_call_rep_iff {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {τ : State C Δ}
+    {base : Nat → Fin W} {m m' : Machine} :
+    compiled.Rep L frame base σ m τ m' ↔
+      ∃ base', Memory.StateRepr L b frame compiled.frag τ base' m' ∧
+        Memory.BaseExtends σ.H base base' ∧
+        Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m τ base' m' := by
+  cases compiled with
+  | core _ _ => cases path
+  | memory _ => cases path
+  | referenceArrays _ => cases path
+  | objects _ => cases path
+  | construction _ => cases path
+  | memoryCalls _ _ => rfl
+
+/-- Actual source success selects represented target success using soundness,
+not the broader public Agrees payment/panic/divergence alternatives. -/
+theorem memory_call_success {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {o : Solidity.Out C σ.H Δ}
+    (input : compiled.Input L frame base σ m) (source : P.run σ = .ok o) :
+    ∃ m' base', run compiled.code m = .ok m' 0 ∧ m'.stack = m.stack ∧
+      Memory.StateRepr L b frame compiled.frag o.st base' m' ∧
+      Memory.BaseExtends σ.H base base' ∧
+      Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m o.st base' m' := by
+  rcases memory_call_result compiled path input with
+    ⟨u, m', base', hs, ht, repr, stack, baseExtension, grows⟩ | ⟨hs, _⟩
+  · have eq : u = o := Except.ok.inj (hs.symm.trans source)
+    subst u
+    exact ⟨m', base', ht, stack, repr, baseExtension, grows⟩
+  · rw [source] at hs
+    cases hs
+
+/-- A source box at a real successful compiled memory call gives a machine-side
+represented specification witness, retaining its entire evaluation-stack tail. -/
+theorem memory_call_spec {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {o : Solidity.Out C σ.H Δ} {φ : Spec C Δ}
+    (input : compiled.Input L frame base σ m) (source : P.run σ = .ok o)
+    (box : Spec.sat σ (.box P φ)) :
+    ∃ m', run compiled.code m = .ok m' 0 ∧ m'.stack = m.stack ∧
+      compiled.Rep L frame base σ m o.st m' ∧ Spec.sat o.st φ := by
+  obtain ⟨m', base', ht, stack, repr, baseExtension, grows⟩ :=
+    memory_call_success compiled path input source
+  exact ⟨m', ht, stack, (memory_call_rep_iff compiled path).2
+    ⟨base', repr, baseExtension, grows⟩, spec_box_post box source⟩
+
+/-- On this actual certificate path, a source failure is precisely empty revert.
+No panic, payload-bearing revert or divergence is silently collapsed into it. -/
+theorem memory_call_failure {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {e : THalt} (input : compiled.Input L frame base σ m)
+    (source : P.run σ = .error e) : e = .revert ∧ run compiled.code m = .revert := by
+  rcases memory_call_result compiled path input with
+    ⟨_, _, _, hs, _⟩ | ⟨hs, ht⟩
+  · rw [source] at hs
+    cases hs
+  · rw [source] at hs
+    exact ⟨Except.error.inj hs, ht⟩
+
+/-- Source alias identity yields equality of actual represented pointer cells. -/
+theorem memory_call_alias {C : Contract} {L b frame : Nat} {Γ : Ctx}
+    {F : Frag Γ} {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
+    (repr : Memory.StateRepr L b frame F σ base m) {R : RefTy}
+    (i j : Idx Γ (.mem R)) (r : HRef σ.H R)
+    (left : TEnv.get i σ.env = some r) (right : TEnv.get j σ.env = some r) :
+    m.mem (cellOf b i) = m.mem (cellOf b j) := by
+  obtain ⟨ri, hi, mi⟩ := repr.pointers i
+  obtain ⟨rj, hj, mj⟩ := repr.pointers j
+  have ei : ri = r := Option.some.inj (hi.symm.trans left)
+  have ej : rj = r := Option.some.inj (hj.symm.trans right)
+  subst ri
+  subst rj
+  exact mi.trans mj.symm
+
+/-- Required private frame size remains an actual admission obligation. -/
+theorem memory_call_small_frame {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} (small : frame < b + compiled.requiredFrame) :
+    ¬ compiled.Input L frame base σ m := by
+  intro input
+  have bound := ((compiled.memoryCalls_input path L frame base σ m).1 input).2.1
+  exact Nat.not_lt_of_ge bound small
+
+/-- Actual reached allocator capacity yields its exact post-run cursor cell. -/
+theorem memory_call_cursor {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {o : Solidity.Out C σ.H Δ}
+    (input : compiled.Input L frame base σ m) (source : P.run σ = .ok o)
+    (cursor : Fin W) (positive : 0 < b)
+    (allocator : Memory.StructAllocatorRepr σ.heap base frame cursor m)
+    (space : cursor.val + compiled.allocationCost σ < W) :
+    ∃ m' base', run compiled.code m = .ok m' 0 ∧ m'.stack = m.stack ∧
+      Memory.StateRepr L b frame compiled.frag o.st base' m' ∧
+      Memory.BaseExtends σ.H base base' ∧
+      Memory.StructAllocatorRepr o.st.heap base' frame
+        ⟨cursor.val + compiled.allocationCost σ, space⟩ m' ∧
+      m'.mem 0 = .val ⟨cursor.val + compiled.allocationCost σ, space⟩ := by
+  obtain ⟨m', base', ht, stack, repr, baseExtension, grows⟩ :=
+    memory_call_success compiled path input source
+  have next := grows cursor positive allocator space
+  exact ⟨m', base', ht, stack, repr, baseExtension, next, next.arrays.free.cell⟩
+
+end Solidity.Roadmap.V16

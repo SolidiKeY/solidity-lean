@@ -1211,3 +1211,5 @@ V16 adds `Solidity/Roadmap/V16/HashHistory.lean` for history-premise adequacy; `
 `Solidity/Roadmap/V16/LoopControls.lean` consumes actual TLoop finite iterations, success invariants and no-failure/failure controls. Test-only `tests/roadmap-v16/NontrivialLifetime.lean` transports the published escrow invariant without importing elaborators into core.
 
 `Solidity/Roadmap/V16/CallbackConsumers.lean` consumes actual callback program/frame executions and selected transfer semantics; `Solidity/Roadmap/V16/CallbackControls.lean` supplies inhabited success, wrong-post and actual invariant-violation controls.
+
+`Solidity/Roadmap/V16/MemoryCallConsumer.lean` consumes the published memory-call compiler certificate, exact failure class, specification, alias and reached allocator guarantees. Its populated-input controls and revision-bound fixture adapter stay in `tests/roadmap-v16/MemoryCallControls.lean`.

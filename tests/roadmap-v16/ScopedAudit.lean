@@ -1,3 +1,4 @@
+import Solidity.Roadmap.V16.MemoryCallConsumer
 import Solidity.Roadmap.V16.CallbackControls
 import Solidity.Roadmap.V16.LoopControls
 import Solidity.Roadmap.V16.HashHistory
@@ -105,3 +106,19 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.CallbackControls.resumption_changes_balance
 
 #print axioms Solidity.Roadmap.V16.CallbackControls.resumed_post_if_modal
+
+#print axioms Solidity.Roadmap.V16.memory_call_result
+
+#print axioms Solidity.Roadmap.V16.memory_call_rep_iff
+
+#print axioms Solidity.Roadmap.V16.memory_call_success
+
+#print axioms Solidity.Roadmap.V16.memory_call_spec
+
+#print axioms Solidity.Roadmap.V16.memory_call_failure
+
+#print axioms Solidity.Roadmap.V16.memory_call_alias
+
+#print axioms Solidity.Roadmap.V16.memory_call_small_frame
+
+#print axioms Solidity.Roadmap.V16.memory_call_cursor
