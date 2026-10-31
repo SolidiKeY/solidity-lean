@@ -420,3 +420,30 @@ The preventive admission lock is unchanged. A small runtime/KeySort smoke may
 check this changed measurement boundary; neither compiler nor frontend will be
 rerun merely to replace their failed validation records. The checkpoint has
 89 synthetic/control tests and all original lane obligations remain open.
+
+### Live kernel declaration preparation
+
+The owned `scripts/roadmap-v17-kernel.py` consumer and
+`scripts/roadmap-v17-kernel-query.lean` template add a separate live extraction
+path; the existing closure reports remain producer-only accounting. Collection
+freshly compiles a narrowly requested published repository import closure into a
+new evidence directory using isolated `LEAN_PATH`, then queries checked Lean
+constants. It records structural names, full closed type/value expressions,
+binders, proposition-valued binder indices, direct constant/projection references
+and installed Lean's transitive axiom inventory. An independent `#print axioms`
+query must agree. Display text is supplemental. Unsupported or oversized
+expressions fail rather than truncate. Installed standard-library/Lean artifacts
+are hashed inputs, not a reproduced standard-library build.
+
+The optional claim consumer checks revision/tree/tool/input/query/configuration
+and retained artifacts, then always repeats fresh compilation and extraction.
+A supplied manifest or log alone is insufficient. Semantic premises are never
+marked discharged, even when a conditional declaration and its hypotheses match.
+This does not promote any closure row or execute the prerequisite-dependent final
+G54.03/G55 gates. KeySort's published conditional and concrete declarations are
+the intended bounded nontrivial witness; full release validation remains blocked.
+Focused template diagnostics retain two raw failures followed by the corrected
+passing check. Synthetic wire/claim controls cover duplicate/truncated output,
+unsupported namespaces, declaration kinds, forged types/axioms/hypotheses and
+conditional-only closure claims. Live results and independent review findings
+will be recorded in the new checkpoint handoff; prior sealed evidence is retained.
