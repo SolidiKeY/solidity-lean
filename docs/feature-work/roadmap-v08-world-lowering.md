@@ -2553,3 +2553,96 @@ No V07 argument/body/modifier/heap translation to intrinsic Entry is published i
 the consumed tree; that application cannot be discharged by supplied target
 results or another interpreter. This investigation is not a claim all further
 independent Work/Backfill is exhausted. Whole assignment and goal stay blocked.
+
+
+## Actual source callable execution and historical fixture repair (2026-10-31)
+
+SourceCallable now proves the actual published callInternal boundary: selected
+G.prog.body(G.dispatchFn F.contract d), actual zeroVals, exact dependent reversed
+parameter/return frame, runMods with checked=true, retVals and mkRet. complete,
+body_failure and wrong_frame require individual initialization/body/extraction
+step equations. These are explicit component premises, not assumed whole target
+preservation or general modifier/body lowering. missing_body and zero_horizon
+retain complete input state. expression_complete/expression_failure/argument_failure
+execute actual evalE.call/evalConvArgs/EM.sub and retain complete reached state.
+Caller-local restoration means the caller's POST-ARGUMENT locals are retained;
+it never rolls back argument writes or copies callee return slots into caller
+locals. No second evaluator, state layer, AST/IR or compiler is introduced.
+
+SourceCallableControls has actual member function declarations, two bool
+parameters and one bool return, matching body.ps/body.rs metadata, zero return
+slot, exact frame and a supplied resolved Program body table. Both pipelines
+execute caller local=false followed by a dependent read, then a real callee
+binary hash allocation and first-parameter return. Reordered arguments produce
+true instead of false while keeping the caller local false and identical full
+nonlocal state. Actual decoy execution returns the second parameter and a
+wrong-declaration control distinguishes it from choose with parameters(true,false).
+These exercise direct dispatch/body selection, not canonical inheritance/parser
+resolution or function-reference lowering. Program bodies are supplied resolved
+fixtures, not certificates relating parsed declaration bodies to target Entry.
+
+EVERY old populated observation is retained: sender/self93/7, selfnonce1/code0,
+saved/scratch true, journal3, heap object0 bytes[0,255], call events/old logs,
+function locals true and caller input true. Successful/failed-return body execution
+adds exactly object1 binary[0,255,128], next2; complete ex/events/logs/fnLocals
+remain exact. Return/parameter frames and raw result values are checked separately.
+The complete checked callee Fr retains this/sender/value/static/contract/depth;
+its checked bit is true despite unchecked caller. A typed uint8 overflow in the
+return expression gives real panic0x11 AFTER allocation; divisionzero in an
+argument gives real panic0x12 BEFORE body execution and keeps heapnext1. Exact
+bytes consume existing source/intrinsic panic encoding laws, not a new emitter.
+Missing body preserves argument effects. A deliberately mismatched supplied body
+checks the call-frame guard, not SourceSpec admission. Timeout at call horizon0,
+expression0 and expression1/argument0 remains distinct from revert/stuck. No
+admission/fuel/depth cutoff or budget increase. No fictional failing retVals
+extraction from a correctly matching typed frame is offered as an inhabited case.
+
+The historical Keccak unit-test regression is repaired: its positive Audit bytes
+come from committed aa640d21 and SHA73c54e69dad346b59e1026f9b0b49cf107fdcf77460e0306a1d67c64289fd2ba,
+also checked against certificate180303. It explicitly rejects current extended
+Audit through the UNCHANGED production guard. Emit's historical positive is
+similarly bound to committed3c4f9f82/SHAde5a0ae3ab1b21dd7ed961ae0804c39667a287b7c1c0cfdf34bbd129bc8aec07
+and certificate14531, with current extension rejection. Old raw script exit1
+records/seals remain unchanged. The new Callable wrapper keeps the exact stopped
+runtime, original explicit command/targets/config/cache/resource checks, exact
+Audit prefix/rest SHA, all old source hashes, and four prior checked modules
+pinned to14531. Its positive fixture derives only from the exact committed Emit
+Audit plus the one explicit Callable import; no arbitrary import stripping.
+
+All614 starting exact axiom sets remain unchanged;42 new checked sets make656.
+Read-only finder/skeptic reviews requested executed decoy discrimination (added)
+and precise caller-local wording (corrected); neither builds/uses Lean servers.
+Per-file Lean MCP and get_goal remain unavailable; goal unchanged. Final checks
+and additive artifacts/reviews are recorded separately. Initial free693719040;
+96MiB conservative growth estimate, same12GiB/no-swap/CPU1 under16GiBparent,
+serial LEAN_NUM_THREADS1/Lean-j1 and original600s/proof/fuel/node/test budgets.
+
+Every original parent stays PARTIAL: G20 canonical callable declaration/body/
+parameter/result/type/layout, inherited/library/getter/function-reference/readonly
+applications; G21 canonical nested/reference/calldata/slice/custom-error/catch;
+G22.01 source external/self-call/runtime frame/admission; G22.02 source callback/
+reentrancy; G22.03 source new/try-new/body/admission; G22.04 source linkage/function
+value/storage; G22.05 Source/world/runtime/admission composition; G23 actual target
+erased-argument/general hash/transient/layout and G16–G22 composition; BackfillA
+source frame/layout and BackfillB Source/V07 applications. Published source
+execution exists and is used here, while canonical G16–G19/V07 argument/body/
+heap/modifier-to-Entry relations remain absent. No actual intrinsic internal-call
+compiler, general modifier lowering or reserved owner implementation is redone.
+These component proofs and finite controls do not close any G parent or lane.
+Mandatory full/Decision exit125 records, raw docs/pins exit1, frozen increases and
+literal-wrapper hold remain. No identical Decision retry or guard/owner change.
+Further independent original work is not claimed exhausted by this checkpoint.
+
+Final registered35093 PASS18.968478829s, sampledaggregateRSS60669952, reported
+cgrouppeak33468416, exact current source/config/runtime/cleanup bindings.
+Inventory656exactsets/69coreclosure; currentpositive+31corruptions; Keccak9,
+Emit9+12 andCallable9+16 extension/priorcertificate controls PASS; existing
+profile/runtime controls PASS. Trust1051sources/246sites/0findings;
+strict491/61budget/11refuted/0pending; layers172/0; orphans1036/0;
+ownedwhitespace0. Rawdocs/task/public1/1 with complete83equalfindings and
+pins1/1 with359equalnotes, separatePUBLIC NEW0 PASS; frozen+11/+345 FAIL kept.
+Decision321 and priorSuite260 dependency sources unchanged; no identicalretry.
+A next independently useful G20/G22.04 clause is actual nonvirtual free/library
+selection through published dispatchFn, with supplied source bodies and exact
+caller context. This is separate from canonical compiler/linkage and modifier
+lowering; no claim independent clauses are exhausted at the callable checkpoint.

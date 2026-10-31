@@ -1255,3 +1255,6 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/SourceEmit.lean` | Actual emit argument/encoding/static/failure boundaries, log-only erasure and exact intrinsic word encoding observations. |
 | `Lowering/V08/SourceEmitControls.lean` | Declared event, populated source machine, allocation/local argument order, panic/static/timeout and malformed encoding controls. |
+
+| `Lowering/V08/SourceCallable.lean` | Actual source callable initialization, selected body, checked frame, return extraction and caller-local/failure boundaries. |
+| `Lowering/V08/SourceCallableControls.lean` | Populated two-argument/one-result source calls, declaration discrimination, exact contexts, order/local retention and failure controls. |
