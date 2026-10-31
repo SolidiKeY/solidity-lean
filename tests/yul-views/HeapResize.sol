@@ -41,7 +41,7 @@ contract HeapResize is HeapBytes {
     }
     function sameHeader() external pure returns (bytes memory) {
         (bytes memory a, string memory b, bytes memory c) = objects();
-        
+
         return observeResize(a, b, c, a);
     }
     function grow3to4() external pure returns (bytes memory) {
