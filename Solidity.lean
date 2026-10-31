@@ -914,3 +914,9 @@ import Solidity.Backend.InternalFlow.TuplePrograms
 import Solidity.Backend.InternalFlow.StorageFrames
 import Solidity.Backend.InternalFlow.StorageCalls
 import Solidity.Backend.InternalFlow.StoragePrograms
+
+import Solidity.Backend.InternalFlow.FragileFrames
+import Solidity.Backend.InternalFlow.FragileCalls
+import Solidity.Backend.InternalFlow.FragilePop
+import Solidity.Backend.InternalFlow.FragilePrograms
+import Solidity.Backend.InternalFlow.StoragePrefixFrame

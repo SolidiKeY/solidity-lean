@@ -1223,3 +1223,9 @@ At the root, the notation's own tests:
 | `Backend/InternalFlow/StorageFrames.lean` | Plain storage-alias declaration/rebinding over actual memory StateRepr, core path execution and heap/allocator frames. |
 | `Backend/InternalFlow/StorageCalls.lean` | Exact single storage-reference call expansion and symbolic-slot export with actual heap extension/cost and bare-failure simulation. |
 | `Backend/InternalFlow/StoragePrograms.lean` | Owned finite selector for checked plain-storage calls and statements, preserving public admission and unsupported/fragile/unset/recursive refusals. |
+
+| `Backend/InternalFlow/FragileFrames.lean` | Reached live indexed-storage path declaration/rebind into full StateRepr. |
+| `Backend/InternalFlow/FragileCalls.lean` | Finite fragile storage-result export with actual reached path/liveness and allocator frame. |
+| `Backend/InternalFlow/FragilePop.lean` | Root-array pop consumer preserving actual storeDrop/dropFragile classification. |
+| `Backend/InternalFlow/FragilePrograms.lean` | Owned finite selector composing plain and fragile direct storage calls; dead/unset refusal unchanged. |
+| `Backend/InternalFlow/StoragePrefixFrame.lean` | Actual storage-prefix heap and target-memory frame consequences, separate from within admission. |
