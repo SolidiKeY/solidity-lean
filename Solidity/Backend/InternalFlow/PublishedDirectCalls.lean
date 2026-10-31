@@ -87,4 +87,31 @@ theorem program_endpoint {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ}
   · rw [executed] at hs
     contradiction
 
+/-- A transported caller alias still names its entry address even when the
+callee has mutated that object's contents. This is not Heap.Keeps. -/
+theorem old_alias_at_entry_address {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Δ}
+    {σ : State C Γ} (out : Solidity.Out C σ.H Δ)
+    {base base' : Nat → Fin W} {m : Machine}
+    (repr : StateRepr L b frame F out.st base' m)
+    (addresses : BaseExtends σ.H base base') {R : RefTy} (r : HRef σ.H R)
+    (i : Idx Δ (.mem R)) (observed : TEnv.get i out.st.env = some (r.wk out.ext)) :
+    m.mem (cellOf b i) = .val (base r.id) := by
+  obtain ⟨s, hs, hm⟩ := repr.pointers i
+  have same : s = r.wk out.ext := Option.some.inj (hs.symm.trans observed)
+  subst s
+  exact hm.trans (congrArg Word.val (addresses r))
+
+/-- The old address represents the ACTUAL output contents, which may differ
+from entry. Unrelated-content preservation must come from actual execution. -/
+theorem old_array_at_entry_address {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Δ}
+    {σ : State C Γ} (out : Solidity.Out C σ.H Δ)
+    {base base' : Nat → Fin W} {m : Machine}
+    (repr : StateRepr L b frame F out.st base' m)
+    (addresses : BaseExtends σ.H base base') {p : PrimTy}
+    (r : HRef σ.H (.array (.prim p))) :
+    ArrayRepr out.st.heap (r.wk out.ext) (base r.id) m := by
+  have actual : ArrayRepr out.st.heap (r.wk out.ext) (base' r.id) m := repr.heap.arrays (r.wk out.ext)
+  rw [addresses r] at actual
+  exact actual
+
 end Solidity.Backend.InternalFlow.PublishedDirectCalls

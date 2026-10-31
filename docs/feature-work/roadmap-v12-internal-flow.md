@@ -977,3 +977,143 @@ complete outputs are byte-identical to the exact frozen-base outputs, so the
 SEPARATE no-new-findings comparisons pass. All seven previous checksum manifests
 verify unchanged (109/84/91/86/114/90/34 entries). The original full300s failure,
 no-build exit3, new cold gate failures and raw doc failures remain in evidence.
+
+
+### Mutating older caller aliases (continuation 8)
+
+This original Work1/G37.01 and Backfill A checkpoint extends the real published
+ordinary memory-call consumer; it does not repeat the earlier private-rebinding
+witness. Two scoped consequences are added to PublishedDirectCalls:
+old_alias_at_entry_address combines a known transported caller local with the
+actual post-StateRepr and BaseExtends to recover its unchanged entry address;
+old_array_at_entry_address represents the ACTUAL output array contents at that
+entry address. Neither assumes or proves general Heap.Keeps. The type retains
+the original HRef and its actual Out.ext weakening. No source/type/state/target
+representation or semantic predicate is changed.
+
+The standalone tests/internal-flow/MutatingMemoryCalls.lean fixture has a real
+prefix producing object0=[7,11], distinct object1=[23,29,31], two aliases of0
+and scalar42. Its typed intrinsic callee writes19 through the evaluated old
+reference, binds the result to that SAME reference, then privately rebinds its
+parameter to object3=[99,101]. This is binding a return variable before the
+later private writes, not inventing early-return execution. Return-entry object2
+is the allocated empty default and stays in the real heap. Exported result0,
+caller other1, both old aliases0/0 and scalar42 have the exact typed Final
+context; only private binders are dropped. Dropping is not physical scrubbing:
+private/scratch cells may retain values outside the live context.
+
+The subsequent caller program writes37 to index1 THROUGH THE RETURNED ALIAS.
+Actual Val.evalT reads through both original aliases and the returned alias see
+19 after the call and37 after next use; the distinct old object reads23/29 and
+retains its entire length3 contents[23,29,31]. All objects, including the empty
+entry allocation and private allocation, have complete ordered source snapshots
+at prefix/entry/body/export/next-use. Ordered actual target observations pin all
+live pointer/scalar cells, lengths, contents, protected stack77, sentinel99,
+private parameter cell5=264 before export, result cell6=256 before export and
+live result cell5=256 after export. Prefix cursor263 becomes267 and stays267.
+Source complete-program observations and actual public Compiler code are also
+checked, rather than only a manually concatenated target endpoint.
+
+represented_stages PRODUCES all three representations through actual prefix,
+call and next-use execution. The prefix costs7, reached call costs4 and next
+use costs0; exact need values are4/6/5 and public requiredFrame6. Public
+Compiler.memoryCalls_input/Compilation.correct are instantiated on the whole
+joined intrinsic program. The call's AllocationInput comes from the prefix's
+actual GrowsAllocator.nextInput; no desired intermediate representation,
+noninterference conclusion or simulation hypothesis is assumed. The actual
+Args.evalT, body.runR and call-return equations are separately proved.
+
+represented_old_objects instantiates the two scoped consequences for mutated
+old0 and unrelated old1. Independent finder and skeptic both caught that its
+first draft dropped the actual run equations from the existential conclusion.
+The corrected theorem RETAINS actual prefix/call Evm.run equations and call
+stack equality with the reached StateRepr/pointer/ArrayRepr facts. Both reviews
+cleared the correction. The unrelated-content claim is established by the
+actual source execution/observations; stable addresses alone do not imply it.
+
+Positive baselines accompany wrong same-typed result1, missing mutation7,
+unrelated-object mutation19, private-result escape3 and composed-cost12
+negatives. Actual public target code separately rejects the corresponding
+wrong return address259, old value7, unrelated value19, private address264 and
+cursor268 observations. These are wrong observations of SUCCESSFUL executions,
+not claims of runtime rejection from a failed input premise. The mutator's
+withinM.view predicate is explicitly false, preserving the allocation-only
+frame exclusion and all existing old-alias-write controls. No arbitrary mutator
+is admitted into Heap.Keeps/withinM by this checkpoint.
+
+Per-file fallback is used because no Lean MCP diagnostics is exposed. Initial
+raw exit137 checks at the enforced12GiB peak and smaller failing probes remain
+FAILURES. Diagnostic-only evidence probes isolated the dependent call-endpoint
+application; no diagnostic IO is present in delivered source. Explicit actual
+result arguments fixed unresolved source metavariables; explicit L/frame/state,
+address maps and machines plus separately typed discharged room/capacity inputs
+removed expensive endpoint inference. The final composition probe passed in
+3.528s with231645184B cgroup peak, and the complete fixture/direct-read check
+passed in18.721s. No memory, swap, heartbeat, depth, fuel, node or test limit was
+raised. Existing large-certificate opacity conventions were inspected; opaque
+runtime-state experimentation was removed after it obstructed dependent types.
+Every raw failure is retained, not relabeled by subsequent scoped passes.
+
+The42 actual new public fixture/helper axiom sets are pinned separately; the
+previous27-report guard remains unchanged. The lane's complete per-file sweep
+now includes both fixtures, and its single source/toolchain-keyed .lake cache
+inventory already hashes both fixtures and their actual imports. No duplicate
+build tree or external dependency cache is exported.
+
+Read-only published-prerequisite reinspection continued beyond the mutation
+checkpoint. The local tracking ref was91e94; fetching ONLY public origin/master
+under the canonical writer lease found4165de133bafd522ab18099e18cad489bb1aa7d6,
+with human-audited93920309f5c800c9ce4809bc74700ed4fde65fb2 its ancestor. No source
+merge/import or worker-branch fetch occurred, and the own branch was preserved.
+The three consumed Compiler/MemoryCalls/MemoryCallExamples files remain exactly
+the91e94 published bytes even on that newer master. Additional published
+Bridge ExternalEvm.MemoryRefinement.Represents is acknowledged: preallocated,
+capacity-wide NUMERIC words, active physical EvmYul memory and explicit padding
+allocator contract. It does not provide a core StateRepr-to-Failure.Slice frame,
+byte/journal or transient-world coupling; Bridge is still forbidden in core.
+The new TryPanicProducer explicitly labels producer36 an intrinsic GHOST, not
+the original carried source callee; its raw ofData-computed bytes theorem is
+not an arbitrary panic-code or target-call compiler theorem. Actual signatures
+and source tags are retained in published-api-audit.log/ready-work-reinspection.json.
+No conditional bridge/ghost result is counted as discharge of V12's missing
+producer or recreated in another namespace.
+
+Full original queue remains binding:
+
+| Original item | Actual progress and remaining obligation |
+|---|---|
+| Work1/G37.01 | PARTIAL: real ordinary target memory-call mutation, old alias return, private rebinding, distinct-object observations and subsequent caller use now proved. General storage/tuple/runtime-recursive frames remain refused/missing in the unchanged producer. |
+| Work2/G37.02 | PARTIAL/BLOCKED: finite direct calls, intrinsic finite recursion and prefixes remain evidence; no unbounded source-lowering/uncapped intrinsic runtime/target recursive simulation is supplied. Published independent Source semantics is acknowledged; existing cutoffs/exhaustion/refusals stay intact. |
+| Work3/G37.03 | BLOCKED: full dependent-signature function-value dispatch needs its actual general runtime frame/lowering producer; restricted owner remains unchanged. |
+| Work4/G36.01-.03 | PARTIAL/BLOCKED: ordinary supported blocks/branches and existing concrete mixed finite-loop evidence are retained. General mixed heap/storage push/pop/shrink/allocation loops and break/continue/early-return transport plus V14 application remain open. |
+| Work5/G38 | PARTIAL/BLOCKED: actual evaluated byte/local projected consumers and ordinary bare target revert exist. Nonempty revertData remains refused by this memory-call compiler. New published byte/refinement/ghost components are not absent, but no actual core word-cell-to-Slice byte/frame/journal relation, qualified full panic/ABI return/unwind or whole-State/world rollback composition is discharged. TRes.error contains no live State. |
+| Work6/G39 | PARTIAL/BLOCKED: existing intrinsic reset/projected-root/local laws remain, with no new transient/self-call/callback/world or general target root/boundary composition from this memory-only witness. |
+| Backfill A | PARTIAL: new genuine mutating target-call/reference/array consequences supplement existing extension/result/prefix/finite-recursion controls; original coverage and mandatory final integration/validation remain open. |
+| Backfill B | PARTIAL: existing nested projected emissions and mixed finite-loop/evaluated payload evidence remain; general unwind/rollback/root/world applications and full validation remain open. |
+
+The original full run-lean.sh exit124 at fixed300s is still FAILED/incomplete;
+TestSuite/sort were not reached. It was not repeated. Old no-build exit3 stays
+inventory only; normal/strict docs raw exit1 and separate complete exact-base
+comparisons are recorded separately. No new axioms, sorry, native_decide,
+implemented_by, changed Fml.inTarget/profile/verdict/exclusion/SolKey mapping,
+reserved source edit, goal write/reset/reactivation, push/merge/PR or whole-lane
+completion claim is made. Prior sealed sets are preserved; a new continuation8
+export binds the actual committed head, gates, reviews and outstanding queue.
+
+
+Continuation8 decisive scoped gates: actual Lean4.24.0
+(797c613eb9b6d4ec95db23e3e00af9ac6657f24b), Lake5.0.0-src+797c613; dedicated
+KeySort reports successful2jobs. Owned/published-control import closure197jobs
+passes in1.407s using the existing validated cache. All16 owned modules and
+BOTH standalone fixtures pass serial per-file checks in73.407s; the final new
+fixture passes in18.721s. Separate host exact-axiom guards pass42 new and27 prior
+sets. Wrong/missing/duplicated/error-bearing guard logs are all rejected by the
+new guard, as intended. Layer/import/orphan/trust checks have zero findings.
+All eight prior seals verify unchanged (109/84/91/86/114/90/34/7 entries).
+Only24 verified stopped continuation8 containers were removed; cached sources,
+.lake artifacts, previous evidence and unrelated containers were retained,
+restoring about14GiB disk headroom. Raw exit137/cap-peak diagnostic failures and
+all intermediate failed checks remain; final green gates do not rewrite them.
+Final documentation exits and complete exact-base comparisons, exact source
+hashes and independent artifact reviews are recorded with the new committed
+checkpoint's handoff. Full300s/TestSuite/sort obligations remain incomplete.
