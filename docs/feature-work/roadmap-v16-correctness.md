@@ -365,8 +365,8 @@ Investigated remaining concrete dependency map (no reserved-owner repair):
   resource bounds must be supplied without residual fragment admission. Generic
   composition or an assumed PublicCorrectness does not construct these fields.
 * G50.01–02: actual source constructor/initcode/artifact/install correspondence,
-  creates_table, address/nonce/payment/rollback/code deposit and StateExport
-  decode_reach/decode_commutes are needed. Target adversarial/backward interaction
+  creates_table, address/nonce/payment/rollback/code deposit and PublicCorrectness
+  decode_reach/decode_commutes for the StateExport decoder are needed. Target adversarial/backward interaction
   coverage is not supplied by forward finite-trace transport or deterministic
   Lifetime invariants. Preserve full per-run hash histories across transactions.
 * G51.01–02: final applications need those actual runtime/deployment results and
@@ -718,3 +718,121 @@ source-success premise. That assigned scoped backfill is taken only after this
 checkpoint's gates, reviews, commit and handoff, without altering box semantics.
 Exact committed head and immutable artifacts are recorded externally under
 /workspace/scratch/v16-diamond-recovery; the blocked goal is not reset/reactivated.
+
+
+## Original box backfill after the sealed diamond checkpoint
+
+Diamond checkpointbd9e4402da292bd4e6ab83c575b1241911cb5e0a completed its proof,
+control, accounting, required-gate outcomes, independent reviews and53-entry
+artifact handoff before this next independently ready originalG51.02 work.
+Its gate-index omissions were independently found and corrected to26exact
+capped/replayable command records, including the failed doc comparator. Both
+artifact reviewers verified the corrected handoff and all53hashes. No goal reset,
+reactivation, source delivery or full-lane completion was claimed.
+
+NEW memory_call_box derives represented source/target success with postcondition
+OR exact source/target empty revert from actual Input and the approved box. It
+does not request source success, infer an arbitrary post at a halt, or erase
+failure. memory_call_box_iff preserves that complete two-alternative witness.
+NEW memory_call_box_diamond_dual proves scoped box/diamond duality using the
+actual certificate's two outcomes and standard classical double negation. It
+registers no global rewrite/simp/closer rule and changes no Spec.sat/Fml.inTarget,
+producer, semantics, profile, exclusion, verdict, SolKey map or search target.
+
+Seven NEW controls reuse the actual constructed populated input and producer
+fixtures. populated_box obtains real success/post representation for the closed
+known caller, using the existing computed source baseline only to select the
+correct result branch. failure_box_false_post and box_false_post_exact_revert
+show a genuine false-post box at the existing empty revert: NEW transport derives
+exact source+target failure rather than fabricating a successful state.
+box_not_total_success rejects the latter inference. box_false_marker_rejected
+rejects a false marker claim on actual success. populated_box_diamond_duality
+instantiates scoped duality at the real reached input; general_modal_duality_rejected
+uses unchanged exhausted source execution to refute an unrestricted global rule.
+All complete ordered observations and prior alias/escape/address/cursor witnesses
+remain intact; no observation subset replaces them.
+
+Both independent read-only proof/control reviewers passed these consequences
+and their scope. The core's first check had an unknown standard theorem namespace,
+corrected to Classical.not_not. The first controls check used Lean's reserved
+prefix keyword as a proof identifier; renamed it. Raw failed exits remain under
+/workspace/scratch/v16-box-recovery. No budget increase, new axiom/sorry,
+native_decide, implemented_by or reserved repair was used. Same explicit-context/
+irreducible sharing, serial capped checks and single source/toolchain cache.
+
+The same reviewed premise-policy mechanism now pins the three box declarations
+as well as the five diamond declarations. Four additional direct corruption/live
+controls reject a strengthened same-name box binder, an added source-success
+premise and input replacement, and check no no-revert premise is assumed. All
+26legacy and39extended audit tests pass. The audit preserves exact revert as an
+alternative; its success fields are not labeled total success. All2207constructor/
+G03/stage obligations remain OPEN. Core metadata110and control-closure186include
+private/generated helpers; reached scoped dependency closure184 retains the
+unrelated imported conditional theorem outside that scope. These are versioned
+structural checks supplementing kernel proofs, not semantic trust shortcuts.
+
+Final proportionate checks subsequently passed as recorded below; exact-head
+artifact reviews are recorded externally after commit. The same required docs
+failure85vs83 and original concrete G48–G51 prerequisites remain unresolved.
+
+
+### Box checkpoint committed handoff and final investigated obligations
+
+The changed-source full run-lean gate PASSED996default jobs/262kernel jobs,
+377taclets/131annotations matched, exit0. Actual cgroup peak4131119104bytes,
+sampled aggregate RSS2351960KiB, maxLean1/maxCompiler0 under the unchanged
+12GiB/no-swap cap and5400-second bound. Strict300seconds/module passed26timing
+rows from unchanged TestSuite sources:491automatic+61step-budget,0manual,
+11refuted,0pending. Complete pinned TestSuite passed564=552derived+11refuted
++1excluded,0pending,2skip. Layers185/0;orphans1011/0/0;trust1026sources/246sites/
+0findings;noncircular1260modules/0violations. All26legacy and39extended audit
+tests passed. Raw current and historical failures remain distinct from passes.
+
+The two mandatory documentation gates still FAIL: raw48missing+37ambiguities,
+complete85current findings versus83frozen-base findings, exactly the same two
+reserved published planned Yul citations and0removed. Neither citations nor
+checker exclusions were edited; no count-only or inherited-debt green waiver.
+This keeps the checkpoint PARTIAL even with successful proofs and runtime gates.
+
+Both separate read-only reviewers passed the box proof/control/accounting
+milestones. They also investigated the original queues after BOTH diamond and
+box consumers. No further specific mandatory independently executable proof
+omission was identified on published91; more generic wrappers would not discharge
+these precise remaining contracts:
+
+* G48: actual full-profile SourceSpec, Admission.sound/complete, Lowering.dom/
+  agrees/cert and independent parsing/checking/progress, preimage/failure/stipend/
+  Horizon evidence. Existing Source owners remain read-only.
+* G49.01: total Roadmap.Compilation.dom/cert across every approved constructor/
+  feature combination. Actual optional fragment-indexed compilation plus the
+  new scoped populated box/diamond consumers is not that total theorem.
+* G49.02–03: actual Execution.assemble/dom/agrees/cert, pinned byte-EVM transport,
+  complete coverage/failure/resource progress and approved per-run history bounds,
+  without residual fragment admission. Recursive/external/Osaka/resource coverage
+  remains missing; SourceSpec/V12–V15 integration is not fabricated.
+* G50: source constructor/initcode/runtime installation/creates_table and actual
+  payment/address/nonce/code-deposit/rollback links; adversarial/backward coverage
+  with PublicCorrectness.decode_reach/decode_commutes for the StateExport decoder.
+  Generic Lifetime induction is
+  not a concrete deployment/transaction construction.
+* G51: final applications of those concrete results with matching SolKey rule,
+  callback, loop and specification correspondence. Fml.inTarget, verdicts,
+  exclusions, search target and reserved calculus/closer repairs stay untouched.
+
+The finite published word-machine consumer now covers both actual success/post
+and exact revert alternatives, with genuine populated inputs and full existing
+ordered observations. Its exhausted/general-duality countercontrols delimit the
+scope; no global source progress, full-profile correctness, source delivery,
+byte-EVM success or whole-lane completion follows. All2207coverage obligations
+and original G48–G51 parents remain OPEN. Existing blocked goal is preserved.
+
+Exact final head, theorem types/premises/axioms, all exact capped gate commands,
+raw failures, complete doc comparison/provenance, independent artifact reviews,
+full/owned/recovery patches, bundle and checksums are prepared under
+/workspace/scratch/v16-box-recovery. Diamond checkpoint53seal and earlier76/110/
+30seals remain preserved. No push, default-branch merge, dependency/toolchain
+change, reserved-owner repair or new/reset/reactivated goal occurred.
+
+Final finder review corrected the decoder-field attribution: decode_reach and
+decode_commutes belong to PublicCorrectness, for the StateExport decoder, not
+to StateExport itself. This documentary correction changes no theorem or scope.

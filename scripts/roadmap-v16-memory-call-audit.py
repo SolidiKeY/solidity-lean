@@ -23,6 +23,12 @@ REQUIRED = {
  T+'diamond_complete_observations': {P+'memory_call_diamond',T+'ordered_words',T+'source_arrays'},
  T+'failure_diamond_rejected': {P+'memory_call_diamond',T+'failure_source'},
  T+'general_diamond_not_success': {P+'SpecificationControls.exhausted_diamond',P+'SpecificationControls.exhausted_has_no_success'},
+ P+'memory_call_box': {P+'memory_call_result',P+'spec_box_post'},
+ P+'memory_call_box_iff': {P+'memory_call_box'},
+ P+'memory_call_box_diamond_dual': {P+'memory_call_result'},
+ T+'populated_box': {P+'memory_call_box',T+'populated_input'},
+ T+'box_false_post_exact_revert': {P+'memory_call_box',T+'failure_box_false_post'},
+ T+'general_modal_duality_rejected': {'Solidity.Spec.sat'},
  P+'memory_call_result': {'Solidity.Evm.Memory.Calls.Program.sound'},
  T+'populated_input': {P+'memory_call_cursor', 'Solidity.Evm.Compiler.Compilation.memoryCalls_input'},
  T+'populated_spec': {P+'memory_call_spec'},
@@ -42,6 +48,9 @@ BOUNDARY = ('Scoped actual ordinary memory-call certificate/specification consum
 PREMISE_POLICY = ROOT/'tests/roadmap-v16/diamond-premises.json'
 COMMON = ['C','b','L','frame','Γ','Δ','F','P','compiled','path','σ','base','m']
 DIAMOND_PARAMETERS = {
+ 'memory_call_box':COMMON+['φ','input','box'],
+ 'memory_call_box_iff':COMMON+['φ','input'],
+ 'memory_call_box_diamond_dual':COMMON+['φ','input'],
  'memory_call_not_exhausted':COMMON+['input'],
  'memory_call_capacity':COMMON+['input','cursor','allocator'],
  'memory_call_diamond':COMMON+['φ','input','diamond'],
@@ -49,6 +58,9 @@ DIAMOND_PARAMETERS = {
  'memory_call_diamond_cursor':COMMON+['φ','input','diamond','cursor','positive','allocator'],
 }
 DIAMOND_PROPOSITIONS = {
+ 'memory_call_box':['path','input','box'],
+ 'memory_call_box_iff':['path','input'],
+ 'memory_call_box_diamond_dual':['path','input'],
  'memory_call_not_exhausted':['path','input'],
  'memory_call_capacity':['path','input','allocator'],
  'memory_call_diamond':['path','input','diamond'],
@@ -73,6 +85,7 @@ def validate_diamond_premises(theorems):
         for name,constant in [('path','Solidity.Evm.Compiler.Compilation.isMemoryCalls'),
                               ('input','Solidity.Evm.Compiler.Compilation.Input'),
                               ('diamond','Solidity.Spec.diamond'),
+                              ('box','Solidity.Spec.box'),
                               ('allocator','Solidity.Evm.Memory.StructAllocatorRepr')]:
             if name in by_name:
                 core.require(constant in by_name[name]['constants'],
@@ -155,6 +168,7 @@ def make_report(core_data, controls_log):
       'openPremises':['Actual compiler Input state/frame/reached AllocationInput',
         'Actual source-success and box premises remain on the older box-only consumer',
         'New diamond consumer requires actual diamond and Input; success/exhaustion/capacity are derived, not new premises',
+        'New box consumer requires actual box and Input; success/post OR exact revert is retained, not total success',
         'SourceSpec/admission/lowering/full-profile coverage and progress',
         'Recursive/external execution and pinned Osaka/resources',
         'Deployment/rollback/adversarial transactions and final SolKey applications'],

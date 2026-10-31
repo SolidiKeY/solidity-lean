@@ -104,6 +104,23 @@ class AuditTests(unittest.TestCase):
         row=next(r for r in controls['theorems'] if r['name']==m.P+'memory_call_diamond')
         row['dependencies'].append('_private.Solidity.Roadmap.V16.MemoryCallConsumer.0.'+m.P+'missingAlias')
         with self.assertRaises(m.core.Invalid):m.validate_scoped_dependencies(controls)
+    def test_same_box_binder_strengthened(self):
+        rows=self.theorem_map();premise=next(p for p in rows[m.P+'memory_call_box']['premises'] if p['name']=='box')
+        premise['type']+=' ∧ sourceSuccess'
+        premise['closedExpr']='And ('+premise['closedExpr']+') sourceSuccess'
+        with self.assertRaises(m.core.Invalid):m.validate_diamond_premises(rows)
+    def test_extra_source_success_on_box(self):
+        rows=self.theorem_map();rows[m.P+'memory_call_box']['premises'].append(
+          {'name':'source','type':'desired source success','isProp':True,'closedExpr':'unproved','constants':['Eq']})
+        with self.assertRaises(m.core.Invalid):m.validate_diamond_premises(rows)
+    def test_box_input_replaced_by_total_success(self):
+        rows=self.theorem_map();premise=next(p for p in rows[m.P+'memory_call_box']['premises'] if p['name']=='input')
+        premise['constants']=['Solidity.Prog.run','Eq']
+        with self.assertRaises(m.core.Invalid):m.validate_diamond_premises(rows)
+    def test_box_does_not_assume_no_revert(self):
+        rows=self.theorem_map();self.assertEqual(
+          [p['name'] for p in rows[m.P+'memory_call_box']['premises'] if p['isProp']],['path','input','box'])
+        m.validate_diamond_premises(rows)
     def test_negative_result_not_counted_as_extra_premise(self):
         rows=self.theorem_map();row=rows[m.P+'memory_call_not_exhausted']
         self.assertEqual([p['name'] for p in row['premises']],m.COMMON+['input'])

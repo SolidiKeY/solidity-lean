@@ -132,3 +132,9 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.memory_call_diamond_iff
 
 #print axioms Solidity.Roadmap.V16.memory_call_diamond_cursor
+
+#print axioms Solidity.Roadmap.V16.memory_call_box
+
+#print axioms Solidity.Roadmap.V16.memory_call_box_iff
+
+#print axioms Solidity.Roadmap.V16.memory_call_box_diamond_dual

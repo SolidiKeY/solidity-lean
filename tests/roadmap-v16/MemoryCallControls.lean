@@ -473,6 +473,82 @@ theorem exhausted_case_not_admitted {b L frame : Nat} {F : Frag []}
     ¬ candidate.Input L frame base SpecificationControls.entryState m :=
   fun input => memory_call_not_exhausted candidate path input rfl
 
+/-- NEW box transport has no source-success premise. The actual closed source
+baseline selects its success branch for this concrete populated application. -/
+theorem populated_box : ∃ m₁ base₁ m₂ base₂,
+    run prefixCompiled.code machine = .ok m₁ 0 ∧
+    remainingCompiled.Input 1 128 base₁ callerEntry.st m₁ ∧
+    run remainingCompiled.code m₁ = .ok m₂ 0 ∧ m₂.stack = [w[77]] ∧
+    StateRepr 1 1 128 remainingCompiled.frag remainingOutput.st base₂ m₂ ∧
+    BaseExtends callerEntry.st.H base₁ base₂ ∧
+    GrowsAllocator 1 128 (remainingCompiled.allocationCost callerEntry.st)
+      callerEntry.st base₁ m₁ remainingOutput.st base₂ m₂ ∧
+    Spec.sat remainingOutput.st markerPost := by
+  obtain ⟨m₁, base₁, runPrefix, initialStack, input, _⟩ := populated_input
+  rcases memory_call_box remainingCompiled remaining_path input remaining_box with
+    ⟨o, m₂, base₂, source, target, stack, repr, baseExtension, grows, post⟩ | ⟨source, _⟩
+  · have eq : o = remainingOutput := Except.ok.inj (source.symm.trans remaining_source)
+    subst o
+    exact ⟨m₁, base₁, m₂, base₂, runPrefix, input, target, stack.trans initialStack,
+      repr, baseExtension, grows, post⟩
+  · rw [remaining_source] at source
+    cases source
+
+/-- The approved box accepts genuine empty revert even with a false post. -/
+theorem failure_box_false_post : Spec.sat initial (.box failureProgram (.not .tt)) := by
+  simp only [Spec.sat, failure_source, ne_eq, reduceCtorEq, not_false_eq_true]
+
+/-- NEW box transport derives exact source/target failure here, not a fictitious
+successful state satisfying the false postcondition. -/
+theorem box_false_post_exact_revert : failureProgram.run initial = .error .revert ∧
+    run failureCompiled.code machine = .revert := by
+  rcases memory_call_box failureCompiled (by decide +kernel)
+    Solidity.Evm.Memory.CallExamples.calleeFailure_input failure_box_false_post with
+    ⟨_, _, _, _, _, _, _, _, _, post⟩ | failure
+  · exact False.elim (post trivial)
+  · exact failure
+
+theorem box_not_total_success : Spec.sat initial (.box failureProgram (.not .tt)) ∧
+    ¬ ∃ o, failureProgram.run initial = .ok o := by
+  refine ⟨failure_box_false_post, ?_⟩
+  rintro ⟨o, source⟩
+  rw [box_false_post_exact_revert.1] at source
+  cases source
+
+theorem box_false_marker_rejected : ¬ Spec.sat initial (.box program (.not markerPost)) := by
+  intro box
+  rcases memory_call_box compiled compiled_path input_inhabited box with
+    ⟨o, _, _, source, _, _, _, _, _, post⟩ | ⟨source, _⟩
+  · have eq : o = sourceOutput := Except.ok.inj (source.symm.trans source_success)
+    subst o
+    exact post source_post
+  · rw [source_success] at source
+    cases source
+
+/-- Scoped modal duality is instantiated at the same genuinely reached caller. -/
+theorem populated_box_diamond_duality : ∃ m₁ base₁,
+    run prefixCompiled.code machine = .ok m₁ 0 ∧
+    remainingCompiled.Input 1 128 base₁ callerEntry.st m₁ ∧
+    (Spec.sat callerEntry.st (.box remainingCalls markerPost) ↔
+      ¬ Spec.sat callerEntry.st (.diamond remainingCalls (.not markerPost))) := by
+  obtain ⟨m₁, base₁, runPrefix, _, input, _⟩ := populated_input
+  exact ⟨m₁, base₁, runPrefix, input, memory_call_box_diamond_dual remainingCompiled remaining_path input⟩
+
+/-- Exhaustion invalidates GENERAL box/diamond duality. The finite certificate
+consumer must not become a global rewrite or a change to the approved reading. -/
+theorem general_modal_duality_rejected :
+    ¬ (Spec.sat SpecificationControls.entryState
+      (.box (Prog.recBase : Prog TransactionControls.contract [] []) .tt) ↔
+      ¬ Spec.sat SpecificationControls.entryState
+        (.diamond (Prog.recBase : Prog TransactionControls.contract [] []) (.not .tt))) := by
+  intro dual
+  have box : Spec.sat SpecificationControls.entryState
+      (.box (Prog.recBase : Prog TransactionControls.contract [] []) .tt) := by
+    change (THalt.exhausted ≠ .panic)
+    intro impossible
+    cases impossible
+  exact dual.1 box rfl
+
 end Solidity.Roadmap.V16.MemoryCallControls
 
 #print axioms Solidity.Roadmap.V16.MemoryCallControls.compiled_path
@@ -535,6 +611,14 @@ end Solidity.Roadmap.V16.MemoryCallControls
 #print axioms Solidity.Roadmap.V16.MemoryCallControls.diamond_does_not_supply_capacity
 #print axioms Solidity.Roadmap.V16.MemoryCallControls.general_diamond_not_success
 #print axioms Solidity.Roadmap.V16.MemoryCallControls.exhausted_case_not_admitted
+
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.populated_box
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.failure_box_false_post
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.box_false_post_exact_revert
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.box_not_total_success
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.box_false_marker_rejected
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.populated_box_diamond_duality
+#print axioms Solidity.Roadmap.V16.MemoryCallControls.general_modal_duality_rejected
 
 /-! Actual checked test closure and definition dependencies; read-only metadata. -/
 open Lean Elab Command in

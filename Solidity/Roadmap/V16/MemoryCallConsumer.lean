@@ -224,4 +224,54 @@ theorem memory_call_diamond_cursor {C : Contract} {b L frame : Nat} {Γ Δ : Ctx
   exact ⟨o, m', base', space, source, target, stack, repr, baseExtension, grows,
     post, next, next.arrays.free.cell⟩
 
+/-- A box on this actual checked path supplies successful represented output
+with its postcondition OR the exact genuine empty-revert alternative. Source
+success is not a premise, and a reverting box does not supply a false post. -/
+theorem memory_call_box {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {φ : Spec C Δ} (input : compiled.Input L frame base σ m)
+    (box : Spec.sat σ (.box P φ)) :
+    (∃ o m' base', P.run σ = .ok o ∧ run compiled.code m = .ok m' 0 ∧
+      m'.stack = m.stack ∧ Memory.StateRepr L b frame compiled.frag o.st base' m' ∧
+      Memory.BaseExtends σ.H base base' ∧
+      Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m o.st base' m' ∧
+      Spec.sat o.st φ) ∨ (P.run σ = .error .revert ∧ run compiled.code m = .revert) := by
+  rcases memory_call_result compiled path input with
+    ⟨o, m', base', source, target, repr, stack, baseExtension, grows⟩ | ⟨source, target⟩
+  · exact .inl ⟨o, m', base', source, target, stack, repr, baseExtension, grows,
+      spec_box_post box source⟩
+  · exact .inr ⟨source, target⟩
+
+/-- Exact scoped box equivalence preserves both success/post and failure; it is
+not a total-success assertion or a change to the approved box reading. -/
+theorem memory_call_box_iff {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {φ : Spec C Δ} (input : compiled.Input L frame base σ m) :
+    Spec.sat σ (.box P φ) ↔
+    (∃ o m' base', P.run σ = .ok o ∧ run compiled.code m = .ok m' 0 ∧
+      m'.stack = m.stack ∧ Memory.StateRepr L b frame compiled.frag o.st base' m' ∧
+      Memory.BaseExtends σ.H base base' ∧
+      Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m o.st base' m' ∧
+      Spec.sat o.st φ) ∨ (P.run σ = .error .revert ∧ run compiled.code m = .revert) := by
+  constructor
+  · exact memory_call_box compiled path input
+  · rintro (⟨o, _, _, source, _, _, _, _, _, post⟩ | ⟨source, _⟩)
+    · simpa only [Spec.sat, source] using post
+    · simp only [Spec.sat, source, ne_eq, reduceCtorEq, not_false_eq_true]
+
+/-- Box/diamond duality is valid on this actual two-outcome certificate path.
+It is deliberately not asserted for arbitrary source execution (exhaustion and
+panic in the approved general semantics would invalidate that inference). -/
+theorem memory_call_box_diamond_dual {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
+    (path : compiled.isMemoryCalls = true) {σ : State C Γ} {base : Nat → Fin W}
+    {m : Machine} {φ : Spec C Δ} (input : compiled.Input L frame base σ m) :
+    Spec.sat σ (.box P φ) ↔ ¬ Spec.sat σ (.diamond P (.not φ)) := by
+  classical
+  rcases memory_call_result compiled path input with ⟨o, _, _, source, _⟩ | ⟨source, _⟩
+  · simpa only [Spec.sat, source] using (Classical.not_not : ¬ ¬ Spec.sat o.st φ ↔ Spec.sat o.st φ).symm
+  · simp only [Spec.sat, source, ne_eq, reduceCtorEq, not_false_eq_true, iff_self]
+
 end Solidity.Roadmap.V16
