@@ -105,3 +105,5 @@ history is in git.
 
 V08's partial independent adapter checkpoint and its open prerequisites are
 recorded in [roadmap-v08-world-lowering](feature-work/roadmap-v08-world-lowering.md).
+
+V08 custom-error failure boundaries and controls are recorded in [the owning roadmap](feature-work/roadmap-v08-world-lowering.md).

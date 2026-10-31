@@ -913,3 +913,6 @@ import Solidity.Lowering.V08.SourceDispatch
 import Solidity.Lowering.V08.SourceDispatchControls
 import Solidity.Lowering.V08.SourceCustomErrors
 import Solidity.Lowering.V08.SourceCustomErrorControls
+
+import Solidity.Lowering.V08.SourceCustomErrorFailures
+import Solidity.Lowering.V08.SourceCustomErrorFailureControls

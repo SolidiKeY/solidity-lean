@@ -79,3 +79,11 @@ for module in ['SourceCustomErrors','SourceCustomErrorControls']:
  result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
  result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
 print('PASS: source custom-error evidence corruption controls rejected')
+
+# Additive coverage: every earlier case remains verbatim above.
+for module in ['SourceCustomErrorFailures','SourceCustomErrorFailureControls']:
+ path='Solidity/Lowering/V08/'+module+'.lean'
+ assert path in original['source_sha256']
+ result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
+ result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
+print('PASS: source custom-error failure evidence corruption controls rejected')

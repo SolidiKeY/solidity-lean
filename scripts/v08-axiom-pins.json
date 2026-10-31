@@ -2236,6 +2236,142 @@
     "Quot.sound",
     "propext"
   ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.argument_failure_boundary": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.argument_prefix_then_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.changed_local_tail_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.converted_hash_head": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.encoding_failure_not_plain_revert": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.nested_intrinsic_panic_bytes": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.nested_panic_execution": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.nested_timeout": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.observed_argument_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.observed_rethrow": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.record_arguments": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.record_complete_state": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.record_encoding_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.record_execution_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.record_members": [],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.record_populated_snapshot": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.record_zero_horizon": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.rethrow_binary": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.rethrow_not_panic": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.wrong_argument_reset": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.wrong_encoding_rollback": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailureControls.wrong_truncated_selector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailures.arguments_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailures.attempt_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailures.converted_tail_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailures.encoding_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailures.rethrow_bytes": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceCustomErrorFailures.rethrow_zero_horizon": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity.Lowering.V08.SourceCustomErrors.distinct_input_encodings": [
     "propext"
   ],

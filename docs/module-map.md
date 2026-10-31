@@ -1264,3 +1264,6 @@ At the root, the notation's own tests:
 
 | `Lowering/V08/SourceCustomErrors.lean` | Actual custom-error execution and selector transport with explicit independent signature input-byte equality. |
 | `Lowering/V08/SourceCustomErrorControls.lean` | Populated exact custom-error payload/order/static/panic/timeout controls and concrete UTF-8 signature checks. |
+
+| `Solidity/Lowering/V08/SourceCustomErrorFailures.lean` | Actual custom-error argument/encoding failure boundaries. |
+| `Solidity/Lowering/V08/SourceCustomErrorFailureControls.lean` | Populated source panic, rethrow and aggregate-encoding-gap controls. |

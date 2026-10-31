@@ -2823,3 +2823,95 @@ Remaining ready G21 work includes general argument/encoding failure composition,
 direct wrong-selector concrete controls and supported nested/reference/catch
 applications; canonical signature/type/layout/source-world certificates stay
 prerequisites. These three checkpoints do not exhaust the original assignment.
+
+
+## G21 actual custom-error failures and supported nested/rethrow checkpoint (2026-10-31)
+
+Owned `Solidity/Lowering/V08/SourceCustomErrorFailures.lean` proves the actual published execS
+revertError argument-failure and encoding-failure boundaries independently.
+The former retains reached St but discards private argument locals via EM.sub;
+the latter executes actual encodeVals after successful arguments at outer L0.
+Each law requires only the respective individual step equations, not a desired
+whole lowering/preservation result. converted_tail_failure composes an actual
+converted head with a failing tail. The populated controls directly instantiate
+it: binary hash allocation succeeds, local true becomes false, then actual
+divisionzero produces exact panic0x12 at the reached heap. Both pipelines and
+static modes are quantified. Complete old ex/world/balances93/7/storage/transient/
+journal3/events/logs/fnLocals, heap0 and reached heap1/next2 remain observable.
+
+A small actual catalog declares Record(bool) and RecordError(bytes32,Record).
+The actual typed struct constructor succeeds after the hash and local assignment,
+allocating Record(false) at2 with full typed returned values and localsfalse.
+The actual published encodeOne reference branch then returns exactly
+.stuck "not ABI-encodable"; this is a REPRODUCED missing aggregate-encoder
+prerequisite, not a dangling reference, EVM revert, approved exclusion or whole
+SourceSpec failure-freedom proof. Complete state is retained: balances93/7,
+persistent/transient true, code0/nonce1/journal3, old events/logs/fnLocals and all
+three typed heap objects/next3. Wrong rollback and plain-revert controls fail.
+No Source/decoder/encoder owner edits, duplicate payload emitter or profile cap.
+
+The next supported G21 application is actual nested-block panic and canonical
+Source.rethrow at the genuinely allocated binary byte object. General
+rethrow_bytes derives exact unchanged-St execution from actual typed local and
+present heap object premises at any positive horizon; zero horizon is exactly
+timeout with no heap premise. The populated application forwards [0,255,128],
+distinct from panic bytes; nested actual panic uses existing panicData_transport
+to observe exact intrinsic encodePanic0x12. EM.attempt observes these exact halts
+and reached complete states; it is NOT claimed as Solidity catch selection.
+A concrete truncated-selector negative distinguishes actual length100 from99
+without a hash noncollision hypothesis; distinct actual four-byte selector
+hashes/general canonical signature representation remain separate obligations.
+
+All719 prior exact standard axiom sets are unchanged;28 new checked sets make747.
+Independent finder/skeptic requested a direct generic-prefix application; actual
+converted_hash_head and changed_local_tail_failure now discharge it. Subsequent
+read-only proof/script reviews found no semantic/ownership issues. Lean MCP and
+get_goal are unavailable; bounded serial import checks are the fallback and the
+existing blocked goal stays untouched. Production source/config/runtime/cache/
+resource/target guards remain exact; new additive wrapper uses checked76535 prior
+certificate plus the exact Audit prefix and10 prior source hashes. Its unit test
+uses the SHA-bound committed8fb41 Audit, rejects different current content and
+checks prior certificate/source corruptions. All original40 checker cases remain
+byte-for-byte;4 new source mutations/omissions make44 streamed cases, unchanged
+production checker outcomes and replayable seed+delta+expandedSHA evidence.
+
+Initial32MiB storage forecast is preserved. Retained additional failed proof
+attempts/raw Docker logs and the supported rethrow extension justified an
+additive36MiB forecast before final check/export; neither forecast is an enforced
+execution guard. Same stopped runtime, warm outputs, cacheoff, aggregate12GiB/
+no-swap/CPU1 under16GiB parent, OS headroom, Lean-j1/LEAN_NUM_THREADS1 and600s/
+all proof/fuel/node/TestSuite budgets unchanged. No deletion/new runtime/cache
+relocation. Raw wrapper inventory/preflight lock/proof/summary-script failures
+are retained separately from corrected passing gates; no failed exit is green.
+
+Committed handoff scope remains PARTIAL for EVERY original group and backfill:
+G20 canonical callable/getter/inherited/functionref/readonly/body applications;
+G21 general nested/reference/calldata/slice/catch/canonical ABI and aggregate
+encoding; G22.01 source external/self/frame, .02 source callback/reentrancy,
+.03 source new/trynew/body, .04 canonical library/functionvalue/linkage, .05
+source/world/runtime composition; G23 general hash/emit/transient/layout and
+G16-G22 composition; BackfillA source frame/layout applications and BackfillB
+canonical Source/V07 signature/ABI applications all remain open. Published
+Source.Eval is consumed as real independent semantics. No compiler/solc/EVM/
+bytecode/admission adequacy follows from these kernel component results.
+Decision321 dependency source hashes are still unchanged, as are Suite260;
+no supported distinct repair justifies repeating failed full/Decision600s.
+All previous125, literal/default/full/executable-refresh holds, raw docs/pins1,
+public-only NEW0 and frozen-base increases remain preserved. Ready independent
+work is not exhausted: supported dynamic-byte/nested ABI source applications,
+canonical signature-input evidence and remaining exact catch/body/frame
+applications require further work under ownership constraints. Artifact handoff
+records exact full committed head/base, every command/exit, reviews and seals.
+
+Final focused110751 PASS57.041997522s, sampled aggregateRSS1264185344,
+reported cgrouppeak608309248; exact747sets/72coreclosure and ALL44corruptioncases
+(positive+43expectedrejections) PASS. Trust1057/246/0; strict491/61budget/11refuted/
+0pending; layers172/0; orphans1042/0. Independent final staged finder/skeptic
+ACCEPT/no findings after the populated generic-application correction. Rawdocs/
+pins1 remain failures. A pre-staging bare owned filename produced one NEW missing
+finding and the complete comparison correctly failed; full owned path/staged
+registration fixed it, retaining raw47missing log separately. Finaldocs46missing/
+37ambiguous andpins359notes exactly equal public baseline, separately PUBLIC NEW0;
+frozen+11/+345 and mandatory125/default/full/literal holds unchanged. All prior
+seals/raw logs persist; exact final head and compact additive artifacts are in
+the checkpoint handoff. No goal identity/objective/status reset or completion.

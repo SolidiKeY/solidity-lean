@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.SourceCustomErrorFailureControls
 import Solidity.Lowering.V08.SourceCustomErrorControls
 import Solidity.Lowering.V08.SourceDispatchControls
 import Solidity.Lowering.V08.SourceCallableControls
