@@ -19,7 +19,7 @@ is introduced. G27/V10 and G32/V11 remain owners of compiler agreements.
 
 | Item | Implemented preparation | Remaining concrete obligation |
 | --- | --- | --- |
-| Y04 | Existing HashedLayout slot interpretation; intrinsic field widths; read/update/low/high/unchanged/bounded-word arithmetic; typed canonical codec/region reconstruction; residual bytes and raw slot updates; actual source reset/rollback controls | Full typed storage packing codecs/layout for all source aggregates/paths, dirty/noncanonical owned bits, derived source view instance and typed writeback, persistent/transient residual journal/reset, VY1 sload/sstore/tload/tstore composition, V10 agreement instance |
+| Y04 | Existing HashedLayout slot interpretation; intrinsic field widths; read/update/low/high/unchanged/bounded-word arithmetic; typed canonical codec/region reconstruction; residual bytes and raw slot updates; actual source reset/rollback controls | Nested/dynamic/mapping/source-path layouts and whole-store codecs, dirty/noncanonical owned bits, derived source view instance and typed writeback, persistent/transient residual journal/reset, VY1 sload/sstore/tload/tstore composition, V10 agreement instance |
 | Y05 | Byte operations; both general word roundtrips; snapshot mcopy including overlap; documented object-size/placement contracts and inhabited two-object allocation choices; reserved-area control; exact actual V04b MemOK preservation obligation | Full logical heap-byte view/writeback and V11 agreement; VY1 memory-safe semantics preserving actual MemOK; integrated nondeterministic allocator and full G01 refinement/resource-adequacy amendment; Gate G0 and speed measurements before any source representation change |
 | Y06 | Raw byte input, size/word-length premise, zero-padding and copying; approved Fixed hash and congruence; typed universally supplied environment values, blockhash window/blob index semantics; executable hash vectors | Source/Yul builtin integration and corresponding Solidity rows with source/session sharing proofs; raw input bounds in final semantics; fork-aware admission; compiler/source/EVM composition |
 | Y09.02 | Lean-only equational preparation table in rule map | Actual VY1 terms/statements and source integration, dl/tm syntax, printers, sound statement/update rules and source-level combinations |
@@ -284,3 +284,118 @@ cannot contain a dirty larger raw value), so whole writeback needs the agreed
 physical/source overlay and owner integration, not silent cleaning in these codecs.
 Actual MemOK is available but no assembly preservation instance is proved.
 No additional permission or semantic decision is requested.
+
+
+### Constructive packed aggregates and exact raw replay (2026-10-31)
+
+Continues revision `3fe717a45ff4267cedcf53173a15a06730800314` in the same VM,
+branch and pinned-base ancestry. No owner source, state representation, Syntax,
+allocator, compiler or manifest changed; original artifacts and failures retained.
+
+`PackedAggregates` constructs canonical **flat scalar-member** storage components.
+`PackedMembers D τs` is an intrinsic layout descriptor indexed by actual source
+field types; each member supplies an existing scalar codec and its documented
+`StorageWidth`. It contains no assumed aggregate inverse. Encoding traverses
+actual `Source.DataList`, accepts actual `Data.val` members and fails otherwise.
+Decoding constructs actual DataList. Struct decoding returns `Source.Data.struct`;
+fixed-array decoding returns `Source.Data.array` with its real declared length
+and actual member function. Array conversion inverses are proved, not assumed.
+`AggregateData` supplies direct actual Source.Data encode entry points, derives
+array length equality from its existing source proof, and rejects reference-only
+Data.val inputs rather than dereferencing them without source state. Its typed
+roundtrip and unchanged results are proved constructively; output-slot residual
+preservation follows from the successful encoder. Actual entry/reference-refusal
+controls are inhabited. Both independent reviewers inspected this final addition
+without checks and found no confirmed issue.
+
+Packing uses low-end byte coordinates inside storage words. `packedStart_spec`
+proves the first fitting offset is forward and cannot cross a word; `endByte`,
+`owned_bounds`, `head_tail_disjoint`, and `nextSlot_spec` prove extents, separation
+and trailing slot rounding. Struct/array entry uses `base.val*32` for a Word base;
+`Fits` requires end≤32*2^256, excluding address wrap. `nextSlot` is a natural end
+sentinel, not a claim that an additional object fits in storage. This follows the
+pinned storage documentation; memory's word-per-member layout is distinct.
+
+`PackedSlots` constructively serializes actual Word-indexed SlotView values to
+low-end bytes and back. `slotsOfBytes_slotBytes` is exact whole-map identity.
+The reverse byte identity requires address<32*2^256. Successful supported
+encoding has a typed decode-after-encode theorem and always exists for actual
+scalar-member DataList. `slot_roundtrip` composes this with the real nonwrapping
+bound. `encode_residual` preserves every unowned byte; `slot_residual_byte`
+preserves padding and residual bits even within partly owned slots. Canonical
+unchanged encoding requires only matching owned bytes; `encode_matches` proves
+that condition for constructed outputs, giving constructive idempotence. Gaps
+and trailing bytes are unrestricted, not assumed zero.
+
+Controls inhabit a heterogeneous five-field struct and12-element uint24 array,
+including slot rollover, internal/trailing nonzero padding, exact decoded source
+data, unchanged encoding, invalid enum refusal, and wrapping-extent refusal.
+Four explicit slot-word goldens are kernel checked and match two new lane-owned
+solc vectors in both pipelines. Nested aggregate members, dynamic arrays/mappings,
+hash-region separation, dirty/noncanonical owned bits, full typed store/heap
+writeback and whole-state identity remain open. HashedLayout still supplies the
+base through `physicalSlot`; its layout/separation and V10 agreement are inputs,
+not replaced compiler proofs. Actual V04b MemOK and allocation contracts unchanged.
+
+#### Gate G0 and independent findings
+
+Finder and skeptic both caught indexed matches in the initial aggregate code.
+They were replaced with tactic `cases`/casesOn elimination and explicit typed
+head/tail recursors; remaining pattern recursion is on Nat. The user was warned
+before this normalization refactor. Per-file final aggregate check1.47s versus
+1.55s initial match form on this small preparation file; these are recorded
+command timings, not a general performance claim. No exemption, proof-budget
+increase or shared source rewrite was used. Raw elaboration/normalization failures
+remain under `/workspace/vy2-evidence/aggregates-replay`.
+
+The skeptic also caught the initial adapter's invalid storage-root check:
+SimpleStateManager does not maintain account storage roots. `reference-first.json`
+retains valid return-byte runs but is **superseded for the storage invariant**.
+The final adapter observes public putStorage calls on a fresh public machine.
+Its declared extra invariant is no attempted writes, including reverted attempts;
+it does not infer state from unsupported roots. A real SSTORE control reads back
+value1 through public getStorage and requires adapter rejection. Both reviewers
+verified these fixes read-only, with no Lean/server/build/tests, and found no
+remaining confirmed issue. Final golden/control followups also found none.
+
+#### Exact pinned upstream replay
+
+The lane-owned adapter is closed to exact hashes of four existing pinned files:
+calldata_length_read (6 calls), mcopy_overlap (5), keccak256_assembly (1), and
+inline_assembly_memory_access (1). It uses public snapshot/parser/vector and
+machine/creation/observation APIs; shared reference scripts are unchanged.
+Each pipeline retains13 ordered calls plus4 implicit deployments. These sources
+have no explicit constructor/failure/storage/log/world-host expectations;
+that complete inventory is recorded, not silently ignored. Local `new bytes(5)`
+is allocation, not a world-host requirement. Raw calldata (including noncanonical
+trailing words) and complete returndata/padding are retained and compared.
+No byte vector is converted to scalar args. Unknown shapes/settings, source drift,
+missing/reordered observations, wrong deployment/code/failure/bytes/state fail closed.
+The unchanged public machine retains exception/log admission and transaction resets.
+
+Final reference exit0: both pipelines, Osaka, optimizer disabled; all four fixtures
+working plus14 lane-owned scalar/aggregate vectors per pipeline. Fail-closed
+controls exit0:8 positive fixture variants and81 mutations, including actual SSTORE.
+Gas100m/step5m and proof/test budgets unchanged. Earlier global adapter exit1 logs
+remain original failures; the narrow lane adapter repairs these exact cases without
+rewriting that other owner's general harness. Unannotated upstream assembly here
+is external evidence only and does not relax YQ7 or establish Lean admission.
+
+#### Gates and full-queue handoff
+
+Final focused closure27 jobs exit0. Complete audit309 public declarations and157
+theorem axiom reports, only propext/Quot.sound/Classical.choice. Mandatory KeySort
+and actual Lean4.24.0/Lake5.0.0-src+797c613 recorded in versions-keysort.log, exit0,
+2 jobs, before this checkpoint's RUNTIME_GATE_PASS prerequisite claim. Full final
+wrapper exit0:1003 default jobs,262 TestSuite jobs,131 annotations matched. Static/docs comparisons are in the external handoff and raw
+`aggregates-replay/*.exit.json`; no fabricated gate markers.
+
+Backfill A now includes constructive supported aggregate codecs/layouts and their
+Word-slot/residual composition, beyond scalar assumed-law interfaces. Backfill B
+agreements/allocation/MemOK obligations remain explicit inputs. No fallback residual
+journal implementation is claimed: aggregate construction was possible and completed
+for the stated supported components. Y04 remains partial for dirty/whole-store and
+source effects; Y05 for whole memory/allocator/MemOK; Y06 for actual source/Yul
+builtins and rows; Y09.02 for intrinsic terms/notation/printers/calculus composition.
+VY1 remains absent; applicable V10/V11 and VY3/VY4/VY5 joint V12/V13/V15/V16 closure
+is not imported. Questions=[]; no new human semantic choice is required.

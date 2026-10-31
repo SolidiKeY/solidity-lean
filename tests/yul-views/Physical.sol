@@ -3,6 +3,29 @@ pragma solidity 0.8.38;
 
 // Reference-only controls. No claim of Lean frontend admission.
 contract Physical {
+    struct Heterogeneous { int8 signedValue; bytes2 pair; address owner; int128 wide; bool enabled; }
+    Heterogeneous private heterogeneous;
+    uint24[12] private fixedArray;
+    function heterogeneousPacking() external returns (uint first, uint second) {
+        assembly ("memory-safe") {
+            sstore(heterogeneous.slot, 0xa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5)
+            sstore(add(heterogeneous.slot, 1), 0xa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5)
+        }
+        heterogeneous.signedValue = -1;
+        heterogeneous.pair = 0x1234;
+        heterogeneous.owner = address(0x112233);
+        heterogeneous.wide = -2;
+        heterogeneous.enabled = true;
+        assembly ("memory-safe") { first := sload(heterogeneous.slot) second := sload(add(heterogeneous.slot, 1)) }
+    }
+    function fixedArrayPacking() external returns (uint first, uint second) {
+        assembly ("memory-safe") {
+            sstore(fixedArray.slot, 0xa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5)
+            sstore(add(fixedArray.slot, 1), 0xa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5)
+        }
+        for (uint i = 0; i < 12; ++i) fixedArray[i] = uint24(i + 1);
+        assembly ("memory-safe") { first := sload(fixedArray.slot) second := sload(add(fixedArray.slot, 1)) }
+    }
     bool public flag;
     struct PackedScalars { int8 signedValue; bytes2 pair; bool enabled; }
     PackedScalars private packed;

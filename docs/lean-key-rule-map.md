@@ -962,3 +962,11 @@ is reopened by this table.
 
 See [VY2 lane record](feature-work/inline-assembly-vy2.md) for integration
 limits, controls and reviews.
+
+
+VY2 further Lean-only equational preparation (YQ5, no SolKey taclet):
+`PackedMembers.decode_encode`/`slot_roundtrip` construct typed flat aggregate
+roundtrips under successful encoding and nonwrapping extent; `encode_residual`/
+`slot_residual_byte` preserve unowned bytes; `encode_unchanged` requires matching
+canonical owned bytes, supplied constructively by `encode_matches` after encoding.
+These are component laws, not Y09.02 statement/calculus rules or source admission.

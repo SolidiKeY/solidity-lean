@@ -183,3 +183,18 @@ Separate finder/skeptic reviews report no confirmed findings.
 See [VY2](inline-assembly-vy2.md) for exact premises, evidence and remaining
 full-lane dependencies; no admission row or whole-layout instance is claimed.
 Full committed revision/patch/bundle/checksums remain in the VM handoff.
+
+
+### VY2 aggregate and raw-fixture handoff (2026-10-31)
+
+Further Backfill A constructs flat scalar fixed-array/heterogeneous-struct codecs
+over actual Data/DataList, computes documented storage packing, and proves typed
+roundtrip, extent/separation, unchanged and residual/padding preservation through
+actual Word slot maps. Inhabited multi-slot controls and pinned compiler goldens
+agree. A closed four-fixture raw adapter retains13 calls and4 deployments per
+pipeline, fixes the previous raw-vector/host overclassification failures, and
+passes81 fail-closed controls. Original failing records remain preserved.
+Finder/skeptic findings (indexed match and unsupported storage-root observation)
+were fixed and independently reviewed. Exact premises, proof/external boundaries,
+remaining full Y04–Y09.02 dependencies and cumulative artifact paths are in
+[VY2](inline-assembly-vy2.md) and `/workspace/vy2-evidence/HANDOFF.md`.

@@ -892,3 +892,4 @@ import Solidity.Yul.Views.SourceControls
 import Solidity.Yul.Views.Agreements
 import Solidity.Yul.Views.ReadControls
 import Solidity.Yul.Views.ScalarControls
+import Solidity.Yul.Views.PackedControls
