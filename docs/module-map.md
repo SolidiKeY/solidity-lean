@@ -1238,3 +1238,8 @@ pass. This is pure encoding/observation evidence, not machine correspondence.
 | `Bridge/SolidityBridge/RoadmapV15/ReferenceImageTransport.lean` | Checked complete typed image/reference byte, state/key, temporal-pair and disjoint observation consequences. |
 | `Bridge/SolidityBridge/RoadmapV15/PreallocatedObservation.lean` | Checked64-byte published target constructor, typed ABI, actual mload frame and supplied-opcode byte frame; no read-value/allocator/driver adequacy. |
 | `Bridge/SolidityBridge/RoadmapV15/ReferenceObservationControls.lean` | Nonzero, pipeline-identity, order/length/overlap, signed, cell-boundary and zero-fuel controls; eight axiom audits. |
+
+| Module | Role |
+|---|---|
+| `Bridge/SolidityBridge/RoadmapV15/EnvironmentReference.lean` | Eight backend/reference environment selection, actual supplied-opcode, ordered-byte and explicit source-representation consequences; no Osaka/driver/transaction closure. |
+| `Bridge/SolidityBridge/RoadmapV15/EnvironmentReferenceControls.lean` | Distinct nonzero/absent accounts, timestamp wrap, stack, ordered-byte, wrong-value/endian/length and inhabited/mismatched intrinsic-source controls; eight axiom audits. |

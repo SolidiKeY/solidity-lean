@@ -1121,3 +1121,78 @@ remaining physical read-value/allocator/compiler-path/calldata/driver/resource
 and full-gate obligations. The finder also required QOFF2's draft to carry its
 full standalone question, source tags and mutually exclusive consequences;
 these are now present. No theorem, premise, expected observation or scope changed.
+
+
+## QOFF2 recovery: reference environment consumer (cd80b3fc)
+
+Frozen base and branch remain unchanged. The96 requested same-pin archives were
+verified against every original source hash, bundle and installed cache bytes;
+one offline unpack passed under12GiB/no swap. Lean4.24.0 and Lake5.0.0-src+797c613
+were recorded; `lake build Solidity.KeySort` passed (2jobs). QOFF2 archive supply
+is fulfilled; endpoint access and the original semantic goal remain blocked.
+
+[EnvironmentReference.lean](../../Bridge/SolidityBridge/RoadmapV15/EnvironmentReference.lean)
+adds eight consumer laws over actual intrinsic/backend and reference definitions:
+`environment_address_word`, `environment_address_roundtrip`,
+`environment_word_encode`, `environment_observe_reference`,
+`environment_selected_backend`, `environment_selected_reference`,
+`environment_reference_bytes`, `environment_source_observation`.
+The arbitrary reference frame uses its actual account map (including absent
+accounts), caller/self identities, value and timestamp modulo256bits. The selected
+reference theorem retains the whole result state and arbitrary stack tail under
+positive fuel and zero charged gas. The source theorem explicitly requires the
+published five-clause environment representation relation; no source execution
+or preservation is assumed. The byte theorem retains all32 ordered bytes.
+BALANCE, other metadata instructions and resource/fetched-driver adequacy remain
+open; Cancun reference arithmetic is not full Osaka correspondence.
+
+[EnvironmentReferenceControls.lean](../../Bridge/SolidityBridge/RoadmapV15/EnvironmentReferenceControls.lean)
+checks distinct self7/caller11 accounts with balances29/31, value13, timestamp
+2^256+17 wrapping to17, absent-account zero, caller changes, credited self balance,
+complete observation order and full byte lists, wrong endian/length negatives,
+arbitrary nonempty stack tail and zero-fuel failure. A matching intrinsic state
+inhabits the exact source relation; a mismatched self balance refutes it.
+All eight headline axiom sets are only propext/Classical.choice/Quot.sound.
+Focused source and controls pass, bringing the checked consumer inventory to100.
+No axioms/sorry/native shortcuts or proof budgets were added.
+
+Review findings corrected before checkpoint: finder and skeptic requested the
+inhabited source relation and mismatch negative; both were added. Runtime finder
+identified fail-open process inspection and a guard-status race; the revised
+runner records inspection outcomes, rejects monitoring failure for a live
+container, and cannot report exit0 with a guard violation. The first mandatory
+Bridge attempt retained exit137: its monitor mistakenly classified a defunct Lean
+zombie as an active compiler missing-j1. The corrected runner ignores statZ only;
+all live compilers retain-j1, one-at-a-time and original300s limits. Reusing the
+same build cache after this diagnosed wrapper correction does not waive that
+failure. Original full5400s exit124, cache403, raw docs1 and disclosed historical
+unsealed retry data loss remain unchanged and retained. Final gate outcomes and
+exact committed-head export are recorded in the recovery handoff.
+
+G46.01 remains incomplete (actual Osaka primitives/control/resource adequacy);
+G46.02 remains incomplete (physical read-value, allocator/padding, compiler-path,
+calldata and driver clauses); G46.03 remains incomplete (actual symbolic-slot
+representation/target composition); G46.04 is partial (the five selectors above,
+with BALANCE/other metadata/world composition still open); G46.05 is partial
+(approved per-run hash-premise transport only); G46.06/G47 remain blocked by
+actual general V13/V14, Osaka driver/resources/account/call/create/transaction
+and finite/infinite trace composition. BackfillA andB have useful checked laws
+and controls, but do not close those parent obligations. All150 opcode rows stay
+OPEN, including every secondary obligation. The unchanged persistent goal is not
+reset/reactivated/completed by cache arrival or a narrow/full Bridge check.
+
+
+Environment checkpoint gate/handoff: actual `timeout 5400 ./scripts/check-bridge.sh`
+passed all four configured targets (2150jobs,443.195s), cgroup peak1911181312bytes,
+memory.max12884901888/swap.max0, no process-guard violation. Task-local config
+copies change only weakLeanArgs-j1/--tstack131072; source pins and defaults are
+unchanged. Layer/orphan/trust/whitespace and32 accounting/publication mutation
+tests pass. Global docs still fails rawexit1 (46missing/37ambiguous); complete
+finding-class/multiplicity comparisons against frozen and published baselines
+have zero additions. Independent finder/skeptic source/control/runner reviews
+clear after the recorded fixes; neither reviewer ran Lean/server/builds.
+Exact checkpoint evidence: /workspace/v15-evm-agreement-evidence/bridge-cd80b3fc.
+Full-source5400s historical exit124 remains failed/pending; no rerun or waiver.
+All100 checked laws are partial consumer progress; all150 opcode rows stay OPEN.
+Next independent original item is operandful BALANCE, preserving actual target
+accessed-account effects. Full remaining G46/G47 obligations above are unchanged.
