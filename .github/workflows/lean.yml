@@ -119,8 +119,10 @@ jobs:
         run: |
           set -o pipefail
           lake build SolkeyTestSuite 2>&1 | tee testsuite-build.log
+      - name: Check fresh replay timing
+        run: timeout 300s python3 scripts/check-memory-loop-timing.py --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json
       - name: Automation gate
-        run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log
+        run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log --replay-group-results memory-loop-ci-replay.json
 
   editor:
     runs-on: ubuntu-latest
