@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceIndexedDelete
 import Solidity.Backend.MemoryOps.SourceDeleteTarget
 import Solidity.Backend.MemoryOps.SourceDefault
 import Solidity.Evm.Correct
@@ -303,4 +304,110 @@ theorem constructor_boundaries :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms delete_word_endpoint
+
+private abbrev SΓ : Source.RCtx := [.int .u256,.array .memory .bool none,.array .memory .bool none]
+private def indexedSource (k : PrimTy.uint.Denote) : Source.EMState E0 SΓ :=
+  (.cons (sourceUint k) (.cons (.memRef rfl 0) (.cons (.memRef rfl 0) .nil)),sy.2)
+private def indexedState (k : PrimTy.uint.Denote) := σ.push (t := .val .uint) k
+private def indexedMachine (k : Nat) := writeMachine machine 2 (.val (wmod k))
+private abbrev sroot : Source.Idx SΓ (.array .memory .bool none) := .there .here
+private abbrev sindex : Source.Idx SΓ (.int .u256) := .here
+private def term : Source.RExpr E0 SΓ (.tuple []) := sourceIndexedDelete sroot sindex
+private theorem indexed_memOK (k : PrimTy.uint.Denote) : Source.MemOK E0 SH (indexedSource k) := by
+  refine ⟨⟨source_memOK.1.1,?_⟩,source_memOK.2⟩
+  exact ⟨trivial,⟨⟨_,rfl,rfl⟩,⟨⟨_,rfl,rfl⟩,trivial⟩⟩⟩
+private theorem indexed_repr : StateRepr 1 1 8 ((Frag.init Γ).push (.val .uint) .ok)
+    (indexedState (uintOfNat 0)) base (indexedMachine 0) := by
+  exact initial_repr.consVal (uintOfNat 0) w[0] (ReprV.uint_of rfl) (by decide)
+
+private def indexedCode : List Instr := deleteLocalCode 1 (.there .here : Idx [.val .uint,.mem B] (.mem B))
+  (compileVal 1 (.simple (.local .here) : Val C [.val .uint,.mem B] .uint))
+private theorem indexed_code_run (m : Machine) (hptr : m.mem 1=w[16]) (hindex : m.mem 2=w[0])
+    (hlen : m.mem 16=w[3]) : run indexedCode m=.ok (writeMachine m 17 w[0]) 0 := by
+  change run ([.push w[0]] ++ ([.mload 1] ++ ([.mload 2] ++ writeArrayStackCode))) m=_
+  rw [run_append_ok (show run [.push w[0]] m=.ok (m.push w[0]) 0 from rfl)]
+  rw [run_append_ok (show run [.mload 1] (m.push w[0])=
+    .ok ((m.push w[0]).push w[16]) 0 from by
+      change Out.ok ((m.push w[0]).push (m.mem 1)) 0=_
+      rw [hptr])]
+  rw [run_append_ok (show run [.mload 2] ((m.push w[0]).push w[16])=
+    .ok (((m.push w[0]).push w[16]).push w[0]) 0 from by
+      change Out.ok (((m.push w[0]).push w[16]).push (m.mem 2)) 0=_
+      rw [hindex])]
+  have ha := arrayAddrStack_run (m.push w[0]) ⟨16,by decide⟩ ⟨0,W_pos⟩ 3 (by decide)
+    (by simpa only [Machine.push,wmod_of_lt (by decide : 3<W)] using hlen)
+  rw [if_pos (by decide : (0 : Nat)<3)] at ha
+  rw [writeArrayStackCode,run_append_ok ha]
+  simp only [run,Machine.push,exec_cons_zero,Instr.step,wmod_of_lt (by decide : 17<W),
+    Out.ok_bind,exec_nil,writeMachine]
+
+/-- Execute the resolved local-index delete and its expression statement with
+an inhabited independent heap relation and two old Source aliases. The target
+index is a real scalar local, not a literal supplied to the operation. -/
+theorem resolved_runtime_delete (p : Roadmap.Pipeline) :
+    ∃ (out : Heap H) (z : Source.EMState E0 SΓ) (target : Machine),
+      (Source.evalE (Source.SemanticsExamples.G0 p) F0 3 term).run (indexedSource (uintOfNat 0))=(.ok Source.RVal.unit,z) ∧
+      (Source.execS (Source.SemanticsExamples.G0 p) F0 4 SΓ.length none
+        (.expr term : Source.RStmt E0 [] false .body SΓ SΓ) (indexedSource (uintOfNat 0)).1).run (.nil,sy.2)=
+          (.ok (.normal (indexedSource (uintOfNat 0)).1),(.nil,z.2)) ∧
+      run (deleteLocalCode 1 (.there .here : Idx [.val .uint,.mem B] (.mem B))
+        (compileVal 1 (.simple (.local .here) : Val C [.val .uint,.mem B] .uint))) (indexedMachine 0)=.ok target 0 ∧
+      SourceBoolMemoryAt z 0 out r .dyn ∧ Source.MemOK E0 SH z ∧
+      z.1=(indexedSource (uintOfNat 0)).1 ∧
+      [MObj.elems .dyn (hp.get r),MObj.elems .dyn (out.get r)]=[[true,false,false],[false,false,false]] ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run z=(.ok (.bool false),z) ∧
+      z.1.get (.there (.there .here))=.memRef rfl 0 ∧ target.stack=[w[42]] ∧
+      [target.mem 0,target.mem 1,target.mem 2,target.mem 5,target.mem 16,target.mem 17,target.mem 18,target.mem 19]=
+        [w[20],w[16],w[0],w[99],w[3],w[0],w[0],w[0]] := by
+  have hr : SourceBoolMemoryAt (indexedSource (uintOfNat 0)) 0 (indexedState (uintOfNat 0)).heap r .dyn := represented
+  have hk : (uintOfNat 0).1.toNat<(indexedState (uintOfNat 0)).heap.len r .dyn := by
+    simp only [indexedState,State.push,σ,Heap.len,Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+    decide
+  obtain ⟨out,z,target,hw,he,hs,hi,hcode,hrep,hm,hmem,hl,hstack,ha⟩ :=
+    resolved_delete_word (Source.SemanticsExamples.G0 p) F0 0 (indexedState (uintOfNat 0)) r hr
+      sroot sindex (.there .here) .here (uintOfNat 0) rfl rfl rfl rfl hk indexed_repr SH (indexed_memOK _)
+  have hv : MObj.elems .dyn (out.get r)=[false,false,false] := by
+    change hp.setIndex r .dyn (uintOfNat 0) false=some out at hw
+    simp only [Heap.setIndex] at hw
+    have hk' : (uintOfNat 0).1.toNat<(MObj.elems .dyn (hp.get r)).length := hk
+    rw [if_pos hk'] at hw
+    rw [←Option.some.inj hw,Heap.get_set_same,MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+    rfl
+  have ht : target=writeMachine (indexedMachine 0) 17 w[0] := by
+    have hc := indexed_code_run (indexedMachine 0) rfl rfl rfl
+    have heq := hc.symm.trans hcode
+    cases heq
+    rfl
+  refine ⟨out,z,target,he,hs,hcode,hrep,hmem,hl,?_,?_,?_,hstack,?_⟩
+  · rw [hv]
+    simp only [Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+  · have hh : z.2.heap.get 0=some ⟨.array .memory .bool none,sourceBoolMemory [false,false,false]⟩ := by rw [←hv];exact hrep
+    exact source_bool_read z 0 _ hh 0 (by decide)
+  · rw [hl];rfl
+  · rw [ht];rfl
+
+/-- A valid runtime local whose value is the exact array endpoint is rejected
+by actual Source location evaluation, before a deletion can take place. -/
+theorem resolved_runtime_endpoint (p : Roadmap.Pipeline) :
+    (Source.evalE (Source.SemanticsExamples.G0 p) F0 3 term).run (indexedSource (uintOfNat 3))=
+      (.error (.revert (Source.panicData .index)),indexedSource (uintOfNat 3)) ∧
+      run indexedCode (indexedMachine 3)=.revert := by
+  have hr : SourceBoolMemoryAt (indexedSource (uintOfNat 3)) 0 hp r .dyn := represented
+  have hm : StateRepr 1 1 8 ((Frag.init Γ).push (.val .uint) .ok)
+      (indexedState (uintOfNat 3)) base (indexedMachine 3) :=
+    initial_repr.consVal (uintOfNat 3) w[3] (ReprV.uint_of rfl) (by decide)
+  exact resolved_delete_word_bounds (Source.SemanticsExamples.G0 p) F0 0 (indexedState (uintOfNat 3)) r hr
+    sroot sindex (.there .here) .here (uintOfNat 3) rfl rfl rfl rfl (by
+      simp only [indexedState,State.push,σ,Heap.len,Heap.get,Objs.get,hp,r,MObj.elems_dyn]
+      decide) hm
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.resolved_runtime_delete' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms resolved_runtime_delete
+/-- info: 'Solidity.Backend.MemoryOps.SourceTargetControls.resolved_runtime_endpoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms resolved_runtime_endpoint
+
 end Solidity.Backend.MemoryOps.SourceTargetControls

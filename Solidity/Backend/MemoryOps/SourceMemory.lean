@@ -19,7 +19,7 @@ def SourceBoolMemoryAt {E : Source.Env} {Γ : Source.RCtx} {H : HTy} {R : RefTy}
     (a : ArrTy R (.prim .bool)) : Prop :=
   y.2.heap.get address=some ⟨.array .memory .bool none,sourceBoolMemory (MObj.elems a (hp.get r))⟩
 
-private theorem source_heapObj_run {E : Source.Env} {Γ : Source.RCtx}
+theorem source_heapObj_run {E : Source.Env} {Γ : Source.RCtx}
     (y : Source.EMState E Γ) (address : Nat) (obj : Σ τ, Source.Data E.layout τ)
     (hr : y.2.heap.get address=some obj) :
     (Source.heapObj (E := E) (Γ := Γ) address).run y=(.ok obj,y) := by
@@ -148,4 +148,6 @@ theorem SourceBoolMemoryAt.copy_schedule {E : Source.Env} {Γ : Source.RCtx} {H 
 #guard_msgs in #print axioms source_bool_alloc_memOK
 /-- info: 'Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy_schedule' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms SourceBoolMemoryAt.copy_schedule
+/-- info: 'Solidity.Backend.MemoryOps.source_heapObj_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms source_heapObj_run
 end Solidity.Backend.MemoryOps

@@ -2910,3 +2910,57 @@ aggregateRSS1706320KiB, no new cap/OOM/kill events. Raw docs1 completepublic83eq
 originalfrozenno-newFAIL11incoming, globalinventory1:1067unrecorded=359inherited+
 708owned,0unsafe. No global gate waiver; reserved registry unchanged. Both source
 reviews accepted with no defect. All prior seals/failures retained.
+
+## Checkpoint thirty-six: resolved Source indexed deletion syntax
+
+Reproduced the remaining G34/Backfill application: C34 composed Source.deleteLoc,
+not resolved RExpr/RStmt execution. SourceIndexedDelete now uses the EXISTING
+typed Source local/index/delete syntax and actual evalE/evalLoc/execS interpreters.
+Published amount_ok discharges the supported index operation domain. Initial
+Source root/index locals and intrinsic root/index locals are aligned explicitly;
+actual Source location evaluation, intrinsic Stmt.run deletion and compiled word
+code success/final local heap relation/MemOK/stack/allocator preservation follow.
+No evaluation oracle, desired final relation or Source syntax semantics was added.
+The unchanged heapObj run proof is exposed to compose actual length/location runs.
+
+Actual Source expression statements use EM.sub and return their reached typed
+locals; deletion preserves those locals. Runtime index and two repeated Source
+aliases are inhabited using the actual previously allocated TFF Source heap.
+The intrinsic target has a real uint local compiled to mload, rather than an
+index literal. Complete TFF→FFF vectors, Source statement normal return, other
+alias ID0, final false read, word cells[0,1,2,5,16,17,18,19] becoming
+[20,16,0,99,3,0,0,0] and stack42 are proved for both declared pipelines.
+An exact endpoint runtime local is rejected during Source location evaluation,
+before deleting. Source panic and symbolic word revert are separate observations,
+not an encoded returndata/ABI or Source rollback equivalence.
+
+The generic source/target theorem quantifies runtime index and object length with
+existing validity only. Bool dynamic-array primitive selection remains explicit;
+this does not establish all resolved Source programs, progress/calls/admission,
+general reference paths/rebinding/delete, physical bytes or an entire compiler.
+All original G32/G33/G34/G35.01/.03/.04/.05 parents and BackfillA/B stay partial;
+G35.02 reserved memory-storage and G35.06 final V10/Source/target chain stay blocked.
+All-profile construction/checked allocation failures, general ABI/reference/storage
+transport, fresh deep-copy/emitted traversal and recursive Source graphs remain
+open. No profiles/refusals/target predicates/budgets changed.
+
+Retained C36 core01/03/05 and controls01 elaboration failures were repaired by
+explicit monad reductions and published typed heap length unfolding, without
+weakening statements. Controls02/03 pass158jobs with standard-only axiom output;
+exact guard/final gates and independent reviews are recorded in the new handoff.
+Preflight1649508352bytes,96MiB build/log/export envelope and unchanged512MiB
+reserve; same capped serial cacheOFF runtime. Historical raw docs/inventory gates
+remain failures, public-baseline equality is separate from frozen-base11incoming
+findings. No compiler/EVM external execution claim.
+
+C36 final guarded158jobs/full1073default/262Suite/SolKey377/131 exit0.
+Strict automatic, complete fixture, layer/orphan/trust, lane723standardpins/
+92modules and script-corruption controls pass. Final sampled aggregateRSS
+1715168KiB,221184bytes warm disk growth, zero new memory.max/OOM/kill events.
+Raw docs1 matches complete83public findings; frozen no-new remainsFAIL11incoming.
+Raw globalinventory1:1082unrecorded=359publicinherited+723owned,0unsafe.
+Independent finder found missing runtime-index WORD endpoint coverage; fixed with
+actual index3 StateRepr and direct resolved_delete_word_bounds application. Both
+source reviews accepted final hypotheses/control/ownership/scope without further
+defects. Standard-only guards cover all15new public laws/controls; prior failures
+and seals retained. No wholelane/physical-byte/SourceSpec completion claimed.

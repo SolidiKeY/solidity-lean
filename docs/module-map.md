@@ -1293,3 +1293,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceTargetControls.lean` | Inhabited three-view Source/intrinsic/compiled-word deletion, exact cells/stack/frame, MemOK and endpoint/fuel controls. |
 
 | `Solidity/Backend/MemoryOps/SourceDefault.lean` | Actual Source zero-default constructor, published intrinsic growth/fresh framing, supported word allocator composition, low fuel and unchecked cursor-wrap boundary. |
+
+| `Solidity/Backend/MemoryOps/SourceIndexedDelete.lean` | Actual resolved Source local-index deletion expression/statement, intrinsic deletion and published word code; explicit initial local/heap alignment, bounds and MemOK. |
