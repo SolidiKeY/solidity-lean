@@ -52,3 +52,6 @@ import SolidityBridge.RoadmapV15.EncodingUniqueness
 import SolidityBridge.RoadmapV15.EncodingUniquenessControls
 import SolidityBridge.RoadmapV15.ReferenceEncoding
 import SolidityBridge.RoadmapV15.ReferenceEncodingControls
+
+import SolidityBridge.RoadmapV15.ByteImageTransport
+import SolidityBridge.RoadmapV15.ByteImageControls

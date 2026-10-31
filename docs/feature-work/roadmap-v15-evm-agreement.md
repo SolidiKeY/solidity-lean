@@ -751,3 +751,104 @@ modules remain unchanged. The final new exports are under
 /workspace/v15-evm-agreement-evidence/publication-7499c0a3. Full G46/G47 and
 Backfill A/B remain unfinished. The already-authorized runtime action is normal
 access restoration to the existing cache endpoint; it needs no reapproval.
+
+
+## Published byte-image consumer checkpoint (audit 57995d33)
+
+Recovery parent is 6a32b2bf2768005a96e7f4531e73d85b625c5bd8 on the existing
+assigned branch; frozen base and the blocked persistent goal are unchanged.
+The normal origin publication was verified at
+4165de133bafd522ab18099e18cad489bb1aa7d6. Only its exact dependency-free
+`Solidity/Evm/TryByteImage.lean` leaf was incorporated (blob
+58bdce849cc7a5dfaeea2fa2497fad3c04f70efe; SHA256
+bcf9bc3576dcc08cad4be80c997a324e5d2f1a0f5e82600044304823f242ba81).
+Its direct State/RevertBytes dependencies are byte-identical to this checkout.
+No master merge, producer repair, external import, dependency/pin/profile or
+budget change was made. Registration is append-only; core stays independent.
+
+`Bridge/SolidityBridge/RoadmapV15/ByteImageTransport.lean` proves fourteen new
+consumer laws: backend_byte_at, image_wordByte_backend, image_store_backend,
+image_store_observation, image_store_surrounding, image_store_read,
+image_store_typed, image_store_signed, image_overlap_backend,
+image_disjoint_backend, image_store_scalar, image_store_modulo,
+image_unsigned_cleanup and image_signed_cleanup. The backend indexed-encoding
+law holds for every natural input with j < width, including truncating widths.
+The full-word laws consume the actual producer wordByte/store32/snapshot and
+existing scalar/toWord encodings. They preserve the complete increasing-address
+32-byte list at any natural bounded offset (no alignment premise), the full
+intrinsic State and FrameKey, and every outside byte. Disjoint framing requires
+one natural interval to finish before the other starts; overlapping last-writer
+observation requires no disjointness. Readback uses the intrinsic uint range;
+arbitrary natural inputs explicitly reduce modulo 2^256. Signed and narrow
+cleanup reuse the published encodings/local scalar runner with the same stack
+tail. No custom machine, simulation premise or byte-memory adapter is defined.
+
+The producer's FrameMem includes ScalarFrame, aligned representation capacity,
+resident-word and zero-above fields. These laws do not restrict compiler/source
+admission or permit overwriting live physical typed heap roots. They show pure
+side-image observations only: no physical allocator, PaddingCorrect witness,
+MSTORE execution, calldata/copy semantics, resident expansion/gas adequacy,
+fetched-code reachability, Osaka relation or account/transaction correspondence.
+Optional TryByteCapture was not copied or used; no ghost capture is being counted
+as a physical allocation. Published ExternalEvm TryMemory/Code/Driver were read
+only: scoped fetched MSTORE/zero-fuel equations keep X admissibility and actual
+FFI/padding/resource obligations separate. Their unavailable EvmYul closure was
+not retried or treated as kernel-checked in this recovery.
+
+`Bridge/SolidityBridge/RoadmapV15/ByteImageControls.lean` inhabits the image with
+an actual State, nonzero ledger/balance/call metadata and full invocation/declaration
+key. Controls cover offsets0/1, nonzero distinct words258/513, actual partial
+overlap [1,33)/[2,34) with changed earlier bytes, nonzero disjoint preservation,
+[64,96) capacity boundary, rejected overrun65, far-offset empty slices, signed
+-1/minimum and unsigned maximum, modulo overflow, unsigned8/signed8 cleanup and
+nonempty framed stack tails. Wrong endian,31/33-byte length and complete word
+order are rejected. Whole lists, not numeric-only or final-byte observations,
+are retained. The fourteen #print axioms reports use propext/Quot.sound and,
+for image laws, inherited Classical.choice; no new axioms or trust shortcuts.
+
+Separate read-only finder and skeptic reviews found no statement, premise,
+nonvacuity, producer ownership or scope defect. The finder flagged key.value13
+versus the fixture's default tx.msgValue0; tx.msgValue is now13 and the controls
+were rechecked. This was witness clarity, not a missing theorem hypothesis.
+Final handoff/artifact review follows before export. Raw focused failures
+(first cache-prefix lookup, record layout and proof elaboration) are retained.
+The corrected runtime probe prints Lean4.24.0 commit797c613 and
+Lake5.0.0-src+797c613, followed by successful KeySort (2jobs), before
+RUNTIME_GATE_PASS. The initial wrapper-version probe failed and remains failed.
+The changed core closure passes971jobs under enforced12GiB/no swap; changed
+consumer/control closure also passes. Detailed commands, metrics, raw docs
+failures, complete finding comparisons and reviews are saved under
+/workspace/v15-evm-agreement-evidence/byteimage-57995d33. Exact committed-head
+patch/bundle/handoff/checksums will be exported under
+/workspace/v15-evm-agreement-artifacts/byteimage-57995d33, preserving prior seals.
+
+Full queue status remains unfinished: G46.01 numeric/control-to-Osaka is open;
+G46.02 now has these checked pure representation consequences, but actual
+reference execution, memory/calldata driver and padding/resource clauses remain
+open; G46.03 symbolic persistent/transient path composition is open;
+G46.04-.05 environment/hash/precompile actual pinned correspondence is open;
+G46.06/G47 production V13/V14, exact driver/resources/account/call/create/return/
+revert/transaction and finite/infinite trace composition are blocked. Backfill A
+is partial (64 checked laws total,15 reference proposals still UNCOMPILED), and
+Backfill B is partial (existing cumulative approved per-run hash/prefix/checkpoint
+laws and150-row secondary accounting; all150 opcode rows OPEN, no emitted/raw
+opcode equivalence claimed). No global hash injectivity or local journal/payment
+Boolean replaces missing account execution. The old cold full5400s exit124 and
+cache860-file CONNECT403 remain retained failures; the full Bridge gate remains
+pending. No unchanged failed heavy/cache gate was repeated. QNET1 already
+authorizes normal access restoration to the configured endpoint; runtime-owner
+restoration evidence and the pinned cache recheck are still required, without
+reapproval. This checkpoint does not complete the lane or goal.
+
+Final checkpoint review: independent finder and skeptic cleared the actual
+fourteen statements, explicit modulo clause, checked controls/gates and handoff
+status split. Both flagged the fixture description's imprecise “call data”;
+it now says call metadata, since no calldata payload was constructed. The finder
+also caught a blank line breaking the append-only module-map table; the new rows
+now continue that table. Only the three newly generated V15 Python bytecode
+files were relocated to the task evidence directory; unrelated bytecode and all
+Lean/dependency caches were preserved. Layer/orphan/trust and whitespace checks
+pass;12 opcode-accounting plus18 reference-boundary tests pass. Raw docs exits
+remain1: current/frozen46missing37ambiguous; publication48missing37ambiguous.
+Complete class/multiplicity comparisons add zero findings against either
+baseline. This is a no-new-findings pass, not a global documentation pass.

@@ -1220,3 +1220,6 @@ At the root, the notation's own tests:
 | `Bridge/SolidityBridge/RoadmapV15/EncodingUniquenessControls.lean` | Checked nonzero/signed/narrow/boundary, wrong-endian/length and complete ordered-observation controls. |
 | `Bridge/SolidityBridge/RoadmapV15/ReferenceEncoding.lean` | Uncompiled source proposal: actual published pure reference encoding to backend/scalar/full ordered-byte observations; external import gate blocked. |
 | `Bridge/SolidityBridge/RoadmapV15/ReferenceEncodingControls.lean` | Uncompiled reference-specific controls and pending axiom audits; checked independent analogues in the preceding control module. |
+| `Solidity/Evm/TryByteImage.lean` | Exact published scalar-frame pure byte-image producer; natural bounds/capacity, not physical EVM execution. |
+| `Bridge/SolidityBridge/RoadmapV15/ByteImageTransport.lean` | Complete ordered store/snapshot bytes to backend encoding, readback, signed/narrow consumers and state/key framing. |
+| `Bridge/SolidityBridge/RoadmapV15/ByteImageControls.lean` | Inhabited unaligned, overlap/disjoint, signed/truncation/boundary and wrong-byte-order/length controls. |
