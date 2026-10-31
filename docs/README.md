@@ -102,3 +102,5 @@ history is in git.
 | Preparation lane | Document |
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
+
+- [V15 EVM correspondence preparation](feature-work/roadmap-v15-evm-agreement.md): partial independent backfill, explicit G46/G47 integration obligations and validation evidence.

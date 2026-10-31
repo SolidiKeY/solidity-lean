@@ -34,3 +34,6 @@ import SolidityBridge.ExternalEvm.Assembly.LinkedChecks
 import SolidityBridge.ExternalEvm.Assembly.ResourceChecks
 import SolidityBridge.ExternalEvm.Assembly.SafeDivergenceChecks
 import SolidityBridge.ExternalEvm.Assembly.PopChecks
+import SolidityBridge.RoadmapV15.PrefixTransport
+import SolidityBridge.RoadmapV15.PremiseTransport
+import SolidityBridge.RoadmapV15.Controls
