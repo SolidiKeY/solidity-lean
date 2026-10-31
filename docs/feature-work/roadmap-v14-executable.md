@@ -5,7 +5,11 @@ Assigned base: `2fe1f8932f96be15b00df03ba2cde46f64a87758`.
 Branch: `codex/solidity-v12-v17-20261031/v14-payments-bytecode`.
 Checkout: `/workspace/solidity-lean`.
 
-This checkpoint is independent preparation from backfill A/B. It does not close
+This document consolidates the original checkpoint and eight recovery checkpoints.
+Milestone-specific gate tables below are historical; the final validation table
+at the end records the current source result.
+
+This work is independent preparation from backfill A/B. It does not close
 G43, G36.03, G44, G45 or the V14 lane. The required serial V11–V13 compiler
 prerequisites are not integrated at the assigned base. No worker branch was
 fetched, imported or cherry-picked. The checkpoint has no source/machine
@@ -113,15 +117,15 @@ are guarded in the owned modules and use only standard Lean axioms.
 |---|---|
 | 1: G43 | Blocked/open. No joint compiled payment/world relation, sender-funds/stipend gas proof, history-dependent strategy agreement, or source-success/machine-revert asymmetry discharge is claimed. The base legacy `Sim.oracle` uses a per-transaction table; the world API is unmetered. `Stipend.Obligation` still requires actual compiled worst-path gas and enforced rejection, not supplied parameters counted as proofs. |
 | 2: G36.03 | Deferred by assignment until independent G43 and integrated V12/G37. Prefix algebra here does not prove payment/call-loop finite-prefix or divergence simulation. |
-| 3: G44.01 | Open: independent source initializer/inheritance order, argument evaluation/ABI and constructor failure transport through the integrated lowering/compiler chain. |
+| 3: G44.01 | Partial: actual source initializer/base-argument prefix and failure-state transport plus successful legacy/viaIR source-deployment controls are proved. Argument controls are standalone metadata; source lowering/ABI and compiler constructor relation remain open. |
 | 3: G44.02 | Published installation/linking/immutable component reused read only; consumer proofs above return exact runtime bytes. Source/runtime interface, immutable declaration/value identity and full artifact-table composition remain open. |
 | 3: G44.03 | Open: source new/try-new, nonce-derived address, account/state/payment installation and failed-creation rollback composition. Existing world controls are preparation, not that proof. |
 | 4: G45.01–.02 | Partial independent consumer now includes selected multi-operation scalar execution over an encoded typed caller frame and derived exact headroom. General source/local/frame producer and fetched-runtime adapters remain open; no Scalar/Evm implementation was duplicated. |
 | 4: G45.03 | Published structured label proofs remain read only; execution transport of structured branch/LOOP and actual backedge execution are open. |
 | 5: G45.04–.05 | Reused assembler/byte proofs named above; offset/link layout, PUSH-data handling and `decode_encode` do not prove pinned decoder/step agreement. Reserved Bridge adapter remains untouched. |
 | 5: G45.06 | Open: selection/stack/control/assembly/encoding composition against actual executable runtime-byte behavior; resources, decoder agreement and integration premises are undischarged. |
-| Backfill A | Partial useful preparation now also includes selected scalar sequence/capacity composition over populated typed caller frames. Actual finite prefixes, suffix transport and assembled-runtime constructor consequences are retained. General runtime frame/layout and relocation/creation composition still need their actual producers; no parent closure. |
-| Backfill B | Partial useful preparation: checkpoint/prefix algebra, actual create/send/transfer rollback and byte/fresh-handle controls. Full effectful loop-prefix and source constructor/payment observations remain open. |
+| Backfill A | Partial: actual selected scalar/local reads and capacity over populated typed caller frames, constructor payload assembly, and library/immutable patch equality to selected bytes are proved. General runtime frames, assembler/session link provenance and executable decoder/control/resource producers remain open. |
+| Backfill B | Partial: actual world finite prefixes/iterations, paid-prefix tryCreate catch boundaries, source-journal nested/committed rollback, and source-initializer/argument failure controls are proved. Full effectful compiler-loop/divergence and source-to-runtime payment/constructor relations remain open. |
 | Reserved lanes V11–V17 | V11–V13 are blocking predecessors; V15–V17 are successors, not V14 prerequisites. No reserved work was reassigned and no unmerged branch imported. Coordinator integration of published predecessor interfaces is required before serial lane closure. |
 
 No reserved edit is proposed as an unauthorized repair. The needed integration
@@ -791,3 +795,97 @@ Checkpoint9 raw closure/allowlist equality is separately checked in
 `/workspace/v14-recovery-evidence/initializer-source-closure.json` (PASS26/22,
 no forbidden closure modules). Actual focused29jobs and fresh2file checks pass;
 source-init/deployment and base-argument boundaries above remain distinct.
+
+
+## Final recovery validation and exact blocking interfaces
+
+The final complete repository command ran on committed source head
+`c470fb4e531a527daf14046a5bddecfb3e797413` after all identified recovery
+consumers and independent reviews. It PASSED: default build1002jobs,
+SolkeyTestSuite262jobs, and solkeycheck parsed377taclets/131read-bearing with
+table coverage131 and exact pinned-file agreement. The following final
+checkpoint changes this owning document only; Lean/scripts/tests remain the
+same tested source. No unchanged failed heavy gate was retried as a waiver.
+
+Actual runtime: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake5.0.0-src+797c613. `lake -f v14-runtime.lakefile.toml build Solidity.KeySort`
+completed successfully (2jobs), recorded in recovery runtime.log before
+RUNTIME_GATE_PASS. That runtime-availability gate does not discharge lane proofs.
+No per-file Lean MCP tool was exposed; fresh explicit-j1 CLI diagnostics and
+focused import closures were used. Seventy-five guarded headline/control axiom
+outputs across21owned Lean modules contain only standard Lean subsets.
+
+The unchanged `./run-lean.sh` ran through a task-owned PATH Lake wrapper which
+selects the saved alternate lakefile (same package/targets, explicit-j1 flags).
+LEAN_NUM_THREADS=1; writer lock held through Docker process completion;
+aggregate MemoryMax12GiB/MemorySwapMax0; one sampled Lean worker throughout.
+Actual full wall10533.2s; peak aggregate Lean RSS10900MiB, peak anonymous10227MiB;
+child cgroup peak12884901888bytes (the12GiB cap), max-events2414 (cap-hit/allocation pressure; reclaim attempted),
+OOM/oom_kill/oom_group_kill all0; minimum host MemAvailable5872MiB. The cap was
+reached, not exceeded or bypassed. Before full gate about29GiB disk free;
+after it24GiB. Existing single build tree/source-toolchain cache was reused;
+no caches or duplicate build trees are exported.
+
+| Gate command | Actual outcome / decisive evidence |
+|---|---|
+| `./run-lean.sh` with saved bounded runtime wrapper and actual SOLKEY_RULES | PASS exit0:1002+262jobs;377/131/131 exact sort agreement; `/workspace/v14-recovery-evidence/full-final.log` |
+| Repository aggregate sampler | `/workspace/v14-recovery-evidence/full-final-measure/summary.json`; one worker, no OOM, cap/pressure statistics above |
+| Per-checkpoint focused/fresh kernel checks | PASS as named in each milestone and exported handoff;75exact guarded standard-axiom outputs |
+| `node --test tests/v14-executable/guard.test.mjs` | PASS17/17,0skips; `/workspace/v14-recovery-evidence/initializer-guard-tests.log` |
+| `node scripts/check-v14-executable.mjs`, layer/orphan/trust checks, whitespace | PASS; final static evidence is in `/workspace/v14-recovery-evidence/checkpoint10-checks.json` |
+| `bash scripts/check-doc-paths.sh` | Raw FAIL exit1/46 retained; final log in `/workspace/v14-recovery-evidence/checkpoint10-docs.log` |
+| Separate exact-base no-new docs comparison | PASS byte-identical to `/workspace/v14-evidence/docs-base.log`; this never relabels the raw checker green |
+
+Initial full-gate setup failure127 (Node absent inside the restricted container)
+and the deliberately interrupted137 attempt before accepted recovery findings
+were implemented remain raw non-passes. The host Node binary was then mounted
+read-only; final full pass used the fixed runtime. All original proof/control
+failures remain in evidence. Original checkpoint/artifacts at bb10f6f6 are
+preserved with unchanged checksums. No new goal/reset/VM/competing continuation,
+reserved implementation edit, push, merge, PR or unmerged predecessor fetch.
+The exposed tools contain stop_goal but no get_goal; the launcher's original
+objective is preserved, and its audited identity is not replaced.
+
+Separate independent read-only finder/skeptic reviews accepted every checkpoint
+and the actual complete base-to-c470fb4e source diff (21modules/28paths), including
+hypotheses, non-vacuity, ownership and model distinctions. Neither reviewer used
+Lean/server/builds. Final validation-document/handoff/export review follows;
+all review refinements are implemented. Kernel proofs, guard regressions and
+repository/TestSuite/sort checks are separate evidence. No external solc/EVM
+execution was run or claimed by this lane; Scalar.run remains gasless, Creation
+execution returns bytes without arbitrary runtime op execution, decode_encode
+is an encoder roundtrip, Source fixtures use toyFixed, and authored PUSH32 link
+metadata is not deployed-library identity or assembler-origin provenance.
+
+The entire assignment remains **blocked/partial**, not complete. The exact
+remaining producer requests (no unauthorized patch made) are:
+
+* Source owner: publish the independent payment/session interfaces required by
+  the frozen G01 decisions. Existing Source.Eval.pay/callAddr have no stipend
+  classification input; Source.Semantics explicitly records missing stipend,
+  sender-validity and failure-point modeling. Complete that reserved interface
+  while preserving the admitted profile/observations; do not add an exclusion
+  or desired-simulation premise. V14 still owes its own joint compiled world/
+  payment relation, actual fitted/enforced gas proof and asymmetry discharge.
+* V11–V13/G37 compiler/frame owners: publish/integrate the source-to-intrinsic
+  constructor/argument/ABI lowering, general runtime-local/reference frame and
+  call/return/world producers. Existing Source.construct/deploy are present;
+  old Evm memory-frame and per-transaction Sim.oracle results are present but
+  do not supply a history-dependent compiled receiver-world strategy or the
+  NEW Backend scalar/control frame relation. G36.03 waits for independentG43
+  and actual V12/G37 prefix/divergence producers, never vice versa.
+* Reserved Evm/Bridge execution owners: publish a checked decoder/layout/state/
+  resource adapter from NEW Backend.Instr, Control.expand and Assembler outputs
+  to the existing pinned-step interface. Old Bridge decoded_loop_turn/prefixes/
+  simulation and SafeStructured safe_simulation already exist over old macro
+  Image/LoopLayout; reusing them requires this representation producer, not
+  recreating their loops. Scalar/Creation/Failure slices do not jointly execute
+  CALL/JUMP/account/gas behavior. Keep Bridge outside Solidity.lean/core.
+
+Consequently G44 source-new/try-new, nonce/account/state/payment/runtime identity
+and immutable/library session identity remain open, as do G45 general selection/
+frame/control/fetched-byte composition and pinned resources. All exact Work/
+Backfill statuses and theorem premises above remain binding. Coordinator G03
+reconciliation should record independent preparation for G43/G36.03/G44.01-.03/
+G45.01-.06 and the feature IDs already listed, without changing parent verdicts
+or TrustAudit/manifest pins. No human semantic scope choice is requested.
