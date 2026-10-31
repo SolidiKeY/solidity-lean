@@ -3775,3 +3775,42 @@ controls/guards unchanged. Raw docs1 COMPLETE83publicfindings byte-identical,
 frozen no-newFAIL11incoming,ownednew0; global inventory1:1227unrecorded=
 359publicinherited+868owned,0unsafe,notglobalpass. Original goal BLOCKED unchanged;
 whole Work/Backfill scope partial/blocked, no independent-exhaustion assertion.
+
+
+### C50: reached struct-member selection into an alias local
+
+SourceStructAlias derives the selected existing Boolean child from INITIAL
+SourceBoolStructAt and the actual intrinsic named field. Its actual Source
+member-expression/local assignment, intrinsic rebindMem and whole published
+PtrFrag.field/rebind word sequence select that same child; both heaps stay
+unchanged. Explicit initial root alignment, mapFree, MemOK and StateRepr remain.
+No initial destination-pointer agreement or final representation is assumed.
+
+Controls select initial left into a local initially holding right, then compose
+the actual C49 reference-field assignment with a reached member selection into
+the retained old-left local. Actual Source RItems6, intrinsic Prog and full word
+append derive right from the reached field. Complete three-stage word vectors,
+local identities, both child vectors, Source reads, stack and allocator distinguish
+stale destination/root/initial-state selection. Low-horizon rejection is actual
+Source timeout; no unsupported panic or rollback claim. All C49 controls/guards
+remain unchanged apart from one import and this appended family.
+
+Serial focused closure176jobs passes seven new exact standard-only guards.
+Earlier control proof-elaboration failures remain retained. Per-file Lean MCP
+is unavailable. This is supported pure-local/two-field struct correspondence,
+not arbitrary graphs, physical bytes, Source ABI, deep copy or compiler/EVM
+execution. All original G32-G35.01-.06 and Backfill A/B parents remain partial
+or blocked; fifty component checkpoints do not complete the lane or goal.
+
+C50 final guarded176/full1092default/262Suite/SolKey377/131 exit0; fresh
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs/cacheOFF pass. Strict/complete
+fixtures/trust/layer/orphan/lane/script corruption pass;875standardpins111modules,
+seven new exact standard-trio laws/controls. Independent finder/skeptic source
+reviews PASS. Full aggregate RSS1567288KiB, new max/OOM/kill events0. All2713
+C49 seal records unchanged; old controls prefix independently compared unchanged.
+Raw docs1 retains83 complete public-identical findings; separate publiczero-new0,
+frozen no-newFAIL11incoming. Raw inventory1 remains1234unrecorded=359public
+inherited+875owned,0unsafe; coordinator additive proposal is not a globalpass.
+All original queue parents remain partial/blocked, existing goal BLOCKED unchanged.
+Further actual member-to-child index/write/delete applications remain to investigate;
+C50 proves reached local selection, not general struct-child content execution.

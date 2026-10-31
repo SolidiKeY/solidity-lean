@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructAlias
 import Solidity.Backend.MemoryOps.SourceStructAssignment
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
@@ -495,5 +496,144 @@ theorem runtime_children (xs ys : List Bool) (hx : xs.length<2^256) (hy : ys.len
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms runtime_children
+
+
+private def aliasInitial : Source.EMState E SΓ := (sy.1.set srhs (.memRef rfl 0),sy.2)
+private def aliasInitialState := σ.setLocal rhs (some left)
+private def aliasInitialMachine := writeMachine machine 3 w[16]
+private def initialSelect : Source.RExpr E SΓ SB := sourceStructSelectedAlias layout srhs sroot
+private def initialSelectCode : List Instr := structSelectedAliasCode 1 rhs root "items"
+private def soldAlias : Source.Idx SΓ SB := .there (.there .here)
+private def aliasReached : Source.EMState E SΓ := (reached.1.set soldAlias (.memRef rfl 1),reached.2)
+private def aliasReachedState := (σ.withHeap out).setLocal oldAlias (some right)
+private def aliasReachedMachine := writeMachine target 2 w[24]
+private def reachedSelect : Source.RExpr E SΓ SB := sourceStructSelectedAlias layout soldAlias sroot
+private def reachedSelectCode : List Instr := structSelectedAliasCode 1 oldAlias root "items"
+
+/-- The initial member selects LEFT despite the destination local initially
+holding RIGHT. Both heaps stay unchanged and the new alias reads actual TFF. -/
+theorem initial_member_alias (p : Roadmap.Pipeline) :
+    (Source.evalE (G p) F0 3 initialSelect).run sy=(.ok (.val (.memRef rfl 0)),aliasInitial) ∧
+    (Source.execS (G p) F0 4 SΓ.length none (.expr initialSelect : Source.RStmt E [] false .body SΓ SΓ) sy.1).run (.nil,sy.2)=
+      (.ok (.normal aliasInitial.1),(.nil,sy.2)) ∧
+    Stmt.run σ (.rebindMem rhs (.alias (fieldPath root)))=.ok ⟨aliasInitialState,List.prefix_refl _⟩ ∧
+    run initialSelectCode machine=.ok aliasInitialMachine 0 ∧
+    SourceBoolStructAt aliasInitial 2 hp parent addresses layout ∧ SourceBoolMemoryAt aliasInitial 0 hp left .dyn ∧
+    Source.MemOK E SH aliasInitial ∧ StateRepr 1 1 8 (Frag.init Γ) aliasInitialState base aliasInitialMachine ∧
+    [sy.1.get srhs,aliasInitial.1.get srhs]=[.memRef rfl 1,.memRef rfl 0] ∧
+    [(TEnv.get rhs σ.env).map HRef.id,(TEnv.get rhs aliasInitialState.env).map HRef.id]=[some 1,some 0] ∧
+    [cells machine,cells aliasInitialMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[48],w[32],w[16],w[16],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]]] ∧
+    (Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run aliasInitial=(.ok (.bool true),aliasInitial) ∧
+    aliasInitial.2.heap=sy.2.heap ∧ aliasInitialState.heap=hp ∧ aliasInitialMachine.stack=[w[42]] ∧
+    StructAllocatorRepr hp base 8 ⟨48,by decide⟩ aliasInitialMachine := by
+  obtain ⟨he,hs,hi,hc,hr,hchild,hm,hrepr,hsh,hth,hget,htget,hstack,halloc⟩ :=
+    SourceBoolStructAt.selected_alias_word layout (G p) F0 0 σ parent addresses initial_at srhs sroot rhs root
+      rfl rfl (by decide) SH source_memOK initial_repr
+  refine ⟨he,hs,hi,hc,hr,hchild,hm,hrepr,rfl,rfl,rfl,?_,hsh,hth,hstack,halloc _ (by decide) initial_allocator⟩
+  exact hchild.read_iff F0 (indexValue ⟨0,by decide⟩) true |>.mpr
+    (by simp only [Heap.index,Heap.get,Objs.get,hp,left,MObj.elems_dyn,indexValue,Int.toNat_natCast];rfl)
+
+private def memberAliasItems : Source.RItems E [] false .body SΓ SΓ :=
+  .stmt (.expr term) (.stmt (.expr reachedSelect) .nil)
+private def memberAliasProg : Prog C Γ Γ :=
+  .cons (.assignMem (.field (.var root (by decide)) "items" layout.child_type) (.ref (.var rhs rfl)))
+    (.cons (.rebindMem oldAlias (.alias (fieldPath root))) .nil)
+
+/-- Actual field write THEN member-selected local alias, in Source RItems,
+intrinsic Prog and appended word code. The second selection comes from the
+reached parent (RIGHT), differing from the original parent (LEFT). -/
+theorem reached_member_alias_program (p : Roadmap.Pipeline) :
+    (Source.execItems (G p) F0 6 SΓ.length none memberAliasItems sy.1).run (.nil,sy.2)=
+      (.ok (.normal aliasReached.1),(.nil,reached.2)) ∧
+    Prog.run σ memberAliasProg=.ok ⟨aliasReachedState,List.prefix_refl _⟩ ∧
+    run (code++reachedSelectCode) machine=.ok aliasReachedMachine 0 ∧
+    (Source.evalE (G p) F0 3 reachedSelect).run reached=(.ok (.val (.memRef rfl 1)),aliasReached) ∧
+    SourceBoolStructAt aliasReached 2 out parent addresses layout ∧ SourceBoolMemoryAt aliasReached 1 out right .dyn ∧
+    Source.MemOK E SH aliasReached ∧ StateRepr 1 1 8 (Frag.init Γ) aliasReachedState base aliasReachedMachine ∧
+    [sy.1.get soldAlias,reached.1.get soldAlias,aliasReached.1.get soldAlias]=[.memRef rfl 0,.memRef rfl 0,.memRef rfl 1] ∧
+    [(TEnv.get oldAlias σ.env).map HRef.id,(TEnv.get oldAlias (σ.withHeap out).env).map HRef.id,
+      (TEnv.get oldAlias aliasReachedState.env).map HRef.id]=[some 0,some 0,some 1] ∧
+    [cells machine,cells target,cells aliasReachedMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[24],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]]] ∧
+    [MObj.elems .dyn (hp.get left),MObj.elems .dyn (hp.get right),MObj.elems .dyn (out.get left),MObj.elems .dyn (out.get right),
+      MObj.elems .dyn (aliasReachedState.heap.get left),MObj.elems .dyn (aliasReachedState.heap.get right)]=
+      [[true,false,false],[false,true,false],[true,false,false],[false,true,false],[true,false,false],[false,true,false]] ∧
+    (Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 1 0)).run aliasReached=(.ok (.bool false),aliasReached) ∧
+    (Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run aliasReached=(.ok (.bool true),aliasReached) ∧
+    aliasReached.2.heap=reached.2.heap ∧ aliasReachedState.heap=out ∧ aliasReached.2.ex=sy.2.ex ∧
+    aliasReachedMachine.stack=[w[42]] ∧ StructAllocatorRepr out base 8 ⟨48,by decide⟩ aliasReachedMachine := by
+  obtain ⟨z,m',hw,he₀,hs₀,hi₀,hc₀,hr,hm,hrepr,hl,hstack₀,ht,halloc₀,htag,hchild,hchildren,hsource,heffects⟩ :=
+    SourceBoolStructAt.resolved_assign_word layout (G p) F0 1 σ parent right addresses initial_at right_at
+      sroot srhs root rhs rfl rfl rfl rfl (by decide) SH source_memOK initial_repr
+  have hknown : (Source.writeLoc (E := E) (Γ := SΓ) F0 3 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run sy=(.ok (),reached) := by
+    obtain ⟨ht,hw⟩ := source_struct_write sy 2 dn layout.source_types u7 0 1 initial_at.parent
+    exact hw
+  have hz : z=reached := congrArg Prod.snd (hw.symm.trans hknown)
+  subst z
+  change m'=target at ht
+  subst m'
+  obtain ⟨he,hs,hi,hc,hr',hselected,hm',hrepr',hsh,hth,hget,htget,hstack,halloc⟩ :=
+    SourceBoolStructAt.selected_alias_word layout (G p) F0 0 (σ.withHeap out) parent addresses hr
+      soldAlias sroot oldAlias root rfl rfl (by decide) SH hm hrepr
+  change out.field parent layout.child_type=right at hchild
+  have hqReached : (σ.withHeap out).heap.field parent layout.child_type=right := hchild
+  simp only [hqReached] at he hs hi hc hr' hselected hm' hrepr' hsh hth hget htget hstack halloc
+  have hitems := source_items_pair_run (G p) F0 0 SΓ.length _ _ sy reached aliasReached hs₀ hs
+  have htail : Prog.run (σ.withHeap out) (.cons (.rebindMem oldAlias (.alias (fieldPath root))) .nil)=
+      .ok ⟨aliasReachedState,List.prefix_refl _⟩ := by
+    unfold fieldPath
+    rw [Prog.run_cons_ok hi,Prog.run_nil]
+    rfl
+  have hprog : Prog.run σ memberAliasProg=.ok ⟨aliasReachedState,List.prefix_refl _⟩ := by
+    rw [memberAliasProg,Prog.run_cons_ok hi₀]
+    change Except.map _ (Prog.run (σ.withHeap out) (.cons (.rebindMem oldAlias (.alias (fieldPath root))) .nil))=_
+    rw [htail]
+    rfl
+  have hold : SourceBoolMemoryAt aliasReached 0 out left .dyn := hsource left left_at
+  have hleft : out.get left=hp.get left := hchildren left
+  have hright : out.get right=hp.get right := hchildren right
+  refine ⟨hitems,hprog,run_append_ok hc₀ |>.trans hc,he,hr',hselected,hm',hrepr',rfl,rfl,rfl,?_,?_,?_,rfl,rfl,rfl,rfl,
+    halloc _ (by decide) (halloc₀ _ (by decide) initial_allocator)⟩
+  · change [MObj.elems .dyn (hp.get left),MObj.elems .dyn (hp.get right),MObj.elems .dyn (out.get left),MObj.elems .dyn (out.get right),MObj.elems .dyn (out.get left),MObj.elems .dyn (out.get right)]=_
+    rw [hleft,hright]
+    simp only [Heap.get,Objs.get,hp,left,right,MObj.elems_dyn]
+  · exact hselected.read_iff F0 (indexValue ⟨0,by decide⟩) false |>.mpr
+      (by simp only [out,Heap.index,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,parent,right,MObj.elems_dyn,indexValue,Int.toNat_natCast];rfl)
+  · exact hold.read_iff F0 (indexValue ⟨0,by decide⟩) true |>.mpr
+      (by simp only [out,Heap.index,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,parent,left,MObj.elems_dyn,indexValue,Int.toNat_natCast];rfl)
+
+
+/-- Distinguishing stale selected identity/content and low Source horizon.
+Neither failure is silently equated with target reversion. -/
+theorem member_alias_negative_views (p : Roadmap.Pipeline) :
+    (∀ n,n≤2 → (Source.evalE (G p) F0 n reachedSelect).run reached=(.error .timeout,reached)) ∧
+    aliasInitial.1.get srhs≠aliasReached.1.get soldAlias ∧
+    aliasInitialMachine.mem 3≠aliasReachedMachine.mem 2 ∧
+    out.index left .dyn (indexValue ⟨0,by decide⟩)≠out.index right .dyn (indexValue ⟨0,by decide⟩) := by
+  refine ⟨source_struct_select_low_horizon layout (G p) F0 reached soldAlias sroot,?_,?_,?_⟩
+  · intro h
+    cases h
+  · change w[16]≠w[24];decide
+  · simp only [out,Heap.index,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,parent,left,right,MObj.elems_dyn,indexValue,Int.toNat_natCast]
+    change (some true : Option Bool)≠some false;decide
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.initial_member_alias' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms initial_member_alias
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.reached_member_alias_program' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reached_member_alias_program
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_alias_negative_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_alias_negative_views
 
 end Solidity.Backend.MemoryOps.SourceStructControls

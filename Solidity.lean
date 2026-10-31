@@ -964,3 +964,5 @@ import Solidity.Backend.MemoryOps.SourceReferenceSequence
 import Solidity.Backend.MemoryOps.SourceStructMemory
 import Solidity.Backend.MemoryOps.SourceStructAssignment
 import Solidity.Backend.MemoryOps.SourceStructControls
+
+import Solidity.Backend.MemoryOps.SourceStructAlias
