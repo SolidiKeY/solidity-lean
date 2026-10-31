@@ -447,3 +447,18 @@ passing check. Synthetic wire/claim controls cover duplicate/truncated output,
 unsupported namespaces, declaration kinds, forged types/axioms/hypotheses and
 conditional-only closure claims. Live results and independent review findings
 will be recorded in the new checkpoint handoff; prior sealed evidence is retained.
+
+Independent read-only finder and skeptic reviews identified the same acceptance
+bug: a successful raw query could bypass collection-time provenance validation.
+The correction retains `commandExit` separately and requires complete integrity
+and runtime validation for both collection and replay. Both reviews also required
+resource headroom guards and valid positive test baselines. The collector now
+records/checks memory headroom and free disk space. Fourteen kernel preparation
+control methods include passing binding/runtime/output baselines followed by
+specific mutation failures; earlier invalid-baseline test runs are retained.
+A first live preflight failed for missing Lean on PATH and remains failed. The
+explicit installed-toolchain run freshly compiled KeySort and extracted four
+published declarations successfully at its historical committed revision.
+Final same-head extraction, replay, actual declaration refusal controls, full
+control-suite output and independent evidence review belong to the external
+checkpoint handoff, avoiding a post-validation source-tree change.
