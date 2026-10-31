@@ -1044,3 +1044,43 @@ panic expectation is corrected to the actual intrinsic bare revert, with raw
 failed exit retained in `arguments-first.log`; final diagnostics pass. A new
 incremental full gate is required for this added import; checkpoint11's full
 pass alone does not validate this new source.
+
+
+### Checkpoint12 final validation and whole-assignment handoff
+
+The incremental `./run-lean.sh` gate passed exit0 on committed Lean source
+`84c28d8e2ba411b0f061fe06439e0c3ce2d20256`:1040default+262TestSuite jobs,
+377taclets/131read-bearing/131covered exact SolKey agreement. Warm-cache wall3.5s;
+peak aggregate Lean/Lake RSS1643MiB, anonymous113MiB, one Lean worker; exact
+cgrouppeak920690688bytes, max/OOM/oom_kill/groupkill all0, swap.max0. The prior
+post-incorporation cold/rebuild full pass and its actual12GiB cap pressure
+remain separately recorded above; neither run changes any proof/test budget.
+Logs: `/workspace/v14-creation-frame-evidence/arguments-full.log` and
+`arguments-full-measure/summary.json`. One keyed cache/build tree is reused.
+
+There are23owned modules and120guarded axiom outputs (75preserved+26frame+
+19argument). Final guard23/0,19/19script regressions0skips, layers180core/0elaborator,
+orphan/trust/automatic and whitespace checks pass. Raw docs remains exit1:
+48missing/37ambiguous, exactly publication's multiset; +2inherited missing
+references versus frozen46/37. The publication-relative no-lane-new gate passes;
+raw checker and frozen-global delta are not relabelled green.
+
+Final whole-assignment handoff and exact-head artifacts:
+`/workspace/v14-creation-frame-artifacts/final/HANDOFF.md`, with original.patch
+from frozenbase, full owned lane.patch from exact publication, recovery.patch
+from reviewed incorporation, namedbranch bundle, APIs, gate/rawfailure evidence,
+independent reviews and checksum manifest. MANIFEST.json binds actual export
+HEAD and both checked source commits; final documentation-only changes preserve
+all checked Lean blobs. Checkpoint11 and the prior original/recovery seals remain
+intact. Restore bundle history for the guard's pinned incorporation ancestry.
+
+All original Work/Backfill rows remain binding. G43 payment/stipend/asymmetry,
+G36.03 prerequisites, general source/NEWBackend constructor/runtime/reference
+frames, paid caller/world reconciliation and G45 fetched-byte/state/resource/
+decoder correspondence are unfinished. Published old Evm memory-call/frame
+certificates and narrow unpaid constructor-source consumers do exist; they do
+not supply these missing NEWBackend relations. No parent or entire lane is
+complete, no human scope weakening is requested, and the original persistent
+goal remains unchanged/blocked. Proposed coordinator ledger updates are only
+independent G44.01/G44.03/Backfill B transport preparation; existing G43/G36/G45
+partial/open verdicts and reserved implementations/pins remain untouched.
