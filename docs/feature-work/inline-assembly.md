@@ -424,3 +424,8 @@ partial/blocked, no admission promotion. Exact SHAs/artifacts/commands at
 ### VY2 computed heap-inventory preparation handoff
 
 The [VY2 lane record](inline-assembly-vy2.md#computed-ordinary-heap-inventory-2026-11-01) now constructs intrinsic images and finite inventory directly from actual Heap.next/get and valid Placement, deriving complete coverage/unique IDs and exact sparse/unsupported accounting. Actual owner MemOK plus explicit canonical declared-family support derives preparation without supplied images or completeness laws. Generated inventories feed existing real source writeback, retained placement/history, raw reads, unchanged state and every-H preservation. Full lane, allocator refinement, broader representations and producer/compiler/calculus closure remain open; no admission promotion. Versioned evidence: `/workspace/vy2-evidence/heap-enumeration`.
+
+
+### VY2 packed-slot complement handoff
+
+The [lane record](inline-assembly-vy2.md#packed-slot-complement-journaling-2026-11-01) now derives complement masks from actual finite typed registrations, reconstructs whole raw slots after canonical typed writeback and couples both parts through existing journals and actual Source.applyOp/frame checks. Nonempty actual source controls and pinned mixed-field/padding/order/rollback/reset vectors are included. Pure unchanged preparation is distinct from journaled/static source behavior. Whole ownership/dirty/dynamic/Yul/compiler/calculus closure remains open; no admission or owner-contract change. Versioned evidence: /workspace/vy2-evidence/packed-residual.

@@ -915,3 +915,5 @@ import Solidity.Yul.Views.JointRetainedControls
 import Solidity.Yul.Views.InventoryRetainedControls
 
 import Solidity.Yul.Views.HeapEnumerationNegativeControls
+
+import Solidity.Yul.Views.PackedResidualTypedSourceControls

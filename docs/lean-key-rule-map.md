@@ -1148,3 +1148,20 @@ VY2 computed-inventory preparation (Lean-only, no SolKey taclet, no new Yul admi
 `Solidity/Yul/Views/EnumeratedMemory.lean`.
 These are constructive canonical preparation/source component theorems with real
 Placement/declared-family/retained-ownership premises, not concrete Y09.02 rules.
+
+
+VY2 packed-slot complement preparation (Lean-only; no SolKey taclet or new Yul admission):
+`finiteEncode_fromComplement`, `packedStoreWriteback_reencode`,
+`packedPersistent_reencode`, `packedTransient_reencode`,
+`packed_frame_child_rollback`, `packed_frame_outer_commit`,
+`packedSourceStep_static`, `packedSourceStep_MemOK`,
+`packedFrameWrite_persistent_reencode`, `packedFrameWrite_transient_reencode`,
+`packedStateWriteback_identity`, `packedStateWriteback_persistent_reencode`.
+Modules: `Solidity/Yul/Views/PackedResidualCodec.lean`,
+`Solidity/Yul/Views/PackedResidualWorld.lean`,
+`Solidity/Yul/Views/PackedResidualSource.lean`,
+`Solidity/Yul/Views/PackedResidualFrame.lean`,
+`Solidity/Yul/Views/PackedResidualWritebackSound.lean`.
+These are concrete canonical source/physical components with real finite layout,
+non-static/current-frame/default/representation premises as stated; concrete
+Y09.02 rules/notation/printers and full assembly composition remain open.
