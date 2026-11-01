@@ -977,3 +977,6 @@ import Solidity.Backend.Executable.TransferCallChecks
 
 import Solidity.Backend.Executable.SendResult
 import Solidity.Backend.Executable.SendResultChecks
+
+import Solidity.Backend.Executable.PaymentArtifact
+import Solidity.Backend.Executable.PaymentArtifactChecks

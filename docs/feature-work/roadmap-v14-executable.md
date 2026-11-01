@@ -1618,3 +1618,68 @@ Final docs/interface-only metadata leaves all checked Lean/test code unchanged.
 Complete original queue and immutable patch/bundles/handoff/evidence/checksum
 paths plus separate final seal reviews are in checkpoint20 artifacts. All prior
 seals preserved; original full goal remains ACTIVE and lane partial.
+
+
+## Checkpoint21 — payment runtime through constructor artifacts
+
+Owned PaymentArtifact consumes actual TransferCallChecks assembly and published
+Creation.fromAssembly/Placement/prefix/terminal components read-only. It proves
+the real assembler widening fixpoint chooses target widths1/2: initial offsets
+249/317 become252/320. Exact runtime321 and complete control/PUSH/empty-REVERT
+suffix bytes follow, rather than an arbitrary supplied assembled result or
+future simulation certificate. Word fit, PUSH2 length and constructor front18
+are derived. Standalone fromAssembly front12 remains a different coordinate.
+No existing assembler, creation, hash, decoder or source implementation changes.
+
+Actual two nonempty CODECOPY-prefix segments precede the return/revert wrapper.
+constructor_exec returns or reverts exactly the same runtime for arbitrary
+arguments and an independent Creation.StackWord tail. This Exec exposes only
+an outcome: it does not expose final stack or prove universal EVM headroom.
+The new prefix_tail_boundary separately exposes unchanged17/29 and the real
+memory32 write at wrapper entry. Creation/Scalar stacks and runners are never
+identified, and the creation runner does not execute runtime CALL/scalar/jump.
+Runtime and argument intervals, return/revert distinction and argument-leak/
+empty-result negatives are constructive; actual no-library references resolve.
+22 guarded headline/control axiom outputs retain standard Lean axioms.
+
+constructor_runtime_coordinates consumes the real selected false operand/tag23.
+Its runtime PC is valid;18+PC is syntactically valid inside the encoded creation
+image; that same18+PC is invalid in the installed runtime because it points at
+zero PUSH data. This proves coordinate separation, not jump reachability.
+The inhabited coordinate_client retains actual constructor execution and the
+populated prefix tail. All normalization/recursion failures remain raw logs;
+component encodings and actual fixpoint equations resolve them without raising
+proof/resource budgets or changing the admitted profile.
+
+New lane-only export-payment-artifact.lean exports actual images/assembly and
+published withKeccak CREATE predictions as native test data, not kernel proofs.
+check-payment-artifact-evm.mjs independently fixes all8 constructor/session
+scenarios, complete golden runtime/initcode/argument bytes and two-instance
+addresses. Six positive/two negative finite Osaka10.1.3 cases pass at the
+unchanged1Mgas-per-message/180s wall limit using the existing offline pins/cache.
+
+Actual CREATE installs321-byte runtime, after which a fetched transfer succeeds
+or reverts while preserving the earlier committed deployment. Constructor
+REVERT returns exactly321 runtime bytes, excludes appended arguments, installs
+nothing and refunds value; the creator's incremented nonce remains1. An occupied
+predicted address with nonce1/balance7 is refused unchanged before constructor
+steps. Empty runtime uses front14; two creations agree with actual published
+withKeccak native/ethers/reference addresses for nonces0/1 and remain distinct
+instances: calling the first cannot change the second's balance. These are
+finite identities, not general hash injectivity or collision assumptions.
+
+Wrong assembly base18 yields322-byte runtime and an exact invalid-JUMP error
+with codehash/address/PC252; copying arguments into runtime yields323bytes and
+an invalid opcode on later execution. Both reject intended runtime identity.
+Constructor steps11/peak3/noCALL, runtime peak12/full frame/memory and all
+balances/nonces/code retention are checked. Raw code/state reads are internal
+artifact validation, not newly admitted source observations; CREATE2 is unused.
+Later-message rollback is not described as atomic source-new rollback. No
+source/world/general nonce/gas/fetched-kernel correspondence is inferred.
+
+Separate independent read-only kernel and harness finder/skeptic reviews accept
+actual code and the explicit outcome/headroom boundary without remaining
+findings. Original G43/G36.03/G44/G45 and BackfillA/B parent obligations remain
+open; this is an incremental constructor/runtime consumer. Current full/combined
+gates, raw docs failures, real signatures and exact committed interfaces/artifacts
+are recorded in the checkpoint21 handoff. Original full goal remains ACTIVE.

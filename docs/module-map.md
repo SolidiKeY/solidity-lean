@@ -1319,3 +1319,6 @@ admits physical assembly or proves target-byte/original-callee transport.
 
 | `Backend/Executable/SendResult.lean` | Actual SWAP1/POP send Bool-local store, intrinsic send/actual-world Bool-or-refusal transport with explicit balance checkpoint, exact unchanged-world settlement and derived operand/suffix capacity; general CALL/frame/world producers open |
 | `Backend/Executable/SendResultChecks.lean` | Inhabited full success/rejection settlement through physical typed-local store, real missing/exhausted refusals, wrong POP/SWAP2, populated uint/spill and capacity/byte controls |
+
+| `Backend/Executable/PaymentArtifact.lean` | Actual payment-assembly width fixpoint and321-byte runtime, derived18-byte constructor placement, exact terminal/data slices and selected runtime/image coordinate separation; creation slice distinct from runtime execution |
+| `Backend/Executable/PaymentArtifactChecks.lean` | Inhabited constructor return/revert and wrapper-entry tail, argument/empty-output negatives, standalone12/prefixed18 origins, link-free and actual selected-target controls |
