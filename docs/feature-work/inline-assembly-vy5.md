@@ -1713,3 +1713,94 @@ unanswered. Original blocked goal untouched; get_goal unavailable. No producer
 retrieval, owner edits, goal reset/reactivation/completion, push/merge/PR/service.
 Reviewed incremental patch/bundles/interface/handoff/evidence/checksums are at
 `/workspace/vy5-composition/heap-catch-20261101/final/`.
+
+
+## Typed catch-local scope consumer (2026-11-01)
+
+This checkpoint consumes ACTUAL `EM.attempt`/`allocRef` results from
+HeapCatchPhysical, binds the returned memory reference into actual indexed
+`Source.Locals.cons`, then executes `EM.sub`, `readLoc (.local .here)` and
+`bytesOfRV`. [ScopeCatchPhysical](../../Solidity/Yul/Composition/ScopeCatchPhysical.lean)
+contains28 component laws, not a full Source try theorem. Generic `sub_run`
+proves the concrete operation for arbitrary typed computations/inputs: outer
+locals are restored on success and ANY halt, returned inner locals are retained
+on success, and post-Source.St is retained. Generic `bound_read_run` and
+`scoped_read_run` require the real heap.get bytes-object premise and prove exact
+full bytes, bound memory-reference type/index, arbitrary outer-local tail and
+restoration with unchanged state (`[ref1, oldAlias0]` is the concrete instance). No arbitrary supplied execution oracle appears.
+
+Actual `run` takes the captured result/allocated state, reads the actual new
+reference through its local (ignoring previously returned bytes), and preserves
+the existing indexed RAW caller companion. Nonempty/empty/panic bind ref1 ahead
+of oldalias0; success skips catch allocation/scope, timeout/stuck propagate.
+All raw dirty words1793 and nonword alias0 remain; subsequent raw continuation
+uses the actual local-read bytes and produces2307/2305/2341 without clean
+resumption. `mutatedHalt` really changes inner locals to `[0,2]` and prepends
+log77: actual sub restores caller alias0 on nonempty/empty/panic revert,
+timeout/stuck while preserving postlogs77/99/55 and raw words. This is NOT
+rollback. Same-type wrong index reads AABB rather than DEAD despite equal
+length2; dynamic wrong-type lookup refuses with `local type`, and empty-context
+indices are uninhabited. Parent allocRef invalid-type AFTER-allocation behavior
+and refusal controls remain unchanged.
+
+`resolved_rethrow` additionally executes the EXISTING canonical resolved
+`RStmt.rethrow` at positive fuel32 over a bound typed local, with an explicit
+found heap-object premise, returning the exact revert bytes/state. This is the
+pre-existing exception, NOT a general Source try selector/catch-name resolver.
+Parsed Syntax.tryStmt/catch alone supplies no resolved/evaluated selector;
+resolved/evaluated general catch selection/error decoding remains missing.
+Raw companion and typed Source scope have distinct contexts; no raw-to-clean
+conversion or ordinary Source raw operator/function/session/frame adequacy is
+inferred. Physical rollback remains the earlier actual coupled journals, not
+EM.sub/attempt; no new placement/refinement/world theorem is claimed.
+
+[Driver](../../tests/yul-composition/ScopeCatchDriver.lean) executes six capture
+outcomes, three actual readback continuations, five mutated scoped halts and
+wrong-index/type controls. [Expectations](../../tests/yul-composition/scope-catch-expectations.json)
+were frozen BEFORE its execution from these operations. [Reader](../../scripts/yul-composition/scope-catch-source.mjs)
+and [mutations](../../scripts/yul-composition/scope-catch-source.test.mjs) bind
+actual private/main State/Machine/Eval/Resolved/Hoare, parent Heap→Attempt→peer
+hashes, selected catalog, current sources/oracle and actual Lean execution.
+All24 ordered calls/four legacy/viaIR optimizer-off/on profiles of the sealed
+native report are revalidated transitively, then16 full-byte comparisons link
+NEW actual local readback to historical evidence. `nativeExecution` remains
+historical-replay-only/fullProofGate pending. Logical heap references are not
+EVM pointers. No fresh solc/EVM execution or80MB old-suite regeneration occurred.
+123 new/affected JS tests pass; prior broad781JS+2Python and earlier148focused
+results stay attributed to their old tested trees. Wrong scope/ref/order/bytes/
+full-tail/restoration/raw/post-state and stale producer/private/report/receipt/
+selection/fake-adequacy controls fail closed. Both independent read-only finder
+and skeptic accepted source/driver/reader/tests with no findings; neither used
+Lean/server/build or edited files.
+
+Mandatory joint gate exits0: Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613;
+KeySort2jobs; library1228/TestSuite262jobs;377taclets/131annotations;
+195core/0elaborator;1243reachable/0orphan; strict491automatic/61budgeted/
+0manual/11refuted/0pending; trust1258sources/252sites/0findings. All28 scoped
+signatures/transitive axiom reports use only standard axioms/subsets, no new
+axiom/sorry. Failed per-file proof-reduction attempts are retained separately
+and corrected using actual APIs, not raised budgets or changed verdicts.
+Final MCP consumer/driver/root diagnostics all success=true/partial=false/no
+errors (nonfatal async shutdown warning retained). Exact committed heads/commands/resources are recorded
+in the versioned handoff. Main's standalone producer closure is not claimed;
+only private root receives the one owned import over sealed inputs.
+
+Initial321298432byte disk headroom and incremental output were measured before
+work. Existing guards, writer lock, serial-j1/LEAN_NUM_THREADS=1, enforced12GiB/
+no swap and OS headroom remain unchanged. New stopped zero-write VFS mount
+metadata copies alone are verified/logged/retired; all protected caches/images/
+mounts/old artifacts/manifests remain. New exports contain only increments and
+reference sealed parents. Docs/G03 historical EXIT1 remain FAILURES; exact-base
+same findings establish zero regression only. No unchanged failing heavy retry.
+
+Work1/Work3/Work2/BackfillA/B remain PARTIAL, all24 original obligations and six
+full Source combinations pending. Still missing: general Source catch selection/
+error decoding/raw operators/function/session/frame hooks; physical placement/
+allocation refinement/G01; concrete source/compiler/world/V16 adequacy and full
+joint closure. LIB1/unchecked-add questions remain unanswered. Actual typed
+scope binding/readback is now proved as a consumer component; frontend catch
+name resolution/dispatch is not. Original blocked goal untouched; get_goal is
+unavailable, no reset/reactivation/completion or publication. Main8a901437 and
+private65227843 preserved as ancestors. Immutable incremental handoff/patch/
+bundles/interface/evidence/checksums:
+`/workspace/vy5-composition/scope-catch-20261101/final/`.

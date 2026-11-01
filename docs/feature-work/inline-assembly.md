@@ -368,3 +368,16 @@ gates pass.16new Source byte comparisons reuse four sealed native profiles; no
 compiler/EVM rerun is claimed. All24 ORIGINAL full obligations/six Source
 combinations remain pending. See [lane details](inline-assembly-vy5.md#typed-heap-allocation-of-captured-bytes--2026-11-01)
 and immutable artifacts `/workspace/vy5-composition/heap-catch-20261101/final/`.
+
+
+### VY5 typed catch-local scope consumer (2026-11-01)
+
+[Lane handoff](inline-assembly-vy5.md#typed-catch-local-scope-consumer-2026-11-01):
+actual captured/allocated reference bound via indexed Source locals/EM.sub, read
+through readLoc/bytesOfRV, outer restoration on any halt without rollback, raw
+companion retention and subsequent continuation;28 component laws/123focusedJS.
+Existing canonical resolved rethrow is checked distinctly from missing general
+Source try selection. New Source readback links16 full bytes across four profiles
+to fully validated historical24call evidence; no fresh native execution. All24
+original obligations/six Source combinations and final adequacy remain pending.
+Incremental artifacts: `/workspace/vy5-composition/scope-catch-20261101/final/`.

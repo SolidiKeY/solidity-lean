@@ -420,5 +420,6 @@
   "rawCatchComponentEvidence": "tests/yul-composition/raw-catch-component-ledger.json",
   "catchFunctionComponentEvidence": "tests/yul-composition/catch-function-component-ledger.json",
   "attemptComponentEvidence": "tests/yul-composition/attempt-component-ledger.json",
-  "heapCatchComponentEvidence": "tests/yul-composition/heap-catch-component-ledger.json"
+  "heapCatchComponentEvidence": "tests/yul-composition/heap-catch-component-ledger.json",
+  "scopeCatchComponentEvidence": "tests/yul-composition/scope-catch-component-ledger.json"
 }
