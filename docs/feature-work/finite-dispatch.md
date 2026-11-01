@@ -195,12 +195,15 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   assignment, `lowerReturn`) dispatch to the direct tuple assignment
   `(a, b) = g(y)` in each branch (`fnTupleDispatch`; vectors `tupleReturn`,
   `tupleAssigned` over two candidates, `tupleForward`, `tupleUnassigned`).
-  The callee must be a name: a tuple assignment from `s.f(x)`, `fs[i](x)`
-  or `(h)(x)` keeps the refusal "a call through a function value in a tuple
-  assignment". Several returns with a memory one stay refused: a direct
-  tuple call binds value returns only (`elabCallRet`'s targets), so there is
-  no direct call to dispatch to. The viaIR callee order on this path is
-  untested.
+  A callee that is not a name (`s.f(x)`, `fs[i](x)`, `(b ? f : g)(x)`,
+  `(h)(x)`) is evaluated into a fresh local of its type first, as `callValue`
+  does, then dispatched (`tupleCallee`). Several returns with a memory one
+  stay refused (see "Blockers" below). The viaIR callee order on this path
+  is untested.
+- **Struct memory returns.** A single nonrecursive struct return in memory
+  (`function(uint) returns (P memory)`) binds a shared memory destination of
+  the struct's type in every branch (`fnMemoryDispatch`, `structReturn`);
+  storage struct returns stay refused.
 - **Callee order.** solc's legacy code reads the callee value after the
   arguments, its IR pipeline before them (EVM observations `calleeOrder`,
   `calleeOrderScalar`). Under `evalOrder .viaIR` a named callee's tag is
@@ -261,6 +264,28 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   the pinned solc 0.8.34 on ethereumjs 10.1.3, legacy/viaIR × optimizer
   off/on (100 executions per EVM version; cancun and osaka both pass), the
   source of every expected observation above.
+
+### Blockers (lane CF2, after integration)
+
+- **Several returns with a memory one.** The ordinary call frame refuses a
+  reference return in any function of several returns, for direct calls too
+  (`elabCallRetCore`: "its return … has a reference type"; `RetKind.rets`
+  and `CallRet.rets` carry value binders only). Dispatching to it first needs
+  a reference-capable `CallRet.rets`/`Binders` in `Syntax/Scoped.lean` and
+  its run (`TRun.call`), a core change outside this lane.
+- **Narrow array elements.** `PrimTy` has no narrow integer: a `uint8[]`
+  is a `uint` array whose width lives in shape rows (`elabTyW`). A raw
+  capture `uint8[] memory y = xs` is a whole use of a narrow array, which the
+  elaborator refuses ("xs has a narrow element … not whole"); the direct
+  call avoids it through `hoistCallArgs`'s typed capture with `shapeCheck`.
+  Admitting it needs the dispatch to emit that typed capture (`captureRef`,
+  `Stmt.declMem` with the parameter's shape) instead of a raw declaration.
+- **viaIR storage-to-memory copy order.** solc's IR pipeline copies a
+  storage argument after every argument ran (`argumentOrder`: 901); the
+  model copies at the argument's position for direct calls
+  (`hoistCallArgs`) and dispatched calls alike (101). A viaIR replay vector
+  would pin a mismatch; changing the ordinary call's copy point under
+  `evalOrder .viaIR` is outside this lane.
 
 ## Dispatch correctness
 
@@ -409,4 +434,13 @@ like-for-like figure was taken; the change adds `DispatchChain` (small) to
   and the duplicated candidate loop were documented, and the forms gained
   EVM-observed replay vectors. The refusal at `Arms.lean`'s named-callee
   `targets` check is now unreachable and was left as a guard.
+- Coordinator follow-up (after integration at `099bfbe1`): non-name callees
+  in tuple assignments and `return h(x)` supported and tested; struct memory
+  returns supported; calldata in tuple assignments refused by the
+  integration's stricter `roMentions` check (`calldataCheck` reads a tuple's
+  right-hand side); `memNoCopy_reason` pins that the false observation fails
+  by the assertion's panic and the program without it returns;
+  `memUnassigned_halt` pins the revert (the `Panic(0x51)` bytes are pinned
+  by the import replay); several memory returns, narrow elements and the
+  viaIR copy order recorded under "Blockers".
 
