@@ -3,10 +3,12 @@ import Solidity.Yul.Views.DynamicHeader
 
 namespace Solidity.Yul.Views
 
+/-- Compatibility selector for the original uint256-header API. Properly
+packed unsigned families use the separate typed unsignedHeaders trace. -/
 def StorageDeclaration.isDynamic {E τ} (d : StorageDeclaration E τ) : Bool :=
-  StorageDeclaration.casesOn (motive := fun _ _ => Bool) d (fun _ => false) true
+  StorageDeclaration.casesOn (motive := fun _ _ => Bool) d (fun _ => false) true (fun _ _ _ => false)
 
-/-- Only dynamic declaration heads are recorded, at the ACTUAL incoming
+/-- Legacy uint256 dynamic declaration heads are recorded, at the ACTUAL incoming
 cursor of the same typed traversal. This is metadata, not another state. -/
 def StorageDeclarations.headers {E ds} (d : StorageDeclarations E ds) : Nat → List (Source.DeclName × Nat) :=
   StorageDeclarations.casesOn (motive := fun _ _ => Nat → List (Source.DeclName × Nat)) d
@@ -42,6 +44,11 @@ theorem StorageDeclarations.headers_sound {E ds} (d : StorageDeclarations E ds) 
           | fixed fixed =>
             change (root,incoming) ∈ tail.headers (fixed.endByte cursor) at member
             change middle = fixed.endByte cursor at next
+            rw [← next] at member
+            obtain ⟨h,hm⟩ := ih _ _ _ second member
+            exact ⟨h,List.mem_append.mpr (Or.inr hm)⟩
+          | packedUnsignedArray t unsigned packed =>
+            change (root,incoming) ∈ tail.headers ((StorageDeclaration.packedUnsignedArray (E := E) t unsigned packed).endByte cursor) at member
             rw [← next] at member
             obtain ⟨h,hm⟩ := ih _ _ _ second member
             exact ⟨h,List.mem_append.mpr (Or.inr hm)⟩

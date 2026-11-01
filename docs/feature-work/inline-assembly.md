@@ -524,3 +524,12 @@ regrowth, exact alias tail reads, frame rollback and transaction controls. See
 [lane scope](inline-assembly-vy2.md#ownership-changing-dynamic-complements-2026-11-01).
 Full original lane remains PARTIAL/BLOCKED, no admission promotion. Committed
 identity, checks, reviews and exports: `/workspace/vy2-evidence/ownership-transport/HANDOFF.md`.
+
+
+VY2 packed dynamic unsigned checkpoint (2026-11-01): declaration-derived generic
+unsigned element packing, partial-slot complement transport and actual source /
+frame/static/alias/MemOK controls; uint16 and uint24 finite pinned pipeline
+observations are separate from kernel/source/compiler correspondence. See
+[lane handoff](inline-assembly-vy2.md#packed-dynamic-unsigned-ownership-2026-11-01).
+Full lane PARTIAL/BLOCKED, no admission promotion. Exact committed identity,
+gates/reviews/exports: `/workspace/vy2-evidence/packed-dynamic/HANDOFF.md`.

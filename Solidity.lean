@@ -942,3 +942,5 @@ import Solidity.Yul.Views.DynamicSourceAliasControls
 import Solidity.Yul.Views.ComputedSnapshotControls
 
 import Solidity.Yul.Views.OwnershipBatchControls
+
+import Solidity.Yul.Views.PackedDynamicMixedControls

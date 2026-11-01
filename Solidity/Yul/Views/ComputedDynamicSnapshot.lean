@@ -10,8 +10,9 @@ def ComputedStorage.traceHeader {E ds d active a} (r : @ComputedStorage E ds d a
   declared := by obtain ⟨h,_⟩ := r.header_present _ _ entry.property; exact h.declared
   bounded := by obtain ⟨h,_⟩ := r.header_present _ _ entry.property; exact h.bounded
 
-/-- Every computed supported dynamic root contributes ALL live indices from
-its supplied raw header. No unsupported entry is silently skipped. -/
+/-- Original uint256-element profile: every header selected by legacy
+headerTrace contributes all live indices. Properly packed unsigned families
+use unsignedSnapshot and its typed unsignedTrace instead. -/
 def ComputedStorage.snapshotInventory {E ds d active a} (r : @ComputedStorage E ds d active a)
     (fixed : Roadmap.Evm.Fixed) (m : SlotView) : List (ScalarPath E.layout (E.lay a)) :=
   r.registrations ++ r.headerTrace.attach.flatMap (fun entry =>

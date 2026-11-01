@@ -139,3 +139,7 @@ records the canonical preparation/source-frame checkpoint and remaining full-lan
 
 VY2 [ownership-changing complements](feature-work/inline-assembly-vy2.md#ownership-changing-dynamic-complements-2026-11-01)
 connect computed dynamic snapshots to actual source/residual execution; full lane remains open.
+
+
+VY2 [packed dynamic unsigned ownership](feature-work/inline-assembly-vy2.md#packed-dynamic-unsigned-ownership-2026-11-01)
+adds computed partial-slot source/residual preparation; full original lane remains open.

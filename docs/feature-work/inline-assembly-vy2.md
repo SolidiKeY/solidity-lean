@@ -2918,3 +2918,106 @@ The initial review request's14-module count was corrected by actual filenames;
 no theorem or source finding was hidden. Exact remaining gate/resource outputs
 and committed identity are in the versioned handoff above. Entire original lane
 remains unfinished and its blocked goal unchanged.
+
+
+## Packed dynamic unsigned ownership (2026-11-01)
+
+Original Y04 / Backfill A–B continuation from clean accepted
+`b1980de8913f0e2bc68953399ade48dc0159c469`, same pinned base/branch/repository.
+Approved YQ1–YQ7 remain implementation directions, not implemented admission.
+Full Y04/Y05/Y06 and both backfills PARTIAL; Y09.02 and original goal BLOCKED
+unchanged. No owner state/AST/compiler edit, producer import or manifest promotion.
+
+StorageDeclaration adds a typed properly-packed unsigned-array certificate;
+actual rootTy/cellTy, declaration order, active origin/bank and ONE existing
+header scalar pack/cursor still compute header position/end. The new constructor
+covers bits<256; uint256 retains its original constructor/legacy trace visibility.
+This is a disjoint certificate normal form, not a language width exclusion:
+unsignedTrace includes BOTH existing full-width and new packed cases. Original
+header?/headerTrace/snapshotInventory and uint256 contracts remain unchanged in
+meaning and explicitly scoped to their original full-width element profile.
+The new unsignedSnapshot enumerates all live fields of the supported unsigned
+trace, without silently skipping an unsigned constructor or adding a length cap.
+Header trace root uniqueness derives from actual checked declaration uniqueness.
+
+PackedDynamicHeader derives width=bits/8, elementsPerSlot=floor(32/width),
+slot=(Fixed.keccak(BE32(header))+floor(i/elementsPerSlot))%2^256 and low-byte
+offset=(i%elementsPerSlot)*width. Width positivity/field fits derive from actual
+IntTy validity; same-slot fields and distinct quotient slots are proved separate.
+Exact live-byte ownership is proved from the computed length and fields.
+Uint24 leaves two padding bytes even in a full slot. Header/registered-region
+separation keeps genuine per-run RegionsDisjoint and actual QUOTIENT-offset
+bounds; no global hash injectivity or stronger convenience premise. Optional
+no-wrap has its real sum bound. HashedLayout remains word-granular, not a packed
+compiler layout proof. Exact full ScalarPath compatibility (including codec)
+with the preserved uint256 element construction is kernel-proved.
+
+PackedOwnership adapters reuse actual scalar codecs/finite writeback,
+OwnershipTransport's exact old/new complement union and real Source.applyOp /
+frame/journal operations. Old inventory derives from ACTUAL Source.readLen;
+new inventory derives from the updated raw headers. On source success only,
+residual updates preserve all dropped fields, padding/high bytes, unknown slots
+and histories. Static/error preserves both prior states. Whole raw reencoding,
+pure/effectful whole-store+complement agreement, fresh following preparation,
+exact source cell/length results, every-H owner MemOK, caller-prefix rollback,
+committed-child/enclosing rollback, bank/account/unselected-cell preservation,
+transaction reset and finite batch failure accounting derive from concrete
+operations. No opaque inverse/view/safety/result law field or duplicate Source
+state/IR is introduced. None stays unsupported canonical preparation, never a
+Yul refusal/no-op/deallocation. Existing whole-memory/assembly obligations and
+all proof/fuel/node/heartbeat/test budgets stay unchanged.
+
+Inhabited uint16 controls run actual Source/residual operations 0->17->1->0->18
+across the slot boundary. Shrink exposes formerly owned bytes in the SAME slot;
+zero keeps the entire dirty/full-width raw words; regrowth recovers tail77 and
+newly-live0xcccc. Two actual local aliases observe length/index/read77 and
+Panic0x32 bounds. Nonzero partial padding, other account/bank and unknown words,
+static failure after caller prefix, real nested rollback/commit, actual inhabited
+and every-H MemOK and full persistent endTx map are checked. Mixed live uint16 /
+uint24 roots additionally prove actual uint24 maximum-value Source.readLoc and
+nonzero0xaabb full-slot padding preservation. Pure unchanged preparation preserves
+none versus explicit default; effectful account no-op still journals. Synthetic
+hash1000/2000 controls are separate from real approved Fixed input provenance,
+compiler Keccak numbers, constructor reachability and source/compiler adequacy.
+
+Pinned PackedDynamic.sol adds independent complete ordered legacy/viaIR external
+controls for uint16/uint24 lengths/aliases/fields/raw slots/padding/unknown words,
+member writes, static failure, full Error("packed"), Panic0x32 and fresh reads.
+Compiler0.8.38 commit1835d247, Osaka, gas100m/steps5m and every old receipt stay
+unchanged. The initial NEW adapter omitted the standard dynamic-array ABI
+head/length; its raw failure remains preserved. Only the independently specified
+ABI offset32/length23 was added; semantic expected words/status/source and ALL
+460 old report fields were unchanged. The 917 new strict negative controls
+include652 coherent complete ABI-word mutations plus packed-history/padding/
+revert mutations. Initial mutation-count arithmetic failure is preserved;
+eight additional meaningful mutations per pipeline fulfilled its917 target,
+without dropping controls or changing gas/step/verdict budgets.
+
+Full original dynamic/mapping/signed/bytes/dirty-owned/transient ownership,
+universal memory/shared-zero/interior writeback, reachable allocation refinement,
+concrete V10/V11 agreements, Y06 input/environment/source bindings, actual VY1 /
+source/assembly MemOK and Y09.02/calculus/notation/printers/compiler/joint closure
+remain OPEN. No admitted dirty form is cleaned, excluded or given no-op semantics.
+Actual available owner MemOK/World/ContractWorld/memory-call/Bridge components are
+not substitutes for missing Yul adequacy. Original blocked goal is never mutated;
+get_goal read is unavailable. Questions=[]. Final tested identity, exact theorem
+signatures/premises/axioms, raw gates/failures/resources, independent finder/skeptic
+reviews and versioned original exports/checksums are recorded in
+`/workspace/vy2-evidence/packed-dynamic/HANDOFF.md`.
+
+
+Final packed checkpoint gates: actual Lean4.24.0/Lake5.0.0-src+797c613,
+KeySort2jobs exit0; final affected207jobs and mandatory ./run-lean.sh
+1248default+262TestSuite/131annotations exit0. Complete3860public signatures /
+2264theorem reports:2192standard-only and72axiom-free, missing0/unexpected0.
+All26prior negative suites plus917packed controls pass. Final32new ordered
+legacy/viaIR calls match every field of the first corrected packed replay;
+ALL460preceding fields and18separate compiler classifications remain unchanged.
+Cumulative492-call projection SHA256
+b71e1adce243d0b04559de7bc1fe945be94442fa933d1ea16a7b93b60a537f78.
+Independent final read-only finder/skeptic review is clear across23new modules,
+4amended lane files, fixture/adapters/tests and appended docs. No reviewer Lean /
+server/build/tests/edits. Exact remaining gate/resource results and committed
+identity are retained in the versioned handoff. Global documentation retains its
+ACTUAL exit1; exact-base zero delta remains separate, never a global pass.
+Entire original assignment/goal remains unfinished/BLOCKED unchanged.
