@@ -1136,3 +1136,12 @@ test("canonical nominal ABI matching preserves enum input ranges", () => {
   runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumAbiRanges.lean',
     '--', '--tstack=131072'], 300000);
 });
+
+test("typed ABI entry decoding replays lazy and noncanonical layouts", () => {
+  // Lane CF1 controls (Semantics/AbiEntry.lean): certified entry reverts with
+  // rollback, eager/lazy values, and the named lazy-only refusals.
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/AbiEntryReplay.lean',
+    '--', '--tstack=131072'], 300000);
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/Replay.lean',
+    '--', '--tstack=131072'], 300000);
+});

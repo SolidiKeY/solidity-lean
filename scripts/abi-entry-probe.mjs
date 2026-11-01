@@ -154,7 +154,17 @@ async function fixtures() {
     const results = await observe(sources, fixture.mainSource, contract, calls);
     const required = Object.keys(results).filter(n => pipelines.some(p => n.startsWith(p)));
     const restricted = Object.fromEntries(required.map(n => [n, results[n]]));
-    report.push({path, requiredPipelines: pipelines, contract, calls, observations: summarize(restricted), configs: required});
+    const observations = summarize(restricted);
+    // Every required configuration agrees, and agrees with the fixture.
+    observations.forEach((o, i) => {
+      const want = calls[i].expected;
+      assert.equal(o.agree, true, `${path} ${o.label}: configurations disagree`);
+      assert.equal(o.failed, want.failure, `${path} ${o.label}: failure`);
+      if (want.bytes !== undefined) assert.equal(o.data, want.bytes, `${path} ${o.label}: bytes`);
+      if (want.values !== undefined && !want.failure) assert.equal(o.data,
+        '0x' + want.values.map(v => BigInt(v).toString(16).padStart(64, '0')).join(''), `${path} ${o.label}: values`);
+    });
+    report.push({path, requiredPipelines: pipelines, contract, calls, observations, configs: required});
   }
   return report;
 }

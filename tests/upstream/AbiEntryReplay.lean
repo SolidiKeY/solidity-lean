@@ -4,8 +4,10 @@ import Solidity.Tools.Upstream
 lazy layouts (`Semantics/AbiEntry.lean`, `Tools/UpstreamEntry.lean`). Each
 vector's expected outcome is pinned solc 0.8.38's
 (`tests/abi-0.8.38/LazyEntry.vectors.json`): positive controls run the body
-once on the decoded value, entry failures are empty reverts before the body
-with state rolled back, and the lazy-only cases stay blocked by name. -/
+once on the decoded value (a read-only calldata parameter on its lazy value),
+entry failures are empty reverts before the body with state rolled back, and
+the remaining lazy-only cases stay blocked by name. Run by
+`scripts/test-solidity.test.mjs`. -/
 open Solidity Solidity.Frontend Solidity.Tools Solidity.Tools.Upstream Lean
 
 namespace AbiEntryReplay

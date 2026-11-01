@@ -393,7 +393,11 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
         ABI.program C d (function.getD "constructor") ctor false bytes
       | .blocked reason => throw reason
       -- An entry check fails: an empty revert before the body.
-      | .revert => entryProg C [.revert]
+      | .revert => do
+        -- The source call must still be admissible (its own refusals apply);
+        -- building it runs nothing.
+        discard <| ABI.program C d (function.getD "constructor") ctor false bytes
+        entryProg C [.revert]
       | .run canonicalBytes =>
         -- Cross-check: the generated decoder reproduces the typed values.
         match ABI.canonical C d (function.getD "constructor") canonicalBytes state true with

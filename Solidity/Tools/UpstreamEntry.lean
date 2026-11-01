@@ -17,8 +17,9 @@ the actual calldata (selector included) and decides, for ABI coder v2:
   typed decoder as their canonical encoding `bytes`. For a calldata parameter
   the eager value is also what every lazy read yields
   (`AbiEntry.eager_cref`). The original calldata remains the reported
-  observation; physical calldata observers (`msg.data`, assembly, slices) are
-  refused by the adapter as before.
+  observation. `msg.data` and assembly are refused by the adapter as before;
+  a calldata slice is admitted only where the elaborator copies or decodes it,
+  so it reads the same eager value.
 * `run` also for a calldata layout only lazy reads accept (negative
   relative offsets), when the body reads that parameter only through complete
   index paths and lengths (`readsOnly`): each read is one lazy access of the
@@ -116,6 +117,7 @@ inductive Plan where
 /-- Decide one raw vector: `signature` is the canonical ABI signature and
 `args` the argument bytes after the selector. -/
 def plan (d : FunDecl) (signature : String) (args : List Nat) : Plan :=
+  if args.any (256 ≤ ·) then .blocked "invalid calldata byte" else
   match params d with
   | none => .legacy
   | some ps =>
