@@ -320,3 +320,16 @@ KeySort/build/TestSuite/strict/trust gates pass;492JS+2Python pass.
 All24full obligations/sixSource combinations and missing producer adequacy remain
 open; no goal status change. See [lane details](inline-assembly-vy5.md#genuine-recursive-physical-composition--2026-11-01) and immutable artifacts
 at `/workspace/vy5-composition/recursive-source-20261101/final/`.
+
+### VY5 raw-local catch transport handoff — 2026-11-01
+
+VY5 adds26kernel laws for actual completed raw caller-prefix continuation across
+coupled physical rollback and exact supplied failure-byte copying. The separate
+finite Solidity try/catch control passes4profiles/32orderedcalls, preserving
+caller prefixes and observing reverted persistent/transient/log/frame effects.
+586JS+2Python and joint KeySort/build/TestSuite/strict/trust/axiom gates pass.
+Raw locals remain a companion to the actual old EMState physical carrier; this
+is not general Source try/catch dispatch or full physical/world adequacy.
+All24full obligations/sixSource combinations stay pending; see
+[lane detail](inline-assembly-vy5.md#raw-local-catchrollback-transport--2026-11-01).
+Versioned evidence is at `/workspace/vy5-composition/raw-catch-20261101/final/`.
