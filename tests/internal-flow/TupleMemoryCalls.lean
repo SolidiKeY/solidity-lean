@@ -575,8 +575,33 @@ def used : Solidity.Out C exported.st.H Final :=
 def scopeProgram : Prog C Caller Caller :=
   .cons (.ite (.simple (.bool true))
     (.cons (.block (.cons outerCall nextUse)) .nil) (.cons .revert .nil)) .nil
+theorem source_outer : outerCall.run caller.st = .ok exported :=
+  actual_get (outerCall.run caller.st) (by decide +kernel)
+theorem source_used : nextUse.run exported.st = .ok used :=
+  actual_get (nextUse.run exported.st) (by decide +kernel)
+
+theorem scope_run_state : scopeProgram.runSt caller.st =
+    .ok (used.st.drop (Ext.append Caller Results)) := by
+  rw [scopeProgram,Prog.runSt_single,Stmt.runSt_ite]
+  change ((Prog.cons (Stmt.block (.cons outerCall nextUse)) .nil).runSt caller.st).map _ = _
+  rw [Prog.runSt_single,Stmt.runSt_block,Prog.runSt_cons]
+  change ((((outerCall.run caller.st).map (·.st)).bind (fun σ => nextUse.runSt σ)).map _).map _ = _
+  rw [source_outer]
+  change (((nextUse.run exported.st).map (·.st)).map _).map _ = _
+  rw [source_used]
+  rfl
+
+theorem scope_has_output : (scopeProgram.run caller.st).toOption.isSome = true := by
+  cases execution : scopeProgram.run caller.st with
+  | error halt =>
+    have state := scope_run_state
+    change (scopeProgram.run caller.st).map (·.st) = _ at state
+    rw [execution] at state
+    cases state
+  | ok out => rfl
+
 def unwound : Solidity.Out C caller.st.H Caller :=
-  (scopeProgram.run caller.st).toOption.get (by decide +kernel)
+  (scopeProgram.run caller.st).toOption.get scope_has_output
 def suffix : Prog C Caller Caller :=
   .cons (.assignLocal (.there (.there (.there .here)))
     (.binop .add rfl rfl (.simple (.local (.there (.there (.there .here))))) (.simple (.lit 5 rfl))))
@@ -598,12 +623,15 @@ def producer : Calls.Program 1 prefixProducer.frag program :=
   (TuplePrograms.compile 1 prefixProducer.frag program).get (by decide +kernel)
 attribute [irreducible] producer
 
-theorem source_outer : outerCall.run caller.st = .ok exported :=
-  actual_get (outerCall.run caller.st) (by decide +kernel)
-theorem source_used : nextUse.run exported.st = .ok used :=
-  actual_get (nextUse.run exported.st) (by decide +kernel)
 theorem source_scoped : scopeProgram.run caller.st = .ok unwound :=
-  actual_get (scopeProgram.run caller.st) (by decide +kernel)
+  actual_get (scopeProgram.run caller.st) scope_has_output
+theorem scope_state_drop : unwound.st = used.st.drop (Ext.append Caller Results) := by
+  have actual : scopeProgram.runSt caller.st = .ok unwound.st := by
+    change (scopeProgram.run caller.st).map _ = _
+    rw [source_scoped]
+    rfl
+  exact Except.ok.inj (actual.symm.trans scope_run_state)
+
 theorem source_suffix : suffix.run unwound.st = .ok final :=
   actual_get (suffix.run unwound.st) (by decide +kernel)
 theorem source_program : program.run caller.st = .ok ⟨final.st, unwound.ext.trans final.ext⟩ := by
@@ -622,7 +650,9 @@ theorem ordered_export : (contents exported.st,resultValues exported.st,callerAl
 theorem ordered_used : (contents used.st,resultValues used.st,callerAliases used.st) =
     (some [[2,19,17],[3,23,29,31],[2,99,101],[1,55]], [1,30,17,1730], [some 1,some 0,some 0]) := by decide +kernel
 theorem ordered_unwind : (contents unwound.st,callerObs unwound.st) =
-    (some [[2,19,17],[3,23,29,31],[2,99,101],[1,55]], ([some 1,some 0,some 0],1730)) := by decide +kernel
+    (some [[2,19,17],[3,23,29,31],[2,99,101],[1,55]], ([some 1,some 0,some 0],1730)) := by
+  rw [scope_state_drop]
+  exact congrArg (fun x => (x.1,(x.2.2,x.2.1[3]!))) ordered_used
 theorem ordered_final : (contents final.st,callerObs final.st) =
     (some [[2,19,1735],[3,23,29,31],[2,99,101],[1,55]], ([some 1,some 0,some 0],1735)) := by decide +kernel
 
@@ -1119,6 +1149,18 @@ info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wron
 info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.bare_failure' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_run_state' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_has_output' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_state_drop' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
 -/
 #guard_msgs in
-#print_checked_axioms Solidity.Backend.InternalFlow.TupleCallChecks.actualSelectorResult, Solidity.Backend.InternalFlow.TupleCallChecks.actualCallConstruction, Solidity.Backend.InternalFlow.TupleCallChecks.actualExpandedTarget, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedSelection, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualOuterConstruction, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedCost, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedTarget, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.expanded_source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.fields, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.target, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_target, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.actual_extension, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_caller, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.private_does_not_escape, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_contents, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_cost, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.bare_failure
+#print_checked_axioms Solidity.Backend.InternalFlow.TupleCallChecks.actualSelectorResult, Solidity.Backend.InternalFlow.TupleCallChecks.actualCallConstruction, Solidity.Backend.InternalFlow.TupleCallChecks.actualExpandedTarget, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedSelection, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualOuterConstruction, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedCost, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedTarget, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.expanded_source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.fields, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.target, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_target, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.actual_extension, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_caller, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.private_does_not_escape, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_contents, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_cost, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.bare_failure, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_run_state, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_has_output, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_state_drop

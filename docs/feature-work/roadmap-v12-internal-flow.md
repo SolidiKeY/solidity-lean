@@ -1876,9 +1876,11 @@ world, catch, or rollback coupling.
 
 ### Kernel evidence, reporting and retained failures
 
-All original mathematical theorem types, proof bodies, ordered observations,
-85 tuple reports and complete542-report registry remain unchanged. The only
-scheduling change to old source is captured axiom metadata. Five metadata guard
+All original mathematical theorem types, ordered observations,85 tuple reports
+and the complete542-report registry remain unchanged. Reviewed later sharing
+changes the selector-construction, scope-success and ordered-unwind proof bodies
+without changing their statements, selected data or programs. Axiom metadata
+scheduling is separate from these ordinary kernel proofs. Five metadata guard
 batches (three old single queries, four C24 roots and twelve new roots) are now
 one joint reporting traversal with the same nineteen names, order and exact
 sets. This changes no kernel proof check or builtin command. All nineteen
@@ -1934,16 +1936,71 @@ recursion-depth, fuel, node, test, stack or time increase is used. Independent
 read-only finder and skeptic reviews of the actual proof/control and metadata
 changes found no issue; final exact-head artifact review is a separate step.
 
+### Further checked structural sharing and current validation
+
+The actual selected branch/block now has an explicit `scope_run_state` theorem,
+derived from the existing actual `source_outer` and `source_used` equations and
+published sequence/block/branch semantics. Those two old statements and proof
+bodies are unchanged, moved earlier only. `scope_has_output` derives success
+presence, so `unwound` still uses the SAME `.toOption.get` result with its checked
+proof shared instead of recomputed. An independent kernel example equates it to
+the original literal `get (by decide +kernel)` expression. `scope_state_drop`
+proves the complete typed state equality after result-local removal, then the
+UNCHANGED `ordered_unwind` statement projects the independently checked complete
+`ordered_used` observation. There is no circular state/endpoint assumption.
+The small imported probe passes2.846s; full fixture source45.159s in the latest
+authenticated preparation. New three builtin sets are checked separately; the
+joint metadata guard retains the previous nineteen names/order/sets and appends
+those three. The original15-report maintained guard and all original542 pins
+remain unchanged. Timing43.508/43.639/45.159 does not prove a fixture speedup.
+
+A separate core profiler found a long simplifier invocation. Replacing only the
+`compileTuple_success` proof with the actual `Option.bind` construction plus
+`rw [built]` preserves its exact statement, selector definition and axiom set.
+Identical profile flags measured5.592s before and3.797s after; tactic execution
+falls1.69s to389ms and the1.36s simplifier invocation disappears, while kernel
+type-checking remains195ms. This is measured local proof elaboration, not a
+claim that a full gate passed. Current complete owned closure passes20.411s
+(168 jobs), and actual source/dependency-keyed preparations for fragile/storage/
+tuple fixtures pass41.457/39.390/45.159s without dropping any control.
+
+The current actual542-type query, original15 builtin sets, new3 source-state
+sets, and retained6 sets all pass with unchanged exact outputs. Current complete
+18-module/542 builtin aggregate exits0 with outer120.095s: child120 completed,
+but this is NOT strictsub120 end-to-end evidence. Earlier source-sharing version
+passes118.708s; it is retained as earlier-version evidence, not a substitute.
+The current COMPLETE35-source sweep remains FAIL124/120.908s, after prior C25
+failures121.432/120.861/120.494s. Every original invocation, fixture and report
+is retained; no cached check is relabelled raw validation. No further unchanged
+raw attempt is justified by the current evidence. Exact axiom/cache/driver
+corruption checks continue independently. Source eligibility and full original
+completion remain unresolved.
+
 ### Required-root preparation and remaining original obligations
 
-Authenticated same-cache required-root preparation continues separately, with
-one actual target/120s per process. The source transition from C24 permits ONLY
-the actual owned TupleCalls change; every other discovered source/compiler hash
-must match. All prior twelve timeout holds stay excluded, and the actual roots
-are excluded from this preparation controller. Receipts, source/object hashes,
-resource peaks and final missing/held counts are recorded in the new handoff.
-Preparation/inventory is never a full, native, TestSuite or sort gate. It grants
-no reserved edit or budget waiver.
+Authenticated same-cache required-root preparation drained naturally, with
+one actual target/120s per process. Source transitions from C24 permit ONLY the
+actual owned TupleCalls implementation/proof edits; every other discovered
+source/compiler hash must match. The original frontier excluded all twelve prior
+timeout holds and the actual roots. After that frontier ended, eight parents had
+demonstrably changed prerequisite objects, backed by actual successful bounded
+dependency receipts and exact before/after source/compiler/object hashes. Their
+separate one-time original120s checks passed seven; Derived20 timed out again.
+Only actual exit0 released a CURRENT preparation hold. Every original timeout
+remains historical failure evidence. PowerBounds/OpenLoops/Derived7/UnitExamples
+were not retried unchanged.
+
+C25 parent preparation totals145commands:142exit0 and3exit124, plus a separately
+recorded Hashing prerequisite diagnostic exit124. Across C24/C25 the parent
+history has357records342exit0/15exit124. The final inventory is34missing objects,
+33 transitively held; the remaining unheld object is an excluded actual root.
+New Horizon and DecisionHashes/Hashing timeouts are retained, with no source edit
+or raised bound. The published source Horizon module supplies fuel monotonicity
+and event-prefix facts, not an unbounded recursive target/lowering theorem; its
+own per-file120s validation is now a distinct pending prerequisite. Actual root
+build/native/TestSuite/sort validation is still separate. Receipts, exact source/
+object hashes, resource peaks and held paths appear in the new handoff.
+Preparation/inventory is never a full gate, reserved edit or budget waiver.
 
 Work1 general runtime/storage/result frames, Work2 uncapped recursive
 source/target compilation, Work3 full dependent-signature dispatch/lowering,

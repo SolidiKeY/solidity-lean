@@ -221,7 +221,9 @@ theorem compileTuple_success {b : Nat} {Γ ps rs Γf : Ctx} (F : Evm.Frag Γ)
     (compiled : Evm.Memory.Calls.Program b F (expand args bs body))
     (built : Evm.Memory.Calls.compile b F (expand args bs body) = some compiled) :
     compileTuple b F (.call f args (.rets bs) body) = some (tupleReturn f args bs body compiled) := by
-  simp only [compileTuple,built]
+  change Option.bind (Calls.compile b F (expand args bs body))
+    (fun selected => some (tupleReturn f args bs body selected)) = _
+  rw [built]
   rfl
 /-- info: 'Solidity.Backend.InternalFlow.TupleCalls.compileTuple_success' depends on axioms: [propext,
  Classical.choice,
