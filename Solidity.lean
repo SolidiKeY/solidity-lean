@@ -183,6 +183,7 @@ import Solidity.Calculus.DecisionUIntGrammar
 import Solidity.Calculus.DecisionUIntFormula
 import Solidity.Calculus.DecisionUIntPrefix
 import Solidity.Calculus.DecisionLeafPreparation
+import Solidity.Calculus.DecisionNumericFormula
 import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.FixedArrayRoot
 import Solidity.Calculus.HashWritten
@@ -234,6 +235,7 @@ import Solidity.Examples.DecisionUIntBridge
 import Solidity.Examples.DecisionUIntPrefix
 import Solidity.Examples.DecisionHaltingOrGaps
 import Solidity.Examples.DecisionLeafPreparation
+import Solidity.Examples.DecisionNumericFormula
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation

@@ -1016,9 +1016,13 @@ AU02 guard-floor repair remains open.
 `Calculus/DecisionLeafPreparation.lean` next proves that actual uint-prefix
 translation yields the existing Num grammar with only its permitted bound
 atom and no environment input. Elimination and simplification preserve those
-predicates. This is a term-level preparation bridge; formula/prefix closure,
-resource bounds and exhaustive coverage remain open. Numeric sequencing can
-add nodes, as the controls explicitly demonstrate.
+predicates. Numeric sequencing can add nodes, as the controls demonstrate.
+The next `Calculus/DecisionNumericFormula.lean` proof composes actual source
+translation, polarity reduction and normalization into a prepared one-uint-
+prefix body with certified source grammar, only its permitted atom and lifting
+weight two. The actual existing liftedExact check passes for this source
+family, and full frozen admission holds for every waiver setting. Separate
+node/cut bounds, Covered and the exhaustive Residue/target bridge remain open.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is

@@ -1197,3 +1197,80 @@ zero new findings. Frozen Decision and original counterexample byte identities
 pass. Final independent read-only finder and skeptic documentation/evidence
 reviews found no issues. Exact cumulative patch/bundle/checksum sealing follows.
 Whole goal and all outstanding queue obligations remain incomplete.
+
+
+## Actual numeric formula/prefix bridge checkpoint
+
+`Calculus/DecisionNumericFormula.lean` connects numeric preparation to the
+actual formula and prefix pipeline. The supported family is precisely one
+positive uint binder over `a=b`, with typed scoped a,b in the intrinsic
+UIntLinear grammar. The theorem quantifies every contract and binder name.
+`uintPrefix_inTarget` proves admission by the **entire unchanged** inTarget
+predicate for every Waivers setting; `uintPrefix_hashFree` proves hash-freedom.
+Neither changes validity/hash premises for other formulas or the frozen
+DecisionTheorem, Waivers, predicates, exclusions or observations.
+
+`uintPrefix_prepared_facts` constructs a body ψ such that the **actual**
+leafOf? result is `some (LFml.all 0 .uint ψ)`, ψ is in the existing Src grammar
+for either conditional flag (cut operators enabled), its actual enumerated
+parameters satisfy `q=(uint,0)`, and its condMax is two. The permitted atom
+need not occur: literal-only terms produce no body parameters. This composes
+actual numeric toLT/toL outputs, both polarity translations, the checked
+comparison/source reducer, the unchanged normalizer and full leaf preparation.
+It does not assume coverage, verdict success or translation success in the
+family theorem. The conditional helper's actual translation hypotheses are
+discharged by the independent source grammar construction.
+
+`uintPrefix_prepared_liftedExact` proves that this actual prepared leaf passes
+the existing liftedExact depth/source/parameter check. A dependent recognizer
+result is explicitly transported across stripAll's body equality. This is
+**not** Covered or a general node/cut bound. condMax measures conditional
+lifting weight, not nodes; optional equality repeats operands across several
+equations/implications. The unchanged 511-node/cut obligation, formula-derived
+fuel, other source classes, broader revised M4 boundary, exhaustive Residue/
+DecisionTheorem-prime/target-to-covered-or-hash bridge remain open. No complement
+of this first grammar is called Residue. Other original AU02 children remain
+open; the APF unsafe-OR unknowns are retained unchanged.
+
+Generic lower-level numeric equation helpers prove source, parameter and
+lifting facts for supplied numeric operands. They do not assert arbitrary
+operands semantically translate arbitrary source a,b. The actual source-family
+construction explicitly closes that gap. Source grammar has no body binders;
+the prenex reasoning here is not arbitrary quantified-formula closure.
+
+`Examples/DecisionNumericFormula.lean` exercises the real distinct partial
+subtractions, their actual source/fragment result, all-waiver/hash facts,
+both-halting semantics and existing certified refutation. A strict literal
+prefix has an exact prepared leaf, **empty** parameter list, unused binder,
+actual kernel proved tag, ValidH and separate ordinary validity. Nested
+sequencing tests the generic lower-level helper explicitly separately, and
+an extra atom is rejected by the exact permitted-parameter predicate.
+
+Final exact-source MCP passes in 5.23 s (core), 4.16 s (controls), focused
+builds in 4.15/3.21 s, all 27 public axiom reports in 13.79 s with only standard
+axioms or none. Source hashes, commands, versions, verified hard cap/prebuild
+and measured aggregate RSS/host reserve are retained in
+`/workspace/va1-evidence/numeric-formula-next/verified-gates.json` and raw logs.
+The same 12 GiB/no-swap, 12 GiB host reserve, thread one/explicit -j1, writer
+lock and all budgets remain. Failed singleton/forall simplification, optional
+parameter tuple, conditional-weight reduction, dependent strip recognizer and
+empty-context length rewrites are retained as failures. No unfinished proof,
+new axiom, dependency, evaluator or premise change is introduced.
+
+Independent read-only finder and skeptic final source/control reviews found
+no issues, including the actual source connection, unused binder and clear
+node-bound limitation. Neither edited or used Lean/server/build. Q1 remains
+answered, Q2 pending for frontend repair/full gates only. This is AU01 bridge
+progress, not whole-lane completion. Final static/documentation checks follow.
+
+Final numeric-formula static gates pass: 1074 reachable/zero orphans,
+180 core/zero elaborator paths, 491 automatic/61 budget/11 refuted/zero
+manual or pending, trust 1089 sources/248 inventoried sites/zero findings.
+Axiom inventory remains FAIL with byte-identical 1206 pins/zero errors/404
+unrecorded changes. Strict docs remain FAIL with the same 85 frozen findings,
+zero added/removed. Frozen Decision and original counterexample byte identities
+pass. Final independent finder/skeptic documentation/evidence reviews found
+no issues; neither edited or used Lean/server/build. Latest-head full build is
+pending; prior exact-source resource failures are retained and not relabeled.
+Q2 and the remaining original queue remain open. This reviewed proof checkpoint
+is not milestone publication eligibility or full-goal completion.
