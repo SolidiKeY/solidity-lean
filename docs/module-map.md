@@ -1392,3 +1392,9 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceUintFixedDeclareAlias.lean` | Actual fixed declaration then OLD-local rebind to NEW root and reached write/delete, deriving contexts/identities/Source Items/Prog/whole word append from initial allocation/ownership premises. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean` | Both-pipeline populated old/shared aliases, fresh zero-to42-to0 contents, complete20word/context/local/allocator vectors, skipped-rebind word contrast, actual fresh/old Source reads and wrong-map/timeout observations. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean` | Genuine fixed Source compound RHS/location/old-cell/conversion/add/write success, checked-overflow, bounds and timeout, reusing existing arithmetic. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean` | Whole published Objects fixed read/binary/write certificate, actual checked uint compound execution and full strong heap/allocator/source-world frames. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedCompoundSequence.lean` | Actual reached two fixed compound updates and late checked overflow in Source Items/typed Prog/full word append with original parameter count and derived second cell/bounds. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedCompoundBounds.lean` | Exact fixed compound Source index panic versus intrinsic/wholeword revert, no posterror target state. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedCompoundControls.lean` | Both-pipeline populated alias/fresh-declaration applications, full20word vectors, all33 target payload cells, old/fresh Source reads and actual max/zero/bounds/timeout/nonadmission controls. |

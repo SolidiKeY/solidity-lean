@@ -5665,3 +5665,148 @@ implemented by C70; its exact Source eval order, bounds and producer premises
 must be checked before a new application. Reserved-copy/physical-byte/all-profile
 constructor/target-failure/generalgraph/ABI/storage/deep-copy/final Source-V10-target
 obligations remain open; no original parent or persistent goal is declared done.
+
+
+## C71: genuine fixed numeric compound updates at reached states (partial)
+
+New owned modules `Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean`,
+`Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean`,
+`Solidity/Backend/MemoryOps/SourceUintFixedCompoundSequence.lean`,
+`Solidity/Backend/MemoryOps/SourceUintFixedCompoundBounds.lean` and
+`Solidity/Backend/MemoryOps/SourceUintFixedCompoundControls.lean` apply published
+producers read-only. The genuine Source type stays array memory int.u256 some-N,
+with intrinsic RefTy.fixed. No dynamic-type cast or duplicate evaluator/allocator/
+operator/representation is introduced. Actual Source compound execution evaluates
+RHS, lvalue, represented OLD cell, converted RHS, binVal, then write. The old cell
+comes from INITIAL SourceUintFixedAt/typed contents; it is not a desired reached
+value or compiler-result premise. Published source_uint_add/overflow supply exact
+numeric conversion/arithmetic. Success supports checked OR unchecked IN-RANGE
+addition only. Overflow explicitly requires F.checked=true, yielding arithmetic
+panic; no unchecked wrapping agreement with the checked intrinsic/word operation.
+
+`fixed_uint_add_certificate` composes EXISTING Objects ValFrag.read/binary and
+PtrFrag.write. Their published correctness uses actual fixed readPrimitive and
+binaryValue_correct while preserving the full Objects representation/ownership,
+then derives full Objects StateRepr and KeepsAllocator from the actual store.
+The postrepresentation is not weakened to legacy primitives. Source MemOK, locals,
+old distinct typed-object/source-address frames and all four world fields derive
+from the same actual fixed write. Pure local operands matter: word arithmetic
+reads OLD before its RHS local whereas Source evaluates RHS first. This is not
+an arbitrary side-effectful order theorem. Whole code and exact bounds/overflow
+revert outcomes are proved; no panic-byte/returndata or post-revert machine claim.
+
+`resolved_uint_fixed_add_twice_word` feeds the first actual output into the second
+operation. INITIAL range cases old+rhs and (old+rhs)+rhs suffice; actual set-self
+lookup derives second OLD and fixed length preservation derives capacity. ONE
+existing Source Items/typed Prog/fullword append executes both stages. Selectable
+ORIGINAL nps is retained by rebuilding pure expression statements. Source Items
+fuel+6 uses statements fuel+5/fuel+4, a sufficient execution horizon without a new
+admission/fuel/depth/length cap or budget increase. The companion late-overflow
+law derives second failure from that actual first write; Source error retains its
+changed globals while intrinsic/word errors expose no final heap/machine/rollback.
+
+Both Source pipeline configurations execute a REAL C69 reference rebind then
+RIGHT9→51→93, retaining LEFT=[7,8,7], neighbour=[11,12], backup aliases, complete
+Source tables, local identities, allocator/cursor and saved [77,88] stack. Frozen
+OLD would incorrectly repeat51. Checked high-word control first computes
+9+(W-10)=max, then the ACTUAL reached max+(W-10) overflows before writing; frozen
+initial9 would still succeed. Actual Source/typed/wholeword successful prefixes,
+exact panic/error boundary and changed Source globals are observed. Canonical
+zero RHS executes successfully without erasing fixed type or modifying prior
+fixtures. Endpoint and low-horizon timeout are distinct from arithmetic overflow.
+
+Actual positive fixed declaration then reached zero→42→84 is also composed as ONE
+Source RItems with ORIGINAL parameter count, typed Prog and full published word
+append from initial constructor/space/frame/SourceMemOK/Objects premises. Source
+cons versus intrinsic weakening/push, fresh identity, default OLD zero, old roots,
+occupied Source addresses, locals, world, stack and allocator are DERIVED. This
+application quantifies arbitrary runtime positive n/k under existing index/space
+validity, not a fixed payload/depth admission cutoff. Length33/index32 really
+updates the fresh last cell; ALL33 target payload words are observed at the actual
+represented base, with exact endpoint33 and stale old-length3 root rejection.
+The raw empty-kernel Source/typed observation gives bounds failure and explicitly
+DOES NOT establish zero-length Source admission or target allocation failure.
+
+Complete20word observations preserve all16 earlier observed cells plus new local7
+and fresh payload40..42. They cover actual reference rebind9→51→93, skipped-rebind
+WORD-only LEFT7→49→91, actual max prefix before revert, and the SAME declaration/
+new-local program zero→42→84 with cursor43 and saved stack. Source declaration
+branch selects the NEW local; C69 branch rebinds an OLD local to an existing root.
+No combined declaration→OLD-local rebind→compound Source theorem is claimed here.
+The distinct valid fixed types of new-n versus old-length3 locals are observed in
+separate typed conjuncts, never a heterogeneous list cast. Existing C66-C70
+controls/vectors/guards and all sealed evidence remain unchanged.
+
+C71 focused01 PASS226jobs/RSS1078972KiB/newOOM0;20new exact standard-trio guards,
+no sorryAx. New evidence-admission script checks exact heads/axiom sets and applied
+missing/unsafe/renamed-guard mutants; those scripts are not execution proofs.
+Per-file Lean MCP and goal get/update APIs remain unavailable; bounded serial
+closure used, persistent BLOCKED goal never mutated. Final gates/reviews recorded
+below before commit. Every actual diagnostic failure and both automatic approval
+rejections are preserved: rejected commands did not execute. Complete named proof
+facts replaced the flagged draft/tuple goal-slot proposals, with no policy bypass,
+expected observation change or unsafe axiom. One pre-write editor assertion failed
+before mutation and controls07 replayed the OLD passing control tree; it is not
+final refined evidence. No new OOM occurred; C60/C67 historical five kills remain
+failures, separately from this exec RSS and per-exec memory.events deltas.
+
+ALL original G32/G33/G34/G35.01/.03/.04/.05 and Backfills A/B remain PARTIAL;
+G35.02 reserved-copy and G35.06 final Source/V10/target remain BLOCKED. Physical
+bytes/all-profile construction/checked target allocation failure/general paths/
+references/graphs/ABI/storage/deep-copy/emitted loops/liveness and final composition
+remain genuine unfinished obligations. This kernel/symbolic-word application is
+not external solc/EVM testing, Source profile closure, queue exhaustion, goal
+reactivation or whole-lane completion. No reserved owner, global registry/ledger,
+predicate/refusal/observation or proof/resource/test budget was changed.
+
+C71 FINAL full01 PASS0 on the registered final Lean tree:1141default/262Suite,
+SolKey377parsed/131read-bearing covered. Actual Lean4.24.0 commit797c613/Lake5.0.0-
+src+797c613/KeySort2jobs and selected actualthreads1/cacheOFF PASS. Final focused01
+PASS226jobs/all20new exact standardtrio guards/RSS1078972KiB/newOOM0. Strict/trust/
+layers/orphans/lane/completefixtures and133combined script/corruption tests PASS,
+including20newcompound evidence-admission tests. Scoped1135ownedpins/160modules
+standard-only PASS; rawglobalinventory staysFAIL1/1494unregistered=359published+
+1135owned/0unsafe. No reserved registry/ledger edit. Rawdocs FAIL1/83 complete
+findings remains byte-identical to consumed public C31; zero-owned-new separately
+PASS. Frozen comparison remainsFAIL1/11incoming. Warmstrict times0newSuite modules;
+every262current/C31source/fixture/toolchain byte and actual71versions independently
+match retained26cold/max160sunder300 only, not new cold timing coverage.
+
+Separate independent read-only finder/skeptic final SOURCE/control/script/doc
+reviews PASS with no confirmed defects. Full Objects preservation, initial-only
+arithmetic case premises, reached late failure and arbitrary-positive fixed
+constructor application were independently scrutinized. Reviewer limitations
+retain pure-local ordering, successonly in-range when unchecked, rawempty not
+admitted, and no combineddecl→OLDlocalrebind→compound Source program. Artifact
+reviews remain separate after commit. Every30C71exec receipt has newOOMdelta0;
+13actual proof failures retained. Both rejected commands never executed; safe
+named completed proof facts subsequently checked with exact guards. The failed
+pre-write editor assertion and old-tree controls07 replay are explicitly retained,
+not final source evidence. Historical C60/C67 cumulative OOM5/12GiBpeak remains
+failed history, not this exec RSS. Full aggregateRSS1583776KiB/diskgrowth270336bytes,
+finalresource750682112available bytes preserves512MiBreserve+96MiBforecast and OS
+headroom in the SAME12GiB/no-swap child/16GiBparent/runtime/cache/lease. No cleanup,
+new runtime or proof/fuel/node/time/TestSuite budget change.
+
+Original-queue reassessment: fixed compound execution/overflow and actual existing-
+root rebinding plus separate fresh-declaration applications are now supplied.
+A distinct possible G33/G34/BackfillB application remains the COMBINED declaration
+then OLD-local rebinding to NEW root then compound updates, in ONE Source program.
+C70 gives context-changing declaration/rebind/ordinarywrite-delete and C71 exposes
+nps-parameterized compound pairs, so these published owned outputs should be
+investigated together rather than called unavailable or duplicated. General
+Source INC/DEC and arbitrary side-effectful paths/graphs are not proved here.
+This is a further supported investigation, NOT a queue-exhaustion or full-lane
+completion assertion. All previously named G32-G35/reserved/final prerequisites
+and raw mandatory global-gate failures remain open; goal BLOCKED unchanged.
+
+C71 refinement: initial staged diff FAIL2 found two trailing spaces in the new
+Source helper, despite earlier unstaged diff being clean before new-file staging.
+Rawlog/assertion failure retained, no commit was made then. Removed ONLY trailing
+whitespace; final focused02 PASS226/RSS917256KiB and FINAL full02 PASS0/1141default/
+262Suite/SolKey377-131 cover the corrected tree. Earlier full01 PASS is earlier-
+tree evidence only. Final full02 warm sampleRSS79752KiB/processcount1/diskgrowth
+266240bytes/newOOM0; earlier full01 RSS1583776KiB separately retained. All32C71execs
+newOOMdelta0,13proof failures plus stagedFAIL2/editor failures retained. Refined
+strict/trust/layers/orphans/133corruptiontests/stageddiff PASS; rawdocs/inventory
+failures and exact public/frozen comparisons remain unchanged and separate.
