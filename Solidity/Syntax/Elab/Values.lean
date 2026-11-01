@@ -205,6 +205,11 @@ def FunDecl.sigTy? (d : FunDecl) : Option String := do
         guard (R == bytesR)
         guard (!(d.widths.any fun (n, _) => n == k ++ "#string"))
         pure "bytesmemory"
+      else if let .struct st := R then
+        -- a nonrecursive struct in memory (`fnRefStruct?`)
+        let c := Semantics.structDisplay st ++ "memory"
+        guard ((fnRefStruct? C c).isSome && C.structName? (Semantics.structDisplay st) == some st)
+        pure c
       else
         -- a memory array of a plain value element (`fnRefElem?`)
         let .array (.prim p) := R | none
@@ -284,10 +289,11 @@ def recPartnersC (f : String) : List String :=
   (reachableC C f).filter fun g => (reachableC C g).contains f
 
 /-- Whether a function type's return component is a memory reference the
-dispatch binds (`fnMemoryDispatch`): `bytes memory` or a memory array of a
-plain value element (`fnRefElem?`). -/
+dispatch binds (`fnMemoryDispatch`): `bytes memory`, a memory array of a
+plain value element (`fnRefElem?`) or a nonrecursive struct in memory
+(`fnRefStruct?`). -/
 def fnMemRet (r : String) : Bool :=
-  r == "bytesmemory" || (fnRefElem? C r).any (!·.2)
+  r == "bytesmemory" || (fnRefElem? C r).any (!·.2) || (fnRefStruct? C r).any (!·.2)
 
 /-- A function type's component as a value: its primitive type and width. -/
 def fnCompTy? (c : String) : Option (PrimTy × Nat) :=

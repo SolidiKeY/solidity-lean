@@ -39,6 +39,8 @@ contract FunctionValueReferences {
         return (xs[0] / k + 100, xs[0] % k);
     }
     function(uint[] memory, uint) internal pure returns (uint, uint) tupleOp;
+    function makeP(uint a) internal pure returns (P memory p) { p.a = a; p.b = a + 1; }
+    function makeP2(uint a) internal pure returns (P memory p) { p.a = a * 10; }
     function sopA(uint x) internal pure returns (uint) { return x + 1; }
     function sopB(uint x) internal pure returns (uint) { return x + 2; }
     function swapSop() internal returns (uint) { sop = sopB; return 10; }
@@ -194,6 +196,19 @@ contract FunctionValueReferences {
         function(uint[] memory, uint) internal pure returns (uint, uint) h;
         (uint q, uint r) = h(xs, 5);
         return q + r;
+    }
+
+    function structReturn(bool b) public pure returns (uint, uint) {
+        function(uint) internal pure returns (P memory) h = b ? makeP : makeP2;
+        P memory p = h(4);
+        return (p.a, p.b);
+    }
+
+    function tupleCallee(bool b) public pure returns (uint, uint) {
+        uint[] memory xs = new uint[](1);
+        xs[0] = 17;
+        (uint q, uint r) = (b ? divmod : divmod2)(xs, 5);
+        return (q, r);
     }
 
     function falseObservation() public returns (uint) {

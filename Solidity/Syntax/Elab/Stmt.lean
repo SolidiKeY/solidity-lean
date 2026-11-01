@@ -355,8 +355,8 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   pure P
 
 
-/-- Internal memory-return dispatch (`bytes memory` or `T[] memory`, one
-return) uses the same source tags, scope checks and argument captures as
+/-- Internal memory-return dispatch (`bytes memory`, `T[] memory` or a
+struct in memory, one return) uses the same source tags, scope checks and argument captures as
 scalar dispatch (`dispatchCaptures`). The shared destination is intrinsically
 a memory reference, and each branch binds the selected call's returned alias;
 no storage copy or scalar encoding of the returned reference is introduced. -/
@@ -365,9 +365,10 @@ partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
   let some (ps, [r], false) := fnParts? ty
     | throw "memory dispatch needs an internal signature with one memory return"
   let dstTy : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
-    match fnRefElem? C r with
-    | some (e, false) => pure (.array (.named e))
-    | _ => throw s!"memory dispatch returns a {r}, not a memory reference"
+    match fnRefElem? C r, fnRefStruct? C r with
+    | some (e, false), _ => pure (.array (.named e))
+    | none, some (st, false) => pure (.named st)
+    | _, _ => throw s!"memory dispatch returns a {r}, not a memory reference"
   unless ps.length == args.length do
     throw s!"memory dispatch takes {ps.length} arguments, not {args.length}"
   if let some c := ps.find? fun c =>
@@ -509,9 +510,10 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
   if let some (h, ty, actuals) := dynamic then
     let some (_, [r], false) := fnParts? ty | throw "memory function value of several returns"
     let expected : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
-      match fnRefElem? C r with
-      | some (e, false) => pure (.array (.named e))
-      | _ => throw s!"memory function value returns a {r}"
+      match fnRefElem? C r, fnRefStruct? C r with
+      | some (e, false), _ => pure (.array (.named e))
+      | none, some (st, false) => pure (.named st)
+      | _, _ => throw s!"memory function value returns a {r}"
     let (T, _) ← ElabM.lift (elabTyW C expected)
     unless T == .ref R do throw "memory function value returns a different reference type"
     let (P, _) ← fnMemoryDispatch h ty actuals
@@ -863,6 +865,15 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
   | .ternary c a b =>
     elabStmtsP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
   | .call f args =>
+    -- a call through a value that is not a name (`s.f(x)`, `fs[i](x)`,
+    -- `(h)(x)`): the callee into a fresh local of its type first, as
+    -- `callValue` does, then the dispatch on that local
+    if f == callValueName then
+      if let h :: rest := args then
+        if let some ty := fnTyOfExpr C (← ctx) h then
+          let y := toString (← freshCapture "se")
+          let P ← elabStmtsP [.decl (.named ty) y (some h)]
+          return P ++ (← fnTupleDispatch ts y ty rest)
     -- a call through an internal function value (`fnTupleDispatch`)
     if (← read).funs.all (·.1 != f) then
       if let some ty := fnTyOf? C (← ctx) f then
