@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import shutil
 
 repo = Path.cwd()
 driver = repo / "tests/internal-flow/check-cached-files.sh"
@@ -51,11 +52,11 @@ if mode == 'fixture' and sys.argv[1] == 'env':
 import json, os, sys
 with open(os.environ["V12_DRIVER_CALLS"], "a") as log:
     log.write(json.dumps(["node", *sys.argv[1:]]) + "\n")
-if os.environ.get("V12_DRIVER_FAILURE") == "fixture:" + sys.argv[3]:
+if os.environ.get("V12_DRIVER_FAILURE") == "batch":
     sys.exit(62)
 ''')
     node.chmod(0o755)
-    for mode, expected_exit in [("", 0), ("build", 61), *[("fixture:" + str(p), 62) for p in fixtures]]:
+    for mode, expected_exit in [("", 0), ("build", 61), ("batch",62)]:
         case = root / (mode.replace("/", "_").replace(":", "_") or "success")
         case.mkdir()
         calls = case / "calls.jsonl"
@@ -67,17 +68,37 @@ if os.environ.get("V12_DRIVER_FAILURE") == "fixture:" + sys.argv[3]:
         assert outcome.returncode == expected_exit, outcome.stdout
         actual = [json.loads(line) for line in calls.read_text().splitlines()]
         assert actual[0][0] == "build" and set(actual[0][1:]) == owned | imports
-        expected_fixtures = [["node", "tests/internal-flow/fixture-cache.mjs", "check", str(p), str(case)] for p in fixtures]
-        if mode == "":
-            assert actual[1:] == expected_fixtures
-        elif mode == "build":
+        expected_batch = ["node", "tests/internal-flow/fixture-cache.mjs", "batch", str(case), *map(str,fixtures)]
+        if mode == "build":
             assert len(actual) == 1
         else:
-            index = next(i for i, p in enumerate(fixtures) if mode == "fixture:" + str(p))
-            assert actual[1:] == expected_fixtures[:index + 1]
+            assert actual[1:] == [expected_batch]
         results.append({"mode": mode or "success", "exit": outcome.returncode,
                         "recorded_calls": len(actual)})
+# Exercise the production serial traversal itself, including failure at EACH
+# fixture position; importing it does not invoke Lean or a cache gate.
+node=shutil.which("node")
+program = """
+import assert from 'node:assert/strict';
+const {visitFixtures,requireSameToolchain}=await import(MODULE);
+const files=FILES, controls=[];
+for(let failure=-1;failure<files.length;failure++) {
+  const calls=[];const check=file=>{calls.push(file);if(calls.length-1===failure)throw new Error('stop');return file;};
+  if(failure<0)assert.deepEqual(visitFixtures(files,check),files);
+  else assert.throws(()=>visitFixtures(files,check),/stop/);
+  assert.deepEqual(calls,files.slice(0,failure<0?files.length:failure+1));
+  controls.push({failure,calls});
+}
+const before={'compiler-binary':'actual-digest','toolchain/Init/Prelude.olean':'actual-digest'};
+requireSameToolchain(before,{...before});
+for(const changed of [{...before,'compiler-binary':'wrong'},{'compiler-binary':'actual-digest'},{...before,extra:'wrong'}])
+  assert.throws(()=>requireSameToolchain(before,changed),/toolchain changed/);
+console.log(JSON.stringify({serial_failfast:controls,toolchain_comparison_controls:4}));
+""".replace("MODULE",json.dumps((repo/"tests/internal-flow/fixture-cache.mjs").as_uri())).replace("FILES",json.dumps(list(map(str,fixtures))))
+check=subprocess.run([node,"--input-type=module","-e",program],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+assert check.returncode==0,check.stdout
+production_controls=json.loads(check.stdout)
 print(json.dumps({"status": "pass", "owned_modules": len(owned),
                   "fixture_imports": len(imports), "fixtures": len(fixtures),
                   "registered_pins": {name: len(entry["pins"]) for name, entry in registry.items()},
-                  "fixture_paths": [str(p) for p in fixtures], "controls": results}, indent=2))
+                  "fixture_paths": [str(p) for p in fixtures], "controls": results, "production_controls":production_controls}, indent=2))

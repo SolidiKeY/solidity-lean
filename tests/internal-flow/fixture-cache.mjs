@@ -4,15 +4,9 @@ import {readFileSync,writeFileSync,mkdirSync,existsSync,readdirSync,realpathSync
 import {resolve,basename} from "node:path";
 import {createHash} from "node:crypto";
 import {spawnSync} from "node:child_process";
-const [mode,file,out] = process.argv.slice(2);
-if (!["prepare","check"].includes(mode) || !/^tests\/internal-flow\/[A-Za-z][A-Za-z0-9]*\.lean$/.test(file ?? "") || !out?.startsWith("/"))
-  throw new Error("usage: fixture-cache.mjs prepare|check tests/internal-flow/Name.lean /absolute/evidence");
-const name=basename(file,".lean"), dir=".lake/build/lib/lean/tests/internal-flow";
-const object=`${dir}/${name}.olean`, manifest=`${dir}/${name}.v12-cache.json`;
+import {pathToFileURL} from "node:url";
 const pinsFile="tests/internal-flow/fixture-axiom-pins.json";
 const registry=JSON.parse(readFileSync(pinsFile,"utf8"));
-const expected=registry[name];
-if (!expected) throw new Error(`unregistered fixture: ${name}`);
 const hash=p=>createHash("sha256").update(readFileSync(p)).digest("hex");
 function imports(text) {
   let clean="", depth=0, quoted=false;
@@ -34,6 +28,54 @@ function imports(text) {
   if(depth || quoted) throw new Error("unclosed source comment/string");
   return [...clean.matchAll(/^\s*import\s+([^\n]+)/gm)].flatMap(m=>m[1].trim().split(/\s+/));
 }
+
+// The actual complete toolchain is read, never inferred from mtimes/version.
+function toolchainInputs() {
+  const inputs={};
+  const toolchain=process.env.LEAN_SYSROOT;
+  if(!toolchain) throw new Error("LEAN_SYSROOT must identify the actual capped toolchain");
+  // In the authorized wrapper /opt/lean-real is the immutable actual compiler.
+  const binary=existsSync("/opt/lean-real/bin/lean")?"/opt/lean-real/bin/lean":`${toolchain}/bin/lean`;
+  inputs["compiler-binary"]=hash(binary);
+  // Bind the COMPLETE actual toolchain, including transitive .olean modules,
+  // IR and shared runtime libraries; root .olean/version hashes are insufficient.
+  const toolRoot=existsSync("/opt/lean-real/bin/lean")?"/opt/lean-real":toolchain;
+  const files=[], directories=[""];
+  while(directories.length) {
+    const rel=directories.pop();
+    for(const entry of readdirSync(`${toolRoot}/${rel}`,{withFileTypes:true})) {
+      const child=rel?`${rel}/${entry.name}`:entry.name;
+      if(statSync(`${toolRoot}/${child}`).isDirectory()) directories.push(child);
+      else files.push(child);
+    }
+  }
+  const byRealPath=new Map();
+  for(const rel of files.sort()) {
+    const path=realpathSync(`${toolRoot}/${rel}`);
+    if(!byRealPath.has(path)) byRealPath.set(path,hash(path));
+    inputs["toolchain/"+rel]=byRealPath.get(path);
+  }
+
+  return inputs;
+}
+
+// Production traversal is serial and stops at the first failed fixture.
+// Exported solely to test the same traversal without substituting mock gates.
+export function visitFixtures(files,check) {
+  const results=[];
+  for(const file of files) results.push(check(file));
+  return results;
+}
+export function requireSameToolchain(before,after) {
+  if(JSON.stringify(before)!==JSON.stringify(after)) throw new Error("toolchain changed during complete fixture batch");
+}
+function fixture(mode,file,out,sharedToolchain=null) {
+  if(!["prepare","check"].includes(mode) || !/^tests\/internal-flow\/[A-Za-z][A-Za-z0-9]*\.lean$/.test(file ?? "") || !out?.startsWith("/"))
+    throw new Error("usage: fixture-cache.mjs prepare|check tests/internal-flow/Name.lean /absolute/evidence");
+  const name=basename(file,".lean"),dir=".lake/build/lib/lean/tests/internal-flow";
+  const object=`${dir}/${name}.olean`,manifest=`${dir}/${name}.v12-cache.json`;
+  const expected=registry[name];
+  if(!expected) throw new Error(`unregistered fixture: ${name}`);
 
 function key() {
   const closure=new Set(), fixtureDeps=new Set(), pending=imports(readFileSync(file,"utf8"));
@@ -58,35 +100,12 @@ function key() {
   const inputs={};
   for(const path of [file,pinsFile,expected.guard,"tests/internal-flow/fixture-cache.mjs","lean-toolchain","lakefile.lean","lakefile.toml","lake-manifest.json"])
     if(existsSync(path)) inputs[path]=hash(path);
-  const toolchain=process.env.LEAN_SYSROOT;
-  if(!toolchain) throw new Error("LEAN_SYSROOT must identify the actual capped toolchain");
-  // In the authorized wrapper /opt/lean-real is the immutable actual compiler.
-  const binary=existsSync("/opt/lean-real/bin/lean")?"/opt/lean-real/bin/lean":`${toolchain}/bin/lean`;
-  inputs["compiler-binary"]=hash(binary);
+  Object.assign(inputs, sharedToolchain ?? toolchainInputs());
   for(const path of [...closure].sort()) {
     inputs[path]=hash(path);
     inputs[".lake/build/lib/lean/"+path.slice(0,-5)+".olean"]=hash(".lake/build/lib/lean/"+path.slice(0,-5)+".olean");
   }
   for(const dependency of [...fixtureDeps].sort()) inputs[registry[dependency].guard]=hash(registry[dependency].guard);
-  // Bind the COMPLETE actual toolchain, including transitive .olean modules,
-  // IR and shared runtime libraries; root .olean/version hashes are insufficient.
-  const toolRoot=existsSync("/opt/lean-real/bin/lean")?"/opt/lean-real":toolchain;
-  const files=[], directories=[""];
-  while(directories.length) {
-    const rel=directories.pop();
-    for(const entry of readdirSync(`${toolRoot}/${rel}`,{withFileTypes:true})) {
-      const child=rel?`${rel}/${entry.name}`:entry.name;
-      if(statSync(`${toolRoot}/${child}`).isDirectory()) directories.push(child);
-      else files.push(child);
-    }
-  }
-  const byRealPath=new Map();
-  for(const rel of files.sort()) {
-    const path=realpathSync(`${toolRoot}/${rel}`);
-    if(!byRealPath.has(path)) byRealPath.set(path,hash(path));
-    inputs["toolchain/"+rel]=byRealPath.get(path);
-  }
-
   // An imported fixture must have its OWN prior checked source/object binding.
   // Merely hashing an arbitrary object alongside a source is insufficient.
   const dependencies=[];
@@ -130,7 +149,7 @@ if(mode==="prepare") {
   const reports=guard(log), after=key();
   if(before.key!==after.key) throw new Error("inputs changed during kernel checking");
   writeFileSync(manifest,JSON.stringify({...after,object_sha256:hash(object),reports},null,2)+"\n");
-  console.log(JSON.stringify({fixture:file,mode,key:after.key,reports,object}));
+  const result={fixture:file,mode,key:after.key,reports,object}; console.log(JSON.stringify(result)); return result;
 } else {
   if(!existsSync(manifest)) throw new Error(`missing checked fixture cache: prepare ${file}`);
   const saved=JSON.parse(readFileSync(manifest,"utf8")), current=key();
@@ -143,6 +162,28 @@ if(mode==="prepare") {
   const reports=guard(log);
   // Recheck keys after execution, including the exact consumed fixture object.
   if(key().key!==saved.key || hash(object)!==saved.object_sha256) throw new Error("inputs changed while importing fixture");
-  writeFileSync(`${out}/cached-${name}-key.json`,JSON.stringify({...saved,fixture:file,reports},null,2)+"\n");
-  console.log(JSON.stringify({fixture:file,mode,key:saved.key,reports,object}));
+  writeFileSync(`${out}/cached-${name}-key.json`,JSON.stringify({...saved,fixture:file,reports,toolchain_verification:sharedToolchain?"complete-batch-boundary":"complete-per-file-boundary"},null,2)+"\n");
+  const result={fixture:file,mode,key:saved.key,reports,object}; console.log(JSON.stringify(result)); return result;
+}
+
+}
+function batch(out,files) {
+  if(!out?.startsWith("/")) throw new Error("absolute batch evidence directory required");
+  const all=Object.keys(registry).map(name=>`tests/internal-flow/${name}.lean`).sort();
+  if(JSON.stringify(files)!==JSON.stringify(all)) throw new Error("batch must contain EVERY registered fixture exactly once in sorted order");
+  const before=Object.freeze(toolchainInputs());
+  const results=visitFixtures(files,file=>fixture("check",file,out,before));
+  const after=toolchainInputs();
+  requireSameToolchain(before,after);
+  const record={status:"pass",toolchain_verification:"complete-before-and-after-batch",toolchain_entries:Object.keys(before).length,
+    before_sha256:createHash("sha256").update(JSON.stringify(before)).digest("hex"),
+    after_sha256:createHash("sha256").update(JSON.stringify(after)).digest("hex"),
+    fixtures:results,reports:results.reduce((n,result)=>n+result.reports,0)};
+  writeFileSync(`${out}/cached-batch-toolchain.json`,JSON.stringify(record,null,2)+"\n");
+  console.log(JSON.stringify(record));
+}
+if(process.argv[1] && import.meta.url===pathToFileURL(resolve(process.argv[1])).href) {
+  const [mode,...args]=process.argv.slice(2);
+  if(mode==="batch") batch(args[0],args.slice(1));
+  else fixture(mode,args[0],args[1]);
 }

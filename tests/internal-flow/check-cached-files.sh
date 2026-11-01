@@ -25,7 +25,8 @@ for file in tests/internal-flow/*.lean; do
   done < "$file"
 done
 lake build "${modules[@]}" > "$out/cached-owned-imports.log" 2>&1
-for file in tests/internal-flow/*.lean; do
-  name=$(basename "$file" .lean)
-  node tests/internal-flow/fixture-cache.mjs check "$file" "$out" > "$out/cached-$name-cache.log" 2>&1
-done
+# One serial batch shares only the complete, freshly hashed toolchain map.
+# Every fixture retains its own source/dependency/object/axiom verification;
+# the full toolchain is hashed AGAIN after the entire batch before success.
+fixtures=(tests/internal-flow/*.lean)
+node tests/internal-flow/fixture-cache.mjs batch "$out" "${fixtures[@]}"
