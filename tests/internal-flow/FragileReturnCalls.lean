@@ -1,3 +1,4 @@
+import Solidity.Backend.InternalFlow.CallerView
 import Solidity.Backend.InternalFlow.StoragePrograms
 import Solidity.Backend.InternalFlow.FragilePrograms
 import Solidity.Backend.InternalFlow.StoragePrefixFrame
@@ -511,3 +512,73 @@ theorem late_no_skipped_cost : lateProducer.cost caller.st ≠ 0 ∧ lateProduce
 #print axioms wrong_old_content
 #print axioms wrong_cursor
 end Solidity.Backend.InternalFlow.FragileReturnChecks
+
+namespace Solidity.Backend.InternalFlow.FragileReturnChecks.CapturedResult
+open Evm Evm.Memory
+/-- Actual result export removes the private memory binder, retaining the
+callee's exact typed storage reference rather than a memory pointer. -/
+theorem returned_reference : exported.st.env.1 = bodyOutput.st.env.2.1 := by rfl
+
+def selectResult : Thin [.alias R] Final :=
+  .keep (.drop (.drop (.drop (.drop (.drop .refl)))))
+def reached : Solidity.Out C exported.st.H Final := ⟨exported.st,List.prefix_refl _⟩
+theorem result_view : TEnv.thin selectResult (TEnv.drop Ext.refl reached.st.env) =
+    TEnv.wk reached.ext [.alias R] (TEnv.thin selectResult exported.st.env) := by rfl
+
+theorem returned_slot : ∃ (m₁ : Machine) (base₁ : Nat → Fin W)
+    (m₂ : Machine) (base₂ : Nat → Fin W) (m₃ : Machine) (base₃ : Nat → Fin W)
+    (r : SRef C (.ref R)) (slot : Slot),
+    Evm.run prefixCode machine = .ok m₁ 0 ∧
+    Evm.run callProducer.code m₁ = .ok m₂ 0 ∧
+    Evm.run suffixProducer.code m₂ = .ok m₃ 0 ∧
+    StateRepr 3 1 128 callProducer.frag exported.st base₂ m₂ ∧
+    StateRepr 3 1 128 suffixProducer.frag final.st base₃ m₃ ∧
+    m₃.stack = machine.stack ∧ BaseExtends caller.st.H base₁ base₂ ∧
+    BaseExtends exported.st.H base₂ base₃ ∧
+    bodyOutput.st.env.2.1 = some r ∧ exported.st.env.1 = some r ∧
+    refObs (some r) = some ("rows",[.idx ⟨1,by decide⟩]) ∧
+    m₂.mem 6 = .slot slot ∧ PathSlot C false r slot ∧
+    ∃ sv, exported.st.storage.findLive r = some sv := by
+  obtain ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hc,hs,hr₂,hr₃,stack,he₂,he₃⟩ := stages
+  have observed := congrArg (fun p => p.2.2) source_export
+  cases old : exported.st.env.1 with
+  | none => rw [old] at observed; cases observed
+  | some r =>
+    have flagSome := congrArg (fun flags => flags[1]?) fragile_classification
+    have flag := Option.some.inj flagSome
+    change callProducer.frag.get (.here : Idx Final (.alias R)) = .fragile at flag
+    have live := CallerView.represented_fragile_drop reached Ext.refl selectResult result_view
+      hr₂ (.here : Idx [.alias R] (.alias R)) r old flag
+    obtain ⟨slot,word,path,sv,found⟩ := live
+    change m₂.mem 6 = .slot slot at word
+    rw [old] at observed
+    exact ⟨m₁,base₁,m₂,base₂,m₃,base₃,r,slot,hp,hc,hs,hr₂,hr₃,stack,he₂,he₃,
+      returned_reference.symm.trans old,rfl,observed,word,path,sv,found⟩
+
+theorem returned_slot_not_memory_pointer : ∃ (m₁ m₂ : Machine) (slot : Slot),
+    Evm.run prefixCode machine = .ok m₁ 0 ∧ Evm.run callProducer.code m₁ = .ok m₂ 0 ∧
+    m₂.mem 6 = .slot slot ∧ ∀ address : Fin W, m₂.mem 6 ≠ .val address := by
+  obtain ⟨m₁,base₁,m₂,base₂,m₃,base₃,r,slot,hp,hc,hs,hr₂,hr₃,stack,he₂,he₃,
+    body,old,observed,word,path,live⟩ := returned_slot
+  refine ⟨m₁,m₂,slot,hp,hc,word,?_⟩
+  intro address wrong
+  rw [word] at wrong
+  cases wrong
+
+/-- Actual shrinking keeps a syntactic source reference but invalidates it;
+the existing selector computes dead and refuses its export. -/
+theorem stale_is_not_live : ∃ r : SRef C (.ref R),
+    staleOut.st.env.1 = some r ∧ staleOut.st.storage.findLive r = none ∧
+    staleExpanded.frag.get .here = .dead ∧
+    (FragilePrograms.compile 1 prefixProducer.frag (.cons staleCall .nil)).isSome = false := by
+  have observed := congrArg Prod.fst stale_source
+  have absent := congrArg Prod.snd stale_source
+  cases old : staleOut.st.env.1 with
+  | none => rw [old] at observed; cases observed
+  | some r =>
+    refine ⟨r,rfl,?_,stale_fragment,stale_refusal⟩
+    rw [old] at absent
+    cases live : staleOut.st.storage.findLive r with
+    | none => rfl
+    | some value => simp only [Option.bind_some,live,Option.isSome_some] at absent; cases absent
+end Solidity.Backend.InternalFlow.FragileReturnChecks.CapturedResult

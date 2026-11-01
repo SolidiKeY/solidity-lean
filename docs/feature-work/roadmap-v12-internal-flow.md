@@ -2768,3 +2768,56 @@ reserved edit, unmerged intake or push/merge/PR. C32 and every earlier seal stay
 immutable. A fresh exact-committed PARALLEL-INTERFACE exports these narrow typed
 contracts and populated clients for private peer staging; final combined-tree
 checks remain required and open.
+
+
+## Continuation34 — storage result paths and reached fragile liveness
+
+`CallerView.storage_alias_drop` transports exact typed storage roots/paths
+through a genuinely captured extended-context view. `represented_storage_drop`
+requires the actual reached .ok flag and derives `PathSlot C true`;
+`represented_fragile_drop` requires the actual reached .fragile flag and derives
+BOTH `PathSlot C false` and `out.st.storage.findLive r = some sv` from the real
+reached representation. No liveness premise, cast to .ok, new evaluator or
+reserved predicate is added. `dead_not_fragile` shows that a retained reference
+with actual findLive=None cannot acquire a fragile flag under those same real
+representation/capture facts. It does not invent dead-code admission.
+
+The populated `FragileReturnChecks.CapturedResult` client removes the actual
+private memory binder with `returned_reference`, then couples that exact callee
+reference to the actual compiled call's .slot word, typed indexed path, source
+rows/index1 observation and DERIVED reached liveness. All prefix/call/suffix
+executions, reached representations, base extensions and final protected stack
+come from existing checked stages. `result_view` is reflexive at the reached
+RESULT boundary: this concrete client does NOT prove general pre-call caller
+storage-alias preservation or alias invariance through an arbitrary suffix.
+The word-kind countercontrol rules out every memory .val pointer on the same
+successful call witness. The actual shrink countercontrol keeps a syntactic
+Some reference while findLive=None, the existing fragment is .dead and the
+existing selector refuses export. All prior pop/rebind/OOB/refusal observations
+and complete ordered vectors remain unchanged; no runtime rejection is inferred
+from a failed compiler/input premise.
+
+The first prototype's whole-suffix rfl proof failed and remains evidence only;
+it is NOT a proof of inequality or a missing-producer claim. The precise private
+result-export identity passes2.011s. The first fixture check failed on missing
+Inhabited Fl and branch-rewritten equalities; raw source/logs are retained.
+The fix uses optional list lookup and the actual rewritten equalities, with no
+flag-instance/semantic change. Corrected actual fixture preparation passes
+41.919s/120, affected dispatch preparation26.108s, core2.551s, per-file2.498s
+and focused all-owned/fixture import closure1.669s. Nine actual new axiom reports
+are pinned separately; all542 old kernel types and C32/C33 scoped sets remain
+exact. Lean4.24.0/Lake5.0.0-src+797c613 and actual KeySort two-job output pass.
+
+Current aggregate/full validation remains pending with C32 strictcached
+command0/121.091>120 FAIL, raw124/121.214, originalfull124/300 and all previous
+raw/prerequisite/OOM/docs failures retained. No unchanged failed heavy command
+is rerun; new semantic facts are not a performance repair or global gate pass.
+Normal/strict docs remain raw1 with separate complete previous/publication
+findings equality, not frozen/global success. All original Work1–6 and
+BackfillsA/B remain partial; general/unbounded/dependent/early-loop/byte-world/
+target-transient producers and remaining frame assembly/validation work stay
+explicit. No independent-work exhaustion, goal write, reserved edit, unmerged
+intake or push/merge/PR. All earlier seals remain immutable; exact committed
+source/signatures/witness/bundle are supplied for private parallel consumers,
+which still require actual combined-tree validation. Independent read-only
+finder/skeptic source and committed-artifact reviews are bound in the handoff.

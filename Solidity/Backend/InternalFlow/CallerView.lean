@@ -126,6 +126,69 @@ theorem represented_value_drop {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Δ}
   rw [value_drop out extension h captured i] at encoded
   exact encoded
 
+/-- Storage aliases retain exact typed roots/paths through captured context drops. -/
+theorem storage_alias_drop {Γ Δ Ξ : Ctx} {σ : State C Γ} (out : Out C σ.H Δ)
+    (extension : Ext Γ Δ) (h : Thin Ξ Γ)
+    (captured : TEnv.thin h (TEnv.drop extension out.st.env) =
+      TEnv.wk out.ext Ξ (TEnv.thin h σ.env))
+    {R : RefTy} (i : Idx Ξ (.alias R)) :
+    TEnv.get ((i.wk h).ext extension) out.st.env = TEnv.get (i.wk h) σ.env := by
+  rw [TEnv.get_ext_drop]
+  have observed := congrArg (TEnv.get i) captured
+  rw [CallerFrame.read_thin,TEnv.get_wk,CallerFrame.read_thin] at observed
+  exact observed
+
+theorem represented_storage_drop {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Δ}
+    {σ : State C Γ} (out : Out C σ.H Δ) (extension : Ext Γ Δ) (h : Thin Ξ Γ)
+    (captured : TEnv.thin h (TEnv.drop extension out.st.env) =
+      TEnv.wk out.ext Ξ (TEnv.thin h σ.env))
+    {base : Nat → Fin W} {m : Machine}
+    (repr : StateRepr L b frame F out.st base m)
+    {R : RefTy} (i : Idx Ξ (.alias R)) (r : SRef C (.ref R))
+    (old : TEnv.get (i.wk h) σ.env = some r)
+    (plain : F.get ((i.wk h).ext extension) = .ok) :
+    ∃ slot, m.mem (cellOf b ((i.wk h).ext extension)) = .slot slot ∧
+      PathSlot C true r slot := by
+  obtain ⟨found,slot,observed,word,path⟩ := repr.core.aliases ((i.wk h).ext extension) plain
+  change TEnv.get ((i.wk h).ext extension) out.st.env = some found at observed
+  have same : found = r := Option.some.inj
+    (observed.symm.trans ((storage_alias_drop out extension h captured i).trans old))
+  subst found
+  exact ⟨slot,word,path⟩
+
+theorem represented_fragile_drop {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Δ}
+    {σ : State C Γ} (out : Out C σ.H Δ) (extension : Ext Γ Δ) (h : Thin Ξ Γ)
+    (captured : TEnv.thin h (TEnv.drop extension out.st.env) =
+      TEnv.wk out.ext Ξ (TEnv.thin h σ.env))
+    {base : Nat → Fin W} {m : Machine}
+    (repr : StateRepr L b frame F out.st base m)
+    {R : RefTy} (i : Idx Ξ (.alias R)) (r : SRef C (.ref R))
+    (old : TEnv.get (i.wk h) σ.env = some r)
+    (fragile : F.get ((i.wk h).ext extension) = .fragile) :
+    ∃ slot, m.mem (cellOf b ((i.wk h).ext extension)) = .slot slot ∧
+      PathSlot C false r slot ∧ ∃ sv, out.st.storage.findLive r = some sv := by
+  obtain ⟨found,slot,observed,word,path,live⟩ := repr.core.fragile ((i.wk h).ext extension) fragile
+  change TEnv.get ((i.wk h).ext extension) out.st.env = some found at observed
+  have same : found = r := Option.some.inj
+    (observed.symm.trans ((storage_alias_drop out extension h captured i).trans old))
+  subst found
+  exact ⟨slot,word,path,live⟩
+
+/-- Syntactic alias identity cannot manufacture liveness after a shrink. -/
+theorem dead_not_fragile {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Δ}
+    {σ : State C Γ} (out : Out C σ.H Δ) (extension : Ext Γ Δ) (h : Thin Ξ Γ)
+    (captured : TEnv.thin h (TEnv.drop extension out.st.env) =
+      TEnv.wk out.ext Ξ (TEnv.thin h σ.env))
+    {base : Nat → Fin W} {m : Machine} (repr : StateRepr L b frame F out.st base m)
+    {R : RefTy} (i : Idx Ξ (.alias R)) (r : SRef C (.ref R))
+    (old : TEnv.get (i.wk h) σ.env = some r)
+    (dead : out.st.storage.findLive r = none) :
+    F.get ((i.wk h).ext extension) ≠ .fragile := by
+  intro flag
+  obtain ⟨slot,word,path,sv,live⟩ := represented_fragile_drop out extension h captured repr i r old flag
+  rw [dead] at live
+  cases live
+
 /-- info: 'Solidity.Backend.InternalFlow.CallerView.by_id' does not depend on any axioms -/
 #guard_msgs in #print axioms by_id
 /-- info: 'Solidity.Backend.InternalFlow.CallerView.reference' depends on axioms: [propext] -/
