@@ -1027,3 +1027,6 @@ import Solidity.Backend.MemoryOps.SourceUintFixedDeclareCompoundOverflow
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclareCompoundControls
 import Solidity.Backend.MemoryOps.SourceUintFixedIncrement
 import Solidity.Backend.MemoryOps.SourceUintFixedIncrementControls
+import Solidity.Backend.MemoryOps.SourceUintFixedDecrement
+import Solidity.Backend.MemoryOps.SourceUintFixedBumpSequence
+import Solidity.Backend.MemoryOps.SourceUintFixedDecrementControls

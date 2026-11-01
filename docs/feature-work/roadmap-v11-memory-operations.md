@@ -6021,3 +6021,134 @@ global pass. Raw docsFAIL1/83rows, exact consumed-public bytes match separately;
 frozen72rows+11incoming remainsFAIL1. Warmstrict0newtimedSuite; independently
 all262current/C31source-fixture-toolchainhashes+runtime versions match retained
 cold26/max160s<300 only, not new timing coverage. Artifactreviews follow commit.
+
+
+## C74: fixed decrement, reached zero underflow and real Source Items pair (partial)
+
+Continued ORIGINAL G34/Backfill A-B, not a replacement assignment. New owned
+[SourceUintFixedDecrement](../../Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean),
+[SourceUintFixedBumpSequence](../../Solidity/Backend/MemoryOps/SourceUintFixedBumpSequence.lean),
+and [SourceUintFixedDecrementControls](../../Solidity/Backend/MemoryOps/SourceUintFixedDecrementControls.lean)
+consume published Source.incDecVal(false), actual evalLoc/read/write and existing
+Evm.Memory.incrementMemory_eq_compound for preDec/postDec, ValFrag binary/sub and
+PtrFrag.write read-only. No replacement allocator/interpreter/AST/value/heap or
+reserved Source/Evm/Bridge producer edit. Frozen fb379ae20f10e2c92113453ddd9d40d8f2efbe09,
+consumed public 2fe1f8932f96be15b00df03ba2cde46f64a87758 and C73 parent
+e8a84af20f8e927ef9cd2c02bdb0299c3276252b remain the recorded ancestry. Goal stays
+BLOCKED unchanged; no goal RPC/status/reset/activation action was taken.
+
+`source_uint_sub_one` and `source_uint_sub_one_underflow` prove actual arithmetic
+and conversion from existing Source.intRes and intrinsic compoundT definitions.
+There was no published owned fixed subtraction-by-one application to invoke.
+The in-range case derives the exact Source uint bound from inRange(x-1), then
+proves actual Source.incDecVal checked false and compoundT .sub results. The
+out-of-range case requires checked Source=true and proves exact arithmetic panic
+and intrinsic none. Neither is an assumed successful execution/output oracle or
+an alternate arithmetic semantics. Unchecked wrapping underflow is not identified
+with the checked target. These are local arithmetic cases, never source exclusions.
+
+`fixed_uint_decrement_certificate` composes actual existing read/sub-one/write
+code with full Objects.ResultRepr. `resolved_uint_fixed_decrement_word` derives
+actual Source location->OLDread->incDecVal(false)->write and prefix NEW/postfix
+OLD expression results, the discarded-result statement, intrinsic preDec/postDec
+and whole word execution. INITIAL genuine SourceUintFixedAt (some N/fixed N),
+root/index local alignment, actual runtime bound, inRange(INITIAL actualcell-1),
+Source.MemOK and full Objects.StateRepr are premises. Actual reads/writes derive
+reached correspondence, all unchanged locals/other typed objects/Source addresses,
+Source ex/events/logs/fnLocals, stack and Objects.KeepsAllocator. Existing initial
+AllocatorRepr and positive base transport through that derived certificate.
+Sufficient expression/statement horizons n+3/n+4 are not minimal-fuel/admission
+claims; runtime lengths/indices have no extra payload/depth cutoff. Genuine fixed
+types are retained. A target statement's discarded result does not prove an
+emitted expression-result compiler theorem or physical-byte encoding.
+
+`resolved_uint_fixed_decrement_underflow_word` reads the actual represented cell,
+requires checked=true and actualcell-1 out of range, then proves Source arithmetic
+panic before write, retained Source globals, intrinsic revert and whole target
+revert. No target machine/panic bytes/transaction rollback are fabricated after
+reversion. Zero remains supported by this failure case, never excluded from a
+profile; no zero-length Source admission is added.
+
+`resolved_uint_fixed_bump_pair_word` closes C73's explicitly missing two-statement
+application with ONE existing Source RItems increment then REACHED decrement,
+matching intrinsic Prog and complete published word append. INITIAL actualcell+1
+in range is the only arithmetic case premise. The first actual set and unchanged
+fixed length derive the second OLD, index bound and subtraction range. Thus
+Source OLD/NEW results follow reached contents for either pre/post choice.
+Original caller nps stays explicit at sufficient Items horizon fuel+6; expression
+horizons are fuel+4/fuel+3. Entire typed heap equality to INITIAL heap is derived
+from both actual writes, List.set_getElem_self and existing dependent heap
+extensionality; it is not a premise. Every Source object lookup is restored from
+initial correspondence/other-address framing, and Source locals/world fields,
+stack and allocator are derived. No claim of total Source machine equality or
+external transaction rollback follows. Arbitrary Source graphs and final compiler
+composition remain separate unfinished obligations.
+
+Both-pipeline controls independently inhabit old LEFT=[7,8,7], RIGHT=[9,10,9],
+neighbor=[11,12] with real Source table, MemOK, Objects heap/locals and allocator.
+Standalone decrement makes LEFT7->6; prefix returns6 and postfix7, unchanged old
+aliases/neighbor/world/cursor40/stack77,88 and complete Source/typed tables follow.
+Reached underflow executes the ACTUAL existing positive length3 declaration,
+OLD-local rebind, write42 and delete0 Source Items/typed Prog/full word append.
+Its final Source z is explicitly linked to the successful SourceItems11 and target
+machine to constructor/alias/write/delete runs. The intermediate write Source
+state is separately linked to actual SourceevalE7 from the derived rebound state;
+its full locals/world fields and old/new table are derived from the existing
+write producer. Actual new-root Source index read is0 while retained OLD-alias
+index read is7; checked decrement rejects only at the selected fresh zero root.
+Full old/intermediate/final object vectors, savedstack, allocator43 and Source
+world/locals are observed without assuming reached correspondence.
+
+`reached_pair` directly applies the generic Source Items/Prog/word theorem in
+both pipelines and all pre/post choices: LEFT7->8->7, decrement postfix observes8
+rather than stale7, all old objects/aliases/neighbor and Source object reads
+restore. Complete20word initial/decrement/decrement vectors give7->6->5; actual
+increment then decrement word vectors give7->8->7 with all prior16cells plus
+local7/fresh40..42, stack/freepointer/frames retained. Wrong-operation and wrong
+pre/post values6/8/7 discriminate accidental increment or stale result. Unlike
+C73's word-only double vector, the increment/decrement pair now has actual Source
+Items and intrinsic Prog certificates; emitted expression-result correctness is
+still not claimed. Every previous C71/C72/C73 fixture/vector/guard/test is preserved.
+The NEW lane test retains every earlier admission case and appends all C74 heads;
+mutation tests validate evidence admission, not replace kernel execution proofs.
+
+Preflight verified all4473 prior seals, same idle runtime/image/mount/cache/toolchain,
+aggregate12GiB/no-swap under16GiB parent and OS headroom; initialfree663412736bytes
+cleared unchanged reserve536870912+forecast100663296. The entire warm source,
+compiled output/log/commit/compact export route was admitted, no cold cache copy,
+cleanup/new runtime/guard or budget change. All failing attempts are retained;
+no subsequent pass relabels a failure. Per-file MCP was unavailable; actual serial
+focused closures substitute within repository permissions, explicit Lean-j1/thread1,
+CPU0/cacheOFF. Final full/strict/structural/fixtures/pins/resources/reviews are
+recorded additively in checkpoint74 evidence. Raw global docs/inventory failures
+remain failures, separate from exact public-byte parity and scoped pin proposals.
+
+All ORIGINAL G32/G33/G34/G35.01/.03/.04/.05 and Backfills A/B remain PARTIAL;
+G35.02/.06 remain BLOCKED on reserved-copy/final Source-V10-target prerequisites.
+Physical bytes/all-profile constructors and target allocation failures/general
+paths/graphs/ABI/storage/deep-copy/recursive liveness/reserved memory-to-storage
+and final composition remain real open obligations. Further late decrement
+failure/bounds/composition work is not declared exhausted or unavailable. Kernel
+and symbolic-word results do not establish external pinned solc/EVM execution or
+whole-lane correctness. Existing goal identity/objective/status remain unchanged.
+
+C74 final source finder/skeptic PASS; only a decrement-comment typo was suggested
+and corrected. Actual script admission exposed a missing exact prefix_postfix
+axiom guard: initial257tests254PASS/3FAIL, static batch exit1 retained. The proof
+already existed; the standard-trio guard was added without changing the theorem,
+expected observations or test cases. Initial raw inventory1516(before guard) and
+full01 PASS1149/262 before guard remain earlier-tree evidence only, not finalgate.
+Final focused02 PASS247jobs; final full02 PASS1149default/262Suite, SolKey
+377parsed/131covered/OK/exit0. Actual Lean4.24.0 commit797c613/Lake5.0.0-src+797c613/
+KeySort2jobs/cacheOFF/thread1 observed. Full sampled aggregateRSS
+206708KiB/diskgrowth270336bytes/newOOM0. All13C74exec
+receipts retain3failed proof gates; historical5OOM/cumulative12GiB
+sessionpeak remain separate. No proof/time/memory/disk guard was increased.
+Refined structural/trust/lane/completefixtures/strict PASS;257script/corruption
+tests PASS. Tennew exactstandard guards give1158owned pins/168modules, all1148
+C73rows unchanged. Raw global inventoryFAIL1/1517=359published+1158owned/0unsafe
+remains failed pending coordinator reconciliation. Raw docsFAIL1/83rows is complete
+byte-identical to consumed public; frozen72rows+11incoming comparison FAIL1,
+separate public zero-new comparison PASS0. Warmstrict0newtimedSuite; all262current/
+C31source-fixture-toolchainhashes+actualruntimeversions match retained cold26/
+max160s<300 only, not new timing coverage. Artifact reviews follow actual commit.

@@ -1405,3 +1405,7 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceUintFixedIncrement.lean` | Actual genuine fixed Source prefix/postfix increment results, existing intrinsic statement and full Objects word/allocator/frame certificate, plus checked overflow before write. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedIncrementControls.lean` | Both-pipeline pre/post result difference with identical write, actual C72 changed MAX-prefix increment rejection, all old/fresh Source/typed frames and complete20word repeated-increment vectors. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean` | Actual subtract-one arithmetic bridge, genuine fixed Source prefix/postfix decrement and full Objects read/sub/write statement/frame certificate, checked underflow before write. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedBumpSequence.lean` | Actual two-statement Source Items/intrinsic Prog/whole word increment then reached decrement, deriving second OLD/range and restoring the entire typed heap and all Source object reads. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedDecrementControls.lean` | Both-pipeline decrement and constructor/alias/write/delete reached-zero underflow with actual Source/target links, stale-alias reads, genuine reached Source pair and complete20word arithmetic/order/restoration vectors. |
