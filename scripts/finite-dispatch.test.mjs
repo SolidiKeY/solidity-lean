@@ -468,6 +468,7 @@ function referenceVectors(viaIR) {
     ['arrayReturn(bool)', ['true'], ['106', '106', '1']],
     ['arrayReturn(bool)', ['false'], ['5', '110', '1']],
     ['bytesReturn()', [], ['3', '65']],
+    ['tupleReturn()', [], ['3', '2']],
     ['structMemory()', [], ['2', '2', '43']],
     ['structStorage()', [], ['8', '8']],
     ['nominalQ()', [], ['9']],

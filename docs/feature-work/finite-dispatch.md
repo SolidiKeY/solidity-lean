@@ -189,6 +189,11 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
 - **Memory returns.** `fnMemoryDispatch` binds one shared memory destination
   of the return's type in every branch, after the argument captures; a
   zero-argument dispatch keeps its original capture of the tag first.
+- **Several value returns.** `(a, b) = h(x)` and `(uint a, uint b) = h(x)`
+  dispatch to the direct tuple assignment `(a, b) = g(y)` in each branch
+  (`fnTupleDispatch`, `tupleReturn`). Several returns with a memory one stay
+  refused: a direct tuple call binds value returns only (`elabCallRet`'s
+  targets), so there is no direct call to dispatch to.
 - **Callee order.** solc's legacy code reads the callee value after the
   arguments, its IR pipeline before them (EVM observations `calleeOrder`,
   `calleeOrderScalar`). Under `evalOrder .viaIR` a named callee's tag is
@@ -247,7 +252,7 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   elements stay unparsed.
 - `scripts/check-function-value-references.mjs SOLJSON MODULES_DIR [cancun|osaka]`:
   the pinned solc 0.8.34 on ethereumjs 10.1.3, legacy/viaIR × optimizer
-  off/on (80 executions per EVM version; cancun and osaka both pass), the
+  off/on (84 executions per EVM version; cancun and osaka both pass), the
   source of every expected observation above.
 
 ## Dispatch correctness
@@ -359,7 +364,8 @@ with the confirmed findings and their fixes:
 ## Handoff (lane CF2)
 
 Checkpoints: 1 (memory arrays), 2 (storage arrays), 3 (memory returns
-beside arguments; nonrecursive structs in memory and storage) and 4 (chain
+beside arguments; several value returns; nonrecursive structs in memory and
+storage) and 4 (chain
 selection theorems, lane-soundness notes) are implemented on
 `cloud/relocated-20261031/function-values`. Still refused: several returns
 with a memory one, narrow array elements, struct returns, calldata
@@ -370,10 +376,10 @@ Gates run: `./run-lean.sh` (`lake build`: 1019 jobs, success; the
 SolkeyTestSuite step OOM-kills `Derived17`, the baseline; `Derived21`, also
 killed once under parallel load, builds on the retry in 166s;
 `check-solkey`: 37 mismatches, the baseline); `TrustAudit.lean` through
-the Lean server ("trust: 8 dispatch theorems use only the standard
+the Lean server ("trust: 9 dispatch theorems use only the standard
 axioms"); `node --test` of `finite-dispatch` (30/30; the FunctionTypes.sol
 suite timed out once under load and passes alone), `dispatch-signatures`
-(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (80
+(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (84
 executions, cancun and osaka); `check-layers`, `check-orphans`,
 `check-trust`, `check-automatic --strict` (0 pending), `check-doc-paths`
 (48, as on the base) and `check-g07` (the base's two failures; three new

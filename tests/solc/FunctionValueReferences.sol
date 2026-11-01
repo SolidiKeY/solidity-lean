@@ -32,6 +32,9 @@ contract FunctionValueReferences {
     function bumpP(P memory p) internal pure returns (uint) { p.a += 1; return p.a; }
     function sumQ(Q memory q) internal pure returns (uint) { return q.a + q.b; }
     function bumpStoredP(P storage p) internal returns (uint) { p.a += 7; return p.a; }
+    function divmod(uint[] memory xs, uint k) internal pure returns (uint, uint) {
+        return (xs[0] / k, xs[0] % k);
+    }
     function sopA(uint x) internal pure returns (uint) { return x + 1; }
     function sopB(uint x) internal pure returns (uint) { return x + 2; }
     function swapSop() internal returns (uint) { sop = sopB; return 10; }
@@ -155,6 +158,14 @@ contract FunctionValueReferences {
         q.a = 4; q.b = 5;
         function(Q memory) internal pure returns (uint) h = sumQ;
         return h(q);
+    }
+
+    function tupleReturn() public pure returns (uint, uint) {
+        uint[] memory xs = new uint[](1);
+        xs[0] = 17;
+        function(uint[] memory, uint) internal pure returns (uint, uint) h = divmod;
+        (uint q, uint r) = h(xs, 5);
+        return (q, r);
     }
 
     function falseObservation() public returns (uint) {

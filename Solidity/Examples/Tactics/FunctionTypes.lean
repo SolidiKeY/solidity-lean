@@ -388,6 +388,7 @@ def MemArgs : Contract := contract!{
   function tokPlus(Token memory t) returns (uint r) { t.value = t.value + 1; r = t.value; }
   function tokStored(Token storage t) returns (uint r) { t.value = t.value + 7; r = t.value; }
   function tokOther(Account memory a) returns (uint r) { r = a.balance; }
+  function divmod(uint[] memory xs, uint k) returns (uint q, uint r) { q = xs[0] / k; r = xs[0] % k; }
   function viaParam(function (uint[] memory) returns (uint) h, uint[] memory xs)
       returns (uint r) { r = h(xs); }
 }
@@ -409,6 +410,7 @@ local instance : InContract := ⟨MemArgs⟩
      ("tokPlus", some "function(Tokenmemory)returns(uint)"),
      ("tokStored", some "function(Tokenstorage)returns(uint)"),
      ("tokOther", some "function(Accountmemory)returns(uint)"),
+     ("divmod", some "function(uint[]memory,uint)returns(uint,uint)"),
      ("viaParam", some "function(function(uint[]memory)returns(uint),uint[]memory)returns(uint)")]
 
 /-- The dispatch of `h(xs)` as the elaborator writes it: the argument is
@@ -520,6 +522,20 @@ type error there): an `Account` function's tag has no arm in a
 theorem structWrongNominal : ¬ (⊨ᶠ dl!{ ⟨ Token memory t;
     function (Token memory) returns (uint) h = tokOther; uint r = h(t); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
+
+/-- Several value returns: `(uint q, uint r) = h(xs, 5)` with `h = divmod`
+is the direct tuple assignment `(q, r) = divmod(xs, 5)` in its branch. -/
+private def tupleReturn := sol[MemArgs]{
+  uint[] memory xs = new uint[](1); xs[0] = 17;
+  function (uint[] memory, uint) returns (uint, uint) h = divmod;
+  (uint q, uint r) = h(xs, 5);
+  assert(q == 3); assert(r == 2);
+}
+
+/-- `(uint q, uint r) = h(xs, 5)` with `h = divmod`: `q == 3`, `r == 2`. -/
+theorem tupleReturn_run :
+    (Prog.run (State.init MemArgs) tupleReturn).toOption.isSome = true := by
+  decide +kernel
 
 /-- A never-assigned storage function value reverts. solc's IR pipeline
 raises `Panic(0x51)`; its legacy pipeline jumps to an invalid destination

@@ -787,6 +787,39 @@ must be entered in). -/
 partial def elabScope (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
   ElabM.lift (SProg.chain Γ.names Γ.ctx (← elabBranch ss))
 
+/-- **A tuple assignment from a call through an internal function value**
+`(a, b) = h(x)`: the dispatch's captures (`dispatchCaptures`), then one
+branch per candidate `g` of `h`'s type, the direct tuple assignment
+`(a, b) = g(y)` on the captured arguments, then the unassigned-value failure.
+Value returns only: a direct tuple call binds primitive returns. -/
+partial def fnTupleDispatch (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
+    ElabM (SProg C) := do
+  let some (ps, rs, false) := fnParts? ty
+    | throw s!"{h}(…): an external function value in a tuple assignment"
+  unless ps.length == args.length do throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  unless rs.length == ts.length do throw s!"{h} returns {rs.length} values, not {ts.length}"
+  if let some c := ps.find? fun c =>
+      (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function type with a {c} parameter is not modelled"
+  if let some c := rs.find? fun c => (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function value returning a {c} among several values is not modelled \
+      (a direct tuple call binds value returns)"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"{h}(…) may call {g}, which is not declared before this function: \
+          declare the functions of type {ty} first"
+  let (pre, tag, as) ← dispatchCaptures (.name h) ty ps args
+  let failure := if (← read).selfFrame || (← read).retainFailureData then
+      RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
+  let dispatch := cands.foldr (fun (g, t) rest =>
+    RawStmt.ite (.binop .eqB tag (.num t)) [.tupleAssign ts (.call g as)] [rest]) failure
+  elabStmtsP (pre ++ [dispatch])
+
 /-- **A tuple assignment** `(t₀, , t₂) = e;`, written out as solkey's
 `ParserUtils.tupleAssignment` writes it.  From a call of a function of several
 returns: the call (`CallRet.rets`), then `tᵢ = rᵢ;` for each target, left to
@@ -830,6 +863,10 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
   | .ternary c a b =>
     elabStmtsP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
   | .call f args =>
+    -- a call through an internal function value (`fnTupleDispatch`)
+    if (← read).funs.all (·.1 != f) then
+      if let some ty := fnTyOf? C (← ctx) f then
+        return ← fnTupleDispatch ts f ty args
     -- a function not declared before this one is `elabCallRet`'s error
     unless (castTy? f).isNone do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"

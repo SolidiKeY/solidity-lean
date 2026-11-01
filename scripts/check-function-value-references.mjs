@@ -45,6 +45,7 @@ const vectors = [
   ['arrayReturn', [true], [106n, 106n, 1n]],
   ['arrayReturn', [false], [5n, 110n, 1n]],
   ['bytesReturn', [], [3n, 65n]],
+  ['tupleReturn', [], [3n, 2n]],
   ['structMemory', [], [2n, 2n, 43n]],
   ['structStorage', [], [8n, 8n]],
   ['nominalQ', [], [9n]],
