@@ -128,3 +128,5 @@ composition; full assembly closure remains open.
 
 VY2 [ordered ordinary roots](feature-work/inline-assembly-vy2.md#ordered-ordinary-root-declarations-2026-11-01)
 adds checked cross-root packing/source-bank/readback components; full lane remains partial.
+
+VY2 inherited-root canonical preparation: see [lane queue](feature-work/inline-assembly-vy2.md#inherited-active-contract-roots-2026-11-01).

@@ -2474,3 +2474,90 @@ to an agreed Word origin. Those ORIGINAL integration/derivation obligations
 remain open; no generic assumed order/origin adequacy witness was substituted.
 No producer/owner branch import or source-definition rewrite occurred. Exact
 symbols/boundaries in root-sequence/owner-order-origin-inspection.json.
+
+
+### Inherited active-contract roots (2026-11-01)
+
+Original Y04/Backfill A/B progress; full lane remains PARTIAL and original goal
+BLOCKED unchanged. YQ1–YQ7 unchanged. Actual pinned solc documentation requires
+base-ward-first C3, allows cross-contract scalar packing, aligns aggregates at
+entry/exit, and keeps transient and persistent layout independent.
+
+InheritedDeclarations uses ACTUAL Source.Env.linearize, reversed; no second C3
+or scalar planner. The computed hierarchy checks unique global contract/interface
+identities, owner basesOK, actual declared active/ancestor nodes, no repeated
+lineage members and closure under actual direct bases. Those are finite metadata
+checks, not supplied final layout/inverse/safety laws. Every descendant scope's
+ordinary roots are concatenated in reverse C3; declaration order within each
+scope follows actual Env.decls. PRIVATE base storage is included, unlike visible
+name lookup. Constants/immutables are filtered as before. Qualified DeclName
+identities and all same-scope stateVar IDs across BOTH banks/constness/malformed
+nodes are checked to preserve ACTUAL first declOf and transientRoot selection.
+Missing/incomplete/wrong-order/wrong-bank/cross-identity metadata cannot silently
+become a complete registry. Existing owner C3 fuel/budgets unchanged.
+
+Existing RootDeclarations/FixedDeclaration and ONE packDeclarationPaths thread
+one byte cursor across contracts. Computed success derives complete root/leaf
+coverage, path uniqueness/cross-contract separation, exact end/nonwrap and actual
+pathTy/bank agreement. Existing Source.Storage, Source.applyOp/current-frame and
+paired residual journal operations yield complete source-store equality and
+whole residual FUNCTION equality, hence full raw supplied-snapshot reconstruction.
+Pure unchanged administrative identity retains none versus explicit default.
+Actual Source reads, two storRef aliases, member/index errors, every-original-H
+MemOK, inhabited initial/written MemOK, static refusal, caller-prefix child rollback,
+committed-child enclosing rollback, account/bank isolation and full transient
+logical+residual reset are instantiated for the computed diamond registry.
+
+Diamond D is B,C; B and C both inherit A. Owner result [D,C,B,A] reverses to
+[A,B,C,D]. A's private uint8 and B's uint248 share slot0. C's bool and Inner[2]
+force alignment and two nested struct slots; D's uint248 then uint16 demonstrate
+spill and nonzero padding, with marker55/unowned999. Separate declared transient
+uint16 occupies transient slot0. Complete supplied kernel map has arbitrary0xee
+residual at8+, whereas independent compiler constructor observations concern
+slots0–7; no entire EVM constructor equality/reachability/correspondence is claimed.
+
+Pinned InheritedSequence.sol independently expects both legacy/viaIR full
+20word ABI/raw/logical/bank observations for7 ordered calls per pipeline, private
+base getter/setter, actual storage aliases, distinguishable reverse updates,
+full100byte Error("inherited"), postfailure reads and unchanged100m gas/5m steps.
+AST-derived owner-qualified field inventory and C3 order are checked independently
+of storageLayout coordinates.397negative controls include240coherent ABI word
+mutations plus wrong root/order/bank/owner/ancestry/revert/limits. The test-only
+InheritedLineage.lean additionally runs EXISTING frontend contractLineage on both
+pinned compiler ASTs and12 malformed ancestry/order/identity controls. This is
+finite owner API testing, NOT a universal frontend-to-source C3 theorem; no
+frontend dependency enters Yul physical core.
+
+Origin remains an explicit Word. Source contract layout-at syntax exists; no
+physical evaluator/semantic origin agreement is supplied or assumed here.
+The checked Source hierarchy bridge does not prove every arbitrary frontend
+source unit's metadata wellformedness, inherited constructor execution or global
+allocation refinement. HashedLayout remains its owner's WORD-GRANULAR model,
+not this packed-layout proof. Dirty owned fields, dynamic/mapping/hash/global
+ownership, remaining memory/shared-zero/interior forms, reachable allocation,
+actual V10/V11 agreements, Y06 bindings, VY1/source/assembly MemOK and Y09.02
+calculus/notation/printer/compiler/joint closure remain original unfinished work.
+Preparation None/errors never become Yul refusal/no-op/deallocation/cleanup.
+Owner MemOK/World/ContractWorld/Bridge remain available, not Yul adequacy.
+
+G0/history reviewed; no owner representation change. New typed certificates
+reuse existing constant-motive eliminators. Measured per-file/source controls
+stay at original budgets. Actual gates, failures, resources, independent reviews,
+full head and artifacts: /workspace/vy2-evidence/inherited-roots/HANDOFF.md.
+Historical global docs exit1/48missing/37ambiguous stays a FAILURE with pinned-base
+zero delta separately verified. No goal mutation, imports of worker branches,
+merge/push/PR or semantic decision. Questions=[].
+
+
+Inherited checkpoint final gates: Lean4.24.0/Lake5.0.0-src+797c613, KeySort2jobs
+exit0; focused123jobs/full1170default+262TestSuite/131annotations exit0.
+Complete3042signatures/1732theorem reports:1673standard-only/59axiom-free,
+no missing/unexpected. Strict491automatic/61budgeted/11refuted/0pending;
+trust1200sources/246sites/0findings; layers361core/0elaborator;
+imports1185reachable/0orphans. All23cumulative negative suites and pinned frontend
+2pipeline/12negative controls pass.422ordered external calls, all408preceding
+fields IDENTICAL; SHA2568a67687757bccdb9e08336e96a73373ed7f2ba3e76aeca096bec2f8b61ae381a.
+Both separate final read-only finder/skeptic reviews CLEAR, no checks/edits.
+Raw audit parser/missing-file failure retained, repaired namespace+mutual handling;
+no proof/budget change. Global docs ACTUAL exit1, exact-base byte equality/delta0
+separate. Full assignment/goal remains PARTIAL/BLOCKED, all original queue open.

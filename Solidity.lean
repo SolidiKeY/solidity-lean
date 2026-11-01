@@ -929,3 +929,5 @@ import Solidity.Yul.Views.FixedDeclarationFinal
 import Solidity.Yul.Views.FixedDeclarationTypingControls
 
 import Solidity.Yul.Views.RootDeclarationInitial
+
+import Solidity.Yul.Views.InheritedDeclarationReads

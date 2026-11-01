@@ -485,3 +485,12 @@ whole typed storage/actual residual journals/source readback. Constructor and
 padding/reset controls plus14new pinned calls supplement unchanged394calls.
 Scope/origin/inheritance/dirty/dynamic/compiler/calculus closure remains open;
 full goal stays BLOCKED. Evidence:/workspace/vy2-evidence/root-sequence.
+
+
+VY2 inherited-root handoff (2026-11-01): constructive canonical active-contract
+root inventory uses reversed ACTUAL Source owner C3 and original typed packer;
+private qualified base members/cross-contract packing, source/store/residual/frame
+and reset controls, pinned diamond pipelines and actual frontend lineage-validator
+controls. Full lane PARTIAL, source/compiler/calculus dependencies and origin
+agreement still OPEN; YQ1–YQ7 unchanged. See lane inherited-active-contract section
+and /workspace/vy2-evidence/inherited-roots/HANDOFF.md for committed head/gates.
