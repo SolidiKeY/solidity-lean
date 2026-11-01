@@ -24,6 +24,15 @@ Inventory status: partial. Regressions: `Examples/Tactics/AbiFeatures.lean`,
 - **External function values** keep their ABI `bytes24` type before address
   and selector become arithmetic: standard encoding right-pads to 32 bytes,
   packed takes 24.
+- **Inherited and renamed function values** keep their source ABI identity:
+  `Base.f.selector`, `this.f.selector` of an override, `this.h.selector` and
+  `abi.encodeCall(this.h, …)` of an inherited function the importer renames,
+  external function values of `f` and `h` (`.selector`), and `abi.encode` of
+  the value of `h` all carry the source declaration's selector
+  (`Examples/Tactics/InheritedSelectorsImport.lean`, checked against pinned
+  solc by `scripts/abi-entry-probe.mjs --inherited`). Calling through an
+  external function value is refused by name for inherited and own functions
+  alike (function-value dispatch).
 - **`abi.encodeCall`** reads parameter spellings before dispatch
   canonicalization erases widths, then checks arity, primitive kinds, integer
   widths, fixed-byte widening and function components, and applies contextual
@@ -72,7 +81,6 @@ Inventory status: partial. Regressions: `Examples/Tactics/AbiFeatures.lean`,
   function markers are absent, so exact legality and enum decoding wait on
   the declaration metadata ([declarations-metadata.md](declarations-metadata.md)).
 - Arrays of hex literals and other aggregate contextual coercions.
-- ABI identity of inherited renamed function values.
 - ABI traversal of recursive graphs ([recursive-types.md](recursive-types.md)).
 - External reference-valued returns: `ExtResult` carries only primitive words.
 - Dynamic recursive round-trip proofs; the recovery/precompile equivalence.
@@ -156,7 +164,9 @@ body. ABI v1 raw replay remains blocked using actual compiler pragma metadata,
 including comments between pragma tokens. Native scalar replay remains
 available for supported canonical v1 cases. Raw replay with inline assembly
 is blocked because physical calldata/memory layout observations need their own
-adapter. Nominal enum ranges are blocked recursively before erasure.
+adapter. Nominal enum ranges are blocked recursively before erasure (since
+2026-11-01, top-level v2 enum parameters decode at their declared
+cardinality: "Next item: nominal enum cardinalities at external entry").
 
 Remaining stages include lazy/noncanonical aggregate entry decoding, compound
 type expressions and multiple reference returns not admitted by the existing
@@ -1007,8 +1017,8 @@ Owner: lane CF1 (`cloud/relocated-20261031/abi-entry-decoding`). Base
 byte-identical decode/re-encode admission of M3 ("Reference/function arguments
 require byte-identical decode/re-encode before execution") by a typed model of
 solc's generated entry decoder with kernel proofs. ABI coder v1, constructor
-arguments and function-valued or nominal-enum parameters keep the M3 gate
-unchanged.
+arguments, function-valued parameters and nested enums keep the M3 gate
+unchanged (top-level v2 enum parameters: see the enum item at the end).
 
 ### Baseline (reproduced on the base before editing)
 
@@ -1207,7 +1217,8 @@ selector included (`UpstreamEntry.plan`, `AbiEntry.verdict`):
 | a possible `Panic(0x41)` | blocked: `possible Panic(0x41) allocation failure in memory decoding` |
 | decoded arguments more than four times the calldata (plus 4096 bytes) | blocked: `decoded arguments exceed four times the calldata: gas is outside the model` (overlapping tails can make solc run out of gas) |
 | a byte above 255, calldata of `2^64` bytes or more, exhausted decoder fuel | blocked by name (`invalid calldata byte`, `calldata of 2^64 bytes or more`, `ABI decoder fuel exhausted`, `calldata element validation exhausted fuel`) |
-| ABI coder v1, constructors, function or nominal enum parameters, all-primitive signatures | unchanged (the M3 gate, or the primitive path) |
+| ABI coder v1, constructors, function parameters, nested enums or an enum parameter without its declared bound, all-primitive signatures without an enum parameter | unchanged (the M3 gate, or the primitive path) |
+| a top-level enum parameter of a v2 entry (raw vector) | decoded at its declared cardinality (`Kind.enumBelow`); see the enum item at the end |
 
 `readsOnly` holds when the declaration has no modifiers, the parameter's shape
 is arrays/`bytes` down to words (no tuple), and every occurrence of its name
@@ -1231,7 +1242,8 @@ hashes and output directories: `tests/upstream/cf1-abi-entry-results.json`
 (collected by `scripts/abi-entry-collect.py`). Same compiler, archive, runner
 script, timeout and loop fuel before and after; only the model changed. All
 42 fixtures: **13 working / 29 blocked before, 21 working / 21 blocked
-after**; no fixture regressed, and every one of the 13 kept its verdict.
+after** this section's work (21 / 20 / 1 broken after the enum item below);
+no fixture regressed, and every one of the 13 kept its verdict.
 
 | Fixture | Before | After | After reason / observations |
 |---|---|---|---|
@@ -1311,4 +1323,107 @@ Read-only, without Lean workers.
 * `Panic(0x41)` is never certified; gas is not modelled (the 4× bound).
 * No theorem connects `entry`/`cval` to solc's bytecode: that is the
   evidence above, and the specification for the compiled-decoder lanes.
+
+### Backfill: ABI identity of inherited renamed function values (2026-11-01)
+
+Taken after the CF1 + CF2 integration (`099bfbe1`, merged into this branch
+without rebase). Reproduction first: `tests/abi-0.8.38/InheritedSelectors.sol`
+covers an overridden `f`/`g`, an inherited `h` (which the importer renames to
+`solcFunction31`), inherited overloads `k(uint256)`/`k(bool)` (both renamed),
+`Base.f.selector`, `this.f.selector`, `this.h.selector`, `abi.encodeCall` of
+`this.g` and `this.h`, external function values of `f` and `h` (their
+`.selector`, and `abi.encode` of the value), `super.f` and calls through
+external function values. On the merged master every admitted case already
+returns the source declaration's selector and encoding; pinned solc agrees in
+all four configurations (`--inherited` asserts each word). The "Left" entry
+was stale: it predates source-identity selectors (`declarationSelector`,
+`solcMetadataSelector*`). The only refusal is the call through an external
+function value (`solidity.functionDispatch: this call needs a finite set of
+typed dispatch targets`), and it refuses the derived `this.f` the same way,
+so it is the function-value dispatch boundary (lane CF2's area), not an
+identity gap. Nothing in `Syntax/Elab/{Values,Stmt,Arms,Context}.lean` or any
+other shared file was edited for this item; the change is the fixture, its
+pinned regression module (registered in `Solidity.lean`, one module-map row)
+and the probe option. Not covered: selectors or values of the renamed
+inherited overloads `k` (an overloaded member has no value without a call
+context in solc) and `Base.h.selector`. The generated G03 ledger
+(`roadmap-g03-ledger.md`, `abiEncodeCall`) still lists the item at its pinned
+base revision; it is regenerated by its audit script, not by hand.
+
+### Next item: nominal enum cardinalities at external entry (2026-11-01)
+
+solc's v2 entry decoder validates an enum parameter against its declared
+member count (`validator_revert_t_enum_*`: an empty revert unless the word is
+below `n`); pinned by the `EnumEntry` probes (in range, one past the last
+member, dirty high bits, an enum before a calldata or memory array; all four
+configurations). The import row already carries the declared bound of each
+top-level enum parameter (`paramRanges`, `(x, 0, largest member)`, from the
+source declaration's `enumBounds`), and the scalar path already enforced it
+(`inRanges`). Two refusals remained: the runner refused every enum in the ABI
+metadata, and raw (noncanonical-word) vectors refused any nominal range.
+
+* `Kind.enumBelow n` (`Semantics/AbiEntry.lean`): a word valid below `n`. The
+  agreement theorems are generic in `Kind.valid` and are unchanged; six
+  kernel controls cover enum values alone and before calldata/memory arrays.
+* `UpstreamEntry.params`/`plan` take the declared bound per parameter
+  position: a top-level enum parameter becomes `.word (.enumBelow (hi + 1))`.
+  An enum parameter without its bound, and every enum nested in an array, a
+  static array or a struct, stays outside (`legacy`, then the existing
+  `nominal enum ABI range needs a declaration adapter`).
+* `Tools/Upstream.lean`: a raw vector whose only nominal ranges are top-level
+  parameter ranges goes through the typed plan (also for all-primitive
+  signatures); constructors, ABI coder v1 and element ranges keep the
+  refusal. `ABI.validate` reads exactly those enum parameters (and returns
+  marked `#enum`) at their ABI type `uint8`; nested enums still throw.
+* `scripts/solidity-upstream.mjs`: `checkAbiMetadata` admits a top-level enum
+  parameter or return of ABI type `uint8`; nested enums are refused as before
+  (`solidity-upstream.test.mjs` pins both).
+* `tests/upstream/EnumAbiRanges.lean`: its raw-vector control, which pinned
+  the old refusal, now pins the typed outcome in both pipelines (in range runs,
+  `2` and `2^256 - 1` revert before the body, wrong expectations are broken).
+
+Fixtures (`tests/upstream/cf1-abi-entry-results.json`, final model, all 42
+rerun): **21 working / 20 blocked / 1 broken**. The 21 working are those
+above, unchanged. `enum_with_256_members.sol` moved from the runner's enum
+metadata refusal (blocked) to an explicit frontend import gap (broken, no
+runtime mismatch): its `decodeEnum` uses `abi.decode` of an enum
+("ABI decoding of enum values requires nominal cardinality checks"), which
+lane-soundness owns; its 256 members also make the enum range byte-wide.
+`enum_v1.sol` and `enum_v2.sol` read the enum through inline assembly and
+stay blocked on that. ABI coder v1 keeps every enum refused: the review
+observed that v1 legacy masks an enum word to `uint8` at entry and panics
+(`0x21`) only on use, unlike v2.
+
+Review (one read-only reviewer acting as finder and skeptic, no Lean worker;
+it reran `--inherited --probes` and probed v1 on the EVM): confirmed and fixed
+the v1 leak above (the runner had admitted v1 enums, which the scalar path
+would have range-checked at entry, turning e.g. `types/mapping_enum_key_v1.sol`
+into a wrong broken verdict); confirmed that `paramRanges` holds the largest
+member (`enumBounds = members - 1`, so `enumBelow (hi + 1)` is the
+cardinality), that nested enums, constructors, missing bounds and position
+mismatches stay refused, and the backfill's pinned selectors on the EVM.
+Fixed doc gaps (stale M3/admission lines, this section). Recorded: a function
+whose only enum is a return still meets the refusal on the raw path (safe),
+and `inRanges` treats an argument-count mismatch as a revert (pre-existing).
+
+### Validation after the CF1 + CF2 merge, the backfill and the enum item
+
+* `./run-lean.sh` (64m52s): default target "Build completed successfully
+  (1041 jobs)"; `SolkeyTestSuite` "Build completed successfully (286 jobs)"
+  (the `Derived17` OOM did not recur); `check-solkey.sh` the baseline 37
+  mismatches.
+* Lean server, clean: `AbiEntry`, `AbiEntryProofs` (axiom pins),
+  `AbiEntryChecks`, `UpstreamEntry`, `Upstream`,
+  `Examples/Tactics/InheritedSelectorsImport.lean`, `TrustAudit.lean`, and
+  `tests/upstream/{AbiEntryReplay,Replay,EnumAbiRanges,EnumBounds,EnumErrorControls,CompoundAbiShape}.lean`.
+* Node: `solidity-upstream.test.mjs` 25/25; `abi-entry-probe.mjs --fixtures
+  --probes --inherited` pass; `check-abi-vectors.mjs` 31 + 5;
+  `test-solidity.test.mjs` "typed ABI entry decoding" passes, while "canonical
+  nominal ABI matching preserves enum input ranges" cannot run here: it first
+  compiles with the solkey-pinned 0.8.34 compiler, absent from this container
+  (its Lean half, `EnumAbiRanges.lean`, is clean above); `check-g07`: trust,
+  layers (184 core, 0 reach the elaborator), orphans (1078, 0 orphaned),
+  noncircular, grammar, control pins pass, its two "new" items are the
+  baseline axiom-pin drift and `check-doc-paths` 48 (46 + 2);
+  `check-automatic --strict` 491 / 61 / 11 refuted / 0 pending.
 

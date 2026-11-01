@@ -40,17 +40,22 @@ private def check (C : Contract) (rows : List ImportRow) (text expected : String
 
 #eval check AbiIR.EnumAbiRanges AbiIR.EnumAbiRanges.report "{\"vectors\":[{\"signature\":\"read(uint8)\",\"args\":[\"2\"],\"failure\":true,\"expected\":[\"1\"]}]}" "broken"
 
--- Raw vectors cannot erase nominal enum bounds into unconstrained uint8 input.
+-- Raw vectors keep the nominal enum bound: the typed entry decoder reads the
+-- declared cardinality (`Semantics/AbiEntry.lean` `Kind.enumBelow`), so an
+-- out-of-range word is an empty revert before the body (as solc's
+-- `validator_revert_t_enum_*`), an in-range word runs, and neither can be
+-- certified against the other outcome.
 #eval (do
   for (C, rows) in [(AbiLegacy.EnumAbiRanges, AbiLegacy.EnumAbiRanges.report),
       (AbiIR.EnumAbiRanges, AbiIR.EnumAbiRanges.report)] do
-    for n in [1, 2] do
+    for (n, failure, expected, status) in
+        [(1, false, [1], "working"), (2, true, [], "working"), (2^256 - 1, true, [], "working"),
+         (1, true, [], "broken"), (2, false, [2], "broken")] do
       let v := Json.mkObj [("signature", toJson "read(uint8)"),
         ("calldata", toJson ((Semantics.wordBytes n).map UInt8.toNat)),
         ("inputTypes", toJson ["uint8"]), ("outputTypes", toJson ["uint256"]),
-        ("expectedBytes", toJson ([] : List Nat)), ("failure", toJson true)]
+        ("expectedBytes", toJson ((expected.flatMap Semantics.wordBytes).map UInt8.toNat)),
+        ("failure", toJson failure)]
       let report := replay C rows (Json.mkObj [("vectors", toJson [v])])
-      unless (report.getObjValAs? String "status").toOption == some "blocked" &&
-          (report.getObjValAs? String "reason").toOption ==
-            some "nominal enum ABI range needs a declaration adapter" do
+      unless (report.getObjValAs? String "status").toOption == some status do
         throw (IO.userError report.pretty) : IO Unit)
