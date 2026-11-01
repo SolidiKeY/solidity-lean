@@ -62,7 +62,9 @@ theorem contextPeak_stages (m : Modality) (inputName resultName : Var)
     omega
   | succ k ih =>
     simp only [stages, contextPeak, contextPeak_compose, List.length_cons]
-    have hb := ih (.push h) .here x.there
+    have hb : contextPeak (stages m inputName resultName j φ k (.push h) .here x.there) ≤
+        max ((LTy.oldNet :: Δ).length + k + 2) (contextPeak φ) :=
+      ih (.push h) .here x.there
     simp only [List.length_cons] at hb
     omega
 
@@ -82,8 +84,11 @@ theorem contextPeak_leaf (m : Modality) (tableName inputName resultName : Var)
     contextPeak (leaf m tableName inputName resultName t k j x φ) ≤
       max (Γ.length + k + 3) (contextPeak φ) := by
   simp only [leaf, contextPeak, contextPeak_base, List.length_cons]
-  have hb := contextPeak_stages m inputName resultName j φ k
-    (.push .refl) (.here : Idx (.oldNet :: Γ) .oldNet) x.there
+  have hb : contextPeak (stages m inputName resultName j φ k (.push .refl)
+      (.here : Idx (.oldNet :: Γ) .oldNet) x.there) ≤
+      max ((LTy.oldNet :: Γ).length + k + 2) (contextPeak φ) :=
+    contextPeak_stages m inputName resultName j φ k
+      (.push .refl) (.here : Idx (.oldNet :: Γ) .oldNet) x.there
   simp only [List.length_cons] at hb
   omega
 

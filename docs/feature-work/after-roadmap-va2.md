@@ -1,6 +1,6 @@
 # VA2 AU03/AU04 handoff
 
-Status: AU03 and the measured primitive-anon loop-cost repair are checked. AU04 now has a complete intrinsic UInt function-family leaf with soundness, full formula-size/context bounds and multiple-k controls. Actual source-summary/default-dispatch transport and final full-assignment gates remain incomplete.
+Status: AU03 and the measured primitive-anon loop-cost repair are checked. AU04 now has a complete intrinsic UInt function-family leaf with soundness, full formula-size/context bounds and multiple-k controls. Actual expanded-summary and typed source-call transport are checked; frontend/default selection and final full-assignment gates remain incomplete.
 
 Repository: `/workspace/va2-sharing`. Branch:
 `codex/solidity-automation-20261031/va2-sharing`. Exact base:
@@ -10,7 +10,7 @@ Repository: `/workspace/va2-sharing`. Branch:
 
 - Baseline measurements/source audits, AU03 warning/unrolling, typed joined walks, conditional notation/chains, Boolean mapping-key kernel closure, multi-base/beyond-split controls and signed sequential/conjunctive repair: checked.
 - Original backfill (printer roundtrip/chain rows, Int.negSucc, SplitTo docs, proof_size relocation/pins, certifyLong audit/context controls, warning fixtures): completed or reused as documented below.
-- AU04: whole-result capture, operational base/graph definitions, complete intrinsic UInt family leaves, full formula-size/context bounds, multi-k semantic clients and one measured post-anon loop repair checked. Transport from actual source/old summaries, automatic selection, concrete source walk/leaf growth and final full gates remain open.
+- AU04: whole-result capture, operational base/graph definitions, complete intrinsic UInt family leaves, full formula-size/context bounds, multi-k semantic clients and one measured post-anon loop repair checked. Actual expanded-assignment and typed source-call transport checked; frontend/default selection, matching parsed-source walk/leaf growth and final full gates remain open.
 - Final full bounded `./run-lean.sh` and full-assignment reviews/package remain open. Earlier sections retain the historical pending states and raw failures; later checkpoints supersede those states without deleting the evidence.
 
 ## Setup checkpoint
@@ -974,3 +974,46 @@ The Corpus/TestSuite local import closure is byte-identical to parent 97fbbd6cf5
 Both independent read-only finder/skeptic reviews found no defect, no Lean/server/build/writes; their requested alias/failure/zero/context and program-modal controls are included. Review evidence work/reviews-call-function-leaf.md. Narrow registrations add three root imports, three module-map rows and one Lean-only logical-construction row. The exported immutable patch/bundle/source/manifest bind this committed checkpoint; parent97fbbd6cf56dce94c208194b248da63cb1ffaef3.
 
 Remaining full assignment work: actual old-summary/source-call correspondence, internal eligibility/capture invariants and automatic concrete family selection, matching multi-k source walk/old-and-new leaf/context/time/RSS measurements, then final full bounded ./run-lean.sh, timed automatic gates and final assignment-wide reviews. The new complete-leaf laws do not assume a future bridge or complete AU04. An external term-transport draft is unchecked research only until separately checked/committed. The original full goal remains incomplete.
+
+
+## AU04 actual expanded-summary and typed source-call transport (2026-11-01)
+
+`Calculus/CallFunctionTermPower.lean` connects the complete shared leaf to actual old intrinsic terms and actual typed calls. `inst?` is existing `Tm.substE` with an intrinsic `Thin` and `SEnv.idAt`, keeping original captured caller locals/globals. `eval_inst` preserves success and proves that a failed argument still fails where the base's checked `strictReads 0` certificate is true. `pushFree_inst` and `pushFree_expanded` reuse existing value-only/no-push certificates. All producer flags/equations must be checked internally, not granted as new user validity/hash premises.
+
+`expanded?` constructs an actual old term for certificate comparison; it is not the emitted leaf. `iterate_add`/`power_iterate` prove exactly 2^k ordered Option applications, and `eval_expanded_power` transports actual old-term evaluation at every typed caller state. `holds_assignment` proves exact equivalence between the full emitted shared leaf and the actual old assignment for either modality and any old-context post. Failure/exhaustion is preserved via internally proved no-push evidence; strictness is not silently assumed.
+
+`summary_ends` derives actual call termination and non-exhaustion from the concrete successful existing `CallRet.summary?` construction, using existing `CallRet.sym_call`/`Prog.sym_sound`. It does not infer termination from update agreement alone. `run_of_summary_eval` reconstructs the exact whole returned caller (globals, heap, every indexed local) from actual checked summary evaluation, excluding every error case explicitly. `holds_call` gives exact both-direction source observation; `sound_call` uses the actual summary/expansion equations to transport arbitrary remaining program/frames through existing `Premise.sound_callSummary`. Its continuation is the existing rule's exact `modalK` representation. No new calculus/Proves/SolKey constructor or one-rule strategy change.
+
+The client constructs real intrinsic typed call bodies: body0 assigns checked x*3+1, body(k+1) calls the preceding body first at its input and then at the returned result. Actual existing summary certificates pass at k1/2/3, and expansion certificates at k0…3. Both-modality source proofs at k1/2/3 use the complete shared leaf plus these concrete certificates. `assignmentTwo` covers all caller states/posts. Actual whole returned state, balance5, ledger19, input2, wrong source result203vs202 and genuine source overflow/revert with box/diamond contrast pass. A nonstrict constant really drops a failed argument under substitution, and its strict-read flag is false; a same-named different body really returns0 and is rejected against the expected22 summary. These are typed source-body witnesses, not yet frontend-parsed original contracts or automatic matcher integration. No EVM test/result is claimed.
+
+### Matching typed-family measurements
+
+The external runtime-input probe constructs actual typed bodies, existing old summaries, actual expanded terms and the full new leaf for the same two-local caller/fixed seven-node post. It does not perform kernel proof checking or an automatic walk. Ten constructions per k include an effectful runtime level read and output sink; measured nanoseconds are aggregate batch costs, not single-call latency.
+
+| k | Typed body nodes | Actual old summary leaf nodes | Actual expanded term nodes | Emitted whole shared leaf nodes | Formula context peak | Ten combined constructions ns |
+|---|---:|---:|---:|---:|---:|---:|
+|0|9|none (existing no-call fallback)|5|62|5|2113498|
+|1|26|18|9|95|6|1834375|
+|2|60|26|17|128|7|2754097|
+|3|128|42|33|161|8|5634491|
+|4|264|74|65|194|9|12287890|
+|5|536|138|129|227|10|25519347|
+|6|1080|266|257|260|11|52569220|
+|7|2168|522|513|293|12|114873714|
+|8|4344|1034|1025|326|13|247946899|
+
+The new leaf is larger throughk5 and smaller fromk6 in this fixture. Emitted formula syntax grows by33 per level; original summary/expansion construction still grows roughly exponentially at largerk. That cost is not repaired by compact leaf emission and remains a producer/selection concern. The full-domain tables remain logical witnesses, never enumerated. Context peaks are separate from kernel bytes/total annotation volume. Actual source walk measurements are still the earlier five-node parsed-call controls; no new default/shared walk measurement is claimed here. Large-k rows are external runtime samples, while concrete kernel source certificates cover k1…3 and earlier semantic leaf clients coverk0…5.
+
+### Gates, resources and review
+
+- `python3 /workspace/va2-sharing-artifacts/work/bounded.py mcp-call-function-term-power-audits /workspace/solidity-lean/.venv/bin/python /workspace/va2-sharing-artifacts/work/mcp_probe_records.py /workspace/va2-sharing-artifacts/work/requests/call-function-term-power-audits.json /workspace/va2-sharing-artifacts/work/call-function-term-power-audit-records.json`: PASS, both actual files and all27 public source/transport theorem audits, standard-three subsets.20.566623 seconds inside, sampled visible aggregate RSS3870744KiB, cgroup1644253184bytes.
+- `python3 .../bounded.py mcp-call-function-transport-final-types /workspace/solidity-lean/.venv/bin/python .../mcp_probe_records.py .../requests/call-function-transport-final-types.json .../call-function-transport-final-types-records.json`: PASS, final actual core/client/metrics diagnostics and four changed-proof audits after explicit have annotations (two source proofs repeated, two affected context laws), standard-three subsets.19.175143seconds inside, RSS3901228KiB, cgroup1722814464bytes. Expanded commands retained in the matching JSON/log; no proof budget changed.
+- `python3 .../bounded.py mcp-call-function-certificate-measurement /workspace/solidity-lean/.venv/bin/python .../mcp_probe_records.py .../requests/call-function-certificate-measurement.json .../call-function-certificate-measurement-records.json`: PASS, actual structured success true and rows above.5.038175seconds inside, RSS1729636KiB, cgroup935178240bytes. This is an external #eval measurement, not a kernel theorem or EVM run.
+- `python3 /workspace/va2-sharing-artifacts/work/bounded.py call-function-transport-affected build Solidity.Calculus.CallFunctionTermPower Solidity.Calculus.CallFunctionLeafMetrics Solidity.Examples.Tactics.CallFunctionTermPower Solidity.Examples.Tactics.CallFunctionLeaf`: PASS, Build completed successfully (180 jobs),7.951906seconds inside,RSS1118120KiB,cgroup355524608bytes.
+- `python3 /workspace/va2-sharing-artifacts/work/checkpoint-static.py call-function-transport`: strict automation/trust/layers/orphans/whitespace PASS,491automatic+61budgeted/zero manual/11refuted/zero pending;1076sources/zero trust findings;181core/zero elaborator;1061reachable/zero orphan or notallowed. Docpaths inherited FAIL48, exact-base outputSHA256 01fd3beaa0d1694397f6231999418eea67e797d42150bf68d2d8a96bc4ea109a; comparisonpasses/checkerfails. Expanded commands/rawoutput/hashes in call-function-transport-static.json.
+
+The Corpus/TestSuite import closure is byte-identical to parentd5a6e85e9242b42c37c226aa2dc96e88da7f908a (bookkeeping, not a new full/kernel run). Every Lean job asserts memory.max12884901888/swap.max0, LEAN_NUM_THREADS1/-j1, at most two LSP files, no simultaneous build/LSP. ActualLean4.24.0/Lake5.0.0-src+797c613 and passingKeySort remain in runtime evidence. Sampled aggregate visible RSS differs from actual cgroup peak. Raw type/elaboration/proof failures, the exact-modalK correction and unchanged200k direct-whole-run reduction timeout are retained. The latter is a failed proof attempt, not a source runtime failure.
+
+Independent read-only finder/skeptic source reviews and follow-ups found no defect, no Lean/server/build/writes. Required strictness, changed-body, exact source run/frame/wrong-post/failure controls are included. Review evidence work/reviews-call-function-transport.md. Narrow registrations add two root imports, two module-map rows and one Lean-only correspondence row; two existing metric proofs gain explicit have types only. The immutable checkpoint patch/bundle/source/manifest bind its resolved committed head, parentd5a6e85e9242b42c37c226aa2dc96e88da7f908a.
+
+Remaining: checked plan production and automatic matching/selection against actual frontend-generated/normalized call terms, bounded producer/certificate costs or precise ordinary fallback, matching multi-k parsed source walk/old/new leaf/context/time/RSS controls, and final full bounded ./run-lean.sh/timed automatic/assignment-wide audits and reviews. An external checked-plan draft is not yet proved/exported code. The full original goal remains incomplete; no VA1 Decision/Residue theorem, AU05/6/compiler/ABI/function-ref work or new semantic exclusion is assumed or taken.
