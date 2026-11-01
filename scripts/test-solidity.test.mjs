@@ -682,7 +682,11 @@ test("quantified consequents parse and omitted specification bodies stay local",
   assert.equal(rows.renamedSpec.status, "proved");
   assert.equal(rows.omittedCaller.status, "pending");
   assert.equal(rows.omittedBody.status, "unsupported");
-  assert.equal(rows.omittedModifier.status, "unsupported");
+  // its modifier's general Yul is the S00 exclusion `solidity.inlineAssembly`
+  // (`Frontend/Source.lean`), reported as `excluded`: a gap like `unsupported`
+  // (docs/solidity-testing.md), still local to this row
+  assert.equal(rows.omittedModifier.status, "excluded");
+  assert.match(rows.omittedModifier.reason, /solidity\.inlineAssembly/);
   assert.equal(rows.stillChecked.status, "pending");
   const ctor = Object.fromEntries(report.results.filter(r => r.contract === "SpecCtorGap")
     .map(r => [r.function, r]));
@@ -750,9 +754,10 @@ test("constant specifications preserve units, lexical visibility and unsigned ty
   const rows = Object.fromEntries(base.results.map(r => [r.function, r]));
   assert.equal(rows.exactUnits.status, "proved");
   assert.equal(rows.falseConstant.status, "pending");
-  for (const fn of ["boundedLoop", "quantifiedShadow"]) {
-    assert.equal(rows[fn].status, "unsupported", fn);
-  }
+  assert.equal(rows.boundedLoop.status, "unsupported");
+  // the quantifier binds COUNT (scoped specifications): `\forall uint COUNT;
+  // COUNT == 2` is false, so open, never proved through the constant COUNT == 2
+  assert.equal(rows.quantifiedShadow.status, "pending");
   assert.match(rows.boundedLoop.reason, /loop's invariant needs a statement/);
   assert.equal(rows.parameterShadow.status, "pending");
   const other = run("OtherConstants");
