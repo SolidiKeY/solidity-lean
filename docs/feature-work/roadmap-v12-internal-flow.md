@@ -2174,3 +2174,124 @@ Python attempt exits127 because the container lacks Python; actual Node
 implementation checks the same content hashes. Final committed-artifact review
 and exact full HEAD/bundle/checksum details belong to the immutable handoff.
 No source obligation, failed mandatory gate or original dependency is waived.
+
+
+## Continuation27 — captured caller views through witnessed finite dispatch
+
+Human scheduling authorization permits exact committed peer packages in private
+dependency worktrees, without whole-lane/publication waiting. It changes no
+semantic decision, theorem premise, profile, guard, budget or final gate.
+The original VM/branch/base/goal identity is unchanged; no goal write or new
+continuation was scheduled. The existing external blocked status is not an
+independent-work-exhaustion claim: this manual recovery continues ready work.
+No peer package has yet been supplied. Already integrated compiler/memory
+producers remain exactly published099bfbe185731c354b12a40f28ccf5d98534c779;
+no unmerged intake, reserved edit, master merge/push/PR or ABI/function-ref repair.
+
+C26 is sealed at4f3050933dd482c1834dd7c0ac9e5f6ede6e38a7, seven-payload
+manifest4d23d19eb917c6f6288b477dba408702e977bc18ebccd4b3b7acc486902bc4f7.
+Its separately exported PARALLEL-INTERFACE contains31 committed owned modules,
+actual dependent signature output and a Git bundle, with manifest
+6bc23ad48aa4521273887668c4060ca3ec48ebf9ebed06001120831456b727d3.
+Both independent read-only artifact reviews passed. All27 prior seals remain.
+Peer staging is development only; final combined concrete-tree gates remain.
+
+### New intrinsic and target consumer
+
+`Solidity/Backend/InternalFlow/CallerFrame.lean` uses existing intrinsic
+CallRet/Thin/TEnv/Out/TRun and public finite-dispatch target certificates.
+`Disjoint` checks ONLY that a scalar destination is outside the selected typed
+caller view; it is not a profile/admission change or preservation oracle.
+`export_environment` handles every EXISTING CallRet constructor and exact
+ret.ext drop. Primitive Binders remain primitive; no reference tuple invented.
+`call_environment` inverts the actual successful argument/body binds and proves
+whole selected-environment equality along the actual composed heap extension.
+`single_call_environment` uses the published runR_eq bridge explicitly;
+`single_call_alias` derives exact old-reference transport from caller capture.
+
+`selected_target` consumes an actual public Calls.Statement plus genuine source
+execution, earlier misses/selected hit, StateRepr, frame need and reached-cost
+AllocationInput. It derives the exact successful target, stack preservation,
+BaseExtends/GrowsAllocator, full caller-view equality and EVERY protected old
+reference's target cell at its entry address. No output alias equality or
+hypothetical simulation is a premise. Body mutation is permitted; this is
+LOCAL capture/reference identity, deliberately not Heap.Keeps or global rollback.
+Source storage aliases keep their value, not an asserted liveness property.
+Memory/storage/tuple source return laws do not widen public compiler admission.
+
+### Closed populated client and countercontrols
+
+The new ProtectedCaller client in `tests/internal-flow/FiniteDispatchEndpoint.lean`
+uses the existing real frontend-generated two-candidate program. The existing
+kernel actual_frontend_link/first_guard/second_guard/candidate_names and
+candidate_signatures close THIS raw declaration/candidate/guard link: memory
+uint-array plus uint arguments, uint result. Canonical full-signature lowering
+and arbitrary candidate profiles remain open, not assumed from printing.
+
+The actual seed creates two distinct nonempty arrays and three aliases of the
+older array, hidden evaluated arguments5/reference0, tag2 and caller marker42.
+The first candidate misses; second mutates old[1]11→16, changes count9→10,
+allocates private array[70,71] and returns16 into caller index2. A Thin selects
+ALL seven other caller locals, including same-typed scalars and aliases. Its
+static destination guard is discharged. Full caller environment and Heap.Keeps
+are each proved FALSE for this very execution, while the captured view survives.
+Wrong projection drops argument5 instead of the result and is statically
+rejected; wrong private escape to fresh object2 and any successful fallback
+output are rejected with their actual positive baselines.
+
+The new closed target derives the reached machine/representation/capacity from
+actual seed execution and GrowsAllocator.nextInput, then uses selected_target.
+It retains the FULL original ordered19-word target observation, including
+all caller cells, actual old/other/private heap contents, count10 and cursor137;
+protected stack77, frame12 within64, prefix cost6 plus selected cost3 and
+composed growth9 remain exact. Protected pointer transport is derived generally
+from capture, not supplied as the desired reached representation. The witness
+uses the same actual target output for all these facts.
+
+### Checked evidence and remaining full assignment
+
+No MCP Lean server is available; permitted per-file CLI fallback is serial
+explicit-j1/LEAN_NUM_THREADS1 under hard12GiB/swap0, canonical writer/compiler
+locks, OS/disk headroom and one keyed cache. New core checks3.572s, complete
+fresh endpoint source/guards20.460s and source/toolchain-bound import11.478s
+pass. All32 owned import targets pass2.302s. Actual new16 builtin sets have
+precisely pinned propext-only, propext/Quot.sound or standard3 dependencies;
+all542 original imported theorem types (including85 tuple types) remain
+byte-identical to C26, and all7+6+5+15+3+11 previous separate builtin sets match.
+Runtime again passes Lean4.24.0/Lake5.0.0-src+797c613/KeySort(two jobs).
+The failed initial implicit runR reduction and two beta-rewrite probes are raw
+failed evidence only; the corrected kernel proofs use no sorry/native shortcut
+or raised proof/fuel/node/test/time/stack/resource budget.
+
+The C26 complete cached FAIL124/120.700 remains FAILED with final post-toolchain
+receipt absent, despite all542 reports. This new source consumer is no timing
+repair. No unchanged aggregate/raw/full/root/held retry occurred. Current
+expanded32-owned/36-fresh-source full confirmation remains pending; previous
+35-source FAIL124/120.908, broad-root124/120.609 and all original/later full300s
+failures remain. TestSuite/sort are unreached. Fresh per-file/cache preparation,
+type/axiom checks and integrity inventory are not those mandatory full gates.
+Normal/strict docs raw1 remain; complete current/publication/frozen findings are
+compared separately, with incoming reserved historical findings not rewritten.
+
+ALL original Work1–6 and Backfills A/B remain PARTIAL. This advances G37.01
+caller/result/reference views, G37.03 finite witnessed dispatch and scoped local
+unwind/Backfill A; it does not close general target/runtime/storage frames,
+uncapped recursive simulation, dependent/full-signature lowering, arbitrary
+multi-statement/ref-result candidate export, early-control/general mixed-loop
+certificates, word-frame/live-byte-journal/world or transient/callback coupling.
+Further owned post-call rebind/sequence and body/unwind proof-cost work is ready;
+no independent-work exhaustion or full assignment/integration claim follows.
+Exact module hashes, dependent signatures, client invariants, required producer
+facts and a NEW committed parallel package belong to the final handoff.
+
+
+Final source controls: layers/imports/orphans/trust and both exact dynamic driver
+coverage/fail-fast scripts pass. All72 original guard negatives and six new
+ordered16-report guard corruptions reject, with actual report provenance stated:
+current fresh Endpoint12 reports, other17 unchanged checked objects and their
+C26 actual builtin logs. This is not a new complete timed542 audit. New producer
+source/object and client-object tamper controls reject before Lean10.524s and
+restore exact bytes. The current full input integrity inventory is separate
+from the unresolved complete aggregate gate. No affected failed workload was
+rerun or relabelled. Independent read-only source finder/skeptic both PASS with
+no findings; final exact committed-artifact reviews are recorded in the handoff.

@@ -116,3 +116,5 @@ history is in git.
 | Structural branch/block/loop local framing and fresh-source investigation (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
 
 | Structural target observation projections (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
+
+- [V12 caller-frame and finite-dispatch consumers](feature-work/roadmap-v12-internal-flow.md): exact committed typed interfaces and remaining original obligations.

@@ -1,3 +1,4 @@
+import Solidity.Backend.InternalFlow.CallerFrame
 import tests.«internal-flow».FiniteDispatchFacts
 import tests.«internal-flow».MemoryDispatchFacts
 namespace Solidity.Backend.InternalFlow.DispatchChecks
@@ -337,3 +338,150 @@ private def trace (code : List Instr) (addresses : List Nat) : Option (List Word
  some ([w[77]],[w[139],w[42],w[128],w[128],w[131],w[2],w[128],w[5],w[128],w[128],w[99],
   w[2],w[12],w[11],w[2],w[23],w[29],w[0],w[0],w[2],w[99],w[101]],11))
 end Solidity.Backend.InternalFlow.DispatchRuntimeChecks
+
+namespace Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller
+open Evm Evm.Memory
+abbrev View : Ctx := [.val .uint,.mem A,.val .uint,.mem A,.mem A,.mem A,.val .uint]
+def projection : Thin View Caller := .keep (.keep (.drop .refl))
+def destination : Idx Caller (.val .uint) := .there (.there .here)
+
+theorem separated (name : Var) :
+    CallerFrame.Disjoint projection (.val .uint name (some destination)) := by
+  intro t i
+  cases i with
+  | here => decide
+  | there i =>
+    cases i with
+    | here => decide
+    | there i =>
+      change 2 ≠ i.toNat + 3
+      omega
+
+theorem complete_caller_frame :
+    TEnv.thin projection chosen.st.env =
+      TEnv.wk chosen.ext View (TEnv.thin projection mid.st.env) := by
+  exact CallerFrame.single_call_environment projection (separated _) body_run
+
+def wrongProjection : Thin [.mem A,.val .uint,.val .uint,.mem A,.mem A,.mem A,.val .uint] Caller :=
+  .drop .refl
+
+theorem wrong_destination (name : Var) :
+    ¬ CallerFrame.Disjoint wrongProjection (.val .uint name (some destination)) := by
+  intro separate
+  exact separate (.val .uint) (.there .here) rfl
+
+theorem full_frame_changes : chosen.st.env ≠ TEnv.wk chosen.ext Caller mid.st.env := by
+  intro same
+  have before : (locals mid.st)[2]! = some 0 := congrArg (fun x => x.2.2.1[2]!) before_values
+  have after : (locals chosen.st)[2]! = some 16 := congrArg (fun x => x.2.2.1[2]!) after_values
+  have value := congrArg (fun env => some ((TEnv.get destination env).1.toNat)) same
+  change (locals chosen.st)[2]! = (locals mid.st)[2]! at value
+  rw [after,before] at value
+  cases value
+
+theorem no_heap_frame : ¬ Heap.Keeps chosen.ext mid.st.heap chosen.st.heap := by
+  intro kept
+  have changed := congrArg (fun obj => (MObj.elems .dyn obj)[1]?) (kept old)
+  have before : (MObj.elems .dyn (MObj.wk chosen.ext A (mid.st.heap.get old)))[1]? =
+      some (indexValue (wmod 11)) := by decide +kernel
+  dsimp only at changed
+  rw [heap_values.2.2.2.2.1,before] at changed
+  have impossible := congrArg (fun v : PrimTy.uint.Denote => v.1) (Option.some.inj changed)
+  cases impossible
+
+theorem fallback_no_success (out : Solidity.Out C cleared.st.H Caller) :
+    actualDispatch.run cleared.st ≠ .ok out := by
+  rw [no_match_run]
+  intro impossible
+  cases impossible
+
+theorem protected_alias_id : (locals chosen.st)[1]! = some 0 := by
+  have same := congrArg (fun env =>
+    (TEnv.get (.there .here : Idx View (.mem A)) env).map HRef.id) complete_caller_frame
+  dsimp only at same
+  rw [CallerFrame.read_thin,TEnv.get_wk,CallerFrame.read_thin] at same
+  simp only [LTy.TDenote.wk,Option.map_map,Function.comp_def] at same
+  change (locals chosen.st)[1]! = (locals mid.st)[1]! at same
+  exact same.trans (congrArg (fun x => x.2.2.1[1]!) before_values)
+
+theorem wrong_private_escape :
+    TEnv.get (.there .here : Idx Caller (.mem A)) chosen.st.env ≠ some fresh := by
+  intro wrong
+  have ids := congrArg (fun v => v.map HRef.id) wrong
+  change (locals chosen.st)[1]! = some 2 at ids
+  rw [protected_alias_id] at ids
+  cases ids
+
+theorem protected_target : ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₂ : Machine) (base₂ : Nat → Fin W),
+    run seed.code machine = .ok m₁ 0 ∧ run checked.code m₁ = .ok m₂ 0 ∧
+    run (seed.code ++ checked.code) machine = .ok m₂ 0 ∧
+    StateRepr 1 1 64 seed.frag mid.st base₁ m₁ ∧
+    StateRepr 1 1 64 checked.frag chosen.st base₂ m₂ ∧
+    BaseExtends mid.st.H base₁ base₂ ∧
+    GrowsAllocator 1 64 9 (State.init C) bases machine chosen.st base₂ m₂ ∧
+    m₂.stack = [w[77]] ∧ m₂.mem 0 = w[137] ∧
+    afterCells base₂ m₂ = [w[42],.val (base₁ 0),.val (base₁ 0),.val (base₁ 1),w[2],w[16],
+      .val (base₁ 0),w[5],w[2],w[7],w[16],w[2],w[23],w[29],w[2],w[70],w[71],w[10],w[137]] ∧
+    TEnv.thin projection chosen.st.env =
+      TEnv.wk chosen.ext View (TEnv.thin projection mid.st.env) ∧
+    ∀ (R : RefTy) (i : Idx View (.mem R)) (r : HRef mid.st.H R),
+      TEnv.get (i.wk projection) mid.st.env = some r →
+        m₂.mem (cellOf 1 (i.wk projection)) = .val (base₁ r.id) := by
+  obtain ⟨m₁,base₁,hp,hr₁,stack₁,he₁,hg₁⟩ := PublishedDirectCalls.program_endpoint
+    seed (initial_repr C).1 seed_frame (capacity.of_le (Nat.le_add_right _ _)) mid seed_run
+  have input := hg₁.nextInput capacity
+  obtain ⟨m₂,base₂,hc,hr₂,stack₂,he₂,hg₂,view,pointers⟩ :=
+    CallerFrame.selected_target projection (separated _)
+      actualSecond.cond [actualFirst] [] .revert checked mid.st (by
+        intro a h; have ha := List.mem_singleton.mp h; subst a; exact first_miss)
+      second_hit armOut body_run hr₁ room input
+  have whole := (run_append_ok hp).trans hc
+  have grows := hg₁.comp hg₂
+  rw [seed_cost,reached_cost] at grows
+  have cursor := (grows (wmod 128) (by decide) (initial_repr C).2 (by decide +kernel)).arrays.free.cell
+  change m₂.mem 0 = w[137] at cursor
+  exact ⟨m₁,base₁,m₂,base₂,hp,hc,whole,hr₁,hr₂,he₂,grows,stack₂.trans stack₁,cursor,
+    observe_after hr₂ he₂ cursor,view,pointers⟩
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.separated' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms separated
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.complete_caller_frame' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms complete_caller_frame
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.wrong_destination' depends on axioms: [propext] -/
+#guard_msgs in #print axioms wrong_destination
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.full_frame_changes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms full_frame_changes
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.no_heap_frame' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms no_heap_frame
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.fallback_no_success' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms fallback_no_success
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.protected_alias_id' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms protected_alias_id
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.wrong_private_escape' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms wrong_private_escape
+
+/-- info: 'Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller.protected_target' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms protected_target
+
+end Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller

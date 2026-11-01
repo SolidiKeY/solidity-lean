@@ -1328,3 +1328,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/TargetObservation.lean` | Structural full-stack/numeric-memory observation reconstruction; checked target subselection without execution replay. |
 
 | `tests/internal-flow/AxiomReports.lean` | Test-only checked-kernel dependency reports; independent builtin audit retained, not proof coverage. |
+
+| `Backend/InternalFlow/CallerFrame.lean` | Captured typed caller subframes and exact old-reference target addresses for finite selected direct calls; body writes do not imply content preservation. |
