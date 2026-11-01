@@ -1804,3 +1804,102 @@ unavailable, no reset/reactivation/completion or publication. Main8a901437 and
 private65227843 preserved as ancestors. Immutable incremental handoff/patch/
 bundles/interface/evidence/checksums:
 `/workspace/vy5-composition/scope-catch-20261101/final/`.
+
+
+## Captured typed scope to canonical rethrow (2026-11-01)
+
+[RethrowPhysical](../../Solidity/Yul/Composition/RethrowPhysical.lean) consumes the
+ACTUAL returned `ScopeCatchPhysical.run` inner locals, whose head is the captured
+allocated memory reference, in ACTUAL `Source.execS (.rethrow .here)`. No local
+rebuild, allocator/evaluator replacement or raw-to-clean resume occurs. Actual
+`EM.sub .nil` transports the evaluator's empty local carrier through the restored
+outer typed scope, and actual `attempt` records the resulting halt/post-state
+beside the unchanged raw caller. This is the pre-existing canonical rethrow
+exception composed with an owned consumer router, NOT general Source.tryStmt
+selection, catch-name resolution/error decoding or raw Source assembly dispatch.
+
+20 kernel laws include arbitrary E/typed contexts/Glob/frame/index/locals/state
+`exec_rethrow_succ` and `scope_succ`. They require the actual indexed local.get
+reference equality and heap.get full-byte object premise; they compute the
+actual evaluator/sub operation at EVERY positive fuel (`fuel+1`), without an
+assumed execution agreement or supplied desired result. `scope_zero` proves
+actual timeout at zero before any dereference. `captured_rethrow` discharges
+reference/object premises using the actual prior capture/allocation/scope laws,
+for arbitrary bytes and arbitrary Glob, and returns the exact complete result,
+restored outer locals and allocated Source.St/raw companion. `positive_unique`
+relates any two positive horizons. Full state preservation is relative to the
+already captured/allocated post-state, including caller-prefix logs/heap; no
+frame/world rollback is inferred. At zero the catch object is ALREADY allocated
+and retained even though the rethrow statement times out. Inner evaluator locals
+remain nil; actual returned catch locals remain the input argument to execS.
+
+DEAD, empty and full panic payload laws expose exact halts/bytes. Wrong same-type
+`.there .here` rethrows old AABB instead of DEAD, despite both length2; dangling
+ref2 yields `dangling memory reference` at positive fuel and timeout at zero.
+Success bypasses rethrow even at zero, while original timeout/stuck propagate
+unchanged. Full raw1793/nonword alias and Source state retention/no-clean-resume
+are proved; logical heap indices are never identified with physical EVM addresses. Earlier
+coupled physical journals remain their actual owner operations; this module adds
+no rollback semantics or pointer placement/refinement premise discharge.
+
+[Driver](../../tests/yul-composition/RethrowDriver.lean) executes12composed cases
+and6controls: caught DEAD/empty/panic at0/1/32, success/timeout/stuck and wrong-index/
+dangling at0/1/32. Its inhabited empty-program Glob is ONLY a Source fixture;
+all laws quantify arbitrary Glob, and no calls/hash/compiler behavior is replaced.
+[Expectations](../../tests/yul-composition/rethrow-expectations.json) were frozen
+before execution from the actual operations. Every row checks complete captured
+bytes/ref/inner order, pre/post raw words, heap next/object/old alias/logs, exact
+outcome/fuel and restored typed local. Generic kernel laws establish full St
+preservation; finite serialization is not a total-world observation theorem.
+
+[Reader](../../scripts/yul-composition/rethrow-source.mjs) and
+[mutations](../../scripts/yul-composition/rethrow-source.test.mjs) fail closed on
+missing/malformed/reordered evidence, wrong same-length bytes/panic tail, wrong
+scope/reference/raw/state/fuel, stale actual main/private producer/consumer/ledger/
+oracle/command/receipt and missing selected catalog. 129 new/affected JS tests
+pass. Transitive Scope→Heap→Attempt provenance fully validates the sealed native
+report ALL24 ordered calls/four legacy/viaIR optimizer profiles, preserving all
+original touched-state/frame/journal/refusal observations and strict-static good().
+That native evidence covers PRIOR caught calls, NOT this NEW rethrow path.
+Reader requires `rows=[]` AND `nativeComparisons=[]` and the explicit prior-caught
+regression role; mutations reject any claimed new native rethrow comparison or
+fresh execution/full adequacy. Historical replay is not compiler correspondence.
+No new solc/EVM fixture or roughly80MB old-native regeneration occurred. Earlier
+781JS+2Python/123focused/148focused results retain their tested-tree attribution.
+
+Joint policy gate exits0: actual Lean4.24.0 commit797c613/Lake5.0.0-src+797c613;
+KeySort2jobs; library1229/TestSuite262;377taclets/131annotations;196core/
+0elaborator;1244reachable/0orphan; strict491automatic/61budgeted/11refuted/
+0pending; trust1259sources/252sites/0findings. All20 exact scoped signatures/
+transitive axiom reports use only standard axioms/subsets, no new axiom/sorry.
+Module/driver/private root final MCP all success=true/partial=false/no errors;
+nonfatal async shutdown warning retained. Committed identities and exact commands/
+exits/resources are in the sealed handoff. Main standalone
+producer closure is not claimed; one private import over sealed bodies is used.
+Independent read-only finder/skeptic accepted source/reader/driver/mutations with
+no actionable findings and no Lean/server/build/edit. Initial syntax/proof and
+driver failures are retained, fixed without altered verdicts or budgets.
+
+Initial disk314376192bytes and comparable incremental178450432byte cost were
+measured. An implementation mistake copied a historical container-name prefix:
+the metadata helper refused on a protected old container, but a subsequent
+check still ran, temporarily leaving TWO new copies and availableBytes0. Its
+wrapper EXIT1/ENOSPC writing the exit receipt is explicitly retained, never a
+pass. Recovery preserved inspect/logs/verified directory metadata and retired
+ONLY the TWO current stopped SizeRw0 copies; historical containers/images/mounts/
+file caches/evidence stayed intact. New unique scope-rethrow prefix and checked
+sequential retirement avoid that collision. No guard/capacity floor or proof/
+fuel/node/test budget was changed, no protected data deleted. Existing writer
+lock, serial-j1/LEAN_NUM_THREADS=1, hard12GiB/no swap and OS-headroom monitoring
+remain. Incremental exports avoid large native regeneration. Docs/G03 historic
+EXIT1 remain failures with exact-base equality, not global passes.
+
+Work1/Work3/Work2/BackfillA/B remain PARTIAL: all24 original full obligations and
+six Source combinations remain pending. Missing general Source selector/error
+decoding/raw operator/function/session/frame hooks, physical placement/allocation
+refinement/G01, concrete compiler/source/world/V16 adequacy and final joint
+composition. LIB1/unchecked-add remain unanswered. Original blocked goal untouched;
+get_goal absent; no goal creation/reset/reactivation/completion or publication.
+Prior mainb43389dc and privatea2e7ed9a preserved as ancestors. Incremental immutable
+patch/bundles/interface/handoff/evidence/checksums:
+`/workspace/vy5-composition/rethrow-20261101/final/`.

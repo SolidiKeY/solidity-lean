@@ -381,3 +381,17 @@ Source try selection. New Source readback links16 full bytes across four profile
 to fully validated historical24call evidence; no fresh native execution. All24
 original obligations/six Source combinations and final adequacy remain pending.
 Incremental artifacts: `/workspace/vy5-composition/scope-catch-20261101/final/`.
+
+
+### VY5 captured typed scope to canonical rethrow (2026-11-01)
+
+[Lane handoff](inline-assembly-vy5.md#captured-typed-scope-to-canonical-rethrow-2026-11-01):
+actual returned allocated catch-local scope feeds existing resolved execS rethrow,
+with exact full bytes/state/restoration for every positive fuel, zero timeout,
+wrong-index/dangling refusal and raw caller retention;20 component laws/129JS.
+New Source driver12cases/6controls; historical24nativecalls are regression only,
+ZERO new native rethrow comparisons. No general Source.try selector or final
+adequacy claim; all24 original obligations/sixSourcecombinations remain pending.
+Resource incident/ENOSPC and recovered verified current metadata copies are
+explicit; old protected data and failing baseline gates preserved.
+Artifacts: `/workspace/vy5-composition/rethrow-20261101/final/`.
