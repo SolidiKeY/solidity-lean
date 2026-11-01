@@ -2295,3 +2295,85 @@ restore exact bytes. The current full input integrity inventory is separate
 from the unresolved complete aggregate gate. No affected failed workload was
 rerun or relabelled. Independent read-only source finder/skeptic both PASS with
 no findings; final exact committed-artifact reviews are recorded in the handoff.
+
+## Continuation28 — caller views through memory-return rebind and suffix
+
+Partial original Work1/G37.01, Work3/G37.03, Work4/G36.01 and Backfill A/B
+progress. `CallerTail.program_environment` derives an entire captured caller
+view from the published `Prog.run_frameM` local projection. `environment` and
+`alias` invert actual call-plus-tail execution and compose the genuine entry,
+body and tail heap extensions. Only the tail requires the unchanged
+`withinM .nonpayable` guard and explicit static protected-index write exclusion.
+The callee may mutate old heap contents. There is no `Heap.Keeps` conclusion.
+`selected_target` consumes the actual public finite selected-arm certificate,
+selection/execution equations, input `StateRepr`, frame room and reached-cost
+`AllocationInput`; it derives real target execution, represented dropped frame,
+stack, BaseExtends, GrowsAllocator and all protected old pointer cells. It does
+not assume output alias preservation or change compiler admission.
+
+The existing generated CF2 memory-return fixture now has a nonempty witnessed
+client `MemoryDispatchChecks.ProtectedTail`. Its actual second candidate is
+call/rebind/nil: return old object0, then rebind caller result destination0 from
+private default2 to old0. The view excludes exactly that overwritten destination
+and retains argument5, old object0, tag2, unrelated object1, two more aliases0
+and marker42. The actual callee mutates old array[2,7,11] to[2,12,11], preserves
+unrelated[2,23,29], leaves defaults2/3[0], and creates private4[2,99,101]; count
+becomes11. The entire callee body fails the allocation-only `withinM` guard,
+while its real rebind tail is admitted. Negative controls show the whole caller
+environment changes and protecting the written destination is invalid. The
+actual frontend suffix then exports the returned reference and the view theorem
+uses the exact composed extension `chosen.ext.trans finished.ext`. Existing full
+ordered22-cell target endpoint, cost7+4=11/cursor139/stack77 and every previous
+fixture/negative remain unchanged and separately checked.
+
+The generic target law is checked; a new combined concrete target/view theorem
+is NOT delivered. Multiple distinct attempts reached the enforced12GiB cap
+(exit137), including the final attempt reusing the old closed target endpoint.
+Their source and raw receipts remain in continuation28 evidence. Broad rewrite
+attempts for the new source suffix also hit137; the SAME source theorem checks
+in2.998s using explicit equality composition and the checked local helper.
+No claim of a uniquely proved OOM cause, no raised budget, and no failed probe
+is a proof. This new source repair is not a measured repair of the older
+complete validation workload and does not justify retrying its failed gates.
+
+Actual14 new builtin axiom sets are separately pinned in
+`tests/internal-flow/check-caller-tail-axioms.py`; original542 types/reports,
+85 tuple types,18 registry entries/17 mathematical fixtures and previous
+separate guards retain their exact statements/order. This is kernel evidence
+for intrinsic/abstract Evm execution, not external compiler/bytecode/gas/world
+agreement. Guard formatting initially mismatched actual line breaks (exit1),
+then was corrected to exact builtin output. No new trust primitive.
+
+CLI per-file/focused fallback is used because no Lean MCP diagnostics are
+available. Final command/resource/source-preservation and independent source
+and committed-artifact review results are bound in the immutable handoff.
+The earlier complete cached124/120.700, raw124/120.908, full124/300s,
+broad/prerequisite failures and raw normal/strict docs1 remain failures.
+Current expanded33-owned/37-raw complete confirmation is pending. Documentation
+comparison remains current=publication/previous complete logs, with frozen
+historical46missing versus48current plus incoming reserved ambiguity: this is
+not a green global gate or exact frozen equality.
+
+PARALLEL-INTERFACE exports committed dependent signatures and the actual CF2
+client for read-only consumption in private dependency worktrees. No peer
+checkpoint was supplied or silently imported; public producer099bfbe185731c354b12a40f28ccf5d98534c779
+remains unchanged. All28 preceding seals are preserved. No push/merge/PR or
+goal reset/reactivation/completion. All six original Work items and both
+Backfills remain partial. General unbounded runtime recursion/full dependent
+dispatch, early-control/general mixed-loop body certificates, word-frame/live
+byte-journal/world and target transient/callback producers remain open. Concrete
+large target assembly and older proof/audit performance engineering also remain
+owned ready work; independent work is NOT claimed exhausted.
+
+Continuation28 validation/reviews: fresh guarded client23.636s;33-module import
+closure2.539s; original542 imported kernel types2.992s; focused source/toolchain
+bound import11.421s; new14 actual axiom query3.192s; original separate
+7+6+5+15+3+11+16 reports rechecked. Driver/layer/import/orphan/trust checks,
+72old and6new guard countercontrols, three source/object cache-tamper controls
+(9.272s), final complete input integrity inventory(6.117s) and actual dependent
+signature query(1.466s) pass. Inventory is not aggregate validation. Runtime
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs passes1.640s under the same cap.
+Independent read-only finder and skeptic source/final-source reviews both PASS,
+no confirmed findings, neither using Lean/server/builds/writes. Final committed
+artifact reviews and all actual resource receipts are in the handoff. All old
+mandatory failed gates remain explicit; no new full validation claim.

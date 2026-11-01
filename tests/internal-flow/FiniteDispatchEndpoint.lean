@@ -1,3 +1,4 @@
+import Solidity.Backend.InternalFlow.CallerTail
 import Solidity.Backend.InternalFlow.CallerFrame
 import tests.«internal-flow».FiniteDispatchFacts
 import tests.«internal-flow».MemoryDispatchFacts
@@ -485,3 +486,115 @@ theorem protected_target : ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₂ 
 #guard_msgs in #print axioms protected_target
 
 end Solidity.Backend.InternalFlow.DispatchChecks.ProtectedCaller
+
+namespace Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail
+open Evm Evm.Memory
+abbrev View : Ctx := [.val .uint,.mem A,.val .uint,.mem A,.mem A,.mem A,.val .uint]
+def projection : Thin View Caller := .drop .refl
+
+def tail : Prog C (.mem A :: Caller) (.mem A :: Caller) :=
+  .cons (.rebindMem (.there .here) (.alias (.var .here rfl))) .nil
+
+theorem tail_within : Prog.withinM .nonpayable tail = true := rfl
+
+theorem tail_unwritten (t : LTy) (i : Idx View t) :
+    (t,((i.wk projection).ext (.push (t := .mem A) .refl)).toNat) ∉ Prog.writesAt 0 tail := by
+  intro member
+  change (t,i.toNat + 2) ∈ [(.mem A,1)] at member
+  have index := congrArg Prod.snd (List.mem_singleton.mp member)
+  omega
+
+theorem complete_caller_frame :
+    TEnv.thin projection chosen.st.env =
+      TEnv.wk chosen.ext View (TEnv.thin projection mid.st.env) :=
+  CallerTail.environment (executed := body_run) projection (by trivial) tail_within (by exact tail_unwritten)
+
+theorem whole_body_guard_stays_false : Prog.withinM .nonpayable actualSecond.body = false := by decide +kernel
+
+theorem wrong_destination : ¬ ∀ (t : LTy) (i : Idx Caller t),
+    (t,(i.ext (.push (t := .mem A) .refl)).toNat) ∉ Prog.writesAt 0 tail := by
+  intro unwritten
+  exact unwritten (.mem A) .here (by decide +kernel)
+
+theorem reference_ids_wk {H H' : HTy} (e : H <+: H') (v : Option (HRef H A)) :
+    (LTy.TDenote.wk (C := C) e (.mem A) v).map HRef.id = v.map HRef.id := by
+  cases v <;> rfl
+
+theorem full_frame_changes : chosen.st.env ≠ TEnv.wk chosen.ext Caller mid.st.env := by
+  intro same
+  have before : (locals mid.st)[0]! = some 2 := congrArg (fun x => x.2.2.1[0]!) before_values
+  have after : (locals chosen.st)[0]! = some 0 := congrArg (fun x => x.2.2.1[0]!) after_values
+  have ids := congrArg (fun env => (TEnv.get (.here : Idx Caller (.mem A)) env).map HRef.id) same
+  dsimp only at ids
+  rw [TEnv.get_wk,reference_ids_wk] at ids
+  change (locals chosen.st)[0]! = (locals mid.st)[0]! at ids
+  rw [after,before] at ids
+  cases ids
+
+theorem protected_alias_id : (locals chosen.st)[2]! = some 0 := by
+  have same := congrArg (fun env =>
+    (TEnv.get (.there .here : Idx View (.mem A)) env).map HRef.id) complete_caller_frame
+  dsimp only at same
+  rw [CallerFrame.read_thin,TEnv.get_wk,CallerFrame.read_thin] at same
+  rw [reference_ids_wk] at same
+  change (locals chosen.st)[2]! = (locals mid.st)[2]! at same
+  exact same.trans (congrArg (fun x => x.2.2.1[2]!) before_values)
+
+theorem post_step :
+    TEnv.thin projection (TEnv.drop post.ext finished.st.env) =
+      TEnv.wk finished.ext View (TEnv.thin projection chosen.st.env) := by
+  exact CallerTail.program_environment (P := post) (σ := chosen.st) (out := finished)
+    projection (by decide +kernel) (by
+      intro t i member
+      change (t,(i.wk projection).toNat) ∈ [] at member
+      exact List.not_mem_nil member) post_run
+theorem protected_final_frame :
+    TEnv.thin projection (TEnv.drop post.ext finished.st.env) =
+      TEnv.wk total.ext View (TEnv.thin projection mid.st.env) :=
+  post_step.trans ((congrArg (TEnv.wk finished.ext View) complete_caller_frame).trans
+    (TEnv.wk_trans chosen.ext finished.ext View (TEnv.thin projection mid.st.env)))
+
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.tail_within' depends on axioms: [propext] -/
+#guard_msgs in #print axioms tail_within
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.tail_unwritten' depends on axioms: [propext,
+ Quot.sound] -/
+#guard_msgs in #print axioms tail_unwritten
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.complete_caller_frame' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms complete_caller_frame
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.whole_body_guard_stays_false' depends on axioms: [propext] -/
+#guard_msgs in #print axioms whole_body_guard_stays_false
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.wrong_destination' depends on axioms: [propext,
+ Quot.sound] -/
+#guard_msgs in #print axioms wrong_destination
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.reference_ids_wk' depends on axioms: [propext] -/
+#guard_msgs in #print axioms reference_ids_wk
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.full_frame_changes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms full_frame_changes
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.protected_alias_id' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms protected_alias_id
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.post_step' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms post_step
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.protected_final_frame' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms protected_final_frame
+
+end Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail

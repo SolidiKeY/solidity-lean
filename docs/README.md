@@ -118,3 +118,5 @@ history is in git.
 | Structural target observation projections (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
 
 - [V12 caller-frame and finite-dispatch consumers](feature-work/roadmap-v12-internal-flow.md): exact committed typed interfaces and remaining original obligations.
+
+- [V12 call-tail frame consumers](feature-work/roadmap-v12-internal-flow.md): scoped reference-result rebind transport and exact committed interfaces.
